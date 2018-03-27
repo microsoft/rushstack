@@ -11,7 +11,7 @@ Configuration options for the API Extractor tool. These options can be loaded fr
 |  [`apiJsonFile`](./api-extractor.iextractorconfig.apijsonfile.md) | `IExtractorApiJsonFileConfig` | Configures how the API JSON files (\*.api.json) will be generated. |
 |  [`apiReviewFile`](./api-extractor.iextractorconfig.apireviewfile.md) | `IExtractorApiReviewFileConfig` | Configures how the API review files (\*.api.ts) will be generated. |
 |  [`compiler`](./api-extractor.iextractorconfig.compiler.md) | `IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig` | Determines how the TypeScript compiler will be invoked. The compiler.configType selects the type of configuration; Different options are available according to the configuration type. |
-|  [`packageTypings`](./api-extractor.iextractorconfig.packagetypings.md) | `IExtractorPackageTypingsConfig` | Configures how the package typings (\*.d.ts) will be generated. |
+|  [`dtsRollup`](./api-extractor.iextractorconfig.dtsrollup.md) | `IExtractorDtsRollupConfig` | Configures how the \*.d.ts rollup files will be generated. |
 |  [`policies`](./api-extractor.iextractorconfig.policies.md) | `IExtractorPoliciesConfig` | These policies determine how API Extractor validates various best practices for API design. |
 |  [`project`](./api-extractor.iextractorconfig.project.md) | `IExtractorProjectConfig` | Describes a specific project that will be analyzed. In principle, multiple individual projects can be processed while reusing a common compiler state. |
 |  [`validationRules`](./api-extractor.iextractorconfig.validationrules.md) | `IExtractorValidationRulesConfig` | Configuration for various validation checks that ensure good API design |

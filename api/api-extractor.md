@@ -21,8 +21,8 @@ API Extractor helps you build better TypeScript library packages. It helps with 
 |  [`IExtractorApiJsonFileConfig`](./api-extractor.iextractorapijsonfileconfig.md) | Configures how the API JSON files (\*.api.json) will be generated. |
 |  [`IExtractorApiReviewFileConfig`](./api-extractor.iextractorapireviewfileconfig.md) | Configures how the API review files (\*.api.ts) will be generated. |
 |  [`IExtractorConfig`](./api-extractor.iextractorconfig.md) | Configuration options for the API Extractor tool. These options can be loaded from a JSON config file. |
+|  [`IExtractorDtsRollupConfig`](./api-extractor.iextractordtsrollupconfig.md) | **_(BETA)_** Configures how the \*.d.ts rollup files will be generated. |
 |  [`IExtractorOptions`](./api-extractor.iextractoroptions.md) | Runtime options for Extractor. |
-|  [`IExtractorPackageTypingsConfig`](./api-extractor.iextractorpackagetypingsconfig.md) | **_(BETA)_** Configures how the package typings (\*.d.ts) will be generated. |
 |  [`IExtractorPoliciesConfig`](./api-extractor.iextractorpoliciesconfig.md) | These policies determine how API Extractor validates various best practices for API design. |
 |  [`IExtractorProjectConfig`](./api-extractor.iextractorprojectconfig.md) | Describes a specific project that will be analyzed. In principle, multiple individual projects can be processed while reusing a common compiler state. |
 |  [`IExtractorRuntimeCompilerConfig`](./api-extractor.iextractorruntimecompilerconfig.md) | With this configuration, API Extractor is configured using an already prepared compiler state that is provided programmatically at runtime. This can potentially enable faster builds, by reusing the same compiler invocation for tsc, tslint, and API Extractor.<p/><!-- -->If configType='runtime' is specified, then IExtractorRuntimeOptions.compilerProgram must be provided. |
