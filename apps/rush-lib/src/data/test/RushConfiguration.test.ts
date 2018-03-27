@@ -186,9 +186,9 @@ describe('RushConfiguration', () => {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, expectedValue);
-    assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, `${expectedValue}/npm-cache`);
-    assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, `${expectedValue}/npm-tmp`);
-    assertPathProperty('pnpmStoreFolder', rushConfiguration.pnpmStoreFolder, `${expectedValue}/pnpm-store`);
+    assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, path.join(expectedValue, 'npm-cache'));
+    assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, path.join(expectedValue, 'npm-tmp'));
+    assertPathProperty('pnpmStoreFolder', rushConfiguration.pnpmStoreFolder, path.join(expectedValue, 'pnpm-store'));
     assertPathProperty(
       'packageManagerToolFilename',
       rushConfiguration.packageManagerToolFilename,
@@ -197,7 +197,7 @@ describe('RushConfiguration', () => {
     assertPathProperty(
       'rushLinkJsonFilename',
       rushConfiguration.rushLinkJsonFilename,
-      `${expectedValue}/rush-link.json`
+      path.join(expectedValue, 'rush-link.json')
     );
   });
 });
