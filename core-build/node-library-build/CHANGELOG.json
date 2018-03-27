@@ -2,6 +2,18 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "4.3.29",
+      "tag": "@microsoft/node-library-build_v4.3.29",
+      "date": "Tue, 27 Mar 2018 01:34:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.9.1` to `4.9.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.28",
       "tag": "@microsoft/node-library-build_v4.3.28",
       "date": "Mon, 26 Mar 2018 19:12:42 GMT",

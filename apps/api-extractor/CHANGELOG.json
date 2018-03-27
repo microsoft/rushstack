@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.6.1",
+      "tag": "@microsoft/api-extractor_v5.6.1",
+      "date": "Tue, 27 Mar 2018 01:34:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update build config so API Extractor builds using the latest version of itself"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.6.0",
       "tag": "@microsoft/api-extractor_v5.6.0",
       "date": "Sun, 25 Mar 2018 01:26:19 GMT",
