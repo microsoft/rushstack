@@ -13,6 +13,7 @@ describe('EnvironmentConfiguration', () => {
   let _oldEnv: typeof process.env;
 
   beforeEach(() => {
+    EnvironmentConfiguration.reset();
     _oldEnv = process.env;
     process.env = {};
   });
@@ -35,9 +36,25 @@ describe('EnvironmentConfiguration', () => {
       process.env['rush_foobar'] = 'asdf'; // tslint:disable-line:no-string-literal
       assert.throws(EnvironmentConfiguration.initialize);
     });
+
+    it('can be re-initialized', () => {
+      process.env['rush_tempDir'] = '/var/tempA'; // tslint:disable-line:no-string-literal
+      EnvironmentConfiguration.initialize();
+
+      assert.equal(EnvironmentConfiguration.getEnvironmentValue(EnvironmentValue.TempDirectoryOverride), '/var/tempA');
+
+      process.env['rush_tempDir'] = '/var/tempB'; // tslint:disable-line:no-string-literal
+      EnvironmentConfiguration.initialize();
+
+      assert.equal(EnvironmentConfiguration.getEnvironmentValue(EnvironmentValue.TempDirectoryOverride), '/var/tempB');
+    });
   });
 
   describe('getEnvironmentValue', () => {
+    it('throws if EnvironmentConfiguration is not initialized', () => {
+      assert.throws(() => EnvironmentConfiguration.getEnvironmentValue(EnvironmentValue.TempDirectoryOverride));
+    });
+
     it('returns undefined for unset environment variables', () => {
       EnvironmentConfiguration.initialize();
 

@@ -15,15 +15,23 @@ for (const envValue in EnvironmentValue) {
   }
 }
 
+/**
+ * Provides Rush-specific environment variable data. All Rush environment variables must start with "rush_".
+ *
+ * Initialize will throw if any unknown parameters are present.
+ */
 export class EnvironmentConfiguration {
   private static _rushValues: Map<EnvironmentValue, string | undefined> =
     new Map<EnvironmentValue, string| undefined>();
+  private static _hasBeenInitialized: boolean = false;
 
+  /**
+   * Reads and validates environment variables. If any are invalid, this function will throw.
+   */
   public static initialize(): void {
-    EnvironmentConfiguration._rushValues.clear();
+    EnvironmentConfiguration.reset();
 
     const unknownEnvVariables: string[] = [];
-
     for (const envVar in process.env) {
       const normalizedEnvVar: string = envVar.toLowerCase(); // tslint:disable-line:forin
       if (process.env.hasOwnProperty(envVar) && normalizedEnvVar.indexOf(ENV_VALUE_PREFIX) === 0) {
@@ -39,9 +47,26 @@ export class EnvironmentConfiguration {
     if (unknownEnvVariables.length > 0) {
       throw new Error(`Unknown environment variables: ${unknownEnvVariables.join(', ')}`);
     }
+
+    EnvironmentConfiguration._hasBeenInitialized = true;
   }
 
+  /**
+   * Resets EnvironmentConfiguration into an un-initialized state.
+   */
+  public static reset(): void {
+    EnvironmentConfiguration._rushValues.clear();
+    EnvironmentConfiguration._hasBeenInitialized = false;
+  }
+
+  /**
+   * Gets the value of a rush environment variable. Throws if EnvironmentConfiguration has not be initialized.
+   */
   public static getEnvironmentValue(envValue: EnvironmentValue): string | undefined {
+    if (!EnvironmentConfiguration._hasBeenInitialized) {
+      throw new Error('The EnvironmentConfiguration must be initialized before values can be accessed.');
+    }
+
     return EnvironmentConfiguration._rushValues.get(envValue);
   }
 }
