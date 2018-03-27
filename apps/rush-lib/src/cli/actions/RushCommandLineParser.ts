@@ -27,7 +27,7 @@ import Telemetry from '../logic/Telemetry';
 
 export default class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
-  public rushConfig: RushConfiguration;
+  public rushConfiguration: RushConfiguration;
 
   private _debugParameter: CommandLineFlagParameter;
 
@@ -86,8 +86,8 @@ export default class RushCommandLineParser extends CommandLineParser {
 
   private _execute(): Promise<void> {
     try {
-      if (this.rushConfig) {
-        this.telemetry = new Telemetry(this.rushConfig);
+      if (this.rushConfiguration) {
+        this.telemetry = new Telemetry(this.rushConfiguration);
       }
       return super.onExecute().then(() => {
         if (this.telemetry) {
@@ -105,10 +105,11 @@ export default class RushCommandLineParser extends CommandLineParser {
 
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation();
       if (rushJsonFilename) {
-        this.rushConfig = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
 
         const commandLineConfigFile: string = path.join(
-          this.rushConfig.commonRushConfigFolder, RushConstants.commandLineFilename);
+          this.rushConfiguration.commonRushConfigFolder, RushConstants.commandLineFilename
+        );
 
         commandLineConfig = CommandLineConfiguration.tryLoadFromFile(commandLineConfigFile);
       }

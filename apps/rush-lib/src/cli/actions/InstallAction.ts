@@ -34,7 +34,8 @@ export default class InstallAction extends BaseRushAction {
       + ' Rush "common" folder, using the exact versions specified in your npm-shrinkwrap.json file.'
       + ' It also makes sure these versions satisfy your dependencies; if not, it will ask you to run'
       + ' "rush generate". If there is nothing to do, then "rush install" won\'t take any time.'
-      + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
+      + ' Afterwards, it will run "rush link" to create symlinks for all your projects.',
+      rushConfiguration: parser.rushConfiguration
     });
     this._parser = parser;
   }

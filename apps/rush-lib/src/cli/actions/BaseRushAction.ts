@@ -17,21 +17,26 @@ export interface IRushCommandLineActionOptions extends ICommandLineActionOptions
   /**
    * If true, no locking mechanism will be enforced when this action is run.
    * Note this defaults to false (which is a safer assumption in case this value
-   *  is ommitted).
+   *  is omitted).
    */
   safeForSimultaneousRushProcesses?: boolean;
+
+  rushConfiguration: RushConfiguration;
 }
 
 /**
  * The base Rush action that all Rush actions should extend.
  */
 export abstract class BaseRushAction extends CommandLineAction {
-  private _rushConfiguration: RushConfiguration;
+  protected rushConfiguration: RushConfiguration;
+
   private _eventHooksManager: EventHooksManager;
   private _safeForSimultaneousRushProcesses: boolean;
 
   constructor(options: IRushCommandLineActionOptions) {
     super(options);
+
+    this.rushConfiguration = options.rushConfiguration;
     this._safeForSimultaneousRushProcesses = !!options.safeForSimultaneousRushProcesses;
   }
 
@@ -54,13 +59,6 @@ export abstract class BaseRushAction extends CommandLineAction {
    * environment has been set up by the base class.
    */
   protected abstract run(): Promise<void>;
-
-  protected get rushConfiguration(): RushConfiguration {
-    if (!this._rushConfiguration) {
-      this._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-    }
-    return this._rushConfiguration;
-  }
 
   protected get eventHooksManager(): EventHooksManager {
     if (!this._eventHooksManager) {

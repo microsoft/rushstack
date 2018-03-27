@@ -16,7 +16,8 @@ export default class LinkAction extends BaseRushAction {
     super({
       actionVerb: 'link',
       summary: 'Create node_modules symlinks for all projects',
-      documentation: 'Create node_modules symlinks for all projects'
+      documentation: 'Create node_modules symlinks for all projects',
+      rushConfiguration: parser.rushConfiguration
     });
     this._parser = parser;
   }

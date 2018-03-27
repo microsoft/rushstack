@@ -37,7 +37,8 @@ export default class GenerateAction extends BaseRushAction {
       + ' The "rush generate" command will do a clean install of your Rush "common" folder,'
       + ' upgrading you to the latest semver-compatible versions of all dependencies.'
       + ' Then, it will create a new shrinkwrap file, which you should commit to source control.'
-      + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
+      + ' Afterwards, it will run "rush link" to create symlinks for all your projects.',
+      rushConfiguration: parser.rushConfiguration
     });
     this._parser = parser;
   }

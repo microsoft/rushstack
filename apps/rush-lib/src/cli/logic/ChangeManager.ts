@@ -49,6 +49,7 @@ export default class ChangeManager {
     this._changeFiles = new ChangeFiles(changesPath);
     this._allChanges = PublishUtilities.findChangeRequests(
       this._allPackages,
+      this._rushConfiguration,
       this._changeFiles,
       includeCommitDetails,
       this._prereleaseToken,
@@ -97,6 +98,7 @@ export default class ChangeManager {
     const updatedPackages: Map<string, IPackageJson> = PublishUtilities.updatePackages(
       this._allChanges,
       this._allPackages,
+      this._rushConfiguration,
       shouldCommit,
       this._prereleaseToken,
       this._lockStepProjectsToExclude);
@@ -109,9 +111,12 @@ export default class ChangeManager {
     // Save them for the official release.
     if (!this._prereleaseToken.hasValue) {
       // Update changelogs.
-      const updatedChangelogs: IChangelog[] = ChangelogGenerator.updateChangelogs(this._allChanges,
+      const updatedChangelogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
+        this._allChanges,
         this._allPackages,
-        shouldCommit);
+        this._rushConfiguration,
+        shouldCommit
+      );
 
       // Remove the change request files only if "-a" was provided.
       this._changeFiles.deleteAll(shouldCommit, updatedChangelogs);

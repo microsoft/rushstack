@@ -75,7 +75,8 @@ export default class ChangeAction extends BaseRushAction {
       summary: 'Records changes made to projects, indicating how the package version number should be bumped ' +
         'for the next publish.',
       documentation: documentation.join(os.EOL),
-      safeForSimultaneousRushProcesses: true
+      safeForSimultaneousRushProcesses: true,
+      rushConfiguration: parser.rushConfiguration
     });
     this._parser = parser;
   }

@@ -19,7 +19,8 @@ export default class CheckAction extends BaseRushAction {
         'version throughout the repository.',
       documentation: 'Checks each project\'s package.json files and ensures that all dependencies are of the ' +
         'same version throughout the repository.',
-      safeForSimultaneousRushProcesses: true
+      safeForSimultaneousRushProcesses: true,
+      rushConfiguration: parser.rushConfiguration
     });
     this._parser = parser;
   }

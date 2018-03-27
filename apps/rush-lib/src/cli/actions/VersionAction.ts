@@ -34,7 +34,8 @@ export default class VersionAction extends BaseRushAction {
     super({
       actionVerb: 'version',
       summary: '(EXPERIMENTAL) Manage package versions in the repo.',
-      documentation: '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.'
+      documentation: '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.',
+      rushConfiguration: parser.rushConfiguration
     });
     this._parser = parser;
   }

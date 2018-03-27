@@ -19,23 +19,36 @@ import ChangeFiles from '../ChangeFiles';
 /* tslint:disable:no-string-literal */
 
 describe('findChangeRequests', () => {
+  let packagesRushConfiguration: RushConfiguration;
+  let repoRushConfiguration: RushConfiguration;
+
+  beforeEach(() => {
+    packagesRushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      path.resolve(__dirname, 'packages', 'rush.json')
+    );
+    repoRushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      path.resolve(__dirname, 'repo', 'rush.json')
+    );
+  });
 
   it('returns no changes in an empty change folder', () => {
-    const allPackages: Map<string, RushConfigurationProject> =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      new ChangeFiles(path.join(__dirname, 'noChange')));
+      packagesRushConfiguration,
+      new ChangeFiles(path.join(__dirname, 'noChange'))
+    );
 
     expect(Object.keys(allChanges).length).to.equal(0);
   });
 
   it('returns 1 change when changing a leaf package', () => {
-    const allPackages: Map<string, RushConfigurationProject> =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      new ChangeFiles(path.join(__dirname, 'leafChange')));
+      packagesRushConfiguration,
+      new ChangeFiles(path.join(__dirname, 'leafChange'))
+    );
 
     expect(Object.keys(allChanges).length).to.equal(1);
     expect(allChanges).has.property('d');
@@ -43,11 +56,12 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 2 changes when patching a root package', () => {
-    const allPackages: Map<string, RushConfigurationProject> =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      new ChangeFiles(path.join(__dirname, 'rootPatchChange')));
+      packagesRushConfiguration,
+      new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
+    );
 
     expect(Object.keys(allChanges).length).to.equal(2);
 
@@ -62,14 +76,12 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 4 changes when hotfixing a root package', () => {
-    const configuration: RushConfiguration =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json'));
-    const allPackages: Map<string, RushConfigurationProject> = configuration.projectsByName;
     // tslint:disable-next-line no-any
-    PublishUtilities.rushConfiguration = configuration as any;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
-      allPackages,
-      new ChangeFiles(path.join(__dirname, 'rootHotfixChange')));
+      packagesRushConfiguration.projectsByName,
+      packagesRushConfiguration,
+      new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
+    );
 
     expect(Object.keys(allChanges).length).to.equal(4);
 
@@ -88,11 +100,12 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 3 changes when major bumping a root package', () => {
-    const allPackages: Map<string, RushConfigurationProject> =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      new ChangeFiles(path.join(__dirname, 'rootMajorChange')));
+      packagesRushConfiguration,
+      new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
+    );
 
     expect(Object.keys(allChanges).length).to.equal(3);
 
@@ -110,11 +123,12 @@ describe('findChangeRequests', () => {
   });
 
   it('returns 2 changes when bumping cyclic dependencies', () => {
-    const allPackages: Map<string, RushConfigurationProject> =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      new ChangeFiles(path.join(__dirname, 'cyclicDeps')));
+      packagesRushConfiguration,
+      new ChangeFiles(path.join(__dirname, 'cyclicDeps'))
+    );
 
     expect(Object.keys(allChanges).length).to.equal(2);
 
@@ -126,40 +140,35 @@ describe('findChangeRequests', () => {
   });
 
   it('returns error when mixing hotfix and non-hotfix changes', () => {
-    const configuration: RushConfiguration =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json'));
-    const allPackages: Map<string, RushConfigurationProject> = configuration.projectsByName;
-    // tslint:disable-next-line no-any
-    PublishUtilities.rushConfiguration = configuration as any;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     expect(PublishUtilities.findChangeRequests.bind(
       PublishUtilities,
       allPackages,
+      packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'hotfixWithPatchChanges')))).to
         .throw('Cannot apply hotfix alongside patch change on same package');
   });
 
   it('returns error when adding hotfix with config disabled', () => {
-    const configuration: RushConfiguration =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json'));
-    const allPackages: Map<string, RushConfigurationProject> = configuration.projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     // Overload hotfixChangeEnabled function
-    configuration['_hotfixChangeEnabled'] = false;
-    // tslint:disable-next-line no-any
-    PublishUtilities.rushConfiguration = configuration as any;
+    packagesRushConfiguration['_hotfixChangeEnabled'] = false;
 
     expect(PublishUtilities.findChangeRequests.bind(
       PublishUtilities,
       allPackages,
+      packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootHotfixChange')))).to
         .throw('Cannot add hotfix change; hotfixChangeEnabled is false in configuration.');
   });
 
   it('can resolve multiple changes requests on the same package', () => {
-    const allPackages: Map<string, RushConfigurationProject> =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
-      new ChangeFiles(path.join(__dirname, 'multipleChanges')));
+      packagesRushConfiguration,
+      new ChangeFiles(path.join(__dirname, 'multipleChanges'))
+    );
 
     expect(Object.keys(allChanges).length).to.equal(3);
     expect(allChanges).has.property('a');
@@ -174,10 +183,10 @@ describe('findChangeRequests', () => {
   });
 
   it('can resolve multiple reverse-ordered changes requests on the same package', () => {
-    const allPackages: Map<string, RushConfigurationProject> =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
+      packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'orderedChanges')));
 
     expect(Object.keys(allChanges).length).to.equal(3);
@@ -193,13 +202,10 @@ describe('findChangeRequests', () => {
   });
 
   it('can resolve multiple hotfix changes', () => {
-    const configuration: RushConfiguration =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json'));
-    const allPackages: Map<string, RushConfigurationProject> = configuration.projectsByName;
-    // tslint:disable-next-line no-any
-    PublishUtilities.rushConfiguration = configuration as any;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
+      packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges')));
 
     expect(Object.keys(allChanges).length).to.equal(4);
@@ -220,10 +226,10 @@ describe('findChangeRequests', () => {
   });
 
   it('can update an explicit dependency', () => {
-    const allPackages: Map<string, RushConfigurationProject> =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
+      packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'explicitVersionChange')));
 
     expect(Object.keys(allChanges).length).to.equal(2);
@@ -234,10 +240,10 @@ describe('findChangeRequests', () => {
   });
 
   it('can exclude lock step projects', () => {
-    const allPackages: Map<string, RushConfigurationProject> =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'repo', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = repoRushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
+      repoRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
       false,
       undefined,
@@ -254,11 +260,17 @@ describe('findChangeRequests', () => {
 });
 
 describe('sortChangeRequests', () => {
+  let rushConfiguration: RushConfiguration;
+
+  beforeEach(() => {
+    rushConfiguration = RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json'));
+  });
+
   it('can return a sorted array of the change requests to be published in the correct order', () => {
-    const allPackages: Map<string, RushConfigurationProject> =
-      RushConfiguration.loadFromConfigurationFile(path.resolve(__dirname, 'packages', 'rush.json')).projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = rushConfiguration.projectsByName;
     const allChanges: IChangeInfoHash = PublishUtilities.findChangeRequests(
       allPackages,
+      rushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleChanges')));
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
 

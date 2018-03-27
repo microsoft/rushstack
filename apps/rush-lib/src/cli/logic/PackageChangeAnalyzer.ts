@@ -9,30 +9,22 @@ import {
 } from '@microsoft/package-deps-hash';
 import { Path } from '@microsoft/node-core-library';
 
-import RushConfiguration from '../../data/RushConfiguration';
 import { RushConstants } from '../../RushConstants';
+import RushConfiguration from '../../data/RushConfiguration';
 
 export class PackageChangeAnalyzer {
   public static _instance: PackageChangeAnalyzer | undefined;
 
   // Allow this function to be overwritten during unit tests
   public static getPackageDeps: (path: string, ignoredFiles: string[]) => IPackageDeps;
-  public static rushConfig: RushConfiguration;
 
   private _data: Map<string, IPackageDeps>;
-
-  public static get instance(): PackageChangeAnalyzer {
-    if (!PackageChangeAnalyzer._instance) {
-      PackageChangeAnalyzer._instance = new PackageChangeAnalyzer();
-    }
-    return PackageChangeAnalyzer._instance;
-  }
 
   public static reset(): void {
     PackageChangeAnalyzer._instance = undefined;
   }
 
-  public constructor() {
+  public constructor(private _rushConfiguration: RushConfiguration) {
     this._data = this.getData();
   }
 
@@ -49,14 +41,11 @@ export class PackageChangeAnalyzer {
     if (!PackageChangeAnalyzer.getPackageDeps) {
       PackageChangeAnalyzer.getPackageDeps = getPackageDeps;
     }
-    if (!PackageChangeAnalyzer.rushConfig) {
-      PackageChangeAnalyzer.rushConfig = RushConfiguration.loadFromDefaultLocation();
-    }
 
     const projectHashDeps: Map<string, IPackageDeps> = new Map<string, IPackageDeps>();
 
     // pre-populate the map with the projects from the config
-    for (const project of PackageChangeAnalyzer.rushConfig.projects) {
+    for (const project of this._rushConfiguration.projects) {
       projectHashDeps.set(project.packageName, {
         files: {}
       });
@@ -66,7 +55,8 @@ export class PackageChangeAnalyzer {
 
     // Load the package deps hash for the whole repository
     const repoDeps: IPackageDeps = PackageChangeAnalyzer.getPackageDeps(
-      PackageChangeAnalyzer.rushConfig.rushJsonFolder, [RushConstants.packageDepsFilename]);
+      this._rushConfiguration.rushJsonFolder, [RushConstants.packageDepsFilename]
+    );
 
     // Sort each project folder into its own package deps hash
     Object.keys(repoDeps.files).forEach((filepath: string) => {
@@ -125,11 +115,11 @@ export class PackageChangeAnalyzer {
 
     // Add the shrinkwrap file to every project's dependencies
     const shrinkwrapFile: string =
-      path.relative(PackageChangeAnalyzer.rushConfig.rushJsonFolder,
-        PackageChangeAnalyzer.rushConfig.committedShrinkwrapFilename)
+      path.relative(this._rushConfiguration.rushJsonFolder,
+        this._rushConfiguration.committedShrinkwrapFilename)
         .replace(/\\/g, '/');
 
-    for (const project of PackageChangeAnalyzer.rushConfig.projects) {
+    for (const project of this._rushConfiguration.projects) {
       const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];
       if (shrinkwrapHash) {
         projectHashDeps.get(project.packageName)!.files[shrinkwrapFile] = shrinkwrapHash;
@@ -140,7 +130,7 @@ export class PackageChangeAnalyzer {
   }
 
   private _getProjectForFile(filepath: string): string | undefined {
-    for (const project of PackageChangeAnalyzer.rushConfig.projects) {
+    for (const project of this._rushConfiguration.projects) {
       if (this._fileExistsInFolder(filepath, project.projectRelativeFolder)) {
         return project.packageName;
       }

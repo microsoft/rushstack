@@ -41,11 +41,15 @@ export class CustomRushAction extends BaseRushAction {
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
 
-  constructor(private _parser: RushCommandLineParser,
+  constructor(
+    private _parser: RushCommandLineParser,
     options: ICommandLineActionOptions,
-    private _parallelized: boolean = false) {
-
-    super(options);
+    private _parallelized: boolean = false
+  ) {
+    super({
+      ...options,
+      rushConfiguration: _parser.rushConfiguration
+    });
   }
 
   /**
@@ -95,7 +99,7 @@ export class CustomRushAction extends BaseRushAction {
 
     const tasks: TaskSelector = new TaskSelector(
       {
-        rushConfiguration: this._parser.rushConfig,
+        rushConfiguration: this._parser.rushConfiguration,
         toFlags: this._toFlag.value,
         fromFlags: this._fromFlag.value,
         commandToRun: this.options.actionVerb,
