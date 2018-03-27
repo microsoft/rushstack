@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Update build config so API Extractor builds using the latest version of itself",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "pgonzal@users.noreply.github.com"
+}
