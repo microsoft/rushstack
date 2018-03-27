@@ -16,8 +16,10 @@ for (const envValue in EnvironmentValue) {
 }
 
 /**
- * Provides Rush-specific environment variable data. All Rush environment variables must start with "rush_".
+ * Provides Rush-specific environment variable data. All Rush environment variables must start with "rush_". This class
+ * is designed to be used by RushConfiguration.
  *
+ * @remarks
  * Initialize will throw if any unknown parameters are present.
  */
 export class EnvironmentConfiguration {
