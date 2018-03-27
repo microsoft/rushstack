@@ -4,7 +4,10 @@
 import * as colors from 'colors';
 import * as os from 'os';
 
-import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import {
+  CommandLineFlagParameter,
+  CommandLineStringListParameter
+} from '@microsoft/ts-command-line';
 
 import { Event } from '../../data/EventHooks';
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -24,6 +27,7 @@ export default class InstallAction extends BaseRushAction {
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
+  private _authenticationTokensParameter: CommandLineStringListParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -64,6 +68,11 @@ export default class InstallAction extends BaseRushAction {
       parameterLongName: '--no-link',
       description: 'Do not automatically run the "rush link" action after "rush install"'
     });
+    this._authenticationTokensParameter = this.defineStringListParameter({
+      parameterLongName: '--auth-token',
+      description: '(EXPERIMENTAL) List authentication tokens required to install packages. These must be in the '
+        + 'format of lines of a .npmrc file. They will be appended to the .npmrc file used during package installation.'
+    });
   }
 
   protected run(): Promise<void> {
@@ -82,7 +91,6 @@ export default class InstallAction extends BaseRushAction {
 
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
     return installManager.ensureLocalPackageManager(this._cleanInstallFull.value).then(() => {
-
       const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
         this.rushConfiguration.packageManager,
         this.rushConfiguration.committedShrinkwrapFilename);
@@ -102,14 +110,17 @@ export default class InstallAction extends BaseRushAction {
         installType = InstallType.ForceClean;
       }
 
-      if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, installType !== InstallType.Normal)) {
+      if (!installManager.createTempModulesAndCheckShrinkwrap(
+        shrinkwrapFile,
+        installType !== InstallType.Normal,
+        this._authenticationTokensParameter.value || []
+      )) {
         console.log('');
         console.log(colors.red('You need to run "rush generate" to update your shrinkwrap file.'));
         return process.exit(1);
       }
 
       installManager.installCommonModules(installType);
-
     }).catch((error) => {
       stopwatch.stop();
       this._collectTelemetry(stopwatch, false);
