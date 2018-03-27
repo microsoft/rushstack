@@ -4,10 +4,7 @@
 import * as colors from 'colors';
 import * as os from 'os';
 
-import {
-  CommandLineFlagParameter,
-  CommandLineStringListParameter
-} from '@microsoft/ts-command-line';
+import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import { Event } from '../../data/EventHooks';
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -19,15 +16,14 @@ import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { BaseLinkManager } from '../logic/base/BaseLinkManager';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
-import { BaseRushAction } from './BaseRushAction';
+import { BaseInstallAction } from './BaseInstallAction';
 
-export default class InstallAction extends BaseRushAction {
+export default class InstallAction extends BaseInstallAction {
   private _parser: RushCommandLineParser;
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
-  private _authenticationTokensParameter: CommandLineStringListParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -45,6 +41,8 @@ export default class InstallAction extends BaseRushAction {
   }
 
   protected onDefineParameters(): void {
+    super.onDefineParameters();
+
     this._cleanInstall = this.defineFlagParameter({
       parameterLongName: '--clean',
       parameterShortName: '-c',
@@ -67,11 +65,6 @@ export default class InstallAction extends BaseRushAction {
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
       description: 'Do not automatically run the "rush link" action after "rush install"'
-    });
-    this._authenticationTokensParameter = this.defineStringListParameter({
-      parameterLongName: '--auth-token',
-      description: '(EXPERIMENTAL) List authentication tokens required to install packages. These must be in the '
-        + 'format of lines of a .npmrc file. They will be appended to the .npmrc file used during package installation.'
     });
   }
 

@@ -17,9 +17,9 @@ import RushCommandLineParser from './RushCommandLineParser';
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
-import { BaseRushAction } from './BaseRushAction';
+import { BaseInstallAction } from './BaseInstallAction';
 
-export default class GenerateAction extends BaseRushAction {
+export default class GenerateAction extends BaseInstallAction {
   private _parser: RushCommandLineParser;
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
@@ -44,6 +44,8 @@ export default class GenerateAction extends BaseRushAction {
   }
 
   protected onDefineParameters(): void {
+    super.onDefineParameters();
+
     this._lazyParameter = this.defineFlagParameter({
       parameterLongName: '--lazy',
       parameterShortName: '-l',
@@ -125,7 +127,7 @@ export default class GenerateAction extends BaseRushAction {
     }
 
     return installManager.ensureLocalPackageManager(false).then(() => {
-      installManager.createTempModules(true);
+      installManager.createTempModules(true, this._authenticationTokensParameter.value || []);
 
       if (this._conservativeParameter.value) {
         if (fsx.existsSync(committedShrinkwrapFilename)) {

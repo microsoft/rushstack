@@ -211,7 +211,7 @@ export default class InstallManager {
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    */
-  public createTempModules(forceCreate: boolean, authTokens: string[] = []): void {
+  public createTempModules(forceCreate: boolean, authTokens: string[]): void {
     this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate, authTokens);
   }
 
