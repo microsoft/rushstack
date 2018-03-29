@@ -51,6 +51,11 @@ export interface ISetWebpackPublicPathOptions {
    * See the README for more information.
    */
   getPostProcessScript?: (varName: string) => string;
+
+  /**
+   * If true, find the last script matching the regexVariable (if it is set). If false, find the first matching script.
+   */
+  findLast?: boolean;
 }
 
 /**

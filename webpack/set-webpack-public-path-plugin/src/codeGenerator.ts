@@ -55,7 +55,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
       `    var path = scripts[i].getAttribute('src');`,
       '    if (path && path.match(regex)) {',
       `      ${varName} = path.substring(0, path.lastIndexOf('/') + 1);`,
-      '      break;',
+      ...(options.findLast ? [] : ['      break;']),
       '    }',
       '  }',
       '}',
@@ -64,7 +64,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
       `  for (var global in ${registryVariableName}) {`,
       '    if (global && global.match(regex)) {',
       `      ${varName} = global.substring(0, global.lastIndexOf('/') + 1);`,
-      '      break;',
+      ...(options.findLast ? [] : ['      break;']),
       '    }',
       '  }',
       '}'

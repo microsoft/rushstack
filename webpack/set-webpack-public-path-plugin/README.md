@@ -121,6 +121,10 @@ the public path variable will have `/assets/` appended to the found path.
 
 Note that the existing value of the variable already ends in a slash (`/`).
 
+#### `findLast = false`
+
+If true, find the last script matching the regexVariable (if it is set). If false, find the first matching script.
+
 # SystemJS Caveat
 
 When modules are loaded with SystemJS (and with the , `scriptLoad: true` meta option) `<script src="..."></script>`
