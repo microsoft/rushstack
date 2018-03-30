@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add --auth-token and RUSH_TEMP_FOLDER options to Rush.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
