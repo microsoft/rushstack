@@ -14,10 +14,7 @@ import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import EventHooks from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
-import {
-  EnvironmentConfiguration,
-  EnvironmentValue
-} from './EnvironmentConfiguration';
+import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -648,9 +645,8 @@ export default class RushConfiguration {
 
     this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
 
-    this._commonTempFolder = EnvironmentConfiguration.getEnvironmentValue(
-      EnvironmentValue.TempDirectoryOverride
-    ) || path.join(this._commonFolder, RushConstants.rushTempFolderName);
+    this._commonTempFolder = EnvironmentConfiguration.rushTempDirOverride ||
+      path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));

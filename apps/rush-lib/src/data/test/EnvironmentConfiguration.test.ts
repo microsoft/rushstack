@@ -4,10 +4,7 @@
 // <reference types='mocha' />
 
 import { assert } from 'chai';
-import {
-  EnvironmentConfiguration,
-  EnvironmentValue
-} from '../EnvironmentConfiguration';
+import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 
 describe('EnvironmentConfiguration', () => {
   let _oldEnv: typeof process.env;
@@ -28,7 +25,7 @@ describe('EnvironmentConfiguration', () => {
     });
 
     it('allows known environment variables', () => {
-      process.env['rush_tempDir'] = '/var/temp'; // tslint:disable-line:no-string-literal
+      process.env['RUSH_TEMP_FOLDER'] = '/var/temp'; // tslint:disable-line:no-string-literal
       assert.doesNotThrow(EnvironmentConfiguration.initialize);
     });
 
@@ -38,35 +35,35 @@ describe('EnvironmentConfiguration', () => {
     });
 
     it('can be re-initialized', () => {
-      process.env['rush_tempDir'] = '/var/tempA'; // tslint:disable-line:no-string-literal
+      process.env['RUSH_TEMP_FOLDER'] = '/var/tempA'; // tslint:disable-line:no-string-literal
       EnvironmentConfiguration.initialize();
 
-      assert.equal(EnvironmentConfiguration.getEnvironmentValue(EnvironmentValue.TempDirectoryOverride), '/var/tempA');
+      assert.equal(EnvironmentConfiguration.rushTempDirOverride, '/var/tempA');
 
-      process.env['rush_tempDir'] = '/var/tempB'; // tslint:disable-line:no-string-literal
+      process.env['RUSH_TEMP_FOLDER'] = '/var/tempB'; // tslint:disable-line:no-string-literal
       EnvironmentConfiguration.initialize();
 
-      assert.equal(EnvironmentConfiguration.getEnvironmentValue(EnvironmentValue.TempDirectoryOverride), '/var/tempB');
+      assert.equal(EnvironmentConfiguration.rushTempDirOverride, '/var/tempB');
     });
   });
 
-  describe('getEnvironmentValue', () => {
+  describe('rushTempDirOverride', () => {
     it('throws if EnvironmentConfiguration is not initialized', () => {
-      assert.throws(() => EnvironmentConfiguration.getEnvironmentValue(EnvironmentValue.TempDirectoryOverride));
+      assert.throws(() => EnvironmentConfiguration.rushTempDirOverride);
     });
 
     it('returns undefined for unset environment variables', () => {
       EnvironmentConfiguration.initialize();
 
-      assert.isUndefined(EnvironmentConfiguration.getEnvironmentValue(EnvironmentValue.TempDirectoryOverride));
+      assert.isUndefined(EnvironmentConfiguration.rushTempDirOverride);
     });
 
     it('returns the value for a set environment variable', () => {
       const expectedValue: string = '/var/temp';
-      process.env['rush_tempDir'] = expectedValue; // tslint:disable-line:no-string-literal
+      process.env['RUSH_TEMP_FOLDER'] = expectedValue; // tslint:disable-line:no-string-literal
       EnvironmentConfiguration.initialize();
 
-      assert.equal(EnvironmentConfiguration.getEnvironmentValue(EnvironmentValue.TempDirectoryOverride), expectedValue);
+      assert.equal(EnvironmentConfiguration.rushTempDirOverride, expectedValue);
     });
   });
 });
