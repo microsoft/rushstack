@@ -22,6 +22,20 @@ function assertPathProperty(validatedPropertyName: string, absolutePath: string,
 }
 
 describe('RushConfiguration', () => {
+  let _oldEnv: typeof process.env;
+
+  beforeEach(() => {
+    _oldEnv = process.env;
+    process.env = {};
+
+    process.env['USERPROFILE'] = _oldEnv['USERPROFILE']; // tslint:disable-line:no-string-literal
+    process.env['HOME'] = _oldEnv['HOME']; // tslint:disable-line:no-string-literal
+  });
+
+  afterEach(() => {
+    process.env = _oldEnv;
+  });
+
   it ('can\'t load too new rush', (done: MochaDone) => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-too-new.json');
 
@@ -162,5 +176,28 @@ describe('RushConfiguration', () => {
     assert.equal(project1.unscopedTempProjectName, 'project1');
 
     done();
+  });
+
+  it('allows the temp directory to be set via environment variable', () => {
+    const expectedValue: string = path.resolve('/var/temp');
+    process.env['RUSH_TEMP_FOLDER'] = expectedValue; // tslint:disable-line:no-string-literal
+
+    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm.json');
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+
+    assertPathProperty('commonTempFolder', rushConfiguration.commonTempFolder, expectedValue);
+    assertPathProperty('npmCacheFolder', rushConfiguration.npmCacheFolder, path.join(expectedValue, 'npm-cache'));
+    assertPathProperty('npmTmpFolder', rushConfiguration.npmTmpFolder, path.join(expectedValue, 'npm-tmp'));
+    assertPathProperty('pnpmStoreFolder', rushConfiguration.pnpmStoreFolder, path.join(expectedValue, 'pnpm-store'));
+    assertPathProperty(
+      'packageManagerToolFilename',
+      rushConfiguration.packageManagerToolFilename,
+      `${expectedValue}/pnpm-local/node_modules/.bin/pnpm`
+    );
+    assertPathProperty(
+      'rushLinkJsonFilename',
+      rushConfiguration.rushLinkJsonFilename,
+      path.join(expectedValue, 'rush-link.json')
+    );
   });
 });

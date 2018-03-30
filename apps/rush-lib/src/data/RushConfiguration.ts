@@ -14,6 +14,7 @@ import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import EventHooks from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
+import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -624,6 +625,8 @@ export default class RushConfiguration {
    * instead.
    */
   private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
+    EnvironmentConfiguration.initialize();
+
     if (rushConfigurationJson.nodeSupportedVersionRange) {
       if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
         throw new Error('Error parsing the node-semver expression in the "nodeSupportedVersionRange"'
@@ -642,7 +645,9 @@ export default class RushConfiguration {
 
     this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
 
-    this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
+    this._commonTempFolder = EnvironmentConfiguration.rushTempFolderOverride ||
+      path.join(this._commonFolder, RushConstants.rushTempFolderName);
+
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
     this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'pnpm-store'));

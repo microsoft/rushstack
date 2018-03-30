@@ -16,10 +16,9 @@ import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { BaseLinkManager } from '../logic/base/BaseLinkManager';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
-import { BaseRushAction } from './BaseRushAction';
+import { BaseInstallAction } from './BaseInstallAction';
 
-export default class InstallAction extends BaseRushAction {
-  private _parser: RushCommandLineParser;
+export default class InstallAction extends BaseInstallAction {
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
@@ -34,12 +33,14 @@ export default class InstallAction extends BaseRushAction {
       + ' Rush "common" folder, using the exact versions specified in your npm-shrinkwrap.json file.'
       + ' It also makes sure these versions satisfy your dependencies; if not, it will ask you to run'
       + ' "rush generate". If there is nothing to do, then "rush install" won\'t take any time.'
-      + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
+      + ' Afterwards, it will run "rush link" to create symlinks for all your projects.',
+      parser
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void {
+    super.onDefineParameters();
+
     this._cleanInstall = this.defineFlagParameter({
       parameterLongName: '--clean',
       parameterShortName: '-c',
@@ -81,7 +82,6 @@ export default class InstallAction extends BaseRushAction {
 
     const installManager: InstallManager = new InstallManager(this.rushConfiguration);
     return installManager.ensureLocalPackageManager(this._cleanInstallFull.value).then(() => {
-
       const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile(
         this.rushConfiguration.packageManager,
         this.rushConfiguration.committedShrinkwrapFilename);
@@ -101,14 +101,17 @@ export default class InstallAction extends BaseRushAction {
         installType = InstallType.ForceClean;
       }
 
-      if (!installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, installType !== InstallType.Normal)) {
+      if (!installManager.createTempModulesAndCheckShrinkwrap(
+        shrinkwrapFile,
+        installType !== InstallType.Normal,
+        this._authenticationTokensParameter.value || []
+      )) {
         console.log('');
         console.log(colors.red('You need to run "rush generate" to update your shrinkwrap file.'));
         return process.exit(1);
       }
 
       installManager.installCommonModules(installType);
-
     }).catch((error) => {
       stopwatch.stop();
       this._collectTelemetry(stopwatch, false);
@@ -131,8 +134,8 @@ export default class InstallAction extends BaseRushAction {
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
-    if (this._parser.telemetry) {
-      this._parser.telemetry.log({
+    if (this.parser.telemetry) {
+      this.parser.telemetry.log({
         name: 'install',
         duration: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',

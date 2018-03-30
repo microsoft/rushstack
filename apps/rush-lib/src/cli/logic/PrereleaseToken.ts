@@ -3,12 +3,16 @@
 
 export default class PrereleaseToken {
   private _name: string;
+  private _prereleaseName: string | undefined;
+  private _suffixName: string | undefined;
 
-  constructor(private _prereleaseName?: string, private _suffixName?: string) {
-    if (_prereleaseName && _suffixName) {
+  constructor(prereleaseName?: string, suffixName?: string) {
+    if (prereleaseName && suffixName) {
       throw new Error('Pre-release name and suffix cannot be provided at the same time.');
     }
-    this._name = _prereleaseName! || _suffixName!;
+    this._name = prereleaseName! || suffixName!;
+    this._prereleaseName = prereleaseName;
+    this._suffixName = suffixName;
   }
 
   public get hasValue(): boolean {

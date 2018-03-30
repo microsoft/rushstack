@@ -26,25 +26,13 @@ const CHANGELOG_MD: string = 'CHANGELOG.md';
 const EOL: string = '\n';
 
 export default class ChangelogGenerator {
-  private static _rushConfiguration: RushConfiguration;
-
-  public static get rushConfiguration(): RushConfiguration {
-    if (!ChangelogGenerator._rushConfiguration) {
-      ChangelogGenerator._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-    }
-    return ChangelogGenerator._rushConfiguration;
-  }
-
-  public static set rushConfiguration(newConfiguration: RushConfiguration) {
-    ChangelogGenerator._rushConfiguration = newConfiguration;
-  }
-
   /**
    * Updates the appropriate changelogs with the given changes.
    */
   public static updateChangelogs(
     allChanges: IChangeInfoHash,
     allProjects: Map<string, RushConfigurationProject>,
+    rushConfiguration: RushConfiguration,
     shouldCommit: boolean
   ): IChangelog[] {
     const updatedChangeLogs: IChangelog[] = [];
@@ -58,8 +46,10 @@ export default class ChangelogGenerator {
             allChanges[packageName],
             project.projectFolder,
             shouldCommit,
+            rushConfiguration,
             project.versionPolicy && project.versionPolicy.isLockstepped,
-            project.isMainProject);
+            project.isMainProject
+          );
 
             if (changeLog) {
               updatedChangeLogs.push(changeLog);
@@ -74,7 +64,8 @@ export default class ChangelogGenerator {
    * Fully regenerate the markdown files based on the current json files.
    */
   public static regenerateChangelogs(
-    allProjects: Map<string, RushConfigurationProject>
+    allProjects: Map<string, RushConfigurationProject>,
+    rushConfiguration: RushConfiguration
   ): void {
     allProjects.forEach(project => {
       const markdownPath: string = path.resolve(project.projectFolder, CHANGELOG_MD);
@@ -91,7 +82,7 @@ export default class ChangelogGenerator {
 
         fs.writeFileSync(
           path.join(project.projectFolder, CHANGELOG_MD),
-          ChangelogGenerator._translateToMarkdown(changelog, isLockstepped),
+          ChangelogGenerator._translateToMarkdown(changelog, rushConfiguration, isLockstepped),
           { encoding: 'utf8' }
         );
       }
@@ -106,6 +97,7 @@ export default class ChangelogGenerator {
     change: IChangeInfo,
     projectFolder: string,
     shouldCommit: boolean,
+    rushConfiguration: RushConfiguration,
     isLockstepped: boolean = false,
     isMain: boolean = true
   ): IChangelog | undefined {
@@ -158,7 +150,7 @@ export default class ChangelogGenerator {
 
         fs.writeFileSync(
           path.join(projectFolder, CHANGELOG_MD),
-          ChangelogGenerator._translateToMarkdown(changelog, isLockstepped),
+          ChangelogGenerator._translateToMarkdown(changelog, rushConfiguration, isLockstepped),
           { encoding: 'utf8' }
         );
       }
@@ -197,7 +189,11 @@ export default class ChangelogGenerator {
   /**
    * Translates the given changelog json object into a markdown string.
    */
-  private static _translateToMarkdown(changelog: IChangelog, isLockstepped: boolean = false): string {
+  private static _translateToMarkdown(
+    changelog: IChangelog,
+    rushConfiguration: RushConfiguration,
+    isLockstepped: boolean = false
+  ): string {
     let markdown: string = [
       `# Change Log - ${changelog.name}`,
       '',
@@ -236,7 +232,7 @@ export default class ChangelogGenerator {
           entry.comments[ChangeType[ChangeType.none]]);
       }
 
-      if (this.rushConfiguration.hotfixChangeEnabled) {
+      if (rushConfiguration.hotfixChangeEnabled) {
         comments += ChangelogGenerator._getChangeComments(
           'Hotfixes',
           entry.comments[ChangeType[ChangeType.hotfix]]);

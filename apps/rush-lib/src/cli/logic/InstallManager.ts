@@ -211,8 +211,8 @@ export default class InstallManager {
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    */
-  public createTempModules(forceCreate: boolean): void {
-    this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate);
+  public createTempModules(forceCreate: boolean, authTokens: string[]): void {
+    this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate, authTokens);
   }
 
   /**
@@ -223,7 +223,9 @@ export default class InstallManager {
    */
   public createTempModulesAndCheckShrinkwrap(
     shrinkwrapFile: BaseShrinkwrapFile | undefined,
-    forceCreate: boolean): boolean {
+    forceCreate: boolean,
+    authTokens: string[]
+  ): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     // Example: "C:\MyRepo\common\temp\projects"
@@ -284,6 +286,10 @@ export default class InstallManager {
     // ensure that we remove any old one that may be hanging around
     fsx.removeSync(tempNpmrcPath);
     this.syncFile(committedNpmrcPath, tempNpmrcPath);
+
+    if (fsx.existsSync(tempNpmrcPath)) {
+      fsx.appendFileSync(tempNpmrcPath, [''].concat(authTokens).join(os.EOL));
+    }
 
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {

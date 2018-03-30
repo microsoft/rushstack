@@ -25,6 +25,7 @@ interface IPinnedVersionsJson {
  */
 export class PinnedVersionsConfiguration {
   private _data: Map<string, string>;
+  private _filename: string;
 
   /** Attempts to load pinned versions configuration from a given file */
   public static tryLoadFromFile(jsonFilename: string): PinnedVersionsConfiguration {
@@ -80,7 +81,8 @@ export class PinnedVersionsConfiguration {
   /**
    * Preferred to use PinnedVersionsConfiguration.loadFromFile()
    */
-  private constructor(pinnedVersionJson: IPinnedVersionsJson | undefined, private _filename: string) {
+  private constructor(pinnedVersionJson: IPinnedVersionsJson | undefined, filename: string) {
+    this._filename = filename;
     this._data = new Map<string, string>();
     if (pinnedVersionJson) {
       for (const dependency of Object.keys(pinnedVersionJson)) {

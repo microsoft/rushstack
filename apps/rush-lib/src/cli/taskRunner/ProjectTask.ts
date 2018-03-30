@@ -34,6 +34,7 @@ export default class ProjectTask implements ITaskDefinition {
   }
 
   private _hasWarningOrError: boolean;
+  private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
   constructor(
     private _rushProject: RushConfigurationProject,
@@ -42,7 +43,9 @@ export default class ProjectTask implements ITaskDefinition {
     private _customFlags: string[],
     public isIncrementalBuildAllowed: boolean,
     private _ignoreMissingScript: boolean
-  ) {}
+  ) {
+    this._packageChangeAnalyzer = new PackageChangeAnalyzer(this._rushConfiguration);
+  }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
@@ -58,16 +61,17 @@ export default class ProjectTask implements ITaskDefinition {
 
   private _getPackageDependencies(taskCommand: string, writer: ITaskWriter): IPackageDependencies | undefined {
     let deps: IPackageDependencies | undefined = undefined;
-    PackageChangeAnalyzer.rushConfig = this._rushConfiguration;
+    this._rushConfiguration = this._rushConfiguration;
     try {
       deps = {
-        files: PackageChangeAnalyzer.instance.getPackageDepsHash(this._rushProject.packageName)!.files,
+        files: this._packageChangeAnalyzer.getPackageDepsHash(this._rushProject.packageName)!.files,
         arguments: taskCommand
       };
     } catch (error) {
       writer.writeLine('Unable to calculate incremental build state. ' +
         'Instead running full rebuild. ' + error.toString());
     }
+
     return deps;
   }
 

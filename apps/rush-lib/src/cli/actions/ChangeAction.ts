@@ -32,7 +32,6 @@ import {
 } from '../../data/VersionPolicy';
 
 export default class ChangeAction extends BaseRushAction {
-  private _parser: RushCommandLineParser;
   private _sortedProjectList: string[];
   private _changeFileData: Map<string, IChangeFile>;
   private _changeComments: Map<string, string[]>;
@@ -75,9 +74,9 @@ export default class ChangeAction extends BaseRushAction {
       summary: 'Records changes made to projects, indicating how the package version number should be bumped ' +
         'for the next publish.',
       documentation: documentation.join(os.EOL),
-      safeForSimultaneousRushProcesses: true
+      safeForSimultaneousRushProcesses: true,
+      parser
     });
-    this._parser = parser;
   }
 
   public onDefineParameters(): void {

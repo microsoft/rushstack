@@ -18,30 +18,17 @@ import {
   ChangeType
 } from '../../data/ChangeManagement';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
-import RushConfiguration from '../../data/RushConfiguration';
 import Utilities from '../../utilities/Utilities';
 import { execSync } from 'child_process';
 import PrereleaseToken from './PrereleaseToken';
 import ChangeFiles from './ChangeFiles';
+import RushConfiguration from '../../data/RushConfiguration';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
 }
 
 export default class PublishUtilities {
-  private static _rushConfiguration: RushConfiguration;
-
-  public static get rushConfiguration(): RushConfiguration {
-    if (!PublishUtilities._rushConfiguration) {
-      PublishUtilities._rushConfiguration = RushConfiguration.loadFromDefaultLocation();
-    }
-    return PublishUtilities._rushConfiguration;
-  }
-
-  public static set rushConfiguration(newConfiguration: RushConfiguration) {
-    PublishUtilities._rushConfiguration = newConfiguration;
-  }
-
   /**
    * Finds change requests in the given folder.
    * @param changesPath Path to the changes folder.
@@ -49,6 +36,7 @@ export default class PublishUtilities {
    */
   public static findChangeRequests(
     allPackages: Map<string, RushConfigurationProject>,
+    rushConfiguration: RushConfiguration,
     changeFiles: ChangeFiles,
     includeCommitDetails?: boolean,
     prereleaseToken?: PrereleaseToken,
@@ -69,7 +57,14 @@ export default class PublishUtilities {
       }
 
       for (const change of changeRequest.changes!) {
-        PublishUtilities._addChange(change, allChanges, allPackages, prereleaseToken, projectsToExclude);
+        PublishUtilities._addChange(
+          change,
+          allChanges,
+          allPackages,
+          rushConfiguration,
+          prereleaseToken,
+          projectsToExclude
+        );
       }
     });
 
@@ -80,6 +75,7 @@ export default class PublishUtilities {
           allChanges[packageName],
           allChanges,
           allPackages,
+          rushConfiguration,
           prereleaseToken,
           projectsToExclude
         );
@@ -139,6 +135,7 @@ export default class PublishUtilities {
   public static updatePackages(
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
+    rushConfiguration: RushConfiguration,
     shouldCommit: boolean,
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
@@ -150,6 +147,7 @@ export default class PublishUtilities {
         allChanges[packageName],
         allChanges,
         allPackages,
+        rushConfiguration,
         shouldCommit,
         prereleaseToken,
         projectsToExclude);
@@ -287,6 +285,7 @@ export default class PublishUtilities {
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
+    rushConfiguration: RushConfiguration,
     shouldCommit: boolean,
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
@@ -317,11 +316,25 @@ export default class PublishUtilities {
     pkg.version = newVersion;
 
     // Update the package's dependencies.
-    PublishUtilities._updateDependencies(pkg.name, pkg.dependencies, allChanges, allPackages,
-      prereleaseToken, projectsToExclude);
+    PublishUtilities._updateDependencies(
+      pkg.name,
+      pkg.dependencies,
+      allChanges,
+      allPackages,
+      rushConfiguration,
+      prereleaseToken,
+      projectsToExclude
+    );
     // Update the package's dev dependencies.
-    PublishUtilities._updateDependencies(pkg.name, pkg.devDependencies, allChanges, allPackages,
-      prereleaseToken, projectsToExclude);
+    PublishUtilities._updateDependencies(
+      pkg.name,
+      pkg.devDependencies,
+      allChanges,
+      allPackages,
+      rushConfiguration,
+      prereleaseToken,
+      projectsToExclude
+    );
 
     change.changes!.forEach(subChange => {
       if (subChange.comment) {
@@ -349,6 +362,7 @@ export default class PublishUtilities {
     dependencies: { [key: string]: string; } | undefined,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
+    rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
   ): void {
@@ -377,7 +391,9 @@ export default class PublishUtilities {
               depName,
               depChange,
               allChanges,
-              allPackages);
+              allPackages,
+              rushConfiguration
+            );
           }
         }
       });
@@ -414,6 +430,7 @@ export default class PublishUtilities {
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
+    rushConfiguration: RushConfiguration,
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
   ): boolean {
@@ -470,7 +487,7 @@ export default class PublishUtilities {
     } else {
       if (change.changeType === ChangeType.hotfix) {
         const prereleaseComponents: string[] = semver.prerelease(pkg.version);
-        if (!this.rushConfiguration.hotfixChangeEnabled) {
+        if (!rushConfiguration.hotfixChangeEnabled) {
           throw new Error(`Cannot add hotfix change; hotfixChangeEnabled is false in configuration.`);
         }
 
@@ -494,7 +511,7 @@ export default class PublishUtilities {
       // If hotfix change, force new range dependency to be the exact new version
       currentChange.newRangeDependency = change.changeType === ChangeType.hotfix ?
         currentChange.newVersion :
-        PublishUtilities._getNewRangeDependency(currentChange.newVersion);
+        PublishUtilities._getNewRangeDependency(currentChange.newVersion!);
     }
     return hasChanged;
   }
@@ -503,6 +520,7 @@ export default class PublishUtilities {
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
+    rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
   ): void {
@@ -517,10 +535,26 @@ export default class PublishUtilities {
         for (const depName of downstreamNames) {
           const pkg: IPackageJson = allPackages.get(depName)!.packageJson;
 
-          PublishUtilities._updateDownstreamDependency(pkg.name, pkg.dependencies, change, allChanges, allPackages,
-            prereleaseToken, projectsToExclude);
-          PublishUtilities._updateDownstreamDependency(pkg.name, pkg.devDependencies, change, allChanges, allPackages,
-            prereleaseToken, projectsToExclude);
+          PublishUtilities._updateDownstreamDependency(
+            pkg.name,
+            pkg.dependencies,
+            change,
+            allChanges,
+            allPackages,
+            rushConfiguration,
+            prereleaseToken,
+            projectsToExclude
+          );
+          PublishUtilities._updateDownstreamDependency(
+            pkg.name,
+            pkg.devDependencies,
+            change,
+            allChanges,
+            allPackages,
+            rushConfiguration,
+            prereleaseToken,
+            projectsToExclude
+          );
         }
       }
     }
@@ -532,6 +566,7 @@ export default class PublishUtilities {
     change: IChangeInfo,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
+    rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
   ): void {
@@ -560,7 +595,7 @@ export default class PublishUtilities {
         const hasChanged: boolean = PublishUtilities._addChange({
           packageName: parentPackageName,
           changeType
-        }, allChanges, allPackages, prereleaseToken, projectsToExclude);
+        }, allChanges, allPackages, rushConfiguration, prereleaseToken, projectsToExclude);
 
         if (hasChanged || alwaysUpdate) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
@@ -569,6 +604,7 @@ export default class PublishUtilities {
             allChanges[parentPackageName],
             allChanges,
             allPackages,
+            rushConfiguration,
             prereleaseToken,
             projectsToExclude
           );
@@ -583,7 +619,8 @@ export default class PublishUtilities {
     dependencyName: string,
     dependencyChange: IChangeInfo,
     allChanges: IChangeInfoHash,
-    allPackages: Map<string, RushConfigurationProject>
+    allPackages: Map<string, RushConfigurationProject>,
+    rushConfiguration: RushConfiguration
   ): void {
     const currentDependencyVersion: string = dependencies[dependencyName];
 
@@ -603,7 +640,8 @@ export default class PublishUtilities {
           ` to \`${dependencies[dependencyName]}\``
       },
       allChanges,
-      allPackages
+      allPackages,
+      rushConfiguration
     );
   }
 }

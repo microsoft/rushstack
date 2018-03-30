@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import * as path from 'path';
 
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
+import RushConfiguration from '../../../data/RushConfiguration';
 
 import {
   IPackageDeps
@@ -34,7 +35,7 @@ describe('PackageChangeAnalyzer', () => {
     };
 
     PackageChangeAnalyzer.getPackageDeps = (packagePath: string, ignored: string[]) => repoHashDeps;
-    PackageChangeAnalyzer.rushConfig = {
+    const rushConfiguration: RushConfiguration = {
       projects: [{
         packageName: packageA,
         projectRelativeFolder: packageAPath
@@ -43,7 +44,8 @@ describe('PackageChangeAnalyzer', () => {
       committedShrinkwrapFilename: 'common/config/rush/shrinkwrap.yaml'
     } as any; // tslint:disable-line:no-any
 
-    const packageDeps: IPackageDeps | undefined = PackageChangeAnalyzer.instance.getPackageDepsHash(packageA);
+    const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);
+    const packageDeps: IPackageDeps | undefined = packageChangeAnalyzer.getPackageDepsHash(packageA);
     expect(packageDeps).eql(repoHashDeps);
   });
 

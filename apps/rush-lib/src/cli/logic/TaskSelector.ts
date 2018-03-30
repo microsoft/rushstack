@@ -33,8 +33,10 @@ export class TaskSelector {
   private _taskRunner: TaskRunner;
   private _dependentList: Map<string, Set<string>>;
   private _rushLinkJson: IRushLinkJson;
+  private _options: ITaskSelectorConstructor;
 
-  constructor(private _options: ITaskSelectorConstructor) {
+  constructor(options: ITaskSelectorConstructor) {
+    this._options = options;
 
     this._taskRunner = new TaskRunner(
       this._options.isQuietMode,
