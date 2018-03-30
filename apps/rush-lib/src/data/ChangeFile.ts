@@ -16,18 +16,26 @@ import {
  * @public
  */
 export class ChangeFile {
+  private _changeFileData: IChangeFile;
+  private _rushConfiguration: RushConfiguration;
+
   /**
    * @internal
    */
-  public constructor(private _changeFileData: IChangeFile,
-    private _rushConfiguration: RushConfiguration
+  public constructor(
+    changeFileData: IChangeFile,
+    rushConfiguration: RushConfiguration
   ) {
-    if (!this._changeFileData) {
+    if (!changeFileData) {
       throw new Error(`_changeFileData does not have value`);
     }
-    if (!this._rushConfiguration) {
+
+    if (!rushConfiguration) {
       throw new Error(`_rushConfiguration does not have value`);
     }
+
+    this._changeFileData = changeFileData;
+    this._rushConfiguration = rushConfiguration;
   }
 
   /**

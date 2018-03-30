@@ -10,7 +10,10 @@ import { Event } from '../../data/EventHooks';
 import { Stopwatch } from '../../utilities/Stopwatch';
 
 export default class EventHooksManager {
-  public constructor(private _eventHooks: EventHooks) {
+  private _eventHooks: EventHooks;
+
+  public constructor(eventHooks: EventHooks) {
+    this._eventHooks = eventHooks;
   }
 
   public handle(event: Event, isDebug: boolean = false): void {

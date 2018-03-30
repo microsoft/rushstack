@@ -60,7 +60,7 @@ enum BumpType {
 class ChangeFile {
   // WARNING: The type "IChangeFile" needs to be exported by the package (e.g. added to index.ts)
   // @internal
-  constructor(_changeFileData: IChangeFile, _rushConfiguration: RushConfiguration);
+  constructor(changeFileData: IChangeFile, rushConfiguration: RushConfiguration);
   addChange(data: IChangeInfo): void;
   generatePath(): string;
   getChanges(packageName: string): IChangeInfo[];
@@ -263,7 +263,7 @@ class VersionPolicy {
 // @beta (undocumented)
 class VersionPolicyConfiguration {
   // @internal
-  constructor(_jsonFileName: string);
+  constructor(jsonFileName: string);
   bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
   getVersionPolicy(policyName: string): VersionPolicy;
   validate(projectsByName: Map<string, RushConfigurationProject>): void;

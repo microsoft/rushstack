@@ -15,8 +15,11 @@ import { IChangelog } from '../../data/Changelog';
  */
 export default class ChangeFiles {
 
-  // Change file path relative to changes folder.
+  /**
+   * Change file path relative to changes folder.
+   */
   private _files: string[];
+  private _changesPath: string;
 
   /**
    * Validate if the newly added change files match the changed packages.
@@ -75,7 +78,8 @@ export default class ChangeFiles {
     return changes;
   }
 
-  constructor(private _changesPath: string) {
+  constructor(changesPath: string) {
+    this._changesPath = changesPath;
   }
 
   /**

@@ -40,11 +40,13 @@ export class VersionPolicyConfiguration {
     path.join(__dirname, '../schemas/version-policies.schema.json'));
 
   private _versionPolicies: Map<string, VersionPolicy>;
+  private _jsonFileName: string;
 
   /**
    * @internal
    */
-  public constructor(private _jsonFileName: string) {
+  public constructor(jsonFileName: string) {
+    this._jsonFileName = jsonFileName;
     this._versionPolicies = new Map<string, VersionPolicy>();
     this._loadFile();
   }

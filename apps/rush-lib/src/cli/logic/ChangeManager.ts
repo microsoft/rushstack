@@ -25,10 +25,15 @@ export default class ChangeManager {
   private _allPackages: Map<string, RushConfigurationProject>;
   private _allChanges: IChangeInfoHash;
   private _changeFiles: ChangeFiles;
+  private _rushConfiguration: RushConfiguration;
+  private _lockStepProjectsToExclude: Set<string> | undefined;
 
-  constructor(private _rushConfiguration: RushConfiguration,
-    private _lockStepProjectsToExclude?: Set<string> | undefined
+  constructor(
+    rushConfiguration: RushConfiguration,
+    lockStepProjectsToExclude?: Set<string> | undefined
   ) {
+    this._rushConfiguration = rushConfiguration;
+    this._lockStepProjectsToExclude = lockStepProjectsToExclude;
   }
 
   /**

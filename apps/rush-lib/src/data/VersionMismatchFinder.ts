@@ -15,8 +15,10 @@ export class VersionMismatchFinder {
   * }
   */
   private _mismatches: Map<string, Map<string, string[]>>;
+  private _projects: RushConfigurationProject[];
 
-  constructor(private _projects: RushConfigurationProject[]) {
+  constructor(projects: RushConfigurationProject[]) {
+    this._projects = projects;
     this._mismatches = new Map<string, Map<string, string[]>>();
     this._analyze();
   }
