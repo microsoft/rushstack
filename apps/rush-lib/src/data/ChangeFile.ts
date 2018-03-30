@@ -27,11 +27,11 @@ export class ChangeFile {
     rushConfiguration: RushConfiguration
   ) {
     if (!changeFileData) {
-      throw new Error(`_changeFileData does not have value`);
+      throw new Error(`changeFileData does not have a value`);
     }
 
     if (!rushConfiguration) {
-      throw new Error(`_rushConfiguration does not have value`);
+      throw new Error(`rushConfiguration does not have a value`);
     }
 
     this._changeFileData = changeFileData;
