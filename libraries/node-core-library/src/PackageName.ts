@@ -76,7 +76,7 @@ export class PackageName {
         return result;
       }
       // Extract the scope substring
-      result.scope = input.substr(0, indexOfScopeSlash);
+      result.scope = input.substr(0, indexOfScopeSlash + 1);
       input = input.substr(indexOfScopeSlash + 1);
     }
 
@@ -88,6 +88,10 @@ export class PackageName {
     }
 
     result.unscopedName = input;
+
+    // Convert "@scope/unscoped-name" --> "scopeunscoped-name"
+    const nameWithoutScopeSymbols: string = (result.scope ? result.scope.slice(1, -1) : '')
+      + result.unscopedName;
 
     if (result.unscopedName === '') {
       result.error = 'The package name must not be empty';
@@ -108,17 +112,14 @@ export class PackageName {
     }
 
     // "New packages must not have uppercase letters in the name."
-    if (result.unscopedName !== result.unscopedName.toLowerCase()) {
+    if (nameWithoutScopeSymbols !== nameWithoutScopeSymbols.toLowerCase()) {
       result.error = 'The package name must not contain upper case characters';
       return result;
     }
 
     // "The name ends up being part of a URL, an argument on the command line, and a folder name.
     // Therefore, the name can't contain any non-URL-safe characters"
-    const fullNameWithoutAtSign: string = result.scope.substr(1) + result.unscopedName;
-
-    const match: RegExpMatchArray | null = fullNameWithoutAtSign.match(PackageName.invalidNameCharactersRegExp);
-
+    const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(PackageName.invalidNameCharactersRegExp);
     if (match) {
       result.error = `The package name contains an invalid character: "${match[0]}"`;
       return result;
