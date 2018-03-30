@@ -1,17 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-enum EnvironmentVariableNames {
-  TempFolderOverride = 'RUSH_TEMP_FOLDER'
-}
-
-const NORMALIZED_ENV_VALUE_NAMES: { [uppercaseValue: string]: EnvironmentVariableNames } = {};
-for (const envValue in EnvironmentVariableNames) {
-  if (EnvironmentVariableNames.hasOwnProperty(envValue)) {
-    const enumValue: string = EnvironmentVariableNames[envValue];
-    NORMALIZED_ENV_VALUE_NAMES[enumValue.toUpperCase()] = enumValue as EnvironmentVariableNames;
-  }
-}
+import * as os from 'os';
 
 /**
  * Provides Rush-specific environment variable data. All Rush environment variables must start with "RUSH_". This class
@@ -40,17 +30,18 @@ export class EnvironmentConfiguration {
     EnvironmentConfiguration.reset();
 
     const unknownEnvVariables: string[] = [];
-    for (const envVar in process.env) {
-      if (process.env.hasOwnProperty(envVar) && envVar.match(/^RUSH_/i)) {
-        const resolvedValueName: EnvironmentVariableNames | undefined = NORMALIZED_ENV_VALUE_NAMES[envVar];
-        const value: string | undefined = process.env[envVar];
-        switch (resolvedValueName) {
-          case EnvironmentVariableNames.TempFolderOverride:
+    for (const envVarName in process.env) {
+      if (process.env.hasOwnProperty(envVarName) && envVarName.match(/^RUSH_/i)) {
+        const value: string | undefined = process.env[envVarName];
+        // Environment variables are only case-insensitive on Windows
+        const normalizedEnvVarName: string = os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
+        switch (normalizedEnvVarName) {
+          case 'RUSH_TEMP_FOLDER':
             EnvironmentConfiguration._rushTempFolderOverride = value;
             break;
 
           default:
-            unknownEnvVariables.push(envVar);
+            unknownEnvVariables.push(envVarName);
             break;
         }
       }
