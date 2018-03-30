@@ -645,7 +645,7 @@ export default class RushConfiguration {
 
     this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
 
-    this._commonTempFolder = EnvironmentConfiguration.rushTempDirOverride ||
+    this._commonTempFolder = EnvironmentConfiguration.rushTempFolderOverride ||
       path.join(this._commonFolder, RushConstants.rushTempFolderName);
 
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));

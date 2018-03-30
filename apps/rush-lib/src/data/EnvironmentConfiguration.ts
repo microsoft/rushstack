@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 enum EnvironmentVariableNames {
-  TempDirectoryOverride = 'RUSH_TEMP_FOLDER'
+  TempFolderOverride = 'RUSH_TEMP_FOLDER'
 }
 
 const NORMALIZED_ENV_VALUE_NAMES: { [uppercaseValue: string]: EnvironmentVariableNames } = {};
@@ -23,14 +23,14 @@ for (const envValue in EnvironmentVariableNames) {
 export class EnvironmentConfiguration {
   private static _hasBeenInitialized: boolean = false;
 
-  private static _rushTempDirOverride: string | undefined;
+  private static _rushTempFolderOverride: string | undefined;
 
   /**
-   * An override for the common/temp directory path.
+   * An override for the common/temp folder path.
    */
-  public static get rushTempDirOverride(): string | undefined {
+  public static get rushTempFolderOverride(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
-    return EnvironmentConfiguration._rushTempDirOverride;
+    return EnvironmentConfiguration._rushTempFolderOverride;
   }
 
   /**
@@ -45,8 +45,8 @@ export class EnvironmentConfiguration {
         const resolvedValueName: EnvironmentVariableNames | undefined = NORMALIZED_ENV_VALUE_NAMES[envVar];
         const value: string | undefined = process.env[envVar];
         switch (resolvedValueName) {
-          case EnvironmentVariableNames.TempDirectoryOverride:
-            EnvironmentConfiguration._rushTempDirOverride = value;
+          case EnvironmentVariableNames.TempFolderOverride:
+            EnvironmentConfiguration._rushTempFolderOverride = value;
             break;
 
           default:
@@ -56,8 +56,12 @@ export class EnvironmentConfiguration {
       }
     }
 
+    // This strictness intends to catch mistakes where variables are misspelled or not used correctly.
     if (unknownEnvVariables.length > 0) {
-      throw new Error(`Unknown environment variables: ${unknownEnvVariables.join(', ')}`);
+      throw new Error(
+        'The following environment variables were found with the "RUSH_" prefix, but they are not ' +
+        `recognized by this version of Rush: ${unknownEnvVariables.join(', ')}`
+      );
     }
 
     EnvironmentConfiguration._hasBeenInitialized = true;
@@ -67,7 +71,7 @@ export class EnvironmentConfiguration {
    * Resets EnvironmentConfiguration into an un-initialized state.
    */
   public static reset(): void {
-    EnvironmentConfiguration._rushTempDirOverride = undefined;
+    EnvironmentConfiguration._rushTempFolderOverride = undefined;
 
     EnvironmentConfiguration._hasBeenInitialized = false;
   }
