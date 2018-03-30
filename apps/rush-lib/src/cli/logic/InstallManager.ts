@@ -224,7 +224,7 @@ export default class InstallManager {
   public createTempModulesAndCheckShrinkwrap(
     shrinkwrapFile: BaseShrinkwrapFile | undefined,
     forceCreate: boolean,
-    authTokens: string[] = []
+    authTokens: string[]
   ): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 

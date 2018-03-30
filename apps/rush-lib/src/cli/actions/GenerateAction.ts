@@ -113,7 +113,7 @@ export default class GenerateAction extends BaseInstallAction {
 
       if (shrinkwrapFile
         && !this._forceParameter.value
-        && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, false)) {
+        && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, false, [])) {
         console.log();
         console.log(colors.yellow('Skipping generate, since all project dependencies are already satisfied.'));
         console.log();
