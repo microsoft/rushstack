@@ -42,6 +42,13 @@ interface IJsonSchemaValidateOptions {
 }
 
 // @public
+interface IManagedMapParameters<K, V> {
+  onClear?: (source: ManagedMap<K, V>) => void;
+  onDelete?: (source: ManagedMap<K, V>, key: K) => void;
+  onSet?: (source: ManagedMap<K, V>, key: K, value: V) => void;
+}
+
+// @public
 interface IPackageJson {
   bin?: string;
   dependencies?: IPackageJsonDependencyTable;
@@ -82,6 +89,14 @@ interface IPackageJsonTsdocConfiguration {
 }
 
 // @public
+interface IParsePackageNameResult {
+  error: string;
+  path: string;
+  scope: string;
+  unscopedName: string;
+}
+
+// @public
 class JsonFile {
   static load(jsonFilename: string): any;
   static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): any;
@@ -113,6 +128,26 @@ class LockFile {
 }
 
 // @public
+class ManagedMap<K, V> {
+  constructor(parameters: IManagedMapParameters<K, V>);
+  // (undocumented)
+  clear(): void;
+  // (undocumented)
+  delete(key: K): boolean;
+  // (undocumented)
+  forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void;
+  // (undocumented)
+  get(key: K): V | undefined;
+  // (undocumented)
+  has(key: K): boolean;
+  // (undocumented)
+  set(key: K, value: V): this;
+  // (undocumented)
+  readonly size: number;
+  readonly view: Map<K, V>;
+}
+
+// @public
 class PackageJsonLookup {
   constructor(parameters?: IPackageJsonLookupParameters);
   clearCache(): void;
@@ -120,6 +155,12 @@ class PackageJsonLookup {
   tryGetPackageFolderFor(fileOrFolderPath: string): string | undefined;
   tryGetPackageJsonFilePathFor(fileOrFolderPath: string): string | undefined;
   tryLoadPackageJsonFor(fileOrFolderPath: string): IPackageJson | undefined;
+}
+
+// @public
+class PackageName {
+  static isValidName(packageName: string): boolean;
+  static tryParse(nameWithPath: string): IParsePackageNameResult;
 }
 
 // @public
