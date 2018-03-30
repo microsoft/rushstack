@@ -4,6 +4,7 @@ export function getGlobalRegisterCode(debug?: boolean): string;
 // @public
 interface ISetWebpackPublicPathOptions {
   getPostProcessScript?: (varName: string) => string;
+  preferLastFoundScript?: boolean;
   publicPath?: string;
   regexVariable?: string;
   systemJs?: boolean;
