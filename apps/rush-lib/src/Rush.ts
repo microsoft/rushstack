@@ -28,8 +28,8 @@ export default class Rush {
   public static launch(launcherVersion: string, isManaged: boolean): void {
     console.log(
       EOL +
-      colors.bold(`Rush Multi-Package Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
-      colors.cyan(' - http://aka.ms/rush') +
+      colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
+      colors.cyan(' - http://rushjs.io') +
       EOL
     );
 
