@@ -10,8 +10,6 @@ import RushCommandLineParser from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class UnlinkAction extends BaseRushAction {
-  private _parser: RushCommandLineParser;
-
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'unlink',
@@ -19,9 +17,8 @@ export default class UnlinkAction extends BaseRushAction {
       documentation: 'This removes the symlinks created by the "rush link" command. This is useful for'
        + ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard npm'
        + ' commands on a project.',
-       rushConfiguration: parser.rushConfiguration
+       parser
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void {

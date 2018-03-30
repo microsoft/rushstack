@@ -10,8 +10,6 @@ import RushCommandLineParser from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class CheckAction extends BaseRushAction {
-  private _parser: RushCommandLineParser;
-
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'check',
@@ -20,9 +18,8 @@ export default class CheckAction extends BaseRushAction {
       documentation: 'Checks each project\'s package.json files and ensures that all dependencies are of the ' +
         'same version throughout the repository.',
       safeForSimultaneousRushProcesses: true,
-      rushConfiguration: parser.rushConfiguration
+      parser
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void {

@@ -32,7 +32,6 @@ import {
 } from '../../data/VersionPolicy';
 
 export default class ChangeAction extends BaseRushAction {
-  private _parser: RushCommandLineParser;
   private _sortedProjectList: string[];
   private _changeFileData: Map<string, IChangeFile>;
   private _changeComments: Map<string, string[]>;
@@ -76,9 +75,8 @@ export default class ChangeAction extends BaseRushAction {
         'for the next publish.',
       documentation: documentation.join(os.EOL),
       safeForSimultaneousRushProcesses: true,
-      rushConfiguration: parser.rushConfiguration
+      parser
     });
-    this._parser = parser;
   }
 
   public onDefineParameters(): void {

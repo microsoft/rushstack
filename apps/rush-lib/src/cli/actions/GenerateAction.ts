@@ -20,7 +20,6 @@ import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { BaseInstallAction } from './BaseInstallAction';
 
 export default class GenerateAction extends BaseInstallAction {
-  private _parser: RushCommandLineParser;
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
   private _forceParameter: CommandLineFlagParameter;
@@ -38,9 +37,8 @@ export default class GenerateAction extends BaseInstallAction {
       + ' upgrading you to the latest semver-compatible versions of all dependencies.'
       + ' Then, it will create a new shrinkwrap file, which you should commit to source control.'
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.',
-      rushConfiguration: parser.rushConfiguration
+      parser
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void {

@@ -12,6 +12,7 @@ import { LockFile } from '@microsoft/node-core-library';
 
 import RushConfiguration from '../../data/RushConfiguration';
 import EventHooksManager from '../logic/EventHooksManager';
+import RushCommandLineParser from './RushCommandLineParser';
 
 export interface IRushCommandLineActionOptions extends ICommandLineActionOptions {
   /**
@@ -21,22 +22,32 @@ export interface IRushCommandLineActionOptions extends ICommandLineActionOptions
    */
   safeForSimultaneousRushProcesses?: boolean;
 
-  rushConfiguration: RushConfiguration;
+  /**
+   * The rush parser.
+   */
+  parser: RushCommandLineParser;
 }
 
 /**
  * The base Rush action that all Rush actions should extend.
  */
 export abstract class BaseRushAction extends CommandLineAction {
-  protected rushConfiguration: RushConfiguration;
-
+  private _parser: RushCommandLineParser;
   private _eventHooksManager: EventHooksManager;
   private _safeForSimultaneousRushProcesses: boolean;
+
+  protected get rushConfiguration(): RushConfiguration {
+    return this._parser.rushConfiguration;
+  }
+
+  protected get parser(): RushCommandLineParser {
+    return this._parser;
+  }
 
   constructor(options: IRushCommandLineActionOptions) {
     super(options);
 
-    this.rushConfiguration = options.rushConfiguration;
+    this._parser = options.parser;
     this._safeForSimultaneousRushProcesses = !!options.safeForSimultaneousRushProcesses;
   }
 

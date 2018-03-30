@@ -19,7 +19,6 @@ import { VersionManager } from '../logic/VersionManager';
 import { Git } from '../logic/Git';
 
 export default class VersionAction extends BaseRushAction {
-  private _parser: RushCommandLineParser;
   private _ensureVersionPolicy: CommandLineFlagParameter;
   private _bumpVersion: CommandLineFlagParameter;
   private _versionPolicy: CommandLineStringParameter;
@@ -35,9 +34,8 @@ export default class VersionAction extends BaseRushAction {
       actionVerb: 'version',
       summary: '(EXPERIMENTAL) Manage package versions in the repo.',
       documentation: '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.',
-      rushConfiguration: parser.rushConfiguration
+      parser
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void {

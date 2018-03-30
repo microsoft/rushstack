@@ -9,7 +9,6 @@ import { BaseLinkManager } from '../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class LinkAction extends BaseRushAction {
-  private _parser: RushCommandLineParser;
   private _force: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
@@ -17,9 +16,8 @@ export default class LinkAction extends BaseRushAction {
       actionVerb: 'link',
       summary: 'Create node_modules symlinks for all projects',
       documentation: 'Create node_modules symlinks for all projects',
-      rushConfiguration: parser.rushConfiguration
+      parser
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void {

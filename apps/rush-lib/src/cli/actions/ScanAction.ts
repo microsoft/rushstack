@@ -11,8 +11,6 @@ import RushCommandLineParser from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class ScanAction extends BaseRushAction {
-  private _parser: RushCommandLineParser;
-
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'scan',
@@ -26,9 +24,8 @@ export default class ScanAction extends BaseRushAction {
         + ` "require('__')", "System.import('__'), etc.  The results are only approximate,`
         + ` but generally pretty accurate.`,
       safeForSimultaneousRushProcesses: true,
-      rushConfiguration: parser.rushConfiguration
+      parser
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void {

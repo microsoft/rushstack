@@ -42,14 +42,14 @@ export class CustomRushAction extends BaseRushAction {
   private _parallelismParameter: CommandLineStringParameter | undefined;
 
   constructor(
-    private _parser: RushCommandLineParser,
+    parser: RushCommandLineParser,
     options: ICommandLineActionOptions,
     private _parallelized: boolean = false,
     private _ignoreMissingScript: boolean = false
   ) {
     super({
       ...options,
-      rushConfiguration: _parser.rushConfiguration
+      parser
     });
   }
 
@@ -100,7 +100,7 @@ export class CustomRushAction extends BaseRushAction {
 
     const tasks: TaskSelector = new TaskSelector(
       {
-        rushConfiguration: this._parser.rushConfiguration,
+        rushConfiguration: this.parser.rushConfiguration,
         toFlags: this._toFlag.value,
         fromFlags: this._fromFlag.value,
         commandToRun: this.options.actionVerb,
@@ -123,7 +123,7 @@ export class CustomRushAction extends BaseRushAction {
         stopwatch.stop();
         console.log(colors.red(`rush ${this.options.actionVerb} - Errors! (${stopwatch.toString()})`));
         this._doAfterTask(stopwatch, false);
-        this._parser.exitWithError();
+        this.parser.exitWithError();
       });
   }
 
@@ -208,8 +208,8 @@ export class CustomRushAction extends BaseRushAction {
       return;
     }
     this._collectTelemetry(stopwatch, success);
-    this._parser.flushTelemetry();
-    this.eventHooksManager.handle(Event.postRushBuild, this._parser.isDebug);
+    this.parser.flushTelemetry();
+    this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug);
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
@@ -225,8 +225,8 @@ export class CustomRushAction extends BaseRushAction {
       }
     });
 
-    if (this._parser.telemetry) {
-      this._parser.telemetry.log({
+    if (this.parser.telemetry) {
+      this.parser.telemetry.log({
         name: this.options.actionVerb,
         duration: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',

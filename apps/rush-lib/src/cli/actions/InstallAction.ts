@@ -19,7 +19,6 @@ import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { BaseInstallAction } from './BaseInstallAction';
 
 export default class InstallAction extends BaseInstallAction {
-  private _parser: RushCommandLineParser;
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
@@ -35,9 +34,8 @@ export default class InstallAction extends BaseInstallAction {
       + ' It also makes sure these versions satisfy your dependencies; if not, it will ask you to run'
       + ' "rush generate". If there is nothing to do, then "rush install" won\'t take any time.'
       + ' Afterwards, it will run "rush link" to create symlinks for all your projects.',
-      rushConfiguration: parser.rushConfiguration
+      parser
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void {
@@ -136,8 +134,8 @@ export default class InstallAction extends BaseInstallAction {
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
-    if (this._parser.telemetry) {
-      this._parser.telemetry.log({
+    if (this.parser.telemetry) {
+      this.parser.telemetry.log({
         name: 'install',
         duration: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
