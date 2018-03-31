@@ -21,7 +21,7 @@ describe('PackageName', () => {
       assert.deepEqual(
         PackageName.tryParse('@microsoft/node-core-library'),
         {
-          scope: '@microsoft/',
+          scope: '@microsoft',
           unscopedName: 'node-core-library',
           error: ''
         }
@@ -57,7 +57,7 @@ describe('PackageName', () => {
       assert.deepEqual(
         PackageName.tryParse('@Microsoft/node-core-library'),
         {
-          scope: '@Microsoft/',
+          scope: '@Microsoft',
           unscopedName: 'node-core-library',
           error: 'The package name must not contain upper case characters'
         }
@@ -66,7 +66,7 @@ describe('PackageName', () => {
       assert.deepEqual(
         PackageName.tryParse('@micro!soft/node-core-library'),
         {
-          scope: '@micro!soft/',
+          scope: '@micro!soft',
           unscopedName: 'node-core-library',
           error: 'The package name contains an invalid character: \"!\"'
         }
@@ -75,7 +75,7 @@ describe('PackageName', () => {
       assert.deepEqual(
         PackageName.tryParse('@microsoft/node-co~re-library'),
         {
-          scope: '@microsoft/',
+          scope: '@microsoft',
           unscopedName: 'node-co~re-library',
           error: 'The package name contains an invalid character: \"~\"'
         }
@@ -84,7 +84,7 @@ describe('PackageName', () => {
       assert.deepEqual(
         PackageName.tryParse('@microsoft/node-core-library/path'),
         {
-          scope: '@microsoft/',
+          scope: '@microsoft',
           unscopedName: 'node-core-library/path',
           error: 'The package name contains an invalid character: \"/\"'
         }
