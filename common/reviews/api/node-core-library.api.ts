@@ -84,7 +84,6 @@ interface IPackageJsonTsdocConfiguration {
 // @public
 interface IParsePackageNameResult {
   error: string;
-  path: string;
   scope: string;
   unscopedName: string;
 }

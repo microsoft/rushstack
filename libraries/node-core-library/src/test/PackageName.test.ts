@@ -19,11 +19,10 @@ describe('PackageName', () => {
 
     it('tryParse tests', () => {
       assert.deepEqual(
-        PackageName.tryParse('@microsoft/node-core-library/path'),
+        PackageName.tryParse('@microsoft/node-core-library'),
         {
           scope: '@microsoft/',
           unscopedName: 'node-core-library',
-          path: '/path',
           error: ''
         }
       );
@@ -33,7 +32,6 @@ describe('PackageName', () => {
         {
           scope: '',
           unscopedName: '',
-          path: '',
           error: 'The package name must not be empty'
         }
       );
@@ -43,8 +41,7 @@ describe('PackageName', () => {
         {
           scope: '',
           unscopedName: '',
-          path: '',
-          error: 'The value must not be null or undefined'
+          error: 'The package name must not be null or undefined'
         }
       );
 
@@ -53,7 +50,6 @@ describe('PackageName', () => {
         {
           scope: '',
           unscopedName: '',
-          path: '',
           error: 'The scope must be followed by a slash'
         }
       );
@@ -63,28 +59,34 @@ describe('PackageName', () => {
         {
           scope: '@Microsoft/',
           unscopedName: 'node-core-library',
-          path: '',
           error: 'The package name must not contain upper case characters'
         }
       );
 
       assert.deepEqual(
-        PackageName.tryParse('@micro!soft/node-core-library/path'),
+        PackageName.tryParse('@micro!soft/node-core-library'),
         {
           scope: '@micro!soft/',
           unscopedName: 'node-core-library',
-          path: '/path',
           error: 'The package name contains an invalid character: \"!\"'
         }
       );
 
       assert.deepEqual(
-        PackageName.tryParse('@microsoft/node-co~re-library/path'),
+        PackageName.tryParse('@microsoft/node-co~re-library'),
         {
           scope: '@microsoft/',
           unscopedName: 'node-co~re-library',
-          path: '/path',
           error: 'The package name contains an invalid character: \"~\"'
+        }
+      );
+
+      assert.deepEqual(
+        PackageName.tryParse('@microsoft/node-core-library/path'),
+        {
+          scope: '@microsoft/',
+          unscopedName: 'node-core-library/path',
+          error: 'The package name contains an invalid character: \"/\"'
         }
       );
 

@@ -9,9 +9,9 @@
 export interface IParsePackageNameResult {
   /**
    * The parsed NPM scope, or an empty string if there was no scope.  The scope value will
-   * always include the at-sign and slash.
+   * always include the at-sign.
    * @remarks
-   * For example, if the parsed input was "@scope/example/path", then scope would be "@scope/".
+   * For example, if the parsed input was "@scope/example/path", then scope would be "@scope".
    */
   scope: string;
 
@@ -21,14 +21,6 @@ export interface IParsePackageNameResult {
    * For example, if the parsed input was "@scope/example/path", then the name would be "example".
    */
   unscopedName: string;
-
-  /**
-   * The parsed module path, or an empty string if there was no path.  The module path will
-   * always start with a "/" character.
-   * @remarks
-   * For example, if the parsed input was "@scope/example/path", then path would be "/path".
-   */
-  path: string;
 
   /**
    * If the input string could not be parsed, then this string will contain a nonempty
@@ -58,14 +50,13 @@ export class PackageName {
     const result: IParsePackageNameResult = {
       scope: '',
       unscopedName: '',
-      path: '',
       error: ''
     };
 
     let input: string = nameWithPath;
 
     if (input === null || input === undefined) {
-      result.error = 'The value must not be null or undefined';
+      result.error = 'The package name must not be null or undefined';
       return result;
     }
 
@@ -78,13 +69,6 @@ export class PackageName {
       // Extract the scope substring
       result.scope = input.substr(0, indexOfScopeSlash + 1);
       input = input.substr(indexOfScopeSlash + 1);
-    }
-
-    const indexOfPathSlash: number = input.indexOf('/');
-    if (indexOfPathSlash >= 0) {
-      // Extract the path substring
-      result.path = input.substr(indexOfPathSlash);
-      input = input.substr(0, indexOfPathSlash);
     }
 
     result.unscopedName = input;
@@ -133,6 +117,6 @@ export class PackageName {
    */
   public static isValidName(packageName: string): boolean {
     const result: IParsePackageNameResult = PackageName.tryParse(packageName);
-    return !result.error && !result.path;
+    return !result.error;
   }
 }
