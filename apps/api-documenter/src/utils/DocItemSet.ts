@@ -132,7 +132,8 @@ export class DocItem {
     for (const docItem of this.getHierarchy()) {
       switch (i) {
         case 0:
-          reference.packageName = docItem.name;
+          reference.scopeName = PackageName.getScope(docItem.name);
+          reference.packageName = PackageName.getUnscopedName(docItem.name);
           break;
         case 1:
           reference.exportName = docItem.name;
