@@ -43,12 +43,12 @@ export interface IParsedPackageNameOrError extends IParsedPackageName {
  * @public
  */
 export class PackageName {
-  // "encodeURIComponent escapes all characters except:  A-Z a-z 0-9 - _ . ! ~ * ' ( )"
-  // However, these are disallowed because they are shell characters:      ! ~ * ' ( )
+  // encodeURIComponent() escapes all characters except:  A-Z a-z 0-9 - _ . ! ~ * ' ( )
+  // However, these are disallowed because they are shell characters:       ! ~ * ' ( )
   private static readonly invalidNameCharactersRegExp: RegExp = /[^A-Za-z0-9\-_\.]/;
 
   /**
-   * This attempts to parse a NPM package name that may optionally include a path component.
+   * This attempts to parse a package name that may include a scope component.
    * @remarks
    * This function will not throw an exception.
    *
@@ -69,9 +69,18 @@ export class PackageName {
       return result;
     }
 
+    // Rule from npmjs.com:
+    // "The name must be less than or equal to 214 characters. This includes the scope for scoped packages."
+    if (packageName.length > 214) {
+      // Don't attempt to parse a ridiculously long input
+      result.error = 'A package name cannot be longer than 214 characters';
+      return result;
+    }
+
     if (input[0] === '@') {
       const indexOfScopeSlash: number = input.indexOf('/');
       if (indexOfScopeSlash <= 0) {
+        result.scope = input;
         result.error = 'The scope must be followed by a slash';
         return result;
       }
@@ -79,37 +88,31 @@ export class PackageName {
       // Extract the scope substring
       result.scope = input.substr(0, indexOfScopeSlash);
 
-      if (result.scope === '@') {
-        result.error = 'The scope name cannot be empty';
-        return result;
-      }
-
       input = input.substr(indexOfScopeSlash + 1);
     }
 
     result.unscopedName = input;
 
-    // Convert "@scope/unscoped-name" --> "scopeunscoped-name"
-    const nameWithoutScopeSymbols: string = (result.scope ? result.scope.slice(1, -1) : '')
-      + result.unscopedName;
+    if (result.scope === '@') {
+      result.error = 'The scope name cannot be empty';
+      return result;
+    }
 
     if (result.unscopedName === '') {
       result.error = 'The package name must not be empty';
       return result;
     }
 
-    // Rules from npmjs.com:
-    // "The name must be less than or equal to 214 characters. This includes the scope for scoped packages."
-    if (result.scope.length + result.unscopedName.length > 214) {
-      result.error = 'A package name cannot be longer than 214 characters';
-      return result;
-    }
-
+    // Rule from npmjs.com:
     // "The name can't start with a dot or an underscore."
     if (result.unscopedName[0] === '.' || result.unscopedName[0] === '_') {
       result.error = 'The package name starts with an invalid character';
       return result;
     }
+
+    // Convert "@scope/unscoped-name" --> "scopeunscoped-name"
+    const nameWithoutScopeSymbols: string = (result.scope ? result.scope.slice(1, -1) : '')
+      + result.unscopedName;
 
     // "New packages must not have uppercase letters in the name."
     if (nameWithoutScopeSymbols !== nameWithoutScopeSymbols.toLowerCase()) {

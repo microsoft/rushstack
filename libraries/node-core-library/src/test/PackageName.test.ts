@@ -48,7 +48,7 @@ describe('PackageName', () => {
       assert.deepEqual(
         PackageName.tryParse('@microsoft'),
         {
-          scope: '',
+          scope: '@microsoft',
           unscopedName: '',
           error: 'The scope must be followed by a slash'
         }
@@ -58,7 +58,7 @@ describe('PackageName', () => {
         PackageName.tryParse('@/node-core-library'),
         {
           scope: '@',
-          unscopedName: '',
+          unscopedName: 'node-core-library',
           error: 'The scope name cannot be empty'
         }
       );
