@@ -20,9 +20,9 @@ export interface IProtectableMapParameters<K, V> {
   onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
 
   /**
-   * An optional hook that will be invoked before Map.onSet() is performed.
+   * An optional hook that will be invoked before Map.set() is performed.
    * @remarks
-   * If this hook is implemented, it MUST return the `value` parameter.
+   * If this hook is provided, the function MUST return the `value` parameter.
    * This provides the opportunity to modify the value before it is added
    * to the map.
    */
@@ -30,19 +30,20 @@ export interface IProtectableMapParameters<K, V> {
 }
 
 /**
- * The ProtectableMap provides an easy way for an API to expose a Map<K, V> view
- * while intercepting and validating any write operations that are performed on it.
+ * The ProtectableMap provides an easy way for an API to expose a Map<K, V> property
+ * while intercepting and validating any write operations that are performed by
+ * consumers of the API.
  *
  * @remarks
  * The ProtectableMap itself is intended to be a private object that only its owner
- * can access directly.  The owner can bypass the protections by interacting directly
- * with the ProtectableMap.  The public getter exposed to API consumers should return
- * {@link ProtectableMap.protectedView}.
+ * can access directly.  Any operations performed directly on the ProtectableMap will
+ * bypass the hooks and any validation they perform.  The public property that is exposed
+ * to API consumers should return {@link ProtectableMap.protectedView} instead.
  *
  * For example, suppose you want to share your Map<string,number> data structure,
  * but you want to enforce that the key must always be an upper case string:
- * You could use the onSet() method to check the keys and throw an exception
- * if the key is invalid.
+ * You could use the onSet() hook to validate the keys and throw an exception
+ * if the key is not uppercase.
  *
  * @public
  */

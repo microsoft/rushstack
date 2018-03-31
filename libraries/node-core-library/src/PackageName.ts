@@ -37,8 +37,7 @@ export interface IParsedPackageNameOrError extends IParsedPackageName {
 }
 
 /**
- * This class provides methods for finding the nearest "package.json" for a folder
- * and retrieving the name of the package.  The results are cached.
+ * Various functions for working with package names that may include scopes.
  *
  * @public
  */
