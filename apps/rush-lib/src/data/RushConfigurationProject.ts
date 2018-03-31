@@ -5,10 +5,10 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 import {
   JsonFile,
-  IPackageJson
+  IPackageJson,
+  PackageName
 } from '@microsoft/node-core-library';
 
-import Utilities from '../utilities/Utilities';
 import RushConfiguration from '../data/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 
@@ -101,7 +101,7 @@ export default class RushConfigurationProject {
     // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
     // suffix).  Even after we strip the NPM scope, it will still be unique.
     // Example: "my-project-2"
-    this._unscopedTempProjectName = Utilities.parseScopedPackageName(tempProjectName).name;
+    this._unscopedTempProjectName = PackageName.getUnscopedName(tempProjectName);
 
     this._cyclicDependencyProjects = new Set<string>();
     if (projectJson.cyclicDependencyProjects) {
