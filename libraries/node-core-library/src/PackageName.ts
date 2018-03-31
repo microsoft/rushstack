@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Result object returned by {@link PackageName.tryParse}
+ * A package name that has been separated into its scope and unscoped name.
  *
  * @public
  */
-export interface IParsePackageNameResult {
+export interface IParsedPackageName {
   /**
    * The parsed NPM scope, or an empty string if there was no scope.  The scope value will
    * always include the at-sign.
@@ -21,10 +21,17 @@ export interface IParsePackageNameResult {
    * For example, if the parsed input was "\@scope/example", then the name would be "example".
    */
   unscopedName: string;
+}
 
+/**
+ * Result object returned by {@link PackageName.tryParse}
+ *
+ * @public
+ */
+export interface IParsedPackageNameOrError extends IParsedPackageName {
   /**
    * If the input string could not be parsed, then this string will contain a nonempty
-   * error message.   Otherwise it will be an empty string.
+   * error message.  Otherwise it will be an empty string.
    */
   error: string;
 }
@@ -43,17 +50,19 @@ export class PackageName {
   /**
    * This attempts to parse a NPM package name that may optionally include a path component.
    * @remarks
-   * @returns an {@link IParsePackageNameResult} structure whose `error` property will be
+   * This function will not throw an exception.
+   *
+   * @returns an {@link IParsedPackageNameOrError} structure whose `error` property will be
    * nonempty if the string could not be parsed.
    */
-  public static tryParse(name: string): IParsePackageNameResult {
-    const result: IParsePackageNameResult = {
+  public static tryParse(packageName: string): IParsedPackageNameOrError {
+    const result: IParsedPackageNameOrError = {
       scope: '',
       unscopedName: '',
       error: ''
     };
 
-    let input: string = name;
+    let input: string = packageName;
 
     if (input === null || input === undefined) {
       result.error = 'The package name must not be null or undefined';
@@ -123,8 +132,8 @@ export class PackageName {
    * Same as {@link PackageName.tryParse}, except this throws an exception if the input
    * cannot be parsed
    */
-  public static parse(name: string): IParsePackageNameResult {
-    const result: IParsePackageNameResult = PackageName.tryParse(name);
+  public static parse(packageName: string): IParsedPackageName {
+    const result: IParsedPackageNameOrError = PackageName.tryParse(packageName);
     if (result.error) {
       throw new Error(result.error);
     }
@@ -132,10 +141,26 @@ export class PackageName {
   }
 
   /**
-   * Returns true if the specified package name is valid.
+   * {@inheritdoc IParsedPackageName.scope}
+   */
+  public static getScope(packageName: string): string {
+    return PackageName.parse(packageName).scope;
+  }
+
+  /**
+   * {@inheritdoc IParsedPackageName.unscopedName}
+   */
+  public static getUnscopedName(packageName: string): string {
+    return PackageName.parse(packageName).unscopedName;
+  }
+
+  /**
+   * Returns true if the specified package name is valid, or false otherwise.
+   * @remarks
+   * This function will not throw an exception.
    */
   public static isValidName(packageName: string): boolean {
-    const result: IParsePackageNameResult = PackageName.tryParse(packageName);
+    const result: IParsedPackageNameOrError = PackageName.tryParse(packageName);
     return !result.error;
   }
 

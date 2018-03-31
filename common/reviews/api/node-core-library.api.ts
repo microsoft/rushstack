@@ -82,10 +82,14 @@ interface IPackageJsonTsdocConfiguration {
 }
 
 // @public
-interface IParsePackageNameResult {
-  error: string;
+interface IParsedPackageName {
   scope: string;
   unscopedName: string;
+}
+
+// @public
+interface IParsedPackageNameOrError extends IParsedPackageName {
+  error: string;
 }
 
 // @public
@@ -139,9 +143,11 @@ class PackageJsonLookup {
 // @public
 class PackageName {
   static combineParts(scope: string, unscopedName: string): string;
+  static getScope(packageName: string): string;
+  static getUnscopedName(packageName: string): string;
   static isValidName(packageName: string): boolean;
-  static parse(name: string): IParsePackageNameResult;
-  static tryParse(name: string): IParsePackageNameResult;
+  static parse(packageName: string): IParsedPackageName;
+  static tryParse(packageName: string): IParsedPackageNameOrError;
 }
 
 // @public
