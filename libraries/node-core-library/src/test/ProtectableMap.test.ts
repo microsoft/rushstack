@@ -3,26 +3,26 @@
 
 /// <reference types='mocha' />
 
-import { ManagedMap } from '../ManagedMap';
+import { ProtectableMap } from '../ProtectableMap';
 import { assert } from 'chai';
 
 class ExampleApi {
   public clearedCount: number = 0;
   public deletedCount: number = 0;
   public setCount: number = 0;
-  private _studentAgesByName: ManagedMap<string, number>;
+  private _studentAgesByName: ProtectableMap<string, number>;
 
   constructor() {
-    this._studentAgesByName = new ManagedMap({
-      onClear: (source: ManagedMap<string, number>) => {
+    this._studentAgesByName = new ProtectableMap({
+      onClear: (source: ProtectableMap<string, number>) => {
         ++this.clearedCount;
       },
 
-      onDelete: (source: ManagedMap<string, number>, key: string) => {
+      onDelete: (source: ProtectableMap<string, number>, key: string) => {
         ++this.deletedCount;
       },
 
-      onSet: (source: ManagedMap<string, number>, key: string, value: number) => {
+      onSet: (source: ProtectableMap<string, number>, key: string, value: number) => {
         ++this.setCount;
         if (key.toUpperCase() !== key) {
           throw new Error('The key must be all upper case: ' + key);
@@ -35,52 +35,52 @@ class ExampleApi {
   }
 
   public get studentAgesByName(): Map<string, number> {
-    return this._studentAgesByName.view;
+    return this._studentAgesByName.protectedView;
   }
 
-  public performControllerOperations(): void {
+  public doUnprotectedOperations(): void {
+    // These are unprotected because they interact with this._studentAgesByName
+    // instead of this._studentAgesByName.protectedView.
     this._studentAgesByName.clear();
     this._studentAgesByName.set('Dave', -123);
   }
 }
 
-describe('ManagedMap', () => {
-  describe('Test', () => {
-    it('exampleApi protected operations', () => {
-      const exampleApi: ExampleApi = new ExampleApi();
-      exampleApi.studentAgesByName.clear();
+describe('ProtectableMap', () => {
+  it('Protected operations', () => {
+    const exampleApi: ExampleApi = new ExampleApi();
+    exampleApi.studentAgesByName.clear();
 
-      exampleApi.studentAgesByName.set('ALICE', 23);
-      exampleApi.studentAgesByName.set('BOB', 21);
-      exampleApi.studentAgesByName.set('BOB', -1);
-      exampleApi.studentAgesByName.set('CHARLIE', 22);
-      exampleApi.studentAgesByName.delete('CHARLIE');
+    exampleApi.studentAgesByName.set('ALICE', 23);
+    exampleApi.studentAgesByName.set('BOB', 21);
+    exampleApi.studentAgesByName.set('BOB', -1);
+    exampleApi.studentAgesByName.set('CHARLIE', 22);
+    exampleApi.studentAgesByName.delete('CHARLIE');
 
-      assert.equal(exampleApi.clearedCount, 1);
-      assert.equal(exampleApi.setCount, 4);
-      assert.equal(exampleApi.deletedCount, 1);
+    assert.equal(exampleApi.clearedCount, 1);
+    assert.equal(exampleApi.setCount, 4);
+    assert.equal(exampleApi.deletedCount, 1);
 
-      assert.equal(exampleApi.studentAgesByName.get('ALICE'), 23);
-      assert.equal(exampleApi.studentAgesByName.get('BOB'), 0); // clamped by onSet()
-      assert.equal(exampleApi.studentAgesByName.has('CHARLIE'), false);
-    });
-
-    it('exampleApi unprotected operations', () => {
-      const exampleApi: ExampleApi = new ExampleApi();
-
-      exampleApi.performControllerOperations();
-
-      // Interacting directly with the ManagedMap bypasses the hooks
-      assert.equal(exampleApi.clearedCount, 0);
-      assert.equal(exampleApi.studentAgesByName.get('Dave'), -123);
-    });
-
-    it('exampleApi error test', () => {
-      const exampleApi: ExampleApi = new ExampleApi();
-      assert.throw(() => {
-        exampleApi.studentAgesByName.set('Jane', 23);
-      }, 'The key must be all upper case: Jane');
-    });
-
+    assert.equal(exampleApi.studentAgesByName.get('ALICE'), 23);
+    assert.equal(exampleApi.studentAgesByName.get('BOB'), 0); // clamped by onSet()
+    assert.equal(exampleApi.studentAgesByName.has('CHARLIE'), false);
   });
+
+  it('Unprotected operations', () => {
+    const exampleApi: ExampleApi = new ExampleApi();
+
+    exampleApi.doUnprotectedOperations();
+
+    // Interacting directly with the ProtectableMap bypasses the hooks
+    assert.equal(exampleApi.clearedCount, 0);
+    assert.equal(exampleApi.studentAgesByName.get('Dave'), -123);
+  });
+
+  it('Error case', () => {
+    const exampleApi: ExampleApi = new ExampleApi();
+    assert.throw(() => {
+      exampleApi.studentAgesByName.set('Jane', 23);
+    }, 'The key must be all upper case: Jane');
+  });
+
 });

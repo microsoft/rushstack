@@ -33,9 +33,9 @@ export {
   LockFile
 } from './LockFile';
 export {
-  ManagedMap,
-  IManagedMapParameters
-} from './ManagedMap';
+  ProtectableMap,
+  IProtectableMapParameters
+} from './ProtectableMap';
 export {
   IPackageJsonLookupParameters,
   PackageJsonLookup

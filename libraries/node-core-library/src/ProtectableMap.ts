@@ -1,23 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ManagedMapView, IManagedMapController } from './ManagedMapView';
+import { ProtectableMapView } from './ProtectableMapView';
 
 /**
- * Constructor parameters for {@link ManagedMap}
+ * Constructor parameters for {@link ProtectableMap}
  *
  * @public
  */
-export interface IManagedMapParameters<K, V> {
+export interface IProtectableMapParameters<K, V> {
   /**
    * An optional hook that will be invoked before Map.clear() is performed.
    */
-  onClear?: (source: ManagedMap<K, V>) => void;
+  onClear?: (source: ProtectableMap<K, V>) => void;
 
   /**
    * An optional hook that will be invoked before Map.delete() is performed.
    */
-  onDelete?: (source: ManagedMap<K, V>, key: K) => void;
+  onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
 
   /**
    * An optional hook that will be invoked before Map.onSet() is performed.
@@ -26,18 +26,18 @@ export interface IManagedMapParameters<K, V> {
    * This provides the opportunity to modify the value before it is added
    * to the map.
    */
-  onSet?: (source: ManagedMap<K, V>, key: K, value: V) => V;
+  onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
 /**
- * The ManagedMap provides an easy way for an API to expose a Map<K, V> view
+ * The ProtectableMap provides an easy way for an API to expose a Map<K, V> view
  * while intercepting and validating any write operations that are performed on it.
  *
  * @remarks
- * The ManagedMap itself is intended to be a private object maintained by its
- * owner, and allows write operations to be performed without any validation.
- * The {@link ManagedMap.view} property is the validated view, and should be
- * exposed to API consumers.
+ * The ProtectableMap itself is intended to be a private object that only its owner
+ * can access directly.  The owner can bypass the protections by interacting directly
+ * with the ProtectableMap.  The public getter exposed to API consumers should return
+ * {@link ProtectableMap.protectedView}.
  *
  * For example, suppose you want to share your Map<string,number> data structure,
  * but you want to enforce that the key must always be an upper case string:
@@ -46,39 +46,33 @@ export interface IManagedMapParameters<K, V> {
  *
  * @public
  */
-export class ManagedMap<K, V> {
-  private readonly _view: ManagedMapView<K, V>;
-  private _controller: IManagedMapController<K, V>;
+export class ProtectableMap<K, V> {
+  private readonly _protectedView: ProtectableMapView<K, V>;
 
-  public constructor(parameters: IManagedMapParameters<K, V>) {
-    this._view = new ManagedMapView<K, V>(this, {
-      ...parameters,
-      onBindController: (controller: IManagedMapController<K, V>) => {
-        this._controller = controller;
-      }
-    });
+  public constructor(parameters: IProtectableMapParameters<K, V>) {
+    this._protectedView = new ProtectableMapView<K, V>(this, parameters);
   }
 
   /**
-   * The owner of the managed map should return this object via its public API.
+   * The owner of the protectable map should return this object via its public API.
    */
-  public get view(): Map<K, V> {
-    return this._view;
+  public get protectedView(): Map<K, V> {
+    return this._protectedView;
   }
 
   // ---------------------------------------------------------------------------
   // lib.es2015.collections contract - write operations
 
   public clear(): void {
-    this._controller.clear();
+    this._protectedView._clearUnprotected();
   }
 
   public delete(key: K): boolean {
-    return this._controller.delete(key);
+    return this._protectedView._deleteUnprotected(key);
   }
 
   public set(key: K, value: V): this {
-    this._controller.set(key, value);
+    this._protectedView._setUnprotected(key, value);
     return this;
   }
 
@@ -87,18 +81,18 @@ export class ManagedMap<K, V> {
 
   // tslint:disable-next-line:no-any
   public forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void {
-    this._view.forEach(callbackfn);
+    this._protectedView.forEach(callbackfn);
   }
 
   public get(key: K): V | undefined {
-    return this._view.get(key);
+    return this._protectedView.get(key);
   }
 
   public has(key: K): boolean {
-    return this._view.has(key);
+    return this._protectedView.has(key);
   }
 
   public get size(): number {
-    return this._view.size;
+    return this._protectedView.size;
   }
 }
