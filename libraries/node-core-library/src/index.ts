@@ -7,7 +7,17 @@
  * @packagedocumentation
  */
 
+export {
+  FileConstants,
+  FolderConstants
+} from './Constants';
 export { FileDiffTest } from './FileDiffTest';
+export {
+  IPackageJson,
+  IPackageJsonDependencyTable,
+  IPackageJsonScriptTable,
+  IPackageJsonTsdocConfiguration
+} from './IPackageJson';
 export {
   JsonFile,
   IJsonFileSaveOptions,
@@ -20,21 +30,16 @@ export {
   IJsonSchemaFromFileOptions
 } from './JsonSchema';
 export {
+  LockFile
+} from './LockFile';
+export {
+  ProtectableMap,
+  IProtectableMapParameters
+} from './ProtectableMap';
+export {
   IPackageJsonLookupParameters,
   PackageJsonLookup
 } from './PackageJsonLookup';
-export {
-  IPackageJson,
-  IPackageJsonDependencyTable,
-  IPackageJsonScriptTable,
-  IPackageJsonTsdocConfiguration
-} from './IPackageJson';
-export {
-  FileConstants,
-  FolderConstants
-} from './Constants';
-export {
-  LockFile
-} from './LockFile';
+export { PackageName, IParsedPackageName, IParsedPackageNameOrError } from './PackageName';
 export { Path } from './Path';
 export { Text } from './Text';

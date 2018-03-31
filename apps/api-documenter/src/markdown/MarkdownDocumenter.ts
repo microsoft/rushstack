@@ -4,7 +4,7 @@
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 
-import { Text } from '@microsoft/node-core-library';
+import { Text, PackageName } from '@microsoft/node-core-library';
 import {
   IApiClass,
   IApiEnum,
@@ -63,7 +63,7 @@ export class MarkdownDocumenter {
   private _writePackagePage(docPackage: DocItem): void {
     console.log(`Writing ${docPackage.name} package`);
 
-    const unscopedPackageName: string = Utilities.getUnscopedPackageName(docPackage.name);
+    const unscopedPackageName: string = PackageName.getUnscopedName(docPackage.name);
 
     const markupPage: IMarkupPage = Markup.createPage(`${unscopedPackageName} package`);
     this._writeBreadcrumb(markupPage, docPackage);
@@ -604,7 +604,7 @@ export class MarkdownDocumenter {
     let baseName: string = '';
     for (const part of docItem.getHierarchy()) {
       if (part.kind === DocItemKind.Package) {
-        baseName = Utilities.getUnscopedPackageName(part.name);
+        baseName = PackageName.getUnscopedName(part.name);
       } else {
         baseName += '.' + part.name;
       }

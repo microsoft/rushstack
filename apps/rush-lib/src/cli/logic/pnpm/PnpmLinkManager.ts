@@ -9,14 +9,14 @@ import uriEncode = require('strict-uri-encode');
 import {
   JsonFile,
   Text,
-  IPackageJson
+  IPackageJson,
+  PackageName
 } from '@microsoft/node-core-library';
 
 import {
   BaseLinkManager,
   SymlinkKind
 } from '../base/BaseLinkManager';
-import Utilities from '../../../utilities/Utilities';
 import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../../RushConstants';
 import { IRushLinkJson } from '../../../data/RushConfiguration';
@@ -57,7 +57,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     // first, read the temp package.json information
 
     // Example: "project1"
-    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(project.tempProjectName).name;
+    const unscopedTempProjectName: string = PackageName.getUnscopedName(project.tempProjectName);
 
     // Example: "C:\MyRepo\common\temp\projects\project1
     const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,

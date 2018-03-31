@@ -21,22 +21,6 @@ import { ApiJsonFile } from './api/ApiJsonFile';
 import { IReferenceResolver } from './aedoc/ApiDocumentation';
 
 /**
- * Used to describe a parsed package name in the form of
- * scopedName/packageName. Ex: @microsoft/sp-core-library.
- */
-export interface IParsedScopeName {
-  /**
-   * The scope prefix. Ex: @microsoft.
-   */
-  scope: string;
-
-  /**
-   * The specific package name. Ex: sp-core-library.
-   */
-  name: string;
-}
-
-/**
  * A loader for locating the ApiItem associated with a given project and API item, or
  * for locating an AstItem  locally.
  * No processing on the ApiItem orAstItem  should be done in this class, this class is only

@@ -82,6 +82,24 @@ interface IPackageJsonTsdocConfiguration {
 }
 
 // @public
+interface IParsedPackageName {
+  scope: string;
+  unscopedName: string;
+}
+
+// @public
+interface IParsedPackageNameOrError extends IParsedPackageName {
+  error: string;
+}
+
+// @public
+interface IProtectableMapParameters<K, V> {
+  onClear?: (source: ProtectableMap<K, V>) => void;
+  onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
+  onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
+}
+
+// @public
 class JsonFile {
   static load(jsonFilename: string): any;
   static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): any;
@@ -123,8 +141,31 @@ class PackageJsonLookup {
 }
 
 // @public
+class PackageName {
+  static combineParts(scope: string, unscopedName: string): string;
+  static getScope(packageName: string): string;
+  static getUnscopedName(packageName: string): string;
+  static isValidName(packageName: string): boolean;
+  static parse(packageName: string): IParsedPackageName;
+  static tryParse(packageName: string): IParsedPackageNameOrError;
+}
+
+// @public
 class Path {
   static isUnder(childPath: string, parentFolderPath: string): boolean;
+}
+
+// @public
+class ProtectableMap<K, V> {
+  constructor(parameters: IProtectableMapParameters<K, V>);
+  clear(): void;
+  delete(key: K): boolean;
+  forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void;
+  get(key: K): V | undefined;
+  has(key: K): boolean;
+  readonly protectedView: Map<K, V>;
+  set(key: K, value: V): this;
+  readonly size: number;
 }
 
 // @public

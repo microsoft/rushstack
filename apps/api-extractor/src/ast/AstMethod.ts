@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import { IParsedPackageName } from '@microsoft/node-core-library';
 import { AstItem, AstItemKind, IAstItemOptions } from './AstItem';
 import { AstMember } from './AstMember';
 import { AstParameter } from './AstParameter';
 import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 import { Markup } from '../markup/Markup';
-import { ApiDefinitionReference, IScopedPackageName } from '../ApiDefinitionReference';
 
 /**
  * This class is part of the AstItem abstract syntax tree. It represents functions that are members of
@@ -70,8 +70,7 @@ export class AstMethod extends AstMember {
         this.documentation.summary.push(
           ...Markup.createTextElements('Constructs a new instance of the '));
 
-        const scopedPackageName: IScopedPackageName = ApiDefinitionReference
-          .parseScopedPackageName(this.context.package.name);
+        const parsedPackageName: IParsedPackageName = this.context.parsedPackageName;
 
         const parentParentContainer: AstItem | undefined = this.parentContainer.parentContainer;
         if (parentParentContainer && parentParentContainer.kind === AstItemKind.Namespace) {
@@ -79,8 +78,8 @@ export class AstMethod extends AstMember {
           // until the new AstSymbolTable engine is wired up
           this.documentation.summary.push(
             Markup.createApiLinkFromText(this.parentContainer.name, {
-                scopeName: scopedPackageName.scope,
-                packageName: scopedPackageName.package,
+                scopeName: parsedPackageName.scope,
+                packageName: parsedPackageName.unscopedName,
                 exportName: parentParentContainer.name,
                 memberName: this.parentContainer.name
               }
@@ -89,8 +88,8 @@ export class AstMethod extends AstMember {
         } else {
           this.documentation.summary.push(
             Markup.createApiLinkFromText(this.parentContainer.name, {
-                scopeName: scopedPackageName.scope,
-                packageName: scopedPackageName.package,
+                scopeName: parsedPackageName.scope,
+                packageName: parsedPackageName.unscopedName,
                 exportName: this.parentContainer.name,
                 memberName: ''
               }

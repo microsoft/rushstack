@@ -14,24 +14,6 @@ import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
  */
 export default class Utilities {
   /**
-   * For a scoped NPM package name this separates the scope and name parts.  For example:
-   * parseScopedPackageName('@my-scope/myproject') = { scope: '@my-scope', name: 'myproject' }
-   * parseScopedPackageName('myproject') = { scope: '', name: 'myproject' }
-   */
-  public static parseScopedPackageName(scopedName: string): { scope: string, name: string } {
-    if (scopedName.substr(0, 1) !== '@') {
-      return { scope: '', name: scopedName };
-    }
-
-    const slashIndex: number = scopedName.indexOf('/');
-    if (slashIndex >= 0) {
-      return { scope: scopedName.substr(0, slashIndex), name: scopedName.substr(slashIndex + 1) };
-    } else {
-      throw new Error('Invalid scoped name: ' + scopedName);
-    }
-  }
-
-  /**
    * NodeJS equivalent of performance.now().
    */
   public static getTimeInMs(): number {

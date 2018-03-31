@@ -4,12 +4,11 @@
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import * as semver from 'semver';
-import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, PackageName } from '@microsoft/node-core-library';
 
 import Rush from '../Rush';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
-import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import EventHooks from './EventHooks';
@@ -260,7 +259,7 @@ export default class RushConfiguration {
     // NOTE: projectJsons was already sorted in alphabetical order by the caller.
     for (const projectJson of sortedProjectJsons) {
       // If the name is "@ms/MyProject", extract the "MyProject" part
-      const unscopedName: string = Utilities.parseScopedPackageName(projectJson.packageName).name;
+      const unscopedName: string = PackageName.getUnscopedName(projectJson.packageName);
 
       // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
       // there is a naming conflict
@@ -587,7 +586,7 @@ export default class RushConfiguration {
 
     // Is there an approximate match?
     for (const project of this._projects) {
-      if (Utilities.parseScopedPackageName(project.packageName).name === shorthandProjectName) {
+      if (PackageName.getUnscopedName(project.packageName) === shorthandProjectName) {
         if (result) {
           // Ambiguous -- there is more than one match
           return undefined;

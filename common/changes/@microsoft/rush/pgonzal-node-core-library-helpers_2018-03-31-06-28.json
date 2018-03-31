@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Refactor to use new @microsoft/node-core-library",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}

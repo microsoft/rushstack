@@ -4,7 +4,7 @@
 import * as ts from 'typescript';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
-import { PackageJsonLookup, IPackageJson } from '@microsoft/node-core-library';
+import { PackageJsonLookup, IPackageJson, PackageName, IParsedPackageName } from '@microsoft/node-core-library';
 
 import { AstPackage } from './ast/AstPackage';
 import { DocItemLoader } from './DocItemLoader';
@@ -53,6 +53,8 @@ export class ExtractorContext {
    */
   public readonly packageJson: IPackageJson;
 
+  public readonly parsedPackageName: IParsedPackageName;
+
   /**
    * One DocItemLoader is needed per analyzer to look up external API members
    * as needed.
@@ -84,6 +86,8 @@ export class ExtractorContext {
     this._packageFolder = folder;
 
     this.packageJson = this.packageJsonLookup.tryLoadPackageJsonFor(this._packageFolder)!;
+
+    this.parsedPackageName = PackageName.parse(this.packageJson.name);
 
     this.docItemLoader = new DocItemLoader(this._packageFolder);
 

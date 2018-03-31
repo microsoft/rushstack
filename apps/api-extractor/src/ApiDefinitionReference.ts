@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { IParsedPackageName, PackageName } from '@microsoft/node-core-library';
 import { IApiItemReference } from './api/ApiItem';
 
 /**
@@ -35,25 +36,6 @@ export interface IApiDefinitionReferenceParts {
    * The name of the member API item.
    */
   memberName: string;
-}
-
-/**
- * A scope and package name are semantic information within an API reference expression.
- * If there is no scope or package, then the corresponding values will be an empty string.
- *
- * Example: '@microsoft/Utilities' -> \{ scope: '@microsoft', package: 'Utilities' \}
- * Example: 'Utilities' -> \{ scope: '', package: 'Utilities' \}
- */
-export interface IScopedPackageName {
-  /**
-   * The scope name of an API reference expression.
-   */
-  scope: string;
-
-  /**
-   * The package name of an API reference expression.
-   */
-  package: string;
 }
 
 /**
@@ -124,9 +106,9 @@ export class ApiDefinitionReference {
     let parts: string[] | null = apiReferenceExpr.match(ApiDefinitionReference._packageRegEx);
     if (parts) {
       // parts[1] is of the form ‘@microsoft/sp-core-library’ or ‘sp-core-library’
-      const scopePackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(parts[1]);
-      apiDefRefParts.scopeName = scopePackageName.scope;
-      apiDefRefParts.packageName = scopePackageName.package;
+      const parsedPackageName: IParsedPackageName = PackageName.parse(parts[1]);
+      apiDefRefParts.scopeName = parsedPackageName.scope;
+      apiDefRefParts.packageName = parsedPackageName.unscopedName;
       apiReferenceExpr = parts[2]; // e.g. Guid.equals
     }
 
@@ -151,37 +133,16 @@ export class ApiDefinitionReference {
   }
 
   /**
-   * For a scoped NPM package name this separates the scope and package parts.  For example:
-   * parseScopedPackageName('@my-scope/myproject') = { scope: '@my-scope', package: 'myproject' }
-   * parseScopedPackageName('myproject') = { scope: '', package: 'myproject' }
-   */
-  public static parseScopedPackageName(scopedName: string): IScopedPackageName {
-    if (scopedName.substr(0, 1) !== '@') {
-      return { scope: '', package: scopedName };
-    }
-
-    const slashIndex: number = scopedName.indexOf('/');
-    if (slashIndex >= 0) {
-      return { scope: scopedName.substr(0, slashIndex), package: scopedName.substr(slashIndex + 1) };
-    } else {
-      throw new Error('Invalid scoped name: ' + scopedName);
-    }
-  }
-
-  /**
    * Stringifies the ApiDefinitionReferenceOptions up and including the
    * scope and package name.
    *
    * Example output: '@microsoft/Utilities'
    */
   public toScopePackageString(): string {
-    let result: string = '';
-    if (this.scopeName) {
-      result += `${this.scopeName}/${this.packageName}`;
-    } else if (this.packageName) {
-      result += this.packageName;
+    if (!this.packageName) {
+      return '';
     }
-    return result;
+    return PackageName.combineParts(this.scopeName, this.packageName);
   }
 
   /**

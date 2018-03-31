@@ -9,7 +9,7 @@ import * as semver from 'semver';
 import * as tar from 'tar';
 import readPackageTree = require('read-package-tree');
 
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, PackageName } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../../RushConstants';
 import { IRushLinkJson } from '../../../data/RushConfiguration';
@@ -95,7 +95,7 @@ export class NpmLinkManager extends BaseLinkManager {
       // This avoids the need to run "rush generate" unnecessarily.
 
       // Example: "project1"
-      const unscopedTempProjectName: string = Utilities.parseScopedPackageName(project.tempProjectName).name;
+      const unscopedTempProjectName: string = PackageName.getUnscopedName(project.tempProjectName);
 
       // Example: "C:\MyRepo\common\temp\projects\project1
       const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,

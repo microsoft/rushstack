@@ -5,6 +5,7 @@
 /* tslint:disable:no-constant-condition */
 
 import * as ts from 'typescript';
+import { IPackageJson, IParsedPackageName, PackageName } from '@microsoft/node-core-library';
 import { ExtractorContext } from '../ExtractorContext';
 import { ApiDocumentation } from '../aedoc/ApiDocumentation';
 import { MarkupElement } from '../markup/MarkupElement';
@@ -14,11 +15,9 @@ import { Markup } from '../markup/Markup';
 import { ResolvedApiItem } from '../ResolvedApiItem';
 import {
   ApiDefinitionReference,
-  IScopedPackageName,
   IApiDefinitionReferenceParts
 } from '../ApiDefinitionReference';
 import { AstItemContainer } from './AstItemContainer';
-import { IPackageJson } from '@microsoft/node-core-library';
 
 /**
  * Indicates the type of definition represented by a AstItem object.
@@ -650,12 +649,12 @@ export abstract class AstItem {
 
     // External
     // Attempt to load from docItemLoader
-    const scopedPackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(
+    const parsedPackageName: IParsedPackageName = PackageName.parse(
       typeReferencePackageName
     );
     const apiDefinitionRefParts: IApiDefinitionReferenceParts = {
-      scopeName: scopedPackageName.scope,
-      packageName: scopedPackageName.package,
+      scopeName: parsedPackageName.scope,
+      packageName: parsedPackageName.unscopedName,
       exportName: '',
       memberName: ''
     };
