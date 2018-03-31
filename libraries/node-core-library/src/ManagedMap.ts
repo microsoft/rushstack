@@ -21,8 +21,12 @@ export interface IManagedMapParameters<K, V> {
 
   /**
    * An optional hook that will be invoked before Map.onSet() is performed.
+   * @remarks
+   * If this hook is implemented, it MUST return the `value` parameter.
+   * This provides the opportunity to modify the value before it is added
+   * to the map.
    */
-  onSet?: (source: ManagedMap<K, V>, key: K, value: V) => void;
+  onSet?: (source: ManagedMap<K, V>, key: K, value: V) => V;
 }
 
 /**

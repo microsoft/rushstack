@@ -45,7 +45,7 @@ interface IJsonSchemaValidateOptions {
 interface IManagedMapParameters<K, V> {
   onClear?: (source: ManagedMap<K, V>) => void;
   onDelete?: (source: ManagedMap<K, V>, key: K) => void;
-  onSet?: (source: ManagedMap<K, V>, key: K, value: V) => void;
+  onSet?: (source: ManagedMap<K, V>, key: K, value: V) => V;
 }
 
 // @public

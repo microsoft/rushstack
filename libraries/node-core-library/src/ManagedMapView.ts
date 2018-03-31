@@ -62,10 +62,11 @@ export class ManagedMapView<K, V> extends Map<K, V> {
   }
 
   public set(key: K, value: V): this { // override
+    let modifiedValue: V = value;
     if (this._parameters.onSet) {
-      this._parameters.onSet(this._owner, key, value);
+      modifiedValue = this._parameters.onSet(this._owner, key, modifiedValue);
     }
-    super.set(key, value);
+    super.set(key, modifiedValue);
     return this;
   }
 }
