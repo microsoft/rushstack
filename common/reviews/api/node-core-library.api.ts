@@ -138,6 +138,7 @@ class PackageJsonLookup {
 
 // @public
 class PackageName {
+  static combineParts(scope: string, unscopedName: string): string;
   static isValidName(packageName: string): boolean;
   static parse(name: string): IParsePackageNameResult;
   static tryParse(name: string): IParsePackageNameResult;

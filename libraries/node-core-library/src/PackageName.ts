@@ -11,14 +11,14 @@ export interface IParsePackageNameResult {
    * The parsed NPM scope, or an empty string if there was no scope.  The scope value will
    * always include the at-sign.
    * @remarks
-   * For example, if the parsed input was "@scope/example", then scope would be "@scope".
+   * For example, if the parsed input was "\@scope/example", then scope would be "\@scope".
    */
   scope: string;
 
   /**
    * The parsed NPM package name without the scope.
    * @remarks
-   * For example, if the parsed input was "@scope/example", then the name would be "example".
+   * For example, if the parsed input was "\@scope/example", then the name would be "example".
    */
   unscopedName: string;
 
@@ -137,5 +137,41 @@ export class PackageName {
   public static isValidName(packageName: string): boolean {
     const result: IParsePackageNameResult = PackageName.tryParse(packageName);
     return !result.error;
+  }
+
+  /**
+   * Combines an optional package scope with an unscoped root name.
+   * @param scope - Must be either an empty string, or a scope name such as "\@example"
+   * @param unscopedName - Must be a nonempty package name that does not contain a scope
+   * @returns A full package name such as "\@example/some-library".
+   */
+  public static combineParts(scope: string, unscopedName: string): string {
+    if (scope !== '') {
+      if (scope[0] !== '@') {
+        throw new Error('The scope must start with an "@" character');
+      }
+    }
+    if (scope.indexOf('/') >= 0) {
+      throw new Error('The scope must not contain a "/" character');
+    }
+
+    if (unscopedName[0] === '@') {
+      throw new Error('The unscopedName cannot start with an "@" character');
+    }
+    if (unscopedName.indexOf('/') >= 0) {
+      throw new Error('The unscopedName must not contain a "/" character');
+    }
+
+    let result: string;
+    if (scope === '') {
+      result = unscopedName;
+    } else {
+      result = scope + '/' + unscopedName;
+    }
+
+    // Make sure the result is a valid package name
+    PackageName.parse(result);
+
+    return result;
   }
 }

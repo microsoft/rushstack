@@ -106,4 +106,23 @@ describe('PackageName', () => {
     assert.throws(() => { PackageName.parse('@'); }, 'The scope must be followed by a slash');
   });
 
+  it('combineParts() tests', () => {
+    assert.equal(PackageName.combineParts('@microsoft', 'node-core-library'),
+      '@microsoft/node-core-library');
+
+    assert.equal(PackageName.combineParts('', 'node-core-library'),
+      'node-core-library');
+  });
+
+  it('combineParts() errors', () => {
+    assert.throws(() => { PackageName.combineParts('', '@microsoft/node-core-library'); },
+      'The unscopedName cannot start with an "@" character');
+
+    assert.throws(() => { PackageName.combineParts('@micr!osoft', 'node-core-library'); },
+      'The package name contains an invalid character: "!"');
+
+    assert.throws(() => { PackageName.combineParts('', ''); },
+      'The package name must not be empty');
+   });
+
 });
