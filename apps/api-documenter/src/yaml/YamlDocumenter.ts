@@ -165,7 +165,7 @@ export class YamlDocumenter {
       if (docItem.kind === DocItemKind.Namespace) {
         // Namespaces don't have nodes yet
         tocItem = {
-          name: PackageName.getUnscopedName(docItem.name)
+          name: docItem.name
         };
       } else {
         if (this._shouldEmbed(docItem.kind)) {
@@ -173,10 +173,17 @@ export class YamlDocumenter {
           continue;
         }
 
-        tocItem = {
-          name: PackageName.getUnscopedName(docItem.name),
-          uid: this._getUid(docItem)
-        };
+        if (docItem.kind === DocItemKind.Package) {
+          tocItem = {
+            name: PackageName.getUnscopedName(docItem.name),
+            uid: this._getUid(docItem)
+          };
+        } else {
+          tocItem = {
+            name: docItem.name,
+            uid: this._getUid(docItem)
+          };
+        }
       }
 
       tocItems.push(tocItem);
