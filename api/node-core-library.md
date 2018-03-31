@@ -13,7 +13,9 @@ Core libraries that every NodeJS toolchain project should use.
 |  [`JsonSchema`](./node-core-library.jsonschema.md) | Represents a JSON schema that can be used to validate JSON data files loaded by the JsonFile class. |
 |  [`LockFile`](./node-core-library.lockfile.md) | A helper utility for working with file-based locks. This class should only be used for locking resources across processes, but should not be used for attempting to lock a resource in the same process. |
 |  [`PackageJsonLookup`](./node-core-library.packagejsonlookup.md) | This class provides methods for finding the nearest "package.json" for a folder and retrieving the name of the package. The results are cached. |
+|  [`PackageName`](./node-core-library.packagename.md) | Various functions for working with package names that may include scopes. |
 |  [`Path`](./node-core-library.path.md) | Common operations for manipulating file and directory paths. |
+|  [`ProtectableMap`](./node-core-library.protectablemap.md) | The ProtectableMap provides an easy way for an API to expose a Map&lt;K, V&gt; property while intercepting and validating any write operations that are performed by consumers of the API. |
 |  [`Text`](./node-core-library.text.md) | Operations for working with strings that contain text. |
 
 ## Interfaces
@@ -30,6 +32,9 @@ Core libraries that every NodeJS toolchain project should use.
 |  [`IPackageJsonLookupParameters`](./node-core-library.ipackagejsonlookupparameters.md) | Constructor parameters for [PackageJsonLookup](./node-core-library.packagejsonlookup.md) |
 |  [`IPackageJsonScriptTable`](./node-core-library.ipackagejsonscripttable.md) | This interface is part of the IPackageJson file format. It is used for the "scripts" field. |
 |  [`IPackageJsonTsdocConfiguration`](./node-core-library.ipackagejsontsdocconfiguration.md) | **_(BETA)_** This interface is part of the IPackageJson file format. It is used for the "tsdoc" field. |
+|  [`IParsedPackageName`](./node-core-library.iparsedpackagename.md) | A package name that has been separated into its scope and unscoped name. |
+|  [`IParsedPackageNameOrError`](./node-core-library.iparsedpackagenameorerror.md) | Result object returned by [PackageName.tryParse](./node-core-library.packagename.tryparse.md) |
+|  [`IProtectableMapParameters`](./node-core-library.iprotectablemapparameters.md) | Constructor parameters for [ProtectableMap](./node-core-library.protectablemap.md) |
 
 ## Enumerations
 
