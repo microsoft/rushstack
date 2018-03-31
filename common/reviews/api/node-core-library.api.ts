@@ -158,20 +158,13 @@ class Path {
 // @public
 class ProtectableMap<K, V> {
   constructor(parameters: IProtectableMapParameters<K, V>);
-  // (undocumented)
   clear(): void;
-  // (undocumented)
   delete(key: K): boolean;
-  // (undocumented)
   forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void;
-  // (undocumented)
   get(key: K): V | undefined;
-  // (undocumented)
   has(key: K): boolean;
   readonly protectedView: Map<K, V>;
-  // (undocumented)
   set(key: K, value: V): this;
-  // (undocumented)
   readonly size: number;
 }
 

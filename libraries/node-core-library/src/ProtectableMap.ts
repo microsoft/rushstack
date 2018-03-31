@@ -63,14 +63,26 @@ export class ProtectableMap<K, V> {
   // ---------------------------------------------------------------------------
   // lib.es2015.collections contract - write operations
 
+  /**
+   * Removes all entries from the map.
+   * This operation does NOT invoke the ProtectableMap onClear() hook.
+   */
   public clear(): void {
     this._protectedView._clearUnprotected();
   }
 
+  /**
+   * Removes the specified key from the map.
+   * This operation does NOT invoke the ProtectableMap onDelete() hook.
+   */
   public delete(key: K): boolean {
     return this._protectedView._deleteUnprotected(key);
   }
 
+  /**
+   * Sets a value for the specified key.
+   * This operation does NOT invoke the ProtectableMap onSet() hook.
+   */
   public set(key: K, value: V): this {
     this._protectedView._setUnprotected(key, value);
     return this;
@@ -79,19 +91,33 @@ export class ProtectableMap<K, V> {
   // ---------------------------------------------------------------------------
   // lib.es2015.collections contract - read operations
 
+  /**
+   * Performs an operation for each (key, value) entries in the map.
+   */
   // tslint:disable-next-line:no-any
   public forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void {
     this._protectedView.forEach(callbackfn);
   }
 
+  /**
+   * Retrieves the value for the specified key.
+   * @returns undefined if the value is undefined OR if the key is missing;
+   * otherwise returns the value associated with the key.
+   */
   public get(key: K): V | undefined {
     return this._protectedView.get(key);
   }
 
+  /**
+   * Returns true if the specified key belongs to the map.
+   */
   public has(key: K): boolean {
     return this._protectedView.has(key);
   }
 
+  /**
+   * Returns the number of (key, value) entries in the map.
+   */
   public get size(): number {
     return this._protectedView.size;
   }
