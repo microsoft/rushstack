@@ -46,14 +46,14 @@ export class PackageName {
    * @returns an {@link IParsePackageNameResult} structure whose `error` property will be
    * nonempty if the string could not be parsed.
    */
-  public static tryParse(nameWithPath: string): IParsePackageNameResult {
+  public static tryParse(name: string): IParsePackageNameResult {
     const result: IParsePackageNameResult = {
       scope: '',
       unscopedName: '',
       error: ''
     };
 
-    let input: string = nameWithPath;
+    let input: string = name;
 
     if (input === null || input === undefined) {
       result.error = 'The package name must not be null or undefined';
@@ -66,8 +66,15 @@ export class PackageName {
         result.error = 'The scope must be followed by a slash';
         return result;
       }
+
       // Extract the scope substring
       result.scope = input.substr(0, indexOfScopeSlash);
+
+      if (result.scope === '@') {
+        result.error = 'The scope name cannot be empty';
+        return result;
+      }
+
       input = input.substr(indexOfScopeSlash + 1);
     }
 
@@ -109,6 +116,18 @@ export class PackageName {
       return result;
     }
 
+    return result;
+  }
+
+  /**
+   * Same as {@link PackageName.tryParse}, except this throws an exception if the input
+   * cannot be parsed
+   */
+  public static parse(name: string): IParsePackageNameResult {
+    const result: IParsePackageNameResult = PackageName.tryParse(name);
+    if (result.error) {
+      throw new Error(result.error);
+    }
     return result;
   }
 

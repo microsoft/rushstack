@@ -139,7 +139,8 @@ class PackageJsonLookup {
 // @public
 class PackageName {
   static isValidName(packageName: string): boolean;
-  static tryParse(nameWithPath: string): IParsePackageNameResult;
+  static parse(name: string): IParsePackageNameResult;
+  static tryParse(name: string): IParsePackageNameResult;
 }
 
 // @public

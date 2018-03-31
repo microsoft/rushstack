@@ -9,15 +9,15 @@ import { assert } from 'chai';
 describe('PackageName', () => {
   describe('Test', () => {
 
-    it('isValidName positive test', () => {
+    it('isValidName() positive test', () => {
       assert.isTrue(PackageName.isValidName('@microsoft/node-core-library'));
     });
 
-    it('isValidName negative test', () => {
+    it('isValidName() negative test', () => {
       assert.isFalse(PackageName.isValidName('@microsoft/node-core-library/path'));
     });
 
-    it('tryParse tests', () => {
+    it('tryParse() tests', () => {
       assert.deepEqual(
         PackageName.tryParse('@microsoft/node-core-library'),
         {
@@ -51,6 +51,15 @@ describe('PackageName', () => {
           scope: '',
           unscopedName: '',
           error: 'The scope must be followed by a slash'
+        }
+      );
+
+      assert.deepEqual(
+        PackageName.tryParse('@/node-core-library'),
+        {
+          scope: '@',
+          unscopedName: '',
+          error: 'The scope name cannot be empty'
         }
       );
 
@@ -92,4 +101,9 @@ describe('PackageName', () => {
 
     });
   });
+
+  it('parse() test', () => {
+    assert.throws(() => { PackageName.parse('@'); }, 'The scope must be followed by a slash');
+  });
+
 });
