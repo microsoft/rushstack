@@ -7,6 +7,7 @@ import * as colors from 'colors';
 import { IPackageJson } from '@microsoft/node-core-library';
 
 import RushCommandLineParser from './cli/actions/RushCommandLineParser';
+import { RushConstants } from './RushConstants';
 
 /**
  * Operations involving the rush tool and its operation.
@@ -29,7 +30,7 @@ export default class Rush {
     console.log(
       EOL +
       colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
-      colors.cyan(' - http://rushjs.io') +
+      colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
       EOL
     );
 

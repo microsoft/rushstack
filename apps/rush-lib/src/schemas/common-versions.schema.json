@@ -10,7 +10,7 @@
       "type": "string"
     },
     "preferredVersions": {
-      "description": "A table that specifies a \"preferred version\" for a dependency package. The \"preferred version\" is typically used to downgrade an indirect dependency to a specific version, however generally it can be any SemVer range specifier (e.g. \"~1.2.3\"), and it will narrow any (compatible) SemVer range specifier. See the Rush documentation for details.",
+      "description": "A table that specifies a \"preferred version\" for a dependency package. The \"preferred version\" is typically used to hold an indirect dependency back to a specific version, however generally it can be any SemVer range specifier (e.g. \"~1.2.3\"), and it will narrow any (compatible) SemVer range specifier. See the Rush documentation for details.",
       "type": "object",
       "additionalProperties": {
         "type": "string"
@@ -24,7 +24,7 @@
       }
     },
     "allowedAlternativeVersions": {
-      "description": "The \"rush check\" command can be used to enforce that every project in the repo must specify the same SemVer range for a given dependency.  However, sometimes exceptions are needed.  The allowedAlternativeVersions table specifies a list of other SemVer ranges that will be ignored by \"rush check\" for a given dependency. Note that the normal version range (used by the majority of projects) should NOT be included in this list.",
+      "description": "The \"rush check\" command can be used to enforce that every project in the repo must specify the same SemVer range for a given dependency.  However, sometimes exceptions are needed.  The allowedAlternativeVersions table allows you to list other SemVer ranges that will be accepted by \"rush check\" for a given dependency. Note that the normal version range (as inferred by looking at all projects in the repo) should NOT be included in this list.",
       "type": "object",
       "additionalProperties": {
         "type": "array",

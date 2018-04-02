@@ -325,7 +325,8 @@ export default class RushConfiguration {
     const pinnedVersionsFilename: string = path.join(commonRushConfigFolder, RushConstants.pinnedVersionsFilename);
     if (fsx.existsSync(pinnedVersionsFilename)) {
       throw new Error('The "pinned-versions.json" config file is no longer supported;'
-        + ' please move these settings to the "preferredVersions" field of a "common-versions.json" config file\n'
+        + ' please move your settings to the "preferredVersions" field of a "common-versions.json" config file.'
+        + ` (See the ${RushConstants.rushWebSiteUrl} documentation for details.)\n\n`
         + pinnedVersionsFilename);
     }
   }

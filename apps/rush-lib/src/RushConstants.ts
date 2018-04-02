@@ -85,6 +85,8 @@ export namespace RushConstants {
    * @deprecated This feature has been superseded by the "preferredVersions" setting
    * in common-versions.json
    */
+  // NOTE: Although this is marked as "deprecated", we will probably never retire it,
+  // since we always want to report the warning when someone upgrades an old repo.
   export const pinnedVersionsFilename: string = 'pinned-versions.json';
 
   /**
@@ -110,4 +112,9 @@ export namespace RushConstants {
    * @beta
    */
   export const versionPoliciesFileName: string = 'version-policies.json';
+
+  /**
+   * The URL ("http://rushjs.io") for the Rush web site.
+   */
+  export const rushWebSiteUrl: string = 'http://rushjs.io';
 }

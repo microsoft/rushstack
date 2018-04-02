@@ -87,6 +87,9 @@ export class CommonVersionsConfiguration {
     return table;
   }
 
+  /**
+   * Writes the "common-versions.json" file to disk, using the filename that was passed to loadFromFile().
+   */
   public save(): void {
     JsonFile.save(this._serialize(), this._filename);
   }
@@ -95,7 +98,7 @@ export class CommonVersionsConfiguration {
    * A table that specifies a "preferred version" for a dependency package.
    *
    * @remarks
-   * The "preferred version" is typically used to downgrade an indirect dependency to a specific
+   * The "preferred version" is typically used to hold an indirect dependency back to a specific
    * version, however generally it can be any SemVer range specifier (e.g. "~1.2.3"), and it
    * will narrow any (compatible) SemVer range specifier.
    *
@@ -120,7 +123,7 @@ export class CommonVersionsConfiguration {
    * A table of specifies preferred versions maintained by the XStitch tool.
    *
    * @remarks
-   * This property has the behavior as the "preferredVersions" property, except these entries
+   * This property has the same behavior as the "preferredVersions" property, except these entries
    * are automatically managed by the XStitch tool.  It is an error for the same dependency name
    * to appear in both tables.
    */
@@ -129,15 +132,16 @@ export class CommonVersionsConfiguration {
   }
 
   /**
-   * For a given dependency, a list of SemVer ranges that will be ignored by "rush check".
+   * A table that stores, for a given dependency, a list of SemVer ranges that will be accepted
+   * by "rush check" in addition to the normal version range.
    *
    * @remarks
    * The "rush check" command can be used to enforce that every project in the repo
    * must specify the same SemVer range for a given dependency.  However, sometimes
-   * exceptions are needed.  The allowedAlternativeVersions table specifies a list of
-   * other SemVer ranges that will be ignored by "rush check" for a given dependency.
-   * Note that the normal version range (used by the majority of projects) should NOT be
-   * included in this list.
+   * exceptions are needed.  The allowedAlternativeVersions table allows you to list
+   * other SemVer ranges that will be accepted by "rush check" for a given dependency.
+   * Note that the normal version range (as inferred by looking at all projects in the repo)
+   * should NOT be included in this list.
    */
   public get allowedAlternativeVersions(): Map<string, ReadonlyArray<string>> {
     return this._allowedAlternativeVersions.protectedView;
