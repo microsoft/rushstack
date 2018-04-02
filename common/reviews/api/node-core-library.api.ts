@@ -148,6 +148,7 @@ class PackageName {
   static isValidName(packageName: string): boolean;
   static parse(packageName: string): IParsedPackageName;
   static tryParse(packageName: string): IParsedPackageNameOrError;
+  static validate(packageName: string): void;
 }
 
 // @public

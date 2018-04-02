@@ -167,6 +167,13 @@ export class PackageName {
   }
 
   /**
+   * Throws an exception if the specified name is not a valid package name.
+   */
+  public static validate(packageName: string): void {
+    PackageName.parse(packageName);
+  }
+
+  /**
    * Combines an optional package scope with an unscoped root name.
    * @param scope - Must be either an empty string, or a scope name such as "\@example"
    * @param unscopedName - Must be a nonempty package name that does not contain a scope
@@ -197,7 +204,7 @@ export class PackageName {
     }
 
     // Make sure the result is a valid package name
-    PackageName.parse(result);
+    PackageName.validate(result);
 
     return result;
   }
