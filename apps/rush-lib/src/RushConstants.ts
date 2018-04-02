@@ -79,12 +79,20 @@ export namespace RushConstants {
   export const packageJsonFilename: string = 'package.json';
 
   /**
-   * The filename ("pinned-versions.json") for an optional configuration file
-   * that stores a table of dependencies that should be pinned to a specific
-   * version for all projects.  This configuration file should go in the
-   * "common/config/rush" folder.
+   * The filename ("pinned-versions.json") for an old configuration file that
+   * that is no longer supported.
+   *
+   * @deprecated This feature has been superseded by the "preferredVersions" setting
+   * in common-versions.json
    */
   export const pinnedVersionsFilename: string = 'pinned-versions.json';
+
+  /**
+   * The filename ("common-versions.json") for an optional configuration file
+   * that stores dependency version information that affects all projects in the repo.
+   * This configuration file should go in the "common/config/rush" folder.
+   */
+  export const commonVersionsFilename: string = 'common-versions.json';
 
   /**
    * The name of the package-deps.json file, which is used by the "rush build"

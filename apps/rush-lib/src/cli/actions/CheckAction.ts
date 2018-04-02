@@ -27,14 +27,20 @@ export default class CheckAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    const pinnedVersions: { [dependency: string]: string } = {};
-    this.rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
-      pinnedVersions[dependency] = version;
+    // Collect all the preferred versions into a single table
+    const allPreferredVersions: { [dependency: string]: string } = {};
+
+    this.rushConfiguration.commonVersions.preferredVersions.forEach((version: string, dependency: string) => {
+      allPreferredVersions[dependency] = version;
+    });
+
+    this.rushConfiguration.commonVersions.xstitchPreferredVersions.forEach((version: string, dependency: string) => {
+      allPreferredVersions[dependency] = version;
     });
 
     this.rushConfiguration.projects.push({
-      packageName: RushConstants.pinnedVersionsFilename,
-      packageJson: { dependencies: pinnedVersions }
+      packageName: '(preferred versions from ' + RushConstants.commonVersionsFilename + ')',
+      packageJson: { dependencies: allPreferredVersions }
     } as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(this.rushConfiguration.projects);

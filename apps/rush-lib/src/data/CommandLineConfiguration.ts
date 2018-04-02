@@ -56,7 +56,6 @@ export class CommandLineConfiguration {
   public options: Map<string, CustomOption>;
   public commands: Map<string, ICustomCommand>;
 
-  /** Attempts to load pinned versions configuration from a given file */
   public static tryLoadFromFile(jsonFilename: string): CommandLineConfiguration {
     let commandLineJson: ICommandLineConfigurationJson | undefined = undefined;
     if (fs.existsSync(jsonFilename)) {

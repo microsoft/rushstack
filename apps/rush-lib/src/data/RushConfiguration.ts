@@ -8,12 +8,12 @@ import { JsonFile, JsonSchema, PackageName } from '@microsoft/node-core-library'
 
 import Rush from '../Rush';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
-import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
 import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import EventHooks from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
+import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -24,6 +24,7 @@ const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const knownRushConfigFilenames: string[] = [
   '.npmrc',
   RushConstants.pinnedVersionsFilename,
+  RushConstants.commonVersionsFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.versionPoliciesFileName,
@@ -147,7 +148,7 @@ export default class RushConfiguration {
   // Rush hooks
   private _eventHooks: EventHooks;
 
-  private _pinnedVersions: PinnedVersionsConfiguration;
+  private _commonVersions: CommonVersionsConfiguration;
 
   private _telemetryEnabled: boolean;
 
@@ -319,6 +320,13 @@ export default class RushConfiguration {
         throw new Error(`An unrecognized file "${filename}" was found in the Rush config folder:`
           + ` ${commonRushConfigFolder}`);
       }
+    }
+
+    const pinnedVersionsFilename: string = path.join(commonRushConfigFolder, RushConstants.pinnedVersionsFilename);
+    if (fsx.existsSync(pinnedVersionsFilename)) {
+      throw new Error('The "pinned-versions.json" config file is no longer supported;'
+        + ' please move these settings to the "preferredVersions" field of a "common-versions.json" config file\n'
+        + pinnedVersionsFilename);
     }
   }
 
@@ -547,12 +555,14 @@ export default class RushConfiguration {
   }
 
   /**
-   * The PinnedVersionsConfiguration object.  If the pinnedVersions.json file is missing,
-   * this property will NOT be undefined.  Instead it will be initialized in an empty state,
-   * and calling PinnedVersionsConfiguration.save() will create the file.
+   * Settings from the common-versions.json config file.
+   * @remarks
+   * If the common-versions.json file is missing, this property will not be undefined.
+   * Instead it will be initialized in an empty state, and calling CommonVersionsConfiguration.save()
+   * will create the file.
    */
-  public get pinnedVersions(): PinnedVersionsConfiguration {
-    return this._pinnedVersions;
+  public get commonVersions(): CommonVersionsConfiguration {
+    return this._commonVersions;
   }
 
   /**
@@ -771,9 +781,9 @@ export default class RushConfiguration {
       this._versionPolicyConfiguration.validate(this._projectsByName);
     }
 
-    // Example: "./common/config/rush/pinnedVersions.json"
-    const pinnedVersionsFile: string = path.join(this.commonRushConfigFolder, RushConstants.pinnedVersionsFilename);
-    this._pinnedVersions = PinnedVersionsConfiguration.tryLoadFromFile(pinnedVersionsFile);
+    // Example: "./common/config/rush/common-versions.json"
+    const commonVersionsFilename: string = path.join(this.commonRushConfigFolder, RushConstants.commonVersionsFilename);
+    this._commonVersions = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
   }
 
   private _populateDownstreamDependencies(
