@@ -105,7 +105,7 @@ export interface IRushLinkJson {
 export type PackageManager = 'pnpm' | 'npm';
 
 /**
- * This represents the Rush configuration for a repository, based on the Rush.json
+ * This represents the Rush configuration for a repository, based on the "rush.json"
  * configuration file.
  * @public
  */

@@ -260,7 +260,7 @@ class VersionPolicy {
   abstract validate(versionString: string, packageName: string): void;
 }
 
-// @beta (undocumented)
+// @beta
 class VersionPolicyConfiguration {
   // @internal
   constructor(jsonFileName: string);
