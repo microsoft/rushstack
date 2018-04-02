@@ -1,6 +1,14 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Sat, 17 Mar 2018 02:54:22 GMT and should not be manually modified.
+This log was last generated on Mon, 02 Apr 2018 16:05:24 GMT and should not be manually modified.
+
+## 1.1.0
+Mon, 02 Apr 2018 16:05:24 GMT
+
+### Minor changes
+
+- Add new API "PackageName" for validating package names and extracting scopes
+- Add new API "ProtectableMap" for tracking/restricting how a map is consumed
 
 ## 1.0.0
 Sat, 17 Mar 2018 02:54:22 GMT

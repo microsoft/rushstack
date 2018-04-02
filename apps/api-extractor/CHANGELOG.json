@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.6.2",
+      "tag": "@microsoft/api-extractor_v5.6.2",
+      "date": "Mon, 02 Apr 2018 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Refactor to use new @microsoft/node-core-library"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.0.0` to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.6.1",
       "tag": "@microsoft/api-extractor_v5.6.1",
       "date": "Tue, 27 Mar 2018 01:34:25 GMT",

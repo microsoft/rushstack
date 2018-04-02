@@ -2,6 +2,29 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.1.31",
+      "tag": "@microsoft/api-documenter_v1.1.31",
+      "date": "Mon, 02 Apr 2018 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Refactor to use new @microsoft/node-core-library"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.6.1` to `5.6.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.0.0` to `1.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.29` to `4.3.30`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.30",
       "tag": "@microsoft/api-documenter_v1.1.30",
       "date": "Tue, 27 Mar 2018 01:34:25 GMT",

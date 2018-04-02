@@ -2,6 +2,23 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "1.5.0",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.5.0",
+      "date": "Mon, 02 Apr 2018 16:05:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Adding new option to ISetWebpackPublicPathOptions, called findLast"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.29` to `4.3.30`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.29",
       "tag": "@microsoft/set-webpack-public-path-plugin_v1.4.29",
       "date": "Tue, 27 Mar 2018 01:34:25 GMT",
