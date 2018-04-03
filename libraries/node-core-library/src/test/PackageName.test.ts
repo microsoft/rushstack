@@ -50,7 +50,7 @@ describe('PackageName', () => {
         {
           scope: '@microsoft',
           unscopedName: '',
-          error: 'The scope must be followed by a slash'
+          error: 'Error parsing "@microsoft": The scope must be followed by a slash'
         }
       );
 
@@ -59,7 +59,7 @@ describe('PackageName', () => {
         {
           scope: '@',
           unscopedName: 'node-core-library',
-          error: 'The scope name cannot be empty'
+          error: 'Error parsing "@/node-core-library": The scope name cannot be empty'
         }
       );
 
@@ -68,7 +68,7 @@ describe('PackageName', () => {
         {
           scope: '@Microsoft',
           unscopedName: 'node-core-library',
-          error: 'The package name must not contain upper case characters'
+          error: 'The package name "@Microsoft/node-core-library" must not contain upper case characters'
         }
       );
 
@@ -77,7 +77,7 @@ describe('PackageName', () => {
         {
           scope: '@micro!soft',
           unscopedName: 'node-core-library',
-          error: 'The package name contains an invalid character: \"!\"'
+          error: 'The package name "@micro!soft/node-core-library" contains an invalid character: \"!\"'
         }
       );
 
@@ -86,7 +86,7 @@ describe('PackageName', () => {
         {
           scope: '@microsoft',
           unscopedName: 'node-co~re-library',
-          error: 'The package name contains an invalid character: \"~\"'
+          error: 'The package name "@microsoft/node-co~re-library" contains an invalid character: \"~\"'
         }
       );
 
@@ -95,7 +95,7 @@ describe('PackageName', () => {
         {
           scope: '@microsoft',
           unscopedName: 'node-core-library/path',
-          error: 'The package name contains an invalid character: \"/\"'
+          error: 'The package name "@microsoft/node-core-library/path" contains an invalid character: \"/\"'
         }
       );
 
@@ -119,7 +119,7 @@ describe('PackageName', () => {
       'The unscopedName cannot start with an "@" character');
 
     assert.throws(() => { PackageName.combineParts('@micr!osoft', 'node-core-library'); },
-      'The package name contains an invalid character: "!"');
+      'The package name "@micr!osoft/node-core-library" contains an invalid character: "!"');
 
     assert.throws(() => { PackageName.combineParts('', ''); },
       'The package name must not be empty');

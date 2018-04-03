@@ -163,7 +163,7 @@ export class CommonVersionsConfiguration {
     return allPreferredVersions;
   }
 
-  private constructor(commonVersionsJson: ICommonVersionsJson | undefined, _filename: string) {
+  private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filename: string) {
     this._preferredVersions = new ProtectableMap<string, string>(
       { onSet: this._onSetPreferredVersions.bind(this) });
 
@@ -174,15 +174,18 @@ export class CommonVersionsConfiguration {
       { onSet: this._onSetAllowedAlternativeVersions.bind(this) });
 
     if (commonVersionsJson) {
-      CommonVersionsConfiguration._deserializeTable(this.preferredVersions,
-        commonVersionsJson.preferredVersions);
-      CommonVersionsConfiguration._deserializeTable(this.xstitchPreferredVersions,
-        commonVersionsJson.xstitchPreferredVersions);
-      CommonVersionsConfiguration._deserializeTable(this.allowedAlternativeVersions,
-        commonVersionsJson.allowedAlternativeVersions);
+      try {
+        CommonVersionsConfiguration._deserializeTable(this.preferredVersions,
+          commonVersionsJson.preferredVersions);
+        CommonVersionsConfiguration._deserializeTable(this.xstitchPreferredVersions,
+          commonVersionsJson.xstitchPreferredVersions);
+        CommonVersionsConfiguration._deserializeTable(this.allowedAlternativeVersions,
+          commonVersionsJson.allowedAlternativeVersions);
+      } catch (e) {
+        throw new Error(`Error loading "${path.basename(filename)}": ${e.message}`);
+      }
     }
-
-    this._filename = _filename;
+    this._filename = filename;
   }
 
   private _onSetPreferredVersions(source: ProtectableMap<string, string>, key: string, value: string): string {
