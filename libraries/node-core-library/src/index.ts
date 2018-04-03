@@ -33,6 +33,9 @@ export {
   LockFile
 } from './LockFile';
 export {
+  MapExtensions
+} from './MapExtensions';
+export {
   ProtectableMap,
   IProtectableMapParameters
 } from './ProtectableMap';
