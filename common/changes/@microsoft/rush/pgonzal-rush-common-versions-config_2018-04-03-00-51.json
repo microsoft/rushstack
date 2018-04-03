@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Rename \"pinned versions\" concept to \"preferred versions\", and separate the XStitch versions into their own field",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}

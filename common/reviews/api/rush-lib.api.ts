@@ -83,6 +83,16 @@ enum ChangeType {
   patch = 3
 }
 
+// @public
+class CommonVersionsConfiguration {
+  readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
+  getAllPreferredVersions(): Map<string, string>;
+  static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
+  readonly preferredVersions: Map<string, string>;
+  save(): void;
+  readonly xstitchPreferredVersions: Map<string, string>;
+}
+
 // @beta
 enum Event {
   postRushBuild = 4,
@@ -144,26 +154,6 @@ class LockStepVersionPolicy extends VersionPolicy {
 }
 
 // @public
-class PinnedVersionsConfiguration {
-  // (undocumented)
-  clear(): this;
-  // (undocumented)
-  delete(dependency: string): boolean;
-  // (undocumented)
-  forEach(cb: (version: string, dependency: string) => void): this;
-  // (undocumented)
-  get(dependency: string): string | undefined;
-  // (undocumented)
-  has(dependency: string): boolean;
-  // (undocumented)
-  save(): this;
-  set(dependency: string, version: string): this;
-  // (undocumented)
-  readonly size: number;
-  static tryLoadFromFile(jsonFilename: string): PinnedVersionsConfiguration;
-}
-
-// @public
 class Rush {
   static launch(launcherVersion: string, isManaged: boolean): void;
   // @public
@@ -178,6 +168,7 @@ class RushConfiguration {
   readonly commonFolder: string;
   readonly commonRushConfigFolder: string;
   readonly commonTempFolder: string;
+  readonly commonVersions: CommonVersionsConfiguration;
   // @beta
   readonly eventHooks: EventHooks;
   findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
@@ -196,7 +187,6 @@ class RushConfiguration {
   readonly packageManager: PackageManager;
   readonly packageManagerToolFilename: string;
   readonly packageManagerToolVersion: string;
-  readonly pinnedVersions: PinnedVersionsConfiguration;
   readonly pnpmStoreFolder: string;
   readonly projectFolderMaxDepth: number;
   readonly projectFolderMinDepth: number;
@@ -260,7 +250,7 @@ class VersionPolicy {
   abstract validate(versionString: string, packageName: string): void;
 }
 
-// @beta (undocumented)
+// @beta
 class VersionPolicyConfiguration {
   // @internal
   constructor(jsonFileName: string);

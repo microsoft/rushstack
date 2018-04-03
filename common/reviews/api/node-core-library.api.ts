@@ -131,6 +131,11 @@ class LockFile {
 }
 
 // @public
+class MapExtensions {
+  static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: Map<K, V>): void;
+}
+
+// @public
 class PackageJsonLookup {
   constructor(parameters?: IPackageJsonLookupParameters);
   clearCache(): void;
@@ -148,6 +153,7 @@ class PackageName {
   static isValidName(packageName: string): boolean;
   static parse(packageName: string): IParsedPackageName;
   static tryParse(packageName: string): IParsedPackageNameOrError;
+  static validate(packageName: string): void;
 }
 
 // @public

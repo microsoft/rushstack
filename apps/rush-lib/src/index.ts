@@ -25,8 +25,8 @@ export {
 } from './data/ApprovedPackagesConfiguration';
 
 export {
-  PinnedVersionsConfiguration
-} from './data/PinnedVersionsConfiguration';
+  CommonVersionsConfiguration
+} from './data/CommonVersionsConfiguration';
 
 export {
   default as EventHooks,

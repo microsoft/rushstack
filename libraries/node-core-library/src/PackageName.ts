@@ -72,7 +72,7 @@ export class PackageName {
     // "The name must be less than or equal to 214 characters. This includes the scope for scoped packages."
     if (packageName.length > 214) {
       // Don't attempt to parse a ridiculously long input
-      result.error = 'A package name cannot be longer than 214 characters';
+      result.error = 'The package name cannot be longer than 214 characters';
       return result;
     }
 
@@ -80,7 +80,7 @@ export class PackageName {
       const indexOfScopeSlash: number = input.indexOf('/');
       if (indexOfScopeSlash <= 0) {
         result.scope = input;
-        result.error = 'The scope must be followed by a slash';
+        result.error = `Error parsing "${packageName}": The scope must be followed by a slash`;
         return result;
       }
 
@@ -93,7 +93,7 @@ export class PackageName {
     result.unscopedName = input;
 
     if (result.scope === '@') {
-      result.error = 'The scope name cannot be empty';
+      result.error = `Error parsing "${packageName}": The scope name cannot be empty`;
       return result;
     }
 
@@ -105,7 +105,7 @@ export class PackageName {
     // Rule from npmjs.com:
     // "The name can't start with a dot or an underscore."
     if (result.unscopedName[0] === '.' || result.unscopedName[0] === '_') {
-      result.error = 'The package name starts with an invalid character';
+      result.error = `The package name "${packageName}" starts with an invalid character`;
       return result;
     }
 
@@ -115,7 +115,7 @@ export class PackageName {
 
     // "New packages must not have uppercase letters in the name."
     if (nameWithoutScopeSymbols !== nameWithoutScopeSymbols.toLowerCase()) {
-      result.error = 'The package name must not contain upper case characters';
+      result.error = `The package name "${packageName}" must not contain upper case characters`;
       return result;
     }
 
@@ -123,7 +123,7 @@ export class PackageName {
     // Therefore, the name can't contain any non-URL-safe characters"
     const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(PackageName.invalidNameCharactersRegExp);
     if (match) {
-      result.error = `The package name contains an invalid character: "${match[0]}"`;
+      result.error = `The package name "${packageName}" contains an invalid character: "${match[0]}"`;
       return result;
     }
 
@@ -167,6 +167,13 @@ export class PackageName {
   }
 
   /**
+   * Throws an exception if the specified name is not a valid package name.
+   */
+  public static validate(packageName: string): void {
+    PackageName.parse(packageName);
+  }
+
+  /**
    * Combines an optional package scope with an unscoped root name.
    * @param scope - Must be either an empty string, or a scope name such as "\@example"
    * @param unscopedName - Must be a nonempty package name that does not contain a scope
@@ -197,7 +204,7 @@ export class PackageName {
     }
 
     // Make sure the result is a valid package name
-    PackageName.parse(result);
+    PackageName.validate(result);
 
     return result;
   }

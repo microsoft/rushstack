@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Rush Configuration",
-  "description": "Configuration file for the Rush multi-package build tool",
+  "title": "Rush command-line.json config file",
+  "description": "For use with the Rush tool, this file defines custom command line commands. See http://rushjs.io for details.",
 
   "type": "object",
   "additionalProperties": false,

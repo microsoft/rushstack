@@ -14,7 +14,8 @@ import {
   JsonFile,
   LockFile,
   Text,
-  IPackageJson
+  IPackageJson,
+  MapExtensions
 } from '@microsoft/node-core-library';
 
 import AsyncRecycler from '../../utilities/AsyncRecycler';
@@ -65,7 +66,7 @@ export default class InstallManager {
   /**
    * Returns a map of all direct dependencies that only have a single semantic version specifier
    */
-  public static collectImplicitlyPinnedVersions(rushConfiguration: RushConfiguration): Map<string, string> {
+  public static collectImplicitlyPreferredVersions(rushConfiguration: RushConfiguration): Map<string, string> {
     const directDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
@@ -75,14 +76,14 @@ export default class InstallManager {
         project.cyclicDependencyProjects, project.packageJson.devDependencies);
     });
 
-    const implicitlyPinned: Map<string, string> = new Map<string, string>();
+    const implicitlyPreferred: Map<string, string> = new Map<string, string>();
     directDependencies.forEach((versions: Set<string>, dep: string) => {
       if (versions.size === 1) {
         const version: string = versions.values().next().value;
-        implicitlyPinned.set(dep, version);
+        implicitlyPreferred.set(dep, version);
       }
     });
-    return implicitlyPinned;
+    return implicitlyPreferred;
   }
 
   // tslint:disable-next-line:no-any
@@ -244,28 +245,23 @@ export default class InstallManager {
       shrinkwrapIsValid = false;
     }
 
-    // Find the implicitly pinnedVersions
+    // Find the implicitly preferred versions
     // These are any first-level dependencies for which we only consume a single version range
     // (e.g. every package that depends on react uses an identical specifier)
-    const implicitlyPinned: Map<string, string> =
-      InstallManager.collectImplicitlyPinnedVersions(this._rushConfiguration);
-    const pinnedVersions: Map<string, string> = new Map<string, string>();
+    const allPreferredVersions: Map<string, string> =
+      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration);
 
-    implicitlyPinned.forEach((version: string, dependency: string) => {
-      pinnedVersions.set(dependency, version);
-    });
-
-    this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
-      pinnedVersions.set(dependency, version);
-    });
+    // Add in the explicitly preferred versions.
+    // Note that these take precedence over implicitly preferred versions.
+    MapExtensions.mergeFromMap(allPreferredVersions, this._rushConfiguration.commonVersions.getAllPreferredVersions());
 
     if (shrinkwrapFile) {
-      // Check any pinned dependencies first
-      pinnedVersions.forEach((version: string, dependency: string) => {
+      // Check any preferred dependencies first
+      allPreferredVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
           console.log(colors.yellow(wrap(
             `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
-            + ` (${version}) required by pinned versions`)));
+            + ` (${version}) required by the preferred versions from ` + RushConstants.commonVersionsFilename)));
           shrinkwrapIsValid = false;
         }
       });
@@ -311,10 +307,10 @@ export default class InstallManager {
       version: '0.0.0'
     };
 
-    // Add any pinned versions to the top of the commonPackageJson
+    // Add any preferred versions to the top of the commonPackageJson
     // do this in alphabetical order for simpler debugging
-    InstallManager._keys(pinnedVersions).sort().forEach((dependency: string) => {
-      commonPackageJson.dependencies![dependency] = pinnedVersions.get(dependency)!;
+    InstallManager._keys(allPreferredVersions).sort().forEach((dependency: string) => {
+      commonPackageJson.dependencies![dependency] = allPreferredVersions.get(dependency)!;
     });
 
     // To make the common/package.json file more readable, sort alphabetically

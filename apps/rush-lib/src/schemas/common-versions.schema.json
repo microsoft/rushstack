@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush common-versions.json config file",
+  "description": "For use with the Rush tool, this file manages dependency versions that affect all projects in the repo. See http://rushjs.io for details.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "preferredVersions": {
+      "description": "A table that specifies a \"preferred version\" for a dependency package. The \"preferred version\" is typically used to hold an indirect dependency back to a specific version, however generally it can be any SemVer range specifier (e.g. \"~1.2.3\"), and it will narrow any (compatible) SemVer range specifier. See the Rush documentation for details.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "xstitchPreferredVersions": {
+      "description": "A table of specifies preferred versions maintained by the XStitch tool. See the Rush documentation for details.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "allowedAlternativeVersions": {
+      "description": "The \"rush check\" command can be used to enforce that every project in the repo must specify the same SemVer range for a given dependency.  However, sometimes exceptions are needed.  The allowedAlternativeVersions table allows you to list other SemVer ranges that will be accepted by \"rush check\" for a given dependency. Note that the normal version range (as inferred by looking at all projects in the repo) should NOT be included in this list.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

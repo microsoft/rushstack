@@ -1,6 +1,7 @@
 {
-  "title": "Rush version policy definitions",
-  "description": "For use with the Rush tool, this file defines version policies",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush version-policies.json config file",
+  "description": "For use with the Rush tool, this file defines version policies. See http://rushjs.io for details.",
 
   "type": "array",
   "items": {
