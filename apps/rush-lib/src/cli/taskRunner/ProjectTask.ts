@@ -93,7 +93,11 @@ export default class ProjectTask implements ITaskDefinition {
         try {
           lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
         } catch (e) {
-          // Ignore - treat failing to load the file as the project being not built.
+          // Warn and ignore - treat failing to load the file as the project being not built.
+          writer.writeLine(
+            `Warning - error parsing ${RushConstants.packageDepsFilename}: ${e}. Ignoring and ` +
+            'treating the project as non-built.'
+          );
         }
       }
 
