@@ -6,9 +6,7 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { JsonFile } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
-  import {
-    IPackageDeps
-  } from '@microsoft/package-deps-hash';
+import { IPackageDeps } from '@microsoft/package-deps-hash';
 
 import RushConfiguration from '../../data/RushConfiguration';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
@@ -92,7 +90,11 @@ export default class ProjectTask implements ITaskDefinition {
 
       const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
       if (fsx.existsSync(currentDepsPath)) {
-        lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
+        try {
+          lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
+        } catch (e) {
+          // Ignore - treat failing to load the file as the project being not built.
+        }
       }
 
       const isPackageUnchanged: boolean = (
