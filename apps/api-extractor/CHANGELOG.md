@@ -1,6 +1,11 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 02 Apr 2018 16:05:24 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Apr 2018 16:05:29 GMT and should not be manually modified.
+
+## 5.6.3
+Tue, 03 Apr 2018 16:05:29 GMT
+
+*Version update only*
 
 ## 5.6.2
 Mon, 02 Apr 2018 16:05:24 GMT

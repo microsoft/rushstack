@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Mon, 02 Apr 2018 16:05:24 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Apr 2018 16:05:29 GMT and should not be manually modified.
+
+## 1.2.0
+Tue, 03 Apr 2018 16:05:29 GMT
+
+### Minor changes
+
+- Add a new API "MapExtensions.mergeFromMap"
 
 ## 1.1.0
 Mon, 02 Apr 2018 16:05:24 GMT
