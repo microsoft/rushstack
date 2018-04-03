@@ -245,11 +245,14 @@ export default class InstallManager {
       shrinkwrapIsValid = false;
     }
 
-    // Find the implicitly preferredVersions
+    // Find the implicitly preferred versions
     // These are any first-level dependencies for which we only consume a single version range
     // (e.g. every package that depends on react uses an identical specifier)
     const allPreferredVersions: Map<string, string> =
       InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration);
+
+    // Add in the explicitly preferred versions.
+    // Note that these take precedence over implicitly preferred versions.
     MapExtensions.mergeFromMap(allPreferredVersions, this._rushConfiguration.commonVersions.getAllPreferredVersions());
 
     if (shrinkwrapFile) {

@@ -34,8 +34,10 @@ export default class CheckAction extends BaseRushAction {
       allPreferredVersions[dependency] = version;
     });
 
+    // Create a fake project for the purposes of reporting conflicts with preferredVersions
+    // or xstitchPreferredVersions from common-versions.json
     this.rushConfiguration.projects.push({
-      packageName: '(preferred versions from ' + RushConstants.commonVersionsFilename + ')',
+      packageName: 'preferred versions from ' + RushConstants.commonVersionsFilename,
       packageJson: { dependencies: allPreferredVersions }
     } as RushConfigurationProject);
 
