@@ -30,11 +30,7 @@ export default class CheckAction extends BaseRushAction {
     // Collect all the preferred versions into a single table
     const allPreferredVersions: { [dependency: string]: string } = {};
 
-    this.rushConfiguration.commonVersions.preferredVersions.forEach((version: string, dependency: string) => {
-      allPreferredVersions[dependency] = version;
-    });
-
-    this.rushConfiguration.commonVersions.xstitchPreferredVersions.forEach((version: string, dependency: string) => {
+    this.rushConfiguration.commonVersions.getAllPreferredVersions().forEach((version: string, dependency: string) => {
       allPreferredVersions[dependency] = version;
     });
 

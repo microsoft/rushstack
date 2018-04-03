@@ -14,7 +14,8 @@ import {
   JsonFile,
   LockFile,
   Text,
-  IPackageJson
+  IPackageJson,
+  MapExtensions
 } from '@microsoft/node-core-library';
 
 import AsyncRecycler from '../../utilities/AsyncRecycler';
@@ -247,21 +248,9 @@ export default class InstallManager {
     // Find the implicitly preferredVersions
     // These are any first-level dependencies for which we only consume a single version range
     // (e.g. every package that depends on react uses an identical specifier)
-    const implicitlyPreferred: Map<string, string> =
+    const allPreferredVersions: Map<string, string> =
       InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration);
-    const allPreferredVersions: Map<string, string> = new Map<string, string>();
-
-    implicitlyPreferred.forEach((version: string, dependency: string) => {
-      allPreferredVersions.set(dependency, version);
-    });
-
-    this._rushConfiguration.commonVersions.preferredVersions.forEach((version: string, dependency: string) => {
-      allPreferredVersions.set(dependency, version);
-    });
-
-    this._rushConfiguration.commonVersions.xstitchPreferredVersions.forEach((version: string, dependency: string) => {
-      allPreferredVersions.set(dependency, version);
-    });
+    MapExtensions.mergeFromMap(allPreferredVersions, this._rushConfiguration.commonVersions.getAllPreferredVersions());
 
     if (shrinkwrapFile) {
       // Check any preferred dependencies first

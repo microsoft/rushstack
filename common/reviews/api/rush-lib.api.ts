@@ -86,6 +86,7 @@ enum ChangeType {
 // @public
 class CommonVersionsConfiguration {
   readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
+  getAllPreferredVersions(): Map<string, string>;
   static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
   readonly preferredVersions: Map<string, string>;
   save(): void;

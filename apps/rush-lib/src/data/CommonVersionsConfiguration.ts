@@ -3,7 +3,13 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { JsonFile, JsonSchema, ProtectableMap, PackageName } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  JsonSchema,
+  MapExtensions,
+  PackageName,
+  ProtectableMap
+} from '@microsoft/node-core-library';
 
 /**
  * Part of the ICommonVersionsJson structure.
@@ -145,6 +151,16 @@ export class CommonVersionsConfiguration {
    */
   public get allowedAlternativeVersions(): Map<string, ReadonlyArray<string>> {
     return this._allowedAlternativeVersions.protectedView;
+  }
+
+  /**
+   * Returns the union of preferredVersions and xstitchPreferredVersions.
+   */
+  public getAllPreferredVersions(): Map<string, string> {
+    const allPreferredVersions: Map<string, string> = new Map<string, string>();
+    MapExtensions.mergeFromMap(allPreferredVersions, this.preferredVersions);
+    MapExtensions.mergeFromMap(allPreferredVersions, this.xstitchPreferredVersions);
+    return allPreferredVersions;
   }
 
   private constructor(commonVersionsJson: ICommonVersionsJson | undefined, _filename: string) {
