@@ -1,0 +1,14 @@
+{
+  "name": "@microsoft/tsdoc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "",
+  "main": "dist/tsdoc.js",
+  "scripts": {
+    "build": "node_modules/.bin/rush-stack build",
+    "start": "node_modules/.bin/rush-stack start"
+  },
+  "dependencies": {
+    "@microsoft/rush-stack": "~0.1.0"
+  }
+}
