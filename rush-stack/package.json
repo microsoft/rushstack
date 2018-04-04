@@ -1,0 +1,24 @@
+{
+  "name": "@microsoft/rush-stack",
+  "version": "0.1.0",
+  "private": true,
+  "description": "",
+  "main": "lib/start.js",
+  "bin": {
+    "rush-stack": "./bin/rush-stack"
+  },
+  "scripts": {
+    "build": "gulp test --clean"
+  },
+  "dependencies": {
+    "@microsoft/node-core-library": "~1.2.0"
+  },
+  "devDependencies": {
+    "@microsoft/node-library-build": "~4.3.31",
+    "@types/node": "8.5.8",
+    "gulp": "~3.9.1"
+  },
+  "peerDependencies": {
+    "@microsoft/rush-stack-compiler": "*"
+  }
+}

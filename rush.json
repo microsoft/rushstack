@@ -1,0 +1,32 @@
+{
+  "rushVersion": "4.3.0",
+  "pnpmVersion": "1.35.10",
+  "nodeSupportedVersionRange": ">=6.9.0 <7.0.0 || >=8.9.4 <9.0.0",
+
+  "projectFolderMinDepth": 1,
+
+  "gitPolicy": {
+    // Require GitHub scrubbed e-mails
+    "allowedEmailRegExps": [
+      "[^@]+@users\\.noreply\\.github\\.com"
+    ],
+    "sampleEmail": "mrexample@users.noreply.github.com"
+  },
+
+  // Projects should be in the same alphabetical order that they appear
+  // in Windows Explorer
+  "projects": [
+    {
+      "packageName": "@microsoft/tsdoc",
+      "projectFolder": "tsdoc"
+    },
+    {
+      "packageName": "@microsoft/rush-stack",
+      "projectFolder": "rush-stack"
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler",
+      "projectFolder": "rush-stack-compiler"
+    }
+  ]
+}
