@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Improve \"rush check\" to ignore peer dependencies, since they don't need to be consistent with everything else (and generally won't be)",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
