@@ -9,6 +9,7 @@
     "start": "node_modules/.bin/rush-stack start"
   },
   "dependencies": {
-    "@microsoft/rush-stack": "~0.1.0"
+    "@microsoft/rush-stack": "~0.1.0",
+    "@microsoft/rush-stack-compiler": "~0.1.0"
   }
 }

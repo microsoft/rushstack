@@ -23,6 +23,10 @@
     {
       "packageName": "@microsoft/rush-stack",
       "projectFolder": "rush-stack"
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler",
+      "projectFolder": "rush-stack-compiler"
     }
   ]
 }
