@@ -1,0 +1,68 @@
+# Prevent Git to auto detect text files and perform LF normalization.
+* -text
+
+# The item with `binary` is treated as binary file.
+# The item with `eol=lf` is converted to LF on checkin, back to LF on checkout.
+# The item with `eol=crlf` is converted to LF on checkin, back to CRLF on checkout.
+
+# To get full extension list in the repo, remove the node_modules folder and run the following PowerShell cmdlet.
+# PS> Get-ChildItem . -Recurse | Where-Object { -not $_.PSIsContainer } | ForEach-Object { $_.Extension.ToLower() } | Sort-Object | Get-Unique
+
+# If new extensions are added, please refresh the repo with the following commands.
+# Reference: https://git-scm.com/docs/gitattributes
+# > rm .git/index     # Remove the index to force Git to
+# > git reset         # re-scan the working directory
+# > git status        # Show files that will be normalized
+# > git add -u
+# > git add .gitattributes
+# > git commit -m "Apply end-of-line normalization based on updated .gitattributes file"
+
+*.aspx            text eol=crlf
+*.bowerrc         text eol=lf
+*.cmd             text eol=crlf
+*.command         text eol=lf
+*.config          text eol=crlf
+*.cs              text eol=crlf
+*.csproj          text eol=crlf
+*.css             text eol=crlf
+*.dll             binary
+*.editorconfig    text eol=lf
+*.eot             binary
+*.example         text eol=crlf
+*.exe             binary
+*.gif             binary
+*.gitattributes   text eol=lf
+*.gitignore       text eol=lf
+*.gitmodules      text eol=lf
+*.html            text eol=crlf
+*.ico             binary
+*.jpg             binary
+*.js              text eol=crlf
+*.json            text eol=crlf
+*.less            text eol=crlf
+*.map             text eol=lf
+*.md              text eol=crlf
+*.npmignore       text eol=lf
+*.png             binary
+*.ps1             text eol=crlf
+*.rels            text eol=crlf
+*.resx            text eol=crlf
+*.scss            text eol=crlf
+*.sln             text eol=crlf
+*.svg             text elf=lf
+*.ts              text eol=crlf
+*.tsx             text eol=crlf
+*.ttf             binary
+*.woff            binary
+*.wsp             binary
+*.xml             text eol=crlf
+
+# NPM "bin" scripts MUST have LF, or else the executable fails to run on Mac.
+# This fnmatch expression only matches files in a "bin" folder and without
+# a period in the filename.
+/*/*/bin/+([!.]) -text
+
+# Don't allow people to merge changes to these generated files, because the result
+# may be invalid.  You need to run "rush generate" again.
+shrinkwrap.yaml              merge=binary
+npm-shrinkwrap.json          merge=binary

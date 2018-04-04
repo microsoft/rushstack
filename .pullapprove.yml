@@ -1,0 +1,65 @@
+version: 2
+
+# Group settings to apply to all groups by default, optionally being overridden later
+group_defaults:
+  approve_by_comment:
+    enabled: true
+    approve_regex: '^(Approved|:shipit:)'
+    reject_regex: '^(Rejected)'
+
+groups:
+  pullapprove-admins:
+    conditions:
+      files:
+        - ".pullapprove.yml"
+        - ".travis.yml"
+    required: 1
+    users:
+      - iclanton
+      - nickpape-msft
+      - pgonzal
+      - qz2017
+      - patmill
+
+  api-approvers:
+    conditions:
+      files:
+        - "common/reviews/*"
+    required: 1
+    users:
+      - iclanton
+      - nickpape-msft
+      - pgonzal
+      - qz2017
+      - mpasarin
+
+  general-approvers:
+    conditions:
+      files:
+        - "apps/*"
+        - "build-tests/*"
+        - "core-build/*"
+        - "libraries/*"
+        - "webpack/*"
+        - "rush.json"
+        - ".gitattributes"
+        - ".gitignore"
+        - "README.md"
+    required: 1
+    users:
+      - iclanton
+      - nickpape-msft
+      - pgonzal
+      - qz2017
+
+  load-themed-styles-approvers:
+    conditions:
+      files:
+        - "libraries/load-themed-styles/*"
+    required: 1
+    users:
+      - iclanton
+      - nickpape-msft
+      - pgonzal
+      - qz2017
+      - dzearing
