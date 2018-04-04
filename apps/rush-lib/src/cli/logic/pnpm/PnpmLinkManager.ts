@@ -5,6 +5,7 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import uriEncode = require('strict-uri-encode');
+import pnpmLinkBins from '@pnpm/link-bins';
 
 import {
   JsonFile,
@@ -14,8 +15,7 @@ import {
 } from '@microsoft/node-core-library';
 
 import {
-  BaseLinkManager,
-  SymlinkKind
+  BaseLinkManager
 } from '../base/BaseLinkManager';
 import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../../RushConstants';
@@ -31,15 +31,19 @@ export class PnpmLinkManager extends BaseLinkManager {
     try {
       const rushLinkJson: IRushLinkJson = { localLinks: {} };
 
+      let promise: Promise<void> = Promise.resolve();
+
       for (const rushProject of this._rushConfiguration.projects) {
-        console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-        this._linkProject(rushProject, rushLinkJson);
+        promise = promise.then(() => {
+          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+          return this._linkProject(rushProject, rushLinkJson);
+        });
       }
 
-      console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-      JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-
-      return Promise.resolve();
+      return promise.then(() => {
+        console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+        JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
+      });
     } catch (error) {
       return Promise.reject(error);
     }
@@ -52,7 +56,7 @@ export class PnpmLinkManager extends BaseLinkManager {
    */
   private _linkProject(
     project: RushConfigurationProject,
-    rushLinkJson: IRushLinkJson): void {
+    rushLinkJson: IRushLinkJson): Promise<void> {
 
     // first, read the temp package.json information
 
@@ -204,11 +208,11 @@ export class PnpmLinkManager extends BaseLinkManager {
     PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
 
     // Also symlink the ".bin" folder
-    const commonBinFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin');
+    const projectFolder: string = path.join(localPackage.folderPath, 'node_modules');
     const projectBinFolder: string = path.join(localPackage.folderPath, 'node_modules', '.bin');
 
-    if (fsx.existsSync(commonBinFolder)) {
-      PnpmLinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
-    }
+    // Return type is Promise<void[]> because the API returns Promise.all()
+    return pnpmLinkBins(projectFolder, projectBinFolder)
+      .then(() => { /* empty block */ });
   }
 }

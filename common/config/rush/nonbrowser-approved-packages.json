@@ -78,6 +78,14 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@pnpm/link-bins",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@pnpm/logger",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "api-extractor-test-01",
       "allowedCategories": [ "tests" ]
     },
