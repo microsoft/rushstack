@@ -1,10 +1,15 @@
 dependencies:
+  '@microsoft/api-extractor': 5.6.3
   '@microsoft/node-core-library': 1.2.0
   '@microsoft/node-library-build': 4.3.31
   '@rush-temp/rush-stack': 'file:projects/rush-stack.tgz'
+  '@rush-temp/rush-stack-compiler': 'file:projects/rush-stack-compiler.tgz'
   '@rush-temp/tsdoc': 'file:projects/tsdoc.tgz'
   '@types/node': 8.5.8
   gulp: 3.9.1
+  tslint: 5.9.1
+  tslint-microsoft-contrib: 5.0.3
+  typescript: 2.4.2
 packages:
   /@gulp-sourcemaps/identity-map/1.0.1:
     dependencies:
@@ -5046,6 +5051,15 @@ packages:
     dev: false
     resolution:
       integrity: sha1-43qG/ajLuvI6BX9HPJ9Nxk5fwug=
+  /tslint-microsoft-contrib/5.0.3:
+    dependencies:
+      tsutils: 2.26.0
+    dev: false
+    peerDependencies:
+      tslint: ^5.1.0
+      typescript: ^2.1.0
+    resolution:
+      integrity: sha1-b8PiOBec1yBFwrQi5NZV9Bg6jVw=
   /tslint-microsoft-contrib/5.0.3/tslint@5.9.1+typescript@2.4.2:
     dependencies:
       tslint: /tslint/5.9.1/typescript@2.4.2
@@ -5058,6 +5072,27 @@ packages:
       typescript: ^2.1.0
     resolution:
       integrity: sha1-b8PiOBec1yBFwrQi5NZV9Bg6jVw=
+  /tslint/5.9.1:
+    dependencies:
+      babel-code-frame: 6.26.0
+      builtin-modules: 1.1.1
+      chalk: 2.3.2
+      commander: 2.15.1
+      diff: 3.5.0
+      glob: 7.1.2
+      js-yaml: 3.11.0
+      minimatch: 3.0.4
+      resolve: 1.6.0
+      semver: 5.5.0
+      tslib: 1.9.0
+      tsutils: 2.26.0
+    dev: false
+    engines:
+      node: '>=4.8.0'
+    peerDependencies:
+      typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev'
+    resolution:
+      integrity: sha1-ElX4ej/1frCw4fDmEKi0dIBGya4=
   /tslint/5.9.1/typescript@2.4.2:
     dependencies:
       babel-code-frame: 6.26.0
@@ -5081,6 +5116,14 @@ packages:
       typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev'
     resolution:
       integrity: sha1-ElX4ej/1frCw4fDmEKi0dIBGya4=
+  /tsutils/2.26.0:
+    dependencies:
+      tslib: 1.9.0
+    dev: false
+    peerDependencies:
+      typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >= 2.10.0-dev'
+    resolution:
+      integrity: sha1-cGJA1jvPGuF5fRcWc41sa+DQhIs=
   /tsutils/2.26.0/typescript@2.4.2:
     dependencies:
       tslib: 1.9.0
@@ -5498,6 +5541,18 @@ packages:
       commander: 2.15.1
     resolution:
       integrity: sha1-6oEysnlTPuYL4khaAvfj5CVBqaI=
+  'file:projects/rush-stack-compiler.tgz':
+    dependencies:
+      '@microsoft/api-extractor': 5.6.3
+      tslint: /tslint/5.9.1/typescript@2.4.2
+      tslint-microsoft-contrib: /tslint-microsoft-contrib/5.0.3/tslint@5.9.1+typescript@2.4.2
+      typescript: 2.4.2
+    dev: false
+    name: '@rush-temp/rush-stack-compiler'
+    resolution:
+      integrity: sha512-t3v1y/DD0tiRQ/QZQgFaHe2uTMojBzMpG848Y+eP5pFVUQdSS6gKaV3vYAO4J7mD+YPpLJQsb/gQxZpsuRLfiA==
+      tarball: 'file:projects/rush-stack-compiler.tgz'
+    version: 0.0.0
   'file:projects/rush-stack.tgz':
     dependencies:
       '@microsoft/node-core-library': 1.2.0
@@ -5507,23 +5562,28 @@ packages:
     dev: false
     name: '@rush-temp/rush-stack'
     resolution:
-      integrity: sha512-4b4H88bCtguagBwuqWB9mDLWWbV/5UO/5Pyow/bykkcAsqZo9NXli+DGpeUbAT1uqovKnm6Th+U7FfEgUPC/TQ==
+      integrity: sha512-TkurnovD92xGdSJ8r5zZ4PWEJsv8DZJSgZh36zoKa0ix+pam150DsHwDb1NGfpFV4HxPvINBGFUdEVZM97XQiw==
       tarball: 'file:projects/rush-stack.tgz'
     version: 0.0.0
   'file:projects/tsdoc.tgz':
     dev: false
     name: '@rush-temp/tsdoc'
     resolution:
-      integrity: sha512-/pa/6jLKuuhOFfBbqJCbKOnK0ZvFkJ52yas+ixIZElShEVxwCSUANRF2mI/9DzoHqj3NgTsi+dnkjI5egPcrrw==
+      integrity: sha512-DeSnqi4hxkIOvAk9Yl1kT1c51stSeXo0J5m8B4pFZcCI/99MLxhVX37xTes6qfHRqyerieFQVd0cMCTUbkUFag==
       tarball: 'file:projects/tsdoc.tgz'
     version: 0.0.0
 registry: 'https://onedrive.pkgs.visualstudio.com/_packaging/odsp-npm/npm/registry/'
 shrinkwrapMinorVersion: 4
 shrinkwrapVersion: 3
 specifiers:
+  '@microsoft/api-extractor': 5.6.3
   '@microsoft/node-core-library': ~1.2.0
   '@microsoft/node-library-build': ~4.3.31
   '@rush-temp/rush-stack': 'file:./projects/rush-stack.tgz'
+  '@rush-temp/rush-stack-compiler': 'file:./projects/rush-stack-compiler.tgz'
   '@rush-temp/tsdoc': 'file:./projects/tsdoc.tgz'
   '@types/node': 8.5.8
   gulp: ~3.9.1
+  tslint: 5.9.1
+  tslint-microsoft-contrib: 5.0.3
+  typescript: 2.4.2
