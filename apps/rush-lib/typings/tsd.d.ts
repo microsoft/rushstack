@@ -10,5 +10,4 @@
 /// <reference path="npm-package-arg/npm-package-arg.d.ts" />
 /// <reference path="read-package-tree/read-package-tree.d.ts" />
 /// <reference path="strict-uri-encode/strict-uri-encode.d.ts" />
-/// <reference path="tar/tar.d.ts" />
 /// <reference path="wordwrap/wordwrap.d.ts" />

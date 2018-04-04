@@ -35,6 +35,19 @@ const MAX_INSTALL_ATTEMPTS: number = 5;
 const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
 
 /**
+ * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
+ * As a temporary workaround, augment the type.
+ */
+import { CreateOptions } from 'tar';
+export interface CreateOptions { // tslint:disable-line:interface-name
+  /**
+   * "Set to true to omit writing mtime values for entries. Note that this prevents using other
+   * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
+   */
+  noMtime?: boolean;
+}
+
+/**
  * Controls the behavior of InstallManager.installCommonModules()
  */
 export enum InstallType {
@@ -456,10 +469,11 @@ export default class InstallManager {
             file: tarballFile,
             cwd: tempProjectFolder,
             portable: true,
+            noMtime: true,
             noPax: true,
             sync: true,
             prefix: npmPackageFolder
-          }, ['package.json']);
+          } as CreateOptions, ['package.json']);
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
