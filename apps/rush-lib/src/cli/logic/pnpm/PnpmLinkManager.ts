@@ -36,7 +36,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       for (const rushProject of this._rushConfiguration.projects) {
         promise = promise.then(() => {
           console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-          this._linkProject(rushProject, rushLinkJson);
+          return this._linkProject(rushProject, rushLinkJson);
         });
       }
 
