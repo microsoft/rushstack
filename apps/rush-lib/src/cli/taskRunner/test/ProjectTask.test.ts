@@ -8,6 +8,8 @@ import { convertSlashesForWindows } from '../ProjectTask';
 
 describe('convertSlashesForWindows()', () => {
   it('converted inputs', () => {
+    assert.equal(convertSlashesForWindows('./node_modules/.bin/tslint -c config/tslint.json'),
+      '.\\node_modules\\.bin\\tslint -c config/tslint.json');
     assert.equal(convertSlashesForWindows('/blah/bleep&&/bloop'), '\\blah\\bleep&&/bloop');
     assert.equal(convertSlashesForWindows('/blah/bleep'), '\\blah\\bleep');
     assert.equal(convertSlashesForWindows('/blah/bleep --path a/b'), '\\blah\\bleep --path a/b');

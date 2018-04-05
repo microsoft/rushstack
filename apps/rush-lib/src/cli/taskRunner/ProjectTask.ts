@@ -127,13 +127,13 @@ export default class ProjectTask implements ITaskDefinition {
 
         // Run the task
 
-        const convertedTaskCommand: string = process.platform === 'win32'
+        const normalizedTaskCommand: string = process.platform === 'win32'
           ? convertSlashesForWindows(taskCommand)
           : taskCommand;
 
-        writer.writeLine(convertedTaskCommand);
+        writer.writeLine(normalizedTaskCommand);
         const task: child_process.ChildProcess =
-          Utilities.executeShellCommandAsync(convertedTaskCommand, projectFolder, process.env, true);
+          Utilities.executeShellCommandAsync(normalizedTaskCommand, projectFolder, process.env, true);
 
         // Hook into events, in order to get live streaming of build log
         task.stdout.on('data', (data: string) => {
@@ -251,28 +251,34 @@ function _areShallowEqual(object1: Object, object2: Object, writer: ITaskWriter)
 
 /**
  * When running a command from the "scripts" block in package.json, if the command
- * contains Unix-style path slashes, for Windows the package managers will convert slashes
- * to backslashes.  This is a complicated heuristic.  For example,  we need to convert
- * "node_modules/bin/this && ./scripts/that" to "node_modules\bin\this && .\scripts\that",
- * but we don't want to convert any of  the slashes in "cmd.exe /c echo a/b".  NPM and PNPM
- * use npm-lifecycle for this, but it unfortunately has a dependency on the entire node-gyp
- * kitchen sink.  Yarn has a simplified implementation in fix-cmd-win-slashes.js, but it's
- * not exposed as a library.
+ * contains Unix-style path slashes and the OS is Windows, the package managers will
+ * convert slashes to backslashes.  This is a complicated undertaking.  For example, they
+ * need to convert "node_modules/bin/this && ./scripts/that --name keep/this"
+ * to "node_modules\bin\this && .\scripts\that --name keep/this", and they don't want to
+ * convert ANY of the slashes in "cmd.exe /c echo a/b".  NPM and PNPM use npm-lifecycle for this,
+ * but it unfortunately has a dependency on the entire node-gyp kitchen sink.  Yarn has a
+ * simplified implementation in fix-cmd-win-slashes.js, but it's not exposed as a library.
  *
- * Here we just do something very basic, because the syntax edge cases are mostly deprecated
- * for modern projects.  We could improve this implementation if someone complains.
+ * Fundamentally NPM's whole feature seems misguided:  They start by inviting people to write
+ * shell scripts that will be executed by wildly different shell languages (e.g. cmd.exe and Bash).
+ * It's very tricky for a developer to guess what's safe to do without testing every OS.
+ * Even simple path separators are not portable, so NPM added heuristics to figure out which
+ * slashes are part of a path or not, and convert them.  These workarounds end up having tons
+ * of special cases.  They probably could have implemented their own entire minimal cross-platform
+ * shell language with less code and less confusion than npm-lifecycle's approach.
  *
- * However NPM's whole scripting concept is misguided:  They start by inviting people to write
- * shell scripts that try to target wildly different shell languages (e.g. cmd.exe and Bash).
- * Even the path slashes aren't consistent, so they use complicated heuristics to convert
- * Bash syntax to cmd.exe (but not if you're using Bash on Windows!).  These workarounds are
- * really complicated, to the point where you could probably implement a small portable
- * shell language with less code.  (Or simply tell people to put their scripts in conventional
- * script files, which is what we advocate.)
+ * We've deprecated shell operators inside package.json.  Instead, we advise people to move their
+ * scripts into conventional script files, and put only a file path in package.json.  So, for
+ * Rush's workaround here, we really only care about supporting the small set of cases seen in the
+ * unit tests.  For anything that doesn't fit those patterns, we leave the string untouched
+ * (i.e. err on the side of not breaking anything).  We could revisit this later if someone
+ * complains about it, but so far nobody has.  :-)
  */
 export function convertSlashesForWindows(command: string): string {
-  // Match everything up to the first space, "&", "|", "<", ">", or quote
+  // The first group will match everything up to the first space, "&", "|", "<", ">", or quote.
+  // The second group matches the remainder.
   const commandRegExp: RegExp = /^([^\s&|<>"]+)(.*)$/;
+
   const match: RegExpMatchArray | null = commandRegExp.exec(command);
   if (match) {
     // Example input: "bin/blarg --path ./config/blah.json && a/b"
