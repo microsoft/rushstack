@@ -3,6 +3,7 @@
 
 import { CommandLineParser } from '@microsoft/ts-command-line';
 
+import { BuildAction } from './BuildAction';
 import { CleanAction } from './CleanAction';
 
 export class RushStackCommandLine extends CommandLineParser {
@@ -19,6 +20,7 @@ export class RushStackCommandLine extends CommandLineParser {
   }
 
   private _populateActions(): void {
+    this.addAction(new BuildAction(this));
     this.addAction(new CleanAction(this));
   }
 }

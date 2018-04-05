@@ -3,10 +3,14 @@
 
 import * as fsx from 'fs-extra';
 import * as path from 'path';
+import * as child_process from 'child_process';
 
 import { BuildContext } from './BuildContext';
 
 export class BasicTasks {
+  /**
+   * Build task: Cleans all the temporary files
+   */
   public static doClean(buildContext: BuildContext): void {
     const foldersToClean: string[] = [
       'temp',
@@ -16,8 +20,18 @@ export class BasicTasks {
 
     for (const folderToClean of foldersToClean) {
       const fullPath: string = path.join(buildContext.projectFolder, folderToClean);
-      console.log(`Cleaning folder: "${fullPath}"`);
+      console.log(`[clean]: Cleaning "${fullPath}"`);
       fsx.emptyDirSync(fullPath);
     }
+  }
+
+  /**
+   * Build task: Runs the typescript compiler
+   */
+  public static doBuild(buildContext: BuildContext): void {
+    console.log(`[clean]: Starting`);
+    const tscPath: string = path.join(buildContext.projectFolder, 'node_modules/.bin/rush-tsc');
+    child_process.execSync(tscPath, { stdio: 'inherit' });
+    console.log(`[clean]: Finished`);
   }
 }

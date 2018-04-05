@@ -6,11 +6,11 @@ import { RushStackCommandLine } from './RushStackCommandLine';
 import { BasicTasks } from '../logic/BasicTasks';
 import { BuildContext } from '../logic/BuildContext';
 
-export class CleanAction extends CommandLineAction {
+export class BuildAction extends CommandLineAction {
   constructor(parser: RushStackCommandLine) {
     super({
-      actionVerb: 'clean',
-      summary: 'Delete all the intermediary files created during a build',
+      actionVerb: 'build',
+      summary: 'Build the current project',
       documentation: ''
     });
   }
@@ -22,6 +22,7 @@ export class CleanAction extends CommandLineAction {
     const buildContext: BuildContext = new BuildContext();
 
     BasicTasks.doClean(buildContext);
+    BasicTasks.doBuild(buildContext);
 
     return Promise.resolve();
   }
