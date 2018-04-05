@@ -4,7 +4,7 @@
 import * as child_process from 'child_process';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, Text } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { IPackageDeps } from '@microsoft/package-deps-hash';
 
@@ -126,9 +126,14 @@ export default class ProjectTask implements ITaskDefinition {
         }
 
         // Run the task
-        writer.writeLine(taskCommand);
+
+        const convertedTaskCommand: string = process.platform === 'win32'
+          ? convertSlashesForWindows(taskCommand)
+          : taskCommand;
+
+        writer.writeLine(convertedTaskCommand);
         const task: child_process.ChildProcess =
-          Utilities.executeShellCommandAsync(taskCommand, projectFolder, process.env, true);
+          Utilities.executeShellCommandAsync(convertedTaskCommand, projectFolder, process.env, true);
 
         // Hook into events, in order to get live streaming of build log
         task.stdout.on('data', (data: string) => {
@@ -242,4 +247,44 @@ function _areShallowEqual(object1: Object, object2: Object, writer: ITaskWriter)
     }
   }
   return true;
+}
+
+/**
+ * When running a command from the "scripts" block in package.json, if the command
+ * contains Unix-style path slashes, the package managers will convert the slashes
+ * to backslashes for the Windows OS.  This is a complicated heuristic.  For example,
+ * we want to convert "node_modules/bin/this && ./scripts/that" to
+ * "node_modules\bin\this && .\scripts\that" but we don't want to convert
+ * the slashes in  "cmd.exe /c blah".  NPM and PNPM use npm-lifecycle for this,
+ * but it unfortunately has a dependency on the entire node-gyp kitchen sink.
+ * Yarn has a simplified implementation in fix-cmd-win-slashes.js, but it's not
+ * exposed as a library.
+ *
+ * Since the "&&" and quoting edge cases are mostly deprecated for Rush projects,
+ * we will just do something very basic for now.  We can improve it later if someone
+ * actually complains.
+ */
+export function convertSlashesForWindows(command: string): string {
+  // Match everything up to the first space, "&" or quote
+  const commandRegExp: RegExp = /^([^\s&"]+)(.*)$/;
+  const match: RegExpMatchArray | null = commandRegExp.exec(command);
+  if (match) {
+    // Example input: "bin/blarg --path ./config/blah.json && a/b"
+    // commandPart="bin/blarg"
+    // remainder=" --path ./config/blah.json && a/b"
+    const commandPart: string = match[1];
+    const remainder: string = match[2];
+
+    // If the command part already contains a backslash, then leave it alone
+    if (commandPart.indexOf('\\') < 0) {
+      // Replace all the slashes with backslashes, e.g. to produce:
+      // "bin\blarg --path ./config/blah.json && a/b"
+      //
+      // NOTE: we don't attempt to process the path parameter or stuff after "&&"
+      return Text.replaceAll(commandPart, '/', '\\') + remainder;
+    }
+  }
+
+  // Don't change anything
+  return command;
 }
