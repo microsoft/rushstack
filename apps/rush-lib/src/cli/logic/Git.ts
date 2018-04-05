@@ -4,8 +4,10 @@
 import PublishUtilities from './PublishUtilities';
 
 export class Git {
+  private _targetBranch: string;
 
-  constructor(private _targetBranch: string) {
+  constructor(targetBranch: string) {
+    this._targetBranch = targetBranch;
   }
 
   public checkout(branchName: string, createBranch?: boolean): void {

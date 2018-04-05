@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJson, PackageName } from '@microsoft/node-core-library';
 
 import { ApprovedPackagesPolicy } from '../../data/ApprovedPackagesPolicy';
 import RushConfiguration from '../../data/RushConfiguration';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
-import Utilities from '../../utilities/Utilities';
 
 export class ApprovedPackagesChecker {
   /**
@@ -43,7 +42,7 @@ export class ApprovedPackagesChecker {
 
     if (dependencies) {
       for (const packageName of Object.keys(dependencies)) {
-        const scope: string = Utilities.parseScopedPackageName(packageName).scope;
+        const scope: string = PackageName.getScope(packageName);
 
         // Make sure the scope isn't something like "@types" which should be ignored
         if (!approvedPackagesPolicy.ignoredNpmScopes.has(scope)) {

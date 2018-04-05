@@ -1,6 +1,25 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sun, 25 Mar 2018 01:26:19 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Apr 2018 16:05:29 GMT and should not be manually modified.
+
+## 5.6.3
+Tue, 03 Apr 2018 16:05:29 GMT
+
+*Version update only*
+
+## 5.6.2
+Mon, 02 Apr 2018 16:05:24 GMT
+
+### Patches
+
+- Refactor to use new @microsoft/node-core-library
+
+## 5.6.1
+Tue, 27 Mar 2018 01:34:25 GMT
+
+### Patches
+
+- Update build config so API Extractor builds using the latest version of itself
 
 ## 5.6.0
 Sun, 25 Mar 2018 01:26:19 GMT

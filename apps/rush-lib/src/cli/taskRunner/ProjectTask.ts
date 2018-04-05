@@ -6,9 +6,7 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { JsonFile } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
-  import {
-    IPackageDeps
-  } from '@microsoft/package-deps-hash';
+import { IPackageDeps } from '@microsoft/package-deps-hash';
 
 import RushConfiguration from '../../data/RushConfiguration';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
@@ -34,6 +32,7 @@ export default class ProjectTask implements ITaskDefinition {
   }
 
   private _hasWarningOrError: boolean;
+  private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
   constructor(
     private _rushProject: RushConfigurationProject,
@@ -42,7 +41,9 @@ export default class ProjectTask implements ITaskDefinition {
     private _customFlags: string[],
     public isIncrementalBuildAllowed: boolean,
     private _ignoreMissingScript: boolean
-  ) {}
+  ) {
+    this._packageChangeAnalyzer = new PackageChangeAnalyzer(this._rushConfiguration);
+  }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
@@ -58,16 +59,17 @@ export default class ProjectTask implements ITaskDefinition {
 
   private _getPackageDependencies(taskCommand: string, writer: ITaskWriter): IPackageDependencies | undefined {
     let deps: IPackageDependencies | undefined = undefined;
-    PackageChangeAnalyzer.rushConfig = this._rushConfiguration;
+    this._rushConfiguration = this._rushConfiguration;
     try {
       deps = {
-        files: PackageChangeAnalyzer.instance.getPackageDepsHash(this._rushProject.packageName)!.files,
+        files: this._packageChangeAnalyzer.getPackageDepsHash(this._rushProject.packageName)!.files,
         arguments: taskCommand
       };
     } catch (error) {
       writer.writeLine('Unable to calculate incremental build state. ' +
         'Instead running full rebuild. ' + error.toString());
     }
+
     return deps;
   }
 
@@ -88,7 +90,15 @@ export default class ProjectTask implements ITaskDefinition {
 
       const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
       if (fsx.existsSync(currentDepsPath)) {
-        lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
+        try {
+          lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
+        } catch (e) {
+          // Warn and ignore - treat failing to load the file as the project being not built.
+          writer.writeLine(
+            `Warning: error parsing ${RushConstants.packageDepsFilename}: ${e}. Ignoring and ` +
+            'treating the project as non-built.'
+          );
+        }
       }
 
       const isPackageUnchanged: boolean = (

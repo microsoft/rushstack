@@ -2,6 +2,66 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "3.2.31",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.31",
+      "date": "Tue, 03 Apr 2018 16:05:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `1.5.0` to `1.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.30` to `4.3.31`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.30",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.30",
+      "date": "Mon, 02 Apr 2018 16:05:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `1.4.29` to `1.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.29` to `4.3.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.29",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.29",
+      "date": "Tue, 27 Mar 2018 01:34:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `1.4.28` to `1.4.29`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.28` to `4.3.29`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.28",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.28",
+      "date": "Mon, 26 Mar 2018 19:12:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `1.4.27` to `1.4.28`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.27` to `4.3.28`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.27",
       "tag": "@microsoft/loader-set-webpack-public-path_v3.2.27",
       "date": "Sun, 25 Mar 2018 01:26:19 GMT",

@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as colors from 'colors';
 
 import yaml = require('js-yaml');
-import { JsonFile, JsonSchema, Text } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, Text, PackageName } from '@microsoft/node-core-library';
 import {
   MarkupElement,
   IApiMethod,
@@ -165,7 +165,7 @@ export class YamlDocumenter {
       if (docItem.kind === DocItemKind.Namespace) {
         // Namespaces don't have nodes yet
         tocItem = {
-          name: Utilities.getUnscopedPackageName(docItem.name)
+          name: docItem.name
         };
       } else {
         if (this._shouldEmbed(docItem.kind)) {
@@ -173,10 +173,17 @@ export class YamlDocumenter {
           continue;
         }
 
-        tocItem = {
-          name: Utilities.getUnscopedPackageName(docItem.name),
-          uid: this._getUid(docItem)
-        };
+        if (docItem.kind === DocItemKind.Package) {
+          tocItem = {
+            name: PackageName.getUnscopedName(docItem.name),
+            uid: this._getUid(docItem)
+          };
+        } else {
+          tocItem = {
+            name: docItem.name,
+            uid: this._getUid(docItem)
+          };
+        }
       }
 
       tocItems.push(tocItem);
@@ -399,7 +406,7 @@ export class YamlDocumenter {
     for (const current of docItem.getHierarchy()) {
       switch (current.kind) {
         case DocItemKind.Package:
-          result += Utilities.getUnscopedPackageName(current.name);
+          result += PackageName.getUnscopedName(current.name);
           break;
         default:
           result += '.';
@@ -425,7 +432,7 @@ export class YamlDocumenter {
     for (const current of docItem.getHierarchy()) {
       switch (current.kind) {
         case DocItemKind.Package:
-          result += Utilities.getUnscopedPackageName(current.name);
+          result += PackageName.getUnscopedName(current.name);
           break;
         default:
           if (current.parent && current.parent.kind === DocItemKind.Package) {

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { PackageName } from '@microsoft/node-core-library';
 import {
   MarkupElement,
   MarkupBasicElement,
@@ -130,6 +131,9 @@ export class Markup {
     if (!target.packageName || target.packageName.length < 1) {
       throw new Error('The IApiItemReference.packageName cannot be empty');
     }
+
+    // Validate that the scopeName and packageName are formatted correctly
+    PackageName.combineParts(target.scopeName, target.packageName);
 
     return {
       kind: 'api-link',

@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { IParsedPackageName } from '@microsoft/node-core-library';
 import {
   MarkupLinkTextElement,
   MarkupBasicElement,
   MarkupElement
 } from '../markup/MarkupElement';
 import { Markup } from '../markup/Markup';
-import { ApiDefinitionReference, IScopedPackageName } from '../ApiDefinitionReference';
+import { ApiDefinitionReference } from '../ApiDefinitionReference';
 import { ApiDocumentation } from '../aedoc/ApiDocumentation';
 import { AstItemKind } from '../ast/AstItem';
 import { Token, TokenType } from '../aedoc/Token';
@@ -178,11 +179,10 @@ export class DocElementParser {
         }
 
         // If the package name is unspecified, assume it is the current package
-        const scopePackageName: IScopedPackageName = ApiDefinitionReference.parseScopedPackageName(
-          documentation.context.packageName);
+        const parsedPackageName: IParsedPackageName = documentation.context.parsedPackageName;
 
-        normalizedApiLink.scopeName = scopePackageName.scope;
-        normalizedApiLink.packageName = scopePackageName.package;
+        normalizedApiLink.scopeName = parsedPackageName.scope;
+        normalizedApiLink.packageName = parsedPackageName.unscopedName;
       }
 
       linkMarkupElement = Markup.createApiLink(displayTextElements, normalizedApiLink);

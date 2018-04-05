@@ -4,16 +4,16 @@
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 import * as semver from 'semver';
-import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, PackageName } from '@microsoft/node-core-library';
 
 import Rush from '../Rush';
 import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
-import { PinnedVersionsConfiguration } from './PinnedVersionsConfiguration';
-import Utilities from '../utilities/Utilities';
 import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import EventHooks from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
+import { EnvironmentConfiguration } from './EnvironmentConfiguration';
+import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -24,6 +24,7 @@ const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const knownRushConfigFilenames: string[] = [
   '.npmrc',
   RushConstants.pinnedVersionsFilename,
+  RushConstants.commonVersionsFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.versionPoliciesFileName,
@@ -105,7 +106,7 @@ export interface IRushLinkJson {
 export type PackageManager = 'pnpm' | 'npm';
 
 /**
- * This represents the Rush configuration for a repository, based on the Rush.json
+ * This represents the Rush configuration for a repository, based on the "rush.json"
  * configuration file.
  * @public
  */
@@ -147,7 +148,7 @@ export default class RushConfiguration {
   // Rush hooks
   private _eventHooks: EventHooks;
 
-  private _pinnedVersions: PinnedVersionsConfiguration;
+  private _commonVersions: CommonVersionsConfiguration;
 
   private _telemetryEnabled: boolean;
 
@@ -259,7 +260,7 @@ export default class RushConfiguration {
     // NOTE: projectJsons was already sorted in alphabetical order by the caller.
     for (const projectJson of sortedProjectJsons) {
       // If the name is "@ms/MyProject", extract the "MyProject" part
-      const unscopedName: string = Utilities.parseScopedPackageName(projectJson.packageName).name;
+      const unscopedName: string = PackageName.getUnscopedName(projectJson.packageName);
 
       // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
       // there is a naming conflict
@@ -319,6 +320,14 @@ export default class RushConfiguration {
         throw new Error(`An unrecognized file "${filename}" was found in the Rush config folder:`
           + ` ${commonRushConfigFolder}`);
       }
+    }
+
+    const pinnedVersionsFilename: string = path.join(commonRushConfigFolder, RushConstants.pinnedVersionsFilename);
+    if (fsx.existsSync(pinnedVersionsFilename)) {
+      throw new Error('The "pinned-versions.json" config file is no longer supported;'
+        + ' please move your settings to the "preferredVersions" field of a "common-versions.json" config file.'
+        + ` (See the ${RushConstants.rushWebSiteUrl} documentation for details.)\n\n`
+        + pinnedVersionsFilename);
     }
   }
 
@@ -547,12 +556,14 @@ export default class RushConfiguration {
   }
 
   /**
-   * The PinnedVersionsConfiguration object.  If the pinnedVersions.json file is missing,
-   * this property will NOT be undefined.  Instead it will be initialized in an empty state,
-   * and calling PinnedVersionsConfiguration.save() will create the file.
+   * Settings from the common-versions.json config file.
+   * @remarks
+   * If the common-versions.json file is missing, this property will not be undefined.
+   * Instead it will be initialized in an empty state, and calling CommonVersionsConfiguration.save()
+   * will create the file.
    */
-  public get pinnedVersions(): PinnedVersionsConfiguration {
-    return this._pinnedVersions;
+  public get commonVersions(): CommonVersionsConfiguration {
+    return this._commonVersions;
   }
 
   /**
@@ -586,7 +597,7 @@ export default class RushConfiguration {
 
     // Is there an approximate match?
     for (const project of this._projects) {
-      if (Utilities.parseScopedPackageName(project.packageName).name === shorthandProjectName) {
+      if (PackageName.getUnscopedName(project.packageName) === shorthandProjectName) {
         if (result) {
           // Ambiguous -- there is more than one match
           return undefined;
@@ -624,6 +635,8 @@ export default class RushConfiguration {
    * instead.
    */
   private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
+    EnvironmentConfiguration.initialize();
+
     if (rushConfigurationJson.nodeSupportedVersionRange) {
       if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
         throw new Error('Error parsing the node-semver expression in the "nodeSupportedVersionRange"'
@@ -642,7 +655,9 @@ export default class RushConfiguration {
 
     this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
 
-    this._commonTempFolder = path.join(this._commonFolder, RushConstants.rushTempFolderName);
+    this._commonTempFolder = EnvironmentConfiguration.rushTempFolderOverride ||
+      path.join(this._commonFolder, RushConstants.rushTempFolderName);
+
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
     this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'pnpm-store'));
@@ -767,9 +782,9 @@ export default class RushConfiguration {
       this._versionPolicyConfiguration.validate(this._projectsByName);
     }
 
-    // Example: "./common/config/rush/pinnedVersions.json"
-    const pinnedVersionsFile: string = path.join(this.commonRushConfigFolder, RushConstants.pinnedVersionsFilename);
-    this._pinnedVersions = PinnedVersionsConfiguration.tryLoadFromFile(pinnedVersionsFile);
+    // Example: "./common/config/rush/common-versions.json"
+    const commonVersionsFilename: string = path.join(this.commonRushConfigFolder, RushConstants.commonVersionsFilename);
+    this._commonVersions = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
   }
 
   private _populateDownstreamDependencies(

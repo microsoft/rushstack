@@ -2,6 +2,33 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "1.2.0",
+      "tag": "@microsoft/node-core-library_v1.2.0",
+      "date": "Tue, 03 Apr 2018 16:05:29 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new API \"MapExtensions.mergeFromMap\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.0",
+      "tag": "@microsoft/node-core-library_v1.1.0",
+      "date": "Mon, 02 Apr 2018 16:05:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new API \"PackageName\" for validating package names and extracting scopes"
+          },
+          {
+            "comment": "Add new API \"ProtectableMap\" for tracking/restricting how a map is consumed"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.0",
       "tag": "@microsoft/node-core-library_v1.0.0",
       "date": "Sat, 17 Mar 2018 02:54:22 GMT",

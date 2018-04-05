@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Change *.d.ts file path for rush-lib",
+      "comment": "Replace pinned-versions.json with a more general common-versions.json that can track other cross-project dependency versions",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

@@ -269,7 +269,7 @@ describe('VersionMismatchFinder', () => {
     done();
   });
 
-  it('checks peer dependencies', (done: MochaDone) => {
+  it('does not check peer dependencies', (done: MochaDone) => {
     const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -294,12 +294,7 @@ describe('VersionMismatchFinder', () => {
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
     assert.isNumber(mismatchFinder.numberOfMismatches);
-    assert.equal(mismatchFinder.numberOfMismatches, 1);
-    assert.equal(mismatchFinder.getMismatches().length, 1);
-    assert.equal(mismatchFinder.getMismatches()[0], '@types/foo');
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
+    assert.equal(mismatchFinder.numberOfMismatches, 0);
     done();
   });
 

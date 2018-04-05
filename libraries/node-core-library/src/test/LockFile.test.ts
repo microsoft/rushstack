@@ -71,8 +71,7 @@ describe('LockFile', () => {
       it('can acquire and close a clean lockfile', () => {
         // ensure test folder is clean
         const testFolder: string = path.join(__dirname, '1');
-        fsx.removeSync(testFolder);
-        fsx.mkdirsSync(testFolder);
+        fsx.emptyDirSync(testFolder);
 
         const resourceName: string = 'test';
         const pidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
@@ -98,8 +97,7 @@ describe('LockFile', () => {
       it('cannot acquire a lock if another valid lock exists', () => {
         // ensure test folder is clean
         const testFolder: string = path.join(__dirname, '2');
-        fsx.removeSync(testFolder);
-        fsx.mkdirsSync(testFolder);
+        fsx.emptyDirSync(testFolder);
 
         const otherPid: number = 999999999;
         const otherPidStartTime: string = '2012-01-02 12:53:12';

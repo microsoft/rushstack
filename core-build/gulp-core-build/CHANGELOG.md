@@ -1,6 +1,23 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Fri, 23 Mar 2018 00:34:53 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Apr 2018 16:05:29 GMT and should not be manually modified.
+
+## 3.7.4
+Tue, 03 Apr 2018 16:05:29 GMT
+
+*Version update only*
+
+## 3.7.3
+Mon, 02 Apr 2018 16:05:24 GMT
+
+*Version update only*
+
+## 3.7.2
+Mon, 26 Mar 2018 19:12:42 GMT
+
+### Patches
+
+- Fix an issue where snapshot filenames did not follow Jest's naming convention.
 
 ## 3.7.1
 Fri, 23 Mar 2018 00:34:53 GMT

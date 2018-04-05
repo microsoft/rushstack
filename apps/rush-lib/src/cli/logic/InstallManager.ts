@@ -14,7 +14,8 @@ import {
   JsonFile,
   LockFile,
   Text,
-  IPackageJson
+  IPackageJson,
+  MapExtensions
 } from '@microsoft/node-core-library';
 
 import AsyncRecycler from '../../utilities/AsyncRecycler';
@@ -32,6 +33,19 @@ import { LastInstallFlag } from '../../utilities/LastInstallFlag';
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
 const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
+
+/**
+ * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
+ * As a temporary workaround, augment the type.
+ */
+import { CreateOptions } from 'tar';
+export interface CreateOptions { // tslint:disable-line:interface-name
+  /**
+   * "Set to true to omit writing mtime values for entries. Note that this prevents using other
+   * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
+   */
+  noMtime?: boolean;
+}
 
 /**
  * Controls the behavior of InstallManager.installCommonModules()
@@ -65,7 +79,7 @@ export default class InstallManager {
   /**
    * Returns a map of all direct dependencies that only have a single semantic version specifier
    */
-  public static collectImplicitlyPinnedVersions(rushConfiguration: RushConfiguration): Map<string, string> {
+  public static collectImplicitlyPreferredVersions(rushConfiguration: RushConfiguration): Map<string, string> {
     const directDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
@@ -75,14 +89,14 @@ export default class InstallManager {
         project.cyclicDependencyProjects, project.packageJson.devDependencies);
     });
 
-    const implicitlyPinned: Map<string, string> = new Map<string, string>();
+    const implicitlyPreferred: Map<string, string> = new Map<string, string>();
     directDependencies.forEach((versions: Set<string>, dep: string) => {
       if (versions.size === 1) {
         const version: string = versions.values().next().value;
-        implicitlyPinned.set(dep, version);
+        implicitlyPreferred.set(dep, version);
       }
     });
-    return implicitlyPinned;
+    return implicitlyPreferred;
   }
 
   // tslint:disable-next-line:no-any
@@ -211,8 +225,8 @@ export default class InstallManager {
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    */
-  public createTempModules(forceCreate: boolean): void {
-    this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate);
+  public createTempModules(forceCreate: boolean, authTokens: string[]): void {
+    this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate, authTokens);
   }
 
   /**
@@ -223,7 +237,9 @@ export default class InstallManager {
    */
   public createTempModulesAndCheckShrinkwrap(
     shrinkwrapFile: BaseShrinkwrapFile | undefined,
-    forceCreate: boolean): boolean {
+    forceCreate: boolean,
+    authTokens: string[]
+  ): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     // Example: "C:\MyRepo\common\temp\projects"
@@ -242,28 +258,23 @@ export default class InstallManager {
       shrinkwrapIsValid = false;
     }
 
-    // Find the implicitly pinnedVersions
+    // Find the implicitly preferred versions
     // These are any first-level dependencies for which we only consume a single version range
     // (e.g. every package that depends on react uses an identical specifier)
-    const implicitlyPinned: Map<string, string> =
-      InstallManager.collectImplicitlyPinnedVersions(this._rushConfiguration);
-    const pinnedVersions: Map<string, string> = new Map<string, string>();
+    const allPreferredVersions: Map<string, string> =
+      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration);
 
-    implicitlyPinned.forEach((version: string, dependency: string) => {
-      pinnedVersions.set(dependency, version);
-    });
-
-    this._rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
-      pinnedVersions.set(dependency, version);
-    });
+    // Add in the explicitly preferred versions.
+    // Note that these take precedence over implicitly preferred versions.
+    MapExtensions.mergeFromMap(allPreferredVersions, this._rushConfiguration.commonVersions.getAllPreferredVersions());
 
     if (shrinkwrapFile) {
-      // Check any pinned dependencies first
-      pinnedVersions.forEach((version: string, dependency: string) => {
+      // Check any preferred dependencies first
+      allPreferredVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
           console.log(colors.yellow(wrap(
             `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
-            + ` (${version}) required by pinned versions`)));
+            + ` (${version}) required by the preferred versions from ` + RushConstants.commonVersionsFilename)));
           shrinkwrapIsValid = false;
         }
       });
@@ -285,6 +296,10 @@ export default class InstallManager {
     fsx.removeSync(tempNpmrcPath);
     this.syncFile(committedNpmrcPath, tempNpmrcPath);
 
+    if (fsx.existsSync(tempNpmrcPath)) {
+      fsx.appendFileSync(tempNpmrcPath, [''].concat(authTokens).join(os.EOL));
+    }
+
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {
       const committedPnpmFilePath: string
@@ -305,10 +320,10 @@ export default class InstallManager {
       version: '0.0.0'
     };
 
-    // Add any pinned versions to the top of the commonPackageJson
+    // Add any preferred versions to the top of the commonPackageJson
     // do this in alphabetical order for simpler debugging
-    InstallManager._keys(pinnedVersions).sort().forEach((dependency: string) => {
-      commonPackageJson.dependencies![dependency] = pinnedVersions.get(dependency)!;
+    InstallManager._keys(allPreferredVersions).sort().forEach((dependency: string) => {
+      commonPackageJson.dependencies![dependency] = allPreferredVersions.get(dependency)!;
     });
 
     // To make the common/package.json file more readable, sort alphabetically
@@ -454,10 +469,11 @@ export default class InstallManager {
             file: tarballFile,
             cwd: tempProjectFolder,
             portable: true,
+            noMtime: true,
             noPax: true,
             sync: true,
             prefix: npmPackageFolder
-          }, ['package.json']);
+          } as CreateOptions, ['package.json']);
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {

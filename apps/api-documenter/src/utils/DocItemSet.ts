@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { PackageName } from '@microsoft/node-core-library';
 import {
   IApiPackage,
   ApiItem,
   ApiJsonFile,
   IApiItemReference
 } from '@microsoft/api-extractor';
-
-import { Utilities } from './Utilities';
 
 export enum DocItemKind {
   Package,
@@ -133,7 +132,8 @@ export class DocItem {
     for (const docItem of this.getHierarchy()) {
       switch (i) {
         case 0:
-          reference.packageName = docItem.name;
+          reference.scopeName = PackageName.getScope(docItem.name);
+          reference.packageName = PackageName.getUnscopedName(docItem.name);
           break;
         case 1:
           reference.exportName = docItem.name;
@@ -219,11 +219,7 @@ export class DocItemSet {
       closestMatch: undefined
     };
 
-    const packageName: string = Utilities.getScopedPackageName(reference.scopeName, reference.packageName);
-    if (!packageName) {
-      // This would indicate an invalid data file, since API Extractor is supposed to normalize this
-      throw new Error('resolveApiItemReference() failed because the packageName should not be empty');
-    }
+    const packageName: string = PackageName.combineParts(reference.scopeName, reference.packageName);
 
     let current: DocItem | undefined = undefined;
 

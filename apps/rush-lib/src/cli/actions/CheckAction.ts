@@ -10,8 +10,6 @@ import RushCommandLineParser from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
 export default class CheckAction extends BaseRushAction {
-  private _parser: RushCommandLineParser;
-
   constructor(parser: RushCommandLineParser) {
     super({
       actionVerb: 'check',
@@ -19,9 +17,9 @@ export default class CheckAction extends BaseRushAction {
         'version throughout the repository.',
       documentation: 'Checks each project\'s package.json files and ensures that all dependencies are of the ' +
         'same version throughout the repository.',
-      safeForSimultaneousRushProcesses: true
+      safeForSimultaneousRushProcesses: true,
+      parser
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void {
@@ -29,14 +27,18 @@ export default class CheckAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    const pinnedVersions: { [dependency: string]: string } = {};
-    this.rushConfiguration.pinnedVersions.forEach((version: string, dependency: string) => {
-      pinnedVersions[dependency] = version;
+    // Collect all the preferred versions into a single table
+    const allPreferredVersions: { [dependency: string]: string } = {};
+
+    this.rushConfiguration.commonVersions.getAllPreferredVersions().forEach((version: string, dependency: string) => {
+      allPreferredVersions[dependency] = version;
     });
 
+    // Create a fake project for the purposes of reporting conflicts with preferredVersions
+    // or xstitchPreferredVersions from common-versions.json
     this.rushConfiguration.projects.push({
-      packageName: RushConstants.pinnedVersionsFilename,
-      packageJson: { dependencies: pinnedVersions }
+      packageName: 'preferred versions from ' + RushConstants.commonVersionsFilename,
+      packageJson: { dependencies: allPreferredVersions }
     } as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(this.rushConfiguration.projects);

@@ -25,12 +25,14 @@ export class VersionManager {
   private _updatedProjects: Map<string, IPackageJson>;
   private _changeFiles: Map<string, ChangeFile>;
 
-  constructor(private _rushConfiguration: RushConfiguration,
+  constructor(
+    private _rushConfiguration: RushConfiguration,
     private _userEmail: string,
     _versionPolicyConfiguration?: VersionPolicyConfiguration
   ) {
-    this._versionPolicyConfiguration = _versionPolicyConfiguration ?
-      _versionPolicyConfiguration : this._rushConfiguration.versionPolicyConfiguration;
+    this._versionPolicyConfiguration = _versionPolicyConfiguration
+      ? _versionPolicyConfiguration
+      : this._rushConfiguration.versionPolicyConfiguration;
 
     this._updatedProjects = new Map<string, IPackageJson>();
     this._changeFiles = new Map<string, ChangeFile>();
@@ -49,7 +51,7 @@ export class VersionManager {
   }
 
   /**
-   * Bumps sversions following version policies.
+   * Bumps versions following version policies.
    *
    * @param lockStepVersionPolicyName - a specified lock step version policy name. Without this value,
    * versions for all lock step policies and all individual policies will be bumped.

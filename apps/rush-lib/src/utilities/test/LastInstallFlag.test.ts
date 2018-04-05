@@ -8,8 +8,7 @@ const TEMP_DIR: string = path.join(__dirname, 'temp');
 
 describe('LastInstallFlag', () => {
   before(() => {
-    fsx.removeSync(TEMP_DIR);
-    fsx.mkdirsSync(TEMP_DIR);
+    fsx.emptyDirSync(TEMP_DIR);
   });
 
   after(() => {

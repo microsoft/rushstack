@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "Upgrade colors to version ~1.2.1",
+      "comment": "Add --auth-token and RUSH_TEMP_FOLDER options to Rush.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
-  "email": "elliottsj@users.noreply.github.com"
+  "email": "iclanton@users.noreply.github.com"
 }

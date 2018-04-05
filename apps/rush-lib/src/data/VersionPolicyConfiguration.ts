@@ -33,6 +33,9 @@ export interface IIndividualVersionJson extends IVersionPolicyJson {
 }
 
 /**
+ * Use this class to load and save the "common/config/rush/version-policies.json" config file.
+ * This config file configures how different groups of projects will be published by Rush,
+ * and how their version numbers will be determined.
  * @beta
  */
 export class VersionPolicyConfiguration {
@@ -40,11 +43,13 @@ export class VersionPolicyConfiguration {
     path.join(__dirname, '../schemas/version-policies.schema.json'));
 
   private _versionPolicies: Map<string, VersionPolicy>;
+  private _jsonFileName: string;
 
   /**
    * @internal
    */
-  public constructor(private _jsonFileName: string) {
+  public constructor(jsonFileName: string) {
+    this._jsonFileName = jsonFileName;
     this._versionPolicies = new Map<string, VersionPolicy>();
     this._loadFile();
   }

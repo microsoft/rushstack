@@ -1,6 +1,28 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sun, 25 Mar 2018 01:26:19 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Apr 2018 16:05:29 GMT and should not be manually modified.
+
+## 1.1.32
+Tue, 03 Apr 2018 16:05:29 GMT
+
+*Version update only*
+
+## 1.1.31
+Mon, 02 Apr 2018 16:05:24 GMT
+
+### Patches
+
+- Refactor to use new @microsoft/node-core-library
+
+## 1.1.30
+Tue, 27 Mar 2018 01:34:25 GMT
+
+*Version update only*
+
+## 1.1.29
+Mon, 26 Mar 2018 19:12:42 GMT
+
+*Version update only*
 
 ## 1.1.28
 Sun, 25 Mar 2018 01:26:19 GMT

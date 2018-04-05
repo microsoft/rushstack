@@ -13,6 +13,12 @@ import { IChangeInfoHash } from '../PublishUtilities';
 import * as path from 'path';
 
 describe('updateIndividualChangelog', () => {
+  const rushJsonFile: string = path.resolve(__dirname, 'packages', 'rush.json');
+  let rushConfiguration: RushConfiguration;
+
+  beforeEach(() => {
+    rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFile);
+  });
 
   it('can translate a single change request into a new changelog object', () => {
     const actualResult: IChangelog = ChangelogGenerator.updateIndividualChangelog(
@@ -28,7 +34,9 @@ describe('updateIndividualChangelog', () => {
         }]
       },
       'rootMajorChange',
-      false)!;
+      false,
+      rushConfiguration
+    )!;
 
     const expectedResult: IChangelog = {
       name: 'a',
@@ -70,7 +78,8 @@ describe('updateIndividualChangelog', () => {
         }]
       },
       path.resolve(__dirname, 'exampleChangelog'),
-      false
+      false,
+      rushConfiguration
     )!;
 
     const expectedResult: IChangelog = {
@@ -125,7 +134,8 @@ describe('updateIndividualChangelog', () => {
         }]
       },
       path.resolve(__dirname, 'exampleChangelog'),
-      false
+      false,
+      rushConfiguration
     )!;
 
     /* tslint:disable-next-line:no-unused-expression */
@@ -146,7 +156,8 @@ describe('updateIndividualChangelog', () => {
         }]
       },
       path.resolve(__dirname, 'exampleChangelog'),
-      false
+      false,
+      rushConfiguration
     )!;
 
     const expectedResult: IChangelog = {
@@ -201,7 +212,8 @@ describe('updateIndividualChangelog', () => {
         }]
       },
       path.resolve(__dirname, 'exampleChangelog'),
-      false
+      false,
+      rushConfiguration
     )!;
 
     const expectedResult: IChangelog = {
@@ -261,7 +273,11 @@ describe('updateChangelogs', () => {
       changes: []
     };
     const updatedChangeLogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
-      changeHash, rushConfiguration.projectsByName, false);
+      changeHash,
+      rushConfiguration.projectsByName,
+      rushConfiguration,
+      false
+    );
     expect(updatedChangeLogs.length).eqls(1);
     expect(updatedChangeLogs[0].name).eqls('b');
   });
@@ -287,7 +303,11 @@ describe('updateChangelogs', () => {
     rushProjectA.packageJson.version = '1.0.1-pre.1';
 
     const updatedChangeLogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
-      changeHash, rushConfiguration.projectsByName, false);
+      changeHash,
+      rushConfiguration.projectsByName,
+      rushConfiguration,
+      false
+    );
     expect(updatedChangeLogs.length).eqls(1);
     expect(updatedChangeLogs[0].name).eqls('b');
   });
@@ -313,7 +333,11 @@ describe('updateChangelogs', () => {
     rushProjectA.packageJson.version = '1.0.1-hotfix.1';
 
     const updatedChangeLogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
-      changeHash, rushConfiguration.projectsByName, false);
+      changeHash,
+      rushConfiguration.projectsByName,
+      rushConfiguration,
+      false
+    );
     expect(updatedChangeLogs.length).eqls(2);
     expect(updatedChangeLogs[0].name).eqls('a');
     expect(updatedChangeLogs[1].name).eqls('b');

@@ -24,8 +24,10 @@ export default class Telemetry {
   private _enabled: boolean;
   private _store: ITelemetryData[];
   private _dataFolder: string;
+  private _rushConfiguration: RushConfiguration;
 
-  public constructor(private _rushConfiguration: RushConfiguration) {
+  public constructor(rushConfiguration: RushConfiguration) {
+    this._rushConfiguration = rushConfiguration;
     this._enabled = this._rushConfiguration.telemetryEnabled;
     this._store = [];
 

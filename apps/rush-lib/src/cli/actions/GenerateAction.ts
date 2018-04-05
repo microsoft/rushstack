@@ -17,10 +17,9 @@ import RushCommandLineParser from './RushCommandLineParser';
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
-import { BaseRushAction } from './BaseRushAction';
+import { BaseInstallAction } from './BaseInstallAction';
 
-export default class GenerateAction extends BaseRushAction {
-  private _parser: RushCommandLineParser;
+export default class GenerateAction extends BaseInstallAction {
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
   private _forceParameter: CommandLineFlagParameter;
@@ -37,12 +36,14 @@ export default class GenerateAction extends BaseRushAction {
       + ' The "rush generate" command will do a clean install of your Rush "common" folder,'
       + ' upgrading you to the latest semver-compatible versions of all dependencies.'
       + ' Then, it will create a new shrinkwrap file, which you should commit to source control.'
-      + ' Afterwards, it will run "rush link" to create symlinks for all your projects.'
+      + ' Afterwards, it will run "rush link" to create symlinks for all your projects.',
+      parser
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void {
+    super.onDefineParameters();
+
     this._lazyParameter = this.defineFlagParameter({
       parameterLongName: '--lazy',
       parameterShortName: '-l',
@@ -110,7 +111,7 @@ export default class GenerateAction extends BaseRushAction {
 
       if (shrinkwrapFile
         && !this._forceParameter.value
-        && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, false)) {
+        && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, false, [])) {
         console.log();
         console.log(colors.yellow('Skipping generate, since all project dependencies are already satisfied.'));
         console.log();
@@ -124,7 +125,7 @@ export default class GenerateAction extends BaseRushAction {
     }
 
     return installManager.ensureLocalPackageManager(false).then(() => {
-      installManager.createTempModules(true);
+      installManager.createTempModules(true, this._authenticationTokensParameter.value || []);
 
       if (this._conservativeParameter.value) {
         if (fsx.existsSync(committedShrinkwrapFilename)) {

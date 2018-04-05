@@ -2,8 +2,8 @@ import * as fsx from 'fs-extra';
 import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as semver from 'semver';
+import { PackageName } from '@microsoft/node-core-library';
 
-import Utilities from '../../../utilities/Utilities';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 
 // This is based on PNPM's own configuration:
@@ -246,7 +246,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   private _getTempProjectKey(tempProjectName: string): string {
     // Example: "project1"
-    const unscopedTempProjectName: string = Utilities.parseScopedPackageName(tempProjectName).name;
+    const unscopedTempProjectName: string = PackageName.getUnscopedName(tempProjectName);
     return `file:projects/${unscopedTempProjectName}.tgz`;
   }
 

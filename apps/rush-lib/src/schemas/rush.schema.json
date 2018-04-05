@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Rush Configuration",
-  "description": "Configuration file for the Rush multi-package build tool",
-  "type": "object",
+  "title": "Rush main config File",
+  "description": "The main configuration file for the Rush multi-project build tool. See http://rushjs.io for details.",
 
+  "type": "object",
   "oneOf": [
     {
       "type": "object",
