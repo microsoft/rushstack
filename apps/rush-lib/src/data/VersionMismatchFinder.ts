@@ -50,12 +50,17 @@ export class VersionMismatchFinder {
   private _analyze(): void {
     this._projects.forEach((project: RushConfigurationProject) => {
       if (!project.skipRushCheck) {
+        // NOTE: We do not consider peer dependencies here.  The purpose of "rush check" is
+        // mainly to avoid side-by-side duplicates in the node_modules folder, whereas
+        // peer dependencies are just a compatibility statement that will be satisfied by a
+        // regular dependency.  (It might be useful for Rush to help people keep their peer dependency
+        // patterns consistent, but on the other hand different projects may have different
+        // levels of compatibility -- we should wait for someone to actually request this feature
+        // before we get into that.)
         this._addDependenciesToList(project.packageName,
           project.packageJson.dependencies, project.cyclicDependencyProjects);
         this._addDependenciesToList(project.packageName,
           project.packageJson.devDependencies, project.cyclicDependencyProjects);
-        this._addDependenciesToList(project.packageName,
-          project.packageJson.peerDependencies, project.cyclicDependencyProjects);
         this._addDependenciesToList(project.packageName,
           project.packageJson.optionalDependencies, project.cyclicDependencyProjects);
       }
