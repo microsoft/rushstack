@@ -265,8 +265,8 @@ function _areShallowEqual(object1: Object, object2: Object, writer: ITaskWriter)
  * actually complains.
  */
 export function convertSlashesForWindows(command: string): string {
-  // Match everything up to the first space, "&" or quote
-  const commandRegExp: RegExp = /^([^\s&"]+)(.*)$/;
+  // Match everything up to the first space, "&", "|", "<", ">", or quote
+  const commandRegExp: RegExp = /^([^\s&|<>"]+)(.*)$/;
   const match: RegExpMatchArray | null = commandRegExp.exec(command);
   if (match) {
     // Example input: "bin/blarg --path ./config/blah.json && a/b"

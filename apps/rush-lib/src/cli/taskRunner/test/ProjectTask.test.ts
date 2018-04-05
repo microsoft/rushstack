@@ -11,9 +11,13 @@ describe('convertSlashesForWindows()', () => {
     assert.equal(convertSlashesForWindows('/blah/bleep&&/bloop'), '\\blah\\bleep&&/bloop');
     assert.equal(convertSlashesForWindows('/blah/bleep'), '\\blah\\bleep');
     assert.equal(convertSlashesForWindows('/blah/bleep --path a/b'), '\\blah\\bleep --path a/b');
+    assert.equal(convertSlashesForWindows('/blah/bleep>output.log'), '\\blah\\bleep>output.log');
+    assert.equal(convertSlashesForWindows('/blah/bleep<input.json'), '\\blah\\bleep<input.json');
+    assert.equal(convertSlashesForWindows('/blah/bleep|/blah/bloop'), '\\blah\\bleep|/blah/bloop');
   });
   it('ignored inputs', () => {
-    assert.equal(convertSlashesForWindows('C:\\blah/bleep && /bloop'), 'C:\\blah/bleep && /bloop');
+    assert.equal(convertSlashesForWindows('/blah\\bleep && /bloop'), '/blah\\bleep && /bloop');
+    assert.equal(convertSlashesForWindows('cmd.exe /c blah'), 'cmd.exe /c blah');
     assert.equal(convertSlashesForWindows('"/blah/bleep"'), '"/blah/bleep"');
   });
 });
