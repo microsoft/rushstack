@@ -2,6 +2,18 @@
   "name": "@microsoft/resolve-chunk-plugin",
   "entries": [
     {
+      "version": "1.0.49",
+      "tag": "@microsoft/resolve-chunk-plugin_v1.0.49",
+      "date": "Fri, 06 Apr 2018 16:03:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade types for webpack@~3.11.0 compatibility"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.48",
       "tag": "@microsoft/resolve-chunk-plugin_v1.0.48",
       "date": "Tue, 03 Apr 2018 16:05:29 GMT",

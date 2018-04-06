@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "4.5.0",
+      "tag": "@microsoft/gulp-core-build-karma_v4.5.0",
+      "date": "Fri, 06 Apr 2018 16:03:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade webpack to ~3.11.0"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.24",
       "tag": "@microsoft/gulp-core-build-karma_v4.4.24",
       "date": "Tue, 03 Apr 2018 16:05:29 GMT",

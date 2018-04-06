@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 03 Apr 2018 16:05:29 GMT and should not be manually modified.
+This log was last generated on Fri, 06 Apr 2018 16:03:14 GMT and should not be manually modified.
+
+## 1.1.33
+Fri, 06 Apr 2018 16:03:14 GMT
+
+### Patches
+
+- Change name and set href for TOC root node.
 
 ## 1.1.32
 Tue, 03 Apr 2018 16:05:29 GMT

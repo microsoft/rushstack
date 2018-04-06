@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.1.33",
+      "tag": "@microsoft/api-documenter_v1.1.33",
+      "date": "Fri, 06 Apr 2018 16:03:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Change name and set href for TOC root node."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.32",
       "tag": "@microsoft/api-documenter_v1.1.32",
       "date": "Tue, 03 Apr 2018 16:05:29 GMT",

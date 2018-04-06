@@ -2,6 +2,18 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "1.5.2",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.5.2",
+      "date": "Fri, 06 Apr 2018 16:03:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade types for webpack@~3.11.0 compatibility"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.1",
       "tag": "@microsoft/set-webpack-public-path-plugin_v1.5.1",
       "date": "Tue, 03 Apr 2018 16:05:29 GMT",
