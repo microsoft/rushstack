@@ -107,10 +107,7 @@ export class VersionMismatchFinder {
     version: string): boolean {
 
     const allowedAlternatives: ReadonlyArray<string> | undefined = this._allowedAlternativeVersion.get(dependency);
-    if (allowedAlternatives && allowedAlternatives.indexOf(version) > -1) {
-      return true;
-    }
-    return false;
+    return Boolean(allowedAlternatives && allowedAlternatives.indexOf(version) > -1);
   }
 
   // tslint:disable-next-line:no-any
