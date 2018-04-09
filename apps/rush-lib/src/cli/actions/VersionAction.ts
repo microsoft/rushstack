@@ -123,7 +123,10 @@ export default class VersionAction extends BaseRushAction {
     // Load the config from file to avoid using inconsistent in-memory data.
     const rushConfig: RushConfiguration =
       RushConfiguration.loadFromConfigurationFile(this.rushConfiguration.rushJsonFile);
-    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(rushConfig.projects);
+    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
+      rushConfig.projects,
+      rushConfig.commonVersions.allowedAlternativeVersions
+    );
     if (mismatchFinder.numberOfMismatches) {
       throw new Error('Unable to finish version bump because inconsistencies were encountered.' +
         ' Run \"rush check\" to find more details.');

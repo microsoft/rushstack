@@ -14,12 +14,14 @@ export class VersionMismatchFinder {
   *   }
   * }
   */
+  private _allowedAlternativeVersion:  Map<string, ReadonlyArray<string>>;
   private _mismatches: Map<string, Map<string, string[]>>;
   private _projects: RushConfigurationProject[];
 
-  constructor(projects: RushConfigurationProject[]) {
+  constructor(projects: RushConfigurationProject[], allowedAlternativeVersions:  Map<string, ReadonlyArray<string>>) {
     this._projects = projects;
     this._mismatches = new Map<string, Map<string, string[]>>();
+    this._allowedAlternativeVersion = allowedAlternativeVersions;
     this._analyze();
   }
 
@@ -82,6 +84,9 @@ export class VersionMismatchFinder {
       Object.keys(dependencyMap).forEach((dependency: string) => {
         if (!exclude || !exclude.has(dependency)) {
           const version: string = dependencyMap[dependency];
+          if (this._isVersionAllowedAlternative(dependency, version)) {
+            return;
+          }
           if (!this._mismatches.has(dependency)) {
             this._mismatches.set(dependency, new Map<string, string[]>());
           }
@@ -95,6 +100,17 @@ export class VersionMismatchFinder {
         }
       });
     }
+  }
+
+  private _isVersionAllowedAlternative(
+    dependency: string,
+    version: string): boolean {
+
+    const allowedAlternatives: ReadonlyArray<string> | undefined = this._allowedAlternativeVersion.get(dependency);
+    if (allowedAlternatives && allowedAlternatives.indexOf(version) > -1) {
+      return true;
+    }
+    return false;
   }
 
   // tslint:disable-next-line:no-any
