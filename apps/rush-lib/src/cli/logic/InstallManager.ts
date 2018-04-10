@@ -84,9 +84,11 @@ export default class InstallManager {
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
       InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
-        project.cyclicDependencyProjects, project.packageJson.dependencies);
+        project.cyclicDependencyProjects, project.packageJson.dependencies,
+        rushConfiguration.commonVersions.allowedAlternativeVersions);
       InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
-        project.cyclicDependencyProjects, project.packageJson.devDependencies);
+        project.cyclicDependencyProjects, project.packageJson.devDependencies,
+        rushConfiguration.commonVersions.allowedAlternativeVersions);
     });
 
     const implicitlyPreferred: Map<string, string> = new Map<string, string>();
@@ -123,17 +125,21 @@ export default class InstallManager {
   private static _addDependenciesToMap(
     rushConfiguration: RushConfiguration,
     directDependencies: Map<string, Set<string>>,
-    cyclicDeps: Set<string>, deps: { [dep: string]: string } | undefined): void {
+    cyclicDeps: Set<string>, deps: { [dep: string]: string } | undefined,
+    alternativeVersionsToSkip: Map<string, ReadonlyArray<string>> = new Map<string, ReadonlyArray<string>>()): void {
 
     if (deps) {
       Object.keys(deps).forEach((dependency: string) => {
         const version: string = deps[dependency];
+        const alternatives: ReadonlyArray<string> = alternativeVersionsToSkip.get(dependency) || [];
 
         // If the dependency is not a local project OR
         //    the dependency is a cyclic dependency OR
-        //    we depend on a different version than the one locally
+        //    we depend on a different version than the one locally OR
+        //    the dependency is not an allowed alternative version
         if (!rushConfiguration.getProjectByName(dependency) || cyclicDeps.has(dependency) ||
-          !semver.satisfies(rushConfiguration.getProjectByName(dependency)!.packageJson.version, version)) {
+          !semver.satisfies(rushConfiguration.getProjectByName(dependency)!.packageJson.version, version) ||
+          alternatives.indexOf(version) === -1) {
           InstallManager._addDependencyToMap(directDependencies, dependency, version);
         }
       });
