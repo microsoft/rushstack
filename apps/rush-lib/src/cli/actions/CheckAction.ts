@@ -41,7 +41,10 @@ export default class CheckAction extends BaseRushAction {
       packageJson: { dependencies: allPreferredVersions }
     } as RushConfigurationProject);
 
-    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(this.rushConfiguration.projects);
+    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
+      this.rushConfiguration.projects,
+      this.rushConfiguration.commonVersions.allowedAlternativeVersions
+    );
 
     // Iterate over the list. For any dependency with mismatching versions, print the projects
     mismatchFinder.getMismatches().forEach((dependency: string) => {

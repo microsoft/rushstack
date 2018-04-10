@@ -8,7 +8,6 @@ import RushConfigurationProject from '../RushConfigurationProject';
 import { VersionMismatchFinder } from '../VersionMismatchFinder';
 
 describe('VersionMismatchFinder', () => {
-
   it('finds no mismatches if there are none', (done: MochaDone) => {
     const projects: RushConfigurationProject[] = [
       {
@@ -329,6 +328,38 @@ describe('VersionMismatchFinder', () => {
     assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
     assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
+    done();
+  });
+
+  it('allows alternative versions', (done: MochaDone) => {
+    const projects: RushConfigurationProject[] = [
+      {
+        packageName: 'A',
+        packageJson: {
+          dependencies: {
+            '@types/foo': '1.2.3',
+            'karma': '0.0.1'
+          }
+        },
+        cyclicDependencyProjects: new Set<string>()
+      },
+      {
+        packageName: 'B',
+        packageJson: {
+          dependencies: {
+            '@types/foo': '2.0.0',
+            'karma': '0.0.1'
+          }
+        },
+        cyclicDependencyProjects: new Set<string>()
+      }
+    ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
+    const alternatives: Map<string, ReadonlyArray<string>> = new Map<string, ReadonlyArray<string>>();
+    alternatives.set('@types/foo', ['2.0.0']);
+    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects, alternatives);
+    assert.isNumber(mismatchFinder.numberOfMismatches);
+    assert.equal(mismatchFinder.numberOfMismatches, 0);
+    assert.equal(mismatchFinder.getMismatches().length, 0);
     done();
   });
 });
