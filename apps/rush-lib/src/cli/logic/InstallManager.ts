@@ -82,22 +82,20 @@ export default class InstallManager {
   public static collectImplicitlyPreferredVersions(rushConfiguration: RushConfiguration): Map<string, string> {
     // First, collect all the direct dependencies of all local projects, and their versions:
     // direct dependency name --> set of version ranges
-    const directDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
+    const versionsForDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
-      InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
-        project.cyclicDependencyProjects, project.packageJson.dependencies,
-        rushConfiguration.commonVersions.allowedAlternativeVersions);
-      InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
-        project.cyclicDependencyProjects, project.packageJson.devDependencies,
-        rushConfiguration.commonVersions.allowedAlternativeVersions);
+      InstallManager._collectVersionsForDependencies(versionsForDependencies, project.packageJson.dependencies,
+        project.cyclicDependencyProjects, rushConfiguration);
+      InstallManager._collectVersionsForDependencies(versionsForDependencies, project.packageJson.devDependencies,
+        project.cyclicDependencyProjects, rushConfiguration);
     });
 
     // If any dependency has more than one version, then filter it out (since we don't know which version
     // should be preferred).  What remains will be the list of preferred dependencies.
     // dependency --> version range
     const implicitlyPreferred: Map<string, string> = new Map<string, string>();
-    directDependencies.forEach((versions: Set<string>, dep: string) => {
+    versionsForDependencies.forEach((versions: Set<string>, dep: string) => {
       if (versions.size === 1) {
         const version: string = versions.values().next().value;
         implicitlyPreferred.set(dep, version);
@@ -120,25 +118,26 @@ export default class InstallManager {
   }
 
   // Helper for collectImplicitlyPreferredVersions()
-  private static _addDependencyToMap(directDependencies: Map<string, Set<string>>,
+  private static _updateVersionsForDependencies(versionsForDependencies: Map<string, Set<string>>,
     dependency: string, version: string): void {
-    if (!directDependencies.has(dependency)) {
-      directDependencies.set(dependency, new Set<string>());
+    if (!versionsForDependencies.has(dependency)) {
+      versionsForDependencies.set(dependency, new Set<string>());
     }
-    directDependencies.get(dependency)!.add(version);
+    versionsForDependencies.get(dependency)!.add(version);
   }
 
   // Helper for collectImplicitlyPreferredVersions()
-  private static _addDependenciesToMap(
-    rushConfiguration: RushConfiguration,
-    directDependencies: Map<string, Set<string>>,
-    cyclicDeps: Set<string>, deps: { [dep: string]: string } | undefined,
-    alternativeVersionsToSkip: Map<string, ReadonlyArray<string>> = new Map<string, ReadonlyArray<string>>()): void {
+  private static _collectVersionsForDependencies(versionsForDependencies: Map<string, Set<string>>,
+    deps: { [dep: string]: string } | undefined,
+    cyclicDeps: Set<string>, rushConfiguration: RushConfiguration): void {
+
+    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>>
+      = rushConfiguration.commonVersions.allowedAlternativeVersions;
 
     if (deps) {
       Object.keys(deps).forEach((dependency: string) => {
         const versionRange: string = deps[dependency];
-        const alternativesForThisDependency: ReadonlyArray<string> = alternativeVersionsToSkip.get(dependency) || [];
+        const alternativesForThisDependency: ReadonlyArray<string> = allowedAlternativeVersions.get(dependency) || [];
 
         // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
         // that appear across the repo.  If there is only one version specifier, then that's the "preferred" one.
@@ -166,7 +165,7 @@ export default class InstallManager {
         }
 
         if (shouldAffectPreferredVersions) {
-          InstallManager._addDependencyToMap(directDependencies, dependency, versionRange);
+          InstallManager._updateVersionsForDependencies(versionsForDependencies, dependency, versionRange);
         }
       });
     }
