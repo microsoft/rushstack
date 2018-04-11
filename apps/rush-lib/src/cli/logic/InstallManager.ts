@@ -129,13 +129,13 @@ export default class InstallManager {
         // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
         // that appear across the repo.  If there is only one version specifier, then that's the "preferred" one.
         // However, there are a few cases where additional version specifiers can be safely ignored.
-        let shouldAffectPreferredVersions: boolean = true;
+        let ignoreVersion: boolean = false;
 
         // 1. If the version specifier was listed in "allowedAlternativeVersions", then it's never a candidate.
         //    (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
         //    otherwise the rule would be difficult to explain.)
         if (alternativesForThisDependency.indexOf(versionSpecifier) > 0) {
-          shouldAffectPreferredVersions = false;
+          ignoreVersion = true;
         } else {
           // Is it a local project?
           const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(dependency);
@@ -147,12 +147,12 @@ export default class InstallManager {
             // - if the local project was specified in "cyclicDependencyProjects" in rush.json
             if (semver.satisfies(localProject.packageJson.version, versionSpecifier)
               && !cyclicDependencies.has(dependency)) {
-              shouldAffectPreferredVersions = false;
+              ignoreVersion = true;
             }
           }
         }
 
-        if (shouldAffectPreferredVersions) {
+        if (!ignoreVersion) {
           InstallManager._updateVersionsForDependencies(versionsForDependencies, dependency, versionSpecifier);
         }
       });
