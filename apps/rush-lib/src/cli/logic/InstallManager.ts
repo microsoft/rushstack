@@ -104,19 +104,6 @@ export default class InstallManager {
     return implicitlyPreferred;
   }
 
-  // tslint:disable-next-line:no-any
-  public static _keys<T>(data: Map<T, any>): Array<T> {
-    const keys: Array<T> = new Array<T>();
-
-    const iterator: Iterator<T> = data.keys();
-    let current: IteratorResult<T> = iterator.next();
-    while (!current.done) {
-      keys.push(current.value);
-      current = iterator.next();
-    }
-    return keys;
-  }
-
   // Helper for collectImplicitlyPreferredVersions()
   private static _updateVersionsForDependencies(versionsForDependencies: Map<string, Set<string>>,
     dependency: string, version: string): void {
@@ -353,9 +340,9 @@ export default class InstallManager {
 
     // Add any preferred versions to the top of the commonPackageJson
     // do this in alphabetical order for simpler debugging
-    InstallManager._keys(allPreferredVersions).sort().forEach((dependency: string) => {
+    for (const dependency of Array.from(allPreferredVersions.keys()).sort()) {
       commonPackageJson.dependencies![dependency] = allPreferredVersions.get(dependency)!;
-    });
+    }
 
     // To make the common/package.json file more readable, sort alphabetically
     // according to rushProject.tempProjectName instead of packageName.
