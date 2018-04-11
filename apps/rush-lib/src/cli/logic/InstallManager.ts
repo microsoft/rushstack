@@ -80,6 +80,8 @@ export default class InstallManager {
    * Returns a map of all direct dependencies that only have a single semantic version specifier
    */
   public static collectImplicitlyPreferredVersions(rushConfiguration: RushConfiguration): Map<string, string> {
+    // First, collect all the direct dependencies of all local projects, and their versions:
+    // direct dependency name --> set of version ranges
     const directDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
@@ -91,6 +93,9 @@ export default class InstallManager {
         rushConfiguration.commonVersions.allowedAlternativeVersions);
     });
 
+    // If any dependency has more than one version, then filter it out (since we don't know which version
+    // should be preferred).  What remains will be the list of preferred dependencies.
+    // dependency --> version range
     const implicitlyPreferred: Map<string, string> = new Map<string, string>();
     directDependencies.forEach((versions: Set<string>, dep: string) => {
       if (versions.size === 1) {
@@ -114,6 +119,7 @@ export default class InstallManager {
     return keys;
   }
 
+  // Helper for collectImplicitlyPreferredVersions()
   private static _addDependencyToMap(directDependencies: Map<string, Set<string>>,
     dependency: string, version: string): void {
     if (!directDependencies.has(dependency)) {
@@ -122,6 +128,7 @@ export default class InstallManager {
     directDependencies.get(dependency)!.add(version);
   }
 
+  // Helper for collectImplicitlyPreferredVersions()
   private static _addDependenciesToMap(
     rushConfiguration: RushConfiguration,
     directDependencies: Map<string, Set<string>>,
@@ -130,17 +137,36 @@ export default class InstallManager {
 
     if (deps) {
       Object.keys(deps).forEach((dependency: string) => {
-        const version: string = deps[dependency];
-        const alternatives: ReadonlyArray<string> = alternativeVersionsToSkip.get(dependency) || [];
+        const versionRange: string = deps[dependency];
+        const alternativesForThisDependency: ReadonlyArray<string> = alternativeVersionsToSkip.get(dependency) || [];
 
-        // If the dependency is not a local project OR
-        //    the dependency is a cyclic dependency OR
-        //    we depend on a different version than the one locally OR
-        //    the dependency is not an allowed alternative version
-        if (!rushConfiguration.getProjectByName(dependency) || cyclicDeps.has(dependency) ||
-          !semver.satisfies(rushConfiguration.getProjectByName(dependency)!.packageJson.version, version) ||
-          alternatives.indexOf(version) === -1) {
-          InstallManager._addDependencyToMap(directDependencies, dependency, version);
+        // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
+        // that appear across the repo.  If there is only one version specifier, then that's the "preferred" one.
+        // However, there are a few cases where additional version specifiers can be safely ignored.
+        let shouldAffectPreferredVersions: boolean = true;
+
+        // 1. If the version range was listed in "allowedAlternativeVersions", then it's never a candidate.
+        //    (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
+        //    otherwise the rule would be difficult to explain.)
+        if (alternativesForThisDependency.indexOf(versionRange) > 0) {
+          shouldAffectPreferredVersions = false;
+        } else {
+          // Is it a local project?
+          const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(dependency);
+          if (localProject) {
+            // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
+            //    never even see it.
+            // However there are two ways that a local project can NOT be symlinked:
+            // - if the local project doesn't satisfy the referenced semver range; OR
+            // - if the local project was specified in "cyclicDependencyProjects" in rush.json
+            if (semver.satisfies(localProject.packageJson.version, versionRange) && !cyclicDeps.has(dependency)) {
+              shouldAffectPreferredVersions = false;
+            }
+          }
+        }
+
+        if (shouldAffectPreferredVersions) {
+          InstallManager._addDependencyToMap(directDependencies, dependency, versionRange);
         }
       });
     }
