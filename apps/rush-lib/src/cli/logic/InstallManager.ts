@@ -81,7 +81,7 @@ export default class InstallManager {
    */
   public static collectImplicitlyPreferredVersions(rushConfiguration: RushConfiguration): Map<string, string> {
     // First, collect all the direct dependencies of all local projects, and their versions:
-    // direct dependency name --> set of version ranges
+    // direct dependency name --> set of version specifiers
     const versionsForDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
@@ -93,7 +93,7 @@ export default class InstallManager {
 
     // If any dependency has more than one version, then filter it out (since we don't know which version
     // should be preferred).  What remains will be the list of preferred dependencies.
-    // dependency --> version range
+    // dependency --> version specifier
     const implicitlyPreferred: Map<string, string> = new Map<string, string>();
     versionsForDependencies.forEach((versions: Set<string>, dep: string) => {
       if (versions.size === 1) {
@@ -115,15 +115,15 @@ export default class InstallManager {
 
   // Helper for collectImplicitlyPreferredVersions()
   private static _collectVersionsForDependencies(versionsForDependencies: Map<string, Set<string>>,
-    deps: { [dep: string]: string } | undefined,
-    cyclicDeps: Set<string>, rushConfiguration: RushConfiguration): void {
+    dependencies: { [dep: string]: string } | undefined,
+    cyclicDependencies: Set<string>, rushConfiguration: RushConfiguration): void {
 
     const allowedAlternativeVersions: Map<string, ReadonlyArray<string>>
       = rushConfiguration.commonVersions.allowedAlternativeVersions;
 
-    if (deps) {
-      Object.keys(deps).forEach((dependency: string) => {
-        const versionRange: string = deps[dependency];
+    if (dependencies) {
+      Object.keys(dependencies).forEach((dependency: string) => {
+        const versionSpecifier: string = dependencies[dependency];
         const alternativesForThisDependency: ReadonlyArray<string> = allowedAlternativeVersions.get(dependency) || [];
 
         // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
@@ -131,10 +131,10 @@ export default class InstallManager {
         // However, there are a few cases where additional version specifiers can be safely ignored.
         let shouldAffectPreferredVersions: boolean = true;
 
-        // 1. If the version range was listed in "allowedAlternativeVersions", then it's never a candidate.
+        // 1. If the version specifier was listed in "allowedAlternativeVersions", then it's never a candidate.
         //    (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
         //    otherwise the rule would be difficult to explain.)
-        if (alternativesForThisDependency.indexOf(versionRange) > 0) {
+        if (alternativesForThisDependency.indexOf(versionSpecifier) > 0) {
           shouldAffectPreferredVersions = false;
         } else {
           // Is it a local project?
@@ -143,16 +143,17 @@ export default class InstallManager {
             // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
             //    never even see it.
             // However there are two ways that a local project can NOT be symlinked:
-            // - if the local project doesn't satisfy the referenced semver range; OR
+            // - if the local project doesn't satisfy the referenced semver specifier; OR
             // - if the local project was specified in "cyclicDependencyProjects" in rush.json
-            if (semver.satisfies(localProject.packageJson.version, versionRange) && !cyclicDeps.has(dependency)) {
+            if (semver.satisfies(localProject.packageJson.version, versionSpecifier)
+              && !cyclicDependencies.has(dependency)) {
               shouldAffectPreferredVersions = false;
             }
           }
         }
 
         if (shouldAffectPreferredVersions) {
-          InstallManager._updateVersionsForDependencies(versionsForDependencies, dependency, versionRange);
+          InstallManager._updateVersionsForDependencies(versionsForDependencies, dependency, versionSpecifier);
         }
       });
     }
