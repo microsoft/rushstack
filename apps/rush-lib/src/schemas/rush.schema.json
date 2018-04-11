@@ -12,7 +12,7 @@
         "npmVersion": {
           "description": "The version of the NPM tool to install.",
           "type": "string",
-          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9a-zA-Z.+\\-]+$"
         }
       }
     },
@@ -23,7 +23,7 @@
         "pnpmVersion": {
           "description": "The version of the PNPM tool to install.",
           "type": "string",
-          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9a-zA-Z.+\\-]+$"
         }
       }
     }
@@ -47,7 +47,7 @@
     "rushVersion": {
       "description": "The version of the Rush tool that will be used to build this repository.",
       "type": "string",
-      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9a-zA-Z.+\\-]+$"
     },
     "nodeSupportedVersionRange": {
       "description": "A node-semver expression (e.g. \">=1.2.3 <2.0.0\", see https://github.com/npm/node-semver) indicating which versions of Node.js can safely be used to build this repository.  If omitted, no validation is performed.",

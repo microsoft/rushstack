@@ -80,19 +80,22 @@ export default class InstallManager {
    * Returns a map of all direct dependencies that only have a single semantic version specifier
    */
   public static collectImplicitlyPreferredVersions(rushConfiguration: RushConfiguration): Map<string, string> {
-    const directDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
+    // First, collect all the direct dependencies of all local projects, and their versions:
+    // direct dependency name --> set of version specifiers
+    const versionsForDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
-      InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
-        project.cyclicDependencyProjects, project.packageJson.dependencies,
-        rushConfiguration.commonVersions.allowedAlternativeVersions);
-      InstallManager._addDependenciesToMap(rushConfiguration, directDependencies,
-        project.cyclicDependencyProjects, project.packageJson.devDependencies,
-        rushConfiguration.commonVersions.allowedAlternativeVersions);
+      InstallManager._collectVersionsForDependencies(versionsForDependencies, project.packageJson.dependencies,
+        project.cyclicDependencyProjects, rushConfiguration);
+      InstallManager._collectVersionsForDependencies(versionsForDependencies, project.packageJson.devDependencies,
+        project.cyclicDependencyProjects, rushConfiguration);
     });
 
+    // If any dependency has more than one version, then filter it out (since we don't know which version
+    // should be preferred).  What remains will be the list of preferred dependencies.
+    // dependency --> version specifier
     const implicitlyPreferred: Map<string, string> = new Map<string, string>();
-    directDependencies.forEach((versions: Set<string>, dep: string) => {
+    versionsForDependencies.forEach((versions: Set<string>, dep: string) => {
       if (versions.size === 1) {
         const version: string = versions.values().next().value;
         implicitlyPreferred.set(dep, version);
@@ -101,46 +104,56 @@ export default class InstallManager {
     return implicitlyPreferred;
   }
 
-  // tslint:disable-next-line:no-any
-  public static _keys<T>(data: Map<T, any>): Array<T> {
-    const keys: Array<T> = new Array<T>();
-
-    const iterator: Iterator<T> = data.keys();
-    let current: IteratorResult<T> = iterator.next();
-    while (!current.done) {
-      keys.push(current.value);
-      current = iterator.next();
-    }
-    return keys;
-  }
-
-  private static _addDependencyToMap(directDependencies: Map<string, Set<string>>,
+  // Helper for collectImplicitlyPreferredVersions()
+  private static _updateVersionsForDependencies(versionsForDependencies: Map<string, Set<string>>,
     dependency: string, version: string): void {
-    if (!directDependencies.has(dependency)) {
-      directDependencies.set(dependency, new Set<string>());
+    if (!versionsForDependencies.has(dependency)) {
+      versionsForDependencies.set(dependency, new Set<string>());
     }
-    directDependencies.get(dependency)!.add(version);
+    versionsForDependencies.get(dependency)!.add(version);
   }
 
-  private static _addDependenciesToMap(
-    rushConfiguration: RushConfiguration,
-    directDependencies: Map<string, Set<string>>,
-    cyclicDeps: Set<string>, deps: { [dep: string]: string } | undefined,
-    alternativeVersionsToSkip: Map<string, ReadonlyArray<string>> = new Map<string, ReadonlyArray<string>>()): void {
+  // Helper for collectImplicitlyPreferredVersions()
+  private static _collectVersionsForDependencies(versionsForDependencies: Map<string, Set<string>>,
+    dependencies: { [dep: string]: string } | undefined,
+    cyclicDependencies: Set<string>, rushConfiguration: RushConfiguration): void {
 
-    if (deps) {
-      Object.keys(deps).forEach((dependency: string) => {
-        const version: string = deps[dependency];
-        const alternatives: ReadonlyArray<string> = alternativeVersionsToSkip.get(dependency) || [];
+    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>>
+      = rushConfiguration.commonVersions.allowedAlternativeVersions;
 
-        // If the dependency is not a local project OR
-        //    the dependency is a cyclic dependency OR
-        //    we depend on a different version than the one locally OR
-        //    the dependency is not an allowed alternative version
-        if (!rushConfiguration.getProjectByName(dependency) || cyclicDeps.has(dependency) ||
-          !semver.satisfies(rushConfiguration.getProjectByName(dependency)!.packageJson.version, version) ||
-          alternatives.indexOf(version) === -1) {
-          InstallManager._addDependencyToMap(directDependencies, dependency, version);
+    if (dependencies) {
+      Object.keys(dependencies).forEach((dependency: string) => {
+        const versionSpecifier: string = dependencies[dependency];
+        const alternativesForThisDependency: ReadonlyArray<string> = allowedAlternativeVersions.get(dependency) || [];
+
+        // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
+        // that appear across the repo.  If there is only one version specifier, then that's the "preferred" one.
+        // However, there are a few cases where additional version specifiers can be safely ignored.
+        let ignoreVersion: boolean = false;
+
+        // 1. If the version specifier was listed in "allowedAlternativeVersions", then it's never a candidate.
+        //    (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
+        //    otherwise the rule would be difficult to explain.)
+        if (alternativesForThisDependency.indexOf(versionSpecifier) > 0) {
+          ignoreVersion = true;
+        } else {
+          // Is it a local project?
+          const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(dependency);
+          if (localProject) {
+            // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
+            //    never even see it.
+            // However there are two ways that a local project can NOT be symlinked:
+            // - if the local project doesn't satisfy the referenced semver specifier; OR
+            // - if the local project was specified in "cyclicDependencyProjects" in rush.json
+            if (semver.satisfies(localProject.packageJson.version, versionSpecifier)
+              && !cyclicDependencies.has(dependency)) {
+              ignoreVersion = true;
+            }
+          }
+        }
+
+        if (!ignoreVersion) {
+          InstallManager._updateVersionsForDependencies(versionsForDependencies, dependency, versionSpecifier);
         }
       });
     }
@@ -328,9 +341,9 @@ export default class InstallManager {
 
     // Add any preferred versions to the top of the commonPackageJson
     // do this in alphabetical order for simpler debugging
-    InstallManager._keys(allPreferredVersions).sort().forEach((dependency: string) => {
+    for (const dependency of Array.from(allPreferredVersions.keys()).sort()) {
       commonPackageJson.dependencies![dependency] = allPreferredVersions.get(dependency)!;
-    });
+    }
 
     // To make the common/package.json file more readable, sort alphabetically
     // according to rushProject.tempProjectName instead of packageName.

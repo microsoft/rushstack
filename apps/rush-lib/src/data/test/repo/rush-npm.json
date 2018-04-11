@@ -1,6 +1,6 @@
 {
   "npmVersion": "4.5.0",
-  "rushVersion": "2.5.0",
+  "rushVersion": "2.5.0-dev.123",
   "projectFolderMinDepth": 1,
   "projectFolderMaxDepth": 99,
   "hotfixChangeEnabled": true,
