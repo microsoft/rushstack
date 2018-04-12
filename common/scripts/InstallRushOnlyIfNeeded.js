@@ -72,7 +72,10 @@ if (!fs.existsSync(rushPath)) {
 const packageContents = {
   "dependencies": {
     [packageName]: expectedVersion
-  }
+  },
+  "description": "DON'T WARN",
+  "repository": "DON'T WARN",
+  "license": "MIT"
 };
 
 fs.writeFileSync(rushPackagePath, JSON.stringify(packageContents, undefined, 2));
