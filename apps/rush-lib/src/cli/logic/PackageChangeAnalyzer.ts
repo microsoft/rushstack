@@ -13,17 +13,11 @@ import { RushConstants } from '../../RushConstants';
 import RushConfiguration from '../../data/RushConfiguration';
 
 export class PackageChangeAnalyzer {
-  public static _instance: PackageChangeAnalyzer | undefined;
-
   // Allow this function to be overwritten during unit tests
   public static getPackageDeps: (path: string, ignoredFiles: string[]) => IPackageDeps;
 
   private _data: Map<string, IPackageDeps>;
   private _rushConfiguration: RushConfiguration;
-
-  public static reset(): void {
-    PackageChangeAnalyzer._instance = undefined;
-  }
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;

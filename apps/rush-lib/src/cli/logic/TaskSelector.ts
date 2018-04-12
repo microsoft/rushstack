@@ -7,6 +7,7 @@ import { JsonFile } from '@microsoft/node-core-library';
 
 import TaskRunner from '../taskRunner/TaskRunner';
 import ProjectTask from '../taskRunner/ProjectTask';
+import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
 
 export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
@@ -34,10 +35,12 @@ export class TaskSelector {
   private _dependentList: Map<string, Set<string>>;
   private _rushLinkJson: IRushLinkJson;
   private _options: ITaskSelectorConstructor;
+  private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
   constructor(options: ITaskSelectorConstructor) {
     this._options = options;
 
+    this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
     this._taskRunner = new TaskRunner(
       this._options.isQuietMode,
       this._options.parallelism,
@@ -164,14 +167,14 @@ export class TaskSelector {
 
   private _registerTask(project: RushConfigurationProject | undefined): void {
     if (project) {
-
       const projectTask: ProjectTask = new ProjectTask(
         project,
         this._options.rushConfiguration,
         this._options.commandToRun,
         this._options.customFlags,
         this._options.isIncrementalBuildAllowed,
-        this._options.ignoreMissingScript
+        this._options.ignoreMissingScript,
+        this._packageChangeAnalyzer
       );
 
       if (!this._taskRunner.hasTask(projectTask.name)) {

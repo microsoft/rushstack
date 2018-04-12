@@ -31,18 +31,32 @@ export default class ProjectTask implements ITaskDefinition {
     return this._rushProject.packageName;
   }
 
+  public isIncrementalBuildAllowed: boolean;
+
   private _hasWarningOrError: boolean;
+  private _rushProject: RushConfigurationProject;
+  private _rushConfiguration: RushConfiguration;
+  private _commandToRun: string;
+  private _customFlags: string[];
+  private _ignoreMissingScript: boolean;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
   constructor(
-    private _rushProject: RushConfigurationProject,
-    private _rushConfiguration: RushConfiguration,
-    private _commandToRun: string,
-    private _customFlags: string[],
-    public isIncrementalBuildAllowed: boolean,
-    private _ignoreMissingScript: boolean
+    rushProject: RushConfigurationProject,
+    rushConfiguration: RushConfiguration,
+    commandToRun: string,
+    customFlags: string[],
+    isIncrementalBuildAllowed: boolean,
+    ignoreMissingScript: boolean,
+    packageChangeAnalyzer: PackageChangeAnalyzer
   ) {
-    this._packageChangeAnalyzer = new PackageChangeAnalyzer(this._rushConfiguration);
+    this._rushProject = rushProject;
+    this._rushConfiguration = rushConfiguration;
+    this._commandToRun = commandToRun;
+    this._customFlags = customFlags;
+    this.isIncrementalBuildAllowed = isIncrementalBuildAllowed;
+    this._ignoreMissingScript = ignoreMissingScript;
+    this._packageChangeAnalyzer = packageChangeAnalyzer;
   }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
