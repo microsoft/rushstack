@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix a performance regression in the way the change analyzer is constructed.",
+      "comment": "Fix a performance regression for \"rush build\"",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
