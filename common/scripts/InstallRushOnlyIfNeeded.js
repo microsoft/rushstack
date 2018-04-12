@@ -86,9 +86,9 @@ let installedVersion = undefined;
 console.log(os.EOL + `Expected Rush version is ${expectedVersion}`);
 
 try {
-  const output = child_process.execSync(`"${npmPath}" list ${packageName} version`,
+  const spawnResult = child_process.spawnSync(npmPath, ['list', packageName, 'version'],
     { cwd: rushPath, stdio: ['pipe', 'pipe', 'pipe'] });
-  const matches = /@microsoft\/rush\@([0-9a-zA-Z.+\-]+)/.exec(output);
+  const matches = /@microsoft\/rush\@([0-9a-zA-Z.+\-]+)/.exec(spawnResult.output);
   if (matches && matches.length === 2) {
     installedVersion = matches[1];
   }
