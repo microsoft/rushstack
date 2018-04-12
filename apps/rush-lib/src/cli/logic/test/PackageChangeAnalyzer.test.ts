@@ -22,10 +22,6 @@ const HASH: string = '12345abcdef';
 // const looseFile: string = 'some/other/folder/index.ts';
 
 describe('PackageChangeAnalyzer', () => {
-  afterEach(() => {
-    PackageChangeAnalyzer.reset();
-  });
-
   it('can associate a file in a project folder with a project', () => {
     const repoHashDeps: IPackageDeps = {
       files: {

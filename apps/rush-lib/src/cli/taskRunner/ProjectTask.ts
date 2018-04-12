@@ -23,6 +23,16 @@ interface IPackageDependencies extends IPackageDeps {
   arguments: string;
 }
 
+export interface IProjectTaskOptions {
+  rushProject: RushConfigurationProject;
+  rushConfiguration: RushConfiguration;
+  commandToRun: string;
+  customFlags: string[];
+  isIncrementalBuildAllowed: boolean;
+  ignoreMissingScript: boolean;
+  packageChangeAnalyzer: PackageChangeAnalyzer;
+}
+
 /**
  * A TaskRunner task which cleans and builds a project
  */
@@ -41,22 +51,14 @@ export default class ProjectTask implements ITaskDefinition {
   private _ignoreMissingScript: boolean;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
-  constructor(
-    rushProject: RushConfigurationProject,
-    rushConfiguration: RushConfiguration,
-    commandToRun: string,
-    customFlags: string[],
-    isIncrementalBuildAllowed: boolean,
-    ignoreMissingScript: boolean,
-    packageChangeAnalyzer: PackageChangeAnalyzer
-  ) {
-    this._rushProject = rushProject;
-    this._rushConfiguration = rushConfiguration;
-    this._commandToRun = commandToRun;
-    this._customFlags = customFlags;
-    this.isIncrementalBuildAllowed = isIncrementalBuildAllowed;
-    this._ignoreMissingScript = ignoreMissingScript;
-    this._packageChangeAnalyzer = packageChangeAnalyzer;
+  constructor(options: IProjectTaskOptions) {
+    this._rushProject = options.rushProject;
+    this._rushConfiguration = options.rushConfiguration;
+    this._commandToRun = options.commandToRun;
+    this._customFlags = options.customFlags;
+    this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
+    this._ignoreMissingScript = options.ignoreMissingScript;
+    this._packageChangeAnalyzer = options.packageChangeAnalyzer;
   }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
