@@ -59,7 +59,7 @@ export interface ICommandLineStringListDefinition extends IKeyedCommandLineDefin
  *
  * @public
  */
-export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
+export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
   /**
    * A list of strings (which contain no spaces), of possible options which can be selected
    */

@@ -20,15 +20,15 @@ class CommandLineAction extends CommandLineParameterProvider {
 }
 
 // @public
+class CommandLineChoiceParameter extends CommandLineParameter<string> {
+}
+
+// @public
 class CommandLineFlagParameter extends CommandLineParameter<boolean> {
 }
 
 // @public
 class CommandLineIntegerParameter extends CommandLineParameter<number> {
-}
-
-// @public
-class CommandLineOptionParameter extends CommandLineParameter<string> {
 }
 
 // @public
@@ -48,9 +48,9 @@ class CommandLineParameterProvider {
   protected _argumentParser: argparse.ArgumentParser;
   // @internal (undocumented)
   protected _processParsedData(data: ICommandLineParserData): void;
+  protected defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
   protected defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
   protected defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
-  protected defineOptionParameter(definition: ICommandLineOptionDefinition): CommandLineOptionParameter;
   protected defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
   protected defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
   protected abstract onDefineParameters(): void;
@@ -89,17 +89,17 @@ interface ICommandLineActionOptions {
 }
 
 // @public
+interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
+  defaultValue?: string;
+  options: string[];
+}
+
+// @public
 interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
 }
 
 // @public
 interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition {
-}
-
-// @public
-interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
-  defaultValue?: string;
-  options: string[];
 }
 
 // @public

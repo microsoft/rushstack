@@ -9,7 +9,7 @@ import {
   ICommandLineStringDefinition,
   ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition,
-  ICommandLineOptionDefinition
+  ICommandLineChoiceDefinition
 } from './CommandLineDefinition';
 
 import {
@@ -20,7 +20,7 @@ import {
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineIntegerParameter,
-  CommandLineOptionParameter
+  CommandLineChoiceParameter
 } from './CommandLineParameter';
 
 /**
@@ -102,12 +102,12 @@ abstract class CommandLineParameterProvider {
 
   /**
    * Defines a command-line parameter whose value must be a string from a fixed set of
-   * allowable choice (similar to an enum).
+   * allowable choices (similar to an enum).
    *
    * @remarks
    * Example:  example-tool --log-level warn
    */
-  protected defineOptionParameter(definition: ICommandLineOptionDefinition): CommandLineOptionParameter {
+  protected defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
     if (!definition.options) {
       throw new Error(`When defining an option parameter, the options array must be defined.`);
     }
@@ -118,7 +118,7 @@ abstract class CommandLineParameterProvider {
     return this._createParameter(definition, {
       choices: definition.options,
       defaultValue: definition.defaultValue
-    }) as CommandLineOptionParameter;
+    }) as CommandLineChoiceParameter;
   }
 
   /** @internal */

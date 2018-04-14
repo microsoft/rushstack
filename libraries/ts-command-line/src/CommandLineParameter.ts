@@ -64,10 +64,10 @@ export class CommandLineParameter<T> {
 }
 
 /**
- * The data type returned by {@link CommandLineParameterProvider.defineOptionParameter}.
+ * The data type returned by {@link CommandLineParameterProvider.defineChoiceParameter}.
  * @public
  */
-export class CommandLineOptionParameter extends CommandLineParameter<string> { }
+export class CommandLineChoiceParameter extends CommandLineParameter<string> { }
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineStringParameter}.
