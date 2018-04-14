@@ -29,7 +29,7 @@ import {
  *
  * @public
  */
-abstract class CommandLineParameterProvider {
+export abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;
 
   /**
@@ -42,6 +42,8 @@ abstract class CommandLineParameterProvider {
   private _parameters: CommandLineParameter<any>[];
   private _keys: Map<string, string>;
 
+  /** @internal */
+  // Third party code should not inherit subclasses or call this constructor
   constructor() {
     this._parameters = [];
     this._keys = new Map<string, string>();
@@ -174,5 +176,3 @@ abstract class CommandLineParameterProvider {
     return result;
   }
 }
-
-export default CommandLineParameterProvider;

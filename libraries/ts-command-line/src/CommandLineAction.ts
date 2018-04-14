@@ -3,7 +3,7 @@
 
 import * as argparse from 'argparse';
 import { ICommandLineParserData } from './CommandLineParameter';
-import CommandLineParameterProvider from './CommandLineParameterProvider';
+import { CommandLineParameterProvider } from './CommandLineParameterProvider';
 
 /**
  * Options for the CommandLineAction constructor.
@@ -77,9 +77,12 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   }
 
   /**
+   * {@inheritdoc CommandLineParameterProvider.onDefineParameters}
+   */
+  protected abstract onDefineParameters(): void;
+
+  /**
    * Your subclass should implement this hook to perform the operation.
    */
   protected abstract onExecute(): Promise<void>;
 }
-
-export default CommandLineAction;

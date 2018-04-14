@@ -4,15 +4,15 @@
 import * as argparse from 'argparse';
 import * as colors from 'colors';
 
-import CommandLineAction from './CommandLineAction';
+import { CommandLineAction } from './CommandLineAction';
 import { ICommandLineParserData } from './CommandLineParameter';
-import CommandLineParameterProvider from './CommandLineParameterProvider';
+import { CommandLineParameterProvider } from './CommandLineParameterProvider';
 
 /**
  * Options for the {@link CommandLineParser} constructor.
  * @public
  */
-export interface ICommandListParserOptions {
+export interface ICommandLineParserOptions {
   /**
    * The name of your tool when invoked from the command line
    */
@@ -22,6 +22,12 @@ export interface ICommandListParserOptions {
    * General documentation that is included in the "--help" main page
    */
   toolDescription: string;
+}
+
+class CustomArgumentParser extends argparse.ArgumentParser {
+  public exit(status: number, message: string): void { // override
+    throw new Error(message);
+  }
 }
 
 /**
@@ -34,25 +40,25 @@ export interface ICommandListParserOptions {
  *
  * @public
  */
-abstract class CommandLineParser extends CommandLineParameterProvider {
+export abstract class CommandLineParser extends CommandLineParameterProvider {
   /**
    * Reports which CommandLineAction was selected on the command line.
    * @remarks
    * The value will be assigned before onExecute() is invoked.
    */
-  protected selectedAction: CommandLineAction;
+  public selectedAction: CommandLineAction;
 
   private _actionsSubParser: argparse.SubParser;
-  private _options: ICommandListParserOptions;
+  private _options: ICommandLineParserOptions;
   private _actions: CommandLineAction[];
 
-  constructor(options: ICommandListParserOptions) {
+  constructor(options: ICommandLineParserOptions) {
     super();
 
     this._options = options;
     this._actions = [];
 
-    this._argumentParser = new argparse.ArgumentParser({
+    this._argumentParser = new CustomArgumentParser({
       addHelp: true,
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
@@ -118,7 +124,7 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
         this._argumentParser.printHelp();
         return Promise.resolve();
       }
-      const data: ICommandLineParserData = this._argumentParser.parseArgs();
+      const data: ICommandLineParserData = this._argumentParser.parseArgs(args);
 
       this._processParsedData(data);
 
@@ -147,5 +153,3 @@ abstract class CommandLineParser extends CommandLineParameterProvider {
     return this.selectedAction._execute();
   }
 }
-
-export default CommandLineParser;

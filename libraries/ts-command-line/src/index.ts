@@ -8,7 +8,7 @@
  */
 
 export {
-  default as CommandLineAction,
+  CommandLineAction,
   ICommandLineActionOptions
 } from './CommandLineAction';
 
@@ -32,10 +32,18 @@ export {
 } from './CommandLineParameter';
 
 export {
-  default as CommandLineParameterProvider
+  CommandLineParameterProvider
 } from './CommandLineParameterProvider';
 
 export {
-  ICommandListParserOptions,
-  default as CommandLineParser
+  ICommandLineParserOptions,
+  CommandLineParser
 } from './CommandLineParser';
+
+export {
+  DynamicCommandLineAction
+} from './DynamicCommandLineAction';
+
+export {
+  DynamicCommandLineParser
+} from './DynamicCommandLineParser';
