@@ -16,6 +16,10 @@ export class BuildAction extends CommandLineAction {
   }
 
   protected onDefineParameters(): void { // override
+    this.defineFlagParameter({
+      parameterLongName: '--production',
+      description: 'used for production builds'
+    });
   }
 
   protected onExecute(): Promise<void> { // override
