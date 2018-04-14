@@ -50,11 +50,11 @@ class CommandLineParameterProvider {
   protected _argumentParser: argparse.ArgumentParser;
   // @internal (undocumented)
   protected _processParsedData(data: ICommandLineParserData): void;
-  protected defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
-  protected defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
-  protected defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
-  protected defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
-  protected defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
+  defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
+  defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
+  defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
+  defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
+  defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
   protected abstract onDefineParameters(): void;
 }
 

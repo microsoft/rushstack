@@ -50,19 +50,13 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * The child class should implement this hook to define its command-line parameters,
-   * e.g. by calling defineFlagParameter().
-   */
-  protected abstract onDefineParameters(): void;
-
-  /**
    * Defines a command-line switch whose boolean value is true if the switch is provided,
    * and false otherwise.
    *
    * @remarks
    * Example:  example-tool --debug
    */
-  protected defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter {
+  public defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter {
     return this._createParameter(definition, {
       action: 'storeTrue'
     }) as CommandLineFlagParameter;
@@ -74,7 +68,7 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * Example:  example-tool --message "Hello, world!"
    */
-  protected defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter {
+  public defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter {
     return this._createParameter(definition, undefined, definition.key) as CommandLineStringParameter;
   }
 
@@ -84,7 +78,7 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * Example:  example-tool --add file1.txt --add file2.txt --add file3.txt
    */
-  protected defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter {
+  public defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter {
     return this._createParameter(definition, {
       action: 'append'
     }, definition.key) as CommandLineStringListParameter;
@@ -96,7 +90,7 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * Example:  example-tool l --max-attempts 5
    */
-  protected defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
+  public defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
     return this._createParameter(definition, {
       type: 'int'
     }, definition.key) as CommandLineIntegerParameter;
@@ -109,7 +103,7 @@ export abstract class CommandLineParameterProvider {
    * @remarks
    * Example:  example-tool --log-level warn
    */
-  protected defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
+  public defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
     if (!definition.options) {
       throw new Error(`When defining an option parameter, the options array must be defined.`);
     }
@@ -122,6 +116,12 @@ export abstract class CommandLineParameterProvider {
       defaultValue: definition.defaultValue
     }) as CommandLineChoiceParameter;
   }
+
+  /**
+   * The child class should implement this hook to define its command-line parameters,
+   * e.g. by calling defineFlagParameter().
+   */
+  protected abstract onDefineParameters(): void;
 
   /** @internal */
   protected _processParsedData(data: ICommandLineParserData): void {

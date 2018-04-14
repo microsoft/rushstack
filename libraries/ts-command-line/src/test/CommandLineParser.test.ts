@@ -37,6 +37,8 @@ class TestCommandLine extends CommandLineParser {
       toolFilename: 'example',
       toolDescription: 'An example project'
     });
+
+    this.addAction(new TestAction());
   }
 
   protected onDefineParameters(): void {
@@ -48,11 +50,12 @@ describe('CommandLineParser tests', () => {
 
   it('simple case', () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
-    const action: TestAction = new TestAction();
-    commandLineParser.addAction(action);
 
     return commandLineParser.execute(['do-job', '--flag']).then(() => {
       expect(commandLineParser.selectedAction).toBeDefined();
+      expect(commandLineParser.selectedAction.options.actionVerb).toEqual('do-job');
+
+      const action: TestAction = commandLineParser.selectedAction as TestAction;
       expect(action.done).toBe(true);
     });
   });
