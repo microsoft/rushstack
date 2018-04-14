@@ -4,13 +4,14 @@
 import * as os from 'os';
 import * as colors from 'colors';
 import * as path from 'path';
+import { JsonFile } from '@microsoft/node-core-library';
 
 import { RushStackCommandLine } from './cli/RushStackCommandLine';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
   __dirname, '..', 'package.json')
 );
-const myPackageJson: { version: string } = require(myPackageJsonFilename);
+const myPackageJson: { version: string } = JsonFile.load(myPackageJsonFilename);
 
 console.log(os.EOL + colors.bold(`rush-stack ${myPackageJson.version} `
   + colors.cyan(' - http://rushstack.io') + os.EOL));

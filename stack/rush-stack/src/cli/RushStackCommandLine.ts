@@ -10,7 +10,7 @@ export class RushStackCommandLine extends CommandLineParser {
   constructor() {
     super({
       toolFilename: 'rush-stack',
-      toolDescription: 'The professional quality TypeScript build rig that\'s complete, integrated, and scalable'
+      toolDescription: ''
     });
     this._populateActions();
   }
