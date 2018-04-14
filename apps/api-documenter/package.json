@@ -19,12 +19,12 @@
     "@microsoft/node-core-library": "1.2.0",
     "@microsoft/ts-command-line": "3.1.1",
     "colors": "~1.2.1",
-    "fs-extra": "~0.26.7",
+    "fs-extra": "~5.0.0",
     "js-yaml": "~3.9.1"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "4.3.31",
-    "@types/fs-extra": "0.0.37",
+    "@types/fs-extra": "5.0.1",
     "@types/js-yaml": "3.9.1",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",
