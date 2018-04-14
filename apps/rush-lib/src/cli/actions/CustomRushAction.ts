@@ -18,7 +18,7 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
-  CommandLineOptionParameter,
+  CommandLineChoiceParameter,
   ICommandLineActionOptions
 } from '@microsoft/ts-command-line';
 
@@ -29,7 +29,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 
 interface ICustomOptionInstance {
   optionDefinition: CustomOption;
-  parameterValue?: CommandLineFlagParameter | CommandLineOptionParameter;
+  parameterValue?: CommandLineFlagParameter | CommandLineChoiceParameter;
 }
 
 export class CustomRushAction extends BaseRushAction {
@@ -174,7 +174,7 @@ export class CustomRushAction extends BaseRushAction {
           description: customOption.optionDefinition.description
         });
       } else if (customOption.optionDefinition.optionType === 'enum') {
-        customOption.parameterValue = this.defineOptionParameter({
+        customOption.parameterValue = this.defineChoiceParameter({
           parameterShortName: customOption.optionDefinition.shortName,
           parameterLongName: longName,
           description: customOption.optionDefinition.description,
