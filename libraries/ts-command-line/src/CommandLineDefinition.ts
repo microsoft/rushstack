@@ -23,35 +23,16 @@ export interface IBaseCommandLineDefinition {
   description: string;
 }
 
-export interface IKeyedCommandLineDefinition extends IBaseCommandLineDefinition {
+export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
   /**
-   * The key used to identify the value of this parameter. This must be a unique value. If it is
-   * omitted, a unique key is created. This key name appears in the help menu.
-   * For certain definitions, the key value is not surfaced in the UI.
+   * The name of the argument, which will be shown in the command-line help.
+   *
+   * @remarks
+   * Suppose the help shows "--output FILE".  Then "--output' is the parameter name,
+   * and "FILE" is the argument name.
    */
-  key?: string;
+  argumentName: string;
 }
-
-/**
- * For use with CommandLineParser, this interface represents a boolean flag command line parameter
- *
- * @public
- */
-export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
-
-/**
- * For use with CommandLineParser, this interface represents a string command line parameter
- *
- * @public
- */
-export interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition { }
-
-/**
- * For use with CommandLineParser, this interface represents a string command line parameter
- *
- * @public
- */
-export interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition { }
 
 /**
  * For use with CommandLineParser, this interface represents a parameter which is constrained to
@@ -63,7 +44,7 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
   /**
    * A list of strings (which contain no spaces), of possible options which can be selected
    */
-  options: string[];
+  alternatives: string[];
 
   /**
    * The default value which will be used if the parameter is omitted from the command line
@@ -72,8 +53,29 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
 }
 
 /**
+ * For use with CommandLineParser, this interface represents a boolean flag command line parameter
+ *
+ * @public
+ */
+export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
+
+/**
  * For use with CommandLineParser, this interface represents an integer command line parameter
  *
  * @public
  */
-export interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition { }
+export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument { }
+
+/**
+ * For use with CommandLineParser, this interface represents a string command line parameter
+ *
+ * @public
+ */
+export interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument { }
+
+/**
+ * For use with CommandLineParser, this interface represents a string command line parameter
+ *
+ * @public
+ */
+export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument { }

@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as argparse from 'argparse';
-import { ICommandLineParserData } from './CommandLineParameter';
-import { CommandLineParameterProvider } from './CommandLineParameterProvider';
+import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
 
 /**
  * Options for the CommandLineAction constructor.

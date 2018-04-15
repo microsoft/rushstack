@@ -1,4 +1,4 @@
-// @internal (undocumented)
+// @internal
 interface _ICommandLineParserData {
   // (undocumented)
   [key: string]: any;
@@ -22,24 +22,49 @@ class CommandLineAction extends CommandLineParameterProvider {
 
 // @public
 class CommandLineChoiceParameter extends CommandLineParameter<string> {
+  // @internal
+  constructor(definition: ICommandLineChoiceDefinition);
+  readonly alternatives: ReadonlyArray<string>;
+  readonly defaultValue: string | undefined;
+  readonly kind: CommandLineParameterKind;
 }
 
 // @public
 class CommandLineFlagParameter extends CommandLineParameter<boolean> {
+  // @internal
+  constructor(definition: ICommandLineFlagDefinition);
+  readonly kind: CommandLineParameterKind;
 }
 
 // @public
-class CommandLineIntegerParameter extends CommandLineParameter<number> {
+class CommandLineIntegerParameter extends CommandLineParameterWithArgument<number> {
+  // @internal
+  constructor(definition: ICommandLineIntegerDefinition);
+  readonly kind: CommandLineParameterKind;
 }
 
 // @public
 class CommandLineParameter<T> {
-  constructor(key: string, converter?: (data: string) => T);
   // @internal
-  readonly _key: string;
+  constructor(definition: IBaseCommandLineDefinition);
   // @internal
-  _setValue(data: ICommandLineParserData): void;
+  _parserKey: string;
+  // @internal
+  _setValue(data: any): void;
+  readonly description: string;
+  readonly kind: CommandLineParameterKind;
+  readonly longName: string;
+  readonly shortName: string | undefined;
   readonly value: T;
+}
+
+// @public
+enum CommandLineParameterKind {
+  Choice = 0,
+  Flag = 1,
+  Integer = 2,
+  String = 3,
+  StringList = 4
 }
 
 // @public
@@ -55,6 +80,11 @@ class CommandLineParameterProvider {
   defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
   defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
   defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
+  getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter;
+  getFlagParameter(parameterLongName: string): CommandLineFlagParameter;
+  getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter;
+  getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
+  getStringParameter(parameterLongName: string): CommandLineStringParameter;
   protected abstract onDefineParameters(): void;
 }
 
@@ -69,11 +99,17 @@ class CommandLineParser extends CommandLineParameterProvider {
 }
 
 // @public
-class CommandLineStringListParameter extends CommandLineParameter<string[]> {
+class CommandLineStringListParameter extends CommandLineParameterWithArgument<string[]> {
+  // @internal
+  constructor(definition: ICommandLineStringListDefinition);
+  readonly kind: CommandLineParameterKind;
 }
 
 // @public
-class CommandLineStringParameter extends CommandLineParameter<string> {
+class CommandLineStringParameter extends CommandLineParameterWithArgument<string> {
+  // @internal
+  constructor(definition: ICommandLineStringDefinition);
+  readonly kind: CommandLineParameterKind;
 }
 
 // @public (undocumented)
@@ -106,8 +142,8 @@ interface ICommandLineActionOptions {
 
 // @public
 interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
+  alternatives: string[];
   defaultValue?: string;
-  options: string[];
 }
 
 // @public
@@ -115,7 +151,7 @@ interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
 }
 
 // @public
-interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition {
+interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument {
 }
 
 // @public
@@ -125,10 +161,10 @@ interface ICommandLineParserOptions {
 }
 
 // @public
-interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition {
+interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument {
 }
 
 // @public
-interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition {
+interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {
 }
 

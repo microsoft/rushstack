@@ -22,7 +22,7 @@ export {
 } from './CommandLineDefinition';
 
 export {
-  ICommandLineParserData as _ICommandLineParserData,
+  CommandLineParameterKind,
   CommandLineParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
@@ -32,7 +32,8 @@ export {
 } from './CommandLineParameter';
 
 export {
-  CommandLineParameterProvider
+  CommandLineParameterProvider,
+  ICommandLineParserData as _ICommandLineParserData
 } from './CommandLineParameterProvider';
 
 export {

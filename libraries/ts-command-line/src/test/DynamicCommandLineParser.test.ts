@@ -3,6 +3,7 @@
 
 import { DynamicCommandLineParser } from '../DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../DynamicCommandLineAction';
+import { CommandLineFlagParameter } from '../CommandLineParameter';
 
 describe('DynamicCommandLineParser tests', () => {
 
@@ -27,6 +28,10 @@ describe('DynamicCommandLineParser tests', () => {
 
     return commandLineParser.execute(['do-job', '--flag']).then(() => {
       expect(commandLineParser.selectedAction).toEqual(action);
+
+      const retrievedParameter: CommandLineFlagParameter = action.getFlagParameter('--flag');
+      expect(retrievedParameter.value).toBe(true);
+
     });
   });
 });
