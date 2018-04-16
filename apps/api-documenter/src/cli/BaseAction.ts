@@ -22,7 +22,7 @@ export abstract class BaseAction extends CommandLineAction {
     this._inputFolderParameter = this.defineStringParameter({
       parameterLongName: '--input-folder',
       parameterShortName: '-i',
-      key: 'FOLDER1',
+      argumentName: 'FOLDER1',
       description: `Specifies the input folder containing the *.api.json files to be processed.`
         + ` If omitted, the default is "./input"`
     });
@@ -30,7 +30,7 @@ export abstract class BaseAction extends CommandLineAction {
     this._outputFolderParameter = this.defineStringParameter({
       parameterLongName: '--output-folder',
       parameterShortName: '-o',
-      key: 'FOLDER2',
+      argumentName: 'FOLDER2',
       description: `Specifies the output folder where the documentation will be written.`
         + ` ANY EXISTING CONTENTS WILL BE DELETED!`
         + ` If omitted, the default is "./${this.options.actionVerb}"`

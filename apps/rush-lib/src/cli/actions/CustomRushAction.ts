@@ -132,7 +132,7 @@ export class CustomRushAction extends BaseRushAction {
       this._parallelismParameter = this.defineStringParameter({
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
-        key: 'COUNT',
+        argumentName: 'COUNT',
         description: 'Specify the number of concurrent build processes'
           + ' The value "max" can be specified to indicate the number of CPU cores.'
           + ' If this parameter omitted, the default value depends on the operating system and number of CPU cores.'
@@ -141,13 +141,13 @@ export class CustomRushAction extends BaseRushAction {
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
-      key: 'PROJECT1',
+      argumentName: 'PROJECT1',
       description: 'Run command in the specified project and all of its dependencies'
     });
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
       parameterShortName: '-f',
-      key: 'PROJECT2',
+      argumentName: 'PROJECT2',
       description: 'Run command in all projects that directly or indirectly depend on the specified project'
     });
     this._verboseParameter = this.defineFlagParameter({
@@ -158,7 +158,7 @@ export class CustomRushAction extends BaseRushAction {
     if (this.options.actionVerb === 'build') {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
-        parameterShortName: '-cpo',
+        parameterShortName: '-o',
         description: 'If specified, the incremental build will only rebuild projects that have changed, '
           + 'but not any projects that directly or indirectly depend on the changed package.'
       });
@@ -179,7 +179,7 @@ export class CustomRushAction extends BaseRushAction {
           parameterLongName: longName,
           description: customOption.optionDefinition.description,
           defaultValue: customOption.optionDefinition.defaultValue,
-          options: customOption.optionDefinition.enumValues.map((enumValue: ICustomEnumValue) => {
+          alternatives: customOption.optionDefinition.enumValues.map((enumValue: ICustomEnumValue) => {
               return enumValue.name;
             })
         });

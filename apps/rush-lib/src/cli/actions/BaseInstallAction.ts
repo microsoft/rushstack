@@ -11,6 +11,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected onDefineParameters(): void {
     this._authenticationTokensParameter = this.defineStringListParameter({
       parameterLongName: '--auth-token',
+      argumentName: 'TOKEN',
       description: '(EXPERIMENTAL) List authentication tokens required to install packages. These must be in the '
         + 'format of lines of a .npmrc file. They will be appended to the .npmrc file used during package installation.'
     });

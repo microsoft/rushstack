@@ -38,7 +38,7 @@ export class RunAction extends CommandLineAction {
     this._configFileParameter = this.defineStringParameter({
       parameterLongName: '--config',
       parameterShortName: '-c',
-      key: 'FILE',
+      argumentName: 'FILE',
       description: `Use the specified ${AE_CONFIG_FILENAME} file path, rather than guessing its location`
     });
     this._localParameter = this.defineFlagParameter({
