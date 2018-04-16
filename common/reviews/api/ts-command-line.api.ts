@@ -86,12 +86,13 @@ class CommandLineParameterProvider {
   getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
   getStringParameter(parameterLongName: string): CommandLineStringParameter;
   protected abstract onDefineParameters(): void;
+  renderHelpText(): string;
 }
 
 // @public
 class CommandLineParser extends CommandLineParameterProvider {
   constructor(options: ICommandLineParserOptions);
-  addAction(command: CommandLineAction): void;
+  addAction(action: CommandLineAction): void;
   execute(args?: string[]): Promise<boolean>;
   executeWithoutErrorHandling(args?: string[]): Promise<void>;
   protected onExecute(): Promise<void>;

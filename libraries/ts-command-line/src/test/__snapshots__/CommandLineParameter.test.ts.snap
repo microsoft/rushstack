@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CommandLineParameter prints the action help 1`] = `
+"usage: example do-job [-h] [-c {one,two}] [-f] [-i NUMBER] [-s TEXT] [-l LIST]
+
+a longer description
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -c {one,two}, --choice {one,two}
+                        A choice
+  -f, --flag            A flag
+  -i NUMBER, --integer NUMBER
+                        An integer
+  -s TEXT, --string TEXT
+                        A string
+  -l LIST, --string-list LIST
+                        A string list
+"
+`;
+
+exports[`CommandLineParameter prints the global help 1`] = `
+"usage: example [-h] [-g] <command> ...
+
+An example project
+
+Positional arguments:
+  <command>
+    do-job           does the job
+
+Optional arguments:
+  -h, --help         Show this help message and exit.
+  -g, --global-flag  A flag that affects all actions
+
+For detailed help about a specific command, use: example <command> -h
+"
+`;

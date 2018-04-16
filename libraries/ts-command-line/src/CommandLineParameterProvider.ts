@@ -59,6 +59,28 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
+   * Defines a command-line parameter whose value must be a string from a fixed set of
+   * allowable choices (similar to an enum).
+   *
+   * @remarks
+   * Example:  example-tool --log-level warn
+   */
+  public defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
+    const parameter: CommandLineChoiceParameter = new CommandLineChoiceParameter(definition);
+    this._defineParameter(parameter);
+    return parameter;
+  }
+
+  /**
+   * Returns the CommandLineChoiceParameter with the specified long name.
+   * @remarks
+   * This method throws an exception if the parameter is not defined.
+   */
+  public getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter {
+    return this._getFlagParameter(parameterLongName, CommandLineParameterKind.Choice);
+  }
+
+  /**
    * Defines a command-line switch whose boolean value is true if the switch is provided,
    * and false otherwise.
    *
@@ -78,6 +100,27 @@ export abstract class CommandLineParameterProvider {
    */
   public getFlagParameter(parameterLongName: string): CommandLineFlagParameter {
     return this._getFlagParameter(parameterLongName, CommandLineParameterKind.Flag);
+  }
+
+  /**
+   * Defines a command-line parameter whose value is an integer.
+   *
+   * @remarks
+   * Example:  example-tool l --max-attempts 5
+   */
+  public defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
+    const parameter: CommandLineIntegerParameter = new CommandLineIntegerParameter(definition);
+    this._defineParameter(parameter);
+    return parameter;
+  }
+
+  /**
+   * Returns the CommandLineIntegerParameter with the specified long name.
+   * @remarks
+   * This method throws an exception if the parameter is not defined.
+   */
+  public getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter {
+    return this._getFlagParameter(parameterLongName, CommandLineParameterKind.Integer);
   }
 
   /**
@@ -123,46 +166,10 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
-   * Defines a command-line parameter whose value is an integer.
-   *
-   * @remarks
-   * Example:  example-tool l --max-attempts 5
+   * Generates the command-line help text.
    */
-  public defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
-    const parameter: CommandLineIntegerParameter = new CommandLineIntegerParameter(definition);
-    this._defineParameter(parameter);
-    return parameter;
-  }
-
-  /**
-   * Returns the CommandLineIntegerParameter with the specified long name.
-   * @remarks
-   * This method throws an exception if the parameter is not defined.
-   */
-  public getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter {
-    return this._getFlagParameter(parameterLongName, CommandLineParameterKind.Integer);
-  }
-
-  /**
-   * Defines a command-line parameter whose value must be a string from a fixed set of
-   * allowable choices (similar to an enum).
-   *
-   * @remarks
-   * Example:  example-tool --log-level warn
-   */
-  public defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
-    const parameter: CommandLineChoiceParameter = new CommandLineChoiceParameter(definition);
-    this._defineParameter(parameter);
-    return parameter;
-  }
-
-  /**
-   * Returns the CommandLineChoiceParameter with the specified long name.
-   * @remarks
-   * This method throws an exception if the parameter is not defined.
-   */
-  public getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter {
-    return this._getFlagParameter(parameterLongName, CommandLineParameterKind.Choice);
+  public renderHelpText(): string {
+    return this._argumentParser.formatHelp();
   }
 
   /**
@@ -222,11 +229,11 @@ export abstract class CommandLineParameterProvider {
       case CommandLineParameterKind.Flag:
         argparseOptions.action = 'storeTrue';
         break;
-      case CommandLineParameterKind.StringList:
-        argparseOptions.action = 'append';
-        break;
       case CommandLineParameterKind.Integer:
         argparseOptions.type = 'int';
+        break;
+      case CommandLineParameterKind.StringList:
+        argparseOptions.action = 'append';
         break;
     }
 

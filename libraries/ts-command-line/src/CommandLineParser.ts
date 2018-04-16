@@ -76,9 +76,9 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   /**
    * Defines a new action that can be used with the CommandLineParser instance.
    */
-  public addAction(command: CommandLineAction): void {
-    command._buildParser(this._actionsSubParser);
-    this._actions.push(command);
+  public addAction(action: CommandLineAction): void {
+    action._buildParser(this._actionsSubParser);
+    this._actions.push(action);
   }
 
   /**

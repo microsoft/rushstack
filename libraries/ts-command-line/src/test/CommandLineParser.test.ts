@@ -46,9 +46,9 @@ class TestCommandLine extends CommandLineParser {
   }
 }
 
-describe('CommandLineParser tests', () => {
+describe('CommandLineParser', () => {
 
-  it('simple case', () => {
+  it('executes an action', () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 
     return commandLineParser.execute(['do-job', '--flag']).then(() => {

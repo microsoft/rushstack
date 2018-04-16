@@ -33,6 +33,9 @@ export enum CommandLineParameterKind {
  * @public
  */
 export abstract class CommandLineParameter<T> {
+  private static _longNameRegExp: RegExp = /^-(-[a-z0-9]+)+$/;
+  private static _shortNameRegExp: RegExp = /^-[a-zA-Z0-9]$/;
+
   /**
    * A unique internal key used to retrieve the value from the parser's dictionary.
    * @internal
@@ -52,7 +55,18 @@ export abstract class CommandLineParameter<T> {
 
   /** @internal */
   constructor(definition: IBaseCommandLineDefinition) {
+    if (!CommandLineParameter._longNameRegExp.test(definition.parameterLongName)) {
+      throw new Error(`Invalid name: "${definition.parameterLongName}". The parameter long name must be`
+        + ` lower-case and use dash delimiters (e.g. "--do-a-thing")`);
+    }
     this.longName = definition.parameterLongName;
+
+    if (definition.parameterShortName) {
+      if (!CommandLineParameter._shortNameRegExp.test(definition.parameterShortName)) {
+        throw new Error(`Invalid name: "${definition.parameterShortName}". The parameter short name must be`
+          + ` a dash followed by a single letter (e.g. "-a")`);
+      }
+    }
     this.shortName = definition.parameterShortName;
     this.description = definition.description;
   }
@@ -83,12 +97,27 @@ export abstract class CommandLineParameter<T> {
 }
 
 export abstract class CommandLineParameterWithArgument<T> extends CommandLineParameter<T> {
+  private static _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
+
   /** {@inheritdoc IBaseCommandLineDefinitionWithArgument.argumentName} */
-  public readonly argumentName: string;
+  public readonly argumentName: string | undefined;
 
   /** @internal */
   constructor(definition: IBaseCommandLineDefinitionWithArgument) {
     super(definition);
+
+    if (definition.argumentName === '') {
+      throw new Error('The argument name cannot be an empty string. (For the default name, specify undefined.)');
+    }
+    if (definition.argumentName.toUpperCase() !== definition.argumentName) {
+      throw new Error(`Invalid name: "${definition.argumentName}". The argument name must be all upper case.`);
+    }
+    const match: RegExpMatchArray | null = definition.argumentName.match(
+      CommandLineParameterWithArgument._invalidArgumentNameRegExp);
+    if (match) {
+      throw new Error(`The argument name "${definition.argumentName}" contains an invalid character "${match[0]}".`
+        + ` Only upper-case letters, numbers, and underscores are allowed.`);
+    }
     this.argumentName = definition.argumentName;
   }
 }

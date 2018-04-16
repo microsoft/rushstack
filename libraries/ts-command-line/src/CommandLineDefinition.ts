@@ -28,8 +28,9 @@ export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLine
    * The name of the argument, which will be shown in the command-line help.
    *
    * @remarks
-   * Suppose the help shows "--output FILE".  Then "--output' is the parameter name,
-   * and "FILE" is the argument name.
+   * For example, if the parameter name is '--count" and the argument name is "NUMBER",
+   * then the command-line help would display "--count NUMBER".  The argument name must
+   * be comprised of upper-case letters, numbers, and underscores.  It should be kept short.
    */
   argumentName: string;
 }

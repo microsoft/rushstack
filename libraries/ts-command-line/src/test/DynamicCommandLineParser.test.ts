@@ -5,9 +5,9 @@ import { DynamicCommandLineParser } from '../DynamicCommandLineParser';
 import { DynamicCommandLineAction } from '../DynamicCommandLineAction';
 import { CommandLineFlagParameter } from '../CommandLineParameter';
 
-describe('DynamicCommandLineParser tests', () => {
+describe('DynamicCommandLineParser', () => {
 
-  it('simple case', () => {
+  it('parses an action', () => {
     const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser(
       {
         toolFilename: 'example',
@@ -31,7 +31,6 @@ describe('DynamicCommandLineParser tests', () => {
 
       const retrievedParameter: CommandLineFlagParameter = action.getFlagParameter('--flag');
       expect(retrievedParameter.value).toBe(true);
-
     });
   });
 });
