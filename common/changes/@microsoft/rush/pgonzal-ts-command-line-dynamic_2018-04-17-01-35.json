@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Eliminate extra letters from shortened command line options (renamed \"-cpo\" to \"-o\", and removed \"-vp\" and \"-pn\")",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
