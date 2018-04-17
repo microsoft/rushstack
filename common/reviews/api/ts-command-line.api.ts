@@ -52,7 +52,7 @@ class CommandLineParameter<T> {
   // @internal
   _parserKey: string;
   // @internal
-  _setValue(data: any): void;
+  _setValue(data: T): void;
   readonly description: string;
   readonly kind: CommandLineParameterKind;
   readonly longName: string;
@@ -88,6 +88,7 @@ class CommandLineParameterProvider {
   getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
   getStringParameter(parameterLongName: string): CommandLineStringParameter;
   protected abstract onDefineParameters(): void;
+  readonly parameters: ReadonlyArray<CommandLineParameter<any>>;
   renderHelpText(): string;
 }
 
@@ -95,7 +96,7 @@ class CommandLineParameterProvider {
 class CommandLineParameterWithArgument<T> extends CommandLineParameter<T> {
   // @internal
   constructor(definition: IBaseCommandLineDefinitionWithArgument);
-  readonly argumentName: string | undefined;
+  readonly argumentName: string;
 }
 
 // @public

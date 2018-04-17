@@ -53,6 +53,13 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
+   * Returns a collection of the parameters that were defined for this object.
+   */
+  public get parameters(): ReadonlyArray<CommandLineParameter<any>> {
+    return this._parameters;
+  }
+
+  /**
    * Defines a command-line parameter whose value must be a string from a fixed set of
    * allowable choices (similar to an enum).
    *
@@ -71,7 +78,7 @@ export abstract class CommandLineParameterProvider {
    * This method throws an exception if the parameter is not defined.
    */
   public getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter {
-    return this._getFlagParameter(parameterLongName, CommandLineParameterKind.Choice);
+    return this._getParameter(parameterLongName, CommandLineParameterKind.Choice);
   }
 
   /**
@@ -93,7 +100,7 @@ export abstract class CommandLineParameterProvider {
    * This method throws an exception if the parameter is not defined.
    */
   public getFlagParameter(parameterLongName: string): CommandLineFlagParameter {
-    return this._getFlagParameter(parameterLongName, CommandLineParameterKind.Flag);
+    return this._getParameter(parameterLongName, CommandLineParameterKind.Flag);
   }
 
   /**
@@ -114,7 +121,7 @@ export abstract class CommandLineParameterProvider {
    * This method throws an exception if the parameter is not defined.
    */
   public getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter {
-    return this._getFlagParameter(parameterLongName, CommandLineParameterKind.Integer);
+    return this._getParameter(parameterLongName, CommandLineParameterKind.Integer);
   }
 
   /**
@@ -135,7 +142,7 @@ export abstract class CommandLineParameterProvider {
    * This method throws an exception if the parameter is not defined.
    */
   public getStringParameter(parameterLongName: string): CommandLineStringParameter {
-    return this._getFlagParameter(parameterLongName, CommandLineParameterKind.String);
+    return this._getParameter(parameterLongName, CommandLineParameterKind.String);
   }
 
   /**
@@ -156,7 +163,7 @@ export abstract class CommandLineParameterProvider {
    * This method throws an exception if the parameter is not defined.
    */
   public getStringListParameter(parameterLongName: string): CommandLineStringListParameter {
-    return this._getFlagParameter(parameterLongName, CommandLineParameterKind.StringList);
+    return this._getParameter(parameterLongName, CommandLineParameterKind.StringList);
   }
 
   /**
@@ -191,7 +198,7 @@ export abstract class CommandLineParameterProvider {
     return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
   }
 
-  private _getFlagParameter<T extends CommandLineParameter<any>>(parameterLongName: string,
+  private _getParameter<T extends CommandLineParameter<any>>(parameterLongName: string,
     expectedKind: CommandLineParameterKind): T {
 
     const parameter: CommandLineParameter<any> | undefined = this._parametersByLongName.get(parameterLongName);

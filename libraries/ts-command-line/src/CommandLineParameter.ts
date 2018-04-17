@@ -33,8 +33,10 @@ export enum CommandLineParameterKind {
  * @public
  */
 export abstract class CommandLineParameter<T> {
+  // Example: "--do-something"
   private static _longNameRegExp: RegExp = /^-(-[a-z0-9]+)+$/;
-  private static _shortNameRegExp: RegExp = /^-[a-zA-Z0-9]$/;
+  // Example: "-d"
+  private static _shortNameRegExp: RegExp = /^-[a-zA-Z]$/;
 
   /**
    * A unique internal key used to retrieve the value from the parser's dictionary.
@@ -64,7 +66,7 @@ export abstract class CommandLineParameter<T> {
     if (definition.parameterShortName) {
       if (!CommandLineParameter._shortNameRegExp.test(definition.parameterShortName)) {
         throw new Error(`Invalid name: "${definition.parameterShortName}". The parameter short name must be`
-          + ` a dash followed by a single letter (e.g. "-a")`);
+          + ` a dash followed by a single upper-case or lower-case letter (e.g. "-a")`);
       }
     }
     this.shortName = definition.parameterShortName;
@@ -75,7 +77,7 @@ export abstract class CommandLineParameter<T> {
    * Called internally by CommandLineParameterProvider._processParsedData()
    * @internal
    */
-  public _setValue(data: any): void { // tslint:disable-line:no-any
+  public _setValue(data: T): void { // tslint:disable-line:no-any
     this._value = data;
   }
 
@@ -105,10 +107,11 @@ export abstract class CommandLineParameter<T> {
  * @public
  */
 export abstract class CommandLineParameterWithArgument<T> extends CommandLineParameter<T> {
+  // Matches the first character that *isn't* part of a valid upper-case argument name such as "URL_2"
   private static _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
 
   /** {@inheritdoc IBaseCommandLineDefinitionWithArgument.argumentName} */
-  public readonly argumentName: string | undefined;
+  public readonly argumentName: string;
 
   /** @internal */
   constructor(definition: IBaseCommandLineDefinitionWithArgument) {

@@ -62,28 +62,32 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
 }
 
 /**
- * For use with CommandLineParser, this interface represents a boolean flag command line parameter
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * that is a boolean flag.
  *
  * @public
  */
 export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
 
 /**
- * For use with CommandLineParser, this interface represents an integer command line parameter
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * whose argument is an integer value.
  *
  * @public
  */
 export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument { }
 
 /**
- * For use with CommandLineParser, this interface represents a string command line parameter
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * whose argument is a string value.
  *
  * @public
  */
 export interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument { }
 
 /**
- * For use with CommandLineParser, this interface represents a string command line parameter
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * whose argument is a list of strings.
  *
  * @public
  */
