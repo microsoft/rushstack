@@ -244,7 +244,7 @@ export default class InstallManager {
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    */
-  public createTempModules(forceCreate: boolean, authTokens: string[]): void {
+  public createTempModules(forceCreate: boolean, authTokens: ReadonlyArray<string>): void {
     this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate, authTokens);
   }
 
@@ -257,7 +257,7 @@ export default class InstallManager {
   public createTempModulesAndCheckShrinkwrap(
     shrinkwrapFile: BaseShrinkwrapFile | undefined,
     forceCreate: boolean,
-    authTokens: string[]
+    authTokens: ReadonlyArray<string>
   ): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -316,7 +316,7 @@ export default class InstallManager {
     this.syncFile(committedNpmrcPath, tempNpmrcPath);
 
     if (fsx.existsSync(tempNpmrcPath)) {
-      fsx.appendFileSync(tempNpmrcPath, [''].concat(authTokens).join(os.EOL));
+      fsx.appendFileSync(tempNpmrcPath, [''].concat(authTokens as string[]).join(os.EOL));
     }
 
     // also, copy the pnpmfile.js if it exists

@@ -32,7 +32,7 @@ export enum CommandLineParameterKind {
  * The base class for the various command-line parameter types.
  * @public
  */
-export abstract class CommandLineParameter<T> {
+export abstract class CommandLineParameter {
   // Example: "--do-something"
   private static _longNameRegExp: RegExp = /^-(-[a-z0-9]+)+$/;
   // Example: "-d"
@@ -52,8 +52,6 @@ export abstract class CommandLineParameter<T> {
 
   /** {@inheritdoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
-
-  private _value: T;
 
   /** @internal */
   constructor(definition: IBaseCommandLineDefinition) {
@@ -77,25 +75,20 @@ export abstract class CommandLineParameter<T> {
    * Called internally by CommandLineParameterProvider._processParsedData()
    * @internal
    */
-  public _setValue(data: T): void { // tslint:disable-line:no-any
-    this._value = data;
-  }
-
-  /**
-   * After the command line has been parsed, this returns the value of the parameter.
-   * @remarks
-   * For example, for a CommandLineFlagParameter it will be a boolean indicating
-   * whether the switch was provided.  For a CommandLineStringListParameter it will
-   * be an array of strings.
-   */
-  public get value(): T {
-    return this._value;
-  }
+  public abstract _setValue(data: any): void; // tslint:disable-line:no-any
 
   /**
    * Indicates the type of parameter.
    */
   public abstract get kind(): CommandLineParameterKind;
+
+  /**
+   * Internal usage only.  Used to report unexpected output from the argparse library.
+   */
+  protected reportInvalidData(data: any): never { // tslint:disable-line:no-any
+    throw new Error(`Unexpected data object for parameter "${this.longName}": `
+      + JSON.stringify(data));
+  }
 }
 
 /**
@@ -106,7 +99,7 @@ export abstract class CommandLineParameter<T> {
  * example "--max-count 123".
  * @public
  */
-export abstract class CommandLineParameterWithArgument<T> extends CommandLineParameter<T> {
+export abstract class CommandLineParameterWithArgument extends CommandLineParameter {
   // Matches the first character that *isn't* part of a valid upper-case argument name such as "URL_2"
   private static _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
 
@@ -137,12 +130,14 @@ export abstract class CommandLineParameterWithArgument<T> extends CommandLinePar
  * The data type returned by {@link CommandLineParameterProvider.defineChoiceParameter}.
  * @public
  */
-export class CommandLineChoiceParameter extends CommandLineParameter<string> {
+export class CommandLineChoiceParameter extends CommandLineParameter {
   /** {@inheritdoc ICommandLineChoiceDefinition.alternatives} */
   public readonly alternatives: ReadonlyArray<string>;
 
   /** {@inheritdoc ICommandLineChoiceDefinition.defaultValue} */
   public readonly defaultValue: string | undefined;
+
+  private _value: string | undefined = undefined;
 
   /** @internal */
   constructor(definition: ICommandLineChoiceDefinition) {
@@ -164,13 +159,41 @@ export class CommandLineChoiceParameter extends CommandLineParameter<string> {
   public get kind(): CommandLineParameterKind {
     return CommandLineParameterKind.Choice;
   }
+
+  /**
+   * {@inheritdoc CommandLineParameter._setValue}
+   * @internal
+   */
+  // tslint:disable-next-line:no-any
+  public _setValue(data: any): void { // abstract
+    if (data === null) {
+      data = undefined;
+    }
+    if (data !== undefined && typeof data !== 'string') {
+      this.reportInvalidData(data);
+    }
+    this._value = data;
+  }
+
+  /**
+   * Returns the argument value for a choice parameter that was parsed from the command line.
+   *
+   * @remarks
+   * The return value will be `undefined` if the command-line has not been parsed yet,
+   * or if the parameter was omitted and has no default value.
+   */
+  public get value(): string | undefined {
+    return this._value;
+  }
 }
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineFlagParameter}.
  * @public
  */
-export class CommandLineFlagParameter extends CommandLineParameter<boolean> {
+export class CommandLineFlagParameter extends CommandLineParameter {
+  private _value: boolean = false;
+
   /** @internal */
   constructor(definition: ICommandLineFlagDefinition) {
     super(definition);
@@ -180,13 +203,41 @@ export class CommandLineFlagParameter extends CommandLineParameter<boolean> {
   public get kind(): CommandLineParameterKind {
     return CommandLineParameterKind.Flag;
   }
+
+  /**
+   * {@inheritdoc CommandLineParameter._setValue}
+   * @internal
+   */
+  // tslint:disable-next-line:no-any
+  public _setValue(data: any): void { // abstract
+    if (data === null) {
+      data = undefined;
+    }
+    if (data !== undefined && typeof data !== 'boolean') {
+      this.reportInvalidData(data);
+    }
+    this._value = !!data;
+  }
+
+  /**
+   * Returns a boolean indicating whether the parameter was included in the command line.
+   *
+   * @remarks
+   * The return value will be false if the command-line has not been parsed yet,
+   * or if the flag was not used.
+   */
+  public get value(): boolean {
+    return this._value;
+  }
 }
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineIntegerParameter}.
  * @public
  */
-export class CommandLineIntegerParameter extends CommandLineParameterWithArgument<number> {
+export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
+  private _value: number | undefined = undefined;
+
   /** @internal */
   constructor(definition: ICommandLineIntegerDefinition) {
     super(definition);
@@ -196,13 +247,41 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
   public get kind(): CommandLineParameterKind {
     return CommandLineParameterKind.Integer;
   }
+
+  /**
+   * {@inheritdoc CommandLineParameter._setValue}
+   * @internal
+   */
+  // tslint:disable-next-line:no-any
+  public _setValue(data: any): void { // abstract
+    if (data === null) {
+      data = undefined;
+    }
+    if (data !== undefined && typeof data !== 'number') {
+      this.reportInvalidData(data);
+    }
+    this._value = data;
+  }
+
+  /**
+   * Returns the argument value for an integer parameter that was parsed from the command line.
+   *
+   * @remarks
+   * The return value will be undefined if the command-line has not been parsed yet,
+   * or if the parameter was omitted and has no default value.
+   */
+  public get value(): number | undefined {
+    return this._value;
+  }
 }
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineStringParameter}.
  * @public
  */
-export class CommandLineStringParameter extends CommandLineParameterWithArgument<string> {
+export class CommandLineStringParameter extends CommandLineParameterWithArgument {
+  private _value: string | undefined = undefined;
+
   /** @internal */
   constructor(definition: ICommandLineStringDefinition) {
     super(definition);
@@ -212,13 +291,41 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
   public get kind(): CommandLineParameterKind {
     return CommandLineParameterKind.String;
   }
+
+  /**
+   * {@inheritdoc CommandLineParameter._setValue}
+   * @internal
+   */
+  // tslint:disable-next-line:no-any
+  public _setValue(data: any): void { // abstract
+    if (data === null) {
+      data = undefined;
+    }
+    if (data !== undefined && typeof data !== 'string') {
+      this.reportInvalidData(data);
+    }
+    this._value = data;
+  }
+
+  /**
+   * Returns the argument value for a string parameter that was parsed from the command line.
+   *
+   * @remarks
+   * The return value will be undefined if the command-line has not been parsed yet,
+   * or if the parameter was omitted and has no default value.
+   */
+  public get value(): string | undefined {
+    return this._value;
+  }
 }
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineStringListParameter}.
  * @public
  */
-export class CommandLineStringListParameter extends CommandLineParameterWithArgument<string[]> {
+export class CommandLineStringListParameter extends CommandLineParameterWithArgument {
+  private _values: string[] = [];
+
   /** @internal */
   constructor(definition: ICommandLineStringListDefinition) {
     super(definition);
@@ -227,5 +334,41 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
   /** {@inheritdoc CommandLineParameter.kind} */
   public get kind(): CommandLineParameterKind {
     return CommandLineParameterKind.StringList;
+  }
+
+  /**
+   * {@inheritdoc CommandLineParameter._setValue}
+   * @internal
+   */
+  // tslint:disable-next-line:no-any
+  public _setValue(data: any): void { // abstract
+    if (data === null) {
+      data = undefined;
+    }
+
+    if (data !== undefined) {
+      if (!Array.isArray(data)) {
+        this.reportInvalidData(data);
+      }
+
+      for (const arrayItem of data) {
+        if (typeof(arrayItem) !== 'string') {
+          this.reportInvalidData(data);
+        }
+      }
+    }
+
+    this._values = data || [];
+  }
+
+  /**
+   * Returns the string arguments for a string list parameter that was parsed from the command line.
+   *
+   * @remarks
+   * The array will be empty if the command-line has not been parsed yet,
+   * or if the parameter was omitted and has no default value.
+   */
+  public get values(): ReadonlyArray<string> {
+    return this._values;
   }
 }

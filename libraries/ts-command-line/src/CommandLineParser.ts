@@ -51,12 +51,15 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   private _actionsSubParser: argparse.SubParser;
   private _options: ICommandLineParserOptions;
   private _actions: CommandLineAction[];
+  private _actionsByName: Map<string, CommandLineAction>;
+  private _executed: boolean = false;
 
   constructor(options: ICommandLineParserOptions) {
     super();
 
     this._options = options;
     this._actions = [];
+    this._actionsByName = new  Map<string, CommandLineAction>();
 
     this._argumentParser = new CustomArgumentParser({
       addHelp: true,
@@ -75,11 +78,31 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   }
 
   /**
+   * Returns the list of actions that were defined for this CommandLineParser object.
+   */
+  public get actions(): ReadonlyArray<CommandLineAction> {
+    return this._actions;
+  }
+
+  /**
    * Defines a new action that can be used with the CommandLineParser instance.
    */
   public addAction(action: CommandLineAction): void {
     action._buildParser(this._actionsSubParser);
     this._actions.push(action);
+    this._actionsByName.set(action.options.actionVerb, action);
+  }
+
+  /**
+   * Retrieves the action with the specified name.  If no matching action is found,
+   * an exception is thrown.
+   */
+  public getAction(actionVerb: string): CommandLineAction {
+    const action: CommandLineAction | undefined = this._actionsByName.get(actionVerb);
+    if (!action) {
+      throw new Error(`The action "${actionVerb}" was not defined`);
+    }
+    return action;
   }
 
   /**
@@ -116,6 +139,13 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    */
   public executeWithoutErrorHandling(args?: string[]): Promise<void> {
     try {
+      if (this._executed) {
+        // In the future we could allow the same parser to be invoked multiple times
+        // with different arguments.  We'll do that work as soon as someone encounters
+        // a real world need for it.
+        throw new Error('execute() was already called for this parser instance');
+      }
+      this._executed = true;
       if (!args) {
         // 0=node.exe, 1=script name
         args = process.argv.slice(2);

@@ -101,8 +101,8 @@ export class CustomRushAction extends BaseRushAction {
     const tasks: TaskSelector = new TaskSelector(
       {
         rushConfiguration: this.parser.rushConfiguration,
-        toFlags: this._toFlag.value,
-        fromFlags: this._fromFlag.value,
+        toFlags: this._toFlag.values,
+        fromFlags: this._fromFlag.values,
         commandToRun: this.options.actionVerb,
         customFlags,
         isQuietMode,
@@ -214,14 +214,14 @@ export class CustomRushAction extends BaseRushAction {
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
     const extraData: { [key: string]: string } = {
-      command_to: (!!this._toFlag.value).toString(),
-      command_from: (!!this._fromFlag.value).toString()
+      command_to: (!!this._toFlag.values).toString(),
+      command_from: (!!this._fromFlag.values).toString()
     };
 
     this.customOptions.forEach((customOption: ICustomOptionInstance, longName: string) => {
       if (customOption.parameterValue!.value) {
         extraData[`${this.options.actionVerb}_${longName}`] =
-          customOption.parameterValue!.value.toString();
+          customOption.parameterValue!.value!.toString();
       }
     });
 

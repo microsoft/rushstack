@@ -23,41 +23,50 @@ class CommandLineAction extends CommandLineParameterProvider {
 }
 
 // @public
-class CommandLineChoiceParameter extends CommandLineParameter<string> {
+class CommandLineChoiceParameter extends CommandLineParameter {
   // @internal
   constructor(definition: ICommandLineChoiceDefinition);
+  // @internal
+  _setValue(data: any): void;
   readonly alternatives: ReadonlyArray<string>;
   readonly defaultValue: string | undefined;
   readonly kind: CommandLineParameterKind;
+  readonly value: string | undefined;
 }
 
 // @public
-class CommandLineFlagParameter extends CommandLineParameter<boolean> {
+class CommandLineFlagParameter extends CommandLineParameter {
   // @internal
   constructor(definition: ICommandLineFlagDefinition);
+  // @internal
+  _setValue(data: any): void;
   readonly kind: CommandLineParameterKind;
+  readonly value: boolean;
 }
 
 // @public
-class CommandLineIntegerParameter extends CommandLineParameterWithArgument<number> {
+class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
   // @internal
   constructor(definition: ICommandLineIntegerDefinition);
+  // @internal
+  _setValue(data: any): void;
   readonly kind: CommandLineParameterKind;
+  readonly value: number | undefined;
 }
 
 // @public
-class CommandLineParameter<T> {
+class CommandLineParameter {
   // @internal
   constructor(definition: IBaseCommandLineDefinition);
   // @internal
   _parserKey: string;
   // @internal
-  _setValue(data: T): void;
+  abstract _setValue(data: any): void;
   readonly description: string;
   readonly kind: CommandLineParameterKind;
   readonly longName: string;
+  protected reportInvalidData(data: any): never;
   readonly shortName: string | undefined;
-  readonly value: T;
 }
 
 // @public
@@ -88,12 +97,12 @@ class CommandLineParameterProvider {
   getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
   getStringParameter(parameterLongName: string): CommandLineStringParameter;
   protected abstract onDefineParameters(): void;
-  readonly parameters: ReadonlyArray<CommandLineParameter<any>>;
+  readonly parameters: ReadonlyArray<CommandLineParameter>;
   renderHelpText(): string;
 }
 
 // @public
-class CommandLineParameterWithArgument<T> extends CommandLineParameter<T> {
+class CommandLineParameterWithArgument extends CommandLineParameter {
   // @internal
   constructor(definition: IBaseCommandLineDefinitionWithArgument);
   readonly argumentName: string;
@@ -104,25 +113,33 @@ class CommandLineParser extends CommandLineParameterProvider {
   constructor(options: ICommandLineParserOptions);
   // @internal
   protected _getArgumentParser(): argparse.ArgumentParser;
+  readonly actions: ReadonlyArray<CommandLineAction>;
   addAction(action: CommandLineAction): void;
   execute(args?: string[]): Promise<boolean>;
   executeWithoutErrorHandling(args?: string[]): Promise<void>;
+  getAction(actionVerb: string): CommandLineAction;
   protected onExecute(): Promise<void>;
   selectedAction: CommandLineAction | undefined;
 }
 
 // @public
-class CommandLineStringListParameter extends CommandLineParameterWithArgument<string[]> {
+class CommandLineStringListParameter extends CommandLineParameterWithArgument {
   // @internal
   constructor(definition: ICommandLineStringListDefinition);
+  // @internal
+  _setValue(data: any): void;
   readonly kind: CommandLineParameterKind;
+  readonly values: ReadonlyArray<string>;
 }
 
 // @public
-class CommandLineStringParameter extends CommandLineParameterWithArgument<string> {
+class CommandLineStringParameter extends CommandLineParameterWithArgument {
   // @internal
   constructor(definition: ICommandLineStringDefinition);
+  // @internal
+  _setValue(data: any): void;
   readonly kind: CommandLineParameterKind;
+  readonly value: string | undefined;
 }
 
 // @public (undocumented)

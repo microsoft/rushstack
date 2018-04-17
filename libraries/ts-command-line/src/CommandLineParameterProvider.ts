@@ -21,16 +21,13 @@ import {
   CommandLineParameterKind
 } from './CommandLineParameter';
 
-// (This source file uses "any" in many places for abstract parameter values)
-// tslint:disable:no-any
-
 /**
  * This is the argparse result data object
  * @internal
  */
 export interface ICommandLineParserData {
   action: string;
-  [key: string]: any;
+  [key: string]: any; // tslint:disable-line:no-any
 }
 
 /**
@@ -42,20 +39,20 @@ export interface ICommandLineParserData {
 export abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;
 
-  private _parameters: CommandLineParameter<any>[];
-  private _parametersByLongName: Map<string, CommandLineParameter<any>>;
+  private _parameters: CommandLineParameter[];
+  private _parametersByLongName: Map<string, CommandLineParameter>;
 
   /** @internal */
   // Third party code should not inherit subclasses or call this constructor
   constructor() {
     this._parameters = [];
-    this._parametersByLongName = new Map<string, CommandLineParameter<any>>();
+    this._parametersByLongName = new Map<string, CommandLineParameter>();
   }
 
   /**
    * Returns a collection of the parameters that were defined for this object.
    */
-  public get parameters(): ReadonlyArray<CommandLineParameter<any>> {
+  public get parameters(): ReadonlyArray<CommandLineParameter> {
     return this._parameters;
   }
 
@@ -189,7 +186,7 @@ export abstract class CommandLineParameterProvider {
   protected _processParsedData(data: ICommandLineParserData): void {
     // Fill in the values for the parameters
     for (const parameter of this._parameters) {
-      const value: any = data[parameter._parserKey];
+      const value: any = data[parameter._parserKey]; // tslint:disable-line:no-any
       parameter._setValue(value);
     }
   }
@@ -198,10 +195,10 @@ export abstract class CommandLineParameterProvider {
     return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
   }
 
-  private _getParameter<T extends CommandLineParameter<any>>(parameterLongName: string,
+  private _getParameter<T extends CommandLineParameter>(parameterLongName: string,
     expectedKind: CommandLineParameterKind): T {
 
-    const parameter: CommandLineParameter<any> | undefined = this._parametersByLongName.get(parameterLongName);
+    const parameter: CommandLineParameter | undefined = this._parametersByLongName.get(parameterLongName);
     if (!parameter) {
       throw new Error(`The parameter "${parameterLongName}" is not defined`);
     }
@@ -212,7 +209,7 @@ export abstract class CommandLineParameterProvider {
     return parameter as T;
   }
 
-  private _defineParameter(parameter: CommandLineParameter<any>): void {
+  private _defineParameter(parameter: CommandLineParameter): void {
     const names: string[] = [];
     if (parameter.shortName) {
       names.push(parameter.shortName);
@@ -224,7 +221,7 @@ export abstract class CommandLineParameterProvider {
     const argparseOptions: argparse.ArgumentOptions = {
       help: parameter.description,
       dest: parameter._parserKey,
-      metavar: (parameter as CommandLineParameterWithArgument<any>).argumentName || undefined
+      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined
     };
 
     switch (parameter.kind) {

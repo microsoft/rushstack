@@ -4,13 +4,13 @@
 import PublishUtilities from './PublishUtilities';
 
 export class Git {
-  private _targetBranch: string;
+  private _targetBranch: string | undefined;
 
-  constructor(targetBranch: string) {
+  constructor(targetBranch: string | undefined) {
     this._targetBranch = targetBranch;
   }
 
-  public checkout(branchName: string, createBranch?: boolean): void {
+  public checkout(branchName: string | undefined, createBranch?: boolean): void {
     const params: string = `checkout ${createBranch ? '-b ' : ''}${branchName}`;
 
     PublishUtilities.execCommand(!!this._targetBranch, 'git', params.split(' '));
@@ -51,7 +51,7 @@ export class Git {
     PublishUtilities.execCommand(!!this._targetBranch, 'git', ['commit', '-m', commitMessage]);
   }
 
-  public push(branchName: string): void {
+  public push(branchName: string | undefined): void {
     PublishUtilities.execCommand(
       !!this._targetBranch,
       'git',
