@@ -95,33 +95,53 @@ export default class AsyncRecycler {
     }
 
     // Asynchronously delete the folder contents.
-    const recyclerFolderContents: string = path.join(this.recyclerFolder, '*');
+    let command: string;
+    let args: string[];
 
-    const windowsTrimmedRecyclerFolder: string = this.recyclerFolder.match(/\\$/)
-      ? this.recyclerFolder.substring(0, this.recyclerFolder.length - 1)
-      : this.recyclerFolder;
-    const command: string = os.platform() === 'win32'
-      // Windows
-      ? 'cmd.exe'
-      // Assume 'NIX or Darwin
-      : 'rm';
+    if (os.platform() === 'win32') {
+      const recyclerFolderWildcard: string = path.join(this.recyclerFolder, '*');
 
-    const args: string[] = os.platform() === 'win32'
-      // Windows
-      ? [
+      const windowsTrimmedRecyclerFolder: string = this.recyclerFolder.match(/\\$/)
+        ? this.recyclerFolder.substring(0, this.recyclerFolder.length - 1)
+        : this.recyclerFolder;
+      command = 'cmd.exe';
+
+      args = [
         '/c',
-        `FOR /F %f IN ('dir /B \\\\?\\${recyclerFolderContents}') `
+        `FOR /F %f IN ('dir /B \\\\?\\${recyclerFolderWildcard}') `
           + `DO rd /S /Q \\\\?\\${windowsTrimmedRecyclerFolder}\\%f`
-      ]
-      // Assume 'NIX or Darwin
-      : ['-rf', `"${recyclerFolderContents}"`];
+      ];
+    } else {
+      command = 'rm';
+      args = [ '-rf' ];
+
+      let pathCount: number = 0;
+
+      // child_process.spawn() doesn't expand wildcards.  To be safe, we will do it manually
+      // rather than rely on an unknown shell.
+      for (const filename of fsx.readdirSync(this.recyclerFolder)) {
+        // The "." and ".." are supposed to be excluded, but let's be safe
+        if (filename !== '.' && filename !== '..') {
+          args.push(path.join(this.recyclerFolder, filename));
+          ++pathCount;
+        }
+      }
+
+      if (pathCount === 0) {
+        // Nothing to do
+        return;
+      }
+    }
 
     const options: child_process.SpawnOptions = {
       detached: true,
+      // The child won't stay alive unless we detach its stdio
       stdio: [ 'ignore', 'ignore', 'ignore' ]
     };
 
     const process: child_process.ChildProcess = child_process.spawn(command, args, options);
+
+    // The child won't stay alive unless we unlink it from the parent process
     process.unref();
   }
 
