@@ -47,6 +47,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    */
   public selectedAction: CommandLineAction;
 
+  private _argumentParser: argparse.ArgumentParser;
   private _actionsSubParser: argparse.SubParser;
   private _options: ICommandLineParserOptions;
   private _actions: CommandLineAction[];
@@ -142,6 +143,14 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     } catch (error) {
       return Promise.reject(error);
     }
+  }
+
+  /**
+   * {@inheritdoc CommandLineParameterProvider._getArgumentParser}
+   * @internal
+   */
+  protected _getArgumentParser(): argparse.ArgumentParser { // override
+    return this._argumentParser;
   }
 
   /**

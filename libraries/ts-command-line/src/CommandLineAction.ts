@@ -41,9 +41,12 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    */
   public options: ICommandLineActionOptions;
 
+  private _argumentParser: argparse.ArgumentParser | undefined;
+
   constructor(options: ICommandLineActionOptions) {
     super();
     this.options = options;
+    this._argumentParser = undefined;
   }
 
   /**
@@ -73,6 +76,19 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    */
   public _execute(): Promise<void> {
     return this.onExecute();
+  }
+
+  /**
+   * {@inheritdoc CommandLineParameterProvider._getArgumentParser}
+   * @internal
+   */
+  protected _getArgumentParser(): argparse.ArgumentParser { // override
+    if (!this._argumentParser) {
+      // We will improve this in the future
+      throw new Error('The CommandLineAction must be added to a CommandLineParser before it can be used');
+    }
+
+    return this._argumentParser;
   }
 
   /**

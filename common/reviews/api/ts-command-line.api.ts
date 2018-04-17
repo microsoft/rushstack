@@ -14,6 +14,8 @@ class CommandLineAction extends CommandLineParameterProvider {
   // @internal
   _execute(): Promise<void>;
   // @internal
+  protected _getArgumentParser(): argparse.ArgumentParser;
+  // @internal
   _processParsedData(data: ICommandLineParserData): void;
   protected abstract onDefineParameters(): void;
   protected abstract onExecute(): Promise<void>;
@@ -72,7 +74,7 @@ class CommandLineParameterProvider {
   // @internal
   constructor();
   // @internal
-  protected _argumentParser: argparse.ArgumentParser;
+  protected abstract _getArgumentParser(): argparse.ArgumentParser;
   // @internal (undocumented)
   protected _processParsedData(data: ICommandLineParserData): void;
   defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
@@ -92,6 +94,8 @@ class CommandLineParameterProvider {
 // @public
 class CommandLineParser extends CommandLineParameterProvider {
   constructor(options: ICommandLineParserOptions);
+  // @internal
+  protected _getArgumentParser(): argparse.ArgumentParser;
   addAction(action: CommandLineAction): void;
   execute(args?: string[]): Promise<boolean>;
   executeWithoutErrorHandling(args?: string[]): Promise<void>;

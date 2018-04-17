@@ -42,12 +42,6 @@ export interface ICommandLineParserData {
 export abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;
 
-  /**
-   * NOTE: THIS IS INTERNAL.  IN THE FUTURE, WE MAY REPLACE "argparse" WITH A DIFFERENT ENGINE.
-   * @internal
-   */
-  protected _argumentParser: argparse.ArgumentParser;
-
   private _parameters: CommandLineParameter<any>[];
   private _parametersByLongName: Map<string, CommandLineParameter<any>>;
 
@@ -169,7 +163,7 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line help text.
    */
   public renderHelpText(): string {
-    return this._argumentParser.formatHelp();
+    return this._getArgumentParser().formatHelp();
   }
 
   /**
@@ -177,6 +171,12 @@ export abstract class CommandLineParameterProvider {
    * e.g. by calling defineFlagParameter().
    */
   protected abstract onDefineParameters(): void;
+
+  /**
+   * Retrieves the argparse object.
+   * @internal
+   */
+  protected abstract _getArgumentParser(): argparse.ArgumentParser;
 
   /** @internal */
   protected _processParsedData(data: ICommandLineParserData): void {
@@ -237,7 +237,7 @@ export abstract class CommandLineParameterProvider {
         break;
     }
 
-    this._argumentParser.addArgument(names, argparseOptions);
+    this._getArgumentParser().addArgument(names, argparseOptions);
 
     this._parameters.push(parameter);
     this._parametersByLongName.set(parameter.longName, parameter);
