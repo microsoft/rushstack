@@ -92,6 +92,13 @@ class CommandLineParameterProvider {
 }
 
 // @public
+class CommandLineParameterWithArgument<T> extends CommandLineParameter<T> {
+  // @internal
+  constructor(definition: IBaseCommandLineDefinitionWithArgument);
+  readonly argumentName: string | undefined;
+}
+
+// @public
 class CommandLineParser extends CommandLineParameterProvider {
   constructor(options: ICommandLineParserOptions);
   // @internal
@@ -136,6 +143,11 @@ interface IBaseCommandLineDefinition {
   description: string;
   parameterLongName: string;
   parameterShortName?: string;
+}
+
+// @public
+interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
+  argumentName: string;
 }
 
 // @public

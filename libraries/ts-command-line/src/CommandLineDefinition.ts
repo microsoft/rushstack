@@ -23,6 +23,14 @@ export interface IBaseCommandLineDefinition {
   description: string;
 }
 
+/**
+ * The common base interface for parameter types that accept an argument.
+ *
+ * @remarks
+ * An argument is an accompanying command-line token, such as "123" in the
+ * example "--max-count 123".
+ * @public
+ */
 export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
   /**
    * The name of the argument, which will be shown in the command-line help.

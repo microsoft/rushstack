@@ -14,6 +14,7 @@ export {
 
 export {
   IBaseCommandLineDefinition,
+  IBaseCommandLineDefinitionWithArgument,
   ICommandLineFlagDefinition,
   ICommandLineStringDefinition,
   ICommandLineStringListDefinition,
@@ -24,6 +25,7 @@ export {
 export {
   CommandLineParameterKind,
   CommandLineParameter,
+  CommandLineParameterWithArgument,
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineFlagParameter,

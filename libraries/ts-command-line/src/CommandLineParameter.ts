@@ -96,6 +96,14 @@ export abstract class CommandLineParameter<T> {
   public abstract get kind(): CommandLineParameterKind;
 }
 
+/**
+ * The common base class for parameters types that receive an argument.
+ *
+ * @remarks
+ * An argument is an accompanying command-line token, such as "123" in the
+ * example "--max-count 123".
+ * @public
+ */
 export abstract class CommandLineParameterWithArgument<T> extends CommandLineParameter<T> {
   private static _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
 
