@@ -53,7 +53,7 @@ describe('CommandLineParser', () => {
 
     return commandLineParser.execute(['do-job', '--flag']).then(() => {
       expect(commandLineParser.selectedAction).toBeDefined();
-      expect(commandLineParser.selectedAction.options.actionVerb).toEqual('do-job');
+      expect(commandLineParser.selectedAction!.options.actionVerb).toEqual('do-job');
 
       const action: TestAction = commandLineParser.selectedAction as TestAction;
       expect(action.done).toBe(true);

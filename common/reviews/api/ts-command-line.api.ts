@@ -100,7 +100,7 @@ class CommandLineParser extends CommandLineParameterProvider {
   execute(args?: string[]): Promise<boolean>;
   executeWithoutErrorHandling(args?: string[]): Promise<void>;
   protected onExecute(): Promise<void>;
-  selectedAction: CommandLineAction;
+  selectedAction: CommandLineAction | undefined;
 }
 
 // @public

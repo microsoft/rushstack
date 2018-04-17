@@ -41,11 +41,11 @@ class CustomArgumentParser extends argparse.ArgumentParser {
  */
 export abstract class CommandLineParser extends CommandLineParameterProvider {
   /**
-   * Reports which CommandLineAction was selected on the command line.
+   * Reports which CommandLineAction was specified on the command line.
    * @remarks
    * The value will be assigned before onExecute() is invoked.
    */
-  public selectedAction: CommandLineAction;
+  public selectedAction: CommandLineAction | undefined;
 
   private _argumentParser: argparse.ArgumentParser;
   private _actionsSubParser: argparse.SubParser;
@@ -158,6 +158,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * the chosen action is executed.
    */
   protected onExecute(): Promise<void> {
-    return this.selectedAction._execute();
+    return this.selectedAction!._execute();
   }
 }
