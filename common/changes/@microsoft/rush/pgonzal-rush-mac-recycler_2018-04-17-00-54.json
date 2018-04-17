@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix a problem where the \"rush-recycler\" folder was not getting cleaned on macOS",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
