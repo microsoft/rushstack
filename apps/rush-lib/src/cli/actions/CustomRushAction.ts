@@ -96,18 +96,18 @@ export class CustomRushAction extends BaseRushAction {
       }
     });
 
-    const changedProjectsOnly: boolean = this.options.actionVerb === 'build' && this._changedProjectsOnly.value;
+    const changedProjectsOnly: boolean = this.actionVerb === 'build' && this._changedProjectsOnly.value;
 
     const tasks: TaskSelector = new TaskSelector(
       {
         rushConfiguration: this.parser.rushConfiguration,
         toFlags: this._toFlag.values,
         fromFlags: this._fromFlag.values,
-        commandToRun: this.options.actionVerb,
+        commandToRun: this.actionVerb,
         customFlags,
         isQuietMode,
         parallelism,
-        isIncrementalBuildAllowed: this.options.actionVerb === 'build',
+        isIncrementalBuildAllowed: this.actionVerb === 'build',
         changedProjectsOnly,
         ignoreMissingScript: this._ignoreMissingScript
       }
@@ -116,12 +116,12 @@ export class CustomRushAction extends BaseRushAction {
     return tasks.execute().then(
       () => {
         stopwatch.stop();
-        console.log(colors.green(`rush ${this.options.actionVerb} (${stopwatch.toString()})`));
+        console.log(colors.green(`rush ${this.actionVerb} (${stopwatch.toString()})`));
         this._doAfterTask(stopwatch, true);
       },
       () => {
         stopwatch.stop();
-        console.log(colors.red(`rush ${this.options.actionVerb} - Errors! (${stopwatch.toString()})`));
+        console.log(colors.red(`rush ${this.actionVerb} - Errors! (${stopwatch.toString()})`));
         this._doAfterTask(stopwatch, false);
         this.parser.exitWithError();
       });
@@ -155,7 +155,7 @@ export class CustomRushAction extends BaseRushAction {
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
-    if (this.options.actionVerb === 'build') {
+    if (this.actionVerb === 'build') {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
         parameterShortName: '-o',
@@ -188,13 +188,13 @@ export class CustomRushAction extends BaseRushAction {
   }
 
   private _isParallelized(): boolean {
-    return this.options.actionVerb === 'build'
-      || this.options.actionVerb === 'rebuild'
+    return this.actionVerb === 'build'
+      || this.actionVerb === 'rebuild'
       || this._parallelized;
   }
 
   private _doBeforeTask(): void {
-    if (this.options.actionVerb !== 'build' && this.options.actionVerb !== 'rebuild') {
+    if (this.actionVerb !== 'build' && this.actionVerb !== 'rebuild') {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }
@@ -203,7 +203,7 @@ export class CustomRushAction extends BaseRushAction {
   }
 
   private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {
-    if (this.options.actionVerb !== 'build' && this.options.actionVerb !== 'rebuild') {
+    if (this.actionVerb !== 'build' && this.actionVerb !== 'rebuild') {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }
@@ -220,14 +220,14 @@ export class CustomRushAction extends BaseRushAction {
 
     this.customOptions.forEach((customOption: ICustomOptionInstance, longName: string) => {
       if (customOption.parameterValue!.value) {
-        extraData[`${this.options.actionVerb}_${longName}`] =
+        extraData[`${this.actionVerb}_${longName}`] =
           customOption.parameterValue!.value!.toString();
       }
     });
 
     if (this.parser.telemetry) {
       this.parser.telemetry.log({
-        name: this.options.actionVerb,
+        name: this.actionVerb,
         duration: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
         extraData

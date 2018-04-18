@@ -40,6 +40,12 @@ class CustomArgumentParser extends argparse.ArgumentParser {
  * @public
  */
 export abstract class CommandLineParser extends CommandLineParameterProvider {
+  /** {@inheritdoc ICommandLineParserOptions.toolFilename} */
+  public readonly toolFilename: string;
+
+  /** {@inheritdoc ICommandLineParserOptions.toolDescription} */
+  public readonly toolDescription: string;
+
   /**
    * Reports which CommandLineAction was specified on the command line.
    * @remarks
@@ -90,7 +96,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   public addAction(action: CommandLineAction): void {
     action._buildParser(this._actionsSubParser);
     this._actions.push(action);
-    this._actionsByName.set(action.options.actionVerb, action);
+    this._actionsByName.set(action.actionVerb, action);
   }
 
   /**
@@ -159,7 +165,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       this._processParsedData(data);
 
       for (const action of this._actions) {
-        if (action.options.actionVerb === data.action) {
+        if (action.actionVerb === data.action) {
           this.selectedAction = action;
           action._processParsedData(data);
           break;

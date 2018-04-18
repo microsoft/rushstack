@@ -61,7 +61,7 @@ export abstract class BaseRushAction extends CommandLineAction {
       }
     }
 
-    console.log(`Starting "rush ${this.options.actionVerb}"${os.EOL}`);
+    console.log(`Starting "rush ${this.actionVerb}"${os.EOL}`);
     return this.run();
   }
 

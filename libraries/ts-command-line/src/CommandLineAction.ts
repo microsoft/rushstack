@@ -10,20 +10,20 @@ import { CommandLineParameterProvider, ICommandLineParserData } from './CommandL
  */
 export interface ICommandLineActionOptions {
   /**
-   * The name of the sub-command.  For example, if the tool is called "example",
-   * then the verb "build" might be invoked as: "foo build -q --some-other-option"
+   * The name of the action.  For example, if the tool is called "example",
+   * then the verb "build" might be invoked as: "example build -q --some-other-option"
    */
   actionVerb: string;
 
   /**
    * A quick summary that is shown on the main help page, which is displayed
-   * by the command "foo --help"
+   * by the command "example --help"
    */
   summary: string;
 
   /**
    * A detailed description that is shown on the action help page, which is displayed
-   * by the command "foo --help build", e.g. for actionVerb="build".
+   * by the command "example build --help", e.g. for actionVerb="build".
    */
   documentation: string;
 }
@@ -36,16 +36,24 @@ export interface ICommandLineActionOptions {
  * @public
  */
 export abstract class CommandLineAction extends CommandLineParameterProvider {
-  /**
-   * The options that were passed to the constructor.
-   */
-  public options: ICommandLineActionOptions;
+  /** {@inheritdoc ICommandLineActionOptions.actionVerb} */
+  public readonly actionVerb: string;
+
+  /** {@inheritdoc ICommandLineActionOptions.summary} */
+  public readonly summary: string;
+
+  /** {@inheritdoc ICommandLineActionOptions.documentation} */
+  public readonly documentation: string;
 
   private _argumentParser: argparse.ArgumentParser | undefined;
 
   constructor(options: ICommandLineActionOptions) {
     super();
-    this.options = options;
+
+    this.actionVerb = options.actionVerb;
+    this.summary = options.summary;
+    this.documentation = options.documentation;
+
     this._argumentParser = undefined;
   }
 
@@ -54,9 +62,9 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * @internal
    */
   public _buildParser(actionsSubParser: argparse.SubParser): void {
-    this._argumentParser = actionsSubParser.addParser(this.options.actionVerb, {
-      help: this.options.summary,
-      description: this.options.documentation
+    this._argumentParser = actionsSubParser.addParser(this.actionVerb, {
+      help: this.summary,
+      description: this.documentation
     });
 
     this.onDefineParameters();
