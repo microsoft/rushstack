@@ -16,7 +16,7 @@ describe('DynamicCommandLineParser', () => {
     );
 
     const action: DynamicCommandLineAction = new DynamicCommandLineAction({
-      actionVerb: 'do-job',
+      actionName: 'do-job',
       summary: 'does the job',
       documentation: 'a longer description'
     });

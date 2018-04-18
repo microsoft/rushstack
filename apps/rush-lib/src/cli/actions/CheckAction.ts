@@ -12,7 +12,7 @@ import { BaseRushAction } from './BaseRushAction';
 export default class CheckAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'check',
+      actionName: 'check',
       summary: 'Checks each project\'s package.json files and ensures that all dependencies are of the same ' +
         'version throughout the repository.',
       documentation: 'Checks each project\'s package.json files and ensures that all dependencies are of the ' +

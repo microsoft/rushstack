@@ -17,7 +17,7 @@ class CommandLineAction extends CommandLineParameterProvider {
   protected _getArgumentParser(): argparse.ArgumentParser;
   // @internal
   _processParsedData(data: ICommandLineParserData): void;
-  readonly actionVerb: string;
+  readonly actionName: string;
   readonly documentation: string;
   protected abstract onDefineParameters(): void;
   protected abstract onExecute(): Promise<void>;
@@ -119,7 +119,7 @@ class CommandLineParser extends CommandLineParameterProvider {
   addAction(action: CommandLineAction): void;
   execute(args?: string[]): Promise<boolean>;
   executeWithoutErrorHandling(args?: string[]): Promise<void>;
-  getAction(actionVerb: string): CommandLineAction;
+  getAction(actionName: string): CommandLineAction;
   protected onExecute(): Promise<void>;
   selectedAction: CommandLineAction | undefined;
   readonly toolDescription: string;
@@ -174,7 +174,7 @@ interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinit
 
 // @public
 interface ICommandLineActionOptions {
-  actionVerb: string;
+  actionName: string;
   documentation: string;
   summary: string;
 }

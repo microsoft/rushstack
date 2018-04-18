@@ -96,17 +96,17 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   public addAction(action: CommandLineAction): void {
     action._buildParser(this._actionsSubParser);
     this._actions.push(action);
-    this._actionsByName.set(action.actionVerb, action);
+    this._actionsByName.set(action.actionName, action);
   }
 
   /**
    * Retrieves the action with the specified name.  If no matching action is found,
    * an exception is thrown.
    */
-  public getAction(actionVerb: string): CommandLineAction {
-    const action: CommandLineAction | undefined = this._actionsByName.get(actionVerb);
+  public getAction(actionName: string): CommandLineAction {
+    const action: CommandLineAction | undefined = this._actionsByName.get(actionName);
     if (!action) {
-      throw new Error(`The action "${actionVerb}" was not defined`);
+      throw new Error(`The action "${actionName}" was not defined`);
     }
     return action;
   }
@@ -165,7 +165,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       this._processParsedData(data);
 
       for (const action of this._actions) {
-        if (action.actionVerb === data.action) {
+        if (action.actionName === data.action) {
           this.selectedAction = action;
           action._processParsedData(data);
           break;

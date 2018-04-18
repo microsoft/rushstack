@@ -27,7 +27,7 @@ export class RunAction extends CommandLineAction {
 
   constructor(parser: ApiExtractorCommandLine) {
     super({
-      actionVerb: 'run',
+      actionName: 'run',
       summary: 'Invoke API Extractor on a project',
       documentation: 'Invoke API Extractor on a project'
     });

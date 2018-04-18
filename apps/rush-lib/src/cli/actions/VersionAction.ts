@@ -31,7 +31,7 @@ export default class VersionAction extends BaseRushAction {
 
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'version',
+      actionName: 'version',
       summary: '(EXPERIMENTAL) Manage package versions in the repo.',
       documentation: '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.',
       parser

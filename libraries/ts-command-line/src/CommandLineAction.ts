@@ -11,9 +11,9 @@ import { CommandLineParameterProvider, ICommandLineParserData } from './CommandL
 export interface ICommandLineActionOptions {
   /**
    * The name of the action.  For example, if the tool is called "example",
-   * then the verb "build" might be invoked as: "example build -q --some-other-option"
+   * then the "build" action might be invoked as: "example build -q --some-other-option"
    */
-  actionVerb: string;
+  actionName: string;
 
   /**
    * A quick summary that is shown on the main help page, which is displayed
@@ -23,7 +23,7 @@ export interface ICommandLineActionOptions {
 
   /**
    * A detailed description that is shown on the action help page, which is displayed
-   * by the command "example build --help", e.g. for actionVerb="build".
+   * by the command "example build --help", e.g. for actionName="build".
    */
   documentation: string;
 }
@@ -36,8 +36,8 @@ export interface ICommandLineActionOptions {
  * @public
  */
 export abstract class CommandLineAction extends CommandLineParameterProvider {
-  /** {@inheritdoc ICommandLineActionOptions.actionVerb} */
-  public readonly actionVerb: string;
+  /** {@inheritdoc ICommandLineActionOptions.actionName} */
+  public readonly actionName: string;
 
   /** {@inheritdoc ICommandLineActionOptions.summary} */
   public readonly summary: string;
@@ -50,7 +50,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   constructor(options: ICommandLineActionOptions) {
     super();
 
-    this.actionVerb = options.actionVerb;
+    this.actionName = options.actionName;
     this.summary = options.summary;
     this.documentation = options.documentation;
 
@@ -62,7 +62,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * @internal
    */
   public _buildParser(actionsSubParser: argparse.SubParser): void {
-    this._argumentParser = actionsSubParser.addParser(this.actionVerb, {
+    this._argumentParser = actionsSubParser.addParser(this.actionName, {
       help: this.summary,
       description: this.documentation
     });

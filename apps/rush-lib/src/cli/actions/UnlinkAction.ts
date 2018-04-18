@@ -12,7 +12,7 @@ import { BaseRushAction } from './BaseRushAction';
 export default class UnlinkAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'unlink',
+      actionName: 'unlink',
       summary: 'Delete node_modules symlinks for all projects',
       documentation: 'This removes the symlinks created by the "rush link" command. This is useful for'
        + ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard npm'
