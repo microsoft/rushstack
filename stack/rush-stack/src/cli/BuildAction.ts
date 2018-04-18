@@ -20,6 +20,10 @@ export class BuildAction extends CommandLineAction {
       parameterLongName: '--production',
       description: 'used for production builds'
     });
+    this.defineFlagParameter({
+      parameterLongName: '--no-color',
+      description: ''
+    });
   }
 
   protected onExecute(): Promise<void> { // override
