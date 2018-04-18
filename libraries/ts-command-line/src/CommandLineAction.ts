@@ -36,6 +36,9 @@ export interface ICommandLineActionOptions {
  * @public
  */
 export abstract class CommandLineAction extends CommandLineParameterProvider {
+  // Example: "do-something"
+  private static _actionNameRegExp: RegExp = /^[a-z]+(-[a-z]+)*$/;
+
   /** {@inheritdoc ICommandLineActionOptions.actionName} */
   public readonly actionName: string;
 
@@ -49,6 +52,11 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
 
   constructor(options: ICommandLineActionOptions) {
     super();
+
+    if (!CommandLineAction._actionNameRegExp.test(options.actionName)) {
+      throw new Error(`Invalid action name "${options.actionName}". `
+        + `The name must be comprised of lower-case words optionally separated by hyphens.`);
+    }
 
     this.actionName = options.actionName;
     this.summary = options.summary;
