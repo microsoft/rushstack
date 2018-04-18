@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build-typescript",
-      "comment": "Expose three more api extractor config parameters in gulp-core-build-typescript",
+      "comment": "Expose three more api-extractor config parameters in gulp-core-build-typescript",
       "type": "patch"
     }
   ],

@@ -70,7 +70,7 @@ export interface IApiExtractorTaskConfig {
   dtsRollupTrimming: boolean;
 
   /**
-   * This setting is only used if "trimming" is true.
+   * This setting is only used if dtsRollupTrimming is true.
    * It indicates the folder where "npm publish" will be run for an internal release.
    * The default value is "./dist/internal".
    *
@@ -80,7 +80,7 @@ export interface IApiExtractorTaskConfig {
   publishFolderForInternal?: string;
 
   /**
-   * This setting is only used if "trimming" is true.
+   * This setting is only used if dtsRollupTrimming is true.
    * It indicates the folder where "npm publish" will be run for a beta release.
    * The default value is "./dist/beta".
    *
@@ -91,7 +91,7 @@ export interface IApiExtractorTaskConfig {
   publishFolderForBeta?: string;
 
   /**
-   * This setting is only used if "trimming" is true.
+   * This setting is only used if dtsRollupTrimming is true.
    * It indicates the folder where "npm publish" will be run for a public release.
    * The default value is "./dist/public".
    *
