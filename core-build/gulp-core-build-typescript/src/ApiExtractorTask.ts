@@ -68,6 +68,38 @@ export interface IApiExtractorTaskConfig {
    * @beta
    */
   dtsRollupTrimming: boolean;
+
+  /**
+   * This setting is only used if "trimming" is true.
+   * It indicates the folder where "npm publish" will be run for an internal release.
+   * The default value is "./dist/internal".
+   *
+   * @beta
+   * An internal release will contain all definitions that are reachable from the entry point.
+   */
+  publishFolderForInternal?: string;
+
+  /**
+   * This setting is only used if "trimming" is true.
+   * It indicates the folder where "npm publish" will be run for a beta release.
+   * The default value is "./dist/beta".
+   *
+   * @beta
+   * A beta release will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@alpha or \@internal.
+   */
+  publishFolderForBeta?: string;
+
+  /**
+   * This setting is only used if "trimming" is true.
+   * It indicates the folder where "npm publish" will be run for a public release.
+   * The default value is "./dist/public".
+   *
+   * @beta
+   * A public release will contain all definitions that are reachable from the entry point,
+   * except definitions marked as \@beta, \@alpha, or \@internal.
+   */
+  publishFolderForPublic?: string;
 }
 
 /**
@@ -159,7 +191,10 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
       if (this.taskConfig.generateDtsRollup) {
         extractorConfig.dtsRollup = {
           enabled: true,
-          trimming: !!this.taskConfig.dtsRollupTrimming
+          trimming: !!this.taskConfig.dtsRollupTrimming,
+          publishFolderForInternal: this.taskConfig.publishFolderForInternal,
+          publishFolderForBeta: this.taskConfig.publishFolderForBeta,
+          publishFolderForPublic: this.taskConfig.publishFolderForPublic
         };
       }
 
