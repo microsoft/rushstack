@@ -1,16 +1,16 @@
 # ts-command-line
 
-This library makes it easy to create professional command-line tools for NodeJS. By "**professional**", we mean:
+This library helps you create professional command-line tools for Node.js. By "professional", we mean:
 
-- **no gotchas for users**:  This requirement seems obvious, but try typing "`npm install --save-dex`" instead of "`npm install --save-dev`" sometime.  The mistyped letter gets silently ignored, and the command appears to execute successfully!  This can be extremely confusing and frustrating.  It plagues many familiar NodeJS tools.  For a great user experience, the command line should always use a strict parser that catches these mistakes.
+- **no gotchas for users**:  Seems obvious, but try typing "`npm install --save-dex`" instead of "`npm install --save-dev`" sometime.  The command seems to execute successfully, but it doesn't save anything, because the misspelled flag was silently ignored.  This lack of rigor plagues many familiar NodeJS tools, and can sometimes be very confusing and frustrating!  For a great user experience, a command line parser should always strictly validate all arguments.
 
-- **no gotchas for developers**:  Most JavaScript command-line parsers store their output in a simple hash object.  This is very convenient for small projects, but suppose many different source files participate in defining and reading command-line parameters:  A misspelled variable name is indistinguishable from a real flag that was omitted. Even if you get the names right, the data type might be unpredictable (is that count `1` or `"1"`?).  **ts-command-line** models each parameter type as a real TypeScript class.
+- **no gotchas for developers**:  Many command-line libraries store their parsed data in a simple JavaScript hash object.  This is convenient for small projects, but suppose a large project has many different source files that define and read parameters. If  you try to read `data['output-dir']` when it wasn't defined, or if you misspell the key name, your tool will silently behave as if the parameter was omitted.  And is `data['max-count']` a string or a number? Hard to tell! The  **ts-command-line** library models each parameter type as a real TypeScript class.
 
-- **automatic documentation**: Some command-line libraries treat the `--help` docs as a separate exercise for the reader.  **ts-command-line** requires documentation for every parameter, and automatically generates the `--help` for you.  If you write long paragraphs, they will be word-wrapped correctly. (Yay!)
+- **automatic documentation**: Some command-line libraries treat the `--help` docs as a separate exercise for the reader.  **ts-command-line** requires each every parameter to have a documentation string, and will automatically generates the `--help` for you.  If you want to write long paragraphs, no problem -- they will be word-wrapped correctly.  *[golf clap]*
 
-- **structure and extensibility**: Instead of a simple function chain, **ts-command-line** provides a  "scaffold" pattern that makes it easy to find and understand the command-line parser for tool project.  The scaffold model is generally recommended, but there's also a "dynamic" model if you need it.  (See below.)
+- **structure and extensibility**: Instead of a simple function chain, **ts-command-line** provides a  "scaffold" pattern that makes it easy to find and understand the command-line implementation for any tool project.  The scaffold model is generally recommended, but there's also a "dynamic" model if you need it.  (See below.)
 
-Internally, **ts-command-line** is based on [argparse](https://www.npmjs.com/package/argparse) and the Python approach to command-lines.  Compared to other libraries, it doesn't provide zillions of alternative syntaxes and bells and whistles.  But if you're looking for a simple, professional, railed experience for your command-line tool, give it a try!
+Internally, **ts-command-line** is based on [argparse](https://www.npmjs.com/package/argparse) and the Python approach to command-lines.  It doesn't provide zillions of alternative syntaxes and bells and whistles.  But if you're looking for a simple, robust solution for your command-line, give it a try!
 
 
 ### Some Terminology
@@ -23,16 +23,18 @@ widget --verbose push --force --max-count 123
 
 In this example, we can identify the following components:
 
-- **"parameter"**:  The `--verbose`, `--force`, and `--max-count` are called *parameters*.  The currently supported parameter types include: **flag** (i.e. boolean), **integer**, **string**, **choice** (i.e. enums), and **string list**.
-
-- **"argument"**: The value "123" is the *argument* for the `--max-count` integer parameter.  (Flags don't have arguments, because their value is determined by whether the flag was provided or not.)
-
-- **"action"**: Similar to Git's command-line, the `push` token acts as sub-command with its own unique set of parameters.  This means that **global parameters** come before the action and affect all actions, whereas **action parameters** come after the action and only affect that action.
+- The **tool name** in this example is `widget`.  This is the name of your Node.js bin script.
+- The **parameters** are  `--verbose`, `--force`, and `--max-count`.
+- The currently supported **parameter kinds** include: **flag** (i.e. boolean), **integer**, **string**, **choice** (i.e. enums), and **string list**.
+- The value "123" is the **argument** for the `--max-count` integer parameter.  (Flags don't have arguments, because their value is determined by whether the flag was provided or not.)
+- Similar to Git's command-line, the `push` token is called an **action**.  It acts as sub-command with its own unique set of parameters.
+- The `--verbose` flag is a **global parameter** because it precedes the action name.  It affects all actions.
+- The `--force` flag is an **action parameter** because it comes after the action name.  It only applies to that action.
 
 
 ## Scaffold Model
 
-The scaffold model  works by extending the abstract base classes `CommandLineParser` (for the overall command-line) and `CommandLineAction` for a specific subcommand.
+If your tool uses the scaffold model, you will create subclasses of two abstract base classes:  `CommandLineParser` for the overall command-line, and `CommandLineAction` for each action.
 
 Continuing our example from above, suppose we want to start with a couple simple flags like this:
 
@@ -40,7 +42,7 @@ Continuing our example from above, suppose we want to start with a couple simple
 widget --verbose push --force
 ```
 
-We could define a subclass for the "`push`" action like this:
+We could define our subclass for the "`push`" action like this:
 
 ```typescript
 class PushAction extends CommandLineAction {
@@ -50,7 +52,7 @@ class PushAction extends CommandLineAction {
     super({
       actionName: 'push',
       summary: 'Pushes a widget to the service',
-      documentation: 'More detail about the "push" action'
+      documentation: 'Your long description goes here.'
     });
   }
 
@@ -61,6 +63,7 @@ class PushAction extends CommandLineAction {
   protected onDefineParameters(): void { // abstract
     this._force = this.defineFlagParameter({
       parameterLongName: '--force',
+      parameterShortName: '-f',
       description: 'Push and overwrite any existing state'
     });
   }
@@ -76,7 +79,7 @@ class WidgetCommandLine extends CommandLineParser {
   public constructor() {
     super({
       toolFilename: 'widget',
-      toolDescription: 'Documentation for the "widget" tool'
+      toolDescription: 'The widget tool is really great.'
     });
 
     this.addAction(new PushAction());
@@ -85,6 +88,7 @@ class WidgetCommandLine extends CommandLineParser {
   protected onDefineParameters(): void { // abstract
     this._verbose = this.defineFlagParameter({
       parameterLongName: '--verbose',
+      parameterShortName: '-v',
       description: 'Show extra logging detail'
     });
   }
@@ -100,10 +104,10 @@ To invoke the parser, the application entry point will do something like this:
 
 ```typescript
 const commandLine: WidgetCommandLine = new WidgetCommandLine();
-commandLine.execute();
+commandLine.execute(process.argv);
 ```
 
-When we run `widget --verbose push --force`, the `PushAction.onExecute()` method will get invoked and your business logic takes over.
+When we run `widget --verbose push --force`, the `PushAction.onExecute()` method will get invoked and then your business logic takes over.
 
 
 #### Testing out the docs
@@ -111,17 +115,17 @@ When we run `widget --verbose push --force`, the `PushAction.onExecute()` method
 If you invoke the tool as "`widget --help`", the docs are automatically generated:
 
 ```
-usage: widget [-h] [--verbose] <command> ...
+usage: widget [-h] [-v] <command> ...
 
-Documentation for the "widget" tool
+The widget tool is really great.
 
 Positional arguments:
   <command>
-    push      Pushes a widget to the service
+    push         Pushes a widget to the service
 
 Optional arguments:
-  -h, --help  Show this help message and exit.
-  --verbose   Show extra logging detail
+  -h, --help     Show this help message and exit.
+  -v, --verbose  Show extra logging detail
 
 For detailed help about a specific command, use: widget <command> -h
 ```
@@ -129,21 +133,21 @@ For detailed help about a specific command, use: widget <command> -h
 For help about the `push` action, the user can type "`widget push --help`", which shows this output:
 
 ```
-usage: widget push [-h] [--force]
+usage: widget push [-h] [-f]
 
-More detail about the "push" action
+Your long description goes here.
 
 Optional arguments:
-  -h, --help  Show this help message and exit.
-  --force     Push and overwrite any existing state
+  -h, --help   Show this help message and exit.
+  -f, --force  Push and overwrite any existing state
 ```
 
 ## Dynamic Model
 
-Creating subclasses provides a simple, recognizable pattern that you can use across all your tooling projects. It's the generally recommended approach. However, there are some cases where we need to break out of the scaffold.  For example:
+The action subclasses provide a simple, recognizable pattern that you can use across all your tooling projects. It's the generally recommended approach. However, there are some cases where we need to break out of the scaffold.  For example:
 
-- Actions or parameters are discovered at runtime, e.g. from a config file
-- The actions and their implementations aren't closely coupled
+- Actions or parameters may be discovered at runtime, e.g. from a config file
+- The actions and their implementations may sometimes have very different structures
 
 In this case, you can use the `DynamicCommandLineAction` and `DynamicCommandLineParser`  classes which are not abstract (and not intended to be subclassed).  Here's our above example rewritten for this model:
 
@@ -151,10 +155,11 @@ In this case, you can use the `DynamicCommandLineAction` and `DynamicCommandLine
 // Define the parser
 const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
   toolFilename: 'widget',
-  toolDescription: 'Documentation for the "widget" tool'
+  toolDescription: 'The widget tool is really great.'
 });
 commandLineParser.defineFlagParameter({
   parameterLongName: '--verbose',
+  parameterShortName: '-v',
   description: 'Show extra logging detail'
 });
 
@@ -168,11 +173,12 @@ commandLineParser.addAction(action);
 
 action.defineFlagParameter({
   parameterLongName: '--force',
+  parameterShortName: '-f',
   description: 'Push and overwrite any existing state'
 });
 
 // Parse the command line
-commandLineParser.execute().then(() => {
+commandLineParser.execute(process.argv).then(() => {
   console.log('The action is: ' + commandLineParser.selectedAction!.actionName);
   console.log('The force flag is: ' + action.getFlagParameter('--force').value);
 });
@@ -181,9 +187,11 @@ commandLineParser.execute().then(() => {
 You can also mix the two models.  For example, we could augment the `WidgetCommandLine` from the original model by adding `DynamicAction` objects to it.
 
 
-### Real world examples
+### Further reading
 
-Here are some GitHub projects that illustrate different use cases for **ts-command-line**:
+The [API reference](http://rushstack.io/api/ts-command-line.html) has complete documentation for the library.
+
+Here are some real world GitHub projects that illustrate different use cases for **ts-command-line**:
 
 - [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush)
 - [@microsoft/api-extractor](https://www.npmjs.com/package/@microsoft/api-extractor)
