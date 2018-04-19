@@ -104,7 +104,7 @@ export abstract class CommandLineParameterProvider {
    * Defines a command-line parameter whose value is an integer.
    *
    * @remarks
-   * Example:  example-tool l --max-attempts 5
+   * Example:  example-tool --max-attempts 5
    */
   public defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
     const parameter: CommandLineIntegerParameter = new CommandLineIntegerParameter(definition);

@@ -23,9 +23,35 @@ export interface ICommandLineParserOptions {
   toolDescription: string;
 }
 
+export class CommandLineParserExitError extends Error {
+  public readonly exitCode: number;
+
+  constructor(exitCode: number, message: string) {
+    super(message);
+
+    // Manually set the prototype, as we can no longer extend built-in classes like Error, Array, Map, etc
+    // tslint:disable-next-line:max-line-length
+    // https://github.com/Microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    //
+    // Note: the prototype must also be set on any classes which extend this one
+    (this as any).__proto__ = CommandLineParserExitError.prototype; // tslint:disable-line:no-any
+
+    this.exitCode = exitCode;
+  }
+}
+
 class CustomArgumentParser extends argparse.ArgumentParser {
   public exit(status: number, message: string): void { // override
-    throw new Error(message);
+    throw new CommandLineParserExitError(status, message);
+  }
+
+  public error(err: Error | string): void { // override
+    // Ensure the ParserExitError bubbles up to the top without any special processing
+    if (err instanceof CommandLineParserExitError) {
+      throw err;
+    }
+
+    super.error(err);
   }
 }
 
@@ -131,10 +157,23 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   public execute(args?: string[]): Promise<boolean> {
     return this.executeWithoutErrorHandling(args).then(() => {
       return true;
-    }).catch((e) => {
-      const message: string = (e.message || 'An unknown error occurred').trim();
-      console.error(colors.red('Error: ' + message));
-      process.exitCode = 1;
+    }).catch((err) => {
+      if (err instanceof CommandLineParserExitError) {
+        // executeWithoutErrorHandling() handles the successful cases,
+        // so here we can assume err has a nonzero exit code
+        if (err.message) {
+          console.error(err.message);
+        }
+        if (!process.exitCode) {
+          process.exitCode = err.exitCode;
+        }
+      } else {
+        const message: string = (err.message || 'An unknown error occurred').trim();
+        console.error(colors.red('Error: ' + message));
+        if (!process.exitCode) {
+          process.exitCode = 1;
+        }
+      }
       return false;
     });
   }
@@ -176,8 +215,17 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
       }
 
       return this.onExecute();
-    } catch (error) {
-      return Promise.reject(error);
+    } catch (err) {
+      if (err instanceof CommandLineParserExitError) {
+        if (!err.exitCode) {
+          // non-error exit modeled using exception handling
+          if (err.message) {
+            console.log(err.message);
+          }
+          return Promise.resolve();
+        }
+      }
+      return Promise.reject(err);
     }
   }
 
