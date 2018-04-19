@@ -23,35 +23,25 @@ export interface IBaseCommandLineDefinition {
   description: string;
 }
 
-export interface IKeyedCommandLineDefinition extends IBaseCommandLineDefinition {
+/**
+ * The common base interface for parameter types that accept an argument.
+ *
+ * @remarks
+ * An argument is an accompanying command-line token, such as "123" in the
+ * example "--max-count 123".
+ * @public
+ */
+export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
   /**
-   * The key used to identify the value of this parameter. This must be a unique value. If it is
-   * omitted, a unique key is created. This key name appears in the help menu.
-   * For certain definitions, the key value is not surfaced in the UI.
+   * The name of the argument, which will be shown in the command-line help.
+   *
+   * @remarks
+   * For example, if the parameter name is '--count" and the argument name is "NUMBER",
+   * then the command-line help would display "--count NUMBER".  The argument name must
+   * be comprised of upper-case letters, numbers, and underscores.  It should be kept short.
    */
-  key?: string;
+  argumentName: string;
 }
-
-/**
- * For use with CommandLineParser, this interface represents a boolean flag command line parameter
- *
- * @public
- */
-export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
-
-/**
- * For use with CommandLineParser, this interface represents a string command line parameter
- *
- * @public
- */
-export interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition { }
-
-/**
- * For use with CommandLineParser, this interface represents a string command line parameter
- *
- * @public
- */
-export interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition { }
 
 /**
  * For use with CommandLineParser, this interface represents a parameter which is constrained to
@@ -59,11 +49,11 @@ export interface ICommandLineStringListDefinition extends IKeyedCommandLineDefin
  *
  * @public
  */
-export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
+export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
   /**
    * A list of strings (which contain no spaces), of possible options which can be selected
    */
-  options: string[];
+  alternatives: string[];
 
   /**
    * The default value which will be used if the parameter is omitted from the command line
@@ -72,8 +62,33 @@ export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition
 }
 
 /**
- * For use with CommandLineParser, this interface represents an integer command line parameter
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * that is a boolean flag.
  *
  * @public
  */
-export interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition { }
+export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
+
+/**
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * whose argument is an integer value.
+ *
+ * @public
+ */
+export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument { }
+
+/**
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * whose argument is a string value.
+ *
+ * @public
+ */
+export interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument { }
+
+/**
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * whose argument is a list of strings.
+ *
+ * @public
+ */
+export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument { }

@@ -11,12 +11,12 @@ import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
 
 export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
-  toFlags: Array<string>;
-  fromFlags: Array<string>;
+  toFlags: ReadonlyArray<string>;
+  fromFlags: ReadonlyArray<string>;
   commandToRun: string;
   customFlags: string[];
   isQuietMode: boolean;
-  parallelism:  string;
+  parallelism: string | undefined;
   isIncrementalBuildAllowed: boolean;
   changedProjectsOnly: boolean;
   ignoreMissingScript: boolean;
@@ -68,7 +68,7 @@ export class TaskSelector {
     return this._taskRunner.execute();
   }
 
-  private _registerToFlags(toFlags: string[]): void {
+  private _registerToFlags(toFlags: ReadonlyArray<string>): void {
     for (const toFlag of toFlags) {
       const toProject: RushConfigurationProject | undefined =
         this._options.rushConfiguration.findProjectByShorthandName(toFlag);
@@ -86,7 +86,7 @@ export class TaskSelector {
     }
   }
 
-  private _registerFromFlags(fromFlags: string[]): void {
+  private _registerFromFlags(fromFlags: ReadonlyArray<string>): void {
     for (const fromFlag of fromFlags) {
       const fromProject: RushConfigurationProject | undefined
         = this._options.rushConfiguration.findProjectByShorthandName(fromFlag);

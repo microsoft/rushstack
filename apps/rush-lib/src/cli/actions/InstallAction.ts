@@ -26,7 +26,7 @@ export default class InstallAction extends BaseInstallAction {
 
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'install',
+      actionName: 'install',
       summary: 'Install NPM packages in the Rush "common" folder, as specified by your shrinkwrap file.',
       documentation: 'Always run "rush install" whenever you: (1) clone a repo, or (2) pull new changes from source'
       + ' control, or (3) edit any package.json file.  The "rush install" command installs NPM packages into your'
@@ -104,7 +104,7 @@ export default class InstallAction extends BaseInstallAction {
       if (!installManager.createTempModulesAndCheckShrinkwrap(
         shrinkwrapFile,
         installType !== InstallType.Normal,
-        this._authenticationTokensParameter.value || []
+        this._authenticationTokensParameter.values || []
       )) {
         console.log('');
         console.log(colors.red('You need to run "rush generate" to update your shrinkwrap file.'));

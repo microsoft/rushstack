@@ -13,7 +13,7 @@ export default class LinkAction extends BaseRushAction {
 
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'link',
+      actionName: 'link',
       summary: 'Create node_modules symlinks for all projects',
       documentation: 'Create node_modules symlinks for all projects',
       parser

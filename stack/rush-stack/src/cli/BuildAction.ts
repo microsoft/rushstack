@@ -9,7 +9,7 @@ import { BuildContext } from '../logic/BuildContext';
 export class BuildAction extends CommandLineAction {
   constructor(parser: RushStackCommandLine) {
     super({
-      actionVerb: 'build',
+      actionName: 'build',
       summary: 'Build the current project',
       documentation: ''
     });

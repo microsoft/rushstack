@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as argparse from 'argparse';
-import { ICommandLineParserData } from './CommandLineParameter';
-import CommandLineParameterProvider from './CommandLineParameterProvider';
+import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
 
 /**
  * Options for the CommandLineAction constructor.
@@ -11,20 +10,20 @@ import CommandLineParameterProvider from './CommandLineParameterProvider';
  */
 export interface ICommandLineActionOptions {
   /**
-   * The name of the sub-command.  For example, if the tool is called "example",
-   * then the verb "build" might be invoked as: "foo build -q --some-other-option"
+   * The name of the action.  For example, if the tool is called "example",
+   * then the "build" action might be invoked as: "example build -q --some-other-option"
    */
-  actionVerb: string;
+  actionName: string;
 
   /**
    * A quick summary that is shown on the main help page, which is displayed
-   * by the command "foo --help"
+   * by the command "example --help"
    */
   summary: string;
 
   /**
    * A detailed description that is shown on the action help page, which is displayed
-   * by the command "foo --help build", e.g. for actionVerb="build".
+   * by the command "example build --help", e.g. for actionName="build".
    */
   documentation: string;
 }
@@ -37,14 +36,33 @@ export interface ICommandLineActionOptions {
  * @public
  */
 export abstract class CommandLineAction extends CommandLineParameterProvider {
-  /**
-   * The options that were passed to the constructor.
-   */
-  public options: ICommandLineActionOptions;
+  // Example: "do-something"
+  private static _actionNameRegExp: RegExp = /^[a-z]+(-[a-z]+)*$/;
+
+  /** {@inheritdoc ICommandLineActionOptions.actionName} */
+  public readonly actionName: string;
+
+  /** {@inheritdoc ICommandLineActionOptions.summary} */
+  public readonly summary: string;
+
+  /** {@inheritdoc ICommandLineActionOptions.documentation} */
+  public readonly documentation: string;
+
+  private _argumentParser: argparse.ArgumentParser | undefined;
 
   constructor(options: ICommandLineActionOptions) {
     super();
-    this.options = options;
+
+    if (!CommandLineAction._actionNameRegExp.test(options.actionName)) {
+      throw new Error(`Invalid action name "${options.actionName}". `
+        + `The name must be comprised of lower-case words optionally separated by hyphens.`);
+    }
+
+    this.actionName = options.actionName;
+    this.summary = options.summary;
+    this.documentation = options.documentation;
+
+    this._argumentParser = undefined;
   }
 
   /**
@@ -52,9 +70,9 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
    * @internal
    */
   public _buildParser(actionsSubParser: argparse.SubParser): void {
-    this._argumentParser = actionsSubParser.addParser(this.options.actionVerb, {
-      help: this.options.summary,
-      description: this.options.documentation
+    this._argumentParser = actionsSubParser.addParser(this.actionName, {
+      help: this.summary,
+      description: this.documentation
     });
 
     this.onDefineParameters();
@@ -77,9 +95,25 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   }
 
   /**
+   * {@inheritdoc CommandLineParameterProvider._getArgumentParser}
+   * @internal
+   */
+  protected _getArgumentParser(): argparse.ArgumentParser { // override
+    if (!this._argumentParser) {
+      // We will improve this in the future
+      throw new Error('The CommandLineAction must be added to a CommandLineParser before it can be used');
+    }
+
+    return this._argumentParser;
+  }
+
+  /**
+   * {@inheritdoc CommandLineParameterProvider.onDefineParameters}
+   */
+  protected abstract onDefineParameters(): void;
+
+  /**
    * Your subclass should implement this hook to perform the operation.
    */
   protected abstract onExecute(): Promise<void>;
 }
-
-export default CommandLineAction;

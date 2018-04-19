@@ -1,0 +1,180 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CommandLineParameter parses an input with ALL parameters 1`] = `
+Object {
+  "description": "A flag that affects all actions",
+  "kind": 1,
+  "longName": "--global-flag",
+  "shortName": "-g",
+  "value": true,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 2`] = `
+Object {
+  "alternatives": Array [
+    "one",
+    "two",
+  ],
+  "defaultValue": undefined,
+  "description": "A choice without a default",
+  "kind": 0,
+  "longName": "--choice",
+  "shortName": "-c",
+  "value": "two",
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 3`] = `
+Object {
+  "description": "A flag",
+  "kind": 1,
+  "longName": "--flag",
+  "shortName": "-f",
+  "value": true,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 4`] = `
+Object {
+  "argumentName": "NUMBER",
+  "description": "An integer",
+  "kind": 2,
+  "longName": "--integer",
+  "shortName": "-i",
+  "value": 123,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 5`] = `
+Object {
+  "argumentName": "TEXT",
+  "description": "A string",
+  "kind": 3,
+  "longName": "--string",
+  "shortName": "-s",
+  "value": "hello",
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 6`] = `
+Object {
+  "argumentName": "LIST",
+  "description": "A string list",
+  "kind": 4,
+  "longName": "--string-list",
+  "shortName": "-l",
+  "values": Array [
+    "first",
+    "second",
+  ],
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 1`] = `
+Object {
+  "description": "A flag that affects all actions",
+  "kind": 1,
+  "longName": "--global-flag",
+  "shortName": "-g",
+  "value": false,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 2`] = `
+Object {
+  "alternatives": Array [
+    "one",
+    "two",
+  ],
+  "defaultValue": undefined,
+  "description": "A choice without a default",
+  "kind": 0,
+  "longName": "--choice",
+  "shortName": "-c",
+  "value": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 3`] = `
+Object {
+  "description": "A flag",
+  "kind": 1,
+  "longName": "--flag",
+  "shortName": "-f",
+  "value": false,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 4`] = `
+Object {
+  "argumentName": "NUMBER",
+  "description": "An integer",
+  "kind": 2,
+  "longName": "--integer",
+  "shortName": "-i",
+  "value": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 5`] = `
+Object {
+  "argumentName": "TEXT",
+  "description": "A string",
+  "kind": 3,
+  "longName": "--string",
+  "shortName": "-s",
+  "value": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 6`] = `
+Object {
+  "argumentName": "LIST",
+  "description": "A string list",
+  "kind": 4,
+  "longName": "--string-list",
+  "shortName": "-l",
+  "values": Array [],
+}
+`;
+
+exports[`CommandLineParameter prints the action help 1`] = `
+"usage: example do-job [-h] [--choice-with-default {one,two}] [-c {one,two}]
+                      [-f] [-i NUMBER] [-s TEXT] [-l LIST]
+                      
+
+a longer description
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --choice-with-default {one,two}
+                        A choice with a default
+  -c {one,two}, --choice {one,two}
+                        A choice without a default
+  -f, --flag            A flag
+  -i NUMBER, --integer NUMBER
+                        An integer
+  -s TEXT, --string TEXT
+                        A string
+  -l LIST, --string-list LIST
+                        A string list
+"
+`;
+
+exports[`CommandLineParameter prints the global help 1`] = `
+"usage: example [-h] [-g] <command> ...
+
+An example project
+
+Positional arguments:
+  <command>
+    do-job           does the job
+
+Optional arguments:
+  -h, --help         Show this help message and exit.
+  -g, --global-flag  A flag that affects all actions
+
+For detailed help about a specific command, use: example <command> -h
+"
+`;

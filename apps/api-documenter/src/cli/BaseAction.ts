@@ -22,7 +22,7 @@ export abstract class BaseAction extends CommandLineAction {
     this._inputFolderParameter = this.defineStringParameter({
       parameterLongName: '--input-folder',
       parameterShortName: '-i',
-      key: 'FOLDER1',
+      argumentName: 'FOLDER1',
       description: `Specifies the input folder containing the *.api.json files to be processed.`
         + ` If omitted, the default is "./input"`
     });
@@ -30,10 +30,10 @@ export abstract class BaseAction extends CommandLineAction {
     this._outputFolderParameter = this.defineStringParameter({
       parameterLongName: '--output-folder',
       parameterShortName: '-o',
-      key: 'FOLDER2',
+      argumentName: 'FOLDER2',
       description: `Specifies the output folder where the documentation will be written.`
         + ` ANY EXISTING CONTENTS WILL BE DELETED!`
-        + ` If omitted, the default is "./${this.options.actionVerb}"`
+        + ` If omitted, the default is "./${this.actionName}"`
     });
   }
 
@@ -45,7 +45,7 @@ export abstract class BaseAction extends CommandLineAction {
       throw new Error('The input folder does not exist: ' + this.inputFolder);
     }
 
-    this.outputFolder = this._outputFolderParameter.value || `./${this.options.actionVerb}`;
+    this.outputFolder = this._outputFolderParameter.value || `./${this.actionName}`;
     if (!fsx.existsSync(this.outputFolder)) {
       throw new Error('The output folder does not exist: ' + this.outputFolder);
     }

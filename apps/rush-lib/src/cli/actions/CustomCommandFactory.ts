@@ -27,14 +27,14 @@ export class CustomCommandFactory {
 
     // always create a build and a rebuild command
     customActions.set('build', new CustomRushAction(parser, {
-      actionVerb: 'build',
+      actionName: 'build',
       summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last '
         + 'built.',
       documentation: documentationForBuild
     }, true));
 
     customActions.set('rebuild', new CustomRushAction(parser, {
-      actionVerb: 'rebuild',
+      actionName: 'rebuild',
       summary: 'Clean and rebuild the entire set of projects',
       documentation: documentationForBuild
     }, true));
@@ -46,7 +46,7 @@ export class CustomCommandFactory {
           throw new Error(`Cannot define two custom actions with the same name: "${command.name}"`);
         }
         customActions.set(command.name, new CustomRushAction(parser, {
-            actionVerb: command.name,
+            actionName: command.name,
             summary: command.summary,
             documentation: command.documentation || command.summary
           },

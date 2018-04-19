@@ -28,7 +28,7 @@ export default class GenerateAction extends BaseInstallAction {
 
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'generate',
+      actionName: 'generate',
       summary: 'Generate a new shrinkwrap file containing the latest semver-compatible versions.',
       documentation: 'Run the "rush generate" command only if: (1) you are setting up a new repo, or'
       + ' (2) you want to upgrade to the latest versions of your dependencies, or (3)'
@@ -125,7 +125,7 @@ export default class GenerateAction extends BaseInstallAction {
     }
 
     return installManager.ensureLocalPackageManager(false).then(() => {
-      installManager.createTempModules(true, this._authenticationTokensParameter.value || []);
+      installManager.createTempModules(true, this._authenticationTokensParameter.values || []);
 
       if (this._conservativeParameter.value) {
         if (fsx.existsSync(committedShrinkwrapFilename)) {

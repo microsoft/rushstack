@@ -31,7 +31,7 @@ export default class VersionAction extends BaseRushAction {
 
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'version',
+      actionName: 'version',
       summary: '(EXPERIMENTAL) Manage package versions in the repo.',
       documentation: '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.',
       parser
@@ -42,7 +42,7 @@ export default class VersionAction extends BaseRushAction {
     this._targetBranch = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
-      key: 'BRANCH',
+      argumentName: 'BRANCH',
       description:
       'If this flag is specified, changes will be committed and merged into the target branch.'
     });
@@ -62,16 +62,19 @@ export default class VersionAction extends BaseRushAction {
     this._versionPolicy = this.defineStringParameter({
       parameterLongName: '--version-policy',
       parameterShortName: '-p',
+      argumentName: 'POLICY',
       description: 'The name of the version policy'
     });
     this._overwriteBump = this.defineStringParameter({
       parameterLongName: '--override-bump',
+      argumentName: 'BUMPTYPE',
       description: 'Overrides the bump type in the version-policy.json for the specified version policy.' +
-        'Valid values include: prerelease, patch, preminor, minor, major. ' +
+        'Valid BUMPTYPE values include: prerelease, patch, preminor, minor, major. ' +
         'This setting only works for lock-step version policy in bump action.'
     });
     this._prereleaseIdentifier = this.defineStringParameter({
       parameterLongName: '--override-prerelease-id',
+      argumentName: 'ID',
       description: 'Overrides the prerelease identifier in the version value of version-policy.json ' +
         'for the specified version policy. ' +
         'This setting only works for lock-step version policy in bump action.'
@@ -100,7 +103,7 @@ export default class VersionAction extends BaseRushAction {
     } else if (this._bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
       this._versionManager.bump(this._versionPolicy.value,
-        BumpType[this._overwriteBump.value],
+        this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
         this._prereleaseIdentifier.value,
         true);
       this._gitProcess(tempBranch);

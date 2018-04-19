@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/ts-command-line",
+      "comment": "Rename \"ICommandLineChoiceDefinition.options\" to \"alternatives\" (API change)",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "pgonzal@users.noreply.github.com"
+}

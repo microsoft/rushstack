@@ -13,7 +13,7 @@ import { BaseRushAction } from './BaseRushAction';
 export default class ScanAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
     super({
-      actionVerb: 'scan',
+      actionName: 'scan',
       summary: 'Scan the current project folder and display a report of imported packages.',
       documentation: `The NPM system allows a project to import dependencies without explicitly`
         + ` listing them in its package.json file. This is a dangerous practice, because`

@@ -70,7 +70,7 @@ export default class ChangeAction extends BaseRushAction {
       ''
     ];
     super({
-      actionVerb: 'change',
+      actionName: 'change',
       summary: 'Records changes made to projects, indicating how the package version number should be bumped ' +
         'for the next publish.',
       documentation: documentation.join(os.EOL),
@@ -88,7 +88,7 @@ export default class ChangeAction extends BaseRushAction {
     this._targetBranchParameter = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
-      key: 'BRANCH',
+      argumentName: 'BRANCH',
       description: 'If this parameter is specified, compare current branch with the target branch to get changes. ' +
         'If this parameter is not specified, the current branch is compared against the "master" branch.'
     });

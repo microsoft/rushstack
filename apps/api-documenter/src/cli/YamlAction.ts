@@ -17,7 +17,7 @@ export class YamlAction extends BaseAction {
 
   constructor(parser: ApiDocumenterCommandLine) {
     super({
-      actionVerb: 'yaml',
+      actionName: 'yaml',
       summary: 'Generate documentation as universal reference YAML files (*.yml)',
       documentation: 'Generates API documentation as a collection of files conforming'
         + ' to the universal reference YAML format, which is used by the docs.microsoft.com'
