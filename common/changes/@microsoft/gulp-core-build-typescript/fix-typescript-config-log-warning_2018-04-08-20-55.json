@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Fix logging warnings in TypeScript config",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "elliottsj@users.noreply.github.com"
+}

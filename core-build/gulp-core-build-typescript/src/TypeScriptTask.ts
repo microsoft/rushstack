@@ -167,7 +167,7 @@ export class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
       compilerOptions = lodash.merge({}, compilerOptions, this.taskConfig.configurationAddons);
     }
 
-    TypeScriptConfiguration.fixupSettings(compilerOptions, this.logWarning);
+    TypeScriptConfiguration.fixupSettings(compilerOptions, this.logWarning.bind(this));
 
     this._tsProject = this._tsProject || ts.createProject(compilerOptions);
 
