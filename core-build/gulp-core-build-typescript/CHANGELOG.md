@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 19 Apr 2018 17:02:06 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Apr 2018 21:25:56 GMT and should not be manually modified.
+
+## 4.9.6
+Thu, 19 Apr 2018 21:25:56 GMT
+
+*Version update only*
 
 ## 4.9.5
 Thu, 19 Apr 2018 17:02:06 GMT

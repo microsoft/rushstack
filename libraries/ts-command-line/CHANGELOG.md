@@ -1,6 +1,17 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Fri, 23 Mar 2018 00:34:53 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Apr 2018 21:25:56 GMT and should not be manually modified.
+
+## 4.0.0
+Thu, 19 Apr 2018 21:25:56 GMT
+
+### Breaking changes
+
+- Rename "CommandLineOptionParameter" to "CommandLineChoiceParameter" (API change)
+- Rename "ICommandLineChoiceDefinition.options" to "alternatives" (API change)
+- Add DynamicCommandLineAction, DynamicCommandLineParser, and other APIs to support defining and reading command-line parameters at runtime
+- Rename "actionVerb" to "actionName" (API change)
+- Replace "CommandLineAction.options" with more concise top-level properties (API change)
 
 ## 3.1.1
 Fri, 23 Mar 2018 00:34:53 GMT

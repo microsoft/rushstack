@@ -2,6 +2,30 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "4.0.0",
+      "tag": "@microsoft/ts-command-line_v4.0.0",
+      "date": "Thu, 19 Apr 2018 21:25:56 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Rename \"CommandLineOptionParameter\" to \"CommandLineChoiceParameter\" (API change)"
+          },
+          {
+            "comment": "Rename \"ICommandLineChoiceDefinition.options\" to \"alternatives\" (API change)"
+          },
+          {
+            "comment": "Add DynamicCommandLineAction, DynamicCommandLineParser, and other APIs to support defining and reading command-line parameters at runtime"
+          },
+          {
+            "comment": "Rename \"actionVerb\" to \"actionName\" (API change)"
+          },
+          {
+            "comment": "Replace \"CommandLineAction.options\" with more concise top-level properties (API change)"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.1",
       "tag": "@microsoft/ts-command-line_v3.1.1",
       "date": "Fri, 23 Mar 2018 00:34:53 GMT",
