@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.9.5",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.9.5",
+      "date": "Thu, 19 Apr 2018 17:02:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Expose three more api-extractor config parameters in gulp-core-build-typescript"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.6.3` to `5.6.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.9.4",
       "tag": "@microsoft/gulp-core-build-typescript_v4.9.4",
       "date": "Tue, 03 Apr 2018 16:05:29 GMT",

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.6.4",
+      "tag": "@microsoft/api-extractor_v5.6.4",
+      "date": "Thu, 19 Apr 2018 17:02:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix errors in schema documentation"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.6.3",
       "tag": "@microsoft/api-extractor_v5.6.3",
       "date": "Tue, 03 Apr 2018 16:05:29 GMT",

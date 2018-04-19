@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 03 Apr 2018 16:05:29 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Apr 2018 17:02:06 GMT and should not be manually modified.
+
+## 5.6.4
+Thu, 19 Apr 2018 17:02:06 GMT
+
+### Patches
+
+- Fix errors in schema documentation
 
 ## 5.6.3
 Tue, 03 Apr 2018 16:05:29 GMT

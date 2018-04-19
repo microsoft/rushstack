@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 03 Apr 2018 16:05:29 GMT and should not be manually modified.
+This log was last generated on Thu, 19 Apr 2018 17:02:06 GMT and should not be manually modified.
+
+## 4.9.5
+Thu, 19 Apr 2018 17:02:06 GMT
+
+### Patches
+
+- Expose three more api-extractor config parameters in gulp-core-build-typescript
 
 ## 4.9.4
 Tue, 03 Apr 2018 16:05:29 GMT
