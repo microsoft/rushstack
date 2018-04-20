@@ -43,6 +43,7 @@ const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFi
     assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project1'));
     assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'));
     assert.isFalse(shrinkwrapFile.tryEnsureCompatibleDependency('left-pad', '~9.9.9', '@rush-temp/project1'));
+    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('@scope/testDep', '>=1.0.0 < 2.0.0', '@rush-temp/project3'));
   });
 
   it('extracts temp projects successfully', () => {

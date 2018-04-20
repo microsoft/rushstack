@@ -93,13 +93,17 @@ export abstract class BaseShrinkwrapFile {
     return result;
   }
 
+  protected checkValidVersionRange(dependencyVersion: string, versionRange: string) : boolean {
+    // If it's a SemVer pattern, then require that the shrinkwrapped version must be compatible
+    return semver.satisfies(dependencyVersion, versionRange);
+  }
+
   private _checkDependencyVerson(dependencyName: string, versionRange: string, dependencyVersion: string): boolean {
     const result: npmPackageArg.IResult = npmPackageArg.resolve(dependencyName, versionRange);
     switch (result.type) {
       case 'version':
       case 'range':
-        // If it's a SemVer pattern, then require that the shrinkwrapped version must be compatible
-        return semver.satisfies(dependencyVersion, versionRange);
+        return this.checkValidVersionRange(dependencyVersion, versionRange);
       default:
         // Only warn once for each spec
         if (!this._alreadyWarnedSpecs.has(result.rawSpec)) {
