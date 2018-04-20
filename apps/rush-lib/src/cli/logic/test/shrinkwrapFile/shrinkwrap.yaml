@@ -15,6 +15,9 @@ packages:
   /left-pad/9.9.9:
     resolution:
       integrity: sha1-3QG6ydBtMObyGa7LglPunr3DCPE=
+  example.pkgs.visualstudio.com/@scope/testDep/1.0.0:
+    resolution:
+      integrity: sha1-3QG6ydBtMObyGa7LglPunr3DCPE=
   'file:projects/project1.tgz':
     dependencies:
       jquery: 2.9.9
@@ -25,6 +28,7 @@ packages:
   'file:projects/project3.tgz':
     dependencies:
       q: 1.5.3
+      '@scope/testDep': example.pkgs.visualstudio.com/@scope/testDep/1.0.0
 registry: 'http://localhost:4873/'
 shrinkwrapVersion: 3
 specifiers:

@@ -95,6 +95,11 @@ export function extractVersionFromPnpmVersionSpecifier(version: string): string 
     if (versionParts.length === 5 && isScoped) {
       extractedVersion = versionParts[3]; // e.g. "3.1.1"
     }
+
+    // e.g. "path.pkgs.visualstudio.com/@scope/depame/1.4.0"
+    if (!extractedVersion && semver.valid(versionParts[versionParts.length - 1]) !== null) {
+      extractedVersion = versionParts[versionParts.length - 1];
+    }
   }
 
   return extractedVersion;
@@ -193,6 +198,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._normalizeDependencyVersion(dependencyName, packageDescription.dependencies[dependencyName]);
   }
 
+  protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean { // override
+    // dependencyVersion could be a relattive or absolute path, for those cases we
+    // need to extract the version from the end of the path.
+    return super.checkValidVersionRange(dependencyVersion.split('/').pop()!, versionRange);
+  }
+
   private constructor(shrinkwrapJson: IShrinkwrapYaml) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
@@ -256,6 +267,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // B - a peer dep version (e.g. "/gulp-karma/0.0.5/karma@0.13.22"
     //                           or "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
     //                           or "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7")
+    // C -The dependency path is relative or absolute (e.g., /foo/1.0.0)
 
     // check to see if this is the special style of specifiers
     // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22" or

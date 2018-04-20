@@ -43,6 +43,8 @@ const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFi
     assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project1'));
     assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'));
     assert.isFalse(shrinkwrapFile.tryEnsureCompatibleDependency('left-pad', '~9.9.9', '@rush-temp/project1'));
+    assert.isTrue(
+      shrinkwrapFile.tryEnsureCompatibleDependency('@scope/testDep', '>=1.0.0 <2.0.0', '@rush-temp/project3'));
   });
 
   it('extracts temp projects successfully', () => {
@@ -66,6 +68,11 @@ describe('extractVersionFromPnpmVersionSpecifier', () => {
   it('extracts a scoped peer dep', () => {
     assert.equal(extractVersionFromPnpmVersionSpecifier('/@ms/sp-client-utilities/3.1.1/foo@13.1.0'), '3.1.1');
   });
+  it('extracts relative versions', () => {
+    assert.equal(extractVersionFromPnpmVersionSpecifier('example.pkgs.visualstudio.com/@scope/testDep/1.0.0'), '1.0.0');
+    assert.equal(extractVersionFromPnpmVersionSpecifier(
+      'example.pkgs.visualstudio.com/@scope/testDep/1.2.3-beta.3'), '1.2.3-beta.3');
+  });
   it('handles bad cases', () => {
     assert.equal(extractVersionFromPnpmVersionSpecifier('/foo/gulp-karma/0.0.5/karma@0.13.22'), undefined);
     assert.equal(extractVersionFromPnpmVersionSpecifier('/@ms/3.1.1/foo@13.1.0'), undefined);
@@ -73,5 +80,6 @@ describe('extractVersionFromPnpmVersionSpecifier', () => {
     assert.equal(extractVersionFromPnpmVersionSpecifier('/'), undefined);
     assert.equal(extractVersionFromPnpmVersionSpecifier('//'), undefined);
     assert.equal(extractVersionFromPnpmVersionSpecifier('/@/'), undefined);
+    assert.equal(extractVersionFromPnpmVersionSpecifier('example.pkgs.visualstudio.com/@scope/testDep/'), undefined);
   });
 });
