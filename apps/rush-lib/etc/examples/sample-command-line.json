@@ -7,7 +7,7 @@
 // see the documentation at https://aka.ms/rush
 
 {
-  "$schema": "https://dev.office.com/json-schemas/rush/v4/command-line.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v4/command-line.schema.json",
   "customCommands": [
     {
       "name": "import-strings",
