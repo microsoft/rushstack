@@ -6,7 +6,7 @@ Defines a command-line parameter whose value is a single text string.
 
 **Signature:**
 ```javascript
-protected defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
+defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
 ```
 **Returns:** `CommandLineStringParameter`
 

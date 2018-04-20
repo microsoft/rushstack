@@ -2,4 +2,4 @@
 
 # ICommandLineIntegerDefinition interface
 
-For use with CommandLineParser, this interface represents an integer command line parameter
+For use with CommandLineParser, this interface represents a command line parameter whose argument is an integer value.

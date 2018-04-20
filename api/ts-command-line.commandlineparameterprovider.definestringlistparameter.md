@@ -6,7 +6,7 @@ Defines a command-line parameter whose value is one or more text strings.
 
 **Signature:**
 ```javascript
-protected defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
+defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
 ```
 **Returns:** `CommandLineStringListParameter`
 

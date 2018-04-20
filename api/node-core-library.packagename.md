@@ -14,4 +14,5 @@ Various functions for working with package names that may include scopes.
 |  [`isValidName(packageName)`](./node-core-library.packagename.isvalidname.md) |  | `boolean` | Returns true if the specified package name is valid, or false otherwise. |
 |  [`parse(packageName)`](./node-core-library.packagename.parse.md) |  | `IParsedPackageName` | Same as [PackageName.tryParse](./node-core-library.packagename.tryparse.md)<!-- -->, except this throws an exception if the input cannot be parsed |
 |  [`tryParse(packageName)`](./node-core-library.packagename.tryparse.md) |  | `IParsedPackageNameOrError` | This attempts to parse a package name that may include a scope component. |
+|  [`validate(packageName)`](./node-core-library.packagename.validate.md) |  | `void` | Throws an exception if the specified name is not a valid package name. |
 

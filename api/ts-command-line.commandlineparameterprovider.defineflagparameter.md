@@ -6,7 +6,7 @@ Defines a command-line switch whose boolean value is true if the switch is provi
 
 **Signature:**
 ```javascript
-protected defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
+defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
 ```
 **Returns:** `CommandLineFlagParameter`
 

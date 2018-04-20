@@ -2,7 +2,7 @@
 
 # ICommandLineActionOptions.summary property
 
-A quick summary that is shown on the main help page, which is displayed by the command "foo --help"
+A quick summary that is shown on the main help page, which is displayed by the command "example --help"
 
 **Signature:**
 ```javascript

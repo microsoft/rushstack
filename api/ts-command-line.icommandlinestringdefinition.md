@@ -2,4 +2,4 @@
 
 # ICommandLineStringDefinition interface
 
-For use with CommandLineParser, this interface represents a string command line parameter
+For use with CommandLineParser, this interface represents a command line parameter whose argument is a string value.

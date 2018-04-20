@@ -6,13 +6,13 @@ Defines a command-line parameter whose value is an integer.
 
 **Signature:**
 ```javascript
-protected defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
+defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
 ```
 **Returns:** `CommandLineIntegerParameter`
 
 ## Remarks
 
-Example: example-tool l --max-attempts 5
+Example: example-tool --max-attempts 5
 
 ## Parameters
 

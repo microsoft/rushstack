@@ -6,12 +6,12 @@ Constructs a new instance of the [CommandLineParser](./ts-command-line.commandli
 
 **Signature:**
 ```javascript
-constructor(options: ICommandListParserOptions);
+constructor(options: ICommandLineParserOptions);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  `options` | `ICommandListParserOptions` |  |
+|  `options` | `ICommandLineParserOptions` |  |
 

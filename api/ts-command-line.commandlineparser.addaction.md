@@ -6,7 +6,7 @@ Defines a new action that can be used with the CommandLineParser instance.
 
 **Signature:**
 ```javascript
-addAction(command: CommandLineAction): void;
+addAction(action: CommandLineAction): void;
 ```
 **Returns:** `void`
 
@@ -14,5 +14,5 @@ addAction(command: CommandLineAction): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  `command` | `CommandLineAction` |  |
+|  `action` | `CommandLineAction` |  |
 

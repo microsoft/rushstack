@@ -2,11 +2,11 @@
 
 # CommandLineParser.selectedAction property
 
-Reports which CommandLineAction was selected on the command line.
+Reports which CommandLineAction was specified on the command line.
 
 **Signature:**
 ```javascript
-selectedAction: CommandLineAction
+selectedAction: CommandLineAction | undefined
 ```
 
 ## Remarks

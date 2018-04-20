@@ -2,4 +2,4 @@
 
 # ICommandLineFlagDefinition interface
 
-For use with CommandLineParser, this interface represents a boolean flag command line parameter
+For use with CommandLineParser, this interface represents a command line parameter that is a boolean flag.
