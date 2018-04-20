@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix to handle pnpm relative\\absolute dependency path version",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "ddlbrena@microsoft.com"
+}
