@@ -199,9 +199,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean { // override
-    // dependencyVersion could be of two formats:
-    // 1. (d*).(d*).(d*)
-    // 2. <path>(d*).(d*).(d*) for example /foo/1.0.0
+    // dependencyVersion could be a relattive or absolute path, for those cases we
+    // need to extract the version from the end of the path.
     return super.checkValidVersionRange(dependencyVersion.split('/').pop()!, versionRange);
   }
 
