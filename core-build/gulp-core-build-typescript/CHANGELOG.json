@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.9.7",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.9.7",
+      "date": "Fri, 20 Apr 2018 16:06:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix logging warnings in TypeScript config"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.9.6",
       "tag": "@microsoft/gulp-core-build-typescript_v4.9.6",
       "date": "Thu, 19 Apr 2018 21:25:56 GMT",
