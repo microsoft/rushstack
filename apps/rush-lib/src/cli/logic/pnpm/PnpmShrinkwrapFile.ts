@@ -97,7 +97,7 @@ export function extractVersionFromPnpmVersionSpecifier(version: string): string 
     }
 
     // e.g. "path.pkgs.visualstudio.com/@scope/depame/1.4.0"
-    if (!extractedVersion && versionParts[versionParts.length - 1].match(/^(\d*)\.(\d*)\.(\d*)/)) {
+    if (!extractedVersion && semver.valid(versionParts[versionParts.length - 1]) !== null) {
       extractedVersion = versionParts[versionParts.length - 1];
     }
   }
@@ -198,6 +198,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._normalizeDependencyVersion(dependencyName, packageDescription.dependencies[dependencyName]);
   }
 
+  protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean { // override
+    // dependencyVersion could be of two formats:
+    // 1. (d*).(d*).(d*)
+    // 2. <path>(d*).(d*).(d*) for example /foo/1.0.0
+    return super.checkValidVersionRange(dependencyVersion.split('/').pop()!, versionRange);
+  }
+
   private constructor(shrinkwrapJson: IShrinkwrapYaml) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
@@ -280,12 +287,5 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     } else {
       return undefined;
     }
-  }
-
-  protected checkValidVersionRange(dependencyVersion: string, versionRange: string) : boolean {
-    // dependencyVersion could be of two formats:
-    // 1. (d*).(d*).(d*)
-    // 2. <path>(d*).(d*).(d*) for example /foo/1.0.0
-    return super.checkValidVersionRange(dependencyVersion.split('/').pop()!, versionRange);
   }
 }

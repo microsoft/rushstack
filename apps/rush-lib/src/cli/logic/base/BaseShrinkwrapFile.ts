@@ -93,7 +93,7 @@ export abstract class BaseShrinkwrapFile {
     return result;
   }
 
-  protected checkValidVersionRange(dependencyVersion: string, versionRange: string) : boolean {
+  protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean {
     // If it's a SemVer pattern, then require that the shrinkwrapped version must be compatible
     return semver.satisfies(dependencyVersion, versionRange);
   }
