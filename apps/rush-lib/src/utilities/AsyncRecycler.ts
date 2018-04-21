@@ -6,6 +6,8 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 
+import { Text } from '@microsoft/node-core-library';
+
 import RushConfiguration from '../data/RushConfiguration';
 import Utilities from './Utilities';
 
@@ -99,17 +101,21 @@ export default class AsyncRecycler {
     let args: string[];
 
     if (os.platform() === 'win32') {
-      const recyclerFolderWildcard: string = path.join(this.recyclerFolder, '*');
+      command = 'PowerShell.exe';
+      // In PowerShell single-quote literals, single quotes are escaped by doubling them
+      const escapedRecyclerFolder: string = Text.replaceAll(this.recyclerFolder, '\'', '\'\'');
 
-      const windowsTrimmedRecyclerFolder: string = this.recyclerFolder.match(/\\$/)
-        ? this.recyclerFolder.substring(0, this.recyclerFolder.length - 1)
-        : this.recyclerFolder;
-      command = 'cmd.exe';
-
+      // NOTE: PowerShell 3.0 supports the "\\?" prefix for paths that exceed MAX_PATH
       args = [
-        '/c',
-        `FOR /F %f IN ('dir /B \\\\?\\${recyclerFolderWildcard}') `
-          + `DO rd /S /Q \\\\?\\${windowsTrimmedRecyclerFolder}\\%f`
+        '-Version',
+        '3.0',
+        '-NoLogo',
+        '-NonInteractive',
+        '-WindowStyle',
+        'Minimized',
+        '-Command',
+        `Get-ChildItem -Force '${escapedRecyclerFolder}'`
+          + ` | ForEach ($_) { Remove-Item -ErrorAction Ignore -Force -Recurse "\\\\?\\$($_.FullName)" }`
       ];
     } else {
       command = 'rm';
