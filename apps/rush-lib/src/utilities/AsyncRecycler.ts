@@ -114,7 +114,8 @@ export default class AsyncRecycler {
       // In PowerShell single-quote literals, single quotes are escaped by doubling them
       const escapedRecyclerFolder: string = Text.replaceAll(this.recyclerFolder, '\'', '\'\'');
 
-      // NOTE: PowerShell 3.0 supports the "\\?" prefix for paths that exceed MAX_PATH
+      // As of PowerShell 3.0, the "\\?" prefix can be used for paths that exceed MAX_PATH.
+      // (This prefix does not seem to work for cmd.exe's "rd" command.)
       args = [
         '/c',
         '"' +
