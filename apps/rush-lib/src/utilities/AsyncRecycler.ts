@@ -100,23 +100,32 @@ export default class AsyncRecycler {
     let command: string;
     let args: string[];
 
+    const options: child_process.SpawnOptions = {
+      detached: true,
+      // The child won't stay alive unless we detach its stdio
+      stdio: 'ignore'
+    };
+
     if (os.platform() === 'win32') {
-      command = 'PowerShell.exe';
+      // PowerShell.exe doesn't work with a detached console, so we need cmd.exe to create
+      // the new console for us.
+      command = 'cmd.exe';
+
       // In PowerShell single-quote literals, single quotes are escaped by doubling them
       const escapedRecyclerFolder: string = Text.replaceAll(this.recyclerFolder, '\'', '\'\'');
 
       // NOTE: PowerShell 3.0 supports the "\\?" prefix for paths that exceed MAX_PATH
       args = [
-        '-Version',
-        '3.0',
-        '-NoLogo',
-        '-NonInteractive',
-        '-WindowStyle',
-        'Minimized',
-        '-Command',
-        `Get-ChildItem -Force '${escapedRecyclerFolder}'`
-          + ` | ForEach ($_) { Remove-Item -ErrorAction Ignore -Force -Recurse "\\\\?\\$($_.FullName)" }`
+        '/c',
+        '"' +
+        'PowerShell.exe -Version 3.0 -NoLogo -NonInteractive -WindowStyle Hidden -Command'
+          + ` Get-ChildItem -Force '${escapedRecyclerFolder}'`
+          // The "^|" here prevents cmd.exe from interpreting the "|" symbol
+          + ` ^| ForEach ($_) { Remove-Item -ErrorAction Ignore -Force -Recurse "\\\\?\\$($_.FullName)" }`
+          + '"'
       ];
+
+      options.windowsVerbatimArguments = true;
     } else {
       command = 'rm';
       args = [ '-rf' ];
@@ -138,12 +147,6 @@ export default class AsyncRecycler {
         return;
       }
     }
-
-    const options: child_process.SpawnOptions = {
-      detached: true,
-      // The child won't stay alive unless we detach its stdio
-      stdio: [ 'ignore', 'ignore', 'ignore' ]
-    };
 
     const process: child_process.ChildProcess = child_process.spawn(command, args, options);
 
