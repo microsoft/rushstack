@@ -6,6 +6,8 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 
+import { Text } from '@microsoft/node-core-library';
+
 import RushConfiguration from '../data/RushConfiguration';
 import Utilities from './Utilities';
 
@@ -98,19 +100,33 @@ export default class AsyncRecycler {
     let command: string;
     let args: string[];
 
-    if (os.platform() === 'win32') {
-      const recyclerFolderWildcard: string = path.join(this.recyclerFolder, '*');
+    const options: child_process.SpawnOptions = {
+      detached: true,
+      // The child won't stay alive unless we detach its stdio
+      stdio: 'ignore'
+    };
 
-      const windowsTrimmedRecyclerFolder: string = this.recyclerFolder.match(/\\$/)
-        ? this.recyclerFolder.substring(0, this.recyclerFolder.length - 1)
-        : this.recyclerFolder;
+    if (os.platform() === 'win32') {
+      // PowerShell.exe doesn't work with a detached console, so we need cmd.exe to create
+      // the new console for us.
       command = 'cmd.exe';
 
+      // In PowerShell single-quote literals, single quotes are escaped by doubling them
+      const escapedRecyclerFolder: string = Text.replaceAll(this.recyclerFolder, '\'', '\'\'');
+
+      // As of PowerShell 3.0, the "\\?" prefix can be used for paths that exceed MAX_PATH.
+      // (This prefix does not seem to work for cmd.exe's "rd" command.)
       args = [
         '/c',
-        `FOR /F %f IN ('dir /B \\\\?\\${recyclerFolderWildcard}') `
-          + `DO rd /S /Q \\\\?\\${windowsTrimmedRecyclerFolder}\\%f`
+        '"' +
+        'PowerShell.exe -Version 3.0 -NoLogo -NonInteractive -WindowStyle Hidden -Command'
+          + ` Get-ChildItem -Force '${escapedRecyclerFolder}'`
+          // The "^|" here prevents cmd.exe from interpreting the "|" symbol
+          + ` ^| ForEach ($_) { Remove-Item -ErrorAction Ignore -Force -Recurse "\\\\?\\$($_.FullName)" }`
+          + '"'
       ];
+
+      options.windowsVerbatimArguments = true;
     } else {
       command = 'rm';
       args = [ '-rf' ];
@@ -132,12 +148,6 @@ export default class AsyncRecycler {
         return;
       }
     }
-
-    const options: child_process.SpawnOptions = {
-      detached: true,
-      // The child won't stay alive unless we detach its stdio
-      stdio: [ 'ignore', 'ignore', 'ignore' ]
-    };
 
     const process: child_process.ChildProcess = child_process.spawn(command, args, options);
 
