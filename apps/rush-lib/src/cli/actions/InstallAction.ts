@@ -104,7 +104,7 @@ export default class InstallAction extends BaseInstallAction {
       if (!installManager.createTempModulesAndCheckShrinkwrap(
         shrinkwrapFile,
         installType !== InstallType.Normal,
-        this._authenticationTokensParameter.values || []
+        this._authenticationTokensParameter.values
       )) {
         console.log('');
         console.log(colors.red('You need to run "rush generate" to update your shrinkwrap file.'));

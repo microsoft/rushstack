@@ -125,7 +125,7 @@ export default class GenerateAction extends BaseInstallAction {
     }
 
     return installManager.ensureLocalPackageManager(false).then(() => {
-      installManager.createTempModules(true, this._authenticationTokensParameter.values || []);
+      installManager.createTempModules(true, this._authenticationTokensParameter.values);
 
       if (this._conservativeParameter.value) {
         if (fsx.existsSync(committedShrinkwrapFilename)) {
