@@ -53,13 +53,13 @@ export class TaskSelector {
         + ` Have you ran "rush install" and/or "rush link"?`);
     }
 
-    if (this._options.toFlags) {
+    if (this._options.toFlags.length > 0) {
       this._registerToFlags(this._options.toFlags);
     }
-    if (this._options.fromFlags) {
+    if (this._options.fromFlags.length > 0) {
       this._registerFromFlags(this._options.fromFlags);
     }
-    if (!this._options.toFlags && !this._options.fromFlags) {
+    if (this._options.toFlags.length === 0 && this._options.fromFlags.length === 0) {
       this._registerAll();
     }
   }
