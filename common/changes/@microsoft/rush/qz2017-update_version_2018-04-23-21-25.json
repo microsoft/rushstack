@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Allow \\\"rush version --ensure-version-policy\\\" to update policy version directly. ",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "qz2017@users.noreply.github.com"
+}
