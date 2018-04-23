@@ -173,13 +173,28 @@ export default class RushConfiguration {
 
     // If the version is missing or malformed, fall through and let the schema handle it.
     if (expectedRushVersion && semver.valid(expectedRushVersion)) {
-      if (semver.lt(Rush.version, expectedRushVersion)) {
-        throw new Error(`Unable to load ${rushJsonBaseName} because its RushVersion is`
-          + ` ${rushConfigurationJson.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.`
-          + ` Consider upgrading the library.`);
-      } else if (semver.lt(expectedRushVersion, MINIMUM_SUPPORTED_RUSH_JSON_VERSION)) {
+      // Make sure the requested version isn't too old
+      if (semver.lt(expectedRushVersion, MINIMUM_SUPPORTED_RUSH_JSON_VERSION)) {
         throw new Error(`${rushJsonBaseName} is version ${expectedRushVersion}, which is too old for this tool. ` +
           `The minimum supported version is ${MINIMUM_SUPPORTED_RUSH_JSON_VERSION}.`);
+      }
+
+      // Make sure the requested version isn't too new.
+      //
+      // If the major/minor versions are the same, then we consider the file to be compatible.
+      // This is somewhat lax, e.g. "5.0.2-dev.3" will be assumed to be loadable by rush-lib 5.0.0.
+      //
+      // IMPORTANT: Whenever a breaking change is introduced for one of the config files, we must
+      // increment the minor version number for Rush.
+      if (semver.major(Rush.version) !== semver.major(expectedRushVersion)
+        || semver.minor(Rush.version) !== semver.minor(expectedRushVersion)) {
+
+          // If the major/minor are different, then make sure it's an older version.
+          if (semver.lt(Rush.version, expectedRushVersion)) {
+            throw new Error(`Unable to load ${rushJsonBaseName} because its RushVersion is`
+              + ` ${rushConfigurationJson.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.`
+              + ` Consider upgrading the library.`);
+        }
       }
     }
 
