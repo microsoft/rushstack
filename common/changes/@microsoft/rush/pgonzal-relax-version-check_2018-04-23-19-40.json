@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Relax the rush.json version check for rush-lib; future versions are now accepted as long as the major/minor parts match",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
