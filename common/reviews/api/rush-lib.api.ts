@@ -149,6 +149,7 @@ class LockStepVersionPolicy extends VersionPolicy {
   ensure(project: IPackageJson): IPackageJson | undefined;
   readonly mainProject: string | undefined;
   readonly nextBump: BumpType;
+  update(newVersion: semver.SemVer): boolean;
   validate(versionString: string, packageName: string): void;
   readonly version: semver.SemVer;
 }
@@ -256,6 +257,7 @@ class VersionPolicyConfiguration {
   constructor(jsonFileName: string);
   bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
   getVersionPolicy(policyName: string): VersionPolicy;
+  update(versionPolicyName: string, newVersion: semver.SemVer): void;
   validate(projectsByName: Map<string, RushConfigurationProject>): void;
   readonly versionPolicies: Map<string, VersionPolicy>;
 }

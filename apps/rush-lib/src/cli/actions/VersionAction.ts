@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as semver from 'semver';
 import { IPackageJson } from '@microsoft/node-core-library';
 import {
   CommandLineFlagParameter,
@@ -20,6 +21,7 @@ import { Git } from '../logic/Git';
 
 export default class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy: CommandLineFlagParameter;
+  private _overwriteVersion: CommandLineStringParameter;
   private _bumpVersion: CommandLineFlagParameter;
   private _versionPolicy: CommandLineStringParameter;
   private _bypassPolicy: CommandLineFlagParameter;
@@ -48,8 +50,13 @@ export default class VersionAction extends BaseRushAction {
     });
     this._ensureVersionPolicy = this.defineFlagParameter({
       parameterLongName: '--ensure-version-policy',
-      parameterShortName: '-e',
       description: 'Updates package versions if needed to satisfy version policies.'
+    });
+    this._overwriteVersion = this.defineStringParameter({
+      parameterLongName: '--overwrite-version',
+      argumentName: 'NEW_VERSION',
+      description: 'Overwrite the version in the specified --version-policy. ' +
+        'This setting only works for lock-step version policy and when --ensure-version-policy is specified.'
     });
     this._bumpVersion = this.defineFlagParameter({
       parameterLongName: '--bump',
@@ -92,6 +99,7 @@ export default class VersionAction extends BaseRushAction {
 
     this._versionManager = new VersionManager(this.rushConfiguration, this._getUserEmail());
     if (this._ensureVersionPolicy.value) {
+      this._overwritePolicyVersionIfNeeded();
       const tempBranch: string = 'version/ensure-' + new Date().getTime();
       this._versionManager.ensure(this._versionPolicy.value, true);
 
@@ -109,6 +117,19 @@ export default class VersionAction extends BaseRushAction {
       this._gitProcess(tempBranch);
     }
     return Promise.resolve();
+  }
+
+  private _overwritePolicyVersionIfNeeded(): void {
+    if (!this._overwriteVersion.value) {
+      // No need to overwrite policy version
+      return;
+    }
+    if (this._versionPolicy.value) {
+      this.rushConfiguration.versionPolicyConfiguration.update(this._versionPolicy.value,
+        new semver.SemVer(this._overwriteVersion.value));
+    } else {
+      throw new Error('Missing --version-policy parameter to specify which version policy should be overwritten.');
+    }
   }
 
   private _validateInput(): void {
