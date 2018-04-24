@@ -25,6 +25,7 @@ import ChangeManager from '../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { Git } from '../logic/Git';
 import VersionControl from '../../utilities/VersionControl';
+import { JsonFile } from '@microsoft/node-core-library';
 
 export default class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -44,6 +45,7 @@ export default class PublishAction extends BaseRushAction {
 
   private _releaseFolder: CommandLineStringParameter;
   private _pack: CommandLineFlagParameter;
+  private _releaseType: CommandLineStringParameter;
 
   private _hotfixTagOverride: string;
 
@@ -129,6 +131,14 @@ export default class PublishAction extends BaseRushAction {
       `This parameter is used with --pack parameter to provide customized location for the tarballs instead of ` +
       `the default value. `
     });
+    this._releaseType = this.defineStringParameter({
+      parameterLongName: '--release-type',
+      argumentName: 'RELEASE_TYPE',
+      description:
+      `This parameter is used with --pack parameter to provide release type for the tarballs. ` +
+      `The default value is 'internal'. The valid values include 'public', 'beta', 'internal'`
+    });
+    // End of NPM pack tarball related parameters
 
     this._includeAll = this.defineFlagParameter({
       parameterLongName: '--include-all',
@@ -198,6 +208,9 @@ export default class PublishAction extends BaseRushAction {
     }
     if (this._releaseFolder.value && !this._pack.value) {
       throw new Error(`--release-folder can only be used with --pack`);
+    }
+    if (this._releaseType.value && !this._pack.value) {
+      throw new Error(`--release-type can only be used with --pack`);
     }
     if (this._registryUrl.value && this._pack.value) {
       throw new Error(`--registry cannot be used with --pack`);
@@ -353,6 +366,10 @@ export default class PublishAction extends BaseRushAction {
     const args: string[] = ['pack'];
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
+    if (this._releaseType.value && this._releaseType.value !== 'internal') {
+      this._updateAPIFile(packageName, project);
+    }
+
     PublishUtilities.execCommand(
       !!this._publish.value,
       this.rushConfiguration.packageManagerToolFilename,
@@ -370,6 +387,41 @@ export default class PublishAction extends BaseRushAction {
 
       fsx.copySync(tarballPath, path.join(destFolder, tarballName));
       fsx.unlinkSync(tarballPath);
+    }
+  }
+
+  private _updateAPIFile(packageName: string, project: RushConfigurationProject): void {
+    const apiConfigPath: string = path.join(project.projectFolder,
+      'config', 'api-extractor.json');
+
+    if (fsx.existsSync(apiConfigPath)) {
+      // Read api-extractor.json file
+      const apiConfig: {} = JsonFile.load(apiConfigPath);
+      /* tslint:disable:no-string-literal */
+      if (!!apiConfig['generateDtsRollup'] &&  !!apiConfig['dtsRollupTrimming']) {
+        // copy all files from publishFolderForPublic or publishFolderForBeta to publishFolderForInternal
+        const toApiFolder: string = !!apiConfig['publishFolderForInternal'] ?
+          apiConfig['publishFolderForInternal'] : './dist';
+        let fromApiFolder: string | undefined = undefined;
+        if (this._releaseType.value === 'public') {
+          fromApiFolder = !!apiConfig['publishFolderForPublic'] ?
+            apiConfig['publishFolderForPublic'] : './dist/public';
+        } else if (this._releaseType.value === 'beta') {
+          fromApiFolder = !!apiConfig['publishFolderForBeta'] ? apiConfig['publishFolderForBeta'] : './dist/beta';
+        }
+
+        if (fromApiFolder) {
+          const fromApiFolderPath: string = path.join(project.projectFolder, fromApiFolder);
+          const toApiFolderPath: string = path.join(project.projectFolder, toApiFolder);
+          if (fsx.existsSync(fromApiFolderPath) && fsx.existsSync(toApiFolderPath)) {
+            fsx.readdirSync(fromApiFolderPath).forEach(fileName => {
+              fsx.copySync(path.join(fromApiFolderPath, fileName), path.join(toApiFolderPath, fileName));
+              console.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
+            });
+          }
+        }
+      }
+      /* tslint:enable:no-string-literal */
     }
   }
 
