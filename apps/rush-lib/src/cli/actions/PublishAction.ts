@@ -368,6 +368,9 @@ export default class PublishAction extends BaseRushAction {
 
     if (this._releaseType.value && this._releaseType.value !== 'internal') {
       // a temporary workaround. Will replace it with npm or rush hooks.
+      if (this._releaseType.value !== 'public' && this._releaseType.value !== 'beta') {
+        throw new Error(`Invalid release type "${this._releaseType.value}"`);
+      }
       this._updateAPIFile(packageName, project);
     }
 
