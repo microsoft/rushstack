@@ -45,9 +45,10 @@ export class VersionManager {
    * This method does not commit changes.
    * @param versionPolicyName -- version policy name
    * @param shouldCommit -- should update files to disk
+   * @param force -- update even when project version is higher than policy version.
    */
-  public ensure(versionPolicyName?: string, shouldCommit?: boolean): void {
-    this._ensure(versionPolicyName, shouldCommit);
+  public ensure(versionPolicyName?: string, shouldCommit?: boolean, force?: boolean): void {
+    this._ensure(versionPolicyName, shouldCommit, force);
   }
 
   /**
@@ -95,8 +96,8 @@ export class VersionManager {
     return this._changeFiles;
   }
 
-  private _ensure(versionPolicyName?: string, shouldCommit?: boolean): void {
-    this._updateVersionsByPolicy(versionPolicyName);
+  private _ensure(versionPolicyName?: string, shouldCommit?: boolean, force?: boolean): void {
+    this._updateVersionsByPolicy(versionPolicyName, force);
 
     // Update all dependencies if needed.
     this._updateDependencies();
@@ -126,7 +127,7 @@ export class VersionManager {
     return lockStepProjectNames;
   }
 
-  private _updateVersionsByPolicy(versionPolicyName?: string): void {
+  private _updateVersionsByPolicy(versionPolicyName?: string, force?: boolean): void {
     // Update versions based on version policy
     this._rushConfiguration.projects.forEach(rushProject => {
       const projectVersionPolicyName: string | undefined = rushProject.versionPolicyName;
@@ -134,7 +135,7 @@ export class VersionManager {
           (!versionPolicyName || projectVersionPolicyName === versionPolicyName)) {
         const versionPolicy: VersionPolicy = this._versionPolicyConfiguration.getVersionPolicy(
           projectVersionPolicyName);
-        const updatedProject: IPackageJson | undefined = versionPolicy.ensure(rushProject.packageJson);
+        const updatedProject: IPackageJson | undefined = versionPolicy.ensure(rushProject.packageJson, force);
         if (updatedProject) {
           this._updatedProjects.set(updatedProject.name, updatedProject);
           // No need to create an entry for prerelease version bump.
