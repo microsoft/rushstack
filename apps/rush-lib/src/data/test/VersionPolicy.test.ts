@@ -5,7 +5,6 @@
 
 import * as path from 'path';
 import { assert } from 'chai';
-import * as semver from 'semver';
 import { IPackageJson } from '@microsoft/node-core-library';
 
 import { VersionPolicyConfiguration } from '../VersionPolicyConfiguration';
@@ -81,9 +80,9 @@ describe('VersionPolicy', () => {
 
     it('can update version directly', () => {
       const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
-      const newVersion: semver.SemVer = new semver.SemVer('1.5.6-beta.0');
+      const newVersion: string = '1.5.6-beta.0';
       lockStepVersionPolicy.update(newVersion);
-      assert.deepEqual(lockStepVersionPolicy.version, newVersion);
+      assert.equal(lockStepVersionPolicy.version.version, newVersion);
     });
   });
 

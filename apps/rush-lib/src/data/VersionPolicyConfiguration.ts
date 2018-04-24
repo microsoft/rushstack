@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 import * as fsx from 'fs-extra';
-import * as semver from 'semver';
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
@@ -125,11 +124,11 @@ export class VersionPolicyConfiguration {
    * @param newVersion - new version
    */
   public update(versionPolicyName: string,
-    newVersion: semver.SemVer
+    newVersion: string
   ): void {
     const policy: VersionPolicy | undefined = this.versionPolicies.get(versionPolicyName);
     if (!policy || !policy.isLockstepped) {
-      throw new Error(`Lockstep Version policy with name ${versionPolicyName} cannot be found`);
+      throw new Error(`Lockstep Version policy with name "${versionPolicyName}" cannot be found`);
     }
     const lockStepVersionPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
     if (lockStepVersionPolicy.update(newVersion)) {

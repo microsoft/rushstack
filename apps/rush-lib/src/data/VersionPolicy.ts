@@ -219,9 +219,10 @@ export class LockStepVersionPolicy extends VersionPolicy {
 
   /**
    * Updates the version of the policy directly with a new value
-   * @param newVersion - New version
+   * @param newVersionString - New version
    */
-  public update(newVersion: semver.SemVer): boolean {
+  public update(newVersionString: string): boolean {
+    const newVersion: semver.SemVer = new semver.SemVer(newVersionString);
     if (!newVersion || this._version === newVersion) {
       return false;
     }

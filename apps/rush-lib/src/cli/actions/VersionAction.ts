@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as semver from 'semver';
 import { IPackageJson } from '@microsoft/node-core-library';
 import {
   CommandLineFlagParameter,
@@ -68,7 +67,6 @@ export default class VersionAction extends BaseRushAction {
     });
     this._versionPolicy = this.defineStringParameter({
       parameterLongName: '--version-policy',
-      parameterShortName: '-p',
       argumentName: 'POLICY',
       description: 'The name of the version policy'
     });
@@ -126,7 +124,7 @@ export default class VersionAction extends BaseRushAction {
     }
     if (this._versionPolicy.value) {
       this.rushConfiguration.versionPolicyConfiguration.update(this._versionPolicy.value,
-        new semver.SemVer(this._overwriteVersion.value));
+        this._overwriteVersion.value);
     } else {
       throw new Error('Missing --version-policy parameter to specify which version policy should be overwritten.');
     }
