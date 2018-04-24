@@ -135,7 +135,7 @@ export default class PublishAction extends BaseRushAction {
       parameterLongName: '--release-type',
       argumentName: 'RELEASE_TYPE',
       description:
-      `This parameter is used with --pack parameter to provide release type for the tarballs. ` +
+      `This parameter is used with --pack parameter to provide release type for the generated tarballs. ` +
       `The default value is 'internal'. The valid values include 'public', 'beta', 'internal'`
     });
     // End of NPM pack tarball related parameters
@@ -367,6 +367,7 @@ export default class PublishAction extends BaseRushAction {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
     if (this._releaseType.value && this._releaseType.value !== 'internal') {
+      // a temporary workaround. Will replace it with npm or rush hooks.
       this._updateAPIFile(packageName, project);
     }
 
