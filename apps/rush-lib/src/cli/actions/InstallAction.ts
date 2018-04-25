@@ -16,9 +16,9 @@ import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { BaseLinkManager } from '../logic/base/BaseLinkManager';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
-import { BaseInstallAction } from './BaseInstallAction';
+import { BaseRushAction } from './BaseRushAction';
 
-export default class InstallAction extends BaseInstallAction {
+export default class InstallAction extends BaseRushAction {
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;
@@ -39,8 +39,6 @@ export default class InstallAction extends BaseInstallAction {
   }
 
   protected onDefineParameters(): void {
-    super.onDefineParameters();
-
     this._cleanInstall = this.defineFlagParameter({
       parameterLongName: '--clean',
       parameterShortName: '-c',
@@ -103,8 +101,7 @@ export default class InstallAction extends BaseInstallAction {
 
       if (!installManager.createTempModulesAndCheckShrinkwrap(
         shrinkwrapFile,
-        installType !== InstallType.Normal,
-        this._authenticationTokensParameter.values
+        installType !== InstallType.Normal
       )) {
         console.log('');
         console.log(colors.red('You need to run "rush generate" to update your shrinkwrap file.'));
