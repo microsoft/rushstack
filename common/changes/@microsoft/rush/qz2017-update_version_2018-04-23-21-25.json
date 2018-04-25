@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Allow \\\"rush version --ensure-version-policy\\\" to update policy version directly. ",
+      "comment": "Allow \"rush version --ensure-version-policy\" to update policy version directly. ",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
