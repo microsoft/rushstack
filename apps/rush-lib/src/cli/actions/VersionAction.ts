@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as semver from 'semver';
 import { IPackageJson } from '@microsoft/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
-import { BumpType } from '../../data/VersionPolicy';
+import { BumpType, LockStepVersionPolicy } from '../../data/VersionPolicy';
+import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
 import RushConfiguration from '../../data/RushConfiguration';
 import Utilities from '../../utilities/Utilities';
 import VersionControl from '../../utilities/VersionControl';
@@ -20,6 +22,7 @@ import { Git } from '../logic/Git';
 
 export default class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy: CommandLineFlagParameter;
+  private _overrideVersion: CommandLineStringParameter;
   private _bumpVersion: CommandLineFlagParameter;
   private _versionPolicy: CommandLineStringParameter;
   private _bypassPolicy: CommandLineFlagParameter;
@@ -48,8 +51,13 @@ export default class VersionAction extends BaseRushAction {
     });
     this._ensureVersionPolicy = this.defineFlagParameter({
       parameterLongName: '--ensure-version-policy',
-      parameterShortName: '-e',
       description: 'Updates package versions if needed to satisfy version policies.'
+    });
+    this._overrideVersion = this.defineStringParameter({
+      parameterLongName: '--override-version',
+      argumentName: 'NEW_VERSION',
+      description: 'Override the version in the specified --version-policy. ' +
+        'This setting only works for lock-step version policy and when --ensure-version-policy is specified.'
     });
     this._bumpVersion = this.defineFlagParameter({
       parameterLongName: '--bump',
@@ -61,7 +69,6 @@ export default class VersionAction extends BaseRushAction {
     });
     this._versionPolicy = this.defineStringParameter({
       parameterLongName: '--version-policy',
-      parameterShortName: '-p',
       argumentName: 'POLICY',
       description: 'The name of the version policy'
     });
@@ -77,7 +84,9 @@ export default class VersionAction extends BaseRushAction {
       argumentName: 'ID',
       description: 'Overrides the prerelease identifier in the version value of version-policy.json ' +
         'for the specified version policy. ' +
-        'This setting only works for lock-step version policy in bump action.'
+        'This setting only works for lock-step version policy. ' +
+        'This setting increases to new prerelease id when "--bump" is provided but only replaces the ' +
+        'prerelease name when "--ensure-version-policy" is provided.'
     });
   }
 
@@ -92,8 +101,10 @@ export default class VersionAction extends BaseRushAction {
 
     this._versionManager = new VersionManager(this.rushConfiguration, this._getUserEmail());
     if (this._ensureVersionPolicy.value) {
+      this._overwritePolicyVersionIfNeeded();
       const tempBranch: string = 'version/ensure-' + new Date().getTime();
-      this._versionManager.ensure(this._versionPolicy.value, true);
+      this._versionManager.ensure(this._versionPolicy.value, true,
+        !!this._overrideVersion.value || !!this._prereleaseIdentifier.value);
 
       const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
       if (updatedPackages.size > 0) {
@@ -109,6 +120,47 @@ export default class VersionAction extends BaseRushAction {
       this._gitProcess(tempBranch);
     }
     return Promise.resolve();
+  }
+
+  private _overwritePolicyVersionIfNeeded(): void {
+    if (!this._overrideVersion.value && !this._prereleaseIdentifier.value) {
+      // No need to overwrite policy version
+      return;
+    }
+    if (this._overrideVersion.value && this._prereleaseIdentifier.value) {
+      throw new Error(`The parameters "--override-version" and` +
+        ` "--override-prerelease-id" cannot be used together.`);
+    }
+
+    if (this._versionPolicy.value) {
+      const versionConfig: VersionPolicyConfiguration = this.rushConfiguration.versionPolicyConfiguration;
+      const policy: LockStepVersionPolicy = versionConfig.getVersionPolicy(this._versionPolicy.value) as
+          LockStepVersionPolicy;
+      if (!policy || !policy.isLockstepped) {
+        throw new Error(`The lockstep version policy "${policy.policyName}" is not found.`);
+      }
+      let newVersion: string | undefined = undefined;
+      if (this._overrideVersion.value) {
+        newVersion = this._overrideVersion.value;
+      } else if (this._prereleaseIdentifier.value) {
+        const newPolicyVersion: semver.SemVer = new semver.SemVer(policy.version);
+        if (newPolicyVersion.prerelease.length) {
+          // Update 1.5.0-alpha.10 to 1.5.0-beta.10
+          newPolicyVersion.prerelease[0] = this._prereleaseIdentifier.value;
+        } else {
+          // Update 1.5.0 to 1.5.0-beta
+          newPolicyVersion.prerelease.push(this._prereleaseIdentifier.value);
+        }
+        newVersion = newPolicyVersion.format();
+      }
+
+      if (newVersion) {
+        console.log(`Update version policy ${policy.policyName} from ${policy.version} to ${newVersion}`);
+        versionConfig.update(this._versionPolicy.value, newVersion);
+      }
+    } else {
+      throw new Error('Missing --version-policy parameter to specify which version policy should be overwritten.');
+    }
   }
 
   private _validateInput(): void {

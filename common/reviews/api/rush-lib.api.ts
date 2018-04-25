@@ -132,7 +132,7 @@ class IndividualVersionPolicy extends VersionPolicy {
   // @internal
   readonly _json: IIndividualVersionJson;
   bump(bumpType?: BumpType, identifier?: string): void;
-  ensure(project: IPackageJson): IPackageJson | undefined;
+  ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
   readonly lockedMajor: number | undefined;
   validate(versionString: string, packageName: string): void;
 }
@@ -146,11 +146,12 @@ class LockStepVersionPolicy extends VersionPolicy {
   // @internal
   readonly _json: ILockStepVersionJson;
   bump(bumpType?: BumpType, identifier?: string): void;
-  ensure(project: IPackageJson): IPackageJson | undefined;
+  ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
   readonly mainProject: string | undefined;
   readonly nextBump: BumpType;
+  update(newVersionString: string): boolean;
   validate(versionString: string, packageName: string): void;
-  readonly version: semver.SemVer;
+  readonly version: string;
 }
 
 // @public
@@ -240,7 +241,7 @@ class VersionPolicy {
   readonly _json: IVersionPolicyJson;
   abstract bump(bumpType?: BumpType, identifier?: string): void;
   readonly definitionName: VersionPolicyDefinitionName;
-  abstract ensure(project: IPackageJson): IPackageJson | undefined;
+  abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
   readonly isLockstepped: boolean;
   // WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
@@ -256,6 +257,7 @@ class VersionPolicyConfiguration {
   constructor(jsonFileName: string);
   bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
   getVersionPolicy(policyName: string): VersionPolicy;
+  update(versionPolicyName: string, newVersion: string): void;
   validate(projectsByName: Map<string, RushConfigurationProject>): void;
   readonly versionPolicies: Map<string, VersionPolicy>;
 }

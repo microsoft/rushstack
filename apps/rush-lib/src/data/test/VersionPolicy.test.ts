@@ -19,12 +19,16 @@ describe('VersionPolicy', () => {
   describe('LockStepVersion', () => {
     const filename: string = path.resolve(__dirname, 'jsonFiles', 'rushWithLockVersion.json');
     const versionPolicyConfig: VersionPolicyConfiguration = new VersionPolicyConfiguration(filename);
-    const versionPolicy: VersionPolicy = versionPolicyConfig.getVersionPolicy('testPolicy1');
+    let versionPolicy: VersionPolicy;
+
+    beforeEach(() => {
+      versionPolicy = versionPolicyConfig.getVersionPolicy('testPolicy1');
+    });
 
     it('loads configuration.', () => {
       assert.isTrue(versionPolicy instanceof LockStepVersionPolicy, 'versionPolicy is a LockStepVersionPolicy');
       const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
-      assert.equal(lockStepVersionPolicy.version.format(), '1.1.0');
+      assert.equal(lockStepVersionPolicy.version, '1.1.0');
       assert.equal(lockStepVersionPolicy.nextBump, BumpType.patch);
     });
 
@@ -60,18 +64,38 @@ describe('VersionPolicy', () => {
       });
     });
 
+    it('update version with force if version is higher than the locked step version', () => {
+      const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
+      const originalPackageJson: IPackageJson = {
+        name: 'a',
+        version: '2.1.0'
+      };
+      const expectedPackageJson: IPackageJson = {
+        name: 'a',
+        version: '1.1.0'
+      };
+      assert.deepEqual(lockStepVersionPolicy.ensure(originalPackageJson, true), expectedPackageJson);
+    });
+
     it('bumps version for preminor release', () => {
       const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
       lockStepVersionPolicy.bump(BumpType.preminor, 'pr');
-      assert.equal(lockStepVersionPolicy.version.format(), '1.2.0-pr.0');
+      assert.equal(lockStepVersionPolicy.version, '1.2.0-pr.0');
       assert.equal(lockStepVersionPolicy.nextBump, BumpType.patch);
     });
 
     it('bumps version for minor release', () => {
       const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
       lockStepVersionPolicy.bump(BumpType.minor);
-      assert.equal(lockStepVersionPolicy.version.format(), '1.2.0');
+      assert.equal(lockStepVersionPolicy.version, '1.2.0');
       assert.equal(lockStepVersionPolicy.nextBump, BumpType.patch);
+    });
+
+    it('can update version directly', () => {
+      const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
+      const newVersion: string = '1.5.6-beta.0';
+      lockStepVersionPolicy.update(newVersion);
+      assert.equal(lockStepVersionPolicy.version, newVersion);
     });
   });
 

@@ -115,12 +115,24 @@ export class VersionPolicyConfiguration {
         }
       });
     }
-    const versionPolicyJson: IVersionPolicyJson[] = [];
-    this.versionPolicies.forEach((versionPolicy) => {
-      versionPolicyJson.push(versionPolicy._json);
-    });
-    if (shouldCommit) {
-      JsonFile.save(versionPolicyJson, this._jsonFileName);
+    this._saveFile(!!shouldCommit);
+  }
+
+  /**
+   * Updates the version directly for the specified version policy
+   * @param versionPolicyName - version policy name
+   * @param newVersion - new version
+   */
+  public update(versionPolicyName: string,
+    newVersion: string
+  ): void {
+    const policy: VersionPolicy | undefined = this.versionPolicies.get(versionPolicyName);
+    if (!policy || !policy.isLockstepped) {
+      throw new Error(`Lockstep Version policy with name "${versionPolicyName}" cannot be found`);
+    }
+    const lockStepVersionPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
+    if (lockStepVersionPolicy.update(newVersion)) {
+      this._saveFile(true);
     }
   }
 
@@ -137,5 +149,15 @@ export class VersionPolicyConfiguration {
         this._versionPolicies.set(policy.policyName, policy);
       }
     });
+  }
+
+  private _saveFile(shouldCommit: boolean): void {
+    const versionPolicyJson: IVersionPolicyJson[] = [];
+    this.versionPolicies.forEach((versionPolicy) => {
+      versionPolicyJson.push(versionPolicy._json);
+    });
+    if (shouldCommit) {
+      JsonFile.save(versionPolicyJson, this._jsonFileName);
+    }
   }
 }

@@ -99,8 +99,9 @@ export abstract class VersionPolicy {
    * Returns an updated package json that satisfies the policy.
    *
    * @param project - package json
+   * @param force - force update even when the project version is higher than the policy version.
    */
-  public abstract ensure(project: IPackageJson): IPackageJson | undefined;
+  public abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
 
   /**
    * Bumps version based on the policy
@@ -150,8 +151,8 @@ export class LockStepVersionPolicy extends VersionPolicy {
   /**
    * The value of the lockstep version
    */
-  public get version(): semver.SemVer {
-    return this._version;
+  public get version(): string {
+    return this._version.format();
   }
 
   /**
@@ -180,7 +181,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     const json: ILockStepVersionJson = {
       policyName: this.policyName,
       definitionName: VersionPolicyDefinitionName[this.definitionName],
-      version: this.version.format(),
+      version: this.version,
       nextBump: BumpType[this.nextBump]
     };
     if (this._mainProject) {
@@ -193,13 +194,14 @@ export class LockStepVersionPolicy extends VersionPolicy {
    * Returns an updated package json that satisfies the version policy.
    *
    * @param project - input package json
+   * @param force - force update even when the project version is higher than the policy version.
    */
-  public ensure(project: IPackageJson): IPackageJson | undefined {
+  public ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined {
     const packageVersion: semver.SemVer = new semver.SemVer(project.version);
     const compareResult: number = packageVersion.compare(this._version);
     if (compareResult === 0) {
       return undefined;
-    } else if (compareResult > 0) {
+    } else if (compareResult > 0 && !force) {
       const errorMessage: string = `Version ${project.version} in package ${project.name}`
         + ` is higher than locked version ${this._version.format()}.`;
       throw new Error(errorMessage);
@@ -214,7 +216,20 @@ export class LockStepVersionPolicy extends VersionPolicy {
    * @param identifier - Prerelease identifier if bump type is prerelease.
    */
   public bump(bumpType?: BumpType, identifier?: string): void {
-    this.version.inc(this._getReleaseType(bumpType || this.nextBump), identifier);
+    this._version.inc(this._getReleaseType(bumpType || this.nextBump), identifier);
+  }
+
+  /**
+   * Updates the version of the policy directly with a new value
+   * @param newVersionString - New version
+   */
+  public update(newVersionString: string): boolean {
+    const newVersion: semver.SemVer = new semver.SemVer(newVersionString);
+    if (!newVersion || this._version === newVersion) {
+      return false;
+    }
+    this._version = newVersion;
+    return true;
   }
 
   /**
@@ -225,7 +240,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
    */
   public validate(versionString: string, packageName: string): void {
     const versionToTest: semver.SemVer = new semver.SemVer(versionString, false);
-    if (this.version.compare(versionToTest) !== 0) {
+    if (this._version.compare(versionToTest) !== 0) {
       throw new Error(`Invalid version ${versionString} in ${packageName}`);
     }
   }
@@ -284,8 +299,9 @@ export class IndividualVersionPolicy extends VersionPolicy {
    * Returns an updated package json that satisfies the version policy.
    *
    * @param project - input package json
+   * @param force - force update even when the project version is higher than the policy version.
    */
-  public ensure(project: IPackageJson): IPackageJson | undefined {
+  public ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined {
     if (this.lockedMajor) {
       const version: semver.SemVer = new semver.SemVer(project.version);
       if (version.major < this.lockedMajor) {
