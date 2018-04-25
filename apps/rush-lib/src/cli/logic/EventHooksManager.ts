@@ -28,7 +28,7 @@ export default class EventHooksManager {
         try {
           Utilities.executeShellCommand(script,
             process.cwd(),
-            process.env,
+            undefined,
             true
           );
         } catch (error) {

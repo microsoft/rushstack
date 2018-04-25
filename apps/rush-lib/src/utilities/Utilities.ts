@@ -9,6 +9,14 @@ import * as tty from 'tty';
 import * as path from 'path';
 import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
 
+export interface IEnvironment {
+  // NOTE: the process.env doesn't actually support "undefined" as a value.
+  // If you try to assign it, it will be converted to the text string "undefined".
+  // But this typing is needed for reading values from the dictionary, and for
+  // subsets that get combined.
+  [environmentVariableName: string]: string | undefined;
+}
+
 /**
  * @public
  */
@@ -192,11 +200,11 @@ export default class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommand(command: string, args: string[], workingDirectory: string,
-    suppressOutput: boolean = false, environmentVariables?: { [key: string]: string | undefined }): void {
+    environment?: IEnvironment, suppressOutput: boolean = false): void {
 
     Utilities._executeCommandInternal(command, args, workingDirectory,
       suppressOutput ? undefined : [0, 1, 2],
-      environmentVariables);
+      environment);
   }
 
   /**
@@ -204,11 +212,11 @@ export default class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommandAndCaptureOutput(command: string, args: string[], workingDirectory: string,
-    environmentVariables?: { [key: string]: string | undefined }): string {
+    environment?: IEnvironment): string {
 
     const  result: child_process.SpawnSyncReturns<Buffer>
       = Utilities._executeCommandInternal(command, args, workingDirectory,
-        ['pipe', 'pipe', 'pipe'], environmentVariables);
+        ['pipe', 'pipe', 'pipe'], environment);
 
     return result.stdout.toString();
   }
@@ -216,8 +224,9 @@ export default class Utilities {
   /**
    * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
    */
-  public static executeCommandWithRetry(command: string, args: string[], maxAttempts: number,
-    workingDirectory: string, suppressOutput: boolean = false, retryCallback?: () => void): void {
+  public static executeCommandWithRetry(maxAttempts: number, command: string, args: string[],
+    workingDirectory: string,  environment?: IEnvironment, suppressOutput: boolean = false,
+    retryCallback?: () => void): void {
 
     if (maxAttempts < 1) {
       throw new Error('The maxAttempts parameter cannot be less than 1');
@@ -228,7 +237,7 @@ export default class Utilities {
     // tslint:disable-next-line:no-constant-condition
     while (true) {
       try {
-        Utilities.executeCommand(command, args, workingDirectory, suppressOutput);
+        Utilities.executeCommand(command, args, workingDirectory, environment, suppressOutput);
       } catch (error) {
         console.log(os.EOL + 'The command failed:');
         console.log(` ${command} ` + args.join(' '));
@@ -255,7 +264,7 @@ export default class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommandAsync(command: string, args: string[], workingDirectory: string,
-    environmentVariables?: { [key: string]: string }): child_process.ChildProcess {
+    environment?: IEnvironment): child_process.ChildProcess {
     // This is a workaround for GitHub issue #25330.  It is not as complete as the workaround above,
     // but there doesn't seem to be an easy asynchronous solution.
     // https://github.com/nodejs/node-v0.x-archive/issues/25330
@@ -270,7 +279,7 @@ export default class Utilities {
     return child_process.spawn(escapedCommand, escapedArgs, {
       cwd: workingDirectory,
       shell: true,
-      env: environmentVariables
+      env: environment
     });
   }
 
@@ -278,13 +287,13 @@ export default class Utilities {
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
    * @param workingDirectory - working directory for running this command
-   * @param environmentVariables - environment variables for running this command
+   * @param environment - environment variables for running this command
    * @beta
    */
   public static executeShellCommand(
     command: string,
     workingDirectory: string,
-    environmentVariables?: { [key: string]: string | undefined },
+    environment?: IEnvironment,
     captureOutput: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {
     let shellCommand: string = process.env.comspec || 'cmd';
@@ -302,7 +311,7 @@ export default class Utilities {
       {
         cwd: workingDirectory,
         shell: useShell,
-        env: environmentVariables,
+        env: environment,
         stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
 
@@ -314,13 +323,13 @@ export default class Utilities {
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
    * @param workingDirectory - working directory for running this command
-   * @param environmentVariables - environment variables for running this command
+   * @param environment - environment variables for running this command
    * @beta
    */
   public static executeShellCommandAsync(
     command: string,
     workingDirectory: string,
-    environmentVariables?: { [key: string]: string | undefined },
+    environment?: IEnvironment,
     captureOutput: boolean = false
   ): child_process.ChildProcess {
     let shellCommand: string = process.env.comspec || 'cmd';
@@ -338,7 +347,7 @@ export default class Utilities {
       {
         cwd: workingDirectory,
         shell: useShell,
-        env: environmentVariables,
+        env: environment,
         stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
   }
@@ -385,7 +394,9 @@ export default class Utilities {
     console.log(os.EOL + 'Running "npm install" in ' + directory);
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
-    Utilities.executeCommandWithRetry('npm', ['install'], maxInstallAttempts, directory, suppressOutput);
+    Utilities.executeCommandWithRetry(maxInstallAttempts, 'npm', ['install'], directory,
+      undefined,
+      suppressOutput);
   }
 
   /**
@@ -395,13 +406,13 @@ export default class Utilities {
   private static _executeCommandInternal(
     command: string, args: string[], workingDirectory: string,
     stdio: (string|number)[] | undefined,
-    environmentVariables: { [key: string]: string | undefined } | undefined): child_process.SpawnSyncReturns<Buffer> {
+    environment?: IEnvironment): child_process.SpawnSyncReturns<Buffer> {
 
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,
       stdio: stdio,
-      env: environmentVariables
+      env: environment
     };
 
     // This is needed since we specify shell=true below.

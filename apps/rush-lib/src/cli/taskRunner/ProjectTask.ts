@@ -4,6 +4,7 @@
 import * as child_process from 'child_process';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
+import * as process from 'process';
 import { JsonFile, Text } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { IPackageDeps } from '@microsoft/package-deps-hash';
@@ -149,7 +150,7 @@ export default class ProjectTask implements ITaskDefinition {
 
         writer.writeLine(normalizedTaskCommand);
         const task: child_process.ChildProcess =
-          Utilities.executeShellCommandAsync(normalizedTaskCommand, projectFolder, process.env, true);
+          Utilities.executeShellCommandAsync(normalizedTaskCommand, projectFolder, undefined, true);
 
         // Hook into events, in order to get live streaming of build log
         task.stdout.on('data', (data: string) => {
