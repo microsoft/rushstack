@@ -11,9 +11,11 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 
 export default class EventHooksManager {
   private _eventHooks: EventHooks;
+  private _commonTempFolder: string;
 
-  public constructor(eventHooks: EventHooks) {
+  public constructor(eventHooks: EventHooks, commonTempFolder: string) {
     this._eventHooks = eventHooks;
+    this._commonTempFolder = commonTempFolder;
   }
 
   public handle(event: Event, isDebug: boolean = false): void {
@@ -26,9 +28,9 @@ export default class EventHooksManager {
       console.log(os.EOL + colors.green(`Executing event hooks for ${Event[event]}`));
       scripts.forEach((script) => {
         try {
-          Utilities.executeShellCommand(script,
+          Utilities.executeLifecycleCommand(script,
             process.cwd(),
-            undefined,
+            this._commonTempFolder,
             true
           );
         } catch (error) {

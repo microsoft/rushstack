@@ -279,7 +279,7 @@ export default class Utilities {
     return child_process.spawn(escapedCommand, escapedArgs, {
       cwd: workingDirectory,
       shell: true,
-      env: environment
+      env: Utilities._createEnvironmentForRushCommand('', environment)
     });
   }
 
@@ -287,13 +287,15 @@ export default class Utilities {
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
    * @param workingDirectory - working directory for running this command
+   * @param initCwd = the folder containing a local .npmrc, which will be used
+   *        for the INIT_CWD environment variable
    * @param environment - environment variables for running this command
    * @beta
    */
-  public static executeShellCommand(
+  public static executeLifecycleCommand(
     command: string,
     workingDirectory: string,
-    environment?: IEnvironment,
+    initCwd: string,
     captureOutput: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {
     let shellCommand: string = process.env.comspec || 'cmd';
@@ -304,6 +306,8 @@ export default class Utilities {
       commandFlags = '-c';
       useShell = false;
     }
+
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(initCwd);
 
     const result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
       shellCommand,
@@ -323,13 +327,15 @@ export default class Utilities {
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
    * @param workingDirectory - working directory for running this command
+   * @param initCwd = the folder containing a local .npmrc, which will be used
+   *        for the INIT_CWD environment variable
    * @param environment - environment variables for running this command
    * @beta
    */
-  public static executeShellCommandAsync(
+  public static executeLifecycleCommandAsync(
     command: string,
     workingDirectory: string,
-    environment?: IEnvironment,
+    initCwd: string,
     captureOutput: boolean = false
   ): child_process.ChildProcess {
     let shellCommand: string = process.env.comspec || 'cmd';
@@ -340,6 +346,8 @@ export default class Utilities {
       commandFlags = '-c';
       useShell = false;
     }
+
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(initCwd);
 
     return child_process.spawn(
       shellCommand,
@@ -395,8 +403,56 @@ export default class Utilities {
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
     Utilities.executeCommandWithRetry(maxInstallAttempts, 'npm', ['install'], directory,
-      undefined,
+      Utilities._createEnvironmentForRushCommand(''),
       suppressOutput);
+  }
+
+  /**
+   * Returns a process.env environment suitable for executing lifecycle scripts.
+   * @param initCwd - The INIT_CWD environment variable
+   * @param initialEnvironment - an existing environment to copy instead of process.env
+   */
+  private static _createEnvironmentForRushCommand(initCwd: string,
+    initialEnvironment?: IEnvironment): { } {
+    if (initialEnvironment === undefined) {
+      initialEnvironment = process.env;
+    }
+    const environment: {} = {};
+    for (const key of Object.getOwnPropertyNames(process.env)) {
+      const normalizedKey: string = os.platform() === 'win32'
+        ? key.toUpperCase() : key;
+
+      // If Rush itself was invoked inside a lifecycle script, this may be set and would interfere
+      // with Rush's installations.  If we actually want it, we will set it explicitly below.
+      if (normalizedKey === 'INIT_CWD') {
+        break;
+      }
+
+      // When NPM invokes a lifecycle event, it copies its entire configuration into environment
+      // variables.  Rush is supposed to be a deterministic controlled environment, so don't bring
+      // this along.
+      //
+      // NOTE: Longer term we should clean out the entire environment and use rush.json to bring
+      // back specific environment variables that the repo maintainer has determined to be safe.
+      if (normalizedKey.match(/^NPM_CONFIG_/)) {
+        break;
+      }
+
+      environment[key] = initialEnvironment[key];
+    }
+
+     // When NPM invokes a lifecycle script, it sets an environment variable INIT_CWD that remembers
+     // the directory that NPM started in.  This allows naive scripts to change their current working directory
+     // and invoke NPM operations, while still be able to find a local .npmrc file.  Although Rush recommends
+     // for toolchain scripts to be professionally written (versus brittle stuff like
+     // "cd ./lib && npm run tsc && cd .."), we support INIT_CWD for compatibility.
+     //
+     // More about this feature: https://github.com/npm/npm/pull/12356
+     if (initCwd) {
+       environment['INIT_CWD'] = initCwd; // tslint:disable-line:no-string-literal
+     }
+
+    return environment;
   }
 
   /**
@@ -412,7 +468,7 @@ export default class Utilities {
       cwd: workingDirectory,
       shell: true,
       stdio: stdio,
-      env: environment
+      env: Utilities._createEnvironmentForRushCommand('', environment)
     };
 
     // This is needed since we specify shell=true below.

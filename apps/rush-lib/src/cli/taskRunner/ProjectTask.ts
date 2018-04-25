@@ -150,7 +150,8 @@ export default class ProjectTask implements ITaskDefinition {
 
         writer.writeLine(normalizedTaskCommand);
         const task: child_process.ChildProcess =
-          Utilities.executeShellCommandAsync(normalizedTaskCommand, projectFolder, undefined, true);
+          Utilities.executeLifecycleCommandAsync(normalizedTaskCommand, projectFolder,
+            this._rushConfiguration.commonTempFolder, true);
 
         // Hook into events, in order to get live streaming of build log
         task.stdout.on('data', (data: string) => {
