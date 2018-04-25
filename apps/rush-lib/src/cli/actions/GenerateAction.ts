@@ -17,9 +17,9 @@ import RushCommandLineParser from './RushCommandLineParser';
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
-import { BaseInstallAction } from './BaseInstallAction';
+import { BaseRushAction } from './BaseRushAction';
 
-export default class GenerateAction extends BaseInstallAction {
+export default class GenerateAction extends BaseRushAction {
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
   private _forceParameter: CommandLineFlagParameter;
@@ -42,8 +42,6 @@ export default class GenerateAction extends BaseInstallAction {
   }
 
   protected onDefineParameters(): void {
-    super.onDefineParameters();
-
     this._lazyParameter = this.defineFlagParameter({
       parameterLongName: '--lazy',
       parameterShortName: '-l',
@@ -111,7 +109,7 @@ export default class GenerateAction extends BaseInstallAction {
 
       if (shrinkwrapFile
         && !this._forceParameter.value
-        && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, false, [])) {
+        && installManager.createTempModulesAndCheckShrinkwrap(shrinkwrapFile, false)) {
         console.log();
         console.log(colors.yellow('Skipping generate, since all project dependencies are already satisfied.'));
         console.log();
@@ -125,7 +123,7 @@ export default class GenerateAction extends BaseInstallAction {
     }
 
     return installManager.ensureLocalPackageManager(false).then(() => {
-      installManager.createTempModules(true, this._authenticationTokensParameter.values);
+      installManager.createTempModules(true);
 
       if (this._conservativeParameter.value) {
         if (fsx.existsSync(committedShrinkwrapFilename)) {
