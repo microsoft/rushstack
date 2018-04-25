@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Remove the experimental --auth-token parameter in favor of tokens in environment variables.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
