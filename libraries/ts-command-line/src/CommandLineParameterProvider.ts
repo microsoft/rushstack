@@ -221,6 +221,7 @@ export abstract class CommandLineParameterProvider {
     const argparseOptions: argparse.ArgumentOptions = {
       help: parameter.description,
       dest: parameter._parserKey,
+      required: parameter.required,
       metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined
     };
 
@@ -234,7 +235,13 @@ export abstract class CommandLineParameterProvider {
         argparseOptions.action = 'storeTrue';
         break;
       case CommandLineParameterKind.Integer:
+        const integerParameter: CommandLineIntegerParameter = parameter as CommandLineIntegerParameter;
         argparseOptions.type = 'int';
+        argparseOptions.defaultValue = integerParameter.defaultValue;
+        break;
+      case CommandLineParameterKind.String:
+        const stringDefaultValue: CommandLineStringParameter = parameter as CommandLineStringParameter;
+        argparseOptions.defaultValue = stringDefaultValue.defaultValue;
         break;
       case CommandLineParameterKind.StringList:
         argparseOptions.action = 'append';

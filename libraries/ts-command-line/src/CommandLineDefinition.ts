@@ -21,6 +21,12 @@ export interface IBaseCommandLineDefinition {
    * Documentation for the flag, that will be shown when invoking the tool with "--help"
    */
   description: string;
+
+  /**
+   * If true, then an error occurs if the parameter was not included on the command-line
+   * or provided via an environment variable.
+   */
+  required?: boolean;
 }
 
 /**
@@ -56,7 +62,7 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
   alternatives: string[];
 
   /**
-   * The default value which will be used if the parameter is omitted from the command line
+   * {@inheritdoc ICommandLineStringDefinition.defaultValue}
    */
   defaultValue?: string;
 }
@@ -75,7 +81,12 @@ export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
  *
  * @public
  */
-export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument { }
+export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument {
+  /**
+   * {@inheritdoc ICommandLineStringDefinition.defaultValue}
+   */
+  defaultValue?: number;
+}
 
 /**
  * For use with CommandLineParser, this interface represents a command line parameter
@@ -83,7 +94,17 @@ export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitio
  *
  * @public
  */
-export interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument { }
+export interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument {
+  /**
+   * The default value which will be used if the parameter is omitted from the command line.
+   *
+   * @remarks
+   * If a default value is specified, then {@link IBaseCommandLineDefinition.required}
+   * must not be true.  Instead, a custom error message should be used to report cases
+   * where the value could not be determined.
+   */
+  defaultValue?: string;
+}
 
 /**
  * For use with CommandLineParser, this interface represents a command line parameter

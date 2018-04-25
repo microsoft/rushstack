@@ -52,6 +52,7 @@ class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
   constructor(definition: ICommandLineIntegerDefinition);
   // @internal
   _setValue(data: any): void;
+  readonly defaultValue: number | undefined;
   readonly kind: CommandLineParameterKind;
   readonly value: number | undefined;
 }
@@ -68,7 +69,10 @@ class CommandLineParameter {
   readonly kind: CommandLineParameterKind;
   readonly longName: string;
   protected reportInvalidData(data: any): never;
+  readonly required: boolean;
   readonly shortName: string | undefined;
+  // (undocumented)
+  protected validateDefaultValue(hasDefaultValue: boolean): void;
 }
 
 // @public
@@ -142,6 +146,7 @@ class CommandLineStringParameter extends CommandLineParameterWithArgument {
   constructor(definition: ICommandLineStringDefinition);
   // @internal
   _setValue(data: any): void;
+  readonly defaultValue: string | undefined;
   readonly kind: CommandLineParameterKind;
   readonly value: string | undefined;
 }
@@ -165,6 +170,7 @@ interface IBaseCommandLineDefinition {
   description: string;
   parameterLongName: string;
   parameterShortName?: string;
+  required?: boolean;
 }
 
 // @public
@@ -191,6 +197,7 @@ interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
 
 // @public
 interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument {
+  defaultValue?: number;
 }
 
 // @public
@@ -201,6 +208,7 @@ interface ICommandLineParserOptions {
 
 // @public
 interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument {
+  defaultValue?: string;
 }
 
 // @public

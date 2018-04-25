@@ -53,22 +53,27 @@ export abstract class CommandLineParameter {
   /** {@inheritdoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
 
+  /** {@inheritdoc IBaseCommandLineDefinition.required} */
+  public readonly required: boolean;
+
   /** @internal */
   constructor(definition: IBaseCommandLineDefinition) {
-    if (!CommandLineParameter._longNameRegExp.test(definition.parameterLongName)) {
-      throw new Error(`Invalid name: "${definition.parameterLongName}". The parameter long name must be`
+    this.longName = definition.parameterLongName;
+    this.shortName = definition.parameterShortName;
+    this.description = definition.description;
+    this.required = !!definition.required;
+
+    if (!CommandLineParameter._longNameRegExp.test(this.longName)) {
+      throw new Error(`Invalid name: "${this.longName}". The parameter long name must be`
         + ` lower-case and use dash delimiters (e.g. "--do-a-thing")`);
     }
-    this.longName = definition.parameterLongName;
 
-    if (definition.parameterShortName) {
-      if (!CommandLineParameter._shortNameRegExp.test(definition.parameterShortName)) {
-        throw new Error(`Invalid name: "${definition.parameterShortName}". The parameter short name must be`
+    if (this.shortName) {
+      if (!CommandLineParameter._shortNameRegExp.test(this.shortName)) {
+        throw new Error(`Invalid name: "${this.shortName}". The parameter short name must be`
           + ` a dash followed by a single upper-case or lower-case letter (e.g. "-a")`);
       }
     }
-    this.shortName = definition.parameterShortName;
-    this.description = definition.description;
   }
 
   /**
@@ -88,6 +93,18 @@ export abstract class CommandLineParameter {
   protected reportInvalidData(data: any): never { // tslint:disable-line:no-any
     throw new Error(`Unexpected data object for parameter "${this.longName}": `
       + JSON.stringify(data));
+  }
+
+  protected validateDefaultValue(hasDefaultValue: boolean): void {
+    if (this.required && hasDefaultValue) {
+      // If a parameter is "required", then the user understands that they always need to
+      // specify a value for this parameter (either via the command line or via an environment variable).
+      // It would be confusing to allow a default value that sometimes allows the "required" parameter
+      // to be omitted.  If you sometimes don't have a suitable default value, then the better approach
+      // is to throw a custom error explaining why the parameter is required in that case.
+      throw new Error(`A default value cannot be specified for "${this.longName}"`
+        + ` because it is a "required" parameter`);
+    }
   }
 }
 
@@ -134,7 +151,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
   /** {@inheritdoc ICommandLineChoiceDefinition.alternatives} */
   public readonly alternatives: ReadonlyArray<string>;
 
-  /** {@inheritdoc ICommandLineChoiceDefinition.defaultValue} */
+  /** {@inheritdoc ICommandLineStringDefinition.defaultValue} */
   public readonly defaultValue: string | undefined;
 
   private _value: string | undefined = undefined;
@@ -153,6 +170,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
 
     this.alternatives = definition.alternatives;
     this.defaultValue = definition.defaultValue;
+    this.validateDefaultValue(!!this.defaultValue);
   }
 
   /** {@inheritdoc CommandLineParameter.kind} */
@@ -236,11 +254,16 @@ export class CommandLineFlagParameter extends CommandLineParameter {
  * @public
  */
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
+  /** {@inheritdoc ICommandLineStringDefinition.defaultValue} */
+  public readonly defaultValue: number | undefined;
+
   private _value: number | undefined = undefined;
 
   /** @internal */
   constructor(definition: ICommandLineIntegerDefinition) {
     super(definition);
+    this.defaultValue = definition.defaultValue;
+    this.validateDefaultValue(!!this.defaultValue);
   }
 
   /** {@inheritdoc CommandLineParameter.kind} */
@@ -280,11 +303,17 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
  * @public
  */
 export class CommandLineStringParameter extends CommandLineParameterWithArgument {
+  /** {@inheritdoc ICommandLineStringDefinition.defaultValue} */
+  public readonly defaultValue: string | undefined;
+
   private _value: string | undefined = undefined;
 
   /** @internal */
   constructor(definition: ICommandLineStringDefinition) {
     super(definition);
+
+    this.defaultValue = definition.defaultValue;
+    this.validateDefaultValue(!!this.defaultValue);
   }
 
   /** {@inheritdoc CommandLineParameter.kind} */
