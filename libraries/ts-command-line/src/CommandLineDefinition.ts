@@ -27,6 +27,16 @@ export interface IBaseCommandLineDefinition {
    * or provided via an environment variable.
    */
   required?: boolean;
+
+  /**
+   * The name of an environment variable that the parameter value will be read from,
+   * if it was omitted from the command-line.  An error will be reported if the
+   * environment value cannot be parsed.
+   * @remarks
+   * The environment variable name must consist only of upper-case letters, numbers,
+   * and underscores. It may not start with a number.
+   */
+  environmentVariable?: string;
 }
 
 /**

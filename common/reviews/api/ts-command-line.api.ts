@@ -66,6 +66,7 @@ class CommandLineParameter {
   // @internal
   abstract _setValue(data: any): void;
   readonly description: string;
+  readonly environmentVariable: string | undefined;
   readonly kind: CommandLineParameterKind;
   readonly longName: string;
   protected reportInvalidData(data: any): never;
@@ -88,6 +89,8 @@ enum CommandLineParameterKind {
 class CommandLineParameterProvider {
   // @internal
   constructor();
+  // @internal
+  _enterLeaveHelpMode(entering: boolean): void;
   // @internal
   protected abstract _getArgumentParser(): argparse.ArgumentParser;
   // @internal (undocumented)
@@ -117,6 +120,8 @@ class CommandLineParameterWithArgument extends CommandLineParameter {
 // @public
 class CommandLineParser extends CommandLineParameterProvider {
   constructor(options: ICommandLineParserOptions);
+  // @internal
+  _enterLeaveHelpMode(entering: boolean): void;
   // @internal
   protected _getArgumentParser(): argparse.ArgumentParser;
   readonly actions: ReadonlyArray<CommandLineAction>;
@@ -168,6 +173,7 @@ class DynamicCommandLineParser extends CommandLineParser {
 // @public
 interface IBaseCommandLineDefinition {
   description: string;
+  environmentVariable?: string;
   parameterLongName: string;
   parameterShortName?: string;
   required?: boolean;
