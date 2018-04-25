@@ -418,14 +418,14 @@ export default class Utilities {
       initialEnvironment = process.env;
     }
     const environment: {} = {};
-    for (const key of Object.getOwnPropertyNames(process.env)) {
+    for (const key of Object.getOwnPropertyNames(initialEnvironment)) {
       const normalizedKey: string = os.platform() === 'win32'
         ? key.toUpperCase() : key;
 
       // If Rush itself was invoked inside a lifecycle script, this may be set and would interfere
       // with Rush's installations.  If we actually want it, we will set it explicitly below.
       if (normalizedKey === 'INIT_CWD') {
-        break;
+        continue;
       }
 
       // When NPM invokes a lifecycle event, it copies its entire configuration into environment
@@ -435,7 +435,7 @@ export default class Utilities {
       // NOTE: Longer term we should clean out the entire environment and use rush.json to bring
       // back specific environment variables that the repo maintainer has determined to be safe.
       if (normalizedKey.match(/^NPM_CONFIG_/)) {
-        break;
+        continue;
       }
 
       environment[key] = initialEnvironment[key];
