@@ -38,6 +38,7 @@ export class CustomRushAction extends BaseRushAction {
   private _changedProjectsOnly: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
   private _toFlag: CommandLineStringListParameter;
+  private _toVersionPolicy: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
 
@@ -101,7 +102,7 @@ export class CustomRushAction extends BaseRushAction {
     const tasks: TaskSelector = new TaskSelector(
       {
         rushConfiguration: this.parser.rushConfiguration,
-        toFlags: this._toFlag.values,
+        toFlags: this._mergeToProjects(),
         fromFlags: this._fromFlag.values,
         commandToRun: this.actionName,
         customFlags,
@@ -144,6 +145,11 @@ export class CustomRushAction extends BaseRushAction {
       argumentName: 'PROJECT1',
       description: 'Run command in the specified project and all of its dependencies'
     });
+    this._toVersionPolicy =  this.defineStringListParameter({
+      parameterLongName: '--to-version-policy',
+      argumentName: 'VERSION_POLICY_NAME',
+      description: 'Run command in all projects with the specified version policy and all of their dependencies'
+    });
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
       parameterShortName: '-f',
@@ -185,6 +191,21 @@ export class CustomRushAction extends BaseRushAction {
         });
       }
     });
+  }
+
+  private _mergeToProjects(): string[] {
+    const projects: string[] = [...this._toFlag.values];
+    if (this._toVersionPolicy.values && this._toVersionPolicy.values.length) {
+      this.rushConfiguration.projects.forEach(project => {
+        const matches: boolean = this._toVersionPolicy.values.some(policyName => {
+          return project.versionPolicyName === policyName;
+        });
+        if (matches) {
+          projects.push(project.packageName);
+        }
+      });
+    }
+    return projects;
   }
 
   private _isParallelized(): boolean {
