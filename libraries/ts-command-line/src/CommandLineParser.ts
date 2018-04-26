@@ -41,11 +41,6 @@ export class CommandLineParserExitError extends Error {
 }
 
 class CustomArgumentParser extends argparse.ArgumentParser {
-
-  constructor(options: argparse.ArgumentParserOptions | undefined) {
-    super(options);
-  }
-
   public exit(status: number, message: string): void { // override
     throw new CommandLineParserExitError(status, message);
   }

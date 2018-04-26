@@ -220,8 +220,9 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
       const environmentValue: string | undefined = process.env[this.environmentVariable];
       if (environmentValue !== undefined && environmentValue !== '') {
         if (this.alternatives.indexOf(environmentValue) < 0) {
-          throw new Error(`Invalid value for the environment variable ${this.environmentVariable}. Valid choices are: "`
-            + this.alternatives.join('", "')) + '"';
+          const choices: string = '"' + this.alternatives.join('", "') + '"';
+          throw new Error(`Invalid value "${environmentValue}" for the environment variable`
+            + ` ${this.environmentVariable}.  Valid choices are: ${choices}`);
         }
         this._value = environmentValue;
         return;
@@ -284,8 +285,8 @@ export class CommandLineFlagParameter extends CommandLineParameter {
       const environmentValue: string | undefined = process.env[this.environmentVariable];
       if (environmentValue !== undefined && environmentValue !== '') {
         if (environmentValue !== '0' && environmentValue !== '1') {
-          throw new Error(`Invalid value for the environment variable ${this.environmentVariable}.`
-            + ` Valid choices are 0 or 1.`);
+          throw new Error(`Invalid value "${environmentValue}" for the environment variable`
+            + ` ${this.environmentVariable}.  Valid choices are 0 or 1.`);
         }
         this._value = environmentValue === '1';
         return;
@@ -349,8 +350,8 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
       if (environmentValue !== undefined && environmentValue !== '') {
         const parsed: number = parseInt(environmentValue, 10);
         if (isNaN(parsed) || environmentValue.indexOf('.') >= 0) {
-          throw new Error(`Invalid value for the environment variable ${this.environmentVariable}.`
-            + ' It must be an integer value.');
+          throw new Error(`Invalid value "${environmentValue}" for the environment variable`
+            + ` ${this.environmentVariable}.  It must be an integer value.`);
         }
         this._value = parsed;
         return;
