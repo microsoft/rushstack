@@ -73,7 +73,8 @@ export abstract class BaseRushAction extends CommandLineAction {
 
   protected get eventHooksManager(): EventHooksManager {
     if (!this._eventHooksManager) {
-      this._eventHooksManager = new EventHooksManager(this.rushConfiguration.eventHooks);
+      this._eventHooksManager = new EventHooksManager(this.rushConfiguration.eventHooks,
+        this.rushConfiguration.commonTempFolder);
     }
     return this._eventHooksManager;
   }

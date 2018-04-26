@@ -625,7 +625,7 @@ export default class InstallManager {
               + ` in ${this._rushConfiguration.commonTempFolder}`);
             const args: string[] = ['prune'];
             this.pushConfigurationArgs(args);
-            Utilities.executeCommandWithRetry(packageManagerFilename, args, MAX_INSTALL_ATTEMPTS,
+            Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename, args,
               this._rushConfiguration.commonTempFolder);
           }
 
@@ -672,10 +672,10 @@ export default class InstallManager {
       console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
         + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
 
-      Utilities.executeCommandWithRetry(packageManagerFilename,
+      Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
         installArgs,
-        MAX_INSTALL_ATTEMPTS,
         this._rushConfiguration.commonTempFolder,
+        undefined,
         false, () => {
           if (this._rushConfiguration.packageManager === 'pnpm') {
             // If there is a failure in pnpm, it is possible that it left the

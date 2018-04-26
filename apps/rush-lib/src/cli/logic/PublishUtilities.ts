@@ -18,7 +18,7 @@ import {
   ChangeType
 } from '../../data/ChangeManagement';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
-import Utilities from '../../utilities/Utilities';
+import Utilities, { IEnvironment } from '../../utilities/Utilities';
 import { execSync } from 'child_process';
 import PrereleaseToken from './PrereleaseToken';
 import ChangeFiles from './ChangeFiles';
@@ -185,18 +185,13 @@ export default class PublishUtilities {
     command: string,
     args: string[] = [],
     workingDirectory: string = process.cwd(),
-    env?: { [key: string]: string | undefined }
+    environment?: IEnvironment
   ): void {
 
     let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
-    const envArgs: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
     if (relativeDirectory) {
       relativeDirectory = `(${relativeDirectory})`;
-    }
-
-    if (env) {
-      Object.keys(env).forEach((name: string) => envArgs[name] = env[name]);
     }
 
     console.log(
@@ -208,8 +203,8 @@ export default class PublishUtilities {
         command,
         args,
         workingDirectory,
-        false,
-        env);
+        environment,
+        false);
     }
   }
 
