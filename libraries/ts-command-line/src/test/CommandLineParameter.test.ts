@@ -71,7 +71,6 @@ function createParser(): DynamicCommandLineParser {
     parameterLongName: '--integer-required',
     description: 'An integer',
     argumentName: 'NUMBER',
-    environmentVariable: 'ENV_INTEGER',
     required: true
   });
 

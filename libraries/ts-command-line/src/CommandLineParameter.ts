@@ -87,6 +87,11 @@ export abstract class CommandLineParameter {
     }
 
     if (this.environmentVariable) {
+      if (this.required) {
+        throw new Error(`An "environmentVariable" cannot be specified for "${this.longName}"`
+          + ` because it is a required parameter`);
+      }
+
       if (!CommandLineParameter._environmentVariableRegExp.test(this.environmentVariable)) {
         throw new Error(`Invalid environment variable name: "${this.environmentVariable}". The name must`
           + ` consist only of upper-case letters, numbers, and underscores. It may not start with a number.`);

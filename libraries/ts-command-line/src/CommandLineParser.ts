@@ -41,11 +41,9 @@ export class CommandLineParserExitError extends Error {
 }
 
 class CustomArgumentParser extends argparse.ArgumentParser {
-  private _commandLineParser: CommandLineParser;
 
-  constructor(commandLineParser: CommandLineParser, options: argparse.ArgumentParserOptions | undefined) {
+  constructor(options: argparse.ArgumentParserOptions | undefined) {
     super(options);
-    this._commandLineParser = commandLineParser;
   }
 
   public exit(status: number, message: string): void { // override
@@ -59,24 +57,6 @@ class CustomArgumentParser extends argparse.ArgumentParser {
     }
 
     super.error(err);
-  }
-
-  public formatUsage(): string {
-    try {
-      this._commandLineParser._enterLeaveHelpMode(true);
-      return super.formatUsage();
-    } finally {
-      this._commandLineParser._enterLeaveHelpMode(false);
-    }
-  }
-
-  public formatHelp(): string {
-    try {
-      this._commandLineParser._enterLeaveHelpMode(true);
-      return super.formatHelp();
-    } finally {
-      this._commandLineParser._enterLeaveHelpMode(false);
-    }
   }
 }
 
@@ -118,15 +98,13 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     this._actions = [];
     this._actionsByName = new  Map<string, CommandLineAction>();
 
-    this._argumentParser = new CustomArgumentParser(this,
-      {
-        addHelp: true,
-        prog: this._options.toolFilename,
-        description: this._options.toolDescription,
-        epilog: colors.bold('For detailed help about a specific command, use:'
-          + ` ${this._options.toolFilename} <command> -h`)
-      }
-    );
+    this._argumentParser = new CustomArgumentParser({
+      addHelp: true,
+      prog: this._options.toolFilename,
+      description: this._options.toolDescription,
+      epilog: colors.bold('For detailed help about a specific command, use:'
+        + ` ${this._options.toolFilename} <command> -h`)
+    });
 
     this._actionsSubParser = this._argumentParser.addSubparsers({
       metavar: '<command>',
@@ -253,18 +231,6 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         }
       }
       return Promise.reject(err);
-    }
-  }
-
-  /**
-   * {@inheritdoc CommandLineParameterProvider._enterLeaveHelpMode}
-   * @internal
-   */
-  public _enterLeaveHelpMode(entering: boolean): void { // override
-    super._enterLeaveHelpMode(entering);
-
-    for (const action of this._actions) {
-      action._enterLeaveHelpMode(entering);
     }
   }
 

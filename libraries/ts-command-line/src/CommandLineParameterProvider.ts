@@ -30,11 +30,6 @@ export interface ICommandLineParserData {
   [key: string]: any; // tslint:disable-line:no-any
 }
 
-// This is missing from the argparse typings
-interface IArgparseParameter {
-  required: boolean;
-}
-
 /**
  * This is the common base class for CommandLineAction and CommandLineParser
  * that provides functionality for defining command-line parameters.
@@ -46,9 +41,6 @@ export abstract class CommandLineParameterProvider {
 
   private _parameters: CommandLineParameter[];
   private _parametersByLongName: Map<string, CommandLineParameter>;
-
-  // Used by the _enterLeaveHelpMode() workaround
-  private _requiredParameters: IArgparseParameter[] = [];
 
   /** @internal */
   // Third party code should not inherit subclasses or call this constructor
@@ -175,27 +167,7 @@ export abstract class CommandLineParameterProvider {
    * Generates the command-line help text.
    */
   public renderHelpText(): string {
-    try {
-      this._enterLeaveHelpMode(true);
-      return this._getArgumentParser().formatHelp();
-    }
-    finally {
-      this._enterLeaveHelpMode(false);
-    }
-  }
-
-  /**
-   * Because of our defaultValue and environmentVariable features, we cannot rely on  "required"
-   * feature of argparse.  However, we do need argparse to format parameters as "required" in
-   * the displayed help.  The workaround is to temporarily enable argparse's "required" flag
-   * only while help is being formatted.
-   * @internal
-   */
-  public _enterLeaveHelpMode(entering: boolean): void { // virtual
-    // Temporarily mark the parameters as "required" only while argparse is printing the help
-    for (const requiredParameter of this._requiredParameters) {
-      requiredParameter.required = entering;
-    }
+    return this._getArgumentParser().formatHelp();
   }
 
   /**
@@ -247,12 +219,12 @@ export abstract class CommandLineParameterProvider {
     parameter._parserKey = this._generateKey();
 
     // NOTE: Our "environmentVariable" feature takes precedence over argparse's "defaultValue",
-    // so we have to reimplement that feature.  The same is true for the argparse's "required" feature,
-    // but since it affects the help formatting, we will temporarily turn it when rendering the help.
+    // so we have to reimplement that feature.
     const argparseOptions: argparse.ArgumentOptions = {
       help: parameter.description,
       dest: parameter._parserKey,
-      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined
+      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined,
+      required: parameter.required
     };
 
     switch (parameter.kind) {
@@ -273,14 +245,9 @@ export abstract class CommandLineParameterProvider {
         break;
     }
 
-    // tslint:disable-next-line:no-any
-    const argparseParameter: any = this._getArgumentParser().addArgument(names, argparseOptions) as any;
+    this._getArgumentParser().addArgument(names, argparseOptions);
 
     this._parameters.push(parameter);
     this._parametersByLongName.set(parameter.longName, parameter);
-
-    if (parameter.required) {
-      this._requiredParameters.push(argparseParameter);
-    }
   }
 }

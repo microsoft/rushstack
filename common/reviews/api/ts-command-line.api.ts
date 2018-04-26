@@ -90,8 +90,6 @@ class CommandLineParameterProvider {
   // @internal
   constructor();
   // @internal
-  _enterLeaveHelpMode(entering: boolean): void;
-  // @internal
   protected abstract _getArgumentParser(): argparse.ArgumentParser;
   // @internal (undocumented)
   protected _processParsedData(data: ICommandLineParserData): void;
@@ -120,8 +118,6 @@ class CommandLineParameterWithArgument extends CommandLineParameter {
 // @public
 class CommandLineParser extends CommandLineParameterProvider {
   constructor(options: ICommandLineParserOptions);
-  // @internal
-  _enterLeaveHelpMode(entering: boolean): void;
   // @internal
   protected _getArgumentParser(): argparse.ArgumentParser;
   readonly actions: ReadonlyArray<CommandLineAction>;

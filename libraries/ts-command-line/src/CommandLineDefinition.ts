@@ -23,8 +23,7 @@ export interface IBaseCommandLineDefinition {
   description: string;
 
   /**
-   * If true, then an error occurs if the parameter was not included on the command-line
-   * or provided via an environment variable.
+   * If true, then an error occurs if the parameter was not included on the command-line.
    */
   required?: boolean;
 
@@ -35,6 +34,9 @@ export interface IBaseCommandLineDefinition {
    * @remarks
    * The environment variable name must consist only of upper-case letters, numbers,
    * and underscores. It may not start with a number.
+   *
+   * This feature cannot be used when {@link IBaseCommandLineDefinition.required} is true,
+   * because in that case the environmentVariable would never be used.
    */
   environmentVariable?: string;
 }
@@ -111,7 +113,7 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
    * @remarks
    * If a default value is specified, then {@link IBaseCommandLineDefinition.required}
    * must not be true.  Instead, a custom error message should be used to report cases
-   * where the value could not be determined.
+   * where a default value was not available.
    */
   defaultValue?: string;
 }
