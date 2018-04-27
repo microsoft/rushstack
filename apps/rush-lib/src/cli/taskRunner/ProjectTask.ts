@@ -13,7 +13,7 @@ import RushConfiguration from '../../data/RushConfiguration';
 import RushConfigurationProject from '../../data/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import Utilities from '../../utilities/Utilities';
-import TaskStatus from './TaskStatus';
+import { TaskStatus } from './TaskStatus';
 import TaskError from './TaskError';
 import { ITaskDefinition } from '../taskRunner/ITask';
 import {

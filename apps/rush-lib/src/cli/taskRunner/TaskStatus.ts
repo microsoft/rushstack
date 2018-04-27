@@ -4,13 +4,12 @@
 /**
  * Enumeration defining potential states of a task: not started, executing, or completed
  */
-enum TaskStatus {
-  Ready = 1,
-  Executing = 2,
-  Success = 3,
-  SuccessWithWarning = 4,
-  Skipped = 5,
-  Failure = 6,
-  Blocked = 7
+export enum TaskStatus {
+  Ready = 'READY',
+  Executing = 'EXECUTING',
+  Success = 'SUCCESS',
+  SuccessWithWarning = 'SUCCESS WITH WARNINGS',
+  Skipped = 'SKIPPED',
+  Failure = 'FAILURE',
+  Blocked = 'BLOCKED'
 }
-export default TaskStatus;
