@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Print the project's relative path to the log in addition to the name.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
