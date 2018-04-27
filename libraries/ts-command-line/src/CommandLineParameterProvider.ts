@@ -218,23 +218,40 @@ export abstract class CommandLineParameterProvider {
 
     parameter._parserKey = this._generateKey();
 
+    let finalDescription: string = parameter.description;
+
+    const supplementaryNotes: string[] = [];
+    parameter._getSupplementaryNotes(supplementaryNotes);
+    if (supplementaryNotes.length > 0) {
+      // If they left the period off the end of their sentence, then add one.
+      if (finalDescription.match(/[a-z0-9]\s*$/i)) {
+        finalDescription = finalDescription.trimRight() + '.';
+      }
+      // Append the supplementary text
+      finalDescription += ' ' + supplementaryNotes.join(' ');
+    }
+
+    // NOTE: Our "environmentVariable" feature takes precedence over argparse's "defaultValue",
+    // so we have to reimplement that feature.
     const argparseOptions: argparse.ArgumentOptions = {
-      help: parameter.description,
+      help: finalDescription,
       dest: parameter._parserKey,
-      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined
+      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined,
+      required: parameter.required
     };
 
     switch (parameter.kind) {
       case CommandLineParameterKind.Choice:
         const choiceParameter: CommandLineChoiceParameter = parameter as CommandLineChoiceParameter;
         argparseOptions.choices = choiceParameter.alternatives as string[];
-        argparseOptions.defaultValue = choiceParameter.defaultValue;
         break;
       case CommandLineParameterKind.Flag:
         argparseOptions.action = 'storeTrue';
         break;
       case CommandLineParameterKind.Integer:
         argparseOptions.type = 'int';
+        break;
+      case CommandLineParameterKind.String:
         break;
       case CommandLineParameterKind.StringList:
         argparseOptions.action = 'append';

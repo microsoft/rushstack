@@ -21,6 +21,24 @@ export interface IBaseCommandLineDefinition {
    * Documentation for the flag, that will be shown when invoking the tool with "--help"
    */
   description: string;
+
+  /**
+   * If true, then an error occurs if the parameter was not included on the command-line.
+   */
+  required?: boolean;
+
+  /**
+   * The name of an environment variable that the parameter value will be read from,
+   * if it was omitted from the command-line.  An error will be reported if the
+   * environment value cannot be parsed.
+   * @remarks
+   * The environment variable name must consist only of upper-case letters, numbers,
+   * and underscores. It may not start with a number.
+   *
+   * This feature cannot be used when {@link IBaseCommandLineDefinition.required} is true,
+   * because in that case the environmentVariable would never be used.
+   */
+  environmentVariable?: string;
 }
 
 /**
@@ -56,7 +74,7 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
   alternatives: string[];
 
   /**
-   * The default value which will be used if the parameter is omitted from the command line
+   * {@inheritdoc ICommandLineStringDefinition.defaultValue}
    */
   defaultValue?: string;
 }
@@ -75,7 +93,12 @@ export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
  *
  * @public
  */
-export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument { }
+export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument {
+  /**
+   * {@inheritdoc ICommandLineStringDefinition.defaultValue}
+   */
+  defaultValue?: number;
+}
 
 /**
  * For use with CommandLineParser, this interface represents a command line parameter
@@ -83,7 +106,17 @@ export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitio
  *
  * @public
  */
-export interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument { }
+export interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument {
+  /**
+   * The default value which will be used if the parameter is omitted from the command line.
+   *
+   * @remarks
+   * If a default value is specified, then {@link IBaseCommandLineDefinition.required}
+   * must not be true.  Instead, a custom error message should be used to report cases
+   * where a default value was not available.
+   */
+  defaultValue?: string;
+}
 
 /**
  * For use with CommandLineParser, this interface represents a command line parameter
