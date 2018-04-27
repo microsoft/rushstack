@@ -1,6 +1,13 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Thu, 19 Apr 2018 21:25:56 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Apr 2018 03:04:32 GMT and should not be manually modified.
+
+## 4.1.0
+Fri, 27 Apr 2018 03:04:32 GMT
+
+### Minor changes
+
+- Add "defaultValue", "environmentVariable", and "required" features for command-line parameters
 
 ## 4.0.0
 Thu, 19 Apr 2018 21:25:56 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.6.6",
+      "tag": "@microsoft/api-extractor_v5.6.6",
+      "date": "Fri, 27 Apr 2018 03:04:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.0.0` to `4.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.6.5",
       "tag": "@microsoft/api-extractor_v5.6.5",
       "date": "Thu, 19 Apr 2018 21:25:56 GMT",

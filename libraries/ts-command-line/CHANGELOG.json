@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "4.1.0",
+      "tag": "@microsoft/ts-command-line_v4.1.0",
+      "date": "Fri, 27 Apr 2018 03:04:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add \"defaultValue\", \"environmentVariable\", and \"required\" features for command-line parameters"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.0",
       "tag": "@microsoft/ts-command-line_v4.0.0",
       "date": "Thu, 19 Apr 2018 21:25:56 GMT",
