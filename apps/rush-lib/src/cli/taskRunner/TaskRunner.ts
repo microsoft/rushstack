@@ -426,7 +426,7 @@ export default class TaskRunner {
           case TaskStatus.SuccessWithWarning:
           case TaskStatus.Blocked:
           case TaskStatus.Failure:
-          console.log(color(`${task.name} (${task.stopwatch.toString()})`));
+            console.log(color(`${task.name} (${task.stopwatch.toString()})`));
             break;
         }
 
