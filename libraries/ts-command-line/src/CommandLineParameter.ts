@@ -106,6 +106,17 @@ export abstract class CommandLineParameter {
   public abstract _setValue(data: any): void; // tslint:disable-line:no-any
 
   /**
+   * Returns additional text used by the help formatter.
+   * @internal
+   */
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+    if (this.environmentVariable !== undefined) {
+      supplementaryNotes.push('This parameter may alternatively specified via the ' + this.environmentVariable
+      + ' environment variable.');
+    }
+  }
+
+  /**
    * Indicates the type of parameter.
    */
   public abstract get kind(): CommandLineParameterKind;
@@ -238,6 +249,17 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
   }
 
   /**
+   * {@inheritdoc CommandLineParameter._getSupplementaryNotes}
+   * @internal
+   */
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+    super._getSupplementaryNotes(supplementaryNotes);
+    if (this.defaultValue !== undefined) {
+      supplementaryNotes.push(`The default value is "${this.defaultValue}".`);
+    }
+  }
+
+  /**
    * Returns the argument value for a choice parameter that was parsed from the command line.
    *
    * @remarks
@@ -367,6 +389,17 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
   }
 
   /**
+   * {@inheritdoc CommandLineParameter._getSupplementaryNotes}
+   * @internal
+   */
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+    super._getSupplementaryNotes(supplementaryNotes);
+    if (this.defaultValue !== undefined) {
+      supplementaryNotes.push(`The default value is ${this.defaultValue}.`);
+    }
+  }
+
+  /**
    * Returns the argument value for an integer parameter that was parsed from the command line.
    *
    * @remarks
@@ -432,6 +465,19 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     }
 
     this._value = undefined;
+  }
+
+  /**
+   * {@inheritdoc CommandLineParameter._getSupplementaryNotes}
+   * @internal
+   */
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+    super._getSupplementaryNotes(supplementaryNotes);
+    if (this.defaultValue !== undefined) {
+      if (this.defaultValue.length < 160) {
+        supplementaryNotes.push(`The default value is ${JSON.stringify(this.defaultValue)}.`);
+      }
+    }
   }
 
   /**

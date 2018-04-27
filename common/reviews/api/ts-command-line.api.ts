@@ -29,6 +29,8 @@ class CommandLineChoiceParameter extends CommandLineParameter {
   // @internal
   constructor(definition: ICommandLineChoiceDefinition);
   // @internal
+  _getSupplementaryNotes(supplementaryNotes: string[]): void;
+  // @internal
   _setValue(data: any): void;
   readonly alternatives: ReadonlyArray<string>;
   readonly defaultValue: string | undefined;
@@ -51,6 +53,8 @@ class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
   // @internal
   constructor(definition: ICommandLineIntegerDefinition);
   // @internal
+  _getSupplementaryNotes(supplementaryNotes: string[]): void;
+  // @internal
   _setValue(data: any): void;
   readonly defaultValue: number | undefined;
   readonly kind: CommandLineParameterKind;
@@ -61,6 +65,8 @@ class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
 class CommandLineParameter {
   // @internal
   constructor(definition: IBaseCommandLineDefinition);
+  // @internal
+  _getSupplementaryNotes(supplementaryNotes: string[]): void;
   // @internal
   _parserKey: string;
   // @internal
@@ -145,6 +151,8 @@ class CommandLineStringListParameter extends CommandLineParameterWithArgument {
 class CommandLineStringParameter extends CommandLineParameterWithArgument {
   // @internal
   constructor(definition: ICommandLineStringDefinition);
+  // @internal
+  _getSupplementaryNotes(supplementaryNotes: string[]): void;
   // @internal
   _setValue(data: any): void;
   readonly defaultValue: string | undefined;
