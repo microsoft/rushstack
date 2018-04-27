@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as colors from 'colors';
 
 import {
   getPackageDeps,
@@ -49,13 +50,24 @@ export class PackageChangeAnalyzer {
 
     const noProjectHashes: { [key: string]: string } = {};
 
-    // Load the package deps hash for the whole repository
-    const repoDeps: IPackageDeps = PackageChangeAnalyzer.getPackageDeps(
-      this._rushConfiguration.rushJsonFolder, [RushConstants.packageDepsFilename]
-    );
+    let repoDeps: IPackageDeps;
+    try {
+      // Load the package deps hash for the whole repository
+      repoDeps = PackageChangeAnalyzer.getPackageDeps(
+        this._rushConfiguration.rushJsonFolder + 'asdfasdfasdfasdfasdf', [RushConstants.packageDepsFilename]
+      );
+    } catch (e) {
+      // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
+      // the state of the files in the repo. This can happen if the environment doesn't have git.
+      console.log(colors.yellow(
+        `Unable to calculate the state of the repo. This can happen if git isn't present ` +
+        `(inner error: ${e}). Continuing without diffing files.`
+      ));
+      return projectHashDeps;
+    }
 
     // Sort each project folder into its own package deps hash
-    Object.keys(repoDeps.files).forEach((filepath: string) => {
+    Object.keys(repoDeps!.files).forEach((filepath: string) => {
       const fileHash: string = repoDeps.files[filepath];
 
       const projectName: string | undefined = this._getProjectForFile(filepath);
