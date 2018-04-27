@@ -42,6 +42,10 @@ export default class ProjectTask implements ITaskDefinition {
     return this._rushProject.packageName;
   }
 
+  public get logName(): string {
+    return `${this.name} (${this._rushProject.projectRelativeFolder})`;
+  }
+
   public isIncrementalBuildAllowed: boolean;
 
   private _hasWarningOrError: boolean;
@@ -103,7 +107,7 @@ export default class ProjectTask implements ITaskDefinition {
     let lastPackageDeps: IPackageDependencies | undefined = undefined;
 
     try {
-      writer.writeLine(`>>> ${this.name}`);
+      writer.writeLine(`>>> ${this.logName}`);
 
       const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
       if (fsx.existsSync(currentDepsPath)) {
@@ -200,7 +204,7 @@ export default class ProjectTask implements ITaskDefinition {
 
       if (script === undefined) {
         // tslint:disable-next-line:max-line-length
-        throw new Error(`The project [${this._rushProject.packageName}] does not define a 'build' command in the 'scripts' section of its package.json`);
+        throw new Error(`The project [${this.logName}] does not define a 'build' command in the 'scripts' section of its package.json`);
       }
 
     } else {
@@ -208,7 +212,7 @@ export default class ProjectTask implements ITaskDefinition {
 
       if (script === undefined && !this._ignoreMissingScript) {
         // tslint:disable-next-line:max-line-length
-        throw new Error(`The project [${this._rushProject.packageName}] does not define a '${this._commandToRun}' command in the 'scripts' section of its package.json`);
+        throw new Error(`The project [${this.logName}] does not define a '${this._commandToRun}' command in the 'scripts' section of its package.json`);
       }
     }
 

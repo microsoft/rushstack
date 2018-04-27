@@ -17,6 +17,11 @@ export interface ITaskDefinition {
   name: string;
 
   /**
+   * The name of the task definition, intended be printed to logs.
+   */
+  logName: string;
+
+  /**
    * This flag determines if an incremental build is allowed for the task.
    */
   isIncrementalBuildAllowed: boolean;
