@@ -408,7 +408,7 @@ export default class TaskRunner {
       console.log(color('================================'));
       for (let i: number = 0; i < tasks.length; i++) {
         const task: ITask = tasks[i];
-        console.log(color(`${task.name} (${task.stopwatch.toString()})`));
+        console.log(color(task.logName));
         if (task.writer) {
           let stderr: string = task.writer.getStdError();
           if (stderr && (task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning)) {
