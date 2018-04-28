@@ -693,7 +693,9 @@ export default class InstallManager {
           }
         });
 
-      this._fixupNpm5Regression();
+      if (this._rushConfiguration.packageManager === 'npm') {
+        this._fixupNpm5Regression();
+      }
 
       // Finally, create the marker file to indicate a successful install
       this._commonNodeModulesMarker.create();
