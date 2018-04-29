@@ -627,23 +627,23 @@ export default class InstallManager {
             this.pushConfigurationArgs(args);
             Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename, args,
               this._rushConfiguration.commonTempFolder);
-          }
 
-          // Delete the (installed image of) the temp projects, since "npm install" does not
-          // detect changes for "file:./" references.
-          // We recognize the temp projects by their names, which always start with "rush-".
+            // Delete the (installed image of) the temp projects, since "npm install" does not
+            // detect changes for "file:./" references.
+            // We recognize the temp projects by their names, which always start with "rush-".
 
-          // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp"
-          const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
-          console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
-          // Glob can't handle Windows paths
-          const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
+            // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp"
+            const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
+            console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
+            // Glob can't handle Windows paths
+            const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
 
-          // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
-          for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
-            // We could potentially use AsyncRecycler here, but in practice these folders tend
-            // to be very small
-            Utilities.dangerouslyDeletePath(tempModulePath);
+            // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
+            for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
+              // We could potentially use AsyncRecycler here, but in practice these folders tend
+              // to be very small
+              Utilities.dangerouslyDeletePath(tempModulePath);
+            }
           }
         }
       }
@@ -693,7 +693,9 @@ export default class InstallManager {
           }
         });
 
-      this._fixupNpm5Regression();
+      if (this._rushConfiguration.packageManager === 'npm') {
+        this._fixupNpm5Regression();
+      }
 
       // Finally, create the marker file to indicate a successful install
       this._commonNodeModulesMarker.create();
