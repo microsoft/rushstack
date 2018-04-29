@@ -35,8 +35,15 @@ export enum CommandLineParameterKind {
 export abstract class CommandLineParameter {
   // Example: "--do-something"
   private static _longNameRegExp: RegExp = /^-(-[a-z0-9]+)+$/;
+
   // Example: "-d"
   private static _shortNameRegExp: RegExp = /^-[a-zA-Z]$/;
+
+  // "Environment variable names used by the utilities in the Shell and Utilities volume of
+  // IEEE Std 1003.1-2001 consist solely of uppercase letters, digits, and the '_' (underscore)
+  // from the characters defined in Portable Character Set and do not begin with a digit."
+  // Example: "THE_SETTING"
+  private static _environmentVariableRegExp: RegExp = /^[A-Z_][A-Z0-9_]*$/;
 
   /**
    * A unique internal key used to retrieve the value from the parser's dictionary.
@@ -53,22 +60,43 @@ export abstract class CommandLineParameter {
   /** {@inheritdoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
 
+  /** {@inheritdoc IBaseCommandLineDefinition.required} */
+  public readonly required: boolean;
+
+  /** {@inheritdoc IBaseCommandLineDefinition.environmentVariable} */
+  public readonly environmentVariable: string | undefined;
+
   /** @internal */
   constructor(definition: IBaseCommandLineDefinition) {
-    if (!CommandLineParameter._longNameRegExp.test(definition.parameterLongName)) {
-      throw new Error(`Invalid name: "${definition.parameterLongName}". The parameter long name must be`
+    this.longName = definition.parameterLongName;
+    this.shortName = definition.parameterShortName;
+    this.description = definition.description;
+    this.required = !!definition.required;
+    this.environmentVariable = definition.environmentVariable;
+
+    if (!CommandLineParameter._longNameRegExp.test(this.longName)) {
+      throw new Error(`Invalid name: "${this.longName}". The parameter long name must be`
         + ` lower-case and use dash delimiters (e.g. "--do-a-thing")`);
     }
-    this.longName = definition.parameterLongName;
 
-    if (definition.parameterShortName) {
-      if (!CommandLineParameter._shortNameRegExp.test(definition.parameterShortName)) {
-        throw new Error(`Invalid name: "${definition.parameterShortName}". The parameter short name must be`
+    if (this.shortName) {
+      if (!CommandLineParameter._shortNameRegExp.test(this.shortName)) {
+        throw new Error(`Invalid name: "${this.shortName}". The parameter short name must be`
           + ` a dash followed by a single upper-case or lower-case letter (e.g. "-a")`);
       }
     }
-    this.shortName = definition.parameterShortName;
-    this.description = definition.description;
+
+    if (this.environmentVariable) {
+      if (this.required) {
+        throw new Error(`An "environmentVariable" cannot be specified for "${this.longName}"`
+          + ` because it is a required parameter`);
+      }
+
+      if (!CommandLineParameter._environmentVariableRegExp.test(this.environmentVariable)) {
+        throw new Error(`Invalid environment variable name: "${this.environmentVariable}". The name must`
+          + ` consist only of upper-case letters, numbers, and underscores. It may not start with a number.`);
+      }
+    }
   }
 
   /**
@@ -76,6 +104,17 @@ export abstract class CommandLineParameter {
    * @internal
    */
   public abstract _setValue(data: any): void; // tslint:disable-line:no-any
+
+  /**
+   * Returns additional text used by the help formatter.
+   * @internal
+   */
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+    if (this.environmentVariable !== undefined) {
+      supplementaryNotes.push('This parameter may alternatively specified via the ' + this.environmentVariable
+      + ' environment variable.');
+    }
+  }
 
   /**
    * Indicates the type of parameter.
@@ -88,6 +127,18 @@ export abstract class CommandLineParameter {
   protected reportInvalidData(data: any): never { // tslint:disable-line:no-any
     throw new Error(`Unexpected data object for parameter "${this.longName}": `
       + JSON.stringify(data));
+  }
+
+  protected validateDefaultValue(hasDefaultValue: boolean): void {
+    if (this.required && hasDefaultValue) {
+      // If a parameter is "required", then the user understands that they always need to
+      // specify a value for this parameter (either via the command line or via an environment variable).
+      // It would be confusing to allow a default value that sometimes allows the "required" parameter
+      // to be omitted.  If you sometimes don't have a suitable default value, then the better approach
+      // is to throw a custom error explaining why the parameter is required in that case.
+      throw new Error(`A default value cannot be specified for "${this.longName}"`
+        + ` because it is a "required" parameter`);
+    }
   }
 }
 
@@ -134,7 +185,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
   /** {@inheritdoc ICommandLineChoiceDefinition.alternatives} */
   public readonly alternatives: ReadonlyArray<string>;
 
-  /** {@inheritdoc ICommandLineChoiceDefinition.defaultValue} */
+  /** {@inheritdoc ICommandLineStringDefinition.defaultValue} */
   public readonly defaultValue: string | undefined;
 
   private _value: string | undefined = undefined;
@@ -153,6 +204,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
 
     this.alternatives = definition.alternatives;
     this.defaultValue = definition.defaultValue;
+    this.validateDefaultValue(!!this.defaultValue);
   }
 
   /** {@inheritdoc CommandLineParameter.kind} */
@@ -166,13 +218,45 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
    */
   // tslint:disable-next-line:no-any
   public _setValue(data: any): void { // abstract
-    if (data === null) {
-      data = undefined;
+    if (data !== null && data !== undefined) {
+      if (typeof data !== 'string') {
+        this.reportInvalidData(data);
+      }
+      this._value = data;
+      return;
     }
-    if (data !== undefined && typeof data !== 'string') {
-      this.reportInvalidData(data);
+
+    if (this.environmentVariable !== undefined) {
+      // Try reading the environment variable
+      const environmentValue: string | undefined = process.env[this.environmentVariable];
+      if (environmentValue !== undefined && environmentValue !== '') {
+        if (this.alternatives.indexOf(environmentValue) < 0) {
+          const choices: string = '"' + this.alternatives.join('", "') + '"';
+          throw new Error(`Invalid value "${environmentValue}" for the environment variable`
+            + ` ${this.environmentVariable}.  Valid choices are: ${choices}`);
+        }
+        this._value = environmentValue;
+        return;
+      }
     }
-    this._value = data;
+
+    if (this.defaultValue !== undefined) {
+      this._value = this.defaultValue;
+      return;
+    }
+
+    this._value = undefined;
+  }
+
+  /**
+   * {@inheritdoc CommandLineParameter._getSupplementaryNotes}
+   * @internal
+   */
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+    super._getSupplementaryNotes(supplementaryNotes);
+    if (this.defaultValue !== undefined) {
+      supplementaryNotes.push(`The default value is "${this.defaultValue}".`);
+    }
   }
 
   /**
@@ -210,13 +294,28 @@ export class CommandLineFlagParameter extends CommandLineParameter {
    */
   // tslint:disable-next-line:no-any
   public _setValue(data: any): void { // abstract
-    if (data === null) {
-      data = undefined;
+    if (data !== null && data !== undefined) {
+      if (typeof data !== 'boolean') {
+        this.reportInvalidData(data);
+      }
+      this._value = data;
+      return;
     }
-    if (data !== undefined && typeof data !== 'boolean') {
-      this.reportInvalidData(data);
+
+    if (this.environmentVariable !== undefined) {
+      // Try reading the environment variable
+      const environmentValue: string | undefined = process.env[this.environmentVariable];
+      if (environmentValue !== undefined && environmentValue !== '') {
+        if (environmentValue !== '0' && environmentValue !== '1') {
+          throw new Error(`Invalid value "${environmentValue}" for the environment variable`
+            + ` ${this.environmentVariable}.  Valid choices are 0 or 1.`);
+        }
+        this._value = environmentValue === '1';
+        return;
+      }
     }
-    this._value = !!data;
+
+    this._value = false;
   }
 
   /**
@@ -236,11 +335,16 @@ export class CommandLineFlagParameter extends CommandLineParameter {
  * @public
  */
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
+  /** {@inheritdoc ICommandLineStringDefinition.defaultValue} */
+  public readonly defaultValue: number | undefined;
+
   private _value: number | undefined = undefined;
 
   /** @internal */
   constructor(definition: ICommandLineIntegerDefinition) {
     super(definition);
+    this.defaultValue = definition.defaultValue;
+    this.validateDefaultValue(!!this.defaultValue);
   }
 
   /** {@inheritdoc CommandLineParameter.kind} */
@@ -254,13 +358,45 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
    */
   // tslint:disable-next-line:no-any
   public _setValue(data: any): void { // abstract
-    if (data === null) {
-      data = undefined;
+    if (data !== null && data !== undefined) {
+      if (typeof data !== 'number') {
+        this.reportInvalidData(data);
+      }
+      this._value = data;
+      return;
     }
-    if (data !== undefined && typeof data !== 'number') {
-      this.reportInvalidData(data);
+
+    if (this.environmentVariable !== undefined) {
+      // Try reading the environment variable
+      const environmentValue: string | undefined = process.env[this.environmentVariable];
+      if (environmentValue !== undefined && environmentValue !== '') {
+        const parsed: number = parseInt(environmentValue, 10);
+        if (isNaN(parsed) || environmentValue.indexOf('.') >= 0) {
+          throw new Error(`Invalid value "${environmentValue}" for the environment variable`
+            + ` ${this.environmentVariable}.  It must be an integer value.`);
+        }
+        this._value = parsed;
+        return;
+      }
     }
-    this._value = data;
+
+    if (this.defaultValue !== undefined) {
+      this._value = this.defaultValue;
+      return;
+    }
+
+    this._value = undefined;
+  }
+
+  /**
+   * {@inheritdoc CommandLineParameter._getSupplementaryNotes}
+   * @internal
+   */
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+    super._getSupplementaryNotes(supplementaryNotes);
+    if (this.defaultValue !== undefined) {
+      supplementaryNotes.push(`The default value is ${this.defaultValue}.`);
+    }
   }
 
   /**
@@ -280,11 +416,17 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
  * @public
  */
 export class CommandLineStringParameter extends CommandLineParameterWithArgument {
+  /** {@inheritdoc ICommandLineStringDefinition.defaultValue} */
+  public readonly defaultValue: string | undefined;
+
   private _value: string | undefined = undefined;
 
   /** @internal */
   constructor(definition: ICommandLineStringDefinition) {
     super(definition);
+
+    this.defaultValue = definition.defaultValue;
+    this.validateDefaultValue(!!this.defaultValue);
   }
 
   /** {@inheritdoc CommandLineParameter.kind} */
@@ -298,13 +440,44 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
    */
   // tslint:disable-next-line:no-any
   public _setValue(data: any): void { // abstract
-    if (data === null) {
-      data = undefined;
+    if (data !== null && data !== undefined) {
+      if (typeof data !== 'string') {
+        this.reportInvalidData(data);
+      }
+      this._value = data;
+      return;
     }
-    if (data !== undefined && typeof data !== 'string') {
-      this.reportInvalidData(data);
+
+    if (this.environmentVariable !== undefined) {
+      // Try reading the environment variable
+      const environmentValue: string | undefined = process.env[this.environmentVariable];
+      if (environmentValue !== undefined) {
+        // NOTE: If the environment variable is defined as an empty string,
+        // here we will accept the empty string as our value.  (For number/flag we don't do that.)
+        this._value = environmentValue;
+        return;
+      }
     }
-    this._value = data;
+
+    if (this.defaultValue !== undefined) {
+      this._value = this.defaultValue;
+      return;
+    }
+
+    this._value = undefined;
+  }
+
+  /**
+   * {@inheritdoc CommandLineParameter._getSupplementaryNotes}
+   * @internal
+   */
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+    super._getSupplementaryNotes(supplementaryNotes);
+    if (this.defaultValue !== undefined) {
+      if (this.defaultValue.length < 160) {
+        supplementaryNotes.push(`The default value is ${JSON.stringify(this.defaultValue)}.`);
+      }
+    }
   }
 
   /**
@@ -342,23 +515,39 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
    */
   // tslint:disable-next-line:no-any
   public _setValue(data: any): void { // abstract
-    if (data === null) {
-      data = undefined;
-    }
-
-    if (data !== undefined) {
+    if (data !== null && data !== undefined) {
       if (!Array.isArray(data)) {
         this.reportInvalidData(data);
       }
-
       for (const arrayItem of data) {
         if (typeof(arrayItem) !== 'string') {
           this.reportInvalidData(data);
         }
       }
+      this._values = data;
+      return;
     }
 
-    this._values = data || [];
+    if (this.environmentVariable !== undefined) {
+      // Try reading the environment variable
+      const environmentValue: string | undefined = process.env[this.environmentVariable];
+      if (environmentValue !== undefined) {
+        // NOTE: If the environment variable is defined as an empty string,
+        // here we will accept the empty string as our value.  (For number/flag we don't do that.)
+
+        // In the current implementation, the environment variable for a "string list" can only
+        // store a single item.  If we wanted to allow multiple items (and still have a conventional-seeming
+        // environment), we would ask the caller to provide an appropriate delimiter.  Getting involved
+        // with escaping here seems unwise, since there are so many shell escaping mechanisms that could
+        // potentially confuse the experience.
+        this._values = [ environmentValue ];
+        return;
+      }
+    }
+
+    // (No default value for string lists)
+
+    this._values = [];
   }
 
   /**

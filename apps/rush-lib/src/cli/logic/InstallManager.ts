@@ -244,8 +244,8 @@ export default class InstallManager {
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    */
-  public createTempModules(forceCreate: boolean, authTokens: ReadonlyArray<string>): void {
-    this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate, authTokens);
+  public createTempModules(forceCreate: boolean): void {
+    this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate);
   }
 
   /**
@@ -256,8 +256,7 @@ export default class InstallManager {
    */
   public createTempModulesAndCheckShrinkwrap(
     shrinkwrapFile: BaseShrinkwrapFile | undefined,
-    forceCreate: boolean,
-    authTokens: ReadonlyArray<string>
+    forceCreate: boolean
   ): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -314,10 +313,6 @@ export default class InstallManager {
     // ensure that we remove any old one that may be hanging around
     fsx.removeSync(tempNpmrcPath);
     this.syncFile(committedNpmrcPath, tempNpmrcPath);
-
-    if (fsx.existsSync(tempNpmrcPath)) {
-      fsx.appendFileSync(tempNpmrcPath, [''].concat(authTokens as string[]).join(os.EOL));
-    }
 
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {
@@ -630,25 +625,25 @@ export default class InstallManager {
               + ` in ${this._rushConfiguration.commonTempFolder}`);
             const args: string[] = ['prune'];
             this.pushConfigurationArgs(args);
-            Utilities.executeCommandWithRetry(packageManagerFilename, args, MAX_INSTALL_ATTEMPTS,
+            Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename, args,
               this._rushConfiguration.commonTempFolder);
-          }
 
-          // Delete the (installed image of) the temp projects, since "npm install" does not
-          // detect changes for "file:./" references.
-          // We recognize the temp projects by their names, which always start with "rush-".
+            // Delete the (installed image of) the temp projects, since "npm install" does not
+            // detect changes for "file:./" references.
+            // We recognize the temp projects by their names, which always start with "rush-".
 
-          // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp"
-          const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
-          console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
-          // Glob can't handle Windows paths
-          const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
+            // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp"
+            const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
+            console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
+            // Glob can't handle Windows paths
+            const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
 
-          // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
-          for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
-            // We could potentially use AsyncRecycler here, but in practice these folders tend
-            // to be very small
-            Utilities.dangerouslyDeletePath(tempModulePath);
+            // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
+            for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
+              // We could potentially use AsyncRecycler here, but in practice these folders tend
+              // to be very small
+              Utilities.dangerouslyDeletePath(tempModulePath);
+            }
           }
         }
       }
@@ -677,10 +672,10 @@ export default class InstallManager {
       console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
         + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
 
-      Utilities.executeCommandWithRetry(packageManagerFilename,
+      Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
         installArgs,
-        MAX_INSTALL_ATTEMPTS,
         this._rushConfiguration.commonTempFolder,
+        undefined,
         false, () => {
           if (this._rushConfiguration.packageManager === 'pnpm') {
             // If there is a failure in pnpm, it is possible that it left the
@@ -698,7 +693,9 @@ export default class InstallManager {
           }
         });
 
-      this._fixupNpm5Regression();
+      if (this._rushConfiguration.packageManager === 'npm') {
+        this._fixupNpm5Regression();
+      }
 
       // Finally, create the marker file to indicate a successful install
       this._commonNodeModulesMarker.create();

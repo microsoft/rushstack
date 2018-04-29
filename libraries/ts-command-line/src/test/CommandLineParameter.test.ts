@@ -28,40 +28,75 @@ function createParser(): DynamicCommandLineParser {
   });
   commandLineParser.addAction(action);
 
-  action.defineChoiceParameter({
-    parameterLongName: '--choice-with-default',
-    description: 'A choice with a default',
-    alternatives: [ 'one', 'two' ],
-    defaultValue: 'one'
-  });
+  // Choice
   action.defineChoiceParameter({
     parameterLongName: '--choice',
     parameterShortName: '-c',
-    description: 'A choice without a default',
-    alternatives: [ 'one', 'two' ]
+    description: 'A choice',
+    alternatives: [ 'one', 'two', 'three', 'default' ],
+    environmentVariable: 'ENV_CHOICE'
   });
+  action.defineChoiceParameter({
+    parameterLongName: '--choice-with-default',
+    description: 'A choice with a default',
+    alternatives: [ 'one', 'two', 'three', 'default' ],
+    environmentVariable: 'ENV_CHOICE',
+    defaultValue: 'default'
+  });
+
+  // Flag
   action.defineFlagParameter({
     parameterLongName: '--flag',
     parameterShortName: '-f',
-    description: 'A flag'
+    description: 'A flag',
+    environmentVariable: 'ENV_FLAG'
   });
+
+  // Integer
   action.defineIntegerParameter({
     parameterLongName: '--integer',
     parameterShortName: '-i',
     description: 'An integer',
-    argumentName: 'NUMBER'
+    argumentName: 'NUMBER',
+    environmentVariable: 'ENV_INTEGER'
   });
+  action.defineIntegerParameter({
+    parameterLongName: '--integer-with-default',
+    description: 'An integer with a default',
+    argumentName: 'NUMBER',
+    environmentVariable: 'ENV_INTEGER',
+    defaultValue: 123
+  });
+  action.defineIntegerParameter({
+    parameterLongName: '--integer-required',
+    description: 'An integer',
+    argumentName: 'NUMBER',
+    required: true
+  });
+
+  // String
   action.defineStringParameter({
     parameterLongName: '--string',
     parameterShortName: '-s',
     description: 'A string',
-    argumentName: 'TEXT'
+    argumentName: 'TEXT',
+    environmentVariable: 'ENV_INTEGER'
   });
+  action.defineStringParameter({
+    parameterLongName: '--string-with-default',
+    description: 'A string with a default',
+    argumentName: 'TEXT',
+    environmentVariable: 'ENV_INTEGER',
+    defaultValue: '123'
+  });
+
+  // String List
   action.defineStringListParameter({
     parameterLongName: '--string-list',
     parameterShortName: '-l',
     description: 'A string list',
-    argumentName: 'LIST'
+    argumentName: 'LIST',
+    environmentVariable: 'ENV_INTEGER'
   });
   return commandLineParser;
 }
@@ -74,6 +109,20 @@ function expectPropertiesToMatchSnapshot(object: {}, propertyNames: string[]): v
   }
   expect(snapshotObject).toMatchSnapshot();
 }
+
+const snapshotPropertyNames: string[] = [
+  'description',
+  'kind',
+  'longName',
+  'shortName',
+  'value',
+  'kind',
+  'argumentName',
+  'environmentVariable',
+  'required',
+  'defaultValue',
+  'values'
+];
 
 describe('CommandLineParameter', () => {
   it('prints the global help', () => {
@@ -92,36 +141,61 @@ describe('CommandLineParameter', () => {
     const commandLineParser: CommandLineParser = createParser();
     const action: CommandLineAction = commandLineParser.getAction('do-job');
 
-    const args: string[] = [ '-g',
-      'do-job', '-c', 'two', '-f', '-i', '123', '-s', 'hello', '-l', 'first', '-l', 'second'];
+    const args: string[] = [
+      '--global-flag',
+      'do-job',
+      '--choice', 'two',
+      '--flag',
+      '--integer', '123',
+      '--integer-required', '321',
+      '--string', 'hello',
+      '--string-list', 'first',
+      '--string-list', 'second'
+    ];
 
     return commandLineParser.execute(args).then(() => {
       expect(commandLineParser.selectedAction).toBe(action);
 
       expectPropertiesToMatchSnapshot(
         commandLineParser.getFlagParameter('--global-flag'),
-        ['description', 'kind', 'longName', 'shortName', 'value']
+        snapshotPropertyNames
       );
 
       expectPropertiesToMatchSnapshot(
         action.getChoiceParameter('--choice'),
-        ['alternatives', 'defaultValue', 'description', 'kind', 'longName', 'shortName', 'value']
+        snapshotPropertyNames
+      );
+      expectPropertiesToMatchSnapshot(
+        action.getChoiceParameter('--choice-with-default'),
+        snapshotPropertyNames
       );
       expectPropertiesToMatchSnapshot(
         action.getFlagParameter('--flag'),
-        ['description', 'kind', 'longName', 'shortName', 'value']
+        snapshotPropertyNames
       );
       expectPropertiesToMatchSnapshot(
         action.getIntegerParameter('--integer'),
-        ['argumentName', 'description', 'kind', 'longName', 'shortName', 'value']
+        snapshotPropertyNames
+      );
+      expectPropertiesToMatchSnapshot(
+        action.getIntegerParameter('--integer-with-default'),
+        snapshotPropertyNames
+      );
+      expectPropertiesToMatchSnapshot(
+        action.getIntegerParameter('--integer-required'),
+        snapshotPropertyNames
       );
       expectPropertiesToMatchSnapshot(
         action.getStringParameter('--string'),
-        ['argumentName', 'description', 'kind', 'longName', 'shortName', 'value']
+        snapshotPropertyNames
+      );
+      expectPropertiesToMatchSnapshot(
+        action.getStringParameter('--string-with-default'),
+        snapshotPropertyNames
       );
       expectPropertiesToMatchSnapshot(
         action.getStringListParameter('--string-list'),
-        ['argumentName', 'description', 'kind', 'longName', 'shortName', 'values']
+        snapshotPropertyNames
       );
     });
   });
@@ -129,35 +203,51 @@ describe('CommandLineParameter', () => {
   it('parses an input with NO parameters', () => {
     const commandLineParser: CommandLineParser = createParser();
     const action: CommandLineAction = commandLineParser.getAction('do-job');
-    const args: string[] = [ 'do-job'];
+    const args: string[] = [ 'do-job', '--integer-required', '123'];
 
     return commandLineParser.execute(args).then(() => {
       expect(commandLineParser.selectedAction).toBe(action);
 
       expectPropertiesToMatchSnapshot(
         commandLineParser.getFlagParameter('--global-flag'),
-        ['description', 'kind', 'longName', 'shortName', 'value']
+        snapshotPropertyNames
       );
 
       expectPropertiesToMatchSnapshot(
         action.getChoiceParameter('--choice'),
-        ['alternatives', 'defaultValue', 'description', 'kind', 'longName', 'shortName', 'value']
+        snapshotPropertyNames
+      );
+      expectPropertiesToMatchSnapshot(
+        action.getChoiceParameter('--choice-with-default'),
+        snapshotPropertyNames
       );
       expectPropertiesToMatchSnapshot(
         action.getFlagParameter('--flag'),
-        ['description', 'kind', 'longName', 'shortName', 'value']
+        snapshotPropertyNames
       );
       expectPropertiesToMatchSnapshot(
         action.getIntegerParameter('--integer'),
-        ['argumentName', 'description', 'kind', 'longName', 'shortName', 'value']
+        snapshotPropertyNames
+      );
+      expectPropertiesToMatchSnapshot(
+        action.getIntegerParameter('--integer-with-default'),
+        snapshotPropertyNames
+      );
+      expectPropertiesToMatchSnapshot(
+        action.getIntegerParameter('--integer-required'),
+        snapshotPropertyNames
       );
       expectPropertiesToMatchSnapshot(
         action.getStringParameter('--string'),
-        ['argumentName', 'description', 'kind', 'longName', 'shortName', 'value']
+        snapshotPropertyNames
+      );
+      expectPropertiesToMatchSnapshot(
+        action.getStringParameter('--string-with-default'),
+        snapshotPropertyNames
       );
       expectPropertiesToMatchSnapshot(
         action.getStringListParameter('--string-list'),
-        ['argumentName', 'description', 'kind', 'longName', 'shortName', 'values']
+        snapshotPropertyNames
       );
     });
   });

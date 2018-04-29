@@ -29,6 +29,8 @@ class CommandLineChoiceParameter extends CommandLineParameter {
   // @internal
   constructor(definition: ICommandLineChoiceDefinition);
   // @internal
+  _getSupplementaryNotes(supplementaryNotes: string[]): void;
+  // @internal
   _setValue(data: any): void;
   readonly alternatives: ReadonlyArray<string>;
   readonly defaultValue: string | undefined;
@@ -51,7 +53,10 @@ class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
   // @internal
   constructor(definition: ICommandLineIntegerDefinition);
   // @internal
+  _getSupplementaryNotes(supplementaryNotes: string[]): void;
+  // @internal
   _setValue(data: any): void;
+  readonly defaultValue: number | undefined;
   readonly kind: CommandLineParameterKind;
   readonly value: number | undefined;
 }
@@ -61,14 +66,20 @@ class CommandLineParameter {
   // @internal
   constructor(definition: IBaseCommandLineDefinition);
   // @internal
+  _getSupplementaryNotes(supplementaryNotes: string[]): void;
+  // @internal
   _parserKey: string;
   // @internal
   abstract _setValue(data: any): void;
   readonly description: string;
+  readonly environmentVariable: string | undefined;
   readonly kind: CommandLineParameterKind;
   readonly longName: string;
   protected reportInvalidData(data: any): never;
+  readonly required: boolean;
   readonly shortName: string | undefined;
+  // (undocumented)
+  protected validateDefaultValue(hasDefaultValue: boolean): void;
 }
 
 // @public
@@ -141,7 +152,10 @@ class CommandLineStringParameter extends CommandLineParameterWithArgument {
   // @internal
   constructor(definition: ICommandLineStringDefinition);
   // @internal
+  _getSupplementaryNotes(supplementaryNotes: string[]): void;
+  // @internal
   _setValue(data: any): void;
+  readonly defaultValue: string | undefined;
   readonly kind: CommandLineParameterKind;
   readonly value: string | undefined;
 }
@@ -163,8 +177,10 @@ class DynamicCommandLineParser extends CommandLineParser {
 // @public
 interface IBaseCommandLineDefinition {
   description: string;
+  environmentVariable?: string;
   parameterLongName: string;
   parameterShortName?: string;
+  required?: boolean;
 }
 
 // @public
@@ -191,6 +207,7 @@ interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
 
 // @public
 interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument {
+  defaultValue?: number;
 }
 
 // @public
@@ -201,6 +218,7 @@ interface ICommandLineParserOptions {
 
 // @public
 interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument {
+  defaultValue?: string;
 }
 
 // @public

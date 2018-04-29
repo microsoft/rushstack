@@ -14,7 +14,7 @@ describe('CLI', () => {
     const startPath: string = path.resolve(path.join(__dirname, '../../start.js'));
 
     assert.doesNotThrow(() => {
-      Utilities.executeCommand('node', [ startPath ], workingDir, true);
+      Utilities.executeCommand('node', [ startPath ], workingDir, undefined, true);
     }, 'rush -h is broken');
   });
 });
