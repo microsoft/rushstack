@@ -6,7 +6,7 @@
 import { assert } from 'chai';
 import * as os from 'os';
 
-import Interleaver, { ITaskWriter } from '../Interleaver';
+import { Interleaver, ITaskWriter } from '../Interleaver';
 
 class StringStream {
   private _buffer: string[] = [];

@@ -6,10 +6,8 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  default as RushConfiguration
-} from '../../../data/RushConfiguration';
-import Utilities from '../../../utilities/Utilities';
+import { RushConfiguration } from '../../../data/RushConfiguration';
+import { Utilities } from '../../../utilities/Utilities';
 import { Stopwatch } from '../../../utilities/Stopwatch';
 import { BasePackage } from './BasePackage';
 

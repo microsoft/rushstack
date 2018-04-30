@@ -11,12 +11,12 @@ export {
 } from './data/ApprovedPackagesPolicy';
 
 export {
-  default as RushConfiguration,
+  RushConfiguration,
   PackageManager
 } from './data/RushConfiguration';
 
 export {
-  default as RushConfigurationProject
+  RushConfigurationProject
 } from './data/RushConfigurationProject';
 
 export {
@@ -29,7 +29,7 @@ export {
 } from './data/CommonVersionsConfiguration';
 
 export {
-  default as EventHooks,
+  EventHooks,
   Event
 } from './data/EventHooks';
 
@@ -61,4 +61,4 @@ export {
 /**
  * @internal
  */
-export { default as Rush } from './Rush';
+export { Rush } from './Rush';

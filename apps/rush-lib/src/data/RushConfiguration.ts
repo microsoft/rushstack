@@ -6,11 +6,11 @@ import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import { JsonFile, JsonSchema, PackageName } from '@microsoft/node-core-library';
 
-import Rush from '../Rush';
-import RushConfigurationProject, { IRushConfigurationProjectJson } from './RushConfigurationProject';
+import { Rush } from '../Rush';
+import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
-import EventHooks from './EventHooks';
+import { EventHooks } from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
@@ -110,7 +110,7 @@ export type PackageManager = 'pnpm' | 'npm';
  * configuration file.
  * @public
  */
-export default class RushConfiguration {
+export class RushConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '../schemas/rush.schema.json'));
 
   private _rushJsonFile: string;

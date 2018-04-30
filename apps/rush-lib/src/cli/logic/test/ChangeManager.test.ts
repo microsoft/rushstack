@@ -4,9 +4,9 @@
 import { expect } from 'chai';
 import * as path from 'path';
 
-import RushConfiguration from '../../../data/RushConfiguration';
-import ChangeManager from '../ChangeManager';
-import PrereleaseToken from '../PrereleaseToken';
+import { RushConfiguration } from '../../../data/RushConfiguration';
+import { ChangeManager } from '../ChangeManager';
+import { PrereleaseToken } from '../PrereleaseToken';
 
 describe('ChangeManager', () => {
   const rushJsonFile: string = path.resolve(__dirname, 'packages', 'rush.json');

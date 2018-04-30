@@ -20,7 +20,7 @@ export interface IEnvironment {
 /**
  * @public
  */
-export default class Utilities {
+export class Utilities {
   /**
    * NodeJS equivalent of performance.now().
    */

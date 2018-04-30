@@ -3,8 +3,8 @@
 
 import { ServeTask } from './ServeTask';
 import { ReloadTask } from './ReloadTask';
-import TrustCertTask from './TrustCertTask';
-import UntrustCertTask from './UntrustCertTask';
+import { TrustCertTask } from './TrustCertTask';
+import { UntrustCertTask } from './UntrustCertTask';
 
 export const serve: ServeTask = new ServeTask();
 export const reload: ReloadTask = new ReloadTask();

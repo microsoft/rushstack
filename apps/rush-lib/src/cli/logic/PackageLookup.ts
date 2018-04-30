@@ -3,7 +3,7 @@
 
 import { BasePackage } from './base/BasePackage';
 
-export default class PackageLookup {
+export class PackageLookup {
   private _packageMap: Map<string, BasePackage>;
 
   constructor() {

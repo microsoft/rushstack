@@ -8,13 +8,13 @@ import {
   IChangeInfo,
   ChangeType
 } from '../../../data/ChangeManagement';
-import RushConfiguration from '../../../data/RushConfiguration';
-import RushConfigurationProject from '../../../data/RushConfigurationProject';
+import { RushConfiguration } from '../../../data/RushConfiguration';
+import { RushConfigurationProject } from '../../../data/RushConfigurationProject';
 import {
-  default as PublishUtilities,
+  PublishUtilities,
   IChangeInfoHash
 } from '../PublishUtilities';
-import ChangeFiles from '../ChangeFiles';
+import { ChangeFiles } from '../ChangeFiles';
 
 /* tslint:disable:no-string-literal */
 

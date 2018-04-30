@@ -6,7 +6,7 @@ import * as path from 'path';
 import { assert } from 'chai';
 
 import { ChangeFile } from '../ChangeFile';
-import RushConfiguration from '../RushConfiguration';
+import { RushConfiguration } from '../RushConfiguration';
 import { ChangeType } from '../ChangeManagement';
 
 describe('ChangeFile', () => {

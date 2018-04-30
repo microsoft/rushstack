@@ -22,7 +22,7 @@ import {
   ICommandLineActionOptions
 } from '@microsoft/ts-command-line';
 
-import RushCommandLineParser from './RushCommandLineParser';
+import { RushCommandLineParser } from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { TaskSelector } from '../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';

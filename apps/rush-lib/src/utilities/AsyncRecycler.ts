@@ -8,8 +8,8 @@ import * as fsx from 'fs-extra';
 
 import { Text } from '@microsoft/node-core-library';
 
-import RushConfiguration from '../data/RushConfiguration';
-import Utilities from './Utilities';
+import { RushConfiguration } from '../data/RushConfiguration';
+import { Utilities } from './Utilities';
 
 /**
  * For deleting large folders, AsyncRecycler is significantly faster than Utilities.dangerouslyDeletePath().
@@ -17,7 +17,7 @@ import Utilities from './Utilities';
  * background process to recursively delete that folder.
  * @public
  */
-export default class AsyncRecycler {
+export class AsyncRecycler {
   private _rushConfiguration: RushConfiguration;
   private _recyclerFolder: string;
   private _movedFolderCount: number;

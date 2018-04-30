@@ -6,7 +6,7 @@
 import * as colors from 'colors';
 import * as stream from 'stream';
 
-import PersistentStream from './PersistentStream';
+import { PersistentStream } from './PersistentStream';
 
 /**
  * This is a special type of stream class which has two substreams (stderr and stdout), which you can write to.
@@ -15,7 +15,7 @@ import PersistentStream from './PersistentStream';
  *
  * @public
  */
-export default class DualTaskStream extends stream.Readable implements NodeJS.ReadableStream, NodeJS.EventEmitter {
+export class DualTaskStream extends stream.Readable implements NodeJS.ReadableStream, NodeJS.EventEmitter {
   public stdout: PersistentStream;
   public stderr: PersistentStream;
 

@@ -7,7 +7,7 @@ import { homedir } from 'os';
 
 const encoding: string = 'utf8';
 
-export default class CertificateStore {
+export class CertificateStore {
   private static _instance: CertificateStore;
 
   public static get instance(): CertificateStore {

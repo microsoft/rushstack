@@ -18,13 +18,11 @@ import {
   MapExtensions
 } from '@microsoft/node-core-library';
 
-import AsyncRecycler from '../../utilities/AsyncRecycler';
-import RushConfiguration, {
-  PackageManager
-} from '../../data/RushConfiguration';
-import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { AsyncRecycler } from '../../utilities/AsyncRecycler';
+import { RushConfiguration, PackageManager } from '../../data/RushConfiguration';
+import { RushConfigurationProject } from '../../data/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
-import Utilities from '../../utilities/Utilities';
+import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { IRushTempPackageJson } from '../logic/base/BasePackage';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
@@ -71,7 +69,7 @@ export enum InstallType {
 /**
  * This class implements common logic between "rush install" and "rush generate".
  */
-export default class InstallManager {
+export class InstallManager {
   private _rushConfiguration: RushConfiguration;
   private _commonNodeModulesMarker: LastInstallFlag;
   private _asyncRecycler: AsyncRecycler;

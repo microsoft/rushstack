@@ -4,7 +4,7 @@
 /// <reference types="mocha" />
 
 import { assert } from 'chai';
-import PersistentStream from '../PersistentStream';
+import { PersistentStream } from '../PersistentStream';
 
 describe('PersistentStream', () => {
   it('passes through unmodified values', (done: () => void) => {

@@ -5,7 +5,7 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import gitInfo = require('git-repo-info');
 
-import RushConfiguration from './RushConfiguration';
+import { RushConfiguration } from './RushConfiguration';
 import {
   IChangeFile,
   IChangeInfo

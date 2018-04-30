@@ -10,7 +10,7 @@ import {
 import { Path } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../RushConstants';
-import RushConfiguration from '../../data/RushConfiguration';
+import { RushConfiguration } from '../../data/RushConfiguration';
 
 export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests

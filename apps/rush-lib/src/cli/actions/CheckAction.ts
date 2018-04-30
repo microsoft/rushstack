@@ -3,13 +3,13 @@
 
 import * as colors from 'colors';
 
-import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { RushConfigurationProject } from '../../data/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import { VersionMismatchFinder } from '../../data/VersionMismatchFinder';
-import RushCommandLineParser from './RushCommandLineParser';
+import { RushCommandLineParser } from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
-export default class CheckAction extends BaseRushAction {
+export class CheckAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'check',

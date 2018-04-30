@@ -6,7 +6,7 @@
 import { assert } from 'chai';
 import * as colors from 'colors';
 
-import DualTaskStream from '../DualTaskStream';
+import { DualTaskStream } from '../DualTaskStream';
 
 const helloWorld: string = 'Hello, world!';
 

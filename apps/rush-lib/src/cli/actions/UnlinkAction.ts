@@ -5,11 +5,11 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 
-import Utilities from '../../utilities/Utilities';
-import RushCommandLineParser from './RushCommandLineParser';
+import { Utilities } from '../../utilities/Utilities';
+import { RushCommandLineParser } from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
-export default class UnlinkAction extends BaseRushAction {
+export class UnlinkAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'unlink',

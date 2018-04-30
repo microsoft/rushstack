@@ -13,14 +13,14 @@ import { JsonFile, PackageName } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../../RushConstants';
 import { IRushLinkJson } from '../../../data/RushConfiguration';
-import RushConfigurationProject from '../../../data/RushConfigurationProject';
-import Utilities from '../../../utilities/Utilities';
+import { RushConfigurationProject } from '../../../data/RushConfigurationProject';
+import { Utilities } from '../../../utilities/Utilities';
 import {
   NpmPackage,
   IResolveOrCreateResult,
   PackageDependencyKind
 } from './NpmPackage';
-import PackageLookup from '../PackageLookup';
+import { PackageLookup } from '../PackageLookup';
 import {
   BaseLinkManager,
   SymlinkKind

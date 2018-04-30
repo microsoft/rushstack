@@ -5,7 +5,7 @@ import { ITaskWriter } from '@microsoft/stream-collator';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { TaskStatus } from './TaskStatus';
-import TaskError from './TaskError';
+import { TaskError } from './TaskError';
 
 /**
  * A definition for a task, an execute function returning a promise and a unique string name
@@ -97,4 +97,3 @@ export interface ITask extends ITaskDefinition {
    */
   stopwatch: Stopwatch;
 }
-export default ITask;

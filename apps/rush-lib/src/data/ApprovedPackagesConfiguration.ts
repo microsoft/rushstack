@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as os from 'os';
 import { JsonFile, JsonSchema, Text } from '@microsoft/node-core-library';
 
-import Utilities from '../utilities/Utilities';
+import { Utilities } from '../utilities/Utilities';
 
 /**
  * Part of IApprovedPackagesJson.

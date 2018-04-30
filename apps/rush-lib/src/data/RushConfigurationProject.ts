@@ -9,7 +9,7 @@ import {
   PackageName
 } from '@microsoft/node-core-library';
 
-import RushConfiguration from '../data/RushConfiguration';
+import { RushConfiguration } from '../data/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 
 /**
@@ -30,7 +30,7 @@ export interface IRushConfigurationProjectJson {
  * the Rush.json configuration file.
  * @public
  */
-export default class RushConfigurationProject {
+export class RushConfigurationProject {
   private _packageName: string;
   private _projectFolder: string;
   private _projectRelativeFolder: string;
