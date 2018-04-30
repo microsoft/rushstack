@@ -41,7 +41,7 @@ enum ITaskOutputStream {
  *
  * @public
  */
-export default class Interleaver {
+export class Interleaver {
   private static _tasks: Map<string, ITaskWriterInfo> = new Map<string, ITaskWriterInfo>();
   private static _activeTask: string = undefined;
   private static _stdout: { write: (text: string) => void } = process.stdout;

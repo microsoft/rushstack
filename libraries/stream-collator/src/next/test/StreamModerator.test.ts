@@ -4,8 +4,8 @@
 /// <reference types="mocha" />
 
 import { assert } from 'chai';
-import StreamCollator from '../StreamCollator';
-import PersistentStream from '../PersistentStream';
+import { StreamCollator } from '../StreamCollator';
+import { PersistentStream } from '../PersistentStream';
 
 let collator: StreamCollator<NodeJS.ReadableStream>;
 let stdout: PersistentStream, taskA: PersistentStream, taskB: PersistentStream;

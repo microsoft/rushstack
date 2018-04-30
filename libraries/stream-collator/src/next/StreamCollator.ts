@@ -35,7 +35,7 @@ class StreamInfo<T extends NodeJS.ReadableStream> {
  *
  * @public
  */
-export default class StreamCollator<T extends NodeJS.ReadableStream>
+export class StreamCollator<T extends NodeJS.ReadableStream>
   extends Stream.Readable implements NodeJS.ReadableStream {
   private _streams: StreamInfo<T>[] = [];
   private _activeStream: StreamInfo<T> = undefined;

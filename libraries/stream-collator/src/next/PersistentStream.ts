@@ -10,7 +10,7 @@ import * as stream from 'stream';
  *
  * @public
  */
-export default class PersistentStream extends stream.Transform {
+export class PersistentStream extends stream.Transform {
   private _buffer: string[] = [];
 
   constructor(opts?: stream.TransformOptions) {
