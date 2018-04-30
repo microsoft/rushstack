@@ -2,6 +2,18 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "4.4.40",
+      "tag": "@microsoft/web-library-build_v4.4.40",
+      "date": "Mon, 30 Apr 2018 21:04:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.2.26` to `3.2.27`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.39",
       "tag": "@microsoft/web-library-build_v4.4.39",
       "date": "Fri, 27 Apr 2018 03:04:32 GMT",
