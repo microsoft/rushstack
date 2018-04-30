@@ -4,7 +4,7 @@ import {
   CustomOption
 } from '../../data/CommandLineConfiguration';
 
-import RushCommandLineParser from './RushCommandLineParser';
+import { RushCommandLineParser } from './RushCommandLineParser';
 import { CustomRushAction } from './CustomRushAction';
 
 /**

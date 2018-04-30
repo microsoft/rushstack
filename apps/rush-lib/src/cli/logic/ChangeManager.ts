@@ -5,21 +5,19 @@ import { IPackageJson } from '@microsoft/node-core-library';
 
 import { IChangeInfo } from '../../data/ChangeManagement';
 import { IChangelog } from '../../data/Changelog';
-import RushConfiguration from '../../data/RushConfiguration';
-import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { RushConfiguration } from '../../data/RushConfiguration';
+import { RushConfigurationProject } from '../../data/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
-import PublishUtilities, {
-  IChangeInfoHash
-} from './PublishUtilities';
-import ChangeFiles from './ChangeFiles';
-import PrereleaseToken from './PrereleaseToken';
-import ChangelogGenerator from './ChangelogGenerator';
+import { PublishUtilities, IChangeInfoHash } from './PublishUtilities';
+import { ChangeFiles } from './ChangeFiles';
+import { PrereleaseToken } from './PrereleaseToken';
+import { ChangelogGenerator } from './ChangelogGenerator';
 
 /**
  * The class manages change files and controls how changes logged by change files
  * can be applied to package.json and change logs.
  */
-export default class ChangeManager {
+export class ChangeManager {
   private _prereleaseToken: PrereleaseToken;
   private _orderedChanges: IChangeInfo[];
   private _allPackages: Map<string, RushConfigurationProject>;

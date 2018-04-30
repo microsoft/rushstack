@@ -20,7 +20,7 @@ import {
 import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../../RushConstants';
 import { IRushLinkJson } from '../../../data/RushConfiguration';
-import RushConfigurationProject from '../../../data/RushConfigurationProject';
+import { RushConfigurationProject } from '../../../data/RushConfigurationProject';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost

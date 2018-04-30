@@ -5,8 +5,8 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 import { cloneDeep } from 'lodash';
 
-import RushConfiguration from '../../data/RushConfiguration';
-import Rush from '../../Rush';
+import { RushConfiguration } from '../../data/RushConfiguration';
+import { Rush } from '../../Rush';
 
 export interface ITelemetryData {
   name: string;
@@ -20,7 +20,7 @@ export interface ITelemetryData {
 
 const MAX_FILE_COUNT: number = 100;
 
-export default class Telemetry {
+export class Telemetry {
   private _enabled: boolean;
   private _store: ITelemetryData[];
   private _dataFolder: string;

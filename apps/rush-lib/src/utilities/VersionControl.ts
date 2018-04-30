@@ -6,7 +6,7 @@ import * as child_process from 'child_process';
 /**
  * @public
  */
-export default class VersionControl {
+export class VersionControl {
   public static getChangedFolders(targetBranch?: string): Array<string | undefined> | undefined {
     const branchName: string = targetBranch ? targetBranch : 'origin/master';
     const output: string | undefined = child_process.execSync(`git diff ${branchName}... --dirstat=files,0`)

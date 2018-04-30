@@ -1,4 +1,4 @@
-import RushConfiguration from '../../data/RushConfiguration';
+import { RushConfiguration } from '../../data/RushConfiguration';
 import { BaseLinkManager } from './base/BaseLinkManager';
 import { NpmLinkManager } from './npm/NpmLinkManager';
 import { PnpmLinkManager } from './pnpm/PnpmLinkManager';

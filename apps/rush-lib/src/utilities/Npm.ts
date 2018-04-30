@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import Utilities from './Utilities';
+import { Utilities } from './Utilities';
 import * as semver from 'semver';
 
 /**
  * @public
  */
-export default class Npm {
+export class Npm {
   public static publishedVersions(
     packageName: string,
     cwd: string,

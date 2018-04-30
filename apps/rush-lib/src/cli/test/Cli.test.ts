@@ -6,7 +6,7 @@
 import * as path from 'path';
 import { assert } from 'chai';
 
-import Utilities from '../../utilities/Utilities';
+import { Utilities } from '../../utilities/Utilities';
 
 describe('CLI', () => {
   it('should not fail when there is no rush.json', () => {

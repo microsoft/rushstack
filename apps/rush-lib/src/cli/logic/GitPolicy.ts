@@ -4,10 +4,10 @@
 import * as os from 'os';
 import * as colors from 'colors';
 
-import RushConfiguration from '../../data/RushConfiguration';
-import Utilities from '../../utilities/Utilities';
+import { RushConfiguration } from '../../data/RushConfiguration';
+import { Utilities } from '../../utilities/Utilities';
 
-export default class GitPolicy {
+export class GitPolicy {
   public static check(rushConfiguration: RushConfiguration): boolean {
     if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
       return true;

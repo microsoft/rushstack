@@ -14,16 +14,16 @@ import {
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
-import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { RushConfigurationProject } from '../../data/RushConfigurationProject';
 import {
   IChangeFile,
   IChangeInfo
 } from '../../data/ChangeManagement';
-import VersionControl from '../../utilities/VersionControl';
+import { VersionControl } from '../../utilities/VersionControl';
 import { ChangeFile } from '../../data/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
-import RushCommandLineParser from './RushCommandLineParser';
-import ChangeFiles from '../logic/ChangeFiles';
+import { RushCommandLineParser } from './RushCommandLineParser';
+import { ChangeFiles } from '../logic/ChangeFiles';
 import {
   VersionPolicy,
   IndividualVersionPolicy,
@@ -31,7 +31,7 @@ import {
   VersionPolicyDefinitionName
 } from '../../data/VersionPolicy';
 
-export default class ChangeAction extends BaseRushAction {
+export class ChangeAction extends BaseRushAction {
   private _sortedProjectList: string[];
   private _changeFileData: Map<string, IChangeFile>;
   private _changeComments: Map<string, string[]>;

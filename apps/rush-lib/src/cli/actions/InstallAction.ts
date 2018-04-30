@@ -8,9 +8,9 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import { Event } from '../../data/EventHooks';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import RushCommandLineParser from './RushCommandLineParser';
-import GitPolicy from '../logic/GitPolicy';
-import InstallManager, { InstallType } from '../logic/InstallManager';
+import { RushCommandLineParser } from './RushCommandLineParser';
+import { GitPolicy } from '../logic/GitPolicy';
+import { InstallManager, InstallType } from '../logic/InstallManager';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { BaseLinkManager } from '../logic/base/BaseLinkManager';
@@ -18,7 +18,7 @@ import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { BaseRushAction } from './BaseRushAction';
 
-export default class InstallAction extends BaseRushAction {
+export class InstallAction extends BaseRushAction {
   private _cleanInstall: CommandLineFlagParameter;
   private _cleanInstallFull: CommandLineFlagParameter;
   private _bypassPolicy: CommandLineFlagParameter;

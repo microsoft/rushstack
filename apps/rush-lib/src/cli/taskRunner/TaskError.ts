@@ -5,7 +5,7 @@
  * Encapsulates information about an error
  * @public
  */
-export default class TaskError {
+export class TaskError {
   protected _type: string;
   protected _message: string;
 

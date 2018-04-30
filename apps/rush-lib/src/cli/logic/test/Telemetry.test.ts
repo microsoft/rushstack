@@ -4,10 +4,10 @@
 import { assert } from 'chai';
 import * as path from 'path';
 
-import RushConfiguration from '../../../data/RushConfiguration';
-import Rush from '../../../Rush';
+import { RushConfiguration } from '../../../data/RushConfiguration';
+import { Rush } from '../../../Rush';
 import {
-  default as Telemetry,
+  Telemetry,
   ITelemetryData
  } from '../Telemetry';
 

@@ -7,10 +7,10 @@ import * as glob from 'glob';
 import * as path from 'path';
 import builtinPackageNames = require('builtins');
 
-import RushCommandLineParser from './RushCommandLineParser';
+import { RushCommandLineParser } from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
-export default class ScanAction extends BaseRushAction {
+export class ScanAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'scan',

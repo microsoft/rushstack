@@ -9,23 +9,23 @@ import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-comma
 
 import { RushConstants } from '../../RushConstants';
 import { CommandLineConfiguration } from '../../data/CommandLineConfiguration';
-import RushConfiguration from '../../data/RushConfiguration';
-import Utilities from '../../utilities/Utilities';
-import ChangeAction from './ChangeAction';
-import CheckAction from './CheckAction';
-import GenerateAction from './GenerateAction';
-import InstallAction from './InstallAction';
-import LinkAction from './LinkAction';
-import PublishAction from './PublishAction';
-import UnlinkAction from './UnlinkAction';
-import ScanAction from './ScanAction';
-import VersionAction from './VersionAction';
+import { RushConfiguration } from '../../data/RushConfiguration';
+import { Utilities } from '../../utilities/Utilities';
+import { ChangeAction } from './ChangeAction';
+import { CheckAction } from './CheckAction';
+import { GenerateAction } from './GenerateAction';
+import { InstallAction } from './InstallAction';
+import { LinkAction } from './LinkAction';
+import { PublishAction } from './PublishAction';
+import { UnlinkAction } from './UnlinkAction';
+import { ScanAction } from './ScanAction';
+import { VersionAction } from './VersionAction';
 import { CustomCommandFactory } from './CustomCommandFactory';
 import { CustomRushAction } from './CustomRushAction';
 
-import Telemetry from '../logic/Telemetry';
+import { Telemetry } from '../logic/Telemetry';
 
-export default class RushCommandLineParser extends CommandLineParser {
+export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushConfiguration: RushConfiguration;
 

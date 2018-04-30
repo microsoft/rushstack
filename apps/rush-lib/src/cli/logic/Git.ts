@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import PublishUtilities from './PublishUtilities';
+import { PublishUtilities } from './PublishUtilities';
 
 export class Git {
   private _targetBranch: string | undefined;
