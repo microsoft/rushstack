@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.2.27",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.27",
+      "date": "Mon, 30 Apr 2018 21:04:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Internal refactoring to eliminate default exports"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.26",
       "tag": "@microsoft/gulp-core-build-serve_v3.2.26",
       "date": "Tue, 03 Apr 2018 16:05:29 GMT",

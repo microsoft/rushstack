@@ -5,8 +5,8 @@
 
 import { assert } from 'chai';
 import * as path from 'path';
-import RushConfiguration from '../RushConfiguration';
-import { Event, default as EventHooks } from '../EventHooks';
+import { RushConfiguration } from '../RushConfiguration';
+import { Event, EventHooks } from '../EventHooks';
 
 describe('EventHooks', () => {
   it('loads a post build hook from rush.json', () => {

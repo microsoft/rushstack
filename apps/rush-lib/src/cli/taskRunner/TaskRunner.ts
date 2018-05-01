@@ -6,9 +6,9 @@ import * as os from 'os';
 import { Interleaver } from '@microsoft/stream-collator';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
-import ITask, { ITaskDefinition } from './ITask';
+import { ITask, ITaskDefinition } from './ITask';
 import { TaskStatus } from './TaskStatus';
-import TaskError from './TaskError';
+import { TaskError } from './TaskError';
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
@@ -19,7 +19,7 @@ import TaskError from './TaskError';
  * definitions must
  * @todo #168352: add unit tests
  */
-export default class TaskRunner {
+export class TaskRunner {
   private _tasks: Map<string, ITask>;
   private _changedProjectsOnly: boolean;
   private _buildQueue: ITask[];

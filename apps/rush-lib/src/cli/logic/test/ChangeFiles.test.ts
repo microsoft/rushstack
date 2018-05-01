@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import * as path from 'path';
 
 import { IChangelog } from '../../../data/Changelog';
-import ChangeFiles from '../ChangeFiles';
+import { ChangeFiles } from '../ChangeFiles';
 
 describe('ChangeFiles', () => {
   describe('getFiles', () => {

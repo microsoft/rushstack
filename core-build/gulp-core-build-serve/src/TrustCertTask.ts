@@ -12,7 +12,7 @@ import { ICertificate } from './certificates';
  *  trusted as a root cert in the keychain. On other platforms, the certificate is generated
  *  and signed, but the user must trust it manually.
  */
-export default class TrustCertTask extends GulpTask<void> {
+export class TrustCertTask extends GulpTask<void> {
   constructor() {
     super('trust-cert');
   }

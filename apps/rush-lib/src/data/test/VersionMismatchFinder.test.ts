@@ -4,7 +4,7 @@
 /// <reference types='mocha' />
 
 import { assert } from 'chai';
-import RushConfigurationProject from '../RushConfigurationProject';
+import { RushConfigurationProject } from '../RushConfigurationProject';
 import { VersionMismatchFinder } from '../VersionMismatchFinder';
 
 describe('VersionMismatchFinder', () => {

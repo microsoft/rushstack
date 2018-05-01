@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Internal refactoring to eliminate default exports",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}

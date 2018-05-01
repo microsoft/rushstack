@@ -9,12 +9,12 @@ import { JsonFile, Text } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { IPackageDeps } from '@microsoft/package-deps-hash';
 
-import RushConfiguration from '../../data/RushConfiguration';
-import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { RushConfiguration } from '../../data/RushConfiguration';
+import { RushConfigurationProject } from '../../data/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
-import Utilities from '../../utilities/Utilities';
+import { Utilities } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
-import TaskError from './TaskError';
+import { TaskError } from './TaskError';
 import { ITaskDefinition } from '../taskRunner/ITask';
 import {
   PackageChangeAnalyzer
@@ -37,7 +37,7 @@ export interface IProjectTaskOptions {
 /**
  * A TaskRunner task which cleans and builds a project
  */
-export default class ProjectTask implements ITaskDefinition {
+export class ProjectTask implements ITaskDefinition {
   public get name(): string {
     return this._rushProject.packageName;
   }

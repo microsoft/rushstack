@@ -14,20 +14,20 @@ import {
   IChangeInfo,
   ChangeType
 } from '../../data/ChangeManagement';
-import RushConfigurationProject from '../../data/RushConfigurationProject';
-import Npm from '../../utilities/Npm';
-import RushCommandLineParser from './RushCommandLineParser';
-import PublishUtilities from '../logic/PublishUtilities';
-import ChangelogGenerator from '../logic/ChangelogGenerator';
-import GitPolicy from '../logic/GitPolicy';
-import PrereleaseToken from '../logic/PrereleaseToken';
-import ChangeManager from '../logic/ChangeManager';
+import { RushConfigurationProject } from '../../data/RushConfigurationProject';
+import { Npm } from '../../utilities/Npm';
+import { RushCommandLineParser } from './RushCommandLineParser';
+import { PublishUtilities } from '../logic/PublishUtilities';
+import { ChangelogGenerator } from '../logic/ChangelogGenerator';
+import { GitPolicy } from '../logic/GitPolicy';
+import { PrereleaseToken } from '../logic/PrereleaseToken';
+import { ChangeManager } from '../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { Git } from '../logic/Git';
-import VersionControl from '../../utilities/VersionControl';
+import { VersionControl } from '../../utilities/VersionControl';
 import { JsonFile } from '@microsoft/node-core-library';
 
-export default class PublishAction extends BaseRushAction {
+export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
   private _apply: CommandLineFlagParameter;
   private _includeAll: CommandLineFlagParameter;

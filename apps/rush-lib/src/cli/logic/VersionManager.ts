@@ -14,11 +14,11 @@ import {
 } from '../../data/VersionPolicy';
 import { ChangeFile } from '../../data/ChangeFile';
 import { ChangeType, IChangeInfo } from '../../data/ChangeManagement';
-import RushConfiguration from '../../data/RushConfiguration';
-import RushConfigurationProject from '../../data/RushConfigurationProject';
+import { RushConfiguration } from '../../data/RushConfiguration';
+import { RushConfigurationProject } from '../../data/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
-import PublishUtilities from './PublishUtilities';
-import ChangeManager from './ChangeManager';
+import { PublishUtilities } from './PublishUtilities';
+import { ChangeManager } from './ChangeManager';
 
 export class VersionManager {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;

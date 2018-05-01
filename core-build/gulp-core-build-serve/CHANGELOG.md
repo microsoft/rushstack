@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Tue, 03 Apr 2018 16:05:29 GMT and should not be manually modified.
+This log was last generated on Mon, 30 Apr 2018 21:04:44 GMT and should not be manually modified.
+
+## 3.2.27
+Mon, 30 Apr 2018 21:04:44 GMT
+
+### Patches
+
+- Internal refactoring to eliminate default exports
 
 ## 3.2.26
 Tue, 03 Apr 2018 16:05:29 GMT

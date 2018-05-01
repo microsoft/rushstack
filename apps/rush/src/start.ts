@@ -39,7 +39,7 @@ import {
   RushConfiguration,
   Rush
 } from '@microsoft/rush-lib';
-import Utilities from '@microsoft/rush-lib/lib/utilities/Utilities';
+import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 import { RushVersionSelector } from './RushVersionSelector';

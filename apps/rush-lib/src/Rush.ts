@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as colors from 'colors';
 import { IPackageJson } from '@microsoft/node-core-library';
 
-import RushCommandLineParser from './cli/actions/RushCommandLineParser';
+import { RushCommandLineParser } from './cli/actions/RushCommandLineParser';
 import { RushConstants } from './RushConstants';
 
 /**
@@ -14,7 +14,7 @@ import { RushConstants } from './RushConstants';
  *
  * @public
  */
-export default class Rush {
+export class Rush {
   private static _version: string;
 
   /**

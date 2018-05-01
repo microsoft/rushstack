@@ -3,11 +3,12 @@
 
 /// <reference types='mocha' />
 
-import { assert } from 'chai';
-import Npm from '../Npm';
 import * as process from 'process';
-import Utilities from '../Utilities';
 import * as sinon from 'sinon';
+
+import { assert } from 'chai';
+import { Npm } from '../Npm';
+import { Utilities } from '../Utilities';
 
 describe('npm', () => {
   const packageName: string = '@microsoft/rush-lib-never';

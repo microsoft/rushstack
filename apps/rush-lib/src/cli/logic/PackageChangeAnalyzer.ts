@@ -11,7 +11,7 @@ import {
 import { Path } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../RushConstants';
-import RushConfiguration from '../../data/RushConfiguration';
+import { RushConfiguration } from '../../data/RushConfiguration';
 import { Git } from './Git';
 
 export class PackageChangeAnalyzer {
@@ -158,3 +158,4 @@ export class PackageChangeAnalyzer {
     return Path.isUnder(filePath, folderPath);
   }
 }
+

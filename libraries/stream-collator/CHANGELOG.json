@@ -2,6 +2,18 @@
   "name": "@microsoft/stream-collator",
   "entries": [
     {
+      "version": "2.2.36",
+      "tag": "@microsoft/stream-collator_v2.2.36",
+      "date": "Mon, 30 Apr 2018 21:04:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Internal refactoring to eliminate default exports"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.35",
       "tag": "@microsoft/stream-collator_v2.2.35",
       "date": "Fri, 27 Apr 2018 03:04:32 GMT",

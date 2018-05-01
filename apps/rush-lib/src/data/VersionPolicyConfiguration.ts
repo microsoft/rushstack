@@ -6,7 +6,7 @@ import * as fsx from 'fs-extra';
 import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
-import RushConfigurationProject from './RushConfigurationProject';
+import { RushConfigurationProject } from './RushConfigurationProject';
 
 /**
  * @beta

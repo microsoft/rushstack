@@ -4,7 +4,7 @@
 import gitInfo = require('git-repo-info');
 import * as child_process from 'child_process';
 
-import PublishUtilities from './PublishUtilities';
+import { PublishUtilities } from './PublishUtilities';
 
 export class Git {
   private _targetBranch: string | undefined;

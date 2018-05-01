@@ -8,18 +8,18 @@ import * as fsx from 'fs-extra';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import { PackageManager } from '../../data/RushConfiguration';
-import Utilities from '../../utilities/Utilities';
+import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import InstallManager, { InstallType } from '../logic/InstallManager';
+import { InstallManager, InstallType } from '../logic/InstallManager';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { BaseLinkManager } from '../logic/base/BaseLinkManager';
-import RushCommandLineParser from './RushCommandLineParser';
+import { RushCommandLineParser } from './RushCommandLineParser';
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { BaseRushAction } from './BaseRushAction';
 
-export default class GenerateAction extends BaseRushAction {
+export class GenerateAction extends BaseRushAction {
   private _lazyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
   private _forceParameter: CommandLineFlagParameter;

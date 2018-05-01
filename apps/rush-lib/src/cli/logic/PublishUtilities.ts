@@ -17,18 +17,18 @@ import {
   IChangeInfo,
   ChangeType
 } from '../../data/ChangeManagement';
-import RushConfigurationProject from '../../data/RushConfigurationProject';
-import Utilities, { IEnvironment } from '../../utilities/Utilities';
+import { RushConfigurationProject } from '../../data/RushConfigurationProject';
+import { Utilities, IEnvironment } from '../../utilities/Utilities';
 import { execSync } from 'child_process';
-import PrereleaseToken from './PrereleaseToken';
-import ChangeFiles from './ChangeFiles';
-import RushConfiguration from '../../data/RushConfiguration';
+import { PrereleaseToken } from './PrereleaseToken';
+import { ChangeFiles } from './ChangeFiles';
+import { RushConfiguration } from '../../data/RushConfiguration';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
 }
 
-export default class PublishUtilities {
+export class PublishUtilities {
   /**
    * Finds change requests in the given folder.
    * @param changesPath Path to the changes folder.

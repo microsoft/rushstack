@@ -10,17 +10,17 @@ import {
 
 import { BumpType, LockStepVersionPolicy } from '../../data/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
-import RushConfiguration from '../../data/RushConfiguration';
-import Utilities from '../../utilities/Utilities';
-import VersionControl from '../../utilities/VersionControl';
+import { RushConfiguration } from '../../data/RushConfiguration';
+import { Utilities } from '../../utilities/Utilities';
+import { VersionControl } from '../../utilities/VersionControl';
 import { VersionMismatchFinder } from '../../data/VersionMismatchFinder';
-import RushCommandLineParser from './RushCommandLineParser';
-import GitPolicy from '../logic/GitPolicy';
+import { RushCommandLineParser } from './RushCommandLineParser';
+import { GitPolicy } from '../logic/GitPolicy';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionManager } from '../logic/VersionManager';
 import { Git } from '../logic/Git';
 
-export default class VersionAction extends BaseRushAction {
+export class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy: CommandLineFlagParameter;
   private _overrideVersion: CommandLineStringParameter;
   private _bumpVersion: CommandLineFlagParameter;

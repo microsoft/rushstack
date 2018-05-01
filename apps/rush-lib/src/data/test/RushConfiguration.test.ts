@@ -3,13 +3,14 @@
 
 /// <reference types='mocha' />
 
+import * as path from 'path';
+
 import { assert } from 'chai';
 import { Text } from '@microsoft/node-core-library';
-import RushConfiguration from '../RushConfiguration';
+import { RushConfiguration } from '../RushConfiguration';
 import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
-import RushConfigurationProject from '../RushConfigurationProject';
-import * as path from 'path';
-import Utilities from '../../utilities/Utilities';
+import { RushConfigurationProject } from '../RushConfigurationProject';
+import { Utilities } from '../../utilities/Utilities';
 
 function normalizePathForComparison(pathToNormalize: string): string {
   return Text.replaceAll(pathToNormalize, '\\', '/').toUpperCase();

@@ -32,7 +32,7 @@ export enum Event {
  * The actions are expressed as a command-line that is executed using the operating system shell.
  * @beta
  */
-export default class EventHooks {
+export class EventHooks {
   private _hooks: Map<Event, string[]>;
 
   /**

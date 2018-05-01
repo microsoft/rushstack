@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as semver from 'semver';
 
-import Utilities from '@microsoft/rush-lib/lib/utilities/Utilities';
+import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import * as rushLib from '@microsoft/rush-lib';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;

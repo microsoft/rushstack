@@ -13,7 +13,7 @@ import { EOL } from 'os';
 
 import { runSudoSync, ISudoSyncResult } from './sudoSync';
 
-import CertificateStore from './CertificateStore';
+import { CertificateStore } from './CertificateStore';
 
 const serialNumber: string = '731c321744e34650a202e3ef91c3c1b9';
 const friendlyName: string = 'gulp-core-build-serve Development Certificate';

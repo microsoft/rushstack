@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 
 import {
-  default as PublishUtilities,
+  PublishUtilities,
   IChangeInfoHash
 } from './PublishUtilities';
 import {
@@ -18,14 +18,14 @@ import {
   IChangeLogEntry,
   IChangeLogComment
 } from '../../data/Changelog';
-import RushConfigurationProject from '../../data/RushConfigurationProject';
-import RushConfiguration from '../../data/RushConfiguration';
+import { RushConfigurationProject } from '../../data/RushConfigurationProject';
+import { RushConfiguration } from '../../data/RushConfiguration';
 
 const CHANGELOG_JSON: string = 'CHANGELOG.json';
 const CHANGELOG_MD: string = 'CHANGELOG.md';
 const EOL: string = '\n';
 
-export default class ChangelogGenerator {
+export class ChangelogGenerator {
   /**
    * Updates the appropriate changelogs with the given changes.
    */
