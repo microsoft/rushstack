@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as colors from 'colors';
 
 import {
   getPackageDeps,
@@ -11,6 +12,7 @@ import { Path } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../RushConstants';
 import { RushConfiguration } from '../../data/RushConfiguration';
+import { Git } from './Git';
 
 export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests
@@ -18,21 +20,23 @@ export class PackageChangeAnalyzer {
 
   private _data: Map<string, IPackageDeps>;
   private _rushConfiguration: RushConfiguration;
+  private _isGitSupported: boolean;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
-    this._data = this.getData();
+    this._isGitSupported = Git.detectIfGitIsSupported();
+    this._data = this._getData();
   }
 
   public getPackageDepsHash(projectName: string): IPackageDeps | undefined {
     if (!this._data) {
-      this._data = this.getData();
+      this._data = this._getData();
     }
 
     return this._data.get(projectName);
   }
 
-  private getData(): Map<string, IPackageDeps> {
+  private _getData(): Map<string, IPackageDeps> {
     // If we are not in a unit test, use the correct resources
     if (!PackageChangeAnalyzer.getPackageDeps) {
       PackageChangeAnalyzer.getPackageDeps = getPackageDeps;
@@ -49,10 +53,26 @@ export class PackageChangeAnalyzer {
 
     const noProjectHashes: { [key: string]: string } = {};
 
-    // Load the package deps hash for the whole repository
-    const repoDeps: IPackageDeps = PackageChangeAnalyzer.getPackageDeps(
-      this._rushConfiguration.rushJsonFolder, [RushConstants.packageDepsFilename]
-    );
+    let repoDeps: IPackageDeps;
+    try {
+      if (this._isGitSupported) {
+        // Load the package deps hash for the whole repository
+        repoDeps = PackageChangeAnalyzer.getPackageDeps(
+          this._rushConfiguration.rushJsonFolder,
+          [RushConstants.packageDepsFilename]
+        );
+      } else {
+        return projectHashDeps;
+      }
+    } catch (e) {
+      // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
+      // the state of the files in the repo. This can happen if the environment doesn't have git.
+      console.log(colors.yellow(
+        `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
+      ));
+
+      return projectHashDeps;
+    }
 
     // Sort each project folder into its own package deps hash
     Object.keys(repoDeps.files).forEach((filepath: string) => {
@@ -138,3 +158,4 @@ export class PackageChangeAnalyzer {
     return Path.isUnder(filePath, folderPath);
   }
 }
+
