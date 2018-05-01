@@ -383,10 +383,8 @@ export class Utilities {
   ): void {
     if (fsx.existsSync(directory)) {
       console.log('Deleting old files from ' + directory);
-      Utilities.dangerouslyDeletePath(directory);
+      fsx.emptyDirSync(directory);
     }
-
-    Utilities.createFolderWithRetry(directory);
 
     const npmPackageJson: IPackageJson = {
       dependencies: {
