@@ -17,7 +17,7 @@
     "fs-extra": "~5.0.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.35",
+    "@microsoft/node-library-build": "4.3.36",
     "@types/colors": "1.2.1",
     "@types/fs-extra": "5.0.1",
     "@types/node": "8.5.8",

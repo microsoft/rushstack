@@ -37,7 +37,7 @@
     "semver": "~5.3.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.35",
+    "@microsoft/node-library-build": "4.3.36",
     "@types/chai": "3.4.34",
     "@types/fs-extra": "5.0.1",
     "@types/mocha": "2.2.38",

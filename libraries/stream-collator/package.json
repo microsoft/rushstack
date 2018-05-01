@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/stream-collator",
-  "version": "2.2.36",
+  "version": "2.2.37",
   "description": "Display intelligible realtime output from your asynchronous streams",
   "repository": {
     "type": "git",
@@ -25,6 +25,6 @@
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "~3.4.2",
-    "@microsoft/node-library-build": "4.3.35"
+    "@microsoft/node-library-build": "4.3.36"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "5.6.6",
+  "version": "5.6.7",
   "description": "Validate, document, and review the exported API for a TypeScript library",
   "keywords": [
     "typescript",
