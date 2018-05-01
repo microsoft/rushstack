@@ -204,7 +204,8 @@ export class PublishUtilities {
         args,
         workingDirectory,
         environment,
-        false);
+        false,
+        true);
     }
   }
 

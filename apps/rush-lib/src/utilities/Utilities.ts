@@ -200,11 +200,15 @@ export class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommand(command: string, args: string[], workingDirectory: string,
-    environment?: IEnvironment, suppressOutput: boolean = false): void {
+    environment?: IEnvironment, suppressOutput: boolean = false,
+    keepEnvironment: boolean = false
+  ): void {
 
     Utilities._executeCommandInternal(command, args, workingDirectory,
       suppressOutput ? undefined : [0, 1, 2],
-      environment);
+      environment,
+      keepEnvironment
+    );
   }
 
   /**
@@ -212,11 +216,16 @@ export class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommandAndCaptureOutput(command: string, args: string[], workingDirectory: string,
-    environment?: IEnvironment): string {
+    environment?: IEnvironment,
+    keepEnvironment: boolean = false
+  ): string {
 
     const  result: child_process.SpawnSyncReturns<Buffer>
       = Utilities._executeCommandInternal(command, args, workingDirectory,
-        ['pipe', 'pipe', 'pipe'], environment);
+        ['pipe', 'pipe', 'pipe'],
+        environment,
+        keepEnvironment
+      );
 
     return result.stdout.toString();
   }
@@ -460,13 +469,15 @@ export class Utilities {
   private static _executeCommandInternal(
     command: string, args: string[], workingDirectory: string,
     stdio: (string|number)[] | undefined,
-    environment?: IEnvironment): child_process.SpawnSyncReturns<Buffer> {
+    environment?: IEnvironment,
+    keepEnvironment: boolean = false
+  ): child_process.SpawnSyncReturns<Buffer> {
 
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,
       stdio: stdio,
-      env: Utilities._createEnvironmentForRushCommand('', environment)
+      env: keepEnvironment ? environment : Utilities._createEnvironmentForRushCommand('', environment)
     };
 
     // This is needed since we specify shell=true below.
