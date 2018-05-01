@@ -3,8 +3,6 @@
 
 import * as path from 'path';
 import * as colors from 'colors';
-import gitInfo = require('git-repo-info');
-import * as child_process from 'child_process';
 
 import {
   getPackageDeps,
@@ -14,6 +12,7 @@ import { Path } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../RushConstants';
 import RushConfiguration from '../../data/RushConfiguration';
+import { Git } from './Git';
 
 export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests
@@ -25,7 +24,7 @@ export class PackageChangeAnalyzer {
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
-    this._isGitSupported = this._detectIfGitIsSupported();
+    this._isGitSupported = Git.detectIfGitIsSupported();
     this._data = this._getData();
   }
 
@@ -157,24 +156,5 @@ export class PackageChangeAnalyzer {
 
   private _fileExistsInFolder(filePath: string, folderPath: string): boolean {
     return Path.isUnder(filePath, folderPath);
-  }
-
-  /**
-   * TODO: Promote this to be part of RushConfiguration, or another global configuration object
-   * if this ends up being useful elsewhere
-   */
-  private _detectIfGitIsSupported(): boolean {
-    const command: string = process.platform === 'win32' ? 'where' : 'which';
-    const result: child_process.SpawnSyncReturns<string> = child_process.spawnSync(command, ['git']);
-
-    if (result.status !== 0) {
-      return false;
-    }
-
-    try {
-      return !!gitInfo().sha;
-    } catch (e) {
-      return false; // Unexpected, but possible if the .git directory is corrupted.
-    }
   }
 }
