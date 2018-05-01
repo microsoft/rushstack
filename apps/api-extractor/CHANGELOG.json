@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.6.7",
+      "tag": "@microsoft/api-extractor_v5.6.7",
+      "date": "Tue, 01 May 2018 22:03:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the *.d.ts rollup trimming did not trim import statements"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.6.6",
       "tag": "@microsoft/api-extractor_v5.6.6",
       "date": "Fri, 27 Apr 2018 03:04:32 GMT",
