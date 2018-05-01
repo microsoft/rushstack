@@ -229,16 +229,20 @@ export class DtsRollupGenerator {
     // Emit the imports
     for (const dtsEntry of this._dtsEntries) {
       if (dtsEntry.astSymbol.astImport) {
-        const astImport: AstImport = dtsEntry.astSymbol.astImport;
 
-        if (astImport.exportName === '*') {
-          indentedWriter.write(`import * as ${dtsEntry.nameForEmit}`);
-        } else if (dtsEntry.nameForEmit !== astImport.exportName) {
-          indentedWriter.write(`import { ${astImport.exportName} as ${dtsEntry.nameForEmit} }`);
-        } else {
-          indentedWriter.write(`import { ${astImport.exportName} }`);
+        const releaseTag: ReleaseTag = this._getReleaseTagForAstSymbol(dtsEntry.astSymbol);
+        if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+          const astImport: AstImport = dtsEntry.astSymbol.astImport;
+
+          if (astImport.exportName === '*') {
+            indentedWriter.write(`import * as ${dtsEntry.nameForEmit}`);
+          } else if (dtsEntry.nameForEmit !== astImport.exportName) {
+            indentedWriter.write(`import { ${astImport.exportName} as ${dtsEntry.nameForEmit} }`);
+          } else {
+            indentedWriter.write(`import { ${astImport.exportName} }`);
+          }
+          indentedWriter.writeLine(` from '${astImport.modulePath}';`);
         }
-        indentedWriter.writeLine(` from '${astImport.modulePath}';`);
       }
     }
 
@@ -247,7 +251,6 @@ export class DtsRollupGenerator {
       if (!dtsEntry.astSymbol.astImport) {
 
         const releaseTag: ReleaseTag = this._getReleaseTagForAstSymbol(dtsEntry.astSymbol);
-
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
 
           // Emit all the declarations for this entry
