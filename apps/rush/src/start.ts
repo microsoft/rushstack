@@ -57,14 +57,16 @@ if (process.argv[2] === RUSH_PURGE_OPTION_NAME) {
   const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', 'package.json'));
 
   // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
-  //  install it
+  // install it
   if (configuration && configuration.rushVersion !== currentPackageJson.version) {
     const versionSelector: RushVersionSelector = new RushVersionSelector(
       configuration.homeFolder,
       currentPackageJson.version
     );
-    const rushWrapper: () => void = versionSelector.ensureRushVersionInstalled(configuration.rushVersion);
-    rushWrapper();
+    versionSelector.ensureRushVersionInstalled(configuration.rushVersion)
+      .catch((error: Error) => {
+        console.log(colors.red('Error: ' + error.message));
+      });
   } else {
     // Otherwise invoke the rush-lib that came with this rush package
     const isManaged: boolean = !!configuration && configuration.rushVersion === currentPackageJson.version;
