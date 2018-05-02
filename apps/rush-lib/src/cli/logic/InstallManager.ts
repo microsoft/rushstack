@@ -18,16 +18,20 @@ import {
   MapExtensions
 } from '@microsoft/node-core-library';
 
+import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { AsyncRecycler } from '../../utilities/AsyncRecycler';
+import { BaseLinkManager } from '../logic/base/BaseLinkManager';
+import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
+import { GitPolicy } from '../logic/GitPolicy';
+import { IRushTempPackageJson } from '../logic/base/BasePackage';
+import { LastInstallFlag } from '../../utilities/LastInstallFlag';
+import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { RushConfiguration, PackageManager } from '../../data/RushConfiguration';
 import { RushConfigurationProject } from '../../data/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
-import { Utilities } from '../../utilities/Utilities';
+import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { IRushTempPackageJson } from '../logic/base/BasePackage';
-import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
-import { LastInstallFlag } from '../../utilities/LastInstallFlag';
-
+import { Utilities } from '../../utilities/Utilities';
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
 const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
@@ -45,25 +49,12 @@ export interface CreateOptions { // tslint:disable-line:interface-name
   noMtime?: boolean;
 }
 
-/**
- * Controls the behavior of InstallManager.installCommonModules()
- */
-export enum InstallType {
-  /**
-   * The default behavior: (1) If the timestamps are up to date, don't do anything.
-   * (2) Otherwise, if the common folder is in a good state, do an incremental install.
-   * (3) Otherwise, delete everything, clear the cache, and do a clean install.
-   */
-  Normal,
-  /**
-   * Force a clean install, i.e. delete "common\node_modules", clear the cache,
-   * and then install.
-   */
-  ForceClean,
-  /**
-   * Same as ForceClean, but also clears the global NPM cache (which is not threadsafe).
-   */
-  UnsafePurge
+export interface IInstallManagerOptions {
+  allowShrinkwrapUpdates: boolean;
+  clean: boolean;
+  bypassPolicy: boolean;
+  noLink: boolean;
+  full: boolean;
 }
 
 /**
@@ -161,23 +152,134 @@ export class InstallManager {
     return this._commonNodeModulesMarker;
   }
 
-  constructor(rushConfiguration: RushConfiguration) {
+  constructor(rushConfiguration: RushConfiguration, asyncRecycler: AsyncRecycler) {
     this._rushConfiguration = rushConfiguration;
+    this._asyncRecycler = asyncRecycler;
 
     this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, {
       node: process.versions.node,
       packageManager: rushConfiguration.packageManager,
       packageManagerVersion: rushConfiguration.packageManagerToolVersion
     });
+  }
 
-    this._asyncRecycler = new AsyncRecycler(this._rushConfiguration);
+  public doInstall(options: IInstallManagerOptions): Promise<boolean> {
+    // Check the policies
+    if (!options.bypassPolicy) {
+      if (!GitPolicy.check(this._rushConfiguration)) {
+        return Promise.resolve(false);
+      }
+
+      ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
+    }
+    // Ensure that the package manager is installed
+    return this.ensureLocalPackageManager()
+      .then(() => {
+
+        // Is the shrinkwrap good?
+        const committedShrinkwrapFilename: string = this._rushConfiguration.committedShrinkwrapFilename;
+        const tempShrinkwrapFilename: string = this._rushConfiguration.tempShrinkwrapFilename;
+
+        let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
+
+        try {
+          shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager,
+            this._rushConfiguration.committedShrinkwrapFilename);
+        } catch (ex) {
+          console.log();
+          console.log('Unable to load the shrinkwrap file: ' + ex.message);
+
+          if (!options.allowShrinkwrapUpdates) {
+            console.log();
+            console.log(colors.red('You need to run "rush update" to fix this problem'));
+            return false;
+          }
+
+          if (fsx.existsSync(tempShrinkwrapFilename)) {
+            console.log(os.EOL + 'Deleting ' + tempShrinkwrapFilename);
+            fsx.unlinkSync(tempShrinkwrapFilename);
+          }
+        }
+
+        const shrinkwrapIsValid: boolean = this._createTempModulesAndCheckShrinkwrap(shrinkwrapFile);
+
+        if (!shrinkwrapIsValid) {
+          if (!options.allowShrinkwrapUpdates) {
+            console.log();
+            console.log(colors.red('The shrinkwrap file is out of date.  You need to run "rush update".'));
+            return false;
+          }
+
+          if (options.full) {
+            if (fsx.existsSync(tempShrinkwrapFilename)) {
+              console.log(os.EOL + 'Deleting ' + tempShrinkwrapFilename);
+              fsx.unlinkSync(tempShrinkwrapFilename);
+            }
+          } else {
+            // Copy common\config\rush\shrinkwrap.yaml --> common\temp\shrinkwrap.yaml
+            this._syncFile(committedShrinkwrapFilename, tempShrinkwrapFilename);
+          }
+
+          const packageManager: PackageManager = this._rushConfiguration.packageManager;
+
+          if (this._rushConfiguration.packageManager === 'pnpm') {
+            this._installCommonModules(false);
+
+          } else if (this._rushConfiguration.packageManager === 'npm') {
+            // Do a clean install, deleting node_modules
+            this._installCommonModules(true);
+
+            console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+            const npmArgs: string[] = ['shrinkwrap'];
+            this._pushConfigurationArgs(npmArgs);
+            Utilities.executeCommand(this._rushConfiguration.packageManagerToolFilename,
+              npmArgs, this._rushConfiguration.commonTempFolder);
+            console.log('"npm shrinkwrap" completed' + os.EOL);
+          } else {
+            // program bug
+            throw new Error(`Program bug: invalid package manager "${packageManager}"`);
+          }
+
+          // Copy (or delete) common\temp\shrinkwrap.yaml --> common\config\rush\shrinkwrap.yaml
+          this._syncFile(this._rushConfiguration.tempShrinkwrapFilename,
+            this._rushConfiguration.committedShrinkwrapFilename);
+
+          // The flag file is normally created by installCommonModules(), but "rush install" will
+          // compare its timestamp against the shrinkwrap file.  Since we just generated a new
+          // npm-shrinkwrap file, it's safe to bump the timestamp, which ensures that "rush install"
+          // won't do anything immediately after "rush generate".  This is a minor performance
+          // optimization, but it helps people to understand the semantics of the commands.
+          if (this.commonNodeModulesMarker.isValid()) {
+            this.commonNodeModulesMarker.create();
+          } else {
+            // Sanity check -- since we requested a clean install above, this should never occur
+            throw new Error('The install flag file is missing');
+          }
+
+        }
+
+        if (!options.noLink) {
+          const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
+          // NOTE: Setting force=true here shouldn't be strictly necessary, since installCommonModules()
+          // above should have already deleted the marker file, but it doesn't hurt to be explicit.
+          return linkManager.createSymlinksForProjects(true)
+            .then(() => {
+              return true;
+            });
+        } else {
+          console.log(os.EOL
+            + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.'));
+        }
+
+        return true;
+      });
   }
 
   /**
    * If the "(p)npm-local" symlink hasn't been set up yet, this creates it, installing the
    * specified (P)npm version in the user's home directory if needed.
    */
-  public ensureLocalPackageManager(forceReinstall: boolean): Promise<void> {
+  public ensureLocalPackageManager(): Promise<void> {
     // Example: "C:\Users\YourName\.rush"
     const rushHomeFolder: string = path.join(this._rushConfiguration.homeFolder, '.rush');
 
@@ -201,7 +303,7 @@ export class InstallManager {
     return LockFile.acquire(rushHomeFolder, packageManagerAndVersion).then((lock: LockFile) => {
       console.log(`Acquired lock for ${packageManagerAndVersion}`);
 
-      if (!packageManagerMarker.isValid() || forceReinstall || lock.dirtyWhenAcquired) {
+      if (!packageManagerMarker.isValid() || lock.dirtyWhenAcquired) {
         console.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
 
         // note that this will remove the last-install flag from the directory
@@ -250,20 +352,12 @@ export class InstallManager {
 
   /**
    * Regenerates the common/package.json and all temp_modules projects.
-   */
-  public createTempModules(forceCreate: boolean): void {
-    this.createTempModulesAndCheckShrinkwrap(undefined, forceCreate);
-  }
-
-  /**
-   * Regenerates the common/package.json and all temp_modules projects.
    * If shrinkwrapFile is provided, this function also validates whether it contains
    * everything we need to install and returns true if so; in all other cases,
    * the return value is false.
    */
-  public createTempModulesAndCheckShrinkwrap(
-    shrinkwrapFile: BaseShrinkwrapFile | undefined,
-    forceCreate: boolean
+  private _createTempModulesAndCheckShrinkwrap(
+    shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): boolean {
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -319,7 +413,7 @@ export class InstallManager {
 
     // ensure that we remove any old one that may be hanging around
     fsx.removeSync(tempNpmrcPath);
-    this.syncFile(committedNpmrcPath, tempNpmrcPath);
+    this._syncFile(committedNpmrcPath, tempNpmrcPath);
 
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {
@@ -330,7 +424,7 @@ export class InstallManager {
 
       // ensure that we remove any old one that may be hanging around
       fsx.removeSync(tempPnpmFilePath);
-      this.syncFile(committedPnpmFilePath, tempPnpmFilePath);
+      this._syncFile(committedPnpmFilePath, tempPnpmFilePath);
     }
 
     const commonPackageJson: IPackageJson = {
@@ -470,7 +564,7 @@ export class InstallManager {
         // ignore the error, we will go ahead and create a new tarball
       }
 
-      if (shouldOverwrite || forceCreate) {
+      if (shouldOverwrite) {
         try {
           // ensure the folder we are about to zip exists
           Utilities.createFolderWithRetry(tempProjectFolder);
@@ -528,188 +622,171 @@ export class InstallManager {
   }
 
   /**
-   * Runs "npm install" in the common folder, in one of three ways:
-   * 1. No action because it is already up to date
-   * 2. Incremental action ("npm prune", "npm install", etc).
-   * 3. Full clean and "npm install"
+   * Runs "npm install" in the common folder.  The "forceDeleteNodeModules" flag is used
+   * to workaround NPM flaws during normal operation.  It is NOT intended for the scenario
+   * where a user is specifying command-line switches because they suspect a folder is corrupted.
    */
-  public installCommonModules(installType: InstallType): void {
-    try {
-      // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
-      const packageManagerFilename: string = this._rushConfiguration.packageManagerToolFilename;
-      if (!fsx.existsSync(packageManagerFilename)) {
-        // This normally should never occur -- it indicates that some code path forgot to call
-        // InstallManager.ensureLocalNpmTool().
-        throw new Error('Expected to find local package manager tool here: "' + packageManagerFilename + '"');
-      }
-
-      console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
-        + os.EOL);
-
-      const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonTempFolder,
-        'node_modules');
-
-      // This marker file indicates that the last "rush install" completed successfully
-      const markerFileExistedAndWasValidAtStart: boolean = this._commonNodeModulesMarker.isValid();
-
-      // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
-      // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
-      // install.
-      const deletingNodeModules: boolean = installType !== InstallType.Normal || !markerFileExistedAndWasValidAtStart;
-
-      // Based on timestamps, can we skip this install entirely?
-      if (!deletingNodeModules) {
-        const potentiallyChangedFiles: string[] = [];
-
-        // Consider the timestamp on the node_modules folder; if someone tampered with it
-        // or deleted it entirely, then we can't skip this install
-        potentiallyChangedFiles.push(commonNodeModulesFolder);
-
-        // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
-        // then we can't skip this install
-        potentiallyChangedFiles.push(this._rushConfiguration.committedShrinkwrapFilename);
-
-        // Also consider timestamps for all the temp tarballs. (createTempModulesAndCheckShrinkwrap() will
-        // carefully preserve these timestamps unless something has changed.)
-        // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
-        potentiallyChangedFiles.push(...this._rushConfiguration.projects.map(x => {
-          return this._getTarballFilePath(x);
-        }));
-
-        // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
-        // exist, then isFileTimestampCurrent() returns false.
-        if (Utilities.isFileTimestampCurrent(this._commonNodeModulesMarker.path, potentiallyChangedFiles)) {
-          // Nothing to do, because everything is up to date according to time stamps
-          return;
-        }
-      } else {
-        if (this._rushConfiguration.packageManager === 'npm') {
-          console.log(`Deleting the "npm-cache" folder`);
-          // This is faster and more thorough than "npm cache clean"
-          this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
-
-          console.log(`Deleting the "npm-tmp" folder`);
-          this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
-
-        } else if (installType !== InstallType.Normal) {
-          console.log(`Deleting the "pnpm-store" folder`);
-          this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
-        }
-      }
-
-      // Delete the successful install file to indicate the install transaction has started
-      this._commonNodeModulesMarker.clear();
-
-      // Since we're tampering with common/node_modules, delete the "rush link" flag file if it exists;
-      // this ensures that a full "rush link" is required next time
-      Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
-
-      // Is there an existing "node_modules" folder to consider?
-      if (fsx.existsSync(commonNodeModulesFolder)) {
-        // Should we delete the entire "node_modules" folder?
-        if (deletingNodeModules) {
-          // YES: Delete "node_modules"
-
-          // Explain to the user why we are hosing their node_modules folder
-          if (installType === InstallType.Normal) {
-            console.log('Deleting the "node_modules" folder because the previous Rush install' +
-              ' did not complete successfully.');
-          } else {
-            console.log('Deleting old files from ' + commonNodeModulesFolder);
-          }
-
-          this._asyncRecycler.moveFolder(commonNodeModulesFolder);
-
-          // Since it may be a while before NPM gets around to creating the "node_modules" folder,
-          // create an empty folder so that the above warning will be shown if we get interrupted.
-          Utilities.createFolderWithRetry(commonNodeModulesFolder);
-        } else {
-          // NO: Do an incremental install in the "node_modules" folder
-
-          // note: it is not necessary to run "prune" with pnpm
-          if (this._rushConfiguration.packageManager === 'npm') {
-            console.log(`Running "${this._rushConfiguration.packageManager} prune"`
-              + ` in ${this._rushConfiguration.commonTempFolder}`);
-            const args: string[] = ['prune'];
-            this.pushConfigurationArgs(args);
-            Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename, args,
-              this._rushConfiguration.commonTempFolder);
-
-            // Delete the (installed image of) the temp projects, since "npm install" does not
-            // detect changes for "file:./" references.
-            // We recognize the temp projects by their names, which always start with "rush-".
-
-            // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp"
-            const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
-            console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
-            // Glob can't handle Windows paths
-            const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
-
-            // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
-            for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
-              // We could potentially use AsyncRecycler here, but in practice these folders tend
-              // to be very small
-              Utilities.dangerouslyDeletePath(tempModulePath);
-            }
-          }
-        }
-      }
-
-      // Run "npm install" in the common folder
-
-      // NOTE:
-      //       we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
-      //       work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
-      //       which is an optional second-order dependency. Optional dependencies work by attempting to install
-      //       the package, but removes the package if the install failed.
-      //       This means that someone running generate on a Mac WILL have fsevents included in their shrinkwrap.
-      //       When someone using Windows attempts to install from the shrinkwrap, the install will fail.
-      //
-      //       If someone generates the shrinkwrap using Windows, then fsevents will NOT be listed in the shrinkwrap.
-      //       When someone using Mac attempts to install from the shrinkwrap, (as of NPM 4), they will NOT have the
-      //       optional dependency installed.
-      //
-      //       One possible solution would be to have the shrinkwrap include information about whether the dependency
-      //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
-      //       people would have different node_modules based on their system.
-
-      const installArgs: string[] = ['install', '--no-optional'];
-      this.pushConfigurationArgs(installArgs);
-
-      console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
-        + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
-
-      Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
-        installArgs,
-        this._rushConfiguration.commonTempFolder,
-        undefined,
-        false, () => {
-          if (this._rushConfiguration.packageManager === 'pnpm') {
-            // If there is a failure in pnpm, it is possible that it left the
-            // store in a bad state. Therefore, we should clean out the store
-            // before attempting the install again.
-
-            console.log(colors.yellow(`Deleting the "node_modules" folder`));
-            this._asyncRecycler.moveFolder(commonNodeModulesFolder);
-            console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-            this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
-
-            // Since it may be a while before the package manager gets around to creating the "node_modules" folder,
-            // create an empty folder so that the warning on the next attempt of "rush install"
-            Utilities.createFolderWithRetry(commonNodeModulesFolder);
-          }
-        });
-
-      if (this._rushConfiguration.packageManager === 'npm') {
-        this._fixupNpm5Regression();
-      }
-
-      // Finally, create the marker file to indicate a successful install
-      this._commonNodeModulesMarker.create();
-    } finally {
-      // Delete anything hanging around in the Async Recycler
-      this._asyncRecycler.deleteAll();
+  private _installCommonModules(forceDeleteNodeModules: boolean): void {
+    // Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
+    const packageManagerFilename: string = this._rushConfiguration.packageManagerToolFilename;
+    if (!fsx.existsSync(packageManagerFilename)) {
+      // This normally should never occur -- it indicates that some code path forgot to call
+      // InstallManager.ensureLocalNpmTool().
+      throw new Error('Expected to find local package manager tool here: "' + packageManagerFilename + '"');
     }
+
+    console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
+      + os.EOL);
+
+    const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonTempFolder,
+      'node_modules');
+
+    // This marker file indicates that the last "rush install" completed successfully
+    const markerFileExistedAndWasValidAtStart: boolean = this._commonNodeModulesMarker.isValid();
+
+    // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
+    // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
+    // install.
+    const deletingNodeModules: boolean = forceDeleteNodeModules || !markerFileExistedAndWasValidAtStart;
+
+    // Based on timestamps, can we skip this install entirely?
+    if (!deletingNodeModules) {
+      const potentiallyChangedFiles: string[] = [];
+
+      // Consider the timestamp on the node_modules folder; if someone tampered with it
+      // or deleted it entirely, then we can't skip this install
+      potentiallyChangedFiles.push(commonNodeModulesFolder);
+
+      // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
+      // then we can't skip this install
+      potentiallyChangedFiles.push(this._rushConfiguration.committedShrinkwrapFilename);
+
+      // Also consider timestamps for all the temp tarballs. (createTempModulesAndCheckShrinkwrap() will
+      // carefully preserve these timestamps unless something has changed.)
+      // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
+      potentiallyChangedFiles.push(...this._rushConfiguration.projects.map(x => {
+        return this._getTarballFilePath(x);
+      }));
+
+      // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
+      // exist, then isFileTimestampCurrent() returns false.
+      if (Utilities.isFileTimestampCurrent(this._commonNodeModulesMarker.path, potentiallyChangedFiles)) {
+        // Nothing to do, because everything is up to date according to time stamps
+        return;
+      }
+    } else {
+      // NOTE: The PNPM store is supposed to be transactionally safe, so we don't delete it automatically.
+      // The user must request that via the command line.
+      if (this._rushConfiguration.packageManager === 'npm') {
+        console.log(`Deleting the "npm-cache" folder`);
+        // This is faster and more thorough than "npm cache clean"
+        this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
+
+        console.log(`Deleting the "npm-tmp" folder`);
+        this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
+      }
+    }
+
+    // Delete the successful install file to indicate the install transaction has started
+    this._commonNodeModulesMarker.clear();
+
+    // Since we're tampering with common/node_modules, delete the "rush link" flag file if it exists;
+    // this ensures that a full "rush link" is required next time
+    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
+
+    // Is there an existing "node_modules" folder to consider?
+    if (fsx.existsSync(commonNodeModulesFolder)) {
+      // Should we delete the entire "node_modules" folder?
+      if (deletingNodeModules) {
+        // YES: Delete "node_modules"
+
+        // Explain to the user why we are hosing their node_modules folder
+        console.log('Deleting files from ' + commonNodeModulesFolder);
+
+        this._asyncRecycler.moveFolder(commonNodeModulesFolder);
+
+        Utilities.createFolderWithRetry(commonNodeModulesFolder);
+      } else {
+        // NO: Do an incremental install in the "node_modules" folder
+
+        // note: it is not necessary to run "prune" with pnpm
+        if (this._rushConfiguration.packageManager === 'npm') {
+          console.log(`Running "${this._rushConfiguration.packageManager} prune"`
+            + ` in ${this._rushConfiguration.commonTempFolder}`);
+          const args: string[] = ['prune'];
+          this._pushConfigurationArgs(args);
+          Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename, args,
+            this._rushConfiguration.commonTempFolder);
+
+          // Delete the (installed image of) the temp projects, since "npm install" does not
+          // detect changes for "file:./" references.
+          // We recognize the temp projects by their names, which always start with "rush-".
+
+          // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp"
+          const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
+          console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
+          // Glob can't handle Windows paths
+          const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
+
+          // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
+          for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
+            // We could potentially use AsyncRecycler here, but in practice these folders tend
+            // to be very small
+            Utilities.dangerouslyDeletePath(tempModulePath);
+          }
+        }
+      }
+    }
+
+    // Run "npm install" in the common folder
+
+    // NOTE:
+    //       we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
+    //       work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
+    //       which is an optional second-order dependency. Optional dependencies work by attempting to install
+    //       the package, but removes the package if the install failed.
+    //       This means that someone running generate on a Mac WILL have fsevents included in their shrinkwrap.
+    //       When someone using Windows attempts to install from the shrinkwrap, the install will fail.
+    //
+    //       If someone generates the shrinkwrap using Windows, then fsevents will NOT be listed in the shrinkwrap.
+    //       When someone using Mac attempts to install from the shrinkwrap, (as of NPM 4), they will NOT have the
+    //       optional dependency installed.
+    //
+    //       One possible solution would be to have the shrinkwrap include information about whether the dependency
+    //       is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
+    //       people would have different node_modules based on their system.
+
+    const installArgs: string[] = ['install', '--no-optional'];
+    this._pushConfigurationArgs(installArgs);
+
+    console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
+      + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
+
+    Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
+      installArgs,
+      this._rushConfiguration.commonTempFolder,
+      undefined,
+      false, () => {
+        if (this._rushConfiguration.packageManager === 'pnpm') {
+          // If there is a failure in pnpm, it is possible that it left the
+          // store in a bad state. Therefore, we should clean out the store
+          // before attempting the install again.
+
+          console.log(colors.yellow(`Deleting the "node_modules" folder`));
+          this._asyncRecycler.moveFolder(commonNodeModulesFolder);
+          console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
+          this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+
+          Utilities.createFolderWithRetry(commonNodeModulesFolder);
+        }
+      });
+
+    if (this._rushConfiguration.packageManager === 'npm') {
+      this._fixupNpm5Regression();
+    }
+
+    // Finally, create the marker file to indicate a successful install
+    this._commonNodeModulesMarker.create();
 
     console.log('');
   }
@@ -718,7 +795,7 @@ export class InstallManager {
    * Used when invoking the NPM tool.  Appends the common configuration options
    * to the command-line.
    */
-  public pushConfigurationArgs(args: string[]): void {
+  private _pushConfigurationArgs(args: string[]): void {
     if (this._rushConfiguration.packageManager === 'npm') {
       args.push('--cache', this._rushConfiguration.npmCacheFolder);
       args.push('--tmp', this._rushConfiguration.npmTmpFolder);
@@ -738,7 +815,7 @@ export class InstallManager {
    * Copies the file "sourcePath" to "targetPath", overwriting the target file location.
    * If the source file does not exist, then the target file is deleted.
    */
-  public syncFile(sourcePath: string, targetPath: string): void {
+  private _syncFile(sourcePath: string, targetPath: string): void {
     if (fsx.existsSync(sourcePath)) {
       console.log('Updating ' + targetPath);
       fsx.copySync(sourcePath, targetPath);

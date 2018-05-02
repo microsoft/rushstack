@@ -13,8 +13,7 @@ import { RushConfiguration } from '../../data/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { ChangeAction } from './ChangeAction';
 import { CheckAction } from './CheckAction';
-import { GenerateAction } from './GenerateAction';
-import { InstallAction } from './InstallAction';
+import { UpdateAction } from './UpdateAction';
 import { LinkAction } from './LinkAction';
 import { PublishAction } from './PublishAction';
 import { UnlinkAction } from './UnlinkAction';
@@ -116,8 +115,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
-      this.addAction(new GenerateAction(this));
-      this.addAction(new InstallAction(this));
+      this.addAction(new UpdateAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new PublishAction(this));
       this.addAction(new ScanAction(this));
