@@ -158,4 +158,3 @@ export class PackageChangeAnalyzer {
     return Path.isUnder(filePath, folderPath);
   }
 }
-
