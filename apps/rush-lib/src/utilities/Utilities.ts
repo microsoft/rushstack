@@ -387,8 +387,8 @@ export class Utilities {
   ): void {
     if (fsx.existsSync(directory)) {
       console.log('Deleting old files from ' + directory);
-      fsx.emptyDirSync(directory);
     }
+    fsx.emptyDirSync(directory);
 
     const npmPackageJson: IPackageJson = {
       dependencies: {
