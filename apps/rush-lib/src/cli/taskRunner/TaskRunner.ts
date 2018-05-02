@@ -380,13 +380,13 @@ export class TaskRunner {
 
     console.log('');
 
-    this._printStatus(TaskStatus.Executing, tasksByStatus, colors.yellow);
-    this._printStatus(TaskStatus.Ready, tasksByStatus, colors.white);
-    this._printStatus(TaskStatus.Skipped, tasksByStatus, colors.grey);
-    this._printStatus(TaskStatus.Success, tasksByStatus, colors.green);
-    this._printStatus(TaskStatus.SuccessWithWarning, tasksByStatus, colors.yellow.underline);
-    this._printStatus(TaskStatus.Blocked, tasksByStatus, colors.red);
-    this._printStatus(TaskStatus.Failure, tasksByStatus, colors.red);
+    this._printStatus('EXECUTING', tasksByStatus[TaskStatus.Executing], colors.yellow);
+    this._printStatus('READY', tasksByStatus[TaskStatus.Ready], colors.white);
+    this._printStatus('SKIPPED', tasksByStatus[TaskStatus.Skipped], colors.grey);
+    this._printStatus('SUCCESS', tasksByStatus[TaskStatus.Success], colors.green);
+    this._printStatus('SUCCESS WITH WARNINGS', tasksByStatus[TaskStatus.SuccessWithWarning], colors.yellow.underline);
+    this._printStatus('BLOCKED', tasksByStatus[TaskStatus.Blocked], colors.red);
+    this._printStatus('FAILURE', tasksByStatus[TaskStatus.Failure], colors.red);
 
     const tasksWithErrors: ITask[] = tasksByStatus[TaskStatus.Failure];
     if (tasksWithErrors) {
@@ -402,34 +402,13 @@ export class TaskRunner {
     console.log('');
   }
 
-  private _printStatus(
-    status: TaskStatus,
-    tasksByStatus: { [status: number]: ITask[] },
-    color: (a: string) => string
-  ): void {
-    const tasks: ITask[] = tasksByStatus[status];
-
+  private _printStatus(status: string, tasks: ITask[], color: (a: string) => string): void {
     if (tasks && tasks.length) {
       console.log(color(`${status} (${tasks.length})`));
       console.log(color('================================'));
       for (let i: number = 0; i < tasks.length; i++) {
         const task: ITask = tasks[i];
-
-        switch (status) {
-          case TaskStatus.Executing:
-          case TaskStatus.Ready:
-          case TaskStatus.Skipped:
-            console.log(color(task.name));
-            break;
-
-          case TaskStatus.Success:
-          case TaskStatus.SuccessWithWarning:
-          case TaskStatus.Blocked:
-          case TaskStatus.Failure:
-            console.log(color(`${task.name} (${task.stopwatch.toString()})`));
-            break;
-        }
-
+        console.log(color(task.name));
         if (task.writer) {
           let stderr: string = task.writer.getStdError();
           if (stderr && (task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning)) {
@@ -442,7 +421,6 @@ export class TaskRunner {
           }
         }
       }
-
       console.log(color('================================' + os.EOL));
     }
   }
