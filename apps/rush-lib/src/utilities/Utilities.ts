@@ -216,11 +216,13 @@ export class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   public static executeCommandAndCaptureOutput(command: string, args: string[], workingDirectory: string,
-    environment?: IEnvironment): string {
+    environment?: IEnvironment,
+    keepEnvironment: boolean = false
+  ): string {
 
     const  result: child_process.SpawnSyncReturns<Buffer>
       = Utilities._executeCommandInternal(command, args, workingDirectory,
-        ['pipe', 'pipe', 'pipe'], environment);
+        ['pipe', 'pipe', 'pipe'], environment, keepEnvironment);
 
     return result.stdout.toString();
   }
