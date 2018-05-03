@@ -63,15 +63,13 @@ export class ProjectTask implements ITaskDefinition {
   }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
-    return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
-      try {
-        const taskCommand: string = this._getScriptToRun();
-        const deps: IPackageDependencies | undefined = this._getPackageDependencies(taskCommand, writer);
-        this._executeTask(taskCommand, writer, deps, resolve, reject);
-      } catch (error) {
-        reject([new TaskError('executing', error.toString())]);
-      }
-    });
+    try {
+      const taskCommand: string = this._getScriptToRun();
+      const deps: IPackageDependencies | undefined = this._getPackageDependencies(taskCommand, writer);
+      return this._executeTask(taskCommand, writer, deps);
+    } catch (error) {
+      return Promise.reject(new TaskError('executing', error.message));
+    }
   }
 
   private _getPackageDependencies(taskCommand: string, writer: ITaskWriter): IPackageDependencies | undefined {
@@ -93,16 +91,13 @@ export class ProjectTask implements ITaskDefinition {
   private _executeTask(
     taskCommand: string,
     writer: ITaskWriter,
-    currentPackageDeps: IPackageDependencies | undefined,
-    resolve: (status: TaskStatus) => void,
-    reject: (errors: TaskError[]) => void
-  ): void {
-    this._hasWarningOrError = false;
-
-    const projectFolder: string = this._rushProject.projectFolder;
-    let lastPackageDeps: IPackageDependencies | undefined = undefined;
-
+    currentPackageDeps: IPackageDependencies | undefined
+  ): Promise<TaskStatus> {
     try {
+      this._hasWarningOrError = false;
+      const projectFolder: string = this._rushProject.projectFolder;
+      let lastPackageDeps: IPackageDependencies | undefined = undefined;
+
       writer.writeLine(`>>> ${this.name}`);
 
       const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
@@ -128,7 +123,7 @@ export class ProjectTask implements ITaskDefinition {
       );
 
       if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
-        resolve(TaskStatus.Skipped);
+        return Promise.resolve(TaskStatus.Skipped);
       } else {
         // If the deps file exists, remove it before starting a build.
         if (fsx.existsSync(currentDepsPath)) {
@@ -138,8 +133,7 @@ export class ProjectTask implements ITaskDefinition {
         if (!taskCommand) {
           // tslint:disable-next-line:max-line-length
           writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank, so no action will be taken.`);
-          resolve(TaskStatus.Skipped);
-          return;
+          return Promise.resolve(TaskStatus.Skipped);
         }
 
         // Run the task
@@ -163,29 +157,29 @@ export class ProjectTask implements ITaskDefinition {
           this._hasWarningOrError = true;
         });
 
-        task.on('close', (code: number) => {
-          // Write the logs to disk
-          this._writeLogsToDisk(writer);
+        return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
+          task.on('close', (code: number) => {
+              this._writeLogsToDisk(writer);
 
-          if (code) {
-            reject([new TaskError('error', `Returned error code: ${code}`)]);
-          } else if (this._hasWarningOrError) {
-            resolve(TaskStatus.SuccessWithWarning);
-          } else {
-            // Write deps on success.
-            if (currentPackageDeps) {
-              JsonFile.save(currentPackageDeps, currentDepsPath);
+            if (code !== 0) {
+              reject(new TaskError('error', `Returned error code: ${code}`));
+            } else if (this._hasWarningOrError) {
+              resolve(TaskStatus.SuccessWithWarning);
+            } else {
+              // Write deps on success.
+              if (currentPackageDeps) {
+                JsonFile.save(currentPackageDeps, currentDepsPath);
+              }
+              resolve(TaskStatus.Success);
             }
-            resolve(TaskStatus.Success);
-          }
+          });
         });
       }
     } catch (error) {
       console.log(error);
 
-      // Write the logs to disk
       this._writeLogsToDisk(writer);
-      reject([new TaskError('error', error.toString())]);
+      return Promise.reject(new TaskError('error', error.toString()));
     }
   }
 
@@ -237,16 +231,20 @@ export class ProjectTask implements ITaskDefinition {
 
   // @todo #179371: add log files to list of things that get gulp cleaned
   private _writeLogsToDisk(writer: ITaskWriter): void {
-    const logFilename: string = path.basename(this._rushProject.projectFolder);
+    try {
+      const logFilename: string = path.basename(this._rushProject.projectFolder);
 
-    const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
-    if (stdout) {
-      fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
-    }
+      const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
+      if (stdout) {
+        fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
+      }
 
-    const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
-    if (stderr) {
-      fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
+      const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
+      if (stderr) {
+        fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
+      }
+    } catch (e) {
+      console.log(`Error writing logs to disk: ${e}`);
     }
   }
 }

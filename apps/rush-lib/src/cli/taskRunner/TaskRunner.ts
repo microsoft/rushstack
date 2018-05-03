@@ -81,7 +81,6 @@ export class TaskRunner {
     const task: ITask = taskDefinition as ITask;
     task.dependencies = new Set<ITask>();
     task.dependents = new Set<ITask>();
-    task.errors = new Set<TaskError>();
     task.status = TaskStatus.Ready;
     task.criticalPathLength = undefined;
     this._tasks.set(task.name, task);
@@ -151,9 +150,7 @@ export class TaskRunner {
       return taskB.criticalPathLength! - taskA.criticalPathLength!;
     });
 
-    return new Promise<void>((complete: () => void, reject: () => void) => {
-      this._startAvailableTasks(complete, reject);
-    });
+    return this._startAvailableTasks().then(() => this._printTaskStatus());
   }
 
   /**
@@ -182,16 +179,8 @@ export class TaskRunner {
    * Helper function which finds any tasks which are available to run and begins executing them.
    * It calls the complete callback when all tasks are completed, or rejects if any task fails.
    */
-  private _startAvailableTasks(complete: () => void, reject: (err?: Object) => void): void {
-    if (!this._areAnyTasksReadyOrExecuting()) {
-      this._printTaskStatus();
-      if (this._hasAnyFailures) {
-        reject();
-      } else {
-        complete();
-      }
-    }
-
+  private _startAvailableTasks(): Promise<void> {
+    const taskPromises: Promise<void>[] = [];
     let ctask: ITask | undefined;
     while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
       this._currentActiveTasks++;
@@ -202,7 +191,7 @@ export class TaskRunner {
       task.stopwatch = Stopwatch.start();
       task.writer = Interleaver.registerTask(task.name, this._quietMode);
 
-      task.execute(task.writer)
+      taskPromises.push(task.execute(task.writer)
         .then((result: TaskStatus) => {
           task.stopwatch.stop();
           task.writer.close();
@@ -224,21 +213,19 @@ export class TaskRunner {
               this._markTaskAsFailed(task);
               break;
           }
-
-          this._startAvailableTasks(complete, reject);
-
-        }).catch((errors: TaskError[]) => {
+        }).catch((error: TaskError) => {
           task.writer.close();
 
           this._currentActiveTasks--;
 
           this._hasAnyFailures = true;
-          task.errors = new Set<TaskError>(errors);
+          task.error = error;
           this._markTaskAsFailed(task);
-          this._startAvailableTasks(complete, reject);
         }
-      );
+      ).then(() => this._startAvailableTasks()));
     }
+
+    return Promise.all(taskPromises).then(() => { /* collapse void[] to void */ });
   }
 
   /**
@@ -315,19 +302,6 @@ export class TaskRunner {
   }
 
   /**
-   * Do any Ready or Executing tasks exist?
-   */
-  private _areAnyTasksReadyOrExecuting(): boolean {
-    let anyNonCompletedTasks: boolean = false;
-    this._tasks.forEach((task: ITask) => {
-      if (task.status === TaskStatus.Executing || task.status === TaskStatus.Ready) {
-        anyNonCompletedTasks = true;
-      }
-    });
-    return anyNonCompletedTasks;
-  }
-
-  /**
    * Checks for projects that indirectly depend on themselves.
    */
   private _checkForCyclicDependencies(tasks: Iterable<ITask>, dependencyChain: string[]): void {
@@ -380,35 +354,55 @@ export class TaskRunner {
 
     console.log('');
 
-    this._printStatus('EXECUTING', tasksByStatus[TaskStatus.Executing], colors.yellow);
-    this._printStatus('READY', tasksByStatus[TaskStatus.Ready], colors.white);
-    this._printStatus('SKIPPED', tasksByStatus[TaskStatus.Skipped], colors.grey);
-    this._printStatus('SUCCESS', tasksByStatus[TaskStatus.Success], colors.green);
-    this._printStatus('SUCCESS WITH WARNINGS', tasksByStatus[TaskStatus.SuccessWithWarning], colors.yellow.underline);
-    this._printStatus('BLOCKED', tasksByStatus[TaskStatus.Blocked], colors.red);
-    this._printStatus('FAILURE', tasksByStatus[TaskStatus.Failure], colors.red);
+    this._printStatus(TaskStatus.Executing, tasksByStatus, colors.yellow);
+    this._printStatus(TaskStatus.Ready, tasksByStatus, colors.white);
+    this._printStatus(TaskStatus.Skipped, tasksByStatus, colors.grey);
+    this._printStatus(TaskStatus.Success, tasksByStatus, colors.green);
+    this._printStatus(TaskStatus.SuccessWithWarning, tasksByStatus, colors.yellow.underline);
+    this._printStatus(TaskStatus.Blocked, tasksByStatus, colors.red);
+    this._printStatus(TaskStatus.Failure, tasksByStatus, colors.red);
 
     const tasksWithErrors: ITask[] = tasksByStatus[TaskStatus.Failure];
     if (tasksWithErrors) {
       tasksWithErrors.forEach((task: ITask) => {
-        task.errors.forEach((error: TaskError) => {
-          if (error) {
-            console.log(colors.red(`[${task.name}] ${error.toString()}`));
-          }
-        });
+        if (task.error) {
+          console.log(colors.red(`[${task.name}] ${task.error.message}`));
+        }
       });
     }
 
     console.log('');
   }
 
-  private _printStatus(status: string, tasks: ITask[], color: (a: string) => string): void {
+  private _printStatus(
+    status: TaskStatus,
+    tasksByStatus: { [status: number]: ITask[] },
+    color: (a: string) => string
+  ): void {
+    const tasks: ITask[] = tasksByStatus[status];
+
     if (tasks && tasks.length) {
       console.log(color(`${status} (${tasks.length})`));
       console.log(color('================================'));
       for (let i: number = 0; i < tasks.length; i++) {
         const task: ITask = tasks[i];
-        console.log(color(task.name));
+
+        switch (status) {
+          case TaskStatus.Executing:
+          case TaskStatus.Ready:
+          case TaskStatus.Skipped:
+            console.log(color(task.name));
+            break;
+
+          case TaskStatus.Success:
+          case TaskStatus.SuccessWithWarning:
+          case TaskStatus.Blocked:
+          case TaskStatus.Failure:
+            const time: string = task.stopwatch ? task.stopwatch.toString() : 'unknown time';
+            console.log(color(`${task.name} (${time})`));
+            break;
+        }
+
         if (task.writer) {
           let stderr: string = task.writer.getStdError();
           if (stderr && (task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning)) {
@@ -421,6 +415,7 @@ export class TaskRunner {
           }
         }
       }
+
       console.log(color('================================' + os.EOL));
     }
   }

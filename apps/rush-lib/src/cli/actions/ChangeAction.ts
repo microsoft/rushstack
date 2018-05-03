@@ -233,7 +233,8 @@ export class ChangeAction extends BaseRushAction {
         this._changeFileData.forEach((changeFile: IChangeFile) => {
           changeFile.email = email;
         });
-        return this._writeChangeFiles();
+
+        this._writeChangeFiles();
       });
     }
   }
@@ -424,23 +425,13 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Writes changefile to the common/changes folder. Will prompt for overwrite if file already exists.
    */
-  private _writeChangeFiles(): Promise<void> {
-    const promises: Promise<void>[] = [];
+  private _writeChangeFiles(): void {
     this._changeFileData.forEach((changeFile: IChangeFile) => {
-      promises.push(this._writeChangeFile(changeFile));
-    });
-
-    return new Promise<void>((resolve, reject) => {
-      Promise.all(promises).then(() => {
-        resolve();
-      })
-      .catch(e => {
-        reject(e);
-      });
+      this._writeChangeFile(changeFile);
     });
   }
 
-  private _writeChangeFile(changeFileData: IChangeFile): Promise<void> {
+  private _writeChangeFile(changeFileData: IChangeFile): void {
     const output: string = JSON.stringify(changeFileData, undefined, 2);
     const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
     const filePath: string = changeFile.generatePath();
@@ -462,28 +453,16 @@ export class ChangeAction extends BaseRushAction {
         }
       });
     }
-    return this._writeFile(filePath, output);
+
+    this._writeFile(filePath, output);
   }
 
   /**
    * Writes a file to disk, ensuring the directory structure up to that point exists
    */
-  private _writeFile(fileName: string, output: string): Promise<void> {
-    return new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
-      // tslint:disable-next-line:no-any
-      fsx.mkdirs(path.dirname(fileName), (err: any) => {
-        if (err) {
-          reject(err);
-        }
-        fsx.writeFile(fileName, output, (error: NodeJS.ErrnoException) => {
-          if (error) {
-            reject(error);
-          } else {
-            console.log('Created file: ' + fileName);
-            resolve();
-          }
-        });
-      });
-    });
+  private _writeFile(fileName: string, output: string): void {
+    fsx.mkdirsSync(path.dirname(fileName));
+    fsx.writeFileSync(fileName, output);
+    console.log('Created file: ' + fileName);
   }
 }

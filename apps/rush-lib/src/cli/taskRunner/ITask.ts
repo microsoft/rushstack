@@ -82,10 +82,10 @@ export interface ITask extends ITaskDefinition {
   criticalPathLength: number | undefined;
 
   /**
-   * A list of all errors which occurred while executing this task, this is stored in case we need
+   * The error which occurred while executing this task, this is stored in case we need
    * it later (for example to re-print errors at end of execution).
    */
-  errors: Set<TaskError>;
+  error: TaskError | undefined;
 
   /**
    * The task writer which contains information from the output streams of this task

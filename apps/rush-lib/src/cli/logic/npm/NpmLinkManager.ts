@@ -40,35 +40,38 @@ interface IQueueItem {
 
 export class NpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
-    return new Promise<void>((resolve: () => void, reject: (reason: Error) => void): void => {
-      readPackageTree(this._rushConfiguration.commonTempFolder,
-        (error: Error, npmPackage: readPackageTree.PackageNode) => {
-        if (error) {
-          reject(error);
-        } else {
-          try {
-            const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
+    return this._readPackageTree(this._rushConfiguration.commonTempFolder).then(
+      (npmPackage: readPackageTree.PackageNode) => {
+        const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
 
-            const commonPackageLookup: PackageLookup = new PackageLookup();
-            commonPackageLookup.loadTree(commonRootPackage);
+        const commonPackageLookup: PackageLookup = new PackageLookup();
+        commonPackageLookup.loadTree(commonRootPackage);
 
-            const rushLinkJson: IRushLinkJson = { localLinks: {} };
+        const rushLinkJson: IRushLinkJson = { localLinks: {} };
 
-            for (const rushProject of this._rushConfiguration.projects) {
-              console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-              this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
-            }
-
-            console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-            JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-
-            resolve();
-          } catch (error) {
-            reject(error);
-          }
+        for (const rushProject of this._rushConfiguration.projects) {
+          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+          this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
         }
-      });
-    });
+
+        console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+        JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
+      }
+    );
+  }
+
+  private _readPackageTree(rootFolderPath: string): Promise<readPackageTree.PackageNode> {
+    return new Promise(
+      (resolve: (rootNode: readPackageTree.PackageNode) => void, reject: (error: Error) => void): void => {
+        readPackageTree(rootFolderPath, (error: Error | undefined, rootNode: readPackageTree.PackageNode) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(rootNode);
+          }
+        });
+      }
+    );
   }
 
   /**

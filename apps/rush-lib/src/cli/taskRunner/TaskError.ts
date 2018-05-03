@@ -5,17 +5,21 @@
  * Encapsulates information about an error
  * @public
  */
-export class TaskError {
+export class TaskError extends Error {
   protected _type: string;
-  protected _message: string;
 
   constructor(type: string, message: string) {
+    super(message);
+
     this._type = type;
-    this._message = message;
+  }
+
+  public get message(): string {
+    return `[${this._type}] '${super.message}'`;
   }
 
   public toString(): string {
-    return `[${this._type}] '${this._message}'`;
+    return this.message;
   }
 }
 
@@ -35,8 +39,12 @@ export class BuildTaskError extends TaskError {
     this._offset = offset;
   }
 
-  public toString(): string {
+  public get message(): string {
     // Example: "C:\Project\Blah.ts(123,1): [tslint] error no-any: 'any' is not allowed"
-    return `${this._file}(${this._line},${this._offset}): [${this._type}] ${this._message}`;
+    return `${this._file}(${this._line},${this._offset}): ${super.message}`;
+  }
+
+  public toString(): string {
+    return this.message;
   }
 }
