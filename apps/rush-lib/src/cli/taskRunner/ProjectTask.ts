@@ -63,15 +63,13 @@ export class ProjectTask implements ITaskDefinition {
   }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
-    return new Promise<TaskStatus>((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
-      try {
-        const taskCommand: string = this._getScriptToRun();
-        const deps: IPackageDependencies | undefined = this._getPackageDependencies(taskCommand, writer);
-        this._executeTask(taskCommand, writer, deps, resolve, reject);
-      } catch (error) {
-        reject([new TaskError('executing', error.toString())]);
-      }
-    });
+    try {
+      const taskCommand: string = this._getScriptToRun();
+      const deps: IPackageDependencies | undefined = this._getPackageDependencies(taskCommand, writer);
+      return this._executeTask(taskCommand, writer, deps);
+    } catch (error) {
+      return Promise.reject([new TaskError('executing', error.toString())]);
+    }
   }
 
   private _getPackageDependencies(taskCommand: string, writer: ITaskWriter): IPackageDependencies | undefined {
@@ -93,10 +91,8 @@ export class ProjectTask implements ITaskDefinition {
   private _executeTask(
     taskCommand: string,
     writer: ITaskWriter,
-    currentPackageDeps: IPackageDependencies | undefined,
-    resolve: (status: TaskStatus) => void,
-    reject: (errors: TaskError[]) => void
-  ): void {
+    currentPackageDeps: IPackageDependencies | undefined
+  ): Promise<TaskStatus> {
     this._hasWarningOrError = false;
 
     const projectFolder: string = this._rushProject.projectFolder;
@@ -128,7 +124,7 @@ export class ProjectTask implements ITaskDefinition {
       );
 
       if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
-        resolve(TaskStatus.Skipped);
+        return Promise.resolve(TaskStatus.Skipped);
       } else {
         // If the deps file exists, remove it before starting a build.
         if (fsx.existsSync(currentDepsPath)) {
@@ -138,8 +134,7 @@ export class ProjectTask implements ITaskDefinition {
         if (!taskCommand) {
           // tslint:disable-next-line:max-line-length
           writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank, so no action will be taken.`);
-          resolve(TaskStatus.Skipped);
-          return;
+          return Promise.resolve(TaskStatus.Skipped);
         }
 
         // Run the task
@@ -163,29 +158,30 @@ export class ProjectTask implements ITaskDefinition {
           this._hasWarningOrError = true;
         });
 
-        task.on('close', (code: number) => {
-          // Write the logs to disk
-          this._writeLogsToDisk(writer);
+        return new Promise((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
+          task.on('close', (code: number) => {
+            // Write the logs to disk
+            this._writeLogsToDisk(writer);
 
-          if (code) {
-            reject([new TaskError('error', `Returned error code: ${code}`)]);
-          } else if (this._hasWarningOrError) {
-            resolve(TaskStatus.SuccessWithWarning);
-          } else {
-            // Write deps on success.
-            if (currentPackageDeps) {
-              JsonFile.save(currentPackageDeps, currentDepsPath);
+            if (code) {
+              reject([new TaskError('error', `Returned error code: ${code}`)]);
+            } else if (this._hasWarningOrError) {
+              resolve(TaskStatus.SuccessWithWarning);
+            } else {
+              // Write deps on success.
+              if (currentPackageDeps) {
+                JsonFile.save(currentPackageDeps, currentDepsPath);
+              }
+              resolve(TaskStatus.Success);
             }
-            resolve(TaskStatus.Success);
-          }
+          });
         });
       }
     } catch (error) {
       console.log(error);
 
-      // Write the logs to disk
       this._writeLogsToDisk(writer);
-      reject([new TaskError('error', error.toString())]);
+      return Promise.reject([new TaskError('error', error.toString())]);
     }
   }
 

@@ -430,14 +430,7 @@ export class ChangeAction extends BaseRushAction {
       promises.push(this._writeChangeFile(changeFile));
     });
 
-    return new Promise<void>((resolve, reject) => {
-      Promise.all(promises).then(() => {
-        resolve();
-      })
-      .catch(e => {
-        reject(e);
-      });
-    });
+    return Promise.all(promises).then(() => { /* collapse void[] to void */ });
   }
 
   private _writeChangeFile(changeFileData: IChangeFile): Promise<void> {

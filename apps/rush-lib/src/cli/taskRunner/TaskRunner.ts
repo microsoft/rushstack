@@ -151,9 +151,7 @@ export class TaskRunner {
       return taskB.criticalPathLength! - taskA.criticalPathLength!;
     });
 
-    return new Promise<void>((complete: () => void, reject: () => void) => {
-      this._startAvailableTasks(complete, reject);
-    });
+    return this._startAvailableTasks().then(() => this._printTaskStatus());
   }
 
   /**
@@ -182,16 +180,8 @@ export class TaskRunner {
    * Helper function which finds any tasks which are available to run and begins executing them.
    * It calls the complete callback when all tasks are completed, or rejects if any task fails.
    */
-  private _startAvailableTasks(complete: () => void, reject: (err?: Object) => void): void {
-    if (!this._areAnyTasksReadyOrExecuting()) {
-      this._printTaskStatus();
-      if (this._hasAnyFailures) {
-        reject();
-      } else {
-        complete();
-      }
-    }
-
+  private _startAvailableTasks(): Promise<void> {
+    const taskPromises: Promise<void>[] = [];
     let ctask: ITask | undefined;
     while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
       this._currentActiveTasks++;
@@ -202,7 +192,7 @@ export class TaskRunner {
       task.stopwatch = Stopwatch.start();
       task.writer = Interleaver.registerTask(task.name, this._quietMode);
 
-      task.execute(task.writer)
+      taskPromises.push(task.execute(task.writer)
         .then((result: TaskStatus) => {
           task.stopwatch.stop();
           task.writer.close();
@@ -224,9 +214,6 @@ export class TaskRunner {
               this._markTaskAsFailed(task);
               break;
           }
-
-          this._startAvailableTasks(complete, reject);
-
         }).catch((errors: TaskError[]) => {
           task.writer.close();
 
@@ -235,10 +222,11 @@ export class TaskRunner {
           this._hasAnyFailures = true;
           task.errors = new Set<TaskError>(errors);
           this._markTaskAsFailed(task);
-          this._startAvailableTasks(complete, reject);
         }
-      );
+      ).then(() => this._startAvailableTasks()));
     }
+
+    return Promise.all(taskPromises).then(() => { /* collapse void[] to void */ });
   }
 
   /**
@@ -312,19 +300,6 @@ export class TaskRunner {
 
   private _getCurrentCompletedTaskString(): string {
     return `${this._completedTasks} of ${this._totalTasks}: `;
-  }
-
-  /**
-   * Do any Ready or Executing tasks exist?
-   */
-  private _areAnyTasksReadyOrExecuting(): boolean {
-    let anyNonCompletedTasks: boolean = false;
-    this._tasks.forEach((task: ITask) => {
-      if (task.status === TaskStatus.Executing || task.status === TaskStatus.Ready) {
-        anyNonCompletedTasks = true;
-      }
-    });
-    return anyNonCompletedTasks;
   }
 
   /**
