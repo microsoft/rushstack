@@ -68,7 +68,7 @@ export class ProjectTask implements ITaskDefinition {
       const deps: IPackageDependencies | undefined = this._getPackageDependencies(taskCommand, writer);
       return this._executeTask(taskCommand, writer, deps);
     } catch (error) {
-      return Promise.reject([new TaskError('executing', error.toString())]);
+      return Promise.reject(new TaskError('executing', error.message));
     }
   }
 
@@ -163,8 +163,8 @@ export class ProjectTask implements ITaskDefinition {
             // Write the logs to disk
             this._writeLogsToDisk(writer);
 
-            if (code) {
-              reject([new TaskError('error', `Returned error code: ${code}`)]);
+            if (code !== 0) {
+              reject(new TaskError('error', `Returned error code: ${code}`));
             } else if (this._hasWarningOrError) {
               resolve(TaskStatus.SuccessWithWarning);
             } else {
@@ -181,7 +181,7 @@ export class ProjectTask implements ITaskDefinition {
       console.log(error);
 
       this._writeLogsToDisk(writer);
-      return Promise.reject([new TaskError('error', error.toString())]);
+      return Promise.reject(new TaskError('error', error.toString()));
     }
   }
 

@@ -81,7 +81,6 @@ export class TaskRunner {
     const task: ITask = taskDefinition as ITask;
     task.dependencies = new Set<ITask>();
     task.dependents = new Set<ITask>();
-    task.errors = new Set<TaskError>();
     task.status = TaskStatus.Ready;
     task.criticalPathLength = undefined;
     this._tasks.set(task.name, task);
@@ -214,13 +213,13 @@ export class TaskRunner {
               this._markTaskAsFailed(task);
               break;
           }
-        }).catch((errors: TaskError[]) => {
+        }).catch((error: TaskError) => {
           task.writer.close();
 
           this._currentActiveTasks--;
 
           this._hasAnyFailures = true;
-          task.errors = new Set<TaskError>(errors);
+          task.error = error;
           this._markTaskAsFailed(task);
         }
       ).then(() => this._startAvailableTasks()));
@@ -366,11 +365,9 @@ export class TaskRunner {
     const tasksWithErrors: ITask[] = tasksByStatus[TaskStatus.Failure];
     if (tasksWithErrors) {
       tasksWithErrors.forEach((task: ITask) => {
-        task.errors.forEach((error: TaskError) => {
-          if (error) {
-            console.log(colors.red(`[${task.name}] ${error.toString()}`));
-          }
-        });
+        if (task.error) {
+          console.log(colors.red(`[${task.name}] ${task.error.message}`));
+        }
       });
     }
 
