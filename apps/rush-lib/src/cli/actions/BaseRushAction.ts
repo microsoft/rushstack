@@ -52,6 +52,9 @@ export abstract class BaseRushAction extends CommandLineAction {
   }
 
   protected onExecute(): Promise<void> {
+    // Defensively set the exit code to 1 so if rush crashes for whatever reason, we'll have a nonzero exit code.
+    process.exitCode = 1;
+
     this._ensureEnvironment();
 
     if (!this._safeForSimultaneousRushProcesses) {
@@ -62,7 +65,10 @@ export abstract class BaseRushAction extends CommandLineAction {
     }
 
     console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
-    return this.run();
+    return this.run().then(() => {
+      // If we make it here, everything went fine, so reset the exit code back to 0
+      process.exitCode = 0;
+    });
   }
 
   /**
