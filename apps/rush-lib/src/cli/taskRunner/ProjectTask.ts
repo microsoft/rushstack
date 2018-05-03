@@ -93,12 +93,11 @@ export class ProjectTask implements ITaskDefinition {
     writer: ITaskWriter,
     currentPackageDeps: IPackageDependencies | undefined
   ): Promise<TaskStatus> {
-    this._hasWarningOrError = false;
-
-    const projectFolder: string = this._rushProject.projectFolder;
-    let lastPackageDeps: IPackageDependencies | undefined = undefined;
-
     try {
+      this._hasWarningOrError = false;
+      const projectFolder: string = this._rushProject.projectFolder;
+      let lastPackageDeps: IPackageDependencies | undefined = undefined;
+
       writer.writeLine(`>>> ${this.name}`);
 
       const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
@@ -158,10 +157,9 @@ export class ProjectTask implements ITaskDefinition {
           this._hasWarningOrError = true;
         });
 
-        return new Promise((resolve: (status: TaskStatus) => void, reject: (errors: TaskError[]) => void) => {
+        return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
           task.on('close', (code: number) => {
-            // Write the logs to disk
-            this._writeLogsToDisk(writer);
+              this._writeLogsToDisk(writer);
 
             if (code !== 0) {
               reject(new TaskError('error', `Returned error code: ${code}`));
@@ -233,16 +231,20 @@ export class ProjectTask implements ITaskDefinition {
 
   // @todo #179371: add log files to list of things that get gulp cleaned
   private _writeLogsToDisk(writer: ITaskWriter): void {
-    const logFilename: string = path.basename(this._rushProject.projectFolder);
+    try {
+      const logFilename: string = path.basename(this._rushProject.projectFolder);
 
-    const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
-    if (stdout) {
-      fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
-    }
+      const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
+      if (stdout) {
+        fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
+      }
 
-    const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
-    if (stderr) {
-      fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
+      const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
+      if (stderr) {
+        fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
+      }
+    } catch (e) {
+      console.log(`Error writing logs to disk: ${e}`);
     }
   }
 }
