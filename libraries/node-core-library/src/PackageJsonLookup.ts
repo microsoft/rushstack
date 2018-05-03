@@ -89,7 +89,7 @@ export class PackageJsonLookup {
     }
 
     // Now call the recursive part of the algorithm
-    return this._tryGetPackageFolderFor(resolvedFileOrFolderPath, false);
+    return this._tryGetPackageFolderFor(resolvedFileOrFolderPath);
   }
 
   /**
@@ -200,20 +200,7 @@ export class PackageJsonLookup {
   }
 
   // Recursive part of the algorithm from tryGetPackageFolderFor()
-  private _tryGetPackageFolderFor(resolvedFileOrFolderPath: string, isRealPath: boolean): string | undefined {
-    if (!isRealPath) {
-      // While walking up the parent tree, as soon as we encounter a path that actually exists,
-      // we need to call realpathSync() to expand any symlinks that we encountered.
-      //
-      // Then we will set isRealPath=true, since this only needs to be done once.
-
-      if (fsx.existsSync(resolvedFileOrFolderPath)) {
-        // Walk any symlinks to avoid duplicate cache keys.
-        resolvedFileOrFolderPath = fsx.realpathSync(resolvedFileOrFolderPath);
-        isRealPath = true;
-      }
-    }
-
+  private _tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | undefined {
     // Two lookups are required, because get() cannot distinguish the undefined value
     // versus a missing key.
     if (this._packageFolderCache.has(resolvedFileOrFolderPath)) {
@@ -236,7 +223,7 @@ export class PackageJsonLookup {
     }
 
     // Recurse upwards, caching every step along the way
-    const parentResult: string | undefined = this._tryGetPackageFolderFor(parentFolder, isRealPath);
+    const parentResult: string | undefined = this._tryGetPackageFolderFor(parentFolder);
     // Cache the parent's answer as well
     this._packageFolderCache.set(resolvedFileOrFolderPath, parentResult);
 
