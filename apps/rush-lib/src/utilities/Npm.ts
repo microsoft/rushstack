@@ -18,7 +18,9 @@ export class Npm {
       const packageTime: string = Utilities.executeCommandAndCaptureOutput('npm',
         `view ${packageName} time --json`.split(' '),
         cwd,
-        env);
+        env,
+        true
+      );
       if (packageTime && packageTime !== '') {
         Object.keys(JSON.parse(packageTime)).forEach(v => {
           if (semver.valid(v)) {
@@ -31,7 +33,9 @@ export class Npm {
         const packageVersions: string = Utilities.executeCommandAndCaptureOutput('npm',
           `view ${packageName} versions --json`.split(' '),
           cwd,
-          env);
+          env,
+          true
+        );
         if (packageVersions && packageVersions.length > 0) {
           (JSON.parse(packageVersions)).forEach(v => {
             versions.push(v);
