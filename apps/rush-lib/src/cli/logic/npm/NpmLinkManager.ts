@@ -63,16 +63,13 @@ export class NpmLinkManager extends BaseLinkManager {
   private _readPackageTree(rootFolderPath: string): Promise<readPackageTree.PackageNode> {
     return new Promise(
       (resolve: (rootNode: readPackageTree.PackageNode) => void, reject: (error: Error) => void): void => {
-        readPackageTree(
-          this._rushConfiguration.commonTempFolder,
-          (error: Error | undefined, rootNode: readPackageTree.PackageNode) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(rootNode);
-            }
+        readPackageTree(rootFolderPath, (error: Error | undefined, rootNode: readPackageTree.PackageNode) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(rootNode);
           }
-        );
+        });
       }
     );
   }
