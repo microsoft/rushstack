@@ -379,6 +379,7 @@ export class Extractor {
               + ' the "publishFolderForInternal": ' + dtsRollup.publishFolderForInternal!);
             return;
           }
+
           mainDtsRollupPath = path.relative(dtsRollup.publishFolderForInternal!, resolvedTypings);
         } else {
           if (!Path.isUnder(resolvedTypings, dtsRollup.publishFolder!)) {
@@ -387,11 +388,13 @@ export class Extractor {
               + ' the "publishFolder": ' + dtsRollup.publishFolder!);
             return;
           }
+
           mainDtsRollupPath = path.relative(dtsRollup.publishFolder!, resolvedTypings);
         }
 
-        this._monitoredLogger.logVerbose(`The "mainDtsRollupPath" setting was inferred'
-          + ' from package.json: ${mainDtsRollupPath}`);
+        this._monitoredLogger.logVerbose(
+          `The "mainDtsRollupPath" setting was inferred from package.json: ${mainDtsRollupPath}`
+        );
       } else {
         this._monitoredLogger.logVerbose(`The "mainDtsRollupPath" is: ${mainDtsRollupPath}`);
 

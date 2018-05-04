@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "Update the package resolution logic to preserve symlinks in paths",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "iclanton@users.noreply.github.com"
+}
