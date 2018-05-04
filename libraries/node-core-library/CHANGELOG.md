@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Tue, 03 Apr 2018 16:05:29 GMT and should not be manually modified.
+This log was last generated on Fri, 04 May 2018 00:42:38 GMT and should not be manually modified.
+
+## 1.3.0
+Fri, 04 May 2018 00:42:38 GMT
+
+### Minor changes
+
+- Update the package resolution logic to preserve symlinks in paths
 
 ## 1.2.0
 Tue, 03 Apr 2018 16:05:29 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.2.28",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.28",
+      "date": "Fri, 04 May 2018 00:42:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.7.4` to `3.7.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.27",
       "tag": "@microsoft/gulp-core-build-serve_v3.2.27",
       "date": "Mon, 30 Apr 2018 21:04:44 GMT",
