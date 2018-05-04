@@ -237,7 +237,7 @@ export class InstallManager {
       try {
         fsx.unlinkSync(localPackageManagerToolFolder);
       } catch (error) {
-        if (error.code !== 'NOENT') {
+        if (error.code !== 'ENOENT') {
           throw error;
         }
       }
