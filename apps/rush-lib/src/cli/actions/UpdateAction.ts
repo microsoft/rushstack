@@ -12,6 +12,7 @@ import { Event } from '../../data/EventHooks';
 import { InstallManager } from '../logic/InstallManager';
 import { RushCommandLineParser } from './RushCommandLineParser';
 import { Stopwatch } from '../../utilities/Stopwatch';
+import { Utilities } from '../../utilities/Utilities';
 
 export class UpdateAction extends BaseRushAction {
   private _cleanParameter: CommandLineFlagParameter;
@@ -56,15 +57,17 @@ export class UpdateAction extends BaseRushAction {
     const asyncRecycler: AsyncRecycler = new AsyncRecycler(this.rushConfiguration);
     const installManager: InstallManager = new InstallManager(this.rushConfiguration, asyncRecycler);
 
-    return installManager.doInstall({
-        allowShrinkwrapUpdates: true,
-        clean: this._cleanParameter.value!,
-        bypassPolicy: this._bypassPolicyParameter.value!,
-        noLink: this._noLinkParameter.value!,
-        full: this._fullParameter.value!
-      })
-      .finally(() => {
-        asyncRecycler.deleteAll();
+    return Utilities.withFinally({
+        promise: installManager.doInstall({
+          allowShrinkwrapUpdates: true,
+          clean: this._cleanParameter.value!,
+          bypassPolicy: this._bypassPolicyParameter.value!,
+          noLink: this._noLinkParameter.value!,
+          full: this._fullParameter.value!
+        }),
+        finally: () => {
+          asyncRecycler.deleteAll();
+        }
       })
       .then((success: boolean) => {
         if (!success) {
@@ -76,7 +79,12 @@ export class UpdateAction extends BaseRushAction {
         this._collectTelemetry(stopwatch, true);
         this.eventHooksManager.handle(Event.postRushInstall);
 
-        console.log(os.EOL + colors.green(`Rush update finished successfully. (${stopwatch.toString()})`));
+        if (success) {
+          console.log(os.EOL + colors.green(`Rush update finished successfully. (${stopwatch.toString()})`));
+        } else {
+          console.log(os.EOL + `Rush update completed. (${stopwatch.toString()})`);
+        }
+
       });
   }
 
@@ -87,7 +95,9 @@ export class UpdateAction extends BaseRushAction {
         duration: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
         extraData: {
-          clean: (!!this._cleanParameter.value).toString()
+          mode: 'update',
+          clean: (!!this._cleanParameter.value).toString(),
+          full: (!!this._fullParameter.value).toString()
         }
       });
     }
