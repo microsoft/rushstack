@@ -228,11 +228,20 @@ export class InstallManager {
       // Example: "C:\MyRepo\common\temp\pnpm-local"
       const localPackageManagerToolFolder: string =
         path.join(this._rushConfiguration.commonTempFolder, `${packageManager}-local`);
-      if (fsx.existsSync(localPackageManagerToolFolder)) {
-        fsx.unlinkSync(localPackageManagerToolFolder);
-      }
+
       console.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
       console.log('  --> "' + packageManagerToolFolder + '"');
+
+      // We cannot use fsx.existsSync() to test the existence of a symlink, because it will
+      // return false for broken symlinks.  There is no way to test without catching an exception.
+      try {
+        fsx.unlinkSync(localPackageManagerToolFolder);
+      } catch (error) {
+        if (error.code !== 'NOENT') {
+          throw error;
+        }
+      }
+
       fsx.symlinkSync(packageManagerToolFolder, localPackageManagerToolFolder, 'junction');
 
       lock.release();
