@@ -55,10 +55,10 @@ export class InstallAction extends BaseRushAction {
     return Utilities.withFinally({
         promise: installManager.doInstall({
           allowShrinkwrapUpdates: false,
-          clean: this._cleanParameter.value!,
           bypassPolicy: this._bypassPolicyParameter.value!,
           noLink: this._noLinkParameter.value!,
-          full: false
+          fullUpgrade: false,
+          forceUpdateShrinkwrap: false
         }),
         finally: () => {
           asyncRecycler.deleteAll();

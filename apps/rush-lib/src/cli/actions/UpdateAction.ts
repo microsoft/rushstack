@@ -19,6 +19,7 @@ export class UpdateAction extends BaseRushAction {
   private _bypassPolicyParameter: CommandLineFlagParameter;
   private _noLinkParameter: CommandLineFlagParameter;
   private _fullParameter: CommandLineFlagParameter;
+  private _forceUpdateParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -47,6 +48,10 @@ export class UpdateAction extends BaseRushAction {
       parameterLongName: '--full',
       description: ''
     });
+    this._forceUpdateParameter = this.defineFlagParameter({
+      parameterLongName: '--force-update',
+      description: ''
+    });
   }
 
   protected run(): Promise<void> {
@@ -60,10 +65,10 @@ export class UpdateAction extends BaseRushAction {
     return Utilities.withFinally({
         promise: installManager.doInstall({
           allowShrinkwrapUpdates: true,
-          clean: this._cleanParameter.value!,
           bypassPolicy: this._bypassPolicyParameter.value!,
           noLink: this._noLinkParameter.value!,
-          full: this._fullParameter.value!
+          fullUpgrade: this._fullParameter.value!,
+          forceUpdateShrinkwrap: this._forceUpdateParameter.value!
         }),
         finally: () => {
           asyncRecycler.deleteAll();

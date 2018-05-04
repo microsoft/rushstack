@@ -50,11 +50,30 @@ export interface CreateOptions { // tslint:disable-line:interface-name
 }
 
 export interface IInstallManagerOptions {
+  /**
+   * Whether or not Rush will automatically update the shrinkwrap file.
+   * True for "rush update", false for "rush install".
+   */
   allowShrinkwrapUpdates: boolean;
-  clean: boolean;
+  /**
+   * Whether to skip policy checks.
+   */
   bypassPolicy: boolean;
+  /**
+   * Whether to skip linking, i.e. require "rush link" to be done manually later.
+   */
   noLink: boolean;
-  full: boolean;
+  /**
+   * Whether to delete the shrinkwrap file before installation, i.e. so that all dependenices
+   * will be upgraded to the latest SemVer-compatible version.
+   */
+  fullUpgrade: boolean;
+  /**
+   * Whether to force an update to the shrinkwrap file even if it appears to be unnecessary.
+   * This is useful e.g. for handling external influences (pnpmfile.js, registry changes, etc)
+   * that are invisible to Rush.
+   */
+  forceUpdateShrinkwrap: boolean;
 }
 
 /**
@@ -181,7 +200,7 @@ export class InstallManager {
           let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
 
           // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
-          if (!options.full) {
+          if (!options.fullUpgrade) {
             try {
               shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager,
                 this._rushConfiguration.committedShrinkwrapFilename);
@@ -199,7 +218,8 @@ export class InstallManager {
             }
           }
 
-          const shrinkwrapIsUpToDate: boolean = this._createTempModulesAndCheckShrinkwrap(shrinkwrapFile);
+          const shrinkwrapIsUpToDate: boolean = this._createTempModulesAndCheckShrinkwrap(shrinkwrapFile)
+            && !options.forceUpdateShrinkwrap;
 
           if (!shrinkwrapIsUpToDate) {
             if (!options.allowShrinkwrapUpdates) {
