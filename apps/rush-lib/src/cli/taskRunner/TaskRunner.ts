@@ -150,7 +150,15 @@ export class TaskRunner {
       return taskB.criticalPathLength! - taskA.criticalPathLength!;
     });
 
-    return this._startAvailableTasks().then(() => this._printTaskStatus());
+    return this._startAvailableTasks().then(() => {
+      this._printTaskStatus();
+
+      if (this._hasAnyFailures) {
+        return Promise.reject(new Error('Project(s) failed to build'));
+      } else {
+        return Promise.resolve();
+      }
+    });
   }
 
   /**

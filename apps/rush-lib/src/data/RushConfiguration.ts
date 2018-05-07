@@ -126,6 +126,7 @@ export class RushConfiguration {
   private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _homeFolder: string;
+  private _rushUserFolder: string;
   private _rushLinkJsonFilename: string;
   private _packageManagerToolVersion: string;
   private _packageManagerToolFilename: string;
@@ -465,6 +466,14 @@ export class RushConfiguration {
   }
 
   /**
+   * The absolute path to Rush's storage in the home directory for the current user.  On Windows,
+   * it would be something like "C:\Users\YourName\.rush".
+   */
+  public get rushUserFolder(): string {
+    return this._rushUserFolder;
+  }
+
+  /**
    * The filename of the build dependency data file.  By default this is
    * called 'rush-link.json' resides in the Rush common folder.
    * Its data structure is defined by IRushLinkJson.
@@ -679,6 +688,7 @@ export class RushConfiguration {
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
     this._homeFolder = RushConfiguration.getHomeDirectory();
+    this._rushUserFolder = path.join(this._homeFolder, '.rush');
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 

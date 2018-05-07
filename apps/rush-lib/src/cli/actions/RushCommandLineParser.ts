@@ -17,6 +17,7 @@ import { UpdateAction } from './UpdateAction';
 import { InstallAction } from './InstallAction';
 import { LinkAction } from './LinkAction';
 import { PublishAction } from './PublishAction';
+import { PurgeAction } from './PurgeAction';
 import { UnlinkAction } from './UnlinkAction';
 import { ScanAction } from './ScanAction';
 import { VersionAction } from './VersionAction';
@@ -119,6 +120,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new InstallAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new PublishAction(this));
+      this.addAction(new PurgeAction(this));
       this.addAction(new ScanAction(this));
       this.addAction(new UpdateAction(this));
       this.addAction(new UnlinkAction(this));

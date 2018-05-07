@@ -6,9 +6,8 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 
-import { Text } from '@microsoft/node-core-library';
+import { Text, Path } from '@microsoft/node-core-library';
 
-import { RushConfiguration } from '../data/RushConfiguration';
 import { Utilities } from './Utilities';
 
 /**
@@ -18,14 +17,12 @@ import { Utilities } from './Utilities';
  * @public
  */
 export class AsyncRecycler {
-  private _rushConfiguration: RushConfiguration;
   private _recyclerFolder: string;
   private _movedFolderCount: number;
   private _deleting: boolean;
 
-  constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
-    this._recyclerFolder = path.join(rushConfiguration.commonTempFolder, 'rush-recycler');
+  constructor(recyclerFolder: string) {
+    this._recyclerFolder = path.resolve(recyclerFolder);
     this._movedFolderCount = 0;
     this._deleting = false;
   }
@@ -46,6 +43,10 @@ export class AsyncRecycler {
   public moveFolder(folderPath: string): void {
     if (this._deleting) {
       throw new Error('AsyncRecycler.moveFolder() must not be called after deleteAll() has started');
+    }
+
+    if (Path.isUnder(this.recyclerFolder, folderPath)) {
+      throw new Error('AsyncRecycler.moveFolder() cannot be called on a parent of the recycler folder');
     }
 
     if (!fsx.existsSync(folderPath)) {
@@ -75,6 +76,38 @@ export class AsyncRecycler {
                       'from a process like the virus scanner.'),
       'recycleFolder'
     );
+  }
+
+  /**
+   * This deletes all items under the specified folder, except for the items in the membersToExclude.
+   * To be conservative, a case-insensitive comparison is used for membersToExclude.
+   * The membersToExclude must be file/folder names that would match readdir() results.
+   */
+  public moveAllItemsInFolder(folderPath: string, membersToExclude?: ReadonlyArray<string>): void {
+    const resolvedFolderPath: string = path.resolve(folderPath);
+
+    const excludeSet: Set<string> = new Set<string>(
+      (membersToExclude || []).map(x => x.toUpperCase())
+    );
+
+    for (const memberName of fsx.readdirSync(resolvedFolderPath)) {
+      const memberPath: string = path.join(resolvedFolderPath, memberName);
+      const normalizedMemberName: string = memberName.toUpperCase();
+      if (!excludeSet.has(normalizedMemberName)) {
+        let shouldMove: boolean = false;
+        try {
+          const stats: fsx.Stats = fsx.lstatSync(memberPath);
+          shouldMove = stats.isDirectory();
+        } catch (error) {
+          // If we fail to access the item, assume it's not a folder
+        }
+        if (shouldMove) {
+          this.moveFolder(memberPath);
+        } else {
+          fsx.unlinkSync(memberPath);
+        }
+      }
+    }
   }
 
   /**
