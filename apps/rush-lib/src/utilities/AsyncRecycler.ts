@@ -102,10 +102,8 @@ export class AsyncRecycler {
           // If we fail to access the item, assume it's not a folder
         }
         if (shouldMove) {
-console.log('==> Recycling: ' + memberPath);
           this.moveFolder(memberPath);
         } else {
-console.log('==> Unlinking: ' + memberPath);
           fsx.unlinkSync(memberPath);
         }
       }
