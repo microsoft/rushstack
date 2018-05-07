@@ -6,10 +6,10 @@ import * as os from 'os';
 
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
-import { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../data/EventHooks';
 import { InstallManager } from '../logic/InstallManager';
+import { PurgeManager } from '../logic/PurgeManager';
 import { RushCommandLineParser } from './RushCommandLineParser';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
@@ -59,8 +59,14 @@ export class UpdateAction extends BaseRushAction {
 
     this.eventHooksManager.handle(Event.preRushInstall);
 
-    const asyncRecycler: AsyncRecycler = new AsyncRecycler(this.rushConfiguration);
-    const installManager: InstallManager = new InstallManager(this.rushConfiguration, asyncRecycler);
+    const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration);
+    const installManager: InstallManager = new InstallManager(this.rushConfiguration, purgeManager);
+
+    if (this._cleanParameter.value!) {
+      console.log('The --clean flag was specified, so performing "rush purge"');
+      purgeManager.purgeNormal();
+      console.log('');
+    }
 
     return Utilities.withFinally({
         promise: installManager.doInstall({
@@ -71,7 +77,7 @@ export class UpdateAction extends BaseRushAction {
           forceUpdateShrinkwrap: this._forceUpdateParameter.value!
         }),
         finally: () => {
-          asyncRecycler.deleteAll();
+          purgeManager.deleteAll();
         }
       })
       .then((success: boolean) => {

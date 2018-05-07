@@ -26,6 +26,7 @@ import { GitPolicy } from '../logic/GitPolicy';
 import { IRushTempPackageJson } from '../logic/base/BasePackage';
 import { LastInstallFlag } from '../../utilities/LastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
+import { PurgeManager } from './PurgeManager';
 import { RushConfiguration, PackageManager } from '../../data/RushConfiguration';
 import { RushConfigurationProject } from '../../data/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
@@ -82,7 +83,7 @@ export interface IInstallManagerOptions {
 export class InstallManager {
   private _rushConfiguration: RushConfiguration;
   private _commonNodeModulesMarker: LastInstallFlag;
-  private _asyncRecycler: AsyncRecycler;
+  private _commonTempFolderRecycler: AsyncRecycler;
 
   /**
    * Returns a map of all direct dependencies that only have a single semantic version specifier
@@ -171,9 +172,9 @@ export class InstallManager {
     return this._commonNodeModulesMarker;
   }
 
-  constructor(rushConfiguration: RushConfiguration, asyncRecycler: AsyncRecycler) {
+  constructor(rushConfiguration: RushConfiguration, purgeManager: PurgeManager) {
     this._rushConfiguration = rushConfiguration;
-    this._asyncRecycler = asyncRecycler;
+    this._commonTempFolderRecycler = purgeManager.commonTempFolderRecycler;
 
     this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, {
       node: process.versions.node,
@@ -652,10 +653,10 @@ export class InstallManager {
       if (this._rushConfiguration.packageManager === 'npm') {
         console.log(`Deleting the "npm-cache" folder`);
         // This is faster and more thorough than "npm cache clean"
-        this._asyncRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
+        this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
 
         console.log(`Deleting the "npm-tmp" folder`);
-        this._asyncRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
+        this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
       }
     }
 
@@ -671,7 +672,7 @@ export class InstallManager {
         // Explain to the user why we are hosing their node_modules folder
         console.log('Deleting files from ' + commonNodeModulesFolder);
 
-        this._asyncRecycler.moveFolder(commonNodeModulesFolder);
+        this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
 
         Utilities.createFolderWithRetry(commonNodeModulesFolder);
       } else {
@@ -741,9 +742,9 @@ export class InstallManager {
           // before attempting the install again.
 
           console.log(colors.yellow(`Deleting the "node_modules" folder`));
-          this._asyncRecycler.moveFolder(commonNodeModulesFolder);
+          this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
           console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-          this._asyncRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+          this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
 
           Utilities.createFolderWithRetry(commonNodeModulesFolder);
         }
