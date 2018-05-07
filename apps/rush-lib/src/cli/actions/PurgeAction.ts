@@ -49,7 +49,8 @@ export class PurgeAction extends BaseRushAction {
 
       purgeManager.deleteAll();
 
-      console.log(os.EOL + colors.green(`Rush purge finished successfully. (${stopwatch.toString()})`));
+      console.log(os.EOL + colors.green(`Rush purge started successfully and will complete asynchronously.`
+        + ` (${stopwatch.toString()})`));
     });
   }
 
