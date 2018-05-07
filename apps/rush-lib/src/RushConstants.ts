@@ -117,4 +117,10 @@ export namespace RushConstants {
    * The URL ("http://rushjs.io") for the Rush web site.
    */
   export const rushWebSiteUrl: string = 'http://rushjs.io';
+
+  /**
+   * The folder name ("rush-recycler") where Rush moves large folder trees
+   * before asynchronously deleting them.
+   */
+  export const rushRecyclerFolderName: string = 'rush-recycler';
 }

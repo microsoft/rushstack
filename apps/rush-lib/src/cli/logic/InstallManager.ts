@@ -170,7 +170,9 @@ export class InstallManager {
       packageManagerVersion: rushConfiguration.packageManagerToolVersion
     });
 
-    this._asyncRecycler = new AsyncRecycler(this._rushConfiguration);
+    const commonAsyncRecyclerPath: string = path.join(this._rushConfiguration.commonTempFolder,
+      RushConstants.rushRecyclerFolderName);
+    this._asyncRecycler = new AsyncRecycler(commonAsyncRecyclerPath);
   }
 
   /**
