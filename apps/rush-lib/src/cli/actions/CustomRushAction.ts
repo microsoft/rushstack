@@ -119,8 +119,11 @@ export class CustomRushAction extends BaseRushAction {
         stopwatch.stop();
         console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
         this._doAfterTask(stopwatch, true);
-      },
-      () => {
+      })
+      .catch((error: Error) => {
+        if (error && error.message) {
+          console.log('Error: ' + error.message);
+        }
         stopwatch.stop();
         console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
         this._doAfterTask(stopwatch, false);
