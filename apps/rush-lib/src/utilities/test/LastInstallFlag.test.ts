@@ -1,4 +1,3 @@
-import { assert } from 'chai';
 import * as path from 'path';
 import * as fsx from 'fs-extra';
 
@@ -7,12 +6,12 @@ import { LastInstallFlag } from '../LastInstallFlag';
 const TEMP_DIR: string = path.join(__dirname, 'temp');
 
 describe('LastInstallFlag', () => {
-  before(() => {
+  beforeEach(() => {
     fsx.emptyDirSync(TEMP_DIR);
   });
 
-  after(() => {
-    fsx.removeSync(TEMP_DIR);
+  afterEach(() => {
+    fsx.emptyDirSync(TEMP_DIR);
   });
 
   it('can create and remove a flag in an empty directory', () => {
@@ -21,17 +20,17 @@ describe('LastInstallFlag', () => {
     fsx.removeSync(flag.path);
 
     // test state, should be invalid since the file doesn't exist
-    assert.isFalse(flag.isValid());
+    expect(flag.isValid()).toEqual(false);
 
     // test creation
     flag.create();
-    assert.isTrue(fsx.existsSync(flag.path));
-    assert.isTrue(flag.isValid());
+    expect(fsx.existsSync(flag.path)).toEqual(true);
+    expect(flag.isValid()).toEqual(true);
 
     // test deletion
     flag.clear();
-    assert.isFalse(fsx.existsSync(flag.path));
-    assert.isFalse(flag.isValid());
+    expect(fsx.existsSync(flag.path)).toEqual(false);
+    expect(flag.isValid()).toEqual(false);
   });
 
   it('can detect if the last flag was in a different state', () => {
@@ -41,22 +40,22 @@ describe('LastInstallFlag', () => {
     fsx.removeSync(flag1.path);
 
     // test state, should be invalid since the file doesn't exist
-    assert.isFalse(flag1.isValid());
-    assert.isFalse(flag2.isValid());
+    expect(flag1.isValid()).toEqual(false);
+    expect(flag2.isValid()).toEqual(false);
 
     // test creation
     flag1.create();
-    assert.isTrue(fsx.existsSync(flag1.path));
-    assert.isTrue(flag1.isValid());
+    expect(fsx.existsSync(flag1.path)).toEqual(true);
+    expect(flag1.isValid()).toEqual(true);
 
     // the second flag has different state and should be invalid
-    assert.isFalse(flag2.isValid());
+    expect(flag2.isValid()).toEqual(false);
 
     // test deletion
     flag1.clear();
-    assert.isFalse(fsx.existsSync(flag1.path));
-    assert.isFalse(flag1.isValid());
-    assert.isFalse(flag2.isValid());
+    expect(fsx.existsSync(flag1.path)).toEqual(false);
+    expect(flag1.isValid()).toEqual(false);
+    expect(flag2.isValid()).toEqual(false);
   });
 
   it('can detect if the last flag was in a corrupted state', () => {
@@ -65,7 +64,7 @@ describe('LastInstallFlag', () => {
     fsx.writeFileSync(flag.path, 'sdfjkaklfjksldajgfkld');
 
     // test state, should be invalid since the file is not JSON
-    assert.isFalse(flag.isValid());
+    expect(flag.isValid()).toEqual(false);
     fsx.removeSync(flag.path);
   });
 });

@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference types='mocha' />
-
 import * as path from 'path';
 
-import { assert } from 'chai';
 import { Text } from '@microsoft/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
 import { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
@@ -18,8 +15,7 @@ function normalizePathForComparison(pathToNormalize: string): string {
 
 function assertPathProperty(validatedPropertyName: string, absolutePath: string, relativePath: string): void {
   const resolvedRelativePath: string = path.resolve(__dirname, relativePath);
-  assert.equal(normalizePathForComparison(absolutePath), normalizePathForComparison(resolvedRelativePath),
-    `Failed to validate ${validatedPropertyName}`);
+  expect(normalizePathForComparison(absolutePath)).toEqual(normalizePathForComparison(resolvedRelativePath));
 }
 
 describe('RushConfiguration', () => {
@@ -37,21 +33,21 @@ describe('RushConfiguration', () => {
     process.env = _oldEnv;
   });
 
-  it ('can\'t load too new rush', (done: MochaDone) => {
+  it('can\'t load too new rush', (done: jest.DoneCallback) => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-too-new.json');
 
-    assert.throws(() => {
+    expect(() => {
       RushConfiguration.loadFromConfigurationFile(rushFilename);
-    }, 'Unable to load rush-too-new.json because its RushVersion is 99.0.0');
+    }).toThrow('Unable to load rush-too-new.json because its RushVersion is 99.0.0');
 
     done();
   });
 
-  it('can load repo/rush-npm.json', (done: MochaDone) => {
+  it('can load repo/rush-npm.json', (done: jest.DoneCallback) => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
-    assert.equal(rushConfiguration.packageManager, 'npm');
+    expect(rushConfiguration.packageManager).toEqual('npm');
     assertPathProperty('committedShrinkwrapFilename',
       rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/npm-shrinkwrap.json');
     assertPathProperty('commonFolder',
@@ -73,54 +69,51 @@ describe('RushConfiguration', () => {
     assertPathProperty('rushLinkJsonFilename',
       rushConfiguration.rushLinkJsonFilename, './repo/common/temp/rush-link.json');
 
-    assert.equal(rushConfiguration.packageManagerToolVersion, '4.5.0', 'Failed to validate packageManagerToolVersion');
+    expect(rushConfiguration.packageManagerToolVersion).toEqual('4.5.0');
 
-    assert.equal(rushConfiguration.repositoryUrl, 'someFakeUrl', 'Failed to get repository url');
-    assert.equal(rushConfiguration.projectFolderMaxDepth, 99, 'Failed to validate projectFolderMaxDepth');
-    assert.equal(rushConfiguration.projectFolderMinDepth, 1, 'Failed to validate projectFolderMinDepth');
-    assert.equal(rushConfiguration.hotfixChangeEnabled, true, 'Failed to validate hotfixChangeEnabled');
+    expect(rushConfiguration.repositoryUrl).toEqual('someFakeUrl');
+    expect(rushConfiguration.projectFolderMaxDepth).toEqual(99);
+    expect(rushConfiguration.projectFolderMinDepth).toEqual(1);
+    expect(rushConfiguration.hotfixChangeEnabled).toEqual(true);
 
-    assert.equal(rushConfiguration.projects.length, 3);
+    expect(rushConfiguration.projects.length).toEqual(3);
 
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
-    assert.isTrue(approvedPackagesPolicy.enabled, 'Failed to validate approvedPackagesPolicy.enabled');
-    assert.deepEqual(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories),
-      [ 'first-party', 'third-party', 'prototype' ],
-      'Failed to validate approvedPackagesPolicy.reviewCategories');
-    assert.deepEqual(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes),
-      [ '@types', '@internal' ],
-      'Failed to validate approvedPackagesPolicy.ignoredNpmScopes');
+    expect(approvedPackagesPolicy.enabled).toEqual(true);
+    expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual(
+      [ 'first-party', 'third-party', 'prototype' ]);
 
-    assert.equal(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName, 'example',
-       'Failed to validate browserApprovedPackages.items[0]');
-    assert.equal(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size, 3,
-       'Failed to validate browserApprovedPackages.items[0]');
+    expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(
+      [ '@types', '@internal' ]);
 
-    assert.isNotTrue(rushConfiguration.telemetryEnabled);
+    expect(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName).toEqual('example');
+    expect(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size).toEqual(3);
+
+    expect(rushConfiguration.telemetryEnabled).toBe(false);
 
     // Validate project1 settings
     const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
-    assert.ok(project1, 'Failed to find project1');
+    expect(project1).toBeDefined();
 
-    assert.equal(project1.packageName, 'project1', 'Failed to validate project1.packageName');
+    expect(project1.packageName).toEqual( 'project1');
     assertPathProperty('project1.projectFolder', project1.projectFolder, './repo/project1');
-    assert.equal(project1.tempProjectName, '@rush-temp/project1', 'Failed to validate project1.tempProjectName');
-    assert.equal(project1.unscopedTempProjectName, 'project1');
-    assert.equal(project1.skipRushCheck, false);
+    expect(project1.tempProjectName).toEqual('@rush-temp/project1');
+    expect(project1.unscopedTempProjectName).toEqual('project1');
+    expect(project1.skipRushCheck).toEqual(false);
 
     // Validate project2 settings
     const project2: RushConfigurationProject = rushConfiguration.getProjectByName('project2')!;
-    assert.equal(project2.skipRushCheck, true);
+    expect(project2.skipRushCheck).toEqual(true);
 
     done();
   });
 
-  it('can load repo/rush-pnpm.json', (done: MochaDone) => {
+  it('can load repo/rush-pnpm.json', (done: jest.DoneCallback) => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
-    assert.equal(rushConfiguration.packageManager, 'pnpm');
+    expect(rushConfiguration.packageManager).toEqual('pnpm');
     assertPathProperty('committedShrinkwrapFilename',
       rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/shrinkwrap.yaml');
     assertPathProperty('commonFolder',
@@ -142,39 +135,35 @@ describe('RushConfiguration', () => {
     assertPathProperty('rushLinkJsonFilename',
       rushConfiguration.rushLinkJsonFilename, './repo/common/temp/rush-link.json');
 
-    assert.equal(rushConfiguration.packageManagerToolVersion, '4.5.0', 'Failed to validate packageManagerToolVersion');
+    expect(rushConfiguration.packageManagerToolVersion).toEqual('4.5.0');
 
-    assert.equal(rushConfiguration.repositoryUrl, 'someFakeUrl', 'Failed to get repository url');
-    assert.equal(rushConfiguration.projectFolderMaxDepth, 99, 'Failed to validate projectFolderMaxDepth');
-    assert.equal(rushConfiguration.projectFolderMinDepth, 1, 'Failed to validate projectFolderMinDepth');
+    expect(rushConfiguration.repositoryUrl).toEqual('someFakeUrl');
+    expect(rushConfiguration.projectFolderMaxDepth).toEqual(99);
+    expect(rushConfiguration.projectFolderMinDepth).toEqual(1);
 
-    assert.equal(rushConfiguration.projects.length, 3);
+    expect(rushConfiguration.projects.length).toEqual(3);
 
     // "approvedPackagesPolicy" feature
     const approvedPackagesPolicy: ApprovedPackagesPolicy = rushConfiguration.approvedPackagesPolicy;
-    assert.isTrue(approvedPackagesPolicy.enabled, 'Failed to validate approvedPackagesPolicy.enabled');
-    assert.deepEqual(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories),
-      [ 'first-party', 'third-party', 'prototype' ],
-      'Failed to validate approvedPackagesPolicy.reviewCategories');
-    assert.deepEqual(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes),
-      [ '@types', '@internal' ],
-      'Failed to validate approvedPackagesPolicy.ignoredNpmScopes');
+    expect(approvedPackagesPolicy.enabled).toBe(true);
+    expect(Utilities.getSetAsArray(approvedPackagesPolicy.reviewCategories)).toEqual(
+      [ 'first-party', 'third-party', 'prototype' ]);
+    expect(Utilities.getSetAsArray(approvedPackagesPolicy.ignoredNpmScopes)).toEqual(
+      [ '@types', '@internal' ]);
 
-    assert.equal(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName, 'example',
-       'Failed to validate browserApprovedPackages.items[0]');
-    assert.equal(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size, 3,
-       'Failed to validate browserApprovedPackages.items[0]');
+    expect(approvedPackagesPolicy.browserApprovedPackages.items[0].packageName).toEqual('example');
+    expect(approvedPackagesPolicy.browserApprovedPackages.items[0].allowedCategories.size).toEqual(3);
 
-    assert.isNotTrue(rushConfiguration.telemetryEnabled);
+    expect(rushConfiguration.telemetryEnabled).toBe(false);
 
     // Validate project1 settings
     const project1: RushConfigurationProject = rushConfiguration.getProjectByName('project1')!;
-    assert.ok(project1, 'Failed to find project1');
+    expect(project1).toBeDefined();
 
-    assert.equal(project1.packageName, 'project1', 'Failed to validate project1.packageName');
+    expect(project1.packageName).toEqual('project1');
     assertPathProperty('project1.projectFolder', project1.projectFolder, './repo/project1');
-    assert.equal(project1.tempProjectName, '@rush-temp/project1', 'Failed to validate project1.tempProjectName');
-    assert.equal(project1.unscopedTempProjectName, 'project1');
+    expect(project1.tempProjectName).toEqual('@rush-temp/project1');
+    expect(project1.unscopedTempProjectName).toEqual('project1');
 
     done();
   });
