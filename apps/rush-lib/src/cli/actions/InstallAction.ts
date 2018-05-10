@@ -22,7 +22,7 @@ export class InstallAction extends BaseInstallAction {
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: false,
-      forceUpdateShrinkwrap: false
+      recheckShrinkwrap: false
     };
   }
 }

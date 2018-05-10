@@ -74,7 +74,7 @@ export interface IInstallManagerOptions {
    * This is useful e.g. for handling external influences (pnpmfile.js, registry changes, etc)
    * that are invisible to Rush.
    */
-  forceUpdateShrinkwrap: boolean;
+  recheckShrinkwrap: boolean;
 }
 
 /**
@@ -220,7 +220,7 @@ export class InstallManager {
           }
 
           const shrinkwrapIsUpToDate: boolean = this._createTempModulesAndCheckShrinkwrap(shrinkwrapFile)
-            && !options.forceUpdateShrinkwrap;
+            && !options.recheckShrinkwrap;
 
           if (!shrinkwrapIsUpToDate) {
             if (!options.allowShrinkwrapUpdates) {

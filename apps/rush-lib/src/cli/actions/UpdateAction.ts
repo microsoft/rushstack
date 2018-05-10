@@ -9,7 +9,7 @@ import { RushCommandLineParser } from './RushCommandLineParser';
 
 export class UpdateAction extends BaseInstallAction {
   private _fullParameter: CommandLineFlagParameter;
-  private _forceUpdateParameter: CommandLineFlagParameter;
+  private _recheckParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -27,8 +27,8 @@ export class UpdateAction extends BaseInstallAction {
       parameterLongName: '--full',
       description: ''
     });
-    this._forceUpdateParameter = this.defineFlagParameter({
-      parameterLongName: '--force-update',
+    this._recheckParameter = this.defineFlagParameter({
+      parameterLongName: '--recheck',
       description: ''
     });
   }
@@ -39,7 +39,7 @@ export class UpdateAction extends BaseInstallAction {
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: this._fullParameter.value!,
-      forceUpdateShrinkwrap: this._forceUpdateParameter.value!
+      recheckShrinkwrap: this._recheckParameter.value!
     };
   }
 }
