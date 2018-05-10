@@ -406,8 +406,12 @@ export class TaskRunner {
           case TaskStatus.SuccessWithWarning:
           case TaskStatus.Blocked:
           case TaskStatus.Failure:
-            const time: string = task.stopwatch ? task.stopwatch.toString() : 'unknown time';
-            console.log(color(`${task.name} (${time})`));
+            if (task.stopwatch) {
+              const time: string = task.stopwatch.toString();
+              console.log(color(`${task.name} (${time})`));
+            } else {
+              console.log(color(`${task.name}`));
+            }
             break;
         }
 
