@@ -71,8 +71,9 @@ export interface IInstallManagerOptions {
   fullUpgrade: boolean;
   /**
    * Whether to force an update to the shrinkwrap file even if it appears to be unnecessary.
-   * This is useful e.g. for handling external influences (pnpmfile.js, registry changes, etc)
-   * that are invisible to Rush.
+   * Normally Rush uses heuristics to determine when "pnpm install" can be skipped,
+   * but sometimes the heuristics can be inaccurate due to external influences
+   * (pnpmfile.js script logic, registry changes, etc).
    */
   recheckShrinkwrap: boolean;
 }
@@ -594,9 +595,7 @@ export class InstallManager {
   }
 
   /**
-   * Runs "npm install" in the common folder.  The "forceDeleteNodeModules" flag is used
-   * to workaround NPM flaws during normal operation.  It is NOT intended for the scenario
-   * where a user is specifying command-line switches because they suspect a folder is corrupted.
+   * Runs "npm install" in the common folder.
    */
   private _installCommonModules(shrinkwrapIsUpToDate: boolean, allowShrinkwrapUpdates: boolean): void {
     console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
@@ -611,10 +610,10 @@ export class InstallManager {
     // If "--clean" or "--full-clean" was specified, or if the last install was interrupted,
     // then we will need to delete the node_modules folder.  Otherwise, we can do an incremental
     // install.
-    const deletingNodeModules: boolean = !markerFileExistedAndWasValidAtStart;
+    const deleteNodeModules: boolean = !markerFileExistedAndWasValidAtStart;
 
     // Based on timestamps, can we skip this install entirely?
-    if (shrinkwrapIsUpToDate && !deletingNodeModules) {
+    if (shrinkwrapIsUpToDate && !deleteNodeModules) {
       const potentiallyChangedFiles: string[] = [];
 
       // Consider the timestamp on the node_modules folder; if someone tampered with it
@@ -649,7 +648,7 @@ export class InstallManager {
 
     // NOTE: The PNPM store is supposed to be transactionally safe, so we don't delete it automatically.
     // The user must request that via the command line.
-    if (deletingNodeModules) {
+    if (deleteNodeModules) {
       if (this._rushConfiguration.packageManager === 'npm') {
         console.log(`Deleting the "npm-cache" folder`);
         // This is faster and more thorough than "npm cache clean"
@@ -666,7 +665,7 @@ export class InstallManager {
     // Is there an existing "node_modules" folder to consider?
     if (fsx.existsSync(commonNodeModulesFolder)) {
       // Should we delete the entire "node_modules" folder?
-      if (deletingNodeModules) {
+      if (deleteNodeModules) {
         // YES: Delete "node_modules"
 
         // Explain to the user why we are hosing their node_modules folder
