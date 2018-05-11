@@ -116,6 +116,7 @@ dependencies:
   istanbul-instrumenter-loader: 3.0.1
   jest: 22.4.3
   jest-cli: 22.4.3
+  jest-environment-jsdom: 22.4.3
   jest-resolve: 22.4.3
   jju: 1.3.0
   js-yaml: 3.9.1
@@ -700,12 +701,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-x1K9IQvvZ5UBtsbLf8hPj0cVjMQ=
-  /acorn-globals/3.1.0:
-    dependencies:
-      acorn: 4.0.13
-    dev: false
-    resolution:
-      integrity: sha1-/YJw9x+7SZawBPqIDuXUZXOnMb8=
   /acorn-globals/4.1.0:
     dependencies:
       acorn: 5.5.3
@@ -2006,10 +2001,6 @@ packages:
       node: '>= 0.6'
     resolution:
       integrity: sha1-DPaLud318r55YcOoUXjLhdunjLQ=
-  /content-type-parser/1.0.2:
-    dev: false
-    resolution:
-      integrity: sha512-lM4l4CnMEwOLHAHr/P6MEZwZFPJFtAAKgL6pogbXmVZggIqXhdB6RbBtPOTsw2FcXwYhehRGERJmRrjOiIB8pQ==
   /content-type/1.0.4:
     dev: false
     engines:
@@ -5176,14 +5167,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-uPKBEAw7YrEMcXueMKZXn/rbMxBiSv48fSqy3uEnmgOlQhSX+lthBqHb1fKWNVmFqAp9E/RsSdBfiV31LbzaOg==
-  /jest-environment-jsdom/21.2.1:
-    dependencies:
-      jest-mock: 21.2.0
-      jest-util: 21.2.1
-      jsdom: 9.12.0
-    dev: false
-    resolution:
-      integrity: sha512-mecaeNh0eWmzNrUNMWARysc0E9R96UPBamNiOCYL28k7mksb1d0q6DD38WKP7ABffjnXyUWJPVaWRgUOivwXwg==
   /jest-environment-jsdom/22.4.3:
     dependencies:
       jest-mock: 22.4.3
@@ -5199,10 +5182,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-reZl8XF6t/lMEuPWwo9OLfttyC26A5AMgDyEQ6DBgZuyfyeNUzYT8BFo6uxCCP/Av/b7eb9fTi3sIHFPBzmlRA==
-  /jest-get-type/21.2.0:
-    dev: false
-    resolution:
-      integrity: sha512-y2fFw3C+D0yjNSDp7ab1kcd6NUYfy3waPTlD8yWkAtiocJdBRQqNoRqVfMNxgj+IjT0V5cBIHJO0z9vuSSZ43Q==
   /jest-get-type/22.4.3:
     dev: false
     resolution:
@@ -5249,14 +5228,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-lsEHVaTnKzdAPR5t4B6OcxXo9Vy4K+kRRbG5gtddY8lBEC+Mlpvm1CJcsMESRjzUhzkz568exMV1hTB76nAKbA==
-  /jest-message-util/21.2.1:
-    dependencies:
-      chalk: 2.4.1
-      micromatch: 2.3.11
-      slash: 1.0.0
-    dev: false
-    resolution:
-      integrity: sha512-EbC1X2n0t9IdeMECJn2BOg7buOGivCvVNjqKMXTzQOu7uIfLml+keUfCALDh8o4rbtndIeyGU8/BKfoTr/LVDQ==
   /jest-message-util/22.4.3:
     dependencies:
       '@babel/code-frame': 7.0.0-beta.46
@@ -5267,10 +5238,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-iAMeKxhB3Se5xkSjU0NndLLCHtP4n+GtCqV0bISKA5dmOXQfEbdEmYiu2qpnWBDCQdEafNDDU6Q+l6oBMd/+BA==
-  /jest-mock/21.2.0:
-    dev: false
-    resolution:
-      integrity: sha512-aZDfyVf0LEoABWiY6N0d+O963dUQSyUa4qgzurHR3TBDPen0YxKCJ6l2i7lQGh1tVdsuvdrCZ4qPj+A7PievCw==
   /jest-mock/22.4.3:
     dev: false
     resolution:
@@ -5348,18 +5315,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-JXA0gVs5YL0HtLDCGa9YxcmmV2LZbwJ+0MfyXBBc5qpgkEYITQFJP7XNhcHFbUvRiniRpRbGVfJrOoYhhGE0RQ==
-  /jest-util/21.2.1:
-    dependencies:
-      callsites: 2.0.0
-      chalk: 2.4.1
-      graceful-fs: 4.1.11
-      jest-message-util: 21.2.1
-      jest-mock: 21.2.0
-      jest-validate: 21.2.1
-      mkdirp: 0.5.1
-    dev: false
-    resolution:
-      integrity: sha512-r20W91rmHY3fnCoO7aOAlyfC51x2yeV3xF+prGsJAUsYhKeV670ZB8NO88Lwm7ASu8SdH0S+U+eFf498kjhA4g==
   /jest-util/22.4.3:
     dependencies:
       callsites: 2.0.0
@@ -5372,15 +5327,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-rfDfG8wyC5pDPNdcnAlZgwKnzHvZDu8Td2NJI/jAGKEGxJPYiE4F0ss/gSAkG4778Y23Hvbz+0GMrDJTeo7RjQ==
-  /jest-validate/21.2.1:
-    dependencies:
-      chalk: 2.4.1
-      jest-get-type: 21.2.0
-      leven: 2.1.0
-      pretty-format: 21.2.1
-    dev: false
-    resolution:
-      integrity: sha512-k4HLI1rZQjlU+EC682RlQ6oZvLrE5SCh3brseQc24vbZTxzT/k/3urar5QMCVgjadmSO7lECeGdc6YxnM3yEGg==
   /jest-validate/22.4.3:
     dependencies:
       chalk: 2.4.1
@@ -5461,30 +5407,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-x5No5FpJgBg3j5aBwA8ka6eGuS5IxbC8FOkmyccKvObtFT0bDMict/LOxINZsZGZSfGdNomLZ/qRV9Bpq/GIBA==
-  /jsdom/9.12.0:
-    dependencies:
-      abab: 1.0.4
-      acorn: 4.0.13
-      acorn-globals: 3.1.0
-      array-equal: 1.0.0
-      content-type-parser: 1.0.2
-      cssom: 0.3.2
-      cssstyle: 0.2.37
-      escodegen: 1.9.1
-      html-encoding-sniffer: 1.0.2
-      nwmatcher: 1.4.4
-      parse5: 1.5.1
-      request: 2.85.0
-      sax: 1.2.4
-      symbol-tree: 3.2.2
-      tough-cookie: 2.3.4
-      webidl-conversions: 4.0.2
-      whatwg-encoding: 1.0.3
-      whatwg-url: 4.8.0
-      xml-name-validator: 2.0.1
-    dev: false
-    resolution:
-      integrity: sha1-6MVG//ywbADUgzyoRBD+1/igl9Q=
   /jsesc/0.5.0:
     dev: false
     resolution:
@@ -7163,10 +7085,6 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-bVuTSkVpk7I9N/QKOC1vFmao5cY=
-  /parse5/1.5.1:
-    dev: false
-    resolution:
-      integrity: sha1-m387DeMr543CQBsXVzzK8Pb1nZQ=
   /parse5/4.0.0:
     dev: false
     resolution:
@@ -7497,13 +7415,6 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-gV7R9uvGWSb4ZbMQwHE7yzMVzks=
-  /pretty-format/21.2.1:
-    dependencies:
-      ansi-regex: 3.0.0
-      ansi-styles: 3.2.1
-    dev: false
-    resolution:
-      integrity: sha512-ZdWPGYAnYfcVP8yKA3zFjCn8s4/17TeYH28MXuC8vTp0o21eXjbFGcOAXZEaDaOFJjc3h2qa7HQNHNshhvoh2A==
   /pretty-format/22.4.3:
     dependencies:
       ansi-regex: 3.0.0
@@ -9154,10 +9065,6 @@ packages:
       node: '>=0.8'
     resolution:
       integrity: sha512-TZ6TTfI5NtZnuyy/Kecv+CnoROnyXn2DN97LontgQpCwsX2XyLYCC0ENhYkehSOwAp8rTQKc/NUIF7BkQ5rKLA==
-  /tr46/0.0.3:
-    dev: false
-    resolution:
-      integrity: sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o=
   /tr46/1.0.1:
     dependencies:
       punycode: 2.1.0
@@ -9659,10 +9566,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-i6dHe3EyLjMmDlU1/bGQpEw25XSjkJULPuAVKCbNRefQVq48yXKUpwg538F7AZTf9kyr57zj++pQFltUa5H7yA==
-  /webidl-conversions/3.0.1:
-    dev: false
-    resolution:
-      integrity: sha1-JFNCdeKnvGvnvIZhHMFq4KVlSHE=
   /webidl-conversions/4.0.2:
     dev: false
     resolution:
@@ -9758,13 +9661,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-FKxhYLytBQiUKjkYteN71fAUA3g6KpNXoho1isLiLSB3N1G4F35Q5vUxWfKFhBwi5IWF27VE6WxhrnnC+m0Mew==
-  /whatwg-url/4.8.0:
-    dependencies:
-      tr46: 0.0.3
-      webidl-conversions: 3.0.1
-    dev: false
-    resolution:
-      integrity: sha1-0pgaqRSMHgCkHFphMRZqtGg7vMA=
   /whatwg-url/6.4.1:
     dependencies:
       lodash.sortby: 4.7.0
@@ -9860,10 +9756,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-OS2LotDxw00e4tYw8V0O+2jhBIo=
-  /xml-name-validator/2.0.1:
-    dev: false
-    resolution:
-      integrity: sha1-TYuPHszTQZqjYgYb7O9RXh5VljU=
   /xml-name-validator/3.0.0:
     dev: false
     resolution:
@@ -10104,7 +9996,6 @@ packages:
       colors: 1.2.5
       fs-extra: 5.0.0
       gulp: 3.9.1
-      jest-environment-jsdom: 21.2.1
       jju: 1.3.0
       lodash: 4.15.0
       typescript: 2.4.2
@@ -10112,7 +10003,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-/ShCeA0ve31GAttUKgx33jxEQrg503mTkDj8xzsrVEu3SapWns8Ne63Q7zuIml1xH4zf2jy1l1mbZhfVg8lqZg==
+      integrity: sha512-SuOHEXK8+RSiWP5dLBg9HhH0pexnNQI5vCd35f/Aagc3w5XhxVPyTj+fyU6VblEpI0yThTGLD7j+Kc+dS3sOfA==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-karma.tgz':
@@ -10585,11 +10476,10 @@ packages:
       argparse: 1.0.10
       colors: 1.2.5
       gulp: 3.9.1
-      jest-environment-jsdom: 21.2.1
     dev: false
     name: '@rush-temp/ts-command-line'
     resolution:
-      integrity: sha512-eW9AS7z26Wu381OobGIeY2v/Kx6W/BxjgnoZKJRRG2zp0OWC1ONy3iEvGoTo8a6Ee/I/eMTn1p3ZLGtpGgeDAA==
+      integrity: sha512-XtxbwZEbtHvPdIBFC3VOObAa+s2baFUuB4zrgOaP5X+C4lp7YWk2epRVWjCnGXtNZUjuugxWvGmAvzUCwJpGIQ==
       tarball: 'file:projects/ts-command-line.tgz'
     version: 0.0.0
   'file:projects/web-library-build-test.tgz':
@@ -10738,6 +10628,7 @@ specifiers:
   istanbul-instrumenter-loader: ~3.0.0
   jest: ~22.4.3
   jest-cli: ~22.4.3
+  jest-environment-jsdom: ~22.4.3
   jest-resolve: ~22.4.3
   jju: ~1.3.0
   js-yaml: ~3.9.1
