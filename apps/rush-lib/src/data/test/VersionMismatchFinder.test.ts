@@ -1,14 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference types='mocha' />
-
-import { assert } from 'chai';
 import { RushConfigurationProject } from '../RushConfigurationProject';
 import { VersionMismatchFinder } from '../VersionMismatchFinder';
 
 describe('VersionMismatchFinder', () => {
-  it('finds no mismatches if there are none', (done: MochaDone) => {
+  it('finds no mismatches if there are none', (done: jest.DoneCallback) => {
     const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -32,13 +29,12 @@ describe('VersionMismatchFinder', () => {
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    assert.isNumber(mismatchFinder.numberOfMismatches);
-    assert.equal(mismatchFinder.numberOfMismatches, 0);
-    assert.equal(mismatchFinder.getMismatches().length, 0);
+    expect(mismatchFinder.numberOfMismatches).toEqual(0);
+    expect(mismatchFinder.getMismatches().length).toEqual(0);
     done();
   });
 
-  it('finds a mismatch in two packages', (done: MochaDone) => {
+  it('finds a mismatch in two packages', (done: jest.DoneCallback) => {
     const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -62,17 +58,16 @@ describe('VersionMismatchFinder', () => {
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    assert.isNumber(mismatchFinder.numberOfMismatches);
-    assert.equal(mismatchFinder.numberOfMismatches, 1);
-    assert.equal(mismatchFinder.getMismatches().length, 1);
-    assert.equal(mismatchFinder.getMismatches()[0], '@types/foo');
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
+    expect(mismatchFinder.numberOfMismatches).toEqual(1);
+    expect(mismatchFinder.getMismatches().length).toEqual(1);
+    expect(mismatchFinder.getMismatches()[0]).toEqual('@types/foo');
+    expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual(['B']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3')).toEqual(['A']);
     done();
   });
 
-  it('ignores cyclic dependencies', (done: MochaDone) => {
+  it('ignores cyclic dependencies', (done: jest.DoneCallback) => {
     const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -96,13 +91,12 @@ describe('VersionMismatchFinder', () => {
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    assert.isNumber(mismatchFinder.numberOfMismatches);
-    assert.equal(mismatchFinder.numberOfMismatches, 0);
-    assert.equal(mismatchFinder.getMismatches().length, 0);
+    expect(mismatchFinder.numberOfMismatches).toEqual(0);
+    expect(mismatchFinder.getMismatches().length).toEqual(0);
     done();
   });
 
-  it('won\'t let you access mismatches that don\t exist', (done: MochaDone) => {
+  it('won\'t let you access mismatches that don\t exist', (done: jest.DoneCallback) => {
     const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -126,13 +120,13 @@ describe('VersionMismatchFinder', () => {
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    assert.equal(mismatchFinder.getVersionsOfMismatch('@types/foobar'), undefined);
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/fobar', '2.0.0'), undefined);
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '9.9.9'), undefined);
+    expect(mismatchFinder.getVersionsOfMismatch('@types/foobar')).toEqual(undefined);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/fobar', '2.0.0')).toEqual(undefined);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '9.9.9')).toEqual(undefined);
     done();
   });
 
-  it('finds two mismatches in two different pairs of projects', (done: MochaDone) => {
+  it('finds two mismatches in two different pairs of projects', (done: jest.DoneCallback) => {
     const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -176,20 +170,19 @@ describe('VersionMismatchFinder', () => {
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    assert.isNumber(mismatchFinder.numberOfMismatches);
-    assert.equal(mismatchFinder.numberOfMismatches, 2);
-    assert.equal(mismatchFinder.getMismatches().length, 2);
-    assert.includeMembers(mismatchFinder.getMismatches(), ['@types/foo', 'mocha']);
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('mocha')!, ['2.0.0', '1.2.3']);
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
-    assert.equal(mismatchFinder.getConsumersOfMismatch('mocha', '1.2.3'), 'C');
-    assert.equal(mismatchFinder.getConsumersOfMismatch('mocha', '2.0.0'), 'D');
+    expect(mismatchFinder.numberOfMismatches).toEqual(2);
+    expect(mismatchFinder.getMismatches().length).toEqual(2);
+    expect(mismatchFinder.getMismatches()).toMatchObject(['@types/foo', 'mocha']);
+    expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
+    expect(mismatchFinder.getVersionsOfMismatch('mocha')!.sort()).toEqual(['1.2.3', '2.0.0']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3')).toEqual(['A']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual(['B']);
+    expect(mismatchFinder.getConsumersOfMismatch('mocha', '1.2.3')).toEqual(['C']);
+    expect(mismatchFinder.getConsumersOfMismatch('mocha', '2.0.0')).toEqual(['D']);
     done();
   });
 
-  it('finds three mismatches in three projects', (done: MochaDone) => {
+  it('finds three mismatches in three projects', (done: jest.DoneCallback) => {
       const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -223,18 +216,17 @@ describe('VersionMismatchFinder', () => {
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    assert.isNumber(mismatchFinder.numberOfMismatches);
-    assert.equal(mismatchFinder.numberOfMismatches, 1);
-    assert.equal(mismatchFinder.getMismatches().length, 1);
-    assert.includeMembers(mismatchFinder.getMismatches(), ['@types/foo']);
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3', '9.9.9']);
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '9.9.9'), 'C');
+    expect(mismatchFinder.numberOfMismatches).toEqual(1);
+    expect(mismatchFinder.getMismatches().length).toEqual(1);
+    expect(mismatchFinder.getMismatches()).toMatchObject(['@types/foo']);
+    expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0', '9.9.9']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3')).toEqual(['A']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual(['B']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '9.9.9')).toEqual(['C']);
     done();
   });
 
-  it('checks dev dependencies', (done: MochaDone) => {
+  it('checks dev dependencies', (done: jest.DoneCallback) => {
     const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -258,17 +250,16 @@ describe('VersionMismatchFinder', () => {
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    assert.isNumber(mismatchFinder.numberOfMismatches);
-    assert.equal(mismatchFinder.numberOfMismatches, 1);
-    assert.equal(mismatchFinder.getMismatches().length, 1);
-    assert.equal(mismatchFinder.getMismatches()[0], '@types/foo');
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
+    expect(mismatchFinder.numberOfMismatches).toEqual(1);
+    expect(mismatchFinder.getMismatches().length).toEqual(1);
+    expect(mismatchFinder.getMismatches()[0]).toEqual('@types/foo');
+    expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual(['B']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3')).toEqual(['A']);
     done();
   });
 
-  it('does not check peer dependencies', (done: MochaDone) => {
+  it('does not check peer dependencies', (done: jest.DoneCallback) => {
     const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -292,12 +283,11 @@ describe('VersionMismatchFinder', () => {
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    assert.isNumber(mismatchFinder.numberOfMismatches);
-    assert.equal(mismatchFinder.numberOfMismatches, 0);
+    expect(mismatchFinder.numberOfMismatches).toEqual(0);
     done();
   });
 
-  it('checks optional dependencies', (done: MochaDone) => {
+  it('checks optional dependencies', (done: jest.DoneCallback) => {
     const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -321,17 +311,16 @@ describe('VersionMismatchFinder', () => {
       }
     ] as any as RushConfigurationProject[]; // tslint:disable-line:no-any
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    assert.isNumber(mismatchFinder.numberOfMismatches);
-    assert.equal(mismatchFinder.numberOfMismatches, 1);
-    assert.equal(mismatchFinder.getMismatches().length, 1);
-    assert.equal(mismatchFinder.getMismatches()[0], '@types/foo');
-    assert.includeMembers(mismatchFinder.getVersionsOfMismatch('@types/foo')!, ['2.0.0', '1.2.3']);
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0'), 'B');
-    assert.equal(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3'), 'A');
+    expect(mismatchFinder.numberOfMismatches).toEqual(1);
+    expect(mismatchFinder.getMismatches().length).toEqual(1);
+    expect(mismatchFinder.getMismatches()[0]).toEqual('@types/foo');
+    expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual(['B']);
+    expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3')).toEqual(['A']);
     done();
   });
 
-  it('allows alternative versions', (done: MochaDone) => {
+  it('allows alternative versions', (done: jest.DoneCallback) => {
     const projects: RushConfigurationProject[] = [
       {
         packageName: 'A',
@@ -357,9 +346,8 @@ describe('VersionMismatchFinder', () => {
     const alternatives: Map<string, ReadonlyArray<string>> = new Map<string, ReadonlyArray<string>>();
     alternatives.set('@types/foo', ['2.0.0']);
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects, alternatives);
-    assert.isNumber(mismatchFinder.numberOfMismatches);
-    assert.equal(mismatchFinder.numberOfMismatches, 0);
-    assert.equal(mismatchFinder.getMismatches().length, 0);
+    expect(mismatchFinder.numberOfMismatches).toEqual(0);
+    expect(mismatchFinder.getMismatches().length).toEqual(0);
     done();
   });
 });

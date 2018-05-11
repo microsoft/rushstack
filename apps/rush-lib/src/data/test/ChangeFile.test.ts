@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// <reference types='mocha' />
 import * as path from 'path';
-import { assert } from 'chai';
 
 import { ChangeFile } from '../ChangeFile';
 import { RushConfiguration } from '../RushConfiguration';
@@ -32,8 +30,8 @@ describe('ChangeFile', () => {
       comment: 'for patch'
     });
 
-    assert.equal(changeFile.getChanges('a').length, 2);
-    assert.equal(changeFile.getChanges('a')[0].comment, 'for minor');
-    assert.equal(changeFile.getChanges('a')[1].comment, 'for patch');
+    expect(changeFile.getChanges('a').length).toEqual(2);
+    expect(changeFile.getChanges('a')[0].comment).toEqual('for minor');
+    expect(changeFile.getChanges('a')[1].comment).toEqual('for patch');
   });
 });

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { expect } from 'chai';
 import * as path from 'path';
 
 import { IChangelog } from '../../../data/Changelog';
@@ -13,27 +12,27 @@ describe('ChangeFiles', () => {
       const changesPath: string = path.join(__dirname, 'leafChange');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
       const expectedPath: string = path.join(changesPath, 'change1.json').replace(/\\/g, '/');
-      expect(changeFiles.getFiles()).to.eql([expectedPath]);
+      expect(changeFiles.getFiles()).toEqual([expectedPath]);
     });
 
     it('returns empty array when no change files', () => {
       const changesPath: string = path.join(__dirname, 'noChange');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.getFiles().length).to.equal(0);
+      expect(changeFiles.getFiles().length).toEqual(0);
     });
 
     it('returns correctly when change files are categorized', () => {
       const changesPath: string = path.join(__dirname, 'categorizedChanges');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
       const files: string[] = changeFiles.getFiles();
-      expect(files.length).to.equal(3);
+      expect(files.length).toEqual(3);
 
       const expectedPathA: string = path.join(changesPath, '@ms', 'a', 'changeA.json').replace(/\\/g, '/');
       const expectedPathB: string = path.join(changesPath, '@ms', 'b', 'changeB.json').replace(/\\/g, '/');
       const expectedPathC: string = path.join(changesPath, 'changeC.json').replace(/\\/g, '/');
-      expect(files).to.contains(expectedPathA, 'changeA is missing');
-      expect(files).to.contains(expectedPathB, 'changeB is missing');
-      expect(files).to.contains(expectedPathC, 'changeC is missing');
+      expect(files).toContain(expectedPathA);
+      expect(files).toContain(expectedPathB);
+      expect(files).toContain(expectedPathC);
     });
   });
 
@@ -43,7 +42,7 @@ describe('ChangeFiles', () => {
       const changedPackages: string[] = ['a', 'b', 'c'];
       expect(() => {
         ChangeFiles.validate([changeFile], changedPackages);
-      }).to.throw(Error);
+      }).toThrow(Error);
     });
 
     it('does not throw when there is no missing packages', () => {
@@ -51,7 +50,7 @@ describe('ChangeFiles', () => {
       const changedPackages: string[] = ['a'];
       expect(() => {
         ChangeFiles.validate([changeFile], changedPackages);
-      }).not.to.throw();
+      }).not.toThrow();
     });
 
     it('throws when missing packages from categorized changes', () => {
@@ -60,7 +59,7 @@ describe('ChangeFiles', () => {
       const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
       expect(() => {
         ChangeFiles.validate([changeFileA, changeFileB], changedPackages);
-      }).to.throw(Error);
+      }).toThrow(Error);
     });
 
     it('does not throw when no missing packages from categorized changes', () => {
@@ -70,7 +69,7 @@ describe('ChangeFiles', () => {
       const changedPackages: string[] = ['@ms/a', '@ms/b', 'c'];
       expect(() => {
         ChangeFiles.validate([changeFileA, changeFileB, changeFileC], changedPackages);
-      }).not.to.throw(Error);
+      }).not.toThrow(Error);
     });
   });
 
@@ -78,7 +77,7 @@ describe('ChangeFiles', () => {
     it('delete all files when there are no prerelease packages', () => {
       const changesPath: string = path.join(__dirname, 'multipleChangeFiles');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.deleteAll(false)).equals(3);
+      expect(changeFiles.deleteAll(false)).toEqual(3);
     });
 
     it('does not delete change files for package whose change logs do not get updated. ', () => {
@@ -94,14 +93,13 @@ describe('ChangeFiles', () => {
           entries: []
         }
       ];
-      expect(changeFiles.deleteAll(false, updatedChangelogs)).equals(2,
-        'Changes files for a and b should be deleted.');
+      expect(changeFiles.deleteAll(false, updatedChangelogs)).toEqual(2);
     });
 
     it('delete all files when there are hotfixes', () => {
       const changesPath: string = path.join(__dirname, 'multipleHotfixChanges');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      expect(changeFiles.deleteAll(false)).equals(3);
+      expect(changeFiles.deleteAll(false)).toEqual(3);
     });
   });
 });

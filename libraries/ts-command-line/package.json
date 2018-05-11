@@ -19,7 +19,8 @@
     "argparse": "~1.0.9",
     "@types/argparse": "1.0.33",
     "colors": "~1.2.1",
-    "@types/node": "8.5.8"
+    "@types/node": "8.5.8",
+    "jest-environment-jsdom": "~21.2.1"
   },
   "devDependencies": {
     "@types/jest": "21.1.10",
