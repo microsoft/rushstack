@@ -49,6 +49,11 @@ export interface IJestConfig {
   testPathIgnorePatterns?: string[];
 
   /**
+   * Same as Jest CLI option modulePathIgnorePatterns
+   */
+  modulePathIgnorePatterns?: string[];
+
+  /**
    * Same as Jest CLI option moduleDirectories
    */
   moduleDirectories?: string[];
@@ -94,7 +99,10 @@ export class JestTask extends GulpTask<IJestConfig> {
       collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
       coverage: true,
       coverageReporters: ['json', 'html'],
-      testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/']
+      testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
+      // Some unit tests rely on data folders that look like packages.  This confuses jest-hast-map
+      // when it tries to scan for package.json files.
+      modulePathIgnorePatterns: ['<rootDir>/(src|lib)/.*/package.json']
     });
   }
 
@@ -137,6 +145,7 @@ export class JestTask extends GulpTask<IJestConfig> {
       testMatch: !!this.taskConfig.testMatch ?
         this.taskConfig.testMatch : ['**/*.test.js?(x)'],
       testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
+      modulePathIgnorePatterns: this.taskConfig.modulePathIgnorePatterns,
       updateSnapshot: !this.buildConfig.production
     };
 
