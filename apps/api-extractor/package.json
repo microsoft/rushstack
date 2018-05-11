@@ -47,7 +47,7 @@
   "devDependencies": {
     "@types/lodash": "4.14.74",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "4.3.28",
+    "@microsoft/node-library-build": "4.3.38",
     "@types/jest": "21.1.10"
   }
 }
