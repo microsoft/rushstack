@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// <reference types='mocha' />
-
-import { assert } from 'chai';
 import * as path from 'path';
 import { RushConfiguration } from '../RushConfiguration';
 import { Event, EventHooks } from '../EventHooks';
