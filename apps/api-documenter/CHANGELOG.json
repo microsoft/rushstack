@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.1.40",
+      "tag": "@microsoft/api-documenter_v1.1.40",
+      "date": "Fri, 11 May 2018 22:43:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.37` to `4.3.38`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.39",
       "tag": "@microsoft/api-documenter_v1.1.39",
       "date": "Fri, 04 May 2018 00:42:38 GMT",

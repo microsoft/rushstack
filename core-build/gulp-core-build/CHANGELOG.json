@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.8.0",
+      "tag": "@microsoft/gulp-core-build_v3.8.0",
+      "date": "Fri, 11 May 2018 22:43:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for modulePathIgnorePatterns for the Jest task"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Upgrade to Jest 22.4.3 and remove the workaround for the symlink bug"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.7.5",
       "tag": "@microsoft/gulp-core-build_v3.7.5",
       "date": "Fri, 04 May 2018 00:42:38 GMT",
