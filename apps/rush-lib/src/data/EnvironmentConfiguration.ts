@@ -5,6 +5,7 @@ import * as os from 'os';
 
 /**
  * Names of environment variables used by Rush.
+ * @public
  */
 export const enum EnvironmentVariableNames {
   /**
@@ -58,6 +59,9 @@ export class EnvironmentConfiguration {
             EnvironmentConfiguration._rushTempFolderOverride = value;
             break;
 
+          case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
+            // Handled by @microsoft/rush front end
+            break;
           default:
             unknownEnvVariables.push(envVarName);
             break;

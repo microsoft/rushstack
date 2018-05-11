@@ -37,7 +37,6 @@ import * as path from 'path';
 import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
 
 import { Rush, EnvironmentVariableNames } from '@microsoft/rush-lib';
-import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 import { RushVersionSelector } from './RushVersionSelector';
@@ -49,35 +48,47 @@ const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..'
 let rushVersionToLoad: string | undefined = undefined;
 
 const previewVersion: string | undefined = process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
-let usingPreviewVersion: boolean = false;
 
-if (previewVersion && semver.valid(previewVersion, false)) {
+if (previewVersion) {
+  if (!semver.valid(previewVersion, false)) {
+    console.error(colors.red(`Invalid value for RUSH_PREVIEW_VERSION: "${previewVersion}"`));
+    process.exit(1);
+  }
+
   rushVersionToLoad = previewVersion;
-  usingPreviewVersion = true;
+
+  console.error(colors.yellow(
+    os.EOL +
+    `* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *` + os.EOL +
+    `  WARNING! THE "RUSH_PREVIEW_VERSION" ENVIRONMENT VARIABLE IS SET.` + os.EOL + os.EOL +
+    `  You are previewing Rush version:        ${previewVersion}`));
+
+  if (configuration) {
+    console.error(colors.yellow(
+      `  The rush.json configuration asks for:   ${configuration.rushVersion}`));
+  }
+
+  console.error(colors.yellow(os.EOL +
+    `  To restore the normal behavior, unset the RUSH_PREVIEW_VERSION` + os.EOL +
+    `  environment variable.` + os.EOL +
+    `* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *` +
+    os.EOL
+  ));
+
 } else if (configuration) {
   rushVersionToLoad = configuration.rushVersion;
 }
 
-if (usingPreviewVersion) {
-  console.error(colors.yellow(
-    os.EOL + os.EOL +
-    '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' + os.EOL +
-    '  WARNING! THE "RUSH_PREVIEW_VERSION" ENVIRONMENT VARIABLE IS SET.' + os.EOL +
-    '  You are previewing version 1.2.3 of Rush as an experiment.' + os.EOL +
-    '  The rush.json configuration for this repo requests version 3.2.1.' + os.EOL +
-    '  To restore the normal behavior, unset the RUSH_PREVIEW_VERSION' + os.EOL +
-    '  environment variable.' + os.EOL +
-    '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' +
-    os.EOL + os.EOL
-  ));
+// If we are previewing an older Rush that doesn't understand the RUSH_PREVIEW_VERSION variable,
+// then unset it.
+if (rushVersionToLoad && semver.lt(rushVersionToLoad, '5.0.0-dev.18')) {
+  delete process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
 }
 
 // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
 // install it
 if (rushVersionToLoad && rushVersionToLoad !== currentPackageJson.version) {
-  const versionSelector: RushVersionSelector = new RushVersionSelector(
-    currentPackageJson.version
-  );
+  const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageJson.version);
   versionSelector.ensureRushVersionInstalled(rushVersionToLoad)
     .catch((error: Error) => {
       console.log(colors.red('Error: ' + error.message));
