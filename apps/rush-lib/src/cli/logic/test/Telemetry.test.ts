@@ -35,7 +35,7 @@ describe('Telemetry', () => {
 
     telemetry.log(logData1);
     telemetry.log(logData2);
-    assert.deepEqual(telemetry.store, [logData1, logData2]);
+    expect(telemetry.store).toEqual([logData1, logData2]);
   });
 
   it('does not add data to store if telemetry is not enabled', () => {
@@ -52,7 +52,7 @@ describe('Telemetry', () => {
     };
 
     telemetry.log(logData);
-    assert.deepEqual(telemetry.store, []);
+    expect(telemetry.store).toEqual([]);
   });
 
   it('deletes data after flush', () => {
@@ -75,9 +75,9 @@ describe('Telemetry', () => {
       logFile = file;
       dataToWrite = data;
     });
-    assert.isDefined(logFile!.match(/telemetry_.*\.json/));
-    assert.deepEqual(dataToWrite!, JSON.stringify([logData]));
-    assert.deepEqual(telemetry.store, []);
+    expect(logFile!.match(/telemetry_.*\.json/)).toBeDefined();
+    expect(dataToWrite!).toEqual(JSON.stringify([logData]));
+    expect(telemetry.store).toEqual([]);
   });
 
   it('populates default fields', () => {
@@ -92,8 +92,8 @@ describe('Telemetry', () => {
 
     telemetry.log(logData);
     const result: ITelemetryData = telemetry.store[0];
-    assert.equal(result.platform, process.platform);
-    assert.equal(result.rushVersion, Rush.version);
-    assert.isDefined(result.timestamp);
+    expect(result.platform).toEqual(process.platform);
+    expect(result.rushVersion).toEqual(Rush.version);
+    expect(result.timestamp).toBeDefined();
   });
 });

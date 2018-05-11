@@ -12,20 +12,22 @@ describe('npm ShrinkwrapFile', () => {
   const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('npm', filename)!;
 
   it('verifies root-level dependency', () => {
-    assert.isTrue(shrinkwrapFile.hasCompatibleTopLevelDependency('q', '~1.5.0'));
+    expect(shrinkwrapFile.hasCompatibleTopLevelDependency('q', '~1.5.0')).toEqual(true);
   });
 
   it('verifies temp project dependencies', () => {
     // Found locally
-    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.2.4 <3.0.0', '@rush-temp/project2'));
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.2.4 <3.0.0', '@rush-temp/project2'))
+      .toEqual(true);
     // Found at root
-    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'));
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'))
+      .toEqual(true);
   });
 
   it('extracts temp projects successfully', () => {
     const tempProjectNames: ReadonlyArray<string> = shrinkwrapFile.getTempProjectNames();
 
-    assert.deepEqual(tempProjectNames, ['@rush-temp/project1', '@rush-temp/project2' ]);
+    expect(tempProjectNames).toEqual(['@rush-temp/project1', '@rush-temp/project2' ]);
   });
 });
 
@@ -35,50 +37,53 @@ const filename: string = path.resolve(path.join(
 const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
   it('verifies root-level dependency', () => {
-    assert.isFalse(shrinkwrapFile.hasCompatibleTopLevelDependency('q', '~1.5.0'));
+    expect(shrinkwrapFile.hasCompatibleTopLevelDependency('q', '~1.5.0')).toEqual(false);
   });
 
   it('verifies temp project dependencies', () => {
-    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project1'));
-    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('q', '~1.5.0', '@rush-temp/project2'));
-    assert.isFalse(shrinkwrapFile.tryEnsureCompatibleDependency('left-pad', '~9.9.9', '@rush-temp/project1'));
-    assert.isTrue(
-      shrinkwrapFile.tryEnsureCompatibleDependency('@scope/testDep', '>=1.0.0 <2.0.0', '@rush-temp/project3'));
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project1'))
+      .toEqual(true);
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency('q', '~1.5.0', '@rush-temp/project2')).toEqual(true);
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency('left-pad', '~9.9.9', '@rush-temp/project1')).toEqual(false);
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency('@scope/testDep', '>=1.0.0 <2.0.0', '@rush-temp/project3'))
+      .toEqual(true);
   });
 
   it('extracts temp projects successfully', () => {
     const tempProjectNames: ReadonlyArray<string> = shrinkwrapFile.getTempProjectNames();
 
-    assert.deepEqual(tempProjectNames, ['@rush-temp/project1', '@rush-temp/project2', '@rush-temp/project3']);
+    expect(tempProjectNames).toEqual(['@rush-temp/project1', '@rush-temp/project2', '@rush-temp/project3']);
   });
 
   it('can reuse the latest version that another temp package is providing', () => {
-    assert.isTrue(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project3'));
+    expect(shrinkwrapFile.tryEnsureCompatibleDependency('jquery', '>=2.0.0 <3.0.0', '@rush-temp/project3'))
+      .toEqual(true);
   });
 });
 
 describe('extractVersionFromPnpmVersionSpecifier', () => {
   it('extracts a simple version with no slashes', () => {
-    assert.equal(extractVersionFromPnpmVersionSpecifier('0.0.5'), '0.0.5');
+    expect(extractVersionFromPnpmVersionSpecifier('0.0.5')).toEqual('0.0.5');
   });
   it('extracts an unscoped peer dep', () => {
-    assert.equal(extractVersionFromPnpmVersionSpecifier('/gulp-karma/0.0.5/karma@0.13.22'), '0.0.5');
+    expect(extractVersionFromPnpmVersionSpecifier('/gulp-karma/0.0.5/karma@0.13.22')).toEqual('0.0.5');
   });
   it('extracts a scoped peer dep', () => {
-    assert.equal(extractVersionFromPnpmVersionSpecifier('/@ms/sp-client-utilities/3.1.1/foo@13.1.0'), '3.1.1');
+    expect(extractVersionFromPnpmVersionSpecifier('/@ms/sp-client-utilities/3.1.1/foo@13.1.0')).toEqual('3.1.1');
   });
   it('extracts relative versions', () => {
-    assert.equal(extractVersionFromPnpmVersionSpecifier('example.pkgs.visualstudio.com/@scope/testDep/1.0.0'), '1.0.0');
-    assert.equal(extractVersionFromPnpmVersionSpecifier(
-      'example.pkgs.visualstudio.com/@scope/testDep/1.2.3-beta.3'), '1.2.3-beta.3');
+    expect(extractVersionFromPnpmVersionSpecifier('example.pkgs.visualstudio.com/@scope/testDep/1.0.0'))
+      .toEqual('1.0.0');
+    expect(extractVersionFromPnpmVersionSpecifier('example.pkgs.visualstudio.com/@scope/testDep/1.2.3-beta.3'))
+      .toEqual('1.2.3-beta.3');
   });
   it('handles bad cases', () => {
-    assert.equal(extractVersionFromPnpmVersionSpecifier('/foo/gulp-karma/0.0.5/karma@0.13.22'), undefined);
-    assert.equal(extractVersionFromPnpmVersionSpecifier('/@ms/3.1.1/foo@13.1.0'), undefined);
-    assert.equal(extractVersionFromPnpmVersionSpecifier(''), undefined);
-    assert.equal(extractVersionFromPnpmVersionSpecifier('/'), undefined);
-    assert.equal(extractVersionFromPnpmVersionSpecifier('//'), undefined);
-    assert.equal(extractVersionFromPnpmVersionSpecifier('/@/'), undefined);
-    assert.equal(extractVersionFromPnpmVersionSpecifier('example.pkgs.visualstudio.com/@scope/testDep/'), undefined);
+    expect(extractVersionFromPnpmVersionSpecifier('/foo/gulp-karma/0.0.5/karma@0.13.22')).toEqual(undefined);
+    expect(extractVersionFromPnpmVersionSpecifier('/@ms/3.1.1/foo@13.1.0')).toEqual(undefined);
+    expect(extractVersionFromPnpmVersionSpecifier('')).toEqual(undefined);
+    expect(extractVersionFromPnpmVersionSpecifier('/')).toEqual(undefined);
+    expect(extractVersionFromPnpmVersionSpecifier('//')).toEqual(undefined);
+    expect(extractVersionFromPnpmVersionSpecifier('/@/')).toEqual(undefined);
+    expect(extractVersionFromPnpmVersionSpecifier('example.pkgs.visualstudio.com/@scope/testDep/')).toEqual(undefined);
   });
 });

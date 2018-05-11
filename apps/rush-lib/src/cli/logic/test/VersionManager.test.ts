@@ -35,52 +35,46 @@ describe('VersionManager', () => {
       versionManager.ensure('testPolicy1');
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       const expectedVersion: string = '10.10.0';
-      assert.equal(updatedPackages.size, 6, 'The number of updated packages matches');
-      assert.equal(updatedPackages.get('a')!.version, expectedVersion);
-      assert.equal(updatedPackages.get('b')!.version, expectedVersion);
-      assert.equal(updatedPackages.get('b')!.dependencies!['a'], `~${expectedVersion}`);
-      assert.equal(updatedPackages.get('c')!.version, '3.1.1', 'c version should not change');
-      assert.equal(updatedPackages.get('c')!.dependencies!['b'], `>=10.10.0 <11.0.0`);
-      assert.equal(updatedPackages.get('d')!.version, '4.1.1', 'd version should not change');
-      assert.equal(updatedPackages.get('d')!.dependencies!['b'], `>=10.10.0 <11.0.0`);
-      assert.equal(updatedPackages.get('f')!.version, '1.0.0', 'f version should not change');
-      assert.equal(updatedPackages.get('f')!.dependencies!['a'], `~10.10.0`);
-      assert.equal(updatedPackages.get('g')!.devDependencies!['a'], `~10.10.0`);
+      expect(updatedPackages.size).toEqual(6);
+      expect(updatedPackages.get('a')!.version).toEqual(expectedVersion);
+      expect(updatedPackages.get('b')!.version).toEqual(expectedVersion);
+      expect(updatedPackages.get('b')!.dependencies!['a']).toEqual(`~${expectedVersion}`);
+      expect(updatedPackages.get('c')!.version).toEqual('3.1.1');
+      expect(updatedPackages.get('c')!.dependencies!['b']).toEqual(`>=10.10.0 <11.0.0`);
+      expect(updatedPackages.get('d')!.version).toEqual('4.1.1');
+      expect(updatedPackages.get('d')!.dependencies!['b']).toEqual(`>=10.10.0 <11.0.0`);
+      expect(updatedPackages.get('f')!.version).toEqual('1.0.0');
+      expect(updatedPackages.get('f')!.dependencies!['a']).toEqual(`~10.10.0`);
+      expect(updatedPackages.get('g')!.devDependencies!['a']).toEqual(`~10.10.0`);
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
-      assert.equal(changeFiles.size, 4, 'The number of change files matches');
-       assert.equal(_getChanges(changeFiles, 'a')!.length, 1, 'a does not have one change');
-       assert.equal(_getChanges(changeFiles, 'a')![0].changeType, ChangeType.none,
-         'a does not have a none change');
-       assert.equal(_getChanges(changeFiles, 'b')!.length, 1, 'b does not have one change');
-       assert.equal(_getChanges(changeFiles, 'b')![0].changeType, ChangeType.none,
-         'b does not have a none change');
-      assert.equal(_getChanges(changeFiles, 'c')!.length, 2, 'c does not have two change');
-      assert.equal(_getChanges(changeFiles, 'c')![0].changeType, ChangeType.patch,
-        'c does not have a patch change');
-      assert.equal(_getChanges(changeFiles, 'c')![1].changeType, ChangeType.dependency,
-        'c does not have a dependency change');
-      assert.equal(_getChanges(changeFiles, 'd')!.length, 2, 'd does not have two change');
-      assert.equal(_getChanges(changeFiles, 'd')![0].changeType, ChangeType.patch,
-        'd does not have a  patch change');
-      assert.equal(_getChanges(changeFiles, 'd')![1].changeType, ChangeType.dependency,
-        'd does not have a  patch change');
+      expect(changeFiles.size).toEqual(4);
+      expect(_getChanges(changeFiles, 'a')!.length).toEqual(1);
+      expect(_getChanges(changeFiles, 'a')![0].changeType).toEqual(ChangeType.none);
+      expect(_getChanges(changeFiles, 'b')!.length).toEqual(1);
+      expect(_getChanges(changeFiles, 'b')![0].changeType).toEqual(ChangeType.none);
+      expect(_getChanges(changeFiles, 'c')!.length).toEqual(2);
+      expect(_getChanges(changeFiles, 'c')![0].changeType).toEqual(ChangeType.patch);
+      expect(_getChanges(changeFiles, 'c')![1].changeType).toEqual(ChangeType.dependency);
+      expect(_getChanges(changeFiles, 'd')!.length).toEqual(2);
+      expect(_getChanges(changeFiles, 'd')![0].changeType).toEqual(ChangeType.patch);
+      expect(_getChanges(changeFiles, 'd')![1].changeType).toEqual(ChangeType.dependency);
     });
 
     it('fixes major version for individual version policy', () => {
       versionManager.ensure('testPolicy2');
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
-      assert.equal(updatedPackages.size, 2);
-      assert.equal(updatedPackages.get('c')!.version, '5.0.0');
-      assert.equal(updatedPackages.get('c')!.dependencies!['b'], `>=2.0.0 <3.0.0`);
-      assert.equal(updatedPackages.get('e')!.version, '10.10.0');
-      assert.equal(updatedPackages.get('e')!.dependencies!['c'], '~5.0.0');
+      expect(updatedPackages.size).toEqual(2);
+      expect(updatedPackages.get('c')!.version).toEqual('5.0.0');
+      expect(updatedPackages.get('c')!.dependencies!['b']).toEqual(`>=2.0.0 <3.0.0`);
+      expect(updatedPackages.get('e')!.version).toEqual('10.10.0');
+      expect(updatedPackages.get('e')!.dependencies!['c']).toEqual('~5.0.0');
     });
 
     it('does not change packageJson if not needed by individual version policy', () => {
       versionManager.ensure('testPolicy3');
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
-      assert.equal(updatedPackages.size, 0);
+      expect(updatedPackages.size).toEqual(0);
     });
   });
 
@@ -92,13 +86,12 @@ describe('VersionManager', () => {
 
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
 
-      assert.equal(updatedPackages.get('a')!.version, expectedVersion, `a version is not expected`);
-      assert.equal(updatedPackages.get('b')!.version, expectedVersion, `b version is not expected`);
-      assert.equal(updatedPackages.get('e')!.version, expectedVersion, `e version is not expected`);
-      assert.equal(updatedPackages.get('g')!.devDependencies!['a'], `~${expectedVersion}`,
-        'a version is not expected in dev dependency');
-      assert.isUndefined(_getChanges(changeFiles, 'a'), 'a has change entry.');
-      assert.isUndefined(_getChanges(changeFiles, 'b'), 'b has change entry');
+      expect(updatedPackages.get('a')!.version).toEqual(expectedVersion);
+      expect(updatedPackages.get('b')!.version).toEqual(expectedVersion);
+      expect(updatedPackages.get('e')!.version).toEqual(expectedVersion);
+      expect(updatedPackages.get('g')!.devDependencies!['a']).toEqual(`~${expectedVersion}`);
+      expect(_getChanges(changeFiles, 'a')).not.toBeDefined();
+      expect(_getChanges(changeFiles, 'b')).not.toBeDefined();
     });
   });
   /* tslint:enable:no-string-literal */

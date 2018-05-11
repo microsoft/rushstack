@@ -5,18 +5,18 @@ import { convertSlashesForWindows } from '../ProjectTask';
 
 describe('convertSlashesForWindows()', () => {
   it('converted inputs', () => {
-    assert.equal(convertSlashesForWindows('./node_modules/.bin/tslint -c config/tslint.json'),
-      '.\\node_modules\\.bin\\tslint -c config/tslint.json');
-    assert.equal(convertSlashesForWindows('/blah/bleep&&/bloop'), '\\blah\\bleep&&/bloop');
-    assert.equal(convertSlashesForWindows('/blah/bleep'), '\\blah\\bleep');
-    assert.equal(convertSlashesForWindows('/blah/bleep --path a/b'), '\\blah\\bleep --path a/b');
-    assert.equal(convertSlashesForWindows('/blah/bleep>output.log'), '\\blah\\bleep>output.log');
-    assert.equal(convertSlashesForWindows('/blah/bleep<input.json'), '\\blah\\bleep<input.json');
-    assert.equal(convertSlashesForWindows('/blah/bleep|/blah/bloop'), '\\blah\\bleep|/blah/bloop');
+    expect(convertSlashesForWindows('./node_modules/.bin/tslint -c config/tslint.json'))
+      .toEqual('.\\node_modules\\.bin\\tslint -c config/tslint.json');
+    expect(convertSlashesForWindows('/blah/bleep&&/bloop')).toEqual('\\blah\\bleep&&/bloop');
+    expect(convertSlashesForWindows('/blah/bleep')).toEqual('\\blah\\bleep');
+    expect(convertSlashesForWindows('/blah/bleep --path a/b')).toEqual('\\blah\\bleep --path a/b');
+    expect(convertSlashesForWindows('/blah/bleep>output.log')).toEqual('\\blah\\bleep>output.log');
+    expect(convertSlashesForWindows('/blah/bleep<input.json')).toEqual('\\blah\\bleep<input.json');
+    expect(convertSlashesForWindows('/blah/bleep|/blah/bloop')).toEqual('\\blah\\bleep|/blah/bloop');
   });
   it('ignored inputs', () => {
-    assert.equal(convertSlashesForWindows('/blah\\bleep && /bloop'), '/blah\\bleep && /bloop');
-    assert.equal(convertSlashesForWindows('cmd.exe /c blah'), 'cmd.exe /c blah');
-    assert.equal(convertSlashesForWindows('"/blah/bleep"'), '"/blah/bleep"');
+    expect(convertSlashesForWindows('/blah\\bleep && /bloop')).toEqual('/blah\\bleep && /bloop');
+    expect(convertSlashesForWindows('cmd.exe /c blah')).toEqual('cmd.exe /c blah');
+    expect(convertSlashesForWindows('"/blah/bleep"')).toEqual('"/blah/bleep"');
   });
 });
