@@ -80,7 +80,7 @@ dependencies:
   autoprefixer: 6.3.7
   builtins: 1.0.3
   chai: 3.5.0
-  colors: 1.2.4
+  colors: 1.2.5
   deasync: 0.1.13
   del: 2.2.2
   end-of-stream: 1.1.0
@@ -116,7 +116,6 @@ dependencies:
   istanbul-instrumenter-loader: 3.0.1
   jest: 22.4.3
   jest-cli: 22.4.3
-  jest-environment-jsdom: 22.4.3
   jest-resolve: 22.4.3
   jju: 1.3.0
   js-yaml: 3.9.1
@@ -204,7 +203,7 @@ packages:
       '@types/fs-extra': 0.0.37
       '@types/node': 8.5.8
       '@types/z-schema': 3.16.31
-      colors: 1.2.4
+      colors: 1.2.5
       fs-extra: 0.26.7
       jju: 1.3.0
       lodash: 4.15.0
@@ -271,7 +270,7 @@ packages:
       '@types/through2': 2.0.32
       '@types/vinyl': 1.2.30
       '@types/yargs': 0.0.34
-      colors: 1.2.4
+      colors: 1.2.5
       del: 2.2.2
       end-of-stream: 1.1.0
       fs-extra: 0.26.7
@@ -327,7 +326,7 @@ packages:
       '@types/argparse': 1.0.33
       '@types/node': 8.5.8
       argparse: 1.0.10
-      colors: 1.2.4
+      colors: 1.2.5
     dev: false
     resolution:
       integrity: sha1-I8JxXmpc6QsiFJ5f1GxWxN6BpPU=
@@ -433,7 +432,7 @@ packages:
       integrity: sha1-ox10JBprHtu5c8822XooloNKUfk=
   /@types/colors/1.2.1:
     dependencies:
-      colors: 1.2.4
+      colors: 1.2.5
     dev: false
     resolution:
       integrity: sha512-7jNkpfN2lVO07nJ1RWzyMnNhH/I5N9iWuMPx9pedptxJ4MODf8rRV0lbJi6RakQ4sKQk231Fw4e2W9n3D7gZ3w==
@@ -1913,12 +1912,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-qiBjkpbMLO/HL68y+lh4q0/O1MZFj2RX6X/KmMa3+gJD3z+WwI1ZzDHysvqHGS3mP6mznPckpXmw1nI9cJjyRg==
-  /colors/1.2.4:
+  /colors/1.2.5:
     dev: false
     engines:
       node: '>=0.1.90'
     resolution:
-      integrity: sha512-6Y+iBnWmXL+AWtlOp2Vr6R2w5MUlNJRwR0ShVFaAb1CqWzhPOpQg4L0jxD+xpw/Nc8QJwaq3KM79QUCriY8CWQ==
+      integrity: sha512-erNRLao/Y3Fv54qUa0LBB+//Uf3YwMUmdJinN20yMXm9zdKKqH9wt7R9IIVZ+K7ShzfpLV/Zg8+VyrBJYB4lpg==
   /combined-stream/1.0.6:
     dependencies:
       delayed-stream: 1.0.0
@@ -3974,7 +3973,7 @@ packages:
       integrity: sha1-HOXrpLlLQMdDav7DxJgsjuqJQZI=
   /gulp-open/2.0.0:
     dependencies:
-      colors: 1.2.4
+      colors: 1.2.5
       gulp-util: 3.0.8
       open: 0.0.5
       through2: 2.0.3
@@ -5903,7 +5902,7 @@ packages:
       bluebird: 2.11.0
       body-parser: 1.18.2
       chokidar: 1.7.0
-      colors: 1.2.4
+      colors: 1.2.5
       connect: 3.6.6
       core-js: 2.5.6
       di: 0.0.1
@@ -10306,7 +10305,7 @@ packages:
       '@types/jest': 21.1.10
       '@types/js-yaml': 3.9.1
       '@types/node': 8.5.8
-      colors: 1.2.4
+      colors: 1.2.5
       fs-extra: 5.0.0
       gulp: 3.9.1
       js-yaml: 3.9.1
@@ -10371,9 +10370,10 @@ packages:
       '@types/lodash': 4.14.74
       '@types/node': 8.5.8
       '@types/z-schema': 3.16.31
-      colors: 1.2.4
+      colors: 1.2.5
       fs-extra: 5.0.0
       gulp: 3.9.1
+      jest-environment-jsdom: 21.2.1
       jju: 1.3.0
       lodash: 4.15.0
       typescript: 2.4.2
@@ -10381,7 +10381,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-KhFnuE7/REixWr7+C2s2fKe6JLtWr4fQeb3DB/wSvWRs7gw2iuCIA4HuxRT3TI4RpFQ1/UnKVjpbPvWyrHRCJA==
+      integrity: sha512-eLelLpKqSajems/RJFnUrf+sKvQ3B9SsjcMmYlGllF3wcL8vERxUjJp+DjnSZo2ZKA++yhUW/Al4s6nEmmE1eQ==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-karma.tgz':
@@ -10479,7 +10479,7 @@ packages:
       '@types/serve-static': 1.13.1
       '@types/through2': 2.0.32
       '@types/vinyl': 1.2.30
-      colors: 1.2.4
+      colors: 1.2.5
       deasync: 0.1.13
       express: 4.16.3
       gulp: 3.9.1
@@ -10540,7 +10540,7 @@ packages:
       '@types/tapable': 0.2.4
       '@types/uglify-js': 2.6.29
       '@types/webpack': 3.8.11
-      colors: 1.2.4
+      colors: 1.2.5
       gulp: 3.9.1
       gulp-util: 3.0.8
       webpack: 3.11.0
@@ -10570,7 +10570,7 @@ packages:
       '@types/yargs': 0.0.34
       '@types/z-schema': 3.16.31
       chai: 3.5.0
-      colors: 1.2.4
+      colors: 1.2.5
       del: 2.2.2
       end-of-stream: 1.1.0
       fs-extra: 5.0.0
@@ -10734,7 +10734,7 @@ packages:
       '@types/tar': 4.0.0
       '@types/z-schema': 3.16.31
       builtins: 1.0.3
-      colors: 1.2.4
+      colors: 1.2.5
       fs-extra: 5.0.0
       git-repo-info: 1.1.4
       glob: 7.0.6
@@ -10782,7 +10782,7 @@ packages:
       '@types/colors': 1.2.1
       '@types/fs-extra': 5.0.1
       '@types/node': 8.5.8
-      colors: 1.2.4
+      colors: 1.2.5
       fs-extra: 5.0.0
       gulp: 3.9.1
     dev: false
@@ -10800,7 +10800,7 @@ packages:
       '@types/semver': 5.3.33
       '@types/sinon': 1.16.34
       chai: 3.5.0
-      colors: 1.2.4
+      colors: 1.2.5
       fs-extra: 5.0.0
       gulp: 3.9.1
       semver: 5.3.0
@@ -10836,7 +10836,7 @@ packages:
       '@types/mocha': 2.2.38
       '@types/node': 8.5.8
       chai: 3.5.0
-      colors: 1.2.4
+      colors: 1.2.5
       gulp: 3.9.1
       mocha: 3.4.2
     dev: false
@@ -10852,12 +10852,13 @@ packages:
       '@types/jest': 21.1.10
       '@types/node': 8.5.8
       argparse: 1.0.10
-      colors: 1.2.4
+      colors: 1.2.5
       gulp: 3.9.1
+      jest-environment-jsdom: 21.2.1
     dev: false
     name: '@rush-temp/ts-command-line'
     resolution:
-      integrity: sha512-nIk7JBRjlhldlNGtzuYEY9eMtQXtTN60LWxNGJM/U6lV0It77nk8TeFp1vN2dao2+u6VNNNEtDLCfNbWkbcmzg==
+      integrity: sha512-2w9STgAAzyrWRATvOfOofOLzn50HObgdcsKS0nman/kddZv3qNZnINVVqw6s9hw0TlaTg8vPxVXAo9gfvHi0iw==
       tarball: 'file:projects/ts-command-line.tgz'
     version: 0.0.0
   'file:projects/web-library-build-test.tgz':
@@ -11006,7 +11007,6 @@ specifiers:
   istanbul-instrumenter-loader: ~3.0.0
   jest: ~22.4.3
   jest-cli: ~22.4.3
-  jest-environment-jsdom: ~22.4.3
   jest-resolve: ~22.4.3
   jju: ~1.3.0
   js-yaml: ~3.9.1
