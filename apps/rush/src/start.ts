@@ -42,60 +42,51 @@ import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 import { RushVersionSelector } from './RushVersionSelector';
 
-const RUSH_PURGE_OPTION_NAME: string = 'purge';
+// Load the configuration
+const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
+const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', 'package.json'));
 
-if (process.argv[2] === RUSH_PURGE_OPTION_NAME) {
-  const rushDirectory: string = path.join(Utilities.getHomeDirectory(), '.rush');
-  console.log(`Deleting ${rushDirectory} directory...`);
-  Utilities.dangerouslyDeletePath(rushDirectory);
-  console.log('done');
+let rushVersionToLoad: string | undefined = undefined;
+
+const previewVersion: string | undefined = process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
+let usingPreviewVersion: boolean = false;
+
+if (previewVersion && semver.valid(previewVersion, false)) {
+  rushVersionToLoad = previewVersion;
+  usingPreviewVersion = true;
+} else if (configuration) {
+  rushVersionToLoad = configuration.rushVersion;
+}
+
+if (usingPreviewVersion) {
+  console.error(colors.yellow(
+    os.EOL + os.EOL +
+    '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' + os.EOL +
+    '  WARNING! THE "RUSH_PREVIEW_VERSION" ENVIRONMENT VARIABLE IS SET.' + os.EOL +
+    '  You are previewing version 1.2.3 of Rush as an experiment.' + os.EOL +
+    '  The rush.json configuration for this repo requests version 3.2.1.' + os.EOL +
+    '  To restore the normal behavior, unset the RUSH_PREVIEW_VERSION' + os.EOL +
+    '  environment variable.' + os.EOL +
+    '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' +
+    os.EOL + os.EOL
+  ));
+}
+
+// If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
+// install it
+if (rushVersionToLoad && rushVersionToLoad !== currentPackageJson.version) {
+  const versionSelector: RushVersionSelector = new RushVersionSelector(
+    currentPackageJson.version
+  );
+  versionSelector.ensureRushVersionInstalled(rushVersionToLoad)
+    .catch((error: Error) => {
+      console.log(colors.red('Error: ' + error.message));
+    });
 } else {
-  // Load the configuration
-  const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
-  const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', 'package.json'));
+  // Otherwise invoke the rush-lib that came with this rush package
 
-  let rushVersionToLoad: string | undefined = undefined;
+  // Rush is "managed" if its version and configuration are dictated by a repo's rush.json
+  const isManaged: boolean = !!configuration;
 
-  const previewVersion: string | undefined = process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
-  let usingPreviewVersion: boolean = false;
-
-  if (previewVersion && semver.valid(previewVersion, false)) {
-    rushVersionToLoad = previewVersion;
-    usingPreviewVersion = true;
-  } else if (configuration) {
-    rushVersionToLoad = configuration.rushVersion;
-  }
-
-  if (usingPreviewVersion) {
-    console.error(colors.yellow(
-      os.EOL + os.EOL +
-      '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' + os.EOL +
-      '  WARNING! THE "RUSH_PREVIEW_VERSION" ENVIRONMENT VARIABLE IS SET.' + os.EOL +
-      '  You are previewing version 1.2.3 of Rush as an experiment.' + os.EOL +
-      '  The rush.json configuration for this repo requests version 3.2.1.' + os.EOL +
-      '  To restore the normal behavior, unset the RUSH_PREVIEW_VERSION' + os.EOL +
-      '  environment variable.' + os.EOL +
-      '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *' +
-      os.EOL + os.EOL
-    ));
-  }
-
-  // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
-  // install it
-  if (rushVersionToLoad && rushVersionToLoad !== currentPackageJson.version) {
-    const versionSelector: RushVersionSelector = new RushVersionSelector(
-      currentPackageJson.version
-    );
-    versionSelector.ensureRushVersionInstalled(rushVersionToLoad)
-      .catch((error: Error) => {
-        console.log(colors.red('Error: ' + error.message));
-      });
-  } else {
-    // Otherwise invoke the rush-lib that came with this rush package
-
-    // Rush is "managed" if its version and configuration are dictated by a repo's rush.json
-    const isManaged: boolean = !!configuration;
-
-    Rush.launch(currentPackageJson.version, isManaged);
-  }
+  Rush.launch(currentPackageJson.version, isManaged);
 }
