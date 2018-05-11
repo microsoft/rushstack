@@ -93,6 +93,12 @@ class CommonVersionsConfiguration {
   readonly xstitchPreferredVersions: Map<string, string>;
 }
 
+// @public
+enum EnvironmentVariableNames {
+  RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
+  RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER"
+}
+
 // @beta
 enum Event {
   postRushBuild = 4,
