@@ -146,7 +146,12 @@ export class JestTask extends GulpTask<IJestConfig> {
         this.taskConfig.testMatch : ['**/*.test.js?(x)'],
       testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
       modulePathIgnorePatterns: this.taskConfig.modulePathIgnorePatterns,
-      updateSnapshot: !this.buildConfig.production
+      updateSnapshot: !this.buildConfig.production,
+
+      // Jest's module resolution for finding jest-environment-jsdom is broken.  See this issue:
+      // https://github.com/facebook/jest/issues/5913
+      // As a workaround, resolve it for Jest:
+      testEnvironment: require.resolve('jest-environment-jsdom')
     };
 
     if (this.taskConfig.cacheDirectory) {
