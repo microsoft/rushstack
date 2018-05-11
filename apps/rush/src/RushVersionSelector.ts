@@ -16,8 +16,8 @@ export class RushVersionSelector {
   private _rushDirectory: string;
   private _currentPackageVersion: string;
 
-  constructor(homeDirectory: string, currentPackageVersion: string) {
-    this._rushDirectory = path.join(homeDirectory, '.rush');
+  constructor(currentPackageVersion: string) {
+    this._rushDirectory = path.join(Utilities.getHomeDirectory(), '.rush');
     this._currentPackageVersion = currentPackageVersion;
   }
 

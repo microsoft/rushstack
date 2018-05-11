@@ -174,11 +174,9 @@ class RushConfiguration {
   readonly eventHooks: EventHooks;
   findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-  static getHomeDirectory(): string;
   getProjectByName(projectName: string): RushConfigurationProject | undefined;
   readonly gitAllowedEmailRegExps: string[];
   readonly gitSampleEmail: string;
-  readonly homeFolder: string;
   readonly hotfixChangeEnabled: boolean;
   static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)

@@ -22,6 +22,21 @@ export interface IEnvironment {
  */
 export class Utilities {
   /**
+   * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
+   * this looks something like "/usr/username/"
+   */
+  public static getHomeDirectory(): string {
+    const unresolvedUserFolder: string | undefined
+      = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    const homeFolder: string = path.resolve(unresolvedUserFolder);
+    if (!fsx.existsSync(homeFolder)) {
+      throw new Error('Unable to determine the current user\'s home directory');
+    }
+
+    return homeFolder;
+  }
+
+  /**
    * NodeJS equivalent of performance.now().
    */
   public static getTimeInMs(): number {
