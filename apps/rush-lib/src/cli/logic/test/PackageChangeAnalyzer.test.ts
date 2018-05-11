@@ -41,7 +41,7 @@ describe('PackageChangeAnalyzer', () => {
 
     const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);
     const packageDeps: IPackageDeps | undefined = packageChangeAnalyzer.getPackageDepsHash(packageA);
-    expect(packageDeps).eql(repoHashDeps);
+    expect(packageDeps).toEqual(repoHashDeps);
   });
 
   /*
@@ -67,7 +67,7 @@ describe('PackageChangeAnalyzer', () => {
     } as any; // tslint:disable-line:no-any
 
     let packageDeps: IPackageDeps = PackageChangeAnalyzer.instance.getPackageDepsHash(packageA);
-    expect(packageDeps).eql({
+    expect(packageDeps).toEqual({
       files: {
         [looseFile]: HASH,
         [fileA]: HASH
@@ -75,7 +75,7 @@ describe('PackageChangeAnalyzer', () => {
     });
 
     packageDeps = PackageChangeAnalyzer.instance.getPackageDepsHash(packageB);
-    expect(packageDeps).eql({
+    expect(packageDeps).toEqual({
       files: {
         [looseFile]: HASH,
         [fileB]: HASH
