@@ -191,6 +191,7 @@ interface IJestConfig {
   isEnabled?: boolean;
   maxWorkers?: number;
   moduleDirectories?: string[];
+  modulePathIgnorePatterns?: string[];
   testMatch?: string[];
   testPathIgnorePatterns?: string[];
 }
