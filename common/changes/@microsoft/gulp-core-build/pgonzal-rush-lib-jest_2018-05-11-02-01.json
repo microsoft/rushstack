@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Upgrade to Jest 22.4.3 and remove the workaround for the symlink bug",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "pgonzal@users.noreply.github.com"
+}
