@@ -8,6 +8,7 @@ import { IPackageJson } from '@microsoft/node-core-library';
 
 import { RushCommandLineParser } from './cli/actions/RushCommandLineParser';
 import { RushConstants } from './RushConstants';
+import { CommandLineMigrationAdvisor } from './cli/actions/CommandLineMigrationAdvisor';
 
 /**
  * Operations involving the rush tool and its operation.
@@ -34,8 +35,13 @@ export class Rush {
       EOL
     );
 
-    const parser: RushCommandLineParser = new RushCommandLineParser();
+    if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
+      // The migration advisor recognized an obsolete command-line
+      process.exitCode = 1;
+      return;
+    }
 
+    const parser: RushCommandLineParser = new RushCommandLineParser();
     parser.execute();
   }
 
