@@ -623,6 +623,16 @@ export class InstallManager {
       // then we can't skip this install
       potentiallyChangedFiles.push(this._rushConfiguration.committedShrinkwrapFilename);
 
+      if (this._rushConfiguration.packageManager === 'pnpm') {
+        // If the repo is using pnpmfile.js, consider that also
+        const pnpmFileFilename: string = path.join(this._rushConfiguration.commonRushConfigFolder,
+          RushConstants.pnpmFileFilename);
+
+        if (fsx.existsSync(pnpmFileFilename)) {
+          potentiallyChangedFiles.push(pnpmFileFilename);
+        }
+      }
+
       // Also consider timestamps for all the temp tarballs. (createTempModulesAndCheckShrinkwrap() will
       // carefully preserve these timestamps unless something has changed.)
       // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
