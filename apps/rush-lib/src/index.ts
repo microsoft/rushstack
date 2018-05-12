@@ -16,6 +16,10 @@ export {
 } from './data/RushConfiguration';
 
 export {
+  EnvironmentVariableNames
+} from './data/EnvironmentConfiguration';
+
+export {
   RushConfigurationProject
 } from './data/RushConfigurationProject';
 

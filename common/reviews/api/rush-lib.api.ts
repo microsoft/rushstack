@@ -93,6 +93,12 @@ class CommonVersionsConfiguration {
   readonly xstitchPreferredVersions: Map<string, string>;
 }
 
+// @public
+enum EnvironmentVariableNames {
+  RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
+  RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER"
+}
+
 // @beta
 enum Event {
   postRushBuild = 4,
@@ -174,11 +180,9 @@ class RushConfiguration {
   readonly eventHooks: EventHooks;
   findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-  static getHomeDirectory(): string;
   getProjectByName(projectName: string): RushConfigurationProject | undefined;
   readonly gitAllowedEmailRegExps: string[];
   readonly gitSampleEmail: string;
-  readonly homeFolder: string;
   readonly hotfixChangeEnabled: boolean;
   static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)

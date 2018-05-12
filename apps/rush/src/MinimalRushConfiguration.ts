@@ -15,7 +15,6 @@ interface IMinimalRushConfigurationJson {
  */
 export class MinimalRushConfiguration {
   private _rushVersion: string;
-  private _homeFolder: string;
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
@@ -37,7 +36,6 @@ export class MinimalRushConfiguration {
 
   private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson) {
     this._rushVersion = minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
-    this._homeFolder = RushConfiguration.getHomeDirectory();
   }
 
   /**
@@ -47,13 +45,5 @@ export class MinimalRushConfiguration {
    */
   public get rushVersion(): string {
     return this._rushVersion;
-  }
-
-  /**
-   * The absolute path to the home directory for the current user. On Windows, it would be something
-   *  like "C:\Users\YourName".
-   */
-  public get homeFolder(): string {
-    return this._homeFolder;
   }
 }

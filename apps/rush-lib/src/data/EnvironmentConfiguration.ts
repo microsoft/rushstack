@@ -4,6 +4,25 @@
 import * as os from 'os';
 
 /**
+ * Names of environment variables used by Rush.
+ * @public
+ */
+export const enum EnvironmentVariableNames {
+  /**
+   * This variable overrides the temporary folder used by Rush.
+   * The default value is "common/temp" under the repoistory root.
+   */
+  RUSH_TEMP_FOLDER = 'RUSH_TEMP_FOLDER',
+
+  /**
+   * This variable overrides the version of Rush that will be installed by
+   * the version selector.  The default value is determined by the "rushVersion"
+   * field from rush.json.
+   */
+  RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION'
+}
+
+/**
  * Provides Rush-specific environment variable data. All Rush environment variables must start with "RUSH_". This class
  * is designed to be used by RushConfiguration.
  *
@@ -36,10 +55,13 @@ export class EnvironmentConfiguration {
         // Environment variables are only case-insensitive on Windows
         const normalizedEnvVarName: string = os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
         switch (normalizedEnvVarName) {
-          case 'RUSH_TEMP_FOLDER':
+          case EnvironmentVariableNames.RUSH_TEMP_FOLDER:
             EnvironmentConfiguration._rushTempFolderOverride = value;
             break;
 
+          case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
+            // Handled by @microsoft/rush front end
+            break;
           default:
             unknownEnvVariables.push(envVarName);
             break;

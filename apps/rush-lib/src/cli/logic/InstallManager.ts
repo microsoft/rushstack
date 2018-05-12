@@ -181,11 +181,11 @@ export class InstallManager {
    */
   public ensureLocalPackageManager(forceReinstall: boolean): Promise<void> {
     // Example: "C:\Users\YourName\.rush"
-    const rushHomeFolder: string = path.join(this._rushConfiguration.homeFolder, '.rush');
+    const rushUserFolder: string = this._rushConfiguration.rushUserFolder;
 
-    if (!fsx.existsSync(rushHomeFolder)) {
-      console.log('Creating ' + rushHomeFolder);
-      fsx.mkdirSync(rushHomeFolder);
+    if (!fsx.existsSync(rushUserFolder)) {
+      console.log('Creating ' + rushUserFolder);
+      fsx.mkdirSync(rushUserFolder);
     }
 
     const packageManager: PackageManager = this._rushConfiguration.packageManager;
@@ -193,14 +193,14 @@ export class InstallManager {
 
     const packageManagerAndVersion: string = `${packageManager}-${packageManagerVersion}`;
     // Example: "C:\Users\YourName\.rush\pnpm-1.2.3"
-    const packageManagerToolFolder: string = path.join(rushHomeFolder, packageManagerAndVersion);
+    const packageManagerToolFolder: string = path.join(rushUserFolder, packageManagerAndVersion);
 
     const packageManagerMarker: LastInstallFlag = new LastInstallFlag(packageManagerToolFolder, {
       node: process.versions.node
     });
 
     console.log(`Trying to acquire lock for ${packageManagerAndVersion}`);
-    return LockFile.acquire(rushHomeFolder, packageManagerAndVersion).then((lock: LockFile) => {
+    return LockFile.acquire(rushUserFolder, packageManagerAndVersion).then((lock: LockFile) => {
       console.log(`Acquired lock for ${packageManagerAndVersion}`);
 
       if (!packageManagerMarker.isValid() || forceReinstall || lock.dirtyWhenAcquired) {
