@@ -577,7 +577,7 @@ export class InstallManager {
     if (shrinkwrapFile) {
       // If we have a (possibly incomplete) shrinkwrap file, save it as the temporary file.
       shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapFilename);
-      shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapFilename + '.before');
+      shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapPreinstallFilename);
     } else {
       // Otherwise delete the temporary file
       fsx.removeSync(this._rushConfiguration.tempShrinkwrapFilename);

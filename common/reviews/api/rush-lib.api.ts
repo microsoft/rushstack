@@ -207,6 +207,7 @@ class RushConfiguration {
   // @beta
   readonly telemetryEnabled: boolean;
   readonly tempShrinkwrapFilename: string;
+  readonly tempShrinkwrapPreinstallFilename: string;
   static tryFindRushJsonLocation(verbose?: boolean): string | undefined;
   // @beta (undocumented)
   readonly versionPolicyConfiguration: VersionPolicyConfiguration;
