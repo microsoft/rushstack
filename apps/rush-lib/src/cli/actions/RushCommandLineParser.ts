@@ -36,12 +36,14 @@ export class RushCommandLineParser extends CommandLineParser {
   constructor() {
     super({
       toolFilename: 'rush',
-      toolDescription: 'Rush helps you to manage a collection of npm'
-      + ' projects.  Rush collects the dependencies for all projects to perform a minimal install,'
-      + ' detects which projects can be locally linked, and performs a fast parallel'
-      + ' build according to the detected dependency graph.  If you want to decompose'
-      + ' your monolithic project into many small packages but are afraid of the dreaded'
-      + ' NPM progress bar, Rush is for you.'
+      toolDescription: 'Rush makes life easier for JavaScript developers who develop, build, and publish'
+        + ' many packages from a central Git repo.  It is designed to handle very large repositories'
+        + ' supporting many projects and people.  Rush provides policies, protections, and customizations'
+        + ' that help coordinate teams and safely onboard new contributors.  Rush also generates change logs'
+        + ' and automates package publishing.  It can manage decoupled subsets of projects with different'
+        + ' release and versioning strategies.  A full API is included to facilitate integration with other'
+        + ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,'
+        + ' Rush is for you.'
     });
     this._populateActions();
   }

@@ -24,15 +24,18 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._purgeParameter = this.defineFlagParameter({
       parameterLongName: '--purge',
       parameterShortName: '-p',
-      description: ''
+      description: 'Perform "rush purge" before starting the installation'
     });
     this._bypassPolicyParameter = this.defineFlagParameter({
       parameterLongName: '--bypass-policy',
-      description: 'Overrides "gitPolicy" enforcement (use honorably!)'
+      description: 'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)'
     });
     this._noLinkParameter = this.defineFlagParameter({
       parameterLongName: '--no-link',
-      description: ''
+      description: 'If "--no-link" is specified, then project symlinks will NOT be created'
+        + ' after the installation completes.  You will need to run "rush link" manually.'
+        + ' This flag is useful for automated builds that want to report stages individually'
+        + ' or perform extra operations in between the two stages.'
     });
   }
 

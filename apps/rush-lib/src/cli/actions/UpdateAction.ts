@@ -14,8 +14,18 @@ export class UpdateAction extends BaseInstallAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'update',
-      summary: '',
-      documentation: '',
+      summary: 'Install package dependencies for all projects in the repo,'
+        + ' and create or update the shrinkwrap file as needed',
+      documentation: 'The "rush update" command installs the dependencies described in your'
+        + ' package.json files, and updates the shrinkwrap file as needed.'
+        + ' (This "shrinkwrap" file stores a central inventory of all dependencies and versions'
+        + ' for projects in your repo. It is found in the "common/config/rush" folder.)'
+        + ' Note that Rush always performs a single install for all projects in your repo.'
+        + ' You should run "rush update" whenever you start working in a Rush repo,'
+        + ' after you pull from Git, and after you modify a package.json file.'
+        + ' If there is nothing to do, "rush update" is instantaneous.'
+        + ' NOTE: In certain cases "rush install" should be used instead of "rush update"'
+        + ' -- for details, see the command help for "rush install".',
       parser
     });
   }
@@ -25,11 +35,21 @@ export class UpdateAction extends BaseInstallAction {
 
     this._fullParameter = this.defineFlagParameter({
       parameterLongName: '--full',
-      description: ''
+      description: 'Normally "rush update" tries to preserve your existing installed versions'
+        + ' and only makes the minimum updates needed to satisfy the package.json files.'
+        + ' This conservatism is important in a large monorepo where seemingly SemVer-compatible'
+        + ' updates can frequently cause regressions.'
+        + ' Use "--full" to update all dependencies to the latest SemVer-compatible version.'
+        + ' A full update is typically performed regularly by a person or robot whose role is'
+        + ' to deal with potential upgrade regressions.'
     });
     this._recheckParameter = this.defineFlagParameter({
       parameterLongName: '--recheck',
-      description: ''
+      description: 'If the shrinkwrap file appears to already satisfy the package.json files,'
+        + ' then "rush update" will skip invoking the package manager at all.  In certain situations'
+        + ' this heuristic may be inaccurate.  Use the "--recheck" flag to force the package manager'
+        + ' to process the shrinkwrap file.  It will also update your shrinkwrap file with any fixups'
+        + ' that Rush normally performs only in the temporary folder (to minimize shrinkwrap churn).'
     });
   }
 
