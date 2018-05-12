@@ -253,7 +253,7 @@ export class PublishAction extends BaseRushAction {
         for (const change of orderedChanges) {
           if (change.changeType && change.changeType > ChangeType.dependency) {
             const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
-            if (project) {
+            if (project && !this._packageExists(project)) {
               this._npmPublish(change.packageName, project.projectFolder);
             }
           }
@@ -326,6 +326,7 @@ export class PublishAction extends BaseRushAction {
         const registryUrl: string = this._registryUrl.value;
         env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
         registry = registryUrl.substring(registryUrl.indexOf('//'));
+        args.push(`--registry ${registryUrl}`);
       }
 
       if (this._npmAuthToken.value) {
