@@ -1,5 +1,8 @@
 {
   "preferredVersions": {
     "ajv": "5.2.2"
+  },
+  "allowedAlternativeVersions": {
+    "jest-environment-jsdom": ["~21.2.1"]
   }
 }

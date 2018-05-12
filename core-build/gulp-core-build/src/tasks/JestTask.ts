@@ -49,6 +49,11 @@ export interface IJestConfig {
   testPathIgnorePatterns?: string[];
 
   /**
+   * Same as Jest CLI option modulePathIgnorePatterns
+   */
+  modulePathIgnorePatterns?: string[];
+
+  /**
    * Same as Jest CLI option moduleDirectories
    */
   moduleDirectories?: string[];
@@ -65,61 +70,6 @@ export interface IJestConfig {
 }
 
 const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
-
-/**
- * We need to replace the resolver function which jest is using until the PR which
- * fixes jest-resolves handling of symlinks is merged:
- * https://github.com/facebook/jest/pull/5085
- */
-// tslint:disable-next-line:no-any
-const nodeModulesPaths: any = require('jest-resolve/build/node_modules_paths');
-nodeModulesPaths.default = (
-  basedir: string,
-  options: {
-    moduleDirectory?: string[],
-    paths?: string[]
-  }
-): string[] => {
-
-  const nodeModulesFolders: string = 'node_modules';
-  const absoluteBaseDir: string = path.resolve(basedir);
-  const realAbsoluteBaseDir: string = fsx.realpathSync(absoluteBaseDir);
-  const possiblePaths: string[] = [realAbsoluteBaseDir];
-
-  let moduleFolders: string[] = [nodeModulesFolders];
-  if (options && options.moduleDirectory) {
-    moduleFolders = ([] as string[]).concat(options.moduleDirectory);
-  }
-
-  const windowsBaseRegex: RegExp = /^([A-Za-z]:)/;
-  const fileshareBaseRegex: RegExp = /^\\\\/;
-  let prefix: string = '/';
-  if (windowsBaseRegex.test(absoluteBaseDir)) {
-    prefix = '';
-  } else if (fileshareBaseRegex.test(absoluteBaseDir)) {
-    prefix = '\\\\';
-  }
-
-  let parsedPath: path.ParsedPath = path.parse(realAbsoluteBaseDir);
-  while (parsedPath.dir !== possiblePaths[possiblePaths.length - 1]) {
-    const realParsedDir: string = fsx.realpathSync(parsedPath.dir);
-    possiblePaths.push(realParsedDir);
-    parsedPath = path.parse(realParsedDir);
-  }
-
-  const dirs: string[] = possiblePaths.reduce((possibleDirs: string[], aPath: string) => {
-    return possibleDirs.concat(
-      moduleFolders.map((moduleDir: string) => {
-        return path.join(prefix, aPath, moduleDir);
-      })
-    );
-  }, []);
-
-  if (options.paths) {
-    return options.paths.concat(dirs);
-  }
-  return dirs;
-};
 
 /**
  * Indicates if jest is enabled
@@ -149,7 +99,10 @@ export class JestTask extends GulpTask<IJestConfig> {
       collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
       coverage: true,
       coverageReporters: ['json', 'html'],
-      testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/']
+      testPathIgnorePatterns: ['<rootDir>/(src|lib-amd|lib-es6|coverage|build|docs|node_modules)/'],
+      // Some unit tests rely on data folders that look like packages.  This confuses jest-hast-map
+      // when it tries to scan for package.json files.
+      modulePathIgnorePatterns: ['<rootDir>/(src|lib)/.*/package.json']
     });
   }
 
@@ -192,7 +145,13 @@ export class JestTask extends GulpTask<IJestConfig> {
       testMatch: !!this.taskConfig.testMatch ?
         this.taskConfig.testMatch : ['**/*.test.js?(x)'],
       testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
-      updateSnapshot: !this.buildConfig.production
+      modulePathIgnorePatterns: this.taskConfig.modulePathIgnorePatterns,
+      updateSnapshot: !this.buildConfig.production,
+
+      // Jest's module resolution for finding jest-environment-jsdom is broken.  See this issue:
+      // https://github.com/facebook/jest/issues/5913
+      // As a workaround, resolve it for Jest:
+      testEnvironment: require.resolve('jest-environment-jsdom')
     };
 
     if (this.taskConfig.cacheDirectory) {

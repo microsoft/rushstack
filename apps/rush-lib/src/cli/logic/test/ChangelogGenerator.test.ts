@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { expect } from 'chai';
-
 import { IChangelog } from '../../../data/Changelog';
 import { ChangeType } from '../../../data/ChangeManagement';
 import { RushConfiguration } from '../../../data/RushConfiguration';
@@ -61,7 +59,7 @@ describe('updateIndividualChangelog', () => {
     // Ignore comparing date.
     expectedResult.entries[0].date = actualResult.entries[0].date;
 
-    expect(actualResult).eql(expectedResult);
+    expect(actualResult).toEqual(expectedResult);
   });
 
   it('can merge a new change request into an existing changelog', () => {
@@ -117,7 +115,7 @@ describe('updateIndividualChangelog', () => {
     // Ignore comparing date.
     expectedResult.entries[0].date = actualResult.entries[0].date;
 
-    expect(actualResult).eql(expectedResult);
+    expect(actualResult).toEqual(expectedResult);
   });
 
   it('can avoid adding duplicate entries', () => {
@@ -139,7 +137,7 @@ describe('updateIndividualChangelog', () => {
     )!;
 
     /* tslint:disable-next-line:no-unused-expression */
-    expect(actualResult).to.be.undefined;
+    expect(actualResult).not.toBeDefined();
   });
 
   it('can handle dependency bumps', () => {
@@ -195,7 +193,7 @@ describe('updateIndividualChangelog', () => {
     // Remove date.
     actualResult.entries[0].date = undefined;
 
-    expect(actualResult).eql(expectedResult);
+    expect(actualResult).toEqual(expectedResult);
   });
 
   it('skip empty comment', () => {
@@ -243,7 +241,7 @@ describe('updateIndividualChangelog', () => {
     // Remove date.
     actualResult.entries[0].date = undefined;
 
-    expect(actualResult).eql(expectedResult);
+    expect(actualResult).toEqual(expectedResult);
   });
 });
 
@@ -278,8 +276,8 @@ describe('updateChangelogs', () => {
       rushConfiguration,
       false
     );
-    expect(updatedChangeLogs.length).eqls(1);
-    expect(updatedChangeLogs[0].name).eqls('b');
+    expect(updatedChangeLogs.length).toEqual(1);
+    expect(updatedChangeLogs[0].name).toEqual('b');
   });
 
   it('skips changes logs if the project is in pre-release', () => {
@@ -308,8 +306,8 @@ describe('updateChangelogs', () => {
       rushConfiguration,
       false
     );
-    expect(updatedChangeLogs.length).eqls(1);
-    expect(updatedChangeLogs[0].name).eqls('b');
+    expect(updatedChangeLogs.length).toEqual(1);
+    expect(updatedChangeLogs[0].name).toEqual('b');
   });
 
   it('writes changelog for hotfix changes', () => {
@@ -338,9 +336,9 @@ describe('updateChangelogs', () => {
       rushConfiguration,
       false
     );
-    expect(updatedChangeLogs.length).eqls(2);
-    expect(updatedChangeLogs[0].name).eqls('a');
-    expect(updatedChangeLogs[1].name).eqls('b');
+    expect(updatedChangeLogs.length).toEqual(2);
+    expect(updatedChangeLogs[0].name).toEqual('a');
+    expect(updatedChangeLogs[1].name).toEqual('b');
   });
   /* tslint:enable:no-string-literal */
 });

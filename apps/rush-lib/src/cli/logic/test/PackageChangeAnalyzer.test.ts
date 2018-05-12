@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { expect } from 'chai';
 import * as path from 'path';
 
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
@@ -42,7 +41,7 @@ describe('PackageChangeAnalyzer', () => {
 
     const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);
     const packageDeps: IPackageDeps | undefined = packageChangeAnalyzer.getPackageDepsHash(packageA);
-    expect(packageDeps).eql(repoHashDeps);
+    expect(packageDeps).toEqual(repoHashDeps);
   });
 
   /*
@@ -68,7 +67,7 @@ describe('PackageChangeAnalyzer', () => {
     } as any; // tslint:disable-line:no-any
 
     let packageDeps: IPackageDeps = PackageChangeAnalyzer.instance.getPackageDepsHash(packageA);
-    expect(packageDeps).eql({
+    expect(packageDeps).toEqual({
       files: {
         [looseFile]: HASH,
         [fileA]: HASH
@@ -76,7 +75,7 @@ describe('PackageChangeAnalyzer', () => {
     });
 
     packageDeps = PackageChangeAnalyzer.instance.getPackageDepsHash(packageB);
-    expect(packageDeps).eql({
+    expect(packageDeps).toEqual({
       files: {
         [looseFile]: HASH,
         [fileB]: HASH

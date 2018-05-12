@@ -14,6 +14,7 @@ import { EventHooks } from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
+import { Utilities } from '../utilities/Utilities';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -125,7 +126,6 @@ export class RushConfiguration {
   private _npmTmpFolder: string;
   private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
-  private _homeFolder: string;
   private _rushUserFolder: string;
   private _rushLinkJsonFilename: string;
   private _packageManagerToolVersion: string;
@@ -244,21 +244,6 @@ export class RushConfiguration {
     }
 
     return undefined;
-  }
-
-  /**
-   * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
-   * this looks something like "/usr/username/"
-   */
-  public static getHomeDirectory(): string {
-    const unresolvedUserFolder: string | undefined
-      = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
-    const homeFolder: string = path.resolve(unresolvedUserFolder);
-    if (!fsx.existsSync(homeFolder)) {
-      throw new Error('Unable to determine the current user\'s home directory');
-    }
-
-    return homeFolder;
   }
 
   /**
@@ -455,14 +440,6 @@ export class RushConfiguration {
    */
   public get tempShrinkwrapFilename(): string {
     return this._tempShrinkwrapFilename;
-  }
-
-  /**
-   * The absolute path to the home directory for the current user.  On Windows,
-   * it would be something like "C:\Users\YourName".
-   */
-  public get homeFolder(): string {
-    return this._homeFolder;
   }
 
   /**
@@ -687,8 +664,7 @@ export class RushConfiguration {
     this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'pnpm-store'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
-    this._homeFolder = RushConfiguration.getHomeDirectory();
-    this._rushUserFolder = path.join(this._homeFolder, '.rush');
+    this._rushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 

@@ -1,6 +1,17 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Fri, 04 May 2018 00:42:38 GMT and should not be manually modified.
+This log was last generated on Fri, 11 May 2018 22:43:14 GMT and should not be manually modified.
+
+## 3.8.0
+Fri, 11 May 2018 22:43:14 GMT
+
+### Minor changes
+
+- Add support for modulePathIgnorePatterns for the Jest task
+
+### Patches
+
+- Upgrade to Jest 22.4.3 and remove the workaround for the symlink bug
 
 ## 3.7.5
 Fri, 04 May 2018 00:42:38 GMT

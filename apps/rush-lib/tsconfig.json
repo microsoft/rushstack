@@ -8,7 +8,8 @@
     "declaration": true,
     "sourceMap": true,
     "types": [
-      "node"
+      "node",
+      "jest"
     ],
     "lib": [
       "es5",
