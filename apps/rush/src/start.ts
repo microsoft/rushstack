@@ -49,31 +49,46 @@ let rushVersionToLoad: string | undefined = undefined;
 
 const previewVersion: string | undefined = process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
 
+function padEnd(s: string, length: number): string {
+  let result: string = s;
+  while (result.length < length) {
+    result += ' ';
+  }
+  return result;
+}
+
 if (previewVersion) {
   if (!semver.valid(previewVersion, false)) {
-    console.error(colors.red(`Invalid value for RUSH_PREVIEW_VERSION: "${previewVersion}"`));
+    console.error(colors.red(`Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`));
     process.exit(1);
   }
 
   rushVersionToLoad = previewVersion;
 
-  console.error(colors.yellow(
-    os.EOL +
-    `* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *` + os.EOL +
-    `  WARNING! THE "RUSH_PREVIEW_VERSION" ENVIRONMENT VARIABLE IS SET.` + os.EOL + os.EOL +
-    `  You are previewing Rush version:        ${previewVersion}`));
+  const lines: string[] = [];
+  lines.push(
+    `*********************************************************************`,
+    `* WARNING! THE "RUSH_PREVIEW_VERSION" ENVIRONMENT VARIABLE IS SET.  *`,
+    `*                                                                   *`,
+    `* You are previewing Rush version:        ${padEnd(previewVersion, 25)} *`
+  );
 
   if (configuration) {
-    console.error(colors.yellow(
-      `  The rush.json configuration asks for:   ${configuration.rushVersion}`));
+    lines.push(
+      `* The rush.json configuration asks for:   ${padEnd(configuration.rushVersion, 25)} *`
+    );
   }
 
-  console.error(colors.yellow(os.EOL +
-    `  To restore the normal behavior, unset the RUSH_PREVIEW_VERSION` + os.EOL +
-    `  environment variable.` + os.EOL +
-    `* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *` +
-    os.EOL
-  ));
+  lines.push(
+    `*                                                                   *`,
+    `* To restore the normal behavior, unset the RUSH_PREVIEW_VERSION    *`,
+    `* environment variable.                                             *`,
+    `*********************************************************************`
+  );
+
+  console.error(lines
+    .map(line => colors.black(colors.bgYellow(line)))
+    .join(os.EOL));
 
 } else if (configuration) {
   rushVersionToLoad = configuration.rushVersion;
