@@ -25,6 +25,7 @@ import { CustomCommandFactory } from './CustomCommandFactory';
 import { CustomRushAction } from './CustomRushAction';
 
 import { Telemetry } from '../logic/Telemetry';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
@@ -43,14 +44,6 @@ export class RushCommandLineParser extends CommandLineParser {
       + ' NPM progress bar, Rush is for you.'
     });
     this._populateActions();
-  }
-
-  public exitWithError(): void {
-    try {
-      this.flushTelemetry();
-    } finally {
-      process.exit(1);
-    }
   }
 
   public get isDebug(): boolean {
@@ -72,20 +65,12 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   protected onExecute(): Promise<void> {
-    // For debugging, don't catch any exceptions; show the full call stack
-    return this._execute().catch((error: Error) => {
-      if (this._debugParameter.value) {
-        console.log(colors.red(error.toString()));
-        if (error.stack) {
-          console.log(os.EOL + error.stack);
-        }
-      } else {
-        this._exitAndReportError(error);
-      }
+    return this._wrapOnExecute().catch((error: Error) => {
+      this._reportErrorAndSetExitCode(error);
     });
   }
 
-  private _execute(): Promise<void> {
+  private _wrapOnExecute(): Promise<void> {
     try {
       if (this.rushConfiguration) {
         this.telemetry = new Telemetry(this.rushConfiguration);
@@ -132,20 +117,24 @@ export class RushCommandLineParser extends CommandLineParser {
         });
 
     } catch (error) {
-      this._exitAndReportError(error);
+      this._reportErrorAndSetExitCode(error);
     }
   }
 
-  private _exitAndReportError(error: Error): void {
-    if (this._debugParameter.value) {
-      // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
-      // would show for an uncaught error
-      console.error(os.EOL + error.stack);
-    } else {
+  private _reportErrorAndSetExitCode(error: Error): void {
+    if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
       const wrap: (textToWrap: string) => string = wordwrap.soft(prefix.length, Utilities.getConsoleWidth());
       console.error(os.EOL + colors.red(prefix + wrap(error.message).trim()));
     }
-    this.exitWithError();
+
+    if (this._debugParameter.value) {
+      // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
+      // would show for an uncaught error
+      console.error(os.EOL + error.stack);
+    }
+
+    this.flushTelemetry();
+    process.exitCode = 1;
   }
 }

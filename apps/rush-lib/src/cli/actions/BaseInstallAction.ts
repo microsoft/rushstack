@@ -11,7 +11,6 @@ import { Event } from '../../data/EventHooks';
 import { InstallManager, IInstallManagerOptions } from '../logic/InstallManager';
 import { PurgeManager } from '../logic/PurgeManager';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { Utilities } from '../../utilities/Utilities';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -55,28 +54,23 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
 
-    return Utilities.withFinally({
-        promise: installManager.doInstall(installManagerOptions),
-        finally: () => {
-          purgeManager.deleteAll();
-        }
-      })
-      .then((success: boolean) => {
-        if (!success) {
-          process.exitCode = 1;
-        }
-
+    return installManager.doInstall(installManagerOptions)
+      .then(() => {
+        purgeManager.deleteAll();
         stopwatch.stop();
 
-        this._collectTelemetry(stopwatch, installManagerOptions, success);
+        this._collectTelemetry(stopwatch, installManagerOptions, true);
         this.eventHooksManager.handle(Event.postRushInstall);
 
-        if (success) {
-          console.log(os.EOL + colors.green(
-            `Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`));
-        } else {
-          console.log(os.EOL + `Rush ${this.actionName} completed. (${stopwatch.toString()})`);
-        }
+        console.log(os.EOL + colors.green(
+          `Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`));
+      })
+      .catch((error) => {
+        purgeManager.deleteAll();
+        stopwatch.stop();
+
+        this._collectTelemetry(stopwatch, installManagerOptions, false);
+        throw error;
       });
   }
 

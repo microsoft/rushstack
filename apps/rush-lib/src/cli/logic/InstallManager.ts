@@ -33,6 +33,8 @@ import { RushConstants } from '../../RushConstants';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+
 const MAX_INSTALL_ATTEMPTS: number = 5;
 
 const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
@@ -184,13 +186,13 @@ export class InstallManager {
     });
   }
 
-  public doInstall(options: IInstallManagerOptions): Promise<boolean> {
+  public doInstall(options: IInstallManagerOptions): Promise<void> {
     return Promise.resolve().then(() => {
 
       // Check the policies
       if (!options.bypassPolicy) {
         if (!GitPolicy.check(this._rushConfiguration)) {
-          return Promise.resolve(false);
+          throw new AlreadyReportedError();
         }
 
         ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
@@ -213,7 +215,7 @@ export class InstallManager {
               if (!options.allowShrinkwrapUpdates) {
                 console.log();
                 console.log(colors.red('You need to run "rush update" to fix this problem'));
-                return false;
+                throw new AlreadyReportedError();
               }
 
               shrinkwrapFile = undefined;
@@ -227,7 +229,7 @@ export class InstallManager {
             if (!options.allowShrinkwrapUpdates) {
               console.log();
               console.log(colors.red('The shrinkwrap file is out of date.  You need to run "rush update".'));
-              return false;
+              throw new AlreadyReportedError();
             }
           }
 
@@ -235,16 +237,13 @@ export class InstallManager {
 
           if (!options.noLink) {
             const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
-            return linkManager.createSymlinksForProjects(false)
-              .then(() => {
-                return true;
-              });
+            return linkManager.createSymlinksForProjects(false);
           } else {
             console.log(os.EOL
               + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.'));
           }
 
-          return true;
+          return;
         });
     });
   }
