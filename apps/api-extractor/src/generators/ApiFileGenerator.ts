@@ -214,7 +214,7 @@ export class ApiFileGenerator extends AstItemVisitor {
         footerParts.push('@virtual');
       }
 
-      if (astItem.documentation.isSealed) {
+      if (astItem.documentation.isOverride) {
         footerParts.push('@override');
       }
 

@@ -184,6 +184,11 @@ export class ApiDocumentation {
     this.reportError = errorLogger;
     this.parameters = {};
     this.warnings = warnings;
+
+    this.isSealed = false;
+    this.isVirtual = false;
+    this.isOverride = false;
+
     this._parseDocs();
   }
 

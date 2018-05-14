@@ -312,7 +312,7 @@ export class YamlDocumenter {
       if (!yamlItem.remarks) {
         yamlItem.remarks = sealedMessage;
       } else {
-        yamlItem.remarks += sealedMessage + '\n\n' + yamlItem.remarks;
+        yamlItem.remarks = sealedMessage + '\n\n' + yamlItem.remarks;
       }
     }
   }
