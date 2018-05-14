@@ -350,6 +350,14 @@ export class ApiDocumentation {
       this.reportError('The @preapproved tag may only be applied to @internal definitions');
       this.preapproved = false;
     }
+
+    if (this.isSealed && this.isVirtual) {
+      this.reportError('The @sealed and @virtual tags may not be used together');
+    }
+
+    if (this.isVirtual && this.isOverride) {
+      this.reportError('The @virtual and @override tags may not be used together');
+    }
   }
 
   protected _parseParam(tokenizer: Tokenizer): IAedocParameter | undefined {

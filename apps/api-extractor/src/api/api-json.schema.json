@@ -421,6 +421,18 @@
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
           "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isSealed": {
+          "description": "If present, indicates that the item was marked as \"@sealed\" and must not be extended",
+          "type": "boolean"
+        },
+        "isVirtual": {
+          "description": "If present, indicates that the item was marked as \"@virtual\" and may be extended",
+          "type": "boolean"
+        },
+        "isOverride": {
+          "description": "If present, indicates that the item was marked as \"@override\" and is overriding a base definition",
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -480,6 +492,18 @@
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
           "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isSealed": {
+          "description": "If present, indicates that the item was marked as \"@sealed\" and must not be extended",
+          "type": "boolean"
+        },
+        "isVirtual": {
+          "description": "If present, indicates that the item was marked as \"@virtual\" and may be extended",
+          "type": "boolean"
+        },
+        "isOverride": {
+          "description": "If present, indicates that the item was marked as \"@override\" and is overriding a base definition",
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -633,6 +657,18 @@
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
           "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isSealed": {
+          "description": "If present, indicates that the item was marked as \"@sealed\" and must not be extended",
+          "type": "boolean"
+        },
+        "isVirtual": {
+          "description": "If present, indicates that the item was marked as \"@virtual\" and may be extended",
+          "type": "boolean"
+        },
+        "isOverride": {
+          "description": "If present, indicates that the item was marked as \"@override\" and is overriding a base definition",
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -791,6 +827,10 @@
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
           "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isSealed": {
+          "description": "If present, indicates that the item was marked as \"@sealed\" and must not be extended",
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -943,6 +983,10 @@
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
           "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isSealed": {
+          "description": "If present, indicates that the item was marked as \"@sealed\" and must not be extended",
+          "type": "boolean"
         }
       },
       "additionalProperties": false,

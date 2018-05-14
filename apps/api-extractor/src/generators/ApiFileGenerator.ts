@@ -190,41 +190,47 @@ export class ApiFileGenerator extends AstItemVisitor {
     if (astItem instanceof AstPackage && !astItem.documentation.summary.length) {
       lines.push('(No @packagedocumentation comment for this package)');
     } else {
-      let footer: string = '';
+      const footerParts: string[] = [];
       switch (astItem.documentation.releaseTag) {
         case ReleaseTag.Internal:
-          footer += '@internal';
+          footerParts.push('@internal');
           break;
         case ReleaseTag.Alpha:
-          footer += '@alpha';
+          footerParts.push('@alpha');
           break;
         case ReleaseTag.Beta:
-          footer += '@beta';
+          footerParts.push('@beta');
           break;
         case ReleaseTag.Public:
-          footer += '@public';
+          footerParts.push('@public');
           break;
+      }
+
+      if (astItem.documentation.isSealed) {
+        footerParts.push('@sealed');
+      }
+
+      if (astItem.documentation.isVirtual) {
+        footerParts.push('@virtual');
+      }
+
+      if (astItem.documentation.isSealed) {
+        footerParts.push('@override');
       }
 
       // deprecatedMessage is initialized by default,
       // this ensures it has contents before adding '@deprecated'
       if (astItem.documentation.deprecatedMessage.length > 0) {
-        if (footer) {
-          footer += ' ';
-        }
-        footer += '@deprecated';
+        footerParts.push('@deprecated');
       }
 
       // If we are anywhere inside a TypeLiteral, _insideTypeLiteral is greater than 0
       if (this._insideTypeLiteral === 0 && astItem.needsDocumentation) {
-        if (footer) {
-          footer += ' ';
-        }
-        footer += '(undocumented)';
+        footerParts.push('(undocumented)');
       }
 
-      if (footer) {
-        lines.push(footer);
+      if (footerParts.length > 0) {
+        lines.push(footerParts.join(' '));
       }
     }
 
