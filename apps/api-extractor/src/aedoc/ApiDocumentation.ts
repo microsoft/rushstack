@@ -41,12 +41,6 @@ export interface IAedocParameter {
 }
 
 export class ApiDocumentation {
-  /**
-   * Match AEDoc block tags and inline tags
-   * Example "@a @b@c d@e @f {whatever} {@link a} { @something } \@g" => ["@a", "@f", "{@link a}", "{ @something }"]
-   */
-  public static readonly _aedocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
-
   // For guidance about using these tags, please see this documentation:
   // https://github.com/Microsoft/web-build-tools/wiki/API-Extractor-~-AEDoc-tags
   private static _allowedRegularAedocTags: string[] = [
@@ -78,21 +72,6 @@ export class ApiDocumentation {
    * Example: "This is a summary. \{\@link a\} \@remarks These are remarks."
    */
   public originalAedoc: string;
-
-  /**
-   * The docComment text string split into an array of ITokenItems.  The tokens are essentially either
-   * AEDoc tags (which start with the "@" character) or substrings containing the
-   * remaining text.  The array can be empty, but not undefined.
-   * Example:
-   * docComment       = "Example Function\n@returns the number of items\n@internal  "
-   * docCommentTokens = [
-   *  {tokenType: 'text', parameter: 'Example Function\n'},
-   *  {tokenType: '\@returns', parameter: ''}
-   *  {tokenType: 'text', parameter: 'the number of items\n'}
-   *  {tokenType: '@internal', parameter: ''}
-   * ];
-   */
-  public docCommentTokens: Token[];
 
    /**
    * docCommentTokens that are parsed into Doc Elements.
@@ -131,23 +110,17 @@ export class ApiDocumentation {
    * True if the "\@preapproved" tag was specified.
    * Indicates that this internal API is exempt from further reviews.
    */
-  public preapproved?: boolean;
+  public preapproved: boolean | undefined;
 
   /**
    * True if the "\@packagedocumentation" tag was specified.
    */
-  public isPackageDocumentation?: boolean;
+  public isPackageDocumentation: boolean | undefined;
 
-  public deprecated?: string;
-  public internalremarks?: string;
-  public paramDocs?: Map<string, string>;
-  public returns?: string;
-  public see?: string[];
-  public isDocBeta?: boolean;
-  public isDocInherited?: boolean;
-  public isDocInheritedDeprecated?: boolean;
-  public isOverride?: boolean;
-  public hasReadOnlyTag?: boolean;
+  public isDocBeta: boolean | undefined;
+  public isDocInherited: boolean | undefined;
+  public isDocInheritedDeprecated: boolean | undefined;
+  public hasReadOnlyTag: boolean | undefined;
   public warnings: string[];
 
   /**
