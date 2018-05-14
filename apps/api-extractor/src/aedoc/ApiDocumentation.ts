@@ -50,6 +50,7 @@ export class ApiDocumentation {
     '@betadocumentation',
     '@internal',
     '@internalremarks',
+    '@override',
     '@packagedocumentation',
     '@param',
     '@preapproved',
@@ -57,7 +58,9 @@ export class ApiDocumentation {
     '@returns',
     '@deprecated',
     '@readonly',
-    '@remarks'
+    '@remarks',
+    '@sealed',
+    '@virtual'
   ];
 
   private static _allowedInlineAedocTags: string[] = [
@@ -122,6 +125,21 @@ export class ApiDocumentation {
   public isDocInheritedDeprecated: boolean | undefined;
   public hasReadOnlyTag: boolean | undefined;
   public warnings: string[];
+
+  /**
+   * Whether the "\@sealed" AEDoc tag was specified.
+   */
+  public isSealed: boolean;
+
+  /**
+   * Whether the "\@virtual" AEDoc tag was specified.
+   */
+  public isVirtual: boolean;
+
+  /**
+   * Whether the "\@override" AEDoc tag was specified.
+   */
+  public isOverride: boolean;
 
   /**
    * A function type interface that abstracts away resolving
@@ -275,6 +293,18 @@ export class ApiDocumentation {
           case '@betadocumentation':
             tokenizer.getToken();
             this.isDocBeta = true;
+            break;
+          case '@sealed':
+            tokenizer.getToken();
+            this.isSealed = true;
+            break;
+         case '@virtual':
+            tokenizer.getToken();
+            this.isVirtual = true;
+            break;
+          case '@override':
+            tokenizer.getToken();
+            this.isOverride = true;
             break;
           default:
             tokenizer.getToken();
