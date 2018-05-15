@@ -41,6 +41,12 @@ interface IJsonSchemaValidateOptions {
   customErrorHeader?: string;
 }
 
+// @alpha (undocumented)
+interface ILoggingProviderSet {
+  error: (message?: string) => void;
+  log: (message?: string) => void;
+}
+
 // @public
 interface IPackageJson {
   bin?: string;
@@ -128,6 +134,15 @@ class LockFile {
   readonly isReleased: boolean;
   release(): void;
   static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined;
+}
+
+// @alpha
+class Logging {
+  static colors: boolean;
+  static error(message?: string): void;
+  static log(message?: string): void;
+  static registerConsoleLogging(): void;
+  static registerLoggingProviderSet(providerSet: ILoggingProviderSet): void;
 }
 
 // @public
