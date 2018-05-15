@@ -38,8 +38,6 @@ export class PurgeAction extends BaseRushAction {
     return Promise.resolve().then(() => {
       const stopwatch: Stopwatch = Stopwatch.start();
 
-      this.eventHooksManager.handle(Event.preRushInstall);
-
       const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration);
 
       if (this._unsafeParameter.value!) {
