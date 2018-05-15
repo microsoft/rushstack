@@ -126,6 +126,7 @@ export class RushConfiguration {
   private _npmTmpFolder: string;
   private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
+  private _tempShrinkwrapPreinstallFilename: string;
   private _rushUserFolder: string;
   private _rushLinkJsonFilename: string;
   private _packageManagerToolVersion: string;
@@ -423,8 +424,9 @@ export class RushConfiguration {
   }
 
   /**
-   * The filename of the NPM shrinkwrap file that is tracked e.g. by Git.  (The "rush install"
+   * The full path of the shrinkwrap file that is tracked by Git.  (The "rush install"
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
+   * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
    * Example: "C:\MyRepo\common\npm-shrinkwrap.json" or "C:\MyRepo\common\shrinkwrap.yaml"
    */
@@ -433,13 +435,27 @@ export class RushConfiguration {
   }
 
   /**
-   * The filename of the temporary NPM shrinkwrap file that is used by "rush install".
-   * (The master copy is tempShrinkwrapFilename.)
+   * The full path of the temporary shrinkwrap file that is used during "rush install".
+   * This file may get rewritten by the package manager during installation.
+   * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
    * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json" or "C:\MyRepo\common\temp\shrinkwrap.yaml"
    */
   public get tempShrinkwrapFilename(): string {
     return this._tempShrinkwrapFilename;
+  }
+
+  /**
+   * The full path of a backup copy of tempShrinkwrapFilename. This backup copy is made
+   * before installation begins, and can be compared to determine how the package manager
+   * modified tempShrinkwrapFilename.
+   * @remarks
+   * This property merely reports the filename; the file itself may not actually exist.
+   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json"
+   * or "C:\MyRepo\common\temp\shrinkwrap-preinstall.yaml"
+   */
+  public get tempShrinkwrapPreinstallFilename(): string {
+    return this._tempShrinkwrapPreinstallFilename;
   }
 
   /**
@@ -691,6 +707,10 @@ export class RushConfiguration {
     } else {
       throw new Error(`Neither "npmVersion" nor "pnpmVersion" was defined in the rush configuration.`);
     }
+
+    /// From "C:\repo\common\temp\shrinkwrap.yaml" --> "C:\repo\common\temp\shrinkwrap-preinstall.yaml"
+    const parsedPath: path.ParsedPath = path.parse(this._tempShrinkwrapFilename);
+    this._tempShrinkwrapPreinstallFilename = parsedPath.dir + parsedPath.name + '-preinstall' + parsedPath.ext;
 
     RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder, this.packageManager);
 

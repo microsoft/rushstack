@@ -26,6 +26,7 @@ import { RushCommandLineParser } from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { TaskSelector } from '../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 interface ICustomOptionInstance {
   optionDefinition: CustomOption;
@@ -127,7 +128,7 @@ export class CustomRushAction extends BaseRushAction {
         stopwatch.stop();
         console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
         this._doAfterTask(stopwatch, false);
-        this.parser.exitWithError();
+        throw new AlreadyReportedError();
       });
   }
 
@@ -223,7 +224,7 @@ export class CustomRushAction extends BaseRushAction {
       return;
     }
 
-    this.eventHooksManager.handle(Event.preRushBuild);
+    this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug);
   }
 
   private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {

@@ -19,8 +19,8 @@ export class CustomCommandFactory {
     const customActions: Map<string, CustomRushAction> = new Map<string, CustomRushAction>();
 
     const documentationForBuild: string = 'The Rush build command assumes that the package.json file for each'
-      + ' project contains scripts for "npm run clean" and "npm run test".  It invokes'
-      + ' these commands to build each project.  Projects are built in parallel where'
+      + ' project contains a "scripts" entry for "npm run build".  It invokes'
+      + ' this commands to build each project.  Projects are built in parallel where'
       + ' possible, but always respecting the dependency graph for locally linked projects.'
       + ' The number of simultaneous processes will be based on the number of machine cores'
       + ' unless overridden by the --parallelism flag.';

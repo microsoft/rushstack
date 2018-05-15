@@ -114,8 +114,11 @@ export class PackageName {
       + result.unscopedName;
 
     // "New packages must not have uppercase letters in the name."
-    if (nameWithoutScopeSymbols !== nameWithoutScopeSymbols.toLowerCase()) {
-      result.error = `The package name "${packageName}" must not contain upper case characters`;
+    // This can't be enforced because "old" packages are still actively maintained.
+    // Example: https://www.npmjs.com/package/Base64
+    // However it's pretty reasonable to require the scope to be lower case
+    if (result.scope !== result.scope.toLowerCase()) {
+      result.error = `The package scope "${result.scope}" must not contain upper case characters`;
       return result;
     }
 

@@ -15,7 +15,10 @@ export class LinkAction extends BaseRushAction {
     super({
       actionName: 'link',
       summary: 'Create node_modules symlinks for all projects',
-      documentation: 'Create node_modules symlinks for all projects',
+      documentation: 'Create node_modules symlinks for all projects.  This operation is normally performed'
+       + ' automatically as part of "rush install" or "rush update".  You should only need to use "rush link"'
+       + ' if you performed "rush unlink" for some reason, or if you specified the "--no-link" option'
+       + ' for "rush install" or "rush update".',
       parser
     });
   }

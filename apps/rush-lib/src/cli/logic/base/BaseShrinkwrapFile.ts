@@ -44,7 +44,7 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
-   * Returns true if the shrinkwrap file includes a package that would satisfiying the specified
+   * Returns true if the shrinkwrap file includes a package that would satisfying the specified
    * package name and SemVer version range.  By default, the dependencies are resolved by looking
    * at the root of the node_modules folder described by the shrinkwrap file.  However, if
    * tempProjectName is specified, then the resolution will start in that subfolder.

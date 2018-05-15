@@ -426,6 +426,26 @@ export class Utilities {
       suppressOutput);
   }
 
+  public static withFinally<T>(options: { promise: Promise<T>, finally: () => void }): Promise<T> {
+    return options.promise
+      .then<T>((result: T) => {
+        try {
+          options.finally();
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        return result;
+      })
+      .catch<T>((error: Error) => {
+        try {
+          options.finally();
+        } catch (innerError) {
+          return Promise.reject(innerError);
+        }
+        return Promise.reject(error);
+      });
+  }
+
   /**
    * Returns a process.env environment suitable for executing lifecycle scripts.
    * @param initCwd - The INIT_CWD environment variable

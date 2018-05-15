@@ -170,14 +170,14 @@
       "type": "object",
       "properties": {
         "preRushInstall": {
-          "description": "The list of scripts to run before the Rush install command starts.",
+          "description": "The list of scripts to run before the Rush installation starts.",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
         "postRushInstall": {
-          "description": "The list of scripts to run after the Rush install command finishes.",
+          "description": "The list of scripts to run after the Rush installation finishes.",
           "type": "array",
           "items": {
             "type": "string"

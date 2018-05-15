@@ -50,7 +50,7 @@ export class TaskSelector {
       this._rushLinkJson = JsonFile.load(this._options.rushConfiguration.rushLinkJsonFilename);
     } catch (error) {
       throw new Error(`Could not read "${this._options.rushConfiguration.rushLinkJsonFilename}".`
-        + ` Have you ran "rush install" and/or "rush link"?`);
+        + ` Did you run "rush install" or "rush update"?`);
     }
 
     if (this._options.toFlags.length > 0) {

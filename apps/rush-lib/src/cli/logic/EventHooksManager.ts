@@ -18,7 +18,7 @@ export class EventHooksManager {
     this._commonTempFolder = commonTempFolder;
   }
 
-  public handle(event: Event, isDebug: boolean = false): void {
+  public handle(event: Event, isDebug: boolean): void {
     if (!this._eventHooks) {
       return;
     }

@@ -13,7 +13,7 @@ import { RushConfiguration } from '../../data/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { ChangeAction } from './ChangeAction';
 import { CheckAction } from './CheckAction';
-import { GenerateAction } from './GenerateAction';
+import { UpdateAction } from './UpdateAction';
 import { InstallAction } from './InstallAction';
 import { LinkAction } from './LinkAction';
 import { PublishAction } from './PublishAction';
@@ -25,6 +25,7 @@ import { CustomCommandFactory } from './CustomCommandFactory';
 import { CustomRushAction } from './CustomRushAction';
 
 import { Telemetry } from '../logic/Telemetry';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
@@ -35,22 +36,16 @@ export class RushCommandLineParser extends CommandLineParser {
   constructor() {
     super({
       toolFilename: 'rush',
-      toolDescription: 'Rush helps you to manage a collection of npm'
-      + ' projects.  Rush collects the dependencies for all projects to perform a minimal install,'
-      + ' detects which projects can be locally linked, and performs a fast parallel'
-      + ' build according to the detected dependency graph.  If you want to decompose'
-      + ' your monolithic project into many small packages but are afraid of the dreaded'
-      + ' NPM progress bar, Rush is for you.'
+      toolDescription: 'Rush makes life easier for JavaScript developers who develop, build, and publish'
+        + ' many packages from a central Git repo.  It is designed to handle very large repositories'
+        + ' supporting many projects and people.  Rush provides policies, protections, and customizations'
+        + ' that help coordinate teams and safely onboard new contributors.  Rush also generates change logs'
+        + ' and automates package publishing.  It can manage decoupled subsets of projects with different'
+        + ' release and versioning strategies.  A full API is included to facilitate integration with other'
+        + ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,'
+        + ' Rush is for you.'
     });
     this._populateActions();
-  }
-
-  public exitWithError(): void {
-    try {
-      this.flushTelemetry();
-    } finally {
-      process.exit(1);
-    }
   }
 
   public get isDebug(): boolean {
@@ -72,20 +67,12 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   protected onExecute(): Promise<void> {
-    // For debugging, don't catch any exceptions; show the full call stack
-    return this._execute().catch((error: Error) => {
-      if (this._debugParameter.value) {
-        console.log(colors.red(error.toString()));
-        if (error.stack) {
-          console.log(os.EOL + error.stack);
-        }
-      } else {
-        this._exitAndReportError(error);
-      }
+    return this._wrapOnExecute().catch((error: Error) => {
+      this._reportErrorAndSetExitCode(error);
     });
   }
 
-  private _execute(): Promise<void> {
+  private _wrapOnExecute(): Promise<void> {
     try {
       if (this.rushConfiguration) {
         this.telemetry = new Telemetry(this.rushConfiguration);
@@ -117,12 +104,12 @@ export class RushCommandLineParser extends CommandLineParser {
 
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
-      this.addAction(new GenerateAction(this));
       this.addAction(new InstallAction(this));
       this.addAction(new LinkAction(this));
       this.addAction(new PublishAction(this));
       this.addAction(new PurgeAction(this));
       this.addAction(new ScanAction(this));
+      this.addAction(new UpdateAction(this));
       this.addAction(new UnlinkAction(this));
       this.addAction(new VersionAction(this));
 
@@ -132,20 +119,31 @@ export class RushCommandLineParser extends CommandLineParser {
         });
 
     } catch (error) {
-      this._exitAndReportError(error);
+      this._reportErrorAndSetExitCode(error);
     }
   }
 
-  private _exitAndReportError(error: Error): void {
-    if (this._debugParameter.value) {
-      // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
-      // would show for an uncaught error
-      console.error(os.EOL + error.stack);
-    } else {
+  private _reportErrorAndSetExitCode(error: Error): void {
+    if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
       const wrap: (textToWrap: string) => string = wordwrap.soft(prefix.length, Utilities.getConsoleWidth());
       console.error(os.EOL + colors.red(prefix + wrap(error.message).trim()));
     }
-    this.exitWithError();
+
+    if (this._debugParameter.value) {
+      // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
+      // would show for an uncaught error
+      console.error(os.EOL + error.stack);
+    }
+
+    this.flushTelemetry();
+
+    // Ideally we want to remove all calls to process.exit() from our code, and replace them
+    // with normal control flow that properly cleans up its data structures.
+    // For this particular call, we have a problem that the RushCommandLineParser constructor
+    // performs nontrivial work that can throw an exception.  Either the Rush class would need
+    // to handle reporting for those exceptions, or else _populateActions() should be moved
+    // to a RushCommandLineParser lifecycle stage that can handle it.
+    process.exit(1);
   }
 }
