@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+
+import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -63,7 +65,7 @@ export abstract class BaseRushAction extends CommandLineAction {
 
     if (!this._safeForSimultaneousRushProcesses) {
       if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-        console.log(`Another rush command is already running in this repository.`);
+        console.log(colors.red(`Another rush command is already running in this repository.`));
         process.exit(1);
       }
     }
