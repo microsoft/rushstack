@@ -137,6 +137,13 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     this.flushTelemetry();
-    process.exitCode = 1;
+
+    // Ideally we want to remove all calls to process.exit() from our code, and replace them
+    // with normal control flow that properly cleans up its data structures.
+    // For this particular call, we have a problem that the RushCommandLineParser constructor
+    // performs nontrivial work that can throw an exception.  Either the Rush class would need
+    // to handle reporting for those exceptions, or else _populateActions() should be moved
+    // to a RushCommandLineParser lifecycle stage that can handle it.
+    process.exit(1);
   }
 }
