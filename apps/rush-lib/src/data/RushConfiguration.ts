@@ -710,7 +710,8 @@ export class RushConfiguration {
 
     /// From "C:\repo\common\temp\shrinkwrap.yaml" --> "C:\repo\common\temp\shrinkwrap-preinstall.yaml"
     const parsedPath: path.ParsedPath = path.parse(this._tempShrinkwrapFilename);
-    this._tempShrinkwrapPreinstallFilename = parsedPath.dir + parsedPath.name + '-preinstall' + parsedPath.ext;
+    this._tempShrinkwrapPreinstallFilename = path.join(parsedPath.dir,
+      parsedPath.name + '-preinstall' + parsedPath.ext);
 
     RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder, this.packageManager);
 
