@@ -45,6 +45,7 @@ interface IJsonSchemaValidateOptions {
 interface ILoggingProviderSet {
   error: (message?: string) => void;
   log: (message?: string) => void;
+  warn: (message?: string) => void;
 }
 
 // @public
@@ -143,6 +144,7 @@ class Logging {
   static log(message?: string): void;
   static registerConsoleLogging(): void;
   static registerLoggingProviderSet(providerSet: ILoggingProviderSet): void;
+  static warn(message?: string): void;
 }
 
 // @public

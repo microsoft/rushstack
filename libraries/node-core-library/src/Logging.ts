@@ -14,6 +14,11 @@ export interface ILoggingProviderSet {
    * Logger for error messages.
    */
   error: (message?: string) => void;
+
+  /**
+   * Logger for warnings.
+   */
+  warn: (message?: string) => void;
 }
 
 /**
@@ -45,7 +50,8 @@ export class Logging {
   public static registerConsoleLogging(): void {
     Logging.registerLoggingProviderSet({
       log: console.log,
-      error: console.error
+      error: console.error,
+      warn: console.warn
     });
   }
 
@@ -68,6 +74,13 @@ export class Logging {
    */
   public static error(message?: string): void {
     Logging._processMessage(message || '', ({ error }) => error);
+  }
+
+  /**
+   * Log a message to the "warn" provider.
+   */
+  public static warn(message?: string): void {
+    Logging._processMessage(message || '', ({ warn }) => warn);
   }
 
   private static _sanetizeColors(message: string): string {
