@@ -81,7 +81,7 @@ export interface IInstallManagerOptions {
 }
 
 /**
- * This class implements common logic between "rush install" and "rush generate".
+ * This class implements common logic between "rush install" and "rush update".
  */
 export class InstallManager {
   private _rushConfiguration: RushConfiguration;

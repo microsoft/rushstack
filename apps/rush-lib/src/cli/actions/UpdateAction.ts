@@ -37,19 +37,18 @@ export class UpdateAction extends BaseInstallAction {
       parameterLongName: '--full',
       description: 'Normally "rush update" tries to preserve your existing installed versions'
         + ' and only makes the minimum updates needed to satisfy the package.json files.'
-        + ' This conservatism is important in a large monorepo where seemingly SemVer-compatible'
-        + ' updates can frequently cause regressions.'
-        + ' Use "--full" to update all dependencies to the latest SemVer-compatible version.'
-        + ' A full update is typically performed regularly by a person or robot whose role is'
-        + ' to deal with potential upgrade regressions.'
+        + ' This conservative approach prevents your PR from getting involved with package updates that'
+        + ' are unrelated to your work. Use "--full" when you really want to update all dependencies'
+        + ' to the latest SemVer-compatible version.  This should be done periodically by a person'
+        + ' or robot whose role is to deal with potential upgrade regressions.'
     });
     this._recheckParameter = this.defineFlagParameter({
       parameterLongName: '--recheck',
       description: 'If the shrinkwrap file appears to already satisfy the package.json files,'
         + ' then "rush update" will skip invoking the package manager at all.  In certain situations'
         + ' this heuristic may be inaccurate.  Use the "--recheck" flag to force the package manager'
-        + ' to process the shrinkwrap file.  It will also update your shrinkwrap file with any fixups'
-        + ' that Rush normally performs only in the temporary folder (to minimize shrinkwrap churn).'
+        + ' to process the shrinkwrap file.  This will also update your shrinkwrap file with Rush\'s fixups.'
+        + ' (To minimize shrinkwrap churn, these fixups are normally performed only in the temporary folder.)'
     });
   }
 

@@ -117,7 +117,7 @@ export class ChangeAction extends BaseRushAction {
 
     return this._promptLoop()
       .catch((error: Error) => {
-        throw new Error(`There was an error creating the changefile: ${error.toString()}`);
+        throw new Error(`There was an error creating the change file: ${error.toString()}`);
       });
   }
 
@@ -174,7 +174,7 @@ export class ChangeAction extends BaseRushAction {
   private _validateChangeFile(changedPackages: string[]): void {
     const files: string[] = this._getChangeFiles();
     if (files.length === 0) {
-      throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
+      throw new Error(`No change file is found. Run "rush change" to generate a change file.`);
     }
     ChangeFiles.validate(files, changedPackages);
   }
@@ -372,7 +372,7 @@ export class ChangeAction extends BaseRushAction {
         .toString()
         .replace(/(\r\n|\n|\r)/gm, '');
     } catch (err) {
-      console.log('There was an issue detecting your git email...');
+      console.log('There was an issue detecting your Git email...');
       email = undefined;
     }
 

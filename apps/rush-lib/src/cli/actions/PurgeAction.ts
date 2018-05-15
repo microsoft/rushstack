@@ -19,7 +19,8 @@ export class PurgeAction extends BaseRushAction {
     super({
       actionName: 'purge',
       summary: 'For diagnostic purposes, use this command to delete caches and other temporary files used by Rush',
-      documentation: 'The "rush purge" command is used to delete temporary files created by Rush.',
+      documentation: 'The "rush purge" command is used to delete temporary files created by Rush.  This is'
+        + ' useful if you are having problems and suspect that cache files may be corrupt.',
       parser
     });
   }

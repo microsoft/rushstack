@@ -30,7 +30,7 @@ Positional arguments:
                imported packages.
     update     Install package dependencies for all projects in the repo, and 
                create or update the shrinkwrap file as needed
-    unlink     Delete node_modules symlinks for all projects
+    unlink     Delete node_modules symlinks for all projects in the repo
     version    (EXPERIMENTAL) Manage package versions in the repo.
     build      (EXPERIMENTAL) Build all projects that haven't been built, or 
                have changed since they were last built.
@@ -52,11 +52,11 @@ exports[`CommandLineHelp prints the help for "rush build" 1`] = `
                   
 
 The Rush build command assumes that the package.json file for each project 
-contains scripts for \\"npm run clean\\" and \\"npm run test\\". It invokes these 
-commands to build each project. Projects are built in parallel where possible,
- but always respecting the dependency graph for locally linked projects. The 
-number of simultaneous processes will be based on the number of machine cores 
-unless overridden by the --parallelism flag.
+contains a \\"scripts\\" entry for \\"npm run build\\". It invokes this commands to 
+build each project. Projects are built in parallel where possible, but always 
+respecting the dependency graph for locally linked projects. The number of 
+simultaneous processes will be based on the number of machine cores unless 
+overridden by the --parallelism flag.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -161,7 +161,11 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for "rush link" 1`] = `
 "usage: rush link [-h] [-f]
 
-Create node_modules symlinks for all projects
+Create node_modules symlinks for all projects. This operation is normally 
+performed automatically as part of \\"rush install\\" or \\"rush update\\". You 
+should only need to use \\"rush link\\" if you performed \\"rush unlink\\" for some 
+reason, or if you specified the \\"--no-link\\" option for \\"rush install\\" or 
+\\"rush update\\".
 
 Optional arguments:
   -h, --help   Show this help message and exit.
@@ -245,7 +249,9 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for "rush purge" 1`] = `
 "usage: rush purge [-h] [--unsafe]
 
-The \\"rush purge\\" command is used to delete temporary files created by Rush.
+The \\"rush purge\\" command is used to delete temporary files created by Rush. 
+This is useful if you are having problems and suspect that cache files may be 
+corrupt.
 
 Optional arguments:
   -h, --help  Show this help message and exit.
@@ -264,11 +270,11 @@ exports[`CommandLineHelp prints the help for "rush rebuild" 1`] = `
                     
 
 The Rush build command assumes that the package.json file for each project 
-contains scripts for \\"npm run clean\\" and \\"npm run test\\". It invokes these 
-commands to build each project. Projects are built in parallel where possible,
- but always respecting the dependency graph for locally linked projects. The 
-number of simultaneous processes will be based on the number of machine cores 
-unless overridden by the --parallelism flag.
+contains a \\"scripts\\" entry for \\"npm run build\\". It invokes this commands to 
+build each project. Projects are built in parallel where possible, but always 
+respecting the dependency graph for locally linked projects. The number of 
+simultaneous processes will be based on the number of machine cores unless 
+overridden by the --parallelism flag.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -317,7 +323,7 @@ exports[`CommandLineHelp prints the help for "rush unlink" 1`] = `
 
 This removes the symlinks created by the \\"rush link\\" command. This is useful 
 for cleaning a repo using \\"git clean\\" without accidentally deleting source 
-files, or for using standard npm commands on a project.
+files, or for using standard NPM commands on a project.
 
 Optional arguments:
   -h, --help  Show this help message and exit.
@@ -353,20 +359,20 @@ Optional arguments:
   --full           Normally \\"rush update\\" tries to preserve your existing 
                    installed versions and only makes the minimum updates 
                    needed to satisfy the package.json files. This 
-                   conservatism is important in a large monorepo where 
-                   seemingly SemVer-compatible updates can frequently cause 
-                   regressions. Use \\"--full\\" to update all dependencies to 
-                   the latest SemVer-compatible version. A full update is 
-                   typically performed regularly by a person or robot whose 
+                   conservative approach prevents your PR from getting 
+                   involved with package updates that are unrelated to your 
+                   work. Use \\"--full\\" when you really want to update all 
+                   dependencies to the latest SemVer-compatible version. This 
+                   should be done periodically by a person or robot whose 
                    role is to deal with potential upgrade regressions.
   --recheck        If the shrinkwrap file appears to already satisfy the 
                    package.json files, then \\"rush update\\" will skip invoking 
                    the package manager at all. In certain situations this 
                    heuristic may be inaccurate. Use the \\"--recheck\\" flag to 
                    force the package manager to process the shrinkwrap file. 
-                   It will also update your shrinkwrap file with any fixups 
-                   that Rush normally performs only in the temporary folder 
-                   (to minimize shrinkwrap churn).
+                   This will also update your shrinkwrap file with Rush's 
+                   fixups. (To minimize shrinkwrap churn, these fixups are 
+                   normally performed only in the temporary folder.)
 "
 `;
 

@@ -19,7 +19,7 @@ export class CommandLineMigrationAdvisor {
 
       if (args[0] === 'generate') {
         CommandLineMigrationAdvisor._reportDeprecated(
-          'Instead of "rush generate", use "rush update".');
+          'Instead of "rush generate", use "rush update" or "rush update --full".');
         return false;
       }
 

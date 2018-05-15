@@ -300,7 +300,7 @@ export class NpmLinkManager extends BaseLinkManager {
         } else {
           if (dependency.kind !== PackageDependencyKind.Optional) {
             throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
-              + ` was not found the common folder -- do you need to run "rush generate"?`);
+              + ` was not found the common folder -- do you need to run "rush install"?`);
           } else {
             console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
           }
