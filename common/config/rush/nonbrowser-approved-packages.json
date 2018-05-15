@@ -254,6 +254,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "https-proxy-agent",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "inquirer",
       "allowedCategories": [ "libraries" ]
     },
@@ -343,6 +347,10 @@
     },
     {
       "name": "mocha",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "node-fetch",
       "allowedCategories": [ "libraries" ]
     },
     {
