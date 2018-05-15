@@ -68,7 +68,7 @@ describe('PackageName', () => {
         {
           scope: '@Microsoft',
           unscopedName: 'node-core-library',
-          error: 'The package name "@Microsoft/node-core-library" must not contain upper case characters'
+          error: 'The package scope "@Microsoft" must not contain upper case characters'
         }
       );
 
