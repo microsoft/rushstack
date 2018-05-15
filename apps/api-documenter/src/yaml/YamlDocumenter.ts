@@ -300,6 +300,20 @@ export class YamlDocumenter {
     if (apiStructure.implements) {
       yamlItem.implements = [ apiStructure.implements ];
     }
+
+    if (apiStructure.isSealed) {
+      let sealedMessage: string;
+      if (docItem.kind === DocItemKind.Class) {
+        sealedMessage = 'This class is marked as `@sealed`. Subclasses should not extend it.';
+      } else {
+        sealedMessage = 'This interface is marked as `@sealed`. Other interfaces should not extend it.';
+      }
+      if (!yamlItem.remarks) {
+        yamlItem.remarks = sealedMessage;
+      } else {
+        yamlItem.remarks = sealedMessage + '\n\n' + yamlItem.remarks;
+      }
+    }
   }
 
   private _populateYamlMethod(yamlItem: Partial<IYamlItem>, docItem: DocItem): void {
@@ -307,7 +321,7 @@ export class YamlDocumenter {
     yamlItem.name = Utilities.getConciseSignature(docItem.name, apiMethod);
 
     const syntax: IYamlSyntax = {
-      content: apiMethod.signature
+      content: this._formatCommentedAnnotations(apiMethod.signature, apiMethod)
     };
     yamlItem.syntax = syntax;
 
@@ -343,8 +357,9 @@ export class YamlDocumenter {
     const apiProperty: IApiProperty = docItem.apiItem as IApiProperty;
 
     const syntax: IYamlSyntax = {
-      content: apiProperty.signature
+      content: this._formatCommentedAnnotations(apiProperty.signature, apiProperty)
     };
+
     yamlItem.syntax = syntax;
 
     if (apiProperty.type) {
@@ -395,6 +410,24 @@ export class YamlDocumenter {
     if (schema) {
       schema.validateObject(dataObject, filePath);
     }
+  }
+
+  // Prepends a string such as "/** @sealed @override */" to an item signature where appropriate.
+  private _formatCommentedAnnotations(signature: string, apiItem: IApiMethod | IApiProperty): string {
+    const annotations: string[] = [];
+    if (apiItem.isSealed) {
+      annotations.push('@sealed');
+    }
+    if (apiItem.isVirtual) {
+      annotations.push('@virtual');
+    }
+    if (apiItem.isOverride) {
+      annotations.push('@override');
+    }
+    if (annotations.length === 0) {
+      return signature;
+    }
+    return '/** ' + annotations.join(' ') + ' */\n' + signature;
   }
 
   /**

@@ -41,12 +41,6 @@ export interface IAedocParameter {
 }
 
 export class ApiDocumentation {
-  /**
-   * Match AEDoc block tags and inline tags
-   * Example "@a @b@c d@e @f {whatever} {@link a} { @something } \@g" => ["@a", "@f", "{@link a}", "{ @something }"]
-   */
-  public static readonly _aedocTagsRegex: RegExp = /{\s*@(\\{|\\}|[^{}])*}|(?:^|\s)(\@[a-z_]+)(?=\s|$)/gi;
-
   // For guidance about using these tags, please see this documentation:
   // https://github.com/Microsoft/web-build-tools/wiki/API-Extractor-~-AEDoc-tags
   private static _allowedRegularAedocTags: string[] = [
@@ -56,6 +50,7 @@ export class ApiDocumentation {
     '@betadocumentation',
     '@internal',
     '@internalremarks',
+    '@override',
     '@packagedocumentation',
     '@param',
     '@preapproved',
@@ -63,7 +58,9 @@ export class ApiDocumentation {
     '@returns',
     '@deprecated',
     '@readonly',
-    '@remarks'
+    '@remarks',
+    '@sealed',
+    '@virtual'
   ];
 
   private static _allowedInlineAedocTags: string[] = [
@@ -78,21 +75,6 @@ export class ApiDocumentation {
    * Example: "This is a summary. \{\@link a\} \@remarks These are remarks."
    */
   public originalAedoc: string;
-
-  /**
-   * The docComment text string split into an array of ITokenItems.  The tokens are essentially either
-   * AEDoc tags (which start with the "@" character) or substrings containing the
-   * remaining text.  The array can be empty, but not undefined.
-   * Example:
-   * docComment       = "Example Function\n@returns the number of items\n@internal  "
-   * docCommentTokens = [
-   *  {tokenType: 'text', parameter: 'Example Function\n'},
-   *  {tokenType: '\@returns', parameter: ''}
-   *  {tokenType: 'text', parameter: 'the number of items\n'}
-   *  {tokenType: '@internal', parameter: ''}
-   * ];
-   */
-  public docCommentTokens: Token[];
 
    /**
    * docCommentTokens that are parsed into Doc Elements.
@@ -131,24 +113,33 @@ export class ApiDocumentation {
    * True if the "\@preapproved" tag was specified.
    * Indicates that this internal API is exempt from further reviews.
    */
-  public preapproved?: boolean;
+  public preapproved: boolean | undefined;
 
   /**
    * True if the "\@packagedocumentation" tag was specified.
    */
-  public isPackageDocumentation?: boolean;
+  public isPackageDocumentation: boolean | undefined;
 
-  public deprecated?: string;
-  public internalremarks?: string;
-  public paramDocs?: Map<string, string>;
-  public returns?: string;
-  public see?: string[];
-  public isDocBeta?: boolean;
-  public isDocInherited?: boolean;
-  public isDocInheritedDeprecated?: boolean;
-  public isOverride?: boolean;
-  public hasReadOnlyTag?: boolean;
+  public isDocBeta: boolean | undefined;
+  public isDocInherited: boolean | undefined;
+  public isDocInheritedDeprecated: boolean | undefined;
+  public hasReadOnlyTag: boolean | undefined;
   public warnings: string[];
+
+  /**
+   * Whether the "\@sealed" AEDoc tag was specified.
+   */
+  public isSealed: boolean;
+
+  /**
+   * Whether the "\@virtual" AEDoc tag was specified.
+   */
+  public isVirtual: boolean;
+
+  /**
+   * Whether the "\@override" AEDoc tag was specified.
+   */
+  public isOverride: boolean;
 
   /**
    * A function type interface that abstracts away resolving
@@ -193,6 +184,11 @@ export class ApiDocumentation {
     this.reportError = errorLogger;
     this.parameters = {};
     this.warnings = warnings;
+
+    this.isSealed = false;
+    this.isVirtual = false;
+    this.isOverride = false;
+
     this._parseDocs();
   }
 
@@ -303,6 +299,18 @@ export class ApiDocumentation {
             tokenizer.getToken();
             this.isDocBeta = true;
             break;
+          case '@sealed':
+            tokenizer.getToken();
+            this.isSealed = true;
+            break;
+         case '@virtual':
+            tokenizer.getToken();
+            this.isVirtual = true;
+            break;
+          case '@override':
+            tokenizer.getToken();
+            this.isOverride = true;
+            break;
           default:
             tokenizer.getToken();
             this._reportBadAedocTag(token);
@@ -346,6 +354,14 @@ export class ApiDocumentation {
     if (this.preapproved && this.releaseTag !== ReleaseTag.Internal) {
       this.reportError('The @preapproved tag may only be applied to @internal definitions');
       this.preapproved = false;
+    }
+
+    if (this.isSealed && this.isVirtual) {
+      this.reportError('The @sealed and @virtual tags may not be used together');
+    }
+
+    if (this.isVirtual && this.isOverride) {
+      this.reportError('The @virtual and @override tags may not be used together');
     }
   }
 
