@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 04 May 2018 00:42:38 GMT and should not be manually modified.
+This log was last generated on Tue, 15 May 2018 02:26:45 GMT and should not be manually modified.
+
+## 1.3.1
+Tue, 15 May 2018 02:26:45 GMT
+
+### Patches
+
+- Fix an issue where the PackageName class could not parse the package name "Base64"
 
 ## 1.3.0
 Fri, 04 May 2018 00:42:38 GMT
