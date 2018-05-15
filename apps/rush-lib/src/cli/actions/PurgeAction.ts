@@ -7,7 +7,6 @@ import * as os from 'os';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
-import { Event } from '../../data/EventHooks';
 import { RushCommandLineParser } from './RushCommandLineParser';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { PurgeManager } from '../logic/PurgeManager';

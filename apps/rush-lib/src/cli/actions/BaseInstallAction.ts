@@ -44,7 +44,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected run(): Promise<void> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    this.eventHooksManager.handle(Event.preRushInstall);
+    this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
 
     const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration);
     const installManager: InstallManager = new InstallManager(this.rushConfiguration, purgeManager);
@@ -63,7 +63,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         stopwatch.stop();
 
         this._collectTelemetry(stopwatch, installManagerOptions, true);
-        this.eventHooksManager.handle(Event.postRushInstall);
+        this.eventHooksManager.handle(Event.postRushInstall, this.parser.isDebug);
 
         console.log(os.EOL + colors.green(
           `Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`));

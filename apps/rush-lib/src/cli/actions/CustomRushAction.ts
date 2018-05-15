@@ -224,7 +224,7 @@ export class CustomRushAction extends BaseRushAction {
       return;
     }
 
-    this.eventHooksManager.handle(Event.preRushBuild);
+    this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug);
   }
 
   private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {
