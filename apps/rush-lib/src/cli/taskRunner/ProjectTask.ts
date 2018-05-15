@@ -5,7 +5,12 @@ import * as child_process from 'child_process';
 import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as process from 'process';
-import { JsonFile, Text } from '@microsoft/node-core-library';
+
+import {
+  JsonFile,
+  Text,
+  Logging
+} from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { IPackageDeps } from '@microsoft/package-deps-hash';
 
@@ -16,9 +21,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 import { ITaskDefinition } from '../taskRunner/ITask';
-import {
-  PackageChangeAnalyzer
-} from '../logic/PackageChangeAnalyzer';
+import { PackageChangeAnalyzer } from '../logic/PackageChangeAnalyzer';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;
@@ -176,7 +179,7 @@ export class ProjectTask implements ITaskDefinition {
         });
       }
     } catch (error) {
-      console.log(error);
+      Logging.log(error);
 
       this._writeLogsToDisk(writer);
       return Promise.reject(new TaskError('error', error.toString()));
@@ -244,7 +247,7 @@ export class ProjectTask implements ITaskDefinition {
         fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
       }
     } catch (e) {
-      console.log(`Error writing logs to disk: ${e}`);
+      Logging.log(`Error writing logs to disk: ${e}`);
     }
   }
 }

@@ -5,6 +5,8 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import gitInfo = require('git-repo-info');
 
+import { Logging } from '@microsoft/node-core-library';
+
 import { RushConfiguration } from './RushConfiguration';
 import {
   IChangeFile,
@@ -77,7 +79,7 @@ export class ChangeFile {
     try {
       branch = gitInfo().branch;
     } catch (error) {
-      console.log('Could not automatically detect git branch name, using timestamp instead.');
+      Logging.log('Could not automatically detect git branch name, using timestamp instead.');
     }
 
     // example filename: yourbranchname_2017-05-01-20-20.json

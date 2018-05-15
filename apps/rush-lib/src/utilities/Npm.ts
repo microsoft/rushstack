@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Utilities } from './Utilities';
 import * as semver from 'semver';
+
+import { Logging } from '@microsoft/node-core-library';
+
+import { Utilities } from './Utilities';
 
 /**
  * @public
@@ -28,7 +31,7 @@ export class Npm {
           }
         });
       } else {
-        console.log(`Package ${packageName} time value does not exist. Fall back to versions.`);
+        Logging.log(`Package ${packageName} time value does not exist. Fall back to versions.`);
         // time property does not exist. It happens sometimes. Fall back to versions.
         const packageVersions: string = Utilities.executeCommandAndCaptureOutput('npm',
           `view ${packageName} versions --json`.split(' '),
@@ -41,14 +44,14 @@ export class Npm {
             versions.push(v);
           });
         } else {
-          console.log(`No version is found for ${packageName}`);
+          Logging.log(`No version is found for ${packageName}`);
         }
       }
     } catch (error) {
       if (error.message.indexOf('npm ERR! 404') >= 0) {
-        console.log(`Package ${packageName} does not exist in the registry.`);
+        Logging.log(`Package ${packageName} does not exist in the registry.`);
       } else {
-        console.log(`Failed to get NPM information about ${packageName}.`);
+        Logging.log(`Failed to get NPM information about ${packageName}.`);
         throw error;
       }
     }

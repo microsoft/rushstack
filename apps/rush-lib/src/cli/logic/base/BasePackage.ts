@@ -3,7 +3,8 @@
 
 import {
   JsonFile,
-  IPackageJson
+  IPackageJson,
+  Logging
 } from '@microsoft/node-core-library';
 
 /**
@@ -154,7 +155,7 @@ export class BasePackage {
     if (!indent) {
       indent = '';
     }
-    console.log(indent + this.nameAndVersion);
+    Logging.log(indent + this.nameAndVersion);
     for (const child of this.children) {
       child.printTree(indent + '  ');
     }

@@ -4,7 +4,10 @@
 import { EOL } from 'os';
 import * as path from 'path';
 import * as colors from 'colors';
-import { IPackageJson } from '@microsoft/node-core-library';
+import {
+  IPackageJson,
+  Logging
+} from '@microsoft/node-core-library';
 
 import { RushCommandLineParser } from './cli/actions/RushCommandLineParser';
 import { RushConstants } from './RushConstants';
@@ -28,7 +31,7 @@ export class Rush {
    *  the tool is executed. This is mainly used for debugging purposes.
    */
   public static launch(launcherVersion: string, isManaged: boolean): void {
-    console.log(
+    Logging.log(
       EOL +
       colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
       colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +

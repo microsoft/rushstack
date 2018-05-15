@@ -5,7 +5,10 @@ import * as colors from 'colors';
 import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
-import { PackageName } from '@microsoft/node-core-library';
+import {
+  PackageName,
+  Logging
+} from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../../RushConstants';
 
@@ -108,7 +111,7 @@ export abstract class BaseShrinkwrapFile {
         // Only warn once for each spec
         if (!this._alreadyWarnedSpecs.has(result.rawSpec)) {
           this._alreadyWarnedSpecs.add(result.rawSpec);
-          console.log(colors.yellow(`WARNING: Not validating ${result.type}-based specifier: "${result.rawSpec}"`));
+          Logging.log(colors.yellow(`WARNING: Not validating ${result.type}-based specifier: "${result.rawSpec}"`));
         }
         return true;
     }

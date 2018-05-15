@@ -7,6 +7,8 @@ import * as glob from 'glob';
 import * as path from 'path';
 import builtinPackageNames = require('builtins');
 
+import { Logging } from '@microsoft/node-core-library';
+
 import { RushCommandLineParser } from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
@@ -93,7 +95,7 @@ export class ScanAction extends BaseRushAction {
           }
         }
       } catch (error) {
-        console.log(colors.bold('Skipping file due to error: ' + filename));
+        Logging.log(colors.bold('Skipping file due to error: ' + filename));
       }
     }
 
@@ -114,10 +116,10 @@ export class ScanAction extends BaseRushAction {
 
     packageNames.sort();
 
-    console.log('Detected dependencies:');
+    Logging.log('Detected dependencies:');
     for (const packageName of packageNames) {
       if (builtinPackageNames.indexOf(packageName) < 0) {
-        console.log('  ' + packageName);
+        Logging.log('  ' + packageName);
       }
     }
     return Promise.resolve();

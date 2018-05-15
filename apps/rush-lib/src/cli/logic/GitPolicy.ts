@@ -4,6 +4,8 @@
 import * as os from 'os';
 import * as colors from 'colors';
 
+import { Logging } from '@microsoft/node-core-library';
+
 import { RushConfiguration } from '../../data/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 
@@ -13,7 +15,7 @@ export class GitPolicy {
       return true;
     }
 
-    console.log('Checking Git policy for this repository.' + os.EOL);
+    Logging.log('Checking Git policy for this repository.' + os.EOL);
 
     // Determine the user's account
     // Ex: "bob@example.com"
@@ -22,7 +24,7 @@ export class GitPolicy {
       userEmail = Utilities.executeCommandAndCaptureOutput('git',
         ['config', 'user.email'], '.').trim();
     } catch (e) {
-      console.log(
+      Logging.log(
 `Error: ${e.message}
 Unable to determine your Git configuration using this command:
 
@@ -30,13 +32,13 @@ Unable to determine your Git configuration using this command:
 
 If you didn't configure your e-mail yet, try something like this:`);
 
-      console.log(colors.cyan(
+      Logging.log(colors.cyan(
 `
     git config --local user.name "Mr. Example"
     git config --local user.email "${rushConfiguration.gitSampleEmail}"
 `));
 
-      console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
+      Logging.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
 
       return false;
     }
@@ -51,7 +53,7 @@ If you didn't configure your e-mail yet, try something like this:`);
       const regex: RegExp = new RegExp('^' + pattern + '$', 'i');
       if (userEmail.match(regex)) {
         // For debugging:
-        // console.log(`${userEmail} matched pattern: "${pattern}"`);
+        // Logging.log(`${userEmail} matched pattern: "${pattern}"`);
         return true;
       }
     }
@@ -76,13 +78,13 @@ If you didn't configure your e-mail yet, try something like this:`);
     } else {
       message += 'this pattern:';
     }
-    console.log(message + os.EOL);
+    Logging.log(message + os.EOL);
 
     for (const pattern of  rushConfiguration.gitAllowedEmailRegExps) {
-      console.log('    ' + colors.cyan(pattern));
+      Logging.log('    ' + colors.cyan(pattern));
     }
 
-    console.log(
+    Logging.log(
 `
 ...but yours is configured like this:
 
@@ -90,13 +92,13 @@ If you didn't configure your e-mail yet, try something like this:`);
 
 To fix it, you can use commands like this:`);
 
-    console.log(colors.cyan(
+    Logging.log(colors.cyan(
 `
     git config --local user.name "Mr. Example"
     git config --local user.email "${rushConfiguration.gitSampleEmail}"
 `));
 
-    console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
+    Logging.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
     return false;
   }
 }

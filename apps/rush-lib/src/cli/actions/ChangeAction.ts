@@ -6,13 +6,13 @@ import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import * as colors from 'colors';
-
 import inquirer = require('inquirer');
 
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
+import { Logging } from '@microsoft/node-core-library';
 
 import { RushConfigurationProject } from '../../data/RushConfigurationProject';
 import {
@@ -95,7 +95,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   public run(): Promise<void> {
-    console.log(`Target branch is ${this._targetBranch}`);
+    Logging.log(`Target branch is ${this._targetBranch}`);
     this._projectHostMap = this._generateHostMap();
 
     if (this._verifyParameter.value) {
@@ -106,7 +106,7 @@ export class ChangeAction extends BaseRushAction {
       .sort();
 
     if (this._sortedProjectList.length === 0) {
-      console.log('No change file is needed.');
+      Logging.log('No change file is needed.');
       this._warnUncommittedChanges();
       return Promise.resolve();
     }
@@ -140,7 +140,7 @@ export class ChangeAction extends BaseRushAction {
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
-      console.log('No change is needed.');
+      Logging.log('No change is needed.');
     }
   }
 
@@ -243,12 +243,12 @@ export class ChangeAction extends BaseRushAction {
    * Asks all questions which are needed to generate changelist for a project.
    */
   private _askQuestions(packageName: string): Promise<IChangeInfo | undefined> {
-    console.log(`${os.EOL}${packageName}`);
+    Logging.log(`${os.EOL}${packageName}`);
     const comments: string[] | undefined = this._changeComments.get(packageName);
     if (comments) {
-      console.log(`Found existing comments:`);
+      Logging.log(`Found existing comments:`);
       comments.forEach(comment => {
-        console.log(`    > ${comment}`);
+        Logging.log(`    > ${comment}`);
       });
       return this._prompt({
         name: 'appendComment',
@@ -372,7 +372,7 @@ export class ChangeAction extends BaseRushAction {
         .toString()
         .replace(/(\r\n|\n|\r)/gm, '');
     } catch (err) {
-      console.log('There was an issue detecting your Git email...');
+      Logging.log('There was an issue detecting your Git email...');
       email = undefined;
     }
 
@@ -414,11 +414,11 @@ export class ChangeAction extends BaseRushAction {
   private _warnUncommittedChanges(): void {
     try {
       if (VersionControl.hasUncommittedChanges()) {
-        console.log(os.EOL +
+        Logging.log(os.EOL +
           colors.yellow('Warning: You have uncommitted changes, which do not trigger a change entry.'));
       }
     } catch (error) {
-      console.log('Ignore the failure of checking uncommitted changes');
+      Logging.log('Ignore the failure of checking uncommitted changes');
     }
   }
 
@@ -448,7 +448,7 @@ export class ChangeAction extends BaseRushAction {
         if (overwrite) {
           return this._writeFile(filePath, output);
         } else {
-          console.log(`Not overwriting ${filePath}...`);
+          Logging.log(`Not overwriting ${filePath}...`);
           return Promise.resolve();
         }
       });
@@ -463,6 +463,6 @@ export class ChangeAction extends BaseRushAction {
   private _writeFile(fileName: string, output: string): void {
     fsx.mkdirsSync(path.dirname(fileName));
     fsx.writeFileSync(fileName, output);
-    console.log('Created file: ' + fileName);
+    Logging.log('Created file: ' + fileName);
   }
 }

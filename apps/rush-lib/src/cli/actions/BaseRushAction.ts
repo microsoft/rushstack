@@ -9,8 +9,10 @@ import {
   CommandLineAction,
   ICommandLineActionOptions
 } from '@microsoft/ts-command-line';
-
-import { LockFile } from '@microsoft/node-core-library';
+import {
+  LockFile,
+  Logging
+} from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../../data/RushConfiguration';
 import { EventHooksManager } from '../logic/EventHooksManager';
@@ -65,12 +67,12 @@ export abstract class BaseRushAction extends CommandLineAction {
 
     if (!this._safeForSimultaneousRushProcesses) {
       if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-        console.log(colors.red(`Another rush command is already running in this repository.`));
+        Logging.log(colors.red(`Another rush command is already running in this repository.`));
         process.exit(1);
       }
     }
 
-    console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
+    Logging.log(`Starting "rush ${this.actionName}"${os.EOL}`);
     return this.run().then(() => {
       // If we make it here, everything went fine, so reset the exit code back to 0
       process.exitCode = 0;

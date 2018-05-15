@@ -5,7 +5,9 @@ import * as os from 'os';
 import * as path from 'path';
 import * as colors from 'colors';
 import * as wordwrap from 'wordwrap';
+
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { Logging } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../RushConstants';
 import { CommandLineConfiguration } from '../../data/CommandLineConfiguration';
@@ -23,7 +25,6 @@ import { ScanAction } from './ScanAction';
 import { VersionAction } from './VersionAction';
 import { CustomCommandFactory } from './CustomCommandFactory';
 import { CustomRushAction } from './CustomRushAction';
-
 import { Telemetry } from '../logic/Telemetry';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
@@ -127,13 +128,13 @@ export class RushCommandLineParser extends CommandLineParser {
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
       const wrap: (textToWrap: string) => string = wordwrap.soft(prefix.length, Utilities.getConsoleWidth());
-      console.error(os.EOL + colors.red(prefix + wrap(error.message).trim()));
+      Logging.error(os.EOL + colors.red(prefix + wrap(error.message).trim()));
     }
 
     if (this._debugParameter.value) {
       // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
       // would show for an uncaught error
-      console.error(os.EOL + error.stack);
+      Logging.error(os.EOL + error.stack);
     }
 
     this.flushTelemetry();

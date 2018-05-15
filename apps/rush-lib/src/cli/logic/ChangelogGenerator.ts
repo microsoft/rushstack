@@ -5,6 +5,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
 
+import { Logging } from '@microsoft/node-core-library';
+
 import {
   PublishUtilities,
   IChangeInfoHash
@@ -72,7 +74,7 @@ export class ChangelogGenerator {
       const markdownJSONPath: string = path.resolve(project.projectFolder, CHANGELOG_JSON);
 
       if (fs.existsSync(markdownPath)) {
-        console.log('Found: ' + markdownPath);
+        Logging.log('Found: ' + markdownPath);
         if (!fs.existsSync(markdownJSONPath)) {
           throw new Error('A CHANGELOG.md without json: ' + markdownPath);
         }
@@ -139,7 +141,7 @@ export class ChangelogGenerator {
 
       const changelogFilename: string = path.join(projectFolder, CHANGELOG_JSON);
 
-      console.log(
+      Logging.log(
         `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ` +
         `Changelog update for "${change.packageName}@${change.newVersion}".`
       );

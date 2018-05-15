@@ -6,22 +6,19 @@ import * as os from 'os';
 import * as colors from 'colors';
 
 import {
-  Event
-} from '../../index';
-
-import {
-  CustomOption,
-  ICustomEnumValue
-} from '../../data/CommandLineConfiguration';
-
-import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineChoiceParameter,
   ICommandLineActionOptions
 } from '@microsoft/ts-command-line';
+import { Logging } from '@microsoft/node-core-library';
 
+import { Event } from '../../index';
+import {
+  CustomOption,
+  ICustomEnumValue
+} from '../../data/CommandLineConfiguration';
 import { RushCommandLineParser } from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { TaskSelector } from '../logic/TaskSelector';
@@ -118,15 +115,15 @@ export class CustomRushAction extends BaseRushAction {
     return tasks.execute().then(
       () => {
         stopwatch.stop();
-        console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+        Logging.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
         this._doAfterTask(stopwatch, true);
       })
       .catch((error: Error) => {
         if (error && error.message) {
-          console.log('Error: ' + error.message);
+          Logging.log('Error: ' + error.message);
         }
         stopwatch.stop();
-        console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+        Logging.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
         this._doAfterTask(stopwatch, false);
         throw new AlreadyReportedError();
       });

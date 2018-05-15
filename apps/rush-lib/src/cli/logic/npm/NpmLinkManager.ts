@@ -9,7 +9,11 @@ import * as semver from 'semver';
 import * as tar from 'tar';
 import readPackageTree = require('read-package-tree');
 
-import { JsonFile, PackageName } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  PackageName,
+  Logging
+} from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../../RushConstants';
 import { IRushLinkJson } from '../../../data/RushConfiguration';
@@ -50,11 +54,11 @@ export class NpmLinkManager extends BaseLinkManager {
         const rushLinkJson: IRushLinkJson = { localLinks: {} };
 
         for (const rushProject of this._rushConfiguration.projects) {
-          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+          Logging.log(os.EOL + 'LINKING: ' + rushProject.packageName);
           this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
         }
 
-        console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+        Logging.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
         JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
       }
     );
@@ -195,7 +199,7 @@ export class NpmLinkManager extends BaseLinkManager {
             // immediate dependencies of top-level projects, indicated by PackageDependencyKind.LocalLink.
             // Is this wise?)
 
-            console.log(colors.yellow(`Rush will not locally link ${dependency.name} for ${localPackage.name}`
+            Logging.log(colors.yellow(`Rush will not locally link ${dependency.name} for ${localPackage.name}`
               + ` because the requested version "${dependency.versionRange}" is incompatible`
               + ` with the local version ${matchedVersion}`));
           } else {
@@ -302,7 +306,7 @@ export class NpmLinkManager extends BaseLinkManager {
             throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
               + ` was not found the common folder -- do you need to run "rush install"?`);
           } else {
-            console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
+            Logging.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
           }
         }
       }

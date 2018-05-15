@@ -11,12 +11,11 @@ import {
   JsonFile,
   Text,
   IPackageJson,
-  PackageName
+  PackageName,
+  Logging
 } from '@microsoft/node-core-library';
 
-import {
-  BaseLinkManager
-} from '../base/BaseLinkManager';
+import { BaseLinkManager } from '../base/BaseLinkManager';
 import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../../RushConstants';
 import { IRushLinkJson } from '../../../data/RushConfiguration';
@@ -35,13 +34,13 @@ export class PnpmLinkManager extends BaseLinkManager {
 
       for (const rushProject of this._rushConfiguration.projects) {
         promise = promise.then(() => {
-          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+          Logging.log(os.EOL + 'LINKING: ' + rushProject.packageName);
           return this._linkProject(rushProject, rushLinkJson);
         });
       }
 
       return promise.then(() => {
-        console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+        Logging.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
         JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
       });
     } catch (error) {

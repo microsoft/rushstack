@@ -11,7 +11,10 @@ import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
 
-import { IPackageJson } from '@microsoft/node-core-library';
+import {
+  IPackageJson,
+  Logging
+} from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
@@ -44,7 +47,7 @@ export class PublishUtilities {
   ): IChangeInfoHash {
 
     const allChanges: IChangeInfoHash = {};
-    console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
+    Logging.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
 
     const files: string[] = changeFiles.getFiles();
 
@@ -194,7 +197,7 @@ export class PublishUtilities {
       relativeDirectory = `(${relativeDirectory})`;
     }
 
-    console.log(
+    Logging.log(
       `${EOL}* ${shouldExecute ? 'EXECUTING' : 'DRYRUN'}: ${command} ${args.join(' ')} ${relativeDirectory}`
     );
 
@@ -297,12 +300,12 @@ export class PublishUtilities {
       PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
 
     if (!shouldSkipVersionBump) {
-      console.log(
+      Logging.log(
         `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType!]} update ` +
         `for ${change.packageName} to ${newVersion}`
       );
     } else {
-      console.log(
+      Logging.log(
         `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: update ` + `for ${change.packageName} at ${newVersion}`
       );
     }
@@ -334,7 +337,7 @@ export class PublishUtilities {
 
     change.changes!.forEach(subChange => {
       if (subChange.comment) {
-        console.log(` - [${ChangeType[subChange.changeType!]}] ${subChange.comment}`);
+        Logging.log(` - [${ChangeType[subChange.changeType!]}] ${subChange.comment}`);
       }
     });
 
@@ -435,7 +438,7 @@ export class PublishUtilities {
     const project: RushConfigurationProject | undefined = allPackages.get(packageName);
 
     if (!project) {
-      console.log(`The package ${packageName} was requested for publishing but ` +
+      Logging.log(`The package ${packageName} was requested for publishing but ` +
         `does not exist. Skip this change.`);
       return false;
     }

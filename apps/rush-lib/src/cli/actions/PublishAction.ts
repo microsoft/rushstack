@@ -9,6 +9,10 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
+import {
+  JsonFile,
+  Logging
+} from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
@@ -25,7 +29,6 @@ import { ChangeManager } from '../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { Git } from '../logic/Git';
 import { VersionControl } from '../../utilities/VersionControl';
-import { JsonFile } from '@microsoft/node-core-library';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -181,7 +184,7 @@ export class PublishAction extends BaseRushAction {
     const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
-      console.log('Regenerating changelogs');
+      Logging.log('Regenerating changelogs');
       ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
       return Promise.resolve();
     }
@@ -195,7 +198,7 @@ export class PublishAction extends BaseRushAction {
       this._publishChanges(allPackages);
     }
 
-    console.log(EOL + colors.green('Rush publish finished successfully.'));
+    Logging.log(EOL + colors.green('Rush publish finished successfully.'));
     return Promise.resolve();
   }
 
@@ -277,7 +280,7 @@ export class PublishAction extends BaseRushAction {
   }
 
   private _publishAll(allPackages: Map<string, RushConfigurationProject>): void {
-    console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
+    Logging.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
     let updated: boolean = false;
     const git: Git = new Git(this._targetBranch.value);
@@ -295,7 +298,7 @@ export class PublishAction extends BaseRushAction {
           git.addTag(!!this._publish.value && !this._registryUrl.value, packageName, packageConfig.packageJson.version);
           updated = true;
         } else {
-          console.log(`Skip ${packageName}. Not updated.`);
+          Logging.log(`Skip ${packageName}. Not updated.`);
         }
       }
     });
@@ -420,7 +423,7 @@ export class PublishAction extends BaseRushAction {
           if (fsx.existsSync(fromApiFolderPath) && fsx.existsSync(toApiFolderPath)) {
             fsx.readdirSync(fromApiFolderPath).forEach(fileName => {
               fsx.copySync(path.join(fromApiFolderPath, fileName), path.join(toApiFolderPath, fileName));
-              console.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
+              Logging.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
             });
           }
         }

@@ -6,6 +6,8 @@ import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 
+import { Logging } from '@microsoft/node-core-library';
+
 import { RushConfiguration } from '../../../data/RushConfiguration';
 import { Utilities } from '../../../utilities/Utilities';
 import { Stopwatch } from '../../../utilities/Stopwatch';
@@ -53,7 +55,7 @@ export abstract class BaseLinkManager {
 
     // The root-level folder is the project itself, so we simply delete its node_modules
     // to start clean
-    console.log('Purging ' + localModuleFolder);
+    Logging.log('Purging ' + localModuleFolder);
     Utilities.dangerouslyDeletePath(localModuleFolder);
 
     if (localPackage.children.length > 0) {
@@ -149,12 +151,12 @@ export abstract class BaseLinkManager {
   public createSymlinksForProjects(force: boolean): Promise<void> {
     if (!force) {
       if (fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
-        console.log(colors.green(`Skipping linking -- everything is already up to date.`));
+        Logging.log(colors.green(`Skipping linking -- everything is already up to date.`));
         return Promise.resolve();
       }
     }
 
-    console.log('Linking projects together...');
+    Logging.log('Linking projects together...');
     const stopwatch: Stopwatch = Stopwatch.start();
 
     // Delete the flag file if it exists; if we get interrupted, this will ensure that
@@ -164,8 +166,8 @@ export abstract class BaseLinkManager {
     return this._linkProjects()
       .then(() => {
         stopwatch.stop();
-        console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
-        console.log(os.EOL + 'Next you should probably run "rush build" or "rush rebuild"');
+        Logging.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+        Logging.log(os.EOL + 'Next you should probably run "rush build" or "rush rebuild"');
       });
   }
 

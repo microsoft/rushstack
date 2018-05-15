@@ -7,7 +7,12 @@ import * as os from 'os';
 import * as rimraf from 'rimraf';
 import * as tty from 'tty';
 import * as path from 'path';
-import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
+
+import {
+  JsonFile,
+  IPackageJson,
+  Logging
+} from '@microsoft/node-core-library';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -87,7 +92,7 @@ export class Utilities {
     if (looped) {
       const currentTime: number = Utilities.getTimeInMs();
       const totalSeconds: string = ((currentTime - startTime) / 1000.0).toFixed(2);
-      console.log(`${fnName}() stalled for ${totalSeconds} seconds`);
+      Logging.log(`${fnName}() stalled for ${totalSeconds} seconds`);
     }
 
     return result;
@@ -167,7 +172,7 @@ export class Utilities {
    */
   public static deleteFile(filePath: string): void {
     if (Utilities.fileExists(filePath)) {
-      console.log(`Deleting: ${filePath}`);
+      Logging.log(`Deleting: ${filePath}`);
       fsx.unlinkSync(filePath);
     }
   }
@@ -260,19 +265,19 @@ export class Utilities {
       try {
         Utilities.executeCommand(command, args, workingDirectory, environment, suppressOutput);
       } catch (error) {
-        console.log(os.EOL + 'The command failed:');
-        console.log(` ${command} ` + args.join(' '));
-        console.log(`ERROR: ${error.toString()}`);
+        Logging.log(os.EOL + 'The command failed:');
+        Logging.log(` ${command} ` + args.join(' '));
+        Logging.log(`ERROR: ${error.toString()}`);
 
         if (attemptNumber < maxAttempts) {
           ++attemptNumber;
-          console.log(`Trying again (attempt #${attemptNumber})...` + os.EOL);
+          Logging.log(`Trying again (attempt #${attemptNumber})...` + os.EOL);
           if (retryCallback) {
             retryCallback();
           }
           continue;
         } else {
-          console.error(`Giving up after ${attemptNumber} attempts` + os.EOL);
+          Logging.error(`Giving up after ${attemptNumber} attempts` + os.EOL);
           throw error;
         }
       }
@@ -403,7 +408,7 @@ export class Utilities {
     suppressOutput: boolean = false
   ): void {
     if (fsx.existsSync(directory)) {
-      console.log('Deleting old files from ' + directory);
+      Logging.log('Deleting old files from ' + directory);
     }
     fsx.emptyDirSync(directory);
 
@@ -418,7 +423,7 @@ export class Utilities {
     };
     JsonFile.save(npmPackageJson, path.join(directory, 'package.json'));
 
-    console.log(os.EOL + 'Running "npm install" in ' + directory);
+    Logging.log(os.EOL + 'Running "npm install" in ' + directory);
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
     Utilities.executeCommandWithRetry(maxInstallAttempts, 'npm', ['install'], directory,

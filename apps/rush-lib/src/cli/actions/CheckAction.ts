@@ -3,6 +3,8 @@
 
 import * as colors from 'colors';
 
+import { Logging } from '@microsoft/node-core-library';
+
 import { RushConfigurationProject } from '../../data/RushConfigurationProject';
 import { RushConstants } from '../../RushConstants';
 import { VersionMismatchFinder } from '../../data/VersionMismatchFinder';
@@ -48,21 +50,21 @@ export class CheckAction extends BaseRushAction {
 
     // Iterate over the list. For any dependency with mismatching versions, print the projects
     mismatchFinder.getMismatches().forEach((dependency: string) => {
-      console.log(colors.yellow(dependency));
+      Logging.log(colors.yellow(dependency));
       mismatchFinder.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
-        console.log(`  ${version}`);
+        Logging.log(`  ${version}`);
         mismatchFinder.getConsumersOfMismatch(dependency, version)!.forEach((project: string) => {
-          console.log(`   - ${project}`);
+          Logging.log(`   - ${project}`);
         });
       });
-      console.log();
+      Logging.log();
     });
 
     if (mismatchFinder.numberOfMismatches) {
-      console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
+      Logging.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
       process.exit(1);
     } else {
-      console.log(colors.green(`Found no mis-matching dependencies!`));
+      Logging.log(colors.green(`Found no mis-matching dependencies!`));
     }
     return Promise.resolve();
   }

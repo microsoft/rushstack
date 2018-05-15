@@ -10,12 +10,14 @@ import * as semver from 'semver';
 import * as tar from 'tar';
 import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
+
 import {
   JsonFile,
   LockFile,
   Text,
   IPackageJson,
-  MapExtensions
+  MapExtensions,
+  Logging
 } from '@microsoft/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
@@ -209,12 +211,12 @@ export class InstallManager {
               shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager,
                 this._rushConfiguration.committedShrinkwrapFilename);
             } catch (ex) {
-              console.log();
-              console.log('Unable to load the shrinkwrap file: ' + ex.message);
+              Logging.log();
+              Logging.log('Unable to load the shrinkwrap file: ' + ex.message);
 
               if (!options.allowShrinkwrapUpdates) {
-                console.log();
-                console.log(colors.red('You need to run "rush update" to fix this problem'));
+                Logging.log();
+                Logging.log(colors.red('You need to run "rush update" to fix this problem'));
                 throw new AlreadyReportedError();
               }
 
@@ -227,8 +229,8 @@ export class InstallManager {
 
           if (!shrinkwrapIsUpToDate) {
             if (!options.allowShrinkwrapUpdates) {
-              console.log();
-              console.log(colors.red('The shrinkwrap file is out of date.  You need to run "rush update".'));
+              Logging.log();
+              Logging.log(colors.red('The shrinkwrap file is out of date.  You need to run "rush update".'));
               throw new AlreadyReportedError();
             }
           }
@@ -239,7 +241,7 @@ export class InstallManager {
             const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
             return linkManager.createSymlinksForProjects(false);
           } else {
-            console.log(os.EOL
+            Logging.log(os.EOL
               + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.'));
           }
 
@@ -257,7 +259,7 @@ export class InstallManager {
     const rushUserFolder: string = this._rushConfiguration.rushUserFolder;
 
     if (!fsx.existsSync(rushUserFolder)) {
-      console.log('Creating ' + rushUserFolder);
+      Logging.log('Creating ' + rushUserFolder);
       fsx.mkdirSync(rushUserFolder);
     }
 
@@ -272,12 +274,12 @@ export class InstallManager {
       node: process.versions.node
     });
 
-    console.log(`Trying to acquire lock for ${packageManagerAndVersion}`);
+    Logging.log(`Trying to acquire lock for ${packageManagerAndVersion}`);
     return LockFile.acquire(rushUserFolder, packageManagerAndVersion).then((lock: LockFile) => {
-      console.log(`Acquired lock for ${packageManagerAndVersion}`);
+      Logging.log(`Acquired lock for ${packageManagerAndVersion}`);
 
       if (!packageManagerMarker.isValid() || lock.dirtyWhenAcquired) {
-        console.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
+        Logging.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
 
         // note that this will remove the last-install flag from the directory
         Utilities.installPackageInDirectory(
@@ -288,9 +290,9 @@ export class InstallManager {
           MAX_INSTALL_ATTEMPTS
         );
 
-        console.log(`Successfully installed ${packageManager} version ${packageManagerVersion}`);
+        Logging.log(`Successfully installed ${packageManager} version ${packageManagerVersion}`);
       } else {
-        console.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);
+        Logging.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);
       }
 
       packageManagerMarker.create();
@@ -304,8 +306,8 @@ export class InstallManager {
       const localPackageManagerToolFolder: string =
         path.join(this._rushConfiguration.commonTempFolder, `${packageManager}-local`);
 
-      console.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
-      console.log('  --> "' + packageManagerToolFolder + '"');
+      Logging.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
+      Logging.log('  --> "' + packageManagerToolFolder + '"');
 
       // We cannot use fsx.existsSync() to test the existence of a symlink, because it will
       // return false for broken symlinks.  There is no way to test without catching an exception.
@@ -338,7 +340,7 @@ export class InstallManager {
     const tempProjectsFolder: string = path.join(this._rushConfiguration.commonTempFolder,
       RushConstants.rushTempProjectsFolderName);
 
-    console.log(os.EOL + colors.bold('Updating temp projects in ' + tempProjectsFolder));
+    Logging.log(os.EOL + colors.bold('Updating temp projects in ' + tempProjectsFolder));
 
     Utilities.createFolderWithRetry(tempProjectsFolder);
 
@@ -364,7 +366,7 @@ export class InstallManager {
       // Check any preferred dependencies first
       allPreferredVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
-          console.log(colors.yellow(wrap(
+          Logging.log(colors.yellow(wrap(
             `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
             + ` (${version}) required by the preferred versions from ` + RushConstants.commonVersionsFilename)));
           shrinkwrapIsUpToDate = false;
@@ -497,7 +499,7 @@ export class InstallManager {
         if (shrinkwrapFile) {
           if (!shrinkwrapFile.tryEnsureCompatibleDependency(pair.packageName, pair.packageVersion,
             rushProject.tempProjectName)) {
-            console.log(colors.yellow(
+            Logging.log(colors.yellow(
               wrap(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
                 + ` (${pair.packageVersion}) required by "${rushProject.packageName}".`)));
             shrinkwrapIsUpToDate = false;
@@ -561,7 +563,7 @@ export class InstallManager {
             prefix: npmPackageFolder
           } as CreateOptions, ['package.json']);
 
-          console.log(`Updating ${tarballFile}`);
+          Logging.log(`Updating ${tarballFile}`);
         } catch (error) {
           // delete everything in case of any error
           fsx.removeSync(tarballFile);
@@ -588,7 +590,7 @@ export class InstallManager {
     JsonFile.save(commonPackageJson, commonPackageJsonFilename, { onlyIfChanged: true });
 
     stopwatch.stop();
-    console.log(`Finished creating temporary modules (${stopwatch.toString()})`);
+    Logging.log(`Finished creating temporary modules (${stopwatch.toString()})`);
 
     return shrinkwrapIsUpToDate;
   }
@@ -597,7 +599,7 @@ export class InstallManager {
    * Runs "npm install" in the common folder.
    */
   private _installCommonModules(shrinkwrapIsUpToDate: boolean, allowShrinkwrapUpdates: boolean): void {
-    console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
+    Logging.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
       + os.EOL);
 
     const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonTempFolder,
@@ -659,11 +661,11 @@ export class InstallManager {
     // The user must request that via the command line.
     if (deleteNodeModules) {
       if (this._rushConfiguration.packageManager === 'npm') {
-        console.log(`Deleting the "npm-cache" folder`);
+        Logging.log(`Deleting the "npm-cache" folder`);
         // This is faster and more thorough than "npm cache clean"
         this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.npmCacheFolder);
 
-        console.log(`Deleting the "npm-tmp" folder`);
+        Logging.log(`Deleting the "npm-tmp" folder`);
         this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.npmTmpFolder);
       }
     }
@@ -678,7 +680,7 @@ export class InstallManager {
         // YES: Delete "node_modules"
 
         // Explain to the user why we are hosing their node_modules folder
-        console.log('Deleting files from ' + commonNodeModulesFolder);
+        Logging.log('Deleting files from ' + commonNodeModulesFolder);
 
         this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
 
@@ -688,7 +690,7 @@ export class InstallManager {
 
         // note: it is not necessary to run "prune" with pnpm
         if (this._rushConfiguration.packageManager === 'npm') {
-          console.log(`Running "${this._rushConfiguration.packageManager} prune"`
+          Logging.log(`Running "${this._rushConfiguration.packageManager} prune"`
             + ` in ${this._rushConfiguration.commonTempFolder}`);
           const args: string[] = ['prune'];
           this._pushConfigurationArgs(args);
@@ -701,7 +703,7 @@ export class InstallManager {
 
           // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp"
           const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder, RushConstants.rushTempNpmScope);
-          console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
+          Logging.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
           // Glob can't handle Windows paths
           const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
 
@@ -736,7 +738,7 @@ export class InstallManager {
     const installArgs: string[] = ['install', '--no-optional'];
     this._pushConfigurationArgs(installArgs);
 
-    console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
+    Logging.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
       + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
 
     Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
@@ -749,9 +751,9 @@ export class InstallManager {
           // store in a bad state. Therefore, we should clean out the store
           // before attempting the install again.
 
-          console.log(colors.yellow(`Deleting the "node_modules" folder`));
+          Logging.log(colors.yellow(`Deleting the "node_modules" folder`));
           this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
-          console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
+          Logging.log(colors.yellow(`Deleting the "pnpm-store" folder`));
           this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
 
           Utilities.createFolderWithRetry(commonNodeModulesFolder);
@@ -760,12 +762,12 @@ export class InstallManager {
 
     if (this._rushConfiguration.packageManager === 'npm') {
 
-      console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
+      Logging.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
       const npmArgs: string[] = ['shrinkwrap'];
       this._pushConfigurationArgs(npmArgs);
       Utilities.executeCommand(this._rushConfiguration.packageManagerToolFilename,
         npmArgs, this._rushConfiguration.commonTempFolder);
-      console.log('"npm shrinkwrap" completed' + os.EOL);
+      Logging.log('"npm shrinkwrap" completed' + os.EOL);
 
       this._fixupNpm5Regression();
     }
@@ -781,7 +783,7 @@ export class InstallManager {
     // Finally, create the marker file to indicate a successful install
     this._commonNodeModulesMarker.create();
 
-    console.log('');
+    Logging.log('');
   }
 
   /**
@@ -810,11 +812,11 @@ export class InstallManager {
    */
   private _syncFile(sourcePath: string, targetPath: string): void {
     if (fsx.existsSync(sourcePath)) {
-      console.log('Updating ' + targetPath);
+      Logging.log('Updating ' + targetPath);
       fsx.copySync(sourcePath, targetPath);
     } else {
       if (fsx.existsSync(targetPath)) {
-        console.log('Deleting ' + targetPath);
+        Logging.log('Deleting ' + targetPath);
         fsx.unlinkSync(targetPath);
       }
     }
@@ -867,7 +869,7 @@ export class InstallManager {
     }
 
     if (anyChanges) {
-      console.log(os.EOL + colors.yellow(wrap(`Applied workaround for NPM 5 bug`)) + os.EOL);
+      Logging.log(os.EOL + colors.yellow(wrap(`Applied workaround for NPM 5 bug`)) + os.EOL);
     }
   }
 
@@ -882,7 +884,7 @@ export class InstallManager {
     // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
     for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {
       if (!this._rushConfiguration.findProjectByTempName(tempProjectName)) {
-        console.log(os.EOL + colors.yellow(wrap(
+        Logging.log(os.EOL + colors.yellow(wrap(
           `Your NPM shrinkwrap file references a project "${tempProjectName}" which no longer exists.`))
           + os.EOL);
         return true;  // found one

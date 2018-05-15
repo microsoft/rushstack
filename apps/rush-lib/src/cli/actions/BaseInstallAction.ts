@@ -5,6 +5,7 @@ import * as colors from 'colors';
 import * as os from 'os';
 
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { Logging } from '@microsoft/node-core-library';
 
 import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../data/EventHooks';
@@ -50,9 +51,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
     const installManager: InstallManager = new InstallManager(this.rushConfiguration, purgeManager);
 
     if (this._purgeParameter.value!) {
-      console.log('The --purge flag was specified, so performing "rush purge"');
+      Logging.log('The --purge flag was specified, so performing "rush purge"');
       purgeManager.purgeNormal();
-      console.log('');
+      Logging.log('');
     }
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
@@ -65,7 +66,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         this._collectTelemetry(stopwatch, installManagerOptions, true);
         this.eventHooksManager.handle(Event.postRushInstall, this.parser.isDebug);
 
-        console.log(os.EOL + colors.green(
+        Logging.log(os.EOL + colors.green(
           `Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`));
       })
       .catch((error) => {
