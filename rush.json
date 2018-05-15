@@ -1,9 +1,9 @@
 {
-  "rushVersion": "5.0.0-dev.17",
-  "pnpmVersion": "1.41.3",
+  "rushVersion": "5.0.0-dev.20",
+  "pnpmVersion": "1.43.1",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0 || >=8.9.4 <9.0.0",
 
-  "projectFolderMinDepth": 1,
+  "projectFolderMinDepth": 2,
 
   "approvedPackagesPolicy": {
     "reviewCategories": [
