@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 11 May 2018 22:43:14 GMT and should not be manually modified.
+This log was last generated on Tue, 15 May 2018 00:18:10 GMT and should not be manually modified.
+
+## 1.2.0
+Tue, 15 May 2018 00:18:10 GMT
+
+### Minor changes
+
+- Add support for new AEDoc tags @sealed, @virtual, and @override
 
 ## 1.1.40
 Fri, 11 May 2018 22:43:14 GMT

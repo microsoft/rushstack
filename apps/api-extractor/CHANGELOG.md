@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 04 May 2018 00:42:38 GMT and should not be manually modified.
+This log was last generated on Tue, 15 May 2018 00:18:10 GMT and should not be manually modified.
+
+## 5.7.0
+Tue, 15 May 2018 00:18:10 GMT
+
+### Minor changes
+
+- Add support for new AEDoc tags @sealed, @virtual, and @override
 
 ## 5.6.8
 Fri, 04 May 2018 00:42:38 GMT

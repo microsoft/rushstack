@@ -2,6 +2,26 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.2.0",
+      "tag": "@microsoft/api-documenter_v1.2.0",
+      "date": "Tue, 15 May 2018 00:18:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for new AEDoc tags @sealed, @virtual, and @override"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.6.8` to `5.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.38` to `4.3.39`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.40",
       "tag": "@microsoft/api-documenter_v1.1.40",
       "date": "Fri, 11 May 2018 22:43:14 GMT",
