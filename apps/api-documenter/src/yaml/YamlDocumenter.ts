@@ -16,8 +16,7 @@ import {
   IApiEnumMember,
   IApiClass,
   IApiInterface,
-  Markup,
-  ApiItem
+  Markup
 } from '@microsoft/api-extractor';
 
 import { DocItemSet, DocItem, DocItemKind, IDocItemSetResolveResult } from '../utils/DocItemSet';
@@ -414,18 +413,15 @@ export class YamlDocumenter {
   }
 
   // Prepends a string such as "/** @sealed @override */" to an item signature where appropriate.
-  private _formatCommentedAnnotations(signature: string, apiItem: ApiItem): string {
-    const apiItemTags: { isSealed?: boolean, isVirtual?: boolean, isOverride?: boolean }
-      = apiItem as any; // tslint:disable-line:no-any
-
+  private _formatCommentedAnnotations(signature: string, apiItem: IApiMethod | IApiProperty): string {
     const annotations: string[] = [];
-    if (apiItemTags.isSealed) {
+    if (apiItem.isSealed) {
       annotations.push('@sealed');
     }
-    if (apiItemTags.isVirtual) {
+    if (apiItem.isVirtual) {
       annotations.push('@virtual');
     }
-    if (apiItemTags.isOverride) {
+    if (apiItem.isOverride) {
       annotations.push('@override');
     }
     if (annotations.length === 0) {
