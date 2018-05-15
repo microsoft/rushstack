@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Replace \"rush install --clean\" and \"--full-clean\" with \"rush install --purge\"",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
