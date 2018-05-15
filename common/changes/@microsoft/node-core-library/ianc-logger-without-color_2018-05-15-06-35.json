@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "Add new logging API that can remove console colors.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "iclanton@users.noreply.github.com"
+}
