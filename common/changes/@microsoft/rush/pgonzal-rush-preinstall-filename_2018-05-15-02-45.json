@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add missing slash for \"shrinkwrap-preinstall.yaml\" file path",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
