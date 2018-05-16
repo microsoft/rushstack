@@ -809,7 +809,9 @@ export class InstallManager {
       if (fsx.existsSync(lastCheckFile)) {
         let cachedResult: boolean | 'error' | undefined = undefined;
         try {
-          const ageMs: number = Date.now() - fsx.statSync(lastCheckFile).mtimeMs;
+          // NOTE: mtimeMs is not supported yet in NodeJS 6.x
+          const nowMs: number = new Date().getTime();
+          const ageMs: number = nowMs - fsx.statSync(lastCheckFile).mtime.getTime();
           const HOUR: number = 60 * 60 * 1000;
 
           // Is the cache too old?
