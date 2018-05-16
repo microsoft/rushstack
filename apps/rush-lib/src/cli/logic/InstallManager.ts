@@ -652,7 +652,7 @@ export class InstallManager {
         }
       }
 
-      return this._checkIfPublishedRelease()
+      return this._checkIfReleaseIsPublished()
         .catch((error) => {
           // This isn't a critical check, so don't bother the user about it
           return undefined;
@@ -801,7 +801,7 @@ export class InstallManager {
     });
   }
 
-  private _checkIfPublishedRelease(): Promise<boolean> {
+  private _checkIfReleaseIsPublished(): Promise<boolean> {
     return Promise.resolve().then(() => {
       const lastCheckFile: string = path.join(this._rushConfiguration.rushUserFolder,
         'rush-' + Rush.version, 'last-check.flag');
@@ -821,7 +821,6 @@ export class InstallManager {
           // Unable to parse file
         }
         if (cachedResult === 'error') {
-          console.log('CACHE ERR');
           return Promise.reject(new Error('Unable to contact server'));
         }
         if (cachedResult === true || cachedResult === false) {
@@ -829,7 +828,7 @@ export class InstallManager {
         }
       }
 
-      return this._queryIfPublishedRelease('https://registry.npmjs.org:443')
+      return this._queryIfReleaseIsPublished('https://registry.npmjs.org:443')
         .then((publishedRelease: boolean) => {
           // Cache the result
           fsx.mkdirsSync(path.dirname(lastCheckFile));
@@ -844,7 +843,7 @@ export class InstallManager {
     });
   }
 
-  private _queryIfPublishedRelease(registryUrl: string): Promise<boolean> {
+  private _queryIfReleaseIsPublished(registryUrl: string): Promise<boolean> {
     let queryUrl: string = registryUrl;
     if (queryUrl[-1] !== '/') {
       queryUrl += '/';
@@ -896,7 +895,11 @@ export class InstallManager {
               })
               .then<boolean>((response2: fetch.Response) => {
                 if (!response2.ok) {
-                  return Promise.reject(new Error('Failed to fetch'));
+                  if (response2.status === 404) {
+                    return false;
+                  } else {
+                    return Promise.reject(new Error('Failed to fetch'));
+                  }
                 }
                 return true;
               });
