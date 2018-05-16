@@ -119,6 +119,11 @@ export namespace RushConstants {
   export const rushWebSiteUrl: string = 'http://rushjs.io';
 
   /**
+   * The name of the NPM package for the Rush tool ("@microsoft/rush").
+   */
+  export const rushPackageName: string = '@microsoft/rush';
+
+  /**
    * The folder name ("rush-recycler") where Rush moves large folder trees
    * before asynchronously deleting them.
    */
