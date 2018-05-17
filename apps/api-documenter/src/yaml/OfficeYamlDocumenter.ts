@@ -25,6 +25,18 @@ interface ISnippetsFile {
 export class OfficeYamlDocumenter extends YamlDocumenter {
   private _snippets: ISnippetsFile;
 
+  // Default API Set URL when no product match is found.
+  private _apiSetUrlDefault: string = '/javascript/office/javascript-api-for-office';
+
+  // Hash set of API Set URLs based on product.
+  private _apiSetUrls: Object = {
+    'Excel': '/javascript/office/requirement-sets/excel-api-requirement-sets',
+    'OneNote': '/javascript/office/requirement-sets/onenote-api-requirement-sets',
+    'Visio': '/javascript/office/overview/visio-javascript-reference-overview',
+    'Outlook': '/javascript/office/requirement-sets/outlook-api-requirement-sets',
+    'Word': '/javascript/office/requirement-sets/word-api-requirement-sets'
+  };
+
   public constructor(docItemSet: DocItemSet, inputFolder: string) {
     super(docItemSet);
 
@@ -89,18 +101,18 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     // Hyperlink it like this:
     // \[ [API set: ExcelApi 1.1](http://bing.com?type=excel) \]
     markup = markup.replace(/Api/, 'API');
-    if (uid.search(/Excel/i) !== -1) {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=excel) \\]`);
-    } else if (uid.search(/OneNote/i) !== -1) {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=onenote) \\]`);
-    } else if (uid.search(/Visio/i) !== -1) {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=visio) \\]`);
-    } else if (uid.search(/Outlook/i) !== -1) {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=outlook) \\]`);
-    } else if (uid.search(/Word/i) !== -1) {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=word) \\]`);
-    } else {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com) \\]`);
-    }
+    return markup.replace(/\\\[(API set:[^\]]+)\\\]/, '\\[ [$1](' + this._getApiSetUrl(uid) + ') \\]');
   }
+
+  // Gets the link to the API set based on product context. Seeks a case-insensitve match in the hash set.
+  private _getApiSetUrl(uid: string): string {
+    for (const key of Object.keys(this._apiSetUrls)) {
+      const regexp: RegExp = new RegExp(key, 'i');
+      if (regexp.test(uid)) {
+          return this._apiSetUrls[key];
+      }
+    }
+    return this._apiSetUrlDefault; // match not found.
+  }
+
 }
