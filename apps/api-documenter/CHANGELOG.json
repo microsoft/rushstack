@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.2.2",
+      "tag": "@microsoft/api-documenter_v1.2.2",
+      "date": "Thu, 24 May 2018 16:03:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update API Set URL resolution in OfficeYamlDocumenter"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.1",
       "tag": "@microsoft/api-documenter_v1.2.1",
       "date": "Tue, 15 May 2018 02:26:45 GMT",

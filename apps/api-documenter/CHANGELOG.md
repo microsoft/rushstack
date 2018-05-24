@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 15 May 2018 02:26:45 GMT and should not be manually modified.
+This log was last generated on Thu, 24 May 2018 16:03:20 GMT and should not be manually modified.
+
+## 1.2.2
+Thu, 24 May 2018 16:03:20 GMT
+
+### Patches
+
+- Update API Set URL resolution in OfficeYamlDocumenter
 
 ## 1.2.1
 Tue, 15 May 2018 02:26:45 GMT
