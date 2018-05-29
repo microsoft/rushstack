@@ -2,7 +2,7 @@ language: node_js
 node_js:
   - '8.9.4'
 before_script:
-  - node common/scripts/install-rush-for-ci.js
+  - node common/scripts/ci-rush.js
 script:
   - set -e
   - echo 'Checking change file...' && echo -en 'travis_fold:start:check\\r'
