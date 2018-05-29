@@ -40,7 +40,7 @@ try {
   const rushJsonContents: string = fs.readFileSync(rushJsonPath, 'UTF-8');
   // Use a regular expression to parse out the rushVersion value because rush.json supports comments,
   // but JSON.parse does not and we don't want to pull in more dependencies than we need to in this script.
-  const rushJsonMatches: string[] = rushJsonContents.match(/\'rushVersion\'\s*\:\s*\'([0-9a-zA-Z.+\-]+)\'/)!;
+  const rushJsonMatches: string[] = rushJsonContents.match(/\"rushVersion\"\s*\:\s*\"([0-9a-zA-Z.+\-]+)\"/)!;
   expectedVersion = rushJsonMatches[1];
 } catch (e) {
   console.error(
@@ -57,7 +57,7 @@ try {
     // We're on Windows
     const whereOutput: string = childProcess.execSync('where npm', { stdio: [] }).toString();
     const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
-    npmPath = lines[-1];
+    npmPath = lines[lines.length - 1];
   } else {
     // We aren't on Windows - assume we're on *NIX or Darwin
     npmPath = childProcess.execSync('which npm', { stdio: [] }).toString();
@@ -85,37 +85,6 @@ for (const rushPathPart of rushPathParts) {
     }
   } catch (e) {
     console.error(`Error building local rush installation directory: ${e}`);
-    process.exit(1);
-  }
-}
-
-const npmrcPath: string = path.join(rushJsonDirectory, 'common', 'config', 'rush', '.npmrc');
-const rushNpmrcPath: string = path.join(rushPath, '.npmrc');
-if (fs.existsSync(npmrcPath)) {
-  try {
-    const npmrcFileLines: string[] = fs.readFileSync(npmrcPath).toString().split('\n').map((line) => line.trim());
-    const resultLines: string[] = [];
-    // Trim out lines that reference environment variables that aren't defined
-    for (const line of npmrcFileLines) {
-      const environmentVariables: string[] | null = line.match(/\$\{([^\}]+)\}/g);
-      let lineShouldBeTrimmed: boolean = false;
-      if (environmentVariables) {
-        for (const environmentVariable of environmentVariables) {
-          if (!process.env[environmentVariable]) {
-            lineShouldBeTrimmed = true;
-            break;
-          }
-        }
-      }
-
-      if (!lineShouldBeTrimmed) {
-        resultLines.push(line);
-      }
-    }
-
-    fs.writeFileSync(rushNpmrcPath, resultLines.join(os.EOL));
-  } catch (e) {
-    console.error(`Error reading or writing .npmrc file: ${e}`);
     process.exit(1);
   }
 }
@@ -153,6 +122,37 @@ if (installedVersion) {
 }
 
 if (!installedVersionValid || installedVersion !== expectedVersion) {
+  const npmrcPath: string = path.join(rushJsonDirectory, 'common', 'config', 'rush', '.npmrc');
+  const rushNpmrcPath: string = path.join(rushPath, '.npmrc');
+  if (fs.existsSync(npmrcPath)) {
+    try {
+      const npmrcFileLines: string[] = fs.readFileSync(npmrcPath).toString().split('\n').map((line) => line.trim());
+      const resultLines: string[] = [];
+      // Trim out lines that reference environment variables that aren't defined
+      for (const line of npmrcFileLines) {
+        const environmentVariables: string[] | null = line.match(/\$\{([^\}]+)\}/g);
+        let lineShouldBeTrimmed: boolean = false;
+        if (environmentVariables) {
+          for (const environmentVariable of environmentVariables) {
+            if (!process.env[environmentVariable]) {
+              lineShouldBeTrimmed = true;
+              break;
+            }
+          }
+        }
+
+        if (!lineShouldBeTrimmed) {
+          resultLines.push(line);
+        }
+      }
+
+      fs.writeFileSync(rushNpmrcPath, resultLines.join(os.EOL));
+    } catch (e) {
+      console.error(`Error reading or writing .npmrc file: ${e}`);
+      process.exit(1);
+    }
+  }
+
   const packageContents: IPackageJson = {
     'name': 'local-rush',
     'version': '0.0.0',
@@ -168,6 +168,6 @@ if (!installedVersionValid || installedVersion !== expectedVersion) {
   fs.writeFileSync(rushPackagePath, JSON.stringify(packageContents, undefined, 2));
 
   console.log(os.EOL + 'Installing Rush...');
-  childProcess.execSync(`'${npmPath}' install ${PACKAGE_NAME}@${expectedVersion}`, { cwd: rushPath });
+  childProcess.execSync(`"${npmPath}" install ${PACKAGE_NAME}@${expectedVersion}`, { cwd: rushPath });
   console.log(os.EOL + `Successfully installed Rush ${expectedVersion}`);
 }
