@@ -69,7 +69,7 @@ if (!fs.existsSync(npmPath)) {
     console.error('The NPM executable does not exist');
     process.exit(1);
 }
-const rushPathParts = ['common', 'temp', 'local-rush'];
+const rushPathParts = ['common', 'temp', 'ci-rush'];
 let rushPath = rushJsonDirectory;
 for (const rushPathPart of rushPathParts) {
     rushPath = path.join(rushPath, rushPathPart);
@@ -115,7 +115,8 @@ if (!installedVersionValid || installedVersion !== expectedVersion) {
     const rushNpmrcPath = path.join(rushPath, '.npmrc');
     if (fs.existsSync(npmrcPath)) {
         try {
-            const npmrcFileLines = fs.readFileSync(npmrcPath).toString().split('\n').map((line) => line.trim());
+            let npmrcFileLines = fs.readFileSync(npmrcPath).toString().split('\n');
+            npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
             const resultLines = [];
             // Trim out lines that reference environment variables that aren't defined
             for (const line of npmrcFileLines) {
@@ -141,7 +142,7 @@ if (!installedVersionValid || installedVersion !== expectedVersion) {
         }
     }
     const packageContents = {
-        'name': 'local-rush',
+        'name': 'ci-rush',
         'version': '0.0.0',
         'dependencies': {
             [PACKAGE_NAME]: expectedVersion
@@ -157,4 +158,4 @@ if (!installedVersionValid || installedVersion !== expectedVersion) {
     console.log(os.EOL + `Successfully installed Rush ${expectedVersion}`);
 }
 
-//# sourceMappingURL=install-rush-for-ci.js.map
+//# sourceMappingURL=ci-rush.js.map

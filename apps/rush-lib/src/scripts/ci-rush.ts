@@ -75,7 +75,7 @@ if (!fs.existsSync(npmPath)) {
   process.exit(1);
 }
 
-const rushPathParts: string[] = ['common', 'temp', 'local-rush'];
+const rushPathParts: string[] = ['common', 'temp', 'ci-rush'];
 let rushPath: string = rushJsonDirectory;
 for (const rushPathPart of rushPathParts) {
   rushPath = path.join(rushPath, rushPathPart);
@@ -126,7 +126,8 @@ if (!installedVersionValid || installedVersion !== expectedVersion) {
   const rushNpmrcPath: string = path.join(rushPath, '.npmrc');
   if (fs.existsSync(npmrcPath)) {
     try {
-      const npmrcFileLines: string[] = fs.readFileSync(npmrcPath).toString().split('\n').map((line) => line.trim());
+      let npmrcFileLines: string[] = fs.readFileSync(npmrcPath).toString().split('\n');
+      npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
       const resultLines: string[] = [];
       // Trim out lines that reference environment variables that aren't defined
       for (const line of npmrcFileLines) {
@@ -154,7 +155,7 @@ if (!installedVersionValid || installedVersion !== expectedVersion) {
   }
 
   const packageContents: IPackageJson = {
-    'name': 'local-rush',
+    'name': 'ci-rush',
     'version': '0.0.0',
     'dependencies': {
       [PACKAGE_NAME]: expectedVersion
