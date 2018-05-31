@@ -24,14 +24,24 @@ export class CommandLineMigrationAdvisor {
       }
 
       if (args[0] === 'install') {
-        if (args.indexOf('-C') >= 0  || args.indexOf('--full-clean') >= 0) {
+        if (args.indexOf('--full-clean') >= 0) {
           CommandLineMigrationAdvisor._reportDeprecated(
             'Instead of "rush install --full-clean", use "rush purge --unsafe".');
           return false;
         }
-        if (args.indexOf('-c') >= 0  || args.indexOf('--clean') >= 0) {
+        if (args.indexOf('-C') >= 0) {
+          CommandLineMigrationAdvisor._reportDeprecated(
+            'Instead of "rush install -C", use "rush purge --unsafe".');
+          return false;
+        }
+        if (args.indexOf('--clean') >= 0) {
           CommandLineMigrationAdvisor._reportDeprecated(
             'Instead of "rush install --clean", use "rush install --purge".');
+          return false;
+        }
+        if (args.indexOf('-c') >= 0) {
+          CommandLineMigrationAdvisor._reportDeprecated(
+            'Instead of "rush install -c", use "rush install --purge".');
           return false;
         }
       }
