@@ -116,7 +116,7 @@ export namespace RushConstants {
   /**
    * The URL ("http://rushjs.io") for the Rush web site.
    */
-  export const rushWebSiteUrl: string = 'http://rushjs.io';
+  export const rushWebSiteUrl: string = 'https://rushjs.io';
 
   /**
    * The name of the NPM package for the Rush tool ("@microsoft/rush").
