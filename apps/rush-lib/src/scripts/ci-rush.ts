@@ -134,8 +134,9 @@ if (!installedVersionValid || installedVersion !== expectedVersion) {
         const environmentVariables: string[] | null = line.match(/\$\{([^\}]+)\}/g);
         let lineShouldBeTrimmed: boolean = false;
         if (environmentVariables) {
-          for (const environmentVariable of environmentVariables) {
-            if (!process.env[environmentVariable]) {
+          for (const token of environmentVariables) {
+            const environmentVariableName: string = token.substring(2, token.length - 1);
+            if (!process.env[environmentVariableName]) {
               lineShouldBeTrimmed = true;
               break;
             }
