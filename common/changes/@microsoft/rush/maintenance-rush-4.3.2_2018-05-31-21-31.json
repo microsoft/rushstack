@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Remove the old undocumented \"rush purge\" command, since it conflicts with Rush 5",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
