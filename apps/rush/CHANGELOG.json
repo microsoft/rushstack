@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "4.3.3",
+      "tag": "@microsoft/rush_v4.3.3",
+      "date": "Thu, 31 May 2018 21:57:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove the old undocumented \"rush purge\" command, since it conflicts with Rush 5"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.2",
       "tag": "@microsoft/rush_v4.3.2",
       "date": "Mon, 26 Mar 2018 19:12:42 GMT",
