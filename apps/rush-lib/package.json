@@ -10,7 +10,7 @@
     "node": ">=5.6.0"
   },
   "engineStrict": true,
-  "homepage": "http://aka.ms/rush",
+  "homepage": "https://rushjs.io",
   "main": "lib/index.js",
   "typings": "dist/rush-lib.d.ts",
   "tsdoc": {

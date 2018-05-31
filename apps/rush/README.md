@@ -3,7 +3,7 @@
 
 ![rush](https://github.com/Microsoft/web-build-tools/blob/master/common/wiki-images/rush-logo.png?raw=true)
 <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://aka.ms/rush
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://rushjs.io
 
 <!-- -------------------------------------------------------------------------- -->
 <!-- Text below this line should stay in sync with Rush.md from the GitHub wiki -->
@@ -59,4 +59,4 @@ _(If you don't have a GitHub account set up, you can use `rush install --bypass-
 
 # Getting Started
 
-The GitHub wiki has complete, up-to-date documentation: https://aka.ms/rush
+The GitHub wiki has complete, up-to-date documentation: https://rushjs.io

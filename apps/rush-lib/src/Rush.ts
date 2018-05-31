@@ -29,7 +29,7 @@ export default class Rush {
     console.log(
       EOL +
       colors.bold(`Rush Multi-Package Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
-      colors.cyan(' - http://aka.ms/rush') +
+      colors.cyan(' - https://rushjs.io') +
       EOL
     );
 
