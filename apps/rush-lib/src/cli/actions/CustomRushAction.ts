@@ -24,6 +24,7 @@ import {
 
 import { RushCommandLineParser } from './RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
+import { SetupChecks } from '../logic/SetupChecks';
 import { TaskSelector } from '../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
@@ -223,6 +224,8 @@ export class CustomRushAction extends BaseRushAction {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }
+
+    SetupChecks.validate(this.rushConfiguration);
 
     this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug);
   }
