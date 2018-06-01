@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 26 Mar 2018 19:12:42 GMT and should not be manually modified.
+This log was last generated on Thu, 31 May 2018 21:57:13 GMT and should not be manually modified.
+
+## 4.3.3
+Thu, 31 May 2018 21:57:13 GMT
+
+### Updates
+
+- Remove the old undocumented "rush purge" command, since it conflicts with Rush 5
 
 ## 4.3.2
 Mon, 26 Mar 2018 19:12:42 GMT

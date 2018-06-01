@@ -131,11 +131,14 @@ if (!installedVersionValid || installedVersion !== expectedVersion) {
       const resultLines: string[] = [];
       // Trim out lines that reference environment variables that aren't defined
       for (const line of npmrcFileLines) {
-        const environmentVariables: string[] | null = line.match(/\$\{([^\}]+)\}/g);
+        const regex: RegExp = /\$\{([^\}]+)\}/g; // This finds environment varible tokens that look like "${VAR_NAME}"
+        const environmentVariables: string[] | null = line.match(regex);
         let lineShouldBeTrimmed: boolean = false;
         if (environmentVariables) {
-          for (const environmentVariable of environmentVariables) {
-            if (!process.env[environmentVariable]) {
+          for (const token of environmentVariables) {
+            // Remove the leading "${" and the trailing "}" from the token
+            const environmentVariableName: string = token.substring(2, token.length - 1);
+            if (!process.env[environmentVariableName]) {
               lineShouldBeTrimmed = true;
               break;
             }
