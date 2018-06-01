@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as wordwrap from 'wordwrap';
 
 import { RushConstants } from '../../RushConstants';
 import { Utilities } from '../../utilities/Utilities';
@@ -52,14 +51,12 @@ export class CommandLineMigrationAdvisor {
   }
 
   private static _reportDeprecated(message: string): void {
-    const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
-
-    console.error(colors.red(wrap(
+    console.error(colors.red(Utilities.wrapWords(
      'ERROR: You specified an outdated command-line that is no longer supported by this version of Rush:'
     )));
-    console.error(colors.yellow(wrap(message)));
+    console.error(colors.yellow(Utilities.wrapWords(message)));
     console.error();
-    console.error(wrap(`For command-line help, type "rush -h".  For migration instructions,`
+    console.error(Utilities.wrapWords(`For command-line help, type "rush -h".  For migration instructions,`
       + ` please visit ${RushConstants.rushWebSiteUrl}`));
   }
 

@@ -4,7 +4,6 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as colors from 'colors';
-import * as wordwrap from 'wordwrap';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import { RushConstants } from '../../RushConstants';
@@ -126,8 +125,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private _reportErrorAndSetExitCode(error: Error): void {
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
-      const wrap: (textToWrap: string) => string = wordwrap.soft(prefix.length, Utilities.getConsoleWidth());
-      console.error(os.EOL + colors.red(prefix + wrap(error.message).trim()));
+      console.error(os.EOL + colors.red(prefix + Utilities.wrapWords(error.message).trim()));
     }
 
     if (this._debugParameter.value) {

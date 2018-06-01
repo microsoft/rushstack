@@ -7,6 +7,7 @@ import * as os from 'os';
 import * as rimraf from 'rimraf';
 import * as tty from 'tty';
 import * as path from 'path';
+import * as wordwrap from 'wordwrap';
 import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
 
 export interface IEnvironment {
@@ -208,6 +209,22 @@ export class Utilities {
       return stdout.columns;
     }
     return 80;
+  }
+
+  /**
+   * Applies word wrapping.  If maxLineLength is unspecified, then it defaults to the console
+   * width.
+   */
+  public static wrapWords(text: string, maxLineLength?: number, indent?: number): string {
+    if (!indent) {
+      indent = 0;
+    }
+    if (!maxLineLength) {
+      maxLineLength = Utilities.getConsoleWidth();
+    }
+
+    const wrap: (textToWrap: string) => string = wordwrap.soft(indent, maxLineLength);
+    return wrap(text);
   }
 
   /**
