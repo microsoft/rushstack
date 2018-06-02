@@ -11,7 +11,6 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import * as tar from 'tar';
-import * as wordwrap from 'wordwrap';
 import globEscape = require('glob-escape');
 import {
   JsonFile,
@@ -40,8 +39,6 @@ import { Rush } from '../../Rush';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
-
-const wrap: (textToWrap: string) => string = wordwrap.soft(Utilities.getConsoleWidth());
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
@@ -367,7 +364,7 @@ export class InstallManager {
       // Check any preferred dependencies first
       allPreferredVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
-          console.log(colors.yellow(wrap(
+          console.log(colors.yellow(Utilities.wrapWords(
             `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
             + ` (${version}) required by the preferred versions from ` + RushConstants.commonVersionsFilename)));
           shrinkwrapIsUpToDate = false;
@@ -501,7 +498,7 @@ export class InstallManager {
           if (!shrinkwrapFile.tryEnsureCompatibleDependency(pair.packageName, pair.packageVersion,
             rushProject.tempProjectName)) {
             console.log(colors.yellow(
-              wrap(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
+              Utilities.wrapWords(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
                 + ` (${pair.packageVersion}) required by "${rushProject.packageName}".`)));
             shrinkwrapIsUpToDate = false;
           }
@@ -1000,7 +997,7 @@ export class InstallManager {
     }
 
     if (anyChanges) {
-      console.log(os.EOL + colors.yellow(wrap(`Applied workaround for NPM 5 bug`)) + os.EOL);
+      console.log(os.EOL + colors.yellow(Utilities.wrapWords(`Applied workaround for NPM 5 bug`)) + os.EOL);
     }
   }
 
@@ -1015,7 +1012,7 @@ export class InstallManager {
     // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
     for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {
       if (!this._rushConfiguration.findProjectByTempName(tempProjectName)) {
-        console.log(os.EOL + colors.yellow(wrap(
+        console.log(os.EOL + colors.yellow(Utilities.wrapWords(
           `Your NPM shrinkwrap file references a project "${tempProjectName}" which no longer exists.`))
           + os.EOL);
         return true;  // found one

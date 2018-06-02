@@ -10,6 +10,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../data/EventHooks';
 import { InstallManager, IInstallManagerOptions } from '../logic/InstallManager';
 import { PurgeManager } from '../logic/PurgeManager';
+import { SetupChecks } from '../logic/SetupChecks';
 import { Stopwatch } from '../../utilities/Stopwatch';
 
 /**
@@ -43,6 +44,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   protected run(): Promise<void> {
     const stopwatch: Stopwatch = Stopwatch.start();
+
+    SetupChecks.validate(this.rushConfiguration);
 
     this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
 
