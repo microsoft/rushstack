@@ -30,12 +30,7 @@ export class Rush {
    *  the tool is executed. This is mainly used for debugging purposes.
    */
   public static launch(launcherVersion: string, isManaged: boolean): void {
-    console.log(
-      EOL +
-      colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
-      colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
-      EOL
-    );
+    Rush._printStartupBanner(isManaged);
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
       // The migration advisor recognized an obsolete command-line
@@ -58,7 +53,9 @@ export class Rush {
    *  the tool is executed. This is mainly used for debugging purposes.
    */
   public static launchRushX(launcherVersion: string, isManaged: boolean): void {
-    RushX.launch(launcherVersion, isManaged);
+    Rush._printStartupBanner(isManaged);
+
+    RushX.launchRushX(launcherVersion, isManaged);
   }
 
   /**
@@ -74,5 +71,14 @@ export class Rush {
     }
 
     return Rush._version;
+  }
+
+  private static _printStartupBanner(isManaged: boolean): void {
+    console.log(
+      EOL +
+      colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
+      colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
+      EOL
+    );
   }
 }
