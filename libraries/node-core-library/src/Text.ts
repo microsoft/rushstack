@@ -38,4 +38,17 @@ export class Text {
     return input.replace(Text._newLineRegEx, '\n');
   }
 
+  /**
+   * Append spaces to the end of a string to ensure the result has a minimum length.
+   * @remarks
+   * If the string length already exceeds the minimum length, then the string is unchanged.
+   * The string is not truncated.
+   */
+  public static padEnd(s: string, minimumLength: number): string {
+    let result: string = s;
+    while (result.length < minimumLength) {
+      result += ' ';
+    }
+    return result;
+  }
 }

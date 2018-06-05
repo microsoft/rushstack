@@ -179,6 +179,7 @@ class ProtectableMap<K, V> {
 class Text {
   static convertToCrLf(input: string): string;
   static convertToLf(input: string): string;
+  static padEnd(s: string, minimumLength: number): string;
   static replaceAll(input: string, searchValue: string, replaceValue: string): string;
 }
 

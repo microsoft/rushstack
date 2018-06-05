@@ -35,7 +35,7 @@ else if (!semver.satisfies(nodeVersion, '^6.9.0')
 }
 
 import * as path from 'path';
-import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
+import { JsonFile, IPackageJson, Text } from '@microsoft/node-core-library';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
@@ -51,14 +51,6 @@ let rushVersionToLoad: string | undefined = undefined;
 
 const previewVersion: string | undefined = process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
 
-function padEnd(s: string, length: number): string {
-  let result: string = s;
-  while (result.length < length) {
-    result += ' ';
-  }
-  return result;
-}
-
 if (previewVersion) {
   if (!semver.valid(previewVersion, false)) {
     console.error(colors.red(`Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`));
@@ -72,12 +64,12 @@ if (previewVersion) {
     `*********************************************************************`,
     `* WARNING! THE "RUSH_PREVIEW_VERSION" ENVIRONMENT VARIABLE IS SET.  *`,
     `*                                                                   *`,
-    `* You are previewing Rush version:        ${padEnd(previewVersion, 25)} *`
+    `* You are previewing Rush version:        ${Text.padEnd(previewVersion, 25)} *`
   );
 
   if (configuration) {
     lines.push(
-      `* The rush.json configuration asks for:   ${padEnd(configuration.rushVersion, 25)} *`
+      `* The rush.json configuration asks for:   ${Text.padEnd(configuration.rushVersion, 25)} *`
     );
   }
 
