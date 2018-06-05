@@ -8,10 +8,11 @@ import { IPackageJson } from '@microsoft/node-core-library';
 
 import { RushCommandLineParser } from './cli/actions/RushCommandLineParser';
 import { RushConstants } from './RushConstants';
+import { RushX } from './RushX';
 import { CommandLineMigrationAdvisor } from './cli/actions/CommandLineMigrationAdvisor';
 
 /**
- * Operations involving the rush tool and its operation.
+ * General operations for the Rush engine.
  *
  * @public
  */
@@ -19,8 +20,9 @@ export class Rush {
   private static _version: string;
 
   /**
-   * Executes the Rush CLI. This is expected to be called by the @microsoft/rush package, which acts as a version
-   *  manager for the Rush tool. The rush-lib API is exposed through the index.ts/js file.
+   * This API is used by the @microsoft/rush front end to launch the "rush" command-line.
+   * Third-party tools should not use this API.  Instead, they should execute the "rush" binary
+   * and start a new NodeJS process.
    *
    * @param launcherVersion - The version of the @microsoft/rush wrapper used to call invoke the CLI.
    * @param isManaged - True if the tool was invoked from within a project with a rush.json file, otherwise false. We
@@ -43,6 +45,20 @@ export class Rush {
 
     const parser: RushCommandLineParser = new RushCommandLineParser();
     parser.execute();
+  }
+
+  /**
+   * This API is used by the @microsoft/rush front end to launch the "rushx" command-line.
+   * Third-party tools should not use this API.  Instead, they should execute the "rushx" binary
+   * and start a new NodeJS process.
+   *
+   * @param launcherVersion - The version of the @microsoft/rush wrapper used to call invoke the CLI.
+   * @param isManaged - True if the tool was invoked from within a project with a rush.json file, otherwise false. We
+   *  consider a project without a rush.json to be "unmanaged" and we'll print that to the command line when
+   *  the tool is executed. This is mainly used for debugging purposes.
+   */
+  public static launchRushX(launcherVersion: string, isManaged: boolean): void {
+    RushX.launch(launcherVersion, isManaged);
   }
 
   /**

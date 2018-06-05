@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// The minimal set of imports that are safe even for ancient NodeJS versions:
 import * as colors from 'colors';
 import * as os from 'os';
 import * as semver from 'semver';
@@ -35,11 +36,12 @@ else if (!semver.satisfies(nodeVersion, '^6.9.0')
 
 import * as path from 'path';
 import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
+import { EnvironmentVariableNames } from '@microsoft/rush-lib';
+import * as rushLib from '@microsoft/rush-lib';
 
-import { Rush, EnvironmentVariableNames } from '@microsoft/rush-lib';
-
-import { MinimalRushConfiguration } from './MinimalRushConfiguration';
+import { RushCommandSelector } from './RushCommandSelector';
 import { RushVersionSelector } from './RushVersionSelector';
+import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 // Load the configuration
 const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
@@ -114,5 +116,5 @@ if (rushVersionToLoad && rushVersionToLoad !== currentPackageJson.version) {
   // Rush is "managed" if its version and configuration are dictated by a repo's rush.json
   const isManaged: boolean = !!configuration;
 
-  Rush.launch(currentPackageJson.version, isManaged);
+  RushCommandSelector.execute(currentPackageJson.version, isManaged, rushLib);
 }
