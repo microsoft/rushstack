@@ -65,7 +65,7 @@ export class RushX {
       const scriptBody: string = scripts[command];
       console.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);
 
-      const packageFolder: string = path.basename(packageJsonFilePath);
+      const packageFolder: string = path.dirname(packageJsonFilePath);
 
       const result: child_process.SpawnSyncReturns<Buffer> = Utilities.executeLifecycleCommand(
         scriptBody,
