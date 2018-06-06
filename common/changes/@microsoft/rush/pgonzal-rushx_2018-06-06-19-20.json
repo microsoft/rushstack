@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add \"rushx\" binary for single-project commands",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
