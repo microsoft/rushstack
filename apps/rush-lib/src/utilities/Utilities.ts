@@ -327,7 +327,7 @@ export class Utilities {
    * @param workingDirectory - working directory for running this command
    * @param initCwd = the folder containing a local .npmrc, which will be used
    *        for the INIT_CWD environment variable
-   * @param environment - environment variables for running this command
+   * @param captureOutput - if true, map stdio to 'pipe' instead of the parent process's streams
    * @beta
    */
   public static executeLifecycleCommand(
@@ -367,7 +367,7 @@ export class Utilities {
    * @param workingDirectory - working directory for running this command
    * @param initCwd = the folder containing a local .npmrc, which will be used
    *        for the INIT_CWD environment variable
-   * @param environment - environment variables for running this command
+   * @param captureOutput - if true, map stdio to 'pipe' instead of the parent process's streams
    * @beta
    */
   public static executeLifecycleCommandAsync(
