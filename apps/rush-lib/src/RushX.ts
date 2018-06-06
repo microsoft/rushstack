@@ -54,7 +54,8 @@ export class RushX {
 
         const availableCommands: string[] = Object.keys(scripts);
         if (availableCommands.length > 0) {
-          console.log(os.EOL + 'Available commands are: ' + availableCommands.map(x => `"${x}"`).join(', '));
+          console.log(os.EOL + 'Available commands for this project are: '
+            + availableCommands.map(x => `"${x}"`).join(', '));
         }
 
         console.log(`Use ${colors.yellow('"rushx --help"')} for more information.`);
@@ -104,9 +105,20 @@ export class RushX {
             warning = command;
           }
         } else {
-          console.log('  '
-          + colors.cyan(Text.padEnd(command + ':', maxLength + 2))
-          + JSON.stringify(scripts[command]));
+          const escapedScriptBody: string = JSON.stringify(scripts[command]);
+
+          // The length of the string e.g. "  command: "
+          const firstPartLength: number = 2 + maxLength + 2;
+          // The length for truncating the escaped escapedScriptBody so it doesn't wrap
+          // to the next line
+          const truncateLength: number = Math.max(0, Utilities.getConsoleWidth() - firstPartLength) - 1;
+
+          console.log(
+            // Example: "  command: "
+            '  ' + colors.cyan(Text.padEnd(command + ':', maxLength + 2))
+            // Example: "do some thin..."
+            + Text.truncateWithEllipsis(escapedScriptBody, truncateLength)
+          );
         }
       }
 

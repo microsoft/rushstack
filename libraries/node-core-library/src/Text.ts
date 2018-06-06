@@ -51,4 +51,23 @@ export class Text {
     }
     return result;
   }
+
+  /**
+   * If the string is longer than maximumLength characters, truncate it to that length
+   * using "..." to indicate the truncation.
+   *
+   * @remarks
+   * For example truncateWithEllipsis('1234578', 5) would produce '12...'.
+   */
+  public static truncateWithEllipsis(s: string, maximumLength: number): string {
+    if (s.length < maximumLength) {
+      return s;
+    }
+
+    if (s.length < 4) {
+      return s.substring(0, maximumLength);
+    }
+
+    return s.substring(0, maximumLength-3) + '...';
+  }
 }

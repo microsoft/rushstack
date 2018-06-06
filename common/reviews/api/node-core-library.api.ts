@@ -181,5 +181,6 @@ class Text {
   static convertToLf(input: string): string;
   static padEnd(s: string, minimumLength: number): string;
   static replaceAll(input: string, searchValue: string, replaceValue: string): string;
+  static truncateWithEllipsis(s: string, maximumLength: number): string;
 }
 
