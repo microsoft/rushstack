@@ -67,14 +67,20 @@ export class RushX {
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
-      const result: child_process.SpawnSyncReturns<Buffer> = Utilities.executeLifecycleCommand(
+      const result: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
         scriptBody,
         packageFolder,
         packageFolder
       );
 
-      // Return the exit code of the child process
-      process.exitCode = result.status;
+      result.on('close', (code) => {
+        if (code) {
+          console.log(colors.red(`The script failed with exit code ${code}`));
+        }
+
+        // Pass along the exit code of the child process
+        process.exitCode = code || 0;
+      });
     } catch (error) {
       console.log(colors.red('Error: ' + error.message));
     }
