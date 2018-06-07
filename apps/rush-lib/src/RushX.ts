@@ -12,7 +12,7 @@ import {
   Text,
   IPackageJsonScriptTable
  } from '@microsoft/node-core-library';
-import { Utilities } from '../lib/utilities/Utilities';
+import { Utilities } from './utilities/Utilities';
 
 /**
  * Parses the "scripts" section from package.json
