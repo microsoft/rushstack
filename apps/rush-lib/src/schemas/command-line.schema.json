@@ -4,9 +4,21 @@
   "description": "For use with the Rush tool, this file defines custom command line commands. See http://rushjs.io for details.",
 
   "definitions": {
+    "anything": {
+      "type": [
+        "array",
+        "boolean",
+        "integer",
+        "number",
+        "object",
+        "string"
+      ],
+      "items": { "$ref": "#/definitions/anything" }
+    },
+
     "baseCommand": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "required": [ "commandKind", "name", "summary", "description" ],
       "properties": {
         "commandKind": {
@@ -33,11 +45,14 @@
       }
     },
     "bulkCommand": {
-      "allof": [
+      "title": "Bulk Command",
+      "description": "A custom command that is run separately for each project in the repository",
+      "type": "object",
+      "allOf": [
         { "$ref": "#/definitions/baseCommand" },
         {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "required": [ "parallelized" ],
           "properties": {
             "commandKind": {
@@ -54,15 +69,31 @@
               "type": "boolean"
             }
           }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "commandKind": { "$ref": "#/definitions/anything" },
+            "name": { "$ref": "#/definitions/anything" },
+            "summary": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+
+            "parallelized": { "$ref": "#/definitions/anything" },
+            "ignoreMissingScript": { "$ref": "#/definitions/anything" }
+          }
         }
       ]
     },
     "globalCommand": {
-      "allof": [
+      "title": "Global Command",
+      "description": "A custom command that is run once for the entire repository",
+      "type": "object",
+      "allOf": [
         { "$ref": "#/definitions/baseCommand" },
         {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "required": [ "scriptPath" ],
           "properties": {
             "commandKind": {
@@ -74,13 +105,25 @@
               "type": "string"
             }
           }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "commandKind": { "$ref": "#/definitions/anything" },
+            "name": { "$ref": "#/definitions/anything" },
+            "summary": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+
+            "scriptPath": { "$ref": "#/definitions/anything" }
+          }
         }
       ]
     },
 
     "baseParameter": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "required": [ "parameterKind", "longName", "description", "associatedCommands" ],
       "properties": {
         "parameterKind": {
@@ -118,26 +161,42 @@
       }
     },
     "flagParameter": {
-      "allof": [
+      "title": "Flag Parameter",
+      "description": "A custom command-line parameter whose presence acts as an on/off switch",
+      "type": "object",
+      "allOf": [
         { "$ref": "#/definitions/baseParameter" },
         {
           "type": "object",
-          "additionalProperties": false,
-          "required": [ ],
+          "additionalProperties": true,
           "properties": {
             "parameterKind": {
               "enum": [ "flag" ]
             }
           }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "associatedCommands": { "$ref": "#/definitions/anything" }
+          }
         }
       ]
     },
     "choiceParameter": {
-      "allof": [
+      "title": "Choice Parameter",
+      "description": "A custom command-line parameter whose argument must be chosen from a list of allowable alternatives",
+      "type": "object",
+      "allOf": [
         { "$ref": "#/definitions/baseParameter" },
         {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "required": [ "alternatives" ],
           "properties": {
             "parameterKind": {
@@ -172,6 +231,20 @@
               "type": "string"
             }
           }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "associatedCommands": { "$ref": "#/definitions/anything" },
+
+            "alternatives": { "$ref": "#/definitions/anything" },
+            "defaultValue": { "$ref": "#/definitions/anything" }
+          }
         }
       ]
     }
@@ -179,7 +252,6 @@
 
   "type": "object",
   "additionalProperties": false,
-  "required": [ ],
 
   "properties": {
     "$schema": {
@@ -192,7 +264,8 @@
       "description": "A list of custom commands that affect all projects in the repository.  These commands are invoked from the Rush command line.",
       "type": "array",
       "items": {
-        "oneof": [
+        "type": "object",
+        "oneOf": [
           { "$ref": "#/definitions/bulkCommand" },
           { "$ref": "#/definitions/globalCommand" }
         ]
@@ -204,7 +277,8 @@
       "description": "A list of custom command-line parameters that can be associated with custom commands and Rush's built-in commands.",
       "type": "array",
       "items": {
-        "oneof": [
+        "type": "object",
+        "oneOf": [
           { "$ref": "#/definitions/flagParameter" },
           { "$ref": "#/definitions/choiceParameter" }
         ]
