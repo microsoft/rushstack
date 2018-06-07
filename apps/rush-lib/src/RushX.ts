@@ -14,8 +14,43 @@ import {
  } from '@microsoft/node-core-library';
 import { Utilities } from '../lib/utilities/Utilities';
 
-export class RushX {
+/**
+ * Parses the "scripts" section from package.json
+ */
+class ProjectCommandSet {
+  public readonly malformedScriptNames: string[] = [];
+  public readonly commandNames: string[] = [];
+  private readonly _scriptsByName: Map<string, string> = new Map<string, string>();
 
+  public constructor(packageJson: IPackageJson) {
+    const scripts: IPackageJsonScriptTable = packageJson.scripts || { };
+
+    for (const scriptName of Object.keys(scripts)) {
+      if (scriptName[0] === '-' || scriptName.length === 0) {
+        this.malformedScriptNames.push(scriptName);
+      } else {
+        this.commandNames.push(scriptName);
+        this._scriptsByName.set(scriptName, scripts[scriptName]);
+      }
+    }
+
+    this.commandNames.sort();
+  }
+
+  public tryGetScriptBody(commandName: string): string | undefined {
+    return this._scriptsByName.get(commandName);
+  }
+
+  public getScriptBody(commandName: string): string {
+    const result: string | undefined = this.tryGetScriptBody(commandName);
+    if (result === undefined) {
+      throw new Error(`The command "${commandName}" was not found`);
+    }
+    return result;
+  }
+}
+
+export class RushX {
   public static launchRushX(launcherVersion: string, isManaged: boolean): void {
     // NodeJS can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
@@ -35,34 +70,39 @@ export class RushX {
 
       const packageJson: IPackageJson = packageJsonLookup.loadPackageJson(packageJsonFilePath);
 
+      const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);
+
       // 0 = node.exe
       // 1 = rushx
       const args: string[] = process.argv.slice(2);
 
+      // Check for the following types of things:
+      //   rush
+      //   rush --help
+      //   rush -h
+      //   rush --unrecognized-option
       if (args.length === 0 || args[0][0] === '-') {
-        RushX._showUsage(packageJson);
+        RushX._showUsage(packageJson, projectCommandSet);
         return;
       }
 
-      const command: string = args[0];
+      const commandName: string = args[0];
 
-      const scripts: IPackageJsonScriptTable = packageJson.scripts || { };
+      const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(commandName);
 
-      if (!Object.hasOwnProperty.call(scripts, command)) {
-        console.log(colors.red(`Error: The command "${command}" is not defined in the`
+      if (scriptBody === undefined) {
+        console.log(colors.red(`Error: The command "${commandName}" is not defined in the`
           + ` package.json file for this project.`));
 
-        const availableCommands: string[] = Object.keys(scripts);
-        if (availableCommands.length > 0) {
+        if (projectCommandSet.commandNames.length > 0) {
           console.log(os.EOL + 'Available commands for this project are: '
-            + availableCommands.map(x => `"${x}"`).join(', '));
+            + projectCommandSet.commandNames.map(x => `"${x}"`).join(', '));
         }
 
         console.log(`Use ${colors.yellow('"rushx --help"')} for more information.`);
         return;
       }
 
-      const scriptBody: string = scripts[command];
       console.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
@@ -86,51 +126,43 @@ export class RushX {
     }
   }
 
-  private static _showUsage(packageJson: IPackageJson): void {
+  private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
     console.log('usage: rushx [-h]');
     console.log('       rushx <command> ...' + os.EOL);
 
     console.log('Optional arguments:');
     console.log('  -h, --help            Show this help message and exit.' + os.EOL);
 
-    const scripts: IPackageJsonScriptTable = packageJson.scripts || { };
-    if (Object.keys(scripts).length > 0) {
+    if (projectCommandSet.commandNames.length > 0) {
       console.log(`Project commands for ${colors.cyan(packageJson.name)}:`);
 
       // Calculate the length of the longest script name, for formatting
       let maxLength: number = 0;
-      for (const command of Object.keys(scripts)) {
-        maxLength = Math.max(maxLength, command.length);
+      for (const commandName of projectCommandSet.commandNames) {
+        maxLength = Math.max(maxLength, commandName.length);
       }
 
-      let warning: string | undefined = undefined;
+      for (const commandName of projectCommandSet.commandNames) {
+        const escapedScriptBody: string = JSON.stringify(projectCommandSet.getScriptBody(commandName));
 
-      for (const command of Object.keys(scripts)) {
-        if (command[0] === '-' || command.length === 0) {
-          if (!warning) {
-            warning = command;
-          }
-        } else {
-          const escapedScriptBody: string = JSON.stringify(scripts[command]);
+        // The length of the string e.g. "  command: "
+        const firstPartLength: number = 2 + maxLength + 2;
+        // The length for truncating the escaped escapedScriptBody so it doesn't wrap
+        // to the next line
+        const truncateLength: number = Math.max(0, Utilities.getConsoleWidth() - firstPartLength) - 1;
 
-          // The length of the string e.g. "  command: "
-          const firstPartLength: number = 2 + maxLength + 2;
-          // The length for truncating the escaped escapedScriptBody so it doesn't wrap
-          // to the next line
-          const truncateLength: number = Math.max(0, Utilities.getConsoleWidth() - firstPartLength) - 1;
-
-          console.log(
-            // Example: "  command: "
-            '  ' + colors.cyan(Text.padEnd(command + ':', maxLength + 2))
-            // Example: "do some thin..."
-            + Text.truncateWithEllipsis(escapedScriptBody, truncateLength)
-          );
-        }
+        console.log(
+          // Example: "  command: "
+          '  ' + colors.cyan(Text.padEnd(commandName + ':', maxLength + 2))
+          // Example: "do some thin..."
+          + Text.truncateWithEllipsis(escapedScriptBody, truncateLength)
+        );
       }
 
-      if (warning) {
-        console.log(os.EOL + colors.yellow('Warning: The "scripts" table in the package.json file'
-          + ` defines a script with an unsupported name: "${warning}"`));
+      if (projectCommandSet.malformedScriptNames.length > 0) {
+        console.log(os.EOL + colors.yellow('Warning: Some "scripts" entries in the package.json file'
+          + ' have malformed names: '
+          + projectCommandSet.malformedScriptNames.map(x => `"${x}"`).join(', ')));
       }
     } else {
       console.log(colors.yellow('Warning: No commands are defined yet for this project.'));
