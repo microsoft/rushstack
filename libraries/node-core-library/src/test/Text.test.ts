@@ -14,6 +14,9 @@ describe('Text', () => {
     assert.equal(Text.padEnd('123456', 5),  '123456');
   });
   it('Text.truncateWithEllipsis()', () => {
+    assert.throws(() => { Text.truncateWithEllipsis('123', -1); });
+    assert.equal(Text.truncateWithEllipsis('123', 0),     '');
+
     assert.equal(Text.truncateWithEllipsis('', 2),        '');
     assert.equal(Text.truncateWithEllipsis('1', 2),       '1');
     assert.equal(Text.truncateWithEllipsis('12', 2),      '12');

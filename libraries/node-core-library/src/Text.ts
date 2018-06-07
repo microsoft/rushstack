@@ -60,11 +60,15 @@ export class Text {
    * For example truncateWithEllipsis('1234578', 5) would produce '12...'.
    */
   public static truncateWithEllipsis(s: string, maximumLength: number): string {
+    if (maximumLength < 0) {
+      throw new Error('The maximumLength cannot be a negative number');
+    }
+
     if (s.length <= maximumLength) {
       return s;
     }
 
-    if (s.length < 4) {
+    if (s.length <= 3) {
       return s.substring(0, maximumLength);
     }
 
