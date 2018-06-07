@@ -5,10 +5,9 @@ import * as path from 'path';
 import * as semver from 'semver';
 
 import { LockFile } from '@microsoft/node-core-library';
-
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
-
-import * as rushLib from '@microsoft/rush-lib';
+import { _LastInstallFlag } from '@microsoft/rush-lib';
+import { RushCommandSelector } from './RushCommandSelector';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
@@ -25,7 +24,7 @@ export class RushVersionSelector {
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushDirectory, `rush-${version}`);
 
-    const installMarker: rushLib._LastInstallFlag = new rushLib._LastInstallFlag(
+    const installMarker: _LastInstallFlag = new _LastInstallFlag(
       expectedRushPath,
       { node: process.versions.node }
     );
@@ -69,6 +68,9 @@ export class RushVersionSelector {
 
     return installPromise.then(() => {
       if (semver.lt(version, '3.0.20')) {
+        // In old versions, requiring the entry point invoked the command-line parser immediately,
+        // so fail if "rushx" was used
+        RushCommandSelector.failIfNotInvokedAsRush(version);
         require(path.join(
           expectedRushPath,
           'node_modules',
@@ -78,6 +80,9 @@ export class RushVersionSelector {
           'rush'
         ));
       } else if (semver.lt(version, '4.0.0')) {
+        // In old versions, requiring the entry point invoked the command-line parser immediately,
+        // so fail if "rushx" was used
+        RushCommandSelector.failIfNotInvokedAsRush(version);
         require(path.join(
           expectedRushPath,
           'node_modules',
@@ -87,7 +92,8 @@ export class RushVersionSelector {
           'start'
         ));
       } else {
-        const rushCliEntrypoint: typeof rushLib = require(path.join(
+        // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
+        const rushCliEntrypoint: { } = require(path.join(
           expectedRushPath,
           'node_modules',
           '@microsoft',
@@ -95,7 +101,7 @@ export class RushVersionSelector {
           'lib',
           'index'
         ));
-        rushCliEntrypoint.Rush.launch(this._currentPackageVersion, true);
+        RushCommandSelector.execute(this._currentPackageVersion, true, rushCliEntrypoint);
       }
     });
   }
