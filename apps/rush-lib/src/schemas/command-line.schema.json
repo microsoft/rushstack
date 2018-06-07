@@ -138,15 +138,10 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": [ "scriptPath", "alternatives" ],
+          "required": [ "alternatives" ],
           "properties": {
             "parameterKind": {
               "enum": [ "choice" ]
-            },
-            "scriptPath": {
-              "title": "Script Path",
-              "description": "The relative path to a JavaScript file that will be invoked using the NodeJS engine.  The path is relative to the repository root folder that contains rush.json.",
-              "type": "string"
             },
             "alternatives": {
               "title": "Alternatives",
@@ -184,6 +179,7 @@
 
   "type": "object",
   "additionalProperties": false,
+  "required": [ ],
 
   "properties": {
     "$schema": {
