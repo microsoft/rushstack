@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.7.43",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.43",
+      "date": "Tue, 05 Jun 2018 21:04:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated getter comment"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.42",
       "tag": "@microsoft/loader-load-themed-styles_v1.7.42",
       "date": "Thu, 31 May 2018 01:39:33 GMT",

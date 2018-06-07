@@ -48,7 +48,7 @@ export class LoadThemedStylesLoader {
   }
 
   /**
-   * Use this property to override the path to the @microsoft/load-themed-styles package.
+   * Use this property to get the path to the loader package (defaults to the path to @microsoft/load-themed-styles).
    */
   public static get loadedThemedStylesPath(): string {
     return LoadThemedStylesLoader._loadedThemedStylesPath;
