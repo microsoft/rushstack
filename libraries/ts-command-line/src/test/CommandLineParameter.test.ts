@@ -197,6 +197,13 @@ describe('CommandLineParameter', () => {
         action.getStringListParameter('--string-list'),
         snapshotPropertyNames
       );
+
+      const copiedArgs: string[] = [];
+      for (const parameter of action.parameters) {
+        copiedArgs.push(`### ${parameter.longName} output: ###`);
+        parameter.appendToArgList(copiedArgs);
+      }
+      expect(copiedArgs).toMatchSnapshot();
     });
   });
 
@@ -249,6 +256,13 @@ describe('CommandLineParameter', () => {
         action.getStringListParameter('--string-list'),
         snapshotPropertyNames
       );
+
+      const copiedArgs: string[] = [];
+      for (const parameter of action.parameters) {
+        copiedArgs.push(`### ${parameter.longName} output: ###`);
+        parameter.appendToArgList(copiedArgs);
+      }
+      expect(copiedArgs).toMatchSnapshot();
     });
   });
 });
