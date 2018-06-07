@@ -60,7 +60,7 @@ export class Text {
    * For example truncateWithEllipsis('1234578', 5) would produce '12...'.
    */
   public static truncateWithEllipsis(s: string, maximumLength: number): string {
-    if (s.length < maximumLength) {
+    if (s.length <= maximumLength) {
       return s;
     }
 
@@ -68,6 +68,6 @@ export class Text {
       return s.substring(0, maximumLength);
     }
 
-    return s.substring(0, maximumLength-3) + '...';
+    return s.substring(0, maximumLength - 3) + '...';
   }
 }
