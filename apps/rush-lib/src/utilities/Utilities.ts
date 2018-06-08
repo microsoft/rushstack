@@ -298,30 +298,6 @@ export class Utilities {
   }
 
   /**
-   * Executes the command with the specified command-line parameters, and waits for it to complete.
-   * The current directory will be set to the specified workingDirectory.
-   */
-  public static executeCommandAsync(command: string, args: string[], workingDirectory: string,
-    environment?: IEnvironment): child_process.ChildProcess {
-    // This is a workaround for GitHub issue #25330.  It is not as complete as the workaround above,
-    // but there doesn't seem to be an easy asynchronous solution.
-    // https://github.com/nodejs/node-v0.x-archive/issues/25330
-    if (fsx.existsSync(command + '.cmd')) {
-      command += '.cmd';
-    }
-
-    // This is needed since we specify shell=true below:
-    const escapedCommand: string = Utilities.escapeShellParameter(command);
-    const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
-
-    return child_process.spawn(escapedCommand, escapedArgs, {
-      cwd: workingDirectory,
-      shell: true,
-      env: Utilities._createEnvironmentForRushCommand('', environment)
-    });
-  }
-
-  /**
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
    * @param workingDirectory - working directory for running this command
