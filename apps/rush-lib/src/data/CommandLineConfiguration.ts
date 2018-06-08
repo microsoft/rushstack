@@ -11,100 +11,62 @@ import {
 
 import { RushConstants } from '../RushConstants';
 
-export interface ICustomCommand {
-  name: string;
-  summary: string;
-  documentation: string | undefined;
-  parallelized: boolean;
-  ignoreMissingScript: boolean | undefined;
-}
-
-export interface ICustomEnumValue {
-  name: string;
-  description: string;
-}
-
-export type CustomOption = ICustomEnumOption | ICustomFlagOption;
-
-export interface IBaseCustomOption {
-  description: string;
-  associatedCommands: Array<string>;
-  shortName?: string;
-}
-
-export interface ICustomFlagOption extends IBaseCustomOption {
-  optionType: 'flag';
-}
-
-export interface ICustomEnumOption extends IBaseCustomOption {
-  optionType: 'enum';
-  enumValues: Array<ICustomEnumValue>;
-  defaultValue?: string;
-}
-
-interface ICommandLineConfigurationJson {
-  customCommands?: Array<ICustomCommand>;
-  customOptions?: { [optionName: string]: CustomOption };
-}
+import {
+  CommandJson,
+  ICommandLineJson,
+  ParameterJson
+} from './CommandLineJson';
 
 /**
  * Custom Commands and Options for the Rush Command Line
  * @public
  */
 export class CommandLineConfiguration {
-  private static _schema: JsonSchema | undefined = undefined;
-  public options: Map<string, CustomOption>;
-  public commands: Map<string, ICustomCommand>;
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
+    path.join(__dirname, '../schemas/command-line.schema.json'));
+
+  public readonly commands: CommandJson[] = [];
+  public readonly parameters: ParameterJson[] = [];
 
   public static tryLoadFromFile(jsonFilename: string): CommandLineConfiguration {
-    let commandLineJson: ICommandLineConfigurationJson | undefined = undefined;
+    let commandLineJson: ICommandLineJson | undefined = undefined;
     if (fs.existsSync(jsonFilename)) {
-      commandLineJson = JsonFile.loadAndValidate(jsonFilename, CommandLineConfiguration.getSchema());
+      commandLineJson = JsonFile.loadAndValidate(jsonFilename, CommandLineConfiguration._jsonSchema);
     }
+
     return new CommandLineConfiguration(commandLineJson);
   }
 
-  private static getSchema(): JsonSchema {
-    if (!CommandLineConfiguration._schema) {
-      const schemaFilename: string = path.join(__dirname, '../schemas/command-line.schema.json');
-      CommandLineConfiguration._schema = JsonSchema.fromFile(schemaFilename);
-    }
-    return CommandLineConfiguration._schema;
-  }
-
   /**
-   * Preferred to use CommandLineConfiguration.loadFromFile()
+   * Use CommandLineConfiguration.loadFromFile()
    */
-  private constructor(commandLineJson: ICommandLineConfigurationJson | undefined) {
-    this.options = new Map<string, CustomOption>();
-    this.commands = new Map<string, ICustomCommand>();
-
+  private constructor(commandLineJson: ICommandLineJson | undefined) {
     if (commandLineJson) {
-      if (commandLineJson.customCommands) {
-        commandLineJson.customCommands.forEach((command: ICustomCommand) => {
-          this.commands.set(command.name, command);
-        });
-      }
-
-      if (commandLineJson.customOptions) {
-        for (const flagName of Object.keys(commandLineJson.customOptions)) {
-          const customOption: CustomOption = commandLineJson.customOptions![flagName];
-
-          if (customOption.optionType === 'enum') {
-
-            const enumValues: string[] = customOption.enumValues.map(v => v.name);
-
-            if (customOption.defaultValue &&
-               (enumValues.indexOf(customOption.defaultValue) === -1)) {
-              throw new Error(`In "${RushConstants.commandLineFilename}", custom option "${flagName}",`
-                + ` uses a default value "${customOption.defaultValue}"`
-                + ` which is missing from list of options: "${enumValues.toString()}"`);
-            }
-          }
-
-          this.options.set(flagName, customOption);
+      if (commandLineJson.commands) {
+        for (const command of commandLineJson.commands) {
+          this.commands.push(command);
         }
       }
+
+      if (commandLineJson.parameters) {
+        for (const parameter of commandLineJson.parameters) {
+          this.parameters.push(parameter);
+
+          // Do some basic validation
+          switch (parameter.parameterKind) {
+            case 'choice':
+              const alternativeNames: string[] = parameter.alternatives.map(x => x.name);
+
+              if (parameter.defaultValue && alternativeNames.indexOf(parameter.defaultValue) < 0) {
+                throw new Error(`In ${RushConstants.commandLineFilename}, the parameter "${parameter.longName}",`
+                  + ` specifies a default value "${parameter.defaultValue}"`
+                  + ` which is not one of the defined alternatives: "${alternativeNames.toString()}"`);
+              }
+              break;
+          }
+        }
+      }
+
     }
   }
 }

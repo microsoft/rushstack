@@ -10,32 +10,31 @@ import {
 } from '../../index';
 
 import {
-  CustomOption,
-  ICustomEnumValue
-} from '../../data/CommandLineConfiguration';
-
-import {
+  CommandLineParameter,
   CommandLineFlagParameter,
   CommandLineStringParameter,
-  CommandLineStringListParameter,
-  CommandLineChoiceParameter,
-  ICommandLineActionOptions
+  CommandLineStringListParameter
 } from '@microsoft/ts-command-line';
 
-import { RushCommandLineParser } from './RushCommandLineParser';
-import { BaseRushAction } from './BaseRushAction';
+import { BaseRushAction, IRushCommandLineActionOptions } from './BaseRushAction';
 import { SetupChecks } from '../logic/SetupChecks';
 import { TaskSelector } from '../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+import { CommandLineConfiguration } from '../../data/CommandLineConfiguration';
+import { ParameterJson } from '../../data/CommandLineJson';
+import { RushConstants } from '../../RushConstants';
 
-interface ICustomOptionInstance {
-  optionDefinition: CustomOption;
-  parameterValue?: CommandLineFlagParameter | CommandLineChoiceParameter;
+export interface ICustomRushActionOptions extends IRushCommandLineActionOptions {
+  parallelized: boolean;
+  ignoreMissingScript: boolean;
+  commandLineConfiguration: CommandLineConfiguration;
 }
 
 export class CustomRushAction extends BaseRushAction {
-  private customOptions: Map<string, ICustomOptionInstance> = new Map<string, ICustomOptionInstance>();
+  private _parallelized: boolean;
+  private _ignoreMissingScript: boolean;
+  private _commandLineConfiguration: CommandLineConfiguration;
 
   private _changedProjectsOnly: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
@@ -44,30 +43,15 @@ export class CustomRushAction extends BaseRushAction {
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
 
-  constructor(
-    parser: RushCommandLineParser,
-    options: ICommandLineActionOptions,
-    private _parallelized: boolean = false,
-    private _ignoreMissingScript: boolean = false
-  ) {
-    super({
-      ...options,
-      parser
-    });
-  }
+  private _customParameters: CommandLineParameter[] = [];
 
-  /**
-   * Registers a custom option to a task. This custom option is then registered during onDefineParameters()
-   * @param longName the long name of the option, e.g. "--verbose"
-   * @param option the Custom Option definition
-   */
-  public addCustomOption(longName: string, option: CustomOption): void {
-    if (this.customOptions.get(longName)) {
-      throw new Error(`Cannot define two custom options with the same name: "${longName}"`);
-    }
-    this.customOptions.set(longName, {
-      optionDefinition: option
-    });
+  constructor(
+    options: ICustomRushActionOptions
+  ) {
+    super(options);
+    this._parallelized = options.parallelized;
+    this._ignoreMissingScript = options.ignoreMissingScript;
+    this._commandLineConfiguration = options.commandLineConfiguration;
   }
 
   public run(): Promise<void> {
@@ -87,27 +71,22 @@ export class CustomRushAction extends BaseRushAction {
       ? this._parallelismParameter!.value
       : '1';
 
-    // collect all custom flags here
-    const customFlags: string[] = [];
-    this.customOptions.forEach((customOption: ICustomOptionInstance, longName: string) => {
-      if (customOption.parameterValue!.value) {
-        if (customOption.optionDefinition.optionType === 'flag') {
-          customFlags.push(longName);
-        } else if (customOption.optionDefinition.optionType === 'enum') {
-          customFlags.push(`${longName} ${customOption.parameterValue!.value}`);
-        }
-      }
-    });
+    // Collect all custom parameter values
+    const customParameterValues: string[] = [];
+
+    for (const customParameter of this._customParameters) {
+      customParameter.appendToArgList(customParameterValues);
+    }
 
     const changedProjectsOnly: boolean = this.actionName === 'build' && this._changedProjectsOnly.value;
 
     const tasks: TaskSelector = new TaskSelector(
       {
-        rushConfiguration: this.parser.rushConfiguration,
+        rushConfiguration: this.rushConfiguration,
         toFlags: this._mergeToProjects(),
         fromFlags: this._fromFlag.values,
         commandToRun: this.actionName,
-        customFlags,
+        customParameterValues,
         isQuietMode,
         parallelism,
         isIncrementalBuildAllowed: this.actionName === 'build',
@@ -175,27 +154,44 @@ export class CustomRushAction extends BaseRushAction {
       });
     }
 
-    // @TODO we should throw if they are trying to overwrite built in flags
-
-    this.customOptions.forEach((customOption: ICustomOptionInstance, longName: string) => {
-      if (customOption.optionDefinition.optionType === 'flag') {
-        customOption.parameterValue = this.defineFlagParameter({
-          parameterShortName: customOption.optionDefinition.shortName,
-          parameterLongName: longName,
-          description: customOption.optionDefinition.description
-        });
-      } else if (customOption.optionDefinition.optionType === 'enum') {
-        customOption.parameterValue = this.defineChoiceParameter({
-          parameterShortName: customOption.optionDefinition.shortName,
-          parameterLongName: longName,
-          description: customOption.optionDefinition.description,
-          defaultValue: customOption.optionDefinition.defaultValue,
-          alternatives: customOption.optionDefinition.enumValues.map((enumValue: ICustomEnumValue) => {
-              return enumValue.name;
-            })
-        });
+    // Find any parameters that are associated with this command
+    for (const parameter of this._commandLineConfiguration.parameters) {
+      let associated: boolean = false;
+      for (const associatedCommand of parameter.associatedCommands) {
+        if (associatedCommand === this.actionName) {
+          associated = true;
+        }
       }
-    });
+
+      if (associated) {
+        let customParameter: CommandLineParameter | undefined;
+
+        switch (parameter.parameterKind) {
+          case 'flag':
+            customParameter = this.defineFlagParameter({
+              parameterShortName: parameter.shortName,
+              parameterLongName: parameter.longName,
+              description: parameter.description
+            });
+            break;
+          case 'choice':
+           customParameter = this.defineChoiceParameter({
+              parameterShortName: parameter.shortName,
+              parameterLongName: parameter.longName,
+              description: parameter.description,
+              alternatives: parameter.alternatives.map(x => x.name),
+              defaultValue: parameter.defaultValue
+            });
+            break;
+          default:
+            throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter!.longName}"`
+              + ` using an unsupported parameter kind "${parameter!.parameterKind}"`);
+        }
+        if (customParameter) {
+          this._customParameters.push(customParameter);
+        }
+      }
+    }
   }
 
   private _mergeToProjects(): string[] {
@@ -241,17 +237,17 @@ export class CustomRushAction extends BaseRushAction {
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
+
+    const customParameterValues: string[] = [];
+    for (const customParameter of this._customParameters) {
+      customParameter.appendToArgList(customParameterValues);
+    }
+
     const extraData: { [key: string]: string } = {
       command_to: (this._toFlag.values.length > 0).toString(),
-      command_from: (this._fromFlag.values.length > 0).toString()
+      command_from: (this._fromFlag.values.length > 0).toString(),
+      customParameters: customParameterValues.join(' ')
     };
-
-    this.customOptions.forEach((customOption: ICustomOptionInstance, longName: string) => {
-      if (customOption.parameterValue!.value) {
-        extraData[`${this.actionName}_${longName}`] =
-          customOption.parameterValue!.value!.toString();
-      }
-    });
 
     if (this.parser.telemetry) {
       this.parser.telemetry.log({

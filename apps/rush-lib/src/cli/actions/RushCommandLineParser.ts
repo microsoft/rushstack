@@ -2,12 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import * as path from 'path';
 import * as colors from 'colors';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
-import { RushConstants } from '../../RushConstants';
-import { CommandLineConfiguration } from '../../data/CommandLineConfiguration';
 import { RushConfiguration } from '../../data/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { ChangeAction } from './ChangeAction';
@@ -21,7 +18,6 @@ import { UnlinkAction } from './UnlinkAction';
 import { ScanAction } from './ScanAction';
 import { VersionAction } from './VersionAction';
 import { CustomCommandFactory } from './CustomCommandFactory';
-import { CustomRushAction } from './CustomRushAction';
 
 import { Telemetry } from '../logic/Telemetry';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
@@ -88,17 +84,9 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _populateActions(): void {
     try {
-      let  commandLineConfig: CommandLineConfiguration | undefined = undefined;
-
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation();
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
-
-        const commandLineConfigFile: string = path.join(
-          this.rushConfiguration.commonRushConfigFolder, RushConstants.commandLineFilename
-        );
-
-        commandLineConfig = CommandLineConfiguration.tryLoadFromFile(commandLineConfigFile);
       }
 
       this.addAction(new ChangeAction(this));
@@ -112,10 +100,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UnlinkAction(this));
       this.addAction(new VersionAction(this));
 
-      CustomCommandFactory.createCommands(this, commandLineConfig)
-        .forEach((customAction: CustomRushAction) => {
-          this.addAction(customAction);
-        });
+      CustomCommandFactory.addActions(this);
 
     } catch (error) {
       this._reportErrorAndSetExitCode(error);
@@ -136,7 +121,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this.flushTelemetry();
 
-    // Ideally we want to remove all calls to process.exit() from our code, and replace them
+    // Ideally we want to eliminate all calls to process.exit() from our code, and replace them
     // with normal control flow that properly cleans up its data structures.
     // For this particular call, we have a problem that the RushCommandLineParser constructor
     // performs nontrivial work that can throw an exception.  Either the Rush class would need
