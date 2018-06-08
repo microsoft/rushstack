@@ -5,13 +5,14 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
-import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@microsoft/ts-command-line';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../api/RushConstants';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 import { CommandJson } from '../api/CommandLineJson';
 import { Utilities } from '../utilities/Utilities';
+import { BaseScriptAction } from '../cli/scriptActions/BaseScriptAction';
 
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
@@ -201,9 +202,15 @@ export class RushCommandLineParser extends CommandLineParser {
     // Check for any invalid associations
     for (const parameter of commandLineConfiguration.parameters) {
       for (const associatedCommand of parameter.associatedCommands) {
-        if (!this.tryGetAction(associatedCommand)) {
+        const action: CommandLineAction | undefined = this.tryGetAction(associatedCommand);
+        if (!action) {
           throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
             + ` that is associated with a nonexistent command "${associatedCommand}"`);
+        }
+        if (!(action instanceof BaseScriptAction)) {
+          throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
+            + ` that is associated with a command "${associatedCommand}", but that command does not`
+            + ` support custom parameters`);
         }
       }
     }
@@ -212,7 +219,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private _reportErrorAndSetExitCode(error: Error): void {
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
-      console.error(os.EOL + colors.red(prefix + Utilities.wrapWords(error.message).trim()));
+      console.error(os.EOL + colors.red(Utilities.wrapWords(prefix + error.message)));
     }
 
     if (this._debugParameter.value) {
