@@ -13,8 +13,8 @@
     "@types/node": "8.5.8",
     "uglify-js": "~3.0.28",
     "lodash": "~4.15.0",
-    "@types/tapable": "0.2.4",
-    "@types/webpack": "3.8.11"
+    "@types/webpack": "4.4.0",
+    "@types/tapable": "1.0.2"
   },
   "devDependencies": {
     "@types/lodash": "4.14.74",

@@ -67,12 +67,11 @@ dependencies:
   '@types/serve-static': 1.13.1
   '@types/sinon': 1.16.34
   '@types/source-map': 0.5.0
-  '@types/tapable': 0.2.4
+  '@types/tapable': 1.0.2
   '@types/tar': 4.0.0
   '@types/through2': 2.0.32
   '@types/uglify-js': 2.6.29
   '@types/vinyl': 1.2.30
-  '@types/webpack': 3.8.11
   '@types/webpack-env': 1.13.0
   '@types/yargs': 0.0.34
   '@types/z-schema': 3.16.31
@@ -522,7 +521,7 @@ packages:
   /@types/loader-utils/1.1.3:
     dependencies:
       '@types/node': 8.5.8
-      '@types/webpack': 3.8.11
+      '@types/webpack': 4.4.0
     dev: false
     resolution:
       integrity: sha512-euKGFr2oCB3ASBwG39CYJMR3N9T0nanVqXdiH7Zu/Nqddt6SmFRxytq/i2w9LQYNQekEtGBz+pE3qG6fQTNvRg==
@@ -615,10 +614,14 @@ packages:
     dev: false
     resolution:
       integrity: sha1-3TS72OMv5OdPLj2KwH+KpbRaR6w=
-  /@types/tapable/0.2.4:
+  /@types/tapable/0.2.5:
     dev: false
     resolution:
-      integrity: sha512-pclMAvhPnXJcJu1ZZ8bQthuUcdDWzDuxDdbSf6l1U6s4fP6EBiZpPsOZYqFOrbqDV97sXGFSsb6AUpiLfv4xIA==
+      integrity: sha512-dEoVvo/I9QFomyhY+4Q6Qk+I+dhG59TYceZgC6Q0mCifVPErx6Y83PNTKGDS5e9h9Eti6q0S2mm16BU6iQK+3w==
+  /@types/tapable/1.0.2:
+    dev: false
+    resolution:
+      integrity: sha512-42zEJkBpNfMEAvWR5WlwtTH22oDzcMjFsL9gDGExwF8X8WvAiw7Vwop7hPw03QT8TKfec83LwbHj6SvpqM4ELQ==
   /@types/tar/4.0.0:
     dependencies:
       '@types/node': 8.5.8
@@ -650,12 +653,21 @@ packages:
   /@types/webpack/3.8.11:
     dependencies:
       '@types/node': 8.5.8
-      '@types/tapable': 0.2.4
+      '@types/tapable': 0.2.5
       '@types/uglify-js': 2.6.29
       source-map: 0.6.1
     dev: false
     resolution:
       integrity: sha512-6a+XQjFMAJekCE7IxkDavoX8cGCEmTE+MrKeUK4CL0Q7SL9w4c5TdrYrUEzcJx3GX3I0fTIC79x0C07Pi5VmlA==
+  /@types/webpack/4.4.0:
+    dependencies:
+      '@types/node': 8.5.8
+      '@types/tapable': 1.0.2
+      '@types/uglify-js': 2.6.29
+      source-map: 0.6.1
+    dev: false
+    resolution:
+      integrity: sha512-G7TXt4IRP7NTQO8R8QyDN7YwkQzlxjiKhA+z7W5FvkGbK7kIdOUtW2e7AE2w33Q10uphyG+vr8pfRy7wBWLmsA==
   /@types/yargs/0.0.34:
     dev: false
     resolution:
@@ -10188,7 +10200,6 @@ packages:
       '@types/orchestrator': 0.0.30
       '@types/q': 0.0.32
       '@types/source-map': 0.5.0
-      '@types/tapable': 0.2.4
       '@types/uglify-js': 2.6.29
       '@types/webpack': 3.8.11
       colors: 1.2.5
@@ -10198,7 +10209,7 @@ packages:
     dev: false
     name: '@rush-temp/gulp-core-build-webpack'
     resolution:
-      integrity: sha512-wrJo5sTNsJW+2U7nZ08YXok9dYn1c89QtVNuckgGSGul9P6ttBA7ZGOHDM0ONqO7HUTxdPlnDM/ZjH6WjUw7wA==
+      integrity: sha512-/rO8tpjYHpkP3hNBUgKa6lG/6eADrlrsqadXPwqZ3fW8OSF03Tdg1WBHAHS+doojAfXUZFowHu9CYUHy0gPXFA==
       tarball: 'file:projects/gulp-core-build-webpack.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build.tgz':
@@ -10271,15 +10282,14 @@ packages:
       '@types/loader-utils': 1.1.3
       '@types/mocha': 2.2.38
       '@types/node': 8.5.8
-      '@types/tapable': 0.2.4
-      '@types/webpack': 3.8.11
+      '@types/webpack': 4.4.0
       chai: 3.5.0
       gulp: 3.9.1
       loader-utils: 1.1.0
     dev: false
     name: '@rush-temp/loader-load-themed-styles'
     resolution:
-      integrity: sha512-HfSqnohCbHEIA47Qdc7PosbWj+xL5pazt6fiUNEK7Ah6WKE+KI/rPxFtwd6CClfvQnmMZH0jWwPdXs8ZbTKSlg==
+      integrity: sha512-wYU/mKRiF+m2tXgI2SoX3So0xLzQ/1fzNl/pnMYbjEeiM/xh3PTlHzBY/FpAmB2C4u7KpReQD/4iSWDv6+WihQ==
       tarball: 'file:projects/loader-load-themed-styles.tgz'
     version: 0.0.0
   'file:projects/loader-raw-script.tgz':
@@ -10359,15 +10369,14 @@ packages:
   'file:projects/resolve-chunk-plugin.tgz':
     dependencies:
       '@types/mocha': 2.2.38
-      '@types/tapable': 0.2.4
-      '@types/webpack': 3.8.11
+      '@types/webpack': 4.4.0
       chai: 3.5.0
       gulp: 3.9.1
       mocha: 3.4.2
     dev: false
     name: '@rush-temp/resolve-chunk-plugin'
     resolution:
-      integrity: sha512-V/wo3hdYQtf4EEKOaWRJfMvT1vivGuFUjLAcqHETV2Vk7e+mcqo9ZRV0HvG+/+hP2bHbPNJZB77INL3DQ6U4Pw==
+      integrity: sha512-jNM0fnFsRmx4mYTD+BdZxe316UCtTZ0m3QTiuMMmvJP5wP9Pp1GNG8If+e/FcdNxFdnDldIUnlEvdReGwUXmFw==
       tarball: 'file:projects/resolve-chunk-plugin.tgz'
     version: 0.0.0
   'file:projects/rush-lib.tgz':
@@ -10470,9 +10479,9 @@ packages:
       '@types/lodash': 4.14.74
       '@types/mocha': 2.2.38
       '@types/node': 8.5.8
-      '@types/tapable': 0.2.4
+      '@types/tapable': 1.0.2
       '@types/uglify-js': 2.6.29
-      '@types/webpack': 3.8.11
+      '@types/webpack': 4.4.0
       chai: 3.5.0
       gulp: 3.9.1
       lodash: 4.15.0
@@ -10481,7 +10490,7 @@ packages:
     dev: false
     name: '@rush-temp/set-webpack-public-path-plugin'
     resolution:
-      integrity: sha512-NBGkwa+Ff9tX3n5QbFB/0SBpocOU8Sx+1IofnlYuJvGfv9z+cOoBvOL78ZUMIPSDHs2SuQezayVm7fyxf/NkjQ==
+      integrity: sha512-FW2ios7f80Ths2NhTQqdcO4y6pjGlj/mWy5ThAaM8gMeE7psFhM7mQvErQBKhmqFgWPRQaaBiCEV488u7xdoOQ==
       tarball: 'file:projects/set-webpack-public-path-plugin.tgz'
     version: 0.0.0
   'file:projects/stream-collator.tgz':
@@ -10611,12 +10620,11 @@ specifiers:
   '@types/serve-static': 1.13.1
   '@types/sinon': 1.16.34
   '@types/source-map': 0.5.0
-  '@types/tapable': 0.2.4
+  '@types/tapable': 1.0.2
   '@types/tar': 4.0.0
   '@types/through2': 2.0.32
   '@types/uglify-js': 2.6.29
   '@types/vinyl': 1.2.30
-  '@types/webpack': 3.8.11
   '@types/webpack-env': 1.13.0
   '@types/yargs': 0.0.34
   '@types/z-schema': 3.16.31
