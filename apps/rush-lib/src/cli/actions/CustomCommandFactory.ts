@@ -40,7 +40,7 @@ export class CustomCommandFactory {
       parser: parser,
       commandLineConfiguration: commandLineConfiguration,
 
-      parallelized: true,
+      enableParallelism: true,
       ignoreMissingScript: false
     }));
 
@@ -52,7 +52,7 @@ export class CustomCommandFactory {
       parser: parser,
       commandLineConfiguration: commandLineConfiguration,
 
-      parallelized: true,
+      enableParallelism: true,
       ignoreMissingScript: false
     }));
 
@@ -73,7 +73,7 @@ export class CustomCommandFactory {
             parser: parser,
             commandLineConfiguration: commandLineConfiguration,
 
-            parallelized: command.parallelized,
+            enableParallelism: command.enableParallelism,
             ignoreMissingScript: command.ignoreMissingScript || false
           }));
           break;

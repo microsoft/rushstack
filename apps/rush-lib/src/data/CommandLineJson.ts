@@ -16,7 +16,7 @@ export interface IBaseCommandJson {
  */
 export interface IBulkCommandJson extends IBaseCommandJson {
   commandKind: 'bulk';
-  parallelized: boolean;
+  enableParallelism: boolean;
   ignoreMissingScript?: boolean;
 }
 

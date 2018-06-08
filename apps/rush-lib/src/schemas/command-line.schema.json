@@ -53,14 +53,14 @@
         {
           "type": "object",
           "additionalProperties": true,
-          "required": [ "parallelized" ],
+          "required": [ "enableParallelism" ],
           "properties": {
             "commandKind": {
               "enum": [ "bulk" ]
             },
-            "parallelized": {
-              "title": "Parallelized",
-              "description": "Describes whether or not this command can be run in parallel (i.e. executed simultaneously for multiple projects).",
+            "enableParallelism": {
+              "title": "enableParallelism",
+              "description": "If true then this command can be run in parallel, i.e. executed simultaneously for multiple projects.",
               "type": "boolean"
             },
             "ignoreMissingScript": {
@@ -79,7 +79,7 @@
             "summary": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
 
-            "parallelized": { "$ref": "#/definitions/anything" },
+            "enableParallelism": { "$ref": "#/definitions/anything" },
             "ignoreMissingScript": { "$ref": "#/definitions/anything" }
           }
         }

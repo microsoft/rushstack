@@ -26,13 +26,13 @@ import { ParameterJson } from '../../data/CommandLineJson';
 import { RushConstants } from '../../RushConstants';
 
 export interface ICustomRushActionOptions extends IRushCommandLineActionOptions {
-  parallelized: boolean;
+  enableParallelism: boolean;
   ignoreMissingScript: boolean;
   commandLineConfiguration: CommandLineConfiguration;
 }
 
 export class CustomRushAction extends BaseRushAction {
-  private _parallelized: boolean;
+  private _enableParallelism: boolean;
   private _ignoreMissingScript: boolean;
   private _commandLineConfiguration: CommandLineConfiguration;
 
@@ -49,7 +49,7 @@ export class CustomRushAction extends BaseRushAction {
     options: ICustomRushActionOptions
   ) {
     super(options);
-    this._parallelized = options.parallelized;
+    this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._commandLineConfiguration = options.commandLineConfiguration;
   }
@@ -66,8 +66,8 @@ export class CustomRushAction extends BaseRushAction {
     const isQuietMode: boolean = !(this._verboseParameter.value);
 
     // if this is parallizable, then use the value from the flag (undefined or a number),
-    // if this is not parallelized, then use 1 core
-    const parallelism: string | undefined = this._isParallelized()
+    // if parallelism is not enabled, then restrict to 1 core
+    const parallelism: string | undefined = this._isParallelismEnabled()
       ? this._parallelismParameter!.value
       : '1';
 
@@ -113,7 +113,7 @@ export class CustomRushAction extends BaseRushAction {
   }
 
   protected onDefineParameters(): void {
-    if (this._isParallelized()) {
+    if (this._isParallelismEnabled()) {
       this._parallelismParameter = this.defineStringParameter({
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
@@ -209,10 +209,10 @@ export class CustomRushAction extends BaseRushAction {
     return projects;
   }
 
-  private _isParallelized(): boolean {
+  private _isParallelismEnabled(): boolean {
     return this.actionName === 'build'
       || this.actionName === 'rebuild'
-      || this._parallelized;
+      || this._enableParallelism;
   }
 
   private _doBeforeTask(): void {
