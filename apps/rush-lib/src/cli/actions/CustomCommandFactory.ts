@@ -1,22 +1,27 @@
-import {
-  CommandLineConfiguration,
-  ICustomCommand,
-  CustomOption
-} from '../../data/CommandLineConfiguration';
+import * as path from 'path';
+
+import { CommandLineConfiguration } from '../../data/CommandLineConfiguration';
+import { CommandJson } from '../../data/CommandLineJson';
 
 import { RushCommandLineParser } from './RushCommandLineParser';
 import { CustomRushAction } from './CustomRushAction';
+import { RushConstants } from '../../RushConstants';
 
 /**
  * Using the custom command line configuration, generates a set of
  * rush actions that are then registered to the command line.
  */
 export class CustomCommandFactory {
-  public static createCommands(
-      parser: RushCommandLineParser,
-      commandLineConfig: CommandLineConfiguration | undefined
-    ): Map<string, CustomRushAction> {
-    const customActions: Map<string, CustomRushAction> = new Map<string, CustomRushAction>();
+  public static addActions(parser: RushCommandLineParser): void {
+    if (!parser.rushConfiguration) {
+      return;
+    }
+
+    const commandLineConfigFile: string = path.join(
+      parser.rushConfiguration.commonRushConfigFolder, RushConstants.commandLineFilename
+    );
+    const commandLineConfiguration: CommandLineConfiguration
+      = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
 
     const documentationForBuild: string = 'The Rush build command assumes that the package.json file for each'
       + ' project contains a "scripts" entry for "npm run build".  It invokes'
@@ -26,49 +31,69 @@ export class CustomCommandFactory {
       + ' unless overridden by the --parallelism flag.';
 
     // always create a build and a rebuild command
-    customActions.set('build', new CustomRushAction(parser, {
+    parser.addAction(new CustomRushAction({
       actionName: 'build',
       summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last '
         + 'built.',
-      documentation: documentationForBuild
-    }, true));
+      documentation: documentationForBuild,
 
-    customActions.set('rebuild', new CustomRushAction(parser, {
+      parser: parser,
+      commandLineConfiguration: commandLineConfiguration,
+
+      enableParallelism: true,
+      ignoreMissingScript: false
+    }));
+
+    parser.addAction(new CustomRushAction({
       actionName: 'rebuild',
       summary: 'Clean and rebuild the entire set of projects',
-      documentation: documentationForBuild
-    }, true));
+      documentation: documentationForBuild,
 
-    if (commandLineConfig) {
-      // Register each custom command
-      commandLineConfig.commands.forEach((command: ICustomCommand) => {
-        if (customActions.get(command.name)) {
-          throw new Error(`Cannot define two custom actions with the same name: "${command.name}"`);
-        }
-        customActions.set(command.name, new CustomRushAction(parser, {
+      parser: parser,
+      commandLineConfiguration: commandLineConfiguration,
+
+      enableParallelism: true,
+      ignoreMissingScript: false
+    }));
+
+    // Register each custom command
+    for (const command of commandLineConfiguration.commands) {
+      if (parser.tryGetAction(command.name)) {
+        throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}"`
+          + ` using a name that already exists`);
+      }
+
+      switch (command.commandKind) {
+        case 'bulk':
+          parser.addAction(new CustomRushAction({
             actionName: command.name,
             summary: command.summary,
-            documentation: command.documentation || command.summary
-          },
-          command.parallelized,
-          command.ignoreMissingScript
-        ));
-      });
+            documentation: command.description || command.summary,
 
-      // Associate each custom option to a command
-      commandLineConfig.options.forEach((customOption: CustomOption, longName: string) => {
-        customOption.associatedCommands.forEach((associatedCommand: string) => {
-          const customAction: CustomRushAction | undefined = customActions.get(associatedCommand);
-          if (customAction) {
-            customAction.addCustomOption(longName, customOption);
-          } else {
-            throw new Error(`Cannot find custom command "${associatedCommand}" associated with`
-              + ` custom option "${longName}".`);
-          }
-        });
-      });
+            parser: parser,
+            commandLineConfiguration: commandLineConfiguration,
+
+            enableParallelism: command.enableParallelism,
+            ignoreMissingScript: command.ignoreMissingScript || false
+          }));
+          break;
+        case 'global':
+          // todo
+          break;
+        default:
+          throw new Error(`${RushConstants.commandLineFilename} defines a command "${command!.name}"`
+            + ` using an unsupported command kind "${command!.commandKind}"`);
+      }
     }
 
-    return customActions;
+    // Check for any invalid associations
+    for (const parameter of commandLineConfiguration.parameters) {
+      for (const associatedCommand of parameter.associatedCommands) {
+        if (!parser.tryGetAction(associatedCommand)) {
+          throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
+            + ` that is associated with a nonexistent command "${associatedCommand}"`);
+        }
+      }
+    }
   }
 }

@@ -163,6 +163,7 @@ class LockStepVersionPolicy extends VersionPolicy {
 // @public
 class Rush {
   static launch(launcherVersion: string, isManaged: boolean): void;
+  static launchRushX(launcherVersion: string, isManaged: boolean): void;
   // @public
   static readonly version: string;
 }

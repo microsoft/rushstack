@@ -62,7 +62,4 @@ export {
   VersionPolicyConfiguration
 } from './data/VersionPolicyConfiguration';
 
-/**
- * @internal
- */
 export { Rush } from './Rush';

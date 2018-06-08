@@ -130,11 +130,19 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * an exception is thrown.
    */
   public getAction(actionName: string): CommandLineAction {
-    const action: CommandLineAction | undefined = this._actionsByName.get(actionName);
+    const action: CommandLineAction | undefined = this.tryGetAction(actionName);
     if (!action) {
       throw new Error(`The action "${actionName}" was not defined`);
     }
     return action;
+  }
+
+  /**
+   * Retrieves the action with the specified name.  If no matching action is found,
+   * undefined is returned.
+   */
+  public tryGetAction(actionName: string): CommandLineAction | undefined {
+    return this._actionsByName.get(actionName);
   }
 
   /**

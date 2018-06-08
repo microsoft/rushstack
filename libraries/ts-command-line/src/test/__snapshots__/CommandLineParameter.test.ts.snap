@@ -153,6 +153,39 @@ Object {
 }
 `;
 
+exports[`CommandLineParameter parses an input with ALL parameters 11`] = `
+Array [
+  "### --choice output: ###",
+  "--choice",
+  "two",
+  "### --choice-with-default output: ###",
+  "--choice-with-default",
+  "default",
+  "### --flag output: ###",
+  "--flag",
+  "### --integer output: ###",
+  "--integer",
+  "123",
+  "### --integer-with-default output: ###",
+  "--integer-with-default",
+  "123",
+  "### --integer-required output: ###",
+  "--integer-required",
+  "321",
+  "### --string output: ###",
+  "--string",
+  "hello",
+  "### --string-with-default output: ###",
+  "--string-with-default",
+  "123",
+  "### --string-list output: ###",
+  "--string-list",
+  "first",
+  "--string-list",
+  "second",
+]
+`;
+
 exports[`CommandLineParameter parses an input with NO parameters 1`] = `
 Object {
   "argumentName": undefined,
@@ -301,6 +334,28 @@ Object {
   "value": undefined,
   "values": Array [],
 }
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 11`] = `
+Array [
+  "### --choice output: ###",
+  "### --choice-with-default output: ###",
+  "--choice-with-default",
+  "default",
+  "### --flag output: ###",
+  "### --integer output: ###",
+  "### --integer-with-default output: ###",
+  "--integer-with-default",
+  "123",
+  "### --integer-required output: ###",
+  "--integer-required",
+  "123",
+  "### --string output: ###",
+  "### --string-with-default output: ###",
+  "--string-with-default",
+  "123",
+  "### --string-list output: ###",
+]
 `;
 
 exports[`CommandLineParameter prints the action help 1`] = `
