@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "(Breaking change) Redesign command-line.json config file to support other command types",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
