@@ -12,6 +12,7 @@ import {
  } from '@microsoft/node-core-library';
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
+import { RushConfiguration } from '../api/RushConfiguration';
 
 export class RushXCommandLine {
   public static launchRushX(launcherVersion: string, isManaged: boolean): void {
@@ -66,13 +67,22 @@ export class RushXCommandLine {
         return;
       }
 
+      // Are we in a Rush repo?
+      let rushConfiguration: RushConfiguration | undefined = undefined;
+      if (RushConfiguration.tryFindRushJsonLocation(false)) {
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+      }
+
       console.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
-      const exitCode: number = Utilities.executeLifecycleCommand(scriptBody, {
+      const exitCode: number = Utilities.executeLifecycleCommand(scriptBody,
+        {
           workingDirectory: packageFolder,
-          initCwd: packageFolder,
+          // If there is a rush.json then use its .npmrc from the temp folder.
+          // Otherwise look for npmrc in the project folder.
+          initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
           handleOutput: false
         }
       );
