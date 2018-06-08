@@ -28,10 +28,11 @@ export class EventHooksManager {
       console.log(os.EOL + colors.green(`Executing event hooks for ${Event[event]}`));
       scripts.forEach((script) => {
         try {
-          Utilities.executeLifecycleCommand(script,
-            process.cwd(),
-            this._commonTempFolder,
-            true
+          Utilities.executeLifecycleCommand(script, {
+              workingDirectory: process.cwd(),
+              initCwd: this._commonTempFolder,
+              handleOutput: true
+            }
           );
         } catch (error) {
           console.error(`${os.EOL} Event hook "${script}" failed. Run "rush" with --debug` +

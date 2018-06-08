@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'child_process';
 import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
@@ -71,20 +70,19 @@ export class RushXCommandLine {
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
-      const result: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
-        scriptBody,
-        packageFolder,
-        packageFolder
+      const exitCode: number = Utilities.executeLifecycleCommand(scriptBody, {
+          workingDirectory: packageFolder,
+          initCwd: packageFolder,
+          handleOutput: false
+        }
       );
 
-      result.on('close', (code) => {
-        if (code) {
-          console.log(colors.red(`The script failed with exit code ${code}`));
-        }
+      if (exitCode > 0) {
+        console.log(colors.red(`The script failed with exit code ${exitCode}`));
+      }
 
-        // Pass along the exit code of the child process
-        process.exitCode = code || 0;
-      });
+      process.exitCode = exitCode;
+
     } catch (error) {
       console.log(colors.red('Error: ' + error.message));
     }

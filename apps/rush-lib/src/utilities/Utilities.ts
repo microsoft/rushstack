@@ -303,15 +303,16 @@ export class Utilities {
    * @param workingDirectory - working directory for running this command
    * @param initCwd = the folder containing a local .npmrc, which will be used
    *        for the INIT_CWD environment variable
-   * @param captureOutput - if true, map stdio to 'pipe' instead of the parent process's streams
-   * @beta
+   * @param handleOutput - if true, hide the process's output, but if there is a nonzero exit code
+   *   then show the stderr
    */
   public static executeLifecycleCommand(
-    command: string,
-    workingDirectory: string,
-    initCwd: string,
-    captureOutput: boolean = false
-  ): child_process.SpawnSyncReturns<Buffer> {
+    command: string, options: {
+      workingDirectory: string,
+      initCwd: string,
+      handleOutput: boolean
+    }
+  ): number {
     let shellCommand: string = process.env.comspec || 'cmd';
     let commandFlags: string = '/d /s /c';
     let useShell: boolean = true;
@@ -321,20 +322,22 @@ export class Utilities {
       useShell = false;
     }
 
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(initCwd);
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
 
     const result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
       shellCommand,
       [commandFlags, command],
       {
-        cwd: workingDirectory,
+        cwd: options.workingDirectory,
         shell: useShell,
         env: environment,
-        stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
 
-    Utilities._processResult(result);
-    return result;
+    if (options.handleOutput) {
+      Utilities._processResult(result);
+    }
+    return result.status;
   }
 
   /**
