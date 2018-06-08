@@ -55,7 +55,7 @@
       "shortName": "-m",
       "parameterKind": "flag",
       "description": "Perform a fast build, which disables certain tasks such as unit tests and linting",
-      "associatedCommands": [ "build", "rebuild", "deploy" ]
+      "associatedCommands": [ "build", "rebuild" ]
     }
   ]
 }

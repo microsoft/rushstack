@@ -85,5 +85,15 @@ export class CustomCommandFactory {
             + ` using an unsupported command kind "${command!.commandKind}"`);
       }
     }
+
+    // Check for any invalid associations
+    for (const parameter of commandLineConfiguration.parameters) {
+      for (const associatedCommand of parameter.associatedCommands) {
+        if (!parser.tryGetAction(associatedCommand)) {
+          throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
+            + ` that is associated with a nonexistent command "${associatedCommand}"`);
+        }
+      }
+    }
   }
 }
