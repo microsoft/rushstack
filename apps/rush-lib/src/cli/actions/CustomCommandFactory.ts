@@ -21,7 +21,7 @@ export class CustomCommandFactory {
       parser.rushConfiguration.commonRushConfigFolder, RushConstants.commandLineFilename
     );
     const commandLineConfiguration: CommandLineConfiguration
-      = CommandLineConfiguration.tryLoadFromFile(commandLineConfigFile);
+      = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
 
     const documentationForBuild: string = 'The Rush build command assumes that the package.json file for each'
       + ' project contains a "scripts" entry for "npm run build".  It invokes'

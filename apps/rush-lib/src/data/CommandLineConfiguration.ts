@@ -28,7 +28,12 @@ export class CommandLineConfiguration {
   public readonly commands: CommandJson[] = [];
   public readonly parameters: ParameterJson[] = [];
 
-  public static tryLoadFromFile(jsonFilename: string): CommandLineConfiguration {
+  /**
+   * Loads the configuration from the specified file.  If the file does not exist,
+   * then an empty default instance is returned.  If the file contains errors, then
+   * an exception is thrown.
+   */
+  public static loadFromFileOrDefault(jsonFilename: string): CommandLineConfiguration {
     let commandLineJson: ICommandLineJson | undefined = undefined;
     if (fs.existsSync(jsonFilename)) {
       commandLineJson = JsonFile.loadAndValidate(jsonFilename, CommandLineConfiguration._jsonSchema);
