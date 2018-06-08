@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IChangelog } from '../../../data/Changelog';
-import { ChangeType } from '../../../data/ChangeManagement';
-import { RushConfiguration } from '../../../data/RushConfiguration';
-import { RushConfigurationProject } from '../../../data/RushConfigurationProject';
+import { IChangelog } from '../../api/Changelog';
+import { ChangeType } from '../../api/ChangeManagement';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ChangelogGenerator } from '../ChangelogGenerator';
 import { IChangeInfoHash } from '../PublishUtilities';
 

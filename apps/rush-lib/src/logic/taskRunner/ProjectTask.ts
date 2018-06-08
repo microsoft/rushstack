@@ -9,16 +9,16 @@ import { JsonFile, Text } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { IPackageDeps } from '@microsoft/package-deps-hash';
 
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
-import { RushConstants } from '../../RushConstants';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { RushConstants } from '../../api/RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 import { ITaskDefinition } from '../taskRunner/ITask';
 import {
   PackageChangeAnalyzer
-} from '../logic/PackageChangeAnalyzer';
+} from '../PackageChangeAnalyzer';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;

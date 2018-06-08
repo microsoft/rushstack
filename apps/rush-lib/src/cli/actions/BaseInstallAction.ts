@@ -7,10 +7,10 @@ import * as os from 'os';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
-import { Event } from '../../data/EventHooks';
-import { InstallManager, IInstallManagerOptions } from '../logic/InstallManager';
-import { PurgeManager } from '../logic/PurgeManager';
-import { SetupChecks } from '../logic/SetupChecks';
+import { Event } from '../../api/EventHooks';
+import { InstallManager, IInstallManagerOptions } from '../../logic/InstallManager';
+import { PurgeManager } from '../../logic/PurgeManager';
+import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch } from '../../utilities/Stopwatch';
 
 /**

@@ -4,7 +4,7 @@
 import * as path from 'path';
 
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
-import { RushConfiguration } from '../../../data/RushConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
 
 import {
   IPackageDeps

@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 
-import { IChangelog } from '../../../data/Changelog';
+import { IChangelog } from '../../api/Changelog';
 import { ChangeFiles } from '../ChangeFiles';
 
 describe('ChangeFiles', () => {

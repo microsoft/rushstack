@@ -16,13 +16,13 @@ import { IPackageJson } from '@microsoft/node-core-library';
 import {
   IChangeInfo,
   ChangeType
-} from '../../data/ChangeManagement';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
-import { Utilities, IEnvironment } from '../../utilities/Utilities';
+} from '../api/ChangeManagement';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { Utilities, IEnvironment } from '../utilities/Utilities';
 import { execSync } from 'child_process';
 import { PrereleaseToken } from './PrereleaseToken';
 import { ChangeFiles } from './ChangeFiles';
-import { RushConfiguration } from '../../data/RushConfiguration';
+import { RushConfiguration } from '../api/RushConfiguration';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;

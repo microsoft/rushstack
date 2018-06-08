@@ -5,8 +5,8 @@ import * as path from 'path';
 import * as fsx from 'fs-extra';
 import { cloneDeep } from 'lodash';
 
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { Rush } from '../../Rush';
+import { RushConfiguration } from '../api/RushConfiguration';
+import { Rush } from '../api/Rush';
 
 export interface ITelemetryData {
   name: string;

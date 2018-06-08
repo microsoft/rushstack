@@ -9,7 +9,7 @@ import {
   PackageName
 } from '@microsoft/node-core-library';
 
-import { RushConfiguration } from '../data/RushConfiguration';
+import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 
 /**

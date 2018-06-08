@@ -6,9 +6,9 @@ import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import { JsonFile, JsonSchema, PackageName } from '@microsoft/node-core-library';
 
-import { Rush } from '../Rush';
+import { Rush } from '../api/Rush';
 import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
-import { RushConstants } from '../RushConstants';
+import { RushConstants } from '../api/RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import { EventHooks } from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';

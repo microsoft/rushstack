@@ -3,11 +3,11 @@
 
 import { IPackageJson } from '@microsoft/node-core-library';
 
-import { IChangeInfo } from '../../data/ChangeManagement';
-import { IChangelog } from '../../data/Changelog';
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
-import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
+import { IChangeInfo } from '../api/ChangeManagement';
+import { IChangelog } from '../api/Changelog';
+import { RushConfiguration } from '../api/RushConfiguration';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
 import { PublishUtilities, IChangeInfoHash } from './PublishUtilities';
 import { ChangeFiles } from './ChangeFiles';
 import { PrereleaseToken } from './PrereleaseToken';

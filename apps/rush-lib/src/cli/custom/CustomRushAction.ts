@@ -17,14 +17,14 @@ import {
   CommandLineParameterKind
 } from '@microsoft/ts-command-line';
 
-import { BaseRushAction, IRushCommandLineActionOptions } from './BaseRushAction';
-import { SetupChecks } from '../logic/SetupChecks';
-import { TaskSelector } from '../logic/TaskSelector';
+import { BaseRushAction, IRushCommandLineActionOptions } from '../actions/BaseRushAction';
+import { SetupChecks } from '../../logic/SetupChecks';
+import { TaskSelector } from '../../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { CommandLineConfiguration } from '../../data/CommandLineConfiguration';
-import { ParameterJson } from '../../data/CommandLineJson';
-import { RushConstants } from '../../RushConstants';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { ParameterJson } from '../../api/CommandLineJson';
+import { RushConstants } from '../../api/RushConstants';
 
 export interface ICustomRushActionOptions extends IRushCommandLineActionOptions {
   enableParallelism: boolean;

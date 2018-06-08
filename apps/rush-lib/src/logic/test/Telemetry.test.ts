@@ -3,8 +3,8 @@
 
 import * as path from 'path';
 
-import { RushConfiguration } from '../../../data/RushConfiguration';
-import { Rush } from '../../../Rush';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { Rush } from '../../api/Rush';
 import {
   Telemetry,
   ITelemetryData

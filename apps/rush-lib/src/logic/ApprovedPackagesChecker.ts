@@ -3,9 +3,9 @@
 
 import { IPackageJson, PackageName } from '@microsoft/node-core-library';
 
-import { ApprovedPackagesPolicy } from '../../data/ApprovedPackagesPolicy';
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
+import { ApprovedPackagesPolicy } from '../api/ApprovedPackagesPolicy';
+import { RushConfiguration } from '../api/RushConfiguration';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 export class ApprovedPackagesChecker {
   /**

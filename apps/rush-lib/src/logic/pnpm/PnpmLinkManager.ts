@@ -18,9 +18,9 @@ import {
   BaseLinkManager
 } from '../base/BaseLinkManager';
 import { BasePackage } from '../base/BasePackage';
-import { RushConstants } from '../../../RushConstants';
-import { IRushLinkJson } from '../../../data/RushConfiguration';
-import { RushConfigurationProject } from '../../../data/RushConfigurationProject';
+import { RushConstants } from '../../api/RushConstants';
+import { IRushLinkJson } from '../../api/RushConfiguration';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost

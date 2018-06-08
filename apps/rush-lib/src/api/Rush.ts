@@ -6,10 +6,10 @@ import * as path from 'path';
 import * as colors from 'colors';
 import { IPackageJson } from '@microsoft/node-core-library';
 
-import { RushCommandLineParser } from './cli/actions/RushCommandLineParser';
+import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from './RushConstants';
 import { RushX } from './RushX';
-import { CommandLineMigrationAdvisor } from './cli/actions/CommandLineMigrationAdvisor';
+import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 
 /**
  * General operations for the Rush engine.
@@ -65,7 +65,7 @@ export class Rush {
    */
   public static get version(): string {
     if (!Rush._version) {
-      const myPackageJsonFilename: string = path.resolve(path.join(__dirname, '..', 'package.json'));
+      const myPackageJsonFilename: string = path.resolve(path.join(__dirname, '..', '..', 'package.json'));
       const myPackageJson: IPackageJson = require(myPackageJsonFilename);
       Rush._version = myPackageJson.version;
     }

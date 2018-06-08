@@ -5,22 +5,22 @@ import * as os from 'os';
 import * as colors from 'colors';
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { Utilities } from '../../utilities/Utilities';
-import { ChangeAction } from './ChangeAction';
-import { CheckAction } from './CheckAction';
-import { UpdateAction } from './UpdateAction';
-import { InstallAction } from './InstallAction';
-import { LinkAction } from './LinkAction';
-import { PublishAction } from './PublishAction';
-import { PurgeAction } from './PurgeAction';
-import { UnlinkAction } from './UnlinkAction';
-import { ScanAction } from './ScanAction';
-import { VersionAction } from './VersionAction';
-import { CustomCommandFactory } from './CustomCommandFactory';
+import { RushConfiguration } from '../api/RushConfiguration';
+import { Utilities } from '../utilities/Utilities';
+import { ChangeAction } from './actions/ChangeAction';
+import { CheckAction } from './actions/CheckAction';
+import { UpdateAction } from './actions/UpdateAction';
+import { InstallAction } from './actions/InstallAction';
+import { LinkAction } from './actions/LinkAction';
+import { PublishAction } from './actions/PublishAction';
+import { PurgeAction } from './actions/PurgeAction';
+import { UnlinkAction } from './actions/UnlinkAction';
+import { ScanAction } from './actions/ScanAction';
+import { VersionAction } from './actions/VersionAction';
+import { CustomCommandFactory } from './custom/CustomCommandFactory';
 
 import { Telemetry } from '../logic/Telemetry';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;

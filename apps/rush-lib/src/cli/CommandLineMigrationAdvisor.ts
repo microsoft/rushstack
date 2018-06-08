@@ -3,8 +3,8 @@
 
 import * as colors from 'colors';
 
-import { RushConstants } from '../../RushConstants';
-import { Utilities } from '../../utilities/Utilities';
+import { RushConstants } from '../api/RushConstants';
+import { Utilities } from '../utilities/Utilities';
 
 export class CommandLineMigrationAdvisor {
 

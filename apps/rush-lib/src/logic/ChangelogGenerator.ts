@@ -12,14 +12,14 @@ import {
 import {
   IChangeInfo,
   ChangeType
-} from '../../data/ChangeManagement';
+} from '../api/ChangeManagement';
 import {
   IChangelog,
   IChangeLogEntry,
   IChangeLogComment
-} from '../../data/Changelog';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
-import { RushConfiguration } from '../../data/RushConfiguration';
+} from '../api/Changelog';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { RushConfiguration } from '../api/RushConfiguration';
 
 const CHANGELOG_JSON: string = 'CHANGELOG.json';
 const CHANGELOG_MD: string = 'CHANGELOG.md';

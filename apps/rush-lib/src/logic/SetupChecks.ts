@@ -3,9 +3,9 @@
 
 import * as colors from 'colors';
 import * as semver from 'semver';
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { Utilities } from '../../utilities/Utilities';
+import { RushConfiguration } from '../api/RushConfiguration';
+import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
+import { Utilities } from '../utilities/Utilities';
 
 // Refuses to run at all if the PNPM version is older than this, because there
 // are known bugs or missing features in earlier releases.

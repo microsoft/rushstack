@@ -1,12 +1,12 @@
 import {
   RushConfiguration,
   IRushLinkJson
-} from '../../data/RushConfiguration';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
+} from '../api/RushConfiguration';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { JsonFile } from '@microsoft/node-core-library';
 
-import { TaskRunner } from '../taskRunner/TaskRunner';
-import { ProjectTask } from '../taskRunner/ProjectTask';
+import { TaskRunner } from '../logic/taskRunner/TaskRunner';
+import { ProjectTask } from '../logic/taskRunner/ProjectTask';
 import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
 
 export interface ITaskSelectorConstructor {

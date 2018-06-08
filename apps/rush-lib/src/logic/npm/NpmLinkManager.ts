@@ -11,10 +11,10 @@ import readPackageTree = require('read-package-tree');
 
 import { JsonFile, PackageName } from '@microsoft/node-core-library';
 
-import { RushConstants } from '../../../RushConstants';
-import { IRushLinkJson } from '../../../data/RushConfiguration';
-import { RushConfigurationProject } from '../../../data/RushConfigurationProject';
-import { Utilities } from '../../../utilities/Utilities';
+import { RushConstants } from '../../api/RushConstants';
+import { IRushLinkJson } from '../../api/RushConfiguration';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { Utilities } from '../../utilities/Utilities';
 import {
   NpmPackage,
   IResolveOrCreateResult,

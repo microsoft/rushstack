@@ -21,22 +21,22 @@ import {
 } from '@microsoft/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
-import { AsyncRecycler } from '../../utilities/AsyncRecycler';
+import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import { BaseLinkManager } from '../logic/base/BaseLinkManager';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { GitPolicy } from '../logic/GitPolicy';
 import { IRushTempPackageJson } from '../logic/base/BasePackage';
-import { LastInstallFlag } from '../../utilities/LastInstallFlag';
+import { LastInstallFlag } from '../api/LastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { PurgeManager } from './PurgeManager';
-import { RushConfiguration, PackageManager } from '../../data/RushConfiguration';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
-import { RushConstants } from '../../RushConstants';
+import { RushConfiguration, PackageManager } from '../api/RushConfiguration';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { RushConstants } from '../api/RushConstants';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import { Utilities } from '../../utilities/Utilities';
-import { Rush } from '../../Rush';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+import { Stopwatch } from '../utilities/Stopwatch';
+import { Utilities } from '../utilities/Utilities';
+import { Rush } from '../api/Rush';
+import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 
 const MAX_INSTALL_ATTEMPTS: number = 5;
 

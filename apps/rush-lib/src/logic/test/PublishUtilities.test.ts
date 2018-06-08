@@ -6,9 +6,9 @@ import * as path from 'path';
 import {
   IChangeInfo,
   ChangeType
-} from '../../../data/ChangeManagement';
-import { RushConfiguration } from '../../../data/RushConfiguration';
-import { RushConfigurationProject } from '../../../data/RushConfigurationProject';
+} from '../../api/ChangeManagement';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
   PublishUtilities,
   IChangeInfoHash

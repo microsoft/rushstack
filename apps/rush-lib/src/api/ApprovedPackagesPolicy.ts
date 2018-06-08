@@ -4,7 +4,7 @@
 import * as path from 'path';
 
 import { ApprovedPackagesConfiguration } from './ApprovedPackagesConfiguration';
-import { RushConstants } from '../RushConstants';
+import { RushConstants } from '../api/RushConstants';
 import { RushConfiguration, IRushConfigurationJson, IApprovedPackagesPolicyJson } from './RushConfiguration';
 
 /**

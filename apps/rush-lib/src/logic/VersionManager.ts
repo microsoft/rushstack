@@ -11,12 +11,12 @@ import {
   VersionPolicy,
   BumpType,
   LockStepVersionPolicy
-} from '../../data/VersionPolicy';
-import { ChangeFile } from '../../data/ChangeFile';
-import { ChangeType, IChangeInfo } from '../../data/ChangeManagement';
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
-import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
+} from '../api/VersionPolicy';
+import { ChangeFile } from '../api/ChangeFile';
+import { ChangeType, IChangeInfo } from '../api/ChangeManagement';
+import { RushConfiguration } from '../api/RushConfiguration';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
 import { PublishUtilities } from './PublishUtilities';
 import { ChangeManager } from './ChangeManager';
 

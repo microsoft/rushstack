@@ -4,9 +4,9 @@
 import * as colors from 'colors';
 import * as path from 'path';
 
-import { AsyncRecycler } from '../../utilities/AsyncRecycler';
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { RushConstants } from '../../RushConstants';
+import { AsyncRecycler } from '../utilities/AsyncRecycler';
+import { RushConfiguration } from '../api/RushConfiguration';
+import { RushConstants } from '../api/RushConstants';
 
 /**
  * This class implements the logic for "rush purge"

@@ -9,7 +9,7 @@ import {
   JsonSchema
 } from '@microsoft/node-core-library';
 
-import { RushConstants } from '../RushConstants';
+import { RushConstants } from '../api/RushConstants';
 
 import {
   CommandJson,

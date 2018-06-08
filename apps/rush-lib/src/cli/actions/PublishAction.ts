@@ -9,23 +9,23 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
+import { JsonFile } from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
   ChangeType
-} from '../../data/ChangeManagement';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
+} from '../../api/ChangeManagement';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Npm } from '../../utilities/Npm';
-import { RushCommandLineParser } from './RushCommandLineParser';
-import { PublishUtilities } from '../logic/PublishUtilities';
-import { ChangelogGenerator } from '../logic/ChangelogGenerator';
-import { GitPolicy } from '../logic/GitPolicy';
-import { PrereleaseToken } from '../logic/PrereleaseToken';
-import { ChangeManager } from '../logic/ChangeManager';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { PublishUtilities } from '../../logic/PublishUtilities';
+import { ChangelogGenerator } from '../../logic/ChangelogGenerator';
+import { GitPolicy } from '../../logic/GitPolicy';
+import { PrereleaseToken } from '../../logic/PrereleaseToken';
+import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
-import { Git } from '../logic/Git';
+import { Git } from '../../logic/Git';
 import { VersionControl } from '../../utilities/VersionControl';
-import { JsonFile } from '@microsoft/node-core-library';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;

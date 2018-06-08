@@ -1,11 +1,11 @@
 import * as path from 'path';
 
-import { CommandLineConfiguration } from '../../data/CommandLineConfiguration';
-import { CommandJson } from '../../data/CommandLineJson';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { CommandJson } from '../../api/CommandLineJson';
 
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CustomRushAction } from './CustomRushAction';
-import { RushConstants } from '../../RushConstants';
+import { RushConstants } from '../../api/RushConstants';
 
 /**
  * Using the custom command line configuration, generates a set of

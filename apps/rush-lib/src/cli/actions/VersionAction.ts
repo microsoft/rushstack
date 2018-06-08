@@ -8,17 +8,17 @@ import {
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
-import { BumpType, LockStepVersionPolicy } from '../../data/VersionPolicy';
-import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
-import { RushConfiguration } from '../../data/RushConfiguration';
+import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
+import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { VersionControl } from '../../utilities/VersionControl';
-import { VersionMismatchFinder } from '../../data/VersionMismatchFinder';
-import { RushCommandLineParser } from './RushCommandLineParser';
-import { GitPolicy } from '../logic/GitPolicy';
+import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { GitPolicy } from '../../logic/GitPolicy';
 import { BaseRushAction } from './BaseRushAction';
-import { VersionManager } from '../logic/VersionManager';
-import { Git } from '../logic/Git';
+import { VersionManager } from '../../logic/VersionManager';
+import { Git } from '../../logic/Git';
 
 export class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy: CommandLineFlagParameter;

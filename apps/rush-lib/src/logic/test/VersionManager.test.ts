@@ -4,10 +4,10 @@
 import * as path from 'path';
 import { IPackageJson } from '@microsoft/node-core-library';
 
-import { BumpType } from '../../../data/VersionPolicy';
-import { ChangeFile } from '../../../data/ChangeFile';
-import { ChangeType, IChangeInfo } from '../../../data/ChangeManagement';
-import { RushConfiguration } from '../../../data/RushConfiguration';
+import { BumpType } from '../../api/VersionPolicy';
+import { ChangeFile } from '../../api/ChangeFile';
+import { ChangeType, IChangeInfo } from '../../api/ChangeManagement';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionManager } from '../VersionManager';
 
 function _getChanges(changeFiles: Map<string, ChangeFile>,
