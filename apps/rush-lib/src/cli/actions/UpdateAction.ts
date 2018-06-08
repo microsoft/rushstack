@@ -4,8 +4,8 @@
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import { BaseInstallAction } from './BaseInstallAction';
-import { IInstallManagerOptions } from '../logic/InstallManager';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { IInstallManagerOptions } from '../../logic/InstallManager';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class UpdateAction extends BaseInstallAction {
   private _fullParameter: CommandLineFlagParameter;

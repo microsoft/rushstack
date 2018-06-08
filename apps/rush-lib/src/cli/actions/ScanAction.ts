@@ -7,7 +7,7 @@ import * as glob from 'glob';
 import * as path from 'path';
 import builtinPackageNames = require('builtins');
 
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
 export class ScanAction extends BaseRushAction {

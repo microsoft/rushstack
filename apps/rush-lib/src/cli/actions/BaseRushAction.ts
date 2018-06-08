@@ -12,9 +12,9 @@ import {
 
 import { LockFile } from '@microsoft/node-core-library';
 
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { EventHooksManager } from '../logic/EventHooksManager';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { EventHooksManager } from '../../logic/EventHooksManager';
+import { RushCommandLineParser } from './../RushCommandLineParser';
 
 export interface IRushCommandLineActionOptions extends ICommandLineActionOptions {
   /**

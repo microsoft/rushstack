@@ -8,47 +8,47 @@
 
 export {
   ApprovedPackagesPolicy
-} from './data/ApprovedPackagesPolicy';
+} from './api/ApprovedPackagesPolicy';
 
 export {
   RushConfiguration,
   PackageManager
-} from './data/RushConfiguration';
+} from './api/RushConfiguration';
 
 export {
   EnvironmentVariableNames
-} from './data/EnvironmentConfiguration';
+} from './api/EnvironmentConfiguration';
 
 export {
   RushConfigurationProject
-} from './data/RushConfigurationProject';
+} from './api/RushConfigurationProject';
 
 export {
   ApprovedPackagesItem,
   ApprovedPackagesConfiguration
-} from './data/ApprovedPackagesConfiguration';
+} from './api/ApprovedPackagesConfiguration';
 
 export {
   CommonVersionsConfiguration
-} from './data/CommonVersionsConfiguration';
+} from './api/CommonVersionsConfiguration';
 
 export {
   EventHooks,
   Event
-} from './data/EventHooks';
+} from './api/EventHooks';
 
 export {
   ChangeFile
-} from './data/ChangeFile';
+} from './api/ChangeFile';
 
 export {
   ChangeType,
   IChangeInfo
-} from './data/ChangeManagement';
+} from './api/ChangeManagement';
 
 export {
   LastInstallFlag as _LastInstallFlag
-} from './utilities/LastInstallFlag';
+} from './api/LastInstallFlag';
 
 export {
   VersionPolicyDefinitionName,
@@ -56,10 +56,10 @@ export {
   LockStepVersionPolicy,
   IndividualVersionPolicy,
   VersionPolicy
-} from './data/VersionPolicy';
+} from './api/VersionPolicy';
 
 export {
   VersionPolicyConfiguration
-} from './data/VersionPolicyConfiguration';
+} from './api/VersionPolicyConfiguration';
 
-export { Rush } from './Rush';
+export { Rush } from './api/Rush';
