@@ -14,22 +14,22 @@ import {
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
   IChangeFile,
   IChangeInfo
-} from '../../data/ChangeManagement';
+} from '../../api/ChangeManagement';
 import { VersionControl } from '../../utilities/VersionControl';
-import { ChangeFile } from '../../data/ChangeFile';
+import { ChangeFile } from '../../api/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
-import { RushCommandLineParser } from './RushCommandLineParser';
-import { ChangeFiles } from '../logic/ChangeFiles';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { ChangeFiles } from '../../logic/ChangeFiles';
 import {
   VersionPolicy,
   IndividualVersionPolicy,
   LockStepVersionPolicy,
   VersionPolicyDefinitionName
-} from '../../data/VersionPolicy';
+} from '../../api/VersionPolicy';
 
 export class ChangeAction extends BaseRushAction {
   private _sortedProjectList: string[];

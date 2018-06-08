@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { BaseInstallAction } from './BaseInstallAction';
-import { IInstallManagerOptions } from '../logic/InstallManager';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { IInstallManagerOptions } from '../../logic/InstallManager';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class InstallAction extends BaseInstallAction {
 
