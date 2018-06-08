@@ -16,7 +16,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 
-export interface IRushCommandLineActionOptions extends ICommandLineActionOptions {
+export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
    * If true, no locking mechanism will be enforced when this action is run.
    * Note this defaults to false (which is a safer assumption in case this value
@@ -46,7 +46,7 @@ export abstract class BaseRushAction extends CommandLineAction {
     return this._parser;
   }
 
-  constructor(options: IRushCommandLineActionOptions) {
+  constructor(options: IBaseRushActionOptions) {
     super(options);
 
     this._parser = options.parser;

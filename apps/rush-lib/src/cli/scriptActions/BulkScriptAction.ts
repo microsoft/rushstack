@@ -10,32 +10,26 @@ import {
 } from '../../index';
 
 import {
-  CommandLineParameter,
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineParameterKind
 } from '@microsoft/ts-command-line';
 
-import { BaseRushAction, IRushCommandLineActionOptions } from '../actions/BaseRushAction';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { TaskSelector } from '../../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
-import { ParameterJson } from '../../api/CommandLineJson';
-import { RushConstants } from '../../api/RushConstants';
+import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 
-export interface ICustomRushActionOptions extends IRushCommandLineActionOptions {
+export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
-  commandLineConfiguration: CommandLineConfiguration;
 }
 
-export class BulkScriptAction extends BaseRushAction {
+export class BulkScriptAction extends BaseScriptAction {
   private _enableParallelism: boolean;
   private _ignoreMissingScript: boolean;
-  private _commandLineConfiguration: CommandLineConfiguration;
 
   private _changedProjectsOnly: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
@@ -44,15 +38,12 @@ export class BulkScriptAction extends BaseRushAction {
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
 
-  private _customParameters: CommandLineParameter[] = [];
-
   constructor(
-    options: ICustomRushActionOptions
+    options: IBulkScriptActionOptions
   ) {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
-    this._commandLineConfiguration = options.commandLineConfiguration;
   }
 
   public run(): Promise<void> {
@@ -75,7 +66,7 @@ export class BulkScriptAction extends BaseRushAction {
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
 
-    for (const customParameter of this._customParameters) {
+    for (const customParameter of this.customParameters) {
       customParameter.appendToArgList(customParameterValues);
     }
 
@@ -155,44 +146,7 @@ export class BulkScriptAction extends BaseRushAction {
       });
     }
 
-    // Find any parameters that are associated with this command
-    for (const parameter of this._commandLineConfiguration.parameters) {
-      let associated: boolean = false;
-      for (const associatedCommand of parameter.associatedCommands) {
-        if (associatedCommand === this.actionName) {
-          associated = true;
-        }
-      }
-
-      if (associated) {
-        let customParameter: CommandLineParameter | undefined;
-
-        switch (parameter.parameterKind) {
-          case 'flag':
-            customParameter = this.defineFlagParameter({
-              parameterShortName: parameter.shortName,
-              parameterLongName: parameter.longName,
-              description: parameter.description
-            });
-            break;
-          case 'choice':
-           customParameter = this.defineChoiceParameter({
-              parameterShortName: parameter.shortName,
-              parameterLongName: parameter.longName,
-              description: parameter.description,
-              alternatives: parameter.alternatives.map(x => x.name),
-              defaultValue: parameter.defaultValue
-            });
-            break;
-          default:
-            throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter!.longName}"`
-              + ` using an unsupported parameter kind "${parameter!.parameterKind}"`);
-        }
-        if (customParameter) {
-          this._customParameters.push(customParameter);
-        }
-      }
-    }
+    this.defineScriptParameters();
   }
 
   private _mergeToProjects(): string[] {
@@ -238,13 +192,12 @@ export class BulkScriptAction extends BaseRushAction {
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
-
     const extraData: { [key: string]: string } = {
       command_to: (this._toFlag.values.length > 0).toString(),
       command_from: (this._fromFlag.values.length > 0).toString()
     };
 
-    for (const customParameter of this._customParameters) {
+    for (const customParameter of this.customParameters) {
       switch (customParameter.kind) {
         case CommandLineParameterKind.Flag:
         case CommandLineParameterKind.Choice:
