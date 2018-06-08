@@ -11,14 +11,15 @@ const ParserHelpers: IParserHelper = require('webpack/lib/ParserHelpers');
 const EXPRESSION_NAME: string = 'resolveChunk';
 const PLUGIN_NAME: string = 'resolve-chunk-plugin';
 
+type ChunkId = number | string | undefined;
+
 /**
  * See README for documentation on this plugin.
  *
  * @public
  */
 export class ResolveChunkPlugin implements Webpack.Plugin {
-  private _chunkIdMap: Map<string, ((id: number | undefined) => void)[]> =
-    new Map<string, ((id: number | undefined) => void)[]>();
+  private _chunkIdMap: Map<string, ((id: ChunkId) => void)[]> = new Map<string, ((id: ChunkId) => void)[]>();
 
   /**
    * Apply the plugin to the compilation.
@@ -78,7 +79,7 @@ export class ResolveChunkPlugin implements Webpack.Plugin {
 
       const state: IModule = parser.state.current;
       const addDependencyFn: ((dependency: IConstDependency) => void) = state.addDependency.bind(state);
-      (this._chunkIdMap.get(chunkName) || []).push((id: number | string | undefined) => {
+      (this._chunkIdMap.get(chunkName) || []).push((id: ChunkId) => {
         let value: string;
         if (id) {
           const normalizedId: string | number = typeof id === 'number' ? id : `"${id}"`;
@@ -109,7 +110,7 @@ export class ResolveChunkPlugin implements Webpack.Plugin {
       }
     }
 
-    this._chunkIdMap.forEach((dependencyFns: ((id: number | undefined) => void)[], chunkName: string) => {
+    this._chunkIdMap.forEach((dependencyFns: ((id: ChunkId) => void)[], chunkName: string) => {
       for (const dependencyFn of dependencyFns) {
         // Replace with an error function
         dependencyFn(undefined);
