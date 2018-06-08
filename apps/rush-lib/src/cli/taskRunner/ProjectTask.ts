@@ -28,7 +28,7 @@ export interface IProjectTaskOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   commandToRun: string;
-  customFlags: string[];
+  customParameterValues: string[];
   isIncrementalBuildAllowed: boolean;
   ignoreMissingScript: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
@@ -48,7 +48,7 @@ export class ProjectTask implements ITaskDefinition {
   private _rushProject: RushConfigurationProject;
   private _rushConfiguration: RushConfiguration;
   private _commandToRun: string;
-  private _customFlags: string[];
+  private _customParameterValues: string[];
   private _ignoreMissingScript: boolean;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
@@ -56,7 +56,7 @@ export class ProjectTask implements ITaskDefinition {
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._commandToRun = options.commandToRun;
-    this._customFlags = options.customFlags;
+    this._customParameterValues = options.customParameterValues;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
@@ -210,7 +210,8 @@ export class ProjectTask implements ITaskDefinition {
       return '';
     }
 
-    return `${script} ${this._customFlags.join(' ')}`;
+    // TODO: Properly escape these strings
+    return `${script} ${this._customParameterValues.join(' ')}`;
   }
 
   private _getScriptCommand(script: string): string | undefined {

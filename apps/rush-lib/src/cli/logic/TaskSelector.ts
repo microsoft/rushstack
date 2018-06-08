@@ -14,7 +14,7 @@ export interface ITaskSelectorConstructor {
   toFlags: ReadonlyArray<string>;
   fromFlags: ReadonlyArray<string>;
   commandToRun: string;
-  customFlags: string[];
+  customParameterValues: string[];
   isQuietMode: boolean;
   parallelism: string | undefined;
   isIncrementalBuildAllowed: boolean;
@@ -171,7 +171,7 @@ export class TaskSelector {
         rushProject: project,
         rushConfiguration: this._options.rushConfiguration,
         commandToRun: this._options.commandToRun,
-        customFlags: this._options.customFlags,
+        customParameterValues: this._options.customParameterValues,
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         ignoreMissingScript: this._options.ignoreMissingScript,
         packageChangeAnalyzer: this._packageChangeAnalyzer
