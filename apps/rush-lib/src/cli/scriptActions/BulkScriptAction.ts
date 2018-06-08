@@ -32,7 +32,7 @@ export interface ICustomRushActionOptions extends IRushCommandLineActionOptions 
   commandLineConfiguration: CommandLineConfiguration;
 }
 
-export class CustomRushAction extends BaseRushAction {
+export class BulkScriptAction extends BaseRushAction {
   private _enableParallelism: boolean;
   private _ignoreMissingScript: boolean;
   private _commandLineConfiguration: CommandLineConfiguration;

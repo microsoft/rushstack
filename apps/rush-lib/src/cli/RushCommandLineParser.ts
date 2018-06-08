@@ -1,12 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import * as colors from 'colors';
+import * as os from 'os';
+import * as path from 'path';
+
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import { RushConfiguration } from '../api/RushConfiguration';
+import { RushConstants } from '../api/RushConstants';
+import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
+import { CommandJson } from '../api/CommandLineJson';
 import { Utilities } from '../utilities/Utilities';
+
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
 import { UpdateAction } from './actions/UpdateAction';
@@ -17,7 +23,8 @@ import { PurgeAction } from './actions/PurgeAction';
 import { UnlinkAction } from './actions/UnlinkAction';
 import { ScanAction } from './actions/ScanAction';
 import { VersionAction } from './actions/VersionAction';
-import { CustomCommandFactory } from './custom/CustomCommandFactory';
+
+import { BulkScriptAction } from './scriptActions/BulkScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
@@ -100,10 +107,95 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UnlinkAction(this));
       this.addAction(new VersionAction(this));
 
-      CustomCommandFactory.addActions(this);
+      this._populateScriptActions();
 
     } catch (error) {
       this._reportErrorAndSetExitCode(error);
+    }
+  }
+
+  private _populateScriptActions(): void {
+    if (!this.rushConfiguration) {
+      return;
+    }
+
+    const commandLineConfigFile: string = path.join(
+      this.rushConfiguration.commonRushConfigFolder, RushConstants.commandLineFilename
+    );
+    const commandLineConfiguration: CommandLineConfiguration
+      = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
+
+    const documentationForBuild: string = 'The Rush build command assumes that the package.json file for each'
+      + ' project contains a "scripts" entry for "npm run build".  It invokes'
+      + ' this commands to build each project.  Projects are built in parallel where'
+      + ' possible, but always respecting the dependency graph for locally linked projects.'
+      + ' The number of simultaneous processes will be based on the number of machine cores'
+      + ' unless overridden by the --parallelism flag.';
+
+    // always create a build and a rebuild command
+    this.addAction(new BulkScriptAction({
+      actionName: 'build',
+      summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last '
+        + 'built.',
+      documentation: documentationForBuild,
+
+      parser: this,
+      commandLineConfiguration: commandLineConfiguration,
+
+      enableParallelism: true,
+      ignoreMissingScript: false
+    }));
+
+    this.addAction(new BulkScriptAction({
+      actionName: 'rebuild',
+      summary: 'Clean and rebuild the entire set of projects',
+      documentation: documentationForBuild,
+
+      parser: this,
+      commandLineConfiguration: commandLineConfiguration,
+
+      enableParallelism: true,
+      ignoreMissingScript: false
+    }));
+
+    // Register each custom command
+    for (const command of commandLineConfiguration.commands) {
+      if (this.tryGetAction(command.name)) {
+        throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}"`
+          + ` using a name that already exists`);
+      }
+
+      switch (command.commandKind) {
+        case 'bulk':
+          this.addAction(new BulkScriptAction({
+            actionName: command.name,
+            summary: command.summary,
+            documentation: command.description || command.summary,
+
+            parser: this,
+            commandLineConfiguration: commandLineConfiguration,
+
+            enableParallelism: command.enableParallelism,
+            ignoreMissingScript: command.ignoreMissingScript || false
+          }));
+          break;
+        case 'global':
+          // todo
+          break;
+        default:
+          throw new Error(`${RushConstants.commandLineFilename} defines a command "${command!.name}"`
+            + ` using an unsupported command kind "${command!.commandKind}"`);
+      }
+    }
+
+    // Check for any invalid associations
+    for (const parameter of commandLineConfiguration.parameters) {
+      for (const associatedCommand of parameter.associatedCommands) {
+        if (!this.tryGetAction(associatedCommand)) {
+          throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"`
+            + ` that is associated with a nonexistent command "${associatedCommand}"`);
+        }
+      }
     }
   }
 
