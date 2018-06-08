@@ -9,48 +9,12 @@ import * as path from 'path';
 import {
   PackageJsonLookup,
   IPackageJson,
-  Text,
-  IPackageJsonScriptTable
+  Text
  } from '@microsoft/node-core-library';
 import { Utilities } from '../utilities/Utilities';
+import { ProjectCommandSet } from '../logic/ProjectCommandSet';
 
-/**
- * Parses the "scripts" section from package.json
- */
-class ProjectCommandSet {
-  public readonly malformedScriptNames: string[] = [];
-  public readonly commandNames: string[] = [];
-  private readonly _scriptsByName: Map<string, string> = new Map<string, string>();
-
-  public constructor(packageJson: IPackageJson) {
-    const scripts: IPackageJsonScriptTable = packageJson.scripts || { };
-
-    for (const scriptName of Object.keys(scripts)) {
-      if (scriptName[0] === '-' || scriptName.length === 0) {
-        this.malformedScriptNames.push(scriptName);
-      } else {
-        this.commandNames.push(scriptName);
-        this._scriptsByName.set(scriptName, scripts[scriptName]);
-      }
-    }
-
-    this.commandNames.sort();
-  }
-
-  public tryGetScriptBody(commandName: string): string | undefined {
-    return this._scriptsByName.get(commandName);
-  }
-
-  public getScriptBody(commandName: string): string {
-    const result: string | undefined = this.tryGetScriptBody(commandName);
-    if (result === undefined) {
-      throw new Error(`The command "${commandName}" was not found`);
-    }
-    return result;
-  }
-}
-
-export class RushX {
+export class RushXCommandLine {
   public static launchRushX(launcherVersion: string, isManaged: boolean): void {
     // NodeJS can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
@@ -82,7 +46,7 @@ export class RushX {
       //   rush -h
       //   rush --unrecognized-option
       if (args.length === 0 || args[0][0] === '-') {
-        RushX._showUsage(packageJson, projectCommandSet);
+        RushXCommandLine._showUsage(packageJson, projectCommandSet);
         return;
       }
 
