@@ -25,6 +25,7 @@ import { ScanAction } from './actions/ScanAction';
 import { VersionAction } from './actions/VersionAction';
 
 import { BulkScriptAction } from './scriptActions/BulkScriptAction';
+import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
@@ -180,7 +181,16 @@ export class RushCommandLineParser extends CommandLineParser {
           }));
           break;
         case 'global':
-          // todo
+          this.addAction(new GlobalScriptAction({
+            actionName: command.name,
+            summary: command.summary,
+            documentation: command.description || command.summary,
+
+            parser: this,
+            commandLineConfiguration: commandLineConfiguration,
+
+            scriptPath: command.scriptPath
+          }));
           break;
         default:
           throw new Error(`${RushConstants.commandLineFilename} defines a command "${command!.name}"`

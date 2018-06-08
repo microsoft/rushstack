@@ -16,7 +16,13 @@ export interface IBaseScriptActionOptions extends IBaseRushActionOptions {
 
 /**
  * Base class for command-line actions that are implemented using user-defined scripts.
- * These actions and their parameters can be defined via common/config/command-line.json.
+ *
+ * @remarks
+ * Compared to the normal built-in actions, these actions are special because (1) they
+ * can be discovered dynamically via from common/config/command-line.json, and (2)
+ * user-defined command-line parameters can be passed through to the script.
+ *
+ * The two subclasses are BulkScriptAction and GlobalScriptAction.
  */
 export abstract class BaseScriptAction extends BaseRushAction {
   protected readonly _commandLineConfiguration: CommandLineConfiguration;

@@ -22,11 +22,23 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 
+/**
+ * Constructor parameters for BulkScriptAction.
+ */
 export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
 }
 
+/**
+ * This class implements bulk commands which are run individually for each project in the repo,
+ * possibly in parallel.  The action executes a script found in the project's package.json file.
+ *
+ * @remarks
+ * Bulk commands can be defined via common/config/command-line.json.  Rush's predefined "build"
+ * and "rebuild" commands are also modeled as bulk commands, because they essentially just
+ * execute scripts from package.json in the same as any custom command.
+ */
 export class BulkScriptAction extends BaseScriptAction {
   private _enableParallelism: boolean;
   private _ignoreMissingScript: boolean;
