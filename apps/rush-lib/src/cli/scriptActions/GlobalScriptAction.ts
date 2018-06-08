@@ -13,7 +13,7 @@ import { AlreadyReportedError } from '../../../lib/utilities/AlreadyReportedErro
  * Constructor parameters for GlobalScriptAction.
  */
 export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
-  scriptPath: string;
+  shellCommand: string;
 }
 
 /**
@@ -27,13 +27,13 @@ export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
  * invoke scripts from package.json in the same way as a custom command.
  */
 export class GlobalScriptAction extends BaseScriptAction {
-  private _scriptPath: string;
+  private _shellCommand: string;
 
   constructor(
     options: IGlobalScriptActionOptions
   ) {
     super(options);
-    this._scriptPath = options.scriptPath;
+    this._shellCommand = options.shellCommand;
   }
 
   public run(): Promise<void> {
@@ -50,7 +50,7 @@ export class GlobalScriptAction extends BaseScriptAction {
         customParameter.appendToArgList(customParameterValues);
       }
 
-      let shellCommand: string = this._scriptPath;
+      let shellCommand: string = this._shellCommand;
       if (customParameterValues.length > 0) {
         shellCommand += ' ' + customParameterValues.join(' ');
       }

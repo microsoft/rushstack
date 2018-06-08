@@ -189,7 +189,7 @@ export class RushCommandLineParser extends CommandLineParser {
             parser: this,
             commandLineConfiguration: commandLineConfiguration,
 
-            scriptPath: command.scriptPath
+            shellCommand: command.shellCommand
           }));
           break;
         default:
