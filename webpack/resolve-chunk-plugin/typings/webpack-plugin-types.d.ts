@@ -6,10 +6,15 @@ interface ILoc { }
 
 interface IConstDependency {
   loc: ILoc;
-  new (value: string, range: IRange): IConstDependency;
+  new (value: string, range: IRange, requireWebpackRequire: boolean): IConstDependency;
 }
 
-interface IChunk {
+interface IParserHelper {
+  evaluateToString(str: string): (...args: any[]) => any;
+  toConstantDependency(parser: IParser, str: string): (...args: any[]) => any;
+}
+
+interface IV3Chunk {
   name: string;
   id: number;
 }
@@ -21,4 +26,36 @@ interface IParam {
 
 interface IModule {
   addDependency: (dependency: IConstDependency) => void;
+}
+
+interface IExpression {
+  arguments: IExpresionArgument[];
+  loc: ILoc;
+  range: IRange;
+}
+
+interface IRange { }
+
+interface IExpresionArgument { }
+
+interface IParser {
+  evaluateExpression(expression: IExpresionArgument): IParam;
+  state: {
+    current: IModule
+  };
+  hooks: {
+    call: {
+      for(expressionName: string): ITapable;
+    };
+    evaluateTypeof: {
+      for(expressionName: string): ITapable;
+    };
+    typeof: {
+      for(expressionName: string): ITapable;
+    };
+  };
+}
+
+interface ITapable {
+  tap(name: string, fn: (...args: any[]) => any): void;
 }
