@@ -12,7 +12,7 @@
       "commandKind": "global",
       "summary": "Deploys the build",
       "description": "Uploads all the built assets to the CDN",
-      "scriptPath": "common/scripts/deploy.js"
+      "scriptPath": "node common/scripts/deploy.js"
     }
   ],
 
