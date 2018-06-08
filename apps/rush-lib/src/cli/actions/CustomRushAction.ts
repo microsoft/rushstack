@@ -13,7 +13,8 @@ import {
   CommandLineParameter,
   CommandLineFlagParameter,
   CommandLineStringParameter,
-  CommandLineStringListParameter
+  CommandLineStringListParameter,
+  CommandLineParameterKind
 } from '@microsoft/ts-command-line';
 
 import { BaseRushAction, IRushCommandLineActionOptions } from './BaseRushAction';
@@ -238,16 +239,24 @@ export class CustomRushAction extends BaseRushAction {
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
 
-    const customParameterValues: string[] = [];
-    for (const customParameter of this._customParameters) {
-      customParameter.appendToArgList(customParameterValues);
-    }
-
     const extraData: { [key: string]: string } = {
       command_to: (this._toFlag.values.length > 0).toString(),
-      command_from: (this._fromFlag.values.length > 0).toString(),
-      customParameters: customParameterValues.join(' ')
+      command_from: (this._fromFlag.values.length > 0).toString()
     };
+
+    for (const customParameter of this._customParameters) {
+      switch (customParameter.kind) {
+        case CommandLineParameterKind.Flag:
+        case CommandLineParameterKind.Choice:
+        case CommandLineParameterKind.String:
+        case CommandLineParameterKind.Integer:
+          // tslint:disable-next-line:no-any
+          extraData[customParameter.longName] = JSON.stringify((customParameter as any).value);
+          break;
+        default:
+          extraData[customParameter.longName] = '?';
+      }
+    }
 
     if (this.parser.telemetry) {
       this.parser.telemetry.log({
