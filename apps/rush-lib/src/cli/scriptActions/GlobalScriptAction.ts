@@ -38,11 +38,6 @@ export class GlobalScriptAction extends BaseScriptAction {
 
   public run(): Promise<void> {
     return Promise.resolve().then(() => {
-      if (!fsx.existsSync(this.rushConfiguration.rushLinkJsonFilename)) {
-        throw new Error(`File not found: ${this.rushConfiguration.rushLinkJsonFilename}` +
-          `${os.EOL}Did you run "rush link"?`);
-      }
-
       // Collect all custom parameter values
       const customParameterValues: string[] = [];
 
