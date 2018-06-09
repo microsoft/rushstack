@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.0.0-dev.21",
+  "version": "5.0.0-dev.22",
   "description": "The professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -31,7 +31,7 @@
   "license": "MIT",
   "dependencies": {
     "@microsoft/node-core-library": "1.4.0",
-    "@microsoft/rush-lib": "5.0.0-dev.21",
+    "@microsoft/rush-lib": "5.0.0-dev.22",
     "colors": "~1.2.1",
     "fs-extra": "~5.0.0",
     "semver": "~5.3.0"
