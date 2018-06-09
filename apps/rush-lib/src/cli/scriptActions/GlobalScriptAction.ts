@@ -2,12 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
-import { AlreadyReportedError } from '../../../lib/utilities/AlreadyReportedError';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 /**
  * Constructor parameters for GlobalScriptAction.
@@ -58,13 +57,12 @@ export class GlobalScriptAction extends BaseScriptAction {
         }
       );
 
-      if (exitCode > 0) {
-        console.log(os.EOL + colors.red(`The script failed with exit code ${exitCode}`));
-      }
-
       process.exitCode = exitCode;
 
-      throw new AlreadyReportedError();
+      if (exitCode > 0) {
+        console.log(os.EOL + colors.red(`The script failed with exit code ${exitCode}`));
+        throw new AlreadyReportedError();
+      }
     });
   }
 
