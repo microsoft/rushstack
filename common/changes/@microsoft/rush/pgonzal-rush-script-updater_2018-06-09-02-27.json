@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Rush now manages some standard scripts in the \"common/scripts\" folder",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
