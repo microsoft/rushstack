@@ -94,14 +94,14 @@
         {
           "type": "object",
           "additionalProperties": true,
-          "required": [ "scriptPath" ],
+          "required": [ "shellCommand" ],
           "properties": {
             "commandKind": {
               "enum": [ "global" ]
             },
-            "scriptPath": {
-              "title": "Script Path",
-              "description": "The relative path to a JavaScript file that will be invoked using the NodeJS engine.  The path is relative to the repository root folder that contains rush.json.",
+            "shellCommand": {
+              "title": "Shell Command",
+              "description": "A command that that will be invoked using the OS shell. The working directory will be the folder that contains rush.json. Additional command-line parameters may be appended to the end of this string.",
               "type": "string"
             }
           }
@@ -115,7 +115,7 @@
             "summary": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
 
-            "scriptPath": { "$ref": "#/definitions/anything" }
+            "shellCommand": { "$ref": "#/definitions/anything" }
           }
         }
       ]

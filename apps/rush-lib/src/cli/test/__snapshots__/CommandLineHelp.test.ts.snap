@@ -39,6 +39,7 @@ Positional arguments:
     rebuild       Clean and rebuild the entire set of projects
     import-strings
                   Imports translated strings into each project.
+    deploy        Deploys the build
 
 Optional arguments:
   -h, --help      Show this help message and exit.
@@ -132,6 +133,20 @@ are of the same version throughout the repository.
 
 Optional arguments:
   -h, --help  Show this help message and exit.
+"
+`;
+
+exports[`CommandLineHelp prints the help for "rush deploy" 1`] = `
+"usage: rush deploy [-h] [--locale {en-us,fr-fr,es-es,zh-cn}]
+
+Uploads all the built assets to the CDN
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --locale {en-us,fr-fr,es-es,zh-cn}
+                        Selects a single instead of the default locale 
+                        (en-us) for non-ship builds or all locales for ship 
+                        builds.
 "
 `;
 

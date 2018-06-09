@@ -25,7 +25,7 @@ export interface IBulkCommandJson extends IBaseCommandJson {
  */
 export interface IGlobalCommandJson extends IBaseCommandJson {
   commandKind: 'global';
-  scriptPath: string;
+  shellCommand: string;
 }
 
 export type CommandJson = IBulkCommandJson | IGlobalCommandJson;
