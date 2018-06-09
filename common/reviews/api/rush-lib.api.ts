@@ -175,6 +175,7 @@ class RushConfiguration {
   readonly committedShrinkwrapFilename: string;
   readonly commonFolder: string;
   readonly commonRushConfigFolder: string;
+  readonly commonScriptsFolder: string;
   readonly commonTempFolder: string;
   readonly commonVersions: CommonVersionsConfiguration;
   // @beta
