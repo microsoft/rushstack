@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": "Pass the hostname from serve.json to gulpConnect.server()",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-serve",
+  "email": "waldekmastykarz@users.noreply.github.com"
+}
