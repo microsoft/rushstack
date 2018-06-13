@@ -342,6 +342,8 @@ export class InstallManager {
 
     Utilities.createFolderWithRetry(tempProjectsFolder);
 
+    const shrinkwrapWarnings: string[] = [];
+
     // We will start with the assumption that it's valid, and then set it to false if
     // any of the checks fail
     let shrinkwrapIsUpToDate: boolean = true;
@@ -350,23 +352,15 @@ export class InstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
-    // Find the implicitly preferred versions
-    // These are any first-level dependencies for which we only consume a single version range
-    // (e.g. every package that depends on react uses an identical specifier)
-    const allPreferredVersions: Map<string, string> =
-      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration);
-
-    // Add in the explicitly preferred versions.
-    // Note that these take precedence over implicitly preferred versions.
-    MapExtensions.mergeFromMap(allPreferredVersions, this._rushConfiguration.commonVersions.getAllPreferredVersions());
+    const allExplicitPreferredVersions: Map<string, string> = this._rushConfiguration.commonVersions
+      .getAllPreferredVersions();
 
     if (shrinkwrapFile) {
-      // Check any preferred dependencies first
-      allPreferredVersions.forEach((version: string, dependency: string) => {
+      // Check any (explicitly) preferred dependencies first
+      allExplicitPreferredVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
-          console.log(colors.yellow(Utilities.wrapWords(
-            `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
-            + ` (${version}) required by the preferred versions from ` + RushConstants.commonVersionsFilename)));
+          shrinkwrapWarnings.push(`"${dependency}" (${version}) required by the preferred versions from `
+            + RushConstants.commonVersionsFilename);
           shrinkwrapIsUpToDate = false;
         }
       });
@@ -405,6 +399,16 @@ export class InstallManager {
       private: true,
       version: '0.0.0'
     };
+
+    // Find the implicitly preferred versions
+    // These are any first-level dependencies for which we only consume a single version range
+    // (e.g. every package that depends on react uses an identical specifier)
+    const allPreferredVersions: Map<string, string> =
+      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration);
+
+    // Add in the explicitly preferred versions.
+    // Note that these take precedence over implicitly preferred versions.
+    MapExtensions.mergeFromMap(allPreferredVersions, allExplicitPreferredVersions);
 
     // Add any preferred versions to the top of the commonPackageJson
     // do this in alphabetical order for simpler debugging
@@ -497,9 +501,8 @@ export class InstallManager {
         if (shrinkwrapFile) {
           if (!shrinkwrapFile.tryEnsureCompatibleDependency(pair.packageName, pair.packageVersion,
             rushProject.tempProjectName)) {
-            console.log(colors.yellow(
-              Utilities.wrapWords(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
-                + ` (${pair.packageVersion}) required by "${rushProject.packageName}".`)));
+              shrinkwrapWarnings.push(`"${pair.packageName}" (${pair.packageVersion}) required by`
+                + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;
           }
         }
@@ -589,6 +592,15 @@ export class InstallManager {
 
     stopwatch.stop();
     console.log(`Finished creating temporary modules (${stopwatch.toString()})`);
+
+    if (shrinkwrapWarnings.length > 0) {
+      console.log();
+      console.log(colors.yellow(Utilities.wrapWords(`The shrinkwrap file is missing the following dependencies:`)));
+      for (const shrinkwrapWarning of shrinkwrapWarnings) {
+        console.log(colors.yellow('  ' + shrinkwrapWarning));
+      }
+      console.log();
+    }
 
     return shrinkwrapIsUpToDate;
   }
