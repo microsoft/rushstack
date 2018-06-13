@@ -26,7 +26,8 @@
     "build": "gulp test --clean"
   },
   "bin": {
-    "rush": "./bin/rush"
+    "rush": "./bin/rush",
+    "rushx": "./bin/rushx"
   },
   "license": "MIT",
   "dependencies": {
