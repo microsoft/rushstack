@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 // This script is invoked by the CI build, via a build definition step.
 //
 // 'npm install @microsoft/rush -g' will always delete and recreate the rush

@@ -119,6 +119,7 @@ export class RushConfiguration {
   private _changesFolder: string;
   private _commonFolder: string;
   private _commonTempFolder: string;
+  private _commonScriptsFolder: string;
   private _commonRushConfigFolder: string;
   private _packageManager: PackageManager;
   private _pnpmStoreFolder: string;
@@ -384,11 +385,20 @@ export class RushConfiguration {
 
   /**
    * The folder where temporary files will be stored.  This is always a subfolder called "temp"
-   * inside the common folder.
+   * under the common folder.
    * Example: "C:\MyRepo\common\temp"
    */
   public get commonTempFolder(): string {
     return this._commonTempFolder;
+  }
+
+  /**
+   * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
+   * under the common folder.
+   * Example: "C:\MyRepo\common\scripts"
+   */
+  public get commonScriptsFolder(): string {
+    return this._commonScriptsFolder;
   }
 
   /**
@@ -674,6 +684,8 @@ export class RushConfiguration {
 
     this._commonTempFolder = EnvironmentConfiguration.rushTempFolderOverride ||
       path.join(this._commonFolder, RushConstants.rushTempFolderName);
+
+    this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
 
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));

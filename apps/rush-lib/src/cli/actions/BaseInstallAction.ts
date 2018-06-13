@@ -11,6 +11,7 @@ import { Event } from '../../api/EventHooks';
 import { InstallManager, IInstallManagerOptions } from '../../logic/InstallManager';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { SetupChecks } from '../../logic/SetupChecks';
+import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
 
 /**
@@ -46,6 +47,12 @@ export abstract class BaseInstallAction extends BaseRushAction {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     SetupChecks.validate(this.rushConfiguration);
+    let warnAboutScriptUpdate: boolean = false;
+    if (this.actionName === 'update') {
+      warnAboutScriptUpdate = StandardScriptUpdater.update(this.rushConfiguration);
+    } else {
+      StandardScriptUpdater.validate(this.rushConfiguration);
+    }
 
     this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
 
@@ -67,6 +74,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
         this._collectTelemetry(stopwatch, installManagerOptions, true);
         this.eventHooksManager.handle(Event.postRushInstall, this.parser.isDebug);
+
+        if (warnAboutScriptUpdate) {
+          console.log(os.EOL + colors.yellow('Rush refreshed some files in the "common/scripts" folder.'
+            + '  Please commit this change to Git.'));
+        }
 
         console.log(os.EOL + colors.green(
           `Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`));
