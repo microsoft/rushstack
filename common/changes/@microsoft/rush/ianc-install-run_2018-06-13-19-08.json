@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Create install-run.js and intsall-run-rush.js to invoke tools in CI.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
