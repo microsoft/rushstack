@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Fri, 08 Jun 2018 08:43:52 GMT and should not be manually modified.
+This log was last generated on Wed, 13 Jun 2018 16:05:21 GMT and should not be manually modified.
+
+## 3.2.33
+Wed, 13 Jun 2018 16:05:21 GMT
+
+### Patches
+
+- Pass the hostname from serve.json to gulpConnect.server()
 
 ## 3.2.32
 Fri, 08 Jun 2018 08:43:52 GMT

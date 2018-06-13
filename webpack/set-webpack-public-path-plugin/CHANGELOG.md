@@ -1,6 +1,13 @@
 # Change Log - @microsoft/set-webpack-public-path-plugin
 
-This log was last generated on Fri, 08 Jun 2018 08:43:52 GMT and should not be manually modified.
+This log was last generated on Wed, 13 Jun 2018 16:05:21 GMT and should not be manually modified.
+
+## 2.1.0
+Wed, 13 Jun 2018 16:05:21 GMT
+
+### Minor changes
+
+- Include an option to skip chunk and asset detection.
 
 ## 2.0.0
 Fri, 08 Jun 2018 08:43:52 GMT
