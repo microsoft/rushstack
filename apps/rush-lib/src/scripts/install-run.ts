@@ -65,7 +65,11 @@ function resolvePackageVersion({ name, version }: IPackageSpecifier): string {
         { stdio: [] }
       ).toString();
       const versionLines: string[] = npmViewVersionOutput.split('\n').filter((line) => !!line);
-      const latestVersion: string = versionLines[versionLines.length - 1];
+      const latestVersion: string | undefined = versionLines[versionLines.length - 1];
+      if (!latestVersion) {
+        throw new Error('No versions found for the specified version range.');
+      }
+
       const versionMatches: string[] | null = latestVersion.match(/^.+\s\'(.+)\'$/);
       if (!versionMatches) {
         throw new Error(`Invalid npm output ${latestVersion}`);
