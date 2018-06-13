@@ -350,19 +350,12 @@ export class InstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
-    // Find the implicitly preferred versions
-    // These are any first-level dependencies for which we only consume a single version range
-    // (e.g. every package that depends on react uses an identical specifier)
-    const allPreferredVersions: Map<string, string> =
-      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration);
-
-    // Add in the explicitly preferred versions.
-    // Note that these take precedence over implicitly preferred versions.
-    MapExtensions.mergeFromMap(allPreferredVersions, this._rushConfiguration.commonVersions.getAllPreferredVersions());
+    const allExplicitPreferredVersions: Map<string, string> = this._rushConfiguration.commonVersions
+      .getAllPreferredVersions();
 
     if (shrinkwrapFile) {
-      // Check any preferred dependencies first
-      allPreferredVersions.forEach((version: string, dependency: string) => {
+      // Check any (explicitly) preferred dependencies first
+      allExplicitPreferredVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
           console.log(colors.yellow(Utilities.wrapWords(
             `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
@@ -405,6 +398,16 @@ export class InstallManager {
       private: true,
       version: '0.0.0'
     };
+
+    // Find the implicitly preferred versions
+    // These are any first-level dependencies for which we only consume a single version range
+    // (e.g. every package that depends on react uses an identical specifier)
+    const allPreferredVersions: Map<string, string> =
+      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration);
+
+    // Add in the explicitly preferred versions.
+    // Note that these take precedence over implicitly preferred versions.
+    MapExtensions.mergeFromMap(allPreferredVersions, allExplicitPreferredVersions);
 
     // Add any preferred versions to the top of the commonPackageJson
     // do this in alphabetical order for simpler debugging
