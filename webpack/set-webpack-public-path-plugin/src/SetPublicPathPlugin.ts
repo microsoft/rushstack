@@ -65,6 +65,11 @@ export interface ISetWebpackPublicPathOptions {
    * This can be useful if there are multiple scripts loaded in the DOM that match the regexVariable.
    */
   preferLastFoundScript?: boolean;
+
+  /**
+   * If true, always include the public path-setting code. Don't try to detect if any chunks or assets are present.
+   */
+  skipDetection?: boolean;
 }
 
 /**
@@ -131,15 +136,20 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
         v4MainTemplate.hooks.startup.tap(
           'set-webpack-public-path',
           (source: string, chunk: IV4Chunk, hash: string) => {
-            let assetOrChunkFound: boolean = false;
-            for (const chunkGroup of chunk.groupsIterable) {
-              const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
-              assetOrChunkFound = assetOrChunkFound || (children.length > 0);
+            let assetOrChunkFound: boolean = !!this.options.skipDetection;
+
+            if (!assetOrChunkFound) {
+              for (const chunkGroup of chunk.groupsIterable) {
+                const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
+                assetOrChunkFound = assetOrChunkFound || (children.length > 0);
+              }
             }
 
-            for (const innerModule of chunk.modulesIterable) {
-              if (innerModule.buildInfo.assets && Object.keys(innerModule.buildInfo.assets).length > 0) {
-                assetOrChunkFound = true;
+            if (!assetOrChunkFound) {
+              for (const innerModule of chunk.modulesIterable) {
+                if (innerModule.buildInfo.assets && Object.keys(innerModule.buildInfo.assets).length > 0) {
+                  assetOrChunkFound = true;
+                }
               }
             }
 
@@ -159,7 +169,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     } else {
       compiler.plugin('compilation', (compilation: IV3Compilation, params: Object): void => {
         compilation.mainTemplate.plugin('startup', (source: string, chunk: IV3Chunk, hash: string) => {
-          let assetOrChunkFound: boolean = chunk.chunks.length > 0;
+          let assetOrChunkFound: boolean = this.options.skipDetection || chunk.chunks.length > 0;
           if (!assetOrChunkFound) {
             chunk.forEachModule((innerModule: IV3Module) => {
               if (innerModule.assets && Object.keys(innerModule.assets).length > 0) {
