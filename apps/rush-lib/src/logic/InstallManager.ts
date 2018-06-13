@@ -342,6 +342,8 @@ export class InstallManager {
 
     Utilities.createFolderWithRetry(tempProjectsFolder);
 
+    const shrinkwrapWarnings: string[] = [];
+
     // We will start with the assumption that it's valid, and then set it to false if
     // any of the checks fail
     let shrinkwrapIsUpToDate: boolean = true;
@@ -357,9 +359,8 @@ export class InstallManager {
       // Check any (explicitly) preferred dependencies first
       allExplicitPreferredVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
-          console.log(colors.yellow(Utilities.wrapWords(
-            `${os.EOL}The NPM shrinkwrap file does not provide "${dependency}"`
-            + ` (${version}) required by the preferred versions from ` + RushConstants.commonVersionsFilename)));
+          shrinkwrapWarnings.push(`"${dependency}" (${version}) required by the preferred versions from `
+            + RushConstants.commonVersionsFilename);
           shrinkwrapIsUpToDate = false;
         }
       });
@@ -500,9 +501,8 @@ export class InstallManager {
         if (shrinkwrapFile) {
           if (!shrinkwrapFile.tryEnsureCompatibleDependency(pair.packageName, pair.packageVersion,
             rushProject.tempProjectName)) {
-            console.log(colors.yellow(
-              Utilities.wrapWords(`${os.EOL}The NPM shrinkwrap file is missing "${pair.packageName}"`
-                + ` (${pair.packageVersion}) required by "${rushProject.packageName}".`)));
+              shrinkwrapWarnings.push(`"${pair.packageName}" (${pair.packageVersion}) required by`
+                + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;
           }
         }
@@ -592,6 +592,15 @@ export class InstallManager {
 
     stopwatch.stop();
     console.log(`Finished creating temporary modules (${stopwatch.toString()})`);
+
+    if (shrinkwrapWarnings.length > 0) {
+      console.log();
+      console.log(colors.yellow(Utilities.wrapWords(`The shrinkwrap file is missing the following dependencies:`)));
+      for (const shrinkwrapWarning of shrinkwrapWarnings) {
+        console.log(colors.yellow('  ' + shrinkwrapWarning));
+      }
+      console.log();
+    }
 
     return shrinkwrapIsUpToDate;
   }
