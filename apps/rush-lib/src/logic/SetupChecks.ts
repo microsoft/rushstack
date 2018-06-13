@@ -86,6 +86,7 @@ export class SetupChecks {
       for (const folder of phantomFolders) {
         console.log(colors.yellow(`"${folder}"`));
       }
+      console.log(); // add a newline
     }
   }
 
