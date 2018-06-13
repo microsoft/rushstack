@@ -298,44 +298,21 @@ export class Utilities {
   }
 
   /**
-   * Executes the command with the specified command-line parameters, and waits for it to complete.
-   * The current directory will be set to the specified workingDirectory.
-   */
-  public static executeCommandAsync(command: string, args: string[], workingDirectory: string,
-    environment?: IEnvironment): child_process.ChildProcess {
-    // This is a workaround for GitHub issue #25330.  It is not as complete as the workaround above,
-    // but there doesn't seem to be an easy asynchronous solution.
-    // https://github.com/nodejs/node-v0.x-archive/issues/25330
-    if (fsx.existsSync(command + '.cmd')) {
-      command += '.cmd';
-    }
-
-    // This is needed since we specify shell=true below:
-    const escapedCommand: string = Utilities.escapeShellParameter(command);
-    const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
-
-    return child_process.spawn(escapedCommand, escapedArgs, {
-      cwd: workingDirectory,
-      shell: true,
-      env: Utilities._createEnvironmentForRushCommand('', environment)
-    });
-  }
-
-  /**
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
    * @param workingDirectory - working directory for running this command
    * @param initCwd = the folder containing a local .npmrc, which will be used
    *        for the INIT_CWD environment variable
-   * @param captureOutput - if true, map stdio to 'pipe' instead of the parent process's streams
-   * @beta
+   * @param handleOutput - if true, hide the process's output, but if there is a nonzero exit code
+   *   then show the stderr
    */
   public static executeLifecycleCommand(
-    command: string,
-    workingDirectory: string,
-    initCwd: string,
-    captureOutput: boolean = false
-  ): child_process.SpawnSyncReturns<Buffer> {
+    command: string, options: {
+      workingDirectory: string,
+      initCwd: string,
+      handleOutput: boolean
+    }
+  ): number {
     let shellCommand: string = process.env.comspec || 'cmd';
     let commandFlags: string = '/d /s /c';
     let useShell: boolean = true;
@@ -345,20 +322,22 @@ export class Utilities {
       useShell = false;
     }
 
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(initCwd);
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
 
     const result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
       shellCommand,
       [commandFlags, command],
       {
-        cwd: workingDirectory,
+        cwd: options.workingDirectory,
         shell: useShell,
         env: environment,
-        stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
 
-    Utilities._processResult(result);
-    return result;
+    if (options.handleOutput) {
+      Utilities._processResult(result);
+    }
+    return result.status;
   }
 
   /**

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as child_process from 'child_process';
 import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
@@ -9,48 +8,13 @@ import * as path from 'path';
 import {
   PackageJsonLookup,
   IPackageJson,
-  Text,
-  IPackageJsonScriptTable
+  Text
  } from '@microsoft/node-core-library';
 import { Utilities } from '../utilities/Utilities';
+import { ProjectCommandSet } from '../logic/ProjectCommandSet';
+import { RushConfiguration } from '../api/RushConfiguration';
 
-/**
- * Parses the "scripts" section from package.json
- */
-class ProjectCommandSet {
-  public readonly malformedScriptNames: string[] = [];
-  public readonly commandNames: string[] = [];
-  private readonly _scriptsByName: Map<string, string> = new Map<string, string>();
-
-  public constructor(packageJson: IPackageJson) {
-    const scripts: IPackageJsonScriptTable = packageJson.scripts || { };
-
-    for (const scriptName of Object.keys(scripts)) {
-      if (scriptName[0] === '-' || scriptName.length === 0) {
-        this.malformedScriptNames.push(scriptName);
-      } else {
-        this.commandNames.push(scriptName);
-        this._scriptsByName.set(scriptName, scripts[scriptName]);
-      }
-    }
-
-    this.commandNames.sort();
-  }
-
-  public tryGetScriptBody(commandName: string): string | undefined {
-    return this._scriptsByName.get(commandName);
-  }
-
-  public getScriptBody(commandName: string): string {
-    const result: string | undefined = this.tryGetScriptBody(commandName);
-    if (result === undefined) {
-      throw new Error(`The command "${commandName}" was not found`);
-    }
-    return result;
-  }
-}
-
-export class RushX {
+export class RushXCommandLine {
   public static launchRushX(launcherVersion: string, isManaged: boolean): void {
     // NodeJS can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
@@ -82,7 +46,7 @@ export class RushX {
       //   rush -h
       //   rush --unrecognized-option
       if (args.length === 0 || args[0][0] === '-') {
-        RushX._showUsage(packageJson, projectCommandSet);
+        RushXCommandLine._showUsage(packageJson, projectCommandSet);
         return;
       }
 
@@ -103,24 +67,32 @@ export class RushX {
         return;
       }
 
+      // Are we in a Rush repo?
+      let rushConfiguration: RushConfiguration | undefined = undefined;
+      if (RushConfiguration.tryFindRushJsonLocation(false)) {
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+      }
+
       console.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
-      const result: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
-        scriptBody,
-        packageFolder,
-        packageFolder
+      const exitCode: number = Utilities.executeLifecycleCommand(scriptBody,
+        {
+          workingDirectory: packageFolder,
+          // If there is a rush.json then use its .npmrc from the temp folder.
+          // Otherwise look for npmrc in the project folder.
+          initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
+          handleOutput: false
+        }
       );
 
-      result.on('close', (code) => {
-        if (code) {
-          console.log(colors.red(`The script failed with exit code ${code}`));
-        }
+      if (exitCode > 0) {
+        console.log(colors.red(`The script failed with exit code ${exitCode}`));
+      }
 
-        // Pass along the exit code of the child process
-        process.exitCode = code || 0;
-      });
+      process.exitCode = exitCode;
+
     } catch (error) {
       console.log(colors.red('Error: ' + error.message));
     }

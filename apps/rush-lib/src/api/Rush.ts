@@ -8,7 +8,7 @@ import { IPackageJson } from '@microsoft/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from './RushConstants';
-import { RushX } from './RushX';
+import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 
 /**
@@ -55,7 +55,7 @@ export class Rush {
   public static launchRushX(launcherVersion: string, isManaged: boolean): void {
     Rush._printStartupBanner(isManaged);
 
-    RushX.launchRushX(launcherVersion, isManaged);
+    RushXCommandLine.launchRushX(launcherVersion, isManaged);
   }
 
   /**

@@ -12,7 +12,7 @@
       "commandKind": "global",
       "summary": "Deploys the build",
       "description": "Uploads all the built assets to the CDN",
-      "scriptPath": "common/scripts/deploy.js"
+      "shellCommand": "node common/scripts/deploy.js"
     }
   ],
 
@@ -21,7 +21,7 @@
       "longName": "--locale",
       "parameterKind": "choice",
       "description": "Selects a single instead of the default locale (en-us) for non-ship builds or all locales for ship builds.",
-      "associatedCommands": [ "import-strings" ],
+      "associatedCommands": [ "import-strings", "deploy" ],
       "alternatives": [
         {
           "name": "en-us",
