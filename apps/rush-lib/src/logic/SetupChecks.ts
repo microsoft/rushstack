@@ -63,23 +63,23 @@ export class SetupChecks {
 
     // Check from the real parent of the common/temp folder
     const commonTempParent: string = path.dirname(fsx.realpathSync(rushConfiguration.commonTempFolder));
-    SetupChecks._collectPhantomFoldersRecursive(commonTempParent, phantomFolders, seenFolders);
+    SetupChecks._collectPhantomFoldersUpwards(commonTempParent, phantomFolders, seenFolders);
 
     // Check from the real folder containing rush.json
     const realRushJsonFolder: string = fsx.realpathSync(rushConfiguration.rushJsonFolder);
-    SetupChecks._collectPhantomFoldersRecursive(realRushJsonFolder, phantomFolders, seenFolders);
+    SetupChecks._collectPhantomFoldersUpwards(realRushJsonFolder, phantomFolders, seenFolders);
 
     if (phantomFolders.length > 0) {
       if (phantomFolders.length === 1) {
         console.log(colors.yellow(Utilities.wrapWords(
           'Warning: A phantom "node_modules" folder was found. This defeats Rush\'s protection against'
-          + ' NPM phantom dependencies, and may cause confusing build errors. It\'s recommended to'
+          + ' NPM phantom dependencies and may cause confusing build errors. It is recommended to'
           + ' delete this folder:'
         )));
       } else {
         console.log(colors.yellow(Utilities.wrapWords(
           'Warning: Phantom "node_modules" folders were found. This defeats Rush\'s protection against'
-          + ' NPM phantom dependencies, and may cause confusing build errors. It\'s recommended to'
+          + ' NPM phantom dependencies and may cause confusing build errors. It is recommended to'
           + ' delete these folders:'
         )));
       }
@@ -90,24 +90,32 @@ export class SetupChecks {
     }
   }
 
-  private static _collectPhantomFoldersRecursive(folder: string, phantomFolders: string[],
+  /**
+   * Checks "folder" and each of its parents to see if it contains a node_modules folder.
+   * The bad folders will be added to phantomFolders.
+   * The seenFolders set is used to avoid duplicates.
+   */
+  private static _collectPhantomFoldersUpwards(folder: string, phantomFolders: string[],
     seenFolders: Set<string>): void {
 
-    if (seenFolders.has(folder)) {
-      // Stop because we already analyzed this folder
-      return;
-    }
-    seenFolders.add(folder);
+    // Stop if we reached a folder that we already analyzed
+    while (!seenFolders.has(folder)) {
+      seenFolders.add(folder);
 
-    const nodeModulesFolder: string = path.join(folder, RushConstants.nodeModulesFolderName);
-    if (fsx.existsSync(nodeModulesFolder)) {
-      phantomFolders.push(nodeModulesFolder);
-    }
+      // If there is a node_modules folder under this folder, add it to the list of bad folders
+      const nodeModulesFolder: string = path.join(folder, RushConstants.nodeModulesFolderName);
+      if (fsx.existsSync(nodeModulesFolder)) {
+        phantomFolders.push(nodeModulesFolder);
+      }
 
-    // Walk upwards until path.dirname() returns its own input, which means we reached the root
-    const parentFolder: string = path.dirname(folder);
-    if (parentFolder && parentFolder !== folder) {
-      SetupChecks._collectPhantomFoldersRecursive(parentFolder, phantomFolders, seenFolders);
+      // Walk upwards
+      const parentFolder: string = path.dirname(folder);
+      if (!parentFolder || parentFolder === folder) {
+        // If path.dirname() returns its own input, then means we reached the root
+        break;
+      }
+
+      folder = parentFolder;
     }
   }
 }
