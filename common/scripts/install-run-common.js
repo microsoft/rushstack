@@ -159,7 +159,7 @@ function cleanInstallFolder(rushCommonFolder, packageInstallFolder) {
         throw new Error(`Error cleaning the package install folder (${packageInstallFolder}): ${e}`);
     }
 }
-function createPackageJason(packageInstallFolder, name, version) {
+function createPackageJson(packageInstallFolder, name, version) {
     try {
         const packageJsonContents = {
             'name': 'ci-rush',
@@ -243,7 +243,7 @@ function installAndRun(nodePath, packageName, packageVersion, packageBinName, pa
         // The package isn't already installed
         cleanInstallFolder(rushCommonFolder, packageInstallFolder);
         copyNpmrcIfItExists(rushCommonFolder, packageInstallFolder);
-        createPackageJason(packageInstallFolder, packageName, packageVersion);
+        createPackageJson(packageInstallFolder, packageName, packageVersion);
         installPackage(packageInstallFolder, packageName, packageVersion);
         writeFlagFile(packageInstallFolder);
     }

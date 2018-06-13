@@ -175,11 +175,11 @@ function cleanInstallFolder(rushCommonFolder: string, packageInstallFolder: stri
       fs.renameSync(nodeModulesFolder, rushRecyclerFolder);
     }
   } catch (e) {
-  throw new Error(`Error cleaning the package install folder (${packageInstallFolder}): ${e}`);
+    throw new Error(`Error cleaning the package install folder (${packageInstallFolder}): ${e}`);
   }
 }
 
-function createPackageJason(packageInstallFolder: string, name: string, version: string): void {
+function createPackageJson(packageInstallFolder: string, name: string, version: string): void {
   try {
     const packageJsonContents: IPackageJson = {
       'name': 'ci-rush',
@@ -273,7 +273,7 @@ export function installAndRun(
     // The package isn't already installed
     cleanInstallFolder(rushCommonFolder, packageInstallFolder);
     copyNpmrcIfItExists(rushCommonFolder, packageInstallFolder);
-    createPackageJason(packageInstallFolder, packageName, packageVersion);
+    createPackageJson(packageInstallFolder, packageName, packageVersion);
     installPackage(packageInstallFolder, packageName, packageVersion);
     writeFlagFile(packageInstallFolder);
   }
