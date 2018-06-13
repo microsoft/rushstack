@@ -101,8 +101,8 @@ function ensureAndResolveFolder(baseFolder: string, ...pathSegments: string[]): 
   return resolvedDirectory;
 }
 
-function copyNpmrcIfItExists(rushJsonFolder: string, packageInstallFolder: string): void {
-  const npmrcPath: string = path.join(rushJsonFolder, 'common', 'config', 'rush', '.npmrc');
+function copyNpmrcIfItExists(rushCommonFolder: string, packageInstallFolder: string): void {
+  const npmrcPath: string = path.join(rushCommonFolder, 'config', 'rush', '.npmrc');
   const packageInstallNpmrcPath: string = path.join(packageInstallFolder, '.npmrc');
   if (fs.existsSync(npmrcPath)) {
     try {
@@ -157,18 +157,22 @@ function isPackageAlreadyInstalled(packageInstallFolder: string): boolean {
 /**
  * Removes the installed.flag file and the node_modules folder under the specified folder path.
  */
-function cleanInstallFolder(packageInstallFolder: string): void {
+function cleanInstallFolder(rushCommonFolder: string, packageInstallFolder: string): void {
   try {
     const flagFile: string = path.resolve(packageInstallFolder, INSTALLED_FLAG_FILENAME);
     if (fs.existsSync(flagFile)) {
       fs.unlinkSync(flagFile);
     }
 
-    // This should probably use the rush-recycler, but these files are intended to be as light as possible
-    // for now.
     const nodeModulesFolder: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME);
     if (fs.existsSync(nodeModulesFolder)) {
-      fs.unlinkSync(nodeModulesFolder);
+      const rushRecyclerFolder: string = ensureAndResolveFolder(
+        rushCommonFolder,
+        'temp',
+        'rush-recycler',
+        Date.now().toString()
+      );
+      fs.renameSync(nodeModulesFolder, rushRecyclerFolder);
     }
   } catch (e) {
   throw new Error(`Error cleaning the package install folder (${packageInstallFolder}): ${e}`);
@@ -257,9 +261,9 @@ export function installAndRun(
   packageBinArgs: string[]
 ): void {
   const rushJsonFolder: string = findRushJsonFolder();
+  const rushCommonFolder: string = path.join(rushJsonFolder, 'common');
   const packageInstallFolder: string = ensureAndResolveFolder(
-    rushJsonFolder,
-    'common',
+    rushCommonFolder,
     'temp',
     'install-run',
     `${packageName}@${packageVersion}`
@@ -267,8 +271,8 @@ export function installAndRun(
 
   if (!isPackageAlreadyInstalled(packageInstallFolder)) {
     // The package isn't already installed
-    cleanInstallFolder(packageInstallFolder);
-    copyNpmrcIfItExists(rushJsonFolder, packageInstallFolder);
+    cleanInstallFolder(rushCommonFolder, packageInstallFolder);
+    copyNpmrcIfItExists(rushCommonFolder, packageInstallFolder);
     createPackageJason(packageInstallFolder, packageName, packageVersion);
     installPackage(packageInstallFolder, packageName, packageVersion);
     writeFlagFile(packageInstallFolder);
