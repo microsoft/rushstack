@@ -21,31 +21,36 @@ export class StandardScriptUpdater {
   public static update(rushConfiguration: RushConfiguration): boolean {
     let anyChanges: boolean = false;
     for (const scriptName of StandardScriptUpdater._scriptNames) {
-      if (StandardScriptUpdater._updateScript(scriptName, rushConfiguration, false)) {
+      if (StandardScriptUpdater._updateScriptOrThrow(scriptName, rushConfiguration, false)) {
         anyChanges = true;
       }
     }
 
     if (anyChanges) {
-      console.log();
+      console.log(); // print a newline after the notices
     }
     return anyChanges;
   }
 
   /**
-   * Throw an exceptions if the scripts are out of date.
+   * Throw an exception if the scripts are out of date.
    * Used by "rush install".
    */
   public static validate(rushConfiguration: RushConfiguration): void {
     for (const scriptName of StandardScriptUpdater._scriptNames) {
-      StandardScriptUpdater._updateScript(scriptName, rushConfiguration, true);
+      StandardScriptUpdater._updateScriptOrThrow(scriptName, rushConfiguration, true);
     }
   }
 
-  private static _updateScript(scriptName: string, rushConfiguration: RushConfiguration,
-    validateOnly: boolean): boolean {
+  /**
+   * Compares a single script in the common/script folder to see if it needs to be updated.
+   * If throwInsteadOfCopy=false, then an outdated or missing script will be recopied;
+   * otherwise, an exception is thrown.
+   */
+  private static _updateScriptOrThrow(scriptName: string, rushConfiguration: RushConfiguration,
+    throwInsteadOfCopy: boolean): boolean {
     const targetFilePath: string = path.join(rushConfiguration.commonScriptsFolder, scriptName);
-    const sourceFilePath: string = path.resolve(__dirname, '../../lib/scripts', scriptName);
+    const sourceFilePath: string = path.resolve(__dirname, '../scripts', scriptName);
 
     fsx.mkdirsSync(rushConfiguration.commonScriptsFolder);
 
@@ -65,7 +70,7 @@ export class StandardScriptUpdater {
     }
 
     if (!filesAreSame) {
-      if (validateOnly) {
+      if (throwInsteadOfCopy) {
         throw new Error('The standard files in the "common/scripts" folders are need to be updated'
           + ' for this Rush version.  Please run "rush update" and commit the changes.');
       } else {
