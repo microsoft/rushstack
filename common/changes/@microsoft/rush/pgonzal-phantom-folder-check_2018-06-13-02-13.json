@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Rush now warns when phantom node_modules folders are found",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
