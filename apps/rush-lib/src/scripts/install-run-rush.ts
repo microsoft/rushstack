@@ -18,7 +18,7 @@ import {
   findRushJsonFolder,
   RUSH_JSON_FILENAME,
   runWithErrorAndStatusCode
-} from './install-run-common';
+} from './install-run';
 
 const PACKAGE_NAME: string = '@microsoft/rush';
 
@@ -41,6 +41,12 @@ function getRushVersion(): string {
 }
 
 function run(): void {
+  const [
+    nodePath, /* Ex: /bin/node */ // tslint:disable-line:no-unused-variable
+    scriptPath, /* /repo/common/scripts/install-run-rush.js */ // tslint:disable-line:no-unused-variable
+    ...packageBinArgs /* [build, --to, myproject] */
+  ]: string[] = process.argv;
+
   if (process.argv.length < 3) {
     console.log('Usage: install-run-rush.js <command> [args...]');
     console.log('Example: install-run-rush.js build --to myproject');
@@ -48,12 +54,6 @@ function run(): void {
   }
 
   runWithErrorAndStatusCode(() => {
-    const [
-      nodePath, /* Ex: /bin/node */ // tslint:disable-line:no-unused-variable
-      scriptPath, /* /repo/common/scripts/install-run-rush.js */ // tslint:disable-line:no-unused-variable
-      ...packageBinArgs /* [build, --to, myproject] */
-    ]: string[] = process.argv;
-
     const version: string = getRushVersion();
     console.log(`The rush.json configuration requests Rush version ${version}`);
 
