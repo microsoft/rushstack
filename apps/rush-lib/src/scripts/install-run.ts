@@ -50,7 +50,7 @@ function parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier {
 /**
  * Resolve a package specifier to a static version
  */
-function resolvePackageVersion(rushTempFolder: string, { name, version }: IPackageSpecifier): string {
+function resolvePackageVersion(rushCommonFolder: string, { name, version }: IPackageSpecifier): string {
   if (!version) {
     version = '*'; // If no version is specified, use the latest version
   }
@@ -62,7 +62,8 @@ function resolvePackageVersion(rushTempFolder: string, { name, version }: IPacka
   } else {
     // version resolves to
     try {
-      copyNpmrcIfItExists(rushTempFolder, rushTempFolder);
+      const rushTempFolder: string = ensureAndResolveFolder(rushCommonFolder, 'temp');
+      copyNpmrcIfItExists(rushCommonFolder, rushTempFolder);
       const npmPath: string = getNpmPath();
 
       // This returns something that looks like:
@@ -164,14 +165,6 @@ export function findRushJsonFolder(): string {
 }
 
 /**
- * Resolve and ensure the <repo>/common/temp folder
- */
-export function ensureAndResolveRushTempFolder(): string {
-  const rushJsonFolder: string = findRushJsonFolder();
-  return ensureAndResolveFolder(rushJsonFolder, 'common', 'temp');
-}
-
-/**
  * Create missing directories under the specified base directory, and return the resolved directory.
  *
  * Does not support "." or ".." path segments.
@@ -253,7 +246,7 @@ function isPackageAlreadyInstalled(packageInstallFolder: string): boolean {
  *  -
  *  - node_modules
  */
-function cleanInstallFolder(rushTempFolder: string, packageInstallFolder: string): void {
+function cleanInstallFolder(rushCommonFolder: string, packageInstallFolder: string): void {
   try {
     const flagFile: string = path.resolve(packageInstallFolder, INSTALLED_FLAG_FILENAME);
     if (fs.existsSync(flagFile)) {
@@ -268,7 +261,8 @@ function cleanInstallFolder(rushTempFolder: string, packageInstallFolder: string
     const nodeModulesFolder: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME);
     if (fs.existsSync(nodeModulesFolder)) {
       const rushRecyclerFolder: string = ensureAndResolveFolder(
-        rushTempFolder,
+        rushCommonFolder,
+        'temp',
         'rush-recycler',
         `install-run-${Date.now().toString()}`
       );
@@ -351,23 +345,21 @@ export function installAndRun(
   packageName: string,
   packageVersion: string,
   packageBinName: string,
-  packageBinArgs: string[],
-  rushTempFolder: string | undefined = undefined
+  packageBinArgs: string[]
 ): number {
-  if (!rushTempFolder) {
-    rushTempFolder = ensureAndResolveRushTempFolder();
-  }
-
+  const rushJsonFolder: string = findRushJsonFolder();
+  const rushCommonFolder: string = path.join(rushJsonFolder, 'common');
   const packageInstallFolder: string = ensureAndResolveFolder(
-    rushTempFolder,
+    rushCommonFolder,
+    'temp',
     'install-run',
     `${packageName}@${packageVersion}`
   );
 
   if (!isPackageAlreadyInstalled(packageInstallFolder)) {
     // The package isn't already installed
-    cleanInstallFolder(rushTempFolder, packageInstallFolder);
-    copyNpmrcIfItExists(rushTempFolder, packageInstallFolder);
+    cleanInstallFolder(rushCommonFolder, packageInstallFolder);
+    copyNpmrcIfItExists(rushCommonFolder, packageInstallFolder);
     createPackageJson(packageInstallFolder, packageName, packageVersion);
     installPackage(packageInstallFolder, packageName, packageVersion);
     writeFlagFile(packageInstallFolder);
@@ -425,17 +417,18 @@ function run(): void {
   }
 
   runWithErrorAndStatusCode(() => {
-    const rushTempFolder: string = ensureAndResolveRushTempFolder();
+    const rushJsonFolder: string = findRushJsonFolder();
+    const rushCommonFolder: string = ensureAndResolveFolder(rushJsonFolder, 'common');
 
     const packageSpecifier: IPackageSpecifier = parsePackageSpecifier(rawPackageSpecifier);
     const name: string = packageSpecifier.name;
-    const version: string = resolvePackageVersion(rushTempFolder, packageSpecifier);
+    const version: string = resolvePackageVersion(rushCommonFolder, packageSpecifier);
 
     if (packageSpecifier.version !== version) {
       console.log(`Resolved to ${name}@${version}`);
     }
 
-    return installAndRun(name, version, packageBinName, packageBinArgs, rushTempFolder);
+    return installAndRun(name, version, packageBinName, packageBinArgs);
   });
 }
 
