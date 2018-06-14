@@ -58,8 +58,8 @@ function resolvePackageVersion(rushCommonFolder, { name, version }) {
     else {
         // version resolves to
         try {
-            const rushTempFolder = ensureAndResolveFolder(rushCommonFolder, 'temp');
-            copyNpmrcIfItExists(rushCommonFolder, rushTempFolder);
+            const rushTempFolder = ensureAndJoinPath(rushCommonFolder, 'temp');
+            syncNpmrc(rushCommonFolder, rushTempFolder);
             const npmPath = getNpmPath();
             // This returns something that looks like:
             //  @microsoft/rush@3.0.0 '3.0.0'
@@ -151,27 +151,27 @@ exports.findRushJsonFolder = findRushJsonFolder;
  * Does not support "." or ".." path segments.
  * Assumes the baseFolder exists.
  */
-function ensureAndResolveFolder(baseFolder, ...pathSegments) {
-    let resolvedDirectory = baseFolder;
+function ensureAndJoinPath(baseFolder, ...pathSegments) {
+    let joinedPath = baseFolder;
     try {
         for (let pathSegment of pathSegments) {
             pathSegment = pathSegment.replace(/[\\\/]/g, '+');
-            resolvedDirectory = path.resolve(resolvedDirectory, pathSegment);
-            if (!fs.existsSync(resolvedDirectory)) {
-                fs.mkdirSync(resolvedDirectory);
+            joinedPath = path.join(joinedPath, pathSegment);
+            if (!fs.existsSync(joinedPath)) {
+                fs.mkdirSync(joinedPath);
             }
         }
     }
     catch (e) {
-        throw new Error(`Error building local installation directory (${path.resolve(baseFolder, ...pathSegments)}): ${e}`);
+        throw new Error(`Error building local installation folder (${path.join(baseFolder, ...pathSegments)}): ${e}`);
     }
-    return resolvedDirectory;
+    return joinedPath;
 }
-function copyNpmrcIfItExists(rushCommonFolder, packageInstallFolder) {
+function syncNpmrc(rushCommonFolder, targetFolder) {
     const npmrcPath = path.join(rushCommonFolder, 'config', 'rush', '.npmrc');
-    const packageInstallNpmrcPath = path.join(packageInstallFolder, '.npmrc');
-    if (fs.existsSync(npmrcPath)) {
-        try {
+    const targetNpmrcPath = path.join(targetFolder, '.npmrc');
+    try {
+        if (fs.existsSync(npmrcPath)) {
             let npmrcFileLines = fs.readFileSync(npmrcPath).toString().split('\n');
             npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
             const resultLines = [];
@@ -194,11 +194,15 @@ function copyNpmrcIfItExists(rushCommonFolder, packageInstallFolder) {
                     resultLines.push(line);
                 }
             }
-            fs.writeFileSync(packageInstallNpmrcPath, resultLines.join(os.EOL));
+            fs.writeFileSync(targetNpmrcPath, resultLines.join(os.EOL));
         }
-        catch (e) {
-            throw new Error(`Error reading or writing .npmrc file: ${e}`);
+        else if (fs.existsSync(targetNpmrcPath)) {
+            // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
+            fs.unlinkSync(targetNpmrcPath);
         }
+    }
+    catch (e) {
+        throw new Error(`Error syncing .npmrc file: ${e}`);
     }
 }
 /**
@@ -235,7 +239,7 @@ function cleanInstallFolder(rushCommonFolder, packageInstallFolder) {
         }
         const nodeModulesFolder = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME);
         if (fs.existsSync(nodeModulesFolder)) {
-            const rushRecyclerFolder = ensureAndResolveFolder(rushCommonFolder, 'temp', 'rush-recycler', `install-run-${Date.now().toString()}`);
+            const rushRecyclerFolder = ensureAndJoinPath(rushCommonFolder, 'temp', 'rush-recycler', `install-run-${Date.now().toString()}`);
             fs.renameSync(nodeModulesFolder, rushRecyclerFolder);
         }
     }
@@ -306,11 +310,11 @@ function writeFlagFile(packageInstallFolder) {
 function installAndRun(packageName, packageVersion, packageBinName, packageBinArgs) {
     const rushJsonFolder = findRushJsonFolder();
     const rushCommonFolder = path.join(rushJsonFolder, 'common');
-    const packageInstallFolder = ensureAndResolveFolder(rushCommonFolder, 'temp', 'install-run', `${packageName}@${packageVersion}`);
+    const packageInstallFolder = ensureAndJoinPath(rushCommonFolder, 'temp', 'install-run', `${packageName}@${packageVersion}`);
     if (!isPackageAlreadyInstalled(packageInstallFolder)) {
         // The package isn't already installed
         cleanInstallFolder(rushCommonFolder, packageInstallFolder);
-        copyNpmrcIfItExists(rushCommonFolder, packageInstallFolder);
+        syncNpmrc(rushCommonFolder, packageInstallFolder);
         createPackageJson(packageInstallFolder, packageName, packageVersion);
         installPackage(packageInstallFolder, packageName, packageVersion);
         writeFlagFile(packageInstallFolder);
@@ -353,7 +357,7 @@ function run() {
     }
     runWithErrorAndStatusCode(() => {
         const rushJsonFolder = findRushJsonFolder();
-        const rushCommonFolder = ensureAndResolveFolder(rushJsonFolder, 'common');
+        const rushCommonFolder = ensureAndJoinPath(rushJsonFolder, 'common');
         const packageSpecifier = parsePackageSpecifier(rawPackageSpecifier);
         const name = packageSpecifier.name;
         const version = resolvePackageVersion(rushCommonFolder, packageSpecifier);
