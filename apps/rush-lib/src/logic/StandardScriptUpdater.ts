@@ -71,7 +71,7 @@ export class StandardScriptUpdater {
 
     if (!filesAreSame) {
       if (throwInsteadOfCopy) {
-        throw new Error('The standard files in the "common/scripts" folders are need to be updated'
+        throw new Error('The standard files in the "common/scripts" folders need to be updated'
           + ' for this Rush version.  Please run "rush update" and commit the changes.');
       } else {
         console.log(`Script is out of date; updating "${targetFilePath}"`);
