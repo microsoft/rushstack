@@ -15,7 +15,7 @@ const fs = require("fs");
 const install_run_1 = require("./install-run");
 const PACKAGE_NAME = '@microsoft/rush';
 function getRushVersion() {
-    const rushJsonFolder = install_run_1.ensureAndResolveRushTempFolder();
+    const rushJsonFolder = install_run_1.findRushJsonFolder();
     const rushJsonPath = path.join(rushJsonFolder, install_run_1.RUSH_JSON_FILENAME);
     try {
         const rushJsonContents = fs.readFileSync(rushJsonPath, 'UTF-8');
