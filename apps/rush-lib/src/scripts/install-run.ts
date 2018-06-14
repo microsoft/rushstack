@@ -361,7 +361,7 @@ export function installAndRun(
   }
 
   const statusMessage: string = `Invoking "${packageBinName} ${packageBinArgs.join(' ')}"`;
-  const statusMessageLine: string = new Array(statusMessage.length + 2).join('-');
+  const statusMessageLine: string = new Array(statusMessage.length + 1).join('-');
   console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
 
   const binPath: string = getBinPath(packageInstallFolder, packageBinName);

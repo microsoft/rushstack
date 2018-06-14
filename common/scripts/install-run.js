@@ -311,7 +311,7 @@ function installAndRun(packageName, packageVersion, packageBinName, packageBinAr
         writeFlagFile(packageInstallFolder);
     }
     const statusMessage = `Invoking "${packageBinName} ${packageBinArgs.join(' ')}"`;
-    const statusMessageLine = new Array(statusMessage.length + 2).join('-');
+    const statusMessageLine = new Array(statusMessage.length + 1).join('-');
     console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
     const binPath = getBinPath(packageInstallFolder, packageBinName);
     const result = childProcess.spawnSync(binPath, packageBinArgs, {
