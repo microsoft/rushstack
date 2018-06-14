@@ -1,0 +1,41 @@
+{
+  "kind": "package",
+  "name": "api-extractor-test-05",
+  "summary": [
+    {
+      "kind": "text",
+      "text": "api-extractor-test-05"
+    },
+    {
+      "kind": "paragraph"
+    },
+    {
+      "kind": "text",
+      "text": "This project tests various documentation generation scenarios and doc comment syntaxes."
+    }
+  ],
+  "remarks": [],
+  "exports": {
+    "DocClass1": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "text",
+          "text": "This is an example class."
+        }
+      ],
+      "remarks": [
+        {
+          "kind": "text",
+          "text": "These are some remarks."
+        }
+      ],
+      "isBeta": false,
+      "isSealed": false
+    }
+  }
+}
