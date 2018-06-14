@@ -79,6 +79,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "api-extractor-test-05",
+      "projectFolder": "build-tests/api-extractor-test-05",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-stack-library-test",
       "projectFolder": "build-tests/rush-stack-library-test",
       "reviewCategory": "tests",
