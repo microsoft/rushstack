@@ -15,7 +15,7 @@ import * as fs from 'fs';
 
 import {
   installAndRun,
-  findRushJsonFolder,
+  ensureAndResolveRushTempFolder,
   RUSH_JSON_FILENAME,
   runWithErrorAndStatusCode
 } from './install-run';
@@ -23,7 +23,7 @@ import {
 const PACKAGE_NAME: string = '@microsoft/rush';
 
 function getRushVersion(): string {
-  const rushJsonFolder: string = findRushJsonFolder();
+  const rushJsonFolder: string = ensureAndResolveRushTempFolder();
   const rushJsonPath: string = path.join(rushJsonFolder, RUSH_JSON_FILENAME);
   try {
     const rushJsonContents: string = fs.readFileSync(rushJsonPath, 'UTF-8');
