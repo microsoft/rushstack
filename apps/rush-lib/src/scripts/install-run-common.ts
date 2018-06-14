@@ -68,7 +68,7 @@ export function findRushJsonFolder(): string {
       } else {
         basePath = tempPath;
       }
-    } while (basePath !== (tempPath = path.resolve(basePath, '..'))); // Exit the loop when we hit the disk root
+    } while (basePath !== (tempPath = path.dirname(basePath))); // Exit the loop when we hit the disk root
 
     if (!_rushJsonFolder) {
       throw new Error('Unable to find rush.json.');
@@ -88,7 +88,7 @@ function ensureAndResolveFolder(baseFolder: string, ...pathSegments: string[]): 
   let resolvedDirectory: string = baseFolder;
   try {
     for (let pathSegment of pathSegments) {
-      pathSegment = pathSegment.replace(/[\\\/]/g, '_');
+      pathSegment = pathSegment.replace(/[\\\/]/g, '+');
       resolvedDirectory = path.resolve(resolvedDirectory, pathSegment);
       if (!fs.existsSync(resolvedDirectory)) {
         fs.mkdirSync(resolvedDirectory);
@@ -155,7 +155,10 @@ function isPackageAlreadyInstalled(packageInstallFolder: string): boolean {
 }
 
 /**
- * Removes the installed.flag file and the node_modules folder under the specified folder path.
+ * Removes the following files and directories under the specified folder path:
+ *  - installed.flag
+ *  -
+ *  - node_modules
  */
 function cleanInstallFolder(rushCommonFolder: string, packageInstallFolder: string): void {
   try {
@@ -164,13 +167,18 @@ function cleanInstallFolder(rushCommonFolder: string, packageInstallFolder: stri
       fs.unlinkSync(flagFile);
     }
 
+    const packageLockFile: string = path.resolve(packageInstallFolder, 'package-lock.json');
+    if (fs.existsSync(packageLockFile)) {
+      fs.unlinkSync(packageLockFile);
+    }
+
     const nodeModulesFolder: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME);
     if (fs.existsSync(nodeModulesFolder)) {
       const rushRecyclerFolder: string = ensureAndResolveFolder(
         rushCommonFolder,
         'temp',
         'rush-recycler',
-        Date.now().toString()
+        `install-run-${Date.now().toString()}`
       );
       fs.renameSync(nodeModulesFolder, rushRecyclerFolder);
     }
@@ -206,7 +214,20 @@ function installPackage(packageInstallFolder: string, name: string, version: str
   try {
     console.log(`Installing ${name}...`);
     const npmPath: string = getNpmPath();
-    childProcess.execSync(`"${npmPath}" install`, { cwd: packageInstallFolder });
+    const result: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(
+      npmPath,
+      ['install'],
+      {
+        stdio: 'inherit',
+        cwd: packageInstallFolder,
+        env: process.env
+      }
+    );
+
+    if (result.status !== 0) {
+      throw new Error('"npm install" encountered an error');
+    }
+
     console.log(`Successfully installed ${name}@${version}`);
   } catch (e) {
     throw new Error(`Unable to install package: ${e}`);
@@ -214,31 +235,12 @@ function installPackage(packageInstallFolder: string, name: string, version: str
 }
 
 /**
- * Try to resolve the specified binary in an installed package.
+ * Get the ".bin" path for the package.
  */
-function findBinPath(packageInstallFolder: string, name: string, binName: string): string {
-  try {
-    const packagePath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, name);
-    const packageJsonPath: string = path.resolve(packagePath, PACKAGE_JSON_FILENAME);
-    const packageJson: IPackageJson = require(packageJsonPath);
-    if (!packageJson.bin) {
-      throw new Error('No binaries are specified for package.');
-    } else {
-      const binValue: string = packageJson.bin[binName];
-      if (!binValue) {
-        throw new Error(`Binary ${binName} is not specified in the package's package.json`);
-      } else {
-        const resolvedBinPath: string = path.resolve(packagePath, binValue);
-        if (!fs.existsSync(resolvedBinPath)) {
-          throw new Error('The specified binary points to a path that does not exist');
-        } else {
-          return resolvedBinPath;
-        }
-      }
-    }
-  } catch (e) {
-    throw new Error(`Unable to find specified binary "${binName}": ${e}`);
-  }
+function getBinPath(packageInstallFolder: string, binName: string): string {
+  const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
+  const resolvedBinName: string = (os.platform() === 'win32') ? `${binName}.cmd` : binName;
+  return path.resolve(binFolderPath, resolvedBinName);
 }
 
 /**
@@ -249,17 +251,16 @@ function writeFlagFile(packageInstallFolder: string): void {
     const flagFilePath: string = path.join(packageInstallFolder, INSTALLED_FLAG_FILENAME);
     fs.writeFileSync(flagFilePath, process.version);
   } catch (e) {
-    // Ignore
+    throw new Error(`Unable to create installed.flag file in ${packageInstallFolder}`);
   }
 }
 
 export function installAndRun(
-  nodePath: string,
   packageName: string,
   packageVersion: string,
   packageBinName: string,
   packageBinArgs: string[]
-): void {
+): number {
   const rushJsonFolder: string = findRushJsonFolder();
   const rushCommonFolder: string = path.join(rushJsonFolder, 'common');
   const packageInstallFolder: string = ensureAndResolveFolder(
@@ -278,21 +279,30 @@ export function installAndRun(
     writeFlagFile(packageInstallFolder);
   }
 
-  const binPath: string = findBinPath(packageInstallFolder, packageName, packageBinName);
-  childProcess.spawnSync(
-    nodePath,
-    [binPath, ...packageBinArgs],
+  const statusMessage: string = `Invoking "${packageBinName} ${packageBinArgs.join(' ')}"`;
+  const statusMessageLine: string = new Array(statusMessage.length).join('-');
+  console.log(os.EOL + statusMessage + os.EOL + statusMessageLine + os.EOL);
+
+  const binPath: string = getBinPath(packageInstallFolder, packageBinName);
+  const result: childProcess.SpawnSyncReturns<Buffer>  = childProcess.spawnSync(
+    binPath,
+    packageBinArgs,
     {
       stdio: 'inherit',
       cwd: process.cwd(),
       env: process.env
     }
   );
+
+  return result.status;
 }
 
-export function runWithErrorPrinting(fn: () => void): void {
+export function runWithErrorAndStatusCode(fn: () => number): void {
+  process.exitCode = 1;
+
   try {
-    fn();
+    const exitCode: number = fn();
+    process.exitCode = exitCode;
   } catch (e) {
     console.error(os.EOL + os.EOL + e.toString() + os.EOL + os.EOL);
   }

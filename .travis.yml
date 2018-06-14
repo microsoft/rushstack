@@ -5,14 +5,14 @@ script:
   - set -e
   - echo 'Checking change file...' && echo -en 'travis_fold:start:change\\r'
   - git fetch origin master:refs/remotes/origin/master -a
-  - node common/scripts/install-run-rush.js rush change -v
+  - node common/scripts/install-run-rush.js change -v
   - echo -en 'travis_fold:end:change\\r'
   - echo 'Running rush check' && echo -en 'travis_fold:start:check\\r'
-  - node common/scripts/install-run-rush.js rush check
+  - node common/scripts/install-run-rush.js check
   - echo -en 'travis_fold:end:check\\r'
   - echo 'Installing...' && echo -en 'travis_fold:start:install\\r'
-  - node common/scripts/install-run-rush.js rush install --bypass-policy
+  - node common/scripts/install-run-rush.js install --bypass-policy
   - echo -en 'travis_fold:end:install\\r'
   - echo 'Building...' && echo -en 'travis_fold:start:build\\r'
-  - node common/scripts/install-run-rush.js rush rebuild --verbose --production
+  - node common/scripts/install-run-rush.js rebuild --verbose --production
   - echo -en 'travis_fold:end:build\\r'
