@@ -1,0 +1,121 @@
+{
+  "kind": "package",
+  "name": "api-extractor-test-05",
+  "summary": [
+    {
+      "kind": "text",
+      "text": "api-extractor-test-05"
+    },
+    {
+      "kind": "paragraph"
+    },
+    {
+      "kind": "text",
+      "text": "This project tests various documentation generation scenarios and doc comment syntaxes."
+    }
+  ],
+  "remarks": [],
+  "exports": {
+    "DocClass1": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "text",
+          "text": "This is an example class."
+        }
+      ],
+      "remarks": [
+        {
+          "kind": "text",
+          "text": "These are some remarks."
+        }
+      ],
+      "isBeta": false,
+      "isSealed": false,
+      "members": {
+        "exampleFunction": {
+          "kind": "method",
+          "signature": "exampleFunction(a: string, b: string): string;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "string",
+            "description": []
+          },
+          "parameters": {
+            "a": {
+              "name": "a",
+              "description": [
+                {
+                  "kind": "text",
+                  "text": "the first string"
+                }
+              ],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "string"
+            },
+            "b": {
+              "name": "b",
+              "description": [
+                {
+                  "kind": "text",
+                  "text": "the second string"
+                }
+              ],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "string"
+            }
+          },
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "This is an overloaded function."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false,
+          "isSealed": false,
+          "isVirtual": false,
+          "isOverride": false
+        },
+        "tableExample": {
+          "kind": "method",
+          "signature": "tableExample(): void;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "An example with tables:"
+            }
+          ],
+          "remarks": [
+            {
+              "kind": "text",
+              "text": "<table> <tr> <td>John</td> <td>Doe</td> </tr> </table>"
+            }
+          ],
+          "isBeta": false,
+          "isSealed": false,
+          "isVirtual": false,
+          "isOverride": false
+        }
+      }
+    }
+  }
+}

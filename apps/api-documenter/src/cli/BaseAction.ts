@@ -46,9 +46,7 @@ export abstract class BaseAction extends CommandLineAction {
     }
 
     this.outputFolder = this._outputFolderParameter.value || `./${this.actionName}`;
-    if (!fsx.existsSync(this.outputFolder)) {
-      throw new Error('The output folder does not exist: ' + this.outputFolder);
-    }
+    fsx.mkdirsSync(this.outputFolder);
 
     for (const filename of fsx.readdirSync(this.inputFolder)) {
       if (filename.match(/\.api\.json$/i)) {
