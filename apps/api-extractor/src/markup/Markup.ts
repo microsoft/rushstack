@@ -17,6 +17,7 @@ import {
   IMarkupHeading2,
   IMarkupPage,
   IMarkupHighlightedText,
+  IMarkupHtmlTag,
   MarkupLinkTextElement,
   IMarkupNoteBox,
   IMarkupCodeBox,
@@ -194,6 +195,19 @@ export class Markup {
       text: code,
       highlighter: highlighter || 'plain'
     } as IMarkupHighlightedText;
+  }
+
+  /**
+   * Constructs an IMarkupHtmlTag element representing an opening or closing HTML tag.
+   */
+  public static createHtmlTag(token: string): IMarkupHtmlTag {
+    if (token.length === 0) {
+      throw new Error('The code parameter is missing');
+    }
+    return {
+      kind: 'html-tag',
+      token: token
+    } as IMarkupHtmlTag;
   }
 
   /**

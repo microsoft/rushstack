@@ -64,11 +64,34 @@ export interface IMarkupHighlightedText {
 }
 
 /**
+ * Represents an HTML tag such as `<td>` or `</td>` or `<img src="example.gif" />`.
+ *
+ * @public
+ */
+export interface IMarkupHtmlTag {
+  /** The kind of markup element */
+  kind: 'html-tag';
+
+  /**
+   * A string containing the HTML tag.
+   *
+   * @remarks
+   * To avoid parsing ambiguities with other AEDoc constructs, API Extractor will ensure that
+   * this string is a complete and properly formatted opening or closing HTML tag such
+   * as `<td>` or `</td>` or `<img src="example.gif" />`.  Beyond this, API Extractor does NOT
+   * attempt to parse the tag attributes, or verify that opening/closing pairs are balanced,
+   * or determine whether the nested tree is valid HTML.  That responsibility is left to the consuming
+   * documentation engine.
+   */
+  token: string;
+}
+
+/**
  * Represents markup that can be used as the link text for a hyperlink
  *
  * @public
  */
-export type MarkupLinkTextElement = IMarkupText | IMarkupHighlightedText;
+export type MarkupLinkTextElement = IMarkupText | IMarkupHighlightedText | IMarkupHtmlTag;
 
 // ----------------------------------------------------------------------------
 
