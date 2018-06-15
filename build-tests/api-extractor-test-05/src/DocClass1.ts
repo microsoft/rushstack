@@ -7,21 +7,29 @@
  * @public
  */
 export class DocClass1 {
+
   /**
-   * An example function
-   * @remarks
-   * Example remarks
-   * @param x - The first parameter {@link http://example.com | and a link} and some text.
-   *
-   * More text for X
-   * @param y - The second parameter {@link http://example.com | and a link} and some text.
-   *
-   * More text for Y
-   * @returns The return value {@link http://example.com | and a link} and some text.
-   *
-   * More text for the return value
+   * This is an overloaded function.
+   * @param x - the number
+   * @param a - the first string
+   * @param b - the second string
    */
-  public exampleFunction(x: number, y: string): string {
-    return '';
+  exampleFunction(a: string, b: string): string;
+  exampleFunction(x: number): number;
+  public exampleFunction(x: number | string, y?: string): string | number {
+    return x;
+  }
+
+  /**
+   * An example with tables:
+   * @remarks
+   * <table>
+   *  <tr>
+   *    <td>John</td>
+   *    <td>Doe</td>
+   *  </tr>
+   * </table>
+   */
+  tableExample(): void {
   }
 }

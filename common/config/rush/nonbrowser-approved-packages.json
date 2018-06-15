@@ -2,6 +2,10 @@
 {
   "packages": [
     {
+      "name": "@microsoft/api-documenter",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/api-extractor",
       "allowedCategories": [ "libraries", "tests" ]
     },

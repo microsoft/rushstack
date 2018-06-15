@@ -1,5 +1,6 @@
 // @public
 class DocClass1 {
-  exampleFunction(x: number, y: string): string;
+  exampleFunction(a: string, b: string): string;
+  tableExample(): void;
 }
 

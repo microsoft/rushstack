@@ -1,0 +1,50 @@
+### YamlMime:UniversalReference
+items:
+  - uid: api-extractor-test-05.DocClass1
+    summary: This is an example class.
+    remarks: These are some remarks.
+    name: DocClass1
+    fullName: api-extractor-test-05.DocClass1
+    langs:
+      - typeScript
+    type: class
+    package: api-extractor-test-05
+    children:
+      - api-extractor-test-05.DocClass1.exampleFunction
+      - api-extractor-test-05.DocClass1.tableExample
+  - uid: api-extractor-test-05.DocClass1.exampleFunction
+    summary: This is an overloaded function.
+    name: 'exampleFunction(a, b)'
+    fullName: api-extractor-test-05.DocClass1.exampleFunction
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'exampleFunction(a: string, b: string): string;'
+      return:
+        type:
+          - string
+        description: ''
+      parameters:
+        - id: a
+          description: the first string
+          type:
+            - string
+        - id: b
+          description: the second string
+          type:
+            - string
+  - uid: api-extractor-test-05.DocClass1.tableExample
+    summary: 'An example with tables:'
+    remarks: '&lt;table&gt; &lt;tr&gt; &lt;td&gt;John&lt;/td&gt; &lt;td&gt;Doe&lt;/td&gt; &lt;/tr&gt; &lt;/table&gt;'
+    name: tableExample()
+    fullName: api-extractor-test-05.DocClass1.tableExample
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'tableExample(): void;'
+      return:
+        type:
+          - void
+        description: ''

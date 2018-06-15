@@ -7,5 +7,10 @@
 
   "project": {
     "entryPointSourceFile": "lib/index.d.ts"
+  },
+
+  "apiJsonFile": {
+    "enabled": true,
+    "outputFolder": "etc"
   }
 }

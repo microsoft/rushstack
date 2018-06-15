@@ -24,4 +24,10 @@ if (process.argv.indexOf('--production') >= 0) {
   executeCommand('node node_modules/@microsoft/api-extractor/lib/start run --local');
 }
 
+// Run the API Documenter command-line
+executeCommand('node node_modules/@microsoft/api-documenter/lib/start '
+  + 'yaml --input-folder etc --output-folder etc/yaml');
+executeCommand('node node_modules/@microsoft/api-documenter/lib/start '
+  + 'markdown --input-folder etc --output-folder etc/markdown');
+
 console.log(`==> Finished build.js for ${path.basename(process.cwd())}`);
