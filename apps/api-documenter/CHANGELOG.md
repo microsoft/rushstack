@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 08 Jun 2018 08:43:52 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Jun 2018 16:05:34 GMT and should not be manually modified.
+
+## 1.2.5
+Fri, 15 Jun 2018 16:05:34 GMT
+
+### Patches
+
+- The output folder is not automatically created if it doesn't exist yet
 
 ## 1.2.4
 Fri, 08 Jun 2018 08:43:52 GMT
