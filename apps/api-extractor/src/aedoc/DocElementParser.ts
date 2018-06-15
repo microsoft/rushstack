@@ -18,6 +18,18 @@ import { IApiItemReference} from '../api/ApiItem';
 
 export class DocElementParser {
   /**
+   * Matches one of:
+   * - an escape sequence, i.e. backslash followed by a non-alphabetical character
+   * - an HTML opening tag such as `<td>` or or `<img src="example.gif" />`
+   * - an HTML closing tag such `</td>`
+   *
+   * Note that the greedy nature of the RegExp ensures that `\<td>` will get interpreted
+   * as an escaped "<", whereas `\\<td>` will get interpreted as an escaped backslash
+   * followed by an HTML element.
+   */
+  private static _htmlTagRegExp: RegExp = /\\[^a-zA-Z\s]|<[\w\-]+(?:\s+[\w\-]+\s*=\s*"[^"]*")*\s*\/?>|<\/[\w\-]+>/g;
+
+  /**
    * Used to validate the display text for an \@link tag.  The display text can contain any
    * characters except for certain AEDoc delimiters: "@", "|", "{", "}".
    * This RegExp matches the first bad character.
@@ -84,7 +96,7 @@ export class DocElementParser {
       } else if (token.type === TokenType.Text) {
         tokenizer.getToken();
 
-        markupElements.push(...Markup.createTextParagraphs(token.text));
+        markupElements.push(...DocElementParser.parseMarkdownishText(token.text));
       } else {
         documentation.reportError(`Unidentifiable Token ${token.type} ${token.tag} "${token.text}"`);
       }
@@ -270,4 +282,65 @@ export class DocElementParser {
       documentation.isDocInheritedDeprecated = true;
     }
   }
+
+  /**
+   * This is a temporary workaround until the TSDoc parser is integrated.  "Markdownish"
+   * text can have:
+   * - paragraphs delimited using double-newlines --> IMarkupParagraph
+   * - HTML tags (as in the CommonMark spec) --> IMarkupHtmlTag
+   * - Backslash as an escape character
+   */
+  public static parseMarkdownishText(text: string): MarkupBasicElement[] {
+    const result: MarkupBasicElement[] = [];
+
+    if (text) {
+      // Split up the paragraphs
+      for (const paragraph of text.split(/\n\s*\n/g)) {
+        if (result.length > 0) {
+          result.push(Markup.PARAGRAPH);
+        }
+
+        // Clone the original RegExp so we get our own state machine
+        const htmlTagRegExp: RegExp = new RegExp(DocElementParser._htmlTagRegExp);
+
+        let lastMatchEndIndex: number = 0;
+        let accumulatedText: string = '';
+
+        // Find the HTML tags and backslash sequences in the paragraph string
+        let match: RegExpExecArray | null;
+        while (match = htmlTagRegExp.exec(paragraph)) {
+          // Was there any plain text between this match and the previous one?
+          // If so accumulate it
+          const textBeforeMatch: string = paragraph.substring(lastMatchEndIndex, match.index);
+          accumulatedText += textBeforeMatch;
+
+          // What did we match?
+          const matchedText: string = match[0];
+          if (matchedText[0] === '\\') {
+            // It's a backslash escape, so accumulate the subsequent character (but not the backslash itself)
+            accumulatedText += matchedText[1];
+          } else {
+            // It's an opening or closing HTML tag
+
+            // First push any text we accumulated
+            result.push(...Markup.createTextElements(accumulatedText));
+            accumulatedText = '';
+
+            // Then push the HTML tag
+            result.push(Markup.createHtmlTag(matchedText));
+          }
+
+          lastMatchEndIndex = match.index + matchedText.length;
+        }
+        // Push any remaining text
+        accumulatedText += paragraph.substring(lastMatchEndIndex);
+
+        result.push(...Markup.createTextElements(accumulatedText));
+        accumulatedText = '';
+      }
+    }
+
+    return result;
+  }
+
 }

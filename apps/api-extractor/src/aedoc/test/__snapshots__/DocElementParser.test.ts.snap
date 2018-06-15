@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DocElementParser.parseMarkdownishText 1`] = `
+Array [
+  Object {
+    "kind": "text",
+    "text": "not an escape: C:\\\\Dog\\\\Cat",
+  },
+]
+`;
+
+exports[`DocElementParser.parseMarkdownishText 2`] = `
+Array [
+  Object {
+    "kind": "text",
+    "text": "escaped symbols: $^",
+  },
+]
+`;
+
+exports[`DocElementParser.parseMarkdownishText 3`] = `
+Array [
+  Object {
+    "kind": "text",
+    "text": "escaped backslashes: \\\\ \\\\\\\\ end",
+  },
+]
+`;
+
+exports[`DocElementParser.parseMarkdownishText 4`] = `
+Array [
+  Object {
+    "kind": "text",
+    "text": "escaped HTML: <td>",
+  },
+]
+`;
+
+exports[`DocElementParser.parseMarkdownishText 5`] = `
+Array [
+  Object {
+    "kind": "text",
+    "text": "real HTML: ",
+  },
+  Object {
+    "kind": "html-tag",
+    "token": "<td>",
+  },
+  Object {
+    "kind": "text",
+    "text": " ",
+  },
+  Object {
+    "kind": "html-tag",
+    "token": "</td>",
+  },
+  Object {
+    "kind": "text",
+    "text": " <a href=\\"#\\" /a>",
+  },
+]
+`;

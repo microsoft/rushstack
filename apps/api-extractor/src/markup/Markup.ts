@@ -111,6 +111,7 @@ export class Markup {
         if (result.length > 0) {
           result.push(Markup.PARAGRAPH);
         }
+
         result.push(...Markup.createTextElements(paragraph, options));
       }
     }
@@ -418,6 +419,8 @@ export class Markup {
         case 'heading1':
         case 'heading2':
           buffer.text += element.text;
+          break;
+        case 'html-tag':
           break;
         case 'note-box':
           buffer.text += Markup.extractTextContent(element.elements);
