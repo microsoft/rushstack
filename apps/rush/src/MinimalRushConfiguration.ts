@@ -5,6 +5,7 @@ import * as path from 'path';
 
 import { JsonFile } from '@microsoft/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
+import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
 
 interface IMinimalRushConfigurationJson {
   rushMinimumVersion: string;
@@ -13,7 +14,7 @@ interface IMinimalRushConfigurationJson {
 
 /**
  * Represents a minimal subset of the rush.json configuration file. It provides the information necessary to
- *  decide which version of Rush should be installed/used.
+ * decide which version of Rush should be installed/used.
  */
 export class MinimalRushConfiguration {
   private _rushJsonFilename: string;
@@ -41,7 +42,8 @@ export class MinimalRushConfiguration {
   private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson, rushJsonFilename: string) {
     this._rushVersion = minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
     this._rushJsonFilename = rushJsonFilename;
-    this._commonRushConfigFolder = path.join(path.dirname(rushJsonFilename), 'common/config/rush');
+    this._commonRushConfigFolder = path.join(path.dirname(rushJsonFilename),
+      RushConstants.commonFolderName, 'config', 'rush');
   }
 
   /**
