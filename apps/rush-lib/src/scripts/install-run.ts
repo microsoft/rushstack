@@ -63,7 +63,10 @@ function resolvePackageVersion(rushCommonFolder: string, { name, version }: IPac
     // version resolves to
     try {
       const rushTempFolder: string = ensureAndJoinPath(rushCommonFolder, 'temp');
-      syncNpmrc(rushCommonFolder, rushTempFolder);
+      const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
+
+      syncNpmrc(sourceNpmrcFolder, rushTempFolder);
+
       const npmPath: string = getNpmPath();
 
       // This returns something that looks like:
@@ -187,17 +190,18 @@ function ensureAndJoinPath(baseFolder: string, ...pathSegments: string[]): strin
   return joinedPath;
 }
 
-function syncNpmrc(rushCommonFolder: string, targetFolder: string): void {
-  const npmrcPath: string = path.join(rushCommonFolder, 'config', 'rush', '.npmrc');
-  const targetNpmrcPath: string = path.join(targetFolder, '.npmrc');
+function syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
+  const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
+  const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
   try {
-    if (fs.existsSync(npmrcPath)) {
-      let npmrcFileLines: string[] = fs.readFileSync(npmrcPath).toString().split('\n');
+    if (fs.existsSync(sourceNpmrcPath)) {
+      let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
       npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
       const resultLines: string[] = [];
       // Trim out lines that reference environment variables that aren't defined
       for (const line of npmrcFileLines) {
-        const regex: RegExp = /\$\{([^\}]+)\}/g; // This finds environment variable tokens that look like "${VAR_NAME}"
+        // This finds environment variable tokens that look like "${VAR_NAME}"
+        const regex: RegExp = /\$\{([^\}]+)\}/g;
         const environmentVariables: string[] | null = line.match(regex);
         let lineShouldBeTrimmed: boolean = false;
         if (environmentVariables) {
@@ -362,7 +366,10 @@ export function installAndRun(
   if (!isPackageAlreadyInstalled(packageInstallFolder)) {
     // The package isn't already installed
     cleanInstallFolder(rushCommonFolder, packageInstallFolder);
-    syncNpmrc(rushCommonFolder, packageInstallFolder);
+
+    const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
+    syncNpmrc(sourceNpmrcFolder, packageInstallFolder);
+
     createPackageJson(packageInstallFolder, packageName, packageVersion);
     installPackage(packageInstallFolder, packageName, packageVersion);
     writeFlagFile(packageInstallFolder);

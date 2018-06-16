@@ -8,6 +8,7 @@ import { LockFile } from '@microsoft/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import { _LastInstallFlag } from '@microsoft/rush-lib';
 import { RushCommandSelector } from './RushCommandSelector';
+import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
@@ -20,7 +21,9 @@ export class RushVersionSelector {
     this._currentPackageVersion = currentPackageVersion;
   }
 
-  public ensureRushVersionInstalled(version: string): Promise<void> {
+  public ensureRushVersionInstalled(version: string,
+    configuration: MinimalRushConfiguration | undefined): Promise<void> {
+
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushDirectory, `rush-${version}`);
 
@@ -46,14 +49,15 @@ export class RushVersionSelector {
             if (installMarker.isValid()) {
               console.log('Another process performed the installation.');
             } else {
-              Utilities.installPackageInDirectory(
-                expectedRushPath,
-                isLegacyRushVersion ? '@microsoft/rush' : '@microsoft/rush-lib',
-                version,
-                'rush-local-install',
-                MAX_INSTALL_ATTEMPTS,
-                true
-              );
+              Utilities.installPackageInDirectory({
+                directory: expectedRushPath,
+                packageName: isLegacyRushVersion ? '@microsoft/rush' : '@microsoft/rush-lib',
+                version: version,
+                tempPackageTitle: 'rush-local-install',
+                maxInstallAttempts: MAX_INSTALL_ATTEMPTS,
+                commonRushConfigFolder: configuration ? configuration.commonRushConfigFolder : undefined,
+                suppressOutput: true
+              });
 
               console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}.`);
 

@@ -280,13 +280,14 @@ export class InstallManager {
         console.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
 
         // note that this will remove the last-install flag from the directory
-        Utilities.installPackageInDirectory(
-          packageManagerToolFolder,
-          packageManager,
-          this._rushConfiguration.packageManagerToolVersion,
-          `${packageManager}-local-install`,
-          MAX_INSTALL_ATTEMPTS
-        );
+        Utilities.installPackageInDirectory({
+          directory: packageManagerToolFolder,
+          packageName: packageManager,
+          version: this._rushConfiguration.packageManagerToolVersion,
+          tempPackageTitle: `${packageManager}-local-install`,
+          maxInstallAttempts: MAX_INSTALL_ATTEMPTS,
+          commonRushConfigFolder: this._rushConfiguration.commonRushConfigFolder
+        });
 
         console.log(`Successfully installed ${packageManager} version ${packageManagerVersion}`);
       } else {
