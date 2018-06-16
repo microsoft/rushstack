@@ -190,6 +190,20 @@ function ensureAndJoinPath(baseFolder: string, ...pathSegments: string[]): strin
   return joinedPath;
 }
 
+  /**
+   * As a workaround, _syncNpmrc() copies the .npmrc file to the target folder, and also trims
+   * unusable lines from the .npmrc file.  If the source .npmrc file not exist, then _syncNpmrc()
+   * will delete an .npmrc that is found in the target folder.
+   *
+   * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
+   * the .npmrc file to provide different authentication tokens for different registry.
+   * However, if the environment variable is undefined, it expands to an empty string, which
+   * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
+   * we'd prefer to skip that line and continue looking in other places such as the user's
+   * home directory.
+   *
+   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
+   */
 function syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
   const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
   const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
@@ -216,6 +230,8 @@ function syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
         }
 
         if (lineShouldBeTrimmed) {
+          // Example output:
+          // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
           resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
         } else {
           resultLines.push(line);
