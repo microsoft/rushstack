@@ -59,7 +59,8 @@ function resolvePackageVersion(rushCommonFolder, { name, version }) {
         // version resolves to
         try {
             const rushTempFolder = ensureAndJoinPath(rushCommonFolder, 'temp');
-            syncNpmrc(rushCommonFolder, rushTempFolder);
+            const sourceNpmrcFolder = path.join(rushCommonFolder, 'config', 'rush');
+            syncNpmrc(sourceNpmrcFolder, rushTempFolder);
             const npmPath = getNpmPath();
             // This returns something that looks like:
             //  @microsoft/rush@3.0.0 '3.0.0'
@@ -167,17 +168,32 @@ function ensureAndJoinPath(baseFolder, ...pathSegments) {
     }
     return joinedPath;
 }
-function syncNpmrc(rushCommonFolder, targetFolder) {
-    const npmrcPath = path.join(rushCommonFolder, 'config', 'rush', '.npmrc');
-    const targetNpmrcPath = path.join(targetFolder, '.npmrc');
+/**
+ * As a workaround, _syncNpmrc() copies the .npmrc file to the target folder, and also trims
+ * unusable lines from the .npmrc file.  If the source .npmrc file not exist, then _syncNpmrc()
+ * will delete an .npmrc that is found in the target folder.
+ *
+ * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
+ * the .npmrc file to provide different authentication tokens for different registry.
+ * However, if the environment variable is undefined, it expands to an empty string, which
+ * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
+ * we'd prefer to skip that line and continue looking in other places such as the user's
+ * home directory.
+ *
+ * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
+ */
+function syncNpmrc(sourceNpmrcFolder, targetNpmrcFolder) {
+    const sourceNpmrcPath = path.join(sourceNpmrcFolder, '.npmrc');
+    const targetNpmrcPath = path.join(targetNpmrcFolder, '.npmrc');
     try {
-        if (fs.existsSync(npmrcPath)) {
-            let npmrcFileLines = fs.readFileSync(npmrcPath).toString().split('\n');
+        if (fs.existsSync(sourceNpmrcPath)) {
+            let npmrcFileLines = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
             npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
             const resultLines = [];
             // Trim out lines that reference environment variables that aren't defined
             for (const line of npmrcFileLines) {
-                const regex = /\$\{([^\}]+)\}/g; // This finds environment variable tokens that look like "${VAR_NAME}"
+                // This finds environment variable tokens that look like "${VAR_NAME}"
+                const regex = /\$\{([^\}]+)\}/g;
                 const environmentVariables = line.match(regex);
                 let lineShouldBeTrimmed = false;
                 if (environmentVariables) {
@@ -190,7 +206,12 @@ function syncNpmrc(rushCommonFolder, targetFolder) {
                         }
                     }
                 }
-                if (!lineShouldBeTrimmed) {
+                if (lineShouldBeTrimmed) {
+                    // Example output:
+                    // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
+                    resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+                }
+                else {
                     resultLines.push(line);
                 }
             }
@@ -314,7 +335,8 @@ function installAndRun(packageName, packageVersion, packageBinName, packageBinAr
     if (!isPackageAlreadyInstalled(packageInstallFolder)) {
         // The package isn't already installed
         cleanInstallFolder(rushCommonFolder, packageInstallFolder);
-        syncNpmrc(rushCommonFolder, packageInstallFolder);
+        const sourceNpmrcFolder = path.join(rushCommonFolder, 'config', 'rush');
+        syncNpmrc(sourceNpmrcFolder, packageInstallFolder);
         createPackageJson(packageInstallFolder, packageName, packageVersion);
         installPackage(packageInstallFolder, packageName, packageVersion);
         writeFlagFile(packageInstallFolder);
