@@ -132,7 +132,7 @@ export class VersionManager {
     this._rushConfiguration.projects.forEach(rushProject => {
       const projectVersionPolicyName: string | undefined = rushProject.versionPolicyName;
       if (projectVersionPolicyName &&
-          (!versionPolicyName || projectVersionPolicyName === versionPolicyName)) {
+        (!versionPolicyName || projectVersionPolicyName === versionPolicyName)) {
         const versionPolicy: VersionPolicy = this._versionPolicyConfiguration.getVersionPolicy(
           projectVersionPolicyName);
         const updatedProject: IPackageJson | undefined = versionPolicy.ensure(rushProject.packageJson, force);
@@ -204,6 +204,11 @@ export class VersionManager {
     ) {
       updated = true;
     }
+    if (this._updateProjectDependencies(clonedProject.peerDependencies, changes,
+      clonedProject, rushProject, projectVersionChanged)
+    ) {
+      updated = true;
+    }
 
     if (updated) {
       this._updatedProjects.set(clonedProject.name, clonedProject);
@@ -232,10 +237,10 @@ export class VersionManager {
 
         const oldDependencyVersion: string = dependencies[updatedDependentProjectName];
         const newDependencyVersion: string = PublishUtilities.getNewDependencyVersion(
-            dependencies,
-            updatedDependentProjectName,
-            updatedDependentProject.version
-          );
+          dependencies,
+          updatedDependentProjectName,
+          updatedDependentProject.version
+        );
 
         if (newDependencyVersion !== oldDependencyVersion) {
           updated = true;

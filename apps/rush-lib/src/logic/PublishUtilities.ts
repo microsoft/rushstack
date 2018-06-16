@@ -331,6 +331,16 @@ export class PublishUtilities {
       prereleaseToken,
       projectsToExclude
     );
+    // Update the package's peer dependencies.
+    PublishUtilities._updateDependencies(
+      pkg.name,
+      pkg.peerDependencies,
+      allChanges,
+      allPackages,
+      rushConfiguration,
+      prereleaseToken,
+      projectsToExclude
+    );
 
     change.changes!.forEach(subChange => {
       if (subChange.comment) {
