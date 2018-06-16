@@ -215,7 +215,9 @@ function syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
           }
         }
 
-        if (!lineShouldBeTrimmed) {
+        if (lineShouldBeTrimmed) {
+          resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+        } else {
           resultLines.push(line);
         }
       }

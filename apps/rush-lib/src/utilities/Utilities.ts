@@ -490,7 +490,9 @@ export class Utilities {
             }
           }
 
-          if (!lineShouldBeTrimmed) {
+          if (lineShouldBeTrimmed) {
+            resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+          } else {
             resultLines.push(line);
           }
         }
