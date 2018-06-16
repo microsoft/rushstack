@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.0.0-dev.23",
+  "version": "5.0.0-dev.24",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
