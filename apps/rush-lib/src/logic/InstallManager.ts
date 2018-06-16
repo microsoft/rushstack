@@ -286,6 +286,12 @@ export class InstallManager {
           version: this._rushConfiguration.packageManagerToolVersion,
           tempPackageTitle: `${packageManager}-local-install`,
           maxInstallAttempts: MAX_INSTALL_ATTEMPTS,
+          // This is using a local configuration to install a package in a shared global location.
+          // Generally that's a bad practice, but in this case if we can successfully install
+          // the package at all, we can reasonably assume it's good for all the repositories.
+          // In particular, we'll assume that two different NPM registries cannot have two
+          // different implementations of the same version of the same package.
+          // This was needed for: https://github.com/Microsoft/web-build-tools/issues/691
           commonRushConfigFolder: this._rushConfiguration.commonRushConfigFolder
         });
 
