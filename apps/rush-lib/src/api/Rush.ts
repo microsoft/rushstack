@@ -7,7 +7,7 @@ import * as colors from 'colors';
 import { IPackageJson } from '@microsoft/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
-import { RushConstants } from './RushConstants';
+import { RushConstants } from '../logic/RushConstants';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 

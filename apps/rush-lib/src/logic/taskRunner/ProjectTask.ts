@@ -11,7 +11,7 @@ import { IPackageDeps } from '@microsoft/package-deps-hash';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../../api/RushConstants';
+import { RushConstants } from '../../logic/RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';

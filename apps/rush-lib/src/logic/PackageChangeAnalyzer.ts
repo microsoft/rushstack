@@ -10,7 +10,7 @@ import {
 } from '@microsoft/package-deps-hash';
 import { Path } from '@microsoft/node-core-library';
 
-import { RushConstants } from '../api/RushConstants';
+import { RushConstants } from '../logic/RushConstants';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Git } from './Git';
 

@@ -18,7 +18,7 @@ import {
   BaseLinkManager
 } from '../base/BaseLinkManager';
 import { BasePackage } from '../base/BasePackage';
-import { RushConstants } from '../../api/RushConstants';
+import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
