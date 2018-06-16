@@ -4,7 +4,11 @@
 /**
  * Constants used by the Rush tool.
  *
- * @public
+ * @remarks
+ *
+ * These are NOT part of the public API surface for rush-lib.
+ * The rationale is that we don't want people implementing custom parsers for
+ * the Rush config files; instead, they should rely on the official APIs from rush-lib.
  */
 export namespace RushConstants {
   /**

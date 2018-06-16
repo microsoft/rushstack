@@ -4,7 +4,7 @@
 import * as colors from 'colors';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../../api/RushConstants';
+import { RushConstants } from '../../logic/RushConstants';
 import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';

@@ -7,7 +7,7 @@ import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
 import { PackageName } from '@microsoft/node-core-library';
 
-import { RushConstants } from '../../api/RushConstants';
+import { RushConstants } from '../../logic/RushConstants';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's shrinkwrap.yaml file formats.

@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
+
 import { JsonFile } from '@microsoft/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
+import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
 
 interface IMinimalRushConfigurationJson {
   rushMinimumVersion: string;
@@ -11,10 +14,12 @@ interface IMinimalRushConfigurationJson {
 
 /**
  * Represents a minimal subset of the rush.json configuration file. It provides the information necessary to
- *  decide which version of Rush should be installed/used.
+ * decide which version of Rush should be installed/used.
  */
 export class MinimalRushConfiguration {
+  private _rushJsonFilename: string;
   private _rushVersion: string;
+  private _commonRushConfigFolder: string;
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
@@ -28,14 +33,17 @@ export class MinimalRushConfiguration {
   private static _loadFromConfigurationFile(rushJsonFilename: string): MinimalRushConfiguration | undefined {
     try {
       const minimalRushConfigurationJson: IMinimalRushConfigurationJson = JsonFile.load(rushJsonFilename);
-      return new MinimalRushConfiguration(minimalRushConfigurationJson);
+      return new MinimalRushConfiguration(minimalRushConfigurationJson, rushJsonFilename);
     } catch (e) {
       return undefined;
     }
   }
 
-  private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson) {
+  private constructor(minimalRushConfigurationJson: IMinimalRushConfigurationJson, rushJsonFilename: string) {
     this._rushVersion = minimalRushConfigurationJson.rushVersion || minimalRushConfigurationJson.rushMinimumVersion;
+    this._rushJsonFilename = rushJsonFilename;
+    this._commonRushConfigFolder = path.join(path.dirname(rushJsonFilename),
+      RushConstants.commonFolderName, 'config', 'rush');
   }
 
   /**
@@ -45,5 +53,17 @@ export class MinimalRushConfiguration {
    */
   public get rushVersion(): string {
     return this._rushVersion;
+  }
+
+  /**
+   * The folder where Rush's additional config files are stored.  This folder is always a
+   * subfolder called "config\rush" inside the common folder.  (The "common\config" folder
+   * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
+   * Rush will report an error if this this folder contains any unrecognized files.
+   *
+   * Example: "C:\MyRepo\common\config\rush"
+   */
+  public get commonRushConfigFolder(): string {
+    return this._commonRushConfigFolder;
   }
 }
