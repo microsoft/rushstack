@@ -98,7 +98,7 @@ if (rushVersionToLoad && semver.lt(rushVersionToLoad, '5.0.0-dev.18')) {
 // install it
 if (rushVersionToLoad && rushVersionToLoad !== currentPackageJson.version) {
   const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageJson.version);
-  versionSelector.ensureRushVersionInstalled(rushVersionToLoad)
+  versionSelector.ensureRushVersionInstalled(rushVersionToLoad, configuration)
     .catch((error: Error) => {
       console.log(colors.red('Error: ' + error.message));
     });
