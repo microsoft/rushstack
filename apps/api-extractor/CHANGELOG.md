@@ -1,6 +1,17 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 08 Jun 2018 08:43:52 GMT and should not be manually modified.
+This log was last generated on Tue, 19 Jun 2018 19:35:11 GMT and should not be manually modified.
+
+## 5.8.0
+Tue, 19 Jun 2018 19:35:11 GMT
+
+### Minor changes
+
+- For namespaceSupport=permissive, allow arbitrary nesting of namespaces
+
+### Patches
+
+- Fix an issue where multi-line type literals sometimes had inconsistent newlines in the *.api.json file
 
 ## 5.7.3
 Fri, 08 Jun 2018 08:43:52 GMT
