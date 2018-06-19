@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import { Text } from '@microsoft/node-core-library';
+
 import { AstItem, AstItemKind, IAstItemOptions } from './AstItem';
 import { AstParameter } from './AstParameter';
 import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
@@ -40,7 +42,7 @@ export class AstFunction extends AstItem {
 
     // Return type
     if (methodDeclaration.type) {
-      this.returnType = methodDeclaration.type.getText();
+      this.returnType = Text.convertToLf(methodDeclaration.type.getText());
     } else {
       this.hasIncompleteTypes = true;
       this.returnType = 'any';
