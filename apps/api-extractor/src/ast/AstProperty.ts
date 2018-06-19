@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import { Text } from '@microsoft/node-core-library';
 
 import { AstItemKind, IAstItemOptions } from './AstItem';
 import { AstMember } from './AstMember';
@@ -21,7 +22,7 @@ export class AstProperty extends AstMember {
 
     const declaration: ts.PropertyDeclaration = options.declaration as ts.PropertyDeclaration;
     if (declaration.type) {
-      this.type = declaration.type.getText();
+      this.type = Text.convertToLf(declaration.type.getText());
     } else {
       this.hasIncompleteTypes = true;
       this.type = 'any';

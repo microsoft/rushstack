@@ -4,6 +4,8 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
+import { Text } from '@microsoft/node-core-library';
+
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { Markup } from '../markup/Markup';
 import { AstMethod } from './AstMethod';
@@ -157,7 +159,7 @@ export class AstStructuredType extends AstItemContainer {
           .join(', ');
       }
     }
-    return result;
+    return Text.convertToLf(result);
   }
 
   protected onCompleteInitialization(): void {
