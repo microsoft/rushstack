@@ -1,0 +1,100 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`empty inputs 1`] = `
+Object {
+  "input": "",
+  "tokens": Array [],
+}
+`;
+
+exports[`empty inputs 2`] = `
+Object {
+  "input": "[r][n]",
+  "tokens": Array [
+    Array [
+      "NewLine",
+      "[r][n]",
+    ],
+  ],
+}
+`;
+
+exports[`white space tokens 1`] = `
+Object {
+  "input": "  abc   [r][n]def  [n]  ghi[n][r]  ",
+  "tokens": Array [
+    Array [
+      "Spaces",
+      "  ",
+    ],
+    Array [
+      "Other",
+      "a",
+    ],
+    Array [
+      "Other",
+      "b",
+    ],
+    Array [
+      "Other",
+      "c",
+    ],
+    Array [
+      "Spaces",
+      "   ",
+    ],
+    Array [
+      "NewLine",
+      "[r][n]",
+    ],
+    Array [
+      "Other",
+      "d",
+    ],
+    Array [
+      "Other",
+      "e",
+    ],
+    Array [
+      "Other",
+      "f",
+    ],
+    Array [
+      "Spaces",
+      "  ",
+    ],
+    Array [
+      "NewLine",
+      "[n]",
+    ],
+    Array [
+      "Spaces",
+      "  ",
+    ],
+    Array [
+      "Other",
+      "g",
+    ],
+    Array [
+      "Other",
+      "h",
+    ],
+    Array [
+      "Other",
+      "i",
+    ],
+    Array [
+      "NewLine",
+      "[n]",
+    ],
+    Array [
+      "NewLine",
+      "[r]",
+    ],
+    Array [
+      "Spaces",
+      "  ",
+    ],
+  ],
+}
+`;
