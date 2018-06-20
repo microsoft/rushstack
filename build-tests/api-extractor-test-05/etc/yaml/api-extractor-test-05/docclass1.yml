@@ -36,7 +36,7 @@ items:
             - string
   - uid: api-extractor-test-05.DocClass1.tableExample
     summary: 'An example with tables:'
-    remarks: '&lt;table&gt; &lt;tr&gt; &lt;td&gt;John&lt;/td&gt; &lt;td&gt;Doe&lt;/td&gt; &lt;/tr&gt; &lt;/table&gt;'
+    remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
     name: tableExample()
     fullName: api-extractor-test-05.DocClass1.tableExample
     langs:

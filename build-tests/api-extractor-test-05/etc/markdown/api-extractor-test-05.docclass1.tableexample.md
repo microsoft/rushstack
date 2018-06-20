@@ -12,4 +12,4 @@ tableExample(): void;
 
 ## Remarks
 
-&lt;table&gt; &lt;tr&gt; &lt;td&gt;John&lt;/td&gt; &lt;td&gt;Doe&lt;/td&gt; &lt;/tr&gt; &lt;/table&gt;
+<table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
