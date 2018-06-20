@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`empty inputs 1`] = `
+exports[`00: empty inputs 1`] = `
 Object {
   "input": "",
   "tokens": Array [],
 }
 `;
 
-exports[`empty inputs 2`] = `
+exports[`00: empty inputs 2`] = `
 Object {
   "input": "[r][n]",
   "tokens": Array [
@@ -19,7 +19,7 @@ Object {
 }
 `;
 
-exports[`white space tokens 1`] = `
+exports[`01: white space tokens 1`] = `
 Object {
   "input": " [t] abc   [r][n]def  [n]  ghi[n][r]  ",
   "tokens": Array [
@@ -70,6 +70,46 @@ Object {
     Array [
       "Spaces",
       "  ",
+    ],
+  ],
+}
+`;
+
+exports[`02: text with escapes 1`] = `
+Object {
+  "input": " ab+56[b]>qrst$(abc[b]))",
+  "tokens": Array [
+    Array [
+      "Spaces",
+      " ",
+    ],
+    Array [
+      "Text",
+      "ab",
+    ],
+    Array [
+      "Other",
+      "+",
+    ],
+    Array [
+      "Text",
+      "56>qrst",
+    ],
+    Array [
+      "Other",
+      "$",
+    ],
+    Array [
+      "Other",
+      "(",
+    ],
+    Array [
+      "Text",
+      "abc)",
+    ],
+    Array [
+      "Other",
+      ")",
     ],
   ],
 }

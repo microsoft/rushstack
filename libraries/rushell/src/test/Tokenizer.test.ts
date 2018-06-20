@@ -6,7 +6,8 @@ import { Tokenizer, TokenKind } from '../Tokenizer';
 function escape(s: string): string {
   return s.replace(/\n/g, '[n]')
     .replace(/\r/g, '[r]')
-    .replace(/\t/g, '[t]');
+    .replace(/\t/g, '[t]')
+    .replace(/\\/g, '[b]');
 }
 
 function matchSnapshot(input: string): void {
@@ -17,11 +18,15 @@ function matchSnapshot(input: string): void {
   }).toMatchSnapshot();
 }
 
-test('empty inputs', () => {
+test('00: empty inputs', () => {
   matchSnapshot('');
   matchSnapshot('\r\n');
 });
 
-test('white space tokens', () => {
-  matchSnapshot('  abc   \r\ndef  \n  ghi\n\r  ');
+test('01: white space tokens', () => {
+  matchSnapshot(' \t abc   \r\ndef  \n  ghi\n\r  ');
+});
+
+test('02: text with escapes', () => {
+  matchSnapshot(' ab+56\\>qrst$(abc\\))');
 });
