@@ -7,27 +7,104 @@ import * as child_process from 'child_process';
 import { setTimeout } from 'timers';
 
 /**
+ * Parses the process start time from a linux /proc/1/stat file.
+ * @param stat The contents of a linux /proc/1/stat file.
+ * @returns The process start time in yiffies.
+ */
+export function getProcessStartTimeFromProcStat (stat: string): string | undefined {
+  // Parse value 22.
+  // We cannot just split stat on spaces, because value 2 may contain spaces.
+  // For example, when running the following Shell commands:
+  // > cp "$(which bash)" ./'bash 2)('
+  // > ./'bash 2)(' -c 'OWNPID=$BASHPID;cat /proc/$OWNPID/stat'
+  // 59389 (bash 2)() S 59358 59389 59358 34818 59389 4202496 329 0 0 0 0 0 0 0 20 0 1 0
+  // > rm -rf ./'bash 2)('
+  // The output shows a stat file such that value 2 contains spaces.
+  // To still umambiguously parse such output we assume all values after the third consist of only digits...
+
+  // trimRight to remove the trailing line terminator.
+  let values: string[] = stat.trimRight().split(' ');
+  let i: number = values.length - 1;
+  while (i >= 0 && /^[0-9]+$/.test(values[i])) {
+    i -= 1;
+  }
+  // i is the index of the third value (but i need not be 2).
+  if (i < 2) {
+    // Format of stat has changed.
+    return undefined;
+  }
+  const value2: string = values.slice(1, i - 1).join(' ');
+  values = [values[0], value2].concat(values.slice(i));
+  if (values.length < 22) {
+    // Older version of linux, or non-standard configuration of linux.
+    return undefined;
+  }
+  const startTimeYiffies: string = values[21];
+  // In theory, the representations of start time returned by /proc/*/stat and ps -o lstart can change while the
+  // system is running, but we assume this does not happen.
+  // So the caller can safely use this value as part of a unique process id (on the machine, without comparing
+  // accross reboots).
+  return startTimeYiffies;
+}
+
+/**
  * Helper function that is exported for unit tests only.
  * Returns undefined if the process doesn't exist with that pid.
  */
 export function getProcessStartTime(pid: number): string | undefined {
+  // Use toFixed() to ensure decimal representation is used when converting the PID to string, although no PID is
+  // large enough to be printed using exponential notation.
+  const pidString: string = pid.toFixed();
   let args: string[];
   if (process.platform === 'darwin') {
-    args = [`-p ${pid.toString()}`, '-o lstart'];
+    args = [`-p ${pidString}`, '-o lstart'];
   } else if (process.platform === 'linux') {
-    args = ['-p', pid.toString(), '-o', 'lstart'];
+    args = ['-p', pidString, '-o', 'lstart'];
   } else {
     throw new Error(`Unsupported system: ${process.platform}`);
   }
 
-  const psResult: string = child_process.spawnSync('ps', args).stdout.toString();
+  const psResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync('ps', args, {
+    encoding: 'utf8'
+  });
+  const psStdout: string = psResult.stdout;
 
-  // there was an error executing psresult
-  if (!psResult) {
+  // If no process with PID pid exists then the exit code is non-zero on linux.
+  // But if no process exists we do not want to fall back on /proc/*/stat to determine the process
+  // start time, so we we additionally add !psStdout.
+  if (psResult.status !== 0 && !psStdout && process.platform === 'linux') {
+    // Try to read /proc/${pidString}/stat and get the value 22.
+    // This is the start time of the process with PID pid, in jiffies.
+    // Sources:
+    // http://man7.org/linux/man-pages/man5/proc.5.html
+    // https://unix.stackexchange.com/questions/62154/when-was-a-process-started/#answer-62156
+    let stat: undefined|string;
+    try {
+      stat = fsx.readFileSync(`/proc/${pidString}/stat`, 'utf8');
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        throw error;
+      }
+      // Either no process with PID pid exists, or this version/configuration of linux is non-standard.
+      // We assume the former.
+      return undefined;
+    }
+    if (stat !== undefined) {
+      const startTimeYiffies: string|undefined = getProcessStartTimeFromProcStat(stat);
+      if (startTimeYiffies === undefined) {
+        throw new Error(`Could not retrieve the start time of process ${pidString} from the OS because the `
+          + `contents of /proc/${pidString}/stat have an unexpected format`);
+      }
+      return startTimeYiffies;
+    }
+  }
+
+  // there was an error executing ps
+  if (!psStdout) {
     throw new Error(`Unexpected output from "ps" command`);
   }
 
-  const psSplit: string[] = psResult.split('\n');
+  const psSplit: string[] = psStdout.split('\n');
 
   // successfuly able to run "ps", but no process was found
   if (psSplit[1] === '') {
@@ -176,21 +253,21 @@ export class LockFile {
           const otherPidCurrentStartTime: string | undefined = LockFile._getStartTime(parseInt(otherPid, 10));
 
           let otherPidOldStartTime: string | undefined;
+          let otherBirthtimeMs: number | undefined;
           try {
-            otherPidOldStartTime = fsx.readFileSync(fileInFolderPath).toString();
+            otherPidOldStartTime = fsx.readFileSync(fileInFolderPath, 'utf8');
+            // check the timestamp of the file
+            otherBirthtimeMs = fsx.statSync(fileInFolderPath).birthtime.getTime();
           } catch (err) {
             // this means the file is probably deleted already
           }
-
-          // check the timestamp of the file
-          const otherBirthtimeMs: number = fsx.statSync(fileInFolderPath).birthtime.getTime();
 
           // if the otherPidOldStartTime is invalid, then we should look at the timestamp,
           // if this file was created after us, ignore it
           // if it was created within 1 second before us, then it could be good, so we
           //  will conservatively fail
           // otherwise it is an old lock file and will be deleted
-          if (otherPidOldStartTime === '') {
+          if (otherPidOldStartTime === '' && otherBirthtimeMs !== undefined) {
             if (otherBirthtimeMs > currentBirthTimeMs) {
               // ignore this file, he will be unable to get the lock since this process
               // will hold it
@@ -217,7 +294,7 @@ export class LockFile {
           // console.log(`Pid ${otherPid} lockfile has birth time: ${otherBirthtimeMs}`);
           // console.log(`Pid ${pid} lockfile has birth time: ${currentBirthTimeMs}`);
           // this is a lockfile pointing at something valid
-          if (otherBirthtimeMs < smallestBirthTimeMs) {
+          if (otherBirthtimeMs !== undefined && otherBirthtimeMs < smallestBirthTimeMs) {
             smallestBirthTimeMs = otherBirthtimeMs;
             smallestBirthTimePid = otherPid;
           }
