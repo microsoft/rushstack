@@ -6,6 +6,11 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 import { setTimeout } from 'timers';
 
+/**
+ * Parses the process start time from a linux /proc/1/stat file.
+ * @param stat The contents of a linux /proc/1/stat file.
+ * @returns The process start time in yiffies.
+ */
 export function getProcessStartTimeFromProcStat (stat: string): string | undefined {
   // Parse value 22.
   // We cannot just split stat on spaces, because value 2 may contain spaces.
