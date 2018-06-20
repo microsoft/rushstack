@@ -12,15 +12,32 @@
     "tsdocFlavor": "AEDoc"
   },
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "gulp test --clean",
+    "start": "jest --watch"
   },
   "license": "MIT",
   "dependencies": {
   },
   "devDependencies": {
+    "@microsoft/node-library-build": "4.3.43",
     "@types/jest": "21.1.10",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "4.3.41"
+    "jest": "~22.4.3",
+    "ts-jest": "~22.4.6"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testMatch": [
+      "<rootDir>/src/**/*.test.ts"
+    ]
   }
 }
