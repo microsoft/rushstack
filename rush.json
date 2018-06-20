@@ -197,6 +197,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@microsoft/rushell",
+      "projectFolder": "libraries/rushell",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@microsoft/stream-collator",
       "projectFolder": "libraries/stream-collator",
       "reviewCategory": "libraries",

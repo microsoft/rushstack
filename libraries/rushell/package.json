@@ -1,0 +1,26 @@
+{
+  "name": "@microsoft/rushell",
+  "version": "0.1.0",
+  "description": "Execute shell commands using a consistent syntax on every platform",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/web-build-tools"
+  },
+  "main": "lib/index.js",
+  "typings": "dist/index-internal.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
+  "scripts": {
+    "build": "gulp test --clean"
+  },
+  "license": "MIT",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/jest": "21.1.10",
+    "@types/node": "8.5.8",
+    "gulp": "~3.9.1",
+    "@microsoft/node-library-build": "4.3.41"
+  }
+}
