@@ -21,23 +21,15 @@ Object {
 
 exports[`white space tokens 1`] = `
 Object {
-  "input": "  abc   [r][n]def  [n]  ghi[n][r]  ",
+  "input": " [t] abc   [r][n]def  [n]  ghi[n][r]  ",
   "tokens": Array [
     Array [
       "Spaces",
-      "  ",
+      " [t] ",
     ],
     Array [
-      "Other",
-      "a",
-    ],
-    Array [
-      "Other",
-      "b",
-    ],
-    Array [
-      "Other",
-      "c",
+      "Text",
+      "abc",
     ],
     Array [
       "Spaces",
@@ -48,16 +40,8 @@ Object {
       "[r][n]",
     ],
     Array [
-      "Other",
-      "d",
-    ],
-    Array [
-      "Other",
-      "e",
-    ],
-    Array [
-      "Other",
-      "f",
+      "Text",
+      "def",
     ],
     Array [
       "Spaces",
@@ -72,16 +56,8 @@ Object {
       "  ",
     ],
     Array [
-      "Other",
-      "g",
-    ],
-    Array [
-      "Other",
-      "h",
-    ],
-    Array [
-      "Other",
-      "i",
+      "Text",
+      "ghi",
     ],
     Array [
       "NewLine",
