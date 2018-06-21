@@ -7,10 +7,13 @@ import { ParseError } from './ParseError';
 export enum TokenKind {
   // One or more spaces/tabs
   Spaces,
+
   // A single newline sequence such as CRLF or LF
   NewLine,
+
   // An unrecognized character
   OtherCharacter,
+
   // A sequence of characters that doesn't contain any symbols with special meaning
   // Characters can be escaped, in which case the Token.text may differ from the
   // Token.range.toString()
