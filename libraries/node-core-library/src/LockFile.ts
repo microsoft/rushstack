@@ -66,8 +66,8 @@ export function getProcessStartTimeFromProcStat (stat: string): string | undefin
  */
 export function getProcessStartTime(pid: number): string | undefined {
   const pidString: string = pid.toString();
-  if (pidString.indexOf('e') >= 0 || pidString.indexOf('E') >= 0) {
-    throw new Error(`"pid" is out of bounds`)
+  if (pid < 0 || pidString.indexOf('e') >= 0 || pidString.indexOf('E') >= 0) {
+    throw new Error(`"pid" is negative or too large`);
   }
   let args: string[];
   if (process.platform === 'darwin') {
