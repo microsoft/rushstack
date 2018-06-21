@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "issue #705: fallback on linux to /proc/{n}/stat if 'ps -p 1 -o lstart' is not supported",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "jbrekelmans@users.noreply.github.com"
+}
