@@ -15,6 +15,17 @@ export enum TokenKind {
   // Characters can be escaped, in which case the Token.text may differ from the
   // Token.range.toString()
   Text,
+
+  // The "&&" operator, which executes the following command only if the preceding command
+  // succeeded (i.e. returned a zero exit code).
+  AndIf,
+
+  // A double-quoted string which can do variable expansions
+  DoubleQuotedText,
+
+  // A dollar sign followed by an environment variable name
+  DollarVariable,
+
   // The end of the input string
   EndOfInput
 }
@@ -58,15 +69,15 @@ export class Tokenizer {
     const input: TextRange = this.input;
 
     const startIndex: number = this._currentIndex;
-    let c: string | undefined = this._peek();
+    const firstChar: string | undefined = this._peek();
 
     // Reached end of input yet?
-    if (c === undefined) {
+    if (firstChar === undefined) {
       return new Token(TokenKind.EndOfInput, TextRange.empty);
     }
 
     // Is it a sequence of whitespace?
-    if (/[ \t]/.test(c)) {
+    if (/[ \t]/.test(firstChar)) {
       this._get();
 
       while (Tokenizer._isSpace(this._peek())) {
@@ -77,21 +88,22 @@ export class Tokenizer {
     }
 
     // Is it a newline?
-    if (c === '\r') {
+    if (firstChar === '\r') {
       this._get();
       if (this._peek() === '\n') {
         this._get();
       }
       return new Token(TokenKind.NewLine, input.getNewRange(startIndex, this._currentIndex));
-    } else if (c === '\n') {
+    } else if (firstChar === '\n') {
       this._get();
       return new Token(TokenKind.NewLine, input.getNewRange(startIndex, this._currentIndex));
     }
 
     // Is it a text token?
-    if (wordCharacterOrBackslashRegExp.test(c)) {
+    if (wordCharacterOrBackslashRegExp.test(firstChar)) {
       let text: string = '';
-      while (wordCharacterOrBackslashRegExp.test(c)) {
+      let c: string | undefined = firstChar;
+      do {
         if (c === '\\') {
           this._get(); // discard the backslash
           if (this._peek() === undefined) {
@@ -104,9 +116,21 @@ export class Tokenizer {
         }
 
         c = this._peek();
-      }
+        if (c == undefined) {
+          break;
+        }
+      } while (wordCharacterOrBackslashRegExp.test(c));
 
       return new Token(TokenKind.Text, input.getNewRange(startIndex, this._currentIndex), text);
+    }
+
+    // Is it the "&&" token?
+    if (firstChar === '&') {
+      if (this._peek2() === '&') {
+        this._get();
+        this._get();
+        return new Token(TokenKind.AndIf, input.getNewRange(startIndex, this._currentIndex));
+      }
     }
 
     // Otherwise treat it as an "other" character
@@ -136,6 +160,13 @@ export class Tokenizer {
       return undefined;
     }
     return this.input.buffer[this._currentIndex];
+  }
+
+  private _peek2(): string | undefined {
+    if (this._currentIndex+1 >= this.input.end) {
+      return undefined;
+    }
+    return this.input.buffer[this._currentIndex+1];
   }
 
   private static _isSpace(c: string | undefined): boolean {

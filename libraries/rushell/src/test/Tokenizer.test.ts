@@ -30,3 +30,10 @@ test('01: white space tokens', () => {
 test('02: text with escapes', () => {
   matchSnapshot(' ab+56\\>qrst$(abc\\))');
 });
+
+test('03: The && operator', () => {
+  matchSnapshot('&&abc&&cde&&');
+  matchSnapshot('a&b');
+  matchSnapshot('&&');
+  matchSnapshot('&');
+});

@@ -114,3 +114,75 @@ Object {
   ],
 }
 `;
+
+exports[`03: The && operator 1`] = `
+Object {
+  "input": "&&abc&&cde&&",
+  "tokens": Array [
+    Array [
+      "AndIf",
+      "&&",
+    ],
+    Array [
+      "Text",
+      "abc",
+    ],
+    Array [
+      "AndIf",
+      "&&",
+    ],
+    Array [
+      "Text",
+      "cde",
+    ],
+    Array [
+      "AndIf",
+      "&&",
+    ],
+  ],
+}
+`;
+
+exports[`03: The && operator 2`] = `
+Object {
+  "input": "a&b",
+  "tokens": Array [
+    Array [
+      "Text",
+      "a",
+    ],
+    Array [
+      "Other",
+      "&",
+    ],
+    Array [
+      "Text",
+      "b",
+    ],
+  ],
+}
+`;
+
+exports[`03: The && operator 3`] = `
+Object {
+  "input": "&&",
+  "tokens": Array [
+    Array [
+      "AndIf",
+      "&&",
+    ],
+  ],
+}
+`;
+
+exports[`03: The && operator 4`] = `
+Object {
+  "input": "&",
+  "tokens": Array [
+    Array [
+      "Other",
+      "&",
+    ],
+  ],
+}
+`;
