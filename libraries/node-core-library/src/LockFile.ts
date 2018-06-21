@@ -30,7 +30,7 @@ export function getProcessStartTimeFromProcStat (stat: string): string | undefin
   // 59389 (bash 2)() S 59358 59389 59358 34818 59389 4202496 329 0 0 0 0 0 0 0 20 0 1 0
   // > rm -rf ./'bash 2)('
   // The output shows a stat file such that value 2 contains spaces.
-  // To still umambiguously parse such output we assume no values after the second end with a right parenthesis...
+  // To still umambiguously parse such output we assume no values after the second ends with a right parenthesis...
 
   // trimRight to remove the trailing line terminator.
   let values: string[] = stat.trimRight().split(' ');
@@ -41,7 +41,7 @@ export function getProcessStartTimeFromProcStat (stat: string): string | undefin
     ) {
     i -= 1;
   }
-  // i is the index of the second value (but i need not be 1).
+  // i is the index of the last part of the second value (but i need not be 1).
   if (i < 1) {
     // Format of stat has changed.
     return undefined;
@@ -65,9 +65,10 @@ export function getProcessStartTimeFromProcStat (stat: string): string | undefin
  * Returns undefined if the process doesn't exist with that pid.
  */
 export function getProcessStartTime(pid: number): string | undefined {
-  // Use toFixed() to ensure decimal representation is used when converting the PID to string, although no PID is
-  // large enough to be printed using exponential notation.
-  const pidString: string = pid.toFixed();
+  const pidString: string = pid.toString();
+  if (pidString.indexOf('e') >= 0 || pidString.indexOf('E') >= 0) {
+    throw new Error(`"pid" is out of bounds`)
+  }
   let args: string[];
   if (process.platform === 'darwin') {
     args = [`-p ${pidString}`, '-o lstart'];
@@ -82,9 +83,10 @@ export function getProcessStartTime(pid: number): string | undefined {
   });
   const psStdout: string = psResult.stdout;
 
-  // If no process with PID pid exists then the exit code is non-zero on linux.
+  // If no process with PID pid exists then the exit code is non-zero on linux but stdout is not empty.
   // But if no process exists we do not want to fall back on /proc/*/stat to determine the process
-  // start time, so we we additionally test for !psStdout.
+  // start time, so we we additionally test for !psStdout. NOTE: !psStdout evaluates to true if
+  // zero bytes are written to stdout.
   if (psResult.status !== 0 && !psStdout && process.platform === 'linux') {
     // Try to read /proc/[pid]/stat and get the value at position procStatStartTimePos.
     let stat: undefined|string;
@@ -108,7 +110,7 @@ export function getProcessStartTime(pid: number): string | undefined {
     }
   }
 
-  // there was an error executing ps
+  // there was an error executing ps (zero bytes were written to stdout).
   if (!psStdout) {
     throw new Error(`Unexpected output from "ps" command`);
   }
