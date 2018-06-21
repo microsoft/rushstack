@@ -218,3 +218,119 @@ Object {
   ],
 }
 `;
+
+exports[`05: double-quoted strings 1`] = `
+Object {
+  "input": "what \\"is\\" is",
+  "tokens": Array [
+    Array [
+      "Text",
+      "what",
+    ],
+    Array [
+      "Spaces",
+      " ",
+    ],
+    Array [
+      "DoubleQuotedText",
+      "is",
+    ],
+    Array [
+      "Spaces",
+      " ",
+    ],
+    Array [
+      "Text",
+      "is",
+    ],
+  ],
+}
+`;
+
+exports[`05: double-quoted strings 2`] = `
+Object {
+  "input": "what\\"is\\"is",
+  "tokens": Array [
+    Array [
+      "Text",
+      "what",
+    ],
+    Array [
+      "DoubleQuotedText",
+      "is",
+    ],
+    Array [
+      "Text",
+      "is",
+    ],
+  ],
+}
+`;
+
+exports[`05: double-quoted strings 3`] = `
+Object {
+  "input": "what\\"is[b]\\"\\"is",
+  "tokens": Array [
+    Array [
+      "Text",
+      "what",
+    ],
+    Array [
+      "DoubleQuotedText",
+      "is\\"",
+    ],
+    Array [
+      "Text",
+      "is",
+    ],
+  ],
+}
+`;
+
+exports[`05: double-quoted strings 4`] = `
+Object {
+  "input": "no C-style escapes: \\"[b]t[b]r[b]n\\"",
+  "tokens": Array [
+    Array [
+      "Text",
+      "no",
+    ],
+    Array [
+      "Spaces",
+      " ",
+    ],
+    Array [
+      "Text",
+      "C",
+    ],
+    Array [
+      "Other",
+      "-",
+    ],
+    Array [
+      "Text",
+      "style",
+    ],
+    Array [
+      "Spaces",
+      " ",
+    ],
+    Array [
+      "Text",
+      "escapes",
+    ],
+    Array [
+      "Other",
+      ":",
+    ],
+    Array [
+      "Spaces",
+      " ",
+    ],
+    Array [
+      "DoubleQuotedText",
+      "trn",
+    ],
+  ],
+}
+`;

@@ -33,6 +33,14 @@ export enum TokenKind {
 export class Token {
   public readonly kind: TokenKind;
   public readonly range: TextRange;
+
+  /**
+   * The extracted content, which depends on the type:
+   *
+   * Text: The unescaped content
+   * DoubleQuotedText: The unescaped contents inside the quotes.
+   * DollarVariable: The variable name without the "$"
+   */
   public readonly text: string;
 
   public constructor(kind: TokenKind, range: TextRange, text?: string) {
@@ -105,6 +113,49 @@ export class Tokenizer {
       return new Token(TokenKind.NewLine, input.getNewRange(startIndex, this._currentIndex));
     }
 
+    // Is it a double-quoted string?
+    if (firstChar === '"') {
+      this._get(); // consume the opening quote
+
+      let text: string = '';
+      let c: string | undefined = this._peek();
+      while (c !== '"') {
+        if (c === undefined) {
+          throw new ParseError('The double-quoted string is missing the ending quote',
+            input.getNewRange(startIndex, this._currentIndex));
+        }
+        if (c === '\r' || c === '\n') {
+          throw new ParseError('Newlines are not supported inside strings',
+            input.getNewRange(this._currentIndex, this._currentIndex + 1));
+        }
+
+        // NOTE: POSIX says that backslash acts as an escape character inside a double-quoted string
+        // ONLY if followed by certain other characters.  For example, yes for "a\$" but no for "a\t".
+        // Whereas Dash says yes for "a\t" but no for "a\q".  And then Bash says yes for "a\t".
+        // This goes against Rushell's goal of being intuitive:  Nobody should have to memorize a list
+        // of alphabet letters that cannot be escaped.  So we just say that backslash is *always* an
+        // escape character inside a double-quoted string.
+        //
+        // NOTE: Dash interprets "\t" as a tab character, but Bash does not.
+        if (c === '\\') {
+          this._get(); // discard the backslash
+          if (this._peek() === undefined) {
+            throw new ParseError('A backslash must be followed by another character',
+              input.getNewRange(this._currentIndex, this._currentIndex + 1));
+          }
+          // Add the escaped character
+          text += this._get();
+        } else {
+          text += this._get();
+        }
+
+        c = this._peek();
+      }
+      this._get(); // consume the closing quote
+
+      return new Token(TokenKind.DoubleQuotedText, input.getNewRange(startIndex, this._currentIndex), text);
+    }
+
     // Is it a text token?
     if (textCharacterRegExp.test(firstChar)) {
       let text: string = '';
@@ -113,9 +164,10 @@ export class Tokenizer {
         if (c === '\\') {
           this._get(); // discard the backslash
           if (this._peek() === undefined) {
-            throw new ParseError('Backslash encountered at end of stream',
+            throw new ParseError('A backslash must be followed by another character',
               input.getNewRange(this._currentIndex, this._currentIndex + 1));
           }
+          // Add the escaped character
           text += this._get();
         } else {
           text += this._get();
