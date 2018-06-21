@@ -77,7 +77,7 @@ Object {
 
 exports[`02: text with escapes 1`] = `
 Object {
-  "input": " ab+56[b]>qrst$(abc[b]))",
+  "input": " ab+56[b]>qrst(abc[b]))",
   "tokens": Array [
     Array [
       "Spaces",
@@ -94,10 +94,6 @@ Object {
     Array [
       "Text",
       "56>qrst",
-    ],
-    Array [
-      "Other",
-      "$",
     ],
     Array [
       "Other",
@@ -182,6 +178,42 @@ Object {
     Array [
       "Other",
       "&",
+    ],
+  ],
+}
+`;
+
+exports[`04: dollar variables 1`] = `
+Object {
+  "input": "$abc123.456",
+  "tokens": Array [
+    Array [
+      "DollarVariable",
+      "abc123",
+    ],
+    Array [
+      "Other",
+      ".",
+    ],
+    Array [
+      "Text",
+      "456",
+    ],
+  ],
+}
+`;
+
+exports[`04: dollar variables 2`] = `
+Object {
+  "input": "$ab$_90",
+  "tokens": Array [
+    Array [
+      "DollarVariable",
+      "ab",
+    ],
+    Array [
+      "DollarVariable",
+      "_90",
     ],
   ],
 }

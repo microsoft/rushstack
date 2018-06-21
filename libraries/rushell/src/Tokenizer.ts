@@ -46,11 +46,17 @@ export class Token {
   }
 }
 
-const wordCharacterOrBackslashRegExp: RegExp = /[a-z0-9_\\]/i;
+const textCharacterRegExp: RegExp = /[a-z0-9_\\]/i;
+const startVariableCharacterRegExp: RegExp = /[a-z_]/i;
+const variableCharacterRegExp: RegExp = /[a-z0-9_]/i;
 
 export class Tokenizer {
   public readonly input: TextRange;
   private _currentIndex: number;
+
+  private static _isSpace(c: string | undefined): boolean {
+    return c === ' ' || c === '\t';
+  }
 
   constructor(input: TextRange | string) {
     if (typeof(input) === 'string') {
@@ -77,7 +83,7 @@ export class Tokenizer {
     }
 
     // Is it a sequence of whitespace?
-    if (/[ \t]/.test(firstChar)) {
+    if (Tokenizer._isSpace(firstChar)) {
       this._get();
 
       while (Tokenizer._isSpace(this._peek())) {
@@ -100,7 +106,7 @@ export class Tokenizer {
     }
 
     // Is it a text token?
-    if (wordCharacterOrBackslashRegExp.test(firstChar)) {
+    if (textCharacterRegExp.test(firstChar)) {
       let text: string = '';
       let c: string | undefined = firstChar;
       do {
@@ -108,7 +114,7 @@ export class Tokenizer {
           this._get(); // discard the backslash
           if (this._peek() === undefined) {
             throw new ParseError('Backslash encountered at end of stream',
-              input.getNewRange(this._currentIndex, this._currentIndex+1));
+              input.getNewRange(this._currentIndex, this._currentIndex + 1));
           }
           text += this._get();
         } else {
@@ -116,12 +122,27 @@ export class Tokenizer {
         }
 
         c = this._peek();
-        if (c == undefined) {
-          break;
-        }
-      } while (wordCharacterOrBackslashRegExp.test(c));
+      } while (c && textCharacterRegExp.test(c));
 
       return new Token(TokenKind.Text, input.getNewRange(startIndex, this._currentIndex), text);
+    }
+
+    // Is it a dollar variable?  The valid environment variable names are [A-Z_][A-Z0-9_]*
+    if (firstChar === '$') {
+      this._get();
+
+      let name: string = this._get() || '';
+      if (!startVariableCharacterRegExp.test(name)) {
+        throw new ParseError('The "$" symbol must be followed by a letter or underscore',
+          input.getNewRange(startIndex, this._currentIndex));
+      }
+
+      let c: string | undefined = this._peek();
+      while (c && variableCharacterRegExp.test(c)) {
+        name += this._get();
+        c = this._peek();
+      }
+      return new Token(TokenKind.DollarVariable, input.getNewRange(startIndex, this._currentIndex), name);
     }
 
     // Is it the "&&" token?
@@ -163,13 +184,9 @@ export class Tokenizer {
   }
 
   private _peek2(): string | undefined {
-    if (this._currentIndex+1 >= this.input.end) {
+    if (this._currentIndex + 1 >= this.input.end) {
       return undefined;
     }
-    return this.input.buffer[this._currentIndex+1];
-  }
-
-  private static _isSpace(c: string | undefined): boolean {
-    return c === ' ' || c === '\t';
+    return this.input.buffer[this._currentIndex + 1];
   }
 }
