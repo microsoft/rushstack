@@ -7,12 +7,22 @@ import * as child_process from 'child_process';
 import { setTimeout } from 'timers';
 
 /**
- * Parses the process start time from a linux /proc/1/stat file.
- * @param stat The contents of a linux /proc/1/stat file.
- * @returns The process start time in yiffies.
+ * http://man7.org/linux/man-pages/man5/proc.5.html
+ * (22) starttime  %llu
+ * The time the process started after system boot. In kernels before Linux 2.6, this value was
+ * expressed in jiffies. Since Linux 2.6, the value is expressed in clock ticks (divide by
+ * sysconf(_SC_CLK_TCK)).
+ * The format for this field was %lu before Linux 2.6.
+ */
+const procStatStartTimePos: number = 22;
+
+/**
+ * Parses the process start time from the contents of a linux /proc/[pid]/stat file.
+ * @param stat The contents of a linux /proc/[pid]/stat file.
+ * @returns The process start time in jiffies, or undefined if stat has an unexpected format.
  */
 export function getProcessStartTimeFromProcStat (stat: string): string | undefined {
-  // Parse value 22.
+  // Parse the value at position procStatStartTimePos.
   // We cannot just split stat on spaces, because value 2 may contain spaces.
   // For example, when running the following Shell commands:
   // > cp "$(which bash)" ./'bash 2)('
@@ -20,31 +30,34 @@ export function getProcessStartTimeFromProcStat (stat: string): string | undefin
   // 59389 (bash 2)() S 59358 59389 59358 34818 59389 4202496 329 0 0 0 0 0 0 0 20 0 1 0
   // > rm -rf ./'bash 2)('
   // The output shows a stat file such that value 2 contains spaces.
-  // To still umambiguously parse such output we assume all values after the third consist of only digits...
+  // To still umambiguously parse such output we assume no values after the second end with a right parenthesis...
 
   // trimRight to remove the trailing line terminator.
   let values: string[] = stat.trimRight().split(' ');
   let i: number = values.length - 1;
-  while (i >= 0 && /^[0-9]+$/.test(values[i])) {
+  while (i >= 0 &&
+    // charAt returns an empty string if the index is out of bounds.
+    values[i].charAt(values[i].length - 1) !== ')'
+    ) {
     i -= 1;
   }
-  // i is the index of the third value (but i need not be 2).
-  if (i < 2) {
+  // i is the index of the second value (but i need not be 1).
+  if (i < 1) {
     // Format of stat has changed.
     return undefined;
   }
-  const value2: string = values.slice(1, i - 1).join(' ');
-  values = [values[0], value2].concat(values.slice(i));
-  if (values.length < 22) {
+  const value2: string = values.slice(1, i).join(' ');
+  values = [values[0], value2].concat(values.slice(i + 1));
+  if (values.length < procStatStartTimePos) {
     // Older version of linux, or non-standard configuration of linux.
     return undefined;
   }
-  const startTimeYiffies: string = values[21];
-  // In theory, the representations of start time returned by /proc/*/stat and ps -o lstart can change while the
-  // system is running, but we assume this does not happen.
+  const startTimeJiffies: string = values[procStatStartTimePos - 1];
+  // In theory, the representations of start time returned by `cat /proc/[pid]/stat` and `ps -o lstart` can change
+  // while the system is running, but we assume this does not happen.
   // So the caller can safely use this value as part of a unique process id (on the machine, without comparing
   // accross reboots).
-  return startTimeYiffies;
+  return startTimeJiffies;
 }
 
 /**
@@ -71,13 +84,9 @@ export function getProcessStartTime(pid: number): string | undefined {
 
   // If no process with PID pid exists then the exit code is non-zero on linux.
   // But if no process exists we do not want to fall back on /proc/*/stat to determine the process
-  // start time, so we we additionally add !psStdout.
+  // start time, so we we additionally test for !psStdout.
   if (psResult.status !== 0 && !psStdout && process.platform === 'linux') {
-    // Try to read /proc/${pidString}/stat and get the value 22.
-    // This is the start time of the process with PID pid, in jiffies.
-    // Sources:
-    // http://man7.org/linux/man-pages/man5/proc.5.html
-    // https://unix.stackexchange.com/questions/62154/when-was-a-process-started/#answer-62156
+    // Try to read /proc/[pid]/stat and get the value at position procStatStartTimePos.
     let stat: undefined|string;
     try {
       stat = fsx.readFileSync(`/proc/${pidString}/stat`, 'utf8');
@@ -90,12 +99,12 @@ export function getProcessStartTime(pid: number): string | undefined {
       return undefined;
     }
     if (stat !== undefined) {
-      const startTimeYiffies: string|undefined = getProcessStartTimeFromProcStat(stat);
-      if (startTimeYiffies === undefined) {
+      const startTimeJiffies: string|undefined = getProcessStartTimeFromProcStat(stat);
+      if (startTimeJiffies === undefined) {
         throw new Error(`Could not retrieve the start time of process ${pidString} from the OS because the `
           + `contents of /proc/${pidString}/stat have an unexpected format`);
       }
-      return startTimeYiffies;
+      return startTimeJiffies;
     }
   }
 

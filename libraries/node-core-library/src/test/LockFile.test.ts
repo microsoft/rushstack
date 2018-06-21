@@ -59,24 +59,24 @@ describe('LockFile', () => {
       return statOutput;
     }
 
-    it('returns undefined if too few values are contained in /proc/*/stat (1)', () => {
+    it('returns undefined if too few values are contained in /proc/[pid]/stat (1)', () => {
       const stat: string = createStatOutput('(bash)', 1);
       const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
       assert.strictEqual(ret, undefined);
     });
-    it('returns undefined if too few values are contained in /proc/*/stat (2)', () => {
+    it('returns undefined if too few values are contained in /proc/[pid]/stat (2)', () => {
       const stat: string = createStatOutput('(bash)', 0);
       const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
       assert.strictEqual(ret, undefined);
     });
-    it('returns the correct start time if the second value in /proc/*/stat contains spaces', () => {
+    it('returns the correct start time if the second value in /proc/[pid]/stat contains spaces', () => {
       let stat: string = createStatOutput('(bash 2)', 18);
       const value22: string = '12345';
       stat += ` ${value22}`;
       const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
       assert.strictEqual(ret, value22);
     });
-    it('returns the correct start time if there are 22 values in /proc/*/stat, including a trailing line '
+    it('returns the correct start time if there are 22 values in /proc/[pid]/stat, including a trailing line '
       + 'terminator', () => {
       let stat: string = createStatOutput('(bash)', 18);
       const value22: string = '12345';
@@ -84,7 +84,7 @@ describe('LockFile', () => {
       const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
       assert.strictEqual(ret, value22);
     });
-    it('returns the correct start time if the second value in /proc/*/stat does not contain spaces', () => {
+    it('returns the correct start time if the second value in /proc/[pid]/stat does not contain spaces', () => {
       let stat: string = createStatOutput('(bash)', 18);
       const value22: string = '12345';
       stat += ` ${value22}`;
