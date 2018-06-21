@@ -46,7 +46,7 @@ export function getProcessStartTimeFromProcStat (stat: string): string | undefin
     // Format of stat has changed.
     return undefined;
   }
-  const value2: string = values.slice(1, i).join(' ');
+  const value2: string = values.slice(1, i + 1).join(' ');
   values = [values[0], value2].concat(values.slice(i + 1));
   if (values.length < procStatStartTimePos) {
     // Older version of linux, or non-standard configuration of linux.
