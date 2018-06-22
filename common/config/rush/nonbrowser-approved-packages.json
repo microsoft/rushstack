@@ -430,6 +430,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ts-jest",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "tslint",
       "allowedCategories": [ "libraries" ]
     },
