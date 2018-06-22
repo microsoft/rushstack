@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "rush schema: add a rule to prevent using shouldPublish and versionPolicyName together",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "aditima@users.noreply.github.com"
+}
