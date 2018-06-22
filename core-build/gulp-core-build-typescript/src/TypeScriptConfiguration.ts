@@ -38,7 +38,7 @@ export class TypeScriptConfiguration {
    */
   public static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings> {
     const file: ITsConfigFile<ts.Settings> = assign({}, this.getTsConfigFile(buildConfig));
-    assign(file.compilerOptions, {
+    file.compilerOptions = assign({}, file.compilerOptions, {
       rootDir: buildConfig.rootPath,
       typescript: this.getTypescriptCompiler()
     });

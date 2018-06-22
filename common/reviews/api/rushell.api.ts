@@ -1,0 +1,4 @@
+// @beta
+class Rushell {
+}
+
