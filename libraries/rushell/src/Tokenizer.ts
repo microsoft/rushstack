@@ -10,7 +10,7 @@ export enum TokenKind {
   // A single newline sequence such as CRLF or LF
   NewLine,
   // An unrecognized character
-  Other,
+  OtherCharacter,
   // A sequence of characters that doesn't contain any symbols with special meaning
   // Characters can be escaped, in which case the Token.text may differ from the
   // Token.range.toString()
@@ -63,6 +63,10 @@ export class Tokenizer {
   private _currentIndex: number;
 
   private static _isSpace(c: string | undefined): boolean {
+    // You can empirically test whether shell treats a given character as whitespace like this:
+    // echo $(echo -e a '\u0009' b)
+    // If you get "a b" it means the tab character (Unicode 0009) is being collapsed away.
+    // If you get "a   b" then the invisible character is being padded like a normal letter.
     return c === ' ' || c === '\t';
   }
 
@@ -208,7 +212,7 @@ export class Tokenizer {
 
     // Otherwise treat it as an "other" character
     this._get();
-    return new Token(TokenKind.Other, input.getNewRange(startIndex, this._currentIndex));
+    return new Token(TokenKind.OtherCharacter, input.getNewRange(startIndex, this._currentIndex));
   }
 
   public getTokens(): Token[] {
