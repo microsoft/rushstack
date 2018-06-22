@@ -162,7 +162,15 @@
         "required": [
           "packageName",
           "projectFolder"
-        ]
+        ],
+        "dependencies": {
+          "versionPolicyName": {
+            "not": {
+              "type": "object",
+              "required": [ "shouldPublish" ]
+            }
+          }
+        }
       }
     },
     "eventHooks": {
