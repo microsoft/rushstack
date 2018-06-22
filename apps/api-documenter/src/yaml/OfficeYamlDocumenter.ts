@@ -10,6 +10,7 @@ import { DocItemSet } from '../utils/DocItemSet';
 import { IYamlTocItem } from './IYamlTocFile';
 import { IYamlItem } from './IYamlApiFile';
 import { YamlDocumenter } from './YamlDocumenter';
+import { Text } from '@microsoft/node-core-library';
 
 interface ISnippetsFile {
   /**
@@ -128,18 +129,10 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
   }
 
   private _fixBoldAndItalics(text: string): string {
-    while (text.indexOf('\\*') >= 0) {
-      text = text.replace('\\*', '*');
-    }
-
-    return text;
+    return Text.replaceAll(text, '\\*', '*');
   }
 
   private _fixCodeTicks(text: string): string {
-    while (text.indexOf('\\`') >= 0) {
-      text = text.replace('\\`', '`');
-    }
-
-    return text;
+    return Text.replaceAll(text, '\\`', '`');
   }
 }
