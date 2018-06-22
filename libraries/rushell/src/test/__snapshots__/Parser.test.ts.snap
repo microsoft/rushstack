@@ -25,6 +25,6 @@ Object {
 exports[`01: basic errors 2`] = `
 Object {
   "input": "command @bad",
-  "reportedError": [Error: (1,9): Unexpected token: Other],
+  "reportedError": [Error: (1,9): Unexpected token: OtherCharacter],
 }
 `;

@@ -27,7 +27,7 @@ function matchErrorSnapshot(input: string): void {
   const parser: Parser = new Parser(tokenizer);
   let error: Error | undefined = undefined;
   try {
-    const result: AstScript = parser.parse();
+    parser.parse();
   } catch (e) {
     error = e;
   }

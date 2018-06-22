@@ -51,7 +51,7 @@ export abstract class AstNode {
 
   protected abstract pushChildNodes(nodes: AstNode[]): void;
 
-  protected getDumpText(): string | undefined{
+  protected getDumpText(): string | undefined {
     return undefined;
   }
 }
@@ -150,7 +150,7 @@ export class AstText extends AstNode {
   }
 
   /** @override */
-  protected getDumpText(): string | undefined{
+  protected getDumpText(): string | undefined {
     if (this.token) {
       return this.token.text;
     }
