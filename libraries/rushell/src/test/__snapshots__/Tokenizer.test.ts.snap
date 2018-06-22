@@ -11,10 +11,10 @@ exports[`00: empty inputs 2`] = `
 Object {
   "input": "[r][n]",
   "tokens": Array [
-    Array [
-      "NewLine",
-      "[r][n]",
-    ],
+    Object {
+      "kind": "NewLine",
+      "value": "[r][n]",
+    },
   ],
 }
 `;
@@ -23,54 +23,54 @@ exports[`01: white space tokens 1`] = `
 Object {
   "input": " [t] abc   [r][n]def  [n]  ghi[n][r]  ",
   "tokens": Array [
-    Array [
-      "Spaces",
-      " [t] ",
-    ],
-    Array [
-      "Text",
-      "abc",
-    ],
-    Array [
-      "Spaces",
-      "   ",
-    ],
-    Array [
-      "NewLine",
-      "[r][n]",
-    ],
-    Array [
-      "Text",
-      "def",
-    ],
-    Array [
-      "Spaces",
-      "  ",
-    ],
-    Array [
-      "NewLine",
-      "[n]",
-    ],
-    Array [
-      "Spaces",
-      "  ",
-    ],
-    Array [
-      "Text",
-      "ghi",
-    ],
-    Array [
-      "NewLine",
-      "[n]",
-    ],
-    Array [
-      "NewLine",
-      "[r]",
-    ],
-    Array [
-      "Spaces",
-      "  ",
-    ],
+    Object {
+      "kind": "Spaces",
+      "value": " [t] ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "abc",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": "   ",
+    },
+    Object {
+      "kind": "NewLine",
+      "value": "[r][n]",
+    },
+    Object {
+      "kind": "Text",
+      "value": "def",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": "  ",
+    },
+    Object {
+      "kind": "NewLine",
+      "value": "[n]",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": "  ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "ghi",
+    },
+    Object {
+      "kind": "NewLine",
+      "value": "[n]",
+    },
+    Object {
+      "kind": "NewLine",
+      "value": "[r]",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": "  ",
+    },
   ],
 }
 `;
@@ -79,34 +79,34 @@ exports[`02: text with escapes 1`] = `
 Object {
   "input": " ab+56[b]>qrst(abc[b]))",
   "tokens": Array [
-    Array [
-      "Spaces",
-      " ",
-    ],
-    Array [
-      "Text",
-      "ab",
-    ],
-    Array [
-      "Other",
-      "+",
-    ],
-    Array [
-      "Text",
-      "56>qrst",
-    ],
-    Array [
-      "Other",
-      "(",
-    ],
-    Array [
-      "Text",
-      "abc)",
-    ],
-    Array [
-      "Other",
-      ")",
-    ],
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "ab",
+    },
+    Object {
+      "kind": "Other",
+      "value": "+",
+    },
+    Object {
+      "kind": "Text",
+      "value": "56>qrst",
+    },
+    Object {
+      "kind": "Other",
+      "value": "(",
+    },
+    Object {
+      "kind": "Text",
+      "value": "abc)",
+    },
+    Object {
+      "kind": "Other",
+      "value": ")",
+    },
   ],
 }
 `;
@@ -115,26 +115,26 @@ exports[`03: The && operator 1`] = `
 Object {
   "input": "&&abc&&cde&&",
   "tokens": Array [
-    Array [
-      "AndIf",
-      "&&",
-    ],
-    Array [
-      "Text",
-      "abc",
-    ],
-    Array [
-      "AndIf",
-      "&&",
-    ],
-    Array [
-      "Text",
-      "cde",
-    ],
-    Array [
-      "AndIf",
-      "&&",
-    ],
+    Object {
+      "kind": "AndIf",
+      "value": "&&",
+    },
+    Object {
+      "kind": "Text",
+      "value": "abc",
+    },
+    Object {
+      "kind": "AndIf",
+      "value": "&&",
+    },
+    Object {
+      "kind": "Text",
+      "value": "cde",
+    },
+    Object {
+      "kind": "AndIf",
+      "value": "&&",
+    },
   ],
 }
 `;
@@ -143,18 +143,18 @@ exports[`03: The && operator 2`] = `
 Object {
   "input": "a&b",
   "tokens": Array [
-    Array [
-      "Text",
-      "a",
-    ],
-    Array [
-      "Other",
-      "&",
-    ],
-    Array [
-      "Text",
-      "b",
-    ],
+    Object {
+      "kind": "Text",
+      "value": "a",
+    },
+    Object {
+      "kind": "Other",
+      "value": "&",
+    },
+    Object {
+      "kind": "Text",
+      "value": "b",
+    },
   ],
 }
 `;
@@ -163,10 +163,10 @@ exports[`03: The && operator 3`] = `
 Object {
   "input": "&&",
   "tokens": Array [
-    Array [
-      "AndIf",
-      "&&",
-    ],
+    Object {
+      "kind": "AndIf",
+      "value": "&&",
+    },
   ],
 }
 `;
@@ -175,10 +175,10 @@ exports[`03: The && operator 4`] = `
 Object {
   "input": "&",
   "tokens": Array [
-    Array [
-      "Other",
-      "&",
-    ],
+    Object {
+      "kind": "Other",
+      "value": "&",
+    },
   ],
 }
 `;
@@ -187,18 +187,18 @@ exports[`04: dollar variables 1`] = `
 Object {
   "input": "$abc123.456",
   "tokens": Array [
-    Array [
-      "DollarVariable",
-      "abc123",
-    ],
-    Array [
-      "Other",
-      ".",
-    ],
-    Array [
-      "Text",
-      "456",
-    ],
+    Object {
+      "kind": "DollarVariable",
+      "value": "abc123",
+    },
+    Object {
+      "kind": "Other",
+      "value": ".",
+    },
+    Object {
+      "kind": "Text",
+      "value": "456",
+    },
   ],
 }
 `;
@@ -207,14 +207,14 @@ exports[`04: dollar variables 2`] = `
 Object {
   "input": "$ab$_90",
   "tokens": Array [
-    Array [
-      "DollarVariable",
-      "ab",
-    ],
-    Array [
-      "DollarVariable",
-      "_90",
-    ],
+    Object {
+      "kind": "DollarVariable",
+      "value": "ab",
+    },
+    Object {
+      "kind": "DollarVariable",
+      "value": "_90",
+    },
   ],
 }
 `;
@@ -223,26 +223,26 @@ exports[`05: double-quoted strings 1`] = `
 Object {
   "input": "what \\"is\\" is",
   "tokens": Array [
-    Array [
-      "Text",
-      "what",
-    ],
-    Array [
-      "Spaces",
-      " ",
-    ],
-    Array [
-      "DoubleQuotedText",
-      "is",
-    ],
-    Array [
-      "Spaces",
-      " ",
-    ],
-    Array [
-      "Text",
-      "is",
-    ],
+    Object {
+      "kind": "Text",
+      "value": "what",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "DoubleQuotedText",
+      "value": "is",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "is",
+    },
   ],
 }
 `;
@@ -251,18 +251,18 @@ exports[`05: double-quoted strings 2`] = `
 Object {
   "input": "what\\"is\\"is",
   "tokens": Array [
-    Array [
-      "Text",
-      "what",
-    ],
-    Array [
-      "DoubleQuotedText",
-      "is",
-    ],
-    Array [
-      "Text",
-      "is",
-    ],
+    Object {
+      "kind": "Text",
+      "value": "what",
+    },
+    Object {
+      "kind": "DoubleQuotedText",
+      "value": "is",
+    },
+    Object {
+      "kind": "Text",
+      "value": "is",
+    },
   ],
 }
 `;
@@ -271,18 +271,18 @@ exports[`05: double-quoted strings 3`] = `
 Object {
   "input": "what\\"is[b]\\"\\"is",
   "tokens": Array [
-    Array [
-      "Text",
-      "what",
-    ],
-    Array [
-      "DoubleQuotedText",
-      "is\\"",
-    ],
-    Array [
-      "Text",
-      "is",
-    ],
+    Object {
+      "kind": "Text",
+      "value": "what",
+    },
+    Object {
+      "kind": "DoubleQuotedText",
+      "value": "is\\"",
+    },
+    Object {
+      "kind": "Text",
+      "value": "is",
+    },
   ],
 }
 `;
@@ -291,46 +291,46 @@ exports[`05: double-quoted strings 4`] = `
 Object {
   "input": "no C-style escapes: \\"[b]t[b]r[b]n\\"",
   "tokens": Array [
-    Array [
-      "Text",
-      "no",
-    ],
-    Array [
-      "Spaces",
-      " ",
-    ],
-    Array [
-      "Text",
-      "C",
-    ],
-    Array [
-      "Other",
-      "-",
-    ],
-    Array [
-      "Text",
-      "style",
-    ],
-    Array [
-      "Spaces",
-      " ",
-    ],
-    Array [
-      "Text",
-      "escapes",
-    ],
-    Array [
-      "Other",
-      ":",
-    ],
-    Array [
-      "Spaces",
-      " ",
-    ],
-    Array [
-      "DoubleQuotedText",
-      "trn",
-    ],
+    Object {
+      "kind": "Text",
+      "value": "no",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "C",
+    },
+    Object {
+      "kind": "Other",
+      "value": "-",
+    },
+    Object {
+      "kind": "Text",
+      "value": "style",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "escapes",
+    },
+    Object {
+      "kind": "Other",
+      "value": ":",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "DoubleQuotedText",
+      "value": "trn",
+    },
   ],
 }
 `;

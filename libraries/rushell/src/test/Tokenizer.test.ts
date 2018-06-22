@@ -17,10 +17,22 @@ function tokenize(input: string): Token[] {
 
 function matchSnapshot(input: string): void {
   const tokenizer: Tokenizer = new Tokenizer(input);
-  expect({
-    input: escape(tokenizer.input.toString()),
-    tokens: tokenizer.getTokens().map(x => [TokenKind[x.kind], escape(x.toString())])
-  }).toMatchSnapshot();
+
+  const reportedTokens = tokenizer.getTokens().map(
+    token => {
+      return {
+        kind: TokenKind[token.kind],
+        value: escape(token.toString())
+      }
+    }
+  );
+
+  expect(
+    {
+      input: escape(tokenizer.input.toString()),
+      tokens: reportedTokens
+    }
+  ).toMatchSnapshot();
 }
 
 test('00: empty inputs', () => {
