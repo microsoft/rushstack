@@ -18,12 +18,12 @@ function tokenize(input: string): Token[] {
 function matchSnapshot(input: string): void {
   const tokenizer: Tokenizer = new Tokenizer(input);
 
-  const reportedTokens = tokenizer.getTokens().map(
+  const reportedTokens: { kind: string, value: string }[] = tokenizer.getTokens().map(
     token => {
       return {
         kind: TokenKind[token.kind],
         value: escape(token.toString())
-      }
+      };
     }
   );
 

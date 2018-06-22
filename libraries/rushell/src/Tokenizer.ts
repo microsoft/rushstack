@@ -199,7 +199,7 @@ export class Tokenizer {
 
     // Is it the "&&" token?
     if (firstChar === '&') {
-      if (this._peek2() === '&') {
+      if (this._peekTwice() === '&') {
         this._get();
         this._get();
         return new Token(TokenKind.AndIf, input.getNewRange(startIndex, this._currentIndex));
@@ -221,6 +221,10 @@ export class Tokenizer {
     return tokens;
   }
 
+  /**
+   * Retrieve the next character in the input stream.
+   * @returns a string of length 1, or undefined if the end of input is reached
+   */
   private _get(): string | undefined {
     if (this._currentIndex >= this.input.end) {
       return undefined;
@@ -228,6 +232,10 @@ export class Tokenizer {
     return this.input.buffer[this._currentIndex++];
   }
 
+  /**
+   * Return the next character in the input stream, but don't advance the stream pointer.
+   * @returns a string of length 1, or undefined if the end of input is reached
+   */
   private _peek(): string | undefined {
     if (this._currentIndex >= this.input.end) {
       return undefined;
@@ -235,7 +243,11 @@ export class Tokenizer {
     return this.input.buffer[this._currentIndex];
   }
 
-  private _peek2(): string | undefined {
+  /**
+   * Return the character after the next character in the input stream, but don't advance the stream pointer.
+   * @returns a string of length 1, or undefined if the end of input is reached
+   */
+  private _peekTwice(): string | undefined {
     if (this._currentIndex + 1 >= this.input.end) {
       return undefined;
     }
