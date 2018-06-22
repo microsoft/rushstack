@@ -88,7 +88,7 @@ Object {
       "value": "ab",
     },
     Object {
-      "kind": "Other",
+      "kind": "OtherCharacter",
       "value": "+",
     },
     Object {
@@ -96,7 +96,7 @@ Object {
       "value": "56>qrst",
     },
     Object {
-      "kind": "Other",
+      "kind": "OtherCharacter",
       "value": "(",
     },
     Object {
@@ -104,7 +104,7 @@ Object {
       "value": "abc)",
     },
     Object {
-      "kind": "Other",
+      "kind": "OtherCharacter",
       "value": ")",
     },
   ],
@@ -148,7 +148,7 @@ Object {
       "value": "a",
     },
     Object {
-      "kind": "Other",
+      "kind": "OtherCharacter",
       "value": "&",
     },
     Object {
@@ -176,7 +176,7 @@ Object {
   "input": "&",
   "tokens": Array [
     Object {
-      "kind": "Other",
+      "kind": "OtherCharacter",
       "value": "&",
     },
   ],
@@ -192,7 +192,7 @@ Object {
       "value": "abc123",
     },
     Object {
-      "kind": "Other",
+      "kind": "OtherCharacter",
       "value": ".",
     },
     Object {
@@ -304,7 +304,7 @@ Object {
       "value": "C",
     },
     Object {
-      "kind": "Other",
+      "kind": "OtherCharacter",
       "value": "-",
     },
     Object {
@@ -320,7 +320,7 @@ Object {
       "value": "escapes",
     },
     Object {
-      "kind": "Other",
+      "kind": "OtherCharacter",
       "value": ":",
     },
     Object {
