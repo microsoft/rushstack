@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.9.0",
+      "tag": "@microsoft/api-extractor_v5.9.0",
+      "date": "Sat, 23 Jun 2018 02:21:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new IMarkupHtmlTag API"
+          },
+          {
+            "comment": "AEDoc now allows HTML tags inside doc comments, which can be disabled using a backslash escape"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.8.1",
       "tag": "@microsoft/api-extractor_v5.8.1",
       "date": "Thu, 21 Jun 2018 08:27:29 GMT",

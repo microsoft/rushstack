@@ -1,6 +1,17 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 22 Jun 2018 16:05:15 GMT and should not be manually modified.
+This log was last generated on Sat, 23 Jun 2018 02:21:20 GMT and should not be manually modified.
+
+## 1.3.0
+Sat, 23 Jun 2018 02:21:20 GMT
+
+### Minor changes
+
+- Add support for rendering the new IMarkupHtmlTag
+
+### Patches
+
+- Fix a issue where Office Documentation had markdown characters escaped
 
 ## 1.2.8
 Fri, 22 Jun 2018 16:05:15 GMT
