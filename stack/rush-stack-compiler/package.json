@@ -12,7 +12,7 @@
     "build": ""
   },
   "dependencies": {
-    "@microsoft/api-extractor": "5.8.1",
+    "@microsoft/api-extractor": "5.9.0",
     "tslint": "~5.9.1",
     "tslint-microsoft-contrib": "~5.0.2",
     "typescript": "~2.4.1"
