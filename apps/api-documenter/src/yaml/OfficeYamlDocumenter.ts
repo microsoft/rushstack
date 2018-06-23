@@ -10,6 +10,7 @@ import { DocItemSet } from '../utils/DocItemSet';
 import { IYamlTocItem } from './IYamlTocFile';
 import { IYamlItem } from './IYamlApiFile';
 import { YamlDocumenter } from './YamlDocumenter';
+import { Text } from '@microsoft/node-core-library';
 
 interface ISnippetsFile {
   /**
@@ -88,9 +89,21 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
     if (yamlItem.summary) {
       yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
+      yamlItem.summary = this._fixBoldAndItalics(yamlItem.summary);
+      yamlItem.summary = this._fixCodeTicks(yamlItem.summary);
     }
     if (yamlItem.remarks) {
       yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
+      yamlItem.remarks = this._fixBoldAndItalics(yamlItem.remarks);
+      yamlItem.remarks = this._fixCodeTicks(yamlItem.remarks);
+    }
+    if (yamlItem.syntax && yamlItem.syntax.parameters) {
+      yamlItem.syntax.parameters.forEach(part => {
+          if (part.description) {
+            part.description = this._fixCodeTicks(part.description);
+            part.description = this._fixBoldAndItalics(part.description);
+          }
+      });
     }
   }
 
@@ -115,4 +128,11 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     return this._apiSetUrlDefault; // match not found.
   }
 
+  private _fixBoldAndItalics(text: string): string {
+    return Text.replaceAll(text, '\\*', '*');
+  }
+
+  private _fixCodeTicks(text: string): string {
+    return Text.replaceAll(text, '\\`', '`');
+  }
 }

@@ -16,10 +16,9 @@
     "start": "jest --watch"
   },
   "license": "MIT",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.44",
+    "@microsoft/node-library-build": "4.3.45",
     "@types/jest": "21.1.10",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",

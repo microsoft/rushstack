@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.9.18",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.9.18",
+      "date": "Fri, 22 Jun 2018 16:05:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed mutation on tsConfigFile resulting in tslint error"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.9.17",
       "tag": "@microsoft/gulp-core-build-typescript_v4.9.17",
       "date": "Thu, 21 Jun 2018 08:27:29 GMT",
