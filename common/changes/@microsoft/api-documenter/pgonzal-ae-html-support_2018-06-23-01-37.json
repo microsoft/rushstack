@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Add support for rendering the new IMarkupHtmlTag",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "pgonzal@users.noreply.github.com"
+}
