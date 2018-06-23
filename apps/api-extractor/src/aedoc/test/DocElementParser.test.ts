@@ -13,4 +13,5 @@ test('DocElementParser.parseMarkdownishText', () => {
   makeSnapshot('escaped backslashes: \\\\ \\\\\\ end');
   makeSnapshot('escaped HTML: \\<td>');
   makeSnapshot('real HTML: <td> </td> <a href="#" /a>');
+  makeSnapshot('HTML with mixed quotes: <tag attr1="#" attr2=\'#\' /a>');
 });

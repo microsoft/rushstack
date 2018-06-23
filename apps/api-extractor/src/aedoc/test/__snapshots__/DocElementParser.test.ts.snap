@@ -60,3 +60,12 @@ Array [
   },
 ]
 `;
+
+exports[`DocElementParser.parseMarkdownishText 6`] = `
+Array [
+  Object {
+    "kind": "text",
+    "text": "HTML with mixed quotes: <tag attr1=\\"#\\" attr2='#' /a>",
+  },
+]
+`;

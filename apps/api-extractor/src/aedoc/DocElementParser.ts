@@ -20,14 +20,16 @@ export class DocElementParser {
   /**
    * Matches one of:
    * - an escape sequence, i.e. backslash followed by a non-alphabetical character
-   * - an HTML opening tag such as `<td>` or or `<img src="example.gif" />`
+   * - an HTML opening tag such as `<td>` or `<img src="example.gif" />`
+   * - an HTML opening tag such as `<td>` or `<img src='example.gif' />`
    * - an HTML closing tag such `</td>`
    *
    * Note that the greedy nature of the RegExp ensures that `\<td>` will get interpreted
    * as an escaped "<", whereas `\\<td>` will get interpreted as an escaped backslash
    * followed by an HTML element.
    */
-  private static _htmlTagRegExp: RegExp = /\\[^a-zA-Z\s]|<[\w\-]+(?:\s+[\w\-]+\s*=\s*"[^"]*")*\s*\/?>|<\/[\w\-]+>/g;
+  private static _htmlTagRegExp: RegExp
+    = /\\[^a-zA-Z\s]|<[\w\-]+(?:\s+[\w\-]+\s*=\s*(?:"[^"]*"|'[^']*'))*\s*\/?>|<\/[\w\-]+>/g;
 
   /**
    * Used to validate the display text for an \@link tag.  The display text can contain any
