@@ -98,3 +98,12 @@ Array [
   },
 ]
 `;
+
+exports[`DocElementParser.parseMarkdownishText 8`] = `
+Array [
+  Object {
+    "kind": "text",
+    "text": "Example: \\"{ \\\\\\"maxItemsToShow\\\\\\": 123 }\\"",
+  },
+]
+`;

@@ -15,4 +15,5 @@ test('DocElementParser.parseMarkdownishText', () => {
   makeSnapshot('real HTML: <td> </td> <a href="#" />');
   makeSnapshot('HTML with mixed quotes: <tag attr1="#" attr2=\'#\' />');
   makeSnapshot('escaped and regular HTML: \\<a>\\\\<b>\\<c><d>');
+  makeSnapshot('Example: "{ \\\\"maxItemsToShow\\\\": 123 }"');
 });
