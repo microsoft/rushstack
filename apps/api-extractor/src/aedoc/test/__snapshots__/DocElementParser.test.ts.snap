@@ -56,7 +56,11 @@ Array [
   },
   Object {
     "kind": "text",
-    "text": " <a href=\\"#\\" /a>",
+    "text": " ",
+  },
+  Object {
+    "kind": "html-tag",
+    "token": "<a href=\\"#\\" />",
   },
 ]
 `;
@@ -65,7 +69,11 @@ exports[`DocElementParser.parseMarkdownishText 6`] = `
 Array [
   Object {
     "kind": "text",
-    "text": "HTML with mixed quotes: <tag attr1=\\"#\\" attr2='#' /a>",
+    "text": "HTML with mixed quotes: ",
+  },
+  Object {
+    "kind": "html-tag",
+    "token": "<tag attr1=\\"#\\" attr2='#' />",
   },
 ]
 `;
