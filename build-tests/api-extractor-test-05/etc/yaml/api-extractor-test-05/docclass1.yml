@@ -11,6 +11,7 @@ items:
     package: api-extractor-test-05
     children:
       - api-extractor-test-05.DocClass1.exampleFunction
+      - api-extractor-test-05.DocClass1.interestingEdgeCases
       - api-extractor-test-05.DocClass1.tableExample
   - uid: api-extractor-test-05.DocClass1.exampleFunction
     summary: This is an overloaded function.
@@ -34,6 +35,22 @@ items:
           description: the second string
           type:
             - string
+  - uid: api-extractor-test-05.DocClass1.interestingEdgeCases
+    summary: |-
+      Example: "{ \\"maxItemsToShow\\": 123 }"
+
+      The regular expression used to validate the constraints is /^\[a-zA-Z0-9\\-\_\]+$/
+    name: interestingEdgeCases()
+    fullName: api-extractor-test-05.DocClass1.interestingEdgeCases
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'interestingEdgeCases(): void;'
+      return:
+        type:
+          - void
+        description: ''
   - uid: api-extractor-test-05.DocClass1.tableExample
     summary: 'An example with tables:'
     remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>

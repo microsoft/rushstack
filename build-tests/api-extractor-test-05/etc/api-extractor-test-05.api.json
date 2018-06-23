@@ -86,6 +86,37 @@
           "isVirtual": false,
           "isOverride": false
         },
+        "interestingEdgeCases": {
+          "kind": "method",
+          "signature": "interestingEdgeCases(): void;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "Example: \"{ \\\"maxItemsToShow\\\": 123 }\""
+            },
+            {
+              "kind": "paragraph"
+            },
+            {
+              "kind": "text",
+              "text": "The regular expression used to validate the constraints is /^[a-zA-Z0-9\\-_]+$/"
+            }
+          ],
+          "remarks": [],
+          "isBeta": false,
+          "isSealed": false,
+          "isVirtual": false,
+          "isOverride": false
+        },
         "tableExample": {
           "kind": "method",
           "signature": "tableExample(): void;",

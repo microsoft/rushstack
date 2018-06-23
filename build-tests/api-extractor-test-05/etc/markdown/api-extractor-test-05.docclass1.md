@@ -9,6 +9,7 @@ This is an example class.
 |  Method | Access Modifier | Returns | Description |
 |  --- | --- | --- | --- |
 |  [`exampleFunction(a, b)`](./api-extractor-test-05.docclass1.examplefunction.md) |  | `string` | This is an overloaded function. |
+|  [`interestingEdgeCases()`](./api-extractor-test-05.docclass1.interestingedgecases.md) |  | `void` | Example: "{ \\"maxItemsToShow\\": 123 }"<p/>The regular expression used to validate the constraints is /^\[a-zA-Z0-9\\-\_\]+$/ |
 |  [`tableExample()`](./api-extractor-test-05.docclass1.tableexample.md) |  | `void` | An example with tables: |
 
 ## Remarks
