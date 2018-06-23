@@ -77,3 +77,24 @@ Array [
   },
 ]
 `;
+
+exports[`DocElementParser.parseMarkdownishText 7`] = `
+Array [
+  Object {
+    "kind": "text",
+    "text": "escaped and regular HTML: <a>\\\\",
+  },
+  Object {
+    "kind": "html-tag",
+    "token": "<b>",
+  },
+  Object {
+    "kind": "text",
+    "text": "<c>",
+  },
+  Object {
+    "kind": "html-tag",
+    "token": "<d>",
+  },
+]
+`;
