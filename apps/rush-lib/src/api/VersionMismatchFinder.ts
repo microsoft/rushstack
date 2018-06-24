@@ -6,12 +6,26 @@ import * as colors from 'colors';
 import { RushConfiguration } from './RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { PackageJsonDependency, DependencyType, PackageJsonEditor } from './PackageJsonEditor';
+import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
+import { Variants } from './Variants';
 
 export interface IVersionMismatchFinderProject {
   packageName: string;
   cyclicDependencyProjects: Set<string>;
   packageJsonEditor: PackageJsonEditor;
   skipRushCheck?: boolean;
+}
+
+export interface IVersionMismatchFinderRushCheckOptions {
+  variant?: Variants.IVariantName;
+}
+
+export interface IVersionMismatchFinderEnsureConsistentVersionsOptions {
+  variant?: Variants.IVariantName;
+}
+
+export interface IVersionMismatchFinderGetMismatchesOptions {
+  variant?: Variants.IVariantName;
 }
 
 /**
@@ -29,23 +43,40 @@ export class VersionMismatchFinder {
   private _mismatches: Map<string, Map<string, string[]>>;
   private _projects: IVersionMismatchFinderProject[];
 
-  public static rushCheck(rushConfiguration: RushConfiguration): void {
-    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, true);
+  public static rushCheck(
+    rushConfiguration: RushConfiguration,
+    options: IVersionMismatchFinderRushCheckOptions = {}
+  ): void {
+    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
+      ...options,
+      isRushCheckCommand: true
+    });
   }
 
-  public static ensureConsistentVersions(rushConfiguration: RushConfiguration): void {
-    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, false);
+  public static ensureConsistentVersions(
+    rushConfiguration: RushConfiguration,
+    options: IVersionMismatchFinderEnsureConsistentVersionsOptions = {}
+  ): void {
+    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, {
+      ...options,
+      isRushCheckCommand: false
+    });
   }
 
   /**
    * Populates a version mismatch finder object given a Rush Configuration.
    * Intentionally considers preferred versions.
    */
-  public static getMismatches(rushConfiguration: RushConfiguration): VersionMismatchFinder {
+  public static getMismatches(
+    rushConfiguration: RushConfiguration,
+    options: IVersionMismatchFinderRushCheckOptions = {}
+  ): VersionMismatchFinder {
     // Collect all the preferred versions into a single table
     const allPreferredVersions: { [dependency: string]: string } = {};
 
-    rushConfiguration.commonVersions.getAllPreferredVersions().forEach((version: string, dependency: string) => {
+    const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(options.variant);
+
+    commonVersions.getAllPreferredVersions().forEach((version: string, dependency: string) => {
       allPreferredVersions[dependency] = version;
     });
 
@@ -62,17 +93,20 @@ export class VersionMismatchFinder {
 
     return new VersionMismatchFinder(
       projects,
-      rushConfiguration.commonVersions.allowedAlternativeVersions
+      commonVersions.allowedAlternativeVersions
     );
   }
 
   private static _checkForInconsistentVersions(
     rushConfiguration: RushConfiguration,
-    isRushCheckCommand: boolean): void {
+    options: {
+      isRushCheckCommand: boolean;
+      variant?: Variants.IVariantName;
+    }): void {
 
-    if (rushConfiguration.ensureConsistentVersions || isRushCheckCommand) {
+    if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder
-        = VersionMismatchFinder.getMismatches(rushConfiguration);
+        = VersionMismatchFinder.getMismatches(rushConfiguration, options);
 
       mismatchFinder.print();
 
@@ -80,7 +114,7 @@ export class VersionMismatchFinder {
         console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
         process.exit(1);
       } else {
-        if (isRushCheckCommand) {
+        if (options.isRushCheckCommand) {
           console.log(colors.green(`Found no mis-matching dependencies!`));
         }
       }

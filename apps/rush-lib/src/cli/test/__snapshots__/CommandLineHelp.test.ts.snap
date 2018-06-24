@@ -52,7 +52,7 @@ For detailed help about a specific command, use: rush <command> -h
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush add" 1`] = `
+exports[`CommandLineHelp prints the help for each action: add 1`] = `
 "usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--dev] [-m] [-s]
 
 Adds a specified package as a dependency of the current project (as 
@@ -92,7 +92,7 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush build" 1`] = `
+exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: rush build [-h] [-p COUNT] [-t PROJECT1]
                   [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2] [-v]
                   [-o] [-s] [-m]
@@ -139,7 +139,7 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush change" 1`] = `
+exports[`CommandLineHelp prints the help for each action: change 1`] = `
 "usage: rush change [-h] [-v] [-b BRANCH]
 
 Asks a series of questions and then generates a <branchname>-<timstamp>.json 
@@ -171,18 +171,21 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush check" 1`] = `
-"usage: rush check [-h]
+exports[`CommandLineHelp prints the help for each action: check 1`] = `
+"usage: rush check [-h] [--variant VARIANT]
 
 Checks each project's package.json files and ensures that all dependencies 
 are of the same version throughout the repository.
 
 Optional arguments:
-  -h, --help  Show this help message and exit.
+  -h, --help         Show this help message and exit.
+  --variant VARIANT  Run command using a variant installation configuration. 
+                     This parameter may alternatively specified via the 
+                     RUSH_VARIANT environment variable.
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush deploy" 1`] = `
+exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
 "usage: rush deploy [-h] [--locale {en-us,fr-fr,es-es,zh-cn}]
 
 Uploads all the built assets to the CDN
@@ -196,7 +199,7 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush import-strings" 1`] = `
+exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
 "usage: rush import-strings [-h] [-p COUNT] [-t PROJECT1]
                            [--to-version-policy VERSION_POLICY_NAME]
                            [-f PROJECT2] [-v]
@@ -232,7 +235,7 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush init" 1`] = `
+exports[`CommandLineHelp prints the help for each action: init 1`] = `
 "usage: rush init [-h] [--overwrite-existing] [--rush-example-repo]
 
 When invoked in an empty folder, this command provisions a standard set of 
@@ -253,9 +256,10 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush install" 1`] = `
+exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
+                    [--variant VARIANT]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -289,11 +293,14 @@ Optional arguments:
                         Activates verbose logging for the package manager. 
                         You will probably want to pipe the output of Rush to 
                         a file when using this command.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively 
+                        specified via the RUSH_VARIANT environment variable.
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush link" 1`] = `
-"usage: rush link [-h] [-f]
+exports[`CommandLineHelp prints the help for each action: link 1`] = `
+"usage: rush link [-h] [-f] [--variant VARIANT]
 
 Create node_modules symlinks for all projects. This operation is normally 
 performed automatically as part of \\"rush install\\" or \\"rush update\\". You 
@@ -302,13 +309,16 @@ reason, or if you specified the \\"--no-link\\" option for \\"rush install\\" or
 \\"rush update\\".
 
 Optional arguments:
-  -h, --help   Show this help message and exit.
-  -f, --force  Deletes and recreates all links, even if the filesystem state 
-               seems to indicate that this is unnecessary.
+  -h, --help         Show this help message and exit.
+  -f, --force        Deletes and recreates all links, even if the filesystem 
+                     state seems to indicate that this is unnecessary.
+  --variant VARIANT  Run command using a variant installation configuration. 
+                     This parameter may alternatively specified via the 
+                     RUSH_VARIANT environment variable.
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush publish" 1`] = `
+exports[`CommandLineHelp prints the help for each action: publish 1`] = `
 "usage: rush publish [-h] [-a] [-b BRANCH] [-p] [--add-commit-details]
                     [--regenerate-changelogs] [-r REGISTRY] [-n TOKEN]
                     [-t TAG] [--pack] [--release-folder FOLDER]
@@ -380,7 +390,7 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush purge" 1`] = `
+exports[`CommandLineHelp prints the help for each action: purge 1`] = `
 "usage: rush purge [-h] [--unsafe]
 
 The \\"rush purge\\" command is used to delete temporary files created by Rush. 
@@ -397,7 +407,7 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush rebuild" 1`] = `
+exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
 "usage: rush rebuild [-h] [-p COUNT] [-t PROJECT1]
                     [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2]
                     [-v] [-s] [-m]
@@ -438,7 +448,7 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush scan" 1`] = `
+exports[`CommandLineHelp prints the help for each action: scan 1`] = `
 "usage: rush scan [-h]
 
 The NPM system allows a project to import dependencies without explicitly 
@@ -455,7 +465,7 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush unlink" 1`] = `
+exports[`CommandLineHelp prints the help for each action: unlink 1`] = `
 "usage: rush unlink [-h]
 
 This removes the symlinks created by the \\"rush link\\" command. This is useful 
@@ -467,10 +477,10 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush update" 1`] = `
+exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
-                   [--full] [--recheck]
+                   [--variant VARIANT] [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -503,6 +513,9 @@ Optional arguments:
                         Activates verbose logging for the package manager. 
                         You will probably want to pipe the output of Rush to 
                         a file when using this command.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively 
+                        specified via the RUSH_VARIANT environment variable.
   --full                Normally \\"rush update\\" tries to preserve your 
                         existing installed versions and only makes the 
                         minimum updates needed to satisfy the package.json 
@@ -525,11 +538,12 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for "rush version" 1`] = `
+exports[`CommandLineHelp prints the help for each action: version 1`] = `
 "usage: rush version [-h] [-b BRANCH] [--ensure-version-policy]
                     [--override-version NEW_VERSION] [--bump]
                     [--bypass-policy] [--version-policy POLICY]
                     [--override-bump BUMPTYPE] [--override-prerelease-id ID]
+                    [--variant VARIANT]
                     
 
 (EXPERIMENTAL) use this \\"rush version\\" command to ensure version policies and 
@@ -566,5 +580,8 @@ Optional arguments:
                         prerelease id when \\"--bump\\" is provided but only 
                         replaces the prerelease name when 
                         \\"--ensure-version-policy\\" is provided.
+  --variant VARIANT     Run command using a variant installation 
+                        configuration. This parameter may alternatively 
+                        specified via the RUSH_VARIANT environment variable.
 "
 `;

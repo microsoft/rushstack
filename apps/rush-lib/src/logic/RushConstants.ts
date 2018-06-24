@@ -57,6 +57,13 @@ export namespace RushConstants {
   export const rushTempProjectsFolderName: string = 'projects';
 
   /**
+   * The folder name ("variants") under which named variant configurations for
+   * alternate dependency sets may be found.
+   * Example: "C:\MyRepo\common\config\rush\variants"
+   */
+  export const rushVariantsFolderName: string = 'variants';
+
+  /**
    * The filename ("npm-shrinkwrap.json") used to store state for the "npm shrinkwrap"
    * command.
    */

@@ -19,7 +19,13 @@ export const enum EnvironmentVariableNames {
    * the version selector.  The default value is determined by the "rushVersion"
    * field from rush.json.
    */
-  RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION'
+  RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION',
+
+  /**
+   * This variable selects an alternate 'variant' for Rush to use when installing
+   * and linking package dependencies.
+   */
+  RUSH_VARIANT = 'RUSH_VARIANT'
 }
 
 /**
@@ -60,6 +66,7 @@ export class EnvironmentConfiguration {
             break;
 
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
+          case EnvironmentVariableNames.RUSH_VARIANT:
             // Handled by @microsoft/rush front end
             break;
           default:

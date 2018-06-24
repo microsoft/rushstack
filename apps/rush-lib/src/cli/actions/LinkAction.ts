@@ -7,9 +7,12 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { LinkManagerFactory } from '../../logic/LinkManagerFactory';
 import { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
+import { CommandLineStringParameter } from '@microsoft/ts-command-line';
+import { Variants } from '../../api/Variants';
 
 export class LinkAction extends BaseRushAction {
   private _force: CommandLineFlagParameter;
+  private _variant: CommandLineStringParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -30,10 +33,14 @@ export class LinkAction extends BaseRushAction {
       description: 'Deletes and recreates all links, even if the filesystem state seems to indicate that this is ' +
         'unnecessary.'
     });
+
+    this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
 
   protected run(): Promise<void> {
-    const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+    const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration, {
+      variant: this._variant.value
+    });
     return linkManager.createSymlinksForProjects(this._force.value);
   }
 }

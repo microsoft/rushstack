@@ -204,6 +204,23 @@
   },
 
   /**
+   * Variations of dependencies which may be installed other than the default.
+   * The actual dependency configuration for a variant is specified under
+   * /common/config/rush/variants/<variant_name>
+   * and can include an alternate common-versions.json file.
+   * After running "rush change --variant <variant_name>", a shrinkwrap file will be produced
+   * under the folder for the variant, and should be committed via Git.
+   */
+  /*[BEGIN "HYPOTHETICAL"]*/
+  "variants": [
+    {
+      "variantName": "test",
+      "description": "A variant of dependencies used when testing."
+    }
+  ],
+  /*[END "HYPOTHETICAL"]*/
+
+  /**
    * Rush can collect anonymous telemetry about everyday developer activity such as
    * success/failure of installs, builds, and other operations.  You can use this to identify
    * problems with your toolchain or Rush itself.  THIS TELEMETRY IS NOT SHARED WITH MICROSOFT.

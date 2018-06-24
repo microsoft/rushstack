@@ -13,6 +13,7 @@ import { Path } from '@microsoft/node-core-library';
 import { RushConstants } from '../logic/RushConstants';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Git } from './Git';
+import { Variants } from '../api/Variants';
 
 export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests
@@ -129,10 +130,14 @@ export class PackageChangeAnalyzer {
     //  });
     // }
 
+    // Determine the current variant from the link JSON.
+    const variant: Variants.IVariantName = this._rushConfiguration.currentInstalledVariant;
+
     // Add the shrinkwrap file to every project's dependencies
+
     const shrinkwrapFile: string =
       path.relative(this._rushConfiguration.rushJsonFolder,
-        this._rushConfiguration.committedShrinkwrapFilename)
+        this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
         .replace(/\\/g, '/');
 
     for (const project of this._rushConfiguration.projects) {

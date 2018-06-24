@@ -30,7 +30,10 @@ const DEBUG: boolean = false;
 export class PnpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
     try {
-      const rushLinkJson: IRushLinkJson = { localLinks: {} };
+      const rushLinkJson: IRushLinkJson = {
+        localLinks: {},
+        ...(this._variant ? { variant: this._variant } : {})
+      };
 
       let promise: Promise<void> = Promise.resolve();
 

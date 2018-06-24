@@ -87,7 +87,8 @@ enum DependencyType {
 // @public
 enum EnvironmentVariableNames {
   RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
-  RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER"
+  RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
+  RUSH_VARIANT = "RUSH_VARIANT"
 }
 
 // @beta
@@ -196,17 +197,28 @@ class Rush {
 class RushConfiguration {
   readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
   readonly changesFolder: string;
+  // @deprecated
   readonly committedShrinkwrapFilename: string;
   readonly commonFolder: string;
   readonly commonRushConfigFolder: string;
   readonly commonScriptsFolder: string;
   readonly commonTempFolder: string;
+  // @deprecated
   readonly commonVersions: CommonVersionsConfiguration;
+  // WARNING: The type "Variants.IVariantName" needs to be exported by the package (e.g. added to index.ts)
+  readonly currentInstalledVariant: Variants.IVariantName;
+  readonly currentVariantJsonFilename: string;
   readonly ensureConsistentVersions: boolean;
   // @beta
   readonly eventHooks: EventHooks;
   findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
+  // WARNING: The type "Variants.IVariantName" needs to be exported by the package (e.g. added to index.ts)
+  getCommittedShrinkwrapFilename(variant?: Variants.IVariantName): string;
+  // WARNING: The type "Variants.IVariantName" needs to be exported by the package (e.g. added to index.ts)
+  getCommonVersions(variant?: Variants.IVariantName): CommonVersionsConfiguration;
+  // WARNING: The type "Variants.IVariantName" needs to be exported by the package (e.g. added to index.ts)
+  getPnpmFilename(variant?: Variants.IVariantName): string;
   getProjectByName(projectName: string): RushConfigurationProject | undefined;
   readonly gitAllowedEmailRegExps: string[];
   readonly gitSampleEmail: string;
@@ -269,6 +281,14 @@ class RushConfigurationProject {
   readonly versionPolicy: VersionPolicy | undefined;
   // @beta
   readonly versionPolicyName: string | undefined;
+}
+
+// WARNING: Unsupported export "IVariantName" Currently the "namespace" block only supports constant variables.
+// @beta
+module Variants {
+  // (undocumented)
+  VARIANT_PARAMETER: ICommandLineStringDefinition;
+
 }
 
 // @beta

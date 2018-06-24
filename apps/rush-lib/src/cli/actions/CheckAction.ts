@@ -4,8 +4,12 @@
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { Variants } from '../../api/Variants';
+import { CommandLineStringParameter } from '@microsoft/ts-command-line';
 
 export class CheckAction extends BaseRushAction {
+  private _variant: CommandLineStringParameter;
+
   constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'check',
@@ -19,11 +23,13 @@ export class CheckAction extends BaseRushAction {
   }
 
   protected onDefineParameters(): void {
-    // abstract
+    this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
 
   protected run(): Promise<void> {
-    VersionMismatchFinder.rushCheck(this.rushConfiguration);
+    VersionMismatchFinder.rushCheck(this.rushConfiguration, {
+      variant: this._variant.value
+    });
     return Promise.resolve();
   }
 }

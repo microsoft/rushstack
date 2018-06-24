@@ -104,6 +104,27 @@
       },
       "additionalProperties": false
     },
+    "variants": {
+      "description": "A list of allowed installation variants for this repository.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "variantName": {
+            "description": "The name of the variant. Maps to /common/rush/variants/{name} under the repository root.",
+            "type": "string"
+          },
+          "description": {
+            "description": "",
+            "type": "string"
+          }
+        },
+        "required": [
+          "variantName",
+           "description"
+        ]
+      }
+    },
     "repository": {
       "description": "The repository location",
       "type": "object",
