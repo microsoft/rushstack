@@ -157,6 +157,16 @@ export class DocItem {
     }
     return undefined;
   }
+
+  /**
+   * Visits this DocItem and every child DocItem in a preorder traversal.
+   */
+  public forEach(callback: (docItem: DocItem) => void): void {
+    callback(this);
+    for (const child of this.children) {
+      child.forEach(callback);
+    }
+  }
 }
 
 /**
@@ -233,5 +243,14 @@ export class DocItemSet {
 
     result.docItem = result.closestMatch;
     return result;
+  }
+
+  /**
+   * Visits every DocItem in the tree.
+   */
+  public forEach(callback: (docItem: DocItem) => void): void {
+    for (const docPackage of this.docPackages) {
+      docPackage.forEach(callback);
+    }
   }
 }
