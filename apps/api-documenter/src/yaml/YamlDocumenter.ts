@@ -54,34 +54,7 @@ export class YamlDocumenter {
     this._docItemSet = docItemSet;
     this._docItemsByTypeName = new Map<string, DocItem>();
 
-    // Collect the _docItemsByTypeName table
-    const ambiguousNames: Set<string> = new Set<string>();
-
-    this._docItemSet.forEach((docItem: DocItem) => {
-      switch (docItem.kind) {
-        case DocItemKind.Class:
-        case DocItemKind.Enum:
-        case DocItemKind.Interface:
-          const typeName: string = docItem.name;
-          if (ambiguousNames.has(typeName)) {
-            break;
-          }
-
-          if (this._docItemsByTypeName.has(typeName)) {
-            // We saw this name before, so it's an ambiguous match
-            ambiguousNames.add(typeName);
-            break;
-          }
-
-          this._docItemsByTypeName.set(typeName, docItem);
-          break;
-      }
-    });
-
-    // Remove the ambiguous matches
-    for (const ambiguousName of ambiguousNames) {
-      this._docItemsByTypeName.delete(ambiguousName);
-    }
+    this._initDocItemsByTypeName();
   }
 
   public generateFiles(outputFolder: string): void { // virtual
@@ -489,6 +462,53 @@ export class YamlDocumenter {
   }
 
   /**
+   * Initialize the _docItemsByTypeName() data structure.
+   */
+  private _initDocItemsByTypeName(): void {
+    // Collect the _docItemsByTypeName table
+    const ambiguousNames: Set<string> = new Set<string>();
+
+    this._docItemSet.forEach((docItem: DocItem) => {
+      switch (docItem.kind) {
+        case DocItemKind.Class:
+        case DocItemKind.Enum:
+        case DocItemKind.Interface:
+          // Attempt to register both the fully qualified name and the short name
+          const namesForType: string[] = [docItem.name];
+
+          // Note that nameWithDot cannot conflict with docItem.name (because docItem.name
+          // cannot contain a dot)
+          const nameWithDot: string | undefined = this._getTypeNameWithDot(docItem);
+          if (nameWithDot) {
+            namesForType.push(nameWithDot);
+          }
+
+          // Register all names
+          for (const typeName of namesForType) {
+            if (ambiguousNames.has(typeName)) {
+              break;
+            }
+
+            if (this._docItemsByTypeName.has(typeName)) {
+              // We saw this name before, so it's an ambiguous match
+              ambiguousNames.add(typeName);
+              break;
+            }
+
+            this._docItemsByTypeName.set(typeName, docItem);
+          }
+
+          break;
+      }
+    });
+
+    // Remove the ambiguous matches
+    for (const ambiguousName of ambiguousNames) {
+      this._docItemsByTypeName.delete(ambiguousName);
+    }
+  }
+
+  /**
    * This is a temporary workaround to enable limited autolinking of API item types
    * until the YAML file format is enhanced to support general hyperlinks.
    * @remarks
@@ -499,12 +519,29 @@ export class YamlDocumenter {
    * it is given #2 but substitutes #1 if the name can be matched to a DocItem.
    */
   private _linkToUidIfPossible(typeName: string): string {
+    // Note that typeName might be a _getTypeNameWithDot() name or it might be a simple class name
     const docItem: DocItem | undefined = this._docItemsByTypeName.get(typeName.trim());
     if (docItem) {
       // Substitute the UID
       return this._getUid(docItem);
     }
     return typeName;
+  }
+
+  /**
+   * If the docItem represents a scoped name such as "my-library:MyNamespace.MyClass",
+   * this returns a string such as "MyNamespace.MyClass".  If the result would not
+   * have at least one dot in it, then undefined is returned.
+   */
+  private _getTypeNameWithDot(docItem: DocItem): string | undefined {
+    const hierarchy: DocItem[] = docItem.getHierarchy();
+    if (hierarchy.length > 0 && hierarchy[0].kind === DocItemKind.Package) {
+      hierarchy.shift(); // ignore the package qualifier
+    }
+    if (hierarchy.length < 1) {
+      return undefined;
+    }
+    return hierarchy.map(x => x.name).join('.');
   }
 
   private _getYamlItemName(docItem: DocItem): string {
