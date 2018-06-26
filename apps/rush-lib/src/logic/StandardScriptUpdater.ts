@@ -75,7 +75,7 @@ export class StandardScriptUpdater {
           + ' for this Rush version.  Please run "rush update" and commit the changes.');
       } else {
         console.log(`Script is out of date; updating "${targetFilePath}"`);
-        fsx.copyFileSync(sourceFilePath, targetFilePath);
+        fsx.copySync(sourceFilePath, targetFilePath);
       }
     }
 
