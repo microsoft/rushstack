@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as fsx from 'fs-extra';
+import * as fs from 'fs';
 import * as semver from 'semver';
-import { JsonFile, JsonSchema, PackageName } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, PackageName, FileSystem } from '@microsoft/node-core-library';
 
 import { Rush } from '../api/Rush';
 import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
@@ -225,7 +225,7 @@ export class RushConfiguration {
     for (let i: number = 0; i < 10; ++i) {
       const rushJsonFilename: string = path.join(currentFolder, 'rush.json');
 
-      if (fsx.existsSync(rushJsonFilename)) {
+      if (FileSystem.exists(rushJsonFilename)) {
         if (i > 0 && verbose) {
           console.log('Found configuration in ' + rushJsonFilename);
         }
@@ -288,18 +288,16 @@ export class RushConfiguration {
    * recognized config files.
    */
   private static _validateCommonRushConfigFolder(commonRushConfigFolder: string, packageManager: PackageManager): void {
-    if (!fsx.existsSync(commonRushConfigFolder)) {
+    if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
-      fsx.mkdirsSync(commonRushConfigFolder);
+      FileSystem.createFolder(commonRushConfigFolder);
       return;
     }
 
-    const filenames: string[] = fsx.readdirSync(commonRushConfigFolder);
-    for (const filename of filenames) {
-      const resolvedFilename: string = path.resolve(commonRushConfigFolder, filename);
+    for (const filename of FileSystem.readFolder(commonRushConfigFolder)) {
 
       // Ignore things that aren't actual files
-      const stat: fsx.Stats = fsx.lstatSync(resolvedFilename);
+      const stat: fs.Stats = FileSystem.getStatistics(filename);
       if (!stat.isFile() && !stat.isSymbolicLink()) {
         continue;
       }
@@ -326,7 +324,7 @@ export class RushConfiguration {
     }
 
     const pinnedVersionsFilename: string = path.join(commonRushConfigFolder, RushConstants.pinnedVersionsFilename);
-    if (fsx.existsSync(pinnedVersionsFilename)) {
+    if (FileSystem.exists(pinnedVersionsFilename)) {
       throw new Error('The "pinned-versions.json" config file is no longer supported;'
         + ' please move your settings to the "preferredVersions" field of a "common-versions.json" config file.'
         + ` (See the ${RushConstants.rushWebSiteUrl} documentation for details.)\n\n`

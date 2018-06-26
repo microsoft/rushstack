@@ -3,9 +3,8 @@
 
 /* tslint:disable:no-bitwise */
 
-import * as fs from 'fs';
 import * as ts from 'typescript';
-import { Text } from '@microsoft/node-core-library';
+import { Text, FileSystem } from '@microsoft/node-core-library';
 
 import { ExtractorContext } from '../../ExtractorContext';
 import { IndentedWriter } from '../../utils/IndentedWriter';
@@ -119,7 +118,7 @@ export class DtsRollupGenerator {
     // Normalize to CRLF
     const fileContent: string = Text.convertToCrLf(indentedWriter.toString());
 
-    fs.writeFileSync(dtsFilename, fileContent);
+    FileSystem.writeFile(dtsFilename, fileContent);
   }
 
   private get astEntryPoint(): AstEntryPoint {

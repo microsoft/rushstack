@@ -1,12 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as colors from 'colors';
 
 import yaml = require('js-yaml');
-import { JsonFile, JsonSchema, Text, PackageName } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  JsonSchema,
+  PackageName,
+  FileSystem,
+  NewlineConversion
+} from '@microsoft/node-core-library';
 import {
   MarkupElement,
   IApiMethod,
@@ -402,10 +407,9 @@ export class YamlDocumenter {
       stringified = `### YamlMime:${yamlMimeType}\n` + stringified;
     }
 
-    const normalized: string = Text.convertToCrLf(stringified);
-
-    fsx.mkdirsSync(path.dirname(filePath));
-    fsx.writeFileSync(filePath, normalized);
+    FileSystem.writeFile(filePath, stringified, {
+      convertLineEndings: NewlineConversion.CrLf
+    });
 
     if (schema) {
       schema.validateObject(dataObject, filePath);
@@ -482,6 +486,6 @@ export class YamlDocumenter {
 
   private _deleteOldOutputFiles(): void {
     console.log('Deleting old output from ' + this._outputFolder);
-    fsx.emptyDirSync(this._outputFolder);
+    FileSystem.emptyFolder(this._outputFolder);
   }
 }

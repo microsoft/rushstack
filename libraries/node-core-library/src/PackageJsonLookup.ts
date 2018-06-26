@@ -3,11 +3,11 @@
 
 /* tslint:disable:no-constant-condition */
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import { JsonFile } from './JsonFile';
 import { IPackageJson } from './IPackageJson';
 import { FileConstants } from './Constants';
+import { FileSystem } from '../dist/index-internal';
 
 /**
  * Constructor parameters for {@link PackageJsonLookup}
@@ -145,13 +145,13 @@ export class PackageJsonLookup {
    * @param jsonFilename - a relative or absolute path to a package.json file
    */
   public loadPackageJson(jsonFilename: string): IPackageJson {
-    if (!fsx.existsSync(jsonFilename)) {
+    if (!FileSystem.exists(jsonFilename)) {
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
 
     // Since this will be a cache key, follow any symlinks and get an absolute path
     // to minimize duplication.  (Note that duplication can still occur due to e.g. character case.)
-    const normalizedFilePath: string = fsx.realpathSync(jsonFilename);
+    const normalizedFilePath: string = FileSystem.followLink(jsonFilename);
 
     let packageJson: IPackageJson | undefined = this._packageJsonCache.get(normalizedFilePath);
 
@@ -208,7 +208,7 @@ export class PackageJsonLookup {
     }
 
     // Is resolvedFileOrFolderPath itself a folder with a package.json file?  If so, return it.
-    if (fsx.existsSync(path.join(resolvedFileOrFolderPath, FileConstants.PackageJson))) {
+    if (FileSystem.exists(path.join(resolvedFileOrFolderPath, FileConstants.PackageJson))) {
       this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
       return resolvedFileOrFolderPath;
     }

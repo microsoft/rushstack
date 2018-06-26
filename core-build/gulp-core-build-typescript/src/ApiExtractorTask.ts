@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as Gulp from 'gulp';
 import * as path from 'path';
 import * as ts from 'typescript';
@@ -13,6 +12,7 @@ import {
 } from '@microsoft/api-extractor';
 import { TypeScriptConfiguration } from './TypeScriptConfiguration';
 import gulpTypeScript = require('gulp-typescript');
+import { FileSystem } from '../../../libraries/node-core-library/dist/index-internal';
 
 /** @public */
 export interface IApiExtractorTaskConfig {
@@ -157,7 +157,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
       }
 
       const typingsFilePath: string = path.join(this.buildConfig.rootPath, 'typings/tsd.d.ts');
-      const otherFiles: string[] = fsx.existsSync(typingsFilePath) ? [typingsFilePath] : [];
+      const otherFiles: string[] = FileSystem.exists(typingsFilePath) ? [typingsFilePath] : [];
 
       // tslint:disable-next-line:no-any
       const gulpTypeScriptSettings: gulpTypeScript.Settings =
@@ -232,7 +232,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
       return false;
     }
 
-    if (!fsx.existsSync(this.taskConfig.entry)) {
+    if (!FileSystem.exists(this.taskConfig.entry)) {
       this.logError(`Entry file ${this.taskConfig.entry} does not exist.`);
       return false;
     }

@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 
 import {
   CommandLineAction,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
+
+import { FileSystem } from '@microsoft/node-core-library';
 
 import { DocItemSet } from '../utils/DocItemSet';
 
@@ -41,14 +42,14 @@ export abstract class BaseAction extends CommandLineAction {
     const docItemSet: DocItemSet = new DocItemSet();
 
     this.inputFolder = this._inputFolderParameter.value || './input';
-    if (!fsx.existsSync(this.inputFolder)) {
+    if (!FileSystem.exists(this.inputFolder)) {
       throw new Error('The input folder does not exist: ' + this.inputFolder);
     }
 
     this.outputFolder = this._outputFolderParameter.value || `./${this.actionName}`;
-    fsx.mkdirsSync(this.outputFolder);
+    FileSystem.createFolder(this.outputFolder);
 
-    for (const filename of fsx.readdirSync(this.inputFolder)) {
+    for (const filename of FileSystem.readFolder(this.inputFolder)) {
       if (filename.match(/\.api\.json$/i)) {
         console.log(`Reading ${filename}`);
         const filenamePath: string = path.join(this.inputFolder, filename);

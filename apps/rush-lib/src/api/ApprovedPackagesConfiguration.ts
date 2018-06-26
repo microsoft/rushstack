@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
-import { JsonFile, JsonSchema, Text } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem, NewlineConversion } from '@microsoft/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 
@@ -93,7 +92,7 @@ export class ApprovedPackagesConfiguration {
    * If the file exists, calls loadFromFile().
    */
   public tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean {
-    if (!fsx.existsSync(this._jsonFilename)) {
+    if (!FileSystem.exists(this._jsonFilename)) {
       return false;
     }
 
@@ -162,8 +161,9 @@ export class ApprovedPackagesConfiguration {
     body = '// DO NOT ADD COMMENTS IN THIS FILE.'
       + '  They will be lost when the Rush tool resaves it.\n' + body;
 
-    body = Text.convertToCrLf(body);
-    fsx.writeFileSync(this._jsonFilename, body);
+    FileSystem.writeFile(this._jsonFilename, body, {
+      convertLineEndings: NewlineConversion.CrLf
+    });
   }
 
   /**

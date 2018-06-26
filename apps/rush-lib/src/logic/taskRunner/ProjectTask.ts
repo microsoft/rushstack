@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as process from 'process';
-import { JsonFile, Text } from '@microsoft/node-core-library';
+import { JsonFile, Text, FileSystem } from '@microsoft/node-core-library';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { IPackageDeps } from '@microsoft/package-deps-hash';
 
@@ -101,7 +100,7 @@ export class ProjectTask implements ITaskDefinition {
       writer.writeLine(`>>> ${this.name}`);
 
       const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
-      if (fsx.existsSync(currentDepsPath)) {
+      if (FileSystem.exists(currentDepsPath)) {
         try {
           lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
         } catch (e) {
@@ -126,8 +125,8 @@ export class ProjectTask implements ITaskDefinition {
         return Promise.resolve(TaskStatus.Skipped);
       } else {
         // If the deps file exists, remove it before starting a build.
-        if (fsx.existsSync(currentDepsPath)) {
-          fsx.unlinkSync(currentDepsPath);
+        if (FileSystem.exists(currentDepsPath)) {
+          FileSystem.deleteFile(currentDepsPath);
         }
 
         if (!taskCommand) {
@@ -237,12 +236,12 @@ export class ProjectTask implements ITaskDefinition {
 
       const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
       if (stdout) {
-        fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
+        FileSystem.writeFile(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
       }
 
       const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
       if (stderr) {
-        fsx.writeFileSync(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
+        FileSystem.writeFile(path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'), stderr);
       }
     } catch (e) {
       console.log(`Error writing logs to disk: ${e}`);

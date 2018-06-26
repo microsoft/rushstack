@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as fsx from 'fs-extra';
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+
+import { FileSystem } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
@@ -20,20 +22,20 @@ export abstract class BaseLinkManager {
   protected _rushConfiguration: RushConfiguration;
 
   protected static _createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
-    fsx.mkdirsSync(path.dirname(linkSource));
+    FileSystem.createFolder(path.dirname(linkSource));
 
     if (symlinkKind === SymlinkKind.Directory) {
       // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-      fsx.symlinkSync(linkTarget, linkSource, 'junction');
+      FileSystem.createSymbolicLinkToFolder(linkTarget, linkSource);
     } else {
       if (process.platform === 'win32') {
         // For files, we use a Windows "hard link", because creating a symbolic link requires
         // administrator permission.
-        fsx.linkSync(linkTarget, linkSource);
+        FileSystem.createHardLinkToFile(linkTarget, linkSource);
       } else {
         // However hard links seem to cause build failures on Mac, so for all other operating systems
         // we use symbolic links for this case.
-        fsx.symlinkSync(linkTarget, linkSource, 'file');
+        FileSystem.createSymbolicLinkToFile(linkTarget, linkSource);
       }
     }
   }
@@ -82,7 +84,7 @@ export abstract class BaseLinkManager {
     // in which case we need to create the '@scope' folder first.
     const parentFolderPath: string = path.dirname(localPackage.folderPath);
     if (parentFolderPath && parentFolderPath !== localPackage.folderPath) {
-      if (!fsx.existsSync(parentFolderPath)) {
+      if (!FileSystem.exists(parentFolderPath)) {
         Utilities.createFolderWithRetry(parentFolderPath);
       }
     }
@@ -97,7 +99,7 @@ export abstract class BaseLinkManager {
       // If there are children, then we need to symlink each item in the folder individually
       Utilities.createFolderWithRetry(localPackage.folderPath);
 
-      for (const filename of fsx.readdirSync(localPackage.symlinkTargetFolderPath)) {
+      for (const filename of FileSystem.readFolder(localPackage.symlinkTargetFolderPath)) {
         if (filename.toLowerCase() !== 'node_modules') {
           // Create the symlink
           let symlinkKind: SymlinkKind = SymlinkKind.File;
@@ -105,10 +107,11 @@ export abstract class BaseLinkManager {
           const linkSource: string = path.join(localPackage.folderPath, filename);
           let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
 
-          const linkStats: fsx.Stats = fsx.lstatSync(linkTarget);
+          const linkStats: fs.Stats = FileSystem.getStatistics(linkTarget);
 
           if (linkStats.isSymbolicLink()) {
-            const targetStats: fsx.Stats = fsx.statSync(linkTarget);
+
+            const targetStats: fs.Stats = FileSystem.getStatistics(FileSystem.followLink(linkTarget));
             if (targetStats.isDirectory()) {
               // Neither a junction nor a directory-symlink can have a directory-symlink
               // as its target; instead, we must obtain the real physical path.
@@ -116,7 +119,7 @@ export abstract class BaseLinkManager {
               // lacks the ability to distinguish between a junction and a directory-symlink
               // (even though it has the ability to create them both), so the safest policy
               // is to always make a junction and always to the real physical path.
-              linkTarget = fsx.realpathSync(linkTarget);
+              linkTarget = FileSystem.followLink(linkTarget);
               symlinkKind = SymlinkKind.Directory;
             }
           } else if (linkStats.isDirectory()) {
@@ -148,7 +151,7 @@ export abstract class BaseLinkManager {
    */
   public createSymlinksForProjects(force: boolean): Promise<void> {
     if (!force) {
-      if (fsx.existsSync(this._rushConfiguration.rushLinkJsonFilename)) {
+      if (FileSystem.exists(this._rushConfiguration.rushLinkJsonFilename)) {
         console.log(colors.green(`Skipping linking -- everything is already up to date.`));
         return Promise.resolve();
       }

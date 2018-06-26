@@ -1,8 +1,8 @@
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 
 import {
-  JsonFile
+  JsonFile,
+  FileSystem
 } from '@microsoft/node-core-library';
 
 import {
@@ -28,13 +28,13 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrapFile | undefined {
     let data: string | undefined = undefined;
     try {
-      if (!fsx.existsSync(shrinkwrapJsonFilename)) {
+      if (!FileSystem.exists(shrinkwrapJsonFilename)) {
         return undefined; // file does not exist
       }
 
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
-      data = fsx.readFileSync(shrinkwrapJsonFilename).toString();
+      data = FileSystem.readFile(shrinkwrapJsonFilename);
       if (data.charCodeAt(0) === 0xFEFF) {  // strip BOM
         data = data.slice(1);
       }

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
@@ -13,6 +12,7 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
+import { FileSystem } from '@microsoft/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
@@ -436,7 +436,7 @@ export class ChangeAction extends BaseRushAction {
     const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
     const filePath: string = changeFile.generatePath();
 
-    if (fsx.existsSync(filePath)) {
+    if (FileSystem.exists(filePath)) {
       // prompt about overwrite
       this._prompt([
         {
@@ -461,8 +461,7 @@ export class ChangeAction extends BaseRushAction {
    * Writes a file to disk, ensuring the directory structure up to that point exists
    */
   private _writeFile(fileName: string, output: string): void {
-    fsx.mkdirsSync(path.dirname(fileName));
-    fsx.writeFileSync(fileName, output);
+    FileSystem.writeFile(fileName, output);
     console.log('Created file: ' + fileName);
   }
 }

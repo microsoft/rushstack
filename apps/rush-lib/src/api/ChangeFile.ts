@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import gitInfo = require('git-repo-info');
 
@@ -10,6 +9,7 @@ import {
   IChangeFile,
   IChangeInfo
 } from './ChangeManagement';
+import { FileSystem } from '@microsoft/node-core-library';
 
 /**
  * This class represents a single change file.
@@ -65,8 +65,7 @@ export class ChangeFile {
    */
   public writeSync(): void {
     const filePath: string = this.generatePath();
-    fsx.ensureFileSync(filePath);
-    fsx.writeFileSync(filePath, JSON.stringify(this._changeFileData, undefined, 2));
+    FileSystem.writeFile(filePath, JSON.stringify(this._changeFileData, undefined, 2));
   }
 
   /**

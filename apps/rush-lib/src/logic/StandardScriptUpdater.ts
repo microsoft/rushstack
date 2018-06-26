@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
-import { Text } from '@microsoft/node-core-library';
+import { Text, FileSystem } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 
@@ -52,14 +51,14 @@ export class StandardScriptUpdater {
     const targetFilePath: string = path.join(rushConfiguration.commonScriptsFolder, scriptName);
     const sourceFilePath: string = path.resolve(__dirname, '../scripts', scriptName);
 
-    fsx.mkdirsSync(rushConfiguration.commonScriptsFolder);
+    FileSystem.createFolder(rushConfiguration.commonScriptsFolder);
 
     // Are the files the same?
     let filesAreSame: boolean = false;
 
-    if (fsx.existsSync(targetFilePath)) {
-      const sourceContent: string = fsx.readFileSync(sourceFilePath).toString();
-      const targetContent: string = fsx.readFileSync(targetFilePath).toString();
+    if (FileSystem.exists(targetFilePath)) {
+      const sourceContent: string = FileSystem.readFile(sourceFilePath);
+      const targetContent: string = FileSystem.readFile(targetFilePath);
 
       const sourceNormalized: string = StandardScriptUpdater._normalize(sourceContent);
       const targetNormalized: string = StandardScriptUpdater._normalize(targetContent);
@@ -75,7 +74,7 @@ export class StandardScriptUpdater {
           + ' for this Rush version.  Please run "rush update" and commit the changes.');
       } else {
         console.log(`Script is out of date; updating "${targetFilePath}"`);
-        fsx.copySync(sourceFilePath, targetFilePath);
+        FileSystem.copyFile(sourceFilePath, targetFilePath);
       }
     }
 

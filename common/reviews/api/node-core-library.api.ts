@@ -11,6 +11,44 @@ class FileDiffTest {
 }
 
 // @public
+class FileSystem {
+  // (undocumented)
+  static copyFile(sourcePath: string, destinationPath: string): void;
+  // (undocumented)
+  static createFolder(folderPath: string): void;
+  // (undocumented)
+  static createHardLinkToFile(linkSource: string, linkTarget: string): void;
+  // (undocumented)
+  static createSymbolicLinkToFile(linkSource: string, linkTarget: string): void;
+  // (undocumented)
+  static createSymbolicLinkToFolder(linkSource: string, linkTarget: string): void;
+  // WARNING: The type "IDeleteFileOptions" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  static deleteFile(filePath: string, options?: IDeleteFileOptions): void;
+  // (undocumented)
+  static deleteFolder(folderPath: string): void;
+  // (undocumented)
+  static emptyFolder(folderPath: string): void;
+  // (undocumented)
+  static exists(path: string): Boolean;
+  // (undocumented)
+  static followLink(linkPath: string): string;
+  // (undocumented)
+  static getStatistics(path: string): fs.Stats;
+  // WARNING: The type "IMoveOptions" needs to be exported by the package (e.g. added to index.ts)
+  // (undocumented)
+  static move(sourcePath: string, destinationPath: string, options?: IMoveOptions): void;
+  // (undocumented)
+  static readFile(filePath: string, options?: IReadFileOptions): string;
+  // (undocumented)
+  static readFileToBuffer(filePath: string): Buffer;
+  // (undocumented)
+  static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
+  // (undocumented)
+  static writeFile(filePath: string, contents: string, options?: IWriteFileOptions): void;
+}
+
+// @public
 enum FolderConstants {
   Git = ".git",
   NodeModules = "node_modules"
@@ -101,6 +139,29 @@ interface IProtectableMapParameters<K, V> {
 }
 
 // @public
+interface IReadFileOptions {
+  // (undocumented)
+  convertLineEndings?: NewlineConversion;
+  // (undocumented)
+  encoding?: string | undefined;
+}
+
+// @public
+interface IReadFolderOptions {
+  absolutePath?: boolean;
+}
+
+// @public
+interface IWriteFileOptions {
+  // (undocumented)
+  convertLineEndings?: NewlineConversion;
+  // (undocumented)
+  encoding?: string | undefined;
+  // (undocumented)
+  ensureFolder?: boolean;
+}
+
+// @public
 class JsonFile {
   static load(jsonFilename: string): any;
   static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): any;
@@ -134,6 +195,16 @@ class LockFile {
 // @public
 class MapExtensions {
   static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: Map<K, V>): void;
+}
+
+// @public
+enum NewlineConversion {
+  // (undocumented)
+  CrLf = 0,
+  // (undocumented)
+  Lf = 1,
+  // (undocumented)
+  None = 2
 }
 
 // @public
