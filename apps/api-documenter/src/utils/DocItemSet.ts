@@ -157,6 +157,16 @@ export class DocItem {
     }
     return undefined;
   }
+
+  /**
+   * Visits this DocItem and every child DocItem in a preorder traversal.
+   */
+  public forEach(callback: (docItem: DocItem) => void): void {
+    callback(this);
+    for (const child of this.children) {
+      child.forEach(callback);
+    }
+  }
 }
 
 /**
@@ -186,27 +196,13 @@ export interface IDocItemSetResolveResult {
 export class DocItemSet {
   public readonly docPackagesByName: Map<string, DocItem> = new Map<string, DocItem>();
   public readonly docPackages: DocItem[] = [];
-  private _calculated: boolean = false;
 
   public loadApiJsonFile(apiJsonFilename: string): void {
-    if (this._calculated) {
-      throw new Error('calculateReferences() was already called');
-    }
-
     const apiPackage: IApiPackage = ApiJsonFile.loadFromFile(apiJsonFilename);
 
     const docItem: DocItem = new DocItem(apiPackage, apiPackage.name, this, undefined);
     this.docPackagesByName.set(apiPackage.name, docItem);
     this.docPackages.push(docItem);
-  }
-
-  public calculateReferences(): void {
-    if (this._calculated) {
-      return;
-    }
-    for (const docPackage of this.docPackages) {
-      this._calculateReferences(docPackage);
-    }
   }
 
   /**
@@ -249,11 +245,12 @@ export class DocItemSet {
     return result;
   }
 
-  private _calculateReferences(docItem: DocItem): void {
-    // (Calculate base classes and child classes)
-
-    for (const child of docItem.children) {
-      this._calculateReferences(child);
+  /**
+   * Visits every DocItem in the tree.
+   */
+  public forEach(callback: (docItem: DocItem) => void): void {
+    for (const docPackage of this.docPackages) {
+      docPackage.forEach(callback);
     }
   }
 }
