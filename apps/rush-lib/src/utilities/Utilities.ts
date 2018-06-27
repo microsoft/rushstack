@@ -123,7 +123,7 @@ export class Utilities {
       return;
     }
 
-    // We need to do a simple "fs.mkdirSync(localModulesFolder)" here,
+    // We need to do a simple "FileSystem.createFolder(localModulesFolder)" here,
     // however if the folder we deleted above happened to contain any files,
     // then there seems to be some OS process (virus scanner?) that holds
     // a lock on the folder for a split second, which causes mkdirSync to

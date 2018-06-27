@@ -6,10 +6,11 @@
 import { GulpTask } from '@microsoft/gulp-core-build';
 import * as forgeType from 'node-forge';
 const forge: typeof forgeType & IForgeExtensions = require('node-forge');
-import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { EOL } from 'os';
+
+import { FileSystem } from '@microsoft/node-core-library';
 
 import { runSudoSync, ISudoSyncResult } from './sudoSync';
 
@@ -194,7 +195,7 @@ function _trySetFriendlyName(certificatePath: string, parentTask: GulpTask<{}>):
       ''
     ].join(EOL);
 
-    fs.writeFileSync(friendlyNamePath, friendlyNameFile);
+    FileSystem.writeFile(friendlyNamePath, friendlyNameFile);
 
     const commands: string[] = [
       '–repairstore',
@@ -340,12 +341,9 @@ function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
   const now: Date = new Date();
   const certificateName: string = now.getTime().toString();
   const tempDirName: string = path.join(__dirname, '..', 'temp');
-  if (!fs.existsSync(tempDirName)) {
-    fs.mkdirSync(tempDirName); // Create the temp dir if it doesn't exist
-  }
 
   const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.cer`);
-  fs.writeFileSync(tempCertificatePath, generatedCertificate.pemCertificate);
+  FileSystem.writeFile(tempCertificatePath, generatedCertificate.pemCertificate);
 
   if (_tryTrustCertificate(tempCertificatePath, parentTask)) {
     certificateStore.certificateData = generatedCertificate.pemCertificate;
@@ -360,7 +358,7 @@ function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
     certificateStore.keyData = undefined;
   }
 
-  fs.unlinkSync(tempCertificatePath);
+  FileSystem.deleteFile(tempCertificatePath);
 }
 
 function _certificateHasSubjectAltName(certificateData: string): boolean {

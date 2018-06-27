@@ -10,7 +10,6 @@ const merge = require('lodash').merge;
 /* tslint:enable:typedef */
 import through2 = require('through2');
 import gutil = require('gulp-util');
-import * as fs from 'fs';
 import * as TSLint from 'tslint';
 import * as path from 'path';
 import * as ts from 'typescript';
@@ -19,6 +18,7 @@ import {
   ITsConfigFile,
   TypeScriptConfiguration
 } from './TypeScriptConfiguration';
+import { JsonFile } from '@microsoft/node-core-library';
 
 export interface ITSLintRulesFile {
   rules?: { [name: string]: any }; /* tslint:disable-line:no-any */
@@ -139,12 +139,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
     const lintRulesFile: ITSLintRulesFile = self._loadLintConfiguration();
 
-    // Write out the active lint rules for easier debugging
-    if (!fs.existsSync(path.dirname(this._getTsLintFilepath()))) {
-      fs.mkdirSync(path.dirname(this._getTsLintFilepath()));
-    }
-
-    fs.writeFileSync(this._getTsLintFilepath(), JSON.stringify(lintRulesFile, undefined, 2));
+    JsonFile.save(lintRulesFile, this._getTsLintFilepath());
 
     const cached = require('gulp-cache'); // tslint:disable-line
 
@@ -157,7 +152,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           this.buildConfig.tempFolder,
           'tslint-tsconfig.json'
         );
-      fs.writeFileSync(tsconfigFilePath, JSON.stringify(tsconfigFileData, undefined, 2));
+      JsonFile.save(tsconfigFileData, tsconfigFilePath);
 
       program = TSLint.Linter.createProgram(
         tsconfigFilePath,

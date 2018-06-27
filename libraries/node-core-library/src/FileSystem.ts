@@ -65,7 +65,7 @@ export interface IDeleteFileOptions {
  * @public
  */
 export class FileSystem {
-  public static exists(path: string): Boolean {
+  public static exists(path: string): boolean {
     return fsx.existsSync(path);
   }
 

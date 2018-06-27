@@ -6,7 +6,11 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { Text, Path, FileSystem } from '@microsoft/node-core-library';
+import {
+  Text,
+  Path,
+  FileSystem
+} from '@microsoft/node-core-library';
 
 import { Utilities } from './Utilities';
 
@@ -55,7 +59,7 @@ export class AsyncRecycler {
 
     ++this._movedFolderCount;
 
-    // We need to do a simple "fs.renameSync" here, however if the folder we're trying to rename
+    // We need to do a simple "FileSystem.move" here, however if the folder we're trying to rename
     // has a lock, or if its destination container doesn't exist yet,
     // then there seems to be some OS process (virus scanner?) that holds
     // a lock on the folder for a split second, which causes renameSync to

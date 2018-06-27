@@ -41,7 +41,7 @@ class FileSystem {
   // (undocumented)
   static emptyFolder(folderPath: string): void;
   // (undocumented)
-  static exists(path: string): Boolean;
+  static exists(path: string): boolean;
   // (undocumented)
   static followLink(linkPath: string): string;
   // (undocumented)

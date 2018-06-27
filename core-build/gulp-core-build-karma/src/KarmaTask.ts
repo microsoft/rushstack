@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
+import { FileSystem } from '@microsoft/node-core-library';
 
 import * as os from 'os';
-import * as fs from 'fs';
 import * as Gulp from 'gulp';
 import * as path from 'path';
 import * as KarmaType from 'karma';
@@ -126,10 +126,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
         // tslint:enable:max-line-length
 
         const tempFolder: string = path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder);
-        if (!fs.existsSync(tempFolder)) {
-          fs.mkdirSync(tempFolder);
-        }
-        fs.writeFileSync(path.join(tempFolder, 'tests.js'), testsJsFileContents);
+        FileSystem.writeFile(path.join(tempFolder, 'tests.js'), testsJsFileContents);
       }
 
       const karma: typeof KarmaType = require('karma'); // tslint:disable-line

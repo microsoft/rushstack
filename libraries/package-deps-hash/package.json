@@ -16,6 +16,7 @@
     "build": "gulp test --clean"
   },
   "devDependencies": {
+    "@microsoft/node-core-library": "1.4.1",
     "@microsoft/node-library-build": "4.3.46",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
