@@ -308,7 +308,9 @@ export class Extractor {
       const actualApiReviewContent: string = generator.generateApiFileContent(context);
 
       // Write the actual file
-      FileSystem.writeFile(actualApiReviewPath, actualApiReviewContent);
+      FileSystem.writeFile(actualApiReviewPath, actualApiReviewContent, {
+        ensureFolder: true
+      });
 
       // Compare it against the expected file
       if (FileSystem.exists(expectedApiReviewPath)) {
@@ -328,9 +330,7 @@ export class Extractor {
             this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
               + ` Updating ${expectedApiReviewShortPath}`);
 
-            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent, {
-              ensureFolder: false // we already know the folder exists, since we just read the file
-            });
+            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent);
           }
         } else {
           this._monitoredLogger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);

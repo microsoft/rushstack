@@ -601,8 +601,7 @@ export class MarkdownDocumenter {
     });
 
     FileSystem.writeFile(filename, content, {
-      convertLineEndings: NewlineConversion.CrLf,
-      ensureFolder: false
+      convertLineEndings: NewlineConversion.CrLf
     });
   }
 

@@ -461,7 +461,9 @@ export class ChangeAction extends BaseRushAction {
    * Writes a file to disk, ensuring the directory structure up to that point exists
    */
   private _writeFile(fileName: string, output: string): void {
-    FileSystem.writeFile(fileName, output);
+    FileSystem.writeFile(fileName, output, {
+      ensureFolder: true
+    });
     console.log('Created file: ' + fileName);
   }
 }

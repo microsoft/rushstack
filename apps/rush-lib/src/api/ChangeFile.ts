@@ -10,6 +10,7 @@ import {
   IChangeInfo
 } from './ChangeManagement';
 import { FileSystem } from '@microsoft/node-core-library';
+import { JsonFile } from '../../../../libraries/node-core-library/dist/index-internal';
 
 /**
  * This class represents a single change file.
@@ -65,7 +66,7 @@ export class ChangeFile {
    */
   public writeSync(): void {
     const filePath: string = this.generatePath();
-    FileSystem.writeFile(filePath, JSON.stringify(this._changeFileData, undefined, 2));
+    JsonFile.save(this._changeFileData, filePath);
   }
 
   /**

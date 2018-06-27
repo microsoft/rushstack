@@ -419,7 +419,8 @@ export class YamlDocumenter {
     }
 
     FileSystem.writeFile(filePath, stringified, {
-      convertLineEndings: NewlineConversion.CrLf
+      convertLineEndings: NewlineConversion.CrLf,
+      ensureFolder: true
     });
 
     if (schema) {

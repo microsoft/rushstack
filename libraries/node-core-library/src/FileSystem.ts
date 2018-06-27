@@ -94,7 +94,7 @@ export class FileSystem {
 
   public static writeFile(filePath: string, contents: string, options?: IWriteFileOptions): void {
     options = {
-      ensureFolder: true,
+      ensureFolder: false,
       convertLineEndings: NewlineConversion.None,
       encoding: 'utf8',
       ...options

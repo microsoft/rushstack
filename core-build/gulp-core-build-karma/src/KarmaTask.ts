@@ -126,7 +126,9 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
         // tslint:enable:max-line-length
 
         const tempFolder: string = path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder);
-        FileSystem.writeFile(path.join(tempFolder, 'tests.js'), testsJsFileContents);
+        FileSystem.writeFile(path.join(tempFolder, 'tests.js'), testsJsFileContents, {
+          ensureFolder: true
+        });
       }
 
       const karma: typeof KarmaType = require('karma'); // tslint:disable-line

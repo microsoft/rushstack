@@ -343,7 +343,9 @@ function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
   const tempDirName: string = path.join(__dirname, '..', 'temp');
 
   const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.cer`);
-  FileSystem.writeFile(tempCertificatePath, generatedCertificate.pemCertificate);
+  FileSystem.writeFile(tempCertificatePath, generatedCertificate.pemCertificate, {
+    ensureFolder: true
+  });
 
   if (_tryTrustCertificate(tempCertificatePath, parentTask)) {
     certificateStore.certificateData = generatedCertificate.pemCertificate;

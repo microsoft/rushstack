@@ -18,6 +18,7 @@ import { AstImport } from './AstImport';
 import { DtsEntry } from './DtsEntry';
 import { AstDeclaration } from './AstDeclaration';
 import { SymbolAnalyzer } from './SymbolAnalyzer';
+import { NewlineConversion } from '../../../../../libraries/node-core-library/dist/index-internal';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -115,10 +116,9 @@ export class DtsRollupGenerator {
 
     this._generateTypingsFileContent(indentedWriter, dtsKind);
 
-    // Normalize to CRLF
-    const fileContent: string = Text.convertToCrLf(indentedWriter.toString());
-
-    FileSystem.writeFile(dtsFilename, fileContent);
+    FileSystem.writeFile(dtsFilename, indentedWriter.toString(), {
+      convertLineEndings: NewlineConversion.CrLf
+    });
   }
 
   private get astEntryPoint(): AstEntryPoint {
