@@ -107,7 +107,7 @@ export abstract class BaseLinkManager {
           const linkSource: string = path.join(localPackage.folderPath, filename);
           let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
 
-          const linkStats: fs.Stats = FileSystem.getStatistics(linkTarget);
+          const linkStats: fs.Stats = FileSystem.getLinkStatistics(linkTarget);
 
           if (linkStats.isSymbolicLink()) {
 

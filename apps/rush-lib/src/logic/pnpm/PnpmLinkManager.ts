@@ -169,7 +169,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         throw Error(`Cannot find installed dependency "${dependencyName}" in "${pathToLocalInstallation}"`);
       }
 
-      if (!FileSystem.getStatistics(dependencyLocalInstallationSymlink).isSymbolicLink()) {
+      if (!FileSystem.getLinkStatistics(dependencyLocalInstallationSymlink).isSymbolicLink()) {
         // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
         throw Error(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
       }

@@ -148,8 +148,11 @@ export class FileSystem {
     fsx.removeSync(folderPath);
   }
 
-  // @todo, fixup places where we are using lstat not stat
   public static getStatistics(path: string): fs.Stats {
+    return fsx.statSync(path);
+  }
+
+  public static getLinkStatistics(path: string): fs.Stats {
     return fsx.lstatSync(path);
   }
 

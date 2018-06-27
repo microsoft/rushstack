@@ -4,7 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import { Text, FileSystem } from '@microsoft/node-core-library';
+import { Text, FileSystem, NewlineConversion } from '@microsoft/node-core-library';
 
 import { ExtractorContext } from '../../ExtractorContext';
 import { IndentedWriter } from '../../utils/IndentedWriter';
@@ -18,7 +18,6 @@ import { AstImport } from './AstImport';
 import { DtsEntry } from './DtsEntry';
 import { AstDeclaration } from './AstDeclaration';
 import { SymbolAnalyzer } from './SymbolAnalyzer';
-import { NewlineConversion } from '../../../../../libraries/node-core-library/dist/index-internal';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()

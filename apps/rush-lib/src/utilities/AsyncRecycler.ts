@@ -99,7 +99,7 @@ export class AsyncRecycler {
       if (!excludeSet.has(normalizedMemberName)) {
         let shouldMove: boolean = false;
         try {
-          const stats: fs.Stats = FileSystem.getStatistics(memberPath);
+          const stats: fs.Stats = FileSystem.getLinkStatistics(memberPath);
           shouldMove = stats.isDirectory();
         } catch (error) {
           // If we fail to access the item, assume it's not a folder

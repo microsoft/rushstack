@@ -297,7 +297,7 @@ export class RushConfiguration {
     for (const filename of FileSystem.readFolder(commonRushConfigFolder)) {
 
       // Ignore things that aren't actual files
-      const stat: fs.Stats = FileSystem.getStatistics(path.join(commonRushConfigFolder, filename));
+      const stat: fs.Stats = FileSystem.getLinkStatistics(path.join(commonRushConfigFolder, filename));
       if (!stat.isFile() && !stat.isSymbolicLink()) {
         continue;
       }

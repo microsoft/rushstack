@@ -145,7 +145,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fs.Stats = FileSystem.getStatistics(filePath);
+      const lstat: fs.Stats = FileSystem.getLinkStatistics(filePath);
       exists = lstat.isFile();
     } catch (e) { /* no-op */ }
 
@@ -159,7 +159,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fs.Stats = FileSystem.getStatistics(directoryPath);
+      const lstat: fs.Stats = FileSystem.getLinkStatistics(directoryPath);
       exists = lstat.isDirectory();
     } catch (e) { /* no-op */ }
 

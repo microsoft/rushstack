@@ -45,6 +45,8 @@ class FileSystem {
   // (undocumented)
   static followLink(linkPath: string): string;
   // (undocumented)
+  static getLinkStatistics(path: string): fs.Stats;
+  // (undocumented)
   static getStatistics(path: string): fs.Stats;
   // (undocumented)
   static move(sourcePath: string, destinationPath: string, options?: IMoveOptions): void;
@@ -74,6 +76,7 @@ interface IDeleteFileOptions {
 
 // @public
 interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
+  ensureFolder?: boolean;
   onlyIfChanged?: boolean;
 }
 
