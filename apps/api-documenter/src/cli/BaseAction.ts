@@ -57,8 +57,6 @@ export abstract class BaseAction extends CommandLineAction {
       }
     }
 
-    docItemSet.calculateReferences();
-
     return docItemSet;
   }
 }

@@ -1,6 +1,20 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sat, 23 Jun 2018 02:21:20 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Jun 2018 23:54:17 GMT and should not be manually modified.
+
+## 1.4.0
+Tue, 26 Jun 2018 23:54:17 GMT
+
+### Minor changes
+
+- The YAML target now automatically hyperlinks type references, but only if the type name is simple and not ambiguous
+
+## 1.3.1
+Tue, 26 Jun 2018 16:04:59 GMT
+
+### Patches
+
+- Improve OfficeYamlDocumenter to replace escaped function arrows in code lines with =>
 
 ## 1.3.0
 Sat, 23 Jun 2018 02:21:20 GMT

@@ -96,6 +96,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
       yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
       yamlItem.remarks = this._fixBoldAndItalics(yamlItem.remarks);
       yamlItem.remarks = this._fixCodeTicks(yamlItem.remarks);
+      yamlItem.remarks = this._fixCodeArrows(yamlItem.remarks);
     }
     if (yamlItem.syntax && yamlItem.syntax.parameters) {
       yamlItem.syntax.parameters.forEach(part => {
@@ -134,5 +135,9 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
   private _fixCodeTicks(text: string): string {
     return Text.replaceAll(text, '\\`', '`');
+  }
+
+  private _fixCodeArrows(text: string): string {
+    return Text.replaceAll(text, '=&gt;', '=>');
   }
 }
