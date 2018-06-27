@@ -31,6 +31,12 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
    * don't write anything; this preserves the old timestamp.
    */
   onlyIfChanged?: boolean;
+
+  /**
+   * Creates the folder recursively using FileSystem.createFolder()
+   * Defaults to false.
+   */
+  ensureFolder?: boolean;
 }
 
 /**
@@ -126,7 +132,9 @@ export class JsonFile {
       }
     }
 
-    FileSystem.writeFile(jsonFilename, buffer.toString());
+    FileSystem.writeFile(jsonFilename, buffer.toString(), {
+      ensureFolder: options.ensureFolder
+    });
 
     // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.
     /*

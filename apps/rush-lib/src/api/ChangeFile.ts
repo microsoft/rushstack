@@ -11,6 +11,7 @@ import {
 } from './ChangeManagement';
 import { FileSystem } from '@microsoft/node-core-library';
 import { JsonFile } from '../../../../libraries/node-core-library/dist/index-internal';
+import { PackageChangeAnalyzer } from '../../lib/logic/PackageChangeAnalyzer';
 
 /**
  * This class represents a single change file.
@@ -66,7 +67,9 @@ export class ChangeFile {
    */
   public writeSync(): void {
     const filePath: string = this.generatePath();
-    JsonFile.save(this._changeFileData, filePath);
+    JsonFile.save(this._changeFileData, filePath, {
+      ensureFolder: true
+    });
   }
 
   /**

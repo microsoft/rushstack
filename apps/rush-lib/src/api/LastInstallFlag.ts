@@ -44,7 +44,9 @@ export class LastInstallFlag {
    * Writes the flag file to disk with the current state
    */
   public create(): void {
-    JsonFile.save(this._state, this._path);
+    JsonFile.save(this._state, this._path, {
+      ensureFolder: true
+    });
   }
 
   /**

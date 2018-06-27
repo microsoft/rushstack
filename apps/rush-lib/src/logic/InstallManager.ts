@@ -850,17 +850,17 @@ export class InstallManager {
       // Before we start the network operation, record a failed state.  If the process exits for some reason,
       // this will record the error.  It will also update the timestamp to prevent other Rush instances
       // from attempting to update the file.
-      JsonFile.save('error', lastCheckFile);
+      JsonFile.save('error', lastCheckFile, { ensureFolder: true });
 
       // For this check we use the official registry, not the private registry
       return this._queryIfReleaseIsPublished('https://registry.npmjs.org:443')
         .then((publishedRelease: boolean) => {
           // Cache the result
-          JsonFile.save(publishedRelease, lastCheckFile);
+          JsonFile.save(publishedRelease, lastCheckFile, { ensureFolder: true });
           return publishedRelease;
         })
         .catch((error: Error) => {
-          JsonFile.save('error', lastCheckFile);
+          JsonFile.save('error', lastCheckFile, { ensureFolder: true });
           return Promise.reject(error);
         });
     });
