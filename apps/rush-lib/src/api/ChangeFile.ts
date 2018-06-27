@@ -9,8 +9,7 @@ import {
   IChangeFile,
   IChangeInfo
 } from './ChangeManagement';
-import { FileSystem, JsonFile } from '@microsoft/node-core-library';
-import { PackageChangeAnalyzer } from '../../lib/logic/PackageChangeAnalyzer';
+import { JsonFile } from '@microsoft/node-core-library';
 
 /**
  * This class represents a single change file.

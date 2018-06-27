@@ -4,7 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import { Text, FileSystem, NewlineConversion } from '@microsoft/node-core-library';
+import { FileSystem, NewlineConversion } from '@microsoft/node-core-library';
 
 import { ExtractorContext } from '../../ExtractorContext';
 import { IndentedWriter } from '../../utils/IndentedWriter';
@@ -116,7 +116,8 @@ export class DtsRollupGenerator {
     this._generateTypingsFileContent(indentedWriter, dtsKind);
 
     FileSystem.writeFile(dtsFilename, indentedWriter.toString(), {
-      convertLineEndings: NewlineConversion.CrLf
+      convertLineEndings: NewlineConversion.CrLf,
+      ensureFolder: true
     });
   }
 
