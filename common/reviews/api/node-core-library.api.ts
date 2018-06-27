@@ -1,10 +1,8 @@
 // @public
 class File {
-  // (undocumented)
   close(): void;
-  // (undocumented)
-  static open(path: string, mode: string): File;
-  // (undocumented)
+  // WARNING: The type "FileHandleOpenFlags" needs to be exported by the package (e.g. added to index.ts)
+  static open(path: string, flags: FileHandleOpenFlags): File;
   write(text: string): void;
 }
 
@@ -22,43 +20,25 @@ class FileDiffTest {
 
 // @public
 class FileSystem {
-  // (undocumented)
   static changeMode(path: string, mode: number): void;
-  // (undocumented)
   static copyFile(sourcePath: string, destinationPath: string): void;
-  // (undocumented)
   static createFolder(folderPath: string): void;
-  // (undocumented)
   static createHardLinkToFile(linkSource: string, linkTarget: string): void;
-  // (undocumented)
   static createSymbolicLinkToFile(linkSource: string, linkTarget: string): void;
-  // (undocumented)
   static createSymbolicLinkToFolder(linkSource: string, linkTarget: string): void;
-  // (undocumented)
   static deleteFile(filePath: string, options?: IDeleteFileOptions): void;
-  // (undocumented)
   static deleteFolder(folderPath: string): void;
-  // (undocumented)
   static emptyFolder(folderPath: string): void;
-  // (undocumented)
   static exists(path: string): boolean;
-  // (undocumented)
   static followLink(linkPath: string): string;
-  // (undocumented)
   static getLinkStatistics(path: string): fs.Stats;
-  // (undocumented)
   static getStatistics(path: string): fs.Stats;
-  // (undocumented)
   static move(sourcePath: string, destinationPath: string, options?: IMoveOptions): void;
-  // (undocumented)
   static readFile(filePath: string, options?: IReadFileOptions): string;
   // (undocumented)
   static readFileToBuffer(filePath: string): Buffer;
-  // (undocumented)
   static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
-  // (undocumented)
   static updateTimes(path: string, accessedTime: number, modifiedTime: number): void;
-  // (undocumented)
   static writeFile(filePath: string, contents: string, options?: IWriteFileOptions): void;
 }
 
@@ -70,7 +50,6 @@ enum FolderConstants {
 
 // @public
 interface IDeleteFileOptions {
-  // (undocumented)
   throwIfNotExists?: boolean;
 }
 
@@ -102,7 +81,7 @@ interface IJsonSchemaValidateOptions {
 
 // @public
 interface IMoveOptions {
-  // (undocumented)
+  ensureFolder?: boolean;
   overwrite?: boolean;
 }
 
@@ -167,9 +146,7 @@ interface IProtectableMapParameters<K, V> {
 
 // @public
 interface IReadFileOptions {
-  // (undocumented)
   convertLineEndings?: NewlineConversion;
-  // (undocumented)
   encoding?: Encoding;
 }
 
@@ -180,11 +157,8 @@ interface IReadFolderOptions {
 
 // @public
 interface IWriteFileOptions {
-  // (undocumented)
   convertLineEndings?: NewlineConversion;
-  // (undocumented)
   encoding?: Encoding;
-  // (undocumented)
   ensureFolder?: boolean;
 }
 
