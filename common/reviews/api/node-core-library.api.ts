@@ -1,4 +1,14 @@
 // @public
+class File {
+  // (undocumented)
+  close(): void;
+  // (undocumented)
+  static open(path: string, mode: string): File;
+  // (undocumented)
+  write(text: string): void;
+}
+
+// @public
 enum FileConstants {
   PackageJson = "package.json"
 }
@@ -13,6 +23,8 @@ class FileDiffTest {
 // @public
 class FileSystem {
   // (undocumented)
+  static changeMode(path: string, mode: number): void;
+  // (undocumented)
   static copyFile(sourcePath: string, destinationPath: string): void;
   // (undocumented)
   static createFolder(folderPath: string): void;
@@ -22,7 +34,6 @@ class FileSystem {
   static createSymbolicLinkToFile(linkSource: string, linkTarget: string): void;
   // (undocumented)
   static createSymbolicLinkToFolder(linkSource: string, linkTarget: string): void;
-  // WARNING: The type "IDeleteFileOptions" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   static deleteFile(filePath: string, options?: IDeleteFileOptions): void;
   // (undocumented)
@@ -35,7 +46,6 @@ class FileSystem {
   static followLink(linkPath: string): string;
   // (undocumented)
   static getStatistics(path: string): fs.Stats;
-  // WARNING: The type "IMoveOptions" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
   static move(sourcePath: string, destinationPath: string, options?: IMoveOptions): void;
   // (undocumented)
@@ -45,6 +55,8 @@ class FileSystem {
   // (undocumented)
   static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
   // (undocumented)
+  static updateTimes(path: string, accessedTime: number, modifiedTime: number): void;
+  // (undocumented)
   static writeFile(filePath: string, contents: string, options?: IWriteFileOptions): void;
 }
 
@@ -52,6 +64,12 @@ class FileSystem {
 enum FolderConstants {
   Git = ".git",
   NodeModules = "node_modules"
+}
+
+// @public
+interface IDeleteFileOptions {
+  // (undocumented)
+  throwIfNotExists?: boolean;
 }
 
 // @public
@@ -77,6 +95,12 @@ interface IJsonSchemaFromFileOptions {
 // @public
 interface IJsonSchemaValidateOptions {
   customErrorHeader?: string;
+}
+
+// @public
+interface IMoveOptions {
+  // (undocumented)
+  overwrite?: boolean;
 }
 
 // @public
@@ -143,7 +167,7 @@ interface IReadFileOptions {
   // (undocumented)
   convertLineEndings?: NewlineConversion;
   // (undocumented)
-  encoding?: string | undefined;
+  encoding?: Encoding;
 }
 
 // @public
@@ -156,7 +180,7 @@ interface IWriteFileOptions {
   // (undocumented)
   convertLineEndings?: NewlineConversion;
   // (undocumented)
-  encoding?: string | undefined;
+  encoding?: Encoding;
   // (undocumented)
   ensureFolder?: boolean;
 }

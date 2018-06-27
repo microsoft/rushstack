@@ -5,7 +5,7 @@ import * as path from 'path';
 
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { Text } from './Text';
-import { FileSystem } from '../lib/FileSystem';
+import { FileSystem } from './FileSystem';
 
 /**
  * Implements a unit testing strategy that generates output files, and then

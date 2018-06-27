@@ -196,15 +196,15 @@ export class FileSystem {
   }
 }
 
+/**
+ * API for interacting with file handles
+ * @public
+ */
 export class File {
   private _fileDescriptor: number | undefined;
 
   public static open(path: string, mode: string): File {
     return new File(fsx.openSync(path, mode));
-  }
-
-  private constructor(fileDescriptor: number) {
-    this._fileDescriptor = fileDescriptor;
   }
 
   public write(text: string): void {
@@ -223,5 +223,9 @@ export class File {
     const fd: number = this._fileDescriptor;
     this._fileDescriptor = undefined;
     fsx.closeSync(fd);
+  }
+
+  private constructor(fileDescriptor: number) {
+    this._fileDescriptor = fileDescriptor;
   }
 }

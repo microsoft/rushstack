@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as child_process from 'child_process';
 
 import { BuildContext } from './BuildContext';
+import { FileSystem } from '@microsoft/node-core-library';
 
 export class BasicTasks {
   /**
@@ -21,7 +21,7 @@ export class BasicTasks {
     for (const folderToClean of foldersToClean) {
       const fullPath: string = path.join(buildContext.projectFolder, folderToClean);
       console.log(`[clean]: Cleaning "${fullPath}"`);
-      fsx.emptyDirSync(fullPath);
+      FileSystem.emptyFolder(fullPath);
     }
   }
 

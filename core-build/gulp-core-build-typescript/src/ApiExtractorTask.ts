@@ -12,7 +12,7 @@ import {
 } from '@microsoft/api-extractor';
 import { TypeScriptConfiguration } from './TypeScriptConfiguration';
 import gulpTypeScript = require('gulp-typescript');
-import { FileSystem } from '../../../libraries/node-core-library/dist/index-internal';
+import { FileSystem } from '@microsoft/node-core-library';
 
 /** @public */
 export interface IApiExtractorTaskConfig {

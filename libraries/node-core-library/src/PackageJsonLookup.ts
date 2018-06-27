@@ -7,7 +7,7 @@ import * as path from 'path';
 import { JsonFile } from './JsonFile';
 import { IPackageJson } from './IPackageJson';
 import { FileConstants } from './Constants';
-import { FileSystem } from '../dist/index-internal';
+import { FileSystem } from './FileSystem';
 
 /**
  * Constructor parameters for {@link PackageJsonLookup}

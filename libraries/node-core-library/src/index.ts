@@ -48,8 +48,11 @@ export { Path } from './Path';
 export { Text } from './Text';
 export {
   FileSystem,
+  File,
   IReadFolderOptions,
   IWriteFileOptions,
   IReadFileOptions,
+  IMoveOptions,
+  IDeleteFileOptions,
   NewlineConversion
 } from './FileSystem';
