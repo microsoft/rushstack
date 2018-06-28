@@ -30,6 +30,7 @@ interface ITsConfigFile<T> {
 interface ITslintCmdTaskConfig {
   buildDirectory?: string;
   customArgs?: string[];
+  displayAsError?: boolean;
   tslintPackagePath?: string;
 }
 

@@ -15,7 +15,7 @@ import {
 import {
   TslintCmdTask,
   ITslintCmdTaskConfig
-} from './miniTasks/TslintCmdTask';
+} from './miniTasks/TslintCmd/TslintCmdTask';
 import { ApiExtractorStandaloneTask } from './miniTasks/ApiExtractorStandaloneTask';
 
 export * from './TypeScriptConfiguration';

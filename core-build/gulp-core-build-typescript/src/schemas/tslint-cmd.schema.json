@@ -27,6 +27,10 @@
     "buildDirectory": {
       "description": "The directory in which tslint should be invoked.",
       "type": "string"
+    },
+    "displayAsError": {
+      "description": "If true, displays warnings as errors. Defaults to false.",
+      "type": "boolean"
     }
   }
 }
