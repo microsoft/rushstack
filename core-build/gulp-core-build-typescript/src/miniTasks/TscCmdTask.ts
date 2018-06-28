@@ -38,7 +38,7 @@ export interface ITscCmdTaskConfig {
 }
 
 /**
- * @public
+ * @alpha
  */
 export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
   constructor() {

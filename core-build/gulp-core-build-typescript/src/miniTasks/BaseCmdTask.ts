@@ -12,7 +12,7 @@ export interface ICallCmdOptions {
 }
 
 /**
- * @public
+ * @alpha
  */
 export abstract class BaseCmdTask<TTaskConfig> extends GulpTask<TTaskConfig> {
   protected _callCmd(

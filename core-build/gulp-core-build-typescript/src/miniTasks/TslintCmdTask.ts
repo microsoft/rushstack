@@ -41,7 +41,7 @@ export interface ITslintCmdTaskConfig {
 }
 
 /**
- * @public
+ * @alpha
  */
 export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
   constructor() {

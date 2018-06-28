@@ -34,7 +34,7 @@ interface ITslintCmdTaskConfig {
   tslintPackagePath?: string;
 }
 
-// @public (undocumented)
+// @alpha (undocumented)
 class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
   constructor();
   // (undocumented)
@@ -43,7 +43,7 @@ class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
   loadSchema(): Object;
 }
 
-// @public (undocumented)
+// @alpha (undocumented)
 class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
   constructor();
   // (undocumented)
