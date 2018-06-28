@@ -125,7 +125,27 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
       });
     });
 
-    promises.push(this._callCmd(compilerBinaryPath, buildDirectory, this.taskConfig.customArgs || []));
+    promises.push(
+      this._callCmd(
+        compilerBinaryPath,
+        buildDirectory,
+        this.taskConfig.customArgs || [],
+        {
+          onData: (data: Buffer) => {
+            // Log lines separately
+            const dataLines: string[] = data.toString().split('\n').map(String.prototype.trim);
+            for (const dataLine of dataLines) {
+              if (dataLine.match(/\serror\s/i)) {
+                // If the line looks like an error, log it as an error
+                this.logError(dataLine);
+              } else {
+                this.log(dataLine);
+              }
+            }
+          }
+        }
+      )
+    );
 
     return Promise.all(promises).then(() => { /* collapse void[] to void */ });
   }
