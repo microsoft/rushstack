@@ -133,13 +133,16 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
         {
           onData: (data: Buffer) => {
             // Log lines separately
-            const dataLines: string[] = data.toString().split('\n').map(String.prototype.trim);
+            const dataLines: (string | undefined)[] = data.toString().split('\n');
             for (const dataLine of dataLines) {
-              if (dataLine.match(/\serror\s/i)) {
-                // If the line looks like an error, log it as an error
-                this.logError(dataLine);
-              } else {
-                this.log(dataLine);
+              if (dataLine) {
+                const trimmedLine: string = dataLine.trim();
+                if (trimmedLine.match(/\serror\s/i)) {
+                  // If the line looks like an error, log it as an error
+                  this.logError(trimmedLine);
+                } else {
+                  this.log(trimmedLine);
+                }
               }
             }
           }
