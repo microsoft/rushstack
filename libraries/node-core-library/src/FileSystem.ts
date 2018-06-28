@@ -155,6 +155,7 @@ export interface IUpdateTimeParameters {
 
 /**
  * The FileSystem API provides a complete set of recommended operations for interacting with the file system.
+ *
  * @remarks
  * We recommend to use this instead of the native `fs` API, because `fs` is a minimal set of low-level
  * primitives that must be mapped for each supported operating system. The FileSystem API takes a
@@ -165,6 +166,8 @@ export interface IUpdateTimeParameters {
  *
  * Note that in the documentation, we refer to "filesystem objects", this can be a
  * file, folder, synbolic link, hard link, directory junction, etc.
+ *
+ * @public
  */
 export class FileSystem {
 
@@ -216,6 +219,7 @@ export class FileSystem {
    * @param mode - UNIX-style file mode bits (e.g. 777 or 666 etc)
    */
   public static changePermissionBits(path: string, mode: IFileModeBits): void {
+    // tslint:disable-next-line:no-bitwise
     const modeAsOctal: number = (mode.Owner << 6) + (mode.Group << 3) + (mode.Other);
     fsx.chmodSync(path, modeAsOctal);
   }
@@ -383,8 +387,14 @@ export class FileSystem {
       ...options
     };
 
-    if (options.throwIfNotExists || FileSystem.exists(filePath)) {
+    if (options.throwIfNotExists) {
       fsx.unlinkSync(filePath);
+    } else {
+      try {
+        fsx.unlinkSync(filePath);
+      } catch (error) {
+        /* no-op */
+      }
     }
   }
 
@@ -402,12 +412,12 @@ export class FileSystem {
   }
 
   /**
-   * Creates a symbolic link to a folder (on Windows this is a "directory junction").
+   * Creates a Windows "directory junction". Behaves like `createSymbolicLinkToFile()` on other platforms.
    * Behind the scenes it uses `fs.symlinkSync()`.
    * @param linkSource - The absolute or relative path to the destination where the link should be created.
    * @param linkTarget - The absolute or relative path to the target of the link.
    */
-  public static createSymbolicLinkToFolder(linkSource: string, linkTarget: string): void {
+  public static createSymbolicLinkJunction(linkTarget: string, linkSource: string): void {
     // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
     fsx.symlinkSync(linkTarget, linkSource, 'junction');
   }
@@ -418,17 +428,27 @@ export class FileSystem {
    * @param linkSource - The absolute or relative path to the destination where the link should be created.
    * @param linkTarget - The absolute or relative path to the target of the link.
    */
-  public static createSymbolicLinkToFile(linkSource: string, linkTarget: string): void {
+  public static createSymbolicLinkFile(linkTarget: string, linkSource: string): void {
     fsx.symlinkSync(linkSource, linkTarget, 'file');
   }
 
   /**
-   * Creates a hard link to a file.
+   * Creates a symbolic link to a folder (on Windows this requires elevated permissionsBits).
+   * Behind the scenes it uses `fs.symlinkSync()`.
+   * @param linkSource - The absolute or relative path to the destination where the link should be created.
+   * @param linkTarget - The absolute or relative path to the target of the link.
+   */
+  public static createSymbolicLinkFolder(linkTarget: string, linkSource: string): void {
+    fsx.symlinkSync(linkSource, linkTarget, 'dir');
+  }
+
+  /**
+   * Creates a hard link.
    * Behind the scenes it uses `fs.linkSync()`.
    * @param linkSource - The absolute or relative path to the destination where the link should be created.
    * @param linkTarget - The absolute or relative path to the target of the link.
    */
-  public static createHardLinkToFile(linkSource: string, linkTarget: string): void {
+  public static createHardLink(linkTarget: string, linkSource: string): void {
     fsx.linkSync(linkSource, linkTarget);
   }
 
@@ -437,7 +457,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs.realpathSync()`.
    * @param linkPath - The path to the link.
    */
-  public static followLink(linkPath: string): string {
+  public static getRealPath(linkPath: string): string {
     return fsx.realpathSync(linkPath);
   }
 
@@ -447,11 +467,13 @@ export class FileSystem {
    * @param lineEndings - The style of line endings to use.
    */
   private static _convertLineEndings(text: string, lineEndings: NewlineKind | undefined): string {
-    if (lineEndings === NewlineKind.CrLf) {
-      return Text.convertToCrLf(text);
-    } else if (lineEndings === NewlineKind.Lf) {
-      return Text.convertToLf(text);
+    switch (lineEndings) {
+      case NewlineKind.CrLf:
+        return Text.convertToCrLf(text);
+      case NewlineKind.Lf:
+        return Text.convertToLf(text);
+      default:
+        return text;
     }
-    return text;
   }
 }

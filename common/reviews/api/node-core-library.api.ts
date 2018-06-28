@@ -12,25 +12,28 @@ class FileDiffTest {
 
 // @public
 class FileSystem {
-  static changeMode(path: string, mode: number): void;
+  // WARNING: The type "IFileModeBits" needs to be exported by the package (e.g. added to index.ts)
+  static changePermissionBits(path: string, mode: IFileModeBits): void;
   static copyFile(sourcePath: string, destinationPath: string): void;
-  static createFolder(folderPath: string): void;
-  static createHardLinkToFile(linkSource: string, linkTarget: string): void;
-  static createSymbolicLinkToFile(linkSource: string, linkTarget: string): void;
-  static createSymbolicLinkToFolder(linkSource: string, linkTarget: string): void;
+  static createHardLink(linkTarget: string, linkSource: string): void;
+  static createSymbolicLinkFile(linkTarget: string, linkSource: string): void;
+  static createSymbolicLinkFolder(linkTarget: string, linkSource: string): void;
+  static createSymbolicLinkJunction(linkTarget: string, linkSource: string): void;
   static deleteFile(filePath: string, options?: IDeleteFileOptions): void;
   static deleteFolder(folderPath: string): void;
-  static emptyFolder(folderPath: string): void;
+  static ensureEmptyFolder(folderPath: string): void;
+  static ensureFolder(folderPath: string): void;
   static exists(path: string): boolean;
-  static followLink(linkPath: string): string;
   static getLinkStatistics(path: string): fs.Stats;
+  static getRealPath(linkPath: string): string;
   static getStatistics(path: string): fs.Stats;
-  static move(sourcePath: string, destinationPath: string, options?: IMoveOptions): void;
+  static move(sourcePath: string, targetPath: string, options?: IFileSystemMoveOptions): void;
   static readFile(filePath: string, options?: IReadFileOptions): string;
   static readFileToBuffer(filePath: string): Buffer;
   static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
-  static updateTimes(path: string, accessedTime: number, modifiedTime: number): void;
-  static writeFile(filePath: string, contents: string, options?: IWriteFileOptions): void;
+  // WARNING: The type "IUpdateTimeParameters" needs to be exported by the package (e.g. added to index.ts)
+  static updateTimes(path: string, times: IUpdateTimeParameters): void;
+  static writeFile(filePath: string, contents: string | Buffer, options?: IWriteFileOptions): void;
 }
 
 // @public
@@ -52,6 +55,12 @@ interface IDeleteFileOptions {
 }
 
 // @public
+interface IFileSystemMoveOptions {
+  ensureFolderExists?: boolean;
+  overwrite?: boolean;
+}
+
+// @public
 interface IFileWriterFlags {
   append?: boolean;
   exclusive?: boolean;
@@ -59,7 +68,7 @@ interface IFileWriterFlags {
 
 // @public
 interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
-  ensureFolder?: boolean;
+  ensureFolderExists?: boolean;
   onlyIfChanged?: boolean;
 }
 
@@ -81,12 +90,6 @@ interface IJsonSchemaFromFileOptions {
 // @public
 interface IJsonSchemaValidateOptions {
   customErrorHeader?: string;
-}
-
-// @public
-interface IMoveOptions {
-  ensureFolder?: boolean;
-  overwrite?: boolean;
 }
 
 // @public
@@ -156,14 +159,14 @@ interface IReadFileOptions {
 
 // @public
 interface IReadFolderOptions {
-  absolutePath?: boolean;
+  absolutePaths?: boolean;
 }
 
 // @public
 interface IWriteFileOptions {
   convertLineEndings?: NewlineKind;
   encoding?: Encoding;
-  ensureFolder?: boolean;
+  ensureFolderExists?: boolean;
 }
 
 // @public
@@ -204,10 +207,8 @@ class MapExtensions {
 
 // @public
 enum NewlineKind {
-  // (undocumented)
-  CrLf = 0,
-  // (undocumented)
-  Lf = 1
+  CrLf = "\r\n",
+  Lf = "\n"
 }
 
 // @public

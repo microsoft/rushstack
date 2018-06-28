@@ -76,13 +76,11 @@ export class FileWriter {
    * Behind the scenes it uses `fs.closeSync()` and releases the file descriptor to be re-used.
    */
   public close(): void {
-    if (!this._fileDescriptor) {
-      throw new Error(`Cannot close a file twice`);
+    const fd: number | undefined = this._fileDescriptor;
+    if (fd) {
+      this._fileDescriptor = undefined;
+      fsx.closeSync(fd);
     }
-
-    const fd: number = this._fileDescriptor;
-    this._fileDescriptor = undefined;
-    fsx.closeSync(fd);
   }
 
   private constructor(fileDescriptor: number) {

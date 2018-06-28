@@ -36,7 +36,7 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
    * Creates the folder recursively using FileSystem.ensureFolder()
    * Defaults to false.
    */
-  ensureFolder?: boolean;
+  ensureFolderExists?: boolean;
 }
 
 /**
@@ -133,7 +133,7 @@ export class JsonFile {
     }
 
     FileSystem.writeFile(jsonFilename, buffer.toString(), {
-      ensureFolderExists: options.ensureFolder
+      ensureFolderExists: options.ensureFolderExists
     });
 
     // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.

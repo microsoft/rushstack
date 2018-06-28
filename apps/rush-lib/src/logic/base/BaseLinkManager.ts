@@ -26,16 +26,16 @@ export abstract class BaseLinkManager {
 
     if (symlinkKind === SymlinkKind.Directory) {
       // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-      FileSystem.createSymbolicLinkToFolder(linkTarget, linkSource);
+      FileSystem.createSymbolicLinkJunction(linkTarget, linkSource);
     } else {
       if (process.platform === 'win32') {
         // For files, we use a Windows "hard link", because creating a symbolic link requires
         // administrator permission.
-        FileSystem.createHardLinkToFile(linkTarget, linkSource);
+        FileSystem.createHardLink(linkTarget, linkSource);
       } else {
         // However hard links seem to cause build failures on Mac, so for all other operating systems
         // we use symbolic links for this case.
-        FileSystem.createSymbolicLinkToFile(linkTarget, linkSource);
+        FileSystem.createSymbolicLinkFile(linkTarget, linkSource);
       }
     }
   }
@@ -111,7 +111,7 @@ export abstract class BaseLinkManager {
 
           if (linkStats.isSymbolicLink()) {
 
-            const targetStats: fs.Stats = FileSystem.getStatistics(FileSystem.followLink(linkTarget));
+            const targetStats: fs.Stats = FileSystem.getStatistics(FileSystem.getRealPath(linkTarget));
             if (targetStats.isDirectory()) {
               // Neither a junction nor a directory-symlink can have a directory-symlink
               // as its target; instead, we must obtain the real physical path.
@@ -119,7 +119,7 @@ export abstract class BaseLinkManager {
               // lacks the ability to distinguish between a junction and a directory-symlink
               // (even though it has the ability to create them both), so the safest policy
               // is to always make a junction and always to the real physical path.
-              linkTarget = FileSystem.followLink(linkTarget);
+              linkTarget = FileSystem.getRealPath(linkTarget);
               symlinkKind = SymlinkKind.Directory;
             }
           } else if (linkStats.isDirectory()) {

@@ -151,7 +151,7 @@ export class PackageJsonLookup {
 
     // Since this will be a cache key, follow any symlinks and get an absolute path
     // to minimize duplication.  (Note that duplication can still occur due to e.g. character case.)
-    const normalizedFilePath: string = FileSystem.followLink(jsonFilename);
+    const normalizedFilePath: string = FileSystem.getRealPath(jsonFilename);
 
     let packageJson: IPackageJson | undefined = this._packageJsonCache.get(normalizedFilePath);
 

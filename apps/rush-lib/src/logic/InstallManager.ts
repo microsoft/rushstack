@@ -324,7 +324,7 @@ export class InstallManager {
         }
       }
 
-      FileSystem.createSymbolicLinkToFolder(packageManagerToolFolder, localPackageManagerToolFolder);
+      FileSystem.createSymbolicLinkFolder(packageManagerToolFolder, localPackageManagerToolFolder);
 
       lock.release();
     });

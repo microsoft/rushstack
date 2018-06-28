@@ -177,7 +177,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       // The dependencyLocalInstallationSymlink is just a symlink to another folder.
       // To reduce the number of filesystem reads that are needed, we will link to where that symlink
       // it pointed, rather than linking to a link.
-      const dependencyLocalInstallationRealpath: string = FileSystem.followLink(dependencyLocalInstallationSymlink);
+      const dependencyLocalInstallationRealpath: string = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
 
       const newLocalFolderPath: string = path.join(
           localPackage.folderPath, 'node_modules', dependencyName);
