@@ -158,7 +158,10 @@ describe('LockFile', () => {
         const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
         lockFileHandle.write(otherPidStartTime);
         lockFileHandle.close();
-        FileSystem.updateTimes(otherPidLockFileName, 10000, 10000);
+        FileSystem.updateTimes(otherPidLockFileName, {
+          accessedTime: 10000,
+          modifiedTime: 10000
+        });
 
         const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 

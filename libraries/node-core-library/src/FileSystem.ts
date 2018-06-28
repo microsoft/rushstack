@@ -29,6 +29,32 @@ export const enum NewlineKind {
 }
 
 /**
+ * Available PermissionsBits bits. These can be added together using the pipe operator, e.g.:
+ *
+ * PermissionsBits.Read === 1                                           (or "001" in decimal)
+ * PermissionsBits.Read | PermissionsBits.Write === 3                       (or "011" in decimal)
+ * PermissionsBits.Read | PermissionsBits.Write | PermissionsBits.Execute === 7 (or "111" in decimal)
+ * @public
+ */
+export const enum PermissionsBits {
+  None = 0,
+  Execute = 1,
+  Write = 2,
+  Read = 4
+}
+
+/**
+ * Interface representing Unix-style file permission mode bits.
+ * All values should be set.
+ * @public
+ */
+export interface IFileModeBits {
+  Owner: PermissionsBits;
+  Group: PermissionsBits;
+  Other: PermissionsBits;
+}
+
+/**
  * The options for FileSystem.readFolder()
  * @public
  */
@@ -86,7 +112,7 @@ export interface IReadFileOptions {
  * The options for FileSystem.move()
  * @public
  */
-export interface IMoveOptions {
+export interface IFileSystemMoveOptions {
   /**
    * If true, will overwrite the file if it already exists. Defaults to false.
    */
@@ -112,9 +138,33 @@ export interface IDeleteFileOptions {
 }
 
 /**
- * A standardized file system API. Mostly contains wrappers around `fs` and `fs-extra`.
- * Also contains useful options to simplify and normalize file system operations.
- * @public
+ * The parameters for `updateTimes()`.
+ * Both times must be specified.
+ */
+export interface IUpdateTimeParameters {
+  /**
+   * The UNIX epoch time or Date when this was last accessed.
+   */
+  accessedTime: number | Date;
+
+  /**
+   * The UNIX epoch time or Date when this was last modified
+   */
+  modifiedTime: number | Date;
+}
+
+/**
+ * The FileSystem API provides a complete set of recommended operations for interacting with the file system.
+ * @remarks
+ * We recommend to use this instead of the native `fs` API, because `fs` is a minimal set of low-level
+ * primitives that must be mapped for each supported operating system. The FileSystem API takes a
+ * philosophical approach of providing "one obvious way" to do each operation. We also prefer synchronous
+ * operations except in cases where there would be a clear performance benefit for using async, since synchronous
+ * code is much easier to read and debug. Also, indiscriminate parallelism has been seen to actually worsen
+ * performance, versus improving it.
+ *
+ * Note that in the documentation, we refer to "filesystem objects", this can be a
+ * file, folder, synbolic link, hard link, directory junction, etc.
  */
 export class FileSystem {
 
@@ -123,53 +173,61 @@ export class FileSystem {
   // ===============
 
   /**
-   * Returns true if the path exists on disk. It can be a file, folder, or link.
+   * Returns true if the path exists on disk.
    * Behind the scenes it uses `fs.existsSync()`.
-   * @param path - The absolute or relative path to the file, folder, or link.
+   * @remarks
+   * There is a debate about the fact that after `fs.existsSync()` returns true,
+   * the file might be deleted before fs.readSync() is called, which would imply that everybody
+   * should catch a `readSync()` exception, and nobody should ever use `fs.existsSync()`.
+   * We find this to be unpersuasive, since "unexceptional exceptions" really hinder the
+   * break-on-exception debugging experience. Also, throwing/catching is generally slow.
+   * @param path - The absolute or relative path to the filesystem object.
    */
   public static exists(path: string): boolean {
     return fsx.existsSync(path);
   }
 
   /**
-   * Gets the statistics for a particular file or folder.
+   * Gets the statistics for a particular filesystem object.
    * If the path is a link, this function follows the link and returns statistics about the link target.
    * Behind the scenes it uses `fs.statSync()`.
-   * @param path - The absolute or relative path to the file, folder, or link.
+   * @param path - The absolute or relative path to the filesystem object.
    */
   public static getStatistics(path: string): fs.Stats {
     return fsx.statSync(path);
   }
 
   /**
-   * Updates the accessed and modified timestamps of the file, folder, or link referenced by path.
+   * Updates the accessed and modified timestamps of the filesystem object referenced by path.
    * Behind the scenes it uses `fs.utimesSync()`.
+   * The caller should specify both times in the `times` parameter.
    * @param path - The path of the file that should be modified.
-   * @param accessedTime - The UNIX epoch time when this was last accessed.
-   * @param modifiedTime - The UNIX epoch time when this was last modified.
+   * @param times - The times that the object should be updated to reflect.
    */
-  public static updateTimes(path: string, accessedTime: number, modifiedTime: number): void {
-    fsx.utimes(path, accessedTime, modifiedTime);
+  public static updateTimes(path: string, times: IUpdateTimeParameters): void {
+    // tslint:disable-next-line:no-any
+    fsx.utimes(path, times.accessedTime as any, times.modifiedTime as any);
   }
 
   /**
-   * Changes the permissions mode of a file, folder, or link.
+   * Changes the permissions (i.e. file mode bits) for a filesystem object.
    * Behind the scenes it uses `fs.chmodSync()`.
    * @param path - The absolute or relative path to the object that should be updated.
-   * @param mode - should be a UNIX-style permissions modifier number (e.g. 777 or 666 etc)
+   * @param mode - UNIX-style file mode bits (e.g. 777 or 666 etc)
    */
-  public static changeMode(path: string, mode: number): void {
-    fsx.chmodSync(path, mode);
+  public static changePermissionBits(path: string, mode: IFileModeBits): void {
+    const modeAsOctal: number = (mode.Owner << 6) + (mode.Group << 3) + (mode.Other);
+    fsx.chmodSync(path, modeAsOctal);
   }
 
   /**
    * Moves a file. The folder must exist, unless the `ensureFolder` option is provided.
    * Behind the scenes it uses `fsx.moveSync()`
    * @param sourcePath - The absolute or relative path to the source file.
-   * @param destinationPath - The absolute or relative path where the file should be moved to.
-   * @param options - Optional settings that can change the behavior. Type: `IMoveOptions`
+   * @param targetPath - The absolute or relative path where the file should be moved to.
+   * @param options - Optional settings that can change the behavior. Type: `IFileSystemMoveOptions`
    */
-  public static move(sourcePath: string, destinationPath: string, options?: IMoveOptions): void {
+  public static move(sourcePath: string, targetPath: string, options?: IFileSystemMoveOptions): void {
     options = {
       overwrite: false,
       ensureFolder: false,
@@ -179,7 +237,7 @@ export class FileSystem {
     if (options.ensureFolder) {
       FileSystem.createFolder(pathUtilities.basename(sourcePath));
     }
-    fsx.moveSync(sourcePath, destinationPath, { overwrite: options.overwrite });
+    fsx.moveSync(sourcePath, targetPath, { overwrite: options.overwrite });
   }
 
   // ===============
@@ -326,9 +384,9 @@ export class FileSystem {
   // ===============
 
   /**
-   * Gets the statistics of a file, folder, or link. Does NOT follow the link to its target.
+   * Gets the statistics of a filesystem object. Does NOT follow the link to its target.
    * Behind the scenes it uses `fs.lstatSync()`.
-   * @param path - The absolute or relative path to the file, folder, or link.
+   * @param path - The absolute or relative path to the filesystem object.
    */
   public static getLinkStatistics(path: string): fs.Stats {
     return fsx.lstatSync(path);
@@ -346,7 +404,7 @@ export class FileSystem {
   }
 
   /**
-   * Creates a symbolic link to a file (on Windows this requires elevated permissions).
+   * Creates a symbolic link to a file (on Windows this requires elevated permissionsBits).
    * Behind the scenes it uses `fs.symlinkSync()`.
    * @param linkSource - The absolute or relative path to the destination where the link should be created.
    * @param linkTarget - The absolute or relative path to the target of the link.

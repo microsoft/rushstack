@@ -51,7 +51,7 @@ export {
   IReadFolderOptions,
   IWriteFileOptions,
   IReadFileOptions,
-  IMoveOptions,
+  IFileSystemMoveOptions,
   IDeleteFileOptions,
   NewlineKind
 } from './FileSystem';

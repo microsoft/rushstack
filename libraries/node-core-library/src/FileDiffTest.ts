@@ -5,7 +5,7 @@ import * as path from 'path';
 
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { Text } from './Text';
-import { FileSystem } from './FileSystem';
+import { FileSystem, PermissionsBits } from './FileSystem';
 
 /**
  * Implements a unit testing strategy that generates output files, and then
@@ -77,7 +77,13 @@ export class FileDiffTest {
           + ' the file already exists:\n' + expectedCopyFilename);
       }
       FileSystem.copyFile(expectedFilePath, expectedCopyFilename);
-      FileSystem.changeMode(expectedCopyFilename, 292); // 292 = 444 octal = "rrr"
+
+      // Set to read-only so that developer doesn't accidentally modify the wrong file
+      FileSystem.changePermissionBits(expectedCopyFilename, {
+        Owner: PermissionsBits.Read,
+        Group: PermissionsBits.Read,
+        Other: PermissionsBits.Read
+      });
 
       throw new Error('The test output file does not match the expected input:\n'
         + actualFilePath);
