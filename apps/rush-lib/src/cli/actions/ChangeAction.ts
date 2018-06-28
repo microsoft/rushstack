@@ -462,7 +462,7 @@ export class ChangeAction extends BaseRushAction {
    */
   private _writeFile(fileName: string, output: string): void {
     FileSystem.writeFile(fileName, output, {
-      ensureFolder: true
+      ensureFolderExists: true
     });
     console.log('Created file: ' + fileName);
   }

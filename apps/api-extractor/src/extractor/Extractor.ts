@@ -309,7 +309,7 @@ export class Extractor {
 
       // Write the actual file
       FileSystem.writeFile(actualApiReviewPath, actualApiReviewContent, {
-        ensureFolder: true
+        ensureFolderExists: true
       });
 
       // Compare it against the expected file

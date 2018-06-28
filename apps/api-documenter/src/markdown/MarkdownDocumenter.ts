@@ -619,6 +619,6 @@ export class MarkdownDocumenter {
 
   private _deleteOldOutputFiles(): void {
     console.log('Deleting old output from ' + this._outputFolder);
-    FileSystem.emptyFolder(this._outputFolder);
+    FileSystem.ensureEmptyFolder(this._outputFolder);
   }
 }

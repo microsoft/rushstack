@@ -75,7 +75,7 @@ export interface IWriteFileOptions {
    * If true, will ensure the folder is created before writing the file.
    * Defaults to `false`.
    */
-  ensureFolder?: boolean;
+  ensureFolderExists?: boolean;
 
   /**
    * If specified, will normalize line endings to the specified style of newline.
@@ -122,7 +122,7 @@ export interface IFileSystemMoveOptions {
    * If true, will ensure the folder is created before writing the file.
    * Defaults to `false`.
    */
-  ensureFolder?: boolean;
+  ensureFolderExists?: boolean;
 }
 
 /**
@@ -230,11 +230,11 @@ export class FileSystem {
   public static move(sourcePath: string, targetPath: string, options?: IFileSystemMoveOptions): void {
     options = {
       overwrite: false,
-      ensureFolder: false,
+      ensureFolderExists: false,
       ...options
     };
 
-    if (options.ensureFolder) {
+    if (options.ensureFolderExists) {
       FileSystem.ensureFolder(pathUtilities.basename(sourcePath));
     }
     fsx.moveSync(sourcePath, targetPath, { overwrite: options.overwrite });
@@ -268,7 +268,7 @@ export class FileSystem {
     };
 
     if (!FileSystem.exists(folderPath)) {
-      throw new Error(`Cannot read contents of folder, as it does not exist: "${folderPath}"`);
+      throw new Error(`Folder does not exist: "${folderPath}"`);
     }
 
     const fileNames: Array<string> = fsx.readdirSync(folderPath);
@@ -282,7 +282,9 @@ export class FileSystem {
 
   /**
    * Deletes a folder, including all of its contents.
-   * Behind the scenes is uses `fsx.removeSync()`
+   * Behind the scenes is uses `fsx.removeSync()`.
+   * @remarks
+   * Does not throw if the folderPath does not exist.
    * @param folderPath - The absolute or relative path to the folder which should be deleted.
    */
   public static deleteFolder(folderPath: string): void {
@@ -290,11 +292,14 @@ export class FileSystem {
   }
 
   /**
-   * Deletes the content of a folder, but not the folder itself.
-   * Behind the scenes it uses `fsx.emptyDirSync()`
+   * Deletes the content of a folder, but not the folder itself. Also ensures the folder exists.
+   * Behind the scenes it uses `fsx.emptyDirSync()`.
+   * @remarks
+   * This is a workaround for a common race condition, where the virus scanner holds a lock on the folder
+   * for a brief period after it was deleted, causing EBUSY errors for any code that tries to recreate the folder.
    * @param folderPath - The absolute or relative path to the folder which should have its contents deleted.
    */
-  public static emptyFolder(folderPath: string): void {
+  public static ensureEmptyFolder(folderPath: string): void {
     fsx.emptyDirSync(folderPath);
   }
 
@@ -304,25 +309,27 @@ export class FileSystem {
 
   /**
    * Writes a text string to a file on disk, overwriting the file if it already exists.
-   * Behind the scenes it uses `fs.writeFileSync()`
+   * Behind the scenes it uses `fs.writeFileSync()`.
+   * @remarks
+   * Throws an error if the folder doesn't exist, unless ensureFolder=true.
    * @param filePath - The absolute or relative path of the file.
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
-  public static writeFile(filePath: string, contents: string, options?: IWriteFileOptions): void {
+  public static writeFile(filePath: string, contents: string | Buffer, options?: IWriteFileOptions): void {
     options = {
-      ensureFolder: false,
+      ensureFolderExists: false,
       convertLineEndings: undefined,
       encoding: Encoding.Utf8,
       ...options
     };
 
-    if (options.ensureFolder) {
+    if (options.ensureFolderExists) {
       const folderPath: string = pathUtilities.dirname(filePath);
       FileSystem.ensureFolder(folderPath);
     }
 
-    contents = FileSystem._convertLineEndings(contents, options.convertLineEndings);
+    contents = FileSystem._convertLineEndings(contents.toString(), options.convertLineEndings);
 
     fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
   }

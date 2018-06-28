@@ -133,7 +133,7 @@ export class JsonFile {
     }
 
     FileSystem.writeFile(jsonFilename, buffer.toString(), {
-      ensureFolder: options.ensureFolder
+      ensureFolderExists: options.ensureFolder
     });
 
     // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.

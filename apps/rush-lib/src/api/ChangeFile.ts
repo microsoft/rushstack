@@ -66,7 +66,7 @@ export class ChangeFile {
   public writeSync(): void {
     const filePath: string = this.generatePath();
     JsonFile.save(this._changeFileData, filePath, {
-      ensureFolder: true
+      ensureFolderExists: true
     });
   }
 

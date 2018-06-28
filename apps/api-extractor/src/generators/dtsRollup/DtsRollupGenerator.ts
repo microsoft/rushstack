@@ -117,7 +117,7 @@ export class DtsRollupGenerator {
 
     FileSystem.writeFile(dtsFilename, indentedWriter.toString(), {
       convertLineEndings: NewlineKind.CrLf,
-      ensureFolder: true
+      ensureFolderExists: true
     });
   }
 

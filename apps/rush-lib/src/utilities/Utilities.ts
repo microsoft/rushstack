@@ -412,7 +412,7 @@ export class Utilities {
     if (FileSystem.exists(directory)) {
       console.log('Deleting old files from ' + directory);
     }
-    FileSystem.emptyFolder(directory);
+    FileSystem.ensureEmptyFolder(directory);
 
     const npmPackageJson: IPackageJson = {
       dependencies: {

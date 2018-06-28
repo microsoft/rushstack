@@ -21,7 +21,7 @@ export class BasicTasks {
     for (const folderToClean of foldersToClean) {
       const fullPath: string = path.join(buildContext.projectFolder, folderToClean);
       console.log(`[clean]: Cleaning "${fullPath}"`);
-      FileSystem.emptyFolder(fullPath);
+      FileSystem.ensureEmptyFolder(fullPath);
     }
   }
 

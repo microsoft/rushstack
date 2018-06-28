@@ -127,7 +127,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
         const tempFolder: string = path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder);
         FileSystem.writeFile(path.join(tempFolder, 'tests.js'), testsJsFileContents, {
-          ensureFolder: true
+          ensureFolderExists: true
         });
       }
 

@@ -139,7 +139,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
     const lintRulesFile: ITSLintRulesFile = self._loadLintConfiguration();
 
-    JsonFile.save(lintRulesFile, this._getTsLintFilepath(), { ensureFolder: true });
+    JsonFile.save(lintRulesFile, this._getTsLintFilepath(), { ensureFolderExists: true });
 
     const cached = require('gulp-cache'); // tslint:disable-line
 
@@ -152,7 +152,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
           this.buildConfig.tempFolder,
           'tslint-tsconfig.json'
         );
-      JsonFile.save(tsconfigFileData, tsconfigFilePath, { ensureFolder: true });
+      JsonFile.save(tsconfigFileData, tsconfigFilePath, { ensureFolderExists: true });
 
       program = TSLint.Linter.createProgram(
         tsconfigFilePath,

@@ -48,7 +48,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
     this.visit(context.package, this.jsonOutput);
 
     // Write the output before validating the schema, so we can debug it
-    JsonFile.save(this.jsonOutput, reportFilename, { ensureFolder: true });
+    JsonFile.save(this.jsonOutput, reportFilename, { ensureFolderExists: true });
 
     // Validate that the output conforms to our JSON schema
     ApiJsonFile.jsonSchema.validateObjectWithCallback(this.jsonOutput, (errorInfo: IJsonSchemaErrorInfo) => {

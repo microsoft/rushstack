@@ -7,11 +7,11 @@ const TEMP_DIR: string = path.join(__dirname, 'temp');
 
 describe('LastInstallFlag', () => {
   beforeEach(() => {
-    FileSystem.emptyFolder(TEMP_DIR);
+    FileSystem.ensureEmptyFolder(TEMP_DIR);
   });
 
   afterEach(() => {
-    FileSystem.emptyFolder(TEMP_DIR);
+    FileSystem.ensureEmptyFolder(TEMP_DIR);
   });
 
   it('can create and remove a flag in an empty directory', () => {

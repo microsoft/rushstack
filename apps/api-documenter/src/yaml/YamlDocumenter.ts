@@ -420,7 +420,7 @@ export class YamlDocumenter {
 
     FileSystem.writeFile(filePath, stringified, {
       convertLineEndings: NewlineKind.CrLf,
-      ensureFolder: true
+      ensureFolderExists: true
     });
 
     if (schema) {
@@ -581,6 +581,6 @@ export class YamlDocumenter {
 
   private _deleteOldOutputFiles(): void {
     console.log('Deleting old output from ' + this._outputFolder);
-    FileSystem.emptyFolder(this._outputFolder);
+    FileSystem.ensureEmptyFolder(this._outputFolder);
   }
 }
