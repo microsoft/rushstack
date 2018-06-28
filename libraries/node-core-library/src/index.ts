@@ -53,7 +53,7 @@ export {
   IReadFileOptions,
   IMoveOptions,
   IDeleteFileOptions,
-  NewlineConversion
+  NewlineKind
 } from './FileSystem';
 export {
   FileWriter,

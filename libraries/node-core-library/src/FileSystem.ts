@@ -16,10 +16,16 @@ export const enum Encoding {
  * Enumeration controlling conversion of newline characters.
  * @public
  */
-export enum NewlineConversion {
-  CrLf,
-  Lf,
-  None
+export const enum NewlineKind {
+  /**
+   * Windows-style newlines
+   */
+  CrLf = '\r\n',
+
+  /**
+   * Unix-style newlines
+   */
+  Lf = '\n'
 }
 
 /**
@@ -47,9 +53,9 @@ export interface IWriteFileOptions {
 
   /**
    * If specified, will normalize line endings to the specified style of newline.
-   * Defaults to `NewlineConversion.None`.
+   * Defaults to `NewlineKind.None`.
    */
-  convertLineEndings?: NewlineConversion;
+  convertLineEndings?: NewlineKind;
 
   /**
    * If specified, will change the encoding of the file that will be written.
@@ -71,9 +77,9 @@ export interface IReadFileOptions {
 
   /**
    * If specified, will normalize line endings to the specified style of newline.
-   * Defaults to `NewlineConversion.None`.
+   * Defaults to `NewlineKind.None`.
    */
-  convertLineEndings?: NewlineConversion;
+  convertLineEndings?: NewlineKind;
 }
 
 /**
@@ -246,7 +252,7 @@ export class FileSystem {
   public static writeFile(filePath: string, contents: string, options?: IWriteFileOptions): void {
     options = {
       ensureFolder: false,
-      convertLineEndings: NewlineConversion.None,
+      convertLineEndings: undefined,
       encoding: Encoding.Utf8,
       ...options
     };
@@ -270,7 +276,7 @@ export class FileSystem {
   public static readFile(filePath: string, options?: IReadFileOptions): string {
     options = {
       encoding: Encoding.Utf8,
-      convertLineEndings: NewlineConversion.None,
+      convertLineEndings: undefined,
       ...options
     };
 
@@ -373,10 +379,10 @@ export class FileSystem {
    * @param text - The text to be normalized.
    * @param lineEndings - The style of line endings to use.
    */
-  private static _convertLineEndings(text: string, lineEndings: NewlineConversion | undefined): string {
-    if (lineEndings === NewlineConversion.CrLf) {
+  private static _convertLineEndings(text: string, lineEndings: NewlineKind | undefined): string {
+    if (lineEndings === NewlineKind.CrLf) {
       return Text.convertToCrLf(text);
-    } else if (lineEndings === NewlineConversion.Lf) {
+    } else if (lineEndings === NewlineKind.Lf) {
       return Text.convertToLf(text);
     }
     return text;

@@ -81,7 +81,7 @@ export class ScanAction extends BaseRushAction {
 
     for (const filename of glob.sync('{./*.{ts,js,tsx,jsx},./{src,lib}/**/*.{ts,js,tsx,jsx}}')) {
       try {
-        const contents: string = FileSystem.readFile(filename, { encoding: 'utf8' });
+        const contents: string = FileSystem.readFile(filename);
         const lines: string[] = contents.split('\n');
 
         for (const line of lines) {

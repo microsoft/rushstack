@@ -6,7 +6,7 @@ import * as path from 'path';
 import {
   PackageName,
   FileSystem,
-  NewlineConversion
+  NewlineKind
 } from '@microsoft/node-core-library';
 import {
   IApiClass,
@@ -601,7 +601,7 @@ export class MarkdownDocumenter {
     });
 
     FileSystem.writeFile(filename, content, {
-      convertLineEndings: NewlineConversion.CrLf
+      convertLineEndings: NewlineKind.CrLf
     });
   }
 

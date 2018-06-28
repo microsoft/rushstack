@@ -10,7 +10,7 @@ import {
   JsonSchema,
   PackageName,
   FileSystem,
-  NewlineConversion
+  NewlineKind
 } from '@microsoft/node-core-library';
 import {
   MarkupElement,
@@ -419,7 +419,7 @@ export class YamlDocumenter {
     }
 
     FileSystem.writeFile(filePath, stringified, {
-      convertLineEndings: NewlineConversion.CrLf,
+      convertLineEndings: NewlineKind.CrLf,
       ensureFolder: true
     });
 

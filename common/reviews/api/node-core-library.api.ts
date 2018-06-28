@@ -150,7 +150,7 @@ interface IProtectableMapParameters<K, V> {
 
 // @public
 interface IReadFileOptions {
-  convertLineEndings?: NewlineConversion;
+  convertLineEndings?: NewlineKind;
   encoding?: Encoding;
 }
 
@@ -161,7 +161,7 @@ interface IReadFolderOptions {
 
 // @public
 interface IWriteFileOptions {
-  convertLineEndings?: NewlineConversion;
+  convertLineEndings?: NewlineKind;
   encoding?: Encoding;
   ensureFolder?: boolean;
 }
@@ -203,13 +203,11 @@ class MapExtensions {
 }
 
 // @public
-enum NewlineConversion {
+enum NewlineKind {
   // (undocumented)
   CrLf = 0,
   // (undocumented)
-  Lf = 1,
-  // (undocumented)
-  None = 2
+  Lf = 1
 }
 
 // @public

@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as os from 'os';
-import { JsonFile, JsonSchema, FileSystem, NewlineConversion } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem, NewlineKind } from '@microsoft/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 
@@ -162,7 +162,7 @@ export class ApprovedPackagesConfiguration {
       + '  They will be lost when the Rush tool resaves it.\n' + body;
 
     FileSystem.writeFile(this._jsonFilename, body, {
-      convertLineEndings: NewlineConversion.CrLf
+      convertLineEndings: NewlineKind.CrLf
     });
   }
 
