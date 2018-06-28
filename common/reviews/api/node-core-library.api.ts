@@ -1,12 +1,4 @@
 // @public
-class File {
-  close(): void;
-  // WARNING: The type "FileHandleOpenFlags" needs to be exported by the package (e.g. added to index.ts)
-  static open(path: string, flags: FileHandleOpenFlags): File;
-  write(text: string): void;
-}
-
-// @public
 enum FileConstants {
   PackageJson = "package.json"
 }
@@ -35,11 +27,17 @@ class FileSystem {
   static getStatistics(path: string): fs.Stats;
   static move(sourcePath: string, destinationPath: string, options?: IMoveOptions): void;
   static readFile(filePath: string, options?: IReadFileOptions): string;
-  // (undocumented)
   static readFileToBuffer(filePath: string): Buffer;
   static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
   static updateTimes(path: string, accessedTime: number, modifiedTime: number): void;
   static writeFile(filePath: string, contents: string, options?: IWriteFileOptions): void;
+}
+
+// @public
+class FileWriter {
+  close(): void;
+  static open(path: string, flags?: IFileWriterFlags): FileWriter;
+  write(text: string): void;
 }
 
 // @public
@@ -51,6 +49,12 @@ enum FolderConstants {
 // @public
 interface IDeleteFileOptions {
   throwIfNotExists?: boolean;
+}
+
+// @public
+interface IFileWriterFlags {
+  append?: boolean;
+  exclusive?: boolean;
 }
 
 // @public

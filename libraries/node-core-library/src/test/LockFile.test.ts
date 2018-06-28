@@ -6,7 +6,8 @@
 import { assert } from 'chai';
 import * as path from 'path';
 import { LockFile, getProcessStartTime, getProcessStartTimeFromProcStat } from '../LockFile';
-import { FileSystem, File } from '../FileSystem';
+import { FileSystem } from '../FileSystem';
+import { FileWriter } from '../FileWriter';
 
 function setLockFileGetProcessStartTime(fn: (process: number) => string | undefined): void {
   // tslint:disable-next-line:no-any
@@ -154,7 +155,7 @@ describe('LockFile', () => {
         });
 
         // create an open lockfile
-        const lockFileHandle: File = File.open(otherPidLockFileName, 'w');
+        const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
         lockFileHandle.write(otherPidStartTime);
         lockFileHandle.close();
         FileSystem.updateTimes(otherPidLockFileName, 10000, 10000);
@@ -193,7 +194,7 @@ describe('LockFile', () => {
       // create an open lockfile
       const resourceName: string = 'test';
       const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
-      const lockFileHandle: File = File.open(lockFileName, 'wx');
+      const lockFileHandle: FileWriter = FileWriter.open(lockFileName, { exclusive: true });
 
       const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
@@ -211,7 +212,7 @@ describe('LockFile', () => {
       // Create a lockfile that is still hanging around on disk,
       const resourceName: string = 'test';
       const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
-      File.open(lockFileName, 'wx').close();
+      FileWriter.open(lockFileName, { exclusive: true }).close();
 
       const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 

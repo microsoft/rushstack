@@ -2,19 +2,15 @@ import * as pathUtilities from 'path';
 import * as fs from 'fs';
 import * as fsx from 'fs-extra';
 
-import { Text } from './';
+import { Text } from './Text';
 
 /**
  * The allowed types of encodings, as supported by Node.js
  * @public
  */
-export type Encoding = 'utf8';
-
-/**
- * Available file handle opening flags.
- * @public
- */
-export type FileHandleOpenFlags = 'r' | 'r+' | 'rs+' | 'w' | 'wx' | 'w+' | 'wx+' | 'a' | 'ax' | 'a+' | 'ax+';
+export const enum Encoding {
+  Utf8 = 'utf8'
+}
 
 /**
  * Enumeration controlling conversion of newline characters.
@@ -251,7 +247,7 @@ export class FileSystem {
     options = {
       ensureFolder: false,
       convertLineEndings: NewlineConversion.None,
-      encoding: 'utf8',
+      encoding: Encoding.Utf8,
       ...options
     };
 
@@ -268,12 +264,12 @@ export class FileSystem {
   /**
    * Reads the contents of a file into a string.
    * Behind the scenes it uses `fs.readFileSync()`.
-   * @param filePath - The path of the file to be read.
+   * @param filePath - The relative or absolute path to the file whose contents should be read.
    * @param options - Optional settings that can change the behavior. Type: `IReadFileOptions`
    */
   public static readFile(filePath: string, options?: IReadFileOptions): string {
     options = {
-      encoding: 'utf8',
+      encoding: Encoding.Utf8,
       convertLineEndings: NewlineConversion.None,
       ...options
     };
@@ -282,6 +278,11 @@ export class FileSystem {
     return FileSystem._convertLineEndings(contents, options.convertLineEndings);
   }
 
+  /**
+   * Reads the contents of a file into a buffer.
+   * Behind the scenes is uses `fs.readFileSync()`.
+   * @param filePath - The relative or absolute path to the file whose contents should be read.
+   */
   public static readFileToBuffer(filePath: string): Buffer {
     return fsx.readFileSync(filePath);
   }
@@ -379,54 +380,5 @@ export class FileSystem {
       return Text.convertToLf(text);
     }
     return text;
-  }
-}
-
-/**
- * API for interacting with file handles.
- * @public
- */
-export class File {
-  private _fileDescriptor: number | undefined;
-
-  /**
-   * Opens a new file handle to the file at the specified path and given mode.
-   * Behind the scenes it uses `fs.openSync()`.
-   * @param path - The absolute or relative path to the file handle that should be opened.
-   * @param flags - The flags for opening the handle
-   */
-  public static open(path: string, flags: FileHandleOpenFlags): File {
-    return new File(fsx.openSync(path, flags));
-  }
-
-  /**
-   * Writes some text to the given file handle. Throws if the file handle has been closed.
-   * Behind the scenes it uses `fs.writeSync()`.
-   * @param text - The text to write to the file.
-   */
-  public write(text: string): void {
-    if (!this._fileDescriptor) {
-      throw new Error(`Cannot write to file, file descriptor has already been released.`);
-    }
-
-    fsx.writeSync(this._fileDescriptor, text);
-  }
-
-  /**
-   * Closes the file handle permanently. No operations can be made on this file handle after calling this.
-   * Behind the scenes it uses `fs.closeSync()` and releases the file descriptor to be re-used.
-   */
-  public close(): void {
-    if (!this._fileDescriptor) {
-      throw new Error(`Cannot close a file twice`);
-    }
-
-    const fd: number = this._fileDescriptor;
-    this._fileDescriptor = undefined;
-    fsx.closeSync(fd);
-  }
-
-  private constructor(fileDescriptor: number) {
-    this._fileDescriptor = fileDescriptor;
   }
 }

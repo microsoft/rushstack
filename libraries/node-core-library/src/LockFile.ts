@@ -4,7 +4,8 @@
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { setTimeout } from 'timers';
-import { FileSystem, File } from './FileSystem';
+import { FileSystem } from './FileSystem';
+import { FileWriter } from './FileWriter';
 
 /**
  * http://man7.org/linux/man-pages/man5/proc.5.html
@@ -226,7 +227,7 @@ export class LockFile {
     }
 
     const pidLockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
-    let lockFileHandle: File | undefined;
+    let lockFileHandle: FileWriter | undefined;
 
     let lockFile: LockFile;
 
@@ -234,7 +235,7 @@ export class LockFile {
       // open in write mode since if this file exists, it cannot be from the current process
       // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
       // We should ideally maintain a dictionary of normalized acquired filenames
-      lockFileHandle = File.open(pidLockFilePath, 'w');
+      lockFileHandle = FileWriter.open(pidLockFilePath);
       lockFileHandle.write(startTime);
 
       const currentBirthTimeMs: number = FileSystem.getStatistics(pidLockFilePath).birthtime.getTime();
@@ -338,7 +339,7 @@ export class LockFile {
     const lockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
     let dirtyWhenAcquired: boolean = false;
 
-    let fileHandle: File | undefined;
+    let fileHandle: FileWriter | undefined;
     let lockFile: LockFile;
 
     try {
@@ -355,7 +356,7 @@ export class LockFile {
 
       try {
         // Attempt to open an exclusive lockfile
-        fileHandle = File.open(lockFilePath, 'wx');
+        fileHandle = FileWriter.open(lockFilePath, { exclusive: true });
       } catch (error) {
         // we tried to delete the lock, but something else is holding it,
         // (probably an active process), therefore we are unable to create a lock
@@ -383,9 +384,9 @@ export class LockFile {
       throw new Error(`The lock for file "${path.basename(this._filePath)}" has already been released.`);
     }
 
-    this._fileDescriptor!.close();
+    this._fileWriter!.close();
     FileSystem.deleteFile(this._filePath);
-    this._fileDescriptor = undefined;
+    this._fileWriter = undefined;
   }
 
   /**
@@ -407,11 +408,11 @@ export class LockFile {
    * Returns true if this lock is currently being held.
    */
   public get isReleased(): boolean {
-    return this._fileDescriptor === undefined;
+    return this._fileWriter === undefined;
   }
 
   private constructor(
-    private _fileDescriptor: File | undefined,
+    private _fileWriter: FileWriter | undefined,
     private _filePath: string,
     private _dirtyWhenAcquired: boolean) {
   }

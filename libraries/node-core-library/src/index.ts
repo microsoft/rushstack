@@ -48,7 +48,6 @@ export { Path } from './Path';
 export { Text } from './Text';
 export {
   FileSystem,
-  File,
   IReadFolderOptions,
   IWriteFileOptions,
   IReadFileOptions,
@@ -56,3 +55,7 @@ export {
   IDeleteFileOptions,
   NewlineConversion
 } from './FileSystem';
+export {
+  FileWriter,
+  IFileWriterFlags
+} from './FileWriter';
