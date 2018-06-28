@@ -2,6 +2,50 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.9.0",
+      "tag": "@microsoft/api-extractor_v5.9.0",
+      "date": "Sat, 23 Jun 2018 02:21:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new IMarkupHtmlTag API"
+          },
+          {
+            "comment": "AEDoc now allows HTML tags inside doc comments, which can be disabled using a backslash escape"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.8.1",
+      "tag": "@microsoft/api-extractor_v5.8.1",
+      "date": "Thu, 21 Jun 2018 08:27:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.4.0` to `1.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.8.0",
+      "tag": "@microsoft/api-extractor_v5.8.0",
+      "date": "Tue, 19 Jun 2018 19:35:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "For namespaceSupport=permissive, allow arbitrary nesting of namespaces"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue where multi-line type literals sometimes had inconsistent newlines in the *.api.json file"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.7.3",
       "tag": "@microsoft/api-extractor_v5.7.3",
       "date": "Fri, 08 Jun 2018 08:43:52 GMT",

@@ -1,6 +1,28 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 08 Jun 2018 08:43:52 GMT and should not be manually modified.
+This log was last generated on Sat, 23 Jun 2018 02:21:20 GMT and should not be manually modified.
+
+## 4.9.19
+Sat, 23 Jun 2018 02:21:20 GMT
+
+*Version update only*
+
+## 4.9.18
+Fri, 22 Jun 2018 16:05:15 GMT
+
+### Patches
+
+- Fixed mutation on tsConfigFile resulting in tslint error
+
+## 4.9.17
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 4.9.16
+Tue, 19 Jun 2018 19:35:11 GMT
+
+*Version update only*
 
 ## 4.9.15
 Fri, 08 Jun 2018 08:43:52 GMT

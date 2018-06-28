@@ -61,12 +61,33 @@
     },
 
     //---------------------------------------------------------------------------------------------
+    "markupHtmlTag": {
+      "description": "An HTML tag such as \"<td>\" or \"</td>\" or \"<img src=\"example.gif\" />\".",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "html-tag" ]
+        },
+        "token": {
+          "description": "A string containing the HTML tag",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "token" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
     "markupLinkTextElement": {
       "description": "Represents markup that can be used as the link text for a hyperlink",
       "type": "object",
       "oneOf": [
         { "$ref": "#/definitions/markupText" },
-        { "$ref": "#/definitions/markupHighlightedText" }
+        { "$ref": "#/definitions/markupHighlightedText" },
+        { "$ref": "#/definitions/markupHtmlTag" }
       ]
     },
 

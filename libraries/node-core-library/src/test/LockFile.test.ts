@@ -6,7 +6,7 @@
 import * as fsx from 'fs-extra';
 import { assert } from 'chai';
 import * as path from 'path';
-import { LockFile, getProcessStartTime } from '../LockFile';
+import { LockFile, getProcessStartTime, getProcessStartTimeFromProcStat } from '../LockFile';
 
 function setLockFileGetProcessStartTime(fn: (process: number) => string | undefined): void {
   // tslint:disable-next-line:no-any
@@ -47,6 +47,49 @@ describe('LockFile', () => {
       assert.throws(() => {
         LockFile.getLockFilePath(process.cwd(), '');
       });
+    });
+  });
+
+  describe('getProcessStartTimeFromProcStat', () => {
+    function createStatOutput (value2: string, n: number): string {
+      let statOutput: string = `0 ${value2} S`;
+      for (let i: number = 0; i < n; i++) {
+        statOutput += ' 0';
+      }
+      return statOutput;
+    }
+
+    it('returns undefined if too few values are contained in /proc/[pid]/stat (1)', () => {
+      const stat: string = createStatOutput('(bash)', 1);
+      const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
+      assert.strictEqual(ret, undefined);
+    });
+    it('returns undefined if too few values are contained in /proc/[pid]/stat (2)', () => {
+      const stat: string = createStatOutput('(bash)', 0);
+      const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
+      assert.strictEqual(ret, undefined);
+    });
+    it('returns the correct start time if the second value in /proc/[pid]/stat contains spaces', () => {
+      let stat: string = createStatOutput('(bash 2)', 18);
+      const value22: string = '12345';
+      stat += ` ${value22}`;
+      const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
+      assert.strictEqual(ret, value22);
+    });
+    it('returns the correct start time if there are 22 values in /proc/[pid]/stat, including a trailing line '
+      + 'terminator', () => {
+      let stat: string = createStatOutput('(bash)', 18);
+      const value22: string = '12345';
+      stat += ` ${value22}\n`;
+      const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
+      assert.strictEqual(ret, value22);
+    });
+    it('returns the correct start time if the second value in /proc/[pid]/stat does not contain spaces', () => {
+      let stat: string = createStatOutput('(bash)', 18);
+      const value22: string = '12345';
+      stat += ` ${value22}`;
+      const ret: string|undefined = getProcessStartTimeFromProcStat(stat);
+      assert.strictEqual(ret, value22);
     });
   });
 

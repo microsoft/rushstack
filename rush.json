@@ -1,6 +1,6 @@
 {
-  "rushVersion": "5.0.0-dev.22",
-  "pnpmVersion": "2.4.0",
+  "rushVersion": "5.0.0-dev.24",
+  "pnpmVersion": "2.6.2",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0 || >=8.9.4 <9.0.0",
 
   "projectFolderMinDepth": 2,
@@ -75,6 +75,12 @@
     {
       "packageName": "api-extractor-test-04",
       "projectFolder": "build-tests/api-extractor-test-04",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-test-05",
+      "projectFolder": "build-tests/api-extractor-test-05",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -189,6 +195,12 @@
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@microsoft/rushell",
+      "projectFolder": "libraries/rushell",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
     },
     {
       "packageName": "@microsoft/stream-collator",

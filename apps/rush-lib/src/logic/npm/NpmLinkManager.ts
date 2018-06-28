@@ -11,7 +11,7 @@ import readPackageTree = require('read-package-tree');
 
 import { JsonFile, PackageName } from '@microsoft/node-core-library';
 
-import { RushConstants } from '../../api/RushConstants';
+import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';

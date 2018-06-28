@@ -8,7 +8,7 @@ import { JsonFile, JsonSchema, PackageName } from '@microsoft/node-core-library'
 
 import { Rush } from '../api/Rush';
 import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
-import { RushConstants } from '../api/RushConstants';
+import { RushConstants } from '../logic/RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import { EventHooks } from './EventHooks';
 import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';

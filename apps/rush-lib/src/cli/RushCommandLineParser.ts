@@ -8,7 +8,7 @@ import * as path from 'path';
 import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@microsoft/ts-command-line';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { RushConstants } from '../api/RushConstants';
+import { RushConstants } from '../logic/RushConstants';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 import { CommandJson } from '../api/CommandLineJson';
 import { Utilities } from '../utilities/Utilities';

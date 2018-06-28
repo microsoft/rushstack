@@ -59,6 +59,12 @@ describe('MarkdownPageRenderer', () => {
     markupPage.elements.push(...Markup.createTextParagraphs(
       '3 or more hyphens: - -- --- ---- ----- ------\n\n'));
 
+    markupPage.elements.push(...[
+      Markup.createHtmlTag('<b>'),
+      ...Markup.createTextElements('bold'),
+      Markup.createHtmlTag('</b>')
+    ]);
+
     const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
     fsx.writeFileSync(outputFilename, MarkdownRenderer.renderElements([markupPage], { }));
 

@@ -2,6 +2,10 @@
 {
   "packages": [
     {
+      "name": "@microsoft/api-documenter",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/api-extractor",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -423,6 +427,10 @@
     },
     {
       "name": "through2",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ts-jest",
       "allowedCategories": [ "libraries" ]
     },
     {

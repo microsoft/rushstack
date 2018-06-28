@@ -1,0 +1,336 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`00: empty inputs 1`] = `
+Object {
+  "input": "",
+  "tokens": Array [],
+}
+`;
+
+exports[`00: empty inputs 2`] = `
+Object {
+  "input": "[r][n]",
+  "tokens": Array [
+    Object {
+      "kind": "NewLine",
+      "value": "[r][n]",
+    },
+  ],
+}
+`;
+
+exports[`01: white space tokens 1`] = `
+Object {
+  "input": " [t] abc   [r][n]def  [n]  ghi[n][r]  ",
+  "tokens": Array [
+    Object {
+      "kind": "Spaces",
+      "value": " [t] ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "abc",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": "   ",
+    },
+    Object {
+      "kind": "NewLine",
+      "value": "[r][n]",
+    },
+    Object {
+      "kind": "Text",
+      "value": "def",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": "  ",
+    },
+    Object {
+      "kind": "NewLine",
+      "value": "[n]",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": "  ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "ghi",
+    },
+    Object {
+      "kind": "NewLine",
+      "value": "[n]",
+    },
+    Object {
+      "kind": "NewLine",
+      "value": "[r]",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": "  ",
+    },
+  ],
+}
+`;
+
+exports[`02: text with escapes 1`] = `
+Object {
+  "input": " ab+56[b]>qrst(abc[b]))",
+  "tokens": Array [
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "ab",
+    },
+    Object {
+      "kind": "OtherCharacter",
+      "value": "+",
+    },
+    Object {
+      "kind": "Text",
+      "value": "56>qrst",
+    },
+    Object {
+      "kind": "OtherCharacter",
+      "value": "(",
+    },
+    Object {
+      "kind": "Text",
+      "value": "abc)",
+    },
+    Object {
+      "kind": "OtherCharacter",
+      "value": ")",
+    },
+  ],
+}
+`;
+
+exports[`03: The && operator 1`] = `
+Object {
+  "input": "&&abc&&cde&&",
+  "tokens": Array [
+    Object {
+      "kind": "AndIf",
+      "value": "&&",
+    },
+    Object {
+      "kind": "Text",
+      "value": "abc",
+    },
+    Object {
+      "kind": "AndIf",
+      "value": "&&",
+    },
+    Object {
+      "kind": "Text",
+      "value": "cde",
+    },
+    Object {
+      "kind": "AndIf",
+      "value": "&&",
+    },
+  ],
+}
+`;
+
+exports[`03: The && operator 2`] = `
+Object {
+  "input": "a&b",
+  "tokens": Array [
+    Object {
+      "kind": "Text",
+      "value": "a",
+    },
+    Object {
+      "kind": "OtherCharacter",
+      "value": "&",
+    },
+    Object {
+      "kind": "Text",
+      "value": "b",
+    },
+  ],
+}
+`;
+
+exports[`03: The && operator 3`] = `
+Object {
+  "input": "&&",
+  "tokens": Array [
+    Object {
+      "kind": "AndIf",
+      "value": "&&",
+    },
+  ],
+}
+`;
+
+exports[`03: The && operator 4`] = `
+Object {
+  "input": "&",
+  "tokens": Array [
+    Object {
+      "kind": "OtherCharacter",
+      "value": "&",
+    },
+  ],
+}
+`;
+
+exports[`04: dollar variables 1`] = `
+Object {
+  "input": "$abc123.456",
+  "tokens": Array [
+    Object {
+      "kind": "DollarVariable",
+      "value": "abc123",
+    },
+    Object {
+      "kind": "OtherCharacter",
+      "value": ".",
+    },
+    Object {
+      "kind": "Text",
+      "value": "456",
+    },
+  ],
+}
+`;
+
+exports[`04: dollar variables 2`] = `
+Object {
+  "input": "$ab$_90",
+  "tokens": Array [
+    Object {
+      "kind": "DollarVariable",
+      "value": "ab",
+    },
+    Object {
+      "kind": "DollarVariable",
+      "value": "_90",
+    },
+  ],
+}
+`;
+
+exports[`05: double-quoted strings 1`] = `
+Object {
+  "input": "what \\"is\\" is",
+  "tokens": Array [
+    Object {
+      "kind": "Text",
+      "value": "what",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "DoubleQuotedText",
+      "value": "is",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "is",
+    },
+  ],
+}
+`;
+
+exports[`05: double-quoted strings 2`] = `
+Object {
+  "input": "what\\"is\\"is",
+  "tokens": Array [
+    Object {
+      "kind": "Text",
+      "value": "what",
+    },
+    Object {
+      "kind": "DoubleQuotedText",
+      "value": "is",
+    },
+    Object {
+      "kind": "Text",
+      "value": "is",
+    },
+  ],
+}
+`;
+
+exports[`05: double-quoted strings 3`] = `
+Object {
+  "input": "what\\"is[b]\\"\\"is",
+  "tokens": Array [
+    Object {
+      "kind": "Text",
+      "value": "what",
+    },
+    Object {
+      "kind": "DoubleQuotedText",
+      "value": "is\\"",
+    },
+    Object {
+      "kind": "Text",
+      "value": "is",
+    },
+  ],
+}
+`;
+
+exports[`05: double-quoted strings 4`] = `
+Object {
+  "input": "no C-style escapes: \\"[b]t[b]r[b]n\\"",
+  "tokens": Array [
+    Object {
+      "kind": "Text",
+      "value": "no",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "C",
+    },
+    Object {
+      "kind": "OtherCharacter",
+      "value": "-",
+    },
+    Object {
+      "kind": "Text",
+      "value": "style",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "Text",
+      "value": "escapes",
+    },
+    Object {
+      "kind": "OtherCharacter",
+      "value": ":",
+    },
+    Object {
+      "kind": "Spaces",
+      "value": " ",
+    },
+    Object {
+      "kind": "DoubleQuotedText",
+      "value": "trn",
+    },
+  ],
+}
+`;

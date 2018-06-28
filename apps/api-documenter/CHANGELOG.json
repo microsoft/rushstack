@@ -2,6 +2,112 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.4.0",
+      "tag": "@microsoft/api-documenter_v1.4.0",
+      "date": "Tue, 26 Jun 2018 23:54:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "The YAML target now automatically hyperlinks type references, but only if the type name is simple and not ambiguous"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.1",
+      "tag": "@microsoft/api-documenter_v1.3.1",
+      "date": "Tue, 26 Jun 2018 16:04:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve OfficeYamlDocumenter to replace escaped function arrows in code lines with =>"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.0",
+      "tag": "@microsoft/api-documenter_v1.3.0",
+      "date": "Sat, 23 Jun 2018 02:21:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a issue where Office Documentation had markdown characters escaped"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add support for rendering the new IMarkupHtmlTag"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.8.1` to `5.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.45` to `4.3.46`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.8",
+      "tag": "@microsoft/api-documenter_v1.2.8",
+      "date": "Fri, 22 Jun 2018 16:05:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.44` to `4.3.45`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.7",
+      "tag": "@microsoft/api-documenter_v1.2.7",
+      "date": "Thu, 21 Jun 2018 08:27:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.8.0` to `5.8.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.4.0` to `1.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.43` to `4.3.44`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.6",
+      "tag": "@microsoft/api-documenter_v1.2.6",
+      "date": "Tue, 19 Jun 2018 19:35:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.7.3` to `5.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.42` to `4.3.43`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.5",
+      "tag": "@microsoft/api-documenter_v1.2.5",
+      "date": "Fri, 15 Jun 2018 16:05:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "The output folder is not automatically created if it doesn't exist yet"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.4",
       "tag": "@microsoft/api-documenter_v1.2.4",
       "date": "Fri, 08 Jun 2018 08:43:52 GMT",

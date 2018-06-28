@@ -31,7 +31,7 @@ import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { PurgeManager } from './PurgeManager';
 import { RushConfiguration, PackageManager } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { RushConstants } from '../api/RushConstants';
+import { RushConstants } from '../logic/RushConstants';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { Stopwatch } from '../utilities/Stopwatch';
 import { Utilities } from '../utilities/Utilities';
@@ -280,13 +280,20 @@ export class InstallManager {
         console.log(colors.bold(`Installing ${packageManager} version ${packageManagerVersion}${os.EOL}`));
 
         // note that this will remove the last-install flag from the directory
-        Utilities.installPackageInDirectory(
-          packageManagerToolFolder,
-          packageManager,
-          this._rushConfiguration.packageManagerToolVersion,
-          `${packageManager}-local-install`,
-          MAX_INSTALL_ATTEMPTS
-        );
+        Utilities.installPackageInDirectory({
+          directory: packageManagerToolFolder,
+          packageName: packageManager,
+          version: this._rushConfiguration.packageManagerToolVersion,
+          tempPackageTitle: `${packageManager}-local-install`,
+          maxInstallAttempts: MAX_INSTALL_ATTEMPTS,
+          // This is using a local configuration to install a package in a shared global location.
+          // Generally that's a bad practice, but in this case if we can successfully install
+          // the package at all, we can reasonably assume it's good for all the repositories.
+          // In particular, we'll assume that two different NPM registries cannot have two
+          // different implementations of the same version of the same package.
+          // This was needed for: https://github.com/Microsoft/web-build-tools/issues/691
+          commonRushConfigFolder: this._rushConfiguration.commonRushConfigFolder
+        });
 
         console.log(`Successfully installed ${packageManager} version ${packageManagerVersion}`);
       } else {

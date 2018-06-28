@@ -8,7 +8,7 @@ import * as semver from 'semver';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { Utilities } from '../utilities/Utilities';
-import { RushConstants } from '../api/RushConstants';
+import { RushConstants } from '../logic/RushConstants';
 
 // Refuses to run at all if the PNPM version is older than this, because there
 // are known bugs or missing features in earlier releases.

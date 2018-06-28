@@ -50,7 +50,7 @@ function parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier {
 /**
  * Resolve a package specifier to a static version
  */
-function resolvePackageVersion({ name, version }: IPackageSpecifier): string {
+function resolvePackageVersion(rushCommonFolder: string, { name, version }: IPackageSpecifier): string {
   if (!version) {
     version = '*'; // If no version is specified, use the latest version
   }
@@ -62,6 +62,11 @@ function resolvePackageVersion({ name, version }: IPackageSpecifier): string {
   } else {
     // version resolves to
     try {
+      const rushTempFolder: string = ensureAndJoinPath(rushCommonFolder, 'temp');
+      const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
+
+      syncNpmrc(sourceNpmrcFolder, rushTempFolder);
+
       const npmPath: string = getNpmPath();
 
       // This returns something that looks like:
@@ -73,7 +78,10 @@ function resolvePackageVersion({ name, version }: IPackageSpecifier): string {
       const npmVersionSpawnResult: childProcess.SpawnSyncReturns<Buffer> = childProcess.spawnSync(
         npmPath,
         ['view', `${name}@${version}`, 'version', '--no-update-notifier'],
-        { stdio: [] }
+        {
+          cwd: rushTempFolder,
+          stdio: []
+        }
       );
 
       if (npmVersionSpawnResult.status !== 0) {
@@ -165,34 +173,49 @@ export function findRushJsonFolder(): string {
  * Does not support "." or ".." path segments.
  * Assumes the baseFolder exists.
  */
-function ensureAndResolveFolder(baseFolder: string, ...pathSegments: string[]): string {
-  let resolvedDirectory: string = baseFolder;
+function ensureAndJoinPath(baseFolder: string, ...pathSegments: string[]): string {
+  let joinedPath: string = baseFolder;
   try {
     for (let pathSegment of pathSegments) {
       pathSegment = pathSegment.replace(/[\\\/]/g, '+');
-      resolvedDirectory = path.resolve(resolvedDirectory, pathSegment);
-      if (!fs.existsSync(resolvedDirectory)) {
-        fs.mkdirSync(resolvedDirectory);
+      joinedPath = path.join(joinedPath, pathSegment);
+      if (!fs.existsSync(joinedPath)) {
+        fs.mkdirSync(joinedPath);
       }
     }
   } catch (e) {
-    throw new Error(`Error building local installation directory (${path.resolve(baseFolder, ...pathSegments)}): ${e}`);
+    throw new Error(`Error building local installation folder (${path.join(baseFolder, ...pathSegments)}): ${e}`);
   }
 
-  return resolvedDirectory;
+  return joinedPath;
 }
 
-function copyNpmrcIfItExists(rushCommonFolder: string, packageInstallFolder: string): void {
-  const npmrcPath: string = path.join(rushCommonFolder, 'config', 'rush', '.npmrc');
-  const packageInstallNpmrcPath: string = path.join(packageInstallFolder, '.npmrc');
-  if (fs.existsSync(npmrcPath)) {
-    try {
-      let npmrcFileLines: string[] = fs.readFileSync(npmrcPath).toString().split('\n');
+  /**
+   * As a workaround, _syncNpmrc() copies the .npmrc file to the target folder, and also trims
+   * unusable lines from the .npmrc file.  If the source .npmrc file not exist, then _syncNpmrc()
+   * will delete an .npmrc that is found in the target folder.
+   *
+   * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
+   * the .npmrc file to provide different authentication tokens for different registry.
+   * However, if the environment variable is undefined, it expands to an empty string, which
+   * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
+   * we'd prefer to skip that line and continue looking in other places such as the user's
+   * home directory.
+   *
+   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities._syncNpmrc()
+   */
+function syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
+  const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
+  const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
+  try {
+    if (fs.existsSync(sourceNpmrcPath)) {
+      let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
       npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
       const resultLines: string[] = [];
       // Trim out lines that reference environment variables that aren't defined
       for (const line of npmrcFileLines) {
-        const regex: RegExp = /\$\{([^\}]+)\}/g; // This finds environment variable tokens that look like "${VAR_NAME}"
+        // This finds environment variable tokens that look like "${VAR_NAME}"
+        const regex: RegExp = /\$\{([^\}]+)\}/g;
         const environmentVariables: string[] | null = line.match(regex);
         let lineShouldBeTrimmed: boolean = false;
         if (environmentVariables) {
@@ -206,15 +229,22 @@ function copyNpmrcIfItExists(rushCommonFolder: string, packageInstallFolder: str
           }
         }
 
-        if (!lineShouldBeTrimmed) {
+        if (lineShouldBeTrimmed) {
+          // Example output:
+          // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
+          resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+        } else {
           resultLines.push(line);
         }
       }
 
-      fs.writeFileSync(packageInstallNpmrcPath, resultLines.join(os.EOL));
-    } catch (e) {
-      throw new Error(`Error reading or writing .npmrc file: ${e}`);
+      fs.writeFileSync(targetNpmrcPath, resultLines.join(os.EOL));
+    } else if (fs.existsSync(targetNpmrcPath)) {
+      // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
+      fs.unlinkSync(targetNpmrcPath);
     }
+  } catch (e) {
+    throw new Error(`Error syncing .npmrc file: ${e}`);
   }
 }
 
@@ -255,7 +285,7 @@ function cleanInstallFolder(rushCommonFolder: string, packageInstallFolder: stri
 
     const nodeModulesFolder: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME);
     if (fs.existsSync(nodeModulesFolder)) {
-      const rushRecyclerFolder: string = ensureAndResolveFolder(
+      const rushRecyclerFolder: string = ensureAndJoinPath(
         rushCommonFolder,
         'temp',
         'rush-recycler',
@@ -344,7 +374,7 @@ export function installAndRun(
 ): number {
   const rushJsonFolder: string = findRushJsonFolder();
   const rushCommonFolder: string = path.join(rushJsonFolder, 'common');
-  const packageInstallFolder: string = ensureAndResolveFolder(
+  const packageInstallFolder: string = ensureAndJoinPath(
     rushCommonFolder,
     'temp',
     'install-run',
@@ -354,7 +384,10 @@ export function installAndRun(
   if (!isPackageAlreadyInstalled(packageInstallFolder)) {
     // The package isn't already installed
     cleanInstallFolder(rushCommonFolder, packageInstallFolder);
-    copyNpmrcIfItExists(rushCommonFolder, packageInstallFolder);
+
+    const sourceNpmrcFolder: string = path.join(rushCommonFolder, 'config', 'rush');
+    syncNpmrc(sourceNpmrcFolder, packageInstallFolder);
+
     createPackageJson(packageInstallFolder, packageName, packageVersion);
     installPackage(packageInstallFolder, packageName, packageVersion);
     writeFlagFile(packageInstallFolder);
@@ -412,9 +445,12 @@ function run(): void {
   }
 
   runWithErrorAndStatusCode(() => {
+    const rushJsonFolder: string = findRushJsonFolder();
+    const rushCommonFolder: string = ensureAndJoinPath(rushJsonFolder, 'common');
+
     const packageSpecifier: IPackageSpecifier = parsePackageSpecifier(rawPackageSpecifier);
     const name: string = packageSpecifier.name;
-    const version: string = resolvePackageVersion(packageSpecifier);
+    const version: string = resolvePackageVersion(rushCommonFolder, packageSpecifier);
 
     if (packageSpecifier.version !== version) {
       console.log(`Resolved to ${name}@${version}`);

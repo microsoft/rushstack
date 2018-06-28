@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 08 Jun 2018 08:43:52 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jun 2018 08:27:29 GMT and should not be manually modified.
+
+## 1.4.1
+Thu, 21 Jun 2018 08:27:29 GMT
+
+### Patches
+
+- issue #705: fallback on linux to /proc/{n}/stat if 'ps -p 1 -o lstart' is not supported
 
 ## 1.4.0
 Fri, 08 Jun 2018 08:43:52 GMT
