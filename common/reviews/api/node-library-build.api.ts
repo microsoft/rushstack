@@ -5,12 +5,11 @@ export function _isJestEnabled(rootFolder: string): boolean;
 export function addSuppression(suppression: string | RegExp): void;
 
 // @public
-class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
-  constructor();
+class ApiExtractorTask extends ApiExtractorBaseTask {
   // (undocumented)
-  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
+  protected updateExtractorConfig(extractorConfig: IExtractorConfig): void;
   // (undocumented)
-  loadSchema(): Object;
+  protected updateExtractorOptions(extractorOptions: IExtractorOptions, entryPointFile: string): void;
 }
 
 // @public
@@ -200,9 +199,25 @@ interface IJestConfig {
 export function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
+interface ITscCmdTaskConfig {
+  buildDirectory?: string;
+  customArgs?: string[];
+  staticMatch?: string[];
+  typescriptCompilerPackagePath?: string;
+}
+
+// @public (undocumented)
 interface ITsConfigFile<T> {
   // (undocumented)
   compilerOptions: T;
+}
+
+// @public (undocumented)
+interface ITslintCmdTaskConfig {
+  buildDirectory?: string;
+  customArgs?: string[];
+  displayAsError?: boolean;
+  tslintPackagePath?: string;
 }
 
 // @alpha
@@ -257,6 +272,24 @@ enum TestResultState {
   Skipped = 3
 }
 
+// @public (undocumented)
+class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
+  constructor();
+  // (undocumented)
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): Promise<void> | undefined;
+  // (undocumented)
+  loadSchema(): Object;
+}
+
+// @public (undocumented)
+class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
+  constructor();
+  // (undocumented)
+  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): Promise<void> | undefined;
+  // (undocumented)
+  loadSchema(): Object;
+}
+
 // @public
 class TypeScriptConfiguration {
   static fixupSettings(compilerOptions: ts.Settings, logWarning: (msg: string) => void, options?: Partial<IFixupSettingsOptions>): void;
@@ -308,6 +341,9 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
 // WARNING: Unsupported export: tslint
 // WARNING: Unsupported export: text
 // WARNING: Unsupported export: removeTripleSlash
+// WARNING: Unsupported export: tscCmd
+// WARNING: Unsupported export: tslintCmd
+// WARNING: Unsupported export: apiExtractorStandalone
 // WARNING: Unsupported export: instrument
 // WARNING: Unsupported export: mocha
 // (No @packagedocumentation comment for this package)
