@@ -13,7 +13,7 @@ import * as TSLint from 'tslint';
 import {
   BaseCmdTask,
   ICallCmdOptions
-} from '../BaseCmdTask';
+} from './BaseCmdTask';
 
 /**
  * @public
@@ -54,7 +54,7 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
   }
 
   public loadSchema(): Object {
-    return JsonFile.load(path.resolve(__dirname, '..', '..', 'schemas', 'tslint-cmd.schema.json'));
+    return JsonFile.load(path.resolve(__dirname, '..', 'schemas', 'tslint-cmd.schema.json'));
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): Promise<void> | undefined {
