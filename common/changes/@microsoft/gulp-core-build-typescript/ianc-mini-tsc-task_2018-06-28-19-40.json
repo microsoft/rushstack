@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Inclusion of three new tasks designed to use as minimal behavior as possible to run tsc, tslint, and api-extractor.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "iclanton@users.noreply.github.com"
+}
