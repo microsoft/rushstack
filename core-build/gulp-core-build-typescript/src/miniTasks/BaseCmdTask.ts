@@ -26,14 +26,14 @@ export abstract class BaseCmdTask<TTaskConfig> extends GulpTask<TTaskConfig> {
 
     promiseHandlers.onData = options.onData
       ? options.onData
-      : (chunk: Buffer) => {
-          this._logChunk(chunk, this.log);
+      : (data: Buffer) => {
+          this._logBuffer(data, this.log);
         };
 
     promiseHandlers.onError = options.onError
       ? options.onError
-      : (chunk: Buffer) => {
-          this._logChunk(chunk, this.logError);
+      : (data: Buffer) => {
+          this._logBuffer(data, this.logError);
         };
 
     promiseHandlers.onClose = options.onClose
@@ -69,8 +69,8 @@ export abstract class BaseCmdTask<TTaskConfig> extends GulpTask<TTaskConfig> {
     });
   }
 
-  protected _logChunk(chunk: Buffer, logFn: (message: string) => void): void {
-    const chunkStr: string = chunk.toString().trim();
+  protected _logBuffer(data: Buffer, logFn: (message: string) => void): void {
+    const chunkStr: string = data.toString().trim();
     logFn.call(this, chunkStr);
   }
 }

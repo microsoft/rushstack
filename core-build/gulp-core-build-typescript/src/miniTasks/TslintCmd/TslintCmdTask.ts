@@ -107,28 +107,35 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
         '--format', 'json'
       ]);
 
-      let tslintErrorLogFn: (
+      const tslintErrorLogFn: (
         filePath: string,
         line: number,
         column: number,
         errorCode: string,
         message: string
-      ) => void = this.taskConfig.displayAsError ? this.fileError : this.fileWarning;
-      tslintErrorLogFn = tslintErrorLogFn.bind(this);
+      ) => void = this.taskConfig.displayAsError ? this.fileError.bind(this) : this.fileWarning.bind(this);
 
       // TSLint errors are logged to stdout
-      callCmdOptions.onData = (chunk: Buffer) => {
-        const errorJson: string = chunk.toString().trim();
-        const errors: TSLint.IRuleFailureJson[] = JSON.parse(errorJson);
-        for (const error of errors) {
-          const pathFromRoot: string = path.relative(this.buildConfig.rootPath, error.name);
-          tslintErrorLogFn(
-            pathFromRoot,
-            error.startPosition.line + 1,
-            error.startPosition.character + 1,
-            error.ruleName,
-            error.failure
-          );
+      callCmdOptions.onData = (data: Buffer) => {
+        try {
+          const errorJson: string = data.toString().trim();
+
+          const errors: TSLint.IRuleFailureJson[] = JSON.parse(errorJson);
+          for (const error of errors) {
+            const pathFromRoot: string = path.relative(this.buildConfig.rootPath, error.name);
+            tslintErrorLogFn(
+              pathFromRoot,
+              error.startPosition.line + 1,
+              error.startPosition.character + 1,
+              error.ruleName,
+              error.failure
+            );
+          }
+        } catch (e) {
+          // If we fail to parse the JSON, it's likely TSLint encountered an error parsing the config file,
+          // or it experienced an inner error. In this case, log the output as an error regardless of the
+          // displayAsError value
+          this._logBuffer(data, this.logError.bind(this));
         }
       };
     }
