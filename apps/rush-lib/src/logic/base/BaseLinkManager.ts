@@ -22,7 +22,7 @@ export abstract class BaseLinkManager {
   protected _rushConfiguration: RushConfiguration;
 
   protected static _createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
-    FileSystem.createFolder(path.dirname(linkSource));
+    FileSystem.ensureFolder(path.dirname(linkSource));
 
     if (symlinkKind === SymlinkKind.Directory) {
       // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.

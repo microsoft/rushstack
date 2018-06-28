@@ -83,7 +83,7 @@ export class CertificateStore {
 
     this._gcbServeDataPath = path.join(this._userProfilePath, '.gcb-serve-data');
     if (!FileSystem.exists(this._gcbServeDataPath)) {
-      FileSystem.createFolder(this._gcbServeDataPath);
+      FileSystem.ensureFolder(this._gcbServeDataPath);
     }
 
     this._certificatePath = path.join(this._gcbServeDataPath, 'gcb-serve.cer');

@@ -63,7 +63,7 @@ export interface IReadFolderOptions {
    * If true, returns the absolute paths of the files in the folder.
    * Defaults to `false`.
    */
-  absolutePath?: boolean;
+  absolutePaths?: boolean;
 }
 
 /**
@@ -235,7 +235,7 @@ export class FileSystem {
     };
 
     if (options.ensureFolder) {
-      FileSystem.createFolder(pathUtilities.basename(sourcePath));
+      FileSystem.ensureFolder(pathUtilities.basename(sourcePath));
     }
     fsx.moveSync(sourcePath, targetPath, { overwrite: options.overwrite });
   }
@@ -247,9 +247,11 @@ export class FileSystem {
   /**
    * Recursively creates a folder at a given path.
    * Behind the scenes is uses `fsx.ensureDirSync()`.
+   * @remarks
+   * Throws an exception if anything in the folderPath is not a folder.
    * @param folderPath - The absolute or relative path of the folder which should be created.
    */
-  public static createFolder(folderPath: string): void {
+  public static ensureFolder(folderPath: string): void {
     fsx.ensureDirSync(folderPath);
   }
 
@@ -261,7 +263,7 @@ export class FileSystem {
    */
   public static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string> {
     options = {
-      absolutePath: false,
+      absolutePaths: false,
       ...options
     };
 
@@ -271,7 +273,7 @@ export class FileSystem {
 
     const fileNames: Array<string> = fsx.readdirSync(folderPath);
 
-    if (options.absolutePath) {
+    if (options.absolutePaths) {
       return fileNames.map(fileName => pathUtilities.resolve(folderPath, fileName));
     }
 
@@ -317,7 +319,7 @@ export class FileSystem {
 
     if (options.ensureFolder) {
       const folderPath: string = pathUtilities.dirname(filePath);
-      FileSystem.createFolder(folderPath);
+      FileSystem.ensureFolder(folderPath);
     }
 
     contents = FileSystem._convertLineEndings(contents, options.convertLineEndings);

@@ -53,7 +53,7 @@ export class Telemetry {
     }
 
     const fullPath: string = this._getFilePath();
-    FileSystem.createFolder(this._dataFolder);
+    FileSystem.ensureFolder(this._dataFolder);
     writeFile(fullPath, JSON.stringify(this._store));
     this._store = [];
     this._cleanUp();

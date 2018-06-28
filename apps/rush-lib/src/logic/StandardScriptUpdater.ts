@@ -51,7 +51,7 @@ export class StandardScriptUpdater {
     const targetFilePath: string = path.join(rushConfiguration.commonScriptsFolder, scriptName);
     const sourceFilePath: string = path.resolve(__dirname, '../scripts', scriptName);
 
-    FileSystem.createFolder(rushConfiguration.commonScriptsFolder);
+    FileSystem.ensureFolder(rushConfiguration.commonScriptsFolder);
 
     // Are the files the same?
     let filesAreSame: boolean = false;

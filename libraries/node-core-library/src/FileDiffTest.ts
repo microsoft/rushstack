@@ -47,7 +47,7 @@ export class FileDiffTest {
     }
 
     const diffTestPath: string = path.join(packageJsonFolderPath, 'temp', 'diff-tests', testModule);
-    FileSystem.createFolder(diffTestPath);
+    FileSystem.ensureFolder(diffTestPath);
 
     FileSystem.emptyFolder(diffTestPath);
 

@@ -167,7 +167,7 @@ export class LockFile {
    * @param resourceName - the name of the resource we are locking on. Should be an alphabetic string.
    */
   public static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined {
-    FileSystem.createFolder(resourceDir);
+    FileSystem.ensureFolder(resourceDir);
     if (process.platform === 'win32') {
       return LockFile._tryAcquireWindows(resourceDir, resourceName);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {

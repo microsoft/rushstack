@@ -166,7 +166,7 @@ export class ExtractorContext {
     }
 
     FileSystem.readFolder(externalJsonCollectionPath, {
-      absolutePath: true
+      absolutePaths: true
     }).forEach(file => {
       if (path.extname(file) === '.json') {
         // Example: "C:\Example\my-package.json" --> "my-package"

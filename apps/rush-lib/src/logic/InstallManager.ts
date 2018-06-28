@@ -258,7 +258,7 @@ export class InstallManager {
 
     if (!FileSystem.exists(rushUserFolder)) {
       console.log('Creating ' + rushUserFolder);
-      FileSystem.createFolder(rushUserFolder);
+      FileSystem.ensureFolder(rushUserFolder);
     }
 
     const packageManager: PackageManager = this._rushConfiguration.packageManager;
@@ -304,7 +304,7 @@ export class InstallManager {
 
       // Example: "C:\MyRepo\common\temp"
       if (!FileSystem.exists(this._rushConfiguration.commonTempFolder)) {
-        FileSystem.createFolder(this._rushConfiguration.commonTempFolder);
+        FileSystem.ensureFolder(this._rushConfiguration.commonTempFolder);
       }
 
       // Example: "C:\MyRepo\common\temp\pnpm-local"

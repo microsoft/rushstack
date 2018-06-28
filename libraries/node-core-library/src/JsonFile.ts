@@ -33,7 +33,7 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
   onlyIfChanged?: boolean;
 
   /**
-   * Creates the folder recursively using FileSystem.createFolder()
+   * Creates the folder recursively using FileSystem.ensureFolder()
    * Defaults to false.
    */
   ensureFolder?: boolean;

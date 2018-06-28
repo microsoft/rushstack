@@ -94,7 +94,7 @@ export class AsyncRecycler {
       (membersToExclude || []).map(x => x.toUpperCase())
     );
 
-    for (const memberPath of FileSystem.readFolder(resolvedFolderPath, { absolutePath: true })) {
+    for (const memberPath of FileSystem.readFolder(resolvedFolderPath, { absolutePaths: true })) {
       const normalizedMemberName: string = path.basename(memberPath).toUpperCase();
       if (!excludeSet.has(normalizedMemberName)) {
         let shouldMove: boolean = false;

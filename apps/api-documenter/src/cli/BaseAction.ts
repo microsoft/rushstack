@@ -47,7 +47,7 @@ export abstract class BaseAction extends CommandLineAction {
     }
 
     this.outputFolder = this._outputFolderParameter.value || `./${this.actionName}`;
-    FileSystem.createFolder(this.outputFolder);
+    FileSystem.ensureFolder(this.outputFolder);
 
     for (const filename of FileSystem.readFolder(this.inputFolder)) {
       if (filename.match(/\.api\.json$/i)) {

@@ -290,7 +290,7 @@ export class RushConfiguration {
   private static _validateCommonRushConfigFolder(commonRushConfigFolder: string, packageManager: PackageManager): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
-      FileSystem.createFolder(commonRushConfigFolder);
+      FileSystem.ensureFolder(commonRushConfigFolder);
       return;
     }
 

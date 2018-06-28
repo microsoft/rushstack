@@ -192,7 +192,7 @@ describe('LockFile', () => {
       // ensure test folder is clean
       const testFolder: string = path.join(__dirname, '1');
       FileSystem.deleteFolder(testFolder);
-      FileSystem.createFolder(testFolder);
+      FileSystem.ensureFolder(testFolder);
 
       // create an open lockfile
       const resourceName: string = 'test';
@@ -210,7 +210,7 @@ describe('LockFile', () => {
       // ensure test folder is clean
       const testFolder: string = path.join(__dirname, '1');
       FileSystem.deleteFolder(testFolder);
-      FileSystem.createFolder(testFolder);
+      FileSystem.ensureFolder(testFolder);
 
       // Create a lockfile that is still hanging around on disk,
       const resourceName: string = 'test';
@@ -234,7 +234,7 @@ describe('LockFile', () => {
       // ensure test folder is clean
       const testFolder: string = path.join(__dirname, '1');
       FileSystem.deleteFolder(testFolder);
-      FileSystem.createFolder(testFolder);
+      FileSystem.ensureFolder(testFolder);
 
       const resourceName: string = 'test';
       const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);

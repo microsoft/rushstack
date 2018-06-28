@@ -112,7 +112,7 @@ export class Utilities {
   }
 
   /**
-   * Creates the specified folder by calling FileSystem.createFolder(), but using a
+   * Creates the specified folder by calling FileSystem.ensureFolder(), but using a
    * retry loop to recover from temporary locks that may be held by other processes.
    * If the folder already exists, no error occurs.
    */
@@ -123,14 +123,14 @@ export class Utilities {
       return;
     }
 
-    // We need to do a simple "FileSystem.createFolder(localModulesFolder)" here,
+    // We need to do a simple "FileSystem.ensureFolder(localModulesFolder)" here,
     // however if the folder we deleted above happened to contain any files,
     // then there seems to be some OS process (virus scanner?) that holds
     // a lock on the folder for a split second, which causes mkdirSync to
     // fail.  To workaround that, retry for up to 7 seconds before giving up.
     const maxWaitTimeMs: number = 7 * 1000;
 
-    return Utilities.retryUntilTimeout(() => FileSystem.createFolder(folderName),
+    return Utilities.retryUntilTimeout(() => FileSystem.ensureFolder(folderName),
                                        maxWaitTimeMs,
                                        (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
                                                         'from a process such as your text editor, command prompt, ' +
