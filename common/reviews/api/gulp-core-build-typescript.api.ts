@@ -13,11 +13,8 @@ interface IFixupSettingsOptions {
 }
 
 // @public (undocumented)
-interface ITscCmdTaskConfig {
-  buildDirectory?: string;
-  customArgs?: string[];
+interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
   staticMatch?: string[];
-  typescriptCompilerPackagePath?: string;
 }
 
 // @public (undocumented)
@@ -27,18 +24,17 @@ interface ITsConfigFile<T> {
 }
 
 // @public (undocumented)
-interface ITslintCmdTaskConfig {
-  buildDirectory?: string;
-  customArgs?: string[];
+interface ITslintCmdTaskConfig extends IBaseCmdTaskConfig {
   displayAsError?: boolean;
-  tslintPackagePath?: string;
 }
 
 // @alpha (undocumented)
 class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
   constructor();
   // (undocumented)
-  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): Promise<void> | undefined;
+  protected _onData(data: Buffer): void;
+  // (undocumented)
+  executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined;
   // (undocumented)
   loadSchema(): Object;
 }
@@ -47,7 +43,11 @@ class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
 class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
   constructor();
   // (undocumented)
-  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): Promise<void> | undefined;
+  protected _getArgs(): string[];
+  // (undocumented)
+  protected _onClose(code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void): void;
+  // (undocumented)
+  protected _onData(data: Buffer): void;
   // (undocumented)
   loadSchema(): Object;
 }
