@@ -133,11 +133,11 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
   }
 
   protected _onData(data: Buffer): void {
-    this._logBuffer(data, this.log);
+    this.log(data.toString().trim());
   }
 
   protected _onError(data: Buffer): void {
-    this._logBuffer(data, this.logError);
+    this.logError(data.toString().trim());
   }
 
   protected _onClose(code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void): void {
@@ -150,10 +150,5 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
 
   protected _getArgs(): string[] {
     return this.taskConfig.customArgs || [];
-  }
-
-  protected _logBuffer(data: Buffer, logFn: (message: string) => void): void {
-    const chunkStr: string = data.toString().trim();
-    logFn.call(this, chunkStr);
   }
 }

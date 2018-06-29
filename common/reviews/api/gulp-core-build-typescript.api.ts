@@ -25,6 +25,7 @@ interface ITsConfigFile<T> {
 
 // @public (undocumented)
 interface ITslintCmdTaskConfig extends IBaseCmdTaskConfig {
+  customArgs?: string[];
   displayAsError?: boolean;
 }
 
@@ -48,6 +49,8 @@ class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
   protected _onClose(code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void): void;
   // (undocumented)
   protected _onData(data: Buffer): void;
+  // (undocumented)
+  executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined;
   // (undocumented)
   loadSchema(): Object;
 }

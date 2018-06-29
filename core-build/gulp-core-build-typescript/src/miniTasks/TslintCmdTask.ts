@@ -15,6 +15,14 @@ import {
  */
 export interface ITslintCmdTaskConfig extends IBaseCmdTaskConfig {
   /**
+   * Optional list of custom args to pass to the tool
+   *
+   * @remarks
+   * Specifying a custom formatter will disable the standard error/warning reporting.
+   */
+  customArgs?: string[];
+
+  /**
    * If true, displays warnings as errors. Defaults to false.
    */
   displayAsError?: boolean;
@@ -39,6 +47,17 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
 
   public loadSchema(): Object {
     return JsonFile.load(path.resolve(__dirname, '..', 'schemas', 'tslint-cmd.schema.json'));
+  }
+
+  public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {
+    if (this._customFormatterSpecified) {
+      this.logVerbose(
+        'A custom formatter has been specified in customArgs, so the default TSLint error logging ' +
+        'has been disabled.'
+      );
+    }
+
+    return super.executeTask(gulp, completeCallback);
   }
 
   protected _getArgs(): string[] {
@@ -69,6 +88,7 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
 
   protected _onData(data: Buffer): void {
     if (!this._customFormatterSpecified) {
+      const dataStr: string = data.toString().trim();
       const tslintErrorLogFn: (
         filePath: string,
         line: number,
@@ -79,9 +99,7 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
 
       // TSLint errors are logged to stdout
       try {
-        const errorJson: string = data.toString().trim();
-
-        const errors: TSLint.IRuleFailureJson[] = JSON.parse(errorJson);
+        const errors: TSLint.IRuleFailureJson[] = JSON.parse(dataStr);
         for (const error of errors) {
           const pathFromRoot: string = path.relative(this.buildConfig.rootPath, error.name);
           tslintErrorLogFn(
@@ -96,7 +114,7 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
         // If we fail to parse the JSON, it's likely TSLint encountered an error parsing the config file,
         // or it experienced an inner error. In this case, log the output as an error regardless of the
         // displayAsError value
-        this._logBuffer(data, this.logError.bind(this));
+        this.logError(dataStr);
       }
     }
   }
