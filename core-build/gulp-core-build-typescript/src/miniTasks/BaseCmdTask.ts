@@ -67,7 +67,6 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
   }
 
   public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {
-    debugger;
     let binaryPackagePath: string = require.resolve(this._packageName);
     let packageJsonPath: string;
     while (!fsx.existsSync(packageJsonPath = path.join(binaryPackagePath, 'package.json'))) {
