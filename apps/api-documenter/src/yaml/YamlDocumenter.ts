@@ -283,7 +283,11 @@ export class YamlDocumenter {
         this._populateYamlMethod(yamlItem, docItem);
         break;
       case DocItemKind.Property:
-        yamlItem.type = 'property';
+        if ((docItem.apiItem as IApiProperty).isEventProperty) {
+          yamlItem.type = 'event';
+        } else {
+          yamlItem.type = 'property';
+        }
         this._populateYamlProperty(yamlItem, docItem);
         break;
       case DocItemKind.Function:

@@ -27,7 +27,7 @@ export interface IYamlException {
  * Part of the IYamlApiFile structure.  Represents the type of an IYamlItem.
  */
 export type YamlTypeId = 'class' | 'constructor' | 'enum' | 'field' | 'function' | 'interface'
-  | 'method' | 'package' | 'property';
+  | 'method' | 'package' | 'property' | 'event';
 
 /**
  * Part of the IYamlApiFile structure.  Represents basic API elements such as
