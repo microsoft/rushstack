@@ -63,7 +63,7 @@ export abstract class BaseRushAction extends CommandLineAction {
     process.exitCode = 1;
 
     if (!this.rushConfiguration) {
-      Utilities.throwRushConfigNotFoundError();
+      throw Utilities.getRushConfigNotFoundError();
     }
 
     this._ensureEnvironment();

@@ -10,8 +10,6 @@ import * as path from 'path';
 import * as wordwrap from 'wordwrap';
 import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
 
-import { RushConfiguration } from '../api/RushConfiguration';
-
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
   // If you try to assign it, it will be converted to the text string "undefined".
@@ -515,8 +513,8 @@ export class Utilities {
     }
   }
 
-  public static throwRushConfigNotFoundError(): RushConfiguration {
-    throw new Error('Unable to find rush.json configuration file');
+  public static getRushConfigNotFoundError(): Error {
+    return new Error('Unable to find rush.json configuration file');
   }
 
   /**
