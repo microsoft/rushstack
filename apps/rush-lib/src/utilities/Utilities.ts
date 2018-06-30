@@ -513,6 +513,10 @@ export class Utilities {
     }
   }
 
+  public static getRushConfigNotFoundError(): Error {
+    return new Error('Unable to find rush.json configuration file');
+  }
+
   /**
    * Returns a process.env environment suitable for executing lifecycle scripts.
    * @param initCwd - The INIT_CWD environment variable
