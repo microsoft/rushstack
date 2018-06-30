@@ -157,6 +157,12 @@ export interface IApiProperty extends IApiBaseDefinition {
   isStatic: boolean;
 
   /**
+   * Whether the item was marked as "\@eventproperty", which indicates an event object that event
+   * handlers can be attached to.
+   */
+  isEventProperty: boolean;
+
+  /**
    * Indicates that the item was marked as "\@sealed" and must not be extended.
    */
   isSealed: boolean;

@@ -218,6 +218,10 @@ export class ApiFileGenerator extends AstItemVisitor {
         footerParts.push('@override');
       }
 
+      if (astItem.documentation.isEventProperty) {
+        footerParts.push('@eventproperty');
+      }
+
       // deprecatedMessage is initialized by default,
       // this ensures it has contents before adding '@deprecated'
       if (astItem.documentation.deprecatedMessage.length > 0) {

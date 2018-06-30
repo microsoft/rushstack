@@ -15,6 +15,7 @@ export class AstProperty extends AstMember {
   public type: string;
   public isStatic: boolean;
   public isReadOnly: boolean;
+  public isEventProperty: boolean;
 
   constructor(options: IAstItemOptions) {
     super(options);
@@ -37,6 +38,11 @@ export class AstProperty extends AstMember {
           this.isReadOnly = true;
         }
       }
+    }
+
+    this.isEventProperty = this.documentation.isEventProperty || false;
+    if (this.isEventProperty && !this.isReadOnly) {
+      this.reportWarning('The @eventProperty tag requires the property to be readonly');
     }
   }
 
