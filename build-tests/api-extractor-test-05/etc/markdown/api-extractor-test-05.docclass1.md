@@ -4,6 +4,19 @@
 
 This is an example class.
 
+## Events
+
+|  Property | Access Modifier | Type | Description |
+|  --- | --- | --- | --- |
+|  [`malformedEvent`](./api-extractor-test-05.docclass1.malformedevent.md) |  | `SystemEvent` | This event should have been marked as readonly. |
+|  [`modifiedEvent`](./api-extractor-test-05.docclass1.modifiedevent.md) |  | `SystemEvent` | This event is fired whenever the object is modified. |
+
+## Properties
+
+|  Property | Access Modifier | Type | Description |
+|  --- | --- | --- | --- |
+|  [`regularProperty`](./api-extractor-test-05.docclass1.regularproperty.md) |  | `SystemEvent` | This is a regular property that happens to use the SystemEvent type. |
+
 ## Methods
 
 |  Method | Access Modifier | Returns | Description |
