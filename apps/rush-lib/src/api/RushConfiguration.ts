@@ -208,11 +208,9 @@ export class RushConfiguration {
 
   public static loadFromDefaultLocation(): RushConfiguration {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
-    if (rushJsonLocation) {
-      return RushConfiguration.loadFromConfigurationFile(rushJsonLocation);
-    } else {
-      throw new Error('Unable to find rush.json configuration file');
-    }
+    return rushJsonLocation
+      ? RushConfiguration.loadFromConfigurationFile(rushJsonLocation)
+      : Utilities.throwRushConfigNotFoundError();
   }
 
   /**
