@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'fs';
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 import { cloneDeep } from 'lodash';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
+import { FileSystem } from '@microsoft/node-core-library';
 
 export interface ITelemetryData {
   name: string;
@@ -46,13 +47,13 @@ export class Telemetry {
     this._store.push(data);
   }
 
-  public flush(writeFile: (file: string, data: string) => void = fsx.writeFileSync): void {
+  public flush(writeFile: (file: string, data: string) => void = FileSystem.writeFile): void {
     if (!this._enabled || this._store.length === 0) {
       return;
     }
 
     const fullPath: string = this._getFilePath();
-    fsx.ensureDirSync(this._dataFolder);
+    FileSystem.ensureFolder(this._dataFolder);
     writeFile(fullPath, JSON.stringify(this._store));
     this._store = [];
     this._cleanUp();
@@ -66,12 +67,12 @@ export class Telemetry {
    * When there are too many log files, delete the old ones.
    */
   private _cleanUp(): void {
-    if (fsx.existsSync(this._dataFolder)) {
-      const files: string[] = fsx.readdirSync(this._dataFolder);
+    if (FileSystem.exists(this._dataFolder)) {
+      const files: string[] = FileSystem.readFolder(this._dataFolder);
       if (files.length > MAX_FILE_COUNT) {
         const sortedFiles: string[] = files.map(fileName => {
           const filePath: string = path.join(this._dataFolder, fileName);
-          const stats: fsx.Stats = fsx.statSync(filePath);
+          const stats: fs.Stats = FileSystem.getStatistics(filePath);
           return {
             filePath: filePath,
             modifiedTime: stats.mtime.getTime(),
@@ -90,7 +91,7 @@ export class Telemetry {
         });
         const filesToDelete: number = sortedFiles.length - MAX_FILE_COUNT;
         for (let i: number = 0; i < filesToDelete; i++) {
-          fsx.unlinkSync(sortedFiles[i]);
+          FileSystem.deleteFile(sortedFiles[i]);
         }
       }
     }

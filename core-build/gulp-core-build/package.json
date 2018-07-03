@@ -32,7 +32,6 @@
     "colors": "~1.2.1",
     "del": "^2.2.2",
     "end-of-stream": "~1.1.0",
-    "fs-extra": "~5.0.0",
     "glob-escape": "~0.0.1",
     "globby": "~5.0.0",
     "gulp": "~3.9.1",

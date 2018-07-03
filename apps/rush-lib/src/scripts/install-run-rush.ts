@@ -28,7 +28,7 @@ function getRushVersion(): string {
   const rushJsonFolder: string = findRushJsonFolder();
   const rushJsonPath: string = path.join(rushJsonFolder, RUSH_JSON_FILENAME);
   try {
-    const rushJsonContents: string = fs.readFileSync(rushJsonPath, 'UTF-8');
+    const rushJsonContents: string = fs.readFileSync(rushJsonPath, 'utf-8');
     // Use a regular expression to parse out the rushVersion value because rush.json supports comments,
     // but JSON.parse does not and we don't want to pull in more dependencies than we need to in this script.
     const rushJsonMatches: string[] = rushJsonContents.match(/\"rushVersion\"\s*\:\s*\"([0-9a-zA-Z.+\-]+)\"/)!;

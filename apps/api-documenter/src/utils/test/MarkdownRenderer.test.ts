@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
-import { FileDiffTest } from '@microsoft/node-core-library';
+import { FileDiffTest, FileSystem } from '@microsoft/node-core-library';
 import { IMarkupPage, Markup } from '@microsoft/api-extractor';
 
 import { MarkdownRenderer } from '../MarkdownRenderer';
@@ -66,7 +65,7 @@ describe('MarkdownPageRenderer', () => {
     ]);
 
     const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
-    fsx.writeFileSync(outputFilename, MarkdownRenderer.renderElements([markupPage], { }));
+    FileSystem.writeFile(outputFilename, MarkdownRenderer.renderElements([markupPage], { }));
 
     FileDiffTest.assertEqual(outputFilename, path.join(__dirname, 'ExpectedOutput.md'));
 

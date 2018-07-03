@@ -3,12 +3,12 @@
 
 import * as colors from 'colors';
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { Utilities } from '../utilities/Utilities';
 import { RushConstants } from '../logic/RushConstants';
+import { FileSystem } from '@microsoft/node-core-library';
 
 // Refuses to run at all if the PNPM version is older than this, because there
 // are known bugs or missing features in earlier releases.
@@ -62,11 +62,11 @@ export class SetupChecks {
     const seenFolders: Set<string> = new Set<string>();
 
     // Check from the real parent of the common/temp folder
-    const commonTempParent: string = path.dirname(fsx.realpathSync(rushConfiguration.commonTempFolder));
+    const commonTempParent: string = path.dirname(FileSystem.getRealPath(rushConfiguration.commonTempFolder));
     SetupChecks._collectPhantomFoldersUpwards(commonTempParent, phantomFolders, seenFolders);
 
     // Check from the real folder containing rush.json
-    const realRushJsonFolder: string = fsx.realpathSync(rushConfiguration.rushJsonFolder);
+    const realRushJsonFolder: string = FileSystem.getRealPath(rushConfiguration.rushJsonFolder);
     SetupChecks._collectPhantomFoldersUpwards(realRushJsonFolder, phantomFolders, seenFolders);
 
     if (phantomFolders.length > 0) {
@@ -104,7 +104,7 @@ export class SetupChecks {
 
       // If there is a node_modules folder under this folder, add it to the list of bad folders
       const nodeModulesFolder: string = path.join(folder, RushConstants.nodeModulesFolderName);
-      if (fsx.existsSync(nodeModulesFolder)) {
+      if (FileSystem.exists(nodeModulesFolder)) {
         phantomFolders.push(nodeModulesFolder);
       }
 

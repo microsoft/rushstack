@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
 import * as path from 'path';
 
 import {
   JsonFile,
-  JsonSchema
+  JsonSchema,
+  FileSystem
 } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../logic/RushConstants';
@@ -35,7 +35,7 @@ export class CommandLineConfiguration {
    */
   public static loadFromFileOrDefault(jsonFilename: string): CommandLineConfiguration {
     let commandLineJson: ICommandLineJson | undefined = undefined;
-    if (fs.existsSync(jsonFilename)) {
+    if (FileSystem.exists(jsonFilename)) {
       commandLineJson = JsonFile.loadAndValidate(jsonFilename, CommandLineConfiguration._jsonSchema);
     }
 

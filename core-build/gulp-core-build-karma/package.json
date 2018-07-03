@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.8.4",
+    "@microsoft/node-core-library": "1.4.1",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "gulp-karma": "~0.0.5",

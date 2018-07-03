@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as fsx from 'fs-extra';
 import * as glob from 'glob';
 import * as path from 'path';
 import builtinPackageNames = require('builtins');
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
+import { FileSystem } from '@microsoft/node-core-library';
 
 export class ScanAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
@@ -35,7 +35,7 @@ export class ScanAction extends BaseRushAction {
   protected run(): Promise<void> {
     const packageJsonFilename: string = path.resolve('./package.json');
 
-    if (!fsx.existsSync(packageJsonFilename)) {
+    if (!FileSystem.exists(packageJsonFilename)) {
       throw new Error('You must run "rush scan" in a project folder containing a package.json file.');
     }
 
@@ -81,7 +81,7 @@ export class ScanAction extends BaseRushAction {
 
     for (const filename of glob.sync('{./*.{ts,js,tsx,jsx},./{src,lib}/**/*.{ts,js,tsx,jsx}}')) {
       try {
-        const contents: string = fsx.readFileSync(filename, 'utf8');
+        const contents: string = FileSystem.readFile(filename);
         const lines: string[] = contents.split('\n');
 
         for (const line of lines) {

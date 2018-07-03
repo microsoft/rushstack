@@ -3,11 +3,11 @@
 
 import * as childProcess from 'child_process';
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 
 import {
   JsonFile,
-  IPackageJson
+  IPackageJson,
+  FileSystem
 } from '@microsoft/node-core-library';
 import { GulpTask } from '@microsoft/gulp-core-build';
 
@@ -69,7 +69,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
   public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {
     let binaryPackagePath: string = require.resolve(this._packageName);
     let packageJsonPath: string;
-    while (!fsx.existsSync(packageJsonPath = path.join(binaryPackagePath, 'package.json'))) {
+    while (!FileSystem.exists(packageJsonPath = path.join(binaryPackagePath, 'package.json'))) {
       const tempBinaryPackagePath: string = path.dirname(binaryPackagePath);
       if (binaryPackagePath === tempBinaryPackagePath) {
         // We've hit the disk root
@@ -82,7 +82,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
 
     if (this.taskConfig.overridePackagePath) {
       // The package version is being overridden
-      if (!fsx.existsSync(this.taskConfig.overridePackagePath)) {
+      if (!FileSystem.exists(this.taskConfig.overridePackagePath)) {
         completeCallback(
           `The specified ${this._packageName} path (${this.taskConfig.overridePackagePath}) does not ` +
           'exist'
@@ -98,7 +98,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
     this.log(`${this._packageName} version: ${packageJson.version}`);
 
     const binaryPath: string = path.resolve(binaryPackagePath, this._packageBinPath);
-    if (!fsx.existsSync(binaryPath)) {
+    if (!FileSystem.exists(binaryPath)) {
       completeCallback(
         `The binary is missing. This indicates that ${this._packageName} is not ` +
         'installed correctly.'

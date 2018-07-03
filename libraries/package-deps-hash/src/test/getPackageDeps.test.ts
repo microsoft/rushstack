@@ -5,8 +5,9 @@ import { getPackageDeps, parseGitLsTree } from '../getPackageDeps';
 import { IPackageDeps } from '../IPackageDeps';
 import { expect, assert } from 'chai';
 import * as path from 'path';
-import * as fs from 'fs';
 import { execSync } from 'child_process';
+
+import { FileSystem } from '@microsoft/node-core-library';
 
 const SOURCE_PATH: string = path.join(__dirname).replace(
   path.join('lib', 'test'),
@@ -103,10 +104,10 @@ describe('getPackageDeps', () => {
   it('can can handle adding one file', (done) => { // tslint:disable-line
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
 
-    fs.writeFileSync(tempFilePath, 'a');
+    FileSystem.writeFile(tempFilePath, 'a');
 
     function _done(e?: Error): void {
-      fs.unlinkSync(tempFilePath);
+      FileSystem.deleteFile(tempFilePath);
       done(e);
     }
 
@@ -136,12 +137,12 @@ describe('getPackageDeps', () => {
     const tempFilePath1: string = path.join(TEST_PROJECT_PATH, 'a.txt');
     const tempFilePath2: string = path.join(TEST_PROJECT_PATH, 'b.txt');
 
-    fs.writeFileSync(tempFilePath1, 'a');
-    fs.writeFileSync(tempFilePath2, 'a');
+    FileSystem.writeFile(tempFilePath1, 'a');
+    FileSystem.writeFile(tempFilePath2, 'a');
 
     function _done(e?: Error): void {
-      fs.unlinkSync(tempFilePath1);
-      fs.unlinkSync(tempFilePath2);
+      FileSystem.deleteFile(tempFilePath1);
+      FileSystem.deleteFile(tempFilePath2);
       done(e);
     }
 
@@ -170,7 +171,7 @@ describe('getPackageDeps', () => {
   it('can can handle removing one file', (done) => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
-    fs.unlinkSync(testFilePath);
+    FileSystem.deleteFile(testFilePath);
 
     function _done(e?: Error): void {
       execSync(`git checkout ${ testFilePath }`);
@@ -198,7 +199,7 @@ describe('getPackageDeps', () => {
   it('can can handle changing one file', (done) => {
     const testFilePath: string = path.join(TEST_PROJECT_PATH, 'file1.txt');
 
-    fs.writeFileSync(testFilePath, 'abc');
+    FileSystem.writeFile(testFilePath, 'abc');
 
     function _done(e?: Error): void {
       execSync(`git checkout ${testFilePath}`);
@@ -244,10 +245,10 @@ describe('getPackageDeps', () => {
   it('can exclude an added file', (done) => {
     const tempFilePath: string = path.join(TEST_PROJECT_PATH, 'a.txt');
 
-    fs.writeFileSync(tempFilePath, 'a');
+    FileSystem.writeFile(tempFilePath, 'a');
 
     function _done(e?: Error): void {
-      fs.unlinkSync(tempFilePath);
+      FileSystem.deleteFile(tempFilePath);
       done(e);
     }
 

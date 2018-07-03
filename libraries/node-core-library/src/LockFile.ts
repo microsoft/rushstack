@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { setTimeout } from 'timers';
+import { FileSystem } from './FileSystem';
+import { FileWriter } from './FileWriter';
 
 /**
  * http://man7.org/linux/man-pages/man5/proc.5.html
@@ -91,7 +92,7 @@ export function getProcessStartTime(pid: number): string | undefined {
     // Try to read /proc/[pid]/stat and get the value at position procStatStartTimePos.
     let stat: undefined|string;
     try {
-      stat = fsx.readFileSync(`/proc/${pidString}/stat`, 'utf8');
+      stat = FileSystem.readFile(`/proc/${pidString}/stat`);
     } catch (error) {
       if (error.code !== 'ENOENT') {
         throw error;
@@ -166,7 +167,7 @@ export class LockFile {
    * @param resourceName - the name of the resource we are locking on. Should be an alphabetic string.
    */
   public static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined {
-    fsx.mkdirsSync(resourceDir);
+    FileSystem.ensureFolder(resourceDir);
     if (process.platform === 'win32') {
       return LockFile._tryAcquireWindows(resourceDir, resourceName);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {
@@ -226,7 +227,7 @@ export class LockFile {
     }
 
     const pidLockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
-    let lockFileDescriptor: number | undefined;
+    let lockFileHandle: FileWriter | undefined;
 
     let lockFile: LockFile;
 
@@ -234,16 +235,16 @@ export class LockFile {
       // open in write mode since if this file exists, it cannot be from the current process
       // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
       // We should ideally maintain a dictionary of normalized acquired filenames
-      lockFileDescriptor = fsx.openSync(pidLockFilePath, 'w');
-      fsx.writeSync(lockFileDescriptor, startTime);
+      lockFileHandle = FileWriter.open(pidLockFilePath);
+      lockFileHandle.write(startTime);
 
-      const currentBirthTimeMs: number = fsx.statSync(pidLockFilePath).birthtime.getTime();
+      const currentBirthTimeMs: number = FileSystem.getStatistics(pidLockFilePath).birthtime.getTime();
 
       let smallestBirthTimeMs: number = currentBirthTimeMs;
       let smallestBirthTimePid: string = pid.toString();
 
       // now, scan the directory for all lockfiles
-      const files: string[] = fsx.readdirSync(resourceDir);
+      const files: string[] = FileSystem.readFolder(resourceDir);
 
       // look for anything ending with # then numbers and ".lock"
       const lockFileRegExp: RegExp = /^(.+)#([0-9]+)\.lock$/;
@@ -266,9 +267,9 @@ export class LockFile {
           let otherPidOldStartTime: string | undefined;
           let otherBirthtimeMs: number | undefined;
           try {
-            otherPidOldStartTime = fsx.readFileSync(fileInFolderPath, 'utf8');
+            otherPidOldStartTime = FileSystem.readFile(fileInFolderPath);
             // check the timestamp of the file
-            otherBirthtimeMs = fsx.statSync(fileInFolderPath).birthtime.getTime();
+            otherBirthtimeMs = FileSystem.getStatistics(fileInFolderPath).birthtime.getTime();
           } catch (err) {
             // this means the file is probably deleted already
           }
@@ -298,7 +299,7 @@ export class LockFile {
           // this means the process is no longer executing, delete the file
           if (!otherPidCurrentStartTime || otherPidOldStartTime !== otherPidCurrentStartTime) {
             // console.log(`Other pid ${otherPid} is no longer executing!`);
-            fsx.removeSync(fileInFolderPath);
+            FileSystem.deleteFile(fileInFolderPath);
             continue;
           }
 
@@ -318,13 +319,13 @@ export class LockFile {
       }
 
       // we have the lock!
-      lockFile = new LockFile(lockFileDescriptor, pidLockFilePath, dirtyWhenAcquired);
-      lockFileDescriptor = undefined; // we have handed the descriptor off to the instance
+      lockFile = new LockFile(lockFileHandle, pidLockFilePath, dirtyWhenAcquired);
+      lockFileHandle = undefined; // we have handed the descriptor off to the instance
     } finally {
-      if (lockFileDescriptor) {
+      if (lockFileHandle) {
         // ensure our lock is closed
-        fsx.closeSync(lockFileDescriptor);
-        fsx.removeSync(pidLockFilePath);
+        lockFileHandle.close();
+        FileSystem.deleteFile(pidLockFilePath);
       }
     }
     return lockFile;
@@ -338,11 +339,11 @@ export class LockFile {
     const lockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
     let dirtyWhenAcquired: boolean = false;
 
-    let fileDescriptor: number | undefined;
+    let fileHandle: FileWriter | undefined;
     let lockFile: LockFile;
 
     try {
-      if (fsx.existsSync(lockFilePath)) {
+      if (FileSystem.exists(lockFilePath)) {
         dirtyWhenAcquired = true;
 
         // If the lockfile is held by an process with an exclusive lock, then removing it will
@@ -350,12 +351,12 @@ export class LockFile {
 
         // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
         // the last process to hold it died.
-        fsx.unlinkSync(lockFilePath);
+        FileSystem.deleteFile(lockFilePath);
       }
 
       try {
         // Attempt to open an exclusive lockfile
-        fileDescriptor = fsx.openSync(lockFilePath, 'wx');
+        fileHandle = FileWriter.open(lockFilePath, { exclusive: true });
       } catch (error) {
         // we tried to delete the lock, but something else is holding it,
         // (probably an active process), therefore we are unable to create a lock
@@ -363,11 +364,11 @@ export class LockFile {
       }
 
       // Ensure we can hand off the file descriptor to the lockfile
-      lockFile = new LockFile(fileDescriptor, lockFilePath, dirtyWhenAcquired);
-      fileDescriptor = undefined;
+      lockFile = new LockFile(fileHandle, lockFilePath, dirtyWhenAcquired);
+      fileHandle = undefined;
     } finally {
-      if (fileDescriptor) {
-        fsx.closeSync(fileDescriptor);
+      if (fileHandle) {
+        fileHandle.close();
       }
     }
 
@@ -383,9 +384,9 @@ export class LockFile {
       throw new Error(`The lock for file "${path.basename(this._filePath)}" has already been released.`);
     }
 
-    fsx.closeSync(this._fileDescriptor!);
-    fsx.removeSync(this._filePath);
-    this._fileDescriptor = undefined;
+    this._fileWriter!.close();
+    FileSystem.deleteFile(this._filePath);
+    this._fileWriter = undefined;
   }
 
   /**
@@ -407,11 +408,11 @@ export class LockFile {
    * Returns true if this lock is currently being held.
    */
   public get isReleased(): boolean {
-    return this._fileDescriptor === undefined;
+    return this._fileWriter === undefined;
   }
 
   private constructor(
-    private _fileDescriptor: number | undefined,
+    private _fileWriter: FileWriter | undefined,
     private _filePath: string,
     private _dirtyWhenAcquired: boolean) {
   }

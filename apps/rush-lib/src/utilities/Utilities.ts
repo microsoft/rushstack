@@ -2,13 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import * as fsx from 'fs-extra';
+import * as fs from 'fs';
 import * as os from 'os';
 import * as rimraf from 'rimraf';
 import * as tty from 'tty';
 import * as path from 'path';
 import * as wordwrap from 'wordwrap';
-import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  IPackageJson,
+  FileSystem
+} from '@microsoft/node-core-library';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -43,7 +47,7 @@ export class Utilities {
     const unresolvedUserFolder: string | undefined
       = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
     const homeFolder: string = path.resolve(unresolvedUserFolder);
-    if (!fsx.existsSync(homeFolder)) {
+    if (!FileSystem.exists(homeFolder)) {
       throw new Error('Unable to determine the current user\'s home directory');
     }
 
@@ -108,7 +112,7 @@ export class Utilities {
   }
 
   /**
-   * Creates the specified folder by calling fsx.mkdirsSync(), but using a
+   * Creates the specified folder by calling FileSystem.ensureFolder(), but using a
    * retry loop to recover from temporary locks that may be held by other processes.
    * If the folder already exists, no error occurs.
    */
@@ -119,14 +123,14 @@ export class Utilities {
       return;
     }
 
-    // We need to do a simple "fs.mkdirSync(localModulesFolder)" here,
+    // We need to do a simple "FileSystem.ensureFolder(localModulesFolder)" here,
     // however if the folder we deleted above happened to contain any files,
     // then there seems to be some OS process (virus scanner?) that holds
     // a lock on the folder for a split second, which causes mkdirSync to
     // fail.  To workaround that, retry for up to 7 seconds before giving up.
     const maxWaitTimeMs: number = 7 * 1000;
 
-    return Utilities.retryUntilTimeout(() => fsx.mkdirsSync(folderName),
+    return Utilities.retryUntilTimeout(() => FileSystem.ensureFolder(folderName),
                                        maxWaitTimeMs,
                                        (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
                                                         'from a process such as your text editor, command prompt, ' +
@@ -141,7 +145,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fsx.Stats = fsx.lstatSync(filePath);
+      const lstat: fs.Stats = FileSystem.getLinkStatistics(filePath);
       exists = lstat.isFile();
     } catch (e) { /* no-op */ }
 
@@ -155,7 +159,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fsx.Stats = fsx.lstatSync(directoryPath);
+      const lstat: fs.Stats = FileSystem.getLinkStatistics(directoryPath);
       exists = lstat.isDirectory();
     } catch (e) { /* no-op */ }
 
@@ -182,7 +186,7 @@ export class Utilities {
   public static deleteFile(filePath: string): void {
     if (Utilities.fileExists(filePath)) {
       console.log(`Deleting: ${filePath}`);
-      fsx.unlinkSync(filePath);
+      FileSystem.deleteFile(filePath);
     }
   }
 
@@ -194,17 +198,17 @@ export class Utilities {
    * timestamp is compared.
    */
   public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean {
-    if (!fsx.existsSync(outputFilename)) {
+    if (!FileSystem.exists(outputFilename)) {
       return false;
     }
-    const outputStats: fsx.Stats = fsx.statSync(outputFilename);
+    const outputStats: fs.Stats = FileSystem.getStatistics(outputFilename);
 
     for (const inputFilename of inputFilenames) {
-      if (!fsx.existsSync(inputFilename)) {
+      if (!FileSystem.exists(inputFilename)) {
         return false;
       }
 
-      const inputStats: fsx.Stats = fsx.statSync(inputFilename);
+      const inputStats: fs.Stats = FileSystem.getStatistics(inputFilename);
       if (outputStats.mtime < inputStats.mtime) {
         return false;
       }
@@ -405,10 +409,10 @@ export class Utilities {
    */
   public static installPackageInDirectory(options: IInstallPackageInDirectoryOptions): void {
     const directory: string = path.resolve(options.directory);
-    if (fsx.existsSync(directory)) {
+    if (FileSystem.exists(directory)) {
       console.log('Deleting old files from ' + directory);
     }
-    fsx.emptyDirSync(directory);
+    FileSystem.ensureEmptyFolder(directory);
 
     const npmPackageJson: IPackageJson = {
       dependencies: {
@@ -471,9 +475,9 @@ export class Utilities {
     const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
     const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
     try {
-      if (fsx.existsSync(sourceNpmrcPath)) {
+      if (FileSystem.exists(sourceNpmrcPath)) {
         console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`);
-        let npmrcFileLines: string[] = fsx.readFileSync(sourceNpmrcPath).toString().split('\n');
+        let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
         npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
         const resultLines: string[] = [];
         // Trim out lines that reference environment variables that aren't defined
@@ -502,11 +506,11 @@ export class Utilities {
           }
         }
 
-        fsx.writeFileSync(targetNpmrcPath, resultLines.join(os.EOL));
-      } else if (fsx.existsSync(targetNpmrcPath)) {
+        FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+      } else if (FileSystem.exists(targetNpmrcPath)) {
         // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
         console.log(`Deleting ${targetNpmrcPath}`);
-        fsx.unlinkSync(targetNpmrcPath);
+        FileSystem.deleteFile(targetNpmrcPath);
       }
     } catch (e) {
       throw new Error(`Error syncing .npmrc file: ${e}`);

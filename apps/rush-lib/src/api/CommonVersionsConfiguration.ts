@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
 import * as path from 'path';
 import {
   JsonFile,
   JsonSchema,
   MapExtensions,
   PackageName,
-  ProtectableMap
+  ProtectableMap,
+  FileSystem
 } from '@microsoft/node-core-library';
 
 /**
@@ -65,7 +65,7 @@ export class CommonVersionsConfiguration {
   public static loadFromFile(jsonFilename: string): CommonVersionsConfiguration {
     let commonVersionsJson: ICommonVersionsJson | undefined = undefined;
 
-    if (fs.existsSync(jsonFilename)) {
+    if (FileSystem.exists(jsonFilename)) {
       commonVersionsJson = JsonFile.loadAndValidate(jsonFilename, CommonVersionsConfiguration._jsonSchema);
     }
 
