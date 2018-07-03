@@ -382,11 +382,8 @@ export class InstallManager {
 
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
-    const committedNpmrcPath: string = path.join(this._rushConfiguration.commonRushConfigFolder, '.npmrc');
-    const tempNpmrcPath: string = path.join(this._rushConfiguration.commonTempFolder, '.npmrc');
-
-    // ensure that we remove any old one that may be hanging around
-    this._syncFile(committedNpmrcPath, tempNpmrcPath);
+    // Also ensure that we remove any old one that may be hanging around
+    Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, this._rushConfiguration.commonTempFolder);
 
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {

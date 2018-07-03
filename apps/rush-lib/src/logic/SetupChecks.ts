@@ -16,7 +16,7 @@ const MINIMUM_SUPPORTED_NPM_VERSION: string = '4.5.0';
 
 // Refuses to run at all if the PNPM version is older than this, because there
 // are known bugs or missing features in earlier releases.
-const MINIMUM_SUPPORTED_PNPM_VERSION: string = '2.1.0';
+const MINIMUM_SUPPORTED_PNPM_VERSION: string = '2.6.2';
 
 /**
  * Validate that the developer's setup is good.

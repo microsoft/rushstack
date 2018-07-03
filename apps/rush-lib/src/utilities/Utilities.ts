@@ -426,7 +426,7 @@ export class Utilities {
     JsonFile.save(npmPackageJson, path.join(directory, 'package.json'));
 
     if (options.commonRushConfigFolder) {
-      Utilities._syncNpmrc(options.commonRushConfigFolder, directory);
+      Utilities.syncNpmrc(options.commonRushConfigFolder, directory);
     }
 
     console.log(os.EOL + 'Running "npm install" in ' + directory);
@@ -458,8 +458,8 @@ export class Utilities {
   }
 
   /**
-   * As a workaround, _syncNpmrc() copies the .npmrc file to the target folder, and also trims
-   * unusable lines from the .npmrc file.  If the source .npmrc file not exist, then _syncNpmrc()
+   * As a workaround, syncNpmrc() copies the .npmrc file to the target folder, and also trims
+   * unusable lines from the .npmrc file.  If the source .npmrc file not exist, then syncNpmrc()
    * will delete an .npmrc that is found in the target folder.
    *
    * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
@@ -471,7 +471,7 @@ export class Utilities {
    *
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _syncNpmrc() FROM scripts/install-run.ts
    */
-  private static _syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
+  public static syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
     const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
     const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
     try {
@@ -515,6 +515,10 @@ export class Utilities {
     } catch (e) {
       throw new Error(`Error syncing .npmrc file: ${e}`);
     }
+  }
+
+  public static getRushConfigNotFoundError(): Error {
+    return new Error('Unable to find rush.json configuration file');
   }
 
   /**
