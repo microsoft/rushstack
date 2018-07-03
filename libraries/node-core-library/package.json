@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/node-core-library",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/index-internal.d.ts",

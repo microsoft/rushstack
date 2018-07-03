@@ -31,13 +31,13 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "1.4.1",
+    "@microsoft/node-core-library": "1.5.0",
     "@microsoft/rush-lib": "5.0.0",
     "colors": "~1.2.1",
     "semver": "~5.3.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.47",
+    "@microsoft/node-library-build": "4.3.48",
     "@types/chai": "3.4.34",
     "@types/mocha": "2.2.38",
     "@types/node": "8.5.8",
