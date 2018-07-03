@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as Gulp from 'gulp';
 import * as path from 'path';
 import { GulpTask } from '@microsoft/gulp-core-build';
+import { FileSystem } from '@microsoft/node-core-library';
 import {
   Extractor,
   IExtractorOptions,
@@ -218,7 +218,7 @@ export abstract class ApiExtractorBaseTask extends GulpTask<IApiExtractorTaskCon
       return false;
     }
 
-    if (!fsx.existsSync(this.taskConfig.entry)) {
+    if (!FileSystem.exists(this.taskConfig.entry)) {
       this.logError(`Entry file ${this.taskConfig.entry} does not exist.`);
       return false;
     }
