@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 21 Jun 2018 08:27:29 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Jul 2018 21:03:31 GMT and should not be manually modified.
+
+## 1.5.0
+Tue, 03 Jul 2018 21:03:31 GMT
+
+### Minor changes
+
+- Add a FileSystem API that wraps and replaces fs and fs-extra
 
 ## 1.4.1
 Thu, 21 Jun 2018 08:27:29 GMT

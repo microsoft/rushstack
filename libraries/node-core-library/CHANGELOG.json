@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "1.5.0",
+      "tag": "@microsoft/node-core-library_v1.5.0",
+      "date": "Tue, 03 Jul 2018 21:03:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a FileSystem API that wraps and replaces fs and fs-extra"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.1",
       "tag": "@microsoft/node-core-library_v1.4.1",
       "date": "Thu, 21 Jun 2018 08:27:29 GMT",
