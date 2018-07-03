@@ -125,9 +125,7 @@ export class ProjectTask implements ITaskDefinition {
         return Promise.resolve(TaskStatus.Skipped);
       } else {
         // If the deps file exists, remove it before starting a build.
-        if (FileSystem.exists(currentDepsPath)) {
-          FileSystem.deleteFile(currentDepsPath);
-        }
+        FileSystem.deleteFile(currentDepsPath);
 
         if (!taskCommand) {
           // tslint:disable-next-line:max-line-length

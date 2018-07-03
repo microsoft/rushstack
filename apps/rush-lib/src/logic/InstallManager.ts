@@ -303,9 +303,7 @@ export class InstallManager {
       packageManagerMarker.create();
 
       // Example: "C:\MyRepo\common\temp"
-      if (!FileSystem.exists(this._rushConfiguration.commonTempFolder)) {
-        FileSystem.ensureFolder(this._rushConfiguration.commonTempFolder);
-      }
+      FileSystem.ensureFolder(this._rushConfiguration.commonTempFolder);
 
       // Example: "C:\MyRepo\common\temp\pnpm-local"
       const localPackageManagerToolFolder: string =

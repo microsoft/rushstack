@@ -114,7 +114,7 @@ export interface IReadFileOptions {
  */
 export interface IFileSystemMoveOptions {
   /**
-   * If true, will overwrite the file if it already exists. Defaults to false.
+   * If true, will overwrite the file if it already exists. Defaults to true.
    */
   overwrite?: boolean;
 
@@ -140,6 +140,7 @@ export interface IDeleteFileOptions {
 /**
  * The parameters for `updateTimes()`.
  * Both times must be specified.
+ * @public
  */
 export interface IUpdateTimeParameters {
   /**
@@ -225,7 +226,7 @@ export class FileSystem {
   }
 
   /**
-   * Moves a file. The folder must exist, unless the `ensureFolder` option is provided.
+   * Moves a file. The folder must exist, unless the `ensureFolderExists` option is provided.
    * Behind the scenes it uses `fsx.moveSync()`
    * @param sourcePath - The absolute or relative path to the source file.
    * @param targetPath - The absolute or relative path where the file should be moved to.
@@ -233,7 +234,7 @@ export class FileSystem {
    */
   public static move(sourcePath: string, targetPath: string, options?: IFileSystemMoveOptions): void {
     options = {
-      overwrite: false,
+      overwrite: true,
       ensureFolderExists: false,
       ...options
     };
@@ -241,6 +242,7 @@ export class FileSystem {
     if (options.ensureFolderExists) {
       FileSystem.ensureFolder(pathUtilities.basename(sourcePath));
     }
+
     fsx.moveSync(sourcePath, targetPath, { overwrite: options.overwrite });
   }
 

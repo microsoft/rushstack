@@ -53,7 +53,9 @@ export {
   IReadFileOptions,
   IFileSystemMoveOptions,
   IDeleteFileOptions,
-  NewlineKind
+  NewlineKind,
+  IFileModeBits,
+  IUpdateTimeParameters
 } from './FileSystem';
 export {
   FileWriter,

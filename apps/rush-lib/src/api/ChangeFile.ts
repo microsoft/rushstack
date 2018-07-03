@@ -4,12 +4,13 @@
 import * as path from 'path';
 import gitInfo = require('git-repo-info');
 
+import { JsonFile } from '@microsoft/node-core-library';
+
 import { RushConfiguration } from './RushConfiguration';
 import {
   IChangeFile,
   IChangeInfo
 } from './ChangeManagement';
-import { JsonFile } from '@microsoft/node-core-library';
 
 /**
  * This class represents a single change file.

@@ -12,7 +12,6 @@ class FileDiffTest {
 
 // @public
 class FileSystem {
-  // WARNING: The type "IFileModeBits" needs to be exported by the package (e.g. added to index.ts)
   static changePermissionBits(path: string, mode: IFileModeBits): void;
   static copyFile(sourcePath: string, destinationPath: string): void;
   static createHardLink(linkTarget: string, linkSource: string): void;
@@ -31,7 +30,6 @@ class FileSystem {
   static readFile(filePath: string, options?: IReadFileOptions): string;
   static readFileToBuffer(filePath: string): Buffer;
   static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
-  // WARNING: The type "IUpdateTimeParameters" needs to be exported by the package (e.g. added to index.ts)
   static updateTimes(path: string, times: IUpdateTimeParameters): void;
   static writeFile(filePath: string, contents: string | Buffer, options?: IWriteFileOptions): void;
 }
@@ -52,6 +50,16 @@ enum FolderConstants {
 // @public
 interface IDeleteFileOptions {
   throwIfNotExists?: boolean;
+}
+
+// @public
+interface IFileModeBits {
+  // (undocumented)
+  Group: PermissionsBits;
+  // (undocumented)
+  Other: PermissionsBits;
+  // (undocumented)
+  Owner: PermissionsBits;
 }
 
 // @public
@@ -160,6 +168,12 @@ interface IReadFileOptions {
 // @public
 interface IReadFolderOptions {
   absolutePaths?: boolean;
+}
+
+// @public
+interface IUpdateTimeParameters {
+  accessedTime: number | Date;
+  modifiedTime: number | Date;
 }
 
 // @public

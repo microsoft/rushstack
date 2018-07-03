@@ -38,10 +38,7 @@ export class ExternalApiHelper {
       rootDir: entryPointFolder
     };
 
-    let outputPath: string = path.resolve(rootDir, libFolder);
-    FileSystem.ensureFolder(outputPath);
-
-    outputPath = path.join(outputPath, 'external-api-json');
+    const outputPath: string = path.resolve(rootDir, libFolder, 'external-api-json');
     FileSystem.ensureFolder(outputPath);
 
     const extractor: Extractor = new Extractor({
