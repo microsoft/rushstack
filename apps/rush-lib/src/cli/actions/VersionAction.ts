@@ -11,7 +11,6 @@ import {
 import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { Utilities } from '../../utilities/Utilities';
 import { VersionControl } from '../../utilities/VersionControl';
 import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -95,14 +94,12 @@ export class VersionAction extends BaseRushAction {
     const userEmail: string | undefined = GitPolicy.getUserEmail(this.rushConfiguration);
 
     if (!userEmail) {
-      process.exitCode = 1;
-      return Promise.reject(1);
+      return Promise.reject(undefined);
     }
 
     if (!this._bypassPolicy.value) {
       if (!GitPolicy.check(this.rushConfiguration, userEmail)) {
-        process.exitCode = 1;
-        return Promise.resolve();
+        return Promise.reject(undefined);
       }
     }
     this._validateInput();

@@ -28,7 +28,7 @@ If you didn't configure your e-mail yet, try something like this:`);
       console.log(colors.cyan(
 `
     git config --local user.name "Mr. Example"
-    git config --local user.email "${rushConfiguration.gitSampleEmail || "example@contoso.com"}"
+    git config --local user.email "${rushConfiguration.gitSampleEmail || 'example@contoso.com'}"
 `));
 
       console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
@@ -36,11 +36,7 @@ If you didn't configure your e-mail yet, try something like this:`);
       return undefined;
     }
 
-    // sanity check; a valid e-mail should not contain any whitespace
-    if (!userEmail.match(/^\S+$/g)) {
-      throw new Error('The gitPolicy check failed because "git config" returned unexpected output:'
-        + os.EOL + `"${userEmail}"`);
-    }
+    return userEmail;
   }
 
   public static check(rushConfiguration: RushConfiguration, userEmail?: string): boolean {
@@ -51,16 +47,20 @@ If you didn't configure your e-mail yet, try something like this:`);
     console.log('Checking Git policy for this repository.' + os.EOL);
 
     userEmail = userEmail || GitPolicy.getUserEmail(rushConfiguration);
-    if (!userEmail) {
+
+    // sanity check; a valid e-mail should not contain any whitespace
+    if (!userEmail || !userEmail.match(/^\S+$/g)) {
+      console.log(colors.red('The gitPolicy check failed because "git config" returned unexpected output:'
+        + os.EOL + `"${userEmail}"`));
       return false;
     }
 
     for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
       const regex: RegExp = new RegExp('^' + pattern + '$', 'i');
-      if (userEmail.match(regex)) {
+      if (!userEmail.match(regex)) {
         // For debugging:
-        // console.log(`${userEmail} matched pattern: "${pattern}"`);
-        return true;
+        // console.log(`${userEmail} did not match pattern: "${pattern}"`);
+        return false;
       }
     }
 
