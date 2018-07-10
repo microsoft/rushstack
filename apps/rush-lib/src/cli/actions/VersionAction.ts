@@ -91,15 +91,24 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
+    // try to get the user email
+    const userEmail: string | undefined = GitPolicy.getUserEmail(this.rushConfiguration);
+
+    if (!userEmail) {
+      process.exitCode = 1;
+      return Promise.reject(1);
+    }
+
     if (!this._bypassPolicy.value) {
-      if (!GitPolicy.check(this.rushConfiguration)) {
-        process.exit(1);
+      if (!GitPolicy.check(this.rushConfiguration, userEmail)) {
+        process.exitCode = 1;
         return Promise.resolve();
       }
     }
     this._validateInput();
 
-    this._versionManager = new VersionManager(this.rushConfiguration, this._getUserEmail());
+    this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
+
     if (this._ensureVersionPolicy.value) {
       this._overwritePolicyVersionIfNeeded();
       const tempBranch: string = 'version/ensure-' + new Date().getTime();
@@ -186,11 +195,6 @@ export class VersionAction extends BaseRushAction {
       throw new Error('Unable to finish version bump because inconsistencies were encountered.' +
         ' Run \"rush check\" to find more details.');
     }
-  }
-
-  private _getUserEmail(): string {
-    return Utilities.executeCommandAndCaptureOutput('git',
-        ['config', 'user.email'], '.').trim();
   }
 
   private _gitProcess(tempBranch: string): void {

@@ -8,13 +8,8 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
 
 export class GitPolicy {
-  public static check(rushConfiguration: RushConfiguration): boolean {
-    if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
-      return true;
-    }
 
-    console.log('Checking Git policy for this repository.' + os.EOL);
-
+  public static getUserEmail(rushConfiguration: RushConfiguration): string | undefined {
     // Determine the user's account
     // Ex: "bob@example.com"
     let userEmail: string;
@@ -33,18 +28,31 @@ If you didn't configure your e-mail yet, try something like this:`);
       console.log(colors.cyan(
 `
     git config --local user.name "Mr. Example"
-    git config --local user.email "${rushConfiguration.gitSampleEmail}"
+    git config --local user.email "${rushConfiguration.gitSampleEmail || "example@contoso.com"}"
 `));
 
       console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
 
-      return false;
+      return undefined;
     }
 
     // sanity check; a valid e-mail should not contain any whitespace
     if (!userEmail.match(/^\S+$/g)) {
       throw new Error('The gitPolicy check failed because "git config" returned unexpected output:'
         + os.EOL + `"${userEmail}"`);
+    }
+  }
+
+  public static check(rushConfiguration: RushConfiguration, userEmail?: string): boolean {
+    if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
+      return true;
+    }
+
+    console.log('Checking Git policy for this repository.' + os.EOL);
+
+    userEmail = userEmail || GitPolicy.getUserEmail(rushConfiguration);
+    if (!userEmail) {
+      return false;
     }
 
     for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
