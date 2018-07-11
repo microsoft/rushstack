@@ -1,6 +1,13 @@
 # Change Log - @microsoft/package-deps-hash
 
-This log was last generated on Tue, 03 Jul 2018 21:03:31 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Jul 2018 21:03:58 GMT and should not be manually modified.
+
+## 2.2.49
+Wed, 11 Jul 2018 21:03:58 GMT
+
+### Patches
+
+- Fix an issue where package-deps-hash did not correctly handle staged file renames.
 
 ## 2.2.48
 Tue, 03 Jul 2018 21:03:31 GMT

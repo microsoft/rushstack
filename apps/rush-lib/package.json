@@ -22,7 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "@microsoft/node-core-library": "1.5.0",
-    "@microsoft/package-deps-hash": "2.2.48",
+    "@microsoft/package-deps-hash": "2.2.49",
     "@microsoft/stream-collator": "2.2.49",
     "@microsoft/ts-command-line": "4.2.0",
     "@pnpm/link-bins": "~1.0.1",
