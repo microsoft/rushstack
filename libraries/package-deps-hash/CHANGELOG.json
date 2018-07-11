@@ -2,6 +2,18 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.2.49",
+      "tag": "@microsoft/package-deps-hash_v2.2.49",
+      "date": "Wed, 11 Jul 2018 21:03:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where package-deps-hash did not correctly handle staged file renames."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.48",
       "tag": "@microsoft/package-deps-hash_v2.2.48",
       "date": "Tue, 03 Jul 2018 21:03:31 GMT",
