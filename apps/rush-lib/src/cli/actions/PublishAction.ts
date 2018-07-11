@@ -3,13 +3,12 @@
 
 import * as colors from 'colors';
 import { EOL } from 'os';
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, FileSystem } from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
@@ -389,8 +388,7 @@ export class PublishAction extends BaseRushAction {
       const destFolder: string = this._releaseFolder.value ?
        this._releaseFolder.value : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
 
-      fsx.copySync(tarballPath, path.join(destFolder, tarballName));
-      fsx.unlinkSync(tarballPath);
+      FileSystem.move(tarballPath, path.join(destFolder, tarballName), { overwrite: true });
     }
   }
 
@@ -398,7 +396,7 @@ export class PublishAction extends BaseRushAction {
     const apiConfigPath: string = path.join(project.projectFolder,
       'config', 'api-extractor.json');
 
-    if (fsx.existsSync(apiConfigPath)) {
+    if (FileSystem.exists(apiConfigPath)) {
       // Read api-extractor.json file
       const apiConfig: {} = JsonFile.load(apiConfigPath);
       /* tslint:disable:no-string-literal */
@@ -417,9 +415,9 @@ export class PublishAction extends BaseRushAction {
         if (fromApiFolder) {
           const fromApiFolderPath: string = path.join(project.projectFolder, fromApiFolder);
           const toApiFolderPath: string = path.join(project.projectFolder, toApiFolder);
-          if (fsx.existsSync(fromApiFolderPath) && fsx.existsSync(toApiFolderPath)) {
-            fsx.readdirSync(fromApiFolderPath).forEach(fileName => {
-              fsx.copySync(path.join(fromApiFolderPath, fileName), path.join(toApiFolderPath, fileName));
+          if (FileSystem.exists(fromApiFolderPath) && FileSystem.exists(toApiFolderPath)) {
+            FileSystem.readFolder(fromApiFolderPath).forEach(fileName => {
+              FileSystem.copyFile(path.join(fromApiFolderPath, fileName), path.join(toApiFolderPath, fileName));
               console.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
             });
           }

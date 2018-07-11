@@ -1,11 +1,9 @@
-// WARNING: The type "IApiExtractorTaskConfig" needs to be exported by the package (e.g. added to index.ts)
 // @public
-class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig> {
-  constructor();
+class ApiExtractorTask extends ApiExtractorBaseTask {
   // (undocumented)
-  executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void;
+  protected updateExtractorConfig(extractorConfig: IExtractorConfig): void;
   // (undocumented)
-  loadSchema(): Object;
+  protected updateExtractorOptions(extractorOptions: IExtractorOptions, entryPointFile: string): void;
 }
 
 // @public (undocumented)
@@ -15,9 +13,46 @@ interface IFixupSettingsOptions {
 }
 
 // @public (undocumented)
+interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
+  staticMatch?: string[];
+}
+
+// @public (undocumented)
 interface ITsConfigFile<T> {
   // (undocumented)
   compilerOptions: T;
+}
+
+// @public (undocumented)
+interface ITslintCmdTaskConfig extends IBaseCmdTaskConfig {
+  customArgs?: string[];
+  displayAsError?: boolean;
+}
+
+// @alpha (undocumented)
+class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
+  constructor();
+  // (undocumented)
+  protected _onData(data: Buffer): void;
+  // (undocumented)
+  executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined;
+  // (undocumented)
+  loadSchema(): Object;
+}
+
+// @alpha (undocumented)
+class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
+  constructor();
+  // (undocumented)
+  protected _getArgs(): string[];
+  // (undocumented)
+  protected _onClose(code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void): void;
+  // (undocumented)
+  protected _onData(data: Buffer): void;
+  // (undocumented)
+  executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined;
+  // (undocumented)
+  loadSchema(): Object;
 }
 
 // @public
@@ -50,5 +85,8 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 // WARNING: Unsupported export: tslint
 // WARNING: Unsupported export: text
 // WARNING: Unsupported export: removeTripleSlash
+// WARNING: Unsupported export: tscCmd
+// WARNING: Unsupported export: tslintCmd
+// WARNING: Unsupported export: apiExtractorStandalone
 // WARNING: Unsupported export: default
 // (No @packagedocumentation comment for this package)

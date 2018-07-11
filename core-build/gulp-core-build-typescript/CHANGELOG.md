@@ -1,6 +1,18 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Sat, 23 Jun 2018 02:21:20 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Jul 2018 21:03:31 GMT and should not be manually modified.
+
+## 4.10.1
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 4.10.0
+Fri, 29 Jun 2018 02:56:51 GMT
+
+### Minor changes
+
+- Inclusion of three new tasks designed to use as minimal behavior as possible to run tsc, tslint, and api-extractor.
 
 ## 4.9.19
 Sat, 23 Jun 2018 02:21:20 GMT

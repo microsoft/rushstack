@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import yaml = require('js-yaml');
 
@@ -10,7 +9,7 @@ import { DocItemSet } from '../utils/DocItemSet';
 import { IYamlTocItem } from './IYamlTocFile';
 import { IYamlItem } from './IYamlApiFile';
 import { YamlDocumenter } from './YamlDocumenter';
-import { Text } from '@microsoft/node-core-library';
+import { Text, FileSystem } from '@microsoft/node-core-library';
 
 interface ISnippetsFile {
   /**
@@ -44,7 +43,8 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     const snippetsFilePath: string = path.join(inputFolder, 'snippets.yaml');
 
     console.log('Loading snippets from ' + snippetsFilePath);
-    const snippetsContent: string = fsx.readFileSync(snippetsFilePath).toString();
+
+    const snippetsContent: string = FileSystem.readFile(snippetsFilePath);
     this._snippets = yaml.load(snippetsContent, { filename: snippetsFilePath });
   }
 

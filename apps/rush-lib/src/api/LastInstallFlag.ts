@@ -1,6 +1,6 @@
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 import * as _ from 'lodash';
+import { FileSystem, JsonFile } from '@microsoft/node-core-library';
 
 export const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install.flag';
 
@@ -29,11 +29,11 @@ export class LastInstallFlag {
    * Returns true if the file exists and the contents match the current state
    */
   public isValid(): boolean {
-    if (!fsx.existsSync(this._path)) {
+    if (!FileSystem.exists(this._path)) {
       return false;
     }
     try {
-      const contents: Object = fsx.readJsonSync(this._path);
+      const contents: Object = JsonFile.load(this._path);
       return _.isEqual(contents, this._state);
     } catch (error) {
       return false;
@@ -44,15 +44,16 @@ export class LastInstallFlag {
    * Writes the flag file to disk with the current state
    */
   public create(): void {
-    fsx.mkdirsSync(path.dirname(this._path));
-    fsx.writeJsonSync(this._path, this._state);
+    JsonFile.save(this._state, this._path, {
+      ensureFolderExists: true
+    });
   }
 
   /**
    * Removes the flag file
    */
   public clear(): void {
-    fsx.removeSync(this._path);
+    FileSystem.deleteFile(this._path);
   }
 
   /**

@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import { EOL } from 'os';
 import * as glob from 'glob';
 
 import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
+import { JsonFile } from '@microsoft/node-core-library';
 
 /**
  * This class represents the collection of change files existing in the repo and provides operations
@@ -31,7 +31,8 @@ export class ChangeFiles {
     const changedSet: Set<string> = new Set<string>();
     newChangeFilePaths.forEach((filePath) => {
       console.log(`Found change file: ${filePath}`);
-      const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
+
+      const changeRequest: IChangeInfo = JsonFile.load(filePath);
       if (changeRequest && changeRequest.changes) {
         changeRequest.changes!.forEach(change => {
           changedSet.add(change.packageName);
@@ -61,7 +62,7 @@ export class ChangeFiles {
 
     newChangeFilePaths.forEach((filePath) => {
       console.log(`Found change file: ${filePath}`);
-      const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
+      const changeRequest: IChangeInfo = JsonFile.load(filePath);
       if (changeRequest && changeRequest.changes) {
         changeRequest.changes!.forEach(change => {
           if (!changes.get(change.packageName)) {
@@ -112,7 +113,7 @@ export class ChangeFiles {
       });
 
       const filesToDelete: string[] = this.getFiles().filter((filePath) => {
-        const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(filePath, 'utf8'));
+        const changeRequest: IChangeInfo = JsonFile.load(filePath);
         for (const changeInfo of changeRequest.changes!) {
           if (!packagesToInclude.has(changeInfo.packageName)) {
             return false;

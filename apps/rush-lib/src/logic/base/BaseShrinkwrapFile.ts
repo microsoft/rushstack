@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import npmPackageArg = require('npm-package-arg');
-import { PackageName } from '@microsoft/node-core-library';
+import { PackageName, FileSystem } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 
@@ -26,7 +25,7 @@ export abstract class BaseShrinkwrapFile {
    * Serializes and saves the shrinkwrap file to specified location
    */
   public save(filePath: string): void {
-    fsx.writeFileSync(filePath, this.serialize());
+    FileSystem.writeFile(filePath, this.serialize());
   }
 
   /**

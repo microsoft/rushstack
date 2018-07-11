@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 import {
   JsonFile,
   IPackageJson,
-  PackageName
+  PackageName,
+  FileSystem
 } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -69,7 +69,7 @@ export class RushConfigurationProject {
 
     this._projectFolder = path.join(rushConfiguration.rushJsonFolder, projectJson.projectFolder);
 
-    if (!fsx.existsSync(this._projectFolder)) {
+    if (!FileSystem.exists(this._projectFolder)) {
       throw new Error(`Project folder not found: ${projectJson.projectFolder}`);
     }
 

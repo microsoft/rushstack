@@ -11,13 +11,72 @@ class FileDiffTest {
 }
 
 // @public
+class FileSystem {
+  static changePermissionBits(path: string, mode: IFileModeBits): void;
+  static copyFile(sourcePath: string, destinationPath: string): void;
+  static createHardLink(linkTarget: string, linkSource: string): void;
+  static createSymbolicLinkFile(linkTarget: string, linkSource: string): void;
+  static createSymbolicLinkFolder(linkTarget: string, linkSource: string): void;
+  static createSymbolicLinkJunction(linkTarget: string, linkSource: string): void;
+  static deleteFile(filePath: string, options?: IDeleteFileOptions): void;
+  static deleteFolder(folderPath: string): void;
+  static ensureEmptyFolder(folderPath: string): void;
+  static ensureFolder(folderPath: string): void;
+  static exists(path: string): boolean;
+  static getLinkStatistics(path: string): fs.Stats;
+  static getRealPath(linkPath: string): string;
+  static getStatistics(path: string): fs.Stats;
+  static move(sourcePath: string, targetPath: string, options?: IFileSystemMoveOptions): void;
+  static readFile(filePath: string, options?: IReadFileOptions): string;
+  static readFileToBuffer(filePath: string): Buffer;
+  static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
+  static updateTimes(path: string, times: IUpdateTimeParameters): void;
+  static writeFile(filePath: string, contents: string | Buffer, options?: IWriteFileOptions): void;
+}
+
+// @public
+class FileWriter {
+  close(): void;
+  static open(path: string, flags?: IFileWriterFlags): FileWriter;
+  write(text: string): void;
+}
+
+// @public
 enum FolderConstants {
   Git = ".git",
   NodeModules = "node_modules"
 }
 
 // @public
+interface IDeleteFileOptions {
+  throwIfNotExists?: boolean;
+}
+
+// @public
+interface IFileModeBits {
+  // (undocumented)
+  Group: PermissionsBits;
+  // (undocumented)
+  Other: PermissionsBits;
+  // (undocumented)
+  Owner: PermissionsBits;
+}
+
+// @public
+interface IFileSystemMoveOptions {
+  ensureFolderExists?: boolean;
+  overwrite?: boolean;
+}
+
+// @public
+interface IFileWriterFlags {
+  append?: boolean;
+  exclusive?: boolean;
+}
+
+// @public
 interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
+  ensureFolderExists?: boolean;
   onlyIfChanged?: boolean;
 }
 
@@ -101,6 +160,30 @@ interface IProtectableMapParameters<K, V> {
 }
 
 // @public
+interface IReadFileOptions {
+  convertLineEndings?: NewlineKind;
+  encoding?: Encoding;
+}
+
+// @public
+interface IReadFolderOptions {
+  absolutePaths?: boolean;
+}
+
+// @public
+interface IUpdateTimeParameters {
+  accessedTime: number | Date;
+  modifiedTime: number | Date;
+}
+
+// @public
+interface IWriteFileOptions {
+  convertLineEndings?: NewlineKind;
+  encoding?: Encoding;
+  ensureFolderExists?: boolean;
+}
+
+// @public
 class JsonFile {
   static load(jsonFilename: string): any;
   static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): any;
@@ -134,6 +217,12 @@ class LockFile {
 // @public
 class MapExtensions {
   static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: Map<K, V>): void;
+}
+
+// @public
+enum NewlineKind {
+  CrLf = "\r\n",
+  Lf = "\n"
 }
 
 // @public

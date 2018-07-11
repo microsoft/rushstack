@@ -7,11 +7,10 @@
  */
 
 import { EOL } from 'os';
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
 
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJson, JsonFile } from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
@@ -50,7 +49,7 @@ export class PublishUtilities {
 
     // Add the minimum changes defined by the change descriptions.
     files.forEach((fullPath: string) => {
-      const changeRequest: IChangeInfo = JSON.parse(fsx.readFileSync(fullPath, 'utf8'));
+      const changeRequest: IChangeInfo = JsonFile.load(fullPath);
 
       if (includeCommitDetails) {
         PublishUtilities._updateCommitDetails(fullPath, changeRequest.changes);
@@ -349,7 +348,7 @@ export class PublishUtilities {
     });
 
     if (shouldCommit) {
-      fsx.writeFileSync(packagePath, JSON.stringify(pkg, undefined, 2), { encoding: 'utf8' });
+      JsonFile.save(pkg, packagePath);
     }
     return pkg;
   }

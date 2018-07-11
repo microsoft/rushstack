@@ -2,9 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import * as fsx from 'fs-extra';
 import * as path from 'path';
-import { PackageJsonLookup, IPackageJson, PackageName, IParsedPackageName } from '@microsoft/node-core-library';
+import {
+  PackageJsonLookup,
+  IPackageJson,
+  PackageName,
+  IParsedPackageName,
+  FileSystem
+} from '@microsoft/node-core-library';
 
 import { AstPackage } from './ast/AstPackage';
 import { DocItemLoader } from './DocItemLoader';
@@ -160,14 +165,13 @@ export class ExtractorContext {
       return;
     }
 
-    const files: string[] = fsx.readdirSync(externalJsonCollectionPath);
-    files.forEach(file => {
+    FileSystem.readFolder(externalJsonCollectionPath, {
+      absolutePaths: true
+    }).forEach(file => {
       if (path.extname(file) === '.json') {
-        const externalJsonFilePath: string = path.join(externalJsonCollectionPath, file);
-
         // Example: "C:\Example\my-package.json" --> "my-package"
         const packageName: string = path.parse(file).name;
-        this.docItemLoader.loadPackageIntoCache(externalJsonFilePath, packageName);
+        this.docItemLoader.loadPackageIntoCache(file, packageName);
       }
     });
   }
