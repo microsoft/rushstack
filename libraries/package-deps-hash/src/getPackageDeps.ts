@@ -63,13 +63,24 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
     .trim()
     .split('\n')
     .forEach(line => {
-      const [changeType, filename]: string[] = line.trim().split(' ');
       /*
-      * changeType == 'D' or 'M' or 'A'
-      * filename == path to the file
+      * changeType is in the format of "XY" where "X" is the status of the file in the index and "Y" is the status of
+      * the file in the working tree. Some example statuses:
+      *   - 'D' == deletion
+      *   - 'M' == modification
+      *   - 'A' == addition
+      *   - '??' == untracked
+      *   - 'R' == rename
+      *   - 'RM' == rename with modifications
+      * filenames == path to the file, or files in the case of files that have been renamed
       */
-      if (changeType && filename) {
-        changes.set(filename, changeType as GitStatusChangeType);
+      const [changeType, ...filenames]: string[] = line.trim().split(' ').filter((linePart) => !!linePart);
+
+      if (changeType && filenames && filenames.length > 0) {
+        // We always care about the last filename in the filenames array. In the case of non-rename changes,
+        // the filenames array only contains one item. In the case of rename changes, the last item in the
+        // array is the path to the file in the working tree, which is the only one that we care about.
+        changes.set(filenames[filenames.length - 1], changeType as GitStatusChangeType);
       }
     });
 
