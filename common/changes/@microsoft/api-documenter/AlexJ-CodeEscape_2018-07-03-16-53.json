@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Changing Office's APIExtractor add-on to unescape characters in code blocks",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "AlexJerabek@users.noreply.github.com"
+}
