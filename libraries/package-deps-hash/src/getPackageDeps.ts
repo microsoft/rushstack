@@ -4,8 +4,6 @@
 import * as child_process from 'child_process';
 import { IPackageDeps } from './IPackageDeps';
 
-export type GitStatusChangeType = 'D' | 'M' | 'A';
-
 /**
  * Parses the output of the "git ls-tree" command
  */
@@ -43,8 +41,8 @@ export function parseGitLsTree(output: string): Map<string, string> {
 /**
  * Parses the output of the "git status" command
  */
-export function parseGitStatus(output: string, packagePath: string): Map<string, GitStatusChangeType> {
-  const changes: Map<string, GitStatusChangeType> = new Map<string, GitStatusChangeType>();
+export function parseGitStatus(output: string, packagePath: string): Map<string, string> {
+  const changes: Map<string, string> = new Map<string, string>();
 
   /*
   * Typically, output will look something like:
@@ -80,7 +78,7 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
         // We always care about the last filename in the filenames array. In the case of non-rename changes,
         // the filenames array only contains one item. In the case of rename changes, the last item in the
         // array is the path to the file in the working tree, which is the only one that we care about.
-        changes.set(filenames[filenames.length - 1], changeType as GitStatusChangeType);
+        changes.set(filenames[filenames.length - 1], changeType);
       }
     });
 
@@ -155,11 +153,11 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
 
   // Update the checked in hashes with the current repo status
   const gitStatusOutput: string = gitStatus(packagePath);
-  const currentlyChangedFiles: Map<string, GitStatusChangeType > =
+  const currentlyChangedFiles: Map<string, string> =
     parseGitStatus(gitStatusOutput, packagePath);
 
   const filesToHash: string[] = [];
-  currentlyChangedFiles.forEach((changeType: GitStatusChangeType, filename: string) => {
+  currentlyChangedFiles.forEach((changeType: string, filename: string) => {
     if (changeType === 'D') {
       delete changes.files[filename];
     } else {
