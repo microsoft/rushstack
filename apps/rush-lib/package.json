@@ -29,6 +29,7 @@
     "@pnpm/logger": "~1.0.1",
     "builtins": "~1.0.3",
     "colors": "~1.2.1",
+    "fs-extra": "~5.0.0",
     "git-repo-info": "~1.1.4",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
@@ -50,6 +51,7 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": "4.3.48",
+    "@types/fs-extra": "5.0.1",
     "@types/node": "8.5.8",
     "@types/node-fetch": "1.6.9",
     "@types/tar": "4.0.0",

@@ -58,7 +58,8 @@ export class UpdateAction extends BaseInstallAction {
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: this._fullParameter.value!,
-      recheckShrinkwrap: this._recheckParameter.value!
+      recheckShrinkwrap: this._recheckParameter.value!,
+      collectLogFile: this._debugPackageManagerParameter.value!
     };
   }
 }

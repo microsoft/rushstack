@@ -3,12 +3,14 @@
 
 import * as glob from 'glob';
 import * as colors from 'colors';
+import * as fsx from 'fs-extra';
 import * as fetch from 'node-fetch';
 import * as http from 'http';
 import HttpsProxyAgent = require('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
+import { Readable as ReadableStream } from 'stream';
 import * as tar from 'tar';
 import globEscape = require('glob-escape');
 import {
@@ -79,6 +81,11 @@ export interface IInstallManagerOptions {
    * (pnpmfile.js script logic, registry changes, etc).
    */
   recheckShrinkwrap: boolean;
+  /**
+   * Whether or not to collect verbose logs from the package manager.
+   * If specified when using PNPM, the logs will be in /common/temp/pnpm.log
+   */
+  collectLogFile: boolean;
 }
 
 /**
@@ -234,7 +241,8 @@ export class InstallManager {
             }
           }
 
-          return this._installCommonModules(shrinkwrapIsUpToDate, options.allowShrinkwrapUpdates)
+          return this._installCommonModules(shrinkwrapIsUpToDate,
+            options.allowShrinkwrapUpdates, options.collectLogFile)
             .then(() => {
               if (!options.noLink) {
                 const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
@@ -610,7 +618,10 @@ export class InstallManager {
   /**
    * Runs "npm install" in the common folder.
    */
-  private _installCommonModules(shrinkwrapIsUpToDate: boolean, allowShrinkwrapUpdates: boolean): Promise<void> {
+  private _installCommonModules(
+    shrinkwrapIsUpToDate: boolean,
+    allowShrinkwrapUpdates: boolean,
+    collectLogFile: boolean): Promise<void> {
     return Promise.resolve().then(() => {
       console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
         + os.EOL);
@@ -717,9 +728,36 @@ export class InstallManager {
                 console.log(`Running "${this._rushConfiguration.packageManager} prune"`
                   + ` in ${this._rushConfiguration.commonTempFolder}`);
                 const args: string[] = ['prune'];
-                this._pushConfigurationArgs(args);
+                this._pushConfigurationArgs(args, collectLogFile);
+
+                const stdoutStream: NodeJS.ReadableStream = new ReadableStream();
+                const stderrStream: NodeJS.ReadableStream = new ReadableStream();
+
+                stdoutStream.pipe(process.stdout);
+                stderrStream.pipe(process.stderr);
+
+                let outputFileStream: NodeJS.WritableStream | undefined;
+                if (collectLogFile) {
+                  const logFilePath: string =
+                    path.join(this._rushConfiguration.commonTempFolder, RushConstants.packageManagerLogFileName);
+                  outputFileStream = fsx.createWriteStream(logFilePath);
+                  stdoutStream.pipe(outputFileStream);
+                  stderrStream.pipe(outputFileStream);
+                }
+
                 Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename, args,
-                  this._rushConfiguration.commonTempFolder);
+                  this._rushConfiguration.commonTempFolder, undefined, undefined, undefined,
+                  stdoutStream, stderrStream);
+
+                if (outputFileStream) {
+                  stdoutStream.unpipe(outputFileStream);
+                  stderrStream.unpipe(outputFileStream);
+                  outputFileStream.end();
+                  outputFileStream = undefined;
+                }
+
+                stdoutStream.unpipe(process.stdout);
+                stdoutStream.unpipe(process.stderr);
 
                 // Delete the (installed image of) the temp projects, since "npm install" does not
                 // detect changes for "file:./" references.
@@ -761,7 +799,7 @@ export class InstallManager {
           // people would have different node_modules based on their system.
 
           const installArgs: string[] = ['install', '--no-optional'];
-          this._pushConfigurationArgs(installArgs);
+          this._pushConfigurationArgs(installArgs, collectLogFile);
 
           console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
             + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
@@ -789,7 +827,7 @@ export class InstallManager {
 
             console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
             const npmArgs: string[] = ['shrinkwrap'];
-            this._pushConfigurationArgs(npmArgs);
+            this._pushConfigurationArgs(npmArgs, collectLogFile);
             Utilities.executeCommand(this._rushConfiguration.packageManagerToolFilename,
               npmArgs, this._rushConfiguration.commonTempFolder);
             console.log('"npm shrinkwrap" completed' + os.EOL);
@@ -929,7 +967,7 @@ export class InstallManager {
    * Used when invoking the NPM tool.  Appends the common configuration options
    * to the command-line.
    */
-  private _pushConfigurationArgs(args: string[]): void {
+  private _pushConfigurationArgs(args: string[], collectLogFile: boolean): void {
     if (this._rushConfiguration.packageManager === 'npm') {
       args.push('--cache', this._rushConfiguration.npmCacheFolder);
       args.push('--tmp', this._rushConfiguration.npmTmpFolder);
@@ -942,6 +980,10 @@ export class InstallManager {
       // lockfile existed, otherwise PNPM would hang indefinitely. it is simpler to rely on Rush's
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
+
+      if (collectLogFile) {
+        args.push('--reporter', 'ndjson');
+      }
     }
   }
 

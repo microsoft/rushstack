@@ -188,6 +188,8 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for "rush install" 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
+                    [--debug-package-manager]
+                    
 
 The \\"rush install\\" command installs package dependencies for all your 
 projects, based on the shrinkwrap file that is created/updated using \\"rush 
@@ -202,15 +204,19 @@ changes. Cautious people can also use \\"rush install\\" if they want to avoid
 accidentally updating their shrinkwrap file.
 
 Optional arguments:
-  -h, --help       Show this help message and exit.
-  -p, --purge      Perform \\"rush purge\\" before starting the installation
-  --bypass-policy  Overrides enforcement of the \\"gitPolicy\\" rules from rush.
-                   json (use honorably!)
-  --no-link        If \\"--no-link\\" is specified, then project symlinks will 
-                   NOT be created after the installation completes. You will 
-                   need to run \\"rush link\\" manually. This flag is useful for 
-                   automated builds that want to report stages individually 
-                   or perform extra operations in between the two stages.
+  -h, --help            Show this help message and exit.
+  -p, --purge           Perform \\"rush purge\\" before starting the installation
+  --bypass-policy       Overrides enforcement of the \\"gitPolicy\\" rules from 
+                        rush.json (use honorably!)
+  --no-link             If \\"--no-link\\" is specified, then project symlinks 
+                        will NOT be created after the installation completes. 
+                        You will need to run \\"rush link\\" manually. This flag 
+                        is useful for automated builds that want to report 
+                        stages individually or perform extra operations in 
+                        between the two stages.
+  --debug-package-manager
+                        Only available for PNPM. Activates verbose logging 
+                        for the package manager.
 "
 `;
 
@@ -388,8 +394,8 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for "rush update" 1`] = `
-"usage: rush update [-h] [-p] [--bypass-policy] [--no-link] [--full]
-                   [--recheck]
+"usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
+                   [--debug-package-manager] [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -404,32 +410,38 @@ be used instead of \\"rush update\\" -- for details, see the command help for
 \\"rush install\\".
 
 Optional arguments:
-  -h, --help       Show this help message and exit.
-  -p, --purge      Perform \\"rush purge\\" before starting the installation
-  --bypass-policy  Overrides enforcement of the \\"gitPolicy\\" rules from rush.
-                   json (use honorably!)
-  --no-link        If \\"--no-link\\" is specified, then project symlinks will 
-                   NOT be created after the installation completes. You will 
-                   need to run \\"rush link\\" manually. This flag is useful for 
-                   automated builds that want to report stages individually 
-                   or perform extra operations in between the two stages.
-  --full           Normally \\"rush update\\" tries to preserve your existing 
-                   installed versions and only makes the minimum updates 
-                   needed to satisfy the package.json files. This 
-                   conservative approach prevents your PR from getting 
-                   involved with package updates that are unrelated to your 
-                   work. Use \\"--full\\" when you really want to update all 
-                   dependencies to the latest SemVer-compatible version. This 
-                   should be done periodically by a person or robot whose 
-                   role is to deal with potential upgrade regressions.
-  --recheck        If the shrinkwrap file appears to already satisfy the 
-                   package.json files, then \\"rush update\\" will skip invoking 
-                   the package manager at all. In certain situations this 
-                   heuristic may be inaccurate. Use the \\"--recheck\\" flag to 
-                   force the package manager to process the shrinkwrap file. 
-                   This will also update your shrinkwrap file with Rush's 
-                   fixups. (To minimize shrinkwrap churn, these fixups are 
-                   normally performed only in the temporary folder.)
+  -h, --help            Show this help message and exit.
+  -p, --purge           Perform \\"rush purge\\" before starting the installation
+  --bypass-policy       Overrides enforcement of the \\"gitPolicy\\" rules from 
+                        rush.json (use honorably!)
+  --no-link             If \\"--no-link\\" is specified, then project symlinks 
+                        will NOT be created after the installation completes. 
+                        You will need to run \\"rush link\\" manually. This flag 
+                        is useful for automated builds that want to report 
+                        stages individually or perform extra operations in 
+                        between the two stages.
+  --debug-package-manager
+                        Only available for PNPM. Activates verbose logging 
+                        for the package manager.
+  --full                Normally \\"rush update\\" tries to preserve your 
+                        existing installed versions and only makes the 
+                        minimum updates needed to satisfy the package.json 
+                        files. This conservative approach prevents your PR 
+                        from getting involved with package updates that are 
+                        unrelated to your work. Use \\"--full\\" when you really 
+                        want to update all dependencies to the latest 
+                        SemVer-compatible version. This should be done 
+                        periodically by a person or robot whose role is to 
+                        deal with potential upgrade regressions.
+  --recheck             If the shrinkwrap file appears to already satisfy the 
+                        package.json files, then \\"rush update\\" will skip 
+                        invoking the package manager at all. In certain 
+                        situations this heuristic may be inaccurate. Use the 
+                        \\"--recheck\\" flag to force the package manager to 
+                        process the shrinkwrap file. This will also update 
+                        your shrinkwrap file with Rush's fixups. (To minimize 
+                        shrinkwrap churn, these fixups are normally performed 
+                        only in the temporary folder.)
 "
 `;
 

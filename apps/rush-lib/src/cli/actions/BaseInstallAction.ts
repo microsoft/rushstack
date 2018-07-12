@@ -21,6 +21,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _purgeParameter: CommandLineFlagParameter;
   protected _bypassPolicyParameter: CommandLineFlagParameter;
   protected _noLinkParameter: CommandLineFlagParameter;
+  protected _debugPackageManagerParameter: CommandLineFlagParameter;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -38,6 +39,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
         + ' after the installation completes.  You will need to run "rush link" manually.'
         + ' This flag is useful for automated builds that want to report stages individually'
         + ' or perform extra operations in between the two stages.'
+    });
+    this._debugPackageManagerParameter = this.defineFlagParameter({
+      parameterLongName: '--debug-package-manager',
+      description: 'Only available for PNPM. Activates verbose logging for the package manager.'
     });
   }
 
