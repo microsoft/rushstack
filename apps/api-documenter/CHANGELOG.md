@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 03 Jul 2018 21:03:31 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Jul 2018 16:03:26 GMT and should not be manually modified.
+
+## 1.4.3
+Thu, 12 Jul 2018 16:03:26 GMT
+
+### Patches
+
+- Changing Office's APIExtractor add-on to unescape characters in code blocks
 
 ## 1.4.2
 Tue, 03 Jul 2018 21:03:31 GMT

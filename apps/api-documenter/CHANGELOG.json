@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.4.3",
+      "tag": "@microsoft/api-documenter_v1.4.3",
+      "date": "Thu, 12 Jul 2018 16:03:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Changing Office's APIExtractor add-on to unescape characters in code blocks"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.2",
       "tag": "@microsoft/api-documenter_v1.4.2",
       "date": "Tue, 03 Jul 2018 21:03:31 GMT",
