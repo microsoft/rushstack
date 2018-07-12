@@ -13,7 +13,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "rush-managed",
+    "@microsoft/node-core-library": "1.2.0",
     "@types/assertion-error": "1.0.30",
     "@types/chai": "3.4.34",
     "@types/chalk": "0.4.31",

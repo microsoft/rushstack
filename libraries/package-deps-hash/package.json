@@ -16,7 +16,7 @@
     "build": "gulp test --clean"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "rush-managed",
+    "@microsoft/node-library-build": "4.3.35",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "@types/chai": "3.4.34",

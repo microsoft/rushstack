@@ -13,9 +13,9 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "rush-managed",
-    "@microsoft/gulp-core-build": "rush-managed",
-    "@microsoft/node-core-library": "rush-managed",
+    "@microsoft/api-extractor": "5.6.6",
+    "@microsoft/gulp-core-build": "3.7.4",
+    "@microsoft/node-core-library": "1.2.0",
     "@types/fs-extra": "5.0.1",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",

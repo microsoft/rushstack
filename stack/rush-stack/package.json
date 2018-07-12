@@ -11,13 +11,13 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "rush-managed",
-    "@microsoft/ts-command-line": "rush-managed",
+    "@microsoft/node-core-library": "1.2.0",
+    "@microsoft/ts-command-line": "4.1.0",
     "colors": "~1.2.1",
     "fs-extra": "~5.0.0"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "rush-managed",
+    "@microsoft/node-library-build": "4.3.35",
     "@types/colors": "1.2.1",
     "@types/fs-extra": "5.0.1",
     "@types/node": "8.5.8",

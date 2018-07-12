@@ -13,9 +13,9 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "rush-managed",
+    "@microsoft/gulp-core-build": "3.7.4",
     "@microsoft/gulp-core-build-mocha": "3.3.24",
-    "@microsoft/gulp-core-build-typescript": "rush-managed",
+    "@microsoft/gulp-core-build-typescript": "4.9.8",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1"

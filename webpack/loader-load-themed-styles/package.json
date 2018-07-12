@@ -21,6 +21,6 @@
     "@types/webpack": "3.8.11",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "rush-managed"
+    "@microsoft/node-library-build": "4.3.35"
   }
 }
