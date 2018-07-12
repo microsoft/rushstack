@@ -14,6 +14,6 @@
   "dependencies": {
     "@microsoft/api-extractor": "5.10.0",
     "fs-extra": "~5.0.0",
-    "typescript": "~2.4.1"
+    "typescript": "~2.9.2"
   }
 }

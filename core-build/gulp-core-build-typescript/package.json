@@ -36,7 +36,7 @@
     "through2": "~2.0.1",
     "tslint": "~5.9.1",
     "tslint-microsoft-contrib": "~5.0.2",
-    "typescript": "~2.4.1"
+    "typescript": "~2.9.2"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "4.3.41",

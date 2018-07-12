@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Upgrade TypeScript dependency to 2.9.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "hans@hansl.ca"
+}
