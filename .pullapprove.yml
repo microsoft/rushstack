@@ -19,6 +19,7 @@ groups:
       - nickpape-msft
       - pgonzal
       - qz2017
+      - patmill
       - aditima
 
   api-approvers:
