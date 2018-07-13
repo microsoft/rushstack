@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 03 Jul 2018 21:03:31 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Jul 2018 19:04:50 GMT and should not be manually modified.
+
+## 4.10.2
+Fri, 13 Jul 2018 19:04:50 GMT
+
+### Patches
+
+- Fix an issue where "spawnSync" may not be able to resolve node.
 
 ## 4.10.1
 Tue, 03 Jul 2018 21:03:31 GMT

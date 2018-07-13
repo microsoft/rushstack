@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.10.2",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.10.2",
+      "date": "Fri, 13 Jul 2018 19:04:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where \"spawnSync\" may not be able to resolve node."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.10.1",
       "tag": "@microsoft/gulp-core-build-typescript_v4.10.1",
       "date": "Tue, 03 Jul 2018 21:03:31 GMT",
