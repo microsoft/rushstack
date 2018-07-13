@@ -16,7 +16,7 @@
     "colors": "~1.2.1"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.48",
+    "@microsoft/node-library-build": "4.3.49",
     "@types/colors": "1.2.1",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1"
