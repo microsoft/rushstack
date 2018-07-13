@@ -330,7 +330,7 @@ export class InstallManager {
         }
       }
 
-      FileSystem.createSymbolicLinkFolder(packageManagerToolFolder, localPackageManagerToolFolder);
+      FileSystem.createSymbolicLinkJunction(packageManagerToolFolder, localPackageManagerToolFolder);
 
       lock.release();
     });
