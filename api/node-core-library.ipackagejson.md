@@ -19,6 +19,7 @@ An interface for accessing common fields from a package.json file.
 |  [`optionalDependencies`](./node-core-library.ipackagejson.optionaldependencies.md) | `IPackageJsonDependencyTable` | An array of optional dependencies that may be installed for this package. |
 |  [`peerDependencies`](./node-core-library.ipackagejson.peerdependencies.md) | `IPackageJsonDependencyTable` | An array of dependencies that must be installed by a consumer of this package, but which will not be automatically installed by this package. |
 |  [`private`](./node-core-library.ipackagejson.private.md) | `boolean` | Indicates whether this package is allowed to be published or not. |
+|  [`repository`](./node-core-library.ipackagejson.repository.md) | `string` | The URL of the project's repository. |
 |  [`scripts`](./node-core-library.ipackagejson.scripts.md) | `IPackageJsonScriptTable` | A table of script hooks that a package manager or build tool may invoke. |
 |  [`tsdoc`](./node-core-library.ipackagejson.tsdoc.md) | `IPackageJsonTsdocConfiguration` | Describes the documentation comment syntax used for the \*.d.ts files exposed by this package. |
 |  [`typings`](./node-core-library.ipackagejson.typings.md) | `string` | The path to the TypeScript \*.d.ts file describing the module file that will act as the main entry point. |

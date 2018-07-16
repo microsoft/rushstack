@@ -8,5 +8,5 @@ The value of the lockstep version
 
 **Signature:**
 ```javascript
-version: semver.SemVer
+version: string
 ```

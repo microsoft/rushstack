@@ -2,7 +2,7 @@
 
 # RushConfiguration.projectFolderMaxDepth property
 
-The maximum allowable folder depth for the projectFolder field in the rush.json file. This setting provides a way for repository maintainers to discourage nesting of project folders that makes the directory tree more difficult to navigate. The default value is 2, which implements on a standard convention of &lt;categoryFolder&gt;/&lt;projectFolder&gt;/package.json.
+The maximum allowable folder depth for the projectFolder field in the rush.json file. This setting provides a way for repository maintainers to discourage nesting of project folders that makes the directory tree more difficult to navigate. The default value is 2, which implements on a standard convention of <categoryFolder>/<projectFolder>/package.json.
 
 **Signature:**
 ```javascript

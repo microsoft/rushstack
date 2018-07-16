@@ -2,9 +2,13 @@
 
 # RushConfiguration.committedShrinkwrapFilename property
 
-The filename of the NPM shrinkwrap file that is tracked e.g. by Git. (The "rush install" command uses a temporary copy, whose path is tempShrinkwrapFilename.) This property merely reports the filename; the file itself may not actually exist. Example: "C:\\MyRepo\\common\\npm-shrinkwrap.json" or "C:\\MyRepo\\common\\shrinkwrap.yaml"
+The full path of the shrinkwrap file that is tracked by Git. (The "rush install" command uses a temporary copy, whose path is tempShrinkwrapFilename.)
 
 **Signature:**
 ```javascript
 committedShrinkwrapFilename: string
 ```
+
+## Remarks
+
+This property merely reports the filename; the file itself may not actually exist. Example: "C:\\MyRepo\\common\\npm-shrinkwrap.json" or "C:\\MyRepo\\common\\shrinkwrap.yaml"

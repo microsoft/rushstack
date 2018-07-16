@@ -2,7 +2,7 @@
 
 # Rush class
 
-Operations involving the rush tool and its operation.
+General operations for the Rush engine.
 
 ## Properties
 
@@ -14,5 +14,6 @@ Operations involving the rush tool and its operation.
 
 |  Method | Access Modifier | Returns | Description |
 |  --- | --- | --- | --- |
-|  [`launch(launcherVersion, isManaged)`](./rush-lib.rush.launch.md) |  | `void` | Executes the Rush CLI. This is expected to be called by the @microsoft/rush package, which acts as a version manager for the Rush tool. The rush-lib API is exposed through the index.ts/js file. |
+|  [`launch(launcherVersion, isManaged)`](./rush-lib.rush.launch.md) |  | `void` | This API is used by the @microsoft/rush front end to launch the "rush" command-line. Third-party tools should not use this API. Instead, they should execute the "rush" binary and start a new NodeJS process. |
+|  [`launchRushX(launcherVersion, isManaged)`](./rush-lib.rush.launchrushx.md) |  | `void` | This API is used by the @microsoft/rush front end to launch the "rushx" command-line. Third-party tools should not use this API. Instead, they should execute the "rushx" binary and start a new NodeJS process. |
 

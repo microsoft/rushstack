@@ -8,7 +8,7 @@ Returns an updated package json that satisfies the policy.
 
 **Signature:**
 ```javascript
-abstract ensure(project: IPackageJson): IPackageJson | undefined;
+abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
 ```
 **Returns:** `IPackageJson | undefined`
 
@@ -17,4 +17,5 @@ abstract ensure(project: IPackageJson): IPackageJson | undefined;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  `project` | `IPackageJson` | package json |
+|  `force` | `boolean` | force update even when the project version is higher than the policy version. |
 

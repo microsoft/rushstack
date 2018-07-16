@@ -23,4 +23,5 @@ The "argparse" library is a relatively advanced command-line parser with feature
 |  [`executeWithoutErrorHandling(args)`](./ts-command-line.commandlineparser.executewithouterrorhandling.md) |  | `Promise<void>` | This is similar to [CommandLineParser.execute](./ts-command-line.commandlineparser.execute.md)<!-- -->, except that execution errors simply cause the promise to reject. It is the caller's responsibility to trap |
 |  [`getAction(actionName)`](./ts-command-line.commandlineparser.getaction.md) |  | `CommandLineAction` | Retrieves the action with the specified name. If no matching action is found, an exception is thrown. |
 |  [`onExecute()`](./ts-command-line.commandlineparser.onexecute.md) | `protected` | `Promise<void>` | This hook allows the subclass to perform additional operations before or after the chosen action is executed. |
+|  [`tryGetAction(actionName)`](./ts-command-line.commandlineparser.trygetaction.md) |  | `CommandLineAction | undefined` | Retrieves the action with the specified name. If no matching action is found, undefined is returned. |
 

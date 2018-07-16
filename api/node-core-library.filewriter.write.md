@@ -1,0 +1,18 @@
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [FileWriter](./node-core-library.filewriter.md) &gt; [write](./node-core-library.filewriter.write.md)
+
+# FileWriter.write method
+
+Writes some text to the given file handle. Throws if the file handle has been closed. Behind the scenes it uses \`fs.writeSync()\`.
+
+**Signature:**
+```javascript
+write(text: string): void;
+```
+**Returns:** `void`
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  `text` | `string` | The text to write to the file. |
+

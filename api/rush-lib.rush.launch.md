@@ -2,7 +2,7 @@
 
 # Rush.launch method
 
-Executes the Rush CLI. This is expected to be called by the @microsoft/rush package, which acts as a version manager for the Rush tool. The rush-lib API is exposed through the index.ts/js file.
+This API is used by the @microsoft/rush front end to launch the "rush" command-line. Third-party tools should not use this API. Instead, they should execute the "rush" binary and start a new NodeJS process.
 
 **Signature:**
 ```javascript

@@ -17,7 +17,7 @@ This policy indicates all related projects get version bump driven by their own 
 |  Method | Access Modifier | Returns | Description |
 |  --- | --- | --- | --- |
 |  [`bump(bumpType, identifier)`](./rush-lib.individualversionpolicy.bump.md) |  | `void` | Bumps version. Individual version policy lets change files drive version bump. This method currently does not do anything. |
-|  [`ensure(project)`](./rush-lib.individualversionpolicy.ensure.md) |  | `IPackageJson | undefined` | Returns an updated package json that satisfies the version policy. |
+|  [`ensure(project, force)`](./rush-lib.individualversionpolicy.ensure.md) |  | `IPackageJson | undefined` | Returns an updated package json that satisfies the version policy. |
 |  [`validate(versionString, packageName)`](./rush-lib.individualversionpolicy.validate.md) |  | `void` | Validates the specified version and throws if the version does not satisfy the policy. |
 
 ## Remarks

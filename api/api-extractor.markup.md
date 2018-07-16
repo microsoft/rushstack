@@ -21,6 +21,7 @@ Provides various operations for working with MarkupElement objects.
 |  [`createCodeBox(code, highlighter)`](./api-extractor.markup.createcodebox.md) |  | `IMarkupCodeBox` | Constructs an IMarkupCodeBox element representing a program code text with the specified syntax highlighting |
 |  [`createHeading1(text)`](./api-extractor.markup.createheading1.md) |  | `IMarkupHeading1` | Constructs an IMarkupHeading1 element with the specified title text |
 |  [`createHeading2(text)`](./api-extractor.markup.createheading2.md) |  | `IMarkupHeading2` | Constructs an IMarkupHeading2 element with the specified title text |
+|  [`createHtmlTag(token)`](./api-extractor.markup.createhtmltag.md) |  | `IMarkupHtmlTag` | Constructs an IMarkupHtmlTag element representing an opening or closing HTML tag. |
 |  [`createNoteBox(textElements)`](./api-extractor.markup.createnotebox.md) |  | `IMarkupNoteBox` | Constructs an IMarkupNoteBox element that will display the specified markup content |
 |  [`createNoteBoxFromText(text)`](./api-extractor.markup.createnoteboxfromtext.md) |  | `IMarkupNoteBox` | Constructs an IMarkupNoteBox element that will display the specified plain text string |
 |  [`createPage(title)`](./api-extractor.markup.createpage.md) |  | `IMarkupPage` | Constructs an IMarkupTable element with the specified title. |

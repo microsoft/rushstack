@@ -9,5 +9,5 @@ For use with CommandLineParser, this interface represents a parameter which is c
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [`alternatives`](./ts-command-line.icommandlinechoicedefinition.alternatives.md) | `string[]` | A list of strings (which contain no spaces), of possible options which can be selected |
-|  [`defaultValue`](./ts-command-line.icommandlinechoicedefinition.defaultvalue.md) | `string` | The default value which will be used if the parameter is omitted from the command line |
+|  [`defaultValue`](./ts-command-line.icommandlinechoicedefinition.defaultvalue.md) | `string` | The default value which will be used if the parameter is omitted from the command line. |
 

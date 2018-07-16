@@ -2,7 +2,7 @@
 
 # ApprovedPackagesPolicy.ignoredNpmScopes property
 
-A list of NPM package scopes that will be excluded from review (e.g. \\"@types\\")
+A list of NPM package scopes that will be excluded from review (e.g. "@types")
 
 **Signature:**
 ```javascript

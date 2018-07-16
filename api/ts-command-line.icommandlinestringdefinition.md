@@ -3,3 +3,10 @@
 # ICommandLineStringDefinition interface
 
 For use with CommandLineParser, this interface represents a command line parameter whose argument is a string value.
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [`defaultValue`](./ts-command-line.icommandlinestringdefinition.defaultvalue.md) | `string` | The default value which will be used if the parameter is omitted from the command line. |
+

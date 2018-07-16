@@ -2,7 +2,7 @@
 
 # RushConfiguration.gitSampleEmail property
 
-\[Part of the "gitPolicy" feature.\] An example valid e-mail address that conforms to one of the allowedEmailRegExps. Example: "foxtrot@example\\.com" This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used.
+\[Part of the "gitPolicy" feature.\] An example valid e-mail address that conforms to one of the allowedEmailRegExps. Example: "foxtrot@example.com" This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used.
 
 **Signature:**
 ```javascript

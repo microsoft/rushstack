@@ -2,9 +2,13 @@
 
 # RushConfiguration.tempShrinkwrapFilename property
 
-The filename of the temporary NPM shrinkwrap file that is used by "rush install". (The master copy is tempShrinkwrapFilename.) This property merely reports the filename; the file itself may not actually exist. Example: "C:\\MyRepo\\common\\temp\\npm-shrinkwrap.json" or "C:\\MyRepo\\common\\temp\\shrinkwrap.yaml"
+The full path of the temporary shrinkwrap file that is used during "rush install". This file may get rewritten by the package manager during installation.
 
 **Signature:**
 ```javascript
 tempShrinkwrapFilename: string
 ```
+
+## Remarks
+
+This property merely reports the filename; the file itself may not actually exist. Example: "C:\\MyRepo\\common\\temp\\npm-shrinkwrap.json" or "C:\\MyRepo\\common\\temp\\shrinkwrap.yaml"

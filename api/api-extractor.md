@@ -25,7 +25,7 @@ API Extractor helps you build better TypeScript library packages. It helps with 
 |  [`IExtractorOptions`](./api-extractor.iextractoroptions.md) | Runtime options for Extractor. |
 |  [`IExtractorPoliciesConfig`](./api-extractor.iextractorpoliciesconfig.md) | These policies determine how API Extractor validates various best practices for API design. |
 |  [`IExtractorProjectConfig`](./api-extractor.iextractorprojectconfig.md) | Describes a specific project that will be analyzed. In principle, multiple individual projects can be processed while reusing a common compiler state. |
-|  [`IExtractorRuntimeCompilerConfig`](./api-extractor.iextractorruntimecompilerconfig.md) | With this configuration, API Extractor is configured using an already prepared compiler state that is provided programmatically at runtime. This can potentially enable faster builds, by reusing the same compiler invocation for tsc, tslint, and API Extractor.<p/><!-- -->If configType='runtime' is specified, then IExtractorRuntimeOptions.compilerProgram must be provided. |
+|  [`IExtractorRuntimeCompilerConfig`](./api-extractor.iextractorruntimecompilerconfig.md) | With this configuration, API Extractor is configured using an already prepared compiler state that is provided programmatically at runtime. This can potentially enable faster builds, by reusing the same compiler invocation for tsc, tslint, and API Extractor.<p/>If configType='runtime' is specified, then IExtractorRuntimeOptions.compilerProgram must be provided. |
 |  [`IExtractorTsconfigCompilerConfig`](./api-extractor.iextractortsconfigcompilerconfig.md) | With this configuration, API Extractor configures the compiler based on settings that it finds in the project's tsconfig.json file. |
 |  [`IExtractorValidationRulesConfig`](./api-extractor.iextractorvalidationrulesconfig.md) | Configuration for various validation checks that ensure good API design |
 |  [`ILogger`](./api-extractor.ilogger.md) | Provides a custom logging service to API Extractor. |
@@ -35,6 +35,7 @@ API Extractor helps you build better TypeScript library packages. It helps with 
 |  [`IMarkupHeading1`](./api-extractor.imarkupheading1.md) | A top-level heading |
 |  [`IMarkupHeading2`](./api-extractor.imarkupheading2.md) | A sub heading |
 |  [`IMarkupHighlightedText`](./api-extractor.imarkuphighlightedtext.md) | Source code shown in a fixed-width font, with syntax highlighting. |
+|  [`IMarkupHtmlTag`](./api-extractor.imarkuphtmltag.md) | Represents an HTML tag such as \`&lt;td&gt;\` or \`&lt;/td&gt;\` or \`&lt;img src="example.gif" /&gt;\`. |
 |  [`IMarkupLineBreak`](./api-extractor.imarkuplinebreak.md) | A line break, similar to the "&lt;br&gt;" tag in HTML. |
 |  [`IMarkupNoteBox`](./api-extractor.imarkupnotebox.md) | A call-out box containing an informational note |
 |  [`IMarkupPage`](./api-extractor.imarkuppage.md) | Represents an entire page. |

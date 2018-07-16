@@ -19,7 +19,7 @@ This is the base class for version policy which controls how versions get bumped
 |  Method | Access Modifier | Returns | Description |
 |  --- | --- | --- | --- |
 |  [`bump(bumpType, identifier)`](./rush-lib.versionpolicy.bump.md) |  | `void` | Bumps version based on the policy |
-|  [`ensure(project)`](./rush-lib.versionpolicy.ensure.md) |  | `IPackageJson | undefined` | Returns an updated package json that satisfies the policy. |
+|  [`ensure(project, force)`](./rush-lib.versionpolicy.ensure.md) |  | `IPackageJson | undefined` | Returns an updated package json that satisfies the policy. |
 |  [`validate(versionString, packageName)`](./rush-lib.versionpolicy.validate.md) |  | `void` | Validates the specified version and throws if the version does not satisfy the policy. |
 
 ## Remarks
