@@ -89,7 +89,7 @@ export class Parser {
     const token: Token = this._peekToken();
 
     if (token.kind === TokenKind.Text) {
-      this._getToken();
+      this._readToken();
 
       const astText: AstText = new AstText();
       astText.token = token;
@@ -105,7 +105,7 @@ export class Parser {
   private _skipWhitespace(): boolean {
     let sawWhitespace: boolean = false;
     while (this._peekToken().kind === TokenKind.Spaces) {
-      this._getToken();
+      this._readToken();
       sawWhitespace = true;
     }
     if (this._peekToken().kind === TokenKind.EndOfInput) {
@@ -114,19 +114,19 @@ export class Parser {
     return sawWhitespace;
   }
 
-  private _getToken(): Token {
+  private _readToken(): Token {
     if (this._peekedToken) {
       const token: Token = this._peekedToken;
       this._peekedToken = undefined;
       return token;
     } else {
-      return this._tokenizer.getToken();
+      return this._tokenizer.readToken();
     }
   }
 
   private _peekToken(): Token {
     if (!this._peekedToken) {
-      this._peekedToken = this._tokenizer.getToken();
+      this._peekedToken = this._tokenizer.readToken();
     }
     return this._peekedToken;
   }

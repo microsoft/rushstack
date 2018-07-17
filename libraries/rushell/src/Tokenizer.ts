@@ -86,11 +86,11 @@ export class Tokenizer {
     return this._currentIndex;
   }
 
-  public getToken(): Token {
+  public readToken(): Token {
     const input: TextRange = this.input;
 
     const startIndex: number = this._currentIndex;
-    const firstChar: string | undefined = this._peek();
+    const firstChar: string | undefined = this._peekCharacter();
 
     // Reached end of input yet?
     if (firstChar === undefined) {
@@ -99,10 +99,10 @@ export class Tokenizer {
 
     // Is it a sequence of whitespace?
     if (Tokenizer._isSpace(firstChar)) {
-      this._get();
+      this._readCharacter();
 
-      while (Tokenizer._isSpace(this._peek())) {
-        this._get();
+      while (Tokenizer._isSpace(this._peekCharacter())) {
+        this._readCharacter();
       }
 
       return new Token(TokenKind.Spaces, input.getNewRange(startIndex, this._currentIndex));
@@ -110,22 +110,22 @@ export class Tokenizer {
 
     // Is it a newline?
     if (firstChar === '\r') {
-      this._get();
-      if (this._peek() === '\n') {
-        this._get();
+      this._readCharacter();
+      if (this._peekCharacter() === '\n') {
+        this._readCharacter();
       }
       return new Token(TokenKind.NewLine, input.getNewRange(startIndex, this._currentIndex));
     } else if (firstChar === '\n') {
-      this._get();
+      this._readCharacter();
       return new Token(TokenKind.NewLine, input.getNewRange(startIndex, this._currentIndex));
     }
 
     // Is it a double-quoted string?
     if (firstChar === '"') {
-      this._get(); // consume the opening quote
+      this._readCharacter(); // consume the opening quote
 
       let text: string = '';
-      let c: string | undefined = this._peek();
+      let c: string | undefined = this._peekCharacter();
       while (c !== '"') {
         if (c === undefined) {
           throw new ParseError('The double-quoted string is missing the ending quote',
@@ -145,20 +145,20 @@ export class Tokenizer {
         //
         // NOTE: Dash interprets "\t" as a tab character, but Bash does not.
         if (c === '\\') {
-          this._get(); // discard the backslash
-          if (this._peek() === undefined) {
+          this._readCharacter(); // discard the backslash
+          if (this._peekCharacter() === undefined) {
             throw new ParseError('A backslash must be followed by another character',
               input.getNewRange(this._currentIndex, this._currentIndex + 1));
           }
           // Add the escaped character
-          text += this._get();
+          text += this._readCharacter();
         } else {
-          text += this._get();
+          text += this._readCharacter();
         }
 
-        c = this._peek();
+        c = this._peekCharacter();
       }
-      this._get(); // consume the closing quote
+      this._readCharacter(); // consume the closing quote
 
       return new Token(TokenKind.DoubleQuotedText, input.getNewRange(startIndex, this._currentIndex), text);
     }
@@ -169,18 +169,18 @@ export class Tokenizer {
       let c: string | undefined = firstChar;
       do {
         if (c === '\\') {
-          this._get(); // discard the backslash
-          if (this._peek() === undefined) {
+          this._readCharacter(); // discard the backslash
+          if (this._peekCharacter() === undefined) {
             throw new ParseError('A backslash must be followed by another character',
               input.getNewRange(this._currentIndex, this._currentIndex + 1));
           }
           // Add the escaped character
-          text += this._get();
+          text += this._readCharacter();
         } else {
-          text += this._get();
+          text += this._readCharacter();
         }
 
-        c = this._peek();
+        c = this._peekCharacter();
       } while (c && textCharacterRegExp.test(c));
 
       return new Token(TokenKind.Text, input.getNewRange(startIndex, this._currentIndex), text);
@@ -188,42 +188,42 @@ export class Tokenizer {
 
     // Is it a dollar variable?  The valid environment variable names are [A-Z_][A-Z0-9_]*
     if (firstChar === '$') {
-      this._get();
+      this._readCharacter();
 
-      let name: string = this._get() || '';
+      let name: string = this._readCharacter() || '';
       if (!startVariableCharacterRegExp.test(name)) {
         throw new ParseError('The "$" symbol must be followed by a letter or underscore',
           input.getNewRange(startIndex, this._currentIndex));
       }
 
-      let c: string | undefined = this._peek();
+      let c: string | undefined = this._peekCharacter();
       while (c && variableCharacterRegExp.test(c)) {
-        name += this._get();
-        c = this._peek();
+        name += this._readCharacter();
+        c = this._peekCharacter();
       }
       return new Token(TokenKind.DollarVariable, input.getNewRange(startIndex, this._currentIndex), name);
     }
 
     // Is it the "&&" token?
     if (firstChar === '&') {
-      if (this._peekTwice() === '&') {
-        this._get();
-        this._get();
+      if (this._peekCharacterAfter() === '&') {
+        this._readCharacter();
+        this._readCharacter();
         return new Token(TokenKind.AndIf, input.getNewRange(startIndex, this._currentIndex));
       }
     }
 
     // Otherwise treat it as an "other" character
-    this._get();
+    this._readCharacter();
     return new Token(TokenKind.OtherCharacter, input.getNewRange(startIndex, this._currentIndex));
   }
 
-  public getTokens(): Token[] {
+  public readTokens(): Token[] {
     const tokens: Token[] = [];
-    let token: Token = this.getToken();
+    let token: Token = this.readToken();
     while (token.kind !== TokenKind.EndOfInput) {
       tokens.push(token);
-      token = this.getToken();
+      token = this.readToken();
     }
     return tokens;
   }
@@ -232,7 +232,7 @@ export class Tokenizer {
    * Retrieve the next character in the input stream.
    * @returns a string of length 1, or undefined if the end of input is reached
    */
-  private _get(): string | undefined {
+  private _readCharacter(): string | undefined {
     if (this._currentIndex >= this.input.end) {
       return undefined;
     }
@@ -243,7 +243,7 @@ export class Tokenizer {
    * Return the next character in the input stream, but don't advance the stream pointer.
    * @returns a string of length 1, or undefined if the end of input is reached
    */
-  private _peek(): string | undefined {
+  private _peekCharacter(): string | undefined {
     if (this._currentIndex >= this.input.end) {
       return undefined;
     }
@@ -254,7 +254,7 @@ export class Tokenizer {
    * Return the character after the next character in the input stream, but don't advance the stream pointer.
    * @returns a string of length 1, or undefined if the end of input is reached
    */
-  private _peekTwice(): string | undefined {
+  private _peekCharacterAfter(): string | undefined {
     if (this._currentIndex + 1 >= this.input.end) {
       return undefined;
     }
