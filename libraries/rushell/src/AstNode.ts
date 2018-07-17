@@ -45,11 +45,11 @@ export abstract class AstNode {
 
   public getChildNodes(): AstNode[] {
     const nodes: AstNode[] = [];
-    this.pushChildNodes(nodes);
+    this.collectChildNodesInto(nodes);
     return nodes;
   }
 
-  protected abstract pushChildNodes(nodes: AstNode[]): void;
+  protected abstract collectChildNodesInto(nodes: AstNode[]): void;
 
   protected getDumpText(): string | undefined {
     return undefined;
@@ -64,7 +64,7 @@ export class AstScript extends AstNode {
   }
 
   /** @override */
-  protected pushChildNodes(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     if (this.body) {
       nodes.push(this.body);
     }
@@ -87,7 +87,7 @@ export class AstAndIf extends AstNode {
   }
 
   /** @override */
-  protected pushChildNodes(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     if (this.firstCommand) {
       nodes.push(this.firstCommand);
     }
@@ -106,7 +106,7 @@ export class AstCommand extends AstNode {
   }
 
   /** @override */
-  protected pushChildNodes(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     if (this.commandPath) {
       nodes.push(this.commandPath);
     }
@@ -122,7 +122,7 @@ export class AstCompoundWord extends AstNode {
   }
 
   /** @override */
-  protected pushChildNodes(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     nodes.push(...this.parts);
   }
 }
@@ -133,7 +133,7 @@ export class AstVariableExpansion extends AstNode {
   }
 
   /** @override */
-  protected pushChildNodes(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     // no children
   }
 }
@@ -145,7 +145,7 @@ export class AstText extends AstNode {
   }
 
   /** @override */
-  protected pushChildNodes(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     // no children
   }
 
