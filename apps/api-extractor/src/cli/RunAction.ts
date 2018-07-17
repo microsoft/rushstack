@@ -2,10 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { JsonFile, PackageJsonLookup } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  PackageJsonLookup,
+  FileSystem
+} from '@microsoft/node-core-library';
 
 import {
   CommandLineAction,
@@ -56,7 +59,7 @@ export class RunAction extends CommandLineAction {
 
     if (this._configFileParameter.value) {
       configFilename = path.normalize(this._configFileParameter.value);
-      if (!fsx.existsSync(configFilename)) {
+      if (!FileSystem.exists(configFilename)) {
         throw new Error('Config file not found: ' + this._configFileParameter.value);
       }
     } else {
@@ -72,7 +75,7 @@ export class RunAction extends CommandLineAction {
         configFilename = path.join(process.cwd(), AE_CONFIG_FILENAME);
       }
 
-      if (!fsx.existsSync(configFilename)) {
+      if (!FileSystem.exists(configFilename)) {
         throw new Error(`Unable to find an ${AE_CONFIG_FILENAME} file`);
       }
 

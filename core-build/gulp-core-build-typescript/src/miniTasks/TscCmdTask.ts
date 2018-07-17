@@ -2,8 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile } from '@microsoft/node-core-library';
-import * as fsx from 'fs-extra';
+import {
+  JsonFile,
+  FileSystem
+} from '@microsoft/node-core-library';
 import * as glob from 'glob';
 
 import {
@@ -70,12 +72,11 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
             reject(error);
           } else {
             for (const matchPath of matchPaths) {
-              const fileContents: Buffer = fsx.readFileSync(matchPath);
+              const fileContents: string = FileSystem.readFile(matchPath);
               const relativePath: string = path.relative(srcPath, matchPath);
               for (const resolvedLibFolder of resolvedLibFolders) {
                 const destPath: string = path.join(resolvedLibFolder, relativePath);
-                fsx.ensureDirSync(path.dirname(destPath));
-                fsx.writeFileSync(destPath, fileContents);
+                FileSystem.writeFile(destPath, fileContents, { ensureFolderExists: true });
               }
             }
 

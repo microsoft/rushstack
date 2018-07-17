@@ -3,9 +3,8 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import * as fsx from 'fs-extra';
 import { cloneDeep } from 'lodash';
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJson, JsonFile } from '@microsoft/node-core-library';
 
 import {
   VersionPolicy,
@@ -323,7 +322,7 @@ export class VersionManager {
       // Update package.json
       if (rushProject) {
         const packagePath: string = path.join(rushProject.projectFolder, 'package.json');
-        fsx.writeFileSync(packagePath, JSON.stringify(newPackageJson, undefined, 2), { encoding: 'utf8' });
+        JsonFile.save(newPackageJson, packagePath);
       }
     });
   }

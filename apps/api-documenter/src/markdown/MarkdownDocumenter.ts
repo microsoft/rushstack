@@ -1,10 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 
-import { Text, PackageName } from '@microsoft/node-core-library';
+import {
+  PackageName,
+  FileSystem,
+  NewlineKind
+} from '@microsoft/node-core-library';
 import {
   IApiClass,
   IApiEnum,
@@ -614,7 +617,9 @@ export class MarkdownDocumenter {
       }
     });
 
-    fsx.writeFileSync(filename, Text.convertToCrLf(content));
+    FileSystem.writeFile(filename, content, {
+      convertLineEndings: NewlineKind.CrLf
+    });
   }
 
   private _getFilenameForDocItem(docItem: DocItem): string {
@@ -631,6 +636,6 @@ export class MarkdownDocumenter {
 
   private _deleteOldOutputFiles(): void {
     console.log('Deleting old output from ' + this._outputFolder);
-    fsx.emptyDirSync(this._outputFolder);
+    FileSystem.ensureEmptyFolder(this._outputFolder);
   }
 }

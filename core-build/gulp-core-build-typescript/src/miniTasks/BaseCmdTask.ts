@@ -3,11 +3,12 @@
 
 import * as childProcess from 'child_process';
 import * as path from 'path';
-import * as fsx from 'fs-extra';
+import * as os from 'os';
 
 import {
   JsonFile,
-  IPackageJson
+  IPackageJson,
+  FileSystem
 } from '@microsoft/node-core-library';
 import { GulpTask } from '@microsoft/gulp-core-build';
 
@@ -55,6 +56,32 @@ export interface IBaseTaskOptions<TTaskConfig> {
  * @alpha
  */
 export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extends GulpTask<TTaskConfig> {
+  private static __nodePath: string | undefined; // tslint:disable-line:variable-name
+  private static get _nodePath(): string | undefined {
+    if (!BaseCmdTask.__nodePath) {
+      try {
+        if (os.platform() === 'win32') {
+          // We're on Windows
+          const whereOutput: string = childProcess.execSync('where node', { stdio: [] }).toString();
+          const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
+          BaseCmdTask.__nodePath = lines[lines.length - 1];
+        } else {
+          // We aren't on Windows - assume we're on *NIX or Darwin
+          BaseCmdTask.__nodePath = childProcess.execSync('which node', { stdio: [] }).toString();
+        }
+      } catch (e) {
+        return undefined;
+      }
+
+      BaseCmdTask.__nodePath = BaseCmdTask.__nodePath.trim();
+      if (!FileSystem.exists(BaseCmdTask.__nodePath)) {
+        return undefined;
+      }
+    }
+
+    return BaseCmdTask.__nodePath;
+  }
+
   protected _packageName: string;
   protected _packageBinPath: string;
   protected _errorHasBeenLogged: boolean;
@@ -69,7 +96,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
   public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {
     let binaryPackagePath: string = require.resolve(this._packageName);
     let packageJsonPath: string;
-    while (!fsx.existsSync(packageJsonPath = path.join(binaryPackagePath, 'package.json'))) {
+    while (!FileSystem.exists(packageJsonPath = path.join(binaryPackagePath, 'package.json'))) {
       const tempBinaryPackagePath: string = path.dirname(binaryPackagePath);
       if (binaryPackagePath === tempBinaryPackagePath) {
         // We've hit the disk root
@@ -82,7 +109,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
 
     if (this.taskConfig.overridePackagePath) {
       // The package version is being overridden
-      if (!fsx.existsSync(this.taskConfig.overridePackagePath)) {
+      if (!FileSystem.exists(this.taskConfig.overridePackagePath)) {
         completeCallback(
           `The specified ${this._packageName} path (${this.taskConfig.overridePackagePath}) does not ` +
           'exist'
@@ -98,7 +125,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
     this.log(`${this._packageName} version: ${packageJson.version}`);
 
     const binaryPath: string = path.resolve(binaryPackagePath, this._packageBinPath);
-    if (!fsx.existsSync(binaryPath)) {
+    if (!FileSystem.exists(binaryPath)) {
       completeCallback(
         `The binary is missing. This indicates that ${this._packageName} is not ` +
         'installed correctly.'
@@ -107,9 +134,15 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
     }
 
     return new Promise((resolve: () => void, reject: (error: Error) => void) => {
+      const nodePath: string | undefined = BaseCmdTask._nodePath;
+      if (!nodePath) {
+        reject(new Error('Unable to find node executable'));
+        return;
+      }
+
       // Invoke the tool and watch for log messages
       const spawnResult: childProcess.ChildProcess = childProcess.spawn(
-        'node',
+        nodePath,
         [binaryPath, ...this._getArgs()],
         {
           cwd: this._buildDirectory,

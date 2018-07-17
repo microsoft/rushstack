@@ -2,11 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 
-import { Text, Path } from '@microsoft/node-core-library';
+import {
+  Text,
+  Path,
+  FileSystem
+} from '@microsoft/node-core-library';
 
 import { Utilities } from './Utilities';
 
@@ -49,13 +53,13 @@ export class AsyncRecycler {
       throw new Error('AsyncRecycler.moveFolder() cannot be called on a parent of the recycler folder');
     }
 
-    if (!fsx.existsSync(folderPath)) {
+    if (!FileSystem.exists(folderPath)) {
       return;
     }
 
     ++this._movedFolderCount;
 
-    // We need to do a simple "fs.renameSync" here, however if the folder we're trying to rename
+    // We need to do a simple "FileSystem.move" here, however if the folder we're trying to rename
     // has a lock, or if its destination container doesn't exist yet,
     // then there seems to be some OS process (virus scanner?) that holds
     // a lock on the folder for a split second, which causes renameSync to
@@ -65,12 +69,12 @@ export class AsyncRecycler {
     const oldFolderName: string = path.basename(folderPath);
     const newFolderPath: string = path.join(this.recyclerFolder, `${oldFolderName}_${new Date().getTime()}`);
 
-    if (!fsx.existsSync(this.recyclerFolder)) {
+    if (!FileSystem.exists(this.recyclerFolder)) {
       Utilities.createFolderWithRetry(this.recyclerFolder);
     }
 
     Utilities.retryUntilTimeout(
-      () => fsx.renameSync(folderPath, newFolderPath),
+      () => FileSystem.move(folderPath, newFolderPath),
       maxWaitTimeMs,
       (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
                       'from a process like the virus scanner.'),
@@ -90,13 +94,12 @@ export class AsyncRecycler {
       (membersToExclude || []).map(x => x.toUpperCase())
     );
 
-    for (const memberName of fsx.readdirSync(resolvedFolderPath)) {
-      const memberPath: string = path.join(resolvedFolderPath, memberName);
-      const normalizedMemberName: string = memberName.toUpperCase();
+    for (const memberPath of FileSystem.readFolder(resolvedFolderPath, { absolutePaths: true })) {
+      const normalizedMemberName: string = path.basename(memberPath).toUpperCase();
       if (!excludeSet.has(normalizedMemberName)) {
         let shouldMove: boolean = false;
         try {
-          const stats: fsx.Stats = fsx.lstatSync(memberPath);
+          const stats: fs.Stats = FileSystem.getLinkStatistics(memberPath);
           shouldMove = stats.isDirectory();
         } catch (error) {
           // If we fail to access the item, assume it's not a folder
@@ -104,7 +107,7 @@ export class AsyncRecycler {
         if (shouldMove) {
           this.moveFolder(memberPath);
         } else {
-          fsx.unlinkSync(memberPath);
+          FileSystem.deleteFolder(memberPath);
         }
       }
     }
@@ -168,7 +171,7 @@ export class AsyncRecycler {
 
       // child_process.spawn() doesn't expand wildcards.  To be safe, we will do it manually
       // rather than rely on an unknown shell.
-      for (const filename of fsx.readdirSync(this.recyclerFolder)) {
+      for (const filename of FileSystem.readFolder(this.recyclerFolder)) {
         // The "." and ".." are supposed to be excluded, but let's be safe
         if (filename !== '.' && filename !== '..') {
           args.push(path.join(this.recyclerFolder, filename));

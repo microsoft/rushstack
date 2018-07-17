@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
-import { Text } from '@microsoft/node-core-library';
+import { Text, FileSystem } from '@microsoft/node-core-library';
 import { ExtractorContext } from '../ExtractorContext';
 import { AstStructuredType } from '../ast/AstStructuredType';
 import { AstEnum } from '../ast/AstEnum';
@@ -60,7 +59,7 @@ export class ApiFileGenerator extends AstItemVisitor {
    */
   public writeApiFile(reportFilename: string, context: ExtractorContext): void {
     const fileContent: string = this.generateApiFileContent(context);
-    fs.writeFileSync(reportFilename, fileContent);
+    FileSystem.writeFile(reportFilename, fileContent);
   }
 
   public generateApiFileContent(context: ExtractorContext): string {

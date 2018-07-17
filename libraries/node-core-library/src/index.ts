@@ -46,3 +46,18 @@ export {
 export { PackageName, IParsedPackageName, IParsedPackageNameOrError } from './PackageName';
 export { Path } from './Path';
 export { Text } from './Text';
+export {
+  FileSystem,
+  IReadFolderOptions,
+  IWriteFileOptions,
+  IReadFileOptions,
+  IFileSystemMoveOptions,
+  IDeleteFileOptions,
+  NewlineKind,
+  IFileModeBits,
+  IUpdateTimeParameters
+} from './FileSystem';
+export {
+  FileWriter,
+  IFileWriterFlags
+} from './FileWriter';

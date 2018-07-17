@@ -1,8 +1,7 @@
-import * as fsx from 'fs-extra';
 import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as semver from 'semver';
-import { PackageName } from '@microsoft/node-core-library';
+import { PackageName, FileSystem } from '@microsoft/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 
@@ -110,13 +109,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
     try {
-      if (!fsx.existsSync(shrinkwrapYamlFilename)) {
+      if (!FileSystem.exists(shrinkwrapYamlFilename)) {
         return undefined; // file does not exist
       }
 
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
-      const parsedData: IShrinkwrapYaml = yaml.safeLoad(fsx.readFileSync(shrinkwrapYamlFilename).toString());
+      const parsedData: IShrinkwrapYaml = yaml.safeLoad(FileSystem.readFile(shrinkwrapYamlFilename).toString());
 
       return new PnpmShrinkwrapFile(parsedData);
     } catch (error) {

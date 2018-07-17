@@ -1,9 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
 import * as path from 'path';
 import * as semver from 'semver';
+
+import {
+  FileSystem,
+  JsonFile
+} from '@microsoft/node-core-library';
 
 import {
   PublishUtilities,
@@ -71,19 +75,18 @@ export class ChangelogGenerator {
       const markdownPath: string = path.resolve(project.projectFolder, CHANGELOG_MD);
       const markdownJSONPath: string = path.resolve(project.projectFolder, CHANGELOG_JSON);
 
-      if (fs.existsSync(markdownPath)) {
+      if (FileSystem.exists(markdownPath)) {
         console.log('Found: ' + markdownPath);
-        if (!fs.existsSync(markdownJSONPath)) {
+        if (!FileSystem.exists(markdownJSONPath)) {
           throw new Error('A CHANGELOG.md without json: ' + markdownPath);
         }
 
         const changelog: IChangelog = ChangelogGenerator._getChangelog(project.packageName, project.projectFolder);
         const isLockstepped: boolean = !!project.versionPolicy && project.versionPolicy.isLockstepped;
 
-        fs.writeFileSync(
+        FileSystem.writeFile(
           path.join(project.projectFolder, CHANGELOG_MD),
-          ChangelogGenerator._translateToMarkdown(changelog, rushConfiguration, isLockstepped),
-          { encoding: 'utf8' }
+          ChangelogGenerator._translateToMarkdown(changelog, rushConfiguration, isLockstepped)
         );
       }
 
@@ -146,12 +149,11 @@ export class ChangelogGenerator {
 
       if (shouldCommit) {
         // Write markdown transform.
-        fs.writeFileSync(changelogFilename, JSON.stringify(changelog, undefined, 2), { encoding: 'utf8' });
+        JsonFile.save(changelog, changelogFilename);
 
-        fs.writeFileSync(
+        FileSystem.writeFile(
           path.join(projectFolder, CHANGELOG_MD),
-          ChangelogGenerator._translateToMarkdown(changelog, rushConfiguration, isLockstepped),
-          { encoding: 'utf8' }
+          ChangelogGenerator._translateToMarkdown(changelog, rushConfiguration, isLockstepped)
         );
       }
       return changelog;
@@ -168,8 +170,8 @@ export class ChangelogGenerator {
     let changelog: IChangelog | undefined = undefined;
 
     // Try to read the existing changelog.
-    if (fs.existsSync(changelogFilename)) {
-      changelog = JSON.parse(fs.readFileSync(changelogFilename, 'utf8')) as IChangelog;
+    if (FileSystem.exists(changelogFilename)) {
+      changelog = JsonFile.load(changelogFilename);
     }
 
     if (!changelog) {

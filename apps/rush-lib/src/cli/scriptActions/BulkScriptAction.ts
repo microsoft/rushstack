@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as colors from 'colors';
 
@@ -21,6 +20,7 @@ import { TaskSelector } from '../../logic/TaskSelector';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
+import { FileSystem } from '@microsoft/node-core-library';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -59,7 +59,7 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   public run(): Promise<void> {
-    if (!fsx.existsSync(this.rushConfiguration.rushLinkJsonFilename)) {
+    if (!FileSystem.exists(this.rushConfiguration.rushLinkJsonFilename)) {
       throw new Error(`File not found: ${this.rushConfiguration.rushLinkJsonFilename}` +
         `${os.EOL}Did you run "rush link"?`);
     }

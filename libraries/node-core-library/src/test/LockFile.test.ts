@@ -3,10 +3,11 @@
 
 /// <reference types='mocha' />
 
-import * as fsx from 'fs-extra';
 import { assert } from 'chai';
 import * as path from 'path';
 import { LockFile, getProcessStartTime, getProcessStartTimeFromProcStat } from '../LockFile';
+import { FileSystem } from '../FileSystem';
+import { FileWriter } from '../FileWriter';
 
 function setLockFileGetProcessStartTime(fn: (process: number) => string | undefined): void {
   // tslint:disable-next-line:no-any
@@ -114,7 +115,7 @@ describe('LockFile', () => {
       it('can acquire and close a clean lockfile', () => {
         // ensure test folder is clean
         const testFolder: string = path.join(__dirname, '1');
-        fsx.emptyDirSync(testFolder);
+        FileSystem.ensureEmptyFolder(testFolder);
 
         const resourceName: string = 'test';
         const pidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
@@ -124,11 +125,11 @@ describe('LockFile', () => {
         assert.isDefined(lock);
         assert.isFalse(lock!.dirtyWhenAcquired);
         assert.isFalse(lock!.isReleased);
-        assert.isTrue(fsx.existsSync(pidLockFileName));
+        assert.isTrue(FileSystem.exists(pidLockFileName));
 
         // Ensure that we can release the "clean" lockfile
         lock!.release();
-        assert.isFalse(fsx.existsSync(pidLockFileName));
+        assert.isFalse(FileSystem.exists(pidLockFileName));
         assert.isTrue(lock!.isReleased);
 
         // Ensure we cannot release the lockfile twice
@@ -140,7 +141,7 @@ describe('LockFile', () => {
       it('cannot acquire a lock if another valid lock exists', () => {
         // ensure test folder is clean
         const testFolder: string = path.join(__dirname, '2');
-        fsx.emptyDirSync(testFolder);
+        FileSystem.ensureEmptyFolder(testFolder);
 
         const otherPid: number = 999999999;
         const otherPidStartTime: string = '2012-01-02 12:53:12';
@@ -154,10 +155,13 @@ describe('LockFile', () => {
         });
 
         // create an open lockfile
-        const lockFileDescriptor: number = fsx.openSync(otherPidLockFileName, 'w');
-        fsx.writeSync(lockFileDescriptor, otherPidStartTime);
-        fsx.closeSync(lockFileDescriptor);
-        fsx.utimesSync(otherPidLockFileName, 10000, 10000);
+        const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
+        lockFileHandle.write(otherPidStartTime);
+        lockFileHandle.close();
+        FileSystem.updateTimes(otherPidLockFileName, {
+          accessedTime: 10000,
+          modifiedTime: 10000
+        });
 
         const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
@@ -187,50 +191,50 @@ describe('LockFile', () => {
     it('will not acquire if existing lock is there', () => {
       // ensure test folder is clean
       const testFolder: string = path.join(__dirname, '1');
-      fsx.removeSync(testFolder);
-      fsx.mkdirsSync(testFolder);
+      FileSystem.deleteFolder(testFolder);
+      FileSystem.ensureFolder(testFolder);
 
       // create an open lockfile
       const resourceName: string = 'test';
       const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
-      const lockFileDescriptor: number = fsx.openSync(lockFileName, 'wx');
+      const lockFileHandle: FileWriter = FileWriter.open(lockFileName, { exclusive: true });
 
       const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
       // this lock should be undefined since there is an existing lock
       assert.isUndefined(lock);
-      fsx.closeSync(lockFileDescriptor);
+      lockFileHandle.close();
     });
 
     it('can acquire and close a dirty lockfile', () => {
       // ensure test folder is clean
       const testFolder: string = path.join(__dirname, '1');
-      fsx.removeSync(testFolder);
-      fsx.mkdirsSync(testFolder);
+      FileSystem.deleteFolder(testFolder);
+      FileSystem.ensureFolder(testFolder);
 
       // Create a lockfile that is still hanging around on disk,
       const resourceName: string = 'test';
       const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
-      fsx.closeSync(fsx.openSync(lockFileName, 'wx'));
+      FileWriter.open(lockFileName, { exclusive: true }).close();
 
       const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
       assert.isDefined(lock);
       assert.isTrue(lock!.dirtyWhenAcquired);
       assert.isFalse(lock!.isReleased);
-      assert.isTrue(fsx.existsSync(lockFileName));
+      assert.isTrue(FileSystem.exists(lockFileName));
 
       // Ensure that we can release the "dirty" lockfile
       lock!.release();
-      assert.isFalse(fsx.existsSync(lockFileName));
+      assert.isFalse(FileSystem.exists(lockFileName));
       assert.isTrue(lock!.isReleased);
     });
 
     it('can acquire and close a clean lockfile', () => {
       // ensure test folder is clean
       const testFolder: string = path.join(__dirname, '1');
-      fsx.removeSync(testFolder);
-      fsx.mkdirsSync(testFolder);
+      FileSystem.deleteFolder(testFolder);
+      FileSystem.ensureFolder(testFolder);
 
       const resourceName: string = 'test';
       const lockFileName: string = LockFile.getLockFilePath(testFolder, resourceName);
@@ -240,11 +244,11 @@ describe('LockFile', () => {
       assert.isDefined(lock);
       assert.isFalse(lock!.dirtyWhenAcquired);
       assert.isFalse(lock!.isReleased);
-      assert.isTrue(fsx.existsSync(lockFileName));
+      assert.isTrue(FileSystem.exists(lockFileName));
 
       // Ensure that we can release the "clean" lockfile
       lock!.release();
-      assert.isFalse(fsx.existsSync(lockFileName));
+      assert.isFalse(FileSystem.exists(lockFileName));
       assert.isTrue(lock!.isReleased);
 
       // Ensure we cannot release the lockfile twice
