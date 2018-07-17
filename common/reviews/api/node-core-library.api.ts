@@ -1,3 +1,8 @@
+// @beta
+class Executable {
+  static tryResolve(name: string, options?: IExecutableResolveOptions): string | undefined;
+}
+
 // @public
 enum FileConstants {
   PackageJson = "package.json"
@@ -52,6 +57,12 @@ enum FolderConstants {
 // @public
 interface IDeleteFileOptions {
   throwIfNotExists?: boolean;
+}
+
+// @beta
+interface IExecutableResolveOptions {
+  currentWorkingDirectory?: string;
+  environment?: NodeJS.ProcessEnv;
 }
 
 // @public
