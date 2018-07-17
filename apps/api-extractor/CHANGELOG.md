@@ -1,6 +1,19 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 21 Jun 2018 08:27:29 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Jul 2018 21:03:31 GMT and should not be manually modified.
+
+## 5.9.1
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 5.9.0
+Sat, 23 Jun 2018 02:21:20 GMT
+
+### Minor changes
+
+- Add new IMarkupHtmlTag API
+- AEDoc now allows HTML tags inside doc comments, which can be disabled using a backslash escape
 
 ## 5.8.1
 Thu, 21 Jun 2018 08:27:29 GMT

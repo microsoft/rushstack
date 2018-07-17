@@ -2,14 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
 import readPackageTree = require('read-package-tree');
 
-import { JsonFile, PackageName } from '@microsoft/node-core-library';
+import { JsonFile, PackageName, FileSystem } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
@@ -125,8 +124,8 @@ export class NpmLinkManager extends BaseLinkManager {
       commonProjectPackage = NpmPackage.createVirtualTempPackage(packageJsonFilename, installFolderName);
 
       // remove the extracted tarball contents
-      fsx.removeSync(packageJsonFilename);
-      fsx.removeSync(extractedFolder);
+      FileSystem.deleteFile(packageJsonFilename);
+      FileSystem.deleteFile(extractedFolder);
 
       commonRootPackage.addChild(commonProjectPackage);
     }
@@ -319,7 +318,7 @@ export class NpmLinkManager extends BaseLinkManager {
       const commonBinFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin');
       const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
-      if (fsx.existsSync(commonBinFolder)) {
+      if (FileSystem.exists(commonBinFolder)) {
         NpmLinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
       }
     }

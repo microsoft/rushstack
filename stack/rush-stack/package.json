@@ -11,15 +11,13 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "1.4.1",
+    "@microsoft/node-core-library": "1.5.0",
     "@microsoft/ts-command-line": "4.2.0",
-    "colors": "~1.2.1",
-    "fs-extra": "~5.0.0"
+    "colors": "~1.2.1"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.44",
+    "@microsoft/node-library-build": "4.3.49",
     "@types/colors": "1.2.1",
-    "@types/fs-extra": "5.0.1",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1"
   },

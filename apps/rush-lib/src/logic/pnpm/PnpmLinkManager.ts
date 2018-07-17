@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import uriEncode = require('strict-uri-encode');
@@ -11,7 +10,8 @@ import {
   JsonFile,
   Text,
   IPackageJson,
-  PackageName
+  PackageName,
+  FileSystem
 } from '@microsoft/node-core-library';
 
 import {
@@ -164,12 +164,12 @@ export class PnpmLinkManager extends BaseLinkManager {
         pathToLocalInstallation,
         dependencyName);
 
-      if (!fsx.existsSync(dependencyLocalInstallationSymlink)) {
+      if (!FileSystem.exists(dependencyLocalInstallationSymlink)) {
         // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
         throw Error(`Cannot find installed dependency "${dependencyName}" in "${pathToLocalInstallation}"`);
       }
 
-      if (!fsx.lstatSync(dependencyLocalInstallationSymlink).isSymbolicLink()) {
+      if (!FileSystem.getLinkStatistics(dependencyLocalInstallationSymlink).isSymbolicLink()) {
         // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
         throw Error(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
       }
@@ -177,7 +177,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       // The dependencyLocalInstallationSymlink is just a symlink to another folder.
       // To reduce the number of filesystem reads that are needed, we will link to where that symlink
       // it pointed, rather than linking to a link.
-      const dependencyLocalInstallationRealpath: string = fsx.realpathSync(dependencyLocalInstallationSymlink);
+      const dependencyLocalInstallationRealpath: string = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
 
       const newLocalFolderPath: string = path.join(
           localPackage.folderPath, 'node_modules', dependencyName);
@@ -185,7 +185,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       let version: string | undefined = undefined;
       if (DEBUG) {
         // read the version number for diagnostic purposes
-        const packageJsonForDependency: IPackageJson = fsx.readJsonSync(
+        const packageJsonForDependency: IPackageJson = JsonFile.load(
           path.join(dependencyLocalInstallationRealpath, RushConstants.packageJsonFilename));
 
         version = packageJsonForDependency.version;

@@ -11,6 +11,10 @@ items:
     package: api-extractor-test-05
     children:
       - api-extractor-test-05.DocClass1.exampleFunction
+      - api-extractor-test-05.DocClass1.interestingEdgeCases
+      - api-extractor-test-05.DocClass1.malformedEvent
+      - api-extractor-test-05.DocClass1.modifiedEvent
+      - api-extractor-test-05.DocClass1.regularProperty
       - api-extractor-test-05.DocClass1.tableExample
   - uid: api-extractor-test-05.DocClass1.exampleFunction
     summary: This is an overloaded function.
@@ -34,9 +38,61 @@ items:
           description: the second string
           type:
             - string
+  - uid: api-extractor-test-05.DocClass1.interestingEdgeCases
+    summary: |-
+      Example: "{ \\"maxItemsToShow\\": 123 }"
+
+      The regular expression used to validate the constraints is /^\[a-zA-Z0-9\\-\_\]+$/
+    name: interestingEdgeCases()
+    fullName: api-extractor-test-05.DocClass1.interestingEdgeCases
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'interestingEdgeCases(): void;'
+      return:
+        type:
+          - void
+        description: ''
+  - uid: api-extractor-test-05.DocClass1.malformedEvent
+    summary: This event should have been marked as readonly.
+    name: malformedEvent
+    fullName: api-extractor-test-05.DocClass1.malformedEvent
+    langs:
+      - typeScript
+    type: event
+    syntax:
+      content: 'malformedEvent: SystemEvent;'
+      return:
+        type:
+          - SystemEvent
+  - uid: api-extractor-test-05.DocClass1.modifiedEvent
+    summary: This event is fired whenever the object is modified.
+    name: modifiedEvent
+    fullName: api-extractor-test-05.DocClass1.modifiedEvent
+    langs:
+      - typeScript
+    type: event
+    syntax:
+      content: 'readonly modifiedEvent: SystemEvent;'
+      return:
+        type:
+          - SystemEvent
+  - uid: api-extractor-test-05.DocClass1.regularProperty
+    summary: This is a regular property that happens to use the SystemEvent type.
+    name: regularProperty
+    fullName: api-extractor-test-05.DocClass1.regularProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'regularProperty: SystemEvent;'
+      return:
+        type:
+          - SystemEvent
   - uid: api-extractor-test-05.DocClass1.tableExample
     summary: 'An example with tables:'
-    remarks: '&lt;table&gt; &lt;tr&gt; &lt;td&gt;John&lt;/td&gt; &lt;td&gt;Doe&lt;/td&gt; &lt;/tr&gt; &lt;/table&gt;'
+    remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
     name: tableExample()
     fullName: api-extractor-test-05.DocClass1.tableExample
     langs:

@@ -3,9 +3,10 @@
 
 import { GulpTask } from './GulpTask';
 import * as Gulp from 'gulp';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
+
+import { JsonFile } from '@microsoft/node-core-library';
 
 export interface IBuildReceiptTask {
 }
@@ -66,7 +67,8 @@ export class UpdateBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
 
     const packageHashPath: string = path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json');
 
-    fs.writeFile(packageHashPath, JSON.stringify(_lastLocalHashes, undefined, 2), completeCallback);
+    JsonFile.save(_lastLocalHashes, packageHashPath);
+    completeCallback();
   }
 }
 
@@ -114,9 +116,7 @@ function _getLocalHashes(): Promise<{ [path: string]: string }> {
 
 function _readPackageHashes(receiptPath: string): Promise<{ [path: string]: string }> {
   return new Promise((complete) => {
-    fs.readFile(receiptPath, 'utf8', (err, data) => {
-      complete(err ? undefined : JSON.parse(data));
-    });
+    complete(JsonFile.load(receiptPath));
   });
 }
 

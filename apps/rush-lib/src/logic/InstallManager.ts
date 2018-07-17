@@ -8,7 +8,6 @@ import * as http from 'http';
 import HttpsProxyAgent = require('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 import * as semver from 'semver';
 import * as tar from 'tar';
 import globEscape = require('glob-escape');
@@ -17,7 +16,8 @@ import {
   LockFile,
   Text,
   IPackageJson,
-  MapExtensions
+  MapExtensions,
+  FileSystem
 } from '@microsoft/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
@@ -256,9 +256,9 @@ export class InstallManager {
     // Example: "C:\Users\YourName\.rush"
     const rushUserFolder: string = this._rushConfiguration.rushUserFolder;
 
-    if (!fsx.existsSync(rushUserFolder)) {
+    if (!FileSystem.exists(rushUserFolder)) {
       console.log('Creating ' + rushUserFolder);
-      fsx.mkdirSync(rushUserFolder);
+      FileSystem.ensureFolder(rushUserFolder);
     }
 
     const packageManager: PackageManager = this._rushConfiguration.packageManager;
@@ -303,9 +303,7 @@ export class InstallManager {
       packageManagerMarker.create();
 
       // Example: "C:\MyRepo\common\temp"
-      if (!fsx.existsSync(this._rushConfiguration.commonTempFolder)) {
-        fsx.mkdirsSync(this._rushConfiguration.commonTempFolder);
-      }
+      FileSystem.ensureFolder(this._rushConfiguration.commonTempFolder);
 
       // Example: "C:\MyRepo\common\temp\pnpm-local"
       const localPackageManagerToolFolder: string =
@@ -314,17 +312,17 @@ export class InstallManager {
       console.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
       console.log('  --> "' + packageManagerToolFolder + '"');
 
-      // We cannot use fsx.existsSync() to test the existence of a symlink, because it will
+      // We cannot use FileSystem.exists() to test the existence of a symlink, because it will
       // return false for broken symlinks.  There is no way to test without catching an exception.
       try {
-        fsx.unlinkSync(localPackageManagerToolFolder);
+        FileSystem.deleteFolder(localPackageManagerToolFolder);
       } catch (error) {
         if (error.code !== 'ENOENT') {
           throw error;
         }
       }
 
-      fsx.symlinkSync(packageManagerToolFolder, localPackageManagerToolFolder, 'junction');
+      FileSystem.createSymbolicLinkFolder(packageManagerToolFolder, localPackageManagerToolFolder);
 
       lock.release();
     });
@@ -382,11 +380,8 @@ export class InstallManager {
 
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
-    const committedNpmrcPath: string = path.join(this._rushConfiguration.commonRushConfigFolder, '.npmrc');
-    const tempNpmrcPath: string = path.join(this._rushConfiguration.commonTempFolder, '.npmrc');
-
-    // ensure that we remove any old one that may be hanging around
-    this._syncFile(committedNpmrcPath, tempNpmrcPath);
+    // Also ensure that we remove any old one that may be hanging around
+    Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, this._rushConfiguration.commonTempFolder);
 
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {
@@ -531,10 +526,10 @@ export class InstallManager {
       let shouldOverwrite: boolean = true;
       try {
         // if the tarball and the temp file still exist, then compare the contents
-        if (fsx.existsSync(tarballFile) && fsx.existsSync(tempPackageJsonFilename)) {
+        if (FileSystem.exists(tarballFile) && FileSystem.exists(tempPackageJsonFilename)) {
 
           // compare the extracted package.json with the one we are about to write
-          const oldBuffer: Buffer = fsx.readFileSync(tempPackageJsonFilename);
+          const oldBuffer: Buffer = FileSystem.readFileToBuffer(tempPackageJsonFilename);
           const newBuffer: Buffer = new Buffer(JsonFile.stringify(tempPackageJson));
 
           if (Buffer.compare(oldBuffer, newBuffer) === 0) {
@@ -553,8 +548,8 @@ export class InstallManager {
           // remove the old tarball & old temp package json, this is for any cases where new tarball creation
           // fails, and the shouldOverwrite logic is messed up because the my-project-2\package.json
           // exists and is updated, but the tarball is not accurate
-          fsx.removeSync(tarballFile);
-          fsx.removeSync(tempPackageJsonFilename);
+          FileSystem.deleteFile(tarballFile);
+          FileSystem.deleteFile(tempPackageJsonFilename);
 
           // write the expected package.json file into the zip staging folder
           JsonFile.save(tempPackageJson, tempPackageJsonFilename);
@@ -574,8 +569,8 @@ export class InstallManager {
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
           // delete everything in case of any error
-          fsx.removeSync(tarballFile);
-          fsx.removeSync(tempPackageJsonFilename);
+          FileSystem.deleteFile(tarballFile);
+          FileSystem.deleteFile(tempPackageJsonFilename);
         }
       }
     }
@@ -590,7 +585,7 @@ export class InstallManager {
       shrinkwrapFile.save(this._rushConfiguration.tempShrinkwrapPreinstallFilename);
     } else {
       // Otherwise delete the temporary file
-      fsx.removeSync(this._rushConfiguration.tempShrinkwrapFilename);
+      FileSystem.deleteFile(this._rushConfiguration.tempShrinkwrapFilename);
     }
 
     // Don't update the file timestamp unless the content has changed, since "rush install"
@@ -648,7 +643,7 @@ export class InstallManager {
           const pnpmFileFilename: string = path.join(this._rushConfiguration.commonRushConfigFolder,
             RushConstants.pnpmFileFilename);
 
-          if (fsx.existsSync(pnpmFileFilename)) {
+          if (FileSystem.exists(pnpmFileFilename)) {
             potentiallyChangedFiles.push(pnpmFileFilename);
           }
         }
@@ -703,7 +698,7 @@ export class InstallManager {
           const packageManagerFilename: string = this._rushConfiguration.packageManagerToolFilename;
 
           // Is there an existing "node_modules" folder to consider?
-          if (fsx.existsSync(commonNodeModulesFolder)) {
+          if (FileSystem.exists(commonNodeModulesFolder)) {
             // Should we delete the entire "node_modules" folder?
             if (deleteNodeModules) {
               // YES: Delete "node_modules"
@@ -823,12 +818,12 @@ export class InstallManager {
       const lastCheckFile: string = path.join(this._rushConfiguration.rushUserFolder,
         'rush-' + Rush.version, 'last-check.flag');
 
-      if (fsx.existsSync(lastCheckFile)) {
+      if (FileSystem.exists(lastCheckFile)) {
         let cachedResult: boolean | 'error' | undefined = undefined;
         try {
           // NOTE: mtimeMs is not supported yet in NodeJS 6.x
           const nowMs: number = new Date().getTime();
-          const ageMs: number = nowMs - fsx.statSync(lastCheckFile).mtime.getTime();
+          const ageMs: number = nowMs - FileSystem.getStatistics(lastCheckFile).mtime.getTime();
           const HOUR: number = 60 * 60 * 1000;
 
           // Is the cache too old?
@@ -850,20 +845,17 @@ export class InstallManager {
       // Before we start the network operation, record a failed state.  If the process exits for some reason,
       // this will record the error.  It will also update the timestamp to prevent other Rush instances
       // from attempting to update the file.
-      fsx.mkdirsSync(path.dirname(lastCheckFile));
-      JsonFile.save('error', lastCheckFile);
+      JsonFile.save('error', lastCheckFile, { ensureFolderExists: true });
 
       // For this check we use the official registry, not the private registry
       return this._queryIfReleaseIsPublished('https://registry.npmjs.org:443')
         .then((publishedRelease: boolean) => {
           // Cache the result
-          fsx.mkdirsSync(path.dirname(lastCheckFile));
-          JsonFile.save(publishedRelease, lastCheckFile);
+          JsonFile.save(publishedRelease, lastCheckFile, { ensureFolderExists: true });
           return publishedRelease;
         })
         .catch((error: Error) => {
-          fsx.mkdirsSync(path.dirname(lastCheckFile));
-          JsonFile.save('error', lastCheckFile);
+          JsonFile.save('error', lastCheckFile, { ensureFolderExists: true });
           return Promise.reject(error);
         });
     });
@@ -958,13 +950,13 @@ export class InstallManager {
    * If the source file does not exist, then the target file is deleted.
    */
   private _syncFile(sourcePath: string, targetPath: string): void {
-    if (fsx.existsSync(sourcePath)) {
+    if (FileSystem.exists(sourcePath)) {
       console.log('Updating ' + targetPath);
-      fsx.copySync(sourcePath, targetPath);
+      FileSystem.copyFile(sourcePath, targetPath);
     } else {
-      if (fsx.existsSync(targetPath)) {
+      if (FileSystem.exists(targetPath)) {
         console.log('Deleting ' + targetPath);
-        fsx.unlinkSync(targetPath);
+        FileSystem.deleteFile(targetPath);
       }
     }
   }

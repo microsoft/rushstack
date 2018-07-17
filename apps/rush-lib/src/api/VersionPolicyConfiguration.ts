@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as fsx from 'fs-extra';
-import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem } from '@microsoft/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
 import { RushConfigurationProject } from './RushConfigurationProject';
@@ -137,7 +136,7 @@ export class VersionPolicyConfiguration {
   }
 
   private _loadFile(): void {
-    if (!fsx.existsSync(this._jsonFileName)) {
+    if (!FileSystem.exists(this._jsonFileName)) {
       return;
     }
     const versionPolicyJson: IVersionPolicyJson[] = JsonFile.loadAndValidate(this._jsonFileName,

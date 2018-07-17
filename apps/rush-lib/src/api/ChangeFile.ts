@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import gitInfo = require('git-repo-info');
+
+import { JsonFile } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from './RushConfiguration';
 import {
@@ -65,8 +66,9 @@ export class ChangeFile {
    */
   public writeSync(): void {
     const filePath: string = this.generatePath();
-    fsx.ensureFileSync(filePath);
-    fsx.writeFileSync(filePath, JSON.stringify(this._changeFileData, undefined, 2));
+    JsonFile.save(this._changeFileData, filePath, {
+      ensureFolderExists: true
+    });
   }
 
   /**

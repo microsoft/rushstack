@@ -1,12 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as colors from 'colors';
 
 import yaml = require('js-yaml');
-import { JsonFile, JsonSchema, Text, PackageName } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  JsonSchema,
+  PackageName,
+  FileSystem,
+  NewlineKind
+} from '@microsoft/node-core-library';
 import {
   MarkupElement,
   IApiMethod,
@@ -40,10 +45,21 @@ const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'type
  */
 export class YamlDocumenter {
   private _docItemSet: DocItemSet;
+
+  // This is used by the _linkToUidIfPossible() workaround.
+  // It stores a mapping from type name (e.g. "MyClass") to the corresponding DocItem.
+  // If the mapping would be ambiguous (e.g. "MyClass" is defined by multiple packages)
+  // then it is excluded from the mapping.  Also excluded are DocItems (such as package
+  // and function) which are not typically used as a data type.
+  private _docItemsByTypeName: Map<string, DocItem>;
+
   private _outputFolder: string;
 
   public constructor(docItemSet: DocItemSet) {
     this._docItemSet = docItemSet;
+    this._docItemsByTypeName = new Map<string, DocItem>();
+
+    this._initDocItemsByTypeName();
   }
 
   public generateFiles(outputFolder: string): void { // virtual
@@ -272,7 +288,11 @@ export class YamlDocumenter {
         this._populateYamlMethod(yamlItem, docItem);
         break;
       case DocItemKind.Property:
-        yamlItem.type = 'property';
+        if ((docItem.apiItem as IApiProperty).isEventProperty) {
+          yamlItem.type = 'event';
+        } else {
+          yamlItem.type = 'property';
+        }
         this._populateYamlProperty(yamlItem, docItem);
         break;
       case DocItemKind.Function:
@@ -330,7 +350,7 @@ export class YamlDocumenter {
         .replace(/^\s*-\s+/, ''); // temporary workaround for people who mistakenly add a hyphen, e.g. "@returns - blah"
 
       syntax.return = {
-        type: [ apiMethod.returnValue.type ],
+        type: [ this._linkToUidIfPossible(apiMethod.returnValue.type) ],
         description: returnDescription
       };
     }
@@ -342,7 +362,7 @@ export class YamlDocumenter {
         {
            id: parameterName,
            description:  this._renderMarkdown(apiParameter.description, docItem),
-           type: [ apiParameter.type || '' ]
+           type: [ this._linkToUidIfPossible(apiParameter.type || '') ]
         } as IYamlParameter
       );
     }
@@ -364,7 +384,7 @@ export class YamlDocumenter {
 
     if (apiProperty.type) {
       syntax.return = {
-        type: [ apiProperty.type ]
+        type: [ this._linkToUidIfPossible(apiProperty.type) ]
       };
     }
   }
@@ -402,10 +422,10 @@ export class YamlDocumenter {
       stringified = `### YamlMime:${yamlMimeType}\n` + stringified;
     }
 
-    const normalized: string = Text.convertToCrLf(stringified);
-
-    fsx.mkdirsSync(path.dirname(filePath));
-    fsx.writeFileSync(filePath, normalized);
+    FileSystem.writeFile(filePath, stringified, {
+      convertLineEndings: NewlineKind.CrLf,
+      ensureFolderExists: true
+    });
 
     if (schema) {
       schema.validateObject(dataObject, filePath);
@@ -450,6 +470,89 @@ export class YamlDocumenter {
     return result;
   }
 
+  /**
+   * Initialize the _docItemsByTypeName() data structure.
+   */
+  private _initDocItemsByTypeName(): void {
+    // Collect the _docItemsByTypeName table
+    const ambiguousNames: Set<string> = new Set<string>();
+
+    this._docItemSet.forEach((docItem: DocItem) => {
+      switch (docItem.kind) {
+        case DocItemKind.Class:
+        case DocItemKind.Enum:
+        case DocItemKind.Interface:
+          // Attempt to register both the fully qualified name and the short name
+          const namesForType: string[] = [docItem.name];
+
+          // Note that nameWithDot cannot conflict with docItem.name (because docItem.name
+          // cannot contain a dot)
+          const nameWithDot: string | undefined = this._getTypeNameWithDot(docItem);
+          if (nameWithDot) {
+            namesForType.push(nameWithDot);
+          }
+
+          // Register all names
+          for (const typeName of namesForType) {
+            if (ambiguousNames.has(typeName)) {
+              break;
+            }
+
+            if (this._docItemsByTypeName.has(typeName)) {
+              // We saw this name before, so it's an ambiguous match
+              ambiguousNames.add(typeName);
+              break;
+            }
+
+            this._docItemsByTypeName.set(typeName, docItem);
+          }
+
+          break;
+      }
+    });
+
+    // Remove the ambiguous matches
+    for (const ambiguousName of ambiguousNames) {
+      this._docItemsByTypeName.delete(ambiguousName);
+    }
+  }
+
+  /**
+   * This is a temporary workaround to enable limited autolinking of API item types
+   * until the YAML file format is enhanced to support general hyperlinks.
+   * @remarks
+   * In the current version, fields such as IApiProperty.type allow either:
+   * (1) a UID identifier such as "node-core-library.JsonFile" which will be rendered
+   * as a hyperlink to that type name, or (2) a block of freeform text that must not
+   * contain any Markdown links.  The _substituteUidForSimpleType() function assumes
+   * it is given #2 but substitutes #1 if the name can be matched to a DocItem.
+   */
+  private _linkToUidIfPossible(typeName: string): string {
+    // Note that typeName might be a _getTypeNameWithDot() name or it might be a simple class name
+    const docItem: DocItem | undefined = this._docItemsByTypeName.get(typeName.trim());
+    if (docItem) {
+      // Substitute the UID
+      return this._getUid(docItem);
+    }
+    return typeName;
+  }
+
+  /**
+   * If the docItem represents a scoped name such as "my-library:MyNamespace.MyClass",
+   * this returns a string such as "MyNamespace.MyClass".  If the result would not
+   * have at least one dot in it, then undefined is returned.
+   */
+  private _getTypeNameWithDot(docItem: DocItem): string | undefined {
+    const hierarchy: DocItem[] = docItem.getHierarchy();
+    if (hierarchy.length > 0 && hierarchy[0].kind === DocItemKind.Package) {
+      hierarchy.shift(); // ignore the package qualifier
+    }
+    if (hierarchy.length < 1) {
+      return undefined;
+    }
+    return hierarchy.map(x => x.name).join('.');
+  }
+
   private _getYamlItemName(docItem: DocItem): string {
     if (docItem.parent && docItem.parent.kind === DocItemKind.Namespace) {
       // For members a namespace, show the full name excluding the package part:
@@ -482,6 +585,6 @@ export class YamlDocumenter {
 
   private _deleteOldOutputFiles(): void {
     console.log('Deleting old output from ' + this._outputFolder);
-    fsx.emptyDirSync(this._outputFolder);
+    FileSystem.ensureEmptyFolder(this._outputFolder);
   }
 }

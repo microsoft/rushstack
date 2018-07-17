@@ -86,6 +86,100 @@
           "isVirtual": false,
           "isOverride": false
         },
+        "interestingEdgeCases": {
+          "kind": "method",
+          "signature": "interestingEdgeCases(): void;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {},
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "Example: \"{ \\\"maxItemsToShow\\\": 123 }\""
+            },
+            {
+              "kind": "paragraph"
+            },
+            {
+              "kind": "text",
+              "text": "The regular expression used to validate the constraints is /^[a-zA-Z0-9\\-_]+$/"
+            }
+          ],
+          "remarks": [],
+          "isBeta": false,
+          "isSealed": false,
+          "isVirtual": false,
+          "isOverride": false
+        },
+        "malformedEvent": {
+          "kind": "property",
+          "signature": "malformedEvent: SystemEvent;",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "SystemEvent",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "This event should have been marked as readonly."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false,
+          "isSealed": false,
+          "isVirtual": false,
+          "isOverride": false,
+          "isEventProperty": true
+        },
+        "modifiedEvent": {
+          "kind": "property",
+          "signature": "readonly modifiedEvent: SystemEvent;",
+          "isOptional": false,
+          "isReadOnly": true,
+          "isStatic": false,
+          "type": "SystemEvent",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "This event is fired whenever the object is modified."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false,
+          "isSealed": false,
+          "isVirtual": false,
+          "isOverride": false,
+          "isEventProperty": true
+        },
+        "regularProperty": {
+          "kind": "property",
+          "signature": "regularProperty: SystemEvent;",
+          "isOptional": false,
+          "isReadOnly": false,
+          "isStatic": false,
+          "type": "SystemEvent",
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "This is a regular property that happens to use the SystemEvent type."
+            }
+          ],
+          "remarks": [],
+          "isBeta": false,
+          "isSealed": false,
+          "isVirtual": false,
+          "isOverride": false,
+          "isEventProperty": false
+        },
         "tableExample": {
           "kind": "method",
           "signature": "tableExample(): void;",
@@ -107,9 +201,123 @@
           "remarks": [
             {
               "kind": "text",
-              "text": "<table> <tr> <td>John</td> <td>Doe</td> </tr> </table>"
+              "text": ""
+            },
+            {
+              "kind": "html-tag",
+              "token": "<table>"
+            },
+            {
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "kind": "html-tag",
+              "token": "<tr>"
+            },
+            {
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "kind": "html-tag",
+              "token": "<td>"
+            },
+            {
+              "kind": "text",
+              "text": "John"
+            },
+            {
+              "kind": "html-tag",
+              "token": "</td>"
+            },
+            {
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "kind": "html-tag",
+              "token": "<td>"
+            },
+            {
+              "kind": "text",
+              "text": "Doe"
+            },
+            {
+              "kind": "html-tag",
+              "token": "</td>"
+            },
+            {
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "kind": "html-tag",
+              "token": "</tr>"
+            },
+            {
+              "kind": "text",
+              "text": " "
+            },
+            {
+              "kind": "html-tag",
+              "token": "</table>"
+            },
+            {
+              "kind": "text",
+              "text": ""
             }
           ],
+          "isBeta": false,
+          "isSealed": false,
+          "isVirtual": false,
+          "isOverride": false
+        }
+      }
+    },
+    "SystemEvent": {
+      "kind": "class",
+      "extends": "",
+      "implements": "",
+      "typeParameters": [],
+      "deprecatedMessage": [],
+      "summary": [
+        {
+          "kind": "text",
+          "text": "A class used to exposed events."
+        }
+      ],
+      "remarks": [],
+      "isBeta": false,
+      "isSealed": false,
+      "members": {
+        "addHandler": {
+          "kind": "method",
+          "signature": "addHandler(handler: () => void): void;",
+          "accessModifier": "",
+          "isOptional": false,
+          "isStatic": false,
+          "returnValue": {
+            "type": "void",
+            "description": []
+          },
+          "parameters": {
+            "handler": {
+              "name": "handler",
+              "description": [],
+              "isOptional": false,
+              "isSpread": false,
+              "type": "() => void"
+            }
+          },
+          "deprecatedMessage": [],
+          "summary": [
+            {
+              "kind": "text",
+              "text": "Adds an handler for the event."
+            }
+          ],
+          "remarks": [],
           "isBeta": false,
           "isSealed": false,
           "isVirtual": false,

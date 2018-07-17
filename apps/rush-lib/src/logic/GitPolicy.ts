@@ -8,13 +8,8 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
 
 export class GitPolicy {
-  public static check(rushConfiguration: RushConfiguration): boolean {
-    if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
-      return true;
-    }
 
-    console.log('Checking Git policy for this repository.' + os.EOL);
-
+  public static getUserEmail(rushConfiguration: RushConfiguration): string | undefined {
     // Determine the user's account
     // Ex: "bob@example.com"
     let userEmail: string;
@@ -33,26 +28,39 @@ If you didn't configure your e-mail yet, try something like this:`);
       console.log(colors.cyan(
 `
     git config --local user.name "Mr. Example"
-    git config --local user.email "${rushConfiguration.gitSampleEmail}"
+    git config --local user.email "${rushConfiguration.gitSampleEmail || 'example@contoso.com'}"
 `));
 
       console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
 
-      return false;
+      return undefined;
     }
 
+    return userEmail;
+  }
+
+  public static check(rushConfiguration: RushConfiguration, userEmail?: string): boolean {
+    if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
+      return true;
+    }
+
+    console.log('Checking Git policy for this repository.' + os.EOL);
+
+    userEmail = userEmail || GitPolicy.getUserEmail(rushConfiguration);
+
     // sanity check; a valid e-mail should not contain any whitespace
-    if (!userEmail.match(/^\S+$/g)) {
-      throw new Error('The gitPolicy check failed because "git config" returned unexpected output:'
-        + os.EOL + `"${userEmail}"`);
+    if (!userEmail || !userEmail.match(/^\S+$/g)) {
+      console.log(colors.red('The gitPolicy check failed because "git config" returned unexpected output:'
+        + os.EOL + `"${userEmail}"`));
+      return false;
     }
 
     for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
       const regex: RegExp = new RegExp('^' + pattern + '$', 'i');
-      if (userEmail.match(regex)) {
+      if (!userEmail.match(regex)) {
         // For debugging:
-        // console.log(`${userEmail} matched pattern: "${pattern}"`);
-        return true;
+        // console.log(`${userEmail} did not match pattern: "${pattern}"`);
+        return false;
       }
     }
 

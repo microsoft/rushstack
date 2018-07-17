@@ -51,7 +51,7 @@ export class Token {
   constructor(type: TokenType, tag?: string, text?: string) {
     this._type = type;
     this._tag = tag ? tag : '';
-    this._text = text ? this._unescape(text) : '';
+    this._text = text ? text : '';
     return this;
   }
 
@@ -74,9 +74,5 @@ export class Token {
 
   public get text(): string {
     return this._text;
-  }
-
-  private _unescape(text: string): string {
-    return  text.replace('\\@', '@').replace('\\{', '{').replace('\\\\', '\\').replace('\\}', '}');
   }
 }
