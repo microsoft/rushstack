@@ -12,13 +12,13 @@ function escape(s: string): string {
 
 function tokenize(input: string): Token[] {
   const tokenizer: Tokenizer = new Tokenizer(input);
-  return tokenizer.getTokens();
+  return tokenizer.readTokens();
 }
 
 function matchSnapshot(input: string): void {
   const tokenizer: Tokenizer = new Tokenizer(input);
 
-  const reportedTokens: { kind: string, value: string }[] = tokenizer.getTokens().map(
+  const reportedTokens: { kind: string, value: string }[] = tokenizer.readTokens().map(
     token => {
       return {
         kind: TokenKind[token.kind],

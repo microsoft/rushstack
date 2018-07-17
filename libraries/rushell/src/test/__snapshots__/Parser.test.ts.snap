@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`00: basic inputs 1`] = `
+Object {
+  "input": "command arg1 arg2",
+  "tree": "Script:
+  Command:
+    CompoundWord:
+      Text=\\"command\\"
+    CompoundWord:
+      Text=\\"arg1\\"
+    CompoundWord:
+      Text=\\"arg2\\"
+",
+}
+`;
+
+exports[`01: basic errors 1`] = `
+Object {
+  "input": "@bad",
+  "reportedError": [Error: (1,1): Expecting a command path],
+}
+`;
+
+exports[`01: basic errors 2`] = `
+Object {
+  "input": "command @bad",
+  "reportedError": [Error: (1,9): Unexpected token: OtherCharacter],
+}
+`;
