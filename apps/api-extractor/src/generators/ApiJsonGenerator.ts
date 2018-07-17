@@ -252,7 +252,8 @@ export class ApiJsonGenerator extends AstItemVisitor {
       isBeta: astProperty.inheritedReleaseTag === ReleaseTag.Beta,
       isSealed: !!astProperty.documentation.isSealed,
       isVirtual: !!astProperty.documentation.isVirtual,
-      isOverride: !!astProperty.documentation.isOverride
+      isOverride: !!astProperty.documentation.isOverride,
+      isEventProperty: astProperty.isEventProperty
     };
 
     refObject![astProperty.name] = newNode;

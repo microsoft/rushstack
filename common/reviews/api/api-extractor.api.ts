@@ -155,6 +155,7 @@ interface IApiParameter {
 
 // @alpha
 interface IApiProperty extends IApiBaseDefinition {
+  isEventProperty: boolean;
   isOptional: boolean;
   isOverride: boolean;
   isReadOnly: boolean;

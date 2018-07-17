@@ -24,7 +24,8 @@ import {
   IMarkupTable,
   Markup,
   MarkupBasicElement,
-  MarkupStructuredElement
+  MarkupStructuredElement,
+  IMarkupTableRow
 } from '@microsoft/api-extractor';
 
 import {
@@ -205,6 +206,13 @@ export class MarkdownDocumenter {
       Markup.createTextElements('Description')
     ]);
 
+    const eventsTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Property'),
+      Markup.createTextElements('Access Modifier'),
+      Markup.createTextElements('Type'),
+      Markup.createTextElements('Description')
+    ]);
+
     const methodsTable: IMarkupTable = Markup.createTable([
       Markup.createTextElements('Method'),
       Markup.createTextElements('Access Modifier'),
@@ -223,14 +231,18 @@ export class MarkdownDocumenter {
               docMember.getApiReference())
           ];
 
-          propertiesTable.rows.push(
-            Markup.createTableRow([
-              propertyTitle,
-              [],
-              [Markup.createCode(apiMember.type, 'javascript')],
-              apiMember.summary
-            ])
-          );
+          const row: IMarkupTableRow = Markup.createTableRow([
+            propertyTitle,
+            [],
+            [Markup.createCode(apiMember.type, 'javascript')],
+            apiMember.summary
+          ]);
+
+          if (apiMember.isEventProperty) {
+            eventsTable.rows.push(row);
+          } else {
+            propertiesTable.rows.push(row);
+          }
           this._writePropertyPage(docMember);
           break;
 
@@ -271,6 +283,11 @@ export class MarkdownDocumenter {
           this._writeMethodPage(docMember);
           break;
       }
+    }
+
+    if (eventsTable.rows.length > 0) {
+      markupPage.elements.push(Markup.createHeading1('Events'));
+      markupPage.elements.push(eventsTable);
     }
 
     if (propertiesTable.rows.length > 0) {

@@ -7,3 +7,5 @@ items:
         items:
           - name: DocClass1
             uid: api-extractor-test-05.DocClass1
+          - name: SystemEvent
+            uid: api-extractor-test-05.SystemEvent
