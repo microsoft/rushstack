@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 03 Jul 2018 21:03:31 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Jul 2018 16:02:52 GMT and should not be manually modified.
+
+## 5.10.0
+Tue, 17 Jul 2018 16:02:52 GMT
+
+### Minor changes
+
+- Add support for new "@eventproperty" AEDoc tag, which indicates that a class/interface property should be documented as an event
 
 ## 5.9.1
 Tue, 03 Jul 2018 21:03:31 GMT

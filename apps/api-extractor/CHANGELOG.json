@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.10.0",
+      "tag": "@microsoft/api-extractor_v5.10.0",
+      "date": "Tue, 17 Jul 2018 16:02:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for new \"@eventproperty\" AEDoc tag, which indicates that a class/interface property should be documented as an event"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.9.1",
       "tag": "@microsoft/api-extractor_v5.9.1",
       "date": "Tue, 03 Jul 2018 21:03:31 GMT",
