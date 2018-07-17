@@ -115,13 +115,13 @@ export class Parser {
   }
 
   private _getToken(): Token {
-    let token: Token;
     if (this._peekedToken) {
-      token = this._peekedToken;
+      const token: Token = this._peekedToken;
       this._peekedToken = undefined;
       return token;
+    } else {
+      return this._tokenizer.getToken();
     }
-    return this._tokenizer.getToken();
   }
 
   private _peekToken(): Token {
