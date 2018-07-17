@@ -3,14 +3,13 @@
 
 import * as glob from 'glob';
 import * as colors from 'colors';
-import * as fsx from 'fs-extra';
+import * as child_process from 'child_process';
 import * as fetch from 'node-fetch';
 import * as http from 'http';
 import HttpsProxyAgent = require('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { Readable as ReadableStream } from 'stream';
 import * as tar from 'tar';
 import globEscape = require('glob-escape');
 import {
@@ -730,34 +729,8 @@ export class InstallManager {
                 const args: string[] = ['prune'];
                 this._pushConfigurationArgs(args, collectLogFile);
 
-                const stdoutStream: NodeJS.ReadableStream = new ReadableStream();
-                const stderrStream: NodeJS.ReadableStream = new ReadableStream();
-
-                stdoutStream.pipe(process.stdout);
-                stderrStream.pipe(process.stderr);
-
-                let outputFileStream: NodeJS.WritableStream | undefined;
-                if (collectLogFile) {
-                  const logFilePath: string =
-                    path.join(this._rushConfiguration.commonTempFolder, RushConstants.packageManagerLogFileName);
-                  outputFileStream = fsx.createWriteStream(logFilePath);
-                  stdoutStream.pipe(outputFileStream);
-                  stderrStream.pipe(outputFileStream);
-                }
-
                 Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename, args,
-                  this._rushConfiguration.commonTempFolder, undefined, undefined, undefined,
-                  stdoutStream, stderrStream);
-
-                if (outputFileStream) {
-                  stdoutStream.unpipe(outputFileStream);
-                  stderrStream.unpipe(outputFileStream);
-                  outputFileStream.end();
-                  outputFileStream = undefined;
-                }
-
-                stdoutStream.unpipe(process.stdout);
-                stdoutStream.unpipe(process.stderr);
+                  this._rushConfiguration.commonTempFolder);
 
                 // Delete the (installed image of) the temp projects, since "npm install" does not
                 // detect changes for "file:./" references.
@@ -804,24 +777,38 @@ export class InstallManager {
           console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
             + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
 
-          Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
-            installArgs,
-            this._rushConfiguration.commonTempFolder,
-            undefined,
-            false, () => {
-              if (this._rushConfiguration.packageManager === 'pnpm') {
-                // If there is a failure in pnpm, it is possible that it left the
-                // store in a bad state. Therefore, we should clean out the store
-                // before attempting the install again.
+          const childProcess: child_process.SpawnSyncReturns<Buffer> =
+            Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
+              installArgs,
+              this._rushConfiguration.commonTempFolder,
+              undefined,
+              false, () => {
+                if (this._rushConfiguration.packageManager === 'pnpm') {
+                  // If there is a failure in pnpm, it is possible that it left the
+                  // store in a bad state. Therefore, we should clean out the store
+                  // before attempting the install again.
 
-                console.log(colors.yellow(`Deleting the "node_modules" folder`));
-                this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
-                console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-                this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+                  console.log(colors.yellow(`Deleting the "node_modules" folder`));
+                  this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
+                  console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
+                  this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
 
-                Utilities.createFolderWithRetry(commonNodeModulesFolder);
-              }
-            });
+                  Utilities.createFolderWithRetry(commonNodeModulesFolder);
+                }
+              });
+
+          if (collectLogFile) {
+            const errorLogPath: string
+              = path.join(this._rushConfiguration.commonTempFolder, RushConstants.packageManagerErrorLogFileName);
+            const logPath: string
+              = path.join(this._rushConfiguration.commonTempFolder, RushConstants.packageManagerLogFileName);
+
+            console.log(`Writing package manager stdout logs to "${logPath}"`);
+            FileSystem.writeFile(logPath, childProcess.stdout, { ensureFolderExists: true });
+
+            console.log(`Writing package manager stderr logs to "${logPath}"`);
+            FileSystem.writeFile(errorLogPath, childProcess.stderr, { ensureFolderExists: true });
+          }
 
           if (this._rushConfiguration.packageManager === 'npm') {
 

@@ -35,16 +35,6 @@ export interface IInstallPackageInDirectoryOptions {
   suppressOutput?: boolean;
 }
 
-export type StdioOption = ('pipe' | 'ipc' | 'ignore' |
-  null | undefined |
-  number |
-  NodeJS.ReadableStream | NodeJS.WritableStream);
-
-/**
- * The different options that can be passed into spawn's stdio option
- */
-type StdioOptions = StdioOption[] | undefined;
-
 /**
  * @public
  */
@@ -260,11 +250,11 @@ export class Utilities {
    */
   public static executeCommand(command: string, args: string[], workingDirectory: string,
     environment?: IEnvironment, suppressOutput: boolean = false,
-    keepEnvironment: boolean = false, stdout?: StdioOption, stderr?: StdioOption
-  ): void {
+    keepEnvironment: boolean = false
+  ): child_process.SpawnSyncReturns<Buffer> {
 
-    Utilities._executeCommandInternal(command, args, workingDirectory,
-      suppressOutput ? undefined : [0, stdout || 1, stderr || 2],
+    return Utilities._executeCommandInternal(command, args, workingDirectory,
+      suppressOutput ? undefined : [0, 1, 2],
       environment,
       keepEnvironment
     );
@@ -291,7 +281,7 @@ export class Utilities {
    */
   public static executeCommandWithRetry(maxAttempts: number, command: string, args: string[],
     workingDirectory: string,  environment?: IEnvironment, suppressOutput: boolean = false,
-    retryCallback?: () => void, stdout?: StdioOption, stderr?: StdioOption): void {
+    retryCallback?: () => void): child_process.SpawnSyncReturns<Buffer> {
 
     if (maxAttempts < 1) {
       throw new Error('The maxAttempts parameter cannot be less than 1');
@@ -302,8 +292,7 @@ export class Utilities {
     // tslint:disable-next-line:no-constant-condition
     while (true) {
       try {
-        Utilities.executeCommand(command, args, workingDirectory, environment,
-          suppressOutput, undefined, stdout, stderr);
+        return Utilities.executeCommand(command, args, workingDirectory, environment, suppressOutput);
       } catch (error) {
         console.log(os.EOL + 'The command failed:');
         console.log(` ${command} ` + args.join(' '));
@@ -321,7 +310,6 @@ export class Utilities {
           throw error;
         }
       }
-      break;
     }
   }
 
@@ -586,7 +574,7 @@ export class Utilities {
    */
   private static _executeCommandInternal(
     command: string, args: string[], workingDirectory: string,
-    stdio: StdioOptions,
+    stdio: (string|number)[] | undefined,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {
