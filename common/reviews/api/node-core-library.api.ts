@@ -1,5 +1,6 @@
 // @beta
 class Executable {
+  static spawnSync(command: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
   static tryResolve(name: string, options?: IExecutableResolveOptions): string | undefined;
 }
 
@@ -63,6 +64,15 @@ interface IDeleteFileOptions {
 interface IExecutableResolveOptions {
   currentWorkingDirectory?: string;
   environment?: NodeJS.ProcessEnv;
+}
+
+// @beta
+interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
+  encoding?: string | BufferEncoding;
+  input?: string;
+  maxBuffer?: number;
+  stdio?: ExecutableStdioMapping;
+  timeoutMs?: number;
 }
 
 // @public
@@ -293,3 +303,5 @@ class Text {
   static truncateWithEllipsis(s: string, maximumLength: number): string;
 }
 
+// WARNING: Unsupported export: ExecutableStdioStreamMapping
+// WARNING: Unsupported export: ExecutableStdioMapping
