@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { FileSystem, PosixModeBits } from '../FileSystem';
 
 // The PosixModeBits are intended to be used with bitwise operations.
