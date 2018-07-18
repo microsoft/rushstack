@@ -1,8 +1,14 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as pathUtilities from 'path';
 import * as fs from 'fs';
 import * as fsx from 'fs-extra';
 
 import { Text } from './Text';
+
+// The PosixModeBits are intended to be used with bitwise operations.
+// tslint:disable:no-bitwise
 
 /**
  * The allowed types of encodings, as supported by Node.js
@@ -29,29 +35,89 @@ export const enum NewlineKind {
 }
 
 /**
- * Available PermissionsBits bits. These can be added together using the pipe operator, e.g.:
+ * POSIX mode bits used to specify files permissions.
+ * @remarks
  *
- * PermissionsBits.Read === 1                                           (or "001" in decimal)
- * PermissionsBits.Read | PermissionsBits.Write === 3                       (or "011" in decimal)
- * PermissionsBits.Read | PermissionsBits.Write | PermissionsBits.Execute === 7 (or "111" in decimal)
+ * This bitfield corresponds to the "mode_t" structure described in this document:
+ * http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_stat.h.html
+ *
+ * It is used with NodeJS APIs such as fs.Stat.mode and fs.chmodSync().  These values
+ * represent a set of permissions and can be combined using bitwise arithmetic.
+ *
  * @public
  */
-export const enum PermissionsBits {
-  None = 0,
-  Execute = 1,
-  Write = 2,
-  Read = 4
-}
+export const enum PosixModeBits {
+  // The bits
 
-/**
- * Interface representing Unix-style file permission mode bits.
- * All values should be set.
- * @public
- */
-export interface IFileModeBits {
-  Owner: PermissionsBits;
-  Group: PermissionsBits;
-  Other: PermissionsBits;
+  /**
+   * Indicates that the item's owner can read the item.
+   */
+  UserRead = 1 << 8,
+
+  /**
+   * Indicates that the item's owner can modify the item.
+   */
+  UserWrite = 1 << 7,
+
+  /**
+   * Indicates that the item's owner can execute the item (if it is a file)
+   * or search the item (if it is a directory).
+   */
+  UserExecute = 1 << 6,
+
+  /**
+   * Indicates that users belonging to the item's group can read the item.
+   */
+  GroupRead = 1 << 5,
+
+  /**
+   * Indicates that users belonging to the item's group can modify the item.
+   */
+  GroupWrite = 1 << 4,
+
+  /**
+   * Indicates that users belonging to the item's group can execute the item (if it is a file)
+   * or search the item (if it is a directory).
+   */
+  GroupExecute = 1 << 3,
+
+  /**
+   * Indicates that other users (besides the item's owner user or group) can read the item.
+   */
+  OthersRead = 1 << 2,
+
+  /**
+   * Indicates that other users (besides the item's owner user or group) can modify the item.
+   */
+  OthersWrite = 1 << 1,
+
+  /**
+   * Indicates that other users (besides the item's owner user or group) can execute the item (if it is a file)
+   * or search the item (if it is a directory).
+   */
+  OthersExecute = 1 << 0,
+
+  // Helpful aliases
+
+  /**
+   * A zero value where no permissions bits are set.
+   */
+  None = 0,
+
+  /**
+   * An alias combining OthersRead, GroupRead, and UserRead permission bits.
+   */
+  AllRead = OthersRead | GroupRead | UserRead,
+
+  /**
+   * An alias combining OthersWrite, GroupWrite, and UserWrite permission bits.
+   */
+  AllWrite = OthersWrite | GroupWrite | UserWrite,
+
+  /**
+   * An alias combining OthersExecute, GroupExecute, and UserExecute permission bits.
+   */
+  AllExecute = OthersExecute | GroupExecute | UserExecute
 }
 
 /**
@@ -217,17 +283,49 @@ export class FileSystem {
    * Changes the permissions (i.e. file mode bits) for a filesystem object.
    * Behind the scenes it uses `fs.chmodSync()`.
    * @param path - The absolute or relative path to the object that should be updated.
+   * @param modeBits - UNIX-style file mode bits (e.g. 777 or 666 etc)
+   */
+  public static changePosixModeBits(path: string, mode: PosixModeBits): void {
+    fs.chmodSync(path, mode);
+  }
+
+  /**
+   * Retrieves the permissions (i.e. file mode bits) for a filesystem object.
+   * Behind the scenes it uses `fs.chmodSync()`.
+   * @param path - The absolute or relative path to the object that should be updated.
    * @param mode - UNIX-style file mode bits (e.g. 777 or 666 etc)
    */
-  public static changePermissionBits(path: string, mode: IFileModeBits): void {
-    // tslint:disable-next-line:no-bitwise
-    const modeAsOctal: number = (mode.Owner << 6) + (mode.Group << 3) + (mode.Other);
-    fsx.chmodSync(path, modeAsOctal);
+  public static getPosixModeBits(path: string): PosixModeBits {
+    return FileSystem.getStatistics(path).mode;
+  }
+
+  /**
+   * Returns a 10-character string representation of a PosixModeBits value similar to what
+   * would be displayed by the POSIX command "ls -l".
+   * @remarks
+   * For example, `PosixModeBits.AllRead | PosixModeBits.AllWrite` would be formatted as "-rw-rw-rw-".
+   */
+  public static formatPosixModeBits(mode: PosixModeBits): string {
+    let result: string = '-';  // (later we may add support for additional states such as S_IFDIR or S_ISUID)
+
+    result += (mode & PosixModeBits.UserRead) ? 'r' : '-';
+    result += (mode & PosixModeBits.UserWrite) ? 'w' : '-';
+    result += (mode & PosixModeBits.UserExecute) ? 'x' : '-';
+
+    result += (mode & PosixModeBits.GroupRead) ? 'r' : '-';
+    result += (mode & PosixModeBits.GroupWrite) ? 'w' : '-';
+    result += (mode & PosixModeBits.GroupExecute) ? 'x' : '-';
+
+    result += (mode & PosixModeBits.OthersRead) ? 'r' : '-';
+    result += (mode & PosixModeBits.OthersWrite) ? 'w' : '-';
+    result += (mode & PosixModeBits.OthersExecute) ? 'x' : '-';
+
+    return result;
   }
 
   /**
    * Moves a file. The folder must exist, unless the `ensureFolderExists` option is provided.
-   * Behind the scenes it uses `fsx.moveSync()`
+   * Behind the scenes it uses `fs-extra.moveSync()`
    * @param sourcePath - The absolute or relative path to the source file.
    * @param targetPath - The absolute or relative path where the file should be moved to.
    * @param options - Optional settings that can change the behavior. Type: `IFileSystemMoveOptions`
@@ -252,7 +350,7 @@ export class FileSystem {
 
   /**
    * Recursively creates a folder at a given path.
-   * Behind the scenes is uses `fsx.ensureDirSync()`.
+   * Behind the scenes is uses `fs-extra.ensureDirSync()`.
    * @remarks
    * Throws an exception if anything in the folderPath is not a folder.
    * @param folderPath - The absolute or relative path of the folder which should be created.
@@ -288,7 +386,7 @@ export class FileSystem {
 
   /**
    * Deletes a folder, including all of its contents.
-   * Behind the scenes is uses `fsx.removeSync()`.
+   * Behind the scenes is uses `fs-extra.removeSync()`.
    * @remarks
    * Does not throw if the folderPath does not exist.
    * @param folderPath - The absolute or relative path to the folder which should be deleted.
@@ -299,7 +397,7 @@ export class FileSystem {
 
   /**
    * Deletes the content of a folder, but not the folder itself. Also ensures the folder exists.
-   * Behind the scenes it uses `fsx.emptyDirSync()`.
+   * Behind the scenes it uses `fs-extra.emptyDirSync()`.
    * @remarks
    * This is a workaround for a common race condition, where the virus scanner holds a lock on the folder
    * for a brief period after it was deleted, causing EBUSY errors for any code that tries to recreate the folder.
