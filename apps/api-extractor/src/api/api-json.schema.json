@@ -438,6 +438,14 @@
           "type": "array",
           "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
+        "examples": {
+          "description": "Example regarding usage of the item",
+          "type": "array",
+          "items": { 
+            "type": "array",
+            "items": { "$ref": "#/definitions/markupStructuredElement" }
+          }
+        },
         "deprecatedMessage": {
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
@@ -513,6 +521,14 @@
           "type": "array",
           "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
+        "examples": {
+          "description": "Example regarding usage of the item",
+          "type": "array",
+          "items": { 
+            "type": "array",
+            "items": { "$ref": "#/definitions/markupStructuredElement" }
+          }
+        },
         "deprecatedMessage": {
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
@@ -573,6 +589,14 @@
           "description": "Detailed additional notes regarding the item",
           "type": "array",
           "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "examples": {
+          "description": "Example regarding usage of the item",
+          "type": "array",
+          "items": { 
+            "type": "array",
+            "items": { "$ref": "#/definitions/markupStructuredElement" }
+          }
         },
         "deprecatedMessage": {
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
@@ -678,6 +702,14 @@
           "type": "array",
           "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
+        "examples": {
+          "description": "Example regarding usage of the item",
+          "type": "array",
+          "items": { 
+            "type": "array",
+            "items": { "$ref": "#/definitions/markupStructuredElement" }
+          }
+        },
         "deprecatedMessage": {
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
@@ -781,6 +813,14 @@
           "type": "array",
           "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
+        "examples": {
+          "description": "Example regarding usage of the item",
+          "type": "array",
+          "items": { 
+            "type": "array",
+            "items": { "$ref": "#/definitions/markupStructuredElement" }
+          }
+        },
         "deprecatedMessage": {
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
@@ -848,6 +888,14 @@
           "type": "array",
           "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
+        "examples": {
+          "description": "Example regarding usage of the item",
+          "type": "array",
+          "items": { 
+            "type": "array",
+            "items": { "$ref": "#/definitions/markupStructuredElement" }
+          }
+        },
         "deprecatedMessage": {
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
@@ -898,6 +946,14 @@
           "type": "array",
           "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
+        "examples": {
+          "description": "Example regarding usage of the item",
+          "type": "array",
+          "items": { 
+            "type": "array",
+            "items": { "$ref": "#/definitions/markupStructuredElement" }
+          }
+        },
         "deprecatedMessage": {
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
@@ -938,6 +994,14 @@
           "description": "Detailed additional notes regarding the item",
           "type": "array",
           "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "examples": {
+          "description": "Example regarding usage of the item",
+          "type": "array",
+          "items": { 
+            "type": "array",
+            "items": { "$ref": "#/definitions/markupStructuredElement" }
+          }
         },
         "deprecatedMessage": {
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
@@ -1004,6 +1068,14 @@
           "type": "array",
           "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
+        "examples": {
+          "description": "Example regarding usage of the item",
+          "type": "array",
+          "items": { 
+            "type": "array",
+            "items": { "$ref": "#/definitions/markupStructuredElement" }
+          }
+        },
         "deprecatedMessage": {
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
@@ -1064,6 +1136,14 @@
           "type": "array",
           "items": { "$ref": "#/definitions/markupStructuredElement" }
         },
+        "examples": {
+          "description": "Example regarding usage of the item",
+          "type": "array",
+          "items": { 
+            "type": "array",
+            "items": { "$ref": "#/definitions/markupStructuredElement" }
+          }
+        },
         "deprecatedMessage": {
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
@@ -1102,6 +1182,14 @@
       "description": "Detailed additional notes regarding the item",
       "type": "array",
       "items": { "$ref": "#/definitions/markupStructuredElement" }
+    },
+    "examples": {
+      "description": "Example regarding usage of the item",
+      "type": "array",
+      "items": { 
+        "type": "array",
+        "items": { "$ref": "#/definitions/markupStructuredElement" }
+      }
     },
     "exports": {
       "description": "The exported definitions for this API package",

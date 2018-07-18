@@ -37,6 +37,8 @@ interface IApiBaseDefinition {
   // (undocumented)
   deprecatedMessage?: MarkupBasicElement[];
   // (undocumented)
+  examples: MarkupStructuredElement[][];
+  // (undocumented)
   isBeta: boolean;
   kind: string;
   // (undocumented)
@@ -134,6 +136,8 @@ interface IApiNamespace extends IApiBaseDefinition {
 interface IApiPackage {
   // (undocumented)
   deprecatedMessage?: MarkupBasicElement[];
+  // (undocumented)
+  examples: MarkupStructuredElement[][];
   exports: IApiNameMap<ApiItem>;
   isBeta: boolean;
   kind: 'package';

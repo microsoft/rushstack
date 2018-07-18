@@ -262,6 +262,7 @@ export class DocElementParser {
     // inheritdoc found, copy over IApiBaseDefinition properties
     documentation.summary =  resolvedAstItem.summary;
     documentation.remarks = resolvedAstItem.remarks;
+    documentation.examples = resolvedAstItem.examples;
 
     // Copy over detailed properties if neccessary
     // Add additional cases if needed

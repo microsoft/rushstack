@@ -16,6 +16,7 @@ export class ResolvedApiItem {
   public kind: AstItemKind;
   public summary: MarkupElement[];
   public remarks: MarkupElement[];
+  public examples: MarkupElement[][];
   public deprecatedMessage: MarkupBasicElement[] | undefined;
   public releaseTag: ReleaseTag;
   public isBeta: boolean;
@@ -35,6 +36,7 @@ export class ResolvedApiItem {
       astItem.kind,
       astItem.documentation.summary,
       astItem.documentation.remarks,
+      astItem.documentation.examples,
       astItem.documentation.deprecatedMessage,
       astItem.documentation.releaseTag === ReleaseTag.Beta,
       astItem.documentation.parameters,
@@ -68,6 +70,7 @@ export class ResolvedApiItem {
       ApiJsonConverter.convertJsonToKind(docItem.kind),
       docItem.summary,
       docItem.remarks,
+      docItem.examples,
       docItem.deprecatedMessage,
       docItem.isBeta,
       parameters,
@@ -81,6 +84,7 @@ export class ResolvedApiItem {
     kind: AstItemKind,
     summary: MarkupElement[],
     remarks: MarkupElement[],
+    examples: MarkupElement[][],
     deprecatedMessage: MarkupBasicElement[] | undefined,
     isBeta: boolean,
     params: { [name: string]: IAedocParameter } | undefined,
@@ -90,6 +94,7 @@ export class ResolvedApiItem {
     this.kind = kind;
     this.summary = summary;
     this.remarks = remarks;
+    this.examples = examples;
     this.deprecatedMessage = deprecatedMessage;
     this.isBeta = isBeta;
     this.params = params;

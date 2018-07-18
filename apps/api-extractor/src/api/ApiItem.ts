@@ -122,6 +122,7 @@ export interface IApiBaseDefinition {
   isBeta: boolean;
   summary: MarkupBasicElement[];
   remarks: MarkupStructuredElement[];
+  examples: MarkupStructuredElement[][],
   deprecatedMessage?: MarkupBasicElement[];
 }
 
@@ -448,6 +449,7 @@ export interface IApiPackage {
   isBeta: boolean;
   summary: MarkupBasicElement[];
   remarks: MarkupStructuredElement[];
+  examples: MarkupStructuredElement[][],
   deprecatedMessage?: MarkupBasicElement[];
 }
 

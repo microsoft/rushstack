@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Add support to AEDoc for the \"@example\" tag.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "hans@hansl.ca"
+}

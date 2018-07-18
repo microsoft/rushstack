@@ -49,6 +49,7 @@ export class ApiDocumentation {
     '@beta',
     '@betadocumentation',
     '@eventproperty',
+    '@example',
     '@internal',
     '@internalremarks',
     '@override',
@@ -83,6 +84,7 @@ export class ApiDocumentation {
   public summary: MarkupElement[];
   public deprecatedMessage: MarkupBasicElement[];
   public remarks: MarkupElement[];
+  public examples: MarkupElement[][];
   public returnsMessage: MarkupBasicElement[];
   public parameters: { [name: string]: IAedocParameter; };
 
@@ -233,6 +235,7 @@ export class ApiDocumentation {
     this.returnsMessage = [];
     this.deprecatedMessage = [];
     this.remarks = [];
+    this.examples = [];
     this.incompleteLinks = [];
     this.incompleteInheritdocs = [];
     this.releaseTag = ReleaseTag.None;
@@ -262,6 +265,11 @@ export class ApiDocumentation {
             tokenizer.getToken();
             this._checkInheritDocStatus(token.tag);
             this.remarks = DocElementParser.parseAndNormalize(this, tokenizer);
+            break;
+          case '@example':
+            tokenizer.getToken();
+            this._checkInheritDocStatus(token.tag);
+            this.examples.push(DocElementParser.parseAndNormalize(this, tokenizer));
             break;
           case '@returns':
             tokenizer.getToken();

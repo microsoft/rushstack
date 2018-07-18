@@ -93,6 +93,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
       deprecatedMessage: astStructuredType.inheritedDeprecatedMessage || [],
       summary: astStructuredType.documentation.summary || [],
       remarks: astStructuredType.documentation.remarks || [],
+      examples: astStructuredType.documentation.examples || [],
       isBeta: astStructuredType.inheritedReleaseTag === ReleaseTag.Beta
     };
 
@@ -130,6 +131,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
       deprecatedMessage: astEnum.inheritedDeprecatedMessage || [],
       summary: astEnum.documentation.summary || [],
       remarks: astEnum.documentation.remarks || [],
+      examples: astEnum.documentation.examples || [],
       isBeta: astEnum.inheritedReleaseTag === ReleaseTag.Beta
     };
     refObject![astEnum.name] = enumNode;
@@ -156,6 +158,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
       deprecatedMessage: astEnumValue.inheritedDeprecatedMessage || [],
       summary: astEnumValue.documentation.summary || [],
       remarks: astEnumValue.documentation.remarks || [],
+      examples: astEnumValue.documentation.examples || [],
       isBeta: astEnumValue.inheritedReleaseTag === ReleaseTag.Beta
     };
   }
@@ -178,6 +181,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
       deprecatedMessage: astFunction.inheritedDeprecatedMessage || [],
       summary: astFunction.documentation.summary || [],
       remarks: astFunction.documentation.remarks || [],
+      examples: astFunction.documentation.examples || [],
       isBeta: astFunction.inheritedReleaseTag === ReleaseTag.Beta
     };
 
@@ -190,6 +194,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
     refObject!['name'] = astPackage.name;
     refObject!['summary'] = astPackage.documentation.summary;
     refObject!['remarks'] = astPackage.documentation.remarks;
+    refObject!['examples'] = astPackage.documentation.examples;
     /* tslint:enable:no-string-literal */
 
     const membersNode: Object = {};
@@ -215,6 +220,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
       deprecatedMessage: astNamespace.inheritedDeprecatedMessage || [],
       summary: astNamespace.documentation.summary || [],
       remarks: astNamespace.documentation.remarks || [],
+      examples: astNamespace.documentation.examples || [],
       isBeta: astNamespace.inheritedReleaseTag === ReleaseTag.Beta,
       exports: membersNode
     };
@@ -249,6 +255,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
       deprecatedMessage: astProperty.inheritedDeprecatedMessage || [],
       summary: astProperty.documentation.summary || [],
       remarks: astProperty.documentation.remarks || [],
+      examples: astProperty.documentation.examples || [],
       isBeta: astProperty.inheritedReleaseTag === ReleaseTag.Beta,
       isSealed: !!astProperty.documentation.isSealed,
       isVirtual: !!astProperty.documentation.isVirtual,
@@ -268,6 +275,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
       deprecatedMessage: astModuleVariable.inheritedDeprecatedMessage || [],
       summary: astModuleVariable.documentation.summary || [],
       remarks: astModuleVariable.documentation.remarks || [],
+      examples: astModuleVariable.documentation.examples || [],
       isBeta: astModuleVariable.inheritedReleaseTag === ReleaseTag.Beta
     };
 
@@ -287,7 +295,8 @@ export class ApiJsonGenerator extends AstItemVisitor {
         parameters: this._createParameters(astMethod),
         deprecatedMessage: astMethod.inheritedDeprecatedMessage || [],
         summary: astMethod.documentation.summary || [],
-        remarks: astMethod.documentation.remarks || []
+        remarks: astMethod.documentation.remarks || [],
+        examples: astMethod.documentation.examples || []
       };
     } else {
       const returnValueNode: IApiReturnValue = {
@@ -306,6 +315,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
         deprecatedMessage: astMethod.inheritedDeprecatedMessage || [],
         summary: astMethod.documentation.summary || [],
         remarks: astMethod.documentation.remarks || [],
+        examples: astMethod.documentation.examples || [],
         isBeta: astMethod.inheritedReleaseTag === ReleaseTag.Beta,
         isSealed: !!astMethod.documentation.isSealed,
         isVirtual: !!astMethod.documentation.isVirtual,
