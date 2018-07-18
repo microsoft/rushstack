@@ -92,17 +92,16 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     if (snippets) {
       delete this._snippets[nameWithoutPackage];
 
-      if (!yamlItem.remarks) {
-        yamlItem.remarks = '';
-      }
-
-      yamlItem.remarks += '\n\n#### Examples\n';
-      for (const snippet of snippets) {
-        if (snippet.search(/await/) === -1) {
-          yamlItem.remarks += '\n```javascript\n' + snippet + '\n```\n';
-        } else {
-          yamlItem.remarks += '\n```typescript\n' + snippet + '\n```\n';
+      if (yamlItem.remarks) {
+        yamlItem.remarks += this._generateSnippetText(snippets);
+      } else if (yamlItem.syntax && yamlItem.syntax.return) {
+        if (!yamlItem.syntax.return.description) {
+          yamlItem.syntax.return.description = '';
         }
+        yamlItem.syntax.return.description += this._generateSnippetText(snippets);
+      }else {
+        yamlItem.remarks = '';
+        yamlItem.remarks += this._generateSnippetText(snippets);
       }
     }
   }
@@ -144,6 +143,18 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
       while (x >= 0) {
         text = text.replace(/\\([^\\])/, '$1');
         x = text.indexOf('\\', x + 1);
+      }
+    }
+    return text;
+  }
+
+  private _generateSnippetText(snippets: string[]): string {
+    let text: string = '\n\n#### Examples\n';
+    for (const snippet of snippets) {
+      if (snippet.search(/await/) === -1) {
+        text += '\n```javascript\n' + snippet + '\n```\n';
+      } else {
+        text += '\n```typescript\n' + snippet + '\n```\n';
       }
     }
     return text;
