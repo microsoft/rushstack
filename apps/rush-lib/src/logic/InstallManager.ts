@@ -943,6 +943,10 @@ export class InstallManager {
     if (this._rushConfiguration.packageManager === 'npm') {
       args.push('--cache', this._rushConfiguration.npmCacheFolder);
       args.push('--tmp', this._rushConfiguration.npmTmpFolder);
+
+      if (collectLogFile) {
+        args.push('--verbose');
+      }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
       args.push('--store', this._rushConfiguration.pnpmStoreFolder);
 
