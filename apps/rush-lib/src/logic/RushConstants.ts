@@ -132,14 +132,4 @@ export namespace RushConstants {
    * before asynchronously deleting them.
    */
   export const rushRecyclerFolderName: string = 'rush-recycler';
-
-  /**
-   * Logfile that gets captured when using the --debug-package-manager flag
-   */
-  export const packageManagerLogFileName: string = 'package-manager.log';
-
-  /**
-   * Logfile that gets captured when using the --debug-package-manager flag
-   */
-  export const packageManagerErrorLogFileName: string = 'package-manager.err.log';
 }

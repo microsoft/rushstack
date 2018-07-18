@@ -3,7 +3,6 @@
 
 import * as glob from 'glob';
 import * as colors from 'colors';
-import * as child_process from 'child_process';
 import * as fetch from 'node-fetch';
 import * as http from 'http';
 import HttpsProxyAgent = require('https-proxy-agent');
@@ -777,38 +776,24 @@ export class InstallManager {
           console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
             + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
 
-          const childProcess: child_process.SpawnSyncReturns<Buffer> =
-            Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
-              installArgs,
-              this._rushConfiguration.commonTempFolder,
-              undefined,
-              false, () => {
-                if (this._rushConfiguration.packageManager === 'pnpm') {
-                  // If there is a failure in pnpm, it is possible that it left the
-                  // store in a bad state. Therefore, we should clean out the store
-                  // before attempting the install again.
+          Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
+            installArgs,
+            this._rushConfiguration.commonTempFolder,
+            undefined,
+            false, () => {
+              if (this._rushConfiguration.packageManager === 'pnpm') {
+                // If there is a failure in pnpm, it is possible that it left the
+                // store in a bad state. Therefore, we should clean out the store
+                // before attempting the install again.
 
-                  console.log(colors.yellow(`Deleting the "node_modules" folder`));
-                  this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
-                  console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-                  this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
+                console.log(colors.yellow(`Deleting the "node_modules" folder`));
+                this._commonTempFolderRecycler.moveFolder(commonNodeModulesFolder);
+                console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
+                this._commonTempFolderRecycler.moveFolder(this._rushConfiguration.pnpmStoreFolder);
 
-                  Utilities.createFolderWithRetry(commonNodeModulesFolder);
-                }
-              });
-
-          if (collectLogFile) {
-            const errorLogPath: string
-              = path.join(this._rushConfiguration.commonTempFolder, RushConstants.packageManagerErrorLogFileName);
-            const logPath: string
-              = path.join(this._rushConfiguration.commonTempFolder, RushConstants.packageManagerLogFileName);
-
-            console.log(`Writing package manager stdout logs to "${logPath}"`);
-            FileSystem.writeFile(logPath, childProcess.stdout, { ensureFolderExists: true });
-
-            console.log(`Writing package manager stderr logs to "${logPath}"`);
-            FileSystem.writeFile(errorLogPath, childProcess.stderr, { ensureFolderExists: true });
-          }
+                Utilities.createFolderWithRetry(commonNodeModulesFolder);
+              }
+            });
 
           if (this._rushConfiguration.packageManager === 'npm') {
 

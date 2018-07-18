@@ -42,7 +42,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
     });
     this._debugPackageManagerParameter = this.defineFlagParameter({
       parameterLongName: '--debug-package-manager',
-      description: 'Only available for PNPM. Activates verbose logging for the package manager.'
+      description: 'Activates verbose logging for the package manager. You will probably want to pipe'
+        + ' the output of Rush to a file when using this command.'
     });
   }
 

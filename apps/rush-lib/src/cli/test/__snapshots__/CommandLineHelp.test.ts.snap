@@ -215,8 +215,9 @@ Optional arguments:
                         stages individually or perform extra operations in 
                         between the two stages.
   --debug-package-manager
-                        Only available for PNPM. Activates verbose logging 
-                        for the package manager.
+                        Activates verbose logging for the package manager. 
+                        You will probably want to pipe the output of Rush to 
+                        a file when using this command.
 "
 `;
 
@@ -421,8 +422,9 @@ Optional arguments:
                         stages individually or perform extra operations in 
                         between the two stages.
   --debug-package-manager
-                        Only available for PNPM. Activates verbose logging 
-                        for the package manager.
+                        Activates verbose logging for the package manager. 
+                        You will probably want to pipe the output of Rush to 
+                        a file when using this command.
   --full                Normally \\"rush update\\" tries to preserve your 
                         existing installed versions and only makes the 
                         minimum updates needed to satisfy the package.json 
