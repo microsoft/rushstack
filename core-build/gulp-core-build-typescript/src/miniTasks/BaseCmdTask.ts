@@ -3,6 +3,7 @@
 
 import * as childProcess from 'child_process';
 import * as path from 'path';
+import * as os from 'os';
 
 import {
   JsonFile,
@@ -55,6 +56,32 @@ export interface IBaseTaskOptions<TTaskConfig> {
  * @alpha
  */
 export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extends GulpTask<TTaskConfig> {
+  private static __nodePath: string | undefined; // tslint:disable-line:variable-name
+  private static get _nodePath(): string | undefined {
+    if (!BaseCmdTask.__nodePath) {
+      try {
+        if (os.platform() === 'win32') {
+          // We're on Windows
+          const whereOutput: string = childProcess.execSync('where node', { stdio: [] }).toString();
+          const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
+          BaseCmdTask.__nodePath = lines[lines.length - 1];
+        } else {
+          // We aren't on Windows - assume we're on *NIX or Darwin
+          BaseCmdTask.__nodePath = childProcess.execSync('which node', { stdio: [] }).toString();
+        }
+      } catch (e) {
+        return undefined;
+      }
+
+      BaseCmdTask.__nodePath = BaseCmdTask.__nodePath.trim();
+      if (!FileSystem.exists(BaseCmdTask.__nodePath)) {
+        return undefined;
+      }
+    }
+
+    return BaseCmdTask.__nodePath;
+  }
+
   protected _packageName: string;
   protected _packageBinPath: string;
   protected _errorHasBeenLogged: boolean;
@@ -107,9 +134,15 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
     }
 
     return new Promise((resolve: () => void, reject: (error: Error) => void) => {
+      const nodePath: string | undefined = BaseCmdTask._nodePath;
+      if (!nodePath) {
+        reject(new Error('Unable to find node executable'));
+        return;
+      }
+
       // Invoke the tool and watch for log messages
       const spawnResult: childProcess.ChildProcess = childProcess.spawn(
-        'node',
+        nodePath,
         [binaryPath, ...this._getArgs()],
         {
           cwd: this._buildDirectory,

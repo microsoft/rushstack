@@ -1,5 +1,17 @@
 
 /**
+ * A class used to exposed events.
+ * @public
+ */
+export class SystemEvent {
+  /**
+   * Adds an handler for the event.
+   */
+  public addHandler(handler: ()=>void): void {
+  }
+}
+
+/**
  * This is an example class.
  *
  * @remarks
@@ -19,6 +31,23 @@ export class DocClass1 {
   public exampleFunction(x: number | string, y?: string): string | number {
     return x;
   }
+
+  /**
+   * This event is fired whenever the object is modified.
+   * @eventproperty
+   */
+  public readonly modifiedEvent: SystemEvent;
+
+  /**
+   * This event should have been marked as readonly.
+   * @eventproperty
+   */
+  public malformedEvent: SystemEvent;
+
+  /**
+   * This is a regular property that happens to use the SystemEvent type.
+   */
+  public regularProperty: SystemEvent;
 
   /**
    * An example with tables:

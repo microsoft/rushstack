@@ -512,6 +512,12 @@ export abstract class AstItem {
       }
     }
 
+    if (this.documentation.isEventProperty) {
+      if (this.kind !== AstItemKind.Property) {
+        this.reportError('The @eventProperty tag may only be applied to a property');
+      }
+    }
+
     if (this.documentation.isDocInheritedDeprecated && this.documentation.deprecatedMessage.length === 0) {
       this.reportError('The @inheritdoc target has been marked as @deprecated.  ' +
         'Add a @deprecated message here, or else remove the @inheritdoc relationship.');

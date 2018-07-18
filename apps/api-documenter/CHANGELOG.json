@@ -2,6 +2,50 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.0",
+      "tag": "@microsoft/api-documenter_v1.5.0",
+      "date": "Tue, 17 Jul 2018 16:02:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for the \"@eventproperty\" AEDoc tag, which indicates that a class/interface property should be documented as an event"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.9.1` to `5.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.49` to `4.3.50`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.4",
+      "tag": "@microsoft/api-documenter_v1.4.4",
+      "date": "Fri, 13 Jul 2018 19:04:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.48` to `4.3.49`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.3",
+      "tag": "@microsoft/api-documenter_v1.4.3",
+      "date": "Thu, 12 Jul 2018 16:03:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Changing Office's APIExtractor add-on to unescape characters in code blocks"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.2",
       "tag": "@microsoft/api-documenter_v1.4.2",
       "date": "Tue, 03 Jul 2018 21:03:31 GMT",

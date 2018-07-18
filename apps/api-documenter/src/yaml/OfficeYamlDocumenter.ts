@@ -68,6 +68,25 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
   protected onCustomizeYamlItem(yamlItem: IYamlItem): void { // override
     const nameWithoutPackage: string = yamlItem.uid.replace(/^[^.]+\./, '');
+    if (yamlItem.summary) {
+      yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
+      yamlItem.summary = this._fixBoldAndItalics(yamlItem.summary);
+      yamlItem.summary = this._fixCodeTicks(yamlItem.summary);
+    }
+    if (yamlItem.remarks) {
+      yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
+      yamlItem.remarks = this._fixBoldAndItalics(yamlItem.remarks);
+      yamlItem.remarks = this._fixCodeTicks(yamlItem.remarks);
+      yamlItem.remarks = this._fixEscapedCode(yamlItem.remarks);
+    }
+    if (yamlItem.syntax && yamlItem.syntax.parameters) {
+      yamlItem.syntax.parameters.forEach(part => {
+          if (part.description) {
+            part.description = this._fixCodeTicks(part.description);
+            part.description = this._fixBoldAndItalics(part.description);
+          }
+      });
+    }
 
     const snippets: string[] | undefined = this._snippets[nameWithoutPackage];
     if (snippets) {
@@ -85,26 +104,6 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
           yamlItem.remarks += '\n```typescript\n' + snippet + '\n```\n';
         }
       }
-    }
-
-    if (yamlItem.summary) {
-      yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
-      yamlItem.summary = this._fixBoldAndItalics(yamlItem.summary);
-      yamlItem.summary = this._fixCodeTicks(yamlItem.summary);
-    }
-    if (yamlItem.remarks) {
-      yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
-      yamlItem.remarks = this._fixBoldAndItalics(yamlItem.remarks);
-      yamlItem.remarks = this._fixCodeTicks(yamlItem.remarks);
-      yamlItem.remarks = this._fixCodeArrows(yamlItem.remarks);
-    }
-    if (yamlItem.syntax && yamlItem.syntax.parameters) {
-      yamlItem.syntax.parameters.forEach(part => {
-          if (part.description) {
-            part.description = this._fixCodeTicks(part.description);
-            part.description = this._fixBoldAndItalics(part.description);
-          }
-      });
     }
   }
 
@@ -137,7 +136,16 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     return Text.replaceAll(text, '\\`', '`');
   }
 
-  private _fixCodeArrows(text: string): string {
-    return Text.replaceAll(text, '=&gt;', '=>');
+  private _fixEscapedCode(text: string): string {
+    const backtickIndex: number = text.indexOf('`');
+    if (text.indexOf('`', backtickIndex) > 0) {
+      text = Text.replaceAll(text, '=&gt;', '=>');
+      let x: number = text.indexOf('\\', backtickIndex);
+      while (x >= 0) {
+        text = text.replace(/\\([^\\])/, '$1');
+        x = text.indexOf('\\', x + 1);
+      }
+    }
+    return text;
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "1.7.67",
+  "version": "1.7.69",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
@@ -19,6 +19,6 @@
     "@types/webpack-env": "1.13.0",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "4.3.48"
+    "@microsoft/node-library-build": "4.3.50"
   }
 }

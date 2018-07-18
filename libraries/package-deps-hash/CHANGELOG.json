@@ -2,6 +2,42 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.2.51",
+      "tag": "@microsoft/package-deps-hash_v2.2.51",
+      "date": "Tue, 17 Jul 2018 16:02:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.49` to `4.3.50`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.50",
+      "tag": "@microsoft/package-deps-hash_v2.2.50",
+      "date": "Fri, 13 Jul 2018 19:04:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.48` to `4.3.49`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.49",
+      "tag": "@microsoft/package-deps-hash_v2.2.49",
+      "date": "Wed, 11 Jul 2018 21:03:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where package-deps-hash did not correctly handle staged file renames."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.48",
       "tag": "@microsoft/package-deps-hash_v2.2.48",
       "date": "Tue, 03 Jul 2018 21:03:31 GMT",

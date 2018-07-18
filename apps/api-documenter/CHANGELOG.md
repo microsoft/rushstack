@@ -1,6 +1,25 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 03 Jul 2018 21:03:31 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Jul 2018 16:02:52 GMT and should not be manually modified.
+
+## 1.5.0
+Tue, 17 Jul 2018 16:02:52 GMT
+
+### Minor changes
+
+- Add support for the "@eventproperty" AEDoc tag, which indicates that a class/interface property should be documented as an event
+
+## 1.4.4
+Fri, 13 Jul 2018 19:04:50 GMT
+
+*Version update only*
+
+## 1.4.3
+Thu, 12 Jul 2018 16:03:26 GMT
+
+### Patches
+
+- Changing Office's APIExtractor add-on to unescape characters in code blocks
 
 ## 1.4.2
 Tue, 03 Jul 2018 21:03:31 GMT

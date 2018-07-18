@@ -12,6 +12,9 @@ items:
     type: package
     children:
       - api-extractor-test-05.DocClass1
+      - api-extractor-test-05.SystemEvent
 references:
   - uid: api-extractor-test-05.DocClass1
     name: DocClass1
+  - uid: api-extractor-test-05.SystemEvent
+    name: SystemEvent

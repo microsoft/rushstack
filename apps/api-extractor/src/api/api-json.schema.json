@@ -489,6 +489,10 @@
           "description": "For a class member, whether it is static",
           "type": "boolean"
         },
+        "isEventProperty": {
+          "description": "Whether the item was marked as \"@eventproperty\", which indicates an event object that event handlers can be attached to",
+          "type": "boolean"
+        },
         "type": {
           "description": "The data type of this property",
           "type": "string"
@@ -528,7 +532,7 @@
         }
       },
       "additionalProperties": false,
-      "required": [ "kind", "isOptional", "isReadOnly", "isStatic", "type", "summary", "isBeta" ]
+      "required": [ "kind", "isOptional", "isReadOnly", "isStatic", "isEventProperty", "type", "summary", "isBeta" ]
     },
 
     //---------------------------------------------------------------------------------------------
