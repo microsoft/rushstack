@@ -5,7 +5,7 @@ import * as child_process from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 
-import { FileSystem } from './FileSystem';
+import { FileSystem, PosixModeBits } from './FileSystem';
 
 /**
  * Typings for one of the streams inside IExecutableSpawnSyncOptions.stdio.
@@ -69,6 +69,14 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
   encoding?: string | BufferEncoding;
 }
 
+// Common environmental state used by Executable members
+interface IExecutableContext {
+  currentWorkingDirectory: string;
+  environment: NodeJS.ProcessEnv;
+  // For Windows, the parsed PATHEXT environment variable
+  windowsExecutableExtensions: string[];
+}
+
 /**
  * The Executable class provides a safe, portable, recommended solution for tools that need
  * to launch child processes.
@@ -115,17 +123,19 @@ export class Executable {
     child_process.SpawnSyncReturns<string> {
 
     if (!options) {
-      options = {};
+      options = { };
     }
 
-    const resolvedPath: string | undefined = Executable.tryResolve(command);
+    const context: IExecutableContext = Executable._getExecutableContext(options);
+
+    const resolvedPath: string | undefined = Executable._tryResolve(command, options, context);
     if (!resolvedPath) {
       throw new Error(`The executable file was not found: "${command}"`);
     }
 
     const spawnOptions: child_process.SpawnSyncOptionsWithStringEncoding = {
-      cwd: options.currentWorkingDirectory,
-      env: options.environment,
+      cwd: context.currentWorkingDirectory,
+      env: context.environment,
       input: options.input,
       stdio: options.stdio,
       timeout: options.timeoutMs,
@@ -166,10 +176,11 @@ export class Executable {
         case '.BAT':
         case '.CMD':
           {
+            Executable._validateArgsForWindowsShell(args);
+
             // These file types must be invoked via the Windows shell
-            // tslint:disable-next-line:no-string-literal
-            let shellPath: string | undefined = environment['COMSPEC'];
-            if (!shellPath || !Executable._canExecute(shellPath)) {
+            let shellPath: string | undefined = environment.COMSPEC;
+            if (!shellPath || !Executable._canExecute(shellPath, context)) {
               shellPath = Executable.tryResolve('cmd.exe');
             }
             if (!shellPath) {
@@ -216,53 +227,38 @@ export class Executable {
    * @returns the absolute path of the executable, or undefined if it was not found
    */
   public static tryResolve(name: string, options?: IExecutableResolveOptions): string | undefined {
-    const environment: NodeJS.ProcessEnv = options && options.environment
-      || process.env;
-    const currentWorkingDirectory: string = options && path.resolve(options.currentWorkingDirectory)
-      || process.cwd();
+    return Executable._tryResolve(name, options || { }, Executable._getExecutableContext(options));
+  }
+
+  private static _tryResolve(name: string, options: IExecutableResolveOptions,
+    context: IExecutableContext): string | undefined {
 
     const hasPathSeparators: boolean = name.indexOf('/') >= 0
       || (os.platform() === 'win32' && name.indexOf('\\') >= 0);
-
-    // File extensions that will be appended automatically on Windows
-    const windowsDefaultExtensions: string[] = [];
-
-    // tslint:disable-next-line:no-string-literal
-    const pathExtVariable: string = environment['PATHEXT'] || '';
-    for (const splitValue of pathExtVariable.split(';')) {
-      const trimmed: string = splitValue.trim().toLowerCase();
-      // Ignore malformed extensions
-      if (/^\.[a-z0-9\.]*[a-z0-9]$/i.test(trimmed)) {
-        // Don't add the same extension twice
-        if (windowsDefaultExtensions.indexOf(trimmed) < 0) {
-          windowsDefaultExtensions.push(trimmed);
-        }
-      }
-    }
 
     const pathsToSearch: string[] = [];
 
     // Are there any path separators?
     if (hasPathSeparators) {
       // If so, then only search the resolved path
-      pathsToSearch.push(path.resolve(currentWorkingDirectory, name));
+      pathsToSearch.push(path.resolve(context.currentWorkingDirectory, name));
     } else {
       // Otherwise if it's a bare name, then try everything in the shell PATH
-      pathsToSearch.push(...Executable._getSearchFolders(environment, currentWorkingDirectory));
+      pathsToSearch.push(...Executable._getSearchFolders(context));
     }
 
     for (const pathToSearch of pathsToSearch) {
       const resolvedPath: string = path.join(pathToSearch, name);
 
-      if (Executable._canExecute(resolvedPath)) {
+      if (Executable._canExecute(resolvedPath, context)) {
         return resolvedPath;
       }
 
       // Try the default file extensions
-      for (const shellExtension of windowsDefaultExtensions) {
+      for (const shellExtension of context.windowsExecutableExtensions) {
         const resolvedNameWithExtension: string = resolvedPath + shellExtension;
 
-        if (Executable._canExecute(resolvedNameWithExtension)) {
+        if (Executable._canExecute(resolvedNameWithExtension, context)) {
           return resolvedNameWithExtension;
         }
       }
@@ -276,19 +272,55 @@ export class Executable {
    * whether a match should be skipped or not.  If it returns true, this does not
    * guarantee that the file can be successfully executed.
    */
-  private static _canExecute(filePath: string): boolean {
-    return FileSystem.exists(filePath);
+  private static _canExecute(filePath: string, context: IExecutableContext): boolean {
+    if (!FileSystem.exists(filePath)) {
+      return false;
+    }
+
+    if (os.platform() === 'win32') {
+      // Does the file have an executable file extension?
+      const fileExtension: string = path.extname(filePath);
+
+      let matchFound: boolean = false;
+      for (const executableExtension of context.windowsExecutableExtensions) {
+        if (fileExtension.localeCompare(executableExtension) === 0) {
+          matchFound = true;
+          break;
+        }
+      }
+
+      if (fileExtension.localeCompare('.js') === 0) {
+        // The .js extension is special and always allowed since this is NodeJS.
+        // However, that file extension must be specified explitily unless it was added to PATHEXT
+        // (which is not usually the case).
+        matchFound = true;
+      }
+
+      if (!matchFound) {
+        return false;
+      }
+    } else {
+      // For Unix, check whether any of the POSIX execute bits are set
+      try {
+        // tslint:disable-next-line:no-bitwise
+        if ((FileSystem.getPosixModeBits(filePath) & PosixModeBits.AllExecute) === 0) {
+          return false; // not executable
+        }
+      } catch (error) {
+        // If we have trouble accessing the file, ignore the error and consider it "not executable"
+        // since that's what a shell would do
+      }
+    }
+    return true;
   }
 
   /**
    * Returns the list of folders where we will search for an executable,
    * based on the PATH environment variable.
    */
-  private static _getSearchFolders(environment: NodeJS.ProcessEnv,
-    currentWorkingDirectory: string): string[] {
+  private static _getSearchFolders(context: IExecutableContext): string[] {
 
-    // tslint:disable-next-line:no-string-literal
-    const pathList: string = environment['PATH'] || '';
+    const pathList: string = context.environment.PATH || '';
 
     const folders: string[] = [];
 
@@ -297,17 +329,17 @@ export class Executable {
 
     if (os.platform() === 'win32') {
       // On Window, the current directory is always tried first
-      folders.push(currentWorkingDirectory);
-      seenPaths.add(currentWorkingDirectory);
+      folders.push(context.currentWorkingDirectory);
+      seenPaths.add(context.currentWorkingDirectory);
     }
 
-    for (const splitPath of pathList.split(';')) {
+    for (const splitPath of pathList.split(path.delimiter)) {
       const trimmedPath: string = splitPath.trim();
       if (trimmedPath !== '') {
         if (!seenPaths.has(trimmedPath)) {
           // Note that PATH is allowed to contain relative paths, which will be resolved
           // relative to the current working directory.
-          const resolvedPath: string = path.resolve(currentWorkingDirectory, trimmedPath);
+          const resolvedPath: string = path.resolve(context.currentWorkingDirectory, trimmedPath);
 
           if (!seenPaths.has(resolvedPath)) {
             if (FileSystem.exists(resolvedPath)) {
@@ -323,5 +355,62 @@ export class Executable {
     }
 
     return folders;
+  }
+
+  private static _getExecutableContext(options: IExecutableResolveOptions | undefined): IExecutableContext {
+    if (!options) {
+      options = { };
+    }
+
+    const environment: NodeJS.ProcessEnv = options.environment || process.env;
+
+    let currentWorkingDirectory: string;
+    if (options.currentWorkingDirectory) {
+      currentWorkingDirectory = path.resolve(options.currentWorkingDirectory);
+    } else {
+      currentWorkingDirectory = process.cwd();
+    }
+
+    const windowsExecutableExtensions: string[] = [];
+
+    if (os.platform() === 'win32') {
+      const pathExtVariable: string = environment.PATHEXT || '';
+      for (const splitValue of pathExtVariable.split(';')) {
+        const trimmed: string = splitValue.trim().toLowerCase();
+        // Ignore malformed extensions
+        if (/^\.[a-z0-9\.]*[a-z0-9]$/i.test(trimmed)) {
+          // Don't add the same extension twice
+          if (windowsExecutableExtensions.indexOf(trimmed) < 0) {
+            windowsExecutableExtensions.push(trimmed);
+          }
+        }
+      }
+    }
+
+    return {
+      environment,
+      currentWorkingDirectory,
+      windowsExecutableExtensions
+    };
+  }
+
+  /**
+   * Checks for characters that are unsafe to pass to a Windows batch file
+   * due to the way that cmd.exe implements escaping.
+   */
+  private static _validateArgsForWindowsShell(args: string[]): void {
+    const specialCharRegExp: RegExp = /[%\^&|<>\r\n]/g;
+
+    for (const arg of args) {
+      const match: RegExpMatchArray | null = arg.match(specialCharRegExp);
+      if (match) {
+        // NOTE: It is possible to escape some of these characters by prefixing them
+        // with a caret (^), however npm-binary-wrapper.cmd the arguments to NodeJS
+        // using "%*" which reevaluates them after they were already unescaped.
+        // There
+        throw new Error(`The command line argument ${JSON.stringify(arg)} contains a`
+          + ` special character ${JSON.stringify(match[0])} that cannot be escaped for the Windows shell`);
+      }
+    }
   }
 }
