@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Upgrading mocha-related pack ages to remove dependency on a version of \"growl\" with NSP warnings.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-karma",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
