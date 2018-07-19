@@ -6,31 +6,76 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 
 import { Executable, IExecutableSpawnSyncOptions } from '../Executable';
-import { FileSystem } from '../FileSystem';
+import { FileSystem, PosixModeBits } from '../FileSystem';
 import { Text } from '../Text';
+
+// The PosixModeBits are intended to be used with bitwise operations.
+// tslint:disable:no-bitwise
 
 // Use src/test/test-data instead of lib/test/test-data
 const executableFolder: string = path.join(__dirname, '..', '..', 'src', 'test', 'test-data', 'executable');
-expect(FileSystem.exists(executableFolder)).toEqual(true);
 
-const environment: NodeJS.ProcessEnv = {
-  PATH: [
-    path.join(executableFolder, 'skipped'),
-    path.join(executableFolder, 'success'),
-    path.join(executableFolder, 'fail'),
-    path.dirname(process.execPath) // the folder where node.exe can be found
-  ].join(path.delimiter),
+let environment: NodeJS.ProcessEnv;
 
-  PATHEXT: '.COM;.EXE;.BAT;.CMD;.VBS',
+if (os.platform() === 'win32') {
+  environment = {
+    PATH: [
+      path.join(executableFolder, 'skipped'),
+      path.join(executableFolder, 'success'),
+      path.join(executableFolder, 'fail'),
+      path.dirname(process.execPath) // the folder where node.exe can be found
+    ].join(path.delimiter),
 
-  TEST_VAR: '123'
-};
+    PATHEXT: '.COM;.EXE;.BAT;.CMD;.VBS',
+
+    TEST_VAR: '123'
+  };
+} else {
+  environment = {
+    PATH: [
+      path.join(executableFolder, 'skipped'),
+      path.join(executableFolder, 'success'),
+      path.join(executableFolder, 'fail'),
+      path.dirname(process.execPath), // the folder where node.exe can be found
+      '/usr/local/bin',
+      '/usr/bin',
+      '/bin'
+    ].join(path.delimiter),
+
+    TEST_VAR: '123'
+  };
+}
 
 const options: IExecutableSpawnSyncOptions = {
   environment: environment,
   currentWorkingDirectory: executableFolder,
   stdio: 'pipe'
 };
+
+beforeAll(() => {
+  // Make sure the test folder exists where we expect it
+  expect(FileSystem.exists(executableFolder)).toEqual(true);
+
+  // Git's core.filemode setting wrongly defaults to true on Windows.  This design flaw makes
+  // it completely impractical to store POSIX file permissions in a cross-platform Git repo.
+  // So instead we set them before the test runs, and then revert them after the test completes.
+  if (os.platform() !== 'win32') {
+    FileSystem.changePosixModeBits(path.join(executableFolder, 'success', 'npm-binary-wrapper'),
+      PosixModeBits.AllRead | PosixModeBits.AllWrite | PosixModeBits.AllExecute);
+    FileSystem.changePosixModeBits(path.join(executableFolder, 'success', 'bash-script.sh'),
+      PosixModeBits.AllRead | PosixModeBits.AllWrite | PosixModeBits.AllExecute);
+  }
+});
+
+afterAll(() => {
+  // Revert the permissions to the defaults
+  if (os.platform() !== 'win32') {
+    FileSystem.changePosixModeBits(path.join(executableFolder, 'success', 'npm-binary-wrapper'),
+      PosixModeBits.AllRead | PosixModeBits.AllWrite);
+    FileSystem.changePosixModeBits(path.join(executableFolder, 'success', 'bash-script.sh'),
+      PosixModeBits.AllRead | PosixModeBits.AllWrite);
+  }
+});
 
 test('Executable.tryResolve()', () => {
   const resolved: string | undefined = Executable.tryResolve('npm-binary-wrapper', options);
@@ -52,7 +97,7 @@ test('Executable.tryResolve()', () => {
 
 function executeNpmBinaryWrapper(args: string[]): string[] {
   const result: child_process.SpawnSyncReturns<string>
-  = Executable.spawnSync('npm-binary-wrapper', args, options);
+    = Executable.spawnSync('npm-binary-wrapper', args, options);
   expect(result.error).toBeUndefined();
 
   expect(result.stderr).toBeDefined();
@@ -64,9 +109,11 @@ function executeNpmBinaryWrapper(args: string[]): string[] {
   let lineIndex: number = 0;
   if (os.platform() === 'win32') {
     expect(outputLines[lineIndex++]).toEqual('Executing npm-binary-wrapper.cmd with args:');
-    // console.log('npm-binary-wrapper.cmd ARGS: ' + outputLines[lineIndex]);
-    ++lineIndex;
+  } else {
+    expect(outputLines[lineIndex++]).toEqual('Executing npm-binary-wrapper with args:');
   }
+  // console.log('npm-binary-wrapper.cmd ARGS: ' + outputLines[lineIndex]);
+  ++lineIndex;  // skip npm-binary-wrapper's args
 
   expect(outputLines[lineIndex++]).toEqual('Executing javascript-file.js with args:');
 
@@ -115,12 +162,14 @@ test('Executable.spawnSync("npm-binary-wrapper") edge cases 2', () => {
 });
 
 test('Executable.spawnSync("npm-binary-wrapper") bad characters', () => {
-  expect(() => { executeNpmBinaryWrapper(['abc%123']); })
-    .toThrowError('The command line argument "abc%123" contains a special character "%"'
-      + ' that cannot be escaped for the Windows shell');
-  expect(() => { executeNpmBinaryWrapper(['abc<>123']); })
-    .toThrowError('The command line argument "abc<>123" contains a special character "<"'
-      + ' that cannot be escaped for the Windows shell');
+  if (os.platform() === 'win32') {
+    expect(() => { executeNpmBinaryWrapper(['abc%123']); })
+      .toThrowError('The command line argument "abc%123" contains a special character "%"'
+        + ' that cannot be escaped for the Windows shell');
+    expect(() => { executeNpmBinaryWrapper(['abc<>123']); })
+      .toThrowError('The command line argument "abc<>123" contains a special character "<"'
+        + ' that cannot be escaped for the Windows shell');
+  }
 });
 
 test('Executable.spawnSync("javascript-file.js")', () => {
@@ -135,7 +184,7 @@ test('Executable.spawnSync("javascript-file.js")', () => {
   ];
 
   const result: child_process.SpawnSyncReturns<string>
-  = Executable.spawnSync('javascript-file.js', args, options);
+    = Executable.spawnSync('javascript-file.js', args, options);
   expect(result.error).toBeUndefined();
 
   expect(result.stderr).toBeDefined();

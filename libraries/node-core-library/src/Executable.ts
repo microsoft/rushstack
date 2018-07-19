@@ -162,13 +162,22 @@ export class Executable {
     // http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/
     // http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
 
-    if (os.platform() === 'win32') {
-      const environment: NodeJS.ProcessEnv = options && options.environment
-        || process.env;
+    const environment: NodeJS.ProcessEnv = options && options.environment
+      || process.env;
+    const fileExtension: string = path.extname(resolvedPath);
 
+    if (fileExtension.toUpperCase() === '.JS') {
+      // Inherit the parent's node.exe
+      const nodePath: string = process.execPath;
+      const nodeArgs: string[] = [];
+      nodeArgs.push(resolvedPath);
+      nodeArgs.push(...args);
+      return child_process.spawnSync(nodePath, nodeArgs, spawnOptions);
+    }
+
+    if (os.platform() === 'win32') {
       // Do we need a custom handler for this file type?
-      const extension: string = path.extname(resolvedPath);
-      switch (extension.toUpperCase()) {
+      switch (fileExtension.toUpperCase()) {
         case '.EXE':
         case '.COM':
           // okay to execute directly
@@ -196,15 +205,6 @@ export class Executable {
             shellArgs.push(...args);
 
             return child_process.spawnSync(shellPath, shellArgs, spawnOptions);
-          }
-        case '.JS':
-          {
-            // Inherit the parent's node.exe
-            const nodePath: string = process.execPath;
-            const nodeArgs: string[] = [];
-            nodeArgs.push(resolvedPath);
-            nodeArgs.push(...args);
-            return child_process.spawnSync(nodePath, nodeArgs, spawnOptions);
           }
         default:
           throw new Error(`Cannot execute "${path.basename(resolvedPath)}" because the file type is not supported`);
@@ -277,10 +277,10 @@ export class Executable {
       return false;
     }
 
+    const fileExtension: string = path.extname(filePath);
+
     if (os.platform() === 'win32') {
       // Does the file have an executable file extension?
-      const fileExtension: string = path.extname(filePath);
-
       let matchFound: boolean = false;
       for (const executableExtension of context.windowsExecutableExtensions) {
         if (fileExtension.localeCompare(executableExtension) === 0) {
@@ -300,15 +300,18 @@ export class Executable {
         return false;
       }
     } else {
-      // For Unix, check whether any of the POSIX execute bits are set
-      try {
-        // tslint:disable-next-line:no-bitwise
-        if ((FileSystem.getPosixModeBits(filePath) & PosixModeBits.AllExecute) === 0) {
-          return false; // not executable
+      // For Unix, check whether any of the POSIX execute bits are set, but don't
+      // require this for JavaSCript scripts (since this is NodeJS)
+      if (fileExtension.localeCompare('.js') !== 0) {
+        try {
+          // tslint:disable-next-line:no-bitwise
+          if ((FileSystem.getPosixModeBits(filePath) & PosixModeBits.AllExecute) === 0) {
+            return false; // not executable
+          }
+        } catch (error) {
+          // If we have trouble accessing the file, ignore the error and consider it "not executable"
+          // since that's what a shell would do
         }
-      } catch (error) {
-        // If we have trouble accessing the file, ignore the error and consider it "not executable"
-        // since that's what a shell would do
       }
     }
     return true;
