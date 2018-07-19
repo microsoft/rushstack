@@ -15,7 +15,7 @@
   "dependencies": {},
   "devDependencies": {
     "@types/chai": "3.4.34",
-    "@types/mocha": "2.2.38",
+    "@types/mocha": "5.2.5",
     "@types/webpack-env": "1.13.0",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
