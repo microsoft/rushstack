@@ -99,7 +99,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
           yamlItem.syntax.return.description = '';
         }
         yamlItem.syntax.return.description += this._generateSnippetText(snippets);
-      }else {
+      } else {
         yamlItem.remarks = '';
         yamlItem.remarks += this._generateSnippetText(snippets);
       }
