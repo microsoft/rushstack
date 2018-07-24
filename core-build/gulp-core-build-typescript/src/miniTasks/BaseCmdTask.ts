@@ -66,7 +66,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
           const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
 
           // take the first result, see https://github.com/Microsoft/web-build-tools/issues/759
-          BaseCmdTask.__nodePath = lines[lines.length];
+          BaseCmdTask.__nodePath = lines[0];
         } else {
           // We aren't on Windows - assume we're on *NIX or Darwin
           BaseCmdTask.__nodePath = childProcess.execSync('which node', { stdio: [] }).toString();
