@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "4.6.0",
+      "tag": "@microsoft/gulp-core-build-karma_v4.6.0",
+      "date": "Fri, 20 Jul 2018 16:04:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrading mocha-related pack ages to remove dependency on a version of \"growl\" with NSP warnings."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.5.7",
       "tag": "@microsoft/gulp-core-build-karma_v4.5.7",
       "date": "Tue, 03 Jul 2018 21:03:31 GMT",

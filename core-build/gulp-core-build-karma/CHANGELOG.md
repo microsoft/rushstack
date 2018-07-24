@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-karma
 
-This log was last generated on Tue, 03 Jul 2018 21:03:31 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Jul 2018 16:04:52 GMT and should not be manually modified.
+
+## 4.6.0
+Fri, 20 Jul 2018 16:04:52 GMT
+
+### Minor changes
+
+- Upgrading mocha-related pack ages to remove dependency on a version of "growl" with NSP warnings.
 
 ## 4.5.7
 Tue, 03 Jul 2018 21:03:31 GMT

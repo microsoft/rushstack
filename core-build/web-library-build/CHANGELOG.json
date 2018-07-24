@@ -2,6 +2,21 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "4.4.57",
+      "tag": "@microsoft/web-library-build_v4.4.57",
+      "date": "Fri, 20 Jul 2018 16:04:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.5.7` to `4.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.3.30` to `4.3.31`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.56",
       "tag": "@microsoft/web-library-build_v4.4.56",
       "date": "Tue, 17 Jul 2018 16:02:52 GMT",
