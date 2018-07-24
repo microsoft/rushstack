@@ -125,6 +125,9 @@ export function getNpmPath(): string {
         // We're on Windows
         const whereOutput: string = childProcess.execSync('where npm', { stdio: [] }).toString();
         const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
+
+        // take the last result, we are looking for a .cmd command
+        // see https://github.com/Microsoft/web-build-tools/issues/759
         _npmPath = lines[lines.length - 1];
       } else {
         // We aren't on Windows - assume we're on *NIX or Darwin
