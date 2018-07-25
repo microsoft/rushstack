@@ -2,6 +2,23 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "4.4.0",
+      "tag": "@microsoft/node-library-build_v4.4.0",
+      "date": "Fri, 20 Jul 2018 16:04:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrading mocha-related pack ages to remove dependency on a version of \"growl\" with NSP warnings."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.3.31` to `3.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.50",
       "tag": "@microsoft/node-library-build_v4.3.50",
       "date": "Tue, 17 Jul 2018 16:02:52 GMT",

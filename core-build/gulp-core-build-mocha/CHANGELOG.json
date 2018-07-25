@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.4.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.4.0",
+      "date": "Fri, 20 Jul 2018 16:04:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrading mocha-related pack ages to remove dependency on a version of \"growl\" with NSP warnings."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.31",
       "tag": "@microsoft/gulp-core-build-mocha_v3.3.31",
       "date": "Tue, 03 Jul 2018 21:03:31 GMT",
