@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.10.4",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.10.4",
+      "date": "Wed, 25 Jul 2018 21:02:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the TscTask and TslintTasks where invoking the wrong version of Node.js"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.10.3",
       "tag": "@microsoft/gulp-core-build-typescript_v4.10.3",
       "date": "Tue, 17 Jul 2018 16:02:52 GMT",
