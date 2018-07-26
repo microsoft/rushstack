@@ -8,12 +8,14 @@ import {
 } from '@microsoft/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
+import * as typescript from 'typescript';
+import * as decomment from 'decomment';
 
 import {
   BaseCmdTask,
   IBaseCmdTaskConfig
 } from './BaseCmdTask';
-import * as decomment from 'decomment';
+import { TsParseConfigHost } from './TsParseConfigHost';
 
 /**
  * @public
@@ -25,10 +27,10 @@ export interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
   staticMatch?: string[];
 
   /**
-   * Removes comments from all generated `.js` files in the specified folders. Will **not** remove comments from
-   * generated `.d.ts` files. Defaults to [].
+   * Removes comments from all generated `.js` files in the TSConfig outDir. Will **not** remove comments from
+   * generated `.d.ts` files. Defaults to false.
    */
-  removeCommentsFromJavaScriptInFolders?: string[];
+  removeCommentsFromJavaScript?: boolean;
 }
 
 /**
@@ -45,7 +47,7 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
             'src/**/*.json',
             'src/**/*.jsx'
           ],
-          removeCommentsFromJavaScriptInFolders: []
+          removeCommentsFromJavaScript: false
         },
         packageName: 'typescript',
         packageBinPath: path.join('bin', 'tsc')
@@ -114,11 +116,8 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
 
     let buildPromise: Promise<void> = Promise.all(promises).then(() => { /* collapse void[] to void */ });
 
-    if (
-      this.taskConfig.removeCommentsFromJavaScriptInFolders &&
-      this.taskConfig.removeCommentsFromJavaScriptInFolders.length > 0
-    ) {
-      buildPromise = buildPromise.then(() => this._removeComments());
+    if (this.taskConfig.removeCommentsFromJavaScript === true) {
+      buildPromise = buildPromise.then(() => this._removeComments(this._getArgs()));
     }
 
     return buildPromise.then(() => {
@@ -144,14 +143,27 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
     }
   }
 
-  private _removeComments(): Promise<void> {
-    return Promise.all((this.taskConfig.removeCommentsFromJavaScriptInFolders || []).map((folder) => {
-      return new Promise((resolve: () => void, reject: (error: Error) => void) => {
-        const resolvedFolder: string = path.isAbsolute(folder)
-          ? folder
-          : path.resolve(this.buildConfig.rootPath, folder);
+  private _removeComments(commandLineArgs: string[]): Promise<void> {
+    const configFilePath: string | undefined = typescript.findConfigFile(this.buildConfig.rootPath, FileSystem.exists);
+    if (!configFilePath) {
+      return Promise.reject(new Error('Unable to resolve tsconfig file to determine outDir.'));
+    }
 
-        glob(path.join(globEscape(resolvedFolder), '**', '*.js'), (error: Error | undefined, matches: string[]) => {
+    const commandLine: typescript.ParsedCommandLine = typescript.parseCommandLine(commandLineArgs);
+    const tsConfig: typescript.ParsedCommandLine = typescript.parseJsonConfigFileContent(
+      JsonFile.load(configFilePath),
+      new TsParseConfigHost(),
+      path.dirname(configFilePath),
+      commandLine.options
+    );
+    if (!tsConfig || !tsConfig.options.outDir) {
+      return Promise.reject('Unable to determine outDir from TypesScript configuration.');
+    }
+
+    return new Promise((resolve: () => void, reject: (error: Error) => void) => {
+      glob(
+        path.join(globEscape(tsConfig.options.outDir), '**', '*.js'),
+        (error: Error | undefined, matches: string[]) => {
           if (error) {
             reject(error);
           } else {
@@ -169,8 +181,8 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
 
             resolve();
           }
-        });
-      });
-    })).then(() => { /* collapse void[] to void */ });
+        }
+      );
+    });
   }
 }
