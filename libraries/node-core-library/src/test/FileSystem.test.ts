@@ -7,18 +7,18 @@ import { FileSystem, PosixModeBits } from '../FileSystem';
 // tslint:disable:no-bitwise
 
 test('PosixModeBits tests', () => {
-  let mode: number = PosixModeBits.AllRead | PosixModeBits.AllWrite;
+  let modeBits: number = PosixModeBits.AllRead | PosixModeBits.AllWrite;
 
-  expect(FileSystem.formatPosixModeBits(mode)).toEqual('-rw-rw-rw-');
+  expect(FileSystem.formatPosixModeBits(modeBits)).toEqual('-rw-rw-rw-');
 
-  mode |= PosixModeBits.GroupExecute;
-  expect(FileSystem.formatPosixModeBits(mode)).toEqual('-rw-rwxrw-');
-
-  // Add the group execute bit
-  mode |= PosixModeBits.OthersExecute;
-  expect(FileSystem.formatPosixModeBits(mode)).toEqual('-rw-rwxrwx');
+  modeBits |= PosixModeBits.GroupExecute;
+  expect(FileSystem.formatPosixModeBits(modeBits)).toEqual('-rw-rwxrw-');
 
   // Add the group execute bit
-  mode &= ~PosixModeBits.AllWrite;
-  expect(FileSystem.formatPosixModeBits(mode)).toEqual('-r--r-xr-x');
+  modeBits |= PosixModeBits.OthersExecute;
+  expect(FileSystem.formatPosixModeBits(modeBits)).toEqual('-rw-rwxrwx');
+
+  // Add the group execute bit
+  modeBits &= ~PosixModeBits.AllWrite;
+  expect(FileSystem.formatPosixModeBits(modeBits)).toEqual('-r--r-xr-x');
 });

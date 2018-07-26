@@ -283,7 +283,7 @@ export class FileSystem {
    * Changes the permissions (i.e. file mode bits) for a filesystem object.
    * Behind the scenes it uses `fs.chmodSync()`.
    * @param path - The absolute or relative path to the object that should be updated.
-   * @param modeBits - UNIX-style file mode bits (e.g. 777 or 666 etc)
+   * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
   public static changePosixModeBits(path: string, mode: PosixModeBits): void {
     fs.chmodSync(path, mode);
@@ -293,7 +293,6 @@ export class FileSystem {
    * Retrieves the permissions (i.e. file mode bits) for a filesystem object.
    * Behind the scenes it uses `fs.chmodSync()`.
    * @param path - The absolute or relative path to the object that should be updated.
-   * @param mode - UNIX-style file mode bits (e.g. 777 or 666 etc)
    */
   public static getPosixModeBits(path: string): PosixModeBits {
     return FileSystem.getStatistics(path).mode;
@@ -304,21 +303,22 @@ export class FileSystem {
    * would be displayed by the POSIX command "ls -l".
    * @remarks
    * For example, `PosixModeBits.AllRead | PosixModeBits.AllWrite` would be formatted as "-rw-rw-rw-".
+   * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
-  public static formatPosixModeBits(mode: PosixModeBits): string {
+  public static formatPosixModeBits(modeBits: PosixModeBits): string {
     let result: string = '-';  // (later we may add support for additional states such as S_IFDIR or S_ISUID)
 
-    result += (mode & PosixModeBits.UserRead) ? 'r' : '-';
-    result += (mode & PosixModeBits.UserWrite) ? 'w' : '-';
-    result += (mode & PosixModeBits.UserExecute) ? 'x' : '-';
+    result += (modeBits & PosixModeBits.UserRead) ? 'r' : '-';
+    result += (modeBits & PosixModeBits.UserWrite) ? 'w' : '-';
+    result += (modeBits & PosixModeBits.UserExecute) ? 'x' : '-';
 
-    result += (mode & PosixModeBits.GroupRead) ? 'r' : '-';
-    result += (mode & PosixModeBits.GroupWrite) ? 'w' : '-';
-    result += (mode & PosixModeBits.GroupExecute) ? 'x' : '-';
+    result += (modeBits & PosixModeBits.GroupRead) ? 'r' : '-';
+    result += (modeBits & PosixModeBits.GroupWrite) ? 'w' : '-';
+    result += (modeBits & PosixModeBits.GroupExecute) ? 'x' : '-';
 
-    result += (mode & PosixModeBits.OthersRead) ? 'r' : '-';
-    result += (mode & PosixModeBits.OthersWrite) ? 'w' : '-';
-    result += (mode & PosixModeBits.OthersExecute) ? 'x' : '-';
+    result += (modeBits & PosixModeBits.OthersRead) ? 'r' : '-';
+    result += (modeBits & PosixModeBits.OthersWrite) ? 'w' : '-';
+    result += (modeBits & PosixModeBits.OthersExecute) ? 'x' : '-';
 
     return result;
   }
