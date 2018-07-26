@@ -14,6 +14,7 @@ interface IFixupSettingsOptions {
 
 // @public (undocumented)
 interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
+  removeCommentsFromJavaScriptInFolders?: string[];
   staticMatch?: string[];
 }
 

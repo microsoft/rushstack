@@ -200,6 +200,7 @@ export function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
 interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
+  removeCommentsFromJavaScriptInFolders?: string[];
   staticMatch?: string[];
 }
 

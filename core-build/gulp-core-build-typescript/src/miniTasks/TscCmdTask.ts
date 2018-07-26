@@ -12,6 +12,7 @@ import {
   BaseCmdTask,
   IBaseCmdTaskConfig
 } from './BaseCmdTask';
+import * as decomment from 'decomment';
 
 /**
  * @public
@@ -21,6 +22,12 @@ export interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
    * Glob matches for files to be passed through the build.
    */
   staticMatch?: string[];
+
+  /**
+   * Removes comments from all generated `.js` files in the specified folders. Will **not** remove comments from
+   * generated `.d.ts` files. Defaults to [].
+   */
+  removeCommentsFromJavaScriptInFolders?: string[];
 }
 
 /**
@@ -36,7 +43,8 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
             'src/**/*.js',
             'src/**/*.json',
             'src/**/*.jsx'
-          ]
+          ],
+          removeCommentsFromJavaScriptInFolders: []
         },
         packageName: 'typescript',
         packageBinPath: path.join('bin', 'tsc')
@@ -67,7 +75,7 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
     const resolvedLibFolders: string[] = libFolders.map((libFolder) => path.join(this.buildConfig.rootPath, libFolder));
     const promises: Promise<void>[] = (this.taskConfig.staticMatch || []).map((pattern) => {
       return new Promise((resolve: () => void, reject: (error: Error) => void) => {
-        glob(path.join(this.buildConfig.rootPath, pattern), (error: Error, matchPaths: string[]) => {
+        glob(path.join(this.buildConfig.rootPath, pattern), (error: Error | undefined, matchPaths: string[]) => {
           if (error) {
             reject(error);
           } else {
@@ -100,7 +108,16 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
       promises.push(basePromise);
     }
 
-    return Promise.all(promises).then(() => {
+    let buildPromise: Promise<void> = Promise.all(promises).then(() => { /* collapse void[] to void */ });
+
+    if (
+      this.taskConfig.removeCommentsFromJavaScriptInFolders &&
+      this.taskConfig.removeCommentsFromJavaScriptInFolders.length > 0
+    ) {
+      buildPromise = buildPromise.then(() => this._removeComments());
+    }
+
+    return buildPromise.then(() => {
       if (completeCallbackCalled) {
         completeCallback(completeCallbackError);
       }
@@ -121,5 +138,29 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
         }
       }
     }
+  }
+
+  private _removeComments(): Promise<void> {
+    return Promise.all((this.taskConfig.removeCommentsFromJavaScriptInFolders || []).map((folder) => {
+      return new Promise((resolve: () => void, reject: (error: Error) => void) => {
+        const resolvedFolder: string = path.isAbsolute(folder)
+          ? folder
+          : path.resolve(this.buildConfig.rootPath, folder);
+
+        glob(path.join(resolvedFolder, '**', '*.js'), (error: Error | undefined, matches: string[]) => {
+          if (error) {
+            reject(error);
+          } else {
+            for (const match of matches) {
+              const sourceText: string = FileSystem.readFile(match);
+              const decommentedText: string = decomment(sourceText, { safe: true });
+              FileSystem.writeFile(match, decommentedText);
+            }
+
+            resolve();
+          }
+        });
+      });
+    })).then(() => { /* collapse void[] to void */ });
   }
 }
