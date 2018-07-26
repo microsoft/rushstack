@@ -157,7 +157,13 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
           } else {
             for (const match of matches) {
               const sourceText: string = FileSystem.readFile(match);
-              const decommentedText: string = decomment(sourceText, { safe: true });
+              const decommentedText: string = decomment(
+                sourceText,
+                {
+                  // This option preserves comments that start with /*!, /**! or //! - typically copyright comments
+                  safe: true
+                }
+              );
               FileSystem.writeFile(match, decommentedText);
             }
 
