@@ -54,7 +54,7 @@ export {
   IFileSystemMoveOptions,
   IDeleteFileOptions,
   NewlineKind,
-  IFileModeBits,
+  PosixModeBits,
   IUpdateTimeParameters
 } from './FileSystem';
 export {

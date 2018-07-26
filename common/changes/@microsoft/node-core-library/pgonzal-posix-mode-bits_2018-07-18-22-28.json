@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "Rename FileSystem.changePermissionBits() to changePosixModeBits()",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "pgonzal@users.noreply.github.com"
+}
