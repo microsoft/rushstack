@@ -29,13 +29,17 @@ export const enum NewlineKind {
   CrLf = '\r\n',
 
   /**
-   * Unix-style newlines
+   * POSIX-style newlines
+   *
+   * @remarks
+   * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
   Lf = '\n'
 }
 
 /**
- * POSIX mode bits used to specify files permissions.
+ * An integer value used to specify file permissions for POSIX-like operating systems.
+ *
  * @remarks
  *
  * This bitfield corresponds to the "mode_t" structure described in this document:
@@ -43,6 +47,8 @@ export const enum NewlineKind {
  *
  * It is used with NodeJS APIs such as fs.Stat.mode and fs.chmodSync().  These values
  * represent a set of permissions and can be combined using bitwise arithmetic.
+ *
+ * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
  *
  * @public
  */
@@ -210,12 +216,12 @@ export interface IDeleteFileOptions {
  */
 export interface IUpdateTimeParameters {
   /**
-   * The UNIX epoch time or Date when this was last accessed.
+   * The POSIX epoch time or Date when this was last accessed.
    */
   accessedTime: number | Date;
 
   /**
-   * The UNIX epoch time or Date when this was last modified
+   * The POSIX epoch time or Date when this was last modified
    */
   modifiedTime: number | Date;
 }
@@ -300,7 +306,7 @@ export class FileSystem {
 
   /**
    * Returns a 10-character string representation of a PosixModeBits value similar to what
-   * would be displayed by the POSIX command "ls -l".
+   * would be displayed by a command such as "ls -l" on a POSIX-like operating system.
    * @remarks
    * For example, `PosixModeBits.AllRead | PosixModeBits.AllWrite` would be formatted as "-rw-rw-rw-".
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
@@ -518,7 +524,7 @@ export class FileSystem {
    * @param linkTarget - The absolute or relative path to the target of the link.
    */
   public static createSymbolicLinkJunction(linkTarget: string, linkSource: string): void {
-    // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
+    // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
     fsx.symlinkSync(linkTarget, linkSource, 'junction');
   }
 

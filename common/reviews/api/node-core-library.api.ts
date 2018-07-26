@@ -23,7 +23,7 @@ class FileSystem {
   static ensureEmptyFolder(folderPath: string): void;
   static ensureFolder(folderPath: string): void;
   static exists(path: string): boolean;
-  static formatPosixModeBits(mode: PosixModeBits): string;
+  static formatPosixModeBits(modeBits: PosixModeBits): string;
   static getLinkStatistics(path: string): fs.Stats;
   static getPosixModeBits(path: string): PosixModeBits;
   static getRealPath(linkPath: string): string;
@@ -74,7 +74,7 @@ interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
 
 // @public
 interface IJsonFileStringifyOptions {
-  unixNewlines?: boolean;
+  newlineConversion?: NewlineKind;
 }
 
 // @public
