@@ -1,6 +1,18 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Tue, 03 Jul 2018 21:03:31 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jul 2018 16:04:17 GMT and should not be manually modified.
+
+## 2.0.0
+Thu, 26 Jul 2018 16:04:17 GMT
+
+### Breaking changes
+
+- Replace IFileModeBits with a more flexible PosixModeBits enum
+- Rename FileSystem.changePermissionBits() to changePosixModeBits()
+
+### Minor changes
+
+- Add new APIs FileSystem.getPosixModeBits() and FileSystem.formatPosixModeBits()
 
 ## 1.5.0
 Tue, 03 Jul 2018 21:03:31 GMT

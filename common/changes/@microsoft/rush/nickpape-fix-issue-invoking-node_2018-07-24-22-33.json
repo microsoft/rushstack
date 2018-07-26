@@ -2,10 +2,10 @@
   "changes": [
     {
       "comment": "",
-      "packageName": "@microsoft/gulp-core-build",
+      "packageName": "@microsoft/rush",
       "type": "none"
     }
   ],
-  "packageName": "@microsoft/gulp-core-build",
+  "packageName": "@microsoft/rush",
   "email": "nickpape-msft@users.noreply.github.com"
 }

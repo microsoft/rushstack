@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "4.10.3",
+  "version": "4.10.5",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,9 +13,9 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "5.10.0",
-    "@microsoft/gulp-core-build": "3.8.5",
-    "@microsoft/node-core-library": "1.5.0",
+    "@microsoft/api-extractor": "5.10.1",
+    "@microsoft/gulp-core-build": "3.8.6",
+    "@microsoft/node-core-library": "2.0.0",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
     "@types/vinyl": "1.2.30",
