@@ -2,6 +2,51 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "3.2.56",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.56",
+      "date": "Thu, 26 Jul 2018 23:53:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.11` to `2.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.2` to `4.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.55",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.55",
+      "date": "Thu, 26 Jul 2018 16:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.10` to `2.1.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.1` to `4.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.54",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.54",
+      "date": "Wed, 25 Jul 2018 21:02:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.9` to `2.1.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.0` to `4.4.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.53",
       "tag": "@microsoft/loader-set-webpack-public-path_v3.2.53",
       "date": "Fri, 20 Jul 2018 16:04:52 GMT",
