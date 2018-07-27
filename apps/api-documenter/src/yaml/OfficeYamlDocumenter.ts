@@ -91,17 +91,16 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     const snippets: string[] | undefined = this._snippets[nameWithoutPackage];
     if (snippets) {
       delete this._snippets[nameWithoutPackage];
-
+      const snippetText: string = this._generateExampleSnippetText(snippets);
       if (yamlItem.remarks) {
-        yamlItem.remarks += this._generateSnippetText(snippets);
+        yamlItem.remarks += snippetText;
       } else if (yamlItem.syntax && yamlItem.syntax.return) {
         if (!yamlItem.syntax.return.description) {
           yamlItem.syntax.return.description = '';
         }
-        yamlItem.syntax.return.description += this._generateSnippetText(snippets);
+        yamlItem.syntax.return.description += snippetText;
       } else {
-        yamlItem.remarks = '';
-        yamlItem.remarks += this._generateSnippetText(snippets);
+        yamlItem.remarks = snippetText;
       }
     }
   }
@@ -148,15 +147,19 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     return text;
   }
 
-  private _generateSnippetText(snippets: string[]): string {
-    let text: string = '\n\n#### Examples\n';
+  private _generateExampleSnippetText(snippets: string[]): string {
+    const text: string[] = ['\n#### Examples\n'];
     for (const snippet of snippets) {
       if (snippet.search(/await/) === -1) {
-        text += '\n```javascript\n' + snippet + '\n```\n';
+        text.push('```javascript');
+
       } else {
-        text += '\n```typescript\n' + snippet + '\n```\n';
+        text.push('```typescript');
       }
+
+      text.push(snippet);
+      text.push('```');
     }
-    return text;
+    return text.join('\n');
   }
 }
