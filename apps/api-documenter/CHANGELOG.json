@@ -2,6 +2,60 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.4",
+      "tag": "@microsoft/api-documenter_v1.5.4",
+      "date": "Thu, 26 Jul 2018 23:53:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.2` to `4.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.3",
+      "tag": "@microsoft/api-documenter_v1.5.3",
+      "date": "Thu, 26 Jul 2018 16:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.10.0` to `5.10.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.5.0` to `2.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.1` to `4.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.2",
+      "tag": "@microsoft/api-documenter_v1.5.2",
+      "date": "Wed, 25 Jul 2018 21:02:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.0` to `4.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.1",
+      "tag": "@microsoft/api-documenter_v1.5.1",
+      "date": "Fri, 20 Jul 2018 16:04:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.50` to `4.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.0",
       "tag": "@microsoft/api-documenter_v1.5.0",
       "date": "Tue, 17 Jul 2018 16:02:52 GMT",

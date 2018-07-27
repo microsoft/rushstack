@@ -9,7 +9,7 @@ build.setConfig({
   shouldWarningsFailBuild: build.getConfig().production
 });
 
-build.task('default', build.serial(typescript, mocha, apiExtractor));
+build.task('default', build.serial(typescript, apiExtractor));
 
 build.initialize(require('gulp'));
 

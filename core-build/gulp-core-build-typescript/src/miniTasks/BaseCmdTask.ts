@@ -64,7 +64,9 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
           // We're on Windows
           const whereOutput: string = childProcess.execSync('where node', { stdio: [] }).toString();
           const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
-          BaseCmdTask.__nodePath = lines[lines.length - 1];
+
+          // take the first result, see https://github.com/Microsoft/web-build-tools/issues/759
+          BaseCmdTask.__nodePath = lines[0];
         } else {
           // We aren't on Windows - assume we're on *NIX or Darwin
           BaseCmdTask.__nodePath = childProcess.execSync('which node', { stdio: [] }).toString();

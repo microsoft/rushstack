@@ -6,7 +6,7 @@ import * as jju from 'jju';
 
 import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
 import { Text } from './Text';
-import { FileSystem } from './FileSystem';
+import { FileSystem, NewlineKind } from './FileSystem';
 
 /**
  * Options for JsonFile.stringify()
@@ -17,7 +17,7 @@ export interface IJsonFileStringifyOptions {
   /**
    * If true, then "\n" will be used for newlines instead of the default "\r\n".
    */
-  unixNewlines?: boolean;
+  newlineConversion?: NewlineKind;
 }
 
 /**
@@ -96,12 +96,16 @@ export class JsonFile {
     JsonFile.validateNoUndefinedMembers(jsonObject);
     const stringified: string = JSON.stringify(jsonObject, undefined, 2) + '\n';
 
-    if (options && options.unixNewlines) {
-      return stringified;
-    } else {
-      return Text.convertToCrLf(stringified);
+    if (options && options.newlineConversion) {
+      switch (options.newlineConversion) {
+        case NewlineKind.CrLf:
+          return Text.convertToCrLf(stringified);
+        case NewlineKind.Lf:
+          return Text.convertToLf(stringified);
+      }
     }
 
+    return stringified;
   }
 
   /**
