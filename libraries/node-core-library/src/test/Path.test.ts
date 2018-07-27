@@ -21,7 +21,7 @@ describe('Path', () => {
       });
     }
 
-    it('Unix paths', () => {
+    it('POSIX-style paths', () => {
       expect(Path.isUnder('/a/b.txt', '/a')).toEqual(true);
       expect(Path.isUnder('/a/b.txt', '/a/')).toEqual(true);
       expect(Path.isUnder('/a/b/c.txt', '/a')).toEqual(true);

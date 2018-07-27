@@ -2,6 +2,26 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "2.0.0",
+      "tag": "@microsoft/node-core-library_v2.0.0",
+      "date": "Thu, 26 Jul 2018 16:04:17 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Replace IFileModeBits with a more flexible PosixModeBits enum"
+          },
+          {
+            "comment": "Rename FileSystem.changePermissionBits() to changePosixModeBits()"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add new APIs FileSystem.getPosixModeBits() and FileSystem.formatPosixModeBits()"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.0",
       "tag": "@microsoft/node-core-library_v1.5.0",
       "date": "Tue, 03 Jul 2018 21:03:31 GMT",

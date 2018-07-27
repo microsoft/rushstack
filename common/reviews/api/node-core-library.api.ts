@@ -12,7 +12,7 @@ class FileDiffTest {
 
 // @public
 class FileSystem {
-  static changePermissionBits(path: string, mode: IFileModeBits): void;
+  static changePosixModeBits(path: string, mode: PosixModeBits): void;
   static copyFile(sourcePath: string, destinationPath: string): void;
   static createHardLink(linkTarget: string, linkSource: string): void;
   static createSymbolicLinkFile(linkTarget: string, linkSource: string): void;
@@ -23,7 +23,9 @@ class FileSystem {
   static ensureEmptyFolder(folderPath: string): void;
   static ensureFolder(folderPath: string): void;
   static exists(path: string): boolean;
+  static formatPosixModeBits(modeBits: PosixModeBits): string;
   static getLinkStatistics(path: string): fs.Stats;
+  static getPosixModeBits(path: string): PosixModeBits;
   static getRealPath(linkPath: string): string;
   static getStatistics(path: string): fs.Stats;
   static move(sourcePath: string, targetPath: string, options?: IFileSystemMoveOptions): void;
@@ -53,16 +55,6 @@ interface IDeleteFileOptions {
 }
 
 // @public
-interface IFileModeBits {
-  // (undocumented)
-  Group: PermissionsBits;
-  // (undocumented)
-  Other: PermissionsBits;
-  // (undocumented)
-  Owner: PermissionsBits;
-}
-
-// @public
 interface IFileSystemMoveOptions {
   ensureFolderExists?: boolean;
   overwrite?: boolean;
@@ -82,7 +74,7 @@ interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
 
 // @public
 interface IJsonFileStringifyOptions {
-  unixNewlines?: boolean;
+  newlineConversion?: NewlineKind;
 }
 
 // @public
@@ -249,6 +241,23 @@ class PackageName {
 // @public
 class Path {
   static isUnder(childPath: string, parentFolderPath: string): boolean;
+}
+
+// @public
+enum PosixModeBits {
+  AllExecute = 73,
+  AllRead = 292,
+  AllWrite = 146,
+  GroupExecute = 8,
+  GroupRead = 32,
+  GroupWrite = 16,
+  None = 0,
+  OthersExecute = 1,
+  OthersRead = 4,
+  OthersWrite = 2,
+  UserExecute = 64,
+  UserRead = 256,
+  UserWrite = 128
 }
 
 // @public

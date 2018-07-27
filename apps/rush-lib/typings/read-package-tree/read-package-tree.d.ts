@@ -10,7 +10,7 @@ declare module 'read-package-tree' {
       id: number;
       isLink: boolean;
       package: PackageJson;
-      parent?: Node;
+      parent?: PackageNode;
 
       /**
        * The absolute path to the folder containing package.json.
