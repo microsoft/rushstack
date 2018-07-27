@@ -22,6 +22,6 @@
   "devDependencies": {
     "@types/jest": "21.1.10",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "4.3.41"
+    "@microsoft/node-library-build": "4.4.0"
   }
 }
