@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.11.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.11.0",
+      "date": "Thu, 26 Jul 2018 23:53:43 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include an option to strip comments from produced JS files in the TSC task."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.10.5",
       "tag": "@microsoft/gulp-core-build-typescript_v4.10.5",
       "date": "Thu, 26 Jul 2018 16:04:17 GMT",

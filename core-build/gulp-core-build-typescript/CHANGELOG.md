@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 26 Jul 2018 16:04:17 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jul 2018 23:53:43 GMT and should not be manually modified.
+
+## 4.11.0
+Thu, 26 Jul 2018 23:53:43 GMT
+
+### Minor changes
+
+- Include an option to strip comments from produced JS files in the TSC task.
 
 ## 4.10.5
 Thu, 26 Jul 2018 16:04:17 GMT

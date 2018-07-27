@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/node-library-build",
-  "version": "4.4.2",
+  "version": "4.4.3",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -15,7 +15,7 @@
   "dependencies": {
     "@microsoft/gulp-core-build": "3.8.6",
     "@microsoft/gulp-core-build-mocha": "3.4.1",
-    "@microsoft/gulp-core-build-typescript": "4.10.5",
+    "@microsoft/gulp-core-build-typescript": "4.11.0",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1"

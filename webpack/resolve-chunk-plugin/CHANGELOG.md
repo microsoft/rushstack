@@ -1,6 +1,11 @@
 # Change Log - @microsoft/resolve-chunk-plugin
 
-This log was last generated on Thu, 26 Jul 2018 16:04:17 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jul 2018 23:53:43 GMT and should not be manually modified.
+
+## 2.0.12
+Thu, 26 Jul 2018 23:53:43 GMT
+
+*Version update only*
 
 ## 2.0.11
 Thu, 26 Jul 2018 16:04:17 GMT
