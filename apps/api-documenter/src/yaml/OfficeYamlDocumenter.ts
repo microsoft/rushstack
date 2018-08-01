@@ -91,18 +91,16 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     const snippets: string[] | undefined = this._snippets[nameWithoutPackage];
     if (snippets) {
       delete this._snippets[nameWithoutPackage];
-
-      if (!yamlItem.remarks) {
-        yamlItem.remarks = '';
-      }
-
-      yamlItem.remarks += '\n\n#### Examples\n';
-      for (const snippet of snippets) {
-        if (snippet.search(/await/) === -1) {
-          yamlItem.remarks += '\n```javascript\n' + snippet + '\n```\n';
-        } else {
-          yamlItem.remarks += '\n```typescript\n' + snippet + '\n```\n';
+      const snippetText: string = this._generateExampleSnippetText(snippets);
+      if (yamlItem.remarks) {
+        yamlItem.remarks += snippetText;
+      } else if (yamlItem.syntax && yamlItem.syntax.return) {
+        if (!yamlItem.syntax.return.description) {
+          yamlItem.syntax.return.description = '';
         }
+        yamlItem.syntax.return.description += snippetText;
+      } else {
+        yamlItem.remarks = snippetText;
       }
     }
   }
@@ -147,5 +145,21 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
       }
     }
     return text;
+  }
+
+  private _generateExampleSnippetText(snippets: string[]): string {
+    const text: string[] = ['\n#### Examples\n'];
+    for (const snippet of snippets) {
+      if (snippet.search(/await/) === -1) {
+        text.push('```javascript');
+
+      } else {
+        text.push('```typescript');
+      }
+
+      text.push(snippet);
+      text.push('```');
+    }
+    return text.join('\n');
   }
 }
