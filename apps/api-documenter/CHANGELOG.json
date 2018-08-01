@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.5",
+      "tag": "@microsoft/api-documenter_v1.5.5",
+      "date": "Wed, 01 Aug 2018 21:02:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updating OfficeYamlDocumenter to append snippets to non-empty sections"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.4",
       "tag": "@microsoft/api-documenter_v1.5.4",
       "date": "Thu, 26 Jul 2018 23:53:43 GMT",
