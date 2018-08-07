@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.2.37",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.37",
+      "date": "Tue, 07 Aug 2018 22:27:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade gulp-open to elimiante security warning"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.6` to `3.8.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.36",
       "tag": "@microsoft/gulp-core-build-serve_v3.2.36",
       "date": "Thu, 26 Jul 2018 16:04:17 GMT",
