@@ -53,7 +53,8 @@
     "jest-cli": "~22.4.3",
     "jest-environment-jsdom": "~22.4.3",
     "jest-resolve": "~22.4.3",
-    "jest": "~22.4.3"
+    "jest": "~22.4.3",
+    "jsdom": "~11.11.0"
   },
   "devDependencies": {
     "@types/z-schema": "3.16.31",
