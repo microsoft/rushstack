@@ -57,10 +57,10 @@ If you didn't configure your e-mail yet, try something like this:`);
 
     for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
       const regex: RegExp = new RegExp('^' + pattern + '$', 'i');
-      if (!userEmail.match(regex)) {
+      if (userEmail.match(regex)) {
         // For debugging:
         // console.log(`${userEmail} did not match pattern: "${pattern}"`);
-        return false;
+        return true;
       }
     }
 
