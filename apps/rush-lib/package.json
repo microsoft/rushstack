@@ -22,8 +22,8 @@
   "license": "MIT",
   "dependencies": {
     "@microsoft/node-core-library": "2.0.0",
-    "@microsoft/package-deps-hash": "2.2.55",
-    "@microsoft/stream-collator": "2.2.55",
+    "@microsoft/package-deps-hash": "2.2.56",
+    "@microsoft/stream-collator": "2.2.56",
     "@microsoft/ts-command-line": "4.2.0",
     "@pnpm/link-bins": "~1.0.1",
     "@pnpm/logger": "~1.0.1",
@@ -49,7 +49,7 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.4.3",
+    "@microsoft/node-library-build": "4.4.4",
     "@types/node": "8.5.8",
     "@types/node-fetch": "1.6.9",
     "@types/tar": "4.0.0",
