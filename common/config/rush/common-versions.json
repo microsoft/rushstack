@@ -1,13 +1,6 @@
 {
   "preferredVersions": {
-    "ajv": "5.2.2"
   },
   "allowedAlternativeVersions": {
-    "jest-environment-jsdom": [
-      "~21.2.1"
-    ],
-    "@types/webpack": [
-      "4.4.0"
-    ]
   }
 }

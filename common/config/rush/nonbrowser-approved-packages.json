@@ -298,6 +298,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "karma",
       "allowedCategories": [ "libraries" ]
     },
