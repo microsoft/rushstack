@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Add explicit dependency on jsdom to workaround Jest regression #6766",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "pgonzal@users.noreply.github.com"
+}
