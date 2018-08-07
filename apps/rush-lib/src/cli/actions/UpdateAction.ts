@@ -10,6 +10,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 export class UpdateAction extends BaseInstallAction {
   private _fullParameter: CommandLineFlagParameter;
   private _recheckParameter: CommandLineFlagParameter;
+  private _skipInstallParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -50,6 +51,22 @@ export class UpdateAction extends BaseInstallAction {
         + ' to process the shrinkwrap file.  This will also update your shrinkwrap file with Rush\'s fixups.'
         + ' (To minimize shrinkwrap churn, these fixups are normally performed only in the temporary folder.)'
     });
+
+    this._skipInstallParameter = this.defineFlagParameter({
+      parameterLongName: '--skip-install',
+      description: '(PNPM only) Updates the shrinkwrap file, but doesn\'t perform an installation.'
+        + ' Useful in certain cases where you only need changes to a shrinkwrap, but don\'t want to'
+        + ' tie up your disk or computer doing an install, e.g. if you are merging from master but'
+        + ' are not planning on doing a local installation.'
+    });
+  }
+
+  protected run(): Promise<void> {
+    if (this._skipInstallParameter.value && this.rushConfiguration.packageManager !== 'pnpm') {
+      return Promise.reject(`The --skip-install flag only works when using PNPM.`);
+    }
+
+    return super.run();
   }
 
   protected buildInstallOptions(): IInstallManagerOptions {
@@ -59,7 +76,8 @@ export class UpdateAction extends BaseInstallAction {
       noLink: this._noLinkParameter.value!,
       fullUpgrade: this._fullParameter.value!,
       recheckShrinkwrap: this._recheckParameter.value!,
-      collectLogFile: this._debugPackageManagerParameter.value!
+      collectLogFile: this._debugPackageManagerParameter.value!,
+      skipInstall: this._skipInstallParameter.value
     };
   }
 }

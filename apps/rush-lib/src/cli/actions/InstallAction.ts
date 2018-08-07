@@ -32,7 +32,8 @@ export class InstallAction extends BaseInstallAction {
       noLink: this._noLinkParameter.value!,
       fullUpgrade: false,
       recheckShrinkwrap: false,
-      collectLogFile: this._debugPackageManagerParameter.value!
+      collectLogFile: this._debugPackageManagerParameter.value!,
+      skipInstall: false
     };
   }
 }

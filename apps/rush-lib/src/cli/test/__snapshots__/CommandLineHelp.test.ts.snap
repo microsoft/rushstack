@@ -397,6 +397,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for "rush update" 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--debug-package-manager] [--full] [--recheck]
+                   [--skip-install]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -444,6 +445,12 @@ Optional arguments:
                         your shrinkwrap file with Rush's fixups. (To minimize 
                         shrinkwrap churn, these fixups are normally performed 
                         only in the temporary folder.)
+  --skip-install        (PNPM only) Updates the shrinkwrap file, but doesn't 
+                        perform an installation. Useful in certain cases 
+                        where you only need changes to a shrinkwrap, but 
+                        don't want to tie up your disk or computer doing an 
+                        install, e.g. if you are merging from master but are 
+                        not planning on doing a local installation.
 "
 `;
 
