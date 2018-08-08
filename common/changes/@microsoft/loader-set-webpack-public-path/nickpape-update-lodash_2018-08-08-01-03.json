@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "comment": "Update lodash.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-set-webpack-public-path",
+  "email": "nickpape-msft@users.noreply.github.com"
+}

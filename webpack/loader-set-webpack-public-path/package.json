@@ -13,7 +13,7 @@
     "@types/node": "8.5.8",
     "@microsoft/set-webpack-public-path-plugin": "2.1.13",
     "loader-utils": "~1.1.0",
-    "lodash": "~4.15.0"
+    "lodash": "~4.17.5"
   },
   "devDependencies": {
     "@types/lodash": "4.14.74",
