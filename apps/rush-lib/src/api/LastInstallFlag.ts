@@ -20,7 +20,7 @@ export class LastInstallFlag {
    * @param folderPath - the folder that this flag is managing
    * @param state - optional, the state that should be managed or compared
   */
-  constructor(folderPath: string, state: Object = {}) {
+  public constructor(folderPath: string, state: Object = {}) {
     this._path = path.join(folderPath, LAST_INSTALL_FLAG_FILE_NAME);
     this._state = state;
   }

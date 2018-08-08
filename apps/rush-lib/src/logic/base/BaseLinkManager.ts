@@ -8,6 +8,7 @@ import * as path from 'path';
 
 import { FileSystem } from '@microsoft/node-core-library';
 
+import { RushLastInstallFlag } from '../../api/RushLastInstallFlag';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -145,6 +146,16 @@ export abstract class BaseLinkManager {
   }
 
   /**
+   * Delete the rush-link.json file. This operation is done before performing a link.
+   */
+  public deleteRushLinkJson(): void {
+    if (FileSystem.exists(this._rushConfiguration.rushLinkJsonFilename)) {
+      console.log(`Deleting "${this._rushConfiguration.rushLinkJsonFilename}"`);
+      Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
+    }
+  }
+
+  /**
    * Creates node_modules symlinks for all Rush projects defined in the RushConfiguration.
    * @param force - Normally the operation will be skipped if the links are already up to date;
    *   if true, this option forces the links to be recreated.
@@ -157,12 +168,20 @@ export abstract class BaseLinkManager {
       }
     }
 
+    // ensure that the last-install.flag is properly set
+    const lastInstallFlag: RushLastInstallFlag = new RushLastInstallFlag(this._rushConfiguration);
+    if (!lastInstallFlag.isValid()) {
+      return Promise.reject(
+        new Error('Cannot perform "rush link" because the last install flag is missing.'
+          + ' Did you forget to run "rush install"?'));
+    }
+
     console.log('Linking projects together...');
     const stopwatch: Stopwatch = Stopwatch.start();
 
     // Delete the flag file if it exists; if we get interrupted, this will ensure that
     // a full "rush link" is required next time
-    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
+    this.deleteRushLinkJson();
 
     return this._linkProjects()
       .then(() => {

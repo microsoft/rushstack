@@ -27,6 +27,7 @@ import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { GitPolicy } from '../logic/GitPolicy';
 import { IRushTempPackageJson } from '../logic/base/BasePackage';
 import { LastInstallFlag } from '../api/LastInstallFlag';
+import { RushLastInstallFlag } from '../api/RushLastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { PurgeManager } from './PurgeManager';
 import { RushConfiguration, PackageManager } from '../api/RushConfiguration';
@@ -96,7 +97,7 @@ export interface IInstallManagerOptions {
  */
 export class InstallManager {
   private _rushConfiguration: RushConfiguration;
-  private _commonNodeModulesMarker: LastInstallFlag;
+  private _commonNodeModulesMarker: RushLastInstallFlag;
   private _commonTempFolderRecycler: AsyncRecycler;
 
   /**
@@ -182,7 +183,7 @@ export class InstallManager {
     }
   }
 
-  public get commonNodeModulesMarker(): LastInstallFlag {
+  public get commonNodeModulesMarker(): RushLastInstallFlag {
     return this._commonNodeModulesMarker;
   }
 
@@ -190,11 +191,7 @@ export class InstallManager {
     this._rushConfiguration = rushConfiguration;
     this._commonTempFolderRecycler = purgeManager.commonTempFolderRecycler;
 
-    this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, {
-      node: process.versions.node,
-      packageManager: rushConfiguration.packageManager,
-      packageManagerVersion: rushConfiguration.packageManagerToolVersion
-    });
+    this._commonNodeModulesMarker = new RushLastInstallFlag(this._rushConfiguration);
   }
 
   public doInstall(options: IInstallManagerOptions): Promise<void> {
@@ -246,12 +243,22 @@ export class InstallManager {
 
           return this._installCommonModules(shrinkwrapIsUpToDate, options)
             .then(() => {
+              const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
               if (!options.noLink) {
-                const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
                 return linkManager.createSymlinksForProjects(false);
               } else {
-                console.log(os.EOL
-                  + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.'));
+                // since our local links are out of date, go ahead and remove the rush-link.json
+                linkManager.deleteRushLinkJson();
+
+                if (options.skipInstall) {
+                  console.log(os.EOL
+                    + colors.yellow('NOTE: The --skip-install flag was specified, so your local node_modules'
+                    + ' is out of sync with the shrinkwrap file. Please run "rush install" to get your enlistment into'
+                    + ' a valid state.'));
+                } else {
+                  console.log(os.EOL
+                    + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.'));
+                }
               }
             });
         });
