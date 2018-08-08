@@ -2,6 +2,203 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "2.1.13",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.13",
+      "date": "Tue, 07 Aug 2018 22:27:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.3` to `4.4.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.12",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.12",
+      "date": "Thu, 26 Jul 2018 23:53:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.2` to `4.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.11",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.11",
+      "date": "Thu, 26 Jul 2018 16:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.1` to `4.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.10",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.10",
+      "date": "Wed, 25 Jul 2018 21:02:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.0` to `4.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.9",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.9",
+      "date": "Fri, 20 Jul 2018 16:04:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.50` to `4.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.8",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.8",
+      "date": "Tue, 17 Jul 2018 16:02:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.49` to `4.3.50`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.7",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.7",
+      "date": "Fri, 13 Jul 2018 19:04:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.48` to `4.3.49`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.6",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.6",
+      "date": "Tue, 03 Jul 2018 21:03:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.47` to `4.3.48`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.5",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.5",
+      "date": "Fri, 29 Jun 2018 02:56:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.46` to `4.3.47`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.4",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.4",
+      "date": "Sat, 23 Jun 2018 02:21:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.45` to `4.3.46`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.3",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.3",
+      "date": "Fri, 22 Jun 2018 16:05:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.44` to `4.3.45`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.2",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.2",
+      "date": "Thu, 21 Jun 2018 08:27:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.43` to `4.3.44`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.1",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.1",
+      "date": "Tue, 19 Jun 2018 19:35:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.42` to `4.3.43`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.0",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.0",
+      "date": "Wed, 13 Jun 2018 16:05:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include an option to skip chunk and asset detection."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.0",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.0.0",
+      "date": "Fri, 08 Jun 2018 08:43:52 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Update the plugin to support Webpack 4."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.41` to `4.3.42`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.12",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v1.5.12",
+      "date": "Thu, 31 May 2018 01:39:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.40` to `4.3.41`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.11",
       "tag": "@microsoft/set-webpack-public-path-plugin_v1.5.11",
       "date": "Tue, 15 May 2018 02:26:45 GMT",

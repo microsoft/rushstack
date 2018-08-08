@@ -12,17 +12,16 @@ import {
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
-import { BumpType, LockStepVersionPolicy } from '../../data/VersionPolicy';
-import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { Utilities } from '../../utilities/Utilities';
+import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
+import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionControl } from '../../utilities/VersionControl';
-import { VersionMismatchFinder } from '../../data/VersionMismatchFinder';
-import { RushCommandLineParser } from './RushCommandLineParser';
-import { GitPolicy } from '../logic/GitPolicy';
+import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { GitPolicy } from '../../logic/GitPolicy';
 import { BaseRushAction } from './BaseRushAction';
-import { VersionManager } from '../logic/VersionManager';
-import { Git } from '../logic/Git';
+import { VersionManager } from '../../logic/VersionManager';
+import { Git } from '../../logic/Git';
 
 export class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy: CommandLineFlagParameter;
@@ -95,15 +94,22 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
+    // try to get the user email
+    const userEmail: string | undefined = GitPolicy.getUserEmail(this.rushConfiguration);
+
+    if (!userEmail) {
+      return Promise.reject(undefined);
+    }
+
     if (!this._bypassPolicy.value) {
-      if (!GitPolicy.check(this.rushConfiguration)) {
-        process.exit(1);
-        return Promise.resolve();
+      if (!GitPolicy.check(this.rushConfiguration, userEmail)) {
+        return Promise.reject(undefined);
       }
     }
     this._validateInput();
 
-    this._versionManager = new VersionManager(this.rushConfiguration, this._getUserEmail());
+    this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
+
     if (this._ensureVersionPolicy.value) {
       this._overwritePolicyVersionIfNeeded();
       const tempBranch: string = 'version/ensure-' + new Date().getTime();
@@ -190,11 +196,6 @@ export class VersionAction extends BaseRushAction {
       throw new Error('Unable to finish version bump because inconsistencies were encountered.' +
         ' Run \"rush check\" to find more details.');
     }
-  }
-
-  private _getUserEmail(): string {
-    return Utilities.executeCommandAndCaptureOutput('git',
-        ['config', 'user.email'], '.').trim();
   }
 
   private _gitProcess(tempBranch: string): void {

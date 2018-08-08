@@ -4,8 +4,8 @@
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import { BaseInstallAction } from './BaseInstallAction';
-import { IInstallManagerOptions } from '../logic/InstallManager';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { IInstallManagerOptions } from '../../logic/InstallManager';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class UpdateAction extends BaseInstallAction {
   private _fullParameter: CommandLineFlagParameter;
@@ -58,7 +58,8 @@ export class UpdateAction extends BaseInstallAction {
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: this._fullParameter.value!,
-      recheckShrinkwrap: this._recheckParameter.value!
+      recheckShrinkwrap: this._recheckParameter.value!,
+      collectLogFile: this._debugPackageManagerParameter.value!
     };
   }
 }

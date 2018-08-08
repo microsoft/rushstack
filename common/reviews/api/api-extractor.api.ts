@@ -155,6 +155,7 @@ interface IApiParameter {
 
 // @alpha
 interface IApiProperty extends IApiBaseDefinition {
+  isEventProperty: boolean;
   isOptional: boolean;
   isOverride: boolean;
   isReadOnly: boolean;
@@ -295,6 +296,12 @@ interface IMarkupHighlightedText {
 }
 
 // @public
+interface IMarkupHtmlTag {
+  kind: 'html-tag';
+  token: string;
+}
+
+// @public
 interface IMarkupLineBreak {
   kind: 'break';
 }
@@ -368,6 +375,7 @@ class Markup {
   static createCodeBox(code: string, highlighter: MarkupHighlighter): IMarkupCodeBox;
   static createHeading1(text: string): IMarkupHeading1;
   static createHeading2(text: string): IMarkupHeading2;
+  static createHtmlTag(token: string): IMarkupHtmlTag;
   static createNoteBox(textElements: MarkupBasicElement[]): IMarkupNoteBox;
   static createNoteBoxFromText(text: string): IMarkupNoteBox;
   static createPage(title: string): IMarkupPage;

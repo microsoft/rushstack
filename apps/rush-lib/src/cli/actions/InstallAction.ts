@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { BaseInstallAction } from './BaseInstallAction';
-import { IInstallManagerOptions } from '../logic/InstallManager';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { IInstallManagerOptions } from '../../logic/InstallManager';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class InstallAction extends BaseInstallAction {
 
@@ -31,7 +31,8 @@ export class InstallAction extends BaseInstallAction {
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: false,
-      recheckShrinkwrap: false
+      recheckShrinkwrap: false,
+      collectLogFile: this._debugPackageManagerParameter.value!
     };
   }
 }

@@ -1,6 +1,46 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Tue, 15 May 2018 02:26:45 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jul 2018 16:04:17 GMT and should not be manually modified.
+
+## 2.0.0
+Thu, 26 Jul 2018 16:04:17 GMT
+
+### Breaking changes
+
+- Replace IFileModeBits with a more flexible PosixModeBits enum
+- Rename FileSystem.changePermissionBits() to changePosixModeBits()
+
+### Minor changes
+
+- Add new APIs FileSystem.getPosixModeBits() and FileSystem.formatPosixModeBits()
+
+## 1.5.0
+Tue, 03 Jul 2018 21:03:31 GMT
+
+### Minor changes
+
+- Add a FileSystem API that wraps and replaces fs and fs-extra
+
+## 1.4.1
+Thu, 21 Jun 2018 08:27:29 GMT
+
+### Patches
+
+- issue #705: fallback on linux to /proc/{n}/stat if 'ps -p 1 -o lstart' is not supported
+
+## 1.4.0
+Fri, 08 Jun 2018 08:43:52 GMT
+
+### Minor changes
+
+- Add Text.truncateWithEllipsis() API
+
+## 1.3.2
+Thu, 31 May 2018 01:39:33 GMT
+
+### Patches
+
+- Add missing "repository" property in IPackageJSON.
 
 ## 1.3.1
 Tue, 15 May 2018 02:26:45 GMT

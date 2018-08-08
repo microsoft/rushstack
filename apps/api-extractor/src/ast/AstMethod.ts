@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import { Text } from '@microsoft/node-core-library';
+
 import { IParsedPackageName } from '@microsoft/node-core-library';
 import { AstItem, AstItemKind, IAstItemOptions } from './AstItem';
 import { AstMember } from './AstMember';
@@ -51,7 +53,7 @@ export class AstMethod extends AstMember {
     // Return type
     if (this.kind !== AstItemKind.Constructor) {
       if (methodDeclaration.type) {
-        this.returnType = methodDeclaration.type.getText();
+        this.returnType = Text.convertToLf(methodDeclaration.type.getText());
       } else {
         this.returnType = 'any';
         this.hasIncompleteTypes = true;

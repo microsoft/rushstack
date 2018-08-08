@@ -1,0 +1,106 @@
+### YamlMime:UniversalReference
+items:
+  - uid: api-extractor-test-05.DocClass1
+    summary: This is an example class.
+    remarks: These are some remarks.
+    name: DocClass1
+    fullName: api-extractor-test-05.DocClass1
+    langs:
+      - typeScript
+    type: class
+    package: api-extractor-test-05
+    children:
+      - api-extractor-test-05.DocClass1.exampleFunction
+      - api-extractor-test-05.DocClass1.interestingEdgeCases
+      - api-extractor-test-05.DocClass1.malformedEvent
+      - api-extractor-test-05.DocClass1.modifiedEvent
+      - api-extractor-test-05.DocClass1.regularProperty
+      - api-extractor-test-05.DocClass1.tableExample
+  - uid: api-extractor-test-05.DocClass1.exampleFunction
+    summary: This is an overloaded function.
+    name: 'exampleFunction(a, b)'
+    fullName: api-extractor-test-05.DocClass1.exampleFunction
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'exampleFunction(a: string, b: string): string;'
+      return:
+        type:
+          - string
+        description: ''
+      parameters:
+        - id: a
+          description: the first string
+          type:
+            - string
+        - id: b
+          description: the second string
+          type:
+            - string
+  - uid: api-extractor-test-05.DocClass1.interestingEdgeCases
+    summary: |-
+      Example: "{ \\"maxItemsToShow\\": 123 }"
+
+      The regular expression used to validate the constraints is /^\[a-zA-Z0-9\\-\_\]+$/
+    name: interestingEdgeCases()
+    fullName: api-extractor-test-05.DocClass1.interestingEdgeCases
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'interestingEdgeCases(): void;'
+      return:
+        type:
+          - void
+        description: ''
+  - uid: api-extractor-test-05.DocClass1.malformedEvent
+    summary: This event should have been marked as readonly.
+    name: malformedEvent
+    fullName: api-extractor-test-05.DocClass1.malformedEvent
+    langs:
+      - typeScript
+    type: event
+    syntax:
+      content: 'malformedEvent: SystemEvent;'
+      return:
+        type:
+          - SystemEvent
+  - uid: api-extractor-test-05.DocClass1.modifiedEvent
+    summary: This event is fired whenever the object is modified.
+    name: modifiedEvent
+    fullName: api-extractor-test-05.DocClass1.modifiedEvent
+    langs:
+      - typeScript
+    type: event
+    syntax:
+      content: 'readonly modifiedEvent: SystemEvent;'
+      return:
+        type:
+          - SystemEvent
+  - uid: api-extractor-test-05.DocClass1.regularProperty
+    summary: This is a regular property that happens to use the SystemEvent type.
+    name: regularProperty
+    fullName: api-extractor-test-05.DocClass1.regularProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'regularProperty: SystemEvent;'
+      return:
+        type:
+          - SystemEvent
+  - uid: api-extractor-test-05.DocClass1.tableExample
+    summary: 'An example with tables:'
+    remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
+    name: tableExample()
+    fullName: api-extractor-test-05.DocClass1.tableExample
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'tableExample(): void;'
+      return:
+        type:
+          - void
+        description: ''

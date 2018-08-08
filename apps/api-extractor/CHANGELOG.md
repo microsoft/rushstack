@@ -1,6 +1,57 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 15 May 2018 02:26:45 GMT and should not be manually modified.
+This log was last generated on Thu, 26 Jul 2018 16:04:17 GMT and should not be manually modified.
+
+## 5.10.1
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 5.10.0
+Tue, 17 Jul 2018 16:02:52 GMT
+
+### Minor changes
+
+- Add support for new "@eventproperty" AEDoc tag, which indicates that a class/interface property should be documented as an event
+
+## 5.9.1
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 5.9.0
+Sat, 23 Jun 2018 02:21:20 GMT
+
+### Minor changes
+
+- Add new IMarkupHtmlTag API
+- AEDoc now allows HTML tags inside doc comments, which can be disabled using a backslash escape
+
+## 5.8.1
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 5.8.0
+Tue, 19 Jun 2018 19:35:11 GMT
+
+### Minor changes
+
+- For namespaceSupport=permissive, allow arbitrary nesting of namespaces
+
+### Patches
+
+- Fix an issue where multi-line type literals sometimes had inconsistent newlines in the *.api.json file
+
+## 5.7.3
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 5.7.2
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
 
 ## 5.7.1
 Tue, 15 May 2018 02:26:45 GMT

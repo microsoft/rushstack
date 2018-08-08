@@ -197,6 +197,7 @@ export class MarkdownRenderer {
                 case '\n':
                 case ' ':
                 case '[':
+                case '>':
                   // okay to put a symbol
                   break;
                 default:
@@ -226,6 +227,10 @@ export class MarkdownRenderer {
 
             writer.write(parts[3]);  // write trailing whitespace
           }
+          break;
+        case 'html-tag':
+          // write the HTML element verbatim into the output
+          writer.write(element.token);
           break;
         case 'code':
           writer.write('`');

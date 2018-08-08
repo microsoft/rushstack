@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as ts from 'typescript';
 import lodash = require('lodash');
@@ -10,7 +9,8 @@ import colors = require('colors');
 import {
   JsonFile,
   JsonSchema,
-  Path
+  Path,
+  FileSystem
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
@@ -161,7 +161,7 @@ export class Extractor {
     switch (this.actualConfig.compiler.configType) {
       case 'tsconfig':
         const rootFolder: string = this.actualConfig.compiler.rootFolder;
-        if (!fsx.existsSync(rootFolder)) {
+        if (!FileSystem.exists(rootFolder)) {
           throw new Error('The root folder does not exist: ' + rootFolder);
         }
 
@@ -202,7 +202,7 @@ export class Extractor {
         if (!rootDir) {
           throw new Error('The provided compiler state does not specify a root folder');
         }
-        if (!fsx.existsSync(rootDir)) {
+        if (!FileSystem.exists(rootDir)) {
           throw new Error('The rootDir does not exist: ' + rootDir);
         }
         this._absoluteRootFolder = path.resolve(rootDir);
@@ -290,7 +290,6 @@ export class Extractor {
       const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
 
       this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
-      fsx.mkdirsSync(path.dirname(apiJsonFilename));
       jsonGenerator.writeJsonFile(apiJsonFilename, context);
     }
 
@@ -309,12 +308,13 @@ export class Extractor {
       const actualApiReviewContent: string = generator.generateApiFileContent(context);
 
       // Write the actual file
-      fsx.mkdirsSync(path.dirname(actualApiReviewPath));
-      fsx.writeFileSync(actualApiReviewPath, actualApiReviewContent);
+      FileSystem.writeFile(actualApiReviewPath, actualApiReviewContent, {
+        ensureFolderExists: true
+      });
 
       // Compare it against the expected file
-      if (fsx.existsSync(expectedApiReviewPath)) {
-        const expectedApiReviewContent: string = fsx.readFileSync(expectedApiReviewPath).toString();
+      if (FileSystem.exists(expectedApiReviewPath)) {
+        const expectedApiReviewContent: string = FileSystem.readFile(expectedApiReviewPath);
 
         if (!ApiFileGenerator.areEquivalentApiFileContents(actualApiReviewContent, expectedApiReviewContent)) {
           if (!this._localBuild) {
@@ -330,7 +330,7 @@ export class Extractor {
             this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
               + ` Updating ${expectedApiReviewShortPath}`);
 
-            fsx.writeFileSync(expectedApiReviewPath, actualApiReviewContent);
+            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent);
           }
         } else {
           this._monitoredLogger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
@@ -432,8 +432,6 @@ export class Extractor {
     dtsKind: DtsRollupKind): void {
 
     this._monitoredLogger.logVerbose(`Writing package typings: ${mainDtsRollupFullPath}`);
-
-    fsx.mkdirsSync(path.dirname(mainDtsRollupFullPath));
 
     dtsRollupGenerator.writeTypingsFile(mainDtsRollupFullPath, dtsKind);
 }

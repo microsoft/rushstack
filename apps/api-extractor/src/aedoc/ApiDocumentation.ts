@@ -48,6 +48,7 @@ export class ApiDocumentation {
     '@alpha',
     '@beta',
     '@betadocumentation',
+    '@eventproperty',
     '@internal',
     '@internalremarks',
     '@override',
@@ -120,10 +121,34 @@ export class ApiDocumentation {
    */
   public isPackageDocumentation: boolean | undefined;
 
+  /**
+   * True if the documentation content has not been reviewed yet.
+   */
   public isDocBeta: boolean | undefined;
+
+  /**
+   * True if the \@eventproperty tag was specified.  This means class/interface property
+   * represents and event.  It should be a read-only property that returns a user-defined class
+   * with operations such as addEventHandler() or removeEventHandler().
+   */
+  public isEventProperty: boolean | undefined;
+
+  /**
+   * True if the \@inheritdoc tag was specified.
+   */
   public isDocInherited: boolean | undefined;
+
+  /**
+   * True if the \@inheritdoc tag was specified and is inheriting from a target object
+   * that was marked as \@deprecated.
+   */
   public isDocInheritedDeprecated: boolean | undefined;
+
+  /**
+   * True if the \@readonly tag was specified.
+   */
   public hasReadOnlyTag: boolean | undefined;
+
   public warnings: string[];
 
   /**
@@ -298,6 +323,10 @@ export class ApiDocumentation {
           case '@betadocumentation':
             tokenizer.getToken();
             this.isDocBeta = true;
+            break;
+          case '@eventproperty':
+            tokenizer.getToken();
+            this.isEventProperty = true;
             break;
           case '@sealed':
             tokenizer.getToken();

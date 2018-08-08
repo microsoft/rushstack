@@ -3,9 +3,9 @@
 
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
-import { RushCommandLineParser } from './RushCommandLineParser';
-import { LinkManagerFactory } from '../logic/LinkManagerFactory';
-import { BaseLinkManager } from '../logic/base/BaseLinkManager';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { LinkManagerFactory } from '../../logic/LinkManagerFactory';
+import { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
 
 export class LinkAction extends BaseRushAction {

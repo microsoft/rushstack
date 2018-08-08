@@ -51,6 +51,21 @@ export {
 export { Path } from './Path';
 export { Text } from './Text';
 export {
+  FileSystem,
+  IReadFolderOptions,
+  IWriteFileOptions,
+  IReadFileOptions,
+  IFileSystemMoveOptions,
+  IDeleteFileOptions,
+  NewlineKind,
+  PosixModeBits,
+  IUpdateTimeParameters
+} from './FileSystem';
+export {
+  FileWriter,
+  IFileWriterFlags
+} from './FileWriter';
+export {
   Logging,
   ILoggingProviderSet
 } from './Logging';

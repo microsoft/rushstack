@@ -7,6 +7,7 @@ interface ISetWebpackPublicPathOptions {
   preferLastFoundScript?: boolean;
   publicPath?: string;
   regexVariable?: string;
+  skipDetection?: boolean;
   systemJs?: boolean;
   urlPrefix?: string;
 }

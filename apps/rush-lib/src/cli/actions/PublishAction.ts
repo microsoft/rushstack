@@ -3,7 +3,6 @@
 
 import * as colors from 'colors';
 import { EOL } from 'os';
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import {
   CommandLineFlagParameter,
@@ -11,23 +10,24 @@ import {
 } from '@microsoft/ts-command-line';
 import {
   JsonFile,
+  FileSystem,
   Logging
 } from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
   ChangeType
-} from '../../data/ChangeManagement';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
+} from '../../api/ChangeManagement';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Npm } from '../../utilities/Npm';
-import { RushCommandLineParser } from './RushCommandLineParser';
-import { PublishUtilities } from '../logic/PublishUtilities';
-import { ChangelogGenerator } from '../logic/ChangelogGenerator';
-import { GitPolicy } from '../logic/GitPolicy';
-import { PrereleaseToken } from '../logic/PrereleaseToken';
-import { ChangeManager } from '../logic/ChangeManager';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { PublishUtilities } from '../../logic/PublishUtilities';
+import { ChangelogGenerator } from '../../logic/ChangelogGenerator';
+import { GitPolicy } from '../../logic/GitPolicy';
+import { PrereleaseToken } from '../../logic/PrereleaseToken';
+import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
-import { Git } from '../logic/Git';
+import { Git } from '../../logic/Git';
 import { VersionControl } from '../../utilities/VersionControl';
 
 export class PublishAction extends BaseRushAction {
@@ -392,8 +392,7 @@ export class PublishAction extends BaseRushAction {
       const destFolder: string = this._releaseFolder.value ?
        this._releaseFolder.value : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
 
-      fsx.copySync(tarballPath, path.join(destFolder, tarballName));
-      fsx.unlinkSync(tarballPath);
+      FileSystem.move(tarballPath, path.join(destFolder, tarballName), { overwrite: true });
     }
   }
 
@@ -401,7 +400,7 @@ export class PublishAction extends BaseRushAction {
     const apiConfigPath: string = path.join(project.projectFolder,
       'config', 'api-extractor.json');
 
-    if (fsx.existsSync(apiConfigPath)) {
+    if (FileSystem.exists(apiConfigPath)) {
       // Read api-extractor.json file
       const apiConfig: {} = JsonFile.load(apiConfigPath);
       /* tslint:disable:no-string-literal */
@@ -420,9 +419,9 @@ export class PublishAction extends BaseRushAction {
         if (fromApiFolder) {
           const fromApiFolderPath: string = path.join(project.projectFolder, fromApiFolder);
           const toApiFolderPath: string = path.join(project.projectFolder, toApiFolder);
-          if (fsx.existsSync(fromApiFolderPath) && fsx.existsSync(toApiFolderPath)) {
-            fsx.readdirSync(fromApiFolderPath).forEach(fileName => {
-              fsx.copySync(path.join(fromApiFolderPath, fileName), path.join(toApiFolderPath, fileName));
+          if (FileSystem.exists(fromApiFolderPath) && FileSystem.exists(toApiFolderPath)) {
+            FileSystem.readFolder(fromApiFolderPath).forEach(fileName => {
+              FileSystem.copyFile(path.join(fromApiFolderPath, fileName), path.join(toApiFolderPath, fileName));
               Logging.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
             });
           }

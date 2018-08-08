@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 
 import { Logging } from '@microsoft/node-core-library';
 
 import { Utilities } from '../../utilities/Utilities';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
+import { FileSystem } from '@microsoft/node-core-library';
 
 export class UnlinkAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
@@ -35,7 +35,7 @@ export class UnlinkAction extends BaseRushAction {
     let didAnything: boolean = false;
     for (const rushProject of this.rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
-      if (fsx.existsSync(localModuleFolder)) {
+      if (FileSystem.exists(localModuleFolder)) {
         Logging.log('Purging ' + localModuleFolder);
         Utilities.dangerouslyDeletePath(localModuleFolder);
         didAnything = true;

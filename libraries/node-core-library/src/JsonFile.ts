@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as jju from 'jju';
 
 import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
 import { Text } from './Text';
+import { FileSystem, NewlineKind } from './FileSystem';
 
 /**
  * Options for JsonFile.stringify()
@@ -17,7 +17,7 @@ export interface IJsonFileStringifyOptions {
   /**
    * If true, then "\n" will be used for newlines instead of the default "\r\n".
    */
-  unixNewlines?: boolean;
+  newlineConversion?: NewlineKind;
 }
 
 /**
@@ -31,6 +31,12 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
    * don't write anything; this preserves the old timestamp.
    */
   onlyIfChanged?: boolean;
+
+  /**
+   * Creates the folder recursively using FileSystem.ensureFolder()
+   * Defaults to false.
+   */
+  ensureFolderExists?: boolean;
 }
 
 /**
@@ -42,13 +48,13 @@ export class JsonFile {
    * Loads a JSON file.
    */
   public static load(jsonFilename: string): any { // tslint:disable-line:no-any
-    if (!fsx.existsSync(jsonFilename)) {
+    if (!FileSystem.exists(jsonFilename)) {
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
 
-    const buffer: Buffer = fsx.readFileSync(jsonFilename);
+    const contents: string = FileSystem.readFile(jsonFilename);
     try {
-      return jju.parse(buffer.toString());
+      return jju.parse(contents);
     } catch (error) {
       throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
     }
@@ -90,12 +96,16 @@ export class JsonFile {
     JsonFile.validateNoUndefinedMembers(jsonObject);
     const stringified: string = JSON.stringify(jsonObject, undefined, 2) + '\n';
 
-    if (options && options.unixNewlines) {
-      return stringified;
-    } else {
-      return Text.convertToCrLf(stringified);
+    if (options && options.newlineConversion) {
+      switch (options.newlineConversion) {
+        case NewlineKind.CrLf:
+          return Text.convertToCrLf(stringified);
+        case NewlineKind.Lf:
+          return Text.convertToLf(stringified);
+      }
     }
 
+    return stringified;
   }
 
   /**
@@ -112,9 +122,9 @@ export class JsonFile {
 
     if (options.onlyIfChanged) {
       // Has the file changed?
-      if (fsx.existsSync(jsonFilename)) {
+      if (FileSystem.exists(jsonFilename)) {
         try {
-          const oldBuffer: Buffer = fsx.readFileSync(jsonFilename);
+          const oldBuffer: Buffer = FileSystem.readFileToBuffer(jsonFilename);
           if (Buffer.compare(buffer, oldBuffer) === 0) {
             // Nothing has changed, so don't touch the file
             return false;
@@ -126,11 +136,13 @@ export class JsonFile {
       }
     }
 
-    fsx.writeFileSync(jsonFilename, buffer);
+    FileSystem.writeFile(jsonFilename, buffer.toString(), {
+      ensureFolderExists: options.ensureFolderExists
+    });
 
     // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.
     /*
-    const oldBuffer2: Buffer = fsx.readFileSync(jsonFilename);
+    const oldBuffer2: Buffer = FileSystem.readFileToBuffer(jsonFilename);
     if (Buffer.compare(buffer, oldBuffer2) !== 0) {
       console.log('new:' + buffer.toString('hex'));
       console.log('old:' + oldBuffer2.toString('hex'));

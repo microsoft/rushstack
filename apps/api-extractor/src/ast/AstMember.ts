@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import { Text } from '@microsoft/node-core-library';
 import { AstItem, IAstItemOptions } from './AstItem';
 import { AstStructuredType } from './AstStructuredType';
 import { PrettyPrinter } from '../utils/PrettyPrinter';
@@ -104,7 +105,7 @@ export class AstMember extends AstItem {
       result += this.isOptional ? '?' : '';
       result += ':';
       result += !this.typeLiteral && property && property.type ? ` ${property.type};` : '';
-      return result;
+      return Text.convertToLf(result);
     } else {
       return PrettyPrinter.getDeclarationSummary(this.declaration);
     }

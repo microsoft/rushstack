@@ -11,19 +11,70 @@ class FileDiffTest {
 }
 
 // @public
+class FileSystem {
+  static changePosixModeBits(path: string, mode: PosixModeBits): void;
+  static copyFile(sourcePath: string, destinationPath: string): void;
+  static createHardLink(linkTarget: string, linkSource: string): void;
+  static createSymbolicLinkFile(linkTarget: string, linkSource: string): void;
+  static createSymbolicLinkFolder(linkTarget: string, linkSource: string): void;
+  static createSymbolicLinkJunction(linkTarget: string, linkSource: string): void;
+  static deleteFile(filePath: string, options?: IDeleteFileOptions): void;
+  static deleteFolder(folderPath: string): void;
+  static ensureEmptyFolder(folderPath: string): void;
+  static ensureFolder(folderPath: string): void;
+  static exists(path: string): boolean;
+  static formatPosixModeBits(modeBits: PosixModeBits): string;
+  static getLinkStatistics(path: string): fs.Stats;
+  static getPosixModeBits(path: string): PosixModeBits;
+  static getRealPath(linkPath: string): string;
+  static getStatistics(path: string): fs.Stats;
+  static move(sourcePath: string, targetPath: string, options?: IFileSystemMoveOptions): void;
+  static readFile(filePath: string, options?: IReadFileOptions): string;
+  static readFileToBuffer(filePath: string): Buffer;
+  static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
+  static updateTimes(path: string, times: IUpdateTimeParameters): void;
+  static writeFile(filePath: string, contents: string | Buffer, options?: IWriteFileOptions): void;
+}
+
+// @public
+class FileWriter {
+  close(): void;
+  static open(path: string, flags?: IFileWriterFlags): FileWriter;
+  write(text: string): void;
+}
+
+// @public
 enum FolderConstants {
   Git = ".git",
   NodeModules = "node_modules"
 }
 
 // @public
+interface IDeleteFileOptions {
+  throwIfNotExists?: boolean;
+}
+
+// @public
+interface IFileSystemMoveOptions {
+  ensureFolderExists?: boolean;
+  overwrite?: boolean;
+}
+
+// @public
+interface IFileWriterFlags {
+  append?: boolean;
+  exclusive?: boolean;
+}
+
+// @public
 interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
+  ensureFolderExists?: boolean;
   onlyIfChanged?: boolean;
 }
 
 // @public
 interface IJsonFileStringifyOptions {
-  unixNewlines?: boolean;
+  newlineConversion?: NewlineKind;
 }
 
 // @public
@@ -61,6 +112,7 @@ interface IPackageJson {
   optionalDependencies?: IPackageJsonDependencyTable;
   peerDependencies?: IPackageJsonDependencyTable;
   private?: boolean;
+  repository?: string;
   scripts?: IPackageJsonScriptTable;
   // @beta
   tsdoc?: IPackageJsonTsdocConfiguration;
@@ -104,6 +156,30 @@ interface IProtectableMapParameters<K, V> {
   onClear?: (source: ProtectableMap<K, V>) => void;
   onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
   onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
+}
+
+// @public
+interface IReadFileOptions {
+  convertLineEndings?: NewlineKind;
+  encoding?: Encoding;
+}
+
+// @public
+interface IReadFolderOptions {
+  absolutePaths?: boolean;
+}
+
+// @public
+interface IUpdateTimeParameters {
+  accessedTime: number | Date;
+  modifiedTime: number | Date;
+}
+
+// @public
+interface IWriteFileOptions {
+  convertLineEndings?: NewlineKind;
+  encoding?: Encoding;
+  ensureFolderExists?: boolean;
 }
 
 // @public
@@ -153,6 +229,12 @@ class MapExtensions {
 }
 
 // @public
+enum NewlineKind {
+  CrLf = "\r\n",
+  Lf = "\n"
+}
+
+// @public
 class PackageJsonLookup {
   constructor(parameters?: IPackageJsonLookupParameters);
   clearCache(): void;
@@ -179,6 +261,23 @@ class Path {
 }
 
 // @public
+enum PosixModeBits {
+  AllExecute = 73,
+  AllRead = 292,
+  AllWrite = 146,
+  GroupExecute = 8,
+  GroupRead = 32,
+  GroupWrite = 16,
+  None = 0,
+  OthersExecute = 1,
+  OthersRead = 4,
+  OthersWrite = 2,
+  UserExecute = 64,
+  UserRead = 256,
+  UserWrite = 128
+}
+
+// @public
 class ProtectableMap<K, V> {
   constructor(parameters: IProtectableMapParameters<K, V>);
   clear(): void;
@@ -195,6 +294,8 @@ class ProtectableMap<K, V> {
 class Text {
   static convertToCrLf(input: string): string;
   static convertToLf(input: string): string;
+  static padEnd(s: string, minimumLength: number): string;
   static replaceAll(input: string, searchValue: string, replaceValue: string): string;
+  static truncateWithEllipsis(s: string, maximumLength: number): string;
 }
 

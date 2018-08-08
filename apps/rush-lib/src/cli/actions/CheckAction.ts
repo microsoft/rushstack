@@ -5,10 +5,10 @@ import * as colors from 'colors';
 
 import { Logging } from '@microsoft/node-core-library';
 
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
-import { RushConstants } from '../../RushConstants';
-import { VersionMismatchFinder } from '../../data/VersionMismatchFinder';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { RushConstants } from '../../logic/RushConstants';
+import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 
 export class CheckAction extends BaseRushAction {

@@ -8,9 +8,9 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { Logging } from '@microsoft/node-core-library';
 
 import { BaseRushAction } from './BaseRushAction';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { PurgeManager } from '../logic/PurgeManager';
+import { PurgeManager } from '../../logic/PurgeManager';
 
 export class PurgeAction extends BaseRushAction {
   private _unsafeParameter: CommandLineFlagParameter;

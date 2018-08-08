@@ -1,6 +1,86 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 15 May 2018 02:26:45 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Aug 2018 22:27:31 GMT and should not be manually modified.
+
+## 4.11.1
+Tue, 07 Aug 2018 22:27:31 GMT
+
+*Version update only*
+
+## 4.11.0
+Thu, 26 Jul 2018 23:53:43 GMT
+
+### Minor changes
+
+- Include an option to strip comments from produced JS files in the TSC task.
+
+## 4.10.5
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 4.10.4
+Wed, 25 Jul 2018 21:02:57 GMT
+
+### Patches
+
+- Fix an issue where the TscTask and TslintTasks where invoking the wrong version of Node.js
+
+## 4.10.3
+Tue, 17 Jul 2018 16:02:52 GMT
+
+*Version update only*
+
+## 4.10.2
+Fri, 13 Jul 2018 19:04:50 GMT
+
+### Patches
+
+- Fix an issue where "spawnSync" may not be able to resolve node.
+
+## 4.10.1
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 4.10.0
+Fri, 29 Jun 2018 02:56:51 GMT
+
+### Minor changes
+
+- Inclusion of three new tasks designed to use as minimal behavior as possible to run tsc, tslint, and api-extractor.
+
+## 4.9.19
+Sat, 23 Jun 2018 02:21:20 GMT
+
+*Version update only*
+
+## 4.9.18
+Fri, 22 Jun 2018 16:05:15 GMT
+
+### Patches
+
+- Fixed mutation on tsConfigFile resulting in tslint error
+
+## 4.9.17
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 4.9.16
+Tue, 19 Jun 2018 19:35:11 GMT
+
+*Version update only*
+
+## 4.9.15
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 4.9.14
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
 
 ## 4.9.13
 Tue, 15 May 2018 02:26:45 GMT

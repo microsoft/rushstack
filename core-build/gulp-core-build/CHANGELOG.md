@@ -1,6 +1,38 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Tue, 15 May 2018 02:26:45 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Aug 2018 22:27:31 GMT and should not be manually modified.
+
+## 3.8.7
+Tue, 07 Aug 2018 22:27:31 GMT
+
+### Patches
+
+- Add explicit dependency on jsdom to workaround Jest regression #6766
+
+## 3.8.6
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 3.8.5
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 3.8.4
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 3.8.3
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 3.8.2
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
 
 ## 3.8.1
 Tue, 15 May 2018 02:26:45 GMT

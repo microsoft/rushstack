@@ -14,11 +14,12 @@ import {
   Logging
 } from '@microsoft/node-core-library';
 
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { EventHooksManager } from '../logic/EventHooksManager';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { EventHooksManager } from '../../logic/EventHooksManager';
+import { RushCommandLineParser } from './../RushCommandLineParser';
+import { Utilities } from '../../utilities/Utilities';
 
-export interface IRushCommandLineActionOptions extends ICommandLineActionOptions {
+export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
    * If true, no locking mechanism will be enforced when this action is run.
    * Note this defaults to false (which is a safer assumption in case this value
@@ -48,7 +49,7 @@ export abstract class BaseRushAction extends CommandLineAction {
     return this._parser;
   }
 
-  constructor(options: IRushCommandLineActionOptions) {
+  constructor(options: IBaseRushActionOptions) {
     super(options);
 
     this._parser = options.parser;
@@ -62,6 +63,10 @@ export abstract class BaseRushAction extends CommandLineAction {
     // Ideally we should do this for all the Rush actions, but "rush build" is the most critical one
     // -- if it falsely appears to succeed, we could merge bad PRs, publish empty packages, etc.
     process.exitCode = 1;
+
+    if (!this.rushConfiguration) {
+      throw Utilities.getRushConfigNotFoundError();
+    }
 
     this._ensureEnvironment();
 

@@ -2,6 +2,186 @@
   "name": "@microsoft/stream-collator",
   "entries": [
     {
+      "version": "2.2.56",
+      "tag": "@microsoft/stream-collator_v2.2.56",
+      "date": "Tue, 07 Aug 2018 22:27:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.3` to `4.4.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.55",
+      "tag": "@microsoft/stream-collator_v2.2.55",
+      "date": "Thu, 26 Jul 2018 23:53:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.2` to `4.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.54",
+      "tag": "@microsoft/stream-collator_v2.2.54",
+      "date": "Thu, 26 Jul 2018 16:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.1` to `4.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.53",
+      "tag": "@microsoft/stream-collator_v2.2.53",
+      "date": "Wed, 25 Jul 2018 21:02:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.0` to `4.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.52",
+      "tag": "@microsoft/stream-collator_v2.2.52",
+      "date": "Fri, 20 Jul 2018 16:04:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.50` to `4.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.51",
+      "tag": "@microsoft/stream-collator_v2.2.51",
+      "date": "Tue, 17 Jul 2018 16:02:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.49` to `4.3.50`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.50",
+      "tag": "@microsoft/stream-collator_v2.2.50",
+      "date": "Fri, 13 Jul 2018 19:04:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.48` to `4.3.49`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.49",
+      "tag": "@microsoft/stream-collator_v2.2.49",
+      "date": "Tue, 03 Jul 2018 21:03:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.47` to `4.3.48`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.48",
+      "tag": "@microsoft/stream-collator_v2.2.48",
+      "date": "Fri, 29 Jun 2018 02:56:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.46` to `4.3.47`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.47",
+      "tag": "@microsoft/stream-collator_v2.2.47",
+      "date": "Sat, 23 Jun 2018 02:21:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.45` to `4.3.46`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.46",
+      "tag": "@microsoft/stream-collator_v2.2.46",
+      "date": "Fri, 22 Jun 2018 16:05:15 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.44` to `4.3.45`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.45",
+      "tag": "@microsoft/stream-collator_v2.2.45",
+      "date": "Thu, 21 Jun 2018 08:27:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.43` to `4.3.44`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.44",
+      "tag": "@microsoft/stream-collator_v2.2.44",
+      "date": "Tue, 19 Jun 2018 19:35:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.42` to `4.3.43`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.43",
+      "tag": "@microsoft/stream-collator_v2.2.43",
+      "date": "Fri, 08 Jun 2018 08:43:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.41` to `4.3.42`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.42",
+      "tag": "@microsoft/stream-collator_v2.2.42",
+      "date": "Thu, 31 May 2018 01:39:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.3.40` to `4.3.41`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.41",
       "tag": "@microsoft/stream-collator_v2.2.41",
       "date": "Tue, 15 May 2018 02:26:45 GMT",

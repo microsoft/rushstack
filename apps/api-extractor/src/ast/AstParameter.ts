@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import { Text } from '@microsoft/node-core-library';
+
 import { AstItem, AstItemKind, IAstItemOptions } from './AstItem';
 
 /**
@@ -24,7 +26,7 @@ export class AstParameter extends AstItem {
     const parameterDeclaration: ts.ParameterDeclaration = options.declaration as ts.ParameterDeclaration;
     this.isOptional = !!parameterDeclaration.questionToken || !!parameterDeclaration.initializer;
     if (parameterDeclaration.type) {
-      this.type = parameterDeclaration.type.getText();
+      this.type = Text.convertToLf(parameterDeclaration.type.getText());
     } else {
       this.hasIncompleteTypes = true;
       this.type = 'any';

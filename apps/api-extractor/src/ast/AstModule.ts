@@ -37,7 +37,7 @@ export abstract class AstModule extends AstItemContainer {
 
       if (followedSymbol.flags & (ts.SymbolFlags.Class | ts.SymbolFlags.Interface)) {
         this.addMemberItem(new AstStructuredType(options));
-      } else if (followedSymbol.flags & ts.SymbolFlags.ValueModule) {
+      } else if (followedSymbol.flags & (ts.SymbolFlags.ValueModule | ts.SymbolFlags.NamespaceModule)) {
         this.addMemberItem(new AstNamespace(options)); // tslint:disable-line:no-use-before-declare
       } else if (followedSymbol.flags & ts.SymbolFlags.Function) {
         this.addMemberItem(new AstFunction(options));

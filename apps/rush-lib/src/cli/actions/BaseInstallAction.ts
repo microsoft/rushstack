@@ -8,9 +8,11 @@ import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { Logging } from '@microsoft/node-core-library';
 
 import { BaseRushAction } from './BaseRushAction';
-import { Event } from '../../data/EventHooks';
-import { InstallManager, IInstallManagerOptions } from '../logic/InstallManager';
-import { PurgeManager } from '../logic/PurgeManager';
+import { Event } from '../../api/EventHooks';
+import { InstallManager, IInstallManagerOptions } from '../../logic/InstallManager';
+import { PurgeManager } from '../../logic/PurgeManager';
+import { SetupChecks } from '../../logic/SetupChecks';
+import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
 
 /**
@@ -20,6 +22,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _purgeParameter: CommandLineFlagParameter;
   protected _bypassPolicyParameter: CommandLineFlagParameter;
   protected _noLinkParameter: CommandLineFlagParameter;
+  protected _debugPackageManagerParameter: CommandLineFlagParameter;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -38,12 +41,25 @@ export abstract class BaseInstallAction extends BaseRushAction {
         + ' This flag is useful for automated builds that want to report stages individually'
         + ' or perform extra operations in between the two stages.'
     });
+    this._debugPackageManagerParameter = this.defineFlagParameter({
+      parameterLongName: '--debug-package-manager',
+      description: 'Activates verbose logging for the package manager. You will probably want to pipe'
+        + ' the output of Rush to a file when using this command.'
+    });
   }
 
   protected abstract buildInstallOptions(): IInstallManagerOptions;
 
   protected run(): Promise<void> {
     const stopwatch: Stopwatch = Stopwatch.start();
+
+    SetupChecks.validate(this.rushConfiguration);
+    let warnAboutScriptUpdate: boolean = false;
+    if (this.actionName === 'update') {
+      warnAboutScriptUpdate = StandardScriptUpdater.update(this.rushConfiguration);
+    } else {
+      StandardScriptUpdater.validate(this.rushConfiguration);
+    }
 
     this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
 
@@ -65,6 +81,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
         this._collectTelemetry(stopwatch, installManagerOptions, true);
         this.eventHooksManager.handle(Event.postRushInstall, this.parser.isDebug);
+
+        if (warnAboutScriptUpdate) {
+          Logging.log(os.EOL + colors.yellow('Rush refreshed some files in the "common/scripts" folder.'
+            + '  Please commit this change to Git.'));
+        }
 
         Logging.log(os.EOL + colors.green(
           `Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`));

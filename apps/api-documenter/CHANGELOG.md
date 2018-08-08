@@ -1,6 +1,131 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 15 May 2018 02:26:45 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Aug 2018 22:27:31 GMT and should not be manually modified.
+
+## 1.5.6
+Tue, 07 Aug 2018 22:27:31 GMT
+
+*Version update only*
+
+## 1.5.5
+Wed, 01 Aug 2018 21:02:43 GMT
+
+### Patches
+
+- Updating OfficeYamlDocumenter to append snippets to non-empty sections
+
+## 1.5.4
+Thu, 26 Jul 2018 23:53:43 GMT
+
+*Version update only*
+
+## 1.5.3
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 1.5.2
+Wed, 25 Jul 2018 21:02:57 GMT
+
+*Version update only*
+
+## 1.5.1
+Fri, 20 Jul 2018 16:04:52 GMT
+
+*Version update only*
+
+## 1.5.0
+Tue, 17 Jul 2018 16:02:52 GMT
+
+### Minor changes
+
+- Add support for the "@eventproperty" AEDoc tag, which indicates that a class/interface property should be documented as an event
+
+## 1.4.4
+Fri, 13 Jul 2018 19:04:50 GMT
+
+*Version update only*
+
+## 1.4.3
+Thu, 12 Jul 2018 16:03:26 GMT
+
+### Patches
+
+- Changing Office's APIExtractor add-on to unescape characters in code blocks
+
+## 1.4.2
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 1.4.1
+Fri, 29 Jun 2018 02:56:51 GMT
+
+*Version update only*
+
+## 1.4.0
+Tue, 26 Jun 2018 23:54:17 GMT
+
+### Minor changes
+
+- The YAML target now automatically hyperlinks type references, but only if the type name is simple and not ambiguous
+
+## 1.3.1
+Tue, 26 Jun 2018 16:04:59 GMT
+
+### Patches
+
+- Improve OfficeYamlDocumenter to replace escaped function arrows in code lines with =>
+
+## 1.3.0
+Sat, 23 Jun 2018 02:21:20 GMT
+
+### Minor changes
+
+- Add support for rendering the new IMarkupHtmlTag
+
+### Patches
+
+- Fix a issue where Office Documentation had markdown characters escaped
+
+## 1.2.8
+Fri, 22 Jun 2018 16:05:15 GMT
+
+*Version update only*
+
+## 1.2.7
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 1.2.6
+Tue, 19 Jun 2018 19:35:11 GMT
+
+*Version update only*
+
+## 1.2.5
+Fri, 15 Jun 2018 16:05:34 GMT
+
+### Patches
+
+- The output folder is not automatically created if it doesn't exist yet
+
+## 1.2.4
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 1.2.3
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
+
+## 1.2.2
+Thu, 24 May 2018 16:03:20 GMT
+
+### Patches
+
+- Update API Set URL resolution in OfficeYamlDocumenter
 
 ## 1.2.1
 Tue, 15 May 2018 02:26:45 GMT

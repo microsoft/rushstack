@@ -4,6 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
+import { Text } from '@microsoft/node-core-library';
 
 import { Span } from './Span';
 
@@ -74,7 +75,7 @@ export class PrettyPrinter {
       }
     });
 
-    return rootSpan.getModifiedText();
+    return Text.convertToLf(rootSpan.getModifiedText());
   }
 
   /**

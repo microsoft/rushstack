@@ -3,8 +3,7 @@
 
 import * as colors from 'colors';
 import * as path from 'path';
-import * as fs from 'fs';
-import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem } from '@microsoft/node-core-library';
 
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
@@ -331,7 +330,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     const fullPath: string = this.resolvePath(localPath);
 
     try {
-      doesExist = fs.statSync(fullPath).isFile();
+      doesExist = FileSystem.getStatistics(fullPath).isFile();
     } catch (e) { /* no-op */ }
 
     return doesExist;
@@ -343,16 +342,12 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param localDestPath - path to the destination file
    */
   public copyFile(localSourcePath: string, localDestPath?: string): void {
-    /* tslint:disable:typedef */
-    const fsx = require('fs-extra');
-    /* tslint:enable:typedef */
-
     const fullSourcePath: string = path.resolve(__dirname, localSourcePath);
     const fullDestPath: string = path.resolve(
       this.buildConfig.rootPath,
       (localDestPath || path.basename(localSourcePath)));
 
-    fsx.copySync(fullSourcePath, fullDestPath);
+    FileSystem.copyFile(fullSourcePath, fullDestPath);
   }
 
   /**
@@ -364,7 +359,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     let result: Object | undefined = undefined;
 
     try {
-      const content: string = fs.readFileSync(fullPath, 'utf8');
+      const content: string = FileSystem.readFile(fullPath);
       result = JSON.parse(content);
     } catch (e) { /* no-op */ }
 
@@ -394,7 +389,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @returns If the configuration file is valid, returns the configuration as an object.
    */
   private _readConfigFile(filePath: string, schema?: Object): TTaskConfig | undefined {
-    if (!fs.existsSync(filePath)) {
+    if (!FileSystem.exists(filePath)) {
       return undefined;
     } else {
       if (args['verbose']) { // tslint:disable-line:no-string-literal

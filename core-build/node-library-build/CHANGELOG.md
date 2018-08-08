@@ -1,6 +1,83 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Tue, 15 May 2018 02:26:45 GMT and should not be manually modified.
+This log was last generated on Tue, 07 Aug 2018 22:27:31 GMT and should not be manually modified.
+
+## 4.4.4
+Tue, 07 Aug 2018 22:27:31 GMT
+
+*Version update only*
+
+## 4.4.3
+Thu, 26 Jul 2018 23:53:43 GMT
+
+*Version update only*
+
+## 4.4.2
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 4.4.1
+Wed, 25 Jul 2018 21:02:57 GMT
+
+*Version update only*
+
+## 4.4.0
+Fri, 20 Jul 2018 16:04:52 GMT
+
+### Minor changes
+
+- Upgrading mocha-related pack ages to remove dependency on a version of "growl" with NSP warnings.
+
+## 4.3.50
+Tue, 17 Jul 2018 16:02:52 GMT
+
+*Version update only*
+
+## 4.3.49
+Fri, 13 Jul 2018 19:04:50 GMT
+
+*Version update only*
+
+## 4.3.48
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 4.3.47
+Fri, 29 Jun 2018 02:56:51 GMT
+
+*Version update only*
+
+## 4.3.46
+Sat, 23 Jun 2018 02:21:20 GMT
+
+*Version update only*
+
+## 4.3.45
+Fri, 22 Jun 2018 16:05:15 GMT
+
+*Version update only*
+
+## 4.3.44
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 4.3.43
+Tue, 19 Jun 2018 19:35:11 GMT
+
+*Version update only*
+
+## 4.3.42
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 4.3.41
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
 
 ## 4.3.40
 Tue, 15 May 2018 02:26:45 GMT

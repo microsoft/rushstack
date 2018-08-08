@@ -48,7 +48,7 @@ export class ApiJsonGenerator extends AstItemVisitor {
     this.visit(context.package, this.jsonOutput);
 
     // Write the output before validating the schema, so we can debug it
-    JsonFile.save(this.jsonOutput, reportFilename);
+    JsonFile.save(this.jsonOutput, reportFilename, { ensureFolderExists: true });
 
     // Validate that the output conforms to our JSON schema
     ApiJsonFile.jsonSchema.validateObjectWithCallback(this.jsonOutput, (errorInfo: IJsonSchemaErrorInfo) => {
@@ -252,7 +252,8 @@ export class ApiJsonGenerator extends AstItemVisitor {
       isBeta: astProperty.inheritedReleaseTag === ReleaseTag.Beta,
       isSealed: !!astProperty.documentation.isSealed,
       isVirtual: !!astProperty.documentation.isVirtual,
-      isOverride: !!astProperty.documentation.isOverride
+      isOverride: !!astProperty.documentation.isOverride,
+      isEventProperty: astProperty.isEventProperty
     };
 
     refObject![astProperty.name] = newNode;

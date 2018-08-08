@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// The minimal set of imports that are safe even for ancient NodeJS versions:
 import * as colors from 'colors';
 import * as os from 'os';
 import * as semver from 'semver';
@@ -36,12 +37,13 @@ else if (!semver.satisfies(nodeVersion, '^6.9.0')
 }
 
 import * as path from 'path';
-import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
+import { JsonFile, IPackageJson, Text } from '@microsoft/node-core-library';
+import { EnvironmentVariableNames } from '@microsoft/rush-lib';
+import * as rushLib from '@microsoft/rush-lib';
 
-import { Rush, EnvironmentVariableNames } from '@microsoft/rush-lib';
-
-import { MinimalRushConfiguration } from './MinimalRushConfiguration';
+import { RushCommandSelector } from './RushCommandSelector';
 import { RushVersionSelector } from './RushVersionSelector';
+import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 // Load the configuration
 const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
@@ -50,14 +52,6 @@ const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..'
 let rushVersionToLoad: string | undefined = undefined;
 
 const previewVersion: string | undefined = process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
-
-function padEnd(s: string, length: number): string {
-  let result: string = s;
-  while (result.length < length) {
-    result += ' ';
-  }
-  return result;
-}
 
 if (previewVersion) {
   if (!semver.valid(previewVersion, false)) {
@@ -72,12 +66,12 @@ if (previewVersion) {
     `*********************************************************************`,
     `* WARNING! THE "RUSH_PREVIEW_VERSION" ENVIRONMENT VARIABLE IS SET.  *`,
     `*                                                                   *`,
-    `* You are previewing Rush version:        ${padEnd(previewVersion, 25)} *`
+    `* You are previewing Rush version:        ${Text.padEnd(previewVersion, 25)} *`
   );
 
   if (configuration) {
     lines.push(
-      `* The rush.json configuration asks for:   ${padEnd(configuration.rushVersion, 25)} *`
+      `* The rush.json configuration asks for:   ${Text.padEnd(configuration.rushVersion, 25)} *`
     );
   }
 
@@ -106,7 +100,7 @@ if (rushVersionToLoad && semver.lt(rushVersionToLoad, '5.0.0-dev.18')) {
 // install it
 if (rushVersionToLoad && rushVersionToLoad !== currentPackageJson.version) {
   const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageJson.version);
-  versionSelector.ensureRushVersionInstalled(rushVersionToLoad)
+  versionSelector.ensureRushVersionInstalled(rushVersionToLoad, configuration)
     .catch((error: Error) => {
       Logging.log(colors.red('Error: ' + error.message));
     });
@@ -116,5 +110,5 @@ if (rushVersionToLoad && rushVersionToLoad !== currentPackageJson.version) {
   // Rush is "managed" if its version and configuration are dictated by a repo's rush.json
   const isManaged: boolean = !!configuration;
 
-  Rush.launch(currentPackageJson.version, isManaged);
+  RushCommandSelector.execute(currentPackageJson.version, isManaged, rushLib);
 }

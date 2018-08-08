@@ -2,6 +2,10 @@
 {
   "packages": [
     {
+      "name": "@microsoft/api-documenter",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/api-extractor",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -130,6 +134,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "decomment",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "del",
       "allowedCategories": [ "libraries" ]
     },
@@ -254,6 +262,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "https-proxy-agent",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "inquirer",
       "allowedCategories": [ "libraries" ]
     },
@@ -283,6 +295,10 @@
     },
     {
       "name": "js-yaml",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jsdom",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -343,6 +359,10 @@
     },
     {
       "name": "mocha",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "node-fetch",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -415,6 +435,10 @@
     },
     {
       "name": "through2",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ts-jest",
       "allowedCategories": [ "libraries" ]
     },
     {
