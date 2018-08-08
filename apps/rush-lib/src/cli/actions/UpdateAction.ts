@@ -54,19 +54,11 @@ export class UpdateAction extends BaseInstallAction {
 
     this._skipInstallParameter = this.defineFlagParameter({
       parameterLongName: '--skip-install',
-      description: '(PNPM only) Updates the shrinkwrap file, but doesn\'t perform an installation.'
+      description: 'Updates the shrinkwrap file, but doesn\'t perform an installation.'
         + ' Useful in certain cases where you only need changes to a shrinkwrap, but don\'t want to'
         + ' tie up your disk or computer doing an install, e.g. if you are merging from master but'
         + ' are not planning on doing a local installation.'
     });
-  }
-
-  protected run(): Promise<void> {
-    if (this._skipInstallParameter.value && this.rushConfiguration.packageManager !== 'pnpm') {
-      return Promise.reject(`The --skip-install flag only works when using PNPM.`);
-    }
-
-    return super.run();
   }
 
   protected buildInstallOptions(): IInstallManagerOptions {

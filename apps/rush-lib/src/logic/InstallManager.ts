@@ -87,7 +87,8 @@ export interface IInstallManagerOptions {
   collectLogFile: boolean;
   /**
    * If specified, the shrinkwrap file will be updated, but an actual installation will
-   * not be performed. Note this option only works if the package manager being used is PNPM.
+   * not be performed. Note that PNPM has to still download tarballs to the store:
+   *   https://github.com/pnpm/pnpm/pull/1177
    */
   skipInstall: boolean;
 }
@@ -959,6 +960,10 @@ export class InstallManager {
 
       if (options.collectLogFile) {
         args.push('--verbose');
+      }
+
+      if (options.skipInstall) {
+        args.push('--package-lock-only');
       }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
       args.push('--store', this._rushConfiguration.pnpmStoreFolder);
