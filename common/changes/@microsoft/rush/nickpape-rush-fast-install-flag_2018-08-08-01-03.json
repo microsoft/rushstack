@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add a --skip-install flag for the update command, which will update the shrinkwrap but not do an installation.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
