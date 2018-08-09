@@ -33,6 +33,8 @@ export class Rush {
    *  the tool is executed. This is mainly used for debugging purposes.
    */
   public static launch(launcherVersion: string, isManaged: boolean): void {
+    Logging.registerConsoleLogging();
+
     Rush._printStartupBanner(isManaged);
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
