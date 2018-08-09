@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.11.2",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.11.2",
+      "date": "Thu, 09 Aug 2018 16:04:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update lodash."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.10.1` to `5.10.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.11.1",
       "tag": "@microsoft/gulp-core-build-typescript_v4.11.1",
       "date": "Tue, 07 Aug 2018 22:27:31 GMT",

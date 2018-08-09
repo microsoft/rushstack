@@ -2,6 +2,23 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "2.1.14",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.14",
+      "date": "Thu, 09 Aug 2018 16:04:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update lodash."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.4` to `4.4.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.13",
       "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.13",
       "date": "Tue, 07 Aug 2018 22:27:31 GMT",

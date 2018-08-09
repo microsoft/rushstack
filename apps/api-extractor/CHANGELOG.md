@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 26 Jul 2018 16:04:17 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Aug 2018 16:04:24 GMT and should not be manually modified.
+
+## 5.10.2
+Thu, 09 Aug 2018 16:04:24 GMT
+
+### Patches
+
+- Update lodash.
 
 ## 5.10.1
 Thu, 26 Jul 2018 16:04:17 GMT
