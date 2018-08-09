@@ -38,10 +38,16 @@ export class MochaTask extends GulpTask<IMochaTaskConfig> {
     /* tslint:enable:no-string-literal */
 
     return gulp.src(this.taskConfig.testMatch, { read: false })
-      .pipe(mocha({
-        grep: matchString,
-        timeout: 15000
-      }))
+      .pipe(
+        mocha({
+          grep: matchString,
+          timeout: 15000
+        }).on('error', (error: Error) => {
+          if (completeCallback) {
+            completeCallback(error.toString());
+          }
+        })
+      )
       .pipe(istanbul.writeReports({
         dir: this.taskConfig.reportDir
       }));
