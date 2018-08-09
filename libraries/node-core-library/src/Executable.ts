@@ -83,9 +83,9 @@ interface IExecutableContext {
  * to launch child processes.
  *
  * @remarks
- * The NodeJS child_process API provides a minimal set of features that encourages reliance
- * on the operating system shell.  Invoking the OS shell is not safe, not portable, and
- * generally not recommended:
+ * The NodeJS child_process API provides a solution for launching child processes, however
+ * its design encourages reliance on the operating system shell for certain features.
+ * Invoking the OS shell is not safe, not portable, and generally not recommended:
  *
  * - Different shells have different behavior and command-line syntax, and which shell you
  *   will get with NodeJS is unpredictable.  There is no universal shell guaranteed to be
