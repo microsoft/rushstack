@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 26 Jul 2018 16:04:17 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Aug 2018 21:03:22 GMT and should not be manually modified.
+
+## 2.1.0
+Thu, 09 Aug 2018 21:03:22 GMT
+
+### Minor changes
+
+- Add a new API "Executable" for spawning child processes
 
 ## 2.0.0
 Thu, 26 Jul 2018 16:04:17 GMT
