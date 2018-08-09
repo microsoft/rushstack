@@ -1,0 +1,20 @@
+{
+  "name": "node-library-build-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "gulp test --clean"
+  },
+  "dependencies": {
+    "@types/node": "8.5.8"
+  },
+  "devDependencies": {
+    "@microsoft/node-library-build": "4.4.6",
+    "@types/chai": "3.4.34",
+    "@types/mocha": "5.2.5",
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1"
+  }
+}

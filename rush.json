@@ -85,6 +85,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "node-library-build-test",
+      "projectFolder": "build-tests/node-library-build-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-stack-library-test",
       "projectFolder": "build-tests/rush-stack-library-test",
       "reviewCategory": "tests",
