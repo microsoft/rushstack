@@ -37,6 +37,7 @@ if (os.platform() === 'win32') {
       path.join(executableFolder, 'success'),
       path.join(executableFolder, 'fail'),
       path.dirname(process.execPath), // the folder where node.exe can be found
+      // These are needed because our example script needs to find bash
       '/usr/local/bin',
       '/usr/bin',
       '/bin'
@@ -77,7 +78,7 @@ afterAll(() => {
   }
 });
 
-test('Executable.tryResolve()', () => {
+test('Executable.tryResolve() pathless', () => {
   const resolved: string | undefined = Executable.tryResolve('npm-binary-wrapper', options);
   expect(resolved).toBeDefined();
   const resolvedRelative: string = Text.replaceAll(path.relative(executableFolder, resolved!),
@@ -90,9 +91,14 @@ test('Executable.tryResolve()', () => {
     expect(resolvedRelative).toEqual('success/npm-binary-wrapper');
   }
 
-  // We should not find the "non-executable-extension.ps1" at all, because its file extension
-  // is not executable
-  expect(Executable.tryResolve('non-executable-extension.ps1', options)).toBeUndefined();
+  // We should not find the "missing-extension" at all, because its file extension
+  // is not executable on Windows (and the execute bit is missing on Unix)
+  expect(Executable.tryResolve('missing-extension', options)).toBeUndefined();
+});
+
+test('Executable.tryResolve() with path', () => {
+  const resolved: string | undefined = Executable.tryResolve('./npm-binary-wrapper', options);
+  expect(resolved).toBeUndefined();
 });
 
 function executeNpmBinaryWrapper(args: string[]): string[] {

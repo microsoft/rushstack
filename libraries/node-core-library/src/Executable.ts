@@ -255,31 +255,39 @@ export class Executable {
     const hasPathSeparators: boolean = filename.indexOf('/') >= 0
       || (os.platform() === 'win32' && filename.indexOf('\\') >= 0);
 
-    const pathsToSearch: string[] = [];
-
     // Are there any path separators?
     if (hasPathSeparators) {
-      // If so, then only search the resolved path
-      pathsToSearch.push(path.resolve(context.currentWorkingDirectory, filename));
+      // If so, then don't search the PATH.  Just resolve relative to the current working directory
+      const resolvedPath: string = path.resolve(context.currentWorkingDirectory, filename);
+      return Executable._tryResolveFileExtension(resolvedPath, context);
     } else {
       // Otherwise if it's a bare name, then try everything in the shell PATH
-      pathsToSearch.push(...Executable._getSearchFolders(context));
-    }
+      const pathsToSearch: string[] = Executable._getSearchFolders(context);
 
-    for (const pathToSearch of pathsToSearch) {
-      const resolvedPath: string = path.join(pathToSearch, filename);
-
-      if (Executable._canExecute(resolvedPath, context)) {
-        return resolvedPath;
+      for (const pathToSearch of pathsToSearch) {
+        const resolvedPath: string = path.join(pathToSearch, filename);
+        const result: string | undefined = Executable._tryResolveFileExtension(resolvedPath, context);
+        if (result) {
+          return result;
+        }
       }
 
-      // Try the default file extensions
-      for (const shellExtension of context.windowsExecutableExtensions) {
-        const resolvedNameWithExtension: string = resolvedPath + shellExtension;
+      // No match was found
+      return undefined;
+    }
+  }
 
-        if (Executable._canExecute(resolvedNameWithExtension, context)) {
-          return resolvedNameWithExtension;
-        }
+  private static _tryResolveFileExtension(resolvedPath: string, context: IExecutableContext): string | undefined {
+    if (Executable._canExecute(resolvedPath, context)) {
+      return resolvedPath;
+    }
+
+    // Try the default file extensions
+    for (const shellExtension of context.windowsExecutableExtensions) {
+      const resolvedNameWithExtension: string = resolvedPath + shellExtension;
+
+      if (Executable._canExecute(resolvedNameWithExtension, context)) {
+        return resolvedNameWithExtension;
       }
     }
 
