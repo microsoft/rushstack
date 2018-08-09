@@ -15,12 +15,14 @@
   "dependencies": {
     "@microsoft/gulp-core-build": "3.8.7",
     "@types/node": "8.5.8",
+    "glob": "~7.0.5",
     "gulp": "~3.9.1",
     "gulp-istanbul": "~0.10.3",
     "gulp-mocha": "~6.0.0"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "4.4.0",
+    "@types/glob": "5.0.30",
     "@types/gulp": "3.8.32",
     "@types/gulp-istanbul": "0.9.30",
     "@types/gulp-mocha": "0.0.32",
