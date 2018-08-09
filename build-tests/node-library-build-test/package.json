@@ -11,7 +11,10 @@
     "@types/node": "8.5.8"
   },
   "devDependencies": {
-    "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "4.4.5"
+    "@microsoft/node-library-build": "4.4.5",
+    "@types/chai": "3.4.34",
+    "@types/mocha": "5.2.5",
+    "chai": "~3.5.0",
+    "gulp": "~3.9.1"
   }
 }
