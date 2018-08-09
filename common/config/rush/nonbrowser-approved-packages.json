@@ -51,7 +51,7 @@
     },
     {
       "name": "@microsoft/node-library-build",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/package-deps-hash",
