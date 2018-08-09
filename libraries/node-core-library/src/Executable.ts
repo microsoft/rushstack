@@ -184,15 +184,6 @@ export class Executable {
       || process.env;
     const fileExtension: string = path.extname(resolvedPath);
 
-    if (fileExtension.toUpperCase() === '.JS') {
-      // Inherit the parent's node.exe
-      const nodePath: string = process.execPath;
-      const nodeArgs: string[] = [];
-      nodeArgs.push(resolvedPath);
-      nodeArgs.push(...args);
-      return child_process.spawnSync(nodePath, nodeArgs, spawnOptions);
-    }
-
     if (os.platform() === 'win32') {
       // Do we need a custom handler for this file type?
       switch (fileExtension.toUpperCase()) {
@@ -312,29 +303,19 @@ export class Executable {
         }
       }
 
-      if (fileExtension.localeCompare('.js') === 0) {
-        // The .js extension is special and always allowed since this is NodeJS.
-        // However, that file extension must be specified explitily unless it was added to PATHEXT
-        // (which is not usually the case).
-        matchFound = true;
-      }
-
       if (!matchFound) {
         return false;
       }
     } else {
-      // For Unix, check whether any of the POSIX execute bits are set, but don't
-      // require this for JavaSCript scripts (since this is NodeJS)
-      if (fileExtension.localeCompare('.js') !== 0) {
-        try {
-          // tslint:disable-next-line:no-bitwise
-          if ((FileSystem.getPosixModeBits(filePath) & PosixModeBits.AllExecute) === 0) {
-            return false; // not executable
-          }
-        } catch (error) {
-          // If we have trouble accessing the file, ignore the error and consider it "not executable"
-          // since that's what a shell would do
+      // For Unix, check whether any of the POSIX execute bits are set
+      try {
+        // tslint:disable-next-line:no-bitwise
+        if ((FileSystem.getPosixModeBits(filePath) & PosixModeBits.AllExecute) === 0) {
+          return false; // not executable
         }
+      } catch (error) {
+        // If we have trouble accessing the file, ignore the error and consider it "not executable"
+        // since that's what a shell would do
       }
     }
     return true;
@@ -356,7 +337,6 @@ export class Executable {
     // NOTE: Cmd.exe on Windows always searches the current working directory first.
     // PowerShell and Unix shells do NOT do that, because it's a security concern.
     // We follow their behavior.
-
 
     for (const splitPath of pathList.split(path.delimiter)) {
       const trimmedPath: string = splitPath.trim();

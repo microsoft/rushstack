@@ -171,37 +171,3 @@ test('Executable.spawnSync("npm-binary-wrapper") bad characters', () => {
         + ' that cannot be escaped for the Windows shell');
   }
 });
-
-test('Executable.spawnSync("javascript-file.js")', () => {
-  // Since cmd.exe isn't involved, all these crazy characters pass through without any trouble
-  const args: string[] = [
-    '', '/', ' \t ', '"a', 'b"', '"c"', '\\"\\d', '!', '!TEST_VAR!',
-    '%TEST_VAR%',
-    '%^&|<>',
-    '~!@#$*()_+`={}[]\:";\'?,./',
-    ' \n ',
-    ' \r\n '
-  ];
-
-  const result: child_process.SpawnSyncReturns<string>
-    = Executable.spawnSync('javascript-file.js', args, options);
-  expect(result.error).toBeUndefined();
-
-  expect(result.stderr).toBeDefined();
-  expect(result.stderr.toString()).toEqual('');
-
-  expect(result.stdout).toBeDefined();
-  const outputLines: string[] = result.stdout.toString().split(/[\r\n]+/g).map(x => x.trim());
-
-  expect(outputLines[0]).toEqual('Executing javascript-file.js with args:');
-
-  const stringifiedArgv: string = outputLines[1];
-  expect(stringifiedArgv.substr(0, 2)).toEqual('[\"');
-
-  const argv: string[] = JSON.parse(stringifiedArgv);
-  // Discard the first two array entries whose path is nondeterministic
-  argv.shift();  // the path to node.exe
-  argv.shift();  // the path to javascript-file.js
-
-  expect(argv).toEqual(args);
-});
