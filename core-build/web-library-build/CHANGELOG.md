@@ -1,6 +1,11 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Thu, 09 Aug 2018 21:03:22 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Aug 2018 21:58:02 GMT and should not be manually modified.
+
+## 4.4.64
+Thu, 09 Aug 2018 21:58:02 GMT
+
+*Version update only*
 
 ## 4.4.63
 Thu, 09 Aug 2018 21:03:22 GMT

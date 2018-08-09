@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Thu, 09 Aug 2018 21:03:22 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Aug 2018 21:58:02 GMT and should not be manually modified.
+
+## 4.3.38
+Thu, 09 Aug 2018 21:58:02 GMT
+
+*Version update only*
 
 ## 4.3.37
 Thu, 09 Aug 2018 21:03:22 GMT

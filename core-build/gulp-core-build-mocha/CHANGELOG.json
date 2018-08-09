@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.5.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.0",
+      "date": "Thu, 09 Aug 2018 21:58:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where the mocha task was breaking the build for projects that don't have any unit tests yet"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.3",
       "tag": "@microsoft/gulp-core-build-mocha_v3.4.3",
       "date": "Thu, 09 Aug 2018 21:03:22 GMT",

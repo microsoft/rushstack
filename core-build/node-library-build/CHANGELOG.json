@@ -2,6 +2,18 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "4.4.7",
+      "tag": "@microsoft/node-library-build_v4.4.7",
+      "date": "Thu, 09 Aug 2018 21:58:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.4.3` to `3.5.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.6",
       "tag": "@microsoft/node-library-build_v4.4.6",
       "date": "Thu, 09 Aug 2018 21:03:22 GMT",

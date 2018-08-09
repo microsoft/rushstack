@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Thu, 09 Aug 2018 21:03:22 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Aug 2018 21:58:02 GMT and should not be manually modified.
+
+## 3.5.0
+Thu, 09 Aug 2018 21:58:02 GMT
+
+### Minor changes
+
+- Fix an issue where the mocha task was breaking the build for projects that don't have any unit tests yet
 
 ## 3.4.3
 Thu, 09 Aug 2018 21:03:22 GMT
