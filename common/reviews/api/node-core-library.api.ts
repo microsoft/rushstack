@@ -1,4 +1,10 @@
 // @public
+class Executable {
+  static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
+  static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
+}
+
+// @public
 enum FileConstants {
   PackageJson = "package.json"
 }
@@ -52,6 +58,20 @@ enum FolderConstants {
 // @public
 interface IDeleteFileOptions {
   throwIfNotExists?: boolean;
+}
+
+// @beta
+interface IExecutableResolveOptions {
+  currentWorkingDirectory?: string;
+  environment?: NodeJS.ProcessEnv;
+}
+
+// @beta
+interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
+  input?: string;
+  maxBuffer?: number;
+  stdio?: ExecutableStdioMapping;
+  timeoutMs?: number;
 }
 
 // @public
@@ -282,3 +302,5 @@ class Text {
   static truncateWithEllipsis(s: string, maximumLength: number): string;
 }
 
+// WARNING: Unsupported export: ExecutableStdioStreamMapping
+// WARNING: Unsupported export: ExecutableStdioMapping
