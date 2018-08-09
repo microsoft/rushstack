@@ -1,7 +1,7 @@
-// @beta
+// @public
 class Executable {
-  static spawnSync(command: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
-  static tryResolve(name: string, options?: IExecutableResolveOptions): string | undefined;
+  static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
+  static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
 }
 
 // @public
@@ -68,7 +68,6 @@ interface IExecutableResolveOptions {
 
 // @beta
 interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
-  encoding?: string | BufferEncoding;
   input?: string;
   maxBuffer?: number;
   stdio?: ExecutableStdioMapping;

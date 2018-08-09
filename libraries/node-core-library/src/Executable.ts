@@ -207,8 +207,11 @@ export class Executable {
             }
 
             const shellArgs: string[] = [];
+            // /D: Disable execution of AutoRun commands when starting the new shell context
             shellArgs.push('/d');
+            // /S: Disable Cmd.exe's parsing of double-quote characters inside the command-line
             shellArgs.push('/s');
+            // /C: Execute the following command and then exit immediately
             shellArgs.push('/c');
             shellArgs.push(resolvedPath);
             shellArgs.push(...args);
