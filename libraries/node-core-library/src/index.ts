@@ -11,6 +11,13 @@ export {
   FileConstants,
   FolderConstants
 } from './Constants';
+export {
+  ExecutableStdioStreamMapping,
+  ExecutableStdioMapping,
+  IExecutableResolveOptions,
+  IExecutableSpawnSyncOptions,
+  Executable
+} from './Executable';
 export { FileDiffTest } from './FileDiffTest';
 export {
   IPackageJson,
