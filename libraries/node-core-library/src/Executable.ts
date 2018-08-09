@@ -247,25 +247,27 @@ export class Executable {
     return Executable._tryResolve(filename, options || { }, Executable._getExecutableContext(options));
   }
 
-  private static _tryResolve(name: string, options: IExecutableResolveOptions,
+  private static _tryResolve(filename: string, options: IExecutableResolveOptions,
     context: IExecutableContext): string | undefined {
 
-    const hasPathSeparators: boolean = name.indexOf('/') >= 0
-      || (os.platform() === 'win32' && name.indexOf('\\') >= 0);
+    // NOTE: Since "filename" cannot contain command-line arguments, the "/" here
+    // must be interpreted as a path delimiter
+    const hasPathSeparators: boolean = filename.indexOf('/') >= 0
+      || (os.platform() === 'win32' && filename.indexOf('\\') >= 0);
 
     const pathsToSearch: string[] = [];
 
     // Are there any path separators?
     if (hasPathSeparators) {
       // If so, then only search the resolved path
-      pathsToSearch.push(path.resolve(context.currentWorkingDirectory, name));
+      pathsToSearch.push(path.resolve(context.currentWorkingDirectory, filename));
     } else {
       // Otherwise if it's a bare name, then try everything in the shell PATH
       pathsToSearch.push(...Executable._getSearchFolders(context));
     }
 
     for (const pathToSearch of pathsToSearch) {
-      const resolvedPath: string = path.join(pathToSearch, name);
+      const resolvedPath: string = path.join(pathToSearch, filename);
 
       if (Executable._canExecute(resolvedPath, context)) {
         return resolvedPath;
@@ -294,13 +296,19 @@ export class Executable {
       return false;
     }
 
-    // NOTE: For Windows, we don't validate that the file extension appears in PATHEXT.
-    // That environment variable determines which extensions can be appended if the
-    // extension is missing, but it does not affect whether a file may be executed or not.
-    // Windows does have a (seldom used) ACL that can be used to deny execution permissions
-    // for a file, but NodeJS doesn't expose that API, so we don't bother checking it.
+    if (os.platform() === 'win32') {
+      // NOTE: For Windows, we don't validate that the file extension appears in PATHEXT.
+      // That environment variable determines which extensions can be appended if the
+      // extension is missing, but it does not affect whether a file may be executed or not.
+      // Windows does have a (seldom used) ACL that can be used to deny execution permissions
+      // for a file, but NodeJS doesn't expose that API, so we don't bother checking it.
 
-    if (os.platform() !== 'win32') {
+      // However, Windows *does* require that the file has some kind of file extension
+      if (path.extname(filePath) === '') {
+        return false;
+      }
+
+    } else {
       // For Unix, check whether any of the POSIX execute bits are set
       try {
         // tslint:disable-next-line:no-bitwise
