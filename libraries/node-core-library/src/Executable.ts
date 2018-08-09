@@ -291,22 +291,13 @@ export class Executable {
       return false;
     }
 
-    const fileExtension: string = path.extname(filePath);
+    // NOTE: For Windows, we don't validate that the file extension appears in PATHEXT.
+    // That environment variable determines which extensions can be appended if the
+    // extension is missing, but it does not affect whether a file may be executed or not.
+    // Windows does have a (seldom used) ACL that can be used to deny execution permissions
+    // for a file, but NodeJS doesn't expose that API, so we don't bother checking it.
 
-    if (os.platform() === 'win32') {
-      // Does the file have an executable file extension?
-      let matchFound: boolean = false;
-      for (const executableExtension of context.windowsExecutableExtensions) {
-        if (fileExtension.localeCompare(executableExtension) === 0) {
-          matchFound = true;
-          break;
-        }
-      }
-
-      if (!matchFound) {
-        return false;
-      }
-    } else {
+    if (os.platform() !== 'win32') {
       // For Unix, check whether any of the POSIX execute bits are set
       try {
         // tslint:disable-next-line:no-bitwise
@@ -318,6 +309,7 @@ export class Executable {
         // since that's what a shell would do
       }
     }
+
     return true;
   }
 
