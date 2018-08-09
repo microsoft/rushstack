@@ -44,11 +44,17 @@ export interface IExecutableResolveOptions {
 export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
   /**
    * The content to be passed to the child process's stdin.
+   *
+   * NOTE: If specified, this content replaces any IExecutableSpawnSyncOptions.stdio[0]
+   * mapping for stdin.
    */
   input?: string;
 
   /**
    * The stdio mappings for the child process.
+   *
+   * NOTE: If IExecutableSpawnSyncOptions.input is provided, it will take precedence
+   * over the stdin mapping (stdio[0]).
    */
   stdio?: ExecutableStdioMapping;
 
@@ -62,11 +68,6 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
    * If exceeded, the child process will be terminated.  The default is 200 * 1024.
    */
   maxBuffer?: number;
-
-  /**
-   * The encoding used for all stdio inputs/outputs.  The default is 'buffer'.
-   */
-  encoding?: string | BufferEncoding;
 }
 
 // Common environmental state used by Executable members
@@ -82,32 +83,31 @@ interface IExecutableContext {
  * to launch child processes.
  *
  * @remarks
- * The child_process API lacks certain higher-level features, which encourages reliance on
- * the operating system shell.  Invoking the OS shell is not safe, not portable, and
+ * The NodeJS child_process API provides a minimal set of features that encourages reliance
+ * on the operating system shell.  Invoking the OS shell is not safe, not portable, and
  * generally not recommended:
  *
  * - Different shells have different behavior and command-line syntax, and which shell you
- *   will get is unpredictable.  There is no universal shell guaranteed to be available on
- *   all platforms.
+ *   will get with NodeJS is unpredictable.  There is no universal shell guaranteed to be
+ *   available on all platforms.
  *
- * - If a command parameter contains symbol characters, a shell may process them, which
+ * - If a command parameter contains symbol characters, a shell may interpret them, which
  *   can introduce a security vulnerability
  *
  * - Each shell has different rules for escaping these symbols.  On Windows, the default
  *   shell is incapable of escaping certain character sequences.
  *
- * The Executable class provides a pure JavaScript implementation of the primitive functionality
- * for searching the PATH, correctly passing command-line arguments (which may contain
- * symbols or spaces), and finding the registered launcher based on the file extension
- * or POSIX shebang.  This primitive functionality is sufficient (and recommended) for
- * most tooling scenarios.
+ * The Executable API provides a pure JavaScript implementation of primitive shell-like
+ * functionality for searching the default PATH, appending default file extensions on Windows,
+ * and executing a file that may contain a POSIX shebang.  This primitive functionality
+ * is sufficient (and recommended) for most tooling scenarios.
  *
- * If you really do need full shell evaluation (e.g. wildcard globbing, environment variable
- * expansion, piping, etc.) then it's recommended to use the `@microsoft/rushell` library
- * instead.  Rushell has a pure JavaScript shell parser with a standard syntax that is
- * guaranteed to work consistently on all platforms.
+ * If you need additional shell features such as wildcard globbing, environment variable
+ * expansion, piping, or built-in commands, then we recommend to use the `@microsoft/rushell`
+ * library instead.  Rushell is a pure JavaScript shell with a standard syntax that is
+ * guaranteed to work consistently across all platforms.
  *
- * @beta
+ * @public
  */
 export class Executable {
   /**
@@ -115,11 +115,30 @@ export class Executable {
    *
    * @remarks
    * This function is similar to child_process.spawnSync().  The main differences are:
-   * It only invokes the OS shell when the executable is a shell script.  File extensions
-   * can be omitted on Windows.  Command-line arguments containing special characters
-   * are more accurately passed through to the child process.
+   *
+   * - It does not invoke the OS shell unless the executable file is a shell script.
+   * - Command-line arguments containing special characters are more accurately passed
+   *   through to the child process.
+   * - If the filename is missing a path, then the shell's default PATH will be searched.
+   * - If the filename is missing a file extension, then Windows default file extensions
+   *   will be searched.
+   *
+   * @param filename - The name of the executable file.  This string must not contain any
+   * command-line arguments.  If the name contains any path delimiters, then the shell's
+   * default PATH will not be searched.
+   * @param args - The command-line arguments to be passed to the process.
+   * @param options - Additional options
+   * @returns the same data type as returned by the NodeJS child_process.spawnSync() API
+   *
+   * @internalremarks
+   *
+   * NOTE: The NodeJS spawnSync() returns SpawnSyncReturns<string> or SpawnSyncReturns<Buffer>
+   * polymorphically based on the options.encoding parameter value.  This is a fairly confusing
+   * design.  In most cases, developers want string with the default encoding.  If/when someone
+   * wants binary output or a non-default text encoding, we will introduce a separate API function
+   * with a name like "spawnWithBufferSync".
    */
-  public static spawnSync(command: string, args: string[], options?: IExecutableSpawnSyncOptions):
+  public static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions):
     child_process.SpawnSyncReturns<string> {
 
     if (!options) {
@@ -128,9 +147,9 @@ export class Executable {
 
     const context: IExecutableContext = Executable._getExecutableContext(options);
 
-    const resolvedPath: string | undefined = Executable._tryResolve(command, options, context);
+    const resolvedPath: string | undefined = Executable._tryResolve(filename, options, context);
     if (!resolvedPath) {
-      throw new Error(`The executable file was not found: "${command}"`);
+      throw new Error(`The executable file was not found: "${filename}"`);
     }
 
     const spawnOptions: child_process.SpawnSyncOptionsWithStringEncoding = {
@@ -140,7 +159,6 @@ export class Executable {
       stdio: options.stdio,
       timeout: options.timeoutMs,
       maxBuffer: options.maxBuffer,
-      encoding: options.encoding,
 
       // NOTE: This is always false, because Rushell is recommended instead of relying on the OS shell.
       shell: false
@@ -215,19 +233,24 @@ export class Executable {
   }
 
   /**
-   * Search for an executable file with the specified name and return its path.
+   * Given a filename, this determines the absolute path of the executable file that would
+   * be executed by a shell:
+   *
+   * - If the filename is missing a path, then the shell's default PATH will be searched.
+   * - If the filename is missing a file extension, then Windows default file extensions
+   *   will be searched.
    *
    * @remarks
-   * If the name has a relative path, it will be resolved relative to the current working directory.
-   * If the name has no path, then the shell PATH will be searched.  If the name is missing a Windows
-   * file extension, it may be appended (based on the PATHEXT environment variable).
    *
-   * @param name - the name of the executable, which may be missing the path or file extension
+   * @param filename - The name of the executable file.  This string must not contain any
+   * command-line arguments.  If the name contains any path delimiters, then the shell's
+   * default PATH will not be searched.
+   * @param filename - the name of the executable, which may be missing the path or file extension
    * @param options - optional other parameters
    * @returns the absolute path of the executable, or undefined if it was not found
    */
-  public static tryResolve(name: string, options?: IExecutableResolveOptions): string | undefined {
-    return Executable._tryResolve(name, options || { }, Executable._getExecutableContext(options));
+  public static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined {
+    return Executable._tryResolve(filename, options || { }, Executable._getExecutableContext(options));
   }
 
   private static _tryResolve(name: string, options: IExecutableResolveOptions,
@@ -330,18 +353,19 @@ export class Executable {
     // Avoid processing duplicates
     const seenPaths: Set<string> = new Set<string>();
 
-    if (os.platform() === 'win32') {
-      // On Window, the current directory is always tried first
-      folders.push(context.currentWorkingDirectory);
-      seenPaths.add(context.currentWorkingDirectory);
-    }
+    // NOTE: Cmd.exe on Windows always searches the current working directory first.
+    // PowerShell and Unix shells do NOT do that, because it's a security concern.
+    // We follow their behavior.
+
 
     for (const splitPath of pathList.split(path.delimiter)) {
       const trimmedPath: string = splitPath.trim();
       if (trimmedPath !== '') {
         if (!seenPaths.has(trimmedPath)) {
-          // Note that PATH is allowed to contain relative paths, which will be resolved
-          // relative to the current working directory.
+          // Fun fact: If you put relative paths in your PATH environment variable,
+          // all shells will dynamically match them against the current working directory.
+          // This is a terrible design, and in practice nobody does that, but it is supported...
+          // so we allow it here.
           const resolvedPath: string = path.resolve(context.currentWorkingDirectory, trimmedPath);
 
           if (!seenPaths.has(resolvedPath)) {
@@ -408,9 +432,16 @@ export class Executable {
       const match: RegExpMatchArray | null = arg.match(specialCharRegExp);
       if (match) {
         // NOTE: It is possible to escape some of these characters by prefixing them
-        // with a caret (^), however npm-binary-wrapper.cmd the arguments to NodeJS
-        // using "%*" which reevaluates them after they were already unescaped.
-        // There
+        // with a caret (^), which allows these characters to be successfully passed
+        // through to the batch file %1 variables.  But they will be expanded again
+        // whenever they are used.  For example, NPM's binary wrapper batch files
+        // use "%*" to pass their arguments to Node.exe, which causes them to be expanded
+        // again.  Unfortunately the Cmd.exe batch language provides native escaping
+        // function (that could be used to insert the carets again).
+        //
+        // We could work around that by adding double carets, but in general there
+        // is no way to predict how many times the variable will get expanded.
+        // Thus, there is no generally reliable way to pass these characters.
         throw new Error(`The command line argument ${JSON.stringify(arg)} contains a`
           + ` special character ${JSON.stringify(match[0])} that cannot be escaped for the Windows shell`);
       }
