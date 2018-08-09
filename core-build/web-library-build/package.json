@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/web-library-build",
-  "version": "4.4.63",
+  "version": "4.4.64",
   "description": "",
   "engines": {
     "npm": "3.10.8"
@@ -17,7 +17,7 @@
   "dependencies": {
     "@microsoft/gulp-core-build": "3.8.8",
     "@microsoft/gulp-core-build-karma": "4.6.3",
-    "@microsoft/gulp-core-build-sass": "4.3.37",
+    "@microsoft/gulp-core-build-sass": "4.3.38",
     "@microsoft/gulp-core-build-serve": "3.2.38",
     "@microsoft/gulp-core-build-typescript": "4.11.3",
     "@microsoft/gulp-core-build-webpack": "3.4.10",
