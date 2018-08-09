@@ -4,6 +4,8 @@
 import * as path from 'path';
 import * as semver from 'semver';
 
+import { Logging } from '@microsoft/node-core-library';
+
 import {
   FileSystem,
   JsonFile
@@ -76,7 +78,7 @@ export class ChangelogGenerator {
       const markdownJSONPath: string = path.resolve(project.projectFolder, CHANGELOG_JSON);
 
       if (FileSystem.exists(markdownPath)) {
-        console.log('Found: ' + markdownPath);
+        Logging.log('Found: ' + markdownPath);
         if (!FileSystem.exists(markdownJSONPath)) {
           throw new Error('A CHANGELOG.md without json: ' + markdownPath);
         }
@@ -142,7 +144,7 @@ export class ChangelogGenerator {
 
       const changelogFilename: string = path.join(projectFolder, CHANGELOG_JSON);
 
-      console.log(
+      Logging.log(
         `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ` +
         `Changelog update for "${change.packageName}@${change.newVersion}".`
       );

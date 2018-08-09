@@ -4,6 +4,8 @@
 import * as os from 'os';
 import * as path from 'path';
 
+import { Logging } from '@microsoft/node-core-library';
+
 import { Utilities } from '../../utilities/Utilities';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
@@ -34,15 +36,15 @@ export class UnlinkAction extends BaseRushAction {
     for (const rushProject of this.rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
       if (FileSystem.exists(localModuleFolder)) {
-        console.log('Purging ' + localModuleFolder);
+        Logging.log('Purging ' + localModuleFolder);
         Utilities.dangerouslyDeletePath(localModuleFolder);
         didAnything = true;
       }
     }
     if (!didAnything) {
-      console.log('Nothing to do.');
+      Logging.log('Nothing to do.');
     } else {
-      console.log(os.EOL + 'Done.');
+      Logging.log(os.EOL + 'Done.');
     }
     return Promise.resolve();
   }

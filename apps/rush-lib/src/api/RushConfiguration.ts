@@ -4,10 +4,20 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';
-import { JsonFile, JsonSchema, PackageName, FileSystem } from '@microsoft/node-core-library';
 
-import { Rush } from '../api/Rush';
-import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
+import {
+  JsonFile,
+  JsonSchema,
+  PackageName,
+  FileSystem,
+  Logging
+} from '@microsoft/node-core-library';
+
+import { Rush } from './Rush';
+import {
+  RushConfigurationProject,
+  IRushConfigurationProjectJson
+} from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { ApprovedPackagesPolicy } from './ApprovedPackagesPolicy';
 import { EventHooks } from './EventHooks';
@@ -228,11 +238,11 @@ export class RushConfiguration {
 
       if (FileSystem.exists(rushJsonFilename)) {
         if (i > 0 && verbose) {
-          console.log('Found configuration in ' + rushJsonFilename);
+          Logging.log('Found configuration in ' + rushJsonFilename);
         }
 
         if (verbose) {
-          console.log('');
+          Logging.log('');
         }
 
         return rushJsonFilename;
@@ -290,7 +300,7 @@ export class RushConfiguration {
    */
   private static _validateCommonRushConfigFolder(commonRushConfigFolder: string, packageManager: PackageManager): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
-      console.log(`Creating folder: ${commonRushConfigFolder}`);
+      Logging.log(`Creating folder: ${commonRushConfigFolder}`);
       FileSystem.ensureFolder(commonRushConfigFolder);
       return;
     }

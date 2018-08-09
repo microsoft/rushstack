@@ -8,7 +8,10 @@ import {
   getPackageDeps,
   IPackageDeps
 } from '@microsoft/package-deps-hash';
-import { Path } from '@microsoft/node-core-library';
+import {
+  Path,
+  Logging
+} from '@microsoft/node-core-library';
 
 import { RushConstants } from '../logic/RushConstants';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -67,7 +70,7 @@ export class PackageChangeAnalyzer {
     } catch (e) {
       // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
       // the state of the files in the repo. This can happen if the environment doesn't have git.
-      console.log(colors.yellow(
+      Logging.log(colors.yellow(
         `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
       ));
 

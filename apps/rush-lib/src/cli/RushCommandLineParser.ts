@@ -5,7 +5,12 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
-import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@microsoft/ts-command-line';
+import {
+  CommandLineParser,
+  CommandLineFlagParameter,
+  CommandLineAction
+} from '@microsoft/ts-command-line';
+import { Logging } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -219,13 +224,13 @@ export class RushCommandLineParser extends CommandLineParser {
   private _reportErrorAndSetExitCode(error: Error): void {
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
-      console.error(os.EOL + colors.red(Utilities.wrapWords(prefix + error.message)));
+      Logging.error(os.EOL + colors.red(Utilities.wrapWords(prefix + error.message)));
     }
 
     if (this._debugParameter.value) {
       // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
       // would show for an uncaught error
-      console.error(os.EOL + error.stack);
+      Logging.error(os.EOL + error.stack);
     }
 
     this.flushTelemetry();

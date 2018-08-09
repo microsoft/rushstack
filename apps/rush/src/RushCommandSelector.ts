@@ -3,7 +3,9 @@
 
 import * as colors from 'colors';
 import * as path from 'path';
+
 import * as rushLib from '@microsoft/rush-lib';
+import { Logging } from '@microsoft/node-core-library';
 
 type CommandName = 'rush' | 'rushx' | undefined;
 
@@ -43,7 +45,7 @@ export class RushCommandSelector {
   }
 
   private static _failWithError(message: string): never {
-    console.log(colors.red(message));
+    Logging.log(colors.red(message));
     return process.exit(1);
   }
 

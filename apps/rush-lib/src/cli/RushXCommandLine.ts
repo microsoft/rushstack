@@ -8,8 +8,10 @@ import * as path from 'path';
 import {
   PackageJsonLookup,
   IPackageJson,
-  Text
- } from '@microsoft/node-core-library';
+  Text,
+  Logging
+} from '@microsoft/node-core-library';
+
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -27,8 +29,8 @@ export class RushXCommandLine {
 
       const packageJsonFilePath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(process.cwd());
       if (!packageJsonFilePath) {
-        console.log(colors.red('This command should be used inside a project folder.'));
-        console.log(`Unable to find a package.json file in the current working directory or any of its parents.`);
+        Logging.log(colors.red('This command should be used inside a project folder.'));
+        Logging.log(`Unable to find a package.json file in the current working directory or any of its parents.`);
         return;
       }
 
@@ -55,15 +57,15 @@ export class RushXCommandLine {
       const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(commandName);
 
       if (scriptBody === undefined) {
-        console.log(colors.red(`Error: The command "${commandName}" is not defined in the`
+        Logging.log(colors.red(`Error: The command "${commandName}" is not defined in the`
           + ` package.json file for this project.`));
 
         if (projectCommandSet.commandNames.length > 0) {
-          console.log(os.EOL + 'Available commands for this project are: '
+          Logging.log(os.EOL + 'Available commands for this project are: '
             + projectCommandSet.commandNames.map(x => `"${x}"`).join(', '));
         }
 
-        console.log(`Use ${colors.yellow('"rushx --help"')} for more information.`);
+        Logging.log(`Use ${colors.yellow('"rushx --help"')} for more information.`);
         return;
       }
 
@@ -73,7 +75,7 @@ export class RushXCommandLine {
         rushConfiguration = RushConfiguration.loadFromDefaultLocation();
       }
 
-      console.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);
+      Logging.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
@@ -88,25 +90,25 @@ export class RushXCommandLine {
       );
 
       if (exitCode > 0) {
-        console.log(colors.red(`The script failed with exit code ${exitCode}`));
+        Logging.log(colors.red(`The script failed with exit code ${exitCode}`));
       }
 
       process.exitCode = exitCode;
 
     } catch (error) {
-      console.log(colors.red('Error: ' + error.message));
+      Logging.log(colors.red('Error: ' + error.message));
     }
   }
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
-    console.log('usage: rushx [-h]');
-    console.log('       rushx <command> ...' + os.EOL);
+    Logging.log('usage: rushx [-h]');
+    Logging.log('       rushx <command> ...' + os.EOL);
 
-    console.log('Optional arguments:');
-    console.log('  -h, --help            Show this help message and exit.' + os.EOL);
+    Logging.log('Optional arguments:');
+    Logging.log('  -h, --help            Show this help message and exit.' + os.EOL);
 
     if (projectCommandSet.commandNames.length > 0) {
-      console.log(`Project commands for ${colors.cyan(packageJson.name)}:`);
+      Logging.log(`Project commands for ${colors.cyan(packageJson.name)}:`);
 
       // Calculate the length of the longest script name, for formatting
       let maxLength: number = 0;
@@ -123,7 +125,7 @@ export class RushXCommandLine {
         // to the next line
         const truncateLength: number = Math.max(0, Utilities.getConsoleWidth() - firstPartLength) - 1;
 
-        console.log(
+        Logging.log(
           // Example: "  command: "
           '  ' + colors.cyan(Text.padEnd(commandName + ':', maxLength + 2))
           // Example: "do some thin..."
@@ -132,13 +134,13 @@ export class RushXCommandLine {
       }
 
       if (projectCommandSet.malformedScriptNames.length > 0) {
-        console.log(os.EOL + colors.yellow('Warning: Some "scripts" entries in the package.json file'
+        Logging.log(os.EOL + colors.yellow('Warning: Some "scripts" entries in the package.json file'
           + ' have malformed names: '
           + projectCommandSet.malformedScriptNames.map(x => `"${x}"`).join(', ')));
       }
     } else {
-      console.log(colors.yellow('Warning: No commands are defined yet for this project.'));
-      console.log('You can define a command by adding a "scripts" table to the project\'s package.json file.');
+      Logging.log(colors.yellow('Warning: No commands are defined yet for this project.'));
+      Logging.log('You can define a command by adding a "scripts" table to the project\'s package.json file.');
     }
   }
 }

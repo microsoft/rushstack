@@ -4,11 +4,16 @@
 import * as colors from 'colors';
 import * as path from 'path';
 import * as semver from 'semver';
+
+import {
+  FileSystem,
+  Logging
+} from '@microsoft/node-core-library';
+
 import { RushConfiguration } from '../api/RushConfiguration';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { Utilities } from '../utilities/Utilities';
 import { RushConstants } from '../logic/RushConstants';
-import { FileSystem } from '@microsoft/node-core-library';
 
 // Refuses to run at all if the PNPM version is older than this, because there
 // are known bugs or missing features in earlier releases.
@@ -33,7 +38,7 @@ export class SetupChecks {
     const errorMessage: string | undefined = SetupChecks._validate(rushConfiguration);
 
     if (errorMessage) {
-      console.error(colors.red(Utilities.wrapWords(errorMessage)));
+      Logging.error(colors.red(Utilities.wrapWords(errorMessage)));
       throw new AlreadyReportedError();
     }
   }
@@ -71,22 +76,22 @@ export class SetupChecks {
 
     if (phantomFolders.length > 0) {
       if (phantomFolders.length === 1) {
-        console.log(colors.yellow(Utilities.wrapWords(
+        Logging.log(colors.yellow(Utilities.wrapWords(
           'Warning: A phantom "node_modules" folder was found. This defeats Rush\'s protection against'
           + ' NPM phantom dependencies and may cause confusing build errors. It is recommended to'
           + ' delete this folder:'
         )));
       } else {
-        console.log(colors.yellow(Utilities.wrapWords(
+        Logging.log(colors.yellow(Utilities.wrapWords(
           'Warning: Phantom "node_modules" folders were found. This defeats Rush\'s protection against'
           + ' NPM phantom dependencies and may cause confusing build errors. It is recommended to'
           + ' delete these folders:'
         )));
       }
       for (const folder of phantomFolders) {
-        console.log(colors.yellow(`"${folder}"`));
+        Logging.log(colors.yellow(`"${folder}"`));
       }
-      console.log(); // add a newline
+      Logging.log(); // add a newline
     }
   }
 

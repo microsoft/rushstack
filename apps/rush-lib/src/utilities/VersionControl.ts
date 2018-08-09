@@ -3,6 +3,8 @@
 
 import * as child_process from 'child_process';
 
+import { Logging } from '@microsoft/node-core-library';
+
 /**
  * @public
  */
@@ -80,7 +82,7 @@ export class VersionControl {
       return defaultMaster;
     } else if (matchingRemotes.length > 0) {
       if (matchingRemotes.length > 1) {
-        console.log(`More than one remotes match the repository url. Use the first remote.`);
+        Logging.log(`More than one remotes match the repository url. Use the first remote.`);
       }
       return `${matchingRemotes[0]}/master`;
     }

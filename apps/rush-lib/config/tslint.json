@@ -1,0 +1,8 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/tslint.schema.json",
+  "lintConfig": {
+    "rules": {
+      "no-console": true
+    }
+  }
+}

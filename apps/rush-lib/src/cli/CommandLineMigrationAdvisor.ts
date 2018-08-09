@@ -3,6 +3,8 @@
 
 import * as colors from 'colors';
 
+import { Logging } from '@microsoft/node-core-library';
+
 import { RushConstants } from '../logic/RushConstants';
 import { Utilities } from '../utilities/Utilities';
 
@@ -51,12 +53,12 @@ export class CommandLineMigrationAdvisor {
   }
 
   private static _reportDeprecated(message: string): void {
-    console.error(colors.red(Utilities.wrapWords(
+    Logging.error(colors.red(Utilities.wrapWords(
      'ERROR: You specified an outdated command-line that is no longer supported by this version of Rush:'
     )));
-    console.error(colors.yellow(Utilities.wrapWords(message)));
-    console.error();
-    console.error(Utilities.wrapWords(`For command-line help, type "rush -h".  For migration instructions,`
+    Logging.error(colors.yellow(Utilities.wrapWords(message)));
+    Logging.error();
+    Logging.error(Utilities.wrapWords(`For command-line help, type "rush -h".  For migration instructions,`
       + ` please visit ${RushConstants.rushWebSiteUrl}`));
   }
 

@@ -11,7 +11,8 @@ import * as wordwrap from 'wordwrap';
 import {
   JsonFile,
   IPackageJson,
-  FileSystem
+  FileSystem,
+  Logging
 } from '@microsoft/node-core-library';
 
 export interface IEnvironment {
@@ -105,7 +106,7 @@ export class Utilities {
     if (looped) {
       const currentTime: number = Utilities.getTimeInMs();
       const totalSeconds: string = ((currentTime - startTime) / 1000.0).toFixed(2);
-      console.log(`${fnName}() stalled for ${totalSeconds} seconds`);
+      Logging.log(`${fnName}() stalled for ${totalSeconds} seconds`);
     }
 
     return result;
@@ -185,7 +186,7 @@ export class Utilities {
    */
   public static deleteFile(filePath: string): void {
     if (Utilities.fileExists(filePath)) {
-      console.log(`Deleting: ${filePath}`);
+      Logging.log(`Deleting: ${filePath}`);
       FileSystem.deleteFile(filePath);
     }
   }
@@ -294,19 +295,19 @@ export class Utilities {
       try {
         Utilities.executeCommand(command, args, workingDirectory, environment, suppressOutput);
       } catch (error) {
-        console.log(os.EOL + 'The command failed:');
-        console.log(` ${command} ` + args.join(' '));
-        console.log(`ERROR: ${error.toString()}`);
+        Logging.log(os.EOL + 'The command failed:');
+        Logging.log(` ${command} ` + args.join(' '));
+        Logging.log(`ERROR: ${error.toString()}`);
 
         if (attemptNumber < maxAttempts) {
           ++attemptNumber;
-          console.log(`Trying again (attempt #${attemptNumber})...` + os.EOL);
+          Logging.log(`Trying again (attempt #${attemptNumber})...` + os.EOL);
           if (retryCallback) {
             retryCallback();
           }
           continue;
         } else {
-          console.error(`Giving up after ${attemptNumber} attempts` + os.EOL);
+          Logging.error(`Giving up after ${attemptNumber} attempts` + os.EOL);
           throw error;
         }
       }
@@ -410,7 +411,7 @@ export class Utilities {
   public static installPackageInDirectory(options: IInstallPackageInDirectoryOptions): void {
     const directory: string = path.resolve(options.directory);
     if (FileSystem.exists(directory)) {
-      console.log('Deleting old files from ' + directory);
+      Logging.log('Deleting old files from ' + directory);
     }
     FileSystem.ensureEmptyFolder(directory);
 
@@ -429,7 +430,7 @@ export class Utilities {
       Utilities.syncNpmrc(options.commonRushConfigFolder, directory);
     }
 
-    console.log(os.EOL + 'Running "npm install" in ' + directory);
+    Logging.log(os.EOL + 'Running "npm install" in ' + directory);
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
     Utilities.executeCommandWithRetry(options.maxInstallAttempts, 'npm', ['install'], directory,
@@ -476,7 +477,7 @@ export class Utilities {
     const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
     try {
       if (FileSystem.exists(sourceNpmrcPath)) {
-        console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`);
+        Logging.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`);
         let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
         npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
         const resultLines: string[] = [];
@@ -509,7 +510,7 @@ export class Utilities {
         FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
       } else if (FileSystem.exists(targetNpmrcPath)) {
         // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
-        console.log(`Deleting ${targetNpmrcPath}`);
+        Logging.log(`Deleting ${targetNpmrcPath}`);
         FileSystem.deleteFile(targetNpmrcPath);
       }
     } catch (e) {

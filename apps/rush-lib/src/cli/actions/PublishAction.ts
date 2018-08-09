@@ -8,7 +8,11 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
-import { JsonFile, FileSystem } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  FileSystem,
+  Logging
+} from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
@@ -180,7 +184,7 @@ export class PublishAction extends BaseRushAction {
     const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
-      console.log('Regenerating changelogs');
+      Logging.log('Regenerating changelogs');
       ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
       return Promise.resolve();
     }
@@ -194,7 +198,7 @@ export class PublishAction extends BaseRushAction {
       this._publishChanges(allPackages);
     }
 
-    console.log(EOL + colors.green('Rush publish finished successfully.'));
+    Logging.log(EOL + colors.green('Rush publish finished successfully.'));
     return Promise.resolve();
   }
 
@@ -276,7 +280,7 @@ export class PublishAction extends BaseRushAction {
   }
 
   private _publishAll(allPackages: Map<string, RushConfigurationProject>): void {
-    console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
+    Logging.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
     let updated: boolean = false;
     const git: Git = new Git(this._targetBranch.value);
@@ -294,7 +298,7 @@ export class PublishAction extends BaseRushAction {
           git.addTag(!!this._publish.value && !this._registryUrl.value, packageName, packageConfig.packageJson.version);
           updated = true;
         } else {
-          console.log(`Skip ${packageName}. Not updated.`);
+          Logging.log(`Skip ${packageName}. Not updated.`);
         }
       }
     });
@@ -418,7 +422,7 @@ export class PublishAction extends BaseRushAction {
           if (FileSystem.exists(fromApiFolderPath) && FileSystem.exists(toApiFolderPath)) {
             FileSystem.readFolder(fromApiFolderPath).forEach(fileName => {
               FileSystem.copyFile(path.join(fromApiFolderPath, fileName), path.join(toApiFolderPath, fileName));
-              console.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
+              Logging.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
             });
           }
         }

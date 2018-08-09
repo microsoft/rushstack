@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Use new logging API that can remove console colors.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}

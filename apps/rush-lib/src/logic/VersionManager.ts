@@ -4,7 +4,11 @@
 import * as path from 'path';
 import * as semver from 'semver';
 import { cloneDeep } from 'lodash';
-import { IPackageJson, JsonFile } from '@microsoft/node-core-library';
+import {
+  IPackageJson,
+  JsonFile,
+  Logging
+} from '@microsoft/node-core-library';
 
 import {
   VersionPolicy,
@@ -230,7 +234,7 @@ export class VersionManager {
       if (dependencies[updatedDependentProjectName]) {
         if (rushProject.cyclicDependencyProjects.has(updatedDependentProjectName)) {
           // Skip if cyclic
-          console.log(`Found cyclic ${rushProject.packageName} ${updatedDependentProjectName}`);
+          Logging.log(`Found cyclic ${rushProject.packageName} ${updatedDependentProjectName}`);
           return;
         }
 

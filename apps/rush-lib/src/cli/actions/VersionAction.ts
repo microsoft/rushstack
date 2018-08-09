@@ -2,7 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson } from '@microsoft/node-core-library';
+
+import {
+  IPackageJson,
+  Logging
+} from '@microsoft/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
@@ -114,7 +118,7 @@ export class VersionAction extends BaseRushAction {
 
       const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
       if (updatedPackages.size > 0) {
-        console.log(`${updatedPackages.size} packages are getting updated.`);
+        Logging.log(`${updatedPackages.size} packages are getting updated.`);
         this._gitProcess(tempBranch);
       }
     } else if (this._bumpVersion.value) {
@@ -161,7 +165,7 @@ export class VersionAction extends BaseRushAction {
       }
 
       if (newVersion) {
-        console.log(`Update version policy ${policy.policyName} from ${policy.version} to ${newVersion}`);
+        Logging.log(`Update version policy ${policy.policyName} from ${policy.version} to ${newVersion}`);
         versionConfig.update(this._versionPolicy.value, newVersion);
       }
     } else {

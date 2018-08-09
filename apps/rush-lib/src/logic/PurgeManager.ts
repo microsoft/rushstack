@@ -4,6 +4,8 @@
 import * as colors from 'colors';
 import * as path from 'path';
 
+import { Logging } from '@microsoft/node-core-library';
+
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -46,7 +48,7 @@ export class PurgeManager {
    */
   public purgeNormal(): void {
     // Delete everything under common\temp except for the recycler folder itself
-    console.log('Purging ' + this._rushConfiguration.commonTempFolder);
+    Logging.log('Purging ' + this._rushConfiguration.commonTempFolder);
 
     this._commonTempFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.commonTempFolder,
       this._getMembersToExclude(this._rushConfiguration.commonTempFolder));
@@ -60,7 +62,7 @@ export class PurgeManager {
     this.purgeNormal();
 
     // Also delete everything under ~/.rush except for the recycler folder itself
-    console.log('Purging ' + this._rushConfiguration.rushUserFolder);
+    Logging.log('Purging ' + this._rushConfiguration.rushUserFolder);
     this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.rushUserFolder,
       this._getMembersToExclude(this._rushConfiguration.rushUserFolder));
   }
@@ -86,7 +88,7 @@ export class PurgeManager {
         membersToExclude.push(firstPart);
 
         // Warn that we won't dispose this folder
-        console.log(colors.yellow('The active process\'s folder will not be deleted: '
+        Logging.log(colors.yellow('The active process\'s folder will not be deleted: '
           + path.join(folderToRecycle, firstPart)));
       }
     }

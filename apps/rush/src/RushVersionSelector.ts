@@ -4,7 +4,10 @@
 import * as path from 'path';
 import * as semver from 'semver';
 
-import { LockFile } from '@microsoft/node-core-library';
+import {
+  LockFile,
+  Logging
+} from '@microsoft/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import { _LastInstallFlag } from '@microsoft/rush-lib';
 import { RushCommandSelector } from './RushCommandSelector';
@@ -37,17 +40,17 @@ export class RushVersionSelector {
     if (!installMarker.isValid()) {
       installPromise = installPromise.then(() => {
         // Need to install Rush
-        console.log(`Rush version ${version} is not currently installed. Installing...`);
+        Logging.log(`Rush version ${version} is not currently installed. Installing...`);
 
         const resourceName: string = `rush-${version}`;
 
-        console.log(`Trying to acquire lock for ${resourceName}`);
+        Logging.log(`Trying to acquire lock for ${resourceName}`);
 
         return LockFile.acquire(expectedRushPath, resourceName)
           .then((lock: LockFile) => {
 
             if (installMarker.isValid()) {
-              console.log('Another process performed the installation.');
+              Logging.log('Another process performed the installation.');
             } else {
               Utilities.installPackageInDirectory({
                 directory: expectedRushPath,
@@ -65,7 +68,7 @@ export class RushVersionSelector {
                 suppressOutput: true
               });
 
-              console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}.`);
+              Logging.log(`Successfully installed Rush version ${version} in ${expectedRushPath}.`);
 
               // If we've made it here without exception, write the flag file
               installMarker.create();

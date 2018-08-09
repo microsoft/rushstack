@@ -5,6 +5,7 @@ import * as colors from 'colors';
 import * as os from 'os';
 
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { Logging } from '@microsoft/node-core-library';
 
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -47,7 +48,7 @@ export class PurgeAction extends BaseRushAction {
 
       purgeManager.deleteAll();
 
-      console.log(os.EOL + colors.green(`Rush purge started successfully and will complete asynchronously.`
+      Logging.log(os.EOL + colors.green(`Rush purge started successfully and will complete asynchronously.`
         + ` (${stopwatch.toString()})`));
     });
   }

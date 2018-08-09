@@ -4,10 +4,14 @@
 import { EOL } from 'os';
 import * as glob from 'glob';
 
+import {
+  JsonFile,
+  Logging
+} from '@microsoft/node-core-library';
+
 import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
-import { JsonFile } from '@microsoft/node-core-library';
 
 /**
  * This class represents the collection of change files existing in the repo and provides operations
@@ -30,7 +34,7 @@ export class ChangeFiles {
   ): void {
     const changedSet: Set<string> = new Set<string>();
     newChangeFilePaths.forEach((filePath) => {
-      console.log(`Found change file: ${filePath}`);
+      Logging.log(`Found change file: ${filePath}`);
 
       const changeRequest: IChangeInfo = JsonFile.load(filePath);
       if (changeRequest && changeRequest.changes) {
@@ -61,7 +65,7 @@ export class ChangeFiles {
     const changes: Map<string, string[]> = new Map<string, string[]>();
 
     newChangeFilePaths.forEach((filePath) => {
-      console.log(`Found change file: ${filePath}`);
+      Logging.log(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JsonFile.load(filePath);
       if (changeRequest && changeRequest.changes) {
         changeRequest.changes!.forEach(change => {
@@ -131,14 +135,14 @@ export class ChangeFiles {
 
   private _deleteFiles(files: string[], shouldDelete: boolean): number {
     if (files.length) {
-      console.log(
+      Logging.log(
         `${EOL}* ` +
         `${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ` +
         `${files.length} change file(s).`
       );
 
       for (const filePath of files) {
-        console.log(` - ${filePath}`);
+        Logging.log(` - ${filePath}`);
 
         if (shouldDelete) {
           Utilities.deleteFile(filePath);

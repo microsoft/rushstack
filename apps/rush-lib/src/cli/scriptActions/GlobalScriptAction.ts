@@ -4,6 +4,8 @@
 import * as colors from 'colors';
 import * as os from 'os';
 
+import { Logging } from '@microsoft/node-core-library';
+
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
@@ -60,7 +62,7 @@ export class GlobalScriptAction extends BaseScriptAction {
       process.exitCode = exitCode;
 
       if (exitCode > 0) {
-        console.log(os.EOL + colors.red(`The script failed with exit code ${exitCode}`));
+        Logging.log(os.EOL + colors.red(`The script failed with exit code ${exitCode}`));
         throw new AlreadyReportedError();
       }
     });

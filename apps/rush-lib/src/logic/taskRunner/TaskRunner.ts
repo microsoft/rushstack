@@ -3,7 +3,9 @@
 
 import * as colors from 'colors';
 import * as os from 'os';
+
 import { Interleaver } from '@microsoft/stream-collator';
+import { Logging } from '@microsoft/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { ITask, ITaskDefinition } from './ITask';
@@ -86,7 +88,7 @@ export class TaskRunner {
     this._tasks.set(task.name, task);
 
     if (!this._quietMode) {
-      console.log(`Registered ${task.name}`);
+      Logging.log(`Registered ${task.name}`);
     }
   }
 
@@ -131,7 +133,7 @@ export class TaskRunner {
     this._currentActiveTasks = 0;
     this._completedTasks = 0;
     this._totalTasks = this._tasks.size;
-    console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
+    Logging.log(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
 
     this._checkForCyclicDependencies(this._tasks.values(), []);
 
@@ -194,7 +196,7 @@ export class TaskRunner {
       this._currentActiveTasks++;
       const task: ITask = ctask;
       task.status = TaskStatus.Executing;
-      console.log(colors.white(`[${task.name}] started`));
+      Logging.log(colors.white(`[${task.name}] started`));
 
       task.stopwatch = Stopwatch.start();
       task.writer = Interleaver.registerTask(task.name, this._quietMode);
@@ -240,7 +242,7 @@ export class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: ITask): void {
-    console.log(colors.red(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed to build!`));
+    Logging.log(colors.red(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed to build!`));
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: ITask) => {
       this._markTaskAsBlocked(dependent, task);
@@ -253,7 +255,7 @@ export class TaskRunner {
   private _markTaskAsBlocked(task: ITask, failedTask: ITask): void {
     if (task.status === TaskStatus.Ready) {
       this._completedTasks++;
-      console.log(colors.red(`${this._getCurrentCompletedTaskString()}`
+      Logging.log(colors.red(`${this._getCurrentCompletedTaskString()}`
         + `[${task.name}] blocked by [${failedTask.name}]!`));
       task.status = TaskStatus.Blocked;
       task.dependents.forEach((dependent: ITask) => {
@@ -266,7 +268,7 @@ export class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    console.log(colors.green(`${this._getCurrentCompletedTaskString()}`
+    Logging.log(colors.green(`${this._getCurrentCompletedTaskString()}`
       + `[${task.name}] completed successfully in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.Success;
 
@@ -283,7 +285,7 @@ export class TaskRunner {
    * list of all its dependents
    */
   private _markTaskAsSuccessWithWarning(task: ITask): void {
-    console.log(colors.yellow(`${this._getCurrentCompletedTaskString()}`
+    Logging.log(colors.yellow(`${this._getCurrentCompletedTaskString()}`
       + `[${task.name}] completed with warnings in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.SuccessWithWarning;
     task.dependents.forEach((dependent: ITask) => {
@@ -298,7 +300,7 @@ export class TaskRunner {
    * Marks a task as skipped.
    */
   private _markTaskAsSkipped(task: ITask): void {
-    console.log(colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`));
+    Logging.log(colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`));
     task.status = TaskStatus.Skipped;
     task.dependents.forEach((dependent: ITask) => {
       dependent.dependencies.delete(task);
@@ -360,7 +362,7 @@ export class TaskRunner {
       }
     });
 
-    console.log('');
+    Logging.log('');
 
     this._printStatus(TaskStatus.Executing, tasksByStatus, colors.yellow);
     this._printStatus(TaskStatus.Ready, tasksByStatus, colors.white);
@@ -374,12 +376,12 @@ export class TaskRunner {
     if (tasksWithErrors) {
       tasksWithErrors.forEach((task: ITask) => {
         if (task.error) {
-          console.log(colors.red(`[${task.name}] ${task.error.message}`));
+          Logging.log(colors.red(`[${task.name}] ${task.error.message}`));
         }
       });
     }
 
-    console.log('');
+    Logging.log('');
   }
 
   private _printStatus(
@@ -390,8 +392,8 @@ export class TaskRunner {
     const tasks: ITask[] = tasksByStatus[status];
 
     if (tasks && tasks.length) {
-      console.log(color(`${status} (${tasks.length})`));
-      console.log(color('================================'));
+      Logging.log(color(`${status} (${tasks.length})`));
+      Logging.log(color('================================'));
       for (let i: number = 0; i < tasks.length; i++) {
         const task: ITask = tasks[i];
 
@@ -399,7 +401,7 @@ export class TaskRunner {
           case TaskStatus.Executing:
           case TaskStatus.Ready:
           case TaskStatus.Skipped:
-            console.log(color(task.name));
+            Logging.log(color(task.name));
             break;
 
           case TaskStatus.Success:
@@ -408,9 +410,9 @@ export class TaskRunner {
           case TaskStatus.Failure:
             if (task.stopwatch) {
               const time: string = task.stopwatch.toString();
-              console.log(color(`${task.name} (${time})`));
+              Logging.log(color(`${task.name} (${time})`));
             } else {
-              console.log(color(`${task.name}`));
+              Logging.log(color(`${task.name}`));
             }
             break;
         }
@@ -423,12 +425,12 @@ export class TaskRunner {
               .filter(text => text)
               .join(os.EOL);
 
-            console.log(stderr + (i !== tasks.length - 1 ? os.EOL : ''));
+            Logging.log(stderr + (i !== tasks.length - 1 ? os.EOL : ''));
           }
         }
       }
 
-      console.log(color('================================' + os.EOL));
+      Logging.log(color('================================' + os.EOL));
     }
   }
 }

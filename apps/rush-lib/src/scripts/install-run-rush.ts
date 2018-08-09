@@ -12,6 +12,8 @@
 //
 // For more information, see: https://rushjs.io/pages/maintainer/setup_new_repo/
 
+// tslint:disable:no-console
+
 import * as path from 'path';
 import * as fs from 'fs';
 

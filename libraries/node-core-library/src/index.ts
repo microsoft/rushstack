@@ -50,7 +50,11 @@ export {
   IPackageJsonLookupParameters,
   PackageJsonLookup
 } from './PackageJsonLookup';
-export { PackageName, IParsedPackageName, IParsedPackageNameOrError } from './PackageName';
+export {
+  PackageName,
+  IParsedPackageName,
+  IParsedPackageNameOrError
+} from './PackageName';
 export { Path } from './Path';
 export { Text } from './Text';
 export {
@@ -68,3 +72,7 @@ export {
   FileWriter,
   IFileWriterFlags
 } from './FileWriter';
+export {
+  Logging,
+  ILoggingProviderSet
+} from './Logging';

@@ -2,7 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Text, FileSystem } from '@microsoft/node-core-library';
+import {
+  Text,
+  FileSystem,
+  Logging
+} from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 
@@ -26,7 +30,7 @@ export class StandardScriptUpdater {
     }
 
     if (anyChanges) {
-      console.log(); // print a newline after the notices
+      Logging.log(); // print a newline after the notices
     }
     return anyChanges;
   }
@@ -73,7 +77,7 @@ export class StandardScriptUpdater {
         throw new Error('The standard files in the "common/scripts" folders need to be updated'
           + ' for this Rush version.  Please run "rush update" and commit the changes.');
       } else {
-        console.log(`Script is out of date; updating "${targetFilePath}"`);
+        Logging.log(`Script is out of date; updating "${targetFilePath}"`);
         FileSystem.copyFile(sourceFilePath, targetFilePath);
       }
     }
