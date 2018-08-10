@@ -83,6 +83,8 @@ export interface IInstallManagerOptions {
   /**
    * The value of the "--network-concurrency" command-line parameter, which
    * is a diagnostic option used to troubleshoot network failures.
+   *
+   * Currently only supported for PNPM.
    */
   networkConcurrency: number | undefined;
 
@@ -778,6 +780,12 @@ export class InstallManager {
 
           console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
             + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
+
+          if (options.collectLogFile || options.networkConcurrency) {
+            // Show the full command-line when diagnostic options are specified
+            console.log(os.EOL + colors.green('Invoking package manager: ')
+              + FileSystem.getRealPath(packageManagerFilename) + ' ' + installArgs.join(' ') + os.EOL);
+          }
 
           Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
             installArgs,
