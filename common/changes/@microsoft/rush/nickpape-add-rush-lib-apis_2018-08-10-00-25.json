@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Expose a few API's that were not public",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
