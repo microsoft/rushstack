@@ -79,6 +79,15 @@ export interface IInstallManagerOptions {
    * (pnpmfile.js script logic, registry changes, etc).
    */
   recheckShrinkwrap: boolean;
+
+  /**
+   * The value of the "--network-concurrency" command-line parameter, which
+   * is a diagnostic option used to troubleshoot network failures.
+   *
+   * Currently only supported for PNPM.
+   */
+  networkConcurrency: number | undefined;
+
   /**
    * Whether or not to collect verbose logs from the package manager.
    * If specified when using PNPM, the logs will be in /common/temp/pnpm.log
@@ -239,8 +248,7 @@ export class InstallManager {
             }
           }
 
-          return this._installCommonModules(shrinkwrapIsUpToDate,
-            options.allowShrinkwrapUpdates, options.collectLogFile)
+          return this._installCommonModules(shrinkwrapIsUpToDate, options)
             .then(() => {
               if (!options.noLink) {
                 const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
@@ -616,10 +624,7 @@ export class InstallManager {
   /**
    * Runs "npm install" in the common folder.
    */
-  private _installCommonModules(
-    shrinkwrapIsUpToDate: boolean,
-    allowShrinkwrapUpdates: boolean,
-    collectLogFile: boolean): Promise<void> {
+  private _installCommonModules(shrinkwrapIsUpToDate: boolean, options: IInstallManagerOptions): Promise<void> {
     return Promise.resolve().then(() => {
       console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
         + os.EOL);
@@ -726,7 +731,7 @@ export class InstallManager {
                 console.log(`Running "${this._rushConfiguration.packageManager} prune"`
                   + ` in ${this._rushConfiguration.commonTempFolder}`);
                 const args: string[] = ['prune'];
-                this._pushConfigurationArgs(args, collectLogFile);
+                this._pushConfigurationArgs(args, options);
 
                 Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename, args,
                   this._rushConfiguration.commonTempFolder);
@@ -771,10 +776,16 @@ export class InstallManager {
           // people would have different node_modules based on their system.
 
           const installArgs: string[] = ['install', '--no-optional'];
-          this._pushConfigurationArgs(installArgs, collectLogFile);
+          this._pushConfigurationArgs(installArgs, options);
 
           console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
             + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
+
+          if (options.collectLogFile || options.networkConcurrency) {
+            // Show the full command-line when diagnostic options are specified
+            console.log(os.EOL + colors.green('Invoking package manager: ')
+              + FileSystem.getRealPath(packageManagerFilename) + ' ' + installArgs.join(' ') + os.EOL);
+          }
 
           Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
             installArgs,
@@ -799,7 +810,7 @@ export class InstallManager {
 
             console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
             const npmArgs: string[] = ['shrinkwrap'];
-            this._pushConfigurationArgs(npmArgs, collectLogFile);
+            this._pushConfigurationArgs(npmArgs, options);
             Utilities.executeCommand(this._rushConfiguration.packageManagerToolFilename,
               npmArgs, this._rushConfiguration.commonTempFolder);
             console.log('"npm shrinkwrap" completed' + os.EOL);
@@ -807,7 +818,7 @@ export class InstallManager {
             this._fixupNpm5Regression();
           }
 
-          if (allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
+          if (options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
             // Copy (or delete) common\temp\shrinkwrap.yaml --> common\config\rush\shrinkwrap.yaml
             this._syncFile(this._rushConfiguration.tempShrinkwrapFilename,
               this._rushConfiguration.committedShrinkwrapFilename);
@@ -939,12 +950,12 @@ export class InstallManager {
    * Used when invoking the NPM tool.  Appends the common configuration options
    * to the command-line.
    */
-  private _pushConfigurationArgs(args: string[], collectLogFile: boolean): void {
+  private _pushConfigurationArgs(args: string[], options: IInstallManagerOptions): void {
     if (this._rushConfiguration.packageManager === 'npm') {
       args.push('--cache', this._rushConfiguration.npmCacheFolder);
       args.push('--tmp', this._rushConfiguration.npmTmpFolder);
 
-      if (collectLogFile) {
+      if (options.collectLogFile) {
         args.push('--verbose');
       }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
@@ -957,8 +968,12 @@ export class InstallManager {
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
 
-      if (collectLogFile) {
+      if (options.collectLogFile) {
         args.push('--reporter', 'ndjson');
+      }
+
+      if (options.networkConcurrency) {
+        args.push('--network-concurrency', options.networkConcurrency.toString());
       }
     }
   }
