@@ -43,7 +43,8 @@ export {
 
 export {
   ChangeType,
-  IChangeInfo
+  IChangeInfo,
+  IChangeFile
 } from './api/ChangeManagement';
 
 export {
@@ -61,5 +62,9 @@ export {
 export {
   VersionPolicyConfiguration
 } from './api/VersionPolicyConfiguration';
+
+export {
+  RushConstants
+} from './logic/RushConstants';
 
 export { Rush } from './api/Rush';

@@ -4,6 +4,8 @@
 /**
  * Constants used by the Rush tool.
  *
+ * @internal
+ *
  * @remarks
  *
  * These are NOT part of the public API surface for rush-lib.
