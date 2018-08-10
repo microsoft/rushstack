@@ -80,7 +80,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     if (this._networkConcurrencyParameter.value) {
       if (this.rushConfiguration.packageManager !== 'pnpm') {
-        throw new Error(`The ${this._networkConcurrencyParameter.longName} parameter is currently`
+        throw new Error(`The "${this._networkConcurrencyParameter.longName}" parameter is`
           + ` only supported when using the PNPM package manager.`);
       }
     }
