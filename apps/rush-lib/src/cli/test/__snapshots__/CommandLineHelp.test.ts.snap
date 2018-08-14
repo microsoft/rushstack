@@ -188,7 +188,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for "rush install" 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
-                    [--debug-package-manager]
+                    [--network-concurrency COUNT] [--debug-package-manager]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -214,6 +214,10 @@ Optional arguments:
                         is useful for automated builds that want to report 
                         stages individually or perform extra operations in 
                         between the two stages.
+  --network-concurrency COUNT
+                        If specified, limits the maximum number of concurrent 
+                        network requests. This is useful when troubleshooting 
+                        network failures.
   --debug-package-manager
                         Activates verbose logging for the package manager. 
                         You will probably want to pipe the output of Rush to 
@@ -396,7 +400,8 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for "rush update" 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
-                   [--debug-package-manager] [--full] [--recheck]
+                   [--network-concurrency COUNT] [--debug-package-manager]
+                   [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -421,6 +426,10 @@ Optional arguments:
                         is useful for automated builds that want to report 
                         stages individually or perform extra operations in 
                         between the two stages.
+  --network-concurrency COUNT
+                        If specified, limits the maximum number of concurrent 
+                        network requests. This is useful when troubleshooting 
+                        network failures.
   --debug-package-manager
                         Activates verbose logging for the package manager. 
                         You will probably want to pipe the output of Rush to 
