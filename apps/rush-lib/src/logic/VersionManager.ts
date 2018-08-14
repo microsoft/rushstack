@@ -4,7 +4,11 @@
 import * as path from 'path';
 import * as semver from 'semver';
 import { cloneDeep } from 'lodash';
-import { IPackageJson, JsonFile } from '@microsoft/node-core-library';
+import {
+  IPackageJson,
+  JsonFile,
+  FileConstants
+} from '@microsoft/node-core-library';
 
 import {
   VersionPolicy,
@@ -321,7 +325,7 @@ export class VersionManager {
       const rushProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(packageName);
       // Update package.json
       if (rushProject) {
-        const packagePath: string = path.join(rushProject.projectFolder, 'package.json');
+        const packagePath: string = path.join(rushProject.projectFolder, FileConstants.PackageJson);
         JsonFile.save(newPackageJson, packagePath);
       }
     });

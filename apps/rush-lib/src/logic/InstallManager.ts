@@ -17,7 +17,8 @@ import {
   Text,
   IPackageJson,
   MapExtensions,
-  FileSystem
+  FileSystem,
+  FileConstants
 } from '@microsoft/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
@@ -526,7 +527,7 @@ export class InstallManager {
         unscopedTempProjectName);
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
-      const tempPackageJsonFilename: string = path.join(tempProjectFolder, RushConstants.packageJsonFilename);
+      const tempPackageJsonFilename: string = path.join(tempProjectFolder, FileConstants.PackageJson);
 
       // we only want to overwrite the package if the existing tarball's package.json is different from tempPackageJson
       let shouldOverwrite: boolean = true;
@@ -570,7 +571,7 @@ export class InstallManager {
             noPax: true,
             sync: true,
             prefix: npmPackageFolder
-          } as CreateOptions, ['package.json']);
+          } as CreateOptions, [FileConstants.PackageJson]);
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
@@ -583,7 +584,7 @@ export class InstallManager {
 
     // Example: "C:\MyRepo\common\temp\package.json"
     const commonPackageJsonFilename: string = path.join(this._rushConfiguration.commonTempFolder,
-      RushConstants.packageJsonFilename);
+      FileConstants.PackageJson);
 
     if (shrinkwrapFile) {
       // If we have a (possibly incomplete) shrinkwrap file, save it as the temporary file.

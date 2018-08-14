@@ -58,6 +58,7 @@ enum BumpType {
 
 // @public
 class ChangeFile {
+  // WARNING: The type "IChangeFile" needs to be exported by the package (e.g. added to index.ts)
   // @internal
   constructor(changeFileData: IChangeFile, rushConfiguration: RushConfiguration);
   addChange(data: IChangeInfo): void;
@@ -112,16 +113,6 @@ class EventHooks {
   // @internal
   constructor(eventHooksJson: IEventHooksJson);
   get(event: Event): string[];
-}
-
-// @public
-interface IChangeFile {
-  // (undocumented)
-  changes: IChangeInfo[];
-  // (undocumented)
-  email: string | undefined;
-  // (undocumented)
-  packageName: string;
 }
 
 // @public
@@ -246,31 +237,6 @@ class RushConfigurationProject {
   readonly versionPolicy: VersionPolicy | undefined;
   // @beta
   readonly versionPolicyName: string | undefined;
-}
-
-// WARNING: Export "browserApprovedPackagesFilename" must have an initialized value
-// WARNING: Export "changeFilesFolderName" must have an initialized value
-// WARNING: Export "nonbrowserApprovedPackagesFilename" must have an initialized value
-// WARNING: Export "commonFolderName" must have an initialized value
-// WARNING: Export "rushTempNpmScope" must have an initialized value
-// WARNING: Export "rushTempFolderName" must have an initialized value
-// WARNING: Export "rushTempProjectsFolderName" must have an initialized value
-// WARNING: Export "npmShrinkwrapFilename" must have an initialized value
-// WARNING: Export "pnpmShrinkwrapFilename" must have an initialized value
-// WARNING: Export "pnpmFileFilename" must have an initialized value
-// WARNING: Export "nodeModulesFolderName" must have an initialized value
-// WARNING: Export "packageJsonFilename" must have an initialized value
-// WARNING: Export "pinnedVersionsFilename" must have an initialized value
-// WARNING: Export "commonVersionsFilename" must have an initialized value
-// WARNING: Export "packageDepsFilename" must have an initialized value
-// WARNING: Export "commandLineFilename" must have an initialized value
-// WARNING: Export "versionPoliciesFileName" must have an initialized value
-// WARNING: Export "rushWebSiteUrl" must have an initialized value
-// WARNING: Export "rushPackageName" must have an initialized value
-// WARNING: Export "rushRecyclerFolderName" must have an initialized value
-// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
-// @internal
-module RushConstants {
 }
 
 // @beta

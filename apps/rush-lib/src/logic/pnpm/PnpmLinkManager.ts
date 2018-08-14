@@ -11,7 +11,8 @@ import {
   Text,
   IPackageJson,
   PackageName,
-  FileSystem
+  FileSystem,
+  FileConstants
 } from '@microsoft/node-core-library';
 
 import {
@@ -68,7 +69,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       RushConstants.rushTempProjectsFolderName, unscopedTempProjectName);
 
     // Example: "C:\MyRepo\common\temp\projects\project1\package.json"
-    const packageJsonFilename: string = path.join(extractedFolder, 'package.json');
+    const packageJsonFilename: string = path.join(extractedFolder, FileConstants.PackageJson);
 
     // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
     const installFolderName: string = path.join(this._rushConfiguration.commonTempFolder,
@@ -186,7 +187,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       if (DEBUG) {
         // read the version number for diagnostic purposes
         const packageJsonForDependency: IPackageJson = JsonFile.load(
-          path.join(dependencyLocalInstallationRealpath, RushConstants.packageJsonFilename));
+          path.join(dependencyLocalInstallationRealpath, FileConstants.PackageJson));
 
         version = packageJsonForDependency.version;
       }
