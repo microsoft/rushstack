@@ -36,20 +36,20 @@ If you didn't configure your e-mail yet, try something like this:`);
       throw new AlreadyReportedError();
     }
 
-    console.log('Checking Git policy for this repository.' + os.EOL);
-
-    if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
-      return userEmail;
+    // sanity check; a valid e-mail should not contain any whitespace
+    if (!userEmail || !userEmail.match(/^\S+$/g)) {
+      throw new Error(colors.red('The gitPolicy check failed because "git config" returned unexpected output:'
+        + os.EOL + `"${userEmail}"`));
     }
 
     if (bypassPolicy) {
       return userEmail;
     }
 
-    // sanity check; a valid e-mail should not contain any whitespace
-    if (!userEmail || !userEmail.match(/^\S+$/g)) {
-      throw new Error(colors.red('The gitPolicy check failed because "git config" returned unexpected output:'
-        + os.EOL + `"${userEmail}"`));
+    console.log('Checking Git policy for this repository.' + os.EOL);
+
+    if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
+      return userEmail;
     }
 
     for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
