@@ -205,13 +205,9 @@ export class InstallManager {
     return Promise.resolve().then(() => {
 
       // Check the policies
-      if (!options.bypassPolicy) {
-        if (!GitPolicy.check(this._rushConfiguration)) {
-          throw new AlreadyReportedError();
-        }
+      GitPolicy.getUserEmail(this._rushConfiguration, options.bypassPolicy);
 
-        ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
-      }
+      ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
 
       // Ensure that the package manager is installed
       return this.ensureLocalPackageManager()

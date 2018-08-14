@@ -173,7 +173,7 @@ export class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected run(): Promise<void> {
-    if (!GitPolicy.check(this.rushConfiguration)) {
+    if (!GitPolicy.getUserEmail(this.rushConfiguration, true)) {
       process.exit(1);
       return Promise.resolve();
     }

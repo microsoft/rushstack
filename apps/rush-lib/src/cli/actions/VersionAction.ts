@@ -90,18 +90,7 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    // try to get the user email
-    const userEmail: string | undefined = GitPolicy.getUserEmail(this.rushConfiguration);
-
-    if (!userEmail) {
-      return Promise.reject(undefined);
-    }
-
-    if (!this._bypassPolicy.value) {
-      if (!GitPolicy.check(this.rushConfiguration, userEmail)) {
-        return Promise.reject(undefined);
-      }
-    }
+    const userEmail: string = GitPolicy.getUserEmail(this.rushConfiguration, this._bypassPolicy.value);
     this._validateInput();
 
     this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
