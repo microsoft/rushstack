@@ -4,7 +4,7 @@
 import * as colors from 'colors';
 import * as os from 'os';
 
-import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { CommandLineFlagParameter, CommandLineIntegerParameter } from '@microsoft/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
@@ -21,6 +21,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _purgeParameter: CommandLineFlagParameter;
   protected _bypassPolicyParameter: CommandLineFlagParameter;
   protected _noLinkParameter: CommandLineFlagParameter;
+  protected _networkConcurrencyParameter: CommandLineIntegerParameter;
   protected _debugPackageManagerParameter: CommandLineFlagParameter;
 
   protected onDefineParameters(): void {
@@ -39,6 +40,12 @@ export abstract class BaseInstallAction extends BaseRushAction {
         + ' after the installation completes.  You will need to run "rush link" manually.'
         + ' This flag is useful for automated builds that want to report stages individually'
         + ' or perform extra operations in between the two stages.'
+    });
+    this._networkConcurrencyParameter = this.defineIntegerParameter({
+      parameterLongName: '--network-concurrency',
+      argumentName: 'COUNT',
+      description: 'If specified, limits the maximum number of concurrent network requests.'
+        + '  This is useful when troubleshooting network failures.'
     });
     this._debugPackageManagerParameter = this.defineFlagParameter({
       parameterLongName: '--debug-package-manager',
@@ -69,6 +76,13 @@ export abstract class BaseInstallAction extends BaseRushAction {
       console.log('The --purge flag was specified, so performing "rush purge"');
       purgeManager.purgeNormal();
       console.log('');
+    }
+
+    if (this._networkConcurrencyParameter.value) {
+      if (this.rushConfiguration.packageManager !== 'pnpm') {
+        throw new Error(`The "${this._networkConcurrencyParameter.longName}" parameter is`
+          + ` only supported when using the PNPM package manager.`);
+      }
     }
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
