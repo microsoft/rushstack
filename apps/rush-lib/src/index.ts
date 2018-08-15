@@ -43,7 +43,8 @@ export {
 
 export {
   ChangeType,
-  IChangeInfo
+  IChangeInfo,
+  IChangeFile
 } from './api/ChangeManagement';
 
 export {

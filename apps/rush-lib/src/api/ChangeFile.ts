@@ -62,13 +62,15 @@ export class ChangeFile {
   }
 
   /**
-   * Writes the change file to disk in sync mode
+   * Writes the change file to disk in sync mode.
+   * Returns the filepath.
    */
-  public writeSync(): void {
+  public writeSync(): string {
     const filePath: string = this.generatePath();
     JsonFile.save(this._changeFileData, filePath, {
       ensureFolderExists: true
     });
+    return filePath;
   }
 
   /**
