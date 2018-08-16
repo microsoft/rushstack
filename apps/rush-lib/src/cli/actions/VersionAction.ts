@@ -90,31 +90,34 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    const userEmail: string = GitPolicy.getUserEmail(this.rushConfiguration, this._bypassPolicy.value);
-    this._validateInput();
+    return Promise.resolve().then(() => {
+      const userEmail: string = GitPolicy.getUserEmail(this.rushConfiguration, this._bypassPolicy.value);
 
-    this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
+      this._validateInput();
 
-    if (this._ensureVersionPolicy.value) {
-      this._overwritePolicyVersionIfNeeded();
-      const tempBranch: string = 'version/ensure-' + new Date().getTime();
-      this._versionManager.ensure(this._versionPolicy.value, true,
-        !!this._overrideVersion.value || !!this._prereleaseIdentifier.value);
+      this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
 
-      const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
-      if (updatedPackages.size > 0) {
-        console.log(`${updatedPackages.size} packages are getting updated.`);
+      if (this._ensureVersionPolicy.value) {
+        this._overwritePolicyVersionIfNeeded();
+        const tempBranch: string = 'version/ensure-' + new Date().getTime();
+        this._versionManager.ensure(this._versionPolicy.value, true,
+          !!this._overrideVersion.value || !!this._prereleaseIdentifier.value);
+
+        const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
+        if (updatedPackages.size > 0) {
+          console.log(`${updatedPackages.size} packages are getting updated.`);
+          this._gitProcess(tempBranch);
+        }
+      } else if (this._bumpVersion.value) {
+        const tempBranch: string = 'version/bump-' + new Date().getTime();
+        this._versionManager.bump(this._versionPolicy.value,
+          this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
+          this._prereleaseIdentifier.value,
+          true);
         this._gitProcess(tempBranch);
       }
-    } else if (this._bumpVersion.value) {
-      const tempBranch: string = 'version/bump-' + new Date().getTime();
-      this._versionManager.bump(this._versionPolicy.value,
-        this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
-        this._prereleaseIdentifier.value,
-        true);
-      this._gitProcess(tempBranch);
-    }
-    return Promise.resolve();
+      return Promise.resolve();
+    });
   }
 
   private _overwritePolicyVersionIfNeeded(): void {
