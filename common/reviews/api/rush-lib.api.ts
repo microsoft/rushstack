@@ -57,30 +57,8 @@ enum BumpType {
 }
 
 // @public
-class ChangeFile {
-  // WARNING: The type "IChangeFile" needs to be exported by the package (e.g. added to index.ts)
-  // @internal
-  constructor(changeFileData: IChangeFile, rushConfiguration: RushConfiguration);
-  addChange(data: IChangeInfo): void;
-  generatePath(): string;
-  getChanges(packageName: string): IChangeInfo[];
-  writeSync(): void;
-}
-
-// @public
-enum ChangeType {
-  // (undocumented)
-  dependency = 1,
-  // (undocumented)
-  hotfix = 2,
-  // (undocumented)
-  major = 5,
-  // (undocumented)
-  minor = 4,
-  // (undocumented)
-  none = 0,
-  // (undocumented)
-  patch = 3
+class ChangeManager {
+  static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 
 // @public
@@ -113,20 +91,6 @@ class EventHooks {
   // @internal
   constructor(eventHooksJson: IEventHooksJson);
   get(event: Event): string[];
-}
-
-// @public
-interface IChangeInfo {
-  author?: string;
-  changes?: IChangeInfo[];
-  changeType?: ChangeType;
-  comment?: string;
-  commit?: string;
-  newRangeDependency?: string;
-  newVersion?: string;
-  order?: number;
-  packageName: string;
-  type?: string;
 }
 
 // @beta

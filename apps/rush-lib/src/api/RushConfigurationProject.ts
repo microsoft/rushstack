@@ -6,7 +6,8 @@ import {
   JsonFile,
   IPackageJson,
   PackageName,
-  FileSystem
+  FileSystem,
+  FileConstants
 } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -88,7 +89,7 @@ export class RushConfigurationProject {
       this._reviewCategory = projectJson.reviewCategory;
     }
 
-    const packageJsonFilename: string = path.join(this._projectFolder, 'package.json');
+    const packageJsonFilename: string = path.join(this._projectFolder, FileConstants.PackageJson);
     this._packageJson = JsonFile.load(packageJsonFilename);
 
     if (this._packageJson.name !== this._packageName) {

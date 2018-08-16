@@ -5,10 +5,12 @@ import * as os from 'os';
 import * as colors from 'colors';
 import * as path from 'path';
 
+import { FileConstants } from '@microsoft/node-core-library';
+
 import { ApiDocumenterCommandLine } from './cli/ApiDocumenterCommandLine';
 
 const myPackageJsonFilename: string = path.resolve(path.join(
-  __dirname, '..', 'package.json')
+  __dirname, '..', FileConstants.PackageJson)
 );
 const myPackageJson: { version: string } = require(myPackageJsonFilename);
 

@@ -62,17 +62,22 @@ export class ChangeFile {
   }
 
   /**
-   * Writes the change file to disk in sync mode
+   * Writes the change file to disk in sync mode.
+   * Returns the filepath.
+   * @returns the path to the file that was written (based on generatePath())
    */
-  public writeSync(): void {
+  public writeSync(): string {
     const filePath: string = this.generatePath();
     JsonFile.save(this._changeFileData, filePath, {
       ensureFolderExists: true
     });
+    return filePath;
   }
 
   /**
-   * Generates a file path for storing the change file to disk
+   * Generates a file path for storing the change file to disk.
+   * Note that this value may change if called twice in a row,
+   * as it is partially based on the current date/time.
    */
   public generatePath(): string {
     let branch: string | undefined = undefined;
