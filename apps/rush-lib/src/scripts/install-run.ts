@@ -16,15 +16,12 @@ import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import {
-  IPackageJson,
-  FileConstants
-} from '@microsoft/node-core-library';
+import { IPackageJson } from '@microsoft/node-core-library';
 
 export const RUSH_JSON_FILENAME: string = 'rush.json';
 const INSTALLED_FLAG_FILENAME: string = 'installed.flag';
 const NODE_MODULES_FOLDER_NAME: string = 'node_modules';
-const PACKAGE_JSON_FILENAME: string = FileConstants.PackageJson;
+const PACKAGE_JSON_FILENAME: string = 'package.json';
 
 /**
  * Parse a package specifier (in the form of name\@version) into name and version parts.

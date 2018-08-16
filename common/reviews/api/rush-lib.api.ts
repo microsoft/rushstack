@@ -56,9 +56,8 @@ enum BumpType {
   'prerelease' = 1
 }
 
-// @public (undocumented)
+// @public
 class ChangeManager {
-  // (undocumented)
   static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 

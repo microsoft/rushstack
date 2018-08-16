@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Expose a few API's that were not public",
+      "comment": "Remove package.json from rush-lib constants. Add public API for creating changefiles.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
