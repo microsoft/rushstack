@@ -56,30 +56,10 @@ enum BumpType {
   'prerelease' = 1
 }
 
-// @public
-class ChangeFile {
-  // @internal
-  constructor(changeFileData: IChangeFile, rushConfiguration: RushConfiguration);
-  addChange(data: IChangeInfo): void;
-  generatePath(): string;
-  getChanges(packageName: string): IChangeInfo[];
-  writeSync(): string;
-}
-
-// @public
-enum ChangeType {
+// @public (undocumented)
+class ChangeManager {
   // (undocumented)
-  dependency = 1,
-  // (undocumented)
-  hotfix = 2,
-  // (undocumented)
-  major = 5,
-  // (undocumented)
-  minor = 4,
-  // (undocumented)
-  none = 0,
-  // (undocumented)
-  patch = 3
+  static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 
 // @public
@@ -112,30 +92,6 @@ class EventHooks {
   // @internal
   constructor(eventHooksJson: IEventHooksJson);
   get(event: Event): string[];
-}
-
-// @public
-interface IChangeFile {
-  // (undocumented)
-  changes: IChangeInfo[];
-  // (undocumented)
-  email: string | undefined;
-  // (undocumented)
-  packageName: string;
-}
-
-// @public
-interface IChangeInfo {
-  author?: string;
-  changes?: IChangeInfo[];
-  changeType?: ChangeType;
-  comment?: string;
-  commit?: string;
-  newRangeDependency?: string;
-  newVersion?: string;
-  order?: number;
-  packageName: string;
-  type?: string;
 }
 
 // @beta

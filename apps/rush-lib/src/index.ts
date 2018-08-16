@@ -38,14 +38,8 @@ export {
 } from './api/EventHooks';
 
 export {
-  ChangeFile
-} from './api/ChangeFile';
-
-export {
-  ChangeType,
-  IChangeInfo,
-  IChangeFile
-} from './api/ChangeManagement';
+  ChangeManager
+} from './api/ChangeManager';
 
 export {
   LastInstallFlag as _LastInstallFlag
