@@ -76,6 +76,11 @@ export class MarkdownDocumenter {
 
     markupPage.elements.push(...apiPackage.summary);
 
+    const namespacesTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Namespaces'),
+      Markup.createTextElements('Description'),
+    ]);
+
     const classesTable: IMarkupTable = Markup.createTable([
       Markup.createTextElements('Class'),
       Markup.createTextElements('Description')
@@ -152,12 +157,26 @@ export class MarkdownDocumenter {
           );
           this._writeEnumPage(docChild);
           break;
+        case 'namespace':
+          namespacesTable.rows.push(
+            Markup.createTableRow([
+              docItemTitle,
+              docChildDescription
+            ])
+          );
+          this._writePackagePage(docChild);
+          break;
       }
     }
 
     if (apiPackage.remarks && apiPackage.remarks.length) {
       markupPage.elements.push(Markup.createHeading1('Remarks'));
       markupPage.elements.push(...apiPackage.remarks);
+    }
+
+    if (namespacesTable.rows.length > 0) {
+      markupPage.elements.push(Markup.createHeading1('Namespaces'));
+      markupPage.elements.push(namespacesTable);
     }
 
     if (classesTable.rows.length > 0) {
