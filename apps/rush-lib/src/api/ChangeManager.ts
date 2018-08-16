@@ -28,5 +28,4 @@ export class ChangeManager {
     }
     return undefined;
   }
-
 }
