@@ -78,11 +78,6 @@ export namespace RushConstants {
   export const nodeModulesFolderName: string = 'node_modules';
 
   /**
-   * The filename ("package.json") used by NPM to define a package.
-   */
-  export const packageJsonFilename: string = 'package.json';
-
-  /**
    * The filename ("pinned-versions.json") for an old configuration file that
    * that is no longer supported.
    *

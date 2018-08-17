@@ -8,7 +8,12 @@ import * as semver from 'semver';
 import * as tar from 'tar';
 import readPackageTree = require('read-package-tree');
 
-import { JsonFile, PackageName, FileSystem } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  PackageName,
+  FileSystem,
+  FileConstants
+} from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
@@ -108,7 +113,7 @@ export class NpmLinkManager extends BaseLinkManager {
         RushConstants.rushTempProjectsFolderName, unscopedTempProjectName + '.tgz');
 
       // Example: "C:\MyRepo\common\temp\projects\project1\package.json"
-      const packageJsonFilename: string = path.join(extractedFolder, 'package', 'package.json');
+      const packageJsonFilename: string = path.join(extractedFolder, 'package', FileConstants.PackageJson);
 
       Utilities.createFolderWithRetry(extractedFolder);
       tar.extract({

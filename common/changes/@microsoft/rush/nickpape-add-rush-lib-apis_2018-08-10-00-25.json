@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Remove package.json from rush-lib constants. Add public API for creating changefiles.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nickpape-msft@users.noreply.github.com"
+}

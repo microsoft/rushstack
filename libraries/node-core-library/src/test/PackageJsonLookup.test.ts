@@ -4,6 +4,7 @@
 import * as path from 'path';
 import { PackageJsonLookup } from '../PackageJsonLookup';
 import { IPackageJson } from '../IPackageJson';
+import { FileConstants } from '../Constants';
 
 describe('PackageJsonLookup', () => {
 
@@ -34,7 +35,7 @@ describe('PackageJsonLookup', () => {
 
       const foundFile: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(sourceFilePath);
 
-      expect(foundFile).toEqual(path.join(foundFolder || '', 'package.json'));
+      expect(foundFile).toEqual(path.join(foundFolder || '', FileConstants.PackageJson));
     });
   });
 });

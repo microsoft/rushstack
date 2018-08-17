@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson } from '@microsoft/node-core-library';
+import {
+  IPackageJson,
+  FileConstants
+} from '@microsoft/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
@@ -212,7 +215,7 @@ export class VersionAction extends BaseRushAction {
 
     // Commit the package.json and change files updates.
     const packageJsonUpdated: boolean = uncommittedChanges.some((changePath) => {
-      return changePath.indexOf('package.json') > 0;
+      return changePath.indexOf(FileConstants.PackageJson) > 0;
     });
 
     if (packageJsonUpdated) {
