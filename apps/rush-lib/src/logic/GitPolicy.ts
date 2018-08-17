@@ -37,27 +37,23 @@ If you didn't configure your e-mail yet, try something like this:`);
     }
 
     // sanity check; a valid e-mail should not contain any whitespace
-    if (!userEmail || !userEmail.match(/^\S+$/g)) {
-      throw new Error(colors.red('The gitPolicy check failed because "git config" returned unexpected output:'
-        + os.EOL + `"${userEmail}"`));
-    }
-
-    if (bypassPolicy) {
-      return userEmail;
-    }
-
-    console.log('Checking Git policy for this repository.' + os.EOL);
-
-    if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
-      return userEmail;
-    }
-
-    for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
-      const regex: RegExp = new RegExp('^' + pattern + '$', 'i');
-      if (userEmail.match(regex)) {
-        // For debugging:
-        // console.log(`${userEmail} did not match pattern: "${pattern}"`);
+    // if this fails, then we have another issue to report
+    if (userEmail && userEmail.match(/^\S+$/g)) {
+      if (bypassPolicy) {
         return userEmail;
+      }
+
+      console.log('Checking Git policy for this repository.' + os.EOL);
+
+      if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
+        return userEmail;
+      }
+
+      for (const pattern of rushConfiguration.gitAllowedEmailRegExps) {
+        const regex: RegExp = new RegExp('^' + pattern + '$', 'i');
+        if (userEmail.match(regex)) {
+          return userEmail;
+        }
       }
     }
 
