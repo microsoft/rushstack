@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 18 Aug 2018 01:21:59 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Aug 2018 01:27:39 GMT and should not be manually modified.
+
+## 5.0.2
+Sat, 18 Aug 2018 01:27:39 GMT
+
+*Version update only*
 
 ## 5.0.1
 Sat, 18 Aug 2018 01:21:59 GMT
