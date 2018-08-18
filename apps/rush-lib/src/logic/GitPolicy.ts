@@ -83,19 +83,18 @@ If you didn't configure your e-mail yet, try something like this:`);
       console.log('    ' + colors.cyan(pattern));
     }
 
-    console.log(
-  `
-  ...but yours is configured like this:
-
-    ${fancyEmail}
-
-  To fix it, you can use commands like this:`);
-
-    console.log(colors.cyan(
-  `
-    git config --local user.name "Mr. Example"
-    git config --local user.email "${rushConfiguration.gitSampleEmail}"
-  `));
+    console.log([
+      '',
+      '...but yours is configured like this:',
+      '',
+      '    ' + fancyEmail,
+      '',
+      'To fix it, you can use commands like this:',
+      '',
+      colors.cyan('    git config --local user.name "Mr. Example"'),
+      colors.cyan(`    git config --local user.email "${rushConfiguration.gitSampleEmail}"`),
+      ''
+    ].join(os.EOL));
 
     console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
     throw new AlreadyReportedError();
