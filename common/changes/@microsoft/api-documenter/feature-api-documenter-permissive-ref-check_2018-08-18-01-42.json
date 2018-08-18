@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Allow markdown to continue generating when api reference check failed",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "adventure-yunfei@users.noreply.github.com"
+}
