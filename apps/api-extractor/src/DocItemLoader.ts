@@ -5,7 +5,8 @@ import * as os from 'os';
 import * as path from 'path';
 import {
   JsonFile,
-  FileSystem
+  FileSystem,
+  FileConstants
 } from '@microsoft/node-core-library';
 
 import {
@@ -40,7 +41,7 @@ export class DocItemLoader implements IReferenceResolver {
    * that we are compiling.
    */
   constructor(projectFolder: string) {
-    if (!FileSystem.exists(path.join(projectFolder, 'package.json'))) {
+    if (!FileSystem.exists(path.join(projectFolder, FileConstants.PackageJson))) {
       throw new Error(`An NPM project was not found in the specified folder: ${projectFolder}`);
     }
 

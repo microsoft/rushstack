@@ -2,6 +2,39 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.0.2",
+      "tag": "@microsoft/rush_v5.0.2",
+      "date": "Sat, 18 Aug 2018 01:27:39 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.0.1",
+      "tag": "@microsoft/rush_v5.0.1",
+      "date": "Sat, 18 Aug 2018 01:21:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix typo in rush error message"
+          },
+          {
+            "comment": "Add a flag to \"rush install\" which runs the package manager in a verbose logging mode."
+          },
+          {
+            "comment": "Remove package.json from rush-lib constants. Add public API for creating changefiles."
+          },
+          {
+            "comment": "Fix an issue where \"rush version\" would fail with a useless error message if the Git user email is not specified."
+          },
+          {
+            "comment": "Update lodash."
+          },
+          {
+            "comment": "Add a \"--network-concurrency\" command-line option to help troubleshoot the ECONNRESET error that people occasionally have reported ( https://github.com/pnpm/pnpm/issues/1230 )"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.0",
       "tag": "@microsoft/rush_v5.0.0",
       "date": "Sat, 30 Jun 2018 00:57:22 GMT",

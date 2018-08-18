@@ -10,7 +10,11 @@ import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 
-import { IPackageJson, JsonFile } from '@microsoft/node-core-library';
+import {
+  IPackageJson,
+  JsonFile,
+  FileConstants
+} from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
@@ -306,7 +310,7 @@ export class PublishUtilities {
       );
     }
 
-    const packagePath: string = path.join(project.projectFolder, 'package.json');
+    const packagePath: string = path.join(project.projectFolder, FileConstants.PackageJson);
 
     pkg.version = newVersion;
 

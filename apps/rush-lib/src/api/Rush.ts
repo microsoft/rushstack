@@ -4,7 +4,10 @@
 import { EOL } from 'os';
 import * as path from 'path';
 import * as colors from 'colors';
-import { IPackageJson } from '@microsoft/node-core-library';
+import {
+  IPackageJson,
+  FileConstants
+} from '@microsoft/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from '../logic/RushConstants';
@@ -65,7 +68,7 @@ export class Rush {
    */
   public static get version(): string {
     if (!Rush._version) {
-      const myPackageJsonFilename: string = path.resolve(path.join(__dirname, '..', '..', 'package.json'));
+      const myPackageJsonFilename: string = path.resolve(path.join(__dirname, '..', '..', FileConstants.PackageJson));
       const myPackageJson: IPackageJson = require(myPackageJsonFilename);
       Rush._version = myPackageJson.version;
     }

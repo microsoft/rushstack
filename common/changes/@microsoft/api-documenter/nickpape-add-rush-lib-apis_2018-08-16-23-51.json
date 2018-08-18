@@ -2,10 +2,10 @@
   "changes": [
     {
       "comment": "",
-      "packageName": "@microsoft/rush",
+      "packageName": "@microsoft/api-documenter",
       "type": "none"
     }
   ],
-  "packageName": "@microsoft/rush",
+  "packageName": "@microsoft/api-documenter",
   "email": "nickpape-msft@users.noreply.github.com"
 }
