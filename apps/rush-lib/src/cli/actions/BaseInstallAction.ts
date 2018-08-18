@@ -64,7 +64,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     if (this.actionName === 'update') {
       warnAboutScriptUpdate = StandardScriptUpdater.update(this.rushConfiguration);
     } else {
-      StandardScriptUpdater.validate(this.rushConfiguration);
+//      StandardScriptUpdater.validate(this.rushConfiguration);
     }
 
     this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
