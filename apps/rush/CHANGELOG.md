@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 30 Jun 2018 01:26:07 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Aug 2018 01:21:59 GMT and should not be manually modified.
+
+## 5.0.1
+Sat, 18 Aug 2018 01:21:59 GMT
+
+### Updates
+
+- Fix typo in rush error message
+- Add a flag to "rush install" which runs the package manager in a verbose logging mode.
+- Remove package.json from rush-lib constants. Add public API for creating changefiles.
+- Fix an issue where "rush version" would fail with a useless error message if the Git user email is not specified.
+- Update lodash.
+- Add a "--network-concurrency" command-line option to help troubleshoot the ECONNRESET error that people occasionally have reported ( https://github.com/pnpm/pnpm/issues/1230 )
 
 ## 5.0.0
 Sat, 30 Jun 2018 00:57:22 GMT
