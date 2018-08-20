@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.10",
+      "tag": "@microsoft/api-documenter_v1.5.10",
+      "date": "Mon, 20 Aug 2018 16:04:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow markdown to continue generating when api reference check failed"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.9",
       "tag": "@microsoft/api-documenter_v1.5.9",
       "date": "Thu, 09 Aug 2018 21:58:02 GMT",
