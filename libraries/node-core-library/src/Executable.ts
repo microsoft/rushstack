@@ -160,6 +160,10 @@ export class Executable {
       timeout: options.timeoutMs,
       maxBuffer: options.maxBuffer,
 
+      // Contrary to what the NodeJS typings imply, we must explicitly specify "utf8" here
+      // if we want the result to be SpawnSyncReturns<string> instead of SpawnSyncReturns<Buffer>.
+      encoding: 'utf8',
+
       // NOTE: This is always false, because Rushell is recommended instead of relying on the OS shell.
       shell: false
     } as child_process.SpawnSyncOptionsWithStringEncoding;
@@ -213,7 +217,10 @@ export class Executable {
             shellArgs.push('/s');
             // /C: Execute the following command and then exit immediately
             shellArgs.push('/c');
-            shellArgs.push(resolvedPath);
+
+            // If the path contains special charactrers (e.g. spaces), escape them so that
+            // they don't get interpreted by the shell
+            shellArgs.push(Executable._getEscapedForWindowsShell(resolvedPath));
             shellArgs.push(...args);
 
             return child_process.spawnSync(shellPath, shellArgs, spawnOptions);
@@ -410,6 +417,15 @@ export class Executable {
       currentWorkingDirectory,
       windowsExecutableExtensions
     };
+  }
+
+  /**
+   * Given an input string containing special symbol characters, this inserts the "^" escape
+   * character to ensure the symbols are interpreted literally by the Windows shell.
+   */
+  private static _getEscapedForWindowsShell(text: string): string {
+    const escapableCharRegExp: RegExp = /[%\^&|<> ]/g;
+    return text.replace(escapableCharRegExp, (value) => '^' + value);
   }
 
   /**

@@ -65,6 +65,45 @@ export class TextRange {
     return new TextRange(this.buffer, pos, end);
   }
 
+  public isEmpty(): boolean {
+    return this.pos === this.end;
+  }
+
+  /**
+   * Returns the smallest TextRange object that encompasses both ranges.  If there is a gap
+   * between the two ranges, it will be included in the encompassing range.
+   */
+  public getEncompassingRange(other: TextRange): TextRange {
+    let newBuffer: string = this.buffer;
+
+    // Allow combining TextRange.empty with a TextRange from a different buffer
+    if (other.buffer.length > 0) {
+      newBuffer = other.buffer;
+
+      if (this.buffer.length > 0) {
+        if (this.buffer !== other.buffer) {
+          throw new Error('The ranges cannot be combined because they come from different buffers');
+        }
+      }
+    }
+
+    let newPos: number = this.pos;
+    let newEnd: number = this.end;
+
+    if (!other.isEmpty()) {
+      if (this.isEmpty()) {
+        newPos = other.pos;
+        newEnd = other.end;
+      } else {
+        // Neither range is empty, so combine them
+        newPos = Math.min(other.pos, this.pos);
+        newEnd = Math.max(other.end, this.end);
+      }
+    }
+
+    return new TextRange(newBuffer, newPos, newEnd);
+  }
+
   /**
    * Returns the range from the associated string buffer.
    */

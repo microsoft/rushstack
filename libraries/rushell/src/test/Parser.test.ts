@@ -18,7 +18,7 @@ function matchSnapshot(input: string): void {
   const result: AstScript = parser.parse();
   expect({
     input: escape(tokenizer.input.toString()),
-    tree: result.getDump()
+    tree: '\n' + result.getDump()
   }).toMatchSnapshot();
 }
 

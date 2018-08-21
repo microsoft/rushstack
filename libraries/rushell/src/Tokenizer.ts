@@ -11,7 +11,7 @@ export enum TokenKind {
   // A single newline sequence such as CRLF or LF
   NewLine,
 
-  // An unrecognized character
+  // A general character without any special meaning
   OtherCharacter,
 
   // A sequence of characters that doesn't contain any symbols with special meaning

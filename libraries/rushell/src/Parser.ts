@@ -93,6 +93,7 @@ export class Parser {
 
       const astText: AstText = new AstText();
       astText.token = token;
+      astText.range = token.range;
       return astText;
     }
 

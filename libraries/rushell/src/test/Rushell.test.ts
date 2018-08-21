@@ -5,5 +5,6 @@ import { Rushell } from '../Rushell';
 
 test('Rushell', () => {
   const rushell: Rushell = new Rushell();
-  expect(rushell).toBeTruthy();
+
+  expect(rushell.execute('npm version').value).toContain('@microsoft/rushell');
 });

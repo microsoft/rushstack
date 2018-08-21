@@ -2,42 +2,46 @@
 // See LICENSE in the project root for license information.
 
 import { Token } from './Tokenizer';
+import { TextRange } from './TextRange';
 
-export enum AstKind {
-  Script,
-  AndIf,
-  Command,
-  CompoundWord,
-  VariableExpansion,
-  Text
+export const enum AstKind {
+  None = 'None',
+  Script = 'Script',
+  AndIf = 'AndIf',
+  Command = 'Command',
+  CompoundWord = 'CompoundWord',
+  VariableExpansion = 'VariableExpansion',
+  Text = 'Text'
 }
 
 /**
  * Base class for all AST nodes.
  */
-export abstract class AstNode {
-  public abstract get kind(): AstKind;
+export abstract class AstBaseNode {
+  public readonly kind: AstKind = AstKind.None;
+  public range: TextRange | undefined;
 
   /**
    * Returns a diagnostic dump of the tree, showing the prefix/suffix/separator for
    * each node.
    */
   public getDump(indent: string = ''): string {
-    let result: string = indent + AstKind[this.kind];
+    const nestedIndent: string = indent + '  ';
+    let result: string = indent + `- ${this.kind}:\n`;
 
     const dumpText: string | undefined = this.getDumpText();
     if (dumpText) {
-      result += '=' + JSON.stringify(dumpText);
+      result += nestedIndent + 'Value=' + JSON.stringify(dumpText) + '\n';
+    }
+
+    const fullRange: TextRange = this.getFullRange();
+    if (!fullRange.isEmpty()) {
+      result += nestedIndent + 'Range=' + JSON.stringify(fullRange.toString()) + '\n';
     }
 
     const childNodes: AstNode[] = this.getChildNodes();
-    if (childNodes.length === 0) {
-      result += '\n';
-    } else {
-      result += ':\n';
-      for (const child of this.getChildNodes()) {
-        result += child.getDump(indent + '  ');
-      }
+    for (const child of childNodes) {
+      result += child.getDump(nestedIndent);
     }
 
     return result;
@@ -49,6 +53,20 @@ export abstract class AstNode {
     return nodes;
   }
 
+  public getFullRange(): TextRange {
+    if (this.range) {
+      return this.range;
+    }
+
+    let encompassingRange: TextRange = TextRange.empty;
+
+    for (const child of this.getChildNodes()) {
+      encompassingRange = encompassingRange.getEncompassingRange(child.getFullRange());
+    }
+
+    return encompassingRange;
+  }
+
   protected abstract collectChildNodesInto(nodes: AstNode[]): void;
 
   protected getDumpText(): string | undefined {
@@ -56,12 +74,13 @@ export abstract class AstNode {
   }
 }
 
-export class AstScript extends AstNode {
-  public body: AstNode | undefined;
+/**
+ * Represents a complete script that can be executed.
+ */
+export class AstScript extends AstBaseNode {
+  public readonly kind: AstKind.Script = AstKind.Script;
 
-  public get kind(): AstKind {
-    return AstKind.Script;
-  }
+  public body: AstNode | undefined;
 
   /** @override */
   protected collectChildNodesInto(nodes: AstNode[]): void {
@@ -71,7 +90,12 @@ export class AstScript extends AstNode {
   }
 }
 
-export class AstAndIf extends AstNode {
+/**
+ * Represents the "&&" operator, which is used to join two individual commands.
+ */
+export class AstAndIf extends AstBaseNode {
+  public readonly kind: AstKind.AndIf = AstKind.AndIf;
+
   /**
    * The command that executes first, and always.
    */
@@ -81,10 +105,6 @@ export class AstAndIf extends AstNode {
    * The command that executes second, and only if the first one succeeds.
    */
   public secondCommand: AstCommand | undefined;
-
-  public get kind(): AstKind {
-    return AstKind.AndIf;
-  }
 
   /** @override */
   protected collectChildNodesInto(nodes: AstNode[]): void {
@@ -97,13 +117,14 @@ export class AstAndIf extends AstNode {
   }
 }
 
-export class AstCommand extends AstNode {
+/**
+ * Represents a command.  For example, the name of an executable to be started.
+ */
+export class AstCommand extends AstBaseNode {
+  public readonly kind: AstKind.Command = AstKind.Command;
+
   public commandPath: AstCompoundWord | undefined;
   public arguments: AstCompoundWord[] = [];
-
-  public get kind(): AstKind {
-    return AstKind.Command;
-  }
 
   /** @override */
   protected collectChildNodesInto(nodes: AstNode[]): void {
@@ -114,12 +135,13 @@ export class AstCommand extends AstNode {
   }
 }
 
-export class AstCompoundWord extends AstNode {
-  public readonly parts: AstNode[] = [];
+/**
+ * Represents a compound word, e.g. "--the-thing" or "./the/thing".
+ */
+export class AstCompoundWord extends AstBaseNode {
+  public readonly kind: AstKind.CompoundWord = AstKind.CompoundWord;
 
-  public get kind(): AstKind {
-    return AstKind.CompoundWord;
-  }
+  public readonly parts: AstNode[] = [];
 
   /** @override */
   protected collectChildNodesInto(nodes: AstNode[]): void {
@@ -127,10 +149,11 @@ export class AstCompoundWord extends AstNode {
   }
 }
 
-export class AstVariableExpansion extends AstNode {
-  public get kind(): AstKind {
-    return AstKind.VariableExpansion;
-  }
+/**
+ * Represents an environment variable expansion expression, e.g. "${VARIABLE}"
+ */
+export class AstVariableExpansion extends AstBaseNode {
+  public readonly kind: AstKind.VariableExpansion = AstKind.VariableExpansion;
 
   /** @override */
   protected collectChildNodesInto(nodes: AstNode[]): void {
@@ -138,11 +161,13 @@ export class AstVariableExpansion extends AstNode {
   }
 }
 
-export class AstText extends AstNode {
+/**
+ * Represents some plain text.
+ */
+export class AstText extends AstBaseNode {
+  public readonly kind: AstKind.Text = AstKind.Text;
+
   public token: Token | undefined;
-  public get kind(): AstKind {
-    return AstKind.Text;
-  }
 
   /** @override */
   protected collectChildNodesInto(nodes: AstNode[]): void {
@@ -157,3 +182,5 @@ export class AstText extends AstNode {
     return undefined;
   }
 }
+
+export type AstNode = AstScript | AstAndIf | AstCommand | AstCompoundWord | AstVariableExpansion | AstText;

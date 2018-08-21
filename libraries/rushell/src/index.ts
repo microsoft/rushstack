@@ -8,5 +8,6 @@
  */
 
 export {
-  Rushell
+  Rushell,
+  IRushellExecuteResult
 } from './Rushell';

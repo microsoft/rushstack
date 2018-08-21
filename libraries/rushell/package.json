@@ -16,7 +16,9 @@
     "start": "jest --watch"
   },
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "@microsoft/node-core-library": "2.1.0"
+  },
   "devDependencies": {
     "@microsoft/node-library-build": "4.4.8",
     "@types/jest": "21.1.10",
