@@ -94,6 +94,13 @@ export class CommonVersionsConfiguration {
   }
 
   /**
+   * Get the absolute file path of the common-versions.json file.
+   */
+  public get filepath(): string {
+    return this._filename;
+  }
+
+  /**
    * Writes the "common-versions.json" file to disk, using the filename that was passed to loadFromFile().
    */
   public save(): void {

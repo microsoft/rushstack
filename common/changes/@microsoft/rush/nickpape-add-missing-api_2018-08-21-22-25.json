@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "git st",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": ""
+}
