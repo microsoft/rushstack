@@ -11,7 +11,8 @@ import * as wordwrap from 'wordwrap';
 import {
   JsonFile,
   IPackageJson,
-  FileSystem
+  FileSystem,
+  FileConstants
 } from '@microsoft/node-core-library';
 
 export interface IEnvironment {
@@ -423,7 +424,7 @@ export class Utilities {
       private: true,
       version: '0.0.0'
     };
-    JsonFile.save(npmPackageJson, path.join(directory, 'package.json'));
+    JsonFile.save(npmPackageJson, path.join(directory, FileConstants.PackageJson));
 
     if (options.commonRushConfigFolder) {
       Utilities.syncNpmrc(options.commonRushConfigFolder, directory);

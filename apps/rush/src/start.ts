@@ -35,7 +35,12 @@ else if (!semver.satisfies(nodeVersion, '^6.9.0')
 }
 
 import * as path from 'path';
-import { JsonFile, IPackageJson, Text } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  IPackageJson,
+  Text,
+  FileConstants
+} from '@microsoft/node-core-library';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
@@ -45,7 +50,7 @@ import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 // Load the configuration
 const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
-const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', 'package.json'));
+const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', FileConstants.PackageJson));
 
 let rushVersionToLoad: string | undefined = undefined;
 

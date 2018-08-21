@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson } from '@microsoft/node-core-library';
+import {
+  IPackageJson,
+  FileConstants
+} from '@microsoft/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
@@ -90,42 +93,34 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    // try to get the user email
-    const userEmail: string | undefined = GitPolicy.getUserEmail(this.rushConfiguration);
+    return Promise.resolve().then(() => {
+      const userEmail: string = GitPolicy.getUserEmail(this.rushConfiguration, this._bypassPolicy.value);
 
-    if (!userEmail) {
-      return Promise.reject(undefined);
-    }
+      this._validateInput();
 
-    if (!this._bypassPolicy.value) {
-      if (!GitPolicy.check(this.rushConfiguration, userEmail)) {
-        return Promise.reject(undefined);
-      }
-    }
-    this._validateInput();
+      this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
 
-    this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
+      if (this._ensureVersionPolicy.value) {
+        this._overwritePolicyVersionIfNeeded();
+        const tempBranch: string = 'version/ensure-' + new Date().getTime();
+        this._versionManager.ensure(this._versionPolicy.value, true,
+          !!this._overrideVersion.value || !!this._prereleaseIdentifier.value);
 
-    if (this._ensureVersionPolicy.value) {
-      this._overwritePolicyVersionIfNeeded();
-      const tempBranch: string = 'version/ensure-' + new Date().getTime();
-      this._versionManager.ensure(this._versionPolicy.value, true,
-        !!this._overrideVersion.value || !!this._prereleaseIdentifier.value);
-
-      const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
-      if (updatedPackages.size > 0) {
-        console.log(`${updatedPackages.size} packages are getting updated.`);
+        const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
+        if (updatedPackages.size > 0) {
+          console.log(`${updatedPackages.size} packages are getting updated.`);
+          this._gitProcess(tempBranch);
+        }
+      } else if (this._bumpVersion.value) {
+        const tempBranch: string = 'version/bump-' + new Date().getTime();
+        this._versionManager.bump(this._versionPolicy.value,
+          this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
+          this._prereleaseIdentifier.value,
+          true);
         this._gitProcess(tempBranch);
       }
-    } else if (this._bumpVersion.value) {
-      const tempBranch: string = 'version/bump-' + new Date().getTime();
-      this._versionManager.bump(this._versionPolicy.value,
-        this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
-        this._prereleaseIdentifier.value,
-        true);
-      this._gitProcess(tempBranch);
-    }
-    return Promise.resolve();
+      return Promise.resolve();
+    });
   }
 
   private _overwritePolicyVersionIfNeeded(): void {
@@ -220,7 +215,7 @@ export class VersionAction extends BaseRushAction {
 
     // Commit the package.json and change files updates.
     const packageJsonUpdated: boolean = uncommittedChanges.some((changePath) => {
-      return changePath.indexOf('package.json') > 0;
+      return changePath.indexOf(FileConstants.PackageJson) > 0;
     });
 
     if (packageJsonUpdated) {

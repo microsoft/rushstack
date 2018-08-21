@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import * as path from 'path';
 
 import {
@@ -625,14 +626,16 @@ export class MarkdownDocumenter {
       onRenderApiLink: (args: IMarkdownRenderApiLinkArgs) => {
         const resolveResult: IDocItemSetResolveResult = this._docItemSet.resolveApiItemReference(args.reference);
         if (!resolveResult.docItem) {
-          throw new Error('Unresolved: ' + JSON.stringify(args.reference));
+          // Eventually we should introduce a warnings file
+          console.error(colors.yellow('Warning: Unresolved hyperlink to '
+            + Markup.formatApiItemReference(args.reference)));
+        } else {
+          // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
+          // unless they start with "./" or "../".
+          const docFilename: string = './' + this._getFilenameForDocItem(resolveResult.docItem);
+          args.prefix = '[';
+          args.suffix = '](' + docFilename + ')';
         }
-
-        // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
-        // unless they start with "./" or "../".
-        const docFilename: string = './' + this._getFilenameForDocItem(resolveResult.docItem);
-        args.prefix = '[';
-        args.suffix = '](' + docFilename + ')';
       }
     });
 

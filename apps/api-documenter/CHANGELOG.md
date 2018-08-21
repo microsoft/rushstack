@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 09 Aug 2018 21:58:02 GMT and should not be manually modified.
+This log was last generated on Mon, 20 Aug 2018 16:04:29 GMT and should not be manually modified.
+
+## 1.5.10
+Mon, 20 Aug 2018 16:04:29 GMT
+
+### Patches
+
+- Allow markdown to continue generating when api reference check failed
 
 ## 1.5.9
 Thu, 09 Aug 2018 21:58:02 GMT

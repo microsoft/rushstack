@@ -8,7 +8,8 @@ import * as os from 'os';
 import {
   JsonFile,
   IPackageJson,
-  FileSystem
+  FileSystem,
+  FileConstants
 } from '@microsoft/node-core-library';
 import { GulpTask } from '@microsoft/gulp-core-build';
 
@@ -98,7 +99,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
   public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {
     let binaryPackagePath: string = require.resolve(this._packageName);
     let packageJsonPath: string;
-    while (!FileSystem.exists(packageJsonPath = path.join(binaryPackagePath, 'package.json'))) {
+    while (!FileSystem.exists(packageJsonPath = path.join(binaryPackagePath, FileConstants.PackageJson))) {
       const tempBinaryPackagePath: string = path.dirname(binaryPackagePath);
       if (binaryPackagePath === tempBinaryPackagePath) {
         // We've hit the disk root
