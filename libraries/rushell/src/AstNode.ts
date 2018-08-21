@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Token } from './Tokenizer';
+import { TextRange } from './TextRange';
 
 export enum AstKind {
   None,
@@ -18,27 +19,29 @@ export enum AstKind {
  */
 export abstract class AstBaseNode {
   public readonly kind: AstKind = AstKind.None;
+  public range: TextRange | undefined;
 
   /**
    * Returns a diagnostic dump of the tree, showing the prefix/suffix/separator for
    * each node.
    */
   public getDump(indent: string = ''): string {
-    let result: string = indent + AstKind[this.kind];
+    const nestedIndent: string = indent + '  ';
+    let result: string = indent + '- ' + AstKind[this.kind] + ':\n';
 
     const dumpText: string | undefined = this.getDumpText();
     if (dumpText) {
-      result += '=' + JSON.stringify(dumpText);
+      result += nestedIndent + 'Value=' + JSON.stringify(dumpText) + '\n';
+    }
+
+    const fullRange: TextRange = this.getFullRange();
+    if (!fullRange.isEmpty()) {
+      result += nestedIndent + 'Range=' + JSON.stringify(fullRange.toString()) + '\n';
     }
 
     const childNodes: AstBaseNode[] = this.getChildNodes();
-    if (childNodes.length === 0) {
-      result += '\n';
-    } else {
-      result += ':\n';
-      for (const child of this.getChildNodes()) {
-        result += child.getDump(indent + '  ');
-      }
+    for (const child of childNodes) {
+      result += child.getDump(nestedIndent);
     }
 
     return result;
@@ -48,6 +51,20 @@ export abstract class AstBaseNode {
     const nodes: AstBaseNode[] = [];
     this.collectChildNodesInto(nodes);
     return nodes;
+  }
+
+  public getFullRange(): TextRange {
+    if (this.range) {
+      return this.range;
+    }
+
+    let encompassingRange: TextRange = TextRange.empty;
+
+    for (const child of this.getChildNodes()) {
+      encompassingRange = encompassingRange.getEncompassingRange(child.getFullRange());
+    }
+
+    return encompassingRange;
   }
 
   protected abstract collectChildNodesInto(nodes: AstBaseNode[]): void;
