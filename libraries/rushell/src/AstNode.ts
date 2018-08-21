@@ -4,6 +4,7 @@
 import { Token } from './Tokenizer';
 
 export enum AstKind {
+  None,
   Script,
   AndIf,
   Command,
@@ -15,8 +16,8 @@ export enum AstKind {
 /**
  * Base class for all AST nodes.
  */
-export abstract class AstNode {
-  public abstract get kind(): AstKind;
+export abstract class AstBaseNode {
+  public readonly kind: AstKind = AstKind.None;
 
   /**
    * Returns a diagnostic dump of the tree, showing the prefix/suffix/separator for
@@ -30,7 +31,7 @@ export abstract class AstNode {
       result += '=' + JSON.stringify(dumpText);
     }
 
-    const childNodes: AstNode[] = this.getChildNodes();
+    const childNodes: AstBaseNode[] = this.getChildNodes();
     if (childNodes.length === 0) {
       result += '\n';
     } else {
@@ -43,35 +44,41 @@ export abstract class AstNode {
     return result;
   }
 
-  public getChildNodes(): AstNode[] {
-    const nodes: AstNode[] = [];
+  public getChildNodes(): AstBaseNode[] {
+    const nodes: AstBaseNode[] = [];
     this.collectChildNodesInto(nodes);
     return nodes;
   }
 
-  protected abstract collectChildNodesInto(nodes: AstNode[]): void;
+  protected abstract collectChildNodesInto(nodes: AstBaseNode[]): void;
 
   protected getDumpText(): string | undefined {
     return undefined;
   }
 }
 
-export class AstScript extends AstNode {
+/**
+ * Represents a complete script that can be executed.
+ */
+export class AstScript extends AstBaseNode {
+  public readonly kind: AstKind.Script = AstKind.Script;
+
   public body: AstNode | undefined;
 
-  public get kind(): AstKind {
-    return AstKind.Script;
-  }
-
   /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
     if (this.body) {
       nodes.push(this.body);
     }
   }
 }
 
-export class AstAndIf extends AstNode {
+/**
+ * Represents the "&&" operator, which is used to join two individual commands.
+ */
+export class AstAndIf extends AstBaseNode {
+  public readonly kind: AstKind.AndIf = AstKind.AndIf;
+
   /**
    * The command that executes first, and always.
    */
@@ -82,12 +89,8 @@ export class AstAndIf extends AstNode {
    */
   public secondCommand: AstCommand | undefined;
 
-  public get kind(): AstKind {
-    return AstKind.AndIf;
-  }
-
   /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
     if (this.firstCommand) {
       nodes.push(this.firstCommand);
     }
@@ -97,16 +100,17 @@ export class AstAndIf extends AstNode {
   }
 }
 
-export class AstCommand extends AstNode {
+/**
+ * Represents a command.  For example, the name of an executable to be started.
+ */
+export class AstCommand extends AstBaseNode {
+  public readonly kind: AstKind.Command = AstKind.Command;
+
   public commandPath: AstCompoundWord | undefined;
   public arguments: AstCompoundWord[] = [];
 
-  public get kind(): AstKind {
-    return AstKind.Command;
-  }
-
   /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
     if (this.commandPath) {
       nodes.push(this.commandPath);
     }
@@ -114,38 +118,42 @@ export class AstCommand extends AstNode {
   }
 }
 
-export class AstCompoundWord extends AstNode {
-  public readonly parts: AstNode[] = [];
+/**
+ * Represents a compound word, e.g. "--the-thing" or "./the/thing".
+ */
+export class AstCompoundWord extends AstBaseNode {
+  public readonly kind: AstKind.CompoundWord = AstKind.CompoundWord;
 
-  public get kind(): AstKind {
-    return AstKind.CompoundWord;
-  }
+  public readonly parts: AstBaseNode[] = [];
 
   /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
     nodes.push(...this.parts);
   }
 }
 
-export class AstVariableExpansion extends AstNode {
-  public get kind(): AstKind {
-    return AstKind.VariableExpansion;
-  }
+/**
+ * Represents an environment variable expansion expression, e.g. "${VARIABLE}"
+ */
+export class AstVariableExpansion extends AstBaseNode {
+  public readonly kind: AstKind.VariableExpansion = AstKind.VariableExpansion;
 
   /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
     // no children
   }
 }
 
-export class AstText extends AstNode {
+/**
+ * Represents some plain text.
+ */
+export class AstText extends AstBaseNode {
+  public readonly kind: AstKind.Text = AstKind.Text;
+
   public token: Token | undefined;
-  public get kind(): AstKind {
-    return AstKind.Text;
-  }
 
   /** @override */
-  protected collectChildNodesInto(nodes: AstNode[]): void {
+  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
     // no children
   }
 
@@ -157,3 +165,5 @@ export class AstText extends AstNode {
     return undefined;
   }
 }
+
+export type AstNode = AstScript | AstAndIf | AstCommand | AstCompoundWord | AstVariableExpansion | AstText;
