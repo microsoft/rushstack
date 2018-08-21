@@ -12,7 +12,7 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "5.10.3",
+    "@microsoft/api-extractor": "5.10.4",
     "fs-extra": "~5.0.0",
     "typescript": "~2.4.1"
   }
