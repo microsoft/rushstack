@@ -79,7 +79,7 @@ export class MarkdownDocumenter {
 
     const namespacesTable: IMarkupTable = Markup.createTable([
       Markup.createTextElements('Namespaces'),
-      Markup.createTextElements('Description'),
+      Markup.createTextElements('Description')
     ]);
 
     const classesTable: IMarkupTable = Markup.createTable([
