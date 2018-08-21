@@ -4,14 +4,14 @@
 import { Token } from './Tokenizer';
 import { TextRange } from './TextRange';
 
-export enum AstKind {
-  None,
-  Script,
-  AndIf,
-  Command,
-  CompoundWord,
-  VariableExpansion,
-  Text
+export const enum AstKind {
+  None = 'None',
+  Script = 'Script',
+  AndIf = 'AndIf',
+  Command = 'Command',
+  CompoundWord = 'CompoundWord',
+  VariableExpansion = 'VariableExpansion',
+  Text = 'Text'
 }
 
 /**
@@ -27,7 +27,7 @@ export abstract class AstBaseNode {
    */
   public getDump(indent: string = ''): string {
     const nestedIndent: string = indent + '  ';
-    let result: string = indent + '- ' + AstKind[this.kind] + ':\n';
+    let result: string = indent + `- ${this.kind}:\n`;
 
     const dumpText: string | undefined = this.getDumpText();
     if (dumpText) {
@@ -39,7 +39,7 @@ export abstract class AstBaseNode {
       result += nestedIndent + 'Range=' + JSON.stringify(fullRange.toString()) + '\n';
     }
 
-    const childNodes: AstBaseNode[] = this.getChildNodes();
+    const childNodes: AstNode[] = this.getChildNodes();
     for (const child of childNodes) {
       result += child.getDump(nestedIndent);
     }
@@ -47,8 +47,8 @@ export abstract class AstBaseNode {
     return result;
   }
 
-  public getChildNodes(): AstBaseNode[] {
-    const nodes: AstBaseNode[] = [];
+  public getChildNodes(): AstNode[] {
+    const nodes: AstNode[] = [];
     this.collectChildNodesInto(nodes);
     return nodes;
   }
@@ -67,7 +67,7 @@ export abstract class AstBaseNode {
     return encompassingRange;
   }
 
-  protected abstract collectChildNodesInto(nodes: AstBaseNode[]): void;
+  protected abstract collectChildNodesInto(nodes: AstNode[]): void;
 
   protected getDumpText(): string | undefined {
     return undefined;
@@ -83,7 +83,7 @@ export class AstScript extends AstBaseNode {
   public body: AstNode | undefined;
 
   /** @override */
-  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     if (this.body) {
       nodes.push(this.body);
     }
@@ -107,7 +107,7 @@ export class AstAndIf extends AstBaseNode {
   public secondCommand: AstCommand | undefined;
 
   /** @override */
-  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     if (this.firstCommand) {
       nodes.push(this.firstCommand);
     }
@@ -127,7 +127,7 @@ export class AstCommand extends AstBaseNode {
   public arguments: AstCompoundWord[] = [];
 
   /** @override */
-  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     if (this.commandPath) {
       nodes.push(this.commandPath);
     }
@@ -141,10 +141,10 @@ export class AstCommand extends AstBaseNode {
 export class AstCompoundWord extends AstBaseNode {
   public readonly kind: AstKind.CompoundWord = AstKind.CompoundWord;
 
-  public readonly parts: AstBaseNode[] = [];
+  public readonly parts: AstNode[] = [];
 
   /** @override */
-  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     nodes.push(...this.parts);
   }
 }
@@ -156,7 +156,7 @@ export class AstVariableExpansion extends AstBaseNode {
   public readonly kind: AstKind.VariableExpansion = AstKind.VariableExpansion;
 
   /** @override */
-  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     // no children
   }
 }
@@ -170,7 +170,7 @@ export class AstText extends AstBaseNode {
   public token: Token | undefined;
 
   /** @override */
-  protected collectChildNodesInto(nodes: AstBaseNode[]): void {
+  protected collectChildNodesInto(nodes: AstNode[]): void {
     // no children
   }
 
