@@ -64,6 +64,7 @@ class ChangeManager {
 // @public
 class CommonVersionsConfiguration {
   readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
+  readonly filepath: string;
   getAllPreferredVersions(): Map<string, string>;
   static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
   readonly preferredVersions: Map<string, string>;
