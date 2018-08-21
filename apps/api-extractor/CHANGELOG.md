@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 09 Aug 2018 21:03:22 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Aug 2018 16:04:38 GMT and should not be manually modified.
+
+## 5.10.4
+Tue, 21 Aug 2018 16:04:38 GMT
+
+### Patches
+
+- fix namespace name for export statement`
 
 ## 5.10.3
 Thu, 09 Aug 2018 21:03:22 GMT

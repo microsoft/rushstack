@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.10.4",
+      "tag": "@microsoft/api-extractor_v5.10.4",
+      "date": "Tue, 21 Aug 2018 16:04:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix namespace name for export statement`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.10.3",
       "tag": "@microsoft/api-extractor_v5.10.3",
       "date": "Thu, 09 Aug 2018 21:03:22 GMT",

@@ -2,6 +2,26 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.11",
+      "tag": "@microsoft/api-documenter_v1.5.11",
+      "date": "Tue, 21 Aug 2018 16:04:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "render markdown for namespace; fix api ref check for namespace"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.10.3` to `5.10.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.7` to `4.4.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.10",
       "tag": "@microsoft/api-documenter_v1.5.10",
       "date": "Mon, 20 Aug 2018 16:04:29 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 20 Aug 2018 16:04:29 GMT and should not be manually modified.
+This log was last generated on Tue, 21 Aug 2018 16:04:38 GMT and should not be manually modified.
+
+## 1.5.11
+Tue, 21 Aug 2018 16:04:38 GMT
+
+### Patches
+
+- render markdown for namespace; fix api ref check for namespace
 
 ## 1.5.10
 Mon, 20 Aug 2018 16:04:29 GMT
