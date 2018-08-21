@@ -122,11 +122,13 @@ export class DocItem {
   }
 
   public getApiReference(): IApiItemReference {
-    const reference: IApiItemReference = {
+    const reference: IApiItemReference & { moreHierarchies: string[]; } = {
       scopeName: '',
       packageName: '',
       exportName: '',
-      memberName: ''
+      memberName: '',
+      // TODO: quick fix for api ref inside namespace, need to adjust IApiItemReference later
+      moreHierarchies: []
     };
     let i: number = 0;
     for (const docItem of this.getHierarchy()) {
@@ -142,7 +144,9 @@ export class DocItem {
           reference.memberName = docItem.name;
           break;
         default:
-          throw new Error('Unable to create API reference for ' + this.name);
+          reference.moreHierarchies.push(docItem.name);
+          break;
+          // throw new Error('Unable to create API reference for ' + this.name);
       }
       ++i;
     }
@@ -209,7 +213,9 @@ export class DocItemSet {
    * Attempts to find the DocItem described by an IApiItemReference.  If no matching item is
    * found, then undefined is returned.
    */
-  public resolveApiItemReference(reference: IApiItemReference): IDocItemSetResolveResult {
+  public resolveApiItemReference(
+    reference: IApiItemReference & { moreHierarchies?: string[]; }
+  ): IDocItemSetResolveResult {
     const result: IDocItemSetResolveResult = {
       docItem: undefined,
       closestMatch: undefined
@@ -219,7 +225,11 @@ export class DocItemSet {
 
     let current: DocItem | undefined = undefined;
 
-    for (const nameToMatch of [packageName, reference.exportName, reference.memberName]) {
+    for (const nameToMatch of [
+      packageName, reference.exportName, reference.memberName,
+      // TODO: quick fix for api ref inside namespace, need to adjust IApiItemReference later
+      ...(reference.moreHierarchies || [])
+    ]) {
       if (!nameToMatch) {
         // Success, since we ran out of stuff to match
         break;
