@@ -127,8 +127,9 @@ export class JsonFile {
     let stringified: string;
 
     if (previousJson !== '') {
+      // NOTE: We don't use mode=json here because comments aren't allowed by strict JSON
       stringified = jju.update(previousJson, newJsonObject, {
-        mode: 'json',
+        mode: 'cjson',
         indent: 2
       });
     } else if (options.prettyFormatting) {

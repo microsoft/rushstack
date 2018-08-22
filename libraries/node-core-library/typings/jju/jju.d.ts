@@ -6,7 +6,7 @@ interface IJjuParseOptions {
   reserved_keys? : 'ignore' | 'throw' | 'replace';
   null_prototype?: boolean;
   reviver?: (key: any, value: any) => any;
-  mode?: 'json' | 'json5' | undefined;
+  mode?: 'json' | 'cjson' | 'json5' | undefined;
 }
 
 interface IJjuStringifyOptions {
@@ -16,7 +16,7 @@ interface IJjuStringifyOptions {
   sort_keys?: boolean;
   replacer?: (key: string, value: any) => any;
   no_trailing_comma?: boolean;
-  mode?: 'json' | 'json5' | undefined;
+  mode?: 'json' | 'cjson' | 'json5' | undefined;
 }
 
 interface IJjuUpdateOptions extends IJjuParseOptions, IJjuStringifyOptions {
