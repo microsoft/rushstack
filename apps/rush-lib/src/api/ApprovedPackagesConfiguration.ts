@@ -6,6 +6,7 @@ import * as os from 'os';
 import { JsonFile, JsonSchema, FileSystem, NewlineKind } from '@microsoft/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
+import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 
 /**
  * Part of IApprovedPackagesJson.
@@ -129,7 +130,7 @@ export class ApprovedPackagesConfiguration {
     // Update the JSON structure that we already loaded, preserving any existing state
     // (which passed schema validation).
 
-    this._loadedJson.$schema = 'https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json',
+    this._loadedJson.$schema = JsonSchemaUrls.approvedPackages,
 
     this._loadedJson.packages = [];
 

@@ -10,6 +10,7 @@ import {
   ProtectableMap,
   FileSystem
 } from '@microsoft/node-core-library';
+import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 
 /**
  * Part of the ICommonVersionsJson structure.
@@ -221,7 +222,7 @@ export class CommonVersionsConfiguration {
 
   private _serialize(): ICommonVersionsJson {
     const result: ICommonVersionsJson = {
-      $schema: 'https://developer.microsoft.com/json-schemas/rush/v5/common-versions.schema.json'
+      $schema: JsonSchemaUrls.commonVersions
     };
 
     if (this._preferredVersions.size) {
