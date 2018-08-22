@@ -2,6 +2,30 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.5.2",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.2",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.9` to `3.8.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.1",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.1",
+      "date": "Wed, 22 Aug 2018 16:03:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.8` to `3.8.9`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.5.0",
       "tag": "@microsoft/gulp-core-build-mocha_v3.5.0",
       "date": "Thu, 09 Aug 2018 21:58:02 GMT",

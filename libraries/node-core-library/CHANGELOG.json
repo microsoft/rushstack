@@ -2,6 +2,33 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "2.2.0",
+      "tag": "@microsoft/node-core-library_v2.2.0",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add features to JsonFile API to update an existing JSON file while preserving comments and whitespace"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.1",
+      "tag": "@microsoft/node-core-library_v2.1.1",
+      "date": "Wed, 22 Aug 2018 16:03:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where Executable.spawnSync() was returning SpawnSyncReturns<Buffer> instead of SpawnSyncReturns<string>"
+          },
+          {
+            "comment": "Fix an issue where Executable.spawnSync() did not support command paths containing spaces"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.0",
       "tag": "@microsoft/node-core-library_v2.1.0",
       "date": "Thu, 09 Aug 2018 21:03:22 GMT",

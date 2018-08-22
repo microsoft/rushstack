@@ -52,7 +52,7 @@ export {
 } from './PackageJsonLookup';
 export { PackageName, IParsedPackageName, IParsedPackageNameOrError } from './PackageName';
 export { Path } from './Path';
-export { Text } from './Text';
+export { Text, NewlineKind } from './Text';
 export {
   FileSystem,
   IReadFolderOptions,
@@ -60,7 +60,6 @@ export {
   IReadFileOptions,
   IFileSystemMoveOptions,
   IDeleteFileOptions,
-  NewlineKind,
   PosixModeBits,
   IUpdateTimeParameters
 } from './FileSystem';

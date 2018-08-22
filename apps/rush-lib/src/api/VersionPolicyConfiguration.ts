@@ -156,7 +156,7 @@ export class VersionPolicyConfiguration {
       versionPolicyJson.push(versionPolicy._json);
     });
     if (shouldCommit) {
-      JsonFile.save(versionPolicyJson, this._jsonFileName);
+      JsonFile.save(versionPolicyJson, this._jsonFileName, { updateExistingFile: true });
     }
   }
 }

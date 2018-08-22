@@ -2,6 +2,35 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.0.3",
+      "tag": "@microsoft/rush_v5.0.3",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "git st"
+          },
+          {
+            "comment": "When saving config files, Rush should include the \"$schema\" directive"
+          },
+          {
+            "comment": "Fix a regression where \"rush version\" sometimes failed with \"The value for entries[0].comments.dependency[0].author is undefined\""
+          },
+          {
+            "comment": "When updating common-versions.json and version-policies.json, preserve the existing comments and whitespace"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.1.1` to `2.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.9` to `4.4.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.2",
       "tag": "@microsoft/rush_v5.0.2",
       "date": "Sat, 18 Aug 2018 01:27:39 GMT",

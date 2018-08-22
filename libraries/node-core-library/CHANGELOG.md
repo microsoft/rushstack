@@ -1,6 +1,21 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 09 Aug 2018 21:03:22 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Aug 2018 20:58:58 GMT and should not be manually modified.
+
+## 2.2.0
+Wed, 22 Aug 2018 20:58:58 GMT
+
+### Minor changes
+
+- Add features to JsonFile API to update an existing JSON file while preserving comments and whitespace
+
+## 2.1.1
+Wed, 22 Aug 2018 16:03:25 GMT
+
+### Patches
+
+- Fix an issue where Executable.spawnSync() was returning SpawnSyncReturns<Buffer> instead of SpawnSyncReturns<string>
+- Fix an issue where Executable.spawnSync() did not support command paths containing spaces
 
 ## 2.1.0
 Thu, 09 Aug 2018 21:03:22 GMT
