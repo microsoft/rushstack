@@ -67,6 +67,8 @@ export class ApprovedPackagesConfiguration {
   public clear(): void {
     this._itemsByName.clear();
     this._loadedJson = {
+      // Ensure this comes first in the key ordering
+      $schema: '',
       packages: []
     };
   }
@@ -149,7 +151,7 @@ export class ApprovedPackagesConfiguration {
     }
 
     // Save the file
-    let body: string = JSON.stringify(this._loadedJson, undefined, 2) + '\n';
+    let body: string = JsonFile.stringify(this._loadedJson);
 
     // Unindent the allowedCategories array to improve readability
     body = body.replace(
