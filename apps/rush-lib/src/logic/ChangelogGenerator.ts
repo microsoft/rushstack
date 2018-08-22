@@ -55,9 +55,9 @@ export class ChangelogGenerator {
             project.isMainProject
           );
 
-            if (changeLog) {
-              updatedChangeLogs.push(changeLog);
-            }
+          if (changeLog) {
+            updatedChangeLogs.push(changeLog);
+          }
         }
       }
     }
@@ -129,11 +129,16 @@ export class ChangelogGenerator {
             changelogEntry.comments[changeTypeString] =
             changelogEntry.comments[changeTypeString] || [];
 
-          comments.push({
-            author: individualChange.author,
-            commit: individualChange.commit,
+          const changeLogComment: IChangeLogComment = {
             comment: individualChange.comment
-          });
+          };
+          if (individualChange.author) {
+            changeLogComment.author = individualChange.author;
+          }
+          if (individualChange.commit) {
+            changeLogComment.commit = individualChange.commit;
+          }
+          comments.push(changeLogComment);
         }
       });
 

@@ -5,7 +5,7 @@ import * as pathUtilities from 'path';
 import * as fs from 'fs';
 import * as fsx from 'fs-extra';
 
-import { Text } from './Text';
+import { Text, NewlineKind } from './Text';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 // tslint:disable:no-bitwise
@@ -16,25 +16,6 @@ import { Text } from './Text';
  */
 export const enum Encoding {
   Utf8 = 'utf8'
-}
-
-/**
- * Enumeration controlling conversion of newline characters.
- * @public
- */
-export const enum NewlineKind {
-  /**
-   * Windows-style newlines
-   */
-  CrLf = '\r\n',
-
-  /**
-   * POSIX-style newlines
-   *
-   * @remarks
-   * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
-   */
-  Lf = '\n'
 }
 
 /**

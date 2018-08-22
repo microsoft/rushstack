@@ -6,6 +6,7 @@ import * as os from 'os';
 import { JsonFile, JsonSchema, FileSystem, NewlineKind } from '@microsoft/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
+import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 
 /**
  * Part of IApprovedPackagesJson.
@@ -67,6 +68,8 @@ export class ApprovedPackagesConfiguration {
   public clear(): void {
     this._itemsByName.clear();
     this._loadedJson = {
+      // Ensure this comes first in the key ordering
+      $schema: '',
       packages: []
     };
   }
@@ -127,6 +130,8 @@ export class ApprovedPackagesConfiguration {
     // Update the JSON structure that we already loaded, preserving any existing state
     // (which passed schema validation).
 
+    this._loadedJson.$schema = JsonSchemaUrls.approvedPackages,
+
     this._loadedJson.packages = [];
 
     this.items.sort((a: ApprovedPackagesItem, b: ApprovedPackagesItem) => {
@@ -147,7 +152,7 @@ export class ApprovedPackagesConfiguration {
     }
 
     // Save the file
-    let body: string = JSON.stringify(this._loadedJson, undefined, 2) + '\n';
+    let body: string = JsonFile.stringify(this._loadedJson);
 
     // Unindent the allowedCategories array to improve readability
     body = body.replace(

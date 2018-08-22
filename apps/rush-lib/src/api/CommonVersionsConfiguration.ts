@@ -10,6 +10,7 @@ import {
   ProtectableMap,
   FileSystem
 } from '@microsoft/node-core-library';
+import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 
 /**
  * Part of the ICommonVersionsJson structure.
@@ -37,6 +38,8 @@ export declare interface ICommonVersionsJsonVersionsMap {
  * Describes the file structure for the "common/config/rush/common-versions.json" config file.
  */
 interface ICommonVersionsJson {
+  $schema?: string;
+
   preferredVersions?: ICommonVersionsJsonVersionMap;
 
   xstitchPreferredVersions?: ICommonVersionsJsonVersionMap;
@@ -104,7 +107,7 @@ export class CommonVersionsConfiguration {
    * Writes the "common-versions.json" file to disk, using the filename that was passed to loadFromFile().
    */
   public save(): void {
-    JsonFile.save(this._serialize(), this._filename);
+    JsonFile.save(this._serialize(), this._filename, { updateExistingFile: true });
   }
 
   /**
@@ -218,7 +221,9 @@ export class CommonVersionsConfiguration {
   }
 
   private _serialize(): ICommonVersionsJson {
-    const result: ICommonVersionsJson = { };
+    const result: ICommonVersionsJson = {
+      $schema: JsonSchemaUrls.commonVersions
+    };
 
     if (this._preferredVersions.size) {
       result.preferredVersions = CommonVersionsConfiguration._serializeTable(this.preferredVersions);
