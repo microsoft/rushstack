@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "Add features to JsonFile API to update an existing JSON file while preserving comments and whitespace",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "pgonzal@users.noreply.github.com"
+}

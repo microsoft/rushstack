@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "When updating common-versions.json and version-policies.json, preserve the existing comments and whitespace",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
