@@ -18,6 +18,12 @@ export interface IJsonFileStringifyOptions {
    * If true, then "\n" will be used for newlines instead of the default "\r\n".
    */
   newlineConversion?: NewlineKind;
+
+  /**
+   * If true, then the JJU library will be used to improve the text formatting.
+   * Note that this is slightly slower than the native JSON.stringify() implementation.
+   */
+  prettyFormatting?: boolean;
 }
 
 /**
@@ -94,7 +100,17 @@ export class JsonFile {
    */
   public static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string {
     JsonFile.validateNoUndefinedMembers(jsonObject);
-    const stringified: string = JSON.stringify(jsonObject, undefined, 2) + '\n';
+
+    let stringified: string;
+
+    if (options && options.prettyFormatting) {
+      stringified = jju.stringify(jsonObject, {
+        mode: 'json',
+        indent: 2
+      }) + '\n';
+    } else {
+      stringified = JSON.stringify(jsonObject, undefined, 2) + '\n';
+    }
 
     if (options && options.newlineConversion) {
       switch (options.newlineConversion) {
