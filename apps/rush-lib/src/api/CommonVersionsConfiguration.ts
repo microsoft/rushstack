@@ -106,7 +106,7 @@ export class CommonVersionsConfiguration {
    * Writes the "common-versions.json" file to disk, using the filename that was passed to loadFromFile().
    */
   public save(): void {
-    JsonFile.save(this._serialize(), this._filename);
+    JsonFile.save(this._serialize(), this._filename, { updateExistingFile: true });
   }
 
   /**
