@@ -90,11 +90,13 @@ interface IFileWriterFlags {
 interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
   ensureFolderExists?: boolean;
   onlyIfChanged?: boolean;
+  updateExistingFile?: boolean;
 }
 
 // @public
 interface IJsonFileStringifyOptions {
   newlineConversion?: NewlineKind;
+  prettyFormatting?: boolean;
 }
 
 // @public
@@ -202,6 +204,7 @@ class JsonFile {
   static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any;
   static save(jsonObject: Object, jsonFilename: string, options?: IJsonFileSaveOptions): boolean;
   static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string;
+  static updateString(previousJson: string, newJsonObject: Object, options?: IJsonFileStringifyOptions): string;
   static validateNoUndefinedMembers(jsonObject: Object): void;
 }
 
@@ -297,6 +300,7 @@ class ProtectableMap<K, V> {
 class Text {
   static convertToCrLf(input: string): string;
   static convertToLf(input: string): string;
+  static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
   static padEnd(s: string, minimumLength: number): string;
   static replaceAll(input: string, searchValue: string, replaceValue: string): string;
   static truncateWithEllipsis(s: string, maximumLength: number): string;

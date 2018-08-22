@@ -5,8 +5,8 @@ import * as os from 'os';
 import * as jju from 'jju';
 
 import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
-import { Text } from './Text';
-import { FileSystem, NewlineKind } from './FileSystem';
+import { Text, NewlineKind } from './Text';
+import { FileSystem } from './FileSystem';
 
 /**
  * Options for JsonFile.stringify()
@@ -20,7 +20,7 @@ export interface IJsonFileStringifyOptions {
   newlineConversion?: NewlineKind;
 
   /**
-   * If true, then the JJU library will be used to improve the text formatting.
+   * If true, then the "jju" library will be used to improve the text formatting.
    * Note that this is slightly slower than the native JSON.stringify() implementation.
    */
   prettyFormatting?: boolean;
@@ -43,6 +43,14 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
    * Defaults to false.
    */
   ensureFolderExists?: boolean;
+
+  /**
+   * If true, use the "jju" library to preserve the existing JSON formatting:  The file will be loaded
+   * from the target filename, the new content will be merged in (preserving whitespace and comments),
+   * and then the file will be overwritten with the merged contents.  If the target file does not exist,
+   * then the file is saved normally.
+   */
+  updateExistingFile?: boolean;
 }
 
 /**
@@ -99,18 +107,41 @@ export class JsonFile {
    * @returns a JSON string, with newlines, and indented with two spaces
    */
   public static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string {
-    JsonFile.validateNoUndefinedMembers(jsonObject);
+    return JsonFile.updateString('', jsonObject, options);
+  }
+
+  /**
+   * Serializes the specified JSON object to a string buffer.
+   * @param jsonObject - the object to be serialized
+   * @param options - other settings that control serialization
+   * @returns a JSON string, with newlines, and indented with two spaces
+   */
+  public static updateString(previousJson: string, newJsonObject: Object,
+    options?: IJsonFileStringifyOptions): string {
+    if (!options) {
+      options = { };
+    }
+
+    JsonFile.validateNoUndefinedMembers(newJsonObject);
 
     let stringified: string;
 
-    if (options && options.prettyFormatting) {
-      stringified = jju.stringify(jsonObject, {
+    if (previousJson !== '') {
+      stringified = jju.update(previousJson, newJsonObject, {
         mode: 'json',
         indent: 2
-      }) + '\n';
+      });
+    } else if (options.prettyFormatting) {
+      stringified = jju.stringify(newJsonObject, {
+        mode: 'json',
+        indent: 2
+      });
     } else {
-      stringified = JSON.stringify(jsonObject, undefined, 2) + '\n';
+      stringified = JSON.stringify(newJsonObject, undefined, 2);
     }
+
+    // Add the trailing newline
+    stringified = Text.ensureTrailingNewline(stringified);
 
     if (options && options.newlineConversion) {
       switch (options.newlineConversion) {
@@ -131,20 +162,17 @@ export class JsonFile {
    * @param options - other settings that control how the file is saved
    * @returns false if ISaveJsonFileOptions.onlyIfChanged didn't save anything; true otherwise
    */
-  public static save(jsonObject: Object, jsonFilename: string, options: IJsonFileSaveOptions = {}): boolean {
-    const normalized: string = JsonFile.stringify(jsonObject, options);
+  public static save(jsonObject: Object, jsonFilename: string, options?: IJsonFileSaveOptions): boolean {
+    if (!options) {
+      options = { };
+    }
 
-    const buffer: Buffer = new Buffer(normalized); // utf8 encoding happens here
-
-    if (options.onlyIfChanged) {
-      // Has the file changed?
+    // Do we need to read the previous file contents?
+    let oldBuffer: Buffer | undefined = undefined;
+    if (options.updateExistingFile || options.onlyIfChanged) {
       if (FileSystem.exists(jsonFilename)) {
         try {
-          const oldBuffer: Buffer = FileSystem.readFileToBuffer(jsonFilename);
-          if (Buffer.compare(buffer, oldBuffer) === 0) {
-            // Nothing has changed, so don't touch the file
-            return false;
-          }
+          oldBuffer = FileSystem.readFileToBuffer(jsonFilename);
         } catch (error) {
           // Ignore this error, and try writing a new file.  If that fails, then we should report that
           // error instead.
@@ -152,7 +180,24 @@ export class JsonFile {
       }
     }
 
-    FileSystem.writeFile(jsonFilename, buffer.toString(), {
+    let jsonToUpdate: string = '';
+    if (options.updateExistingFile && oldBuffer) {
+      jsonToUpdate = oldBuffer.toString();
+    }
+
+    const newJson: string = JsonFile.updateString(jsonToUpdate, jsonObject, options);
+
+    const newBuffer: Buffer = new Buffer(newJson); // utf8 encoding happens here
+
+    if (options.onlyIfChanged) {
+      // Has the file changed?
+      if (oldBuffer && Buffer.compare(newBuffer, oldBuffer) === 0) {
+        // Nothing has changed, so don't touch the file
+        return false;
+      }
+    }
+
+    FileSystem.writeFile(jsonFilename, newBuffer.toString(), {
       ensureFolderExists: options.ensureFolderExists
     });
 
