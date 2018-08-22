@@ -2,6 +2,25 @@
 // See LICENSE in the project root for license information.
 
 /**
+ * Enumeration controlling conversion of newline characters.
+ * @public
+ */
+export const enum NewlineKind {
+  /**
+   * Windows-style newlines
+   */
+  CrLf = '\r\n',
+
+  /**
+   * POSIX-style newlines
+   *
+   * @remarks
+   * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
+   */
+  Lf = '\n'
+}
+
+/**
  * Operations for working with strings that contain text.
  *
  * @remarks
@@ -12,6 +31,7 @@
  */
 export class Text {
   private static readonly _newLineRegEx: RegExp = /\r\n|\n\r|\r|\n/g;
+  private static readonly _newLineAtEndRegEx: RegExp = /(\r\n|\n\r|\r|\n)$/;
 
   /**
    * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
@@ -75,5 +95,16 @@ export class Text {
     }
 
     return s.substring(0, maximumLength - 3) + '...';
+  }
+
+  /**
+   * Returns the input string with a trailing '\n' character appended, if not already present.
+   */
+  public static ensureTrailingNewline(s: string, newlineKind: NewlineKind = NewlineKind.Lf): string {
+    // Is there already a newline?
+    if (Text._newLineAtEndRegEx.test(s)) {
+      return s; // yes, no change
+    }
+    return s + newlineKind; // no, add it
   }
 }
