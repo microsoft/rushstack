@@ -1,6 +1,9 @@
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/common-versions.schema.json",
+
   "preferredVersions": {
   },
+
   "allowedAlternativeVersions": {
   }
 }
