@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-raw-script",
   "entries": [
     {
+      "version": "1.2.61",
+      "tag": "@microsoft/loader-raw-script_v1.2.61",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.9` to `4.4.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.60",
       "tag": "@microsoft/loader-raw-script_v1.2.60",
       "date": "Wed, 22 Aug 2018 16:03:25 GMT",

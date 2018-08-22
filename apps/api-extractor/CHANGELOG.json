@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.10.6",
+      "tag": "@microsoft/api-extractor_v5.10.6",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.1.1` to `2.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.10.5",
       "tag": "@microsoft/api-extractor_v5.10.5",
       "date": "Wed, 22 Aug 2018 16:03:25 GMT",

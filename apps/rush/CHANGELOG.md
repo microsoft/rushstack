@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 18 Aug 2018 01:27:39 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Aug 2018 20:58:58 GMT and should not be manually modified.
+
+## 5.0.3
+Wed, 22 Aug 2018 20:58:58 GMT
+
+### Updates
+
+- git st
+- When saving config files, Rush should include the "$schema" directive
+- Fix a regression where "rush version" sometimes failed with "The value for entries[0].comments.dependency[0].author is undefined"
+- When updating common-versions.json and version-policies.json, preserve the existing comments and whitespace
 
 ## 5.0.2
 Sat, 18 Aug 2018 01:27:39 GMT

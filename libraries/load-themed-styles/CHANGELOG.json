@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.7.80",
+      "tag": "@microsoft/load-themed-styles_v1.7.80",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.9` to `4.4.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.79",
       "tag": "@microsoft/load-themed-styles_v1.7.79",
       "date": "Wed, 22 Aug 2018 16:03:25 GMT",
