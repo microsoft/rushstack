@@ -37,6 +37,8 @@ export declare interface ICommonVersionsJsonVersionsMap {
  * Describes the file structure for the "common/config/rush/common-versions.json" config file.
  */
 interface ICommonVersionsJson {
+  $schema?: string;
+
   preferredVersions?: ICommonVersionsJsonVersionMap;
 
   xstitchPreferredVersions?: ICommonVersionsJsonVersionMap;
@@ -218,7 +220,9 @@ export class CommonVersionsConfiguration {
   }
 
   private _serialize(): ICommonVersionsJson {
-    const result: ICommonVersionsJson = { };
+    const result: ICommonVersionsJson = {
+      $schema: 'https://developer.microsoft.com/json-schemas/rush/v5/common-versions.schema.json'
+    };
 
     if (this._preferredVersions.size) {
       result.preferredVersions = CommonVersionsConfiguration._serializeTable(this.preferredVersions);

@@ -127,6 +127,8 @@ export class ApprovedPackagesConfiguration {
     // Update the JSON structure that we already loaded, preserving any existing state
     // (which passed schema validation).
 
+    this._loadedJson.$schema = 'https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json',
+
     this._loadedJson.packages = [];
 
     this.items.sort((a: ApprovedPackagesItem, b: ApprovedPackagesItem) => {
