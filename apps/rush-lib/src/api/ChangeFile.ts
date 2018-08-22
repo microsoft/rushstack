@@ -63,7 +63,7 @@ export class ChangeFile {
 
   /**
    * Writes the change file to disk in sync mode.
-   * Returns the filepath.
+   * Returns the file path.
    * @returns the path to the file that was written (based on generatePath())
    */
   public writeSync(): string {

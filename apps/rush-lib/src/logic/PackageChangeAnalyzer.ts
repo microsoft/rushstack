@@ -75,16 +75,16 @@ export class PackageChangeAnalyzer {
     }
 
     // Sort each project folder into its own package deps hash
-    Object.keys(repoDeps.files).forEach((filepath: string) => {
-      const fileHash: string = repoDeps.files[filepath];
+    Object.keys(repoDeps.files).forEach((filePath: string) => {
+      const fileHash: string = repoDeps.files[filePath];
 
-      const projectName: string | undefined = this._getProjectForFile(filepath);
+      const projectName: string | undefined = this._getProjectForFile(filePath);
 
       // If we found a project for the file, go ahead and store this file's hash
       if (projectName) {
-        projectHashDeps.get(projectName)!.files[filepath] = fileHash;
+        projectHashDeps.get(projectName)!.files[filePath] = fileHash;
       } else {
-        noProjectHashes[filepath] = fileHash;
+        noProjectHashes[filePath] = fileHash;
       }
     });
 
@@ -123,9 +123,9 @@ export class PackageChangeAnalyzer {
 
     // Add the "NO_PROJECT" files to every project's dependencies
     // for (const project of PackageChangeAnalyzer.rushConfig.projects) {
-    //  Object.keys(noProjectHashes).forEach((filepath: string) => {
-    //    const fileHash: string = noProjectHashes[filepath];
-    //    projectHashDeps.get(project.packageName).files[filepath] = fileHash;
+    //  Object.keys(noProjectHashes).forEach((filePath: string) => {
+    //    const fileHash: string = noProjectHashes[filePath];
+    //    projectHashDeps.get(project.packageName).files[filePath] = fileHash;
     //  });
     // }
 
@@ -145,9 +145,9 @@ export class PackageChangeAnalyzer {
     return projectHashDeps;
   }
 
-  private _getProjectForFile(filepath: string): string | undefined {
+  private _getProjectForFile(filePath: string): string | undefined {
     for (const project of this._rushConfiguration.projects) {
-      if (this._fileExistsInFolder(filepath, project.projectRelativeFolder)) {
+      if (this._fileExistsInFolder(filePath, project.projectRelativeFolder)) {
         return project.packageName;
       }
     }
