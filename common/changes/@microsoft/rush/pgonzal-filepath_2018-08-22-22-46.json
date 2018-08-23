@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix capitalization of new \"filePath\" API property",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}

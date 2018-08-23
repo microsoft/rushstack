@@ -28,7 +28,7 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.commonVersionsFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.nonbrowserApprovedPackagesFilename,
-  RushConstants.versionPoliciesFileName,
+  RushConstants.versionPoliciesFilename,
   RushConstants.commandLineFilename
 ];
 
@@ -772,7 +772,7 @@ export class RushConfiguration {
     }
 
     const versionPolicyConfigFile: string =
-      path.join(this._commonRushConfigFolder, RushConstants.versionPoliciesFileName);
+      path.join(this._commonRushConfigFolder, RushConstants.versionPoliciesFilename);
     this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
 
     this._projects = [];
