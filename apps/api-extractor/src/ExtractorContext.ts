@@ -107,7 +107,7 @@ export class ExtractorContext {
 
     this.typeChecker = options.program.getTypeChecker();
 
-    const rootFile: ts.SourceFile = options.program.getSourceFile(options.entryPointFile);
+    const rootFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);
     if (!rootFile) {
       throw new Error('Unable to load file: ' + options.entryPointFile);
     }
