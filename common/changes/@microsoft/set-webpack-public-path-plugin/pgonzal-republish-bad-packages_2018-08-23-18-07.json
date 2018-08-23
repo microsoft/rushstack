@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/set-webpack-public-path-plugin",
+      "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/set-webpack-public-path-plugin",
+  "email": "pgonzal@users.noreply.github.com"
+}
