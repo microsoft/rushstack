@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/package-deps-hash",
-  "version": "2.2.62",
+  "version": "2.2.63",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
@@ -16,8 +16,8 @@
     "build": "gulp test --clean"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.4.10",
-    "@microsoft/node-core-library": "2.2.0",
+    "@microsoft/node-library-build": "4.4.11",
+    "@microsoft/node-core-library": "2.2.1",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "@types/chai": "3.4.34",

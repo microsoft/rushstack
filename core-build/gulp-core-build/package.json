@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "3.8.10",
+  "version": "3.8.11",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "2.2.0",
+    "@microsoft/node-core-library": "2.2.1",
     "@types/assertion-error": "1.0.30",
     "@types/chai": "3.4.34",
     "@types/chalk": "0.4.31",
