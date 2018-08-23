@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.0.4",
+      "tag": "@microsoft/rush_v5.0.4",
+      "date": "Thu, 23 Aug 2018 00:08:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix capitalization of new \"filePath\" API property"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.3",
       "tag": "@microsoft/rush_v5.0.3",
       "date": "Wed, 22 Aug 2018 20:58:58 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 22 Aug 2018 20:58:58 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Aug 2018 00:08:41 GMT and should not be manually modified.
+
+## 5.0.4
+Thu, 23 Aug 2018 00:08:41 GMT
+
+### Updates
+
+- Fix capitalization of new "filePath" API property
 
 ## 5.0.3
 Wed, 22 Aug 2018 20:58:58 GMT
