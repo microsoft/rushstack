@@ -2,6 +2,23 @@
   "name": "@microsoft/loader-raw-script",
   "entries": [
     {
+      "version": "1.2.62",
+      "tag": "@microsoft/loader-raw-script_v1.2.62",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.10` to `4.4.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.61",
       "tag": "@microsoft/loader-raw-script_v1.2.61",
       "date": "Wed, 22 Aug 2018 20:58:58 GMT",

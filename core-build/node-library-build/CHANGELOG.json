@@ -2,6 +2,29 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "4.4.11",
+      "tag": "@microsoft/node-library-build_v4.4.11",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.10` to `3.8.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" from `3.5.2` to `3.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.11.6` to `4.11.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.10",
       "tag": "@microsoft/node-library-build_v4.4.10",
       "date": "Wed, 22 Aug 2018 20:58:58 GMT",

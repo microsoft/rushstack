@@ -2,6 +2,23 @@
   "name": "@microsoft/resolve-chunk-plugin",
   "entries": [
     {
+      "version": "2.0.20",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.20",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.10` to `4.4.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.19",
       "tag": "@microsoft/resolve-chunk-plugin_v2.0.19",
       "date": "Wed, 22 Aug 2018 20:58:58 GMT",

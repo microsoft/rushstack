@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 22 Aug 2018 20:58:58 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Aug 2018 18:18:53 GMT and should not be manually modified.
+
+## 5.10.7
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
 
 ## 5.10.6
 Wed, 22 Aug 2018 20:58:58 GMT

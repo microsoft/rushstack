@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "4.6.6",
+      "tag": "@microsoft/gulp-core-build-karma_v4.6.6",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.10` to `3.8.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.2.0` to `2.2.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.6.5",
       "tag": "@microsoft/gulp-core-build-karma_v4.6.5",
       "date": "Wed, 22 Aug 2018 20:58:58 GMT",

@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.3.42",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.42",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.10` to `3.8.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.80` to `1.7.81`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.41",
       "tag": "@microsoft/gulp-core-build-sass_v4.3.41",
       "date": "Wed, 22 Aug 2018 20:58:58 GMT",

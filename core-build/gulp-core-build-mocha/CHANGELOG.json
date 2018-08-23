@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.5.3",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.3",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.10` to `3.8.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.5.2",
       "tag": "@microsoft/gulp-core-build-mocha_v3.5.2",
       "date": "Wed, 22 Aug 2018 20:58:58 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Fri, 08 Jun 2018 08:43:52 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Aug 2018 18:18:53 GMT and should not be manually modified.
+
+## 4.2.1
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
 
 ## 4.2.0
 Fri, 08 Jun 2018 08:43:52 GMT
