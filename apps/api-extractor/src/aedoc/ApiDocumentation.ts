@@ -6,11 +6,14 @@
 
 import {
   TSDocParser,
-  TSDocParserConfiguration,
   TSDocTagDefinition,
-  TSDocTagSyntaxKind,
   TextRange,
-  ParserContext
+  ParserContext,
+  ModifierTagSet,
+  DocBlockTag,
+  StandardTags,
+  Excerpt,
+  StandardModifierTagSet
 } from '@microsoft/tsdoc';
 import { AstPackage } from '../ast/AstPackage';
 import { ApiDefinitionReference, IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
@@ -23,6 +26,7 @@ import {
   IMarkupApiLink
 } from '../markup/MarkupElement';
 import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
+import { AedocDefinitions } from './AedocDefinitions';
 
 /**
  * A dependency for ApiDocumentation constructor that abstracts away the function
@@ -197,8 +201,7 @@ export class ApiDocumentation {
     this.incompleteInheritdocs = [];
     this.releaseTag = ReleaseTag.None;
 
-    // TODO: Use isEmpty()
-    if (inputTextRange !== TextRange.empty) {
+    if (!inputTextRange.isEmpty()) {
       this._parseDocs(inputTextRange);
     }
   }
@@ -236,14 +239,68 @@ export class ApiDocumentation {
   }
 
   private _parseDocs(inputTextRange: TextRange): void {
-    const tsdocConfiguration: TSDocParserConfiguration = new TSDocParserConfiguration();
-    const preapprovedTagDefinition: TSDocTagDefinition = new TSDocTagDefinition({
-      tagName: '@preapproved',
-      syntaxKind: TSDocTagSyntaxKind.ModifierTag
-    });
-    tsdocConfiguration.addTagDefinition(preapprovedTagDefinition);
-    const tsdocParser: TSDocParser = new TSDocParser(tsdocConfiguration);
+    const tsdocParser: TSDocParser = new TSDocParser(AedocDefinitions.parserConfiguration);
     this._parserContext = tsdocParser.parseRange(inputTextRange);
+
+    this._parseModifierTags();
+  }
+
+  private _reportError(message: string, excerpt?: Excerpt): void {
+    this.reportError(message);
+  }
+
+  private _parseModifierTags(): void {
+    if (!this._parserContext) {
+      return;
+    }
+    const modifierTagSet: StandardModifierTagSet = this._parserContext.docComment.modifierTagSet;
+
+    // The first function call that encounters a duplicate will return false.
+    // When there are duplicates, the broadest release tag wins.
+    // tslint:disable-next-line:no-unused-expression
+    this._parseReleaseTag(modifierTagSet, StandardTags.public, ReleaseTag.Public)
+      && this._parseReleaseTag(modifierTagSet, StandardTags.beta, ReleaseTag.Beta)
+      && this._parseReleaseTag(modifierTagSet, StandardTags.alpha, ReleaseTag.Alpha)
+      && this._parseReleaseTag(modifierTagSet, StandardTags.internal, ReleaseTag.Internal);
+
+    this.preapproved = modifierTagSet.hasTag(AedocDefinitions.preapprovedTag);
+
+    this.isPackageDocumentation = modifierTagSet.isPackageDocumentation();
+    this.hasReadOnlyTag = modifierTagSet.isReadonly();
+    this.isDocBeta = modifierTagSet.hasTag(AedocDefinitions.betaDocumentation);
+    this.isEventProperty = modifierTagSet.isEventProperty();
+    this.isSealed = modifierTagSet.isSealed();
+    this.isVirtual = modifierTagSet.isVirtual();
+    this.isOverride = modifierTagSet.isOverride();
+
+    if (this.preapproved && this.releaseTag !== ReleaseTag.Internal) {
+      this.reportError('The @preapproved tag may only be applied to @internal definitions');
+      this.preapproved = false;
+    }
+
+    if (this.isSealed && this.isVirtual) {
+      this.reportError('The @sealed and @virtual tags may not be used together');
+    }
+
+    if (this.isVirtual && this.isOverride) {
+      this.reportError('The @virtual and @override tags may not be used together');
+    }
+  }
+
+  private _parseReleaseTag(modifierTagSet: ModifierTagSet, tagDefinition: TSDocTagDefinition,
+    releaseTag: ReleaseTag): boolean {
+
+    const node: DocBlockTag | undefined = modifierTagSet.tryGetTag(tagDefinition);
+    if (node) {
+      if (this.releaseTag !== ReleaseTag.None) {
+        this._reportError('More than one release tag was specified (@alpha, @beta, @public, @internal)',
+          node.excerpt);
+        return false;
+      }
+      this.releaseTag = releaseTag;
+    }
+
+    return true;
   }
 
   /**
