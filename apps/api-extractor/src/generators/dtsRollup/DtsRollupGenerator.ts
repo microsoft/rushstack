@@ -4,6 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
+import * as tsdoc from '@microsoft/tsdoc';
 import { FileSystem, NewlineKind } from '@microsoft/node-core-library';
 
 import { ExtractorContext } from '../../ExtractorContext';
@@ -47,6 +48,7 @@ export enum DtsRollupKind {
 export class DtsRollupGenerator {
   private _context: ExtractorContext;
   private _typeChecker: ts.TypeChecker;
+  private _tsdocParser: tsdoc.TSDocParser;
   private _astSymbolTable: AstSymbolTable;
   private _astEntryPoint: AstEntryPoint | undefined;
 
@@ -65,6 +67,7 @@ export class DtsRollupGenerator {
   public constructor(context: ExtractorContext) {
     this._context = context;
     this._typeChecker = context.typeChecker;
+    this._tsdocParser = new tsdoc.TSDocParser();
     this._astSymbolTable = new AstSymbolTable(this._context.typeChecker, this._context.packageJsonLookup);
   }
 
@@ -478,42 +481,31 @@ export class DtsRollupGenerator {
   // In the near future we will overhaul the AEDoc parser to separate syntactic/semantic analysis,
   // at which point this will be wired up to the same ApiDocumentation layer used for the API Review files
   private _getReleaseTagForDeclaration(declaration: ts.Node): ReleaseTag {
-    let releaseTag: ReleaseTag = ReleaseTag.None;
-
-    // We don't want to match "bill@example.com".  But we do want to match "/**@public*/".
-    // So for now we require whitespace or a star before/after the string.
-    const releaseTagRegExp: RegExp = /(?:\s|\*)@(internal|alpha|beta|public)(?:\s|\*)/g;
-
     const sourceFileText: string = declaration.getSourceFile().text;
 
     for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || []) {
       // NOTE: This string includes "/**"
-      const comment: string = sourceFileText.substring(commentRange.pos, commentRange.end);
+      const commentTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(
+        sourceFileText, commentRange.pos, commentRange.end);
 
-      let match: RegExpMatchArray | null;
-      while (match = releaseTagRegExp.exec(comment)) {
-        let foundReleaseTag: ReleaseTag = ReleaseTag.None;
-        switch (match[1]) {
-          case 'internal':
-            foundReleaseTag = ReleaseTag.Internal; break;
-          case 'alpha':
-            foundReleaseTag = ReleaseTag.Alpha; break;
-          case 'beta':
-            foundReleaseTag = ReleaseTag.Beta; break;
-          case 'public':
-            foundReleaseTag = ReleaseTag.Public; break;
-        }
+      const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(commentTextRange);
+      const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;
 
-        if (releaseTag !== ReleaseTag.None && foundReleaseTag !== releaseTag) {
-          // this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
-          return releaseTag;
-        }
-
-        releaseTag = foundReleaseTag;
+      if (modifierTagSet.isPublic()) {
+        return ReleaseTag.Public;
+      }
+      if (modifierTagSet.isBeta()) {
+        return ReleaseTag.Beta;
+      }
+      if (modifierTagSet.isAlpha()) {
+        return ReleaseTag.Alpha;
+      }
+      if (modifierTagSet.isInternal()) {
+        return ReleaseTag.Internal;
       }
     }
 
-    return releaseTag;
+    return ReleaseTag.None;
   }
 
   private _collectTypeDefinitionReferences(astSymbol: AstSymbol): void {
