@@ -5,6 +5,7 @@
 /* tslint:disable:no-constant-condition */
 
 import * as ts from 'typescript';
+import * as tsdoc from '@microsoft/tsdoc';
 import { IPackageJson, IParsedPackageName, PackageName } from '@microsoft/node-core-library';
 import { ExtractorContext } from '../ExtractorContext';
 import { ApiDocumentation } from '../aedoc/ApiDocumentation';
@@ -295,12 +296,14 @@ export abstract class AstItem {
 
     const sourceFileText: string = this.declaration.getSourceFile().text;
 
-    let aedocCommentRange: ts.TextRange | undefined;
+    // This will contain the AEDoc content, including the "/**" characters
+    let inputTextRange: tsdoc.TextRange = tsdoc.TextRange.empty;
 
     if (options.aedocCommentRange) { // but might be ""
       // This is e.g. for the special @packagedocumentation comment, which is pulled
       // from elsewhere in the AST.
-      aedocCommentRange = options.aedocCommentRange;
+      inputTextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
+        options.aedocCommentRange.pos, options.aedocCommentRange.end);
     } else {
       // This is the typical case
       const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(
@@ -308,22 +311,14 @@ export abstract class AstItem {
       if (ranges.length > 0) {
         // We use the JSDoc comment block that is closest to the definition, i.e.
         // the last one preceding it
-        aedocCommentRange = ranges[ranges.length - 1];
-      }
-    }
-
-    // This will be the AEDoc content, excluding the "/**" characters
-    let aedoc: string = '';
-    if (aedocCommentRange) {
-      // This is the raw comment including the "/**" characters, or "" if there was no comment
-      const rawComment: string = sourceFileText.substring(aedocCommentRange.pos, aedocCommentRange.end);
-      if (rawComment) {
-        aedoc = TypeScriptHelpers.extractJSDocContent(rawComment, this.reportError);
+        const lastRange: ts.TextRange =  ranges[ranges.length - 1];
+        inputTextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
+          lastRange.pos, lastRange.end);
       }
     }
 
     this.documentation = new ApiDocumentation(
-      aedoc,
+      inputTextRange,
       this.context.docItemLoader,
       this.context,
       this.reportError,
@@ -489,7 +484,8 @@ export abstract class AstItem {
     }
 
     if (this.kind === AstItemKind.Package) {
-      if (this.documentation.originalAedoc.trim().length > 0) {
+      // TODO: Use isEmpty()
+      if (this.documentation.aedocCommentFound) {
         if (!this.documentation.isPackageDocumentation) {
           this.reportError('A package comment was found, but it is missing the @packagedocumentation tag');
         }

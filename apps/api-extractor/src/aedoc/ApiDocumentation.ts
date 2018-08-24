@@ -4,6 +4,14 @@
 /* tslint:disable:no-bitwise */
 /* tslint:disable:member-ordering */
 
+import {
+  TSDocParser,
+  TSDocParserConfiguration,
+  TSDocTagDefinition,
+  TSDocTagSyntaxKind,
+  TextRange,
+  ParserContext
+} from '@microsoft/tsdoc';
 import { AstPackage } from '../ast/AstPackage';
 import { ApiDefinitionReference, IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
 import { ExtractorContext } from '../ExtractorContext';
@@ -14,6 +22,7 @@ import {
   MarkupBasicElement,
   IMarkupApiLink
 } from '../markup/MarkupElement';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 
 /**
  * A dependency for ApiDocumentation constructor that abstracts away the function
@@ -43,13 +52,6 @@ export interface IAedocParameter {
 
 export class ApiDocumentation {
   /**
-   * The original AEDoc comment, with the "/**" characters already removed.
-   *
-   * Example: "This is a summary. \{\@link a\} \@remarks These are remarks."
-   */
-  public originalAedoc: string;
-
-   /**
    * docCommentTokens that are parsed into Doc Elements.
    */
   public summary: MarkupElement[];
@@ -164,7 +166,9 @@ export class ApiDocumentation {
 
   public readonly reportError: (message: string) => void;
 
-  constructor(originalAedoc: string,
+  private _parserContext: ParserContext | undefined;
+
+  constructor(inputTextRange: TextRange,
     referenceResolver: IReferenceResolver,
     context: ExtractorContext,
     errorLogger: (message: string) => void,
@@ -175,7 +179,6 @@ export class ApiDocumentation {
       this.failedToParse = true;
     };
 
-    this.originalAedoc = originalAedoc;
     this.referenceResolver = referenceResolver;
     this.context = context;
     this.reportError = errorLogger;
@@ -194,7 +197,31 @@ export class ApiDocumentation {
     this.incompleteInheritdocs = [];
     this.releaseTag = ReleaseTag.None;
 
-    this._parseDocs();
+    // TODO: Use isEmpty()
+    if (inputTextRange !== TextRange.empty) {
+      this._parseDocs(inputTextRange);
+    }
+  }
+
+  /**
+   * Returns true if an AEDoc comment was parsed for the API item.
+   */
+  public get aedocCommentFound(): boolean {
+    if (this._parserContext) {
+      return this._parserContext.tokens.length > 0;
+    }
+    return false;
+  }
+
+  /**
+   * Returns the original AEDoc comment
+   */
+  public emitNormalizedComment(): string {
+    if (this._parserContext) {
+      const content: string = this._parserContext.lines.map(x => x.toString()).join('\n');
+      return TypeScriptHelpers.formatJSDocContent(content);
+    }
+    return '';
   }
 
   /**
@@ -208,8 +235,15 @@ export class ApiDocumentation {
     this._completeInheritdocs(warnings);
   }
 
-  private _parseDocs(): void {
-    // ...
+  private _parseDocs(inputTextRange: TextRange): void {
+    const tsdocConfiguration: TSDocParserConfiguration = new TSDocParserConfiguration();
+    const preapprovedTagDefinition: TSDocTagDefinition = new TSDocTagDefinition({
+      tagName: '@preapproved',
+      syntaxKind: TSDocTagSyntaxKind.ModifierTag
+    });
+    tsdocConfiguration.addTagDefinition(preapprovedTagDefinition);
+    const tsdocParser: TSDocParser = new TSDocParser(tsdocConfiguration);
+    this._parserContext = tsdocParser.parseRange(inputTextRange);
   }
 
   /**

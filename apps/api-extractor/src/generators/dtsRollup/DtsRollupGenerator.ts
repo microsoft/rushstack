@@ -215,9 +215,9 @@ export class DtsRollupGenerator {
     indentedWriter.clear();
 
     // If there is a @packagedocumentation header, put it first:
-    const packageDocumentation: string = this._context.package.documentation.originalAedoc;
+    const packageDocumentation: string = this._context.package.documentation.emitNormalizedComment();
     if (packageDocumentation) {
-      indentedWriter.writeLine(TypeScriptHelpers.formatJSDocContent(packageDocumentation));
+      indentedWriter.writeLine(packageDocumentation);
       indentedWriter.writeLine();
     }
 
