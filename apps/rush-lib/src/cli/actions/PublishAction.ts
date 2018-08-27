@@ -19,7 +19,7 @@ import { Npm } from '../../utilities/Npm';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PublishUtilities } from '../../logic/PublishUtilities';
 import { ChangelogGenerator } from '../../logic/ChangelogGenerator';
-import { GitPolicy } from '../../logic/GitPolicy';
+import { GitEmailPolicy } from '../../logic/policy/GitEmailPolicy';
 import { PrereleaseToken } from '../../logic/PrereleaseToken';
 import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
@@ -173,7 +173,7 @@ export class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected run(): Promise<void> {
-    if (!GitPolicy.getUserEmail(this.rushConfiguration, true)) {
+    if (!GitEmailPolicy.getUserEmail(this.rushConfiguration)) {
       process.exit(1);
       return Promise.resolve();
     }

@@ -7,20 +7,33 @@ import * as child_process from 'child_process';
 import { PublishUtilities } from './PublishUtilities';
 
 export class Git {
+  private static _hasGit: boolean | undefined = undefined;
+  private static _gitPath: string | undefined;
+
   private _targetBranch: string | undefined;
 
-  public static detectIfGitIsSupported(): boolean {
-    const command: string = process.platform === 'win32' ? 'where' : 'which';
-    const result: child_process.SpawnSyncReturns<string> = child_process.spawnSync(command, ['git']);
+  public static getGitPath(): string | undefined {
+    if (Git._hasGit === undefined) {
+      const command: string = process.platform === 'win32' ? 'where' : 'which';
+      const result: child_process.SpawnSyncReturns<string> = child_process.spawnSync(command, ['git']);
 
-    if (result.status !== 0) {
-      return false;
+      if (result.status === 0) {
+        Git._gitPath = result.stdout;
+      }
     }
 
-    try {
-      return !!gitInfo().sha;
-    } catch (e) {
-      return false; // Unexpected, but possible if the .git directory is corrupted.
+    return Git._gitPath;
+  }
+
+  public static detectIfGitIsSupported(): boolean {
+    if (Git.getGitPath()) { // Do we even have a git binary?
+      try {
+        return !!gitInfo().sha;
+      } catch (e) {
+        return false; // Unexpected, but possible if the .git directory is corrupted.
+      }
+    } else {
+      return false;
     }
   }
 

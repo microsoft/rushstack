@@ -17,7 +17,8 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionControl } from '../../utilities/VersionControl';
 import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { GitPolicy } from '../../logic/GitPolicy';
+import { GitEmailPolicy } from '../../logic/policy/GitEmailPolicy';
+import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionManager } from '../../logic/VersionManager';
 import { Git } from '../../logic/Git';
@@ -94,7 +95,8 @@ export class VersionAction extends BaseRushAction {
 
   protected run(): Promise<void> {
     return Promise.resolve().then(() => {
-      const userEmail: string = GitPolicy.getUserEmail(this.rushConfiguration, this._bypassPolicy.value);
+      PolicyValidator.validatePolicy(this.rushConfiguration, this._bypassPolicy.value);
+      const userEmail: string = GitEmailPolicy.getUserEmail(this.rushConfiguration);
 
       this._validateInput();
 
