@@ -15,7 +15,7 @@ import {
   getConfig,
   IBuildConfig
 } from '@microsoft/gulp-core-build';
-import { apiExtractor, typescript, tslint, text } from '@microsoft/gulp-core-build-typescript';
+import { apiExtractor, tscCmd, tslintCmd, text } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
 import { karma } from '@microsoft/gulp-core-build-karma';
 import { webpack } from '@microsoft/gulp-core-build-webpack';
@@ -52,8 +52,8 @@ tslint.mergeConfig({
 });
 
 // Define default task groups.
-export const compileTsTasks: IExecutable = parallel(typescript, text);
-export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(tslint, compileTsTasks), apiExtractor, postCopy));
+export const compileTsTasks: IExecutable = parallel(tscCmd, text);
+export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(tslintCmd, compileTsTasks), apiExtractor, postCopy));
 export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 export const testTasks: IExecutable = task('test', serial(buildTasks, karma, jest));
 export const defaultTasks: IExecutable = serial(bundleTasks, karma, jest);

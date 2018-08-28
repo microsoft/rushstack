@@ -12,7 +12,9 @@
     "@types/chai": "3.4.34",
     "chai": "~3.5.0",
     "@types/jest": "21.1.10",
-    "@types/node": "8.5.8"
+    "@types/node": "8.5.8",
+    "@microsoft/rush-stack": "0.1.0",
+    "@microsoft/rush-stack-compiler": "0.1.0"
   },
   "dependencies": {
     "@microsoft/load-themed-styles": "1.7.81",

@@ -16,6 +16,7 @@
     "colors": "~1.2.1"
   },
   "devDependencies": {
+    "@microsoft/rush-stack-compiler": "0.1.0",
     "@microsoft/node-library-build": "4.4.11",
     "@types/colors": "1.2.1",
     "@types/node": "8.5.8",

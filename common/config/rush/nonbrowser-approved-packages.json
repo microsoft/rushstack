@@ -64,11 +64,11 @@
     },
     {
       "name": "@microsoft/rush-stack",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/set-webpack-public-path-plugin",

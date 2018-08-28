@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
 
   "rushVersion": "5.0.3",
-  "pnpmVersion": "2.13.5",
+  "pnpmVersion": "2.13.6",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0 || >=8.9.4 <9.0.0",
 
   "projectFolderMinDepth": 2,
@@ -96,7 +96,10 @@
       "packageName": "rush-stack-library-test",
       "projectFolder": "build-tests/rush-stack-library-test",
       "reviewCategory": "tests",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
     },
     {
       "packageName": "web-library-build-test",
@@ -164,10 +167,7 @@
       "packageName": "@microsoft/gulp-core-build-webpack",
       "projectFolder": "core-build/gulp-core-build-webpack",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
-      ]
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/node-library-build",
@@ -231,7 +231,10 @@
       "packageName": "@microsoft/rush-stack",
       "projectFolder": "stack/rush-stack",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": false,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler",

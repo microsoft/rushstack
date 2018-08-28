@@ -1,20 +1,25 @@
 {
+  // Put this back and remove the rest when node-library-build has been re-published
+  // "extends": "./node_modules/@microsoft/rush-stack/includes/tsconfig-node.json"
+
   "compilerOptions": {
     "target": "es6",
+    "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
-    "jsx": "react",
     "declaration": true,
     "sourceMap": true,
+    "experimentalDecorators": true,
     "strictNullChecks": true,
     "types": [
       "node"
     ],
-    "typeRoots": [
-      "./node_modules/@types"
-    ],
     "lib": [
       "es5",
-      "es2015.iterable"
+      "scripthost",
+      "es2015.collection",
+      "es2015.promise",
+      "es2015.iterable",
+      "dom"
     ]
   }
 }

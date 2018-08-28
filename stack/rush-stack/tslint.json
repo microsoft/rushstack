@@ -1,7 +1,10 @@
 {
   // Put this back and remove the rest when node-library-build has been re-published
-  // "extends": "@microsoft/rush-stack/includes/tslint.json"
+  // "extends": "@microsoft/rush-stack-compiler/includes/tslint.json",
 
+  "rulesDirectory": [
+    "tslint-microsoft-contrib"
+  ],
   "rules": {
     "class-name": true,
     "comment-format": [true, "check-space"],

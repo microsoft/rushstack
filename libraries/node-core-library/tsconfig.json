@@ -1,4 +1,7 @@
 {
+  // Put this back and remove the rest when rush-stack-compiler has been re-published
+  // "extends": "./node_modules/@microsoft/rush-stack/includes/tsconfig-node.json"
+
   "compilerOptions": {
     "target": "es6",
     "forceConsistentCasingInFileNames": true,
@@ -6,6 +9,7 @@
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
+    "strictNullChecks": true,
     "types": [
       "node",
       "jest"
@@ -17,7 +21,6 @@
       "es2015.promise",
       "es2015.iterable",
       "dom"
-    ],
-    "strictNullChecks": true
+    ]
   }
 }
