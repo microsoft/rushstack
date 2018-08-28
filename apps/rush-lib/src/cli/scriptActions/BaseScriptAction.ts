@@ -11,7 +11,7 @@ import { RushConstants } from '../../logic/RushConstants';
  * Constructor parameters for BaseScriptAction
  */
 export interface IBaseScriptActionOptions extends IBaseRushActionOptions {
-  commandLineConfiguration: CommandLineConfiguration;
+  commandLineConfiguration: CommandLineConfiguration | undefined;
 }
 
 /**
@@ -25,7 +25,7 @@ export interface IBaseScriptActionOptions extends IBaseRushActionOptions {
  * The two subclasses are BulkScriptAction and GlobalScriptAction.
  */
 export abstract class BaseScriptAction extends BaseRushAction {
-  protected readonly _commandLineConfiguration: CommandLineConfiguration;
+  protected readonly _commandLineConfiguration: CommandLineConfiguration | undefined;
   protected readonly customParameters: CommandLineParameter[] = [];
 
   constructor(
@@ -36,6 +36,10 @@ export abstract class BaseScriptAction extends BaseRushAction {
   }
 
   protected defineScriptParameters(): void {
+    if (!this._commandLineConfiguration) {
+      return;
+    }
+
     // Find any parameters that are associated with this command
     for (const parameter of this._commandLineConfiguration.parameters) {
       let associated: boolean = false;

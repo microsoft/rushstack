@@ -117,15 +117,17 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _populateScriptActions(): void {
-    if (!this.rushConfiguration) {
-      return;
-    }
+    let commandLineConfiguration: CommandLineConfiguration | undefined = undefined;
 
-    const commandLineConfigFile: string = path.join(
-      this.rushConfiguration.commonRushConfigFolder, RushConstants.commandLineFilename
-    );
-    const commandLineConfiguration: CommandLineConfiguration
-      = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
+    // If there is not a rush.json file, we still want "build" and "rebuild" to appear in the
+    // command-line help
+    if (this.rushConfiguration) {
+      const commandLineConfigFile: string = path.join(
+        this.rushConfiguration.commonRushConfigFolder, RushConstants.commandLineFilename
+      );
+
+      commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
+    }
 
     const documentationForBuild: string = 'The Rush build command assumes that the package.json file for each'
       + ' project contains a "scripts" entry for "npm run build".  It invokes'
@@ -159,6 +161,11 @@ export class RushCommandLineParser extends CommandLineParser {
       enableParallelism: true,
       ignoreMissingScript: false
     }));
+
+    if (!commandLineConfiguration) {
+      // If there is not a rush.json file, so don't attempt to define custom commands/parameters
+      return;
+    }
 
     // Register each custom command
     for (const command of commandLineConfiguration.commands) {
