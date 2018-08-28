@@ -129,20 +129,19 @@ export class RushCommandLineParser extends CommandLineParser {
       commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
     }
 
-    const documentationForBuild: string = 'The Rush build command assumes that the package.json file for each'
-      + ' project contains a "scripts" entry for "npm run build".  It invokes'
-      + ' this commands to build each project.  Projects are built in parallel where'
-      + ' possible, but always respecting the dependency graph for locally linked projects.'
-      + ' The number of simultaneous processes will be based on the number of machine cores'
-      + ' unless overridden by the --parallelism flag.';
-
     // always create a build and a rebuild command
     this.addAction(new BulkScriptAction({
       actionName: 'build',
       summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last '
         + 'built.',
-      documentation: documentationForBuild,
-
+      documentation: 'This command is similar to "rush rebuild", except that "rush build" performs'
+        + ' an incremental build. In other words, it only builds projects whose source files have'
+        + ' changed since the last successful build. The analysis requires a Git working tree, and'
+        + ' only considers source files that are tracked by Git and whose path is under the project folder.'
+        + ' (For more details about this algorithm, see the documentation for the "package-deps-hash"'
+        + ' NPM package.) The incremental build state is tracked in a file "package-deps.json" which should'
+        + ' NOT be added to Git.  The build command is tracked by the "arguments" field in this JSON file;'
+        + ' a full rebuild is forced whenever the command has changed (e.g. "--production" or not).',
       parser: this,
       commandLineConfiguration: commandLineConfiguration,
 
@@ -153,8 +152,13 @@ export class RushCommandLineParser extends CommandLineParser {
     this.addAction(new BulkScriptAction({
       actionName: 'rebuild',
       summary: 'Clean and rebuild the entire set of projects',
-      documentation: documentationForBuild,
-
+      documentation: 'This command assumes that the package.json file for each project contains'
+        + ' a "scripts" entry for "npm run build" that performs a full clean build.'
+        + ' Rush invokes this script to build each project that is registered in rush.json.'
+        + ' Projects are built in parallel where possible, but always respecting the dependency'
+        + ' graph for locally linked projects.  The number of simultaneous processes will be'
+        + ' based on the number of machine cores unless overridden by the --parallelism flag.'
+        + ' (For an incremental build, see "rush build" instead of "rush rebuild".)',
       parser: this,
       commandLineConfiguration: commandLineConfiguration,
 
