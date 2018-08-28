@@ -34,21 +34,21 @@ export class PurgeAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    const stopwatch: Stopwatch = Stopwatch.start();
+    return Promise.resolve().then(() => {
+      const stopwatch: Stopwatch = Stopwatch.start();
 
-    const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration);
+      const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration);
 
-    if (this._unsafeParameter.value!) {
-      purgeManager.purgeUnsafe();
-    } else {
-      purgeManager.purgeNormal();
-    }
+      if (this._unsafeParameter.value!) {
+        purgeManager.purgeUnsafe();
+      } else {
+        purgeManager.purgeNormal();
+      }
 
-    purgeManager.deleteAll();
+      purgeManager.deleteAll();
 
-    console.log(os.EOL + colors.green(`Rush purge started successfully and will complete asynchronously.`
-      + ` (${stopwatch.toString()})`));
-
-    return Promise.resolve();
+      console.log(os.EOL + colors.green(`Rush purge started successfully and will complete asynchronously.`
+        + ` (${stopwatch.toString()})`));
+    });
   }
 }
