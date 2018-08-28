@@ -19,12 +19,12 @@ import { Npm } from '../../utilities/Npm';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PublishUtilities } from '../../logic/PublishUtilities';
 import { ChangelogGenerator } from '../../logic/ChangelogGenerator';
-import { GitEmailPolicy } from '../../logic/policy/GitEmailPolicy';
 import { PrereleaseToken } from '../../logic/PrereleaseToken';
 import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
-import { Git } from '../../logic/Git';
+import { PublishGit } from '../../logic/PublishGit';
 import { VersionControl } from '../../utilities/VersionControl';
+import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -173,10 +173,8 @@ export class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected run(): Promise<void> {
-    if (!GitEmailPolicy.getUserEmail(this.rushConfiguration)) {
-      process.exit(1);
-      return Promise.resolve();
-    }
+    PolicyValidator.validatePolicy(this.rushConfiguration, false);
+
     const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
     if (this._regenerateChangelogs.value) {
@@ -224,7 +222,7 @@ export class PublishAction extends BaseRushAction {
 
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.changes;
-      const git: Git = new Git(this._targetBranch.value);
+      const git: PublishGit = new PublishGit(this._targetBranch.value);
       const tempBranch: string = 'publish-' + new Date().getTime();
 
       // Make changes in temp branch.
@@ -279,7 +277,7 @@ export class PublishAction extends BaseRushAction {
     console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
     let updated: boolean = false;
-    const git: Git = new Git(this._targetBranch.value);
+    const git: PublishGit = new PublishGit(this._targetBranch.value);
 
     allPackages.forEach((packageConfig, packageName) => {
       if (packageConfig.shouldPublish &&
@@ -303,7 +301,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _gitAddTags(git: Git, orderedChanges: IChangeInfo[]): void {
+  private _gitAddTags(git: PublishGit, orderedChanges: IChangeInfo[]): void {
     for (const change of orderedChanges) {
       if (
         change.changeType &&

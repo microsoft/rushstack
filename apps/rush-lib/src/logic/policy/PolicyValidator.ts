@@ -3,7 +3,6 @@
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { GitEmailPolicy } from './GitEmailPolicy';
-import { RushPolicy } from './RushPolicy';
 
 export class PolicyValidator {
   public static validatePolicy(rushConfiguration: RushConfiguration, bypassPolicy: boolean): void {
@@ -11,9 +10,6 @@ export class PolicyValidator {
       return;
     }
 
-    const policies: RushPolicy[] = [new GitEmailPolicy()];
-    for (const policy of policies) {
-      policy.validate(rushConfiguration);
-    }
+    GitEmailPolicy.validate(rushConfiguration);
   }
 }

@@ -17,10 +17,10 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionControl } from '../../utilities/VersionControl';
 import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { GitEmailPolicy } from '../../logic/policy/GitEmailPolicy';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionManager } from '../../logic/VersionManager';
+import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
 
 export class VersionAction extends BaseRushAction {
@@ -94,35 +94,34 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, this._bypassPolicy.value);
-      const userEmail: string = GitEmailPolicy.getUserEmail(this.rushConfiguration);
+    PolicyValidator.validatePolicy(this.rushConfiguration, this._bypassPolicy.value);
+    const userEmail: string = Git.getGitEmail(this.rushConfiguration);
 
-      this._validateInput();
+    this._validateInput();
 
-      this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
+    this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
 
-      if (this._ensureVersionPolicy.value) {
-        this._overwritePolicyVersionIfNeeded();
-        const tempBranch: string = 'version/ensure-' + new Date().getTime();
-        this._versionManager.ensure(this._versionPolicy.value, true,
-          !!this._overrideVersion.value || !!this._prereleaseIdentifier.value);
+    if (this._ensureVersionPolicy.value) {
+      this._overwritePolicyVersionIfNeeded();
+      const tempBranch: string = 'version/ensure-' + new Date().getTime();
+      this._versionManager.ensure(this._versionPolicy.value, true,
+        !!this._overrideVersion.value || !!this._prereleaseIdentifier.value);
 
-        const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
-        if (updatedPackages.size > 0) {
-          console.log(`${updatedPackages.size} packages are getting updated.`);
-          this._gitProcess(tempBranch);
-        }
-      } else if (this._bumpVersion.value) {
-        const tempBranch: string = 'version/bump-' + new Date().getTime();
-        this._versionManager.bump(this._versionPolicy.value,
-          this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
-          this._prereleaseIdentifier.value,
-          true);
+      const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
+      if (updatedPackages.size > 0) {
+        console.log(`${updatedPackages.size} packages are getting updated.`);
         this._gitProcess(tempBranch);
       }
-      return Promise.resolve();
-    });
+    } else if (this._bumpVersion.value) {
+      const tempBranch: string = 'version/bump-' + new Date().getTime();
+      this._versionManager.bump(this._versionPolicy.value,
+        this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
+        this._prereleaseIdentifier.value,
+        true);
+      this._gitProcess(tempBranch);
+    }
+
+    return Promise.resolve();
   }
 
   private _overwritePolicyVersionIfNeeded(): void {
@@ -195,7 +194,7 @@ export class VersionAction extends BaseRushAction {
     // Validate the result before commit.
     this._validateResult();
 
-    const git: Git = new Git(this._targetBranch.value);
+    const git: PublishGit = new PublishGit(this._targetBranch.value);
 
     // Make changes in temp branch.
     git.checkout(tempBranch, true);
