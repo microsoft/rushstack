@@ -64,11 +64,12 @@ export class Git {
 
     if (!emailResult.result) {
       console.log([
-        'Git email was not specified. Unable to continue.',
+        'This operation requires that a git email be specified.',
         '',
-        `If you didn't configure your e-mail yet, try something like this:`,
+        `If you didn't configure your email yet, try something like this:`,
         '',
-        ...GitEmailPolicy.getEmailExampleLines(rushConfiguration)
+        ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
+        ''
       ].join(os.EOL));
       throw new AlreadyReportedError();
     }

@@ -32,7 +32,7 @@ export class GitEmailPolicy {
 
     console.log('Checking Git policy for this repository.' + os.EOL);
 
-    // sanity check; a valid e-mail should not contain any whitespace
+    // sanity check; a valid email should not contain any whitespace
     // if this fails, then we have another issue to report
     if (userEmail.match(/^\S+$/g)) {
       if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
@@ -64,8 +64,8 @@ export class GitEmailPolicy {
     }
 
     console.log([
-      'Hey there!  To keep things tidy, this repo asks you to submit your Git commits using an e-mail like ',
-      rushConfiguration.gitAllowedEmailRegExps.length > 1 ? 'one of these patterns:' : 'this pattern:',
+      'Hey there!  To keep things tidy, this repo asks you to submit your Git commits using an email like ' +
+        (rushConfiguration.gitAllowedEmailRegExps.length > 1 ? 'one of these patterns:' : 'this pattern:'),
       '',
       ...rushConfiguration.gitAllowedEmailRegExps.map((pattern) => '    ' + colors.cyan(pattern)),
       '',
