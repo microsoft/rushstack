@@ -24,7 +24,7 @@ export class PackageChangeAnalyzer {
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
-    this._isGitSupported = Git.detectIfGitIsSupported();
+    this._isGitSupported = Git.isPathUnderGitWorkingTree();
     this._data = this._getData();
   }
 

@@ -10,9 +10,8 @@ import { Utilities } from '../../utilities/Utilities';
 import { Git } from '../Git';
 
 export class GitEmailPolicy {
-  public static validate(rushConfiguration: RushConfiguration ): void {
-    const gitPath: string | undefined = Git.getGitPath();
-    if (!gitPath) {
+  public static validate(rushConfiguration: RushConfiguration): void {
+    if (!Git.isGitPresent()) {
       // Git isn't present, so the git policy doesn't apply
       return;
     }
@@ -25,7 +24,6 @@ export class GitEmailPolicy {
         console.log(colors.red('Aborting, so you can go fix your settings.  (Or use --bypass-policy to skip.)'));
         throw e;
       } else {
-        console.log(colors.red(`An unexpected error occurred: ${e}`));
         throw e;
       }
     }
@@ -50,6 +48,7 @@ export class GitEmailPolicy {
     // Show the user's name as well.
     // Ex. "Mr. Example <mr@example.com>"
     let fancyEmail: string = colors.cyan(userEmail);
+    const gitPath: string = Git.getGitPath()!;
     try {
       const userName: string = Utilities.executeCommandAndCaptureOutput(
         gitPath,

@@ -19,6 +19,9 @@ export class Git {
   private static _hasGit: boolean | undefined = undefined;
   private static _gitPath: string | undefined;
 
+  /**
+   * Returns the path to the git binary if git is found. If git can't be found, return undefined.
+   */
   public static getGitPath(): string | undefined {
     if (Git._hasGit === undefined) {
       const command: string = process.platform === 'win32' ? 'where' : 'which';
@@ -33,8 +36,15 @@ export class Git {
     return Git._gitPath;
   }
 
-  public static detectIfGitIsSupported(): boolean {
-    if (Git.getGitPath()) { // Do we even have a git binary?
+  public static isGitPresent(): boolean {
+    return !!Git.getGitPath();
+  }
+
+  /**
+   * Checks if git is supported and if the current path is under a git working tree.
+   */
+  public static isPathUnderGitWorkingTree(): boolean {
+    if (Git.isGitPresent()) { // Do we even have a git binary?
       try {
         return !!gitInfo().sha;
       } catch (e) {
