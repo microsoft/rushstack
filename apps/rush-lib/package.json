@@ -49,8 +49,8 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack": "0.1.0",
-    "@microsoft/rush-stack-compiler": "0.1.0",
+    "@microsoft/rush-stack": "0.0.1",
+    "@microsoft/rush-stack-compiler": "0.0.1",
     "@microsoft/node-library-build": "5.0.0",
     "@types/node": "8.5.8",
     "@types/node-fetch": "1.6.9",

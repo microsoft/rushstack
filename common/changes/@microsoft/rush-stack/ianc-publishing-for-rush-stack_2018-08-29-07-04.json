@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack",
+      "comment": "Initial release.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack",
+  "email": "iclanton@users.noreply.github.com"
+}
