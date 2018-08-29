@@ -334,8 +334,8 @@ export class InstallManager {
       }
 
       FileSystem.createSymbolicLinkJunction({
-        newLinkPath: localPackageManagerToolFolder,
-        linkTargetPath: packageManagerToolFolder
+        linkTargetPath: packageManagerToolFolder,
+        newLinkPath: localPackageManagerToolFolder
       });
 
       lock.release();
