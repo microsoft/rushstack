@@ -15,7 +15,7 @@ import { PosixModeBits } from './PosixModeBits';
  * The options for FileSystem.readFolder()
  * @public
  */
-export interface IReadFolderOptions {
+export interface IFileSystemReadFolderOptions {
   /**
    * If true, returns the absolute paths of the files in the folder.
    * Defaults to `false`.
@@ -27,7 +27,7 @@ export interface IReadFolderOptions {
  * The options for FileSystem.writeFile()
  * @public
  */
-export interface IWriteFileOptions {
+export interface IFileSystemWriteFileOptions {
   /**
    * If true, will ensure the folder is created before writing the file.
    * Defaults to `false`.
@@ -51,7 +51,7 @@ export interface IWriteFileOptions {
  * The options for FileSystem.readFile()
  * @public
  */
-export interface IReadFileOptions {
+export interface IFileSystemReadFileOptions {
   /**
    * If specified, will change the encoding of the file that will be written.
    * Defaults to `"utf8"`.
@@ -116,7 +116,7 @@ export interface IFileSystemCopyFileOptions {
  * The options for FileSystem.deleteFile()
  * @public
 */
-export interface IDeleteFileOptions {
+export interface IFileSystemDeleteFileOptions {
   /**
    * If true, will throw an exception if the file did not exist before `deleteFile()` was called.
    * Defaults to `false`.
@@ -129,7 +129,7 @@ export interface IDeleteFileOptions {
  * Both times must be specified.
  * @public
  */
-export interface IUpdateTimeParameters {
+export interface IFileSystemUpdateTimeParameters {
   /**
    * The POSIX epoch time or Date when this was last accessed.
    */
@@ -142,8 +142,8 @@ export interface IUpdateTimeParameters {
 }
 
 /**
- * The options for FileSystem.createSymbolicLinkJunction(), createSymbolicLinkFile(), createSymbolicLinkFolder(),
- * and createHardLink().
+ * The options for `FileSystem.createSymbolicLinkJunction()`, `createSymbolicLinkFile()`,
+ * `createSymbolicLinkFolder()`,  and `createHardLink()`.
  *
  * @public
  */
@@ -213,7 +213,7 @@ export class FileSystem {
    * @param path - The path of the file that should be modified.
    * @param times - The times that the object should be updated to reflect.
    */
-  public static updateTimes(path: string, times: IUpdateTimeParameters): void {
+  public static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void {
     // tslint:disable-next-line:no-any
     fsx.utimes(path, times.accessedTime as any, times.modifiedTime as any);
   }
@@ -301,7 +301,7 @@ export class FileSystem {
    * @param folderPath - The absolute or relative path to the folder which should be read.
    * @param options - Optional settings that can change the behavior. Type: `IReadFolderOptions`
    */
-  public static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string> {
+  public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): Array<string> {
     options = {
       absolutePaths: false,
       ...options
@@ -356,7 +356,7 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
-  public static writeFile(filePath: string, contents: string | Buffer, options?: IWriteFileOptions): void {
+  public static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
     options = {
       ensureFolderExists: false,
       convertLineEndings: undefined,
@@ -380,7 +380,7 @@ export class FileSystem {
    * @param filePath - The relative or absolute path to the file whose contents should be read.
    * @param options - Optional settings that can change the behavior. Type: `IReadFileOptions`
    */
-  public static readFile(filePath: string, options?: IReadFileOptions): string {
+  public static readFile(filePath: string, options?: IFileSystemReadFileOptions): string {
     options = {
       encoding: Encoding.Utf8,
       convertLineEndings: undefined,
@@ -415,7 +415,7 @@ export class FileSystem {
    * @param filePath - The absolute or relative path to the file that should be deleted.
    * @param options - Optional settings that can change the behavior. Type: `IDeleteFileOptions`
    */
-  public static deleteFile(filePath: string, options?: IDeleteFileOptions): void {
+  public static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void {
     options = {
       throwIfNotExists: false,
       ...options

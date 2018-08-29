@@ -56,13 +56,13 @@ export { Path } from './Path';
 export { Text, NewlineKind } from './Text';
 export {
   FileSystem,
-  IReadFolderOptions,
-  IWriteFileOptions,
-  IReadFileOptions,
+  IFileSystemReadFolderOptions,
+  IFileSystemWriteFileOptions,
+  IFileSystemReadFileOptions,
   IFileSystemMoveOptions,
   IFileSystemCopyFileOptions,
-  IDeleteFileOptions,
-  IUpdateTimeParameters,
+  IFileSystemDeleteFileOptions,
+  IFileSystemUpdateTimeParameters,
   IFileSystemCreateLinkOptions
 } from './FileSystem';
 export {
