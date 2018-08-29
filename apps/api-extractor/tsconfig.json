@@ -1,4 +1,7 @@
 {
+  // Put this back and remove the rest when rush-stack-compiler has been re-published
+  // "extends": "./node_modules/@microsoft/rush-stack/includes/tsconfig-node.json"
+
   "compilerOptions": {
     "target": "es6",
     "forceConsistentCasingInFileNames": true,

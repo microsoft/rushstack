@@ -16,6 +16,8 @@
     "build": "gulp test --clean"
   },
   "devDependencies": {
+    "@microsoft/rush-stack": "0.1.0",
+    "@microsoft/rush-stack-compiler": "0.1.0",
     "@microsoft/node-library-build": "4.4.11",
     "@microsoft/node-core-library": "2.2.1",
     "chai": "~3.5.0",

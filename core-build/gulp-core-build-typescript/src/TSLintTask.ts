@@ -249,7 +249,7 @@ export class TSLintTask extends GulpTask<ITSLintTaskConfig> {
 
   private _loadLintConfiguration(): ITSLintRulesFile { // tslint:disable-line:no-any
     if (!this._defaultLintRules) {
-      this._defaultLintRules = require('./defaultTslint.json');
+      this._defaultLintRules = require('../defaultTslint.json');
     }
 
     return merge(

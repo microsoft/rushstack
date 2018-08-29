@@ -1,11 +1,14 @@
 {
+  // Put this back and remove the rest when rush-stack-compiler has been re-published
+  // "extends": "./node_modules/@microsoft/rush-stack/includes/tsconfig-node.json"
+
   "compilerOptions": {
     "target": "es6",
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
-    "jsx": "react",
     "declaration": true,
     "sourceMap": true,
+    "experimentalDecorators": true,
     "strictNullChecks": true,
     "types": [
       "node",
@@ -13,9 +16,11 @@
     ],
     "lib": [
       "es5",
+      "scripthost",
+      "es2015.collection",
       "es2015.promise",
       "es2015.iterable",
-      "es2015.collection"
+      "dom"
     ]
   }
 }

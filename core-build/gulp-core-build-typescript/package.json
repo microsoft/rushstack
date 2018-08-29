@@ -41,6 +41,8 @@
     "typescript": "~2.4.1"
   },
   "devDependencies": {
+    "@microsoft/rush-stack": "0.1.0",
+    "@microsoft/rush-stack-compiler": "0.1.0",
     "@microsoft/node-library-build": "4.4.0",
     "@types/glob": "5.0.30",
     "@types/gulp-util": "3.0.30",

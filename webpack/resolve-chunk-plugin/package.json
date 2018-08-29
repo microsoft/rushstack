@@ -13,6 +13,8 @@
     "@types/webpack": "4.4.0"
   },
   "devDependencies": {
+    "@microsoft/rush-stack": "0.1.0",
+    "@microsoft/rush-stack-compiler": "0.1.0",
     "@types/mocha": "5.2.5",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",

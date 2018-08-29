@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/// <reference path="../typings/tsd.d.ts" />
+
 import * as Webpack from 'webpack';
 
 // tslint:disable:variable-name
