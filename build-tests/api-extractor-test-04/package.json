@@ -17,7 +17,7 @@
     "typescript": "~2.4.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack": "0.0.1",
-    "@microsoft/rush-stack-compiler": "0.0.1"
+    "@microsoft/rush-stack": "0.1.0",
+    "@microsoft/rush-stack-compiler": "0.1.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-serve",
-  "version": "3.2.42",
+  "version": "3.2.43",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.8.12",
+    "@microsoft/gulp-core-build": "3.8.13",
     "@microsoft/node-core-library": "3.0.0",
     "@types/node": "8.5.8",
     "colors": "~1.2.1",
@@ -27,8 +27,8 @@
     "sudo": "~1.0.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack": "0.0.1",
-    "@microsoft/rush-stack-compiler": "0.0.1",
+    "@microsoft/rush-stack": "0.1.0",
+    "@microsoft/rush-stack-compiler": "0.1.0",
     "@microsoft/node-library-build": "4.4.0",
     "@types/express": "4.11.0",
     "@types/express-serve-static-core": "4.11.0",
