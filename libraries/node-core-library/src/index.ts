@@ -60,8 +60,10 @@ export {
   IWriteFileOptions,
   IReadFileOptions,
   IFileSystemMoveOptions,
+  IFileSystemCopyFileOptions,
   IDeleteFileOptions,
-  IUpdateTimeParameters
+  IUpdateTimeParameters,
+  IFileSystemCreateLinkOptions
 } from './FileSystem';
 export {
   FileWriter,

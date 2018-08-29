@@ -71,6 +71,18 @@ export interface IReadFileOptions {
  */
 export interface IFileSystemMoveOptions {
   /**
+   * The path of the object to be moved.
+   * The path may be absolute or relative.
+   */
+  sourcePath: string;
+
+  /**
+   * The new path for the object.
+   * The path may be absolute or relative.
+   */
+  destinationPath: string;
+
+  /**
    * If true, will overwrite the file if it already exists. Defaults to true.
    */
   overwrite?: boolean;
@@ -80,6 +92,24 @@ export interface IFileSystemMoveOptions {
    * Defaults to `false`.
    */
   ensureFolderExists?: boolean;
+}
+
+/**
+ * The options for FileSystem.copyFile()
+ * @public
+ */
+export interface IFileSystemCopyFileOptions {
+  /**
+   * The path of the object that will be copied.
+   * The path may be absolute or relative.
+   */
+  sourcePath: string;
+
+  /**
+   * The path that the object will be copied to.
+   * The path may be absolute or relative.
+   */
+  destinationPath: string;
 }
 
 /**
@@ -109,6 +139,24 @@ export interface IUpdateTimeParameters {
    * The POSIX epoch time or Date when this was last modified
    */
   modifiedTime: number | Date;
+}
+
+/**
+ * The options for FileSystem.createSymbolicLinkJunction(), createSymbolicLinkFile(), createSymbolicLinkFolder(),
+ * and createHardLink().
+ *
+ * @public
+ */
+export interface IFileSystemCreateLinkOptions {
+  /**
+   * The path where the new symlink link will be created.
+   */
+  linkPath: string;
+
+  /**
+   * The newly created symbolic link will point to this target.
+   */
+  linkTargetPath: string;
 }
 
 /**
@@ -217,11 +265,8 @@ export class FileSystem {
   /**
    * Moves a file. The folder must exist, unless the `ensureFolderExists` option is provided.
    * Behind the scenes it uses `fs-extra.moveSync()`
-   * @param sourcePath - The absolute or relative path to the source file.
-   * @param targetPath - The absolute or relative path where the file should be moved to.
-   * @param options - Optional settings that can change the behavior. Type: `IFileSystemMoveOptions`
    */
-  public static move(sourcePath: string, targetPath: string, options?: IFileSystemMoveOptions): void {
+  public static move(options: IFileSystemMoveOptions): void {
     options = {
       overwrite: true,
       ensureFolderExists: false,
@@ -229,10 +274,10 @@ export class FileSystem {
     };
 
     if (options.ensureFolderExists) {
-      FileSystem.ensureFolder(pathUtilities.basename(sourcePath));
+      FileSystem.ensureFolder(pathUtilities.basename(options.sourcePath));
     }
 
-    fsx.moveSync(sourcePath, targetPath, { overwrite: options.overwrite });
+    fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
   }
 
   // ===============
@@ -359,11 +404,9 @@ export class FileSystem {
    * Copies a file from one location to another.
    * By default, destinationPath is overwritten if it already exists.
    * Behind the scenes it uses `fs.copyFileSync()`.
-   * @param sourcePath - The absolute or relative path to the source file to be copied.
-   * @param destinationPath - The absolute or relative path to the new copy that will be created.
    */
-  public static copyFile(sourcePath: string, destinationPath: string): void {
-    fsx.copySync(sourcePath, destinationPath);
+  public static copyFile(options: IFileSystemCopyFileOptions): void {
+    fsx.copySync(options.sourcePath, options.destinationPath);
   }
 
   /**
@@ -408,39 +451,33 @@ export class FileSystem {
    * @param linkSource - The absolute or relative path to the destination where the link should be created.
    * @param linkTarget - The absolute or relative path to the target of the link.
    */
-  public static createSymbolicLinkJunction(linkTarget: string, linkSource: string): void {
+  public static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void {
     // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
-    fsx.symlinkSync(linkTarget, linkSource, 'junction');
+    fsx.symlinkSync(options.linkTargetPath, options.linkPath, 'junction');
   }
 
   /**
    * Creates a symbolic link to a file (on Windows this requires elevated permissionsBits).
    * Behind the scenes it uses `fs.symlinkSync()`.
-   * @param linkSource - The absolute or relative path to the destination where the link should be created.
-   * @param linkTarget - The absolute or relative path to the target of the link.
    */
-  public static createSymbolicLinkFile(linkTarget: string, linkSource: string): void {
-    fsx.symlinkSync(linkSource, linkTarget, 'file');
+  public static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void {
+    fsx.symlinkSync(options.linkTargetPath, options.linkPath, 'file');
   }
 
   /**
    * Creates a symbolic link to a folder (on Windows this requires elevated permissionsBits).
    * Behind the scenes it uses `fs.symlinkSync()`.
-   * @param linkSource - The absolute or relative path to the destination where the link should be created.
-   * @param linkTarget - The absolute or relative path to the target of the link.
    */
-  public static createSymbolicLinkFolder(linkTarget: string, linkSource: string): void {
-    fsx.symlinkSync(linkSource, linkTarget, 'dir');
+  public static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void {
+    fsx.symlinkSync(options.linkTargetPath, options.linkPath, 'dir');
   }
 
   /**
    * Creates a hard link.
    * Behind the scenes it uses `fs.linkSync()`.
-   * @param linkSource - The absolute or relative path to the destination where the link should be created.
-   * @param linkTarget - The absolute or relative path to the target of the link.
    */
-  public static createHardLink(linkTarget: string, linkSource: string): void {
-    fsx.linkSync(linkSource, linkTarget);
+  public static createHardLink(options: IFileSystemCreateLinkOptions): void {
+    fsx.linkSync(options.linkTargetPath, options.linkPath);
   }
 
   /**

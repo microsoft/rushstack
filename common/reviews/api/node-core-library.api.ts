@@ -19,11 +19,11 @@ class FileDiffTest {
 // @public
 class FileSystem {
   static changePosixModeBits(path: string, mode: PosixModeBits): void;
-  static copyFile(sourcePath: string, destinationPath: string): void;
-  static createHardLink(linkTarget: string, linkSource: string): void;
-  static createSymbolicLinkFile(linkTarget: string, linkSource: string): void;
-  static createSymbolicLinkFolder(linkTarget: string, linkSource: string): void;
-  static createSymbolicLinkJunction(linkTarget: string, linkSource: string): void;
+  static copyFile(options: IFileSystemCopyFileOptions): void;
+  static createHardLink(options: IFileSystemCreateLinkOptions): void;
+  static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
+  static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void;
+  static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
   static deleteFile(filePath: string, options?: IDeleteFileOptions): void;
   static deleteFolder(folderPath: string): void;
   static ensureEmptyFolder(folderPath: string): void;
@@ -34,7 +34,7 @@ class FileSystem {
   static getPosixModeBits(path: string): PosixModeBits;
   static getRealPath(linkPath: string): string;
   static getStatistics(path: string): fs.Stats;
-  static move(sourcePath: string, targetPath: string, options?: IFileSystemMoveOptions): void;
+  static move(options: IFileSystemMoveOptions): void;
   static readFile(filePath: string, options?: IReadFileOptions): string;
   static readFileToBuffer(filePath: string): Buffer;
   static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
@@ -75,9 +75,23 @@ interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
 }
 
 // @public
+interface IFileSystemCopyFileOptions {
+  destinationPath: string;
+  sourcePath: string;
+}
+
+// @public
+interface IFileSystemCreateLinkOptions {
+  linkPath: string;
+  linkTargetPath: string;
+}
+
+// @public
 interface IFileSystemMoveOptions {
+  destinationPath: string;
   ensureFolderExists?: boolean;
   overwrite?: boolean;
+  sourcePath: string;
 }
 
 // @public

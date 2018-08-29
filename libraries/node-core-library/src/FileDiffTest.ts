@@ -77,7 +77,10 @@ export class FileDiffTest {
         throw new Error('The FileDiffTest failed, but the expected output cannot be copied because'
           + ' the file already exists:\n' + expectedCopyFilename);
       }
-      FileSystem.copyFile(expectedFilePath, expectedCopyFilename);
+      FileSystem.copyFile({
+        sourcePath: expectedFilePath,
+        destinationPath: expectedCopyFilename
+      });
 
       // Set to read-only so that developer doesn't accidentally modify the wrong file
       FileSystem.changePosixModeBits(expectedCopyFilename, PosixModeBits.AllRead);
