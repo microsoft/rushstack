@@ -347,7 +347,10 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
       this.buildConfig.rootPath,
       (localDestPath || path.basename(localSourcePath)));
 
-    FileSystem.copyFile(fullSourcePath, fullDestPath);
+    FileSystem.copyFile({
+      sourcePath: fullSourcePath,
+      destinationPath: fullDestPath
+    });
   }
 
   /**

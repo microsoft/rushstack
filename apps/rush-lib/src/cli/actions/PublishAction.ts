@@ -388,7 +388,11 @@ export class PublishAction extends BaseRushAction {
       const destFolder: string = this._releaseFolder.value ?
        this._releaseFolder.value : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
 
-      FileSystem.move(tarballPath, path.join(destFolder, tarballName), { overwrite: true });
+      FileSystem.move({
+        sourcePath: tarballPath,
+        destinationPath: path.join(destFolder, tarballName),
+        overwrite: true
+      });
     }
   }
 
@@ -417,7 +421,10 @@ export class PublishAction extends BaseRushAction {
           const toApiFolderPath: string = path.join(project.projectFolder, toApiFolder);
           if (FileSystem.exists(fromApiFolderPath) && FileSystem.exists(toApiFolderPath)) {
             FileSystem.readFolder(fromApiFolderPath).forEach(fileName => {
-              FileSystem.copyFile(path.join(fromApiFolderPath, fileName), path.join(toApiFolderPath, fileName));
+              FileSystem.copyFile({
+                sourcePath: path.join(fromApiFolderPath, fileName),
+                destinationPath: path.join(toApiFolderPath, fileName)
+              });
               console.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
             });
           }
