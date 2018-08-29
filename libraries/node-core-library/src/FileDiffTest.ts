@@ -5,7 +5,8 @@ import * as path from 'path';
 
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { Text } from './Text';
-import { FileSystem, PosixModeBits } from './FileSystem';
+import { FileSystem } from './FileSystem';
+import { PosixModeBits } from './PosixModeBits';
 
 /**
  * Implements a unit testing strategy that generates output files, and then

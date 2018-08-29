@@ -42,6 +42,7 @@ export {
 export {
   MapExtensions
 } from './MapExtensions';
+export { PosixModeBits } from './PosixModeBits';
 export {
   ProtectableMap,
   IProtectableMapParameters
@@ -60,7 +61,6 @@ export {
   IReadFileOptions,
   IFileSystemMoveOptions,
   IDeleteFileOptions,
-  PosixModeBits,
   IUpdateTimeParameters
 } from './FileSystem';
 export {
