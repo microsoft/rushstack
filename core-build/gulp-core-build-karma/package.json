@@ -37,7 +37,7 @@
   "devDependencies": {
     "@microsoft/rush-stack": "0.1.0",
     "@microsoft/rush-stack-compiler": "0.1.0",
-    "@microsoft/node-library-build": "4.4.0",
+    "@microsoft/node-library-build": "5.0.0",
     "@types/gulp": "3.8.32",
     "@types/karma": "0.13.33",
     "@types/log4js": "0.0.33",

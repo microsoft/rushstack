@@ -1,4 +1,0 @@
-{
-  "$schema": "http://json.schemastore.org/tsconfig",
-  "extends": "../../rush-stack-compiler/includes/tsconfig-web.json"
-}

@@ -20,6 +20,7 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
+    "tslint-microsoft-contrib": "~5.2.1",
     "@types/jest": "21.1.10",
     "gulp": "~3.9.1",
     "@microsoft/node-library-build": "4.4.11"
