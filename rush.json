@@ -140,10 +140,7 @@
       "packageName": "@microsoft/gulp-core-build-sass",
       "projectFolder": "core-build/gulp-core-build-sass",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
-      ]
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/gulp-core-build-serve",

@@ -12,8 +12,7 @@ import {
   task,
   watch,
   setConfig,
-  getConfig,
-  IBuildConfig
+  getConfig
 } from '@microsoft/gulp-core-build';
 import { apiExtractor, tscCmd, tslintCmd, text } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
@@ -41,19 +40,19 @@ const sourceMatch: string[] = [
   '!src/**/*.scss.ts'
 ];
 
-const PRODUCTION = !!getConfig().args['production'] || !!getConfig().args['ship'];
+// tslint:disable-next-line:no-string-literal
+const PRODUCTION: boolean = !!getConfig().args['production'] || !!getConfig().args['ship'];
 setConfig({
   production: PRODUCTION,
   shouldWarningsFailBuild: PRODUCTION
 });
 
-tslint.mergeConfig({
-  displayAsWarning: true
-});
-
 // Define default task groups.
 export const compileTsTasks: IExecutable = parallel(tscCmd, text);
-export const buildTasks: IExecutable = task('build', serial(preCopy, sass, parallel(tslintCmd, compileTsTasks), apiExtractor, postCopy));
+export const buildTasks: IExecutable = task(
+  'build',
+  serial(preCopy, sass, parallel(tslintCmd, compileTsTasks), apiExtractor, postCopy)
+);
 export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 export const testTasks: IExecutable = task('test', serial(buildTasks, karma, jest));
 export const defaultTasks: IExecutable = serial(bundleTasks, karma, jest);
