@@ -17,9 +17,10 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionControl } from '../../utilities/VersionControl';
 import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { GitPolicy } from '../../logic/GitPolicy';
+import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionManager } from '../../logic/VersionManager';
+import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
 
 export class VersionAction extends BaseRushAction {
@@ -94,7 +95,8 @@ export class VersionAction extends BaseRushAction {
 
   protected run(): Promise<void> {
     return Promise.resolve().then(() => {
-      const userEmail: string = GitPolicy.getUserEmail(this.rushConfiguration, this._bypassPolicy.value);
+      PolicyValidator.validatePolicy(this.rushConfiguration, this._bypassPolicy.value);
+      const userEmail: string = Git.getGitEmail(this.rushConfiguration);
 
       this._validateInput();
 
@@ -119,7 +121,6 @@ export class VersionAction extends BaseRushAction {
           true);
         this._gitProcess(tempBranch);
       }
-      return Promise.resolve();
     });
   }
 
@@ -193,7 +194,7 @@ export class VersionAction extends BaseRushAction {
     // Validate the result before commit.
     this._validateResult();
 
-    const git: Git = new Git(this._targetBranch.value);
+    const git: PublishGit = new PublishGit(this._targetBranch.value);
 
     // Make changes in temp branch.
     git.checkout(tempBranch, true);

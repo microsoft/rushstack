@@ -531,7 +531,7 @@ export class RushConfiguration {
 
   /**
    * [Part of the "gitPolicy" feature.]
-   * A list of regular expressions describing allowable e-mail patterns for Git commits.
+   * A list of regular expressions describing allowable email patterns for Git commits.
    * They are case-insensitive anchored JavaScript RegExps.
    * Example: ".*@example\.com"
    * This array will never be undefined.
@@ -542,7 +542,7 @@ export class RushConfiguration {
 
   /**
    * [Part of the "gitPolicy" feature.]
-   * An example valid e-mail address that conforms to one of the allowedEmailRegExps.
+   * An example valid email address that conforms to one of the allowedEmailRegExps.
    * Example: "foxtrot@example\.com"
    * This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used.
    */

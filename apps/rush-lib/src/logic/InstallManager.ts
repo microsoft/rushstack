@@ -25,7 +25,7 @@ import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import { BaseLinkManager } from '../logic/base/BaseLinkManager';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
-import { GitPolicy } from '../logic/GitPolicy';
+import { PolicyValidator } from '../logic/policy/PolicyValidator';
 import { IRushTempPackageJson } from '../logic/base/BasePackage';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
@@ -206,7 +206,7 @@ export class InstallManager {
     return Promise.resolve().then(() => {
 
       // Check the policies
-      GitPolicy.getUserEmail(this._rushConfiguration, options.bypassPolicy);
+      PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
 
       ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
 
