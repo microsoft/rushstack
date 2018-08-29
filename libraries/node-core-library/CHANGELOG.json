@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.0.0",
+      "tag": "@microsoft/node-core-library_v3.0.0",
+      "date": "Wed, 29 Aug 2018 06:36:50 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "(Breaking API change) The FileSystem move/copy/createLink operations now require the source/target parameters to be explicitly specified, to avoid confusion"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.1",
       "tag": "@microsoft/node-core-library_v2.2.1",
       "date": "Thu, 23 Aug 2018 18:18:53 GMT",

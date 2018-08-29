@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 23 Aug 2018 18:18:53 GMT and should not be manually modified.
+This log was last generated on Wed, 29 Aug 2018 06:36:50 GMT and should not be manually modified.
+
+## 3.8.12
+Wed, 29 Aug 2018 06:36:50 GMT
+
+### Patches
+
+- Update to use new node-core-library API
 
 ## 3.8.11
 Thu, 23 Aug 2018 18:18:53 GMT
