@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as gitInfo from 'git-repo-info';
+import gitInfo = require('git-repo-info');
 import * as child_process from 'child_process';
 
 import { PublishUtilities } from './PublishUtilities';

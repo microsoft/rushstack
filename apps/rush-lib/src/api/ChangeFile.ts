@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as gitInfo from 'git-repo-info';
+import gitInfo = require('git-repo-info');
 
 import { JsonFile } from '@microsoft/node-core-library';
 
