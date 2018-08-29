@@ -11,7 +11,7 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "2.2.1",
+    "@microsoft/node-core-library": "3.0.0",
     "@microsoft/ts-command-line": "4.2.1",
     "colors": "~1.2.1"
   },
