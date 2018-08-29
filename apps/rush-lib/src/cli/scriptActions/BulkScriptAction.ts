@@ -69,7 +69,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const isQuietMode: boolean = !(this._verboseParameter.value);
 
-    // if this is parallizable, then use the value from the flag (undefined or a number),
+    // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
     const parallelism: string | undefined = this._isParallelismEnabled()
       ? this._parallelismParameter!.value
