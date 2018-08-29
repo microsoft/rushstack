@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": "Updating the way typescript and tslint are invoked.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/node-library-build",
+  "email": "iclanton@users.noreply.github.com"
+}
