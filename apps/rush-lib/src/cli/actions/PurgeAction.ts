@@ -51,5 +51,4 @@ export class PurgeAction extends BaseRushAction {
         + ` (${stopwatch.toString()})`));
     });
   }
-
 }
