@@ -2,6 +2,7 @@
   "extends": "./node_modules/@microsoft/rush-stack/includes/tsconfig-node.json",
   "include": [
     "./typings/tsd.d.ts",
-    "src/**/*"
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ]
 }
