@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Improve command-line help for \"rush build\"",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}

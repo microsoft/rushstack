@@ -333,7 +333,10 @@ export class InstallManager {
         }
       }
 
-      FileSystem.createSymbolicLinkJunction(packageManagerToolFolder, localPackageManagerToolFolder);
+      FileSystem.createSymbolicLinkJunction({
+        linkTargetPath: packageManagerToolFolder,
+        newLinkPath: localPackageManagerToolFolder
+      });
 
       lock.release();
     });
@@ -976,17 +979,17 @@ export class InstallManager {
   }
 
   /**
-   * Copies the file "sourcePath" to "targetPath", overwriting the target file location.
+   * Copies the file "sourcePath" to "destinationPath", overwriting the target file location.
    * If the source file does not exist, then the target file is deleted.
    */
-  private _syncFile(sourcePath: string, targetPath: string): void {
+  private _syncFile(sourcePath: string, destinationPath: string): void {
     if (FileSystem.exists(sourcePath)) {
-      console.log('Updating ' + targetPath);
-      FileSystem.copyFile(sourcePath, targetPath);
+      console.log('Updating ' + destinationPath);
+      FileSystem.copyFile({sourcePath, destinationPath});
     } else {
-      if (FileSystem.exists(targetPath)) {
-        console.log('Deleting ' + targetPath);
-        FileSystem.deleteFile(targetPath);
+      if (FileSystem.exists(destinationPath)) {
+        console.log('Deleting ' + destinationPath);
+        FileSystem.deleteFile(destinationPath);
       }
     }
   }
