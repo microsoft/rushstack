@@ -1,0 +1,17 @@
+{
+  "name": "@microsoft/rush-stack-compiler",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@microsoft/rush-stack-compiler_v0.1.0",
+      "date": "Wed, 29 Aug 2018 21:43:23 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release."
+          }
+        ]
+      }
+    }
+  ]
+}
