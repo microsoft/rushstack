@@ -31,24 +31,24 @@ export abstract class BaseLinkManager {
     if (options.symlinkKind === SymlinkKind.Directory) {
       // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
       FileSystem.createSymbolicLinkJunction({
-        linkPath: options.linkPath,
-        linkTargetPath: options.linkTargetPath
-      });
+        linkTargetPath: options.linkTargetPath,
+        linkPath: options.linkPath
+    });
     } else {
       if (process.platform === 'win32') {
         // For files, we use a Windows "hard link", because creating a symbolic link requires
         // administrator permission.
         FileSystem.createHardLink({
-          linkPath: options.linkPath,
-          linkTargetPath: options.linkTargetPath
-          });
+          linkTargetPath: options.linkTargetPath,
+          linkPath: options.linkPath
+        });
       } else {
         // However hard links seem to cause build failures on Mac, so for all other operating systems
         // we use symbolic links for this case.
         FileSystem.createSymbolicLinkFile({
-          linkPath: options.linkPath,
-          linkTargetPath: options.linkTargetPath
-          });
+          linkTargetPath: options.linkTargetPath,
+          linkPath: options.linkPath
+        });
       }
     }
   }
@@ -105,8 +105,8 @@ export abstract class BaseLinkManager {
     if (localPackage.children.length === 0) {
       // If there are no children, then we can symlink the entire folder
       BaseLinkManager._createSymlink({
-        linkPath: localPackage.symlinkTargetFolderPath,
-        linkTargetPath: localPackage.folderPath,
+        linkTargetPath: localPackage.symlinkTargetFolderPath,
+        linkPath: localPackage.folderPath,
         symlinkKind: SymlinkKind.Directory
       });
     } else {
@@ -141,8 +141,8 @@ export abstract class BaseLinkManager {
           }
 
           BaseLinkManager._createSymlink({
-            linkPath: linkSource,
             linkTargetPath: linkTarget,
+            linkPath: linkSource,
             symlinkKind
           });
         }

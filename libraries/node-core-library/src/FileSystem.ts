@@ -71,7 +71,7 @@ export interface IFileSystemReadFileOptions {
  */
 export interface IFileSystemMoveOptions {
   /**
-   * The path of the object to be moved.
+   * The path of the existing object to be moved.
    * The path may be absolute or relative.
    */
   sourcePath: string;
@@ -100,7 +100,7 @@ export interface IFileSystemMoveOptions {
  */
 export interface IFileSystemCopyFileOptions {
   /**
-   * The path of the object that will be copied.
+   * The path of the existing object to be copied.
    * The path may be absolute or relative.
    */
   sourcePath: string;
@@ -149,14 +149,14 @@ export interface IFileSystemUpdateTimeParameters {
  */
 export interface IFileSystemCreateLinkOptions {
   /**
-   * The path where the new symlink link will be created.
-   */
-  linkPath: string;
-
-  /**
-   * The newly created symbolic link will point to this target.
+   * The existing path that the symbolic link will point to.
    */
   linkTargetPath: string;
+
+  /**
+   * The new path for the new symlink link to be created.
+   */
+  linkPath: string;
 }
 
 /**
@@ -171,7 +171,7 @@ export interface IFileSystemCreateLinkOptions {
  * performance, versus improving it.
  *
  * Note that in the documentation, we refer to "filesystem objects", this can be a
- * file, folder, synbolic link, hard link, directory junction, etc.
+ * file, folder, symbolic link, hard link, directory junction, etc.
  *
  * @public
  */
@@ -448,8 +448,6 @@ export class FileSystem {
   /**
    * Creates a Windows "directory junction". Behaves like `createSymbolicLinkToFile()` on other platforms.
    * Behind the scenes it uses `fs.symlinkSync()`.
-   * @param linkSource - The absolute or relative path to the destination where the link should be created.
-   * @param linkTarget - The absolute or relative path to the target of the link.
    */
   public static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void {
     // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
