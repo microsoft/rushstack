@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "(Breaking API change) The FileSystem move/copy/createLink operations now require the source/target parameters to be explicitly specified, to avoid confusion",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "pgonzal@users.noreply.github.com"
+}
