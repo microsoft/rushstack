@@ -74,7 +74,10 @@ export class StandardScriptUpdater {
           + ' for this Rush version.  Please run "rush update" and commit the changes.');
       } else {
         console.log(`Script is out of date; updating "${targetFilePath}"`);
-        FileSystem.copyFile(sourceFilePath, targetFilePath);
+        FileSystem.copyFile({
+          sourcePath: sourceFilePath,
+          destinationPath: targetFilePath
+        });
       }
     }
 

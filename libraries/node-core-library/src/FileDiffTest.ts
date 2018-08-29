@@ -5,7 +5,8 @@ import * as path from 'path';
 
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { Text } from './Text';
-import { FileSystem, PosixModeBits } from './FileSystem';
+import { FileSystem } from './FileSystem';
+import { PosixModeBits } from './PosixModeBits';
 
 /**
  * Implements a unit testing strategy that generates output files, and then
@@ -76,7 +77,10 @@ export class FileDiffTest {
         throw new Error('The FileDiffTest failed, but the expected output cannot be copied because'
           + ' the file already exists:\n' + expectedCopyFilename);
       }
-      FileSystem.copyFile(expectedFilePath, expectedCopyFilename);
+      FileSystem.copyFile({
+        sourcePath: expectedFilePath,
+        destinationPath: expectedCopyFilename
+      });
 
       // Set to read-only so that developer doesn't accidentally modify the wrong file
       FileSystem.changePosixModeBits(expectedCopyFilename, PosixModeBits.AllRead);

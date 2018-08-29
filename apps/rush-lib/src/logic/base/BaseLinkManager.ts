@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem, IFileSystemCreateLinkOptions } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
@@ -18,24 +18,37 @@ export enum SymlinkKind {
   Directory
 }
 
+export interface IBaseLinkManagerCreateSymlinkOptions extends IFileSystemCreateLinkOptions {
+  symlinkKind: SymlinkKind;
+}
+
 export abstract class BaseLinkManager {
   protected _rushConfiguration: RushConfiguration;
 
-  protected static _createSymlink(linkTarget: string, linkSource: string, symlinkKind: SymlinkKind): void {
-    FileSystem.ensureFolder(path.dirname(linkSource));
+  protected static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
+    FileSystem.ensureFolder(path.dirname(options.newLinkPath));
 
-    if (symlinkKind === SymlinkKind.Directory) {
+    if (options.symlinkKind === SymlinkKind.Directory) {
       // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-      FileSystem.createSymbolicLinkJunction(linkTarget, linkSource);
+      FileSystem.createSymbolicLinkJunction({
+        linkTargetPath: options.linkTargetPath,
+        newLinkPath: options.newLinkPath
+    });
     } else {
       if (process.platform === 'win32') {
         // For files, we use a Windows "hard link", because creating a symbolic link requires
         // administrator permission.
-        FileSystem.createHardLink(linkTarget, linkSource);
+        FileSystem.createHardLink({
+          linkTargetPath: options.linkTargetPath,
+          newLinkPath: options.newLinkPath
+        });
       } else {
         // However hard links seem to cause build failures on Mac, so for all other operating systems
         // we use symbolic links for this case.
-        FileSystem.createSymbolicLinkFile(linkTarget, linkSource);
+        FileSystem.createSymbolicLinkFile({
+          linkTargetPath: options.linkTargetPath,
+          newLinkPath: options.newLinkPath
+        });
       }
     }
   }
@@ -91,10 +104,11 @@ export abstract class BaseLinkManager {
 
     if (localPackage.children.length === 0) {
       // If there are no children, then we can symlink the entire folder
-      BaseLinkManager._createSymlink(
-        localPackage.symlinkTargetFolderPath,
-        localPackage.folderPath,
-        SymlinkKind.Directory);
+      BaseLinkManager._createSymlink({
+        linkTargetPath: localPackage.symlinkTargetFolderPath,
+        newLinkPath: localPackage.folderPath,
+        symlinkKind: SymlinkKind.Directory
+      });
     } else {
       // If there are children, then we need to symlink each item in the folder individually
       Utilities.createFolderWithRetry(localPackage.folderPath);
@@ -126,7 +140,11 @@ export abstract class BaseLinkManager {
             symlinkKind = SymlinkKind.Directory;
           }
 
-          BaseLinkManager._createSymlink(linkTarget, linkSource, symlinkKind);
+          BaseLinkManager._createSymlink({
+            linkTargetPath: linkTarget,
+            newLinkPath: linkSource,
+            symlinkKind
+          });
         }
       }
     }
