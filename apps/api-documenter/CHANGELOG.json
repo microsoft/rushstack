@@ -2,6 +2,24 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.15",
+      "tag": "@microsoft/api-documenter_v1.5.15",
+      "date": "Wed, 29 Aug 2018 06:36:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.10.7` to `5.10.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.2.1` to `3.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.11` to `5.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.14",
       "tag": "@microsoft/api-documenter_v1.5.14",
       "date": "Thu, 23 Aug 2018 18:18:53 GMT",

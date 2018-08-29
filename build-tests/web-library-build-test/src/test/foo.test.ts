@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { assert } from 'chai';
 import { add } from '../test';
 
 describe('foo test', () => {
   it('can assert using chai', () => {
-    assert(add(1, 2) === 3);
+    expect(add(1, 2) === 3);
   });
 
   it('can assert using jest', () => {
