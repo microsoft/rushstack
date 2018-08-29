@@ -1,6 +1,25 @@
 {
-  "extends": "./node_modules/@microsoft/rush-stack/includes/tsconfig-web.json",
+  // Put this back when the lib-amd issue is fixed
+  // "extends": "./node_modules/@microsoft/rush-stack/includes/tsconfig-web.json",
+  // "compilerOptions": {
+  //   "module": "commonjs"
+  // }
+
   "compilerOptions": {
-    "module": "commonjs"
+    "target": "es5",
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "jsx": "react",
+    "declaration": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "types": [
+      "webpack-env"
+    ],
+    "lib": [
+      "es5",
+      "dom"
+    ],
+    "strictNullChecks": true
   }
 }
