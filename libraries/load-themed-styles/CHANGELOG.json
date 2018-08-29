@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.7.83",
+      "tag": "@microsoft/load-themed-styles_v1.7.83",
+      "date": "Wed, 29 Aug 2018 20:34:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the lib-amd folder was missing."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.82",
       "tag": "@microsoft/load-themed-styles_v1.7.82",
       "date": "Wed, 29 Aug 2018 06:36:50 GMT",
