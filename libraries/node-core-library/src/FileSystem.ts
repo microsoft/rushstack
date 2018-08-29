@@ -156,7 +156,7 @@ export interface IFileSystemCreateLinkOptions {
   /**
    * The new path for the new symlink link to be created.
    */
-  linkPath: string;
+  newLinkPath: string;
 }
 
 /**
@@ -451,7 +451,7 @@ export class FileSystem {
    */
   public static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void {
     // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
-    fsx.symlinkSync(options.linkTargetPath, options.linkPath, 'junction');
+    fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'junction');
   }
 
   /**
@@ -459,7 +459,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs.symlinkSync()`.
    */
   public static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void {
-    fsx.symlinkSync(options.linkTargetPath, options.linkPath, 'file');
+    fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'file');
   }
 
   /**
@@ -467,7 +467,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs.symlinkSync()`.
    */
   public static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void {
-    fsx.symlinkSync(options.linkTargetPath, options.linkPath, 'dir');
+    fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'dir');
   }
 
   /**
@@ -475,7 +475,7 @@ export class FileSystem {
    * Behind the scenes it uses `fs.linkSync()`.
    */
   public static createHardLink(options: IFileSystemCreateLinkOptions): void {
-    fsx.linkSync(options.linkTargetPath, options.linkPath);
+    fsx.linkSync(options.linkTargetPath, options.newLinkPath);
   }
 
   /**

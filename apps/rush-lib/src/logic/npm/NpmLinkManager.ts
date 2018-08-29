@@ -325,7 +325,7 @@ export class NpmLinkManager extends BaseLinkManager {
 
       if (FileSystem.exists(commonBinFolder)) {
         NpmLinkManager._createSymlink({
-          linkPath: projectBinFolder,
+          newLinkPath: projectBinFolder,
           linkTargetPath: commonBinFolder,
           symlinkKind: SymlinkKind.Directory
         });

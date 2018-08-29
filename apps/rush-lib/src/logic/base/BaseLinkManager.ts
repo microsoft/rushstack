@@ -26,13 +26,13 @@ export abstract class BaseLinkManager {
   protected _rushConfiguration: RushConfiguration;
 
   protected static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
-    FileSystem.ensureFolder(path.dirname(options.linkPath));
+    FileSystem.ensureFolder(path.dirname(options.newLinkPath));
 
     if (options.symlinkKind === SymlinkKind.Directory) {
       // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
       FileSystem.createSymbolicLinkJunction({
         linkTargetPath: options.linkTargetPath,
-        linkPath: options.linkPath
+        newLinkPath: options.newLinkPath
     });
     } else {
       if (process.platform === 'win32') {
@@ -40,14 +40,14 @@ export abstract class BaseLinkManager {
         // administrator permission.
         FileSystem.createHardLink({
           linkTargetPath: options.linkTargetPath,
-          linkPath: options.linkPath
+          newLinkPath: options.newLinkPath
         });
       } else {
         // However hard links seem to cause build failures on Mac, so for all other operating systems
         // we use symbolic links for this case.
         FileSystem.createSymbolicLinkFile({
           linkTargetPath: options.linkTargetPath,
-          linkPath: options.linkPath
+          newLinkPath: options.newLinkPath
         });
       }
     }
@@ -106,7 +106,7 @@ export abstract class BaseLinkManager {
       // If there are no children, then we can symlink the entire folder
       BaseLinkManager._createSymlink({
         linkTargetPath: localPackage.symlinkTargetFolderPath,
-        linkPath: localPackage.folderPath,
+        newLinkPath: localPackage.folderPath,
         symlinkKind: SymlinkKind.Directory
       });
     } else {
@@ -142,7 +142,7 @@ export abstract class BaseLinkManager {
 
           BaseLinkManager._createSymlink({
             linkTargetPath: linkTarget,
-            linkPath: linkSource,
+            newLinkPath: linkSource,
             symlinkKind
           });
         }

@@ -77,8 +77,8 @@ interface IFileSystemCopyFileOptions {
 
 // @public
 interface IFileSystemCreateLinkOptions {
-  linkPath: string;
   linkTargetPath: string;
+  newLinkPath: string;
 }
 
 // @public
