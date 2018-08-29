@@ -74,7 +74,7 @@ export class AsyncRecycler {
     }
 
     Utilities.retryUntilTimeout(
-      () => FileSystem.move(folderPath, newFolderPath),
+      () => FileSystem.move({ sourcePath: folderPath, destinationPath: newFolderPath }),
       maxWaitTimeMs,
       (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
                       'from a process like the virus scanner.'),

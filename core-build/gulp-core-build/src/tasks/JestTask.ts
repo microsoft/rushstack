@@ -205,7 +205,10 @@ export class JestTask extends GulpTask<IJestConfig> {
     const testFileName: string = path.basename(snapDestFile, '.snap');
     const testFile: string = path.resolve(path.dirname(snapDestFile), '..', testFileName); // Up from `__snapshots__`.
     if (FileSystem.exists(testFile)) {
-      FileSystem.copyFile(snapSourceFile, snapDestFile);
+      FileSystem.copyFile({
+        sourcePath: snapSourceFile,
+        destinationPath: snapDestFile
+      });
       return true;
     } else {
       return false;

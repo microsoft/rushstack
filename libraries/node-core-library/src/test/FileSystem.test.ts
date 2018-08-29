@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, PosixModeBits } from '../FileSystem';
+import { FileSystem } from '../FileSystem';
+import { PosixModeBits } from '../PosixModeBits';
 
 // The PosixModeBits are intended to be used with bitwise operations.
 // tslint:disable:no-bitwise

@@ -2,6 +2,14 @@
 // See LICENSE in the project root for license information.
 
 /**
+ * The allowed types of encodings, as supported by Node.js
+ * @public
+ */
+export const enum Encoding {
+  Utf8 = 'utf8'
+}
+
+/**
  * Enumeration controlling conversion of newline characters.
  * @public
  */

@@ -324,7 +324,11 @@ export class NpmLinkManager extends BaseLinkManager {
       const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
       if (FileSystem.exists(commonBinFolder)) {
-        NpmLinkManager._createSymlink(commonBinFolder, projectBinFolder, SymlinkKind.Directory);
+        NpmLinkManager._createSymlink({
+          linkTargetPath: commonBinFolder,
+          newLinkPath: projectBinFolder,
+          symlinkKind: SymlinkKind.Directory
+        });
       }
     }
   }

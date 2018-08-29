@@ -6,7 +6,8 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 
 import { Executable, IExecutableSpawnSyncOptions } from '../Executable';
-import { FileSystem, PosixModeBits } from '../FileSystem';
+import { FileSystem } from '../FileSystem';
+import { PosixModeBits } from '../PosixModeBits';
 import { Text } from '../Text';
 
 // The PosixModeBits are intended to be used with bitwise operations.

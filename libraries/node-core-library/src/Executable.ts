@@ -5,7 +5,8 @@ import * as child_process from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
 
-import { FileSystem, PosixModeBits } from './FileSystem';
+import { FileSystem } from './FileSystem';
+import { PosixModeBits } from './PosixModeBits';
 
 /**
  * Typings for one of the streams inside IExecutableSpawnSyncOptions.stdio.
