@@ -1,8 +1,8 @@
 {
   "name": "@microsoft/rush-stack-compiler",
   "version": "0.0.1",
-  "private": true,
-  "description": "",
+  "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain",
+  "license": "MIT",
   "bin": {
     "rush-api-extractor": "./bin/rush-api-extractor",
     "rush-tsc": "./bin/rush-tsc",

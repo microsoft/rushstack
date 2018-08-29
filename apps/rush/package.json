@@ -1,7 +1,7 @@
 {
   "name": "@microsoft/rush",
   "version": "5.0.5",
-  "description": "The professional solution for consolidating all your JavaScript projects in one Git repo",
+  "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
     "build",
