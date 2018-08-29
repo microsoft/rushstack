@@ -1,7 +1,6 @@
 'use strict';
 
 const build = require('@microsoft/node-library-build');
-const path = require('path');
 
 build.tscCmd = 'tsc-commonjs';
 
