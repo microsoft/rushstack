@@ -5,5 +5,8 @@
   },
 
   "allowedAlternativeVersions": {
+    "@microsoft/node-library-build": [
+      "4.4.11" // Temporary, until we're able to fix the task to work for load-themed-styles
+    ]
   }
 }
