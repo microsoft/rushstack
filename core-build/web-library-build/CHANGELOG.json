@@ -2,6 +2,41 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "5.0.0",
+      "tag": "@microsoft/web-library-build_v5.0.0",
+      "date": "Wed, 29 Aug 2018 06:30:11 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Updating the way typescript and tslint are invoked."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.11` to `3.8.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.6.6` to `4.6.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.3.42` to `4.3.43`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.2.41` to `3.2.42`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `4.11.7` to `4.11.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.13` to `3.4.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.11` to `5.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.68",
       "tag": "@microsoft/web-library-build_v4.4.68",
       "date": "Thu, 23 Aug 2018 18:18:53 GMT",
