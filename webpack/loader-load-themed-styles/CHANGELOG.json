@@ -2,6 +2,30 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.7.69",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.69",
+      "date": "Thu, 30 Aug 2018 04:42:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.0` to `1.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.68",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.68",
+      "date": "Thu, 30 Aug 2018 04:24:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.84` to `1.8.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.67",
       "tag": "@microsoft/loader-load-themed-styles_v1.7.67",
       "date": "Wed, 29 Aug 2018 21:43:23 GMT",

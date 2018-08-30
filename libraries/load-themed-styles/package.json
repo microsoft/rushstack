@@ -1,13 +1,13 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "1.7.84",
+  "version": "1.8.1",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/Microsoft/web-build-tools"
   },
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "gulp --clean"
   },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
