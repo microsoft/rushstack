@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.8.14",
+      "tag": "@microsoft/gulp-core-build_v3.8.14",
+      "date": "Thu, 30 Aug 2018 18:45:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the Jest task uses the global temp directory."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.13",
       "tag": "@microsoft/gulp-core-build_v3.8.13",
       "date": "Wed, 29 Aug 2018 21:43:23 GMT",

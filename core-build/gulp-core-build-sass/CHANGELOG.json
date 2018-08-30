@@ -2,6 +2,24 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.3.48",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.48",
+      "date": "Thu, 30 Aug 2018 18:45:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.13` to `3.8.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.1` to `1.8.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.1` to `5.0.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.47",
       "tag": "@microsoft/gulp-core-build-sass_v4.3.47",
       "date": "Thu, 30 Aug 2018 04:42:01 GMT",
