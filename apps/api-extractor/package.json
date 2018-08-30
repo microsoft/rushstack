@@ -45,7 +45,7 @@
     "tslint-microsoft-contrib": "~5.2.1",
     "@types/lodash": "4.14.74",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "5.0.0",
+    "@microsoft/node-library-build": "5.0.2",
     "@types/jest": "21.1.10"
   }
 }
