@@ -12,9 +12,5 @@
     "api-extractor-test-02": "1.0.0",
     "fs-extra": "~5.0.0",
     "typescript": "~2.4.1"
-  },
-  "devDependencies": {
-    "@microsoft/rush-stack": "0.1.0",
-    "@microsoft/rush-stack-compiler": "0.1.0"
   }
 }
