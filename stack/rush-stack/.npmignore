@@ -5,6 +5,7 @@
 !/bin/**
 !/lib/**
 !/dist/**
+!/includes/**
 !ThirdPartyNotice.txt
 
 # Ignore certain files in the above folder

@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@microsoft/rush-stack-compiler_v0.1.1",
+      "date": "Thu, 30 Aug 2018 19:23:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the \"includes\" directory wasn't published."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@microsoft/rush-stack-compiler_v0.1.0",
       "date": "Wed, 29 Aug 2018 21:43:23 GMT",

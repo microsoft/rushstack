@@ -5,6 +5,7 @@
 !/bin/**
 !/lib/**
 !/lib-amd/**
+!/lib-es6/**
 !/dist/**
 !ThirdPartyNotice.txt
 
