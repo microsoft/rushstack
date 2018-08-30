@@ -42,6 +42,7 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
+    "@microsoft/rush-stack-compiler": "0.1.1",
     "tslint-microsoft-contrib": "~5.2.1",
     "@types/lodash": "4.14.74",
     "gulp": "~3.9.1",
