@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.8.0",
+      "tag": "@microsoft/load-themed-styles_v1.8.0",
+      "date": "Thu, 30 Aug 2018 04:24:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add esnext-flavor output."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.84",
       "tag": "@microsoft/load-themed-styles_v1.7.84",
       "date": "Wed, 29 Aug 2018 21:43:23 GMT",
