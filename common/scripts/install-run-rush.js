@@ -48,5 +48,4 @@ function run() {
     });
 }
 run();
-
 //# sourceMappingURL=install-run-rush.js.map
