@@ -22,7 +22,7 @@
   "devDependencies": {
     "@microsoft/rush-stack": "0.1.0",
     "@microsoft/rush-stack-compiler": "0.1.0",
-    "@microsoft/node-library-build": "5.0.1",
+    "@microsoft/node-library-build": "5.0.2",
     "@types/jest": "21.1.10",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",

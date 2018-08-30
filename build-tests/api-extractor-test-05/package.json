@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@microsoft/api-extractor": "5.10.8",
-    "@microsoft/api-documenter": "1.5.16",
+    "@microsoft/api-documenter": "1.5.17",
     "@types/jest": "21.1.10",
     "@types/node": "8.5.8",
     "fs-extra": "~5.0.0",
