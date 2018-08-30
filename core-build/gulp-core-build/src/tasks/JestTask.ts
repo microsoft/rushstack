@@ -24,11 +24,6 @@ export interface IJestConfig {
   cache?: boolean;
 
   /**
-   * The directory where Jest should store its cached information.
-   */
-  cacheDirectory?: string;
-
-  /**
    * Same as Jest CLI option collectCoverageFrom
    */
   collectCoverageFrom?: string[];
@@ -151,13 +146,9 @@ export class JestTask extends GulpTask<IJestConfig> {
       // Jest's module resolution for finding jest-environment-jsdom is broken.  See this issue:
       // https://github.com/facebook/jest/issues/5913
       // As a workaround, resolve it for Jest:
-      testEnvironment: require.resolve('jest-environment-jsdom')
+      testEnvironment: require.resolve('jest-environment-jsdom'),
+      cacheDirectory: path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder, 'jest-cache')
     };
-
-    if (this.taskConfig.cacheDirectory) {
-      // tslint:disable-next-line:no-string-literal
-      jestConfig['cacheDirectory'] = this.taskConfig.cacheDirectory;
-    }
 
     // suppress 'Running coverage on untested files...' warning
     const oldTTY: true | undefined = process.stdout.isTTY;
