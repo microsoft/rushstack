@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Fix an issue where the \"lib-es6\" directory wasn't published.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "iclanton@users.noreply.github.com"
+}
