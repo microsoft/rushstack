@@ -70,6 +70,13 @@ export interface IRushRepositoryJson {
 }
 
 /**
+ * Part of IRushConfigurationJson.
+ */
+export interface IPnpmOptionsJson {
+  shamefullyFlatten?: boolean;
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -88,6 +95,7 @@ export interface IRushConfigurationJson {
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
+  pnpmOptions?: IPnpmOptionsJson;
 }
 
 /**
@@ -98,6 +106,29 @@ export interface IRushLinkJson {
   localLinks: {
     [name: string]: string[]
   };
+}
+
+/**
+ * Options that are only used when the PNPM package manager is selected.
+ *
+ * @remarks
+ * It is valid to define these options in rush.json even if the PNPM package manager
+ * is not being used.
+ *
+ * @public
+ */
+export class PnpmOptionsConfiguration {
+  /**
+   * If true, the "--shamefully-flatten" option will be added when invoking PNPM.
+   * This is a compatibility workaround for legacy packages that are incompatible with
+   * PNPM's symlinking strategy.
+   */
+  public readonly shamefullyFlatten: boolean;
+
+  /** @internal */
+  public constructor(json: IPnpmOptionsJson) {
+    this.shamefullyFlatten = !!json.shamefullyFlatten;
+  }
 }
 
 /**
@@ -147,6 +178,8 @@ export class RushConfiguration {
 
   // Repository info
   private _repositoryUrl: string;
+
+  private _pnpmOptions: PnpmOptionsConfiguration;
 
   // Rush hooks
   private _eventHooks: EventHooks;
@@ -582,6 +615,13 @@ export class RushConfiguration {
   }
 
   /**
+   * {@inheritdoc PnpmOptionsConfiguration}
+   */
+  public get pnpmOptions(): PnpmOptionsConfiguration {
+    return this._pnpmOptions;
+  }
+
+  /**
    * Settings from the common-versions.json config file.
    * @remarks
    * If the common-versions.json file is missing, this property will not be undefined.
@@ -694,6 +734,8 @@ export class RushConfiguration {
     this._rushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
+
+    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || { });
 
     if (rushConfigurationJson.npmVersion) {
       this._packageManager = 'npm';
