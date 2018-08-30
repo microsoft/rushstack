@@ -33,7 +33,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack"
       ]
     },
     {
@@ -192,7 +193,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack"
       ]
     },
     {
@@ -219,7 +221,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack"
       ]
     },
 
