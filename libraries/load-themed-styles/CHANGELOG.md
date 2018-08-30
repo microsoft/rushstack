@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Thu, 30 Aug 2018 18:45:12 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Aug 2018 19:23:16 GMT and should not be manually modified.
+
+## 1.8.3
+Thu, 30 Aug 2018 19:23:16 GMT
+
+### Patches
+
+- Fix an issue where the "lib-es6" directory wasn't published.
 
 ## 1.8.2
 Thu, 30 Aug 2018 18:45:12 GMT
