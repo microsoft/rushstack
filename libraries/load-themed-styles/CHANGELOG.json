@@ -2,6 +2,72 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.8.2",
+      "tag": "@microsoft/load-themed-styles_v1.8.2",
+      "date": "Thu, 30 Aug 2018 18:45:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.1` to `5.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.8.1",
+      "tag": "@microsoft/load-themed-styles_v1.8.1",
+      "date": "Thu, 30 Aug 2018 04:42:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a build issue."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.8.0",
+      "tag": "@microsoft/load-themed-styles_v1.8.0",
+      "date": "Thu, 30 Aug 2018 04:24:41 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add esnext-flavor output."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.84",
+      "tag": "@microsoft/load-themed-styles_v1.7.84",
+      "date": "Wed, 29 Aug 2018 21:43:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.0.1` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.0.1` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.11` to `5.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.83",
+      "tag": "@microsoft/load-themed-styles_v1.7.83",
+      "date": "Wed, 29 Aug 2018 20:34:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the lib-amd folder was missing."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.82",
       "tag": "@microsoft/load-themed-styles_v1.7.82",
       "date": "Wed, 29 Aug 2018 06:36:50 GMT",

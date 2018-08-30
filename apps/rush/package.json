@@ -1,7 +1,7 @@
 {
   "name": "@microsoft/rush",
   "version": "5.0.5",
-  "description": "The professional solution for consolidating all your JavaScript projects in one Git repo",
+  "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
     "build",
@@ -39,7 +39,7 @@
   "devDependencies": {
     "@microsoft/rush-stack": "0.1.0",
     "@microsoft/rush-stack-compiler": "0.1.0",
-    "@microsoft/node-library-build": "5.0.0",
+    "@microsoft/node-library-build": "5.0.2",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/node": "8.5.8",

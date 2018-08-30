@@ -25,6 +25,7 @@ lib-amd
 lib-es6
 node_modules
 npm-debug.log
+pnpm-debug.log
 npminstall-log.txt
 temp
 

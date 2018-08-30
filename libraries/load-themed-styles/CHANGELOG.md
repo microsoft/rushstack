@@ -1,6 +1,37 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Wed, 29 Aug 2018 06:36:50 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Aug 2018 18:45:12 GMT and should not be manually modified.
+
+## 1.8.2
+Thu, 30 Aug 2018 18:45:12 GMT
+
+*Version update only*
+
+## 1.8.1
+Thu, 30 Aug 2018 04:42:01 GMT
+
+### Patches
+
+- Fix a build issue.
+
+## 1.8.0
+Thu, 30 Aug 2018 04:24:41 GMT
+
+### Minor changes
+
+- Add esnext-flavor output.
+
+## 1.7.84
+Wed, 29 Aug 2018 21:43:23 GMT
+
+*Version update only*
+
+## 1.7.83
+Wed, 29 Aug 2018 20:34:33 GMT
+
+### Patches
+
+- Fix an issue where the lib-amd folder was missing.
 
 ## 1.7.82
 Wed, 29 Aug 2018 06:36:50 GMT
