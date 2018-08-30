@@ -99,6 +99,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@yarnpkg/lockfile",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "api-extractor-test-01",
       "allowedCategories": [ "tests" ]
     },
