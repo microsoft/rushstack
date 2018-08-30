@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Fix an issue where the Jest task uses the global temp directory.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "iclanton@users.noreply.github.com"
+}
