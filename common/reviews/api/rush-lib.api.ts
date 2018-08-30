@@ -126,6 +126,14 @@ class LockStepVersionPolicy extends VersionPolicy {
 }
 
 // @public
+class PnpmOptionsConfiguration {
+  // WARNING: The type "IPnpmOptionsJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
+  constructor(json: IPnpmOptionsJson);
+  readonly shamefullyFlatten: boolean;
+}
+
+// @public
 class Rush {
   static launch(launcherVersion: string, isManaged: boolean): void;
   static launchRushX(launcherVersion: string, isManaged: boolean): void;
@@ -159,6 +167,7 @@ class RushConfiguration {
   readonly packageManager: PackageManager;
   readonly packageManagerToolFilename: string;
   readonly packageManagerToolVersion: string;
+  readonly pnpmOptions: PnpmOptionsConfiguration;
   readonly pnpmStoreFolder: string;
   readonly projectFolderMaxDepth: number;
   readonly projectFolderMinDepth: number;

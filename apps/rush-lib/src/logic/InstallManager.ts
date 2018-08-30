@@ -195,10 +195,14 @@ export class InstallManager {
     this._rushConfiguration = rushConfiguration;
     this._commonTempFolderRecycler = purgeManager.commonTempFolderRecycler;
 
+    const shamefullyFlatten: boolean = this._rushConfiguration.packageManager === 'pnpm'
+      && this._rushConfiguration.pnpmOptions.shamefullyFlatten;
+
     this._commonNodeModulesMarker = new LastInstallFlag(this._rushConfiguration.commonTempFolder, {
       node: process.versions.node,
       packageManager: rushConfiguration.packageManager,
-      packageManagerVersion: rushConfiguration.packageManagerToolVersion
+      packageManagerVersion: rushConfiguration.packageManagerToolVersion,
+      shamefullyFlatten
     });
   }
 
@@ -967,6 +971,10 @@ export class InstallManager {
       // lockfile existed, otherwise PNPM would hang indefinitely. it is simpler to rely on Rush's
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
+
+      if (this._rushConfiguration.pnpmOptions.shamefullyFlatten) {
+        args.push('--shamefully-flatten');
+      }
 
       if (options.collectLogFile) {
         args.push('--reporter', 'ndjson');

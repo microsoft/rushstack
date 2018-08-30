@@ -61,6 +61,17 @@
       "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default.",
       "type": "boolean"
     },
+    "pnpmOptions": {
+      "description": "Options that are only used when the PNPM pacakge manager is selected.",
+      "type": "object",
+      "properties": {
+        "shamefullyFlatten": {
+          "description": "If true, the \"--shamefully-flatten\" option will be added when invoking PNPM. This is a compatibility workaround for legacy packages that are incompatible with PNPM's symlinking strategy.",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
     "projectFolderMaxDepth": {
       "description": "The maximum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
       "type": "number"
