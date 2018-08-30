@@ -14,7 +14,6 @@
     "@microsoft/load-themed-styles": "1.8.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack": "0.1.1",
     "@microsoft/rush-stack-compiler": "0.1.1",
     "@types/mocha": "5.2.5",
     "@types/node": "8.5.8",

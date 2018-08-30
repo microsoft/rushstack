@@ -16,7 +16,6 @@
     "lodash": "~4.17.5"
   },
   "devDependencies": {
-    "@microsoft/rush-stack": "0.1.1",
     "@microsoft/rush-stack-compiler": "0.1.1",
     "@types/lodash": "4.14.74",
     "@types/mocha": "5.2.5",
