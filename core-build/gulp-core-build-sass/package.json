@@ -16,6 +16,7 @@
     "@microsoft/gulp-core-build": "3.8.15",
     "@microsoft/load-themed-styles": "1.8.4",
     "@types/node": "8.5.8",
+    "@types/gulp": "3.8.32",
     "autoprefixer": "6.3.7",
     "gulp": "~3.9.1",
     "gulp-clean-css": "~3.0.4",
@@ -32,7 +33,6 @@
   "devDependencies": {
     "@microsoft/rush-stack-compiler": "0.1.1",
     "@microsoft/node-library-build": "5.0.4",
-    "@types/gulp": "3.8.32",
     "@types/gulp-util": "3.0.30",
     "@types/mime": "0.0.29",
     "@types/orchestrator": "0.0.30",
