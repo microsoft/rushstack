@@ -55,10 +55,27 @@ export class Git {
     }
   }
 
+  /**
+   * If a Git email address is configured and is nonempty, this returns it.
+   * Otherwise, undefined is returned.
+   */
+  public static tryGetGitEmail(rushConfiguration: RushConfiguration): string | undefined {
+    const emailResult: IResultOrError<string> = Git._tryGetGitEmail();
+    if (emailResult.result !== undefined && emailResult.result.length > 0) {
+      return emailResult.result;
+    }
+    return undefined;
+  }
+
+  /**
+   * If a Git email address is configured and is nonempty, this returns it.
+   * Otherwise, configuration instructions are printed to the console,
+   * and AlreadyReportedError is thrown.
+   */
   public static getGitEmail(rushConfiguration: RushConfiguration): string {
     // Determine the user's account
     // Ex: "bob@example.com"
-    const emailResult: IResultOrError<string> = Git.tryGetGitEmail();
+    const emailResult: IResultOrError<string> = Git._tryGetGitEmail();
     if (emailResult.error) {
       console.log(
         [
@@ -72,7 +89,7 @@ export class Git {
       throw new AlreadyReportedError();
     }
 
-    if (!emailResult.result) {
+    if (emailResult.result === undefined || emailResult.result.length === 0) {
       console.log([
         'This operation requires that a git email be specified.',
         '',
@@ -87,7 +104,7 @@ export class Git {
     return emailResult.result;
   }
 
-  private static tryGetGitEmail(): IResultOrError<string> {
+  private static _tryGetGitEmail(): IResultOrError<string> {
     const gitPath: string | undefined = Git.getGitPath();
     if (!gitPath) {
       return {
