@@ -1,6 +1,60 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Wed, 22 Aug 2018 20:58:58 GMT and should not be manually modified.
+This log was last generated on Fri, 31 Aug 2018 00:11:01 GMT and should not be manually modified.
+
+## 5.0.8
+Fri, 31 Aug 2018 00:11:01 GMT
+
+*Version update only*
+
+## 5.0.7
+Thu, 30 Aug 2018 22:47:34 GMT
+
+*Version update only*
+
+## 5.0.6
+Thu, 30 Aug 2018 19:23:16 GMT
+
+*Version update only*
+
+## 5.0.5
+Thu, 30 Aug 2018 18:45:12 GMT
+
+*Version update only*
+
+## 5.0.4
+Thu, 30 Aug 2018 04:42:01 GMT
+
+*Version update only*
+
+## 5.0.3
+Thu, 30 Aug 2018 04:24:41 GMT
+
+*Version update only*
+
+## 5.0.2
+Wed, 29 Aug 2018 21:43:23 GMT
+
+*Version update only*
+
+## 5.0.1
+Wed, 29 Aug 2018 20:34:33 GMT
+
+*Version update only*
+
+## 5.0.0
+Wed, 29 Aug 2018 06:36:50 GMT
+
+### Breaking changes
+
+- Updating the way typescript and tslint are invoked.
+
+## 4.4.68
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
 
 ## 4.4.67
 Wed, 22 Aug 2018 20:58:58 GMT

@@ -1,6 +1,23 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 22 Aug 2018 20:58:58 GMT and should not be manually modified.
+This log was last generated on Wed, 29 Aug 2018 07:05:22 GMT and should not be manually modified.
+
+## 5.0.5
+Wed, 29 Aug 2018 07:05:22 GMT
+
+### Updates
+
+- Fix an issue where rush install will fail if git isn't installed.
+- Fix an issue where "rush -h" didn't print help for the "build" and "rebuild" commands, unless invoked under a Rush folder
+- Improve command-line help for "rush build"
+- Fix regression causing "ERROR: EEXIST: file already exists"
+
+## 5.0.4
+Thu, 23 Aug 2018 00:08:41 GMT
+
+### Updates
+
+- Fix capitalization of new "filePath" API property
 
 ## 5.0.3
 Wed, 22 Aug 2018 20:58:58 GMT

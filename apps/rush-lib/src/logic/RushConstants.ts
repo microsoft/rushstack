@@ -110,7 +110,7 @@ export namespace RushConstants {
   /**
    * @beta
    */
-  export const versionPoliciesFileName: string = 'version-policies.json';
+  export const versionPoliciesFilename: string = 'version-policies.json';
 
   /**
    * The URL ("http://rushjs.io") for the Rush web site.

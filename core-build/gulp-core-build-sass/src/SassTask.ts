@@ -111,8 +111,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     const checkFilenameForCSSModule: (file: gulpUtil.File) => void = (file: gulpUtil.File) => {
       if (!path.basename(file.path).match(/module\.scss$/)) {
 
-        const filepath: string = path.relative(this.buildConfig.rootPath, file.path);
-        this.logWarning(`${filepath}: filename should end with module.scss`);
+        const filePath: string = path.relative(this.buildConfig.rootPath, file.path);
+        this.logWarning(`${filePath}: filename should end with module.scss`);
       }
     };
 

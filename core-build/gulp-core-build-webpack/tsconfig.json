@@ -1,17 +1,3 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "jsx": "react",
-    "declaration": true,
-    "sourceMap": true,
-    "strictNullChecks": true,
-    "types": [
-      "node"
-    ],
-    "lib": [
-      "es5",
-      "es2015.iterable"
-    ]
-  }
+  "extends": "./node_modules/@microsoft/rush-stack-compiler/includes/tsconfig-node.json"
 }

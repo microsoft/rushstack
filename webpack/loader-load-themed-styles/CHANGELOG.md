@@ -1,6 +1,53 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Wed, 22 Aug 2018 20:58:58 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Aug 2018 22:47:34 GMT and should not be manually modified.
+
+## 1.7.72
+Thu, 30 Aug 2018 22:47:34 GMT
+
+*Version update only*
+
+## 1.7.71
+Thu, 30 Aug 2018 19:23:16 GMT
+
+*Version update only*
+
+## 1.7.70
+Thu, 30 Aug 2018 18:45:12 GMT
+
+*Version update only*
+
+## 1.7.69
+Thu, 30 Aug 2018 04:42:01 GMT
+
+*Version update only*
+
+## 1.7.68
+Thu, 30 Aug 2018 04:24:41 GMT
+
+*Version update only*
+
+## 1.7.67
+Wed, 29 Aug 2018 21:43:23 GMT
+
+*Version update only*
+
+## 1.7.66
+Wed, 29 Aug 2018 20:34:33 GMT
+
+*Version update only*
+
+## 1.7.65
+Wed, 29 Aug 2018 06:36:50 GMT
+
+*Version update only*
+
+## 1.7.64
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
 
 ## 1.7.63
 Wed, 22 Aug 2018 20:58:58 GMT

@@ -1,6 +1,37 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 22 Aug 2018 20:58:58 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Aug 2018 19:23:16 GMT and should not be manually modified.
+
+## 3.8.15
+Thu, 30 Aug 2018 19:23:16 GMT
+
+*Version update only*
+
+## 3.8.14
+Thu, 30 Aug 2018 18:45:12 GMT
+
+### Patches
+
+- Fix an issue where the Jest task uses the global temp directory.
+
+## 3.8.13
+Wed, 29 Aug 2018 21:43:23 GMT
+
+*Version update only*
+
+## 3.8.12
+Wed, 29 Aug 2018 06:36:50 GMT
+
+### Patches
+
+- Update to use new node-core-library API
+
+## 3.8.11
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
 
 ## 3.8.10
 Wed, 22 Aug 2018 20:58:58 GMT

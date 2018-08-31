@@ -19,12 +19,12 @@ class FileDiffTest {
 // @public
 class FileSystem {
   static changePosixModeBits(path: string, mode: PosixModeBits): void;
-  static copyFile(sourcePath: string, destinationPath: string): void;
-  static createHardLink(linkTarget: string, linkSource: string): void;
-  static createSymbolicLinkFile(linkTarget: string, linkSource: string): void;
-  static createSymbolicLinkFolder(linkTarget: string, linkSource: string): void;
-  static createSymbolicLinkJunction(linkTarget: string, linkSource: string): void;
-  static deleteFile(filePath: string, options?: IDeleteFileOptions): void;
+  static copyFile(options: IFileSystemCopyFileOptions): void;
+  static createHardLink(options: IFileSystemCreateLinkOptions): void;
+  static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
+  static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void;
+  static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
+  static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void;
   static deleteFolder(folderPath: string): void;
   static ensureEmptyFolder(folderPath: string): void;
   static ensureFolder(folderPath: string): void;
@@ -34,12 +34,12 @@ class FileSystem {
   static getPosixModeBits(path: string): PosixModeBits;
   static getRealPath(linkPath: string): string;
   static getStatistics(path: string): fs.Stats;
-  static move(sourcePath: string, targetPath: string, options?: IFileSystemMoveOptions): void;
-  static readFile(filePath: string, options?: IReadFileOptions): string;
+  static move(options: IFileSystemMoveOptions): void;
+  static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
   static readFileToBuffer(filePath: string): Buffer;
-  static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
-  static updateTimes(path: string, times: IUpdateTimeParameters): void;
-  static writeFile(filePath: string, contents: string | Buffer, options?: IWriteFileOptions): void;
+  static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): Array<string>;
+  static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
+  static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
 }
 
 // @public
@@ -53,11 +53,6 @@ class FileWriter {
 enum FolderConstants {
   Git = ".git",
   NodeModules = "node_modules"
-}
-
-// @public
-interface IDeleteFileOptions {
-  throwIfNotExists?: boolean;
 }
 
 // @beta
@@ -75,9 +70,52 @@ interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
 }
 
 // @public
+interface IFileSystemCopyFileOptions {
+  destinationPath: string;
+  sourcePath: string;
+}
+
+// @public
+interface IFileSystemCreateLinkOptions {
+  linkTargetPath: string;
+  newLinkPath: string;
+}
+
+// @public
+interface IFileSystemDeleteFileOptions {
+  throwIfNotExists?: boolean;
+}
+
+// @public
 interface IFileSystemMoveOptions {
+  destinationPath: string;
   ensureFolderExists?: boolean;
   overwrite?: boolean;
+  sourcePath: string;
+}
+
+// @public
+interface IFileSystemReadFileOptions {
+  convertLineEndings?: NewlineKind;
+  encoding?: Encoding;
+}
+
+// @public
+interface IFileSystemReadFolderOptions {
+  absolutePaths?: boolean;
+}
+
+// @public
+interface IFileSystemUpdateTimeParameters {
+  accessedTime: number | Date;
+  modifiedTime: number | Date;
+}
+
+// @public
+interface IFileSystemWriteFileOptions {
+  convertLineEndings?: NewlineKind;
+  encoding?: Encoding;
+  ensureFolderExists?: boolean;
 }
 
 // @public
@@ -171,30 +209,6 @@ interface IProtectableMapParameters<K, V> {
   onClear?: (source: ProtectableMap<K, V>) => void;
   onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
   onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
-}
-
-// @public
-interface IReadFileOptions {
-  convertLineEndings?: NewlineKind;
-  encoding?: Encoding;
-}
-
-// @public
-interface IReadFolderOptions {
-  absolutePaths?: boolean;
-}
-
-// @public
-interface IUpdateTimeParameters {
-  accessedTime: number | Date;
-  modifiedTime: number | Date;
-}
-
-// @public
-interface IWriteFileOptions {
-  convertLineEndings?: NewlineKind;
-  encoding?: Encoding;
-  ensureFolderExists?: boolean;
 }
 
 // @public

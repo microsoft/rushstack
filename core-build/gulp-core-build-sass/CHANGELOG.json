@@ -2,6 +2,173 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.3.51",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.51",
+      "date": "Fri, 31 Aug 2018 00:11:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include @types/gulp as a non-dev dependency."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.50",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.50",
+      "date": "Thu, 30 Aug 2018 22:47:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.3` to `1.8.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.3` to `5.0.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.49",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.49",
+      "date": "Thu, 30 Aug 2018 19:23:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.14` to `3.8.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.2` to `1.8.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.1.0` to `0.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.0` to `0.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.2` to `5.0.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.48",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.48",
+      "date": "Thu, 30 Aug 2018 18:45:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.13` to `3.8.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.1` to `1.8.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.1` to `5.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.47",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.47",
+      "date": "Thu, 30 Aug 2018 04:42:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.0` to `1.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.46",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.46",
+      "date": "Thu, 30 Aug 2018 04:24:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.84` to `1.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.45",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.45",
+      "date": "Wed, 29 Aug 2018 21:43:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.12` to `3.8.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.83` to `1.7.84`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.0.1` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.0.1` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.0` to `5.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.44",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.44",
+      "date": "Wed, 29 Aug 2018 20:34:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.82` to `1.7.83`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.43",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.43",
+      "date": "Wed, 29 Aug 2018 06:36:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.11` to `3.8.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.81` to `1.7.82`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.11` to `5.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.42",
+      "tag": "@microsoft/gulp-core-build-sass_v4.3.42",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.10` to `3.8.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.7.80` to `1.7.81`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.41",
       "tag": "@microsoft/gulp-core-build-sass_v4.3.41",
       "date": "Wed, 22 Aug 2018 20:58:58 GMT",

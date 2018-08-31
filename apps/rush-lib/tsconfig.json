@@ -1,22 +1,8 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "forceConsistentCasingInFileNames": true,
-    "strictNullChecks": true,
-    "module": "commonjs",
-    "jsx": "react",
-    "declaration": true,
-    "sourceMap": true,
-    "types": [
-      "node",
-      "jest"
-    ],
-    "lib": [
-      "es5",
-      "scripthost",
-      "es2015.collection",
-      "es2015.promise",
-      "es2015.iterable"
-    ]
-  }
+  "extends": "./node_modules/@microsoft/rush-stack-compiler/includes/tsconfig-node.json",
+  "include": [
+    "./typings/tsd.d.ts",
+    "./src/**/*.ts",
+    "./src/**/*.tsx"
+  ]
 }

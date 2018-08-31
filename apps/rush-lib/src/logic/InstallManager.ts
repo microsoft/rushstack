@@ -25,7 +25,7 @@ import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import { BaseLinkManager } from '../logic/base/BaseLinkManager';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
-import { GitPolicy } from '../logic/GitPolicy';
+import { PolicyValidator } from '../logic/policy/PolicyValidator';
 import { IRushTempPackageJson } from '../logic/base/BasePackage';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
@@ -206,7 +206,7 @@ export class InstallManager {
     return Promise.resolve().then(() => {
 
       // Check the policies
-      GitPolicy.getUserEmail(this._rushConfiguration, options.bypassPolicy);
+      PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
 
       ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
 
@@ -333,7 +333,10 @@ export class InstallManager {
         }
       }
 
-      FileSystem.createSymbolicLinkJunction(packageManagerToolFolder, localPackageManagerToolFolder);
+      FileSystem.createSymbolicLinkJunction({
+        linkTargetPath: packageManagerToolFolder,
+        newLinkPath: localPackageManagerToolFolder
+      });
 
       lock.release();
     });
@@ -965,6 +968,10 @@ export class InstallManager {
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
 
+      // Ensure that Rush's tarball dependencies get synchronized properly with the shrinkwrap.yaml file.
+      // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
+      args.push('--prefer-frozen-shrinkwrap', 'false');
+
       if (options.collectLogFile) {
         args.push('--reporter', 'ndjson');
       }
@@ -976,17 +983,17 @@ export class InstallManager {
   }
 
   /**
-   * Copies the file "sourcePath" to "targetPath", overwriting the target file location.
+   * Copies the file "sourcePath" to "destinationPath", overwriting the target file location.
    * If the source file does not exist, then the target file is deleted.
    */
-  private _syncFile(sourcePath: string, targetPath: string): void {
+  private _syncFile(sourcePath: string, destinationPath: string): void {
     if (FileSystem.exists(sourcePath)) {
-      console.log('Updating ' + targetPath);
-      FileSystem.copyFile(sourcePath, targetPath);
+      console.log('Updating ' + destinationPath);
+      FileSystem.copyFile({sourcePath, destinationPath});
     } else {
-      if (FileSystem.exists(targetPath)) {
-        console.log('Deleting ' + targetPath);
-        FileSystem.deleteFile(targetPath);
+      if (FileSystem.exists(destinationPath)) {
+        console.log('Deleting ' + destinationPath);
+        FileSystem.deleteFile(destinationPath);
       }
     }
   }

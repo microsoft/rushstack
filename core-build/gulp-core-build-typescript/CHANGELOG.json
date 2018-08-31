@@ -2,6 +2,112 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "4.11.12",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.11.12",
+      "date": "Thu, 30 Aug 2018 22:47:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include defaultTslint in npm package."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.11.11",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.11.11",
+      "date": "Thu, 30 Aug 2018 19:23:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.14` to `3.8.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.1.0` to `0.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.0` to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.11.10",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.11.10",
+      "date": "Thu, 30 Aug 2018 18:45:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.13` to `3.8.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.11.9",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.11.9",
+      "date": "Wed, 29 Aug 2018 21:43:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.12` to `3.8.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.0.1` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.0.1` to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.11.8",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.11.8",
+      "date": "Wed, 29 Aug 2018 06:36:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixing minor path issue."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.10.7` to `5.10.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.11` to `3.8.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.2.1` to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.11.7",
+      "tag": "@microsoft/gulp-core-build-typescript_v4.11.7",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.10.6` to `5.10.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.10` to `3.8.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.2.0` to `2.2.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.11.6",
       "tag": "@microsoft/gulp-core-build-typescript_v4.11.6",
       "date": "Wed, 22 Aug 2018 20:58:58 GMT",

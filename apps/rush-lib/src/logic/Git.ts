@@ -3,76 +3,110 @@
 
 import gitInfo = require('git-repo-info');
 import * as child_process from 'child_process';
+import * as os from 'os';
 
-import { PublishUtilities } from './PublishUtilities';
+import { Utilities } from '../utilities/Utilities';
+import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
+import { GitEmailPolicy } from './policy/GitEmailPolicy';
+import { RushConfiguration } from '../api/RushConfiguration';
+
+interface IResultOrError<TResult> {
+  error?: Error;
+  result?: TResult;
+}
 
 export class Git {
-  private _targetBranch: string | undefined;
+  private static _hasGit: boolean | undefined = undefined;
+  private static _gitPath: string | undefined;
 
-  public static detectIfGitIsSupported(): boolean {
-    const command: string = process.platform === 'win32' ? 'where' : 'which';
-    const result: child_process.SpawnSyncReturns<string> = child_process.spawnSync(command, ['git']);
+  /**
+   * Returns the path to the git binary if git is found. If git can't be found, return undefined.
+   */
+  public static getGitPath(): string | undefined {
+    if (Git._hasGit === undefined) {
+      const command: string = process.platform === 'win32' ? 'where' : 'which';
+      const result: child_process.SpawnSyncReturns<string> = child_process.spawnSync(command, ['git']);
 
-    if (result.status !== 0) {
+      if (result.status === 0) {
+        Git._gitPath = result.stdout;
+        Git._hasGit = !!result.stdout;
+      }
+    }
+
+    return Git._gitPath;
+  }
+
+  public static isGitPresent(): boolean {
+    return !!Git.getGitPath();
+  }
+
+  /**
+   * Checks if git is supported and if the current path is under a git working tree.
+   */
+  public static isPathUnderGitWorkingTree(): boolean {
+    if (Git.isGitPresent()) { // Do we even have a git binary?
+      try {
+        return !!gitInfo().sha;
+      } catch (e) {
+        return false; // Unexpected, but possible if the .git directory is corrupted.
+      }
+    } else {
       return false;
+    }
+  }
+
+  public static getGitEmail(rushConfiguration: RushConfiguration): string {
+    // Determine the user's account
+    // Ex: "bob@example.com"
+    const emailResult: IResultOrError<string> = Git.tryGetGitEmail();
+    if (emailResult.error) {
+      console.log(
+        [
+          `Error: ${emailResult.error.message}`,
+          'Unable to determine your Git configuration using this command:',
+          '',
+          '    git config user.email',
+          ''
+        ].join(os.EOL)
+      );
+      throw new AlreadyReportedError();
+    }
+
+    if (!emailResult.result) {
+      console.log([
+        'This operation requires that a git email be specified.',
+        '',
+        `If you didn't configure your email yet, try something like this:`,
+        '',
+        ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
+        ''
+      ].join(os.EOL));
+      throw new AlreadyReportedError();
+    }
+
+    return emailResult.result;
+  }
+
+  private static tryGetGitEmail(): IResultOrError<string> {
+    const gitPath: string | undefined = Git.getGitPath();
+    if (!gitPath) {
+      return {
+        error: new Error('Git isn\'t present on the path')
+      };
     }
 
     try {
-      return !!gitInfo().sha;
+      return {
+        result: Utilities.executeCommandAndCaptureOutput(
+          'git',
+          ['config', 'user.email'],
+          '.'
+        ).trim()
+      };
     } catch (e) {
-      return false; // Unexpected, but possible if the .git directory is corrupted.
+      return {
+        error: e
+      };
     }
-  }
-
-  constructor(targetBranch: string | undefined) {
-    this._targetBranch = targetBranch;
-  }
-
-  public checkout(branchName: string | undefined, createBranch?: boolean): void {
-    const params: string = `checkout ${createBranch ? '-b ' : ''}${branchName}`;
-
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', params.split(' '));
-  }
-
-  public merge(branchName: string): void {
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', `merge ${branchName} --no-edit`.split(' '));
-  }
-
-  public deleteBranch(branchName: string, hasRemote: boolean = true): void {
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', `branch -d ${branchName}`.split(' '));
-    if (hasRemote) {
-      PublishUtilities.execCommand(!!this._targetBranch, 'git', `push origin --delete ${branchName}`.split(' '));
-    }
-  }
-
-  public pull(): void {
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', `pull origin ${this._targetBranch}`.split(' '));
-  }
-
-  public addChanges(pathspec?: string, workingDirectory?: string): void {
-    const files: string = pathspec ? pathspec : '.';
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['add', files],
-      workingDirectory ? workingDirectory : process.cwd());
-  }
-
-  public addTag(shouldExecute: boolean, packageName: string, packageVersion: string): void {
-    // Tagging only happens if we're publishing to real NPM and committing to git.
-    const tagName: string = PublishUtilities.createTagname(packageName, packageVersion);
-    PublishUtilities.execCommand(
-      !!this._targetBranch && shouldExecute,
-      'git',
-      ['tag', '-a', tagName, '-m', `${packageName} v${packageVersion}`]);
-  }
-
-  public commit(message?: string): void {
-    const commitMessage: string = message ? message : 'Applying package updates.';
-    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['commit', '-m', commitMessage]);
-  }
-
-  public push(branchName: string | undefined): void {
-    PublishUtilities.execCommand(
-      !!this._targetBranch,
-      'git',
-      ['push', 'origin', 'HEAD:' + branchName, '--follow-tags', '--verbose']);
   }
 }

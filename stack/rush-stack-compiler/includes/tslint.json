@@ -1,6 +1,9 @@
 {
   "$schema": "http://json.schemastore.org/tslint",
 
+  "rulesDirectory": [
+    "tslint-microsoft-contrib"
+  ],
   "rules": {
     "class-name": true,
     "comment-format": [true, "check-space"],

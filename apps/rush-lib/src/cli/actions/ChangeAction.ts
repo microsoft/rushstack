@@ -228,7 +228,7 @@ export class ChangeAction extends BaseRushAction {
         });
     } else {
       this._warnUncommittedChanges();
-      // We are done, collect their e-mail
+      // We are done, collect their email
       return this._detectOrAskForEmail().then((email: string) => {
         this._changeFileData.forEach((changeFile: IChangeFile) => {
           changeFile.email = email;
@@ -393,7 +393,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   /**
-   * Asks the user for their e-mail address
+   * Asks the user for their email address
    */
   private _promptForEmail(): Promise<string> {
     return this._prompt([

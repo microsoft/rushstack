@@ -2,6 +2,39 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.0.5",
+      "tag": "@microsoft/rush_v5.0.5",
+      "date": "Wed, 29 Aug 2018 07:05:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush install will fail if git isn't installed."
+          },
+          {
+            "comment": "Fix an issue where \"rush -h\" didn't print help for the \"build\" and \"rebuild\" commands, unless invoked under a Rush folder"
+          },
+          {
+            "comment": "Improve command-line help for \"rush build\""
+          },
+          {
+            "comment": "Fix regression causing \"ERROR: EEXIST: file already exists\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.4",
+      "tag": "@microsoft/rush_v5.0.4",
+      "date": "Thu, 23 Aug 2018 00:08:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix capitalization of new \"filePath\" API property"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.3",
       "tag": "@microsoft/rush_v5.0.3",
       "date": "Wed, 22 Aug 2018 20:58:58 GMT",

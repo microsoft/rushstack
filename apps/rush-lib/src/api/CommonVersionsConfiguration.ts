@@ -56,7 +56,7 @@ export class CommonVersionsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../schemas/common-versions.schema.json'));
 
-  private _filename: string;
+  private _filePath: string;
   private _preferredVersions: ProtectableMap<string, string>;
   private _xstitchPreferredVersions: ProtectableMap<string, string>;
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
@@ -99,15 +99,15 @@ export class CommonVersionsConfiguration {
   /**
    * Get the absolute file path of the common-versions.json file.
    */
-  public get filepath(): string {
-    return this._filename;
+  public get filePath(): string {
+    return this._filePath;
   }
 
   /**
    * Writes the "common-versions.json" file to disk, using the filename that was passed to loadFromFile().
    */
   public save(): void {
-    JsonFile.save(this._serialize(), this._filename, { updateExistingFile: true });
+    JsonFile.save(this._serialize(), this._filePath, { updateExistingFile: true });
   }
 
   /**
@@ -173,7 +173,7 @@ export class CommonVersionsConfiguration {
     return allPreferredVersions;
   }
 
-  private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filename: string) {
+  private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
     this._preferredVersions = new ProtectableMap<string, string>(
       { onSet: this._onSetPreferredVersions.bind(this) });
 
@@ -192,10 +192,10 @@ export class CommonVersionsConfiguration {
         CommonVersionsConfiguration._deserializeTable(this.allowedAlternativeVersions,
           commonVersionsJson.allowedAlternativeVersions);
       } catch (e) {
-        throw new Error(`Error loading "${path.basename(filename)}": ${e.message}`);
+        throw new Error(`Error loading "${path.basename(filePath)}": ${e.message}`);
       }
     }
-    this._filename = filename;
+    this._filePath = filePath;
   }
 
   private _onSetPreferredVersions(source: ProtectableMap<string, string>, key: string, value: string): string {
