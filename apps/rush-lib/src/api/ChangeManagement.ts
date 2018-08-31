@@ -47,7 +47,7 @@ export interface IChangeInfo {
   comment?: string;
 
   /**
-   * The email of the user who provided the comment. Pulled from the git log.
+   * The email of the user who provided the comment. Pulled from the Git log.
    */
   author?: string;
 

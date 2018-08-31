@@ -66,7 +66,7 @@ export class PackageChangeAnalyzer {
       }
     } catch (e) {
       // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
-      // the state of the files in the repo. This can happen if the environment doesn't have git.
+      // the state of the files in the repo. This can happen if the environment doesn't have Git.
       console.log(colors.yellow(
         `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
       ));
