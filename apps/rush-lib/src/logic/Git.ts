@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import gitInfo = require('git-repo-info');
-import * as child_process from 'child_process';
 import * as os from 'os';
+import { Executable } from '@microsoft/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
@@ -16,32 +16,32 @@ interface IResultOrError<TResult> {
 }
 
 export class Git {
-  private static _hasGit: boolean | undefined = undefined;
+  private static _checkedGitPath: boolean = false;
   private static _gitPath: string | undefined;
 
+  private static _gitEmailResult: IResultOrError<string> | undefined = undefined;
+
   /**
-   * Returns the path to the git binary if git is found. If git can't be found, return undefined.
+   * Returns the path to the Git binary if git is found. If git can't be found, return undefined.
    */
   public static getGitPath(): string | undefined {
-    if (Git._hasGit === undefined) {
-      const command: string = process.platform === 'win32' ? 'where' : 'which';
-      const result: child_process.SpawnSyncReturns<string> = child_process.spawnSync(command, ['git']);
-
-      if (result.status === 0) {
-        Git._gitPath = result.stdout;
-        Git._hasGit = !!result.stdout;
-      }
+    if (!Git._checkedGitPath) {
+      Git._gitPath = Executable.tryResolve('git');
+      Git._checkedGitPath = true;
     }
 
     return Git._gitPath;
   }
 
+  /**
+   * Returns true if the Git binary can be found.
+   */
   public static isGitPresent(): boolean {
     return !!Git.getGitPath();
   }
 
   /**
-   * Checks if git is supported and if the current path is under a git working tree.
+   * Returns true if the Git binary was found and the current path is under a Git working tree.
    */
   public static isPathUnderGitWorkingTree(): boolean {
     if (Git.isGitPresent()) { // Do we even have a git binary?
@@ -105,25 +105,28 @@ export class Git {
   }
 
   private static _tryGetGitEmail(): IResultOrError<string> {
-    const gitPath: string | undefined = Git.getGitPath();
-    if (!gitPath) {
-      return {
-        error: new Error('Git isn\'t present on the path')
-      };
+    if (Git._gitEmailResult === undefined) {
+      if (!Git.isGitPresent()) {
+        Git._gitEmailResult = {
+          error: new Error('Git isn\'t present on the path')
+        };
+      } else {
+        try {
+          Git._gitEmailResult = {
+            result: Utilities.executeCommandAndCaptureOutput(
+              'git',
+              ['config', 'user.email'],
+              '.'
+            ).trim()
+          };
+        } catch (e) {
+          Git._gitEmailResult = {
+            error: e
+          };
+        }
+      }
     }
 
-    try {
-      return {
-        result: Utilities.executeCommandAndCaptureOutput(
-          'git',
-          ['config', 'user.email'],
-          '.'
-        ).trim()
-      };
-    } catch (e) {
-      return {
-        error: e
-      };
-    }
+    return Git._gitEmailResult;
   }
 }
