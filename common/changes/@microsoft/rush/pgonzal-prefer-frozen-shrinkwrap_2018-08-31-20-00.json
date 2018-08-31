@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add \"--prefer-frozen-shrinkwrap false\" to the \"pnpm install\" command line as a workaround for https://github.com/pnpm/pnpm/issues/1342",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
