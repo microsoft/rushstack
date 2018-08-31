@@ -968,6 +968,10 @@ export class InstallManager {
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
 
+      // Ensure that Rush's tarball dependencies get synchronized properly with the shrinkwrap.yaml file.
+      // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
+      args.push('--prefer-frozen-shrinkwrap', 'false');
+
       if (options.collectLogFile) {
         args.push('--reporter', 'ndjson');
       }
