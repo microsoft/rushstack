@@ -22,7 +22,7 @@ export class Git {
   private static _gitEmailResult: IResultOrError<string> | undefined = undefined;
 
   /**
-   * Returns the path to the Git binary if git is found. If git can't be found, return undefined.
+   * Returns the path to the Git binary if found. Otherwise, return undefined.
    */
   public static getGitPath(): string | undefined {
     if (!Git._checkedGitPath) {
@@ -44,7 +44,7 @@ export class Git {
    * Returns true if the Git binary was found and the current path is under a Git working tree.
    */
   public static isPathUnderGitWorkingTree(): boolean {
-    if (Git.isGitPresent()) { // Do we even have a git binary?
+    if (Git.isGitPresent()) { // Do we even have a Git binary?
       try {
         return !!gitInfo().sha;
       } catch (e) {
@@ -91,7 +91,7 @@ export class Git {
 
     if (emailResult.result === undefined || emailResult.result.length === 0) {
       console.log([
-        'This operation requires that a git email be specified.',
+        'This operation requires that a Git email be specified.',
         '',
         `If you didn't configure your email yet, try something like this:`,
         '',
