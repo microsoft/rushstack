@@ -26,27 +26,39 @@ export abstract class BaseLinkManager {
   protected _rushConfiguration: RushConfiguration;
 
   protected static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
-    FileSystem.ensureFolder(path.dirname(options.newLinkPath));
+    const newLinkFolder: string = path.dirname(options.newLinkPath);
+    FileSystem.ensureFolder(newLinkFolder);
 
-    if (options.symlinkKind === SymlinkKind.Directory) {
-      // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
-      FileSystem.createSymbolicLinkJunction({
-        linkTargetPath: options.linkTargetPath,
-        newLinkPath: options.newLinkPath
-    });
-    } else {
-      if (process.platform === 'win32') {
-        // For files, we use a Windows "hard link", because creating a symbolic link requires
-        // administrator permission.
-        FileSystem.createHardLink({
-          linkTargetPath: options.linkTargetPath,
+    // Link to the relative path, to avoid going outside containers such as a Docker image
+    const targetRelativePath: string = path.relative(fs.realpathSync(newLinkFolder),
+      options.linkTargetPath);
+
+    if (process.platform === 'win32') {
+      if (options.symlinkKind === SymlinkKind.Directory) {
+        // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
+        FileSystem.createSymbolicLinkJunction({
+          linkTargetPath: targetRelativePath,
           newLinkPath: options.newLinkPath
         });
       } else {
-        // However hard links seem to cause build failures on Mac, so for all other operating systems
-        // we use symbolic links for this case.
+        // For files, we use a Windows "hard link", because creating a symbolic link requires
+        // administrator permission.
+        FileSystem.createHardLink({
+          linkTargetPath: targetRelativePath,
+          newLinkPath: options.newLinkPath
+        });
+      }
+    } else {
+      // However hard links seem to cause build failures on Mac, so for all other operating systems
+      // we use symbolic links for this case.
+      if (options.symlinkKind === SymlinkKind.Directory) {
+        FileSystem.createSymbolicLinkFolder({
+          linkTargetPath: targetRelativePath,
+          newLinkPath: options.newLinkPath
+        });
+      } else {
         FileSystem.createSymbolicLinkFile({
-          linkTargetPath: options.linkTargetPath,
+          linkTargetPath: targetRelativePath,
           newLinkPath: options.newLinkPath
         });
       }
