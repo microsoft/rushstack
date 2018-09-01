@@ -59,7 +59,7 @@
     "@types/glob": "5.0.30",
     "@types/jest": "21.1.10",
     "@types/js-yaml": "3.9.1",
-    "@types/lodash": "4.14.74",
+    "@types/lodash": "4.14.116",
     "@types/minimatch": "2.0.29",
     "@types/semver": "5.3.33"
   }

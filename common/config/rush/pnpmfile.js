@@ -29,9 +29,9 @@ module.exports = {
  * We are expected to return the object.
  */
 function readPackage(pkg) {
-  // tslint-microsoft-contrib and tslint have peerDependencies on typescript, but now we have two copies
+  // tslint-microsoft-contrib, tslint, and ts-jest have peerDependencies on typescript, but now we have two copies
   //  in the repo so it doesn't know which one to pick
-  if (pkg.name === 'tslint-microsoft-contrib' || pkg.name === 'tslint') {
+  if (pkg.name === 'tslint-microsoft-contrib' || pkg.name === 'tslint' || pkg.name === 'ts-jest') {
     pkg.dependencies['typescript'] = '~2.4.1';
     delete pkg.peerDependencies['typescript'];
   }

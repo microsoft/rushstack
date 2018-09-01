@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler": "0.1.1",
-    "@types/lodash": "4.14.74",
+    "@types/lodash": "4.14.116",
     "@types/mocha": "5.2.5",
     "@types/uglify-js": "2.6.29",
     "chai": "~3.5.0",

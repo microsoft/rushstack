@@ -55,7 +55,7 @@ dependencies:
   '@types/js-yaml': 3.9.1
   '@types/karma': 0.13.33
   '@types/loader-utils': 1.1.3
-  '@types/lodash': 4.14.74
+  '@types/lodash': 4.14.116
   '@types/log4js': 0.0.33
   '@types/mime': 0.0.29
   '@types/minimatch': 2.0.29
@@ -627,10 +627,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-euKGFr2oCB3ASBwG39CYJMR3N9T0nanVqXdiH7Zu/Nqddt6SmFRxytq/i2w9LQYNQekEtGBz+pE3qG6fQTNvRg==
-  /@types/lodash/4.14.74:
+  /@types/lodash/4.14.116:
     dev: false
     resolution:
-      integrity: sha512-BZknw3E/z3JmCLqQVANcR17okqVTPZdlxvcIz0fJiJVLUCbSH1hK3zs9r634PVSmrzAxN+n/fxlVRiYoArdOIQ==
+      integrity: sha512-lRnAtKnxMXcYYXqOiotTmJd74uawNWuPnsnPrrO7HiFuE3npE2iQhfABatbYDyxTNqZNuXzcKGhw37R7RjBFLg==
   /@types/log4js/0.0.33:
     dependencies:
       '@types/express': 4.11.0
@@ -9261,11 +9261,11 @@ packages:
       lodash: 4.17.10
       pkg-dir: 2.0.0
       source-map-support: 0.5.9
+      typescript: 2.4.2
       yargs: 11.1.0
     dev: false
     peerDependencies:
       jest: ^22.4.0 || ^22.5.0-alpha.1 || ^23.0.0-alpha.1
-      typescript: 2.x
     resolution:
       integrity: sha512-kYQ6g1G1AU+bOO9rv+SSQXg4WTcni6Wx3AM48iHni0nP1vIuhdNRjKTE9Cxx36Ix/IOV7L85iKu07dgXJzH2pQ==
   /ts-jest/22.4.6/jest@22.4.4:
@@ -9281,12 +9281,12 @@ packages:
       lodash: 4.17.10
       pkg-dir: 2.0.0
       source-map-support: 0.5.9
+      typescript: 2.4.2
       yargs: 11.1.0
     dev: false
     id: registry.npmjs.org/ts-jest/22.4.6
     peerDependencies:
       jest: ^22.4.0 || ^22.5.0-alpha.1 || ^23.0.0-alpha.1
-      typescript: 2.x
     resolution:
       integrity: sha512-kYQ6g1G1AU+bOO9rv+SSQXg4WTcni6Wx3AM48iHni0nP1vIuhdNRjKTE9Cxx36Ix/IOV7L85iKu07dgXJzH2pQ==
   /tslib/1.9.3:
@@ -10242,7 +10242,7 @@ packages:
       '@microsoft/node-library-build': 5.0.2
       '@microsoft/rush-stack-compiler': 0.1.1
       '@types/jest': 21.1.10
-      '@types/lodash': 4.14.74
+      '@types/lodash': 4.14.116
       '@types/node': 8.5.8
       '@types/z-schema': 3.16.31
       colors: 1.2.5
@@ -10255,7 +10255,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-PEEvvyUPG+RQc8tAG0HrM4/Mst0zglrxShgRMB9dlV3c6lVgvMHxwvhFHBswjK2pjQ1VCQaHzycSDtssDk6umw==
+      integrity: sha512-uvB5oZKnHNFNnvIN7HZTX+womZqFODp7Uz+GggqnW1ZeK+MmLgIEg+queGaHxBvQiUG1Uf6InGUaX57wOyGIHw==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-karma.tgz':
@@ -10521,7 +10521,7 @@ packages:
     version: 0.0.0
   'file:projects/loader-set-webpack-public-path.tgz':
     dependencies:
-      '@types/lodash': 4.14.74
+      '@types/lodash': 4.14.116
       '@types/mocha': 5.2.5
       '@types/node': 8.5.8
       chai: 3.5.0
@@ -10532,7 +10532,7 @@ packages:
     dev: false
     name: '@rush-temp/loader-set-webpack-public-path'
     resolution:
-      integrity: sha512-eZo3pAG61/353oipSj/8USz1sK0GwS0i8UKMEhZ7pQ6eklFR5OEQfOSjfIXMXRLKicbqt8maIY+t34xmz8QrPw==
+      integrity: sha512-zHtCDjFAKvSRJJZOFI0hV8sU4yviFrtoNDGh+MQ6U5j0edWdNlGv8AFocPlaw8ORRLFK/HWCLkY0JuMQeui4Ew==
       tarball: 'file:projects/loader-set-webpack-public-path.tgz'
     version: 0.0.0
   'file:projects/node-core-library.tgz':
@@ -10611,7 +10611,7 @@ packages:
       '@types/glob': 5.0.30
       '@types/jest': 21.1.10
       '@types/js-yaml': 3.9.1
-      '@types/lodash': 4.14.74
+      '@types/lodash': 4.14.116
       '@types/minimatch': 2.0.29
       '@types/node': 8.5.8
       '@types/node-fetch': 1.6.9
@@ -10642,7 +10642,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-lib'
     resolution:
-      integrity: sha512-/RK9grKMdv885XLKPbvlc/ENewnezMWp42g/DKUB+zZyM41tBigWY9YSTjYPx1OlZClWGZ9LlvYyzUr4o1DYEw==
+      integrity: sha512-SHsITnjTHp++xkrLovRglkHSlcRwevi4viTtpCJysxkcbVEz5T8o+H6NSkNcsP2WUPM2V9bKENwuedEa3xutFA==
       tarball: 'file:projects/rush-lib.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler.tgz':
@@ -10709,7 +10709,7 @@ packages:
     version: 0.0.0
   'file:projects/set-webpack-public-path-plugin.tgz':
     dependencies:
-      '@types/lodash': 4.14.74
+      '@types/lodash': 4.14.116
       '@types/mocha': 5.2.5
       '@types/node': 8.5.8
       '@types/tapable': 1.0.2
@@ -10723,7 +10723,7 @@ packages:
     dev: false
     name: '@rush-temp/set-webpack-public-path-plugin'
     resolution:
-      integrity: sha512-23Mfh3wYcYvYVrBvifA9/MTHFyJwvs8EFICpQm9JdhjhDdPFCfYVU6kgId9+CraRAjtdT9MnWIo45gByL7otkQ==
+      integrity: sha512-w1uRbpJ6WhCTqIBxrVSLCQ0QDIGuyCbj7Wbq2NPY+Alvh2jKprzXQaozIeX05i4nChkf4F1XLcmzxyz2sQgIYw==
       tarball: 'file:projects/set-webpack-public-path-plugin.tgz'
     version: 0.0.0
   'file:projects/stream-collator.tgz':
@@ -10841,7 +10841,7 @@ specifiers:
   '@types/js-yaml': 3.9.1
   '@types/karma': 0.13.33
   '@types/loader-utils': 1.1.3
-  '@types/lodash': 4.14.74
+  '@types/lodash': 4.14.116
   '@types/log4js': 0.0.33
   '@types/mime': 0.0.29
   '@types/minimatch': 2.0.29

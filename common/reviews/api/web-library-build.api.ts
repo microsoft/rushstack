@@ -5,14 +5,6 @@ export function _isJestEnabled(rootFolder: string): boolean;
 export function addSuppression(suppression: string | RegExp): void;
 
 // @public
-class ApiExtractorTask extends ApiExtractorBaseTask {
-  // (undocumented)
-  protected updateExtractorConfig(extractorConfig: IExtractorConfig): void;
-  // (undocumented)
-  protected updateExtractorOptions(extractorOptions: IExtractorOptions, entryPointFile: string): void;
-}
-
-// @public
 class CleanFlagTask extends CleanTask {
   constructor();
   // (undocumented)
@@ -372,7 +364,6 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: copyStaticAssets
 // WARNING: Unsupported export: jest
-// WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript
 // WARNING: Unsupported export: tslint
 // WARNING: Unsupported export: text
