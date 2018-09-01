@@ -6,7 +6,6 @@ import { TSLintTask } from './TSLintTask';
 import { TextTask } from './TextTask';
 import { RemoveTripleSlashReferenceTask } from './RemoveTripleSlashReferenceTask';
 import { IExecutable, parallel, serial } from '@microsoft/gulp-core-build';
-import { ApiExtractorTask } from './ApiExtractorTask';
 
 import {
   TscCmdTask,
@@ -16,7 +15,7 @@ import {
   TslintCmdTask,
   ITslintCmdTaskConfig
 } from './miniTasks/TslintCmdTask';
-import { ApiExtractorStandaloneTask } from './miniTasks/ApiExtractorStandaloneTask';
+import { ApiExtractorTask } from './miniTasks/ApiExtractorTask';
 
 export * from './TypeScriptConfiguration';
 export {
@@ -24,11 +23,9 @@ export {
   TscCmdTask,
   ITscCmdTaskConfig,
   TslintCmdTask,
-  ITslintCmdTaskConfig,
-  ApiExtractorTask
+  ITslintCmdTaskConfig
 };
 
-export const apiExtractor: ApiExtractorTask = new ApiExtractorTask();
 export const typescript: TypeScriptTask = new TypeScriptTask();
 export const tslint: TSLintTask = new TSLintTask();
 export const text: TextTask = new TextTask();
@@ -36,7 +33,7 @@ export const removeTripleSlash: RemoveTripleSlashReferenceTask = new RemoveTripl
 
 export const tscCmd: TscCmdTask = new TscCmdTask();
 export const tslintCmd: TslintCmdTask = new TslintCmdTask();
-export const apiExtractorStandalone: ApiExtractorStandaloneTask = new ApiExtractorStandaloneTask();
+export const apiExtractor: ApiExtractorTask = new ApiExtractorTask();
 
 // tslint:disable:export-name
 export default parallel(tslint, serial(typescript, removeTripleSlash)) as IExecutable;

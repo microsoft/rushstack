@@ -1,11 +1,3 @@
-// @public
-class ApiExtractorTask extends ApiExtractorBaseTask {
-  // (undocumented)
-  protected updateExtractorConfig(extractorConfig: IExtractorConfig): void;
-  // (undocumented)
-  protected updateExtractorOptions(extractorOptions: IExtractorOptions, entryPointFile: string): void;
-}
-
 // @public (undocumented)
 interface IFixupSettingsOptions {
   // (undocumented)
@@ -81,13 +73,12 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
   mergeConfig(config: ITypeScriptTaskConfig): void;
 }
 
-// WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: typescript
 // WARNING: Unsupported export: tslint
 // WARNING: Unsupported export: text
 // WARNING: Unsupported export: removeTripleSlash
 // WARNING: Unsupported export: tscCmd
 // WARNING: Unsupported export: tslintCmd
-// WARNING: Unsupported export: apiExtractorStandalone
+// WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: default
 // (No @packagedocumentation comment for this package)

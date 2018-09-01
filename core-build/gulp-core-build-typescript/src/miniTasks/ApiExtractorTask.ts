@@ -14,7 +14,7 @@ import { ApiExtractorBaseTask } from '../ApiExtractorBaseTask';
  * find the aliased exports of the project. An api-extractor.ts file is generated for the project in the temp folder.
  * @alpha
  */
-export class ApiExtractorStandaloneTask extends ApiExtractorBaseTask {
+export class ApiExtractorTask extends ApiExtractorBaseTask {
   protected updateExtractorConfig(extractorConfig: IExtractorConfig): void {
     extractorConfig.compiler = {
       configType: 'tsconfig',

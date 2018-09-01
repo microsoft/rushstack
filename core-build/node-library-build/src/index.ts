@@ -13,7 +13,7 @@ import {
   setConfig,
   IBuildConfig
 } from '@microsoft/gulp-core-build';
-import { tscCmd, tslintCmd, apiExtractorStandalone } from '@microsoft/gulp-core-build-typescript';
+import { tscCmd, tslintCmd, apiExtractor } from '@microsoft/gulp-core-build-typescript';
 import { instrument, mocha } from '@microsoft/gulp-core-build-mocha';
 
 export * from '@microsoft/gulp-core-build';
@@ -33,7 +33,7 @@ setConfig({
   shouldWarningsFailBuild: PRODUCTION
 });
 
-const buildSubtask: IExecutable = serial(preCopy, parallel(tslintCmd, tscCmd, copyStaticAssets), apiExtractorStandalone, postCopy);
+const buildSubtask: IExecutable = serial(preCopy, parallel(tslintCmd, tscCmd, copyStaticAssets), apiExtractor, postCopy);
 export const buildTasks: IExecutable = task('build', buildSubtask);
 export const testTasks: IExecutable = task('test', serial(buildSubtask, mocha, jest));
 export const defaultTasks: IExecutable = task('default', serial(buildSubtask, instrument, mocha, jest));
