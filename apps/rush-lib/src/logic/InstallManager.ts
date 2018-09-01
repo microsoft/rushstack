@@ -56,6 +56,10 @@ export interface CreateOptions { // tslint:disable-line:interface-name
 
 export interface IInstallManagerOptions {
   /**
+   * Whether the global "--debug" flag was specified.
+   */
+  debug: boolean;
+  /**
    * Whether or not Rush will automatically update the shrinkwrap file.
    * True for "rush update", false for "rush install".
    */
@@ -775,14 +779,14 @@ export class InstallManager {
           // is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
           // people would have different node_modules based on their system.
 
-          const installArgs: string[] = ['install', '--no-optional'];
+          const installArgs: string[] = [ 'install' ];
           this._pushConfigurationArgs(installArgs, options);
 
           console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
             + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
 
-          if (options.collectLogFile || options.networkConcurrency) {
-            // Show the full command-line when diagnostic options are specified
+          // If any diagnostic options were specified, then show the full command-line
+          if (options.debug || options.collectLogFile || options.networkConcurrency || options.debug) {
             console.log(os.EOL + colors.green('Invoking package manager: ')
               + FileSystem.getRealPath(packageManagerFilename) + ' ' + installArgs.join(' ') + os.EOL);
           }
@@ -952,6 +956,7 @@ export class InstallManager {
    */
   private _pushConfigurationArgs(args: string[], options: IInstallManagerOptions): void {
     if (this._rushConfiguration.packageManager === 'npm') {
+      args.push('--no-optional');
       args.push('--cache', this._rushConfiguration.npmCacheFolder);
       args.push('--tmp', this._rushConfiguration.npmTmpFolder);
 
@@ -959,6 +964,7 @@ export class InstallManager {
         args.push('--verbose');
       }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
+      args.push('--no-optional');
       args.push('--store', this._rushConfiguration.pnpmStoreFolder);
 
       // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
@@ -975,6 +981,16 @@ export class InstallManager {
       if (options.collectLogFile) {
         args.push('--reporter', 'ndjson');
       }
+
+      if (options.networkConcurrency) {
+        args.push('--network-concurrency', options.networkConcurrency.toString());
+      }
+    } else if (this._rushConfiguration.packageManager === 'yarn') {
+      args.push('--ignore-optional');
+      args.push('--link-folder', 'yarn-link');
+      args.push('--cache-folder', 'yarn-cache');
+
+      args.push('--non-interactive');
 
       if (options.networkConcurrency) {
         args.push('--network-concurrency', options.networkConcurrency.toString());
