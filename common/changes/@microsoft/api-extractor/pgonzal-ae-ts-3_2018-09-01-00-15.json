@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Upgrade api-extractor to internally use TypeScript 3.0.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "iclanton@users.noreply.github.com"
+}
