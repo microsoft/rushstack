@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler",
+      "comment": "Include an empty \"types\" array in tsconfig.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler",
+  "email": "iclanton@users.noreply.github.com"
+}
