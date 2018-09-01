@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build-typescript",
-      "comment": "Remove the legacy api-extractor task.",
+      "comment": "Replace the old api-extractor task with the new one that uses tsconfig.json instead of a runtime configuration.",
       "type": "major"
     }
   ],

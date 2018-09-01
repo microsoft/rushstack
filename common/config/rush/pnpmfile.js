@@ -30,7 +30,8 @@ module.exports = {
  */
 function readPackage(pkg) {
   // tslint-microsoft-contrib, tslint, and ts-jest have peerDependencies on typescript, but now we have two copies
-  //  in the repo so it doesn't know which one to pick
+  // in the repo so it doesn't know which one to pick
+  // See this issue: https://github.com/pnpm/pnpm/issues/1187
   if (pkg.name === 'tslint-microsoft-contrib' || pkg.name === 'tslint' || pkg.name === 'ts-jest') {
     pkg.dependencies['typescript'] = '~2.4.1';
     delete pkg.peerDependencies['typescript'];

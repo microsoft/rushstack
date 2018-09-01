@@ -15,7 +15,7 @@ import {
   TslintCmdTask,
   ITslintCmdTaskConfig
 } from './miniTasks/TslintCmdTask';
-import { ApiExtractorStandaloneTask } from './miniTasks/ApiExtractorStandaloneTask';
+import { ApiExtractorTask } from './miniTasks/ApiExtractorTask';
 
 export * from './TypeScriptConfiguration';
 export {
@@ -33,7 +33,7 @@ export const removeTripleSlash: RemoveTripleSlashReferenceTask = new RemoveTripl
 
 export const tscCmd: TscCmdTask = new TscCmdTask();
 export const tslintCmd: TslintCmdTask = new TslintCmdTask();
-export const apiExtractorStandalone: ApiExtractorStandaloneTask = new ApiExtractorStandaloneTask();
+export const apiExtractor: ApiExtractorTask = new ApiExtractorTask();
 
 // tslint:disable:export-name
 export default parallel(tslint, serial(typescript, removeTripleSlash)) as IExecutable;

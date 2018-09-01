@@ -370,7 +370,7 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
 // WARNING: Unsupported export: removeTripleSlash
 // WARNING: Unsupported export: tscCmd
 // WARNING: Unsupported export: tslintCmd
-// WARNING: Unsupported export: apiExtractorStandalone
+// WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: sass
 // WARNING: Unsupported export: karma
 // WARNING: Unsupported export: webpack

@@ -79,6 +79,6 @@ class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
 // WARNING: Unsupported export: removeTripleSlash
 // WARNING: Unsupported export: tscCmd
 // WARNING: Unsupported export: tslintCmd
-// WARNING: Unsupported export: apiExtractorStandalone
+// WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: default
 // (No @packagedocumentation comment for this package)

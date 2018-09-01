@@ -14,7 +14,7 @@ import {
   setConfig,
   getConfig
 } from '@microsoft/gulp-core-build';
-import { apiExtractorStandalone, tscCmd, tslintCmd, text } from '@microsoft/gulp-core-build-typescript';
+import { apiExtractor, tscCmd, tslintCmd, text } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
 import { karma } from '@microsoft/gulp-core-build-karma';
 import { webpack } from '@microsoft/gulp-core-build-webpack';
@@ -51,7 +51,7 @@ setConfig({
 export const compileTsTasks: IExecutable = parallel(tscCmd, text);
 export const buildTasks: IExecutable = task(
   'build',
-  serial(preCopy, sass, parallel(tslintCmd, compileTsTasks), apiExtractorStandalone, postCopy)
+  serial(preCopy, sass, parallel(tslintCmd, compileTsTasks), apiExtractor, postCopy)
 );
 export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 export const testTasks: IExecutable = task('test', serial(buildTasks, karma, jest));

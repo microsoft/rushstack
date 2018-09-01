@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/api-extractor",
       "comment": "Upgrade api-extractor to internally use TypeScript 3.0.",
-      "type": "major"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-extractor",
