@@ -97,7 +97,7 @@ A build task which processes scss files using SASS, runs them through `postcss`,
 
 ### [@microsoft/gulp-core-build-serve](./core-build/gulp-core-build-serve/README.md)
 
-A build task for testing/serving web content on the localhost, and live reloading it when things change.  This drives the `gulp serve' experience.
+A build task for testing/serving web content on the localhost, and live reloading it when things change.  This drives the `gulp serve` experience.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve)
 [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-serve.svg)](https://david-dm.org/Microsoft/gulp-core-build-serve)
