@@ -77,6 +77,7 @@ export interface IRushConfigurationJson {
   $schema: string;
   npmVersion?: string;
   pnpmVersion?: string;
+  yarnVersion?: string;
   rushVersion: string;
   repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
@@ -104,7 +105,7 @@ export interface IRushLinkJson {
  * This represents the available Package Manager tools as a string
  * @public
  */
-export type PackageManager = 'pnpm' | 'npm';
+export type PackageManager = 'pnpm' | 'npm' | 'yarn';
 
 /**
  * This represents the Rush configuration for a repository, based on the "rush.json"
@@ -695,28 +696,52 @@ export class RushConfiguration {
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
+    // TODO: Add an actual "packageManager" field in rush.json
+    const packageManagerFields: string[] = [];
+
     if (rushConfigurationJson.npmVersion) {
       this._packageManager = 'npm';
+      packageManagerFields.push('npmVersion');
+    }
+    if (rushConfigurationJson.pnpmVersion) {
+      this._packageManager = 'pnpm';
+      packageManagerFields.push('pnpmVersion');
+    }
+    if (rushConfigurationJson.yarnVersion) {
+      this._packageManager = 'yarn';
+      packageManagerFields.push('yarnVersion');
+    }
 
+    if (packageManagerFields.length === 0) {
+      throw new Error(`The rush.json configuration must specify one of: npmVersion, pnpmVersion, or yarnVersion`);
+    }
+
+    if (packageManagerFields.length > 1) {
+      throw new Error(`The rush.json configuration cannot specify both ${packageManagerFields[0]}`
+        + ` and ${packageManagerFields[1]} `);
+    }
+
+    if (this._packageManager === 'npm') {
       this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
       this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
 
-      this._packageManagerToolVersion = rushConfigurationJson.npmVersion;
+      this._packageManagerToolVersion = rushConfigurationJson.npmVersion!;
       this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
         'npm-local', 'node_modules', '.bin', 'npm'));
-
-    } else if (rushConfigurationJson.pnpmVersion) {
-      this._packageManager = 'pnpm';
-
+    } else if (this._packageManager === 'pnpm') {
       this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.pnpmShrinkwrapFilename);
       this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.pnpmShrinkwrapFilename);
 
-      this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion;
+      this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
       this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
         'pnpm-local', 'node_modules', '.bin', 'pnpm'));
-
     } else {
-      throw new Error(`Neither "npmVersion" nor "pnpmVersion" was defined in the rush configuration.`);
+      this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.yarnShrinkwrapFilename);
+      this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.yarnShrinkwrapFilename);
+
+      this._packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
+      this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
+        'yarn-local', 'node_modules', '.bin', 'yarn'));
     }
 
     /// From "C:\repo\common\temp\shrinkwrap.yaml" --> "C:\repo\common\temp\shrinkwrap-preinstall.yaml"
