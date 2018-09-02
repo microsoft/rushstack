@@ -22,7 +22,6 @@
     "gulp": "~3.9.1",
     "gulp-connect": "~5.5.0",
     "gulp-open": "~3.0.1",
-    "gulp-util": "~3.0.7",
     "node-forge": "~0.7.1",
     "sudo": "~1.0.3"
   },
@@ -32,7 +31,6 @@
     "@types/express": "4.11.0",
     "@types/express-serve-static-core": "4.11.0",
     "@types/gulp": "3.8.32",
-    "@types/gulp-util": "3.0.30",
     "@types/mime": "0.0.29",
     "@types/node-forge": "0.6.8",
     "@types/orchestrator": "0.0.30",
