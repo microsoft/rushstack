@@ -42,7 +42,6 @@ dependencies:
   '@types/bluebird': 3.5.3
   '@types/chai': 3.4.34
   '@types/chalk': 0.4.31
-  '@types/colors': 1.2.1
   '@types/express': 4.11.0
   '@types/express-serve-static-core': 4.11.0
   '@types/fs-extra': 5.0.1
@@ -533,13 +532,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-ox10JBprHtu5c8822XooloNKUfk=
-  /@types/colors/1.2.1:
-    dependencies:
-      colors: 1.2.5
-    deprecated: 'This is a stub types definition. colors provides its own type definitions, so you don''t need this installed.'
-    dev: false
-    resolution:
-      integrity: sha512-7jNkpfN2lVO07nJ1RWzyMnNhH/I5N9iWuMPx9pedptxJ4MODf8rRV0lbJi6RakQ4sKQk231Fw4e2W9n3D7gZ3w==
   /@types/connect/3.4.32:
     dependencies:
       '@types/node': 8.5.8
@@ -10666,14 +10658,13 @@ packages:
   'file:projects/rush-stack.tgz':
     dependencies:
       '@microsoft/node-library-build': 5.0.2
-      '@types/colors': 1.2.1
       '@types/node': 8.5.8
       colors: 1.2.5
       gulp: 3.9.1
     dev: false
     name: '@rush-temp/rush-stack'
     resolution:
-      integrity: sha512-urqWokOPw3QaHNnGmXvlk2MUXVEqEvg5rsL+A4D+T/qcZ5vQ2PuR0/iGQ1CFSn4xm/mG/IamvtE3WnAuGGnzBQ==
+      integrity: sha512-sqKJQblWlFwG0nsOb4YyR6S4UdRd8khoR9QlSx3mFJh3482eyjO3r1VL7WRll/xQLb2yCKkaBfbXc2rUNNjxkA==
       tarball: 'file:projects/rush-stack.tgz'
     version: 0.0.0
   'file:projects/rush.tgz':
@@ -10691,7 +10682,7 @@ packages:
     dev: false
     name: '@rush-temp/rush'
     resolution:
-      integrity: sha512-q/ccaqmsZRvCrPN2zfqYIlGTmZUdU0ko9bJKabmSWJ1ZAAJwueetX2pHRKMUJXZ7gNdstPSr8YR0wS6lJ5N6aw==
+      integrity: sha512-RFflXIwl4Ctcst0M9LLc5FlG/6BDTPgPYYDq4jOniRGsqZ3T6HLjov+vGYICE2Ft81/6AdfKC9h4fEJMCKNXTA==
       tarball: 'file:projects/rush.tgz'
     version: 0.0.0
   'file:projects/rushell.tgz':
@@ -10828,7 +10819,6 @@ specifiers:
   '@types/bluebird': 3.5.3
   '@types/chai': 3.4.34
   '@types/chalk': 0.4.31
-  '@types/colors': 1.2.1
   '@types/express': 4.11.0
   '@types/express-serve-static-core': 4.11.0
   '@types/fs-extra': 5.0.1
