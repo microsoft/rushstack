@@ -9,7 +9,8 @@
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "types": []
   },
   "include": [
     "../../../../src/**/*.ts",
