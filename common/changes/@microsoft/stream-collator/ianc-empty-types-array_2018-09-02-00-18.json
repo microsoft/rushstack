@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/stream-collator",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/stream-collator",
+  "email": "iclanton@users.noreply.github.com"
+}
