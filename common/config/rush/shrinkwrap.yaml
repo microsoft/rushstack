@@ -10358,7 +10358,7 @@ packages:
     dev: false
     name: '@rush-temp/gulp-core-build-serve'
     resolution:
-      integrity: sha512-NrbYvqZnCkJfwDQK8Ws/5mDvskKrA4v3bx63/DxxsauRMKQ2gr1v2tkLhtNs4ylJl1uTrO2eoGnzhM2GvAMMYg==
+      integrity: sha512-747NpsptM2Eo0SyF4Ph+jk8Zb+tRLdAh6Ay7l3VOrJAV6e86jC/6664u1EC2RXDB7rVJLcCp2sxfdb+7cr5L0Q==
       tarball: 'file:projects/gulp-core-build-serve.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-typescript.tgz':
