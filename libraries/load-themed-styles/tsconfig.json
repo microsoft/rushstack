@@ -1,6 +1,9 @@
 {
   "extends": "./node_modules/@microsoft/rush-stack-compiler/includes/tsconfig-web.json",
   "compilerOptions": {
-    "module": "commonjs"
+    "module": "commonjs",
+    "types": [
+      "webpack-env"
+    ]
   }
 }
