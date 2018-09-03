@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.11.0",
+      "tag": "@microsoft/api-extractor_v5.11.0",
+      "date": "Mon, 03 Sep 2018 16:04:45 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade api-extractor to internally use TypeScript 3.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.10.8",
       "tag": "@microsoft/api-extractor_v5.10.8",
       "date": "Wed, 29 Aug 2018 06:36:50 GMT",

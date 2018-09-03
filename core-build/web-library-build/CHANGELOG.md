@@ -1,6 +1,13 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Fri, 31 Aug 2018 00:11:01 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Sep 2018 16:04:46 GMT and should not be manually modified.
+
+## 5.1.0
+Mon, 03 Sep 2018 16:04:46 GMT
+
+### Minor changes
+
+- Update the way api-extractor is invoked.
 
 ## 5.0.8
 Fri, 31 Aug 2018 00:11:01 GMT

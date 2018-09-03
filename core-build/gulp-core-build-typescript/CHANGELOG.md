@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 30 Aug 2018 22:47:34 GMT and should not be manually modified.
+This log was last generated on Mon, 03 Sep 2018 16:04:45 GMT and should not be manually modified.
+
+## 5.0.0
+Mon, 03 Sep 2018 16:04:45 GMT
+
+### Breaking changes
+
+- Replace the old api-extractor task with the new one that uses tsconfig.json instead of a runtime configuration.
 
 ## 4.11.12
 Thu, 30 Aug 2018 22:47:34 GMT
