@@ -2,6 +2,23 @@
   "name": "@microsoft/rush-stack-compiler",
   "entries": [
     {
+      "version": "0.1.2",
+      "tag": "@microsoft/rush-stack-compiler_v0.1.2",
+      "date": "Mon, 03 Sep 2018 16:04:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include an empty \"types\" array in tsconfig."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.10.8` to `5.11.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@microsoft/rush-stack-compiler_v0.1.1",
       "date": "Thu, 30 Aug 2018 19:23:16 GMT",

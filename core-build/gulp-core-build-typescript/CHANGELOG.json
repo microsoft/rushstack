@@ -2,6 +2,29 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "5.0.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v5.0.0",
+      "date": "Mon, 03 Sep 2018 16:04:45 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Replace the old api-extractor task with the new one that uses tsconfig.json instead of a runtime configuration."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.10.8` to `5.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.15` to `3.8.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.1` to `0.1.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.11.12",
       "tag": "@microsoft/gulp-core-build-typescript_v4.11.12",
       "date": "Thu, 30 Aug 2018 22:47:34 GMT",
