@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler
 
-This log was last generated on Mon, 03 Sep 2018 16:04:46 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Sep 2018 21:34:10 GMT and should not be manually modified.
+
+## 0.1.3
+Tue, 04 Sep 2018 21:34:10 GMT
+
+### Patches
+
+- Update the tsconfig to include sources in sourcemaps.
 
 ## 0.1.2
 Mon, 03 Sep 2018 16:04:46 GMT
