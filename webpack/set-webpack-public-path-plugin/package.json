@@ -1,11 +1,14 @@
 {
   "name": "@microsoft/set-webpack-public-path-plugin",
-  "version": "2.1.26",
+  "version": "2.1.28",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "repository": "github:microsoft/web-build-tools",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/webpack/set-webpack-public-path-plugin"
+  },
   "scripts": {
     "build": "gulp test --clean"
   },
@@ -17,13 +20,13 @@
     "@types/tapable": "1.0.2"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.1.2",
+    "@microsoft/rush-stack-compiler": "0.1.4",
     "@types/lodash": "4.14.116",
     "@types/mocha": "5.2.5",
     "@types/uglify-js": "2.6.29",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "^5.2.0",
-    "@microsoft/node-library-build": "5.0.5"
+    "@microsoft/node-library-build": "5.0.7"
   }
 }

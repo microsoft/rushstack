@@ -15,7 +15,7 @@
   "preferGlobal": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/rush"
   },
   "engines": {
     "node": ">=5.6.0"
@@ -31,14 +31,14 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.0.0",
+    "@microsoft/node-core-library": "3.0.1",
     "@microsoft/rush-lib": "5.0.6",
     "colors": "~1.2.1",
     "semver": "~5.3.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.1.2",
-    "@microsoft/node-library-build": "5.0.5",
+    "@microsoft/rush-stack-compiler": "0.1.4",
+    "@microsoft/node-library-build": "5.0.7",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/node": "8.5.8",

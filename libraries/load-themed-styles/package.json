@@ -1,10 +1,10 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "1.8.5",
+  "version": "1.8.7",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/Microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/load-themed-styles"
   },
   "scripts": {
     "build": "gulp --clean"
@@ -14,12 +14,12 @@
   "keywords": [],
   "dependencies": {},
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.1.2",
+    "@microsoft/rush-stack-compiler": "0.1.4",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/webpack-env": "1.13.0",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "5.0.5"
+    "@microsoft/node-library-build": "5.0.7"
   }
 }

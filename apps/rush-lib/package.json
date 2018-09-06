@@ -4,7 +4,7 @@
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/rush-lib"
   },
   "engines": {
     "node": ">=5.6.0"
@@ -21,10 +21,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.0.0",
-    "@microsoft/package-deps-hash": "2.2.69",
-    "@microsoft/stream-collator": "2.2.69",
-    "@microsoft/ts-command-line": "4.2.1",
+    "@microsoft/node-core-library": "3.0.1",
+    "@microsoft/package-deps-hash": "2.2.71",
+    "@microsoft/stream-collator": "2.2.71",
+    "@microsoft/ts-command-line": "4.2.2",
     "@pnpm/link-bins": "~1.0.1",
     "@pnpm/logger": "~1.0.1",
     "builtins": "~1.0.3",
@@ -49,8 +49,8 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.1.2",
-    "@microsoft/node-library-build": "5.0.5",
+    "@microsoft/rush-stack-compiler": "0.1.4",
+    "@microsoft/node-library-build": "5.0.7",
     "@types/node": "8.5.8",
     "@types/node-fetch": "1.6.9",
     "@types/tar": "4.0.0",
