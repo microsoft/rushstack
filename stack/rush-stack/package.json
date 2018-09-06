@@ -15,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/stack/rush-stack"
   },
   "main": "lib/start.js",
   "bin": {

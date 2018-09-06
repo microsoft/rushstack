@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Update \"repository\" field in package.json",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "pgonzal@users.noreply.github.com"
+}

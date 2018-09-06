@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack",
+      "comment": "Update \"repository\" field in package.json",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack",
+  "email": "pgonzal@users.noreply.github.com"
+}
