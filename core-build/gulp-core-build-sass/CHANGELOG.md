@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Thu, 06 Sep 2018 01:25:26 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Sep 2018 21:04:43 GMT and should not be manually modified.
+
+## 4.4.0
+Thu, 06 Sep 2018 21:04:43 GMT
+
+### Minor changes
+
+- Upgrade PostCSS related packages to newest versions.
 
 ## 4.3.54
 Thu, 06 Sep 2018 01:25:26 GMT

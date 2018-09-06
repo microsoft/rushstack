@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.4.0",
+      "tag": "@microsoft/gulp-core-build-sass_v4.4.0",
+      "date": "Thu, 06 Sep 2018 21:04:43 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade PostCSS related packages to newest versions."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.54",
       "tag": "@microsoft/gulp-core-build-sass_v4.3.54",
       "date": "Thu, 06 Sep 2018 01:25:26 GMT",
