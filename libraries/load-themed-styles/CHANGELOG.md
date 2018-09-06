@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 04 Sep 2018 21:34:10 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Sep 2018 01:25:26 GMT and should not be manually modified.
+
+## 1.8.7
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
 
 ## 1.8.6
 Tue, 04 Sep 2018 21:34:10 GMT

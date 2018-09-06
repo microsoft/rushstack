@@ -1,6 +1,13 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Tue, 04 Sep 2018 21:34:10 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Sep 2018 01:25:26 GMT and should not be manually modified.
+
+## 5.1.2
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
 
 ## 5.1.1
 Tue, 04 Sep 2018 21:34:10 GMT
