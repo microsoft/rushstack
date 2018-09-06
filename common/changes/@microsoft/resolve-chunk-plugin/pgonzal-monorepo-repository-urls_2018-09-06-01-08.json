@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/resolve-chunk-plugin",
+      "comment": "Update \"repository\" field in package.json",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/resolve-chunk-plugin",
+  "email": "pgonzal@users.noreply.github.com"
+}

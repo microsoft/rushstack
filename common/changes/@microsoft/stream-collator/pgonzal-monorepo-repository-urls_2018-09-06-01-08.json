@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/stream-collator",
+      "comment": "Update \"repository\" field in package.json",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/stream-collator",
+  "email": "pgonzal@users.noreply.github.com"
+}
