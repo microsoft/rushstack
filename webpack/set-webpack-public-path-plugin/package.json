@@ -5,7 +5,10 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
-  "repository": "github:microsoft/web-build-tools",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/web-build-tools/webpack/set-webpack-public-path-plugin"
+  },
   "scripts": {
     "build": "gulp test --clean"
   },

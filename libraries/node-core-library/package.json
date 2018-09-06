@@ -8,6 +8,9 @@
     "tsdocFlavor": "AEDoc"
   },
   "license": "MIT",
+  "repository": {
+    "url": "https://github.com/Microsoft/web-build-tools/libraries/node-core-library"
+  },
   "scripts": {
     "build": "gulp test --clean"
   },

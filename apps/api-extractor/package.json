@@ -15,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/microsoft/web-build-tools/apps/api-extractor"
   },
   "homepage": "http://aka.ms/extractor",
   "main": "lib/index.js",

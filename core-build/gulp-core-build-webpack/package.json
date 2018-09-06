@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/microsoft/web-build-tools/core-build/gulp-core-build-webpack"
   },
   "scripts": {
     "build": "gulp --clean"
