@@ -31,6 +31,8 @@ export abstract class BaseShrinkwrapFile {
   /**
    * Returns true if the shrinkwrap file includes a top-level package that would satisfy the specified
    * package name and SemVer version range
+   *
+   * @virtual
    */
   public hasCompatibleTopLevelDependency(dependencyName: string, versionRange: string): boolean {
     const dependencyVersion: string | undefined = this.getTopLevelDependencyVersion(dependencyName);
@@ -57,6 +59,8 @@ export abstract class BaseShrinkwrapFile {
    *
    * In this example, hasCompatibleDependency("lib-b", ">= 1.1.0", "temp-project") would fail
    * because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
+   *
+   * @virtual
    */
   public tryEnsureCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName: string): boolean {
     const dependencyVersion: string | undefined =

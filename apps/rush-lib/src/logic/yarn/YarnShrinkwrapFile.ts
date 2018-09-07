@@ -66,24 +66,26 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   private static packageNameAndSemVerRegExp: RegExp = /^(@?[^@\s]+)(?:@(.*))?$/;
 
   private _shrinkwrapJson: IYarnShrinkwrapJson;
+  private _shrinkwrapString: string;
 
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
+    let shrinkwrapString: string;
     let shrinkwrapJson: lockfile.ParseResult;
     try {
       if (!FileSystem.exists(shrinkwrapFilename)) {
         return undefined; // file does not exist
       }
 
-      const fileContent: string = FileSystem.readFile(shrinkwrapFilename);
-      shrinkwrapJson = lockfile.parse(fileContent);
+      shrinkwrapString = FileSystem.readFile(shrinkwrapFilename);
+      shrinkwrapJson = lockfile.parse(shrinkwrapString);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapFilename}":` + os.EOL + `  ${error.message}`);
     }
 
-    return new YarnShrinkwrapFile(shrinkwrapJson.object as IYarnShrinkwrapJson);
+    return new YarnShrinkwrapFile(shrinkwrapJson.object as IYarnShrinkwrapJson, shrinkwrapString);
   }
 
-  private static _parsePackageNameAndSemVer(packageNameAndSemVer: string): IPackageNameAndSemVer {
+  private static _decodePackageNameAndSemVer(packageNameAndSemVer: string): IPackageNameAndSemVer {
     const result: RegExpExecArray | null = YarnShrinkwrapFile.packageNameAndSemVerRegExp.exec(packageNameAndSemVer);
     if (!result) {
       // Sanity check -- this should never happen
@@ -96,13 +98,17 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     };
   }
 
-  public getTempProjectNames(): ReadonlyArray<string> {
+  private static _encodePackageNameAndSemVer(packageNameAndSemVer: IPackageNameAndSemVer): string {
+    return packageNameAndSemVer.packageName + '@' + packageNameAndSemVer.semVerRange;
+  }
+
+  public getTempProjectNames(): ReadonlyArray<string> { // abstract
     const seenEntries: Set<string> = new Set();
     const result: string[] = [];
 
     for (const key of Object.keys(this._shrinkwrapJson)) {
       // Example key:
-      const packageNameAndSemVer: IPackageNameAndSemVer = YarnShrinkwrapFile._parsePackageNameAndSemVer(key);
+      const packageNameAndSemVer: IPackageNameAndSemVer = YarnShrinkwrapFile._decodePackageNameAndSemVer(key);
 
       // If it starts with @rush-temp, then include it:
       if (PackageName.getScope(packageNameAndSemVer.packageName) === RushConstants.rushTempNpmScope) {
@@ -127,28 +133,46 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     return result;
   }
 
-  protected serialize(): string {
-    throw new Error('todo');
+  /** @override */
+  public hasCompatibleTopLevelDependency(dependencyName: string, versionRange: string): boolean {
+    // It seems like we should normalize the key somehow, but Yarn apparently does not
+    // do any normalization.
+    const key: string = YarnShrinkwrapFile._encodePackageNameAndSemVer({
+      packageName: dependencyName,
+      semVerRange: versionRange
+    });
+
+    // Check whether this exact key appears in the shrinkwrap file
+    return Object.hasOwnProperty.call(this._shrinkwrapJson, key);
   }
 
-  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
-    throw new Error('todo');
+  /** @override */
+  public tryEnsureCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName: string): boolean {
+    return this.hasCompatibleTopLevelDependency(dependencyName, versionRange);
   }
 
-  /**
-   * @param dependencyName the name of the dependency to get a version for
-   * @param tempProjectName the name of the temp project to check for this dependency
-   * @param versionRange Not used, just exists to satisfy abstract API contract
-   */
+  /** @override */
+  protected serialize(): string { // abstract
+    // For now, we don't attempt to modify Yarn's shrinkwrap file in any way
+    return this._shrinkwrapString;
+  }
+
+  /** @override */
+  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined { // abstract
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
   protected tryEnsureDependencyVersion(dependencyName: string,
     tempProjectName: string,
-    versionRange: string): string | undefined {
+    versionRange: string): string | undefined { // abstract
 
-    throw new Error('todo');
+    throw new Error('Not implemented');
   }
 
-  private constructor(shrinkwrapJson: IYarnShrinkwrapJson) {
+  private constructor(shrinkwrapJson: IYarnShrinkwrapJson, shrinkwrapString: string) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
+    this._shrinkwrapString = shrinkwrapString;
   }
 }
