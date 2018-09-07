@@ -1077,7 +1077,7 @@ export class InstallManager {
     for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {
       if (!this._rushConfiguration.findProjectByTempName(tempProjectName)) {
         console.log(os.EOL + colors.yellow(Utilities.wrapWords(
-          `Your NPM shrinkwrap file references a project "${tempProjectName}" which no longer exists.`))
+          `Your shrinkwrap file references a project "${tempProjectName}" which no longer exists.`))
           + os.EOL);
         return true;  // found one
       }

@@ -14,7 +14,7 @@ const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
   sortKeys: true
 };
 
-interface IShrinkwrapDependencyJson {
+interface IPnpmShrinkwrapDependencyYaml {
   /** Information about the resolved package */
   resolution: {
     /** The hash of the tarball, to ensure archive integrity */
@@ -57,11 +57,11 @@ interface IShrinkwrapDependencyJson {
  *    }
  *  }
  */
-interface IShrinkwrapYaml {
+interface IPnpmShrinkwrapYaml {
   /** The list of resolved version numbers for direct dependencies */
   dependencies: { [dependency: string]: string };
   /** The description of the solved graph */
-  packages: { [dependencyVersion: string]: IShrinkwrapDependencyJson };
+  packages: { [dependencyVersion: string]: IPnpmShrinkwrapDependencyYaml };
   /** URL of the registry which was used */
   registry: string;
   /** The list of specifiers used to resolve direct dependency versions */
@@ -105,7 +105,7 @@ export function extractVersionFromPnpmVersionSpecifier(version: string): string 
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
-  private _shrinkwrapJson: IShrinkwrapYaml;
+  private _shrinkwrapJson: IPnpmShrinkwrapYaml;
 
   public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
     try {
@@ -115,7 +115,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
-      const parsedData: IShrinkwrapYaml = yaml.safeLoad(FileSystem.readFile(shrinkwrapYamlFilename).toString());
+      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(FileSystem.readFile(shrinkwrapYamlFilename).toString());
 
       return new PnpmShrinkwrapFile(parsedData);
     } catch (error) {
@@ -159,7 +159,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // linked to.
 
     const tempProjectDependencyKey: string = this._getTempProjectKey(tempProjectName);
-    const packageDescription: IShrinkwrapDependencyJson | undefined =
+    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
       this._getPackageDescription(tempProjectDependencyKey);
     if (!packageDescription) {
       return undefined;
@@ -203,7 +203,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return super.checkValidVersionRange(dependencyVersion.split('/').pop()!, versionRange);
   }
 
-  private constructor(shrinkwrapJson: IShrinkwrapYaml) {
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
 
@@ -227,7 +227,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   private _getDependencyVersion(dependencyName: string, tempProjectName: string): string | undefined {
     const tempProjectDependencyKey: string = this._getTempProjectKey(tempProjectName);
-    const packageDescription: IShrinkwrapDependencyJson | undefined =
+    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
       this._getPackageDescription(tempProjectDependencyKey);
     if (!packageDescription) {
       return undefined;
@@ -243,8 +243,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /**
    * Gets the package description for a tempProject from the shrinkwrap file.
    */
-  private _getPackageDescription(tempProjectDependencyKey: string): IShrinkwrapDependencyJson | undefined {
-    const packageDescription: IShrinkwrapDependencyJson | undefined
+  private _getPackageDescription(tempProjectDependencyKey: string): IPnpmShrinkwrapDependencyYaml | undefined {
+    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined
       = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.packages, tempProjectDependencyKey);
 
     if (!packageDescription || !packageDescription.dependencies) {

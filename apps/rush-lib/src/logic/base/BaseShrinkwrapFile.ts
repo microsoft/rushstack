@@ -32,7 +32,6 @@ export abstract class BaseShrinkwrapFile {
    * Returns true if the shrinkwrap file includes a top-level package that would satisfy the specified
    * package name and SemVer version range
    */
-
   public hasCompatibleTopLevelDependency(dependencyName: string, versionRange: string): boolean {
     const dependencyVersion: string | undefined = this.getTopLevelDependencyVersion(dependencyName);
     if (!dependencyVersion) {
