@@ -12,7 +12,8 @@ export {
 
 export {
   RushConfiguration,
-  PackageManager
+  PackageManager,
+  PnpmOptionsConfiguration
 } from './api/RushConfiguration';
 
 export {

@@ -70,6 +70,13 @@ export interface IRushRepositoryJson {
 }
 
 /**
+ * Part of IRushConfigurationJson.
+ */
+export interface IPnpmOptionsJson {
+  strictPeerDependencies?: boolean;
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -89,6 +96,7 @@ export interface IRushConfigurationJson {
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
+  pnpmOptions?: IPnpmOptionsJson;
 }
 
 /**
@@ -99,6 +107,33 @@ export interface IRushLinkJson {
   localLinks: {
     [name: string]: string[]
   };
+}
+
+/**
+ * Options that are only used when the PNPM package manager is selected.
+ *
+ * @remarks
+ * It is valid to define these options in rush.json even if the PNPM package manager
+ * is not being used.
+ *
+ * @public
+ */
+export class PnpmOptionsConfiguration {
+  /**
+   * If true, then Rush will add the "--strict-peer-dependencies" option when invoking PNPM.
+   * This causes "rush install" to fail if there are unsatisfied peer dependencies, which is
+   * an invalid state that can cause build failures or incompatible dependency versions.
+   * (For historical reasons, JavaScript package managers generally do not treat this invalid state
+   * as an error.)
+   *
+   * The default value is false.  (For now.)
+   */
+  public readonly strictPeerDependencies: boolean;
+
+  /** @internal */
+  public constructor(json: IPnpmOptionsJson) {
+    this.strictPeerDependencies = !!json.strictPeerDependencies;
+  }
 }
 
 /**
@@ -149,6 +184,8 @@ export class RushConfiguration {
 
   // Repository info
   private _repositoryUrl: string;
+
+  private _pnpmOptions: PnpmOptionsConfiguration;
 
   // Rush hooks
   private _eventHooks: EventHooks;
@@ -614,6 +651,13 @@ export class RushConfiguration {
   }
 
   /**
+   * {@inheritdoc PnpmOptionsConfiguration}
+   */
+  public get pnpmOptions(): PnpmOptionsConfiguration {
+    return this._pnpmOptions;
+  }
+
+  /**
    * Settings from the common-versions.json config file.
    * @remarks
    * If the common-versions.json file is missing, this property will not be undefined.
@@ -727,6 +771,8 @@ export class RushConfiguration {
     this._rushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
+
+    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || { });
 
     // TODO: Add an actual "packageManager" field in rush.json
     const packageManagerFields: string[] = [];
