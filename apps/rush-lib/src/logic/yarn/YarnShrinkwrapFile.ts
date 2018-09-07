@@ -11,7 +11,7 @@ interface IPackageNameAndSemVer {
   semVerRange: string;
 }
 
-interface IYarnShrinkwrapSemVerResolution {
+interface IYarnShrinkwrapEntry {
   /**
    * The specific version that was chosen for this entry (i.e. package name and SemVer range)/
    *
@@ -51,7 +51,7 @@ interface IYarnShrinkwrapJson {
    *
    * The value records how the SemVer range was solved.
    */
-  [packageNameAndSemVer: string]: IYarnShrinkwrapSemVerResolution;
+  [packageNameAndSemVer: string]: IYarnShrinkwrapEntry;
 }
 
 /**
@@ -66,7 +66,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   private static packageNameAndSemVerRegExp: RegExp = /^(@?[^@\s]+)(?:@(.*))?$/;
 
   private _shrinkwrapJson: IYarnShrinkwrapJson;
-  private _shrinkwrapString: string;
+  private _tempProjectNames: string[];
 
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
     let shrinkwrapString: string;
@@ -82,7 +82,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       throw new Error(`Error reading "${shrinkwrapFilename}":` + os.EOL + `  ${error.message}`);
     }
 
-    return new YarnShrinkwrapFile(shrinkwrapJson.object as IYarnShrinkwrapJson, shrinkwrapString);
+    return new YarnShrinkwrapFile(shrinkwrapJson.object as IYarnShrinkwrapJson);
   }
 
   private static _decodePackageNameAndSemVer(packageNameAndSemVer: string): IPackageNameAndSemVer {
@@ -103,34 +103,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public getTempProjectNames(): ReadonlyArray<string> { // abstract
-    const seenEntries: Set<string> = new Set();
-    const result: string[] = [];
-
-    for (const key of Object.keys(this._shrinkwrapJson)) {
-      // Example key:
-      const packageNameAndSemVer: IPackageNameAndSemVer = YarnShrinkwrapFile._decodePackageNameAndSemVer(key);
-
-      // If it starts with @rush-temp, then include it:
-      if (PackageName.getScope(packageNameAndSemVer.packageName) === RushConstants.rushTempNpmScope) {
-        if (!/^file:/i.test(packageNameAndSemVer.semVerRange)) {
-          // Sanity check to make sure this is a real package.
-          // (Nobody should ever have an actual dependency on an "@rush-temp/" package.
-          throw new Error('Unexpected package/semver expression found in the Yarn shrinkwrap file: '
-            + JSON.stringify(key));
-        }
-
-        if (!seenEntries.add(packageNameAndSemVer.packageName)) {
-          // Sanity check -- this should never happen
-          throw new Error('Duplicate @rush-temp package found in the Yarn shrinkwrap file: '
-            + JSON.stringify(key));
-        }
-
-        result.push(packageNameAndSemVer.packageName);
-      }
-    }
-
-    result.sort();  // make the result deterministic
-    return result;
+    return this._tempProjectNames;
   }
 
   /** @override */
@@ -153,8 +126,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
   /** @override */
   protected serialize(): string { // abstract
-    // For now, we don't attempt to modify Yarn's shrinkwrap file in any way
-    return this._shrinkwrapString;
+    return lockfile.stringify(this._shrinkwrapJson);
   }
 
   /** @override */
@@ -170,9 +142,48 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     throw new Error('Not implemented');
   }
 
-  private constructor(shrinkwrapJson: IYarnShrinkwrapJson, shrinkwrapString: string) {
+  private constructor(shrinkwrapJson: IYarnShrinkwrapJson) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
-    this._shrinkwrapString = shrinkwrapString;
+    this._tempProjectNames = [];
+
+    const seenEntries: Set<string> = new Set();
+
+    for (const key of Object.keys(this._shrinkwrapJson)) {
+      // Example key:
+      const packageNameAndSemVer: IPackageNameAndSemVer = YarnShrinkwrapFile._decodePackageNameAndSemVer(key);
+
+      // If it starts with @rush-temp, then include it:
+      if (PackageName.getScope(packageNameAndSemVer.packageName) === RushConstants.rushTempNpmScope) {
+        if (!/^file:/i.test(packageNameAndSemVer.semVerRange)) {
+          // Sanity check to make sure this is a real package.
+          // (Nobody should ever have an actual dependency on an "@rush-temp/" package.
+          throw new Error('Unexpected package/semver expression found in the Yarn shrinkwrap file: '
+            + JSON.stringify(key));
+        }
+
+        if (!seenEntries.add(packageNameAndSemVer.packageName)) {
+          // Sanity check -- this should never happen
+          throw new Error('Duplicate @rush-temp package found in the Yarn shrinkwrap file: '
+            + JSON.stringify(key));
+        }
+
+        this._tempProjectNames.push(packageNameAndSemVer.packageName);
+
+        const entry: IYarnShrinkwrapEntry = this._shrinkwrapJson[key];
+
+        // Yarn wrongly performs integrity checking for tarball references.
+        // So we need to transform this:
+        //   "file:./projects/my-project.tgz#80cefe05fd715e65219d1ed481209dc4023408aa"
+        // ..to this:
+        //   "file:./projects/my-project.tgz"
+        const indexOfHash: number = entry.resolved.indexOf('#');
+        if (indexOfHash >= 0) {
+          entry.resolved = entry.resolved.substring(0, indexOfHash);
+        }
+      }
+    }
+
+    this._tempProjectNames.sort();  // make the result deterministic
   }
 }
