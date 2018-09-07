@@ -761,6 +761,18 @@ export class InstallManager {
             }
           }
 
+          if (this._rushConfiguration.packageManager === 'yarn') {
+            // Yarn does not correctly detect changes to a tarball, so we need to forcibly clear its cache
+            const yarnRushTempCacheFolder: string = path.join(
+              this._rushConfiguration.commonTempFolder,
+              'yarn-cache', 'v2', 'npm-@rush-temp'
+            );
+            if (FileSystem.exists(yarnRushTempCacheFolder)) {
+              console.log('Deleting ' + yarnRushTempCacheFolder);
+              Utilities.dangerouslyDeletePath(yarnRushTempCacheFolder);
+            }
+          }
+
           // Run "npm install" in the common folder
 
           // NOTE:
