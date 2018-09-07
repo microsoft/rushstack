@@ -3,7 +3,7 @@ import * as lockfile from '@yarnpkg/lockfile';
 import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
-import { FileSystem, PackageName } from '@microsoft/node-core-library';
+import { FileSystem, PackageName, IParsedPackageNameOrError } from '@microsoft/node-core-library';
 import { RushConstants } from '../RushConstants';
 
 interface IPackageNameAndSemVer {
@@ -92,8 +92,17 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       throw new Error('Unable to parse package/semver expression in the Yarn shrinkwrap file: '
         + JSON.stringify(packageNameAndSemVer));
     }
+
+    const packageName: string = result[1] || '';
+    const parsedPackageName: IParsedPackageNameOrError = PackageName.tryParse(packageName);
+    if (parsedPackageName.error) {
+      // Sanity check -- this should never happen
+      throw new Error('Invalid package name the Yarn shrinkwrap file: '
+        + JSON.stringify(packageNameAndSemVer) + '\n' + parsedPackageName.error);
+    }
+
     return {
-      packageName: result[1] || '',
+      packageName,
       semVerRange: result[2] || ''
     };
   }
