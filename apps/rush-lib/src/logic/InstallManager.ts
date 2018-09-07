@@ -39,7 +39,7 @@ import { Utilities } from '../utilities/Utilities';
 import { Rush } from '../api/Rush';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 
-const MAX_INSTALL_ATTEMPTS: number = 5;
+const MAX_INSTALL_ATTEMPTS: number = 2;
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
