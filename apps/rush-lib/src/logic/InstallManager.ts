@@ -39,7 +39,7 @@ import { Utilities } from '../utilities/Utilities';
 import { Rush } from '../api/Rush';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 
-const MAX_INSTALL_ATTEMPTS: number = 5;
+const MAX_INSTALL_ATTEMPTS: number = 2;
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
@@ -990,7 +990,7 @@ export class InstallManager {
 
       // Ensure that Rush's tarball dependencies get synchronized properly with the shrinkwrap.yaml file.
       // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
-      args.push('--prefer-frozen-shrinkwrap', 'false');
+      args.push('--no-prefer-frozen-shrinkwrap');
 
       if (options.collectLogFile) {
         args.push('--reporter', 'ndjson');
@@ -998,6 +998,10 @@ export class InstallManager {
 
       if (options.networkConcurrency) {
         args.push('--network-concurrency', options.networkConcurrency.toString());
+      }
+
+      if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
+        args.push('--strict-peer-dependencies');
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--ignore-optional');
