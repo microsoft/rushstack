@@ -171,6 +171,7 @@ class RushConfiguration {
   readonly rushJsonFolder: string;
   readonly rushLinkJsonFilename: string;
   readonly rushUserFolder: string;
+  readonly shrinkwrapFilePhrase: string;
   // @beta
   readonly telemetryEnabled: boolean;
   readonly tempShrinkwrapFilename: string;
@@ -178,6 +179,7 @@ class RushConfiguration {
   static tryFindRushJsonLocation(verbose?: boolean): string | undefined;
   // @beta (undocumented)
   readonly versionPolicyConfiguration: VersionPolicyConfiguration;
+  readonly yarnCacheFolder: string;
 }
 
 // @public

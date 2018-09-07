@@ -9,21 +9,21 @@ import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
 
-interface IShrinkwrapDependencyJson {
+interface INpmShrinkwrapDependencyJson {
   version: string;
   from: string;
   resolved: string;
-  dependencies: { [dependency: string]: IShrinkwrapDependencyJson };
+  dependencies: { [dependency: string]: INpmShrinkwrapDependencyJson };
 }
 
-interface IShrinkwrapJson {
+interface INpmShrinkwrapJson {
   name: string;
   version: string;
-  dependencies: { [dependency: string]: IShrinkwrapDependencyJson };
+  dependencies: { [dependency: string]: INpmShrinkwrapDependencyJson };
 }
 
 export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
-  private _shrinkwrapJson: IShrinkwrapJson;
+  private _shrinkwrapJson: INpmShrinkwrapJson;
 
   public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrapFile | undefined {
     let data: string | undefined = undefined;
@@ -55,7 +55,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
      // First, check under tempProjectName, as this is the first place "rush link" looks.
-    const dependencyJson: IShrinkwrapDependencyJson | undefined =
+    const dependencyJson: INpmShrinkwrapDependencyJson | undefined =
       NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
 
      if (!dependencyJson) {
@@ -75,9 +75,9 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     versionRange: string): string | undefined {
 
     // First, check under tempProjectName, as this is the first place "rush link" looks.
-    let dependencyJson: IShrinkwrapDependencyJson | undefined = undefined;
+    let dependencyJson: INpmShrinkwrapDependencyJson | undefined = undefined;
 
-    const tempDependency: IShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
+    const tempDependency: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
       this._shrinkwrapJson.dependencies, tempProjectName);
     if (tempDependency && tempDependency.dependencies) {
       dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
@@ -91,7 +91,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return dependencyJson.version;
   }
 
-  private constructor(shrinkwrapJson: IShrinkwrapJson) {
+  private constructor(shrinkwrapJson: INpmShrinkwrapJson) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
 

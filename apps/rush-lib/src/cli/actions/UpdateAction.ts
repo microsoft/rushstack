@@ -54,6 +54,7 @@ export class UpdateAction extends BaseInstallAction {
 
   protected buildInstallOptions(): IInstallManagerOptions {
     return {
+      debug: this.parser.isDebug,
       allowShrinkwrapUpdates: true,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
