@@ -764,8 +764,7 @@ export class InstallManager {
           if (this._rushConfiguration.packageManager === 'yarn') {
             // Yarn does not correctly detect changes to a tarball, so we need to forcibly clear its cache
             const yarnRushTempCacheFolder: string = path.join(
-              this._rushConfiguration.commonTempFolder,
-              'yarn-cache', 'v2', 'npm-@rush-temp'
+              this._rushConfiguration.yarnCacheFolder, 'v2', 'npm-@rush-temp'
             );
             if (FileSystem.exists(yarnRushTempCacheFolder)) {
               console.log('Deleting ' + yarnRushTempCacheFolder);
@@ -1000,8 +999,10 @@ export class InstallManager {
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--ignore-optional');
       args.push('--link-folder', 'yarn-link');
-      args.push('--cache-folder', 'yarn-cache');
+      args.push('--cache-folder', this._rushConfiguration.yarnCacheFolder);
 
+      // Without this option, Yarn will sometimes stop and ask for user input on STDIN
+      // (e.g. "Which command would you like to run?").
       args.push('--non-interactive');
 
       if (options.networkConcurrency) {

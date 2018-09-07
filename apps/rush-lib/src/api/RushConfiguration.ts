@@ -123,9 +123,10 @@ export class RushConfiguration {
   private _commonScriptsFolder: string;
   private _commonRushConfigFolder: string;
   private _packageManager: PackageManager;
-  private _pnpmStoreFolder: string;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
+  private _pnpmStoreFolder: string;
+  private _yarnCacheFolder: string;
   private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _tempShrinkwrapPreinstallFilename: string;
@@ -440,6 +441,15 @@ export class RushConfiguration {
   }
 
   /**
+   * The local folder that will store the Yarn package cache.
+   *
+   * Example: "C:\MyRepo\common\temp\yarn-cache"
+   */
+  public get yarnCacheFolder(): string {
+    return this._yarnCacheFolder;
+  }
+
+  /**
    * The full path of the shrinkwrap file that is tracked by Git.  (The "rush install"
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
    * @remarks
@@ -696,6 +706,7 @@ export class RushConfiguration {
     this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
     this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
     this._pnpmStoreFolder = path.resolve(path.join(this._commonTempFolder, 'pnpm-store'));
+    this._yarnCacheFolder = path.resolve(path.join(this._commonTempFolder, 'yarn-cache'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
     this._rushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');

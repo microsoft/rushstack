@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Add support for the Yarn package manager",
+      "comment": "Add support for the Yarn package manager (this is a \"beta\" feature; please report any issues you encounter!)",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
