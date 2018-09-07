@@ -65,6 +65,14 @@ interface IYarnShrinkwrapJson {
 
 /**
  * Support for consuming the "yarn.lock" file.
+ *
+ * Yarn refers to its shrinkwrap file as a "lock file", even though it has nothing to do
+ * with file locking.  Apparently this was based on a convention of the Ruby bundler.
+ * Since Rush has to work interchangeably with 3 different package managers, here we refer
+ * generically to yarn.lock as a "shrinkwrap file".
+ *
+ * If Rush's Yarn support gains popularity, we will try to improve the wording of
+ * logging messages to use terminology more consistent with Yarn's own documentation.
  */
 export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   // Example inputs:
@@ -103,7 +111,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     const result: RegExpExecArray | null = YarnShrinkwrapFile.packageNameAndSemVerRegExp.exec(packageNameAndSemVer);
     if (!result) {
       // Sanity check -- this should never happen
-      throw new Error('Unable to parse package/semver expression in the Yarn shrinkwrap file: '
+      throw new Error('Unable to parse package/semver expression in the Yarn shrinkwrap file (yarn.lock): '
         + JSON.stringify(packageNameAndSemVer));
     }
 
@@ -111,7 +119,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     const parsedPackageName: IParsedPackageNameOrError = PackageName.tryParse(packageName);
     if (parsedPackageName.error) {
       // Sanity check -- this should never happen
-      throw new Error('Invalid package name the Yarn shrinkwrap file: '
+      throw new Error('Invalid package name the Yarn shrinkwrap file (yarn.lock): '
         + JSON.stringify(packageNameAndSemVer) + '\n' + parsedPackageName.error);
     }
 
@@ -186,13 +194,13 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
         if (!/^file:/i.test(packageNameAndSemVer.semVerRange)) {
           // Sanity check to make sure this is a real package.
           // (Nobody should ever have an actual dependency on an "@rush-temp/" package.
-          throw new Error('Unexpected package/semver expression found in the Yarn shrinkwrap file: '
+          throw new Error('Unexpected package/semver expression found in the Yarn shrinkwrap file (yarn.lock): '
             + JSON.stringify(key));
         }
 
         if (!seenEntries.add(packageNameAndSemVer.packageName)) {
           // Sanity check -- this should never happen
-          throw new Error('Duplicate @rush-temp package found in the Yarn shrinkwrap file: '
+          throw new Error('Duplicate @rush-temp package found in the Yarn shrinkwrap file (yarn.lock): '
             + JSON.stringify(key));
         }
 

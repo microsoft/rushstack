@@ -226,7 +226,7 @@ export class InstallManager {
                 this._rushConfiguration.committedShrinkwrapFilename);
             } catch (ex) {
               console.log();
-              console.log('Unable to load the shrinkwrap file: ' + ex.message);
+              console.log(`Unable to load the ${this._shrinkwrapFilePhrase}: ${ex.message}`);
 
               if (!options.allowShrinkwrapUpdates) {
                 console.log();
@@ -244,7 +244,8 @@ export class InstallManager {
           if (!shrinkwrapIsUpToDate) {
             if (!options.allowShrinkwrapUpdates) {
               console.log();
-              console.log(colors.red('The shrinkwrap file is out of date.  You need to run "rush update".'));
+              console.log(colors.red(`The ${this._shrinkwrapFilePhrase} is out of date.`
+                + `  You need to run "rush update".`));
               throw new AlreadyReportedError();
             }
           }
@@ -615,7 +616,9 @@ export class InstallManager {
 
     if (shrinkwrapWarnings.length > 0) {
       console.log();
-      console.log(colors.yellow(Utilities.wrapWords(`The shrinkwrap file is missing the following dependencies:`)));
+      console.log(colors.yellow(Utilities.wrapWords(
+        `The ${this._shrinkwrapFilePhrase} is missing the following dependencies:`)));
+
       for (const shrinkwrapWarning of shrinkwrapWarnings) {
         console.log(colors.yellow('  ' + shrinkwrapWarning));
       }
@@ -1090,12 +1093,16 @@ export class InstallManager {
     for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {
       if (!this._rushConfiguration.findProjectByTempName(tempProjectName)) {
         console.log(os.EOL + colors.yellow(Utilities.wrapWords(
-          `Your shrinkwrap file references a project "${tempProjectName}" which no longer exists.`))
+          `Your ${this._shrinkwrapFilePhrase} references a project "${tempProjectName}" which no longer exists.`))
           + os.EOL);
         return true;  // found one
       }
     }
 
     return false;  // none found
+  }
+
+  private get _shrinkwrapFilePhrase(): string {
+    return this._rushConfiguration.shrinkwrapFilePhrase;
   }
 }

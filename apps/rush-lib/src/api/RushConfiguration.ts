@@ -485,6 +485,21 @@ export class RushConfiguration {
   }
 
   /**
+   * Returns an English phrase such as "shrinkwrap file" that can be used in logging messages
+   * to refer to the shrinkwrap file using appropriate terminology for the currently selected
+   * package manager.
+   */
+  public get shrinkwrapFilePhrase(): string {
+    if (this._packageManager === 'yarn') {
+      // Eventually we'd like to be consistent with Yarn's terminology of calling this a "lock file",
+      // but a lot of Rush documentation uses "shrinkwrap" file and would all need to be updated.
+      return 'shrinkwrap file (yarn.lock)';
+    } else {
+      return 'shrinkwrap file';
+    }
+  }
+
+  /**
    * The absolute path to Rush's storage in the home directory for the current user.  On Windows,
    * it would be something like "C:\Users\YourName\.rush".
    */
