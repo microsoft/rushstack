@@ -6,11 +6,17 @@ import {
 import { FileSystem, PackageName, IParsedPackageNameOrError } from '@microsoft/node-core-library';
 import { RushConstants } from '../RushConstants';
 
+/**
+ * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
+ */
 interface IPackageNameAndSemVer {
   packageName: string;
   semVerRange: string;
 }
 
+/**
+ * Part of IYarnShrinkwrapJson
+ */
 interface IYarnShrinkwrapEntry {
   /**
    * The specific version that was chosen for this entry (i.e. package name and SemVer range)/
@@ -43,6 +49,9 @@ interface IYarnShrinkwrapEntry {
   optionalDependencies?: { [dependency: string]: string };
 }
 
+/**
+ * Used by YarnShrinkwrapFile to interpret the `@yarnpkg/lockfile` data structure.
+ */
 interface IYarnShrinkwrapJson {
   /**
    * Example keys:
@@ -55,9 +64,7 @@ interface IYarnShrinkwrapJson {
 }
 
 /**
- * Support for consuming the "yarn.lock" file.  (The Yarn documentation refers to this
- * as a "lock file", but we avoid that terminology because it is inconsistent with decades
- * of industry convention.  Its function is identical to the NPM/PNPM shrinkwrap file.)
+ * Support for consuming the "yarn.lock" file.
  */
 export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   // Example inputs:
@@ -85,6 +92,13 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     return new YarnShrinkwrapFile(shrinkwrapJson.object as IYarnShrinkwrapJson);
   }
 
+  /**
+   * The `@yarnpkg/lockfile` API only partially deserializes its data, and expects the caller
+   * to parse the yarn.lock lookup keys (sometimes called a "pattern").
+   *
+   * Example input:  "js-tokens@^3.0.0 || ^4.0.0"
+   * Example output: { packageName: "js-tokens", semVerRange: "^3.0.0 || ^4.0.0" }
+   */
   private static _decodePackageNameAndSemVer(packageNameAndSemVer: string): IPackageNameAndSemVer {
     const result: RegExpExecArray | null = YarnShrinkwrapFile.packageNameAndSemVerRegExp.exec(packageNameAndSemVer);
     if (!result) {
@@ -107,6 +121,11 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     };
   }
 
+  /**
+   * This is the inverse of _decodePackageNameAndSemVer():
+   * Given an IPackageNameAndSemVer object, recreate the yarn.lock lookup key
+   * (sometimes called a "pattern").
+   */
   private static _encodePackageNameAndSemVer(packageNameAndSemVer: IPackageNameAndSemVer): string {
     return packageNameAndSemVer.packageName + '@' + packageNameAndSemVer.semVerRange;
   }
@@ -181,8 +200,14 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
         const entry: IYarnShrinkwrapEntry = this._shrinkwrapJson[key];
 
-        // Yarn wrongly performs integrity checking for tarball references.
-        // So we need to transform this:
+        // Yarn fails installation if the integrity hash does not match a "file://" reference to a tarball.
+        // This is incorrect:  Normally a mismatched integrity hash does indicate a corrupted download,
+        // since an NPM registry normally guarantees that a specific version number cannot be republished
+        // with different content.  But this is NOT true for a "file://" reference, and there are valid
+        // reasons why someone would update the file.  (PNPM handles this correctly, by simply reinstalling
+        // the tarball if its hash has changed.)
+        //
+        // As a workaround, we can simply remove the hashes from the shrinkwrap file.  We will convert this:
         //   "file:./projects/my-project.tgz#80cefe05fd715e65219d1ed481209dc4023408aa"
         // ..to this:
         //   "file:./projects/my-project.tgz"
