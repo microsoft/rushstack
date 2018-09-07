@@ -999,6 +999,10 @@ export class InstallManager {
       if (options.networkConcurrency) {
         args.push('--network-concurrency', options.networkConcurrency.toString());
       }
+
+      if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
+        args.push('--strict-peer-dependencies');
+      }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--ignore-optional');
       args.push('--link-folder', 'yarn-link');
@@ -1010,10 +1014,6 @@ export class InstallManager {
 
       if (options.networkConcurrency) {
         args.push('--network-concurrency', options.networkConcurrency.toString());
-      }
-
-      if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
-        args.push('--strict-peer-dependencies');
       }
     }
   }
