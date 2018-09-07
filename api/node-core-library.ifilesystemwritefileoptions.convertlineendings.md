@@ -1,0 +1,10 @@
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IFileSystemWriteFileOptions](./node-core-library.ifilesystemwritefileoptions.md) &gt; [convertLineEndings](./node-core-library.ifilesystemwritefileoptions.convertlineendings.md)
+
+# IFileSystemWriteFileOptions.convertLineEndings property
+
+If specified, will normalize line endings to the specified style of newline. Defaults to \`NewlineKind.None\`.
+
+**Signature:**
+```javascript
+convertLineEndings: NewlineKind
+```

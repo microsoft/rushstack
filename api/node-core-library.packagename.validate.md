@@ -2,7 +2,7 @@
 
 # PackageName.validate method
 
-Throws an exception if the specified name is not a valid package name.
+Throws an exception if the specified name is not a valid package name. The packageName must not be an empty string.
 
 **Signature:**
 ```javascript

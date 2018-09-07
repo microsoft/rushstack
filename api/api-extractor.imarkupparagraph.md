@@ -2,7 +2,7 @@
 
 # IMarkupParagraph interface
 
-A paragraph separator, similar to the "&lt;p&gt;" tag in HTML
+A paragraph separator, similar to the "<p>" tag in HTML
 
 ## Properties
 

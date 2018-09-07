@@ -6,7 +6,7 @@ Creates a symbolic link to a file (on Windows this requires elevated permissions
 
 **Signature:**
 ```javascript
-static createSymbolicLinkFile(linkTarget: string, linkSource: string): void;
+static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
 ```
 **Returns:** `void`
 
@@ -14,6 +14,5 @@ static createSymbolicLinkFile(linkTarget: string, linkSource: string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  `linkTarget` | `string` | The absolute or relative path to the target of the link. |
-|  `linkSource` | `string` | The absolute or relative path to the destination where the link should be created. |
+|  `options` | `IFileSystemCreateLinkOptions` |  |
 

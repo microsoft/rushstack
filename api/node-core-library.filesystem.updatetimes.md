@@ -6,7 +6,7 @@ Updates the accessed and modified timestamps of the filesystem object referenced
 
 **Signature:**
 ```javascript
-static updateTimes(path: string, times: IUpdateTimeParameters): void;
+static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
 ```
 **Returns:** `void`
 
@@ -15,5 +15,5 @@ static updateTimes(path: string, times: IUpdateTimeParameters): void;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  `path` | `string` | The path of the file that should be modified. |
-|  `times` | `IUpdateTimeParameters` | The times that the object should be updated to reflect. |
+|  `times` | `IFileSystemUpdateTimeParameters` | The times that the object should be updated to reflect. |
 

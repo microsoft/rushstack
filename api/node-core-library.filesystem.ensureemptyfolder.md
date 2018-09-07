@@ -2,7 +2,7 @@
 
 # FileSystem.ensureEmptyFolder method
 
-Deletes the content of a folder, but not the folder itself. Also ensures the folder exists. Behind the scenes it uses \`fsx.emptyDirSync()\`.
+Deletes the content of a folder, but not the folder itself. Also ensures the folder exists. Behind the scenes it uses \`fs-extra.emptyDirSync()\`.
 
 **Signature:**
 ```javascript

@@ -6,7 +6,7 @@ Writes a text string to a file on disk, overwriting the file if it already exist
 
 **Signature:**
 ```javascript
-static writeFile(filePath: string, contents: string | Buffer, options?: IWriteFileOptions): void;
+static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
 ```
 **Returns:** `void`
 
@@ -20,5 +20,5 @@ Throws an error if the folder doesn't exist, unless ensureFolder=true.
 |  --- | --- | --- |
 |  `filePath` | `string` | The absolute or relative path of the file. |
 |  `contents` | `string | Buffer` | The text that should be written to the file. |
-|  `options` | `IWriteFileOptions` | Optional settings that can change the behavior. Type: \`IWriteFileOptions\` |
+|  `options` | `IFileSystemWriteFileOptions` | Optional settings that can change the behavior. Type: \`IWriteFileOptions\` |
 

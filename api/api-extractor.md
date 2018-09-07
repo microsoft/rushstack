@@ -35,11 +35,11 @@ API Extractor helps you build better TypeScript library packages. It helps with 
 |  [`IMarkupHeading1`](./api-extractor.imarkupheading1.md) | A top-level heading |
 |  [`IMarkupHeading2`](./api-extractor.imarkupheading2.md) | A sub heading |
 |  [`IMarkupHighlightedText`](./api-extractor.imarkuphighlightedtext.md) | Source code shown in a fixed-width font, with syntax highlighting. |
-|  [`IMarkupHtmlTag`](./api-extractor.imarkuphtmltag.md) | Represents an HTML tag such as \`&lt;td&gt;\` or \`&lt;/td&gt;\` or \`&lt;img src="example.gif" /&gt;\`. |
-|  [`IMarkupLineBreak`](./api-extractor.imarkuplinebreak.md) | A line break, similar to the "&lt;br&gt;" tag in HTML. |
+|  [`IMarkupHtmlTag`](./api-extractor.imarkuphtmltag.md) | Represents an HTML tag such as \`<td>\` or \`</td>\` or \`<img src="example.gif" />\`. |
+|  [`IMarkupLineBreak`](./api-extractor.imarkuplinebreak.md) | A line break, similar to the "<br>" tag in HTML. |
 |  [`IMarkupNoteBox`](./api-extractor.imarkupnotebox.md) | A call-out box containing an informational note |
 |  [`IMarkupPage`](./api-extractor.imarkuppage.md) | Represents an entire page. |
-|  [`IMarkupParagraph`](./api-extractor.imarkupparagraph.md) | A paragraph separator, similar to the "&lt;p&gt;" tag in HTML |
+|  [`IMarkupParagraph`](./api-extractor.imarkupparagraph.md) | A paragraph separator, similar to the "<p>" tag in HTML |
 |  [`IMarkupTable`](./api-extractor.imarkuptable.md) | A table, with an optional header row |
 |  [`IMarkupTableCell`](./api-extractor.imarkuptablecell.md) | A cell inside an IMarkupTableRow element. |
 |  [`IMarkupTableRow`](./api-extractor.imarkuptablerow.md) | A row inside an IMarkupTable element. |

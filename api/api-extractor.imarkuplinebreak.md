@@ -2,7 +2,7 @@
 
 # IMarkupLineBreak interface
 
-A line break, similar to the "&lt;br&gt;" tag in HTML.
+A line break, similar to the "<br>" tag in HTML.
 
 ## Properties
 

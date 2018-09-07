@@ -6,7 +6,7 @@ Reads the contents of the folder, not including "." or "..". Behind the scenes i
 
 **Signature:**
 ```javascript
-static readFolder(folderPath: string, options?: IReadFolderOptions): Array<string>;
+static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): Array<string>;
 ```
 **Returns:** `Array<string>`
 
@@ -15,5 +15,5 @@ static readFolder(folderPath: string, options?: IReadFolderOptions): Array<strin
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  `folderPath` | `string` | The absolute or relative path to the folder which should be read. |
-|  `options` | `IReadFolderOptions` | Optional settings that can change the behavior. Type: \`IReadFolderOptions\` |
+|  `options` | `IFileSystemReadFolderOptions` | Optional settings that can change the behavior. Type: \`IReadFolderOptions\` |
 

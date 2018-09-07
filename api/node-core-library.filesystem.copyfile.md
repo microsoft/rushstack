@@ -6,7 +6,7 @@ Copies a file from one location to another. By default, destinationPath is overw
 
 **Signature:**
 ```javascript
-static copyFile(sourcePath: string, destinationPath: string): void;
+static copyFile(options: IFileSystemCopyFileOptions): void;
 ```
 **Returns:** `void`
 
@@ -14,6 +14,5 @@ static copyFile(sourcePath: string, destinationPath: string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  `sourcePath` | `string` | The absolute or relative path to the source file to be copied. |
-|  `destinationPath` | `string` | The absolute or relative path to the new copy that will be created. |
+|  `options` | `IFileSystemCopyFileOptions` |  |
 

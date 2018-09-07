@@ -13,4 +13,4 @@ publishFolderForBeta: string
 
 ## Remarks
 
-A beta release will contain all definitions that are reachable from the entry point, except definitions marked as @alpha or \\@internal.
+A beta release will contain all definitions that are reachable from the entry point, except definitions marked as @alpha or @internal.

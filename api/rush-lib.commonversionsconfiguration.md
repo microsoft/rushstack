@@ -9,6 +9,7 @@ Use this class to load and save the "common/config/rush/common-versions.json" co
 |  Property | Access Modifier | Type | Description |
 |  --- | --- | --- | --- |
 |  [`allowedAlternativeVersions`](./rush-lib.commonversionsconfiguration.allowedalternativeversions.md) |  | `Map<string, ReadonlyArray<string>>` | A table that stores, for a given dependency, a list of SemVer ranges that will be accepted by "rush check" in addition to the normal version range. |
+|  [`filePath`](./rush-lib.commonversionsconfiguration.filepath.md) |  | `string` | Get the absolute file path of the common-versions.json file. |
 |  [`preferredVersions`](./rush-lib.commonversionsconfiguration.preferredversions.md) |  | `Map<string, string>` | A table that specifies a "preferred version" for a dependency package. |
 |  [`xstitchPreferredVersions`](./rush-lib.commonversionsconfiguration.xstitchpreferredversions.md) |  | `Map<string, string>` | A table of specifies preferred versions maintained by the XStitch tool. |
 

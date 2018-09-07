@@ -2,7 +2,7 @@
 
 # PackageName.tryParse method
 
-This attempts to parse a package name that may include a scope component.
+This attempts to parse a package name that may include a scope component. The packageName must not be an empty string.
 
 **Signature:**
 ```javascript

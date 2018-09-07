@@ -13,4 +13,4 @@ dtsRollup: IExtractorDtsRollupConfig
 
 ## Remarks
 
-API Extractor can generate a consolidated \*.d.ts file that contains all the exported typings for the package entry point. It can also trim @alpha, \\@beta, and \\@internal definitions according to the release type.
+API Extractor can generate a consolidated \*.d.ts file that contains all the exported typings for the package entry point. It can also trim @alpha, @beta, and @internal definitions according to the release type.

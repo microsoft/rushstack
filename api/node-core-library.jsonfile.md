@@ -13,5 +13,6 @@ Utilities for reading/writing JSON files.
 |  [`loadAndValidateWithCallback(jsonFilename, jsonSchema, errorCallback)`](./node-core-library.jsonfile.loadandvalidatewithcallback.md) |  | `any` | Loads a JSON file and validate its schema, reporting errors using a callback |
 |  [`save(jsonObject, jsonFilename, options)`](./node-core-library.jsonfile.save.md) |  | `boolean` | Saves the file to disk. Returns false if nothing was written due to options.onlyIfChanged. |
 |  [`stringify(jsonObject, options)`](./node-core-library.jsonfile.stringify.md) |  | `string` | Serializes the specified JSON object to a string buffer. |
+|  [`updateString(previousJson, newJsonObject, options)`](./node-core-library.jsonfile.updatestring.md) |  | `string` | Serializes the specified JSON object to a string buffer. |
 |  [`validateNoUndefinedMembers(jsonObject)`](./node-core-library.jsonfile.validatenoundefinedmembers.md) |  | `void` | Used to validate a data structure before writing. Reports an error if there are any undefined members. |
 

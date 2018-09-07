@@ -2,7 +2,7 @@
 
 # FileSystem.deleteFolder method
 
-Deletes a folder, including all of its contents. Behind the scenes is uses \`fsx.removeSync()\`.
+Deletes a folder, including all of its contents. Behind the scenes is uses \`fs-extra.removeSync()\`.
 
 **Signature:**
 ```javascript

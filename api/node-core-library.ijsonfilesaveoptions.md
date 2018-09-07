@@ -10,4 +10,5 @@ Options for JsonFile.saveJsonFile()
 |  --- | --- | --- |
 |  [`ensureFolderExists`](./node-core-library.ijsonfilesaveoptions.ensurefolderexists.md) | `boolean` | Creates the folder recursively using FileSystem.ensureFolder() Defaults to false. |
 |  [`onlyIfChanged`](./node-core-library.ijsonfilesaveoptions.onlyifchanged.md) | `boolean` | If there is an existing file, and the contents have not changed, then don't write anything; this preserves the old timestamp. |
+|  [`updateExistingFile`](./node-core-library.ijsonfilesaveoptions.updateexistingfile.md) | `boolean` | If true, use the "jju" library to preserve the existing JSON formatting: The file will be loaded from the target filename, the new content will be merged in (preserving whitespace and comments), and then the file will be overwritten with the merged contents. If the target file does not exist, then the file is saved normally. |
 

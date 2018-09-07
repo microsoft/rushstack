@@ -2,13 +2,17 @@
 
 # PackageName.parse method
 
-Same as [PackageName.tryParse](./node-core-library.packagename.tryparse.md)<!-- -->, except this throws an exception if the input cannot be parsed
+Same as [PackageName.tryParse](./node-core-library.packagename.tryparse.md)<!-- -->, except this throws an exception if the input cannot be parsed.
 
 **Signature:**
 ```javascript
 static parse(packageName: string): IParsedPackageName;
 ```
 **Returns:** `IParsedPackageName`
+
+## Remarks
+
+The packageName must not be an empty string.
 
 ## Parameters
 

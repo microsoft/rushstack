@@ -8,5 +8,6 @@ Options for JsonFile.stringify()
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [`unixNewlines`](./node-core-library.ijsonfilestringifyoptions.unixnewlines.md) | `boolean` | If true, then "\\n" will be used for newlines instead of the default "\\r\\n". |
+|  [`newlineConversion`](./node-core-library.ijsonfilestringifyoptions.newlineconversion.md) | `NewlineKind` | If true, then "\\n" will be used for newlines instead of the default "\\r\\n". |
+|  [`prettyFormatting`](./node-core-library.ijsonfilestringifyoptions.prettyformatting.md) | `boolean` | If true, then the "jju" library will be used to improve the text formatting. Note that this is slightly slower than the native JSON.stringify() implementation. |
 

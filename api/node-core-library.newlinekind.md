@@ -7,5 +7,5 @@ Enumeration controlling conversion of newline characters.
 |  Member | Value | Description |
 |  --- | --- | --- |
 |  CrLf | `= "\r\n"` | Windows-style newlines |
-|  Lf | `= "\n"` | Unix-style newlines |
+|  Lf | `= "\n"` | POSIX-style newlines |
 

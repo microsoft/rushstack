@@ -13,4 +13,4 @@ publishFolderForPublic: string
 
 ## Remarks
 
-A public release will contain all definitions that are reachable from the entry point, except definitions marked as @beta, \\@alpha, or \\@internal.
+A public release will contain all definitions that are reachable from the entry point, except definitions marked as @beta, @alpha, or @internal.

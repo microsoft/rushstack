@@ -2,9 +2,15 @@
 
 # IFileWriterFlags.exclusive property
 
-Fails if path exists. The exclusive flag ensures that path is newly created. On POSIX systems, path is considered to exist even if it is a symlink to a non-existent file. The exclusive flag may or may not work with network file systems.
+Fails if path exists. The exclusive flag ensures that path is newly created.
 
 **Signature:**
 ```javascript
 exclusive: boolean
 ```
+
+## Remarks
+
+On POSIX-like operating systems, path is considered to exist even if it is a symlink to a non-existent file. The exclusive flag may or may not work with network file systems.
+
+POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.

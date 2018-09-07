@@ -6,7 +6,7 @@ Creates a Windows "directory junction". Behaves like \`createSymbolicLinkToFile(
 
 **Signature:**
 ```javascript
-static createSymbolicLinkJunction(linkTarget: string, linkSource: string): void;
+static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
 ```
 **Returns:** `void`
 
@@ -14,6 +14,5 @@ static createSymbolicLinkJunction(linkTarget: string, linkSource: string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  `linkTarget` | `string` | The absolute or relative path to the target of the link. |
-|  `linkSource` | `string` | The absolute or relative path to the destination where the link should be created. |
+|  `options` | `IFileSystemCreateLinkOptions` |  |
 

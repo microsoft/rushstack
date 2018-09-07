@@ -6,7 +6,7 @@ Reads the contents of a file into a string. Behind the scenes it uses \`fs.readF
 
 **Signature:**
 ```javascript
-static readFile(filePath: string, options?: IReadFileOptions): string;
+static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
 ```
 **Returns:** `string`
 
@@ -15,5 +15,5 @@ static readFile(filePath: string, options?: IReadFileOptions): string;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  `filePath` | `string` | The relative or absolute path to the file whose contents should be read. |
-|  `options` | `IReadFileOptions` | Optional settings that can change the behavior. Type: \`IReadFileOptions\` |
+|  `options` | `IFileSystemReadFileOptions` | Optional settings that can change the behavior. Type: \`IReadFileOptions\` |
 
