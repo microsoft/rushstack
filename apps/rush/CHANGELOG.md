@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 31 Aug 2018 23:10:31 GMT and should not be manually modified.
+This log was last generated on Sat, 08 Sep 2018 20:57:32 GMT and should not be manually modified.
+
+## 5.1.0
+Sat, 08 Sep 2018 20:57:32 GMT
+
+### Updates
+
+- Update "repository" field in package.json
+- Add support for PNPM's --strict-peer-dependencies feature
+- Add support for the Yarn package manager (this is a "beta" feature; please report any issues you encounter!)
 
 ## 5.0.6
 Fri, 31 Aug 2018 23:10:31 GMT

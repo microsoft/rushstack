@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.1.0",
+      "tag": "@microsoft/rush_v5.1.0",
+      "date": "Sat, 08 Sep 2018 20:57:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update \"repository\" field in package.json"
+          },
+          {
+            "comment": "Add support for PNPM's --strict-peer-dependencies feature"
+          },
+          {
+            "comment": "Add support for the Yarn package manager (this is a \"beta\" feature; please report any issues you encounter!)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.6",
       "tag": "@microsoft/rush_v5.0.6",
       "date": "Fri, 31 Aug 2018 23:10:31 GMT",
