@@ -36,7 +36,6 @@ class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
   loadSchema(): Object;
 }
 
-// WARNING: Unsupported export: removeTripleSlash
 // WARNING: Unsupported export: tscCmd
 // WARNING: Unsupported export: tslintCmd
 // WARNING: Unsupported export: apiExtractor
