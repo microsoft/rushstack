@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.23",
+      "tag": "@microsoft/api-documenter_v1.5.23",
+      "date": "Mon, 10 Sep 2018 23:23:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.7` to `5.0.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.22",
       "tag": "@microsoft/api-documenter_v1.5.22",
       "date": "Thu, 06 Sep 2018 01:25:25 GMT",

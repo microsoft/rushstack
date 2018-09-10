@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "6.0.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v6.0.0",
+      "date": "Mon, 10 Sep 2018 23:23:01 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Remove the old TypeScript, TSLint, Text, and RemoveTripleSlash tasks."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.2",
       "tag": "@microsoft/gulp-core-build-typescript_v5.0.2",
       "date": "Thu, 06 Sep 2018 01:25:26 GMT",

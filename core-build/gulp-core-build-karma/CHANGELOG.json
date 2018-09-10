@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-karma",
   "entries": [
     {
+      "version": "4.6.14",
+      "tag": "@microsoft/gulp-core-build-karma_v4.6.14",
+      "date": "Mon, 10 Sep 2018 23:23:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.7` to `5.0.8`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.6.13",
       "tag": "@microsoft/gulp-core-build-karma_v4.6.13",
       "date": "Thu, 06 Sep 2018 01:25:26 GMT",
