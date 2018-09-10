@@ -1,8 +1,8 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
 
-  "rushVersion": "5.0.6",
-  "pnpmVersion": "2.15.0",
+  "rushVersion": "5.1.0",
+  "pnpmVersion": "2.15.1",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0 || >=8.9.4 <9.0.0",
 
   "projectFolderMinDepth": 2,
@@ -13,6 +13,10 @@
       "tests"
     ],
     "ignoredNpmScopes": [ "@types" ]
+  },
+
+  "pnpmOptions": {
+    "strictPeerDependencies": true
   },
 
   "gitPolicy": {
