@@ -17,6 +17,7 @@
     "@microsoft/gulp-core-build": "3.8.18",
     "@microsoft/node-core-library": "3.0.1",
     "@types/gulp": "3.8.32",
+    "@types/node": "8.5.8",
     "decomment": "~0.9.1",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
