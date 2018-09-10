@@ -103,9 +103,9 @@ export interface IApiExtractorTaskConfig {
  * The ApiExtractorTask uses the api-extractor tool to analyze a project for public APIs. api-extractor will detect
  * common problems and generate a report of the exported public API. The task uses the entry point of a project to
  * find the aliased exports of the project. An api-extractor.ts file is generated for the project in the temp folder.
- * @internal
+ * @alpha
  */
-export abstract class ApiExtractorBaseTask extends GulpTask<IApiExtractorTaskConfig>  {
+export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
   constructor() {
     super(
       'api-extractor',
@@ -154,6 +154,10 @@ export abstract class ApiExtractorBaseTask extends GulpTask<IApiExtractorTaskCon
       }
 
       const extractorConfig: IExtractorConfig = {
+        compiler: {
+          configType: 'tsconfig',
+          rootFolder: this.buildConfig.rootPath
+        },
         project: {
           entryPointSourceFile: entryPointFile,
           externalJsonFileFolders: [ path.join(__dirname, 'external-api-json') ]
@@ -189,9 +193,6 @@ export abstract class ApiExtractorBaseTask extends GulpTask<IApiExtractorTaskCon
         }
       };
 
-      this.updateExtractorOptions(extractorOptions, entryPointFile);
-      this.updateExtractorConfig(extractorConfig);
-
       const extractor: Extractor = new Extractor(extractorConfig, extractorOptions);
 
       // NOTE: processProject() returns false if errors or warnings occurred, however we
@@ -204,9 +205,6 @@ export abstract class ApiExtractorBaseTask extends GulpTask<IApiExtractorTaskCon
 
     completeCallback();
   }
-
-  protected abstract updateExtractorOptions(extractorOptions: IExtractorOptions, entryPointFile: string): void;
-  protected abstract updateExtractorConfig(extractorConfig: IExtractorConfig): void;
 
   private _validateConfiguration(): boolean {
     if (!this.taskConfig.entry) {
