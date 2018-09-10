@@ -6,7 +6,6 @@
 !/lib/**
 !/dist/**
 !ThirdPartyNotice.txt
-!defaultTslint.json
 
 # Ignore certain files in the above folder
 /dist/*.stats.*

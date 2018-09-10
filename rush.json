@@ -1,8 +1,8 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
 
-  "rushVersion": "5.0.6",
-  "pnpmVersion": "2.15.0",
+  "rushVersion": "5.1.0",
+  "pnpmVersion": "2.15.1",
   "nodeSupportedVersionRange": ">=6.9.0 <7.0.0 || >=8.9.4 <9.0.0",
 
   "projectFolderMinDepth": 2,
@@ -13,6 +13,10 @@
       "tests"
     ],
     "ignoredNpmScopes": [ "@types" ]
+  },
+
+  "pnpmOptions": {
+    "strictPeerDependencies": true
   },
 
   "gitPolicy": {
@@ -97,10 +101,7 @@
       "packageName": "rush-stack-library-test",
       "projectFolder": "build-tests/rush-stack-library-test",
       "reviewCategory": "tests",
-      "shouldPublish": false,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
-      ]
+      "shouldPublish": false
     },
     {
       "packageName": "web-library-build-test",
@@ -123,10 +124,7 @@
       "packageName": "@microsoft/gulp-core-build-karma",
       "projectFolder": "core-build/gulp-core-build-karma",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
-      ]
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/gulp-core-build-mocha",
@@ -147,10 +145,7 @@
       "packageName": "@microsoft/gulp-core-build-serve",
       "projectFolder": "core-build/gulp-core-build-serve",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
-      ]
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/gulp-core-build-typescript",
