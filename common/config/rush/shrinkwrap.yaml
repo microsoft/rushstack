@@ -199,21 +199,6 @@ packages:
       node: '>= 0.10'
     resolution:
       integrity: sha1-iQrnxdjId/bThIYCFazp1+yUW9o=
-  /@microsoft/api-extractor/5.10.8:
-    dependencies:
-      '@microsoft/node-core-library': 3.0.0
-      '@microsoft/ts-command-line': 4.2.1
-      '@types/node': 8.5.8
-      '@types/z-schema': 3.16.31
-      colors: 1.2.5
-      jju: 1.3.0
-      lodash: 4.17.10
-      typescript: 2.4.2
-      z-schema: 3.18.4
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha512-Hb7Ku90PZXwF/auibi1Ot6HcXi/4lDa5EJeZ6E8dRae1Ex8lrrppAaksK4CrkjyInXEdLjinEJLlzy7ap9lTEw==
   /@microsoft/api-extractor/5.11.0:
     dependencies:
       '@microsoft/node-core-library': 3.0.0
@@ -229,17 +214,6 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-CjrnUNazzORS2dGb3Dac/dpK51LwpEExi/ctcgmcNHZAWMcEKiaidIfaF+QU0IJ3+RzxACtgIbNXywCVCmEw5Q==
-  /@microsoft/gulp-core-build-mocha/3.5.6:
-    dependencies:
-      '@microsoft/gulp-core-build': 3.8.14
-      '@types/node': 8.5.8
-      glob: 7.0.6
-      gulp: 3.9.1
-      gulp-istanbul: 0.10.4
-      gulp-mocha: 6.0.0
-    dev: false
-    resolution:
-      integrity: sha512-RpVfLR76yYc7Wkhz3LBN/ObP5/AzGsveb8Z3ji8eD97mGGS3r9IQBJoB2BFon+mWr9iMnHHlM0L197EGHePGug==
   /@microsoft/gulp-core-build-mocha/3.5.9:
     dependencies:
       '@microsoft/gulp-core-build': 3.8.17
@@ -251,37 +225,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-borx6i8BiiuZDiNuWkYMRi1WUCue5I1ri1dlYhDNYrscOVR6PfWwJ3jaWO4gexESQEsUkHJFNRVvNr2v1Y7lwQ==
-  /@microsoft/gulp-core-build-typescript/4.11.10:
-    dependencies:
-      '@microsoft/api-extractor': 5.10.8
-      '@microsoft/gulp-core-build': 3.8.14
-      '@microsoft/node-core-library': 3.0.0
-      '@types/gulp': 3.8.32
-      '@types/node': 8.5.8
-      '@types/vinyl': 1.2.30
-      decomment: 0.9.2
-      glob: 7.0.6
-      glob-escape: 0.0.2
-      gulp: 3.9.1
-      gulp-cache: 0.4.6
-      gulp-changed: 1.3.2
-      gulp-decomment: 0.2.0
-      gulp-plumber: 1.1.0
-      gulp-sourcemaps: 2.6.4
-      gulp-texttojs: 1.0.3
-      gulp-typescript: /gulp-typescript/3.1.7/typescript@2.4.2
-      gulp-util: 3.0.8
-      lodash: 4.17.10
-      md5: 2.2.1
-      merge2: 1.0.3
-      object-assign: 4.1.1
-      through2: 2.0.3
-      tslint: 5.9.1
-      tslint-microsoft-contrib: /tslint-microsoft-contrib/5.0.3/tslint@5.9.1
-      typescript: 2.4.2
-    dev: false
-    resolution:
-      integrity: sha512-+YS+aOzboPbTOowEdv9vW1evfEx8Gybzbv0qQH8K72TQc1hhBxCQzdkL/BhKct936dzK3KQwh7HXG7FU9dBDLA==
   /@microsoft/gulp-core-build-typescript/5.0.1:
     dependencies:
       '@microsoft/api-extractor': 5.11.0
@@ -313,53 +256,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-1IJ/SMQzwH2cZoV+xzpXofUhSIEgzPLEgLD+RYTa19B6k5sR1ltczTHX+ckOeWNtsJs/v7yh7qdOl6sD+NYjLQ==
-  /@microsoft/gulp-core-build/3.8.14:
-    dependencies:
-      '@microsoft/node-core-library': 3.0.0
-      '@types/assertion-error': 1.0.30
-      '@types/chai': 3.4.34
-      '@types/chalk': 0.4.31
-      '@types/gulp': 3.8.32
-      '@types/gulp-util': 3.0.30
-      '@types/mocha': 5.2.5
-      '@types/node': 8.5.8
-      '@types/node-notifier': 0.0.28
-      '@types/orchestrator': 0.0.30
-      '@types/q': 0.0.32
-      '@types/rimraf': 0.0.28
-      '@types/semver': 5.3.33
-      '@types/through2': 2.0.32
-      '@types/vinyl': 1.2.30
-      '@types/yargs': 0.0.34
-      colors: 1.2.5
-      del: 2.2.2
-      end-of-stream: 1.1.0
-      glob-escape: 0.0.2
-      globby: 5.0.0
-      gulp: 3.9.1
-      gulp-flatten: 0.2.0
-      gulp-if: 2.0.2
-      gulp-util: 3.0.8
-      jest: 22.4.4
-      jest-cli: 22.4.4
-      jest-environment-jsdom: 22.4.3
-      jest-resolve: 22.4.3
-      jju: 1.3.0
-      jsdom: 11.11.0
-      lodash.merge: 4.3.5
-      merge2: 1.0.3
-      node-notifier: 5.0.2
-      object-assign: 4.1.1
-      orchestrator: 0.3.8
-      pretty-hrtime: 1.0.3
-      rimraf: 2.5.4
-      semver: 5.3.0
-      through2: 2.0.3
-      yargs: 4.6.0
-      z-schema: 3.18.4
-    dev: false
-    resolution:
-      integrity: sha512-VZTB+l1Qv83PdpgawlUv4TwZuRtn3YqrwHIpZczZ5FDnvKA0bmsFxlIsE1ssmf0RKbb+YE0R3vxKAk7oK+M12A==
   /@microsoft/gulp-core-build/3.8.17:
     dependencies:
       '@microsoft/node-core-library': 3.0.0
@@ -418,17 +314,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-wcjlD67z9fByzqofLYB+fJmh/mcRSyUEFL0NNvAZ50maTiMVZWvSZoslhhh8GayJ3nXtr8RHGLv77lbGiHdWaw==
-  /@microsoft/node-library-build/5.0.2:
-    dependencies:
-      '@microsoft/gulp-core-build': 3.8.14
-      '@microsoft/gulp-core-build-mocha': 3.5.6
-      '@microsoft/gulp-core-build-typescript': 4.11.10
-      '@types/gulp': 3.8.32
-      '@types/node': 8.5.8
-      gulp: 3.9.1
-    dev: false
-    resolution:
-      integrity: sha512-pdzADSxpC7wrqkXyI39TMLHrUveZ5WxqX/6LcycByzNaWvLGirHobGBK1vklt7TCyFwGLU7PIVZVqEDPK0dbCQ==
   /@microsoft/node-library-build/5.0.6:
     dependencies:
       '@microsoft/gulp-core-build': 3.8.17
@@ -440,16 +325,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-51QiIV84rOKGcP+CdtNh5PzlvB+UVncPK+vLnJnrTbkPVgbjCGgZ0ldurMbLQ84WnmcEw2tdYWPbZVU0Ao+OlA==
-  /@microsoft/rush-stack-compiler/0.1.1:
-    dependencies:
-      '@microsoft/api-extractor': 5.10.8
-      tslint: 5.9.1
-      tslint-microsoft-contrib: /tslint-microsoft-contrib/5.0.3/tslint@5.9.1
-      typescript: 2.4.2
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha512-J+CqrEnrkN7RMzClcLBI7rN9dsr1DU82WFJvSpHcNvru/gOmaH9a1XN4wZB1Uo4mWsnH7QLypwis1fs0hJ9iJA==
   /@microsoft/rush-stack-compiler/0.1.3:
     dependencies:
       '@microsoft/api-extractor': 5.11.0
@@ -659,10 +534,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-lRnAtKnxMXcYYXqOiotTmJd74uawNWuPnsnPrrO7HiFuE3npE2iQhfABatbYDyxTNqZNuXzcKGhw37R7RjBFLg==
-  /@types/lodash/4.14.74:
-    dev: false
-    resolution:
-      integrity: sha512-BZknw3E/z3JmCLqQVANcR17okqVTPZdlxvcIz0fJiJVLUCbSH1hK3zs9r634PVSmrzAxN+n/fxlVRiYoArdOIQ==
   /@types/log4js/0.0.33:
     dependencies:
       '@types/express': 4.11.0
@@ -764,6 +635,7 @@ packages:
     dev: false
     resolution:
       integrity: sha1-RwAkRQ8at2QPGfnr9C09pXTCYSk=
+      tarball: 'http://registry.npmjs.org/@types/through2/-/through2-2.0.32.tgz'
   /@types/uglify-js/2.6.29:
     dependencies:
       '@types/source-map': 0.5.0
@@ -1240,18 +1112,6 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
-  /autoprefixer/6.3.7:
-    dependencies:
-      browserslist: 1.3.6
-      caniuse-db: 1.0.30000885
-      normalize-range: 0.1.2
-      num2fraction: 1.2.2
-      postcss: 5.2.18
-      postcss-value-parser: 3.3.0
-    dev: false
-    resolution:
-      integrity: sha1-jt8xZt2f1hFlM2Ysi7NqA8DvyHQ=
-      tarball: 'http://registry.npmjs.org/autoprefixer/-/autoprefixer-6.3.7.tgz'
   /autoprefixer/9.1.5:
     dependencies:
       browserslist: 4.1.1
@@ -1721,15 +1581,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==
-  /browserslist/1.3.6:
-    dependencies:
-      caniuse-db: 1.0.30000885
-    deprecated: Browserslist 2 could fail on reading Browserslist >3.0 config used in other tools.
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha1-lS/0jVZGPTtTj4XvL46t39KEsTM=
-      tarball: 'http://registry.npmjs.org/browserslist/-/browserslist-1.3.6.tgz'
   /browserslist/4.1.1:
     dependencies:
       caniuse-lite: 1.0.30000885
@@ -1873,10 +1724,6 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-1UVjW+HjPFQmScaRc+Xeas+uNN0=
-  /caniuse-db/1.0.30000885:
-    dev: false
-    resolution:
-      integrity: sha512-Hy1a+UIXooG+tRlt3WnT9avMf+l999bR9J1MqlQdYKgbsYjKxV4a4rgcmiyMmdCLPBFsiRoDxdl9tnNyaq2RXw==
   /caniuse-lite/1.0.30000885:
     dev: false
     resolution:
@@ -2127,6 +1974,7 @@ packages:
     dev: false
     resolution:
       integrity: sha512-VlfT9F3V0v+jr4yxPc5gg9s62/fIVWsd2Bk2iD435um1NlGMYdVCq+MjcXnhYq2icNOizHr1kK+5TI6H0Hy0ag==
+      tarball: 'http://registry.npmjs.org/commander/-/commander-2.15.1.tgz'
   /commander/2.17.1:
     dev: false
     optional: true
@@ -2238,20 +2086,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
-  /cosmiconfig/2.2.2:
-    dependencies:
-      is-directory: 0.3.1
-      js-yaml: 3.9.1
-      minimist: 1.2.0
-      object-assign: 4.1.1
-      os-homedir: 1.0.2
-      parse-json: 2.2.0
-      require-from-string: 1.2.1
-    dev: false
-    engines:
-      node: '>=0.12'
-    resolution:
-      integrity: sha512-GiNXLwAFPYHy25XmTPpafYvn3CLAkJ8FLsscq78MQd1Kh0OU6Yzhn4eV2MVF4G9WEQZoWEGltatdR+ntGPMl5A==
   /cosmiconfig/4.0.0:
     dependencies:
       is-directory: 0.3.1
@@ -4154,15 +3988,6 @@ packages:
       npm: '>=1.2.10'
     resolution:
       integrity: sha1-8SF2wtBCL2AwbCQv/2oBo5T6ugk=
-  /gulp-postcss/6.3.0:
-    dependencies:
-      gulp-util: 3.0.8
-      postcss: 5.2.18
-      postcss-load-config: 1.2.0
-      vinyl-sourcemaps-apply: 0.2.1
-    dev: false
-    resolution:
-      integrity: sha1-M+6XI+WcMC8z1wf8S3OYsQ8DK/8=
   /gulp-postcss/8.0.0:
     dependencies:
       fancy-log: 1.3.2
@@ -7498,17 +7323,6 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-AerA/jta9xoqbAL+q7jB/vfgDqs=
-  /postcss-load-config/1.2.0:
-    dependencies:
-      cosmiconfig: 2.2.2
-      object-assign: 4.1.1
-      postcss-load-options: 1.2.0
-      postcss-load-plugins: 2.3.0
-    dev: false
-    engines:
-      node: '>=0.12'
-    resolution:
-      integrity: sha1-U56a/J3chiASHr+djDZz4M5Q0oo=
   /postcss-load-config/2.0.0:
     dependencies:
       cosmiconfig: 4.0.0
@@ -7518,24 +7332,6 @@ packages:
       node: '>= 4'
     resolution:
       integrity: sha512-V5JBLzw406BB8UIfsAWSK2KSwIJ5yoEIVFb4gVkXci0QdKgA24jLmHZ/ghe/GgX0lJ0/D1uUK1ejhzEY94MChQ==
-  /postcss-load-options/1.2.0:
-    dependencies:
-      cosmiconfig: 2.2.2
-      object-assign: 4.1.1
-    dev: false
-    engines:
-      node: '>=0.12'
-    resolution:
-      integrity: sha1-sJixVZ3awt8EvAuzdfmaXP4rbYw=
-  /postcss-load-plugins/2.3.0:
-    dependencies:
-      cosmiconfig: 2.2.2
-      object-assign: 4.1.1
-    dev: false
-    engines:
-      node: '>=0.12'
-    resolution:
-      integrity: sha1-dFdoEWWZrKLwCfrUJrABdQSdjZI=
   /postcss-modules-extract-imports/1.1.0:
     dependencies:
       postcss: 6.0.23
@@ -7563,15 +7359,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-7P+p1+GSUYOJ9CrQ6D9yrsRW6iA=
-  /postcss-modules/0.6.4:
-    dependencies:
-      css-modules-loader-core: 1.1.0
-      generic-names: 1.0.3
-      postcss: 5.2.18
-      string-hash: 1.1.3
-    dev: false
-    resolution:
-      integrity: sha1-d6WLt3uhtDkrJwwLWYUv116JqLQ=
   /postcss-modules/1.3.2:
     dependencies:
       css-modules-loader-core: 1.1.0
@@ -7586,17 +7373,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-h/OPnxj3dKSrTIojL1xc6IcqnRU=
-  /postcss/5.2.18:
-    dependencies:
-      chalk: 1.1.3
-      js-base64: 2.4.9
-      source-map: 0.5.7
-      supports-color: 3.2.3
-    dev: false
-    engines:
-      node: '>=0.12'
-    resolution:
-      integrity: sha512-zrUjRRe1bpXKsX1qAJNJjqZViErVuyEkMTRrwu4ud4sbTtIBRmtaYDrHmcGgmrbsW3MHfmtIf+vJumgQn+PrXg==
   /postcss/6.0.1:
     dependencies:
       chalk: 1.1.3
@@ -8148,12 +7924,6 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-jGStX9MNqxyXbiNE/+f3kqam30I=
-  /require-from-string/1.2.1:
-    dev: false
-    engines:
-      node: '>=0.10.0'
-    resolution:
-      integrity: sha1-UpyczvJzgK3+yaL5ZbZJu+5jZBg=
   /require-from-string/2.0.2:
     dev: false
     engines:
@@ -9372,17 +9142,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-4krF8scpejhaOgqzBEcGM7yDIEfi0/8+8zDRZhNZZ2kjmHJ4hv3zCbQWxoJGz1iw5U0Jl0nma13xzHXcncMavQ==
-  /tslint-microsoft-contrib/5.0.3/tslint@5.9.1:
-    dependencies:
-      tslint: 5.9.1
-      tsutils: /tsutils/2.29.0/typescript@2.4.2
-      typescript: 2.4.2
-    dev: false
-    id: registry.npmjs.org/tslint-microsoft-contrib/5.0.3
-    peerDependencies:
-      tslint: ^5.1.0
-    resolution:
-      integrity: sha512-5AnfTGlfpUzpRHLmoojPBKFTTmbjnwgdaTHMdllausa4GBPya5u36i9ddrTX4PhetGZvd4JUYIpAmgHqVnsctg==
   /tslint-microsoft-contrib/5.2.1:
     dependencies:
       tsutils: /tsutils/2.28.0/typescript@2.4.2
@@ -10333,10 +10092,10 @@ packages:
     version: 0.0.0
   'file:projects/api-extractor.tgz':
     dependencies:
-      '@microsoft/node-library-build': 5.0.2
-      '@microsoft/rush-stack-compiler': 0.1.1
+      '@microsoft/node-library-build': 5.0.6
+      '@microsoft/rush-stack-compiler': 0.1.3
       '@types/jest': 21.1.10
-      '@types/lodash': 4.14.74
+      '@types/lodash': 4.14.116
       '@types/node': 8.5.8
       '@types/z-schema': 3.16.31
       colors: 1.2.5
@@ -10344,7 +10103,7 @@ packages:
       jju: 1.3.0
       lodash: 4.17.10
       tslint-microsoft-contrib: 5.2.1
-      typescript: 2.4.2
+      typescript: 3.0.3
       z-schema: 3.18.4
     dev: false
     name: '@rush-temp/api-extractor'
@@ -10354,7 +10113,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-karma.tgz':
     dependencies:
-      '@microsoft/node-library-build': 5.0.2
+      '@microsoft/node-library-build': 5.0.6
       '@types/bluebird': 3.5.3
       '@types/gulp': 3.8.32
       '@types/karma': 0.13.33
@@ -10386,7 +10145,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-mocha.tgz':
     dependencies:
-      '@microsoft/node-library-build': 5.0.2
+      '@microsoft/node-library-build': 5.0.6
       '@types/glob': 5.0.30
       '@types/gulp': 3.8.32
       '@types/gulp-istanbul': 0.9.30
@@ -10415,17 +10174,17 @@ packages:
       '@types/q': 0.0.32
       '@types/through2': 2.0.32
       '@types/vinyl': 1.2.30
-      autoprefixer: 6.3.7
+      autoprefixer: 9.1.5
       gulp: 3.9.1
       gulp-clean-css: 3.0.4
       gulp-clip-empty-files: 0.1.2
       gulp-clone: 1.0.0
-      gulp-postcss: 6.3.0
+      gulp-postcss: 8.0.0
       gulp-sass: 3.1.0
       gulp-sourcemaps: 2.6.4
       gulp-texttojs: 1.0.3
       merge2: 1.0.3
-      postcss-modules: 0.6.4
+      postcss-modules: 1.3.2
       through2: 2.0.3
     dev: false
     name: '@rush-temp/gulp-core-build-sass'
@@ -10435,7 +10194,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-serve.tgz':
     dependencies:
-      '@microsoft/node-library-build': 5.0.2
+      '@microsoft/node-library-build': 5.0.6
       '@types/express': 4.11.0
       '@types/express-serve-static-core': 4.11.0
       '@types/gulp': 3.8.32
@@ -10501,7 +10260,7 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build.tgz':
     dependencies:
-      '@microsoft/node-library-build': 5.0.2
+      '@microsoft/node-library-build': 5.0.6
       '@types/assertion-error': 1.0.30
       '@types/chai': 3.4.34
       '@types/chalk': 0.4.31
@@ -10611,8 +10370,8 @@ packages:
     version: 0.0.0
   'file:projects/node-core-library.tgz':
     dependencies:
-      '@microsoft/node-library-build': 5.0.2
-      '@microsoft/rush-stack-compiler': 0.1.1
+      '@microsoft/node-library-build': 5.0.6
+      '@microsoft/rush-stack-compiler': 0.1.3
       '@types/fs-extra': 5.0.1
       '@types/jest': 21.1.10
       '@types/node': 8.5.8
@@ -10692,6 +10451,7 @@ packages:
       '@types/semver': 5.3.33
       '@types/tar': 4.0.0
       '@types/z-schema': 3.16.31
+      '@yarnpkg/lockfile': 1.0.2
       builtins: 1.0.3
       colors: 1.2.5
       git-repo-info: 1.1.4
@@ -10739,7 +10499,7 @@ packages:
     version: 0.0.0
   'file:projects/rush-stack.tgz':
     dependencies:
-      '@microsoft/node-library-build': 5.0.2
+      '@microsoft/node-library-build': 5.0.6
       '@types/node': 8.5.8
       colors: 1.2.5
       gulp: 3.9.1
@@ -10816,8 +10576,8 @@ packages:
     version: 0.0.0
   'file:projects/ts-command-line.tgz':
     dependencies:
-      '@microsoft/node-library-build': 5.0.2
-      '@microsoft/rush-stack-compiler': 0.1.1
+      '@microsoft/node-library-build': 5.0.6
+      '@microsoft/rush-stack-compiler': 0.1.3
       '@types/argparse': 1.0.33
       '@types/jest': 21.1.10
       '@types/node': 8.5.8
