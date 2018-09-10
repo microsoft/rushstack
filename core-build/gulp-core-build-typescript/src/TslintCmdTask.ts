@@ -46,7 +46,7 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
   }
 
   public loadSchema(): Object {
-    return JsonFile.load(path.resolve(__dirname, '..', 'schemas', 'tslint-cmd.schema.json'));
+    return JsonFile.load(path.resolve(__dirname, 'schemas', 'tslint-cmd.schema.json'));
   }
 
   public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {

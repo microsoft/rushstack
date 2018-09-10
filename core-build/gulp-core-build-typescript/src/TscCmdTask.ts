@@ -56,7 +56,7 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
   }
 
   public loadSchema(): Object {
-    return JsonFile.load(path.resolve(__dirname, '..', 'schemas', 'tsc-cmd.schema.json'));
+    return JsonFile.load(path.resolve(__dirname, 'schemas', 'tsc-cmd.schema.json'));
   }
 
   public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {

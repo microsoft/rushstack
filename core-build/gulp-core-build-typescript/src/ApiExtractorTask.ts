@@ -4,7 +4,10 @@
 import * as Gulp from 'gulp';
 import * as path from 'path';
 import { GulpTask } from '@microsoft/gulp-core-build';
-import { FileSystem } from '@microsoft/node-core-library';
+import {
+  FileSystem,
+  JsonFile
+} from '@microsoft/node-core-library';
 import {
   Extractor,
   IExtractorOptions,
@@ -119,7 +122,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
   }
 
   public loadSchema(): Object {
-    return require('./schemas/api-extractor.schema.json');
+    return JsonFile.load(path.resolve(__dirname, 'schemas', 'api-extractor.schema.json'));
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void {
