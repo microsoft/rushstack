@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-karma",
+      "comment": "Allow additional lines to be specified in the temp/tests.js file.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-karma",
+  "email": "iclanton@users.noreply.github.com"
+}
