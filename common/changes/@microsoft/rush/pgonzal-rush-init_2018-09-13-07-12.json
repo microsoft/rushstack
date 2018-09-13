@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Allow \"rush scan\" to be used without a rush.json configuration",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
