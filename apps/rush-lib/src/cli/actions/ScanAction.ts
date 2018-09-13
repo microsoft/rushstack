@@ -9,10 +9,10 @@ import * as path from 'path';
 import builtinPackageNames = require('builtins');
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { BaseRushAction } from './BaseRushAction';
+import { BaseConfiglessRushAction } from './BaseRushAction';
 import { FileSystem } from '@microsoft/node-core-library';
 
-export class ScanAction extends BaseRushAction {
+export class ScanAction extends BaseConfiglessRushAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'scan',
