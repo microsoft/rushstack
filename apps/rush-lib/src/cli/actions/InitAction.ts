@@ -140,12 +140,14 @@ export class InitAction extends BaseConfiglessRushAction {
   }
 
   private _copyTemplateFiles(initFolder: string): void {
+    // The "[dot]" base name is used for hidden files to prevent various tools from interpreting them.
+    // For example, "npm publish" will always exclude the filename ".gitignore"
     const templateFilePaths: string[] = [
       'rush.json',
-      '.gitattributes',
-      '.gitignore',
-      '.travis.yml',
-      'common/config/rush/.npmrc',
+      '[dot]gitattributes',
+      '[dot]gitignore',
+      '[dot]travis.yml',
+      'common/config/rush/[dot]npmrc',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/pnpmfile.js',
@@ -162,7 +164,10 @@ export class InitAction extends BaseConfiglessRushAction {
         throw new Error('Unable to find template input file: ' + sourcePath);
       }
 
-      this._copyTemplateFile(sourcePath, path.join(initFolder, templateFilePath));
+      const destinationPath: string = path.join(initFolder, templateFilePath)
+        .replace('[dot]', '.');
+
+      this._copyTemplateFile(sourcePath, destinationPath);
     }
   }
 
