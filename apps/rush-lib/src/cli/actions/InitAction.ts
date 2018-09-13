@@ -34,36 +34,47 @@ export class InitAction extends BaseConfiglessRushAction {
   private static _lineMacroRegExp: RegExp = /\/\*\[LINE "([A-Z]+)"\]\s*\*\//;
 
   // Matches anything that starts with "/*[" and ends with "]*/"
-  // Used to catch malformed macro expression
+  // Used to catch malformed macro expressions
   private static _anyMacroRegExp: RegExp = /\/\*\s*\[.*\]\s*\*\//;
 
+  private _overwriteParameter: CommandLineFlagParameter;
   private _rushExampleParameter: CommandLineFlagParameter;
 
-  // section name --> whether it should be commented out
+  // template section name --> whether it should be commented out
   private _commentedBySectionName: Map<string, boolean> = new Map<string, boolean>();
 
   constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'init',
-      summary: 'Initializes a new Rush repo',
+      summary: 'Initializes a new repository to be managed by Rush',
       documentation: 'When invoked in an empty folder, this command provisions a standard'
-        + ' set of config files to start managing projects using Rush.',
+        + ' set of config file templates to start managing projects using Rush.',
       parser
     });
   }
 
   protected onDefineParameters(): void { // abstract
+    this._overwriteParameter = this.defineFlagParameter({
+      parameterLongName: '--overwrite-existing',
+      description: 'By default "rush init" will not overwrite existing config files.'
+        + ' Specify this switch to override that. This can be useful when upgrading'
+        + ' your repo to a newer release of Rush. WARNING: USE WITH CARE!'
+    });
     this._rushExampleParameter = this.defineFlagParameter({
       parameterLongName: '--rush-example-repo',
-      description: 'Uncomment the configuration lines used by the "rush-example" GitHub repo, which'
-        + ' is a buildable monorepo that illustrates many Rush features'
+      description: 'When copying the template config files, this uncomments fragments that are used'
+        + ' by the "rush-example" GitHub repo, which is a sample monorepo that illustrates many Rush'
+        + ' features. This option is primarily intended for maintaining that example.'
     });
   }
 
   protected run(): Promise<void> {
     const initFolder: string = process.cwd();
-    if (!this._validateFolderIsEmpty(initFolder)) {
-      return Promise.reject(new AlreadyReportedError());
+
+    if (!this._overwriteParameter.value) {
+      if (!this._validateFolderIsEmpty(initFolder)) {
+        return Promise.reject(new AlreadyReportedError());
+      }
     }
 
     this._commentedBySectionName.clear();
@@ -142,12 +153,18 @@ export class InitAction extends BaseConfiglessRushAction {
   }
 
   private _copyTemplateFile(sourcePath: string, destinationPath: string): void {
-    if (FileSystem.exists(destinationPath)) {
-      console.log(colors.yellow('Not overwriting already existing file: ') + destinationPath);
-      return;
+    if (!this._overwriteParameter.value) {
+      if (FileSystem.exists(destinationPath)) {
+        console.log(colors.yellow('Not overwriting already existing file: ') + destinationPath);
+        return;
+      }
     }
 
-    console.log(`Generating: ${destinationPath}`);
+    if (FileSystem.exists(destinationPath)) {
+      console.log(colors.yellow(`Overwriting: ${destinationPath}`));
+    } else {
+      console.log(`Generating: ${destinationPath}`);
+    }
 
     const outputLines: string[] = [];
     const lines: string[] = FileSystem.readFile(sourcePath, { convertLineEndings: NewlineKind.Lf })
