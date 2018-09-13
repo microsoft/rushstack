@@ -8,7 +8,9 @@ export interface IBaseCommandJson {
   commandKind: 'bulk' | 'global';
   name: string;
   summary: string;
-  // If omitted, the summary will be used instead.
+  /**
+   * If omitted, the summary will be used instead.
+   */
   description?: string;
 }
 

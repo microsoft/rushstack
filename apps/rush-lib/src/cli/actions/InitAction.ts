@@ -142,11 +142,11 @@ export class InitAction extends BaseConfiglessRushAction {
   }
 
   private _copyTemplateFile(sourcePath: string, destinationPath: string): void {
-
     if (FileSystem.exists(destinationPath)) {
       console.log(colors.yellow('Not overwriting already existing file: ') + destinationPath);
       return;
     }
+
     console.log(`Generating: ${destinationPath}`);
 
     const outputLines: string[] = [];

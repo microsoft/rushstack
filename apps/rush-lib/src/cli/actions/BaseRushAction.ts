@@ -67,10 +67,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
     }
 
     console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
-    return this.run().then(() => {
-      // If we make it here, everything went fine, so reset the exit code back to 0
-      process.exitCode = 0;
-    });
+    return this.run();
   }
 
   /**
