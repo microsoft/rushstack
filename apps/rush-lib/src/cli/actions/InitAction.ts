@@ -11,6 +11,7 @@ import { BaseConfiglessRushAction } from './BaseRushAction';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { FileSystem, NewlineKind } from '@microsoft/node-core-library';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { Rush } from '../../api/Rush';
 
 export class InitAction extends BaseConfiglessRushAction {
   // Matches a well-formed BEGIN macro starting a block section.
@@ -33,6 +34,12 @@ export class InitAction extends BaseConfiglessRushAction {
   //
   // Group #1 is the section name
   private static _lineMacroRegExp: RegExp = /\/\*\[LINE "([A-Z]+)"\]\s*\*\/\s?/;
+
+  // Matches a variable expansion.
+  // Example:  [%RUSH_VERSION%]
+  //
+  // Group #1 is the variable name including the dollar sign
+  private static _variableMacroRegExp: RegExp = /\[(%[A-Z0-9_]+%)\]/;
 
   // Matches anything that starts with "/*[" and ends with "]*/"
   // Used to catch malformed macro expressions
@@ -181,6 +188,14 @@ export class InitAction extends BaseConfiglessRushAction {
   //     // (content goes
   //     // here)
   //
+  // Lastly, a variable expansion has this form:
+  //
+  //     // The value is [%NAME%].
+  //
+  // ...and when expanded with e.g. "123" will look like this:
+  //
+  //     // The value is 123.
+  //
   // The section names must be one of the predefined names used by "rush init".
   // A single-line section may appear inside a block section, in which case it will get
   // commented twice.
@@ -206,8 +221,6 @@ export class InitAction extends BaseConfiglessRushAction {
     let activeBlockIndent: string = '';
 
     for (const line of lines) {
-      let transformedLine: string = line;
-
       let match: RegExpMatchArray | null;
 
       // Check for a block section start
@@ -250,13 +263,23 @@ export class InitAction extends BaseConfiglessRushAction {
         continue;
       }
 
+      let transformedLine: string = line;
+
       // Check for a single-line section
       // Example:  /*[LINE "HYPOTHETICAL"]*/
-      match = line.match(InitAction._lineMacroRegExp);
+      match = transformedLine.match(InitAction._lineMacroRegExp);
       if (match) {
         const sectionName: string = match[1];
         const replacement: string = this._isSectionCommented(sectionName) ? '// ' : '';
-        transformedLine = line.replace(InitAction._lineMacroRegExp, replacement);
+        transformedLine = transformedLine.replace(InitAction._lineMacroRegExp, replacement);
+      }
+
+      // Check for variable expansions
+      // Example:  [%RUSH_VERSION%]
+      while (match = transformedLine.match(InitAction._variableMacroRegExp)) {
+        const variableName: string = match[1];
+        const replacement: string = this._expandMacroVariable(variableName);
+        transformedLine = transformedLine.replace(InitAction._variableMacroRegExp, replacement);
       }
 
       // Verify that all macros were handled
@@ -299,5 +322,14 @@ export class InitAction extends BaseConfiglessRushAction {
     }
 
     return value!;
+  }
+
+  private _expandMacroVariable(variableName: string): string {
+    switch (variableName) {
+      case '%RUSH_VERSION%':
+        return Rush.version;
+      default:
+        throw new Error(`The template references an undefined variable "${variableName}"`);
+    }
   }
 }
