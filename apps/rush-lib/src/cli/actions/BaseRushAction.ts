@@ -32,14 +32,14 @@ export interface IBaseRushActionOptions extends ICommandLineActionOptions {
 }
 
 /**
- * The base Rush action that all Rush actions should extend.
+ * The base class for a few specialized Rush command-line actions that
+ * can be used without a rush.json configuration.
  */
-export abstract class BaseRushAction extends CommandLineAction {
+export abstract class BaseConfiglessRushAction extends CommandLineAction {
   private _parser: RushCommandLineParser;
-  private _eventHooksManager: EventHooksManager;
   private _safeForSimultaneousRushProcesses: boolean;
 
-  protected get rushConfiguration(): RushConfiguration {
+  protected get rushConfiguration(): RushConfiguration | undefined {
     return this._parser.rushConfiguration;
   }
 
@@ -55,31 +55,19 @@ export abstract class BaseRushAction extends CommandLineAction {
   }
 
   protected onExecute(): Promise<void> {
-    // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
-    // For example, NodeJS currently has the inexcusable design of terminating with zero exit code when
-    // there is an uncaught promise exception.  This will supposedly be fixed in NodeJS 9.
-    // Ideally we should do this for all the Rush actions, but "rush build" is the most critical one
-    // -- if it falsely appears to succeed, we could merge bad PRs, publish empty packages, etc.
-    process.exitCode = 1;
-
-    if (!this.rushConfiguration) {
-      throw Utilities.getRushConfigNotFoundError();
-    }
-
     this._ensureEnvironment();
 
-    if (!this._safeForSimultaneousRushProcesses) {
-      if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-        console.log(colors.red(`Another rush command is already running in this repository.`));
-        process.exit(1);
+    if (this.rushConfiguration) {
+      if (!this._safeForSimultaneousRushProcesses) {
+        if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
+          console.log(colors.red(`Another rush command is already running in this repository.`));
+          process.exit(1);
+        }
       }
     }
 
     console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
-    return this.run().then(() => {
-      // If we make it here, everything went fine, so reset the exit code back to 0
-      process.exitCode = 0;
-    });
+    return this.run();
   }
 
   /**
@@ -88,20 +76,41 @@ export abstract class BaseRushAction extends CommandLineAction {
    */
   protected abstract run(): Promise<void>;
 
+  private _ensureEnvironment(): void {
+    if (this.rushConfiguration) {
+      /* tslint:disable-next-line:no-string-literal */
+      let environmentPath: string | undefined = process.env['PATH'];
+      environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
+        path.delimiter + environmentPath;
+      /* tslint:disable-next-line:no-string-literal */
+      process.env['PATH'] = environmentPath;
+    }
+  }
+}
+
+/**
+ * The base class that most Rush command-line actions should extend.
+ */
+export abstract class BaseRushAction extends BaseConfiglessRushAction {
+  private _eventHooksManager: EventHooksManager;
+
+  protected get rushConfiguration(): RushConfiguration {
+    return super.rushConfiguration!;
+  }
+
+  protected onExecute(): Promise<void> {
+    if (!this.rushConfiguration) {
+      throw Utilities.getRushConfigNotFoundError();
+    }
+
+    return super.onExecute();
+  }
+
   protected get eventHooksManager(): EventHooksManager {
     if (!this._eventHooksManager) {
       this._eventHooksManager = new EventHooksManager(this.rushConfiguration.eventHooks,
         this.rushConfiguration.commonTempFolder);
     }
     return this._eventHooksManager;
-  }
-
-  private _ensureEnvironment(): void {
-    /* tslint:disable-next-line:no-string-literal */
-    let environmentPath: string | undefined = process.env['PATH'];
-    environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
-      path.delimiter + environmentPath;
-    /* tslint:disable-next-line:no-string-literal */
-    process.env['PATH'] = environmentPath;
   }
 }

@@ -149,7 +149,7 @@
             "type": "boolean"
           },
           "versionPolicyName": {
-            "description": "An optional version policy associated with the project. Version policies are defined in \"version-policies.json file.",
+            "description": "An optional version policy associated with the project. Version policies are defined in \"version-policies.json\" file.",
             "type": "string"
           }
         },
