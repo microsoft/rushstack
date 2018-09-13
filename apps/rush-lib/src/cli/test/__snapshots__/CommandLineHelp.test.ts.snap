@@ -192,13 +192,16 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for "rush init" 1`] = `
-"usage: rush init [-h]
+"usage: rush init [-h] [--rush-example-repo]
 
 When invoked in an empty folder, this command provisions a standard set of 
 config files to start managing projects using Rush.
 
 Optional arguments:
-  -h, --help  Show this help message and exit.
+  -h, --help           Show this help message and exit.
+  --rush-example-repo  Uncomment the configuration lines used by the 
+                       \\"rush-example\\" GitHub repo, which is a buildable 
+                       monorepo that illustrates many Rush features
 "
 `;
 
