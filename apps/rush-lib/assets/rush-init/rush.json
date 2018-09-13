@@ -92,6 +92,7 @@
    * The approvals are tracked in two config files "browser-approved-packages.json"
    * and "nonbrowser-approved-packages.json".  See the Rush documentation for details.
    */
+  /*[BEGIN "DEMO"]*/
   "approvedPackagesPolicy": {
     /**
      * The review categories allow you to say for example "This library is approved for usage
@@ -101,7 +102,7 @@
      * associated with a review category.  The approval is recorded in the files
      * "browser-approved-packages.json" and "nonbrowser-approved-packages.json".
      */
-    /*[LINE "DEMO"]*/ "reviewCategories": [ "main", "tools", "prototypes" ],
+    /*[LINE "HYPOTHETICAL"]*/ "reviewCategories": [ "main", "tools", "prototypes" ],
 
     /**
      * A list of NPM package scopes that will be excluded from review.
@@ -109,8 +110,9 @@
      * if the underlying package was already approved, this would imply that the typings
      * are also approved.
      */
-    /*[LINE "DEMO"]*/ "ignoredNpmScopes": [ "@types" ]
+    /*[LINE "HYPOTHETICAL"]*/ "ignoredNpmScopes": [ "@types" ]
   },
+  /*[END "DEMO"]*/
 
   /**
    * If you use Git as your version control system, this section has some additional
