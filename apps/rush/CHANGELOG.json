@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.2.1",
+      "tag": "@microsoft/rush_v5.2.1",
+      "date": "Thu, 13 Sep 2018 21:57:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush init\" failed because its \".gitignore\" template was excluded from the package"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.0",
       "tag": "@microsoft/rush_v5.2.0",
       "date": "Thu, 13 Sep 2018 19:34:37 GMT",

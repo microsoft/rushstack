@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 13 Sep 2018 19:34:37 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Sep 2018 21:57:21 GMT and should not be manually modified.
+
+## 5.2.1
+Thu, 13 Sep 2018 21:57:21 GMT
+
+### Updates
+
+- Fix an issue where "rush init" failed because its ".gitignore" template was excluded from the package
 
 ## 5.2.0
 Thu, 13 Sep 2018 19:34:37 GMT
