@@ -144,10 +144,10 @@ export class InitAction extends BaseConfiglessRushAction {
     // For example, "npm publish" will always exclude the filename ".gitignore"
     const templateFilePaths: string[] = [
       'rush.json',
-      '[dot].gitattributes',
-      '[dot].gitignore',
-      '[dot].travis.yml',
-      'common/config/rush/[dot].npmrc',
+      '[dot]gitattributes',
+      '[dot]gitignore',
+      '[dot]travis.yml',
+      'common/config/rush/[dot]npmrc',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/pnpmfile.js',
@@ -165,7 +165,7 @@ export class InitAction extends BaseConfiglessRushAction {
       }
 
       const destinationPath: string = path.join(initFolder, templateFilePath)
-        .replace('[dot]', '');
+        .replace('[dot]', '.');
 
       this._copyTemplateFile(sourcePath, destinationPath);
     }
