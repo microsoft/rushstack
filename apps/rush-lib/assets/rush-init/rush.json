@@ -98,11 +98,20 @@
      * The review categories allow you to say for example "This library is approved for usage
      * in prototypes, but not in production code."
      *
-     * Using the "reviewCategory" field in the "projects" section below, each project can
-     * associated with a review category.  The approval is recorded in the files
-     * "browser-approved-packages.json" and "nonbrowser-approved-packages.json".
+     * Each project can be associated with one review category, by assigning the "reviewCategory" field
+     * in the "projects" section of rush.json.  The approval is then recorded in the files
+     * "common/config/rush/browser-approved-packages.json" and "nonbrowser-approved-packages.json"
+     * which are automatically generated during "rush update".
+     *
+     * Designate categories with whatever granularity is appropriate for your review process,
+     * or you could just have a single category called "default".
      */
-    /*[LINE "HYPOTHETICAL"]*/ "reviewCategories": [ "main", "tools", "prototypes" ],
+    "reviewCategories": [
+      // Some example categories:
+      "production", // projects that ship to production
+      "tools",      // non-shipping projects that are part of the developer toolchain
+      "prototypes"  // experiments that should mostly be ignored by the review process
+    ],
 
     /**
      * A list of NPM package scopes that will be excluded from review.
@@ -222,7 +231,7 @@
        * and "nonbrowser-approved-packages.json" files.  The value must be one of the
        * strings from the "reviewCategories" defined above.
        */
-      "reviewCategory": "main",
+      "reviewCategory": "production",
 
       /**
        * A list of local projects that appear as devDependencies for this project, but cannot be
@@ -257,7 +266,7 @@
     {
       "packageName": "my-controls",
       "projectFolder": "libraries/my-controls",
-      "reviewCategory": "main"
+      "reviewCategory": "production"
     },
 
     {
