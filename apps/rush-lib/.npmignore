@@ -22,4 +22,4 @@
 # -----------------------------
 
 # (Add your exceptions here)
-!/etc/examples/**
+!/assets/**

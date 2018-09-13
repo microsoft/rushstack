@@ -28,8 +28,8 @@
    */
   "pnpmVersion": "2.15.1",
 
-  // "npmVersion": "4.5.0",
-  // "yarnVersion": "1.9.4",
+  /*[LINE "HYPOTHETICAL"]*/ "npmVersion": "4.5.0",
+  /*[LINE "HYPOTHETICAL"]*/ "yarnVersion": "1.9.4",
 
   /**
    * Options that are only used when the PNPM package manager is selected
@@ -46,7 +46,7 @@
      * The default value is false to avoid legacy compatibility issues.
      * It is strongly recommended to set strictPeerDependencies=true.
      */
-    "strictPeerDependencies": true
+    /*[LINE "DEMO"]*/ "strictPeerDependencies": true
   },
 
   /**
@@ -82,8 +82,8 @@
    * To remove these restrictions, you could set projectFolderMinDepth=1
    * and set projectFolderMaxDepth to a large number.
    */
-  // "projectFolderMinDepth": 2,
-  // "projectFolderMaxDepth": 2,
+  /*[LINE "HYPOTHETICAL"]*/ "projectFolderMinDepth": 2,
+  /*[LINE "HYPOTHETICAL"]*/ "projectFolderMaxDepth": 2,
 
   /**
    * This feature helps you to review and approve new packages before they are introduced
@@ -101,7 +101,7 @@
      * associated with a review category.  The approval is recorded in the files
      * "browser-approved-packages.json" and "nonbrowser-approved-packages.json".
      */
-    "reviewCategories": [ "main", "tools", "prototypes" ],
+    /*[LINE "DEMO"]*/ "reviewCategories": [ "main", "tools", "prototypes" ],
 
     /**
      * A list of NPM package scopes that will be excluded from review.
@@ -109,7 +109,7 @@
      * if the underlying package was already approved, this would imply that the typings
      * are also approved.
      */
-    "ignoredNpmScopes": [ "@types" ]
+    /*[LINE "DEMO"]*/ "ignoredNpmScopes": [ "@types" ]
   },
 
   /**
@@ -128,17 +128,19 @@
      * IMPORTANT: Because these are regular expressions encoded as JSON string literals,
      * RegExp escapes need two backspashes, and ordinary periods should be "\\.".
      */
+    /*[BEGIN "DEMO"]*/
     "allowedEmailRegExps": [
       "[^@]+@users\\.noreply\\.github\\.com",
       "travis@example\\.org"
     ],
+    /*[END "DEMO"]*/
 
     /**
      * When Rush reports that the address is malformed, the notice can include an example
      * of a recommended email.  Make sure it conforms to one of the allowedEmailRegExps
      * expressions.
      */
-    "sampleEmail": "mrexample@users.noreply.github.com"
+    /*[LINE "DEMO"]*/ "sampleEmail": "mrexample@users.noreply.github.com"
   },
 
   "repository": {
@@ -147,7 +149,7 @@
      * It specifies the remote url for the official Git repository.  If this URL is provided,
      * "rush change" will use it to find the right remote to compare against.
      */
-    // "url": "https://github.com/Microsoft/rush-example"
+    /*[LINE "HYPOTHETICAL"]*/ "url": "https://github.com/Microsoft/rush-example"
   },
 
   /**
@@ -157,7 +159,9 @@
     /**
      * The list of shell commands to run before the Rush installation starts
      */
-    "preRushInstall": [],
+    "preRushInstall": [
+      /*[LINE "HYPOTHETICAL"]*/ "common/scripts/pre-rush-install.js"
+    ],
 
     /**
      * The list of shell commands to run after the Rush installation finishes
@@ -183,12 +187,12 @@
    * that read these JSON files and do something with them.  These scripts are typically registered
    * in the "eventHooks" section.
    */
-  // "telemetryEnabled": false,
+  /*[LINE "HYPOTHETICAL"]*/ "telemetryEnabled": false,
 
   /**
    * Allows creation of hotfix changes. This feature is experimental so it is disabled by default.
    */
-  // "hotfixChangeEnabled": false,
+  /*[LINE "HYPOTHETICAL"]*/ "hotfixChangeEnabled": false,
 
   /**
    * (Required) This is the inventory of projects to be managed by Rush.
@@ -199,6 +203,7 @@
    * 3. It's useful to have a centralized inventory of all projects and their important metadata.
    */
   "projects": [
+    /*[BEGIN "DEMO"]*/
     {
       /**
        * The NPM package name of the project (must match package.json)
@@ -258,5 +263,6 @@
       "projectFolder": "tools/my-toolchain",
       "reviewCategory": "tools"
     }
+    /*[END "DEMO"]*/
   ]
 }

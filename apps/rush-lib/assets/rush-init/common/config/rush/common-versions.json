@@ -17,7 +17,7 @@
      * When someone asks for "^1.0.0" make sure they get "1.2.3" when working in this repo,
      * instead of the latest version.
      */
-    // "some-library": "1.2.3"
+    /*[LINE "HYPOTHETICAL"]*/ "some-library": "1.2.3"
   },
 
   /**
@@ -36,8 +36,8 @@
      * For example, allow some projects to use an older TypeScript compiler
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
-    // "typescript": [
-    //   "~2.4.0"
-    // ]
+    /*[LINE "HYPOTHETICAL"]*/ "typescript": [
+    /*[LINE "HYPOTHETICAL"]*/   "~2.4.0"
+    /*[LINE "HYPOTHETICAL"]*/ ]
   }
 }

@@ -29,11 +29,11 @@ module.exports = {
  */
 function readPackage(packageJson, context) {
 
-  // // The karma types have a missing dependency on typings from the log4js package.
-  // if (packageJson.name === '@types/karma') {
-  //  context.log('Fixed up dependencies for @types/karma');
-  //  packageJson.dependencies['log4js'] = '0.6.38';
-  // }
+  /*[LINE "HYPOTHETICAL"]*/ // The karma types have a missing dependency on typings from the log4js package.
+  /*[LINE "HYPOTHETICAL"]*/ if (packageJson.name === '@types/karma') {
+  /*[LINE "HYPOTHETICAL"]*/  context.log('Fixed up dependencies for @types/karma');
+  /*[LINE "HYPOTHETICAL"]*/  packageJson.dependencies['log4js'] = '0.6.38';
+  /*[LINE "HYPOTHETICAL"]*/ }
 
   return packageJson;
 }
