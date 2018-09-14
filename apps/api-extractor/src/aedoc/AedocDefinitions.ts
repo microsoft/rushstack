@@ -13,6 +13,11 @@ export class AedocDefinitions {
     syntaxKind: TSDocTagSyntaxKind.ModifierTag
   });
 
+  public static readonly internalRemarks: TSDocTagDefinition = new TSDocTagDefinition({
+    tagName: '@internalRemarks',
+    syntaxKind: TSDocTagSyntaxKind.BlockTag
+  });
+
   public static readonly preapprovedTag: TSDocTagDefinition = new TSDocTagDefinition({
     tagName: '@preapproved',
     syntaxKind: TSDocTagSyntaxKind.ModifierTag
@@ -23,6 +28,7 @@ export class AedocDefinitions {
       const configuration: TSDocParserConfiguration = new TSDocParserConfiguration();
       configuration.addTagDefinitions([
         AedocDefinitions.betaDocumentation,
+        AedocDefinitions.internalRemarks,
         AedocDefinitions.preapprovedTag
       ]);
       AedocDefinitions._parserConfiguration = configuration;

@@ -484,7 +484,6 @@ export abstract class AstItem {
     }
 
     if (this.kind === AstItemKind.Package) {
-      // TODO: Use isEmpty()
       if (this.documentation.aedocCommentFound) {
         if (!this.documentation.isPackageDocumentation) {
           this.reportError('A package comment was found, but it is missing the @packagedocumentation tag');

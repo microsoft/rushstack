@@ -13,7 +13,21 @@ import {
   DocBlockTag,
   StandardTags,
   Excerpt,
-  StandardModifierTagSet
+  StandardModifierTagSet,
+  DocComment,
+  DocSection,
+  DocNodeKind,
+  DocPlainText,
+  DocCodeSpan,
+  DocErrorText,
+  DocEscapedText,
+  DocNode,
+  DocParagraph,
+  DocCodeFence,
+  DocHtmlStartTag,
+  DocHtmlEndTag,
+  DocInlineTag,
+  DocNodeTransforms
 } from '@microsoft/tsdoc';
 import { AstPackage } from '../ast/AstPackage';
 import { ApiDefinitionReference, IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
@@ -23,8 +37,10 @@ import { ReleaseTag } from './ReleaseTag';
 import {
   MarkupElement,
   MarkupBasicElement,
-  IMarkupApiLink
+  IMarkupApiLink,
+  MarkupHighlighter
 } from '../markup/MarkupElement';
+import { Markup } from '../markup/Markup';
 import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 import { AedocDefinitions } from './AedocDefinitions';
 
@@ -58,11 +74,11 @@ export class ApiDocumentation {
   /**
    * docCommentTokens that are parsed into Doc Elements.
    */
-  public summary: MarkupElement[];
-  public deprecatedMessage: MarkupBasicElement[];
-  public remarks: MarkupElement[];
-  public returnsMessage: MarkupBasicElement[];
-  public parameters: { [name: string]: IAedocParameter; };
+  public readonly summary: MarkupElement[];
+  public readonly deprecatedMessage: MarkupBasicElement[];
+  public readonly remarks: MarkupElement[];
+  public readonly returnsMessage: MarkupBasicElement[];
+  public readonly parameters: { [name: string]: IAedocParameter; };
 
   /**
    * A list of \@link elements to be post-processed after all basic documentation has been created
@@ -171,6 +187,7 @@ export class ApiDocumentation {
   public readonly reportError: (message: string) => void;
 
   private _parserContext: ParserContext | undefined;
+  private _docComment: DocComment | undefined;
 
   constructor(inputTextRange: TextRange,
     referenceResolver: IReferenceResolver,
@@ -200,6 +217,9 @@ export class ApiDocumentation {
     this.incompleteLinks = [];
     this.incompleteInheritdocs = [];
     this.releaseTag = ReleaseTag.None;
+
+    this._parserContext = undefined;
+    this._docComment = undefined;
 
     if (!inputTextRange.isEmpty()) {
       this._parseDocs(inputTextRange);
@@ -241,8 +261,10 @@ export class ApiDocumentation {
   private _parseDocs(inputTextRange: TextRange): void {
     const tsdocParser: TSDocParser = new TSDocParser(AedocDefinitions.parserConfiguration);
     this._parserContext = tsdocParser.parseRange(inputTextRange);
+    this._docComment = this._parserContext.docComment;
 
     this._parseModifierTags();
+    this._parseSections();
   }
 
   private _reportError(message: string, excerpt?: Excerpt): void {
@@ -250,10 +272,10 @@ export class ApiDocumentation {
   }
 
   private _parseModifierTags(): void {
-    if (!this._parserContext) {
+    if (!this._docComment) {
       return;
     }
-    const modifierTagSet: StandardModifierTagSet = this._parserContext.docComment.modifierTagSet;
+    const modifierTagSet: StandardModifierTagSet = this._docComment.modifierTagSet;
 
     // The first function call that encounters a duplicate will return false.
     // When there are duplicates, the broadest release tag wins.
@@ -301,6 +323,131 @@ export class ApiDocumentation {
     }
 
     return true;
+  }
+
+  private _parseSections(): void {
+    if (!this._docComment) {
+      return;
+    }
+
+    this._renderAsMarkupElementsInto(this.summary, this._docComment.summarySection);
+
+    if (this._docComment.remarksBlock) {
+      this._renderAsMarkupElementsInto(this.remarks, this._docComment.remarksBlock);
+    }
+
+    if (this._docComment.deprecatedBlock) {
+      this._renderAsMarkupElementsInto(this.deprecatedMessage, this._docComment.deprecatedBlock);
+    }
+
+    if (this._docComment.returnsBlock) {
+      this._renderAsMarkupElementsInto(this.returnsMessage, this._docComment.returnsBlock);
+    }
+
+    for (const paramBlock of this._docComment.paramBlocks) {
+      const aedocParameter: IAedocParameter = {
+        name: paramBlock.parameterName,
+        description: []
+      };
+      this._renderAsMarkupElementsInto(aedocParameter.description, paramBlock);
+
+      this.parameters[paramBlock.parameterName] = aedocParameter;
+    }
+  }
+
+  private _renderAsMarkupElementsInto(result: MarkupElement[], node: DocNode): void {
+    switch (node.kind) {
+      case DocNodeKind.Block:
+      case DocNodeKind.Section:
+      case DocNodeKind.ParamBlock:
+        const docSection: DocSection = node as DocSection;
+        for (const childNode of docSection.nodes) {
+          this._renderAsMarkupElementsInto(result, childNode);
+        }
+        break;
+      case DocNodeKind.BlockTag:
+        // If an unrecognized TSDoc block tag appears in the content, don't render it
+        break;
+      case DocNodeKind.CodeFence:
+        const docCodeFence: DocCodeFence = node as DocCodeFence;
+        let markupHighlighter: MarkupHighlighter = 'plain';
+        switch (docCodeFence.language.toUpperCase()) {
+          case 'TS':
+          case 'TYPESCRIPT':
+          case 'JS':
+          case 'JAVASCRIPT':
+            markupHighlighter = 'javascript';
+            break;
+        }
+        result.push(Markup.createCodeBox(docCodeFence.code, markupHighlighter));
+        break;
+      case DocNodeKind.CodeSpan:
+        const docCodeSpan: DocCodeSpan = node as DocCodeSpan;
+        result.push(Markup.createCode(docCodeSpan.code));
+        break;
+      case DocNodeKind.ErrorText:
+        const docErrorText: DocErrorText = node as DocErrorText;
+        Markup.appendTextElements(result, docErrorText.text);
+        break;
+      case DocNodeKind.EscapedText:
+        const docEscapedText: DocEscapedText = node as DocEscapedText;
+        Markup.appendTextElements(result, docEscapedText.text);
+        break;
+      case DocNodeKind.HtmlStartTag:
+        const docHtmlStartTag: DocHtmlStartTag = node as DocHtmlStartTag;
+        let htmlStartTag: string = '<';
+        htmlStartTag += docHtmlStartTag.elementName;
+        for (const attribute of docHtmlStartTag.htmlAttributes) {
+          htmlStartTag += ` ${attribute.attributeName}=${attribute.attributeValue}`;
+        }
+        if (docHtmlStartTag.selfClosingTag) {
+          htmlStartTag += '/';
+        }
+        htmlStartTag += '>';
+        result.push(Markup.createHtmlTag(htmlStartTag));
+        break;
+      case DocNodeKind.HtmlEndTag:
+        const docHtmlEndTag: DocHtmlEndTag = node as DocHtmlEndTag;
+        result.push(Markup.createHtmlTag(`</${docHtmlEndTag.elementName}>`));
+        break;
+      case DocNodeKind.InlineTag:
+        // TODO: Process inline tags correctly
+        const docInlineTag: DocInlineTag = node as DocInlineTag;
+        Markup.appendTextElements(result, '{' + docInlineTag.tagName + '}');
+        break;
+      case DocNodeKind.Paragraph:
+        if (result.length > 0) {
+          switch (result[result.length - 1].kind) {
+            case 'code-box':
+            case 'heading1':
+            case 'heading2':
+            case 'note-box':
+            case 'page':
+            case 'paragraph':
+            case 'table':
+              // Don't put a Markup.PARAGRAPH after a structural element,
+              // since it is implicit.
+              break;
+            default:
+              result.push(Markup.PARAGRAPH);
+              break;
+          }
+        }
+        const docParagraph: DocParagraph = node as DocParagraph;
+        for (const childNode of DocNodeTransforms.trimSpacesInParagraph(docParagraph).nodes) {
+          this._renderAsMarkupElementsInto(result, childNode);
+        }
+        break;
+      case DocNodeKind.PlainText:
+        const docPlainText: DocPlainText = node as DocPlainText;
+        Markup.appendTextElements(result, docPlainText.text);
+        break;
+      case DocNodeKind.SoftBreak:
+        Markup.appendTextElements(result, ' ');
+        break;
+      default:
+        this.reportError('Unsupported TSDoc element: ' + node.kind);
+    }
   }
 
   /**
