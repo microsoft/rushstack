@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 08 Sep 2018 20:57:32 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Sep 2018 21:57:21 GMT and should not be manually modified.
+
+## 5.2.1
+Thu, 13 Sep 2018 21:57:21 GMT
+
+### Updates
+
+- Fix an issue where "rush init" failed because its ".gitignore" template was excluded from the package
+
+## 5.2.0
+Thu, 13 Sep 2018 19:34:37 GMT
+
+### Updates
+
+- Add a "rush init" command for scaffolding new monorepo folders
+- Allow "rush scan" to be used without a rush.json configuration
 
 ## 5.1.0
 Sat, 08 Sep 2018 20:57:32 GMT

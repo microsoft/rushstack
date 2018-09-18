@@ -6,6 +6,8 @@ class _TypeReferencesInAedoc {
   getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
   // WARNING: Unable to find referenced export "api-extractor-test-01:TypeReferencesInAedoc"
   getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
+  // (undocumented)
+  getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
 }
 
 // @public

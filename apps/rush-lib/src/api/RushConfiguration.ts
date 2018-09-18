@@ -204,14 +204,15 @@ export class RushConfiguration {
    * an RushConfiguration object.
    */
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
-    const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(rushJsonFilename);
+    const resolvedRushJsonFilename: string = path.resolve(rushJsonFilename);
+    const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(resolvedRushJsonFilename);
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
     // then the schema may have changed. This should no longer be a problem after Rush 4.0 and the C2R wrapper,
     // but we'll validate anyway.
     const expectedRushVersion: string = rushConfigurationJson.rushVersion;
 
-    const rushJsonBaseName: string = path.basename(rushJsonFilename);
+    const rushJsonBaseName: string = path.basename(resolvedRushJsonFilename);
 
     // If the version is missing or malformed, fall through and let the schema handle it.
     if (expectedRushVersion && semver.valid(expectedRushVersion)) {
@@ -240,9 +241,9 @@ export class RushConfiguration {
       }
     }
 
-    RushConfiguration._jsonSchema.validateObject(rushConfigurationJson, rushJsonFilename);
+    RushConfiguration._jsonSchema.validateObject(rushConfigurationJson, resolvedRushJsonFilename);
 
-    return new RushConfiguration(rushConfigurationJson, rushJsonFilename);
+    return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
   }
 
   public static loadFromDefaultLocation(): RushConfiguration {
@@ -386,14 +387,14 @@ export class RushConfiguration {
   }
 
   /**
-   * The Rush configuration file
+   * The absolute path to the "rush.json" configuration file that was loaded to construct this object.
    */
   public get rushJsonFile(): string {
     return this._rushJsonFile;
   }
 
   /**
-   * The folder that contains rush.json for this project.
+   * The absolute path of the folder that contains rush.json for this project.
    */
   public get rushJsonFolder(): string {
     return this._rushJsonFolder;
