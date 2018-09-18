@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 06 Sep 2018 01:25:25 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Sep 2018 21:04:55 GMT and should not be manually modified.
+
+## 5.11.2
+Tue, 18 Sep 2018 21:04:55 GMT
+
+### Patches
+
+- Fix an issue where parameters mentioned in comments were attempting to be analyzed by api-extractor.
 
 ## 5.11.1
 Thu, 06 Sep 2018 01:25:25 GMT

@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 06 Sep 2018 01:25:26 GMT and should not be manually modified.
+This log was last generated on Tue, 18 Sep 2018 21:04:56 GMT and should not be manually modified.
+
+## 3.8.19
+Tue, 18 Sep 2018 21:04:56 GMT
+
+*Version update only*
 
 ## 3.8.18
 Thu, 06 Sep 2018 01:25:26 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.11.2",
+      "tag": "@microsoft/api-extractor_v5.11.2",
+      "date": "Tue, 18 Sep 2018 21:04:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where parameters mentioned in comments were attempting to be analyzed by api-extractor."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.11.1",
       "tag": "@microsoft/api-extractor_v5.11.1",
       "date": "Thu, 06 Sep 2018 01:25:25 GMT",
