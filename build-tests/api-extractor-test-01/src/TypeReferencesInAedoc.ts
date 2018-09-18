@@ -19,4 +19,11 @@ export class TypeReferencesInAedoc {
   public getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc {
     return this;
   }
+
+  /**
+   * @param {arg} - Malformed param reference.
+   */
+  public getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc {
+    return this;
+  }
 }

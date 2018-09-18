@@ -225,6 +225,10 @@ export declare class _TypeReferencesInAedoc {
     getValue(arg1: _TypeReferencesInAedoc): _TypeReferencesInAedoc;
     /** {@inheritdoc api-extractor-test-01:TypeReferencesInAedoc.getValue} */
     getValue2(arg1: _TypeReferencesInAedoc): _TypeReferencesInAedoc;
+    /**
+     * @param {arg} - Malformed param reference.
+     */
+    getValue3(arg1: _TypeReferencesInAedoc): _TypeReferencesInAedoc;
 }
 
 /**

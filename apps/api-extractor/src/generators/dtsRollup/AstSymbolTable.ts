@@ -190,8 +190,11 @@ export class AstSymbolTable {
    * Used by analyze to recursively analyze the entire child tree.
    */
   private _analyzeChildTree(node: ts.Node, governingAstDeclaration: AstDeclaration): void {
-    // is this a reference to another AstSymbol?
     switch (node.kind) {
+      case ts.SyntaxKind.JSDocComment: // Skip JSDoc comments - TS considers @param tags TypeReference nodes
+        return;
+
+      // is this a reference to another AstSymbol?
       case ts.SyntaxKind.TypeReference: // general type references
       case ts.SyntaxKind.ExpressionWithTypeArguments: // special case for e.g. the "extends" keyword
         {
