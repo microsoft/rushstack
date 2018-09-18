@@ -420,8 +420,14 @@ export class ApiDocumentation {
       const descriptionElements: MarkupBasicElement[] = commentTextElements.concat(remainingElements);
       Markup.normalize(descriptionElements);
 
+      // If the paramter name is in brackets, remove them
+      const bracketedNameMatches: string[] | null = name.match(/^\{\s*([^\s]+)\s*\}$/);
+      const normalizedName: string = bracketedNameMatches && bracketedNameMatches.length === 2
+        ? bracketedNameMatches[1]
+        : name;
+
       const paramDocElement: IAedocParameter = {
-        name: name,
+        name: normalizedName,
         description: descriptionElements
       };
       return paramDocElement;
