@@ -8,7 +8,7 @@
 export class TypeReferencesInAedoc {
   /**
    * Returns a value
-   * @param {arg1} - The input parameter of type {@link TypeReferencesInAedoc}.
+   * @param arg1 - The input parameter of type {@link TypeReferencesInAedoc}.
    * @returns An object of type {@link TypeReferencesInAedoc}.
    */
   public getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc {
