@@ -94,6 +94,7 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
+    this.runRushCheckIfNecessary();
     return Promise.resolve().then(() => {
       PolicyValidator.validatePolicy(this.rushConfiguration, this._bypassPolicy.value);
       const userEmail: string = Git.getGitEmail(this.rushConfiguration);

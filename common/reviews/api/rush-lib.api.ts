@@ -176,6 +176,7 @@ class RushConfiguration {
   // (undocumented)
   readonly projectsByName: Map<string, RushConfigurationProject>;
   readonly repositoryUrl: string;
+  readonly requireVersionChecks: boolean;
   readonly rushJsonFile: string;
   readonly rushJsonFolder: string;
   readonly rushLinkJsonFilename: string;

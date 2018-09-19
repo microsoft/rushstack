@@ -97,6 +97,7 @@ export interface IRushConfigurationJson {
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
   pnpmOptions?: IPnpmOptionsJson;
+  requireVersionChecks?: boolean;
 }
 
 /**
@@ -171,6 +172,7 @@ export class RushConfiguration {
   private _packageManagerToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
+  private _requireVersionChecks: boolean;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -636,6 +638,13 @@ export class RushConfiguration {
   }
 
   /**
+   * If true, then "rush check" will be run before all commands
+   */
+  public get requireVersionChecks(): boolean {
+    return this._requireVersionChecks;
+  }
+
+  /**
    * Indicates whether telemetry collection is enabled for Rush runs.
    * @beta
    */
@@ -772,6 +781,8 @@ export class RushConfiguration {
     this._rushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
+
+    this._requireVersionChecks = !!rushConfigurationJson.requireVersionChecks;
 
     this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || { });
 

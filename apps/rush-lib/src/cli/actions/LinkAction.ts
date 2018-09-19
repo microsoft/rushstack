@@ -33,6 +33,7 @@ export class LinkAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
+    this.runRushCheckIfNecessary();
     const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
     return linkManager.createSymlinksForProjects(this._force.value);
   }

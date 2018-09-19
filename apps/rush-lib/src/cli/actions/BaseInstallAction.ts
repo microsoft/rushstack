@@ -57,6 +57,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected abstract buildInstallOptions(): IInstallManagerOptions;
 
   protected run(): Promise<void> {
+
+    this.runRushCheckIfNecessary();
+
     const stopwatch: Stopwatch = Stopwatch.start();
 
     SetupChecks.validate(this.rushConfiguration);
