@@ -25,6 +25,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
+import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -173,7 +174,7 @@ export class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected run(): Promise<void> {
-    this.runRushCheckIfNecessary();
+    VersionMismatchFinder.runRushCheckIfNecessary(this.rushConfiguration);
     return Promise.resolve().then(() => {
       PolicyValidator.validatePolicy(this.rushConfiguration, false);
 

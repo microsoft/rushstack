@@ -3,6 +3,7 @@
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
+import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 
 export class CheckAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
@@ -22,7 +23,7 @@ export class CheckAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    this.runRushCheckIfNecessary(true);
+    VersionMismatchFinder.runRushCheckIfNecessary(this.rushConfiguration, true);
     return Promise.resolve();
   }
 }

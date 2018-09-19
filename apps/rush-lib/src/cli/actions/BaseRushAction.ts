@@ -16,9 +16,6 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { RushConstants } from '../../logic/RushConstants';
-import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
@@ -115,51 +112,5 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
         this.rushConfiguration.commonTempFolder);
     }
     return this._eventHooksManager;
-  }
-
-  protected runRushCheckIfNecessary(isRushCheckCommand: boolean = false): void {
-    if (this.rushConfiguration.requireVersionChecks || isRushCheckCommand) {
-      // Collect all the preferred versions into a single table
-      const allPreferredVersions: { [dependency: string]: string } = {};
-
-      this.rushConfiguration.commonVersions.getAllPreferredVersions().forEach((version: string, dependency: string) => {
-        allPreferredVersions[dependency] = version;
-      });
-
-      // Create a fake project for the purposes of reporting conflicts with preferredVersions
-      // or xstitchPreferredVersions from common-versions.json
-      const projects: RushConfigurationProject[] = [...this.rushConfiguration.projects];
-
-      projects.push({
-        packageName: 'preferred versions from ' + RushConstants.commonVersionsFilename,
-        packageJson: { dependencies: allPreferredVersions }
-      } as RushConfigurationProject);
-
-      const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
-        projects,
-        this.rushConfiguration.commonVersions.allowedAlternativeVersions
-      );
-
-      // Iterate over the list. For any dependency with mismatching versions, print the projects
-      mismatchFinder.getMismatches().forEach((dependency: string) => {
-        console.log(colors.yellow(dependency));
-        mismatchFinder.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
-          console.log(`  ${version}`);
-          mismatchFinder.getConsumersOfMismatch(dependency, version)!.forEach((project: string) => {
-            console.log(`   - ${project}`);
-          });
-        });
-        console.log();
-      });
-
-      if (mismatchFinder.numberOfMismatches) {
-        console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
-        process.exit(1);
-      } else {
-        if (isRushCheckCommand) {
-          console.log(colors.green(`Found no mis-matching dependencies!`));
-        }
-      }
-    }
   }
 }
