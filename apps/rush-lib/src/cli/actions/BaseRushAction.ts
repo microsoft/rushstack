@@ -128,13 +128,15 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
 
       // Create a fake project for the purposes of reporting conflicts with preferredVersions
       // or xstitchPreferredVersions from common-versions.json
-      this.rushConfiguration.projects.push({
+      const projects: RushConfigurationProject[] = [...this.rushConfiguration.projects];
+
+      projects.push({
         packageName: 'preferred versions from ' + RushConstants.commonVersionsFilename,
         packageJson: { dependencies: allPreferredVersions }
       } as RushConfigurationProject);
 
       const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
-        this.rushConfiguration.projects,
+        projects,
         this.rushConfiguration.commonVersions.allowedAlternativeVersions
       );
 
