@@ -23,7 +23,7 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     isRushCheckCommand: boolean = false): void {
 
-    if (rushConfiguration.requireVersionChecks || isRushCheckCommand) {
+    if (rushConfiguration.enforceConsistentVersions || isRushCheckCommand) {
       // Collect all the preferred versions into a single table
       const allPreferredVersions: { [dependency: string]: string } = {};
 

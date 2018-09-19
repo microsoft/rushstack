@@ -97,7 +97,7 @@ export interface IRushConfigurationJson {
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
   pnpmOptions?: IPnpmOptionsJson;
-  requireVersionChecks?: boolean;
+  enforceConsistentVersions?: boolean;
 }
 
 /**
@@ -172,7 +172,7 @@ export class RushConfiguration {
   private _packageManagerToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
-  private _requireVersionChecks: boolean;
+  private _enforceConsistentVersions: boolean;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -638,10 +638,11 @@ export class RushConfiguration {
   }
 
   /**
-   * If true, then "rush check" will be run before all commands
+   * If true, then consistent version specifiers for dependencies will be enforced.
+   * I.e. "rush check" is run before some commands.
    */
-  public get requireVersionChecks(): boolean {
-    return this._requireVersionChecks;
+  public get enforceConsistentVersions(): boolean {
+    return this._enforceConsistentVersions;
   }
 
   /**
@@ -782,7 +783,7 @@ export class RushConfiguration {
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
-    this._requireVersionChecks = !!rushConfigurationJson.requireVersionChecks;
+    this._enforceConsistentVersions = !!rushConfigurationJson.enforceConsistentVersions;
 
     this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || { });
 
