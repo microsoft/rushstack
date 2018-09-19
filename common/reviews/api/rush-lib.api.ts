@@ -151,6 +151,7 @@ class RushConfiguration {
   readonly commonScriptsFolder: string;
   readonly commonTempFolder: string;
   readonly commonVersions: CommonVersionsConfiguration;
+  readonly enforceConsistentVersions: boolean;
   // @beta
   readonly eventHooks: EventHooks;
   findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
@@ -176,7 +177,6 @@ class RushConfiguration {
   // (undocumented)
   readonly projectsByName: Map<string, RushConfigurationProject>;
   readonly repositoryUrl: string;
-  readonly requireVersionChecks: boolean;
   readonly rushJsonFile: string;
   readonly rushJsonFolder: string;
   readonly rushLinkJsonFilename: string;
