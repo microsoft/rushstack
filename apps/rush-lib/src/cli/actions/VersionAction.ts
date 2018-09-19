@@ -94,7 +94,6 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    VersionMismatchFinder.runRushCheckIfNecessary(this.rushConfiguration);
     return Promise.resolve().then(() => {
       PolicyValidator.validatePolicy(this.rushConfiguration, this._bypassPolicy.value);
       const userEmail: string = Git.getGitEmail(this.rushConfiguration);
@@ -122,9 +121,6 @@ export class VersionAction extends BaseRushAction {
           true);
         this._gitProcess(tempBranch);
       }
-
-      // run the version check again to see if Rush accidentally broke "rush check"
-      VersionMismatchFinder.runRushCheckIfNecessary(this.rushConfiguration);
     });
   }
 

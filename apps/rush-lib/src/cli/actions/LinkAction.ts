@@ -7,7 +7,6 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { LinkManagerFactory } from '../../logic/LinkManagerFactory';
 import { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
-import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 
 export class LinkAction extends BaseRushAction {
   private _force: CommandLineFlagParameter;
@@ -34,7 +33,6 @@ export class LinkAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    VersionMismatchFinder.runRushCheckIfNecessary(this.rushConfiguration);
     const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
     return linkManager.createSymlinksForProjects(this._force.value);
   }

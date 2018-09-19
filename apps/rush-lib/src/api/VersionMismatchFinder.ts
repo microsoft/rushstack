@@ -7,6 +7,9 @@ import { RushConfiguration } from './RushConfiguration';
 import { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 
+/**
+ * @public
+ */
 export class VersionMismatchFinder {
  /* store it like this:
   * {
@@ -19,9 +22,17 @@ export class VersionMismatchFinder {
   private _mismatches: Map<string, Map<string, string[]>>;
   private _projects: RushConfigurationProject[];
 
-  public static runRushCheckIfNecessary(
+  public static rushCheck(rushConfiguration: RushConfiguration): void {
+    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, true);
+  }
+
+  public static enforceConsistentVersions(rushConfiguration: RushConfiguration): void {
+    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, false);
+  }
+
+  private static _checkForInconsistentVersions(
     rushConfiguration: RushConfiguration,
-    isRushCheckCommand: boolean = false): void {
+    isRushCheckCommand: boolean): void {
 
     if (rushConfiguration.enforceConsistentVersions || isRushCheckCommand) {
       // Collect all the preferred versions into a single table

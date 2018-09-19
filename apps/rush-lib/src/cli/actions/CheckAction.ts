@@ -23,7 +23,7 @@ export class CheckAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    VersionMismatchFinder.runRushCheckIfNecessary(this.rushConfiguration, true);
+    VersionMismatchFinder.rushCheck(this.rushConfiguration);
     return Promise.resolve();
   }
 }
