@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Add \"enforceConsistentVersions\" configuration which runs \"rush check\" before certain commands",
+      "comment": "Add \"ensureConsistentVersions\" configuration which runs \"rush check\" before certain commands",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
