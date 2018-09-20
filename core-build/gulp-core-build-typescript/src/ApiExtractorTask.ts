@@ -104,12 +104,11 @@ export interface IApiExtractorTaskConfig {
   publishFolderForPublic?: string;
 
   /**
-   * If specified, use typings specified in the project's compilerOptions -> lib option
-   * from this TypeScript compiler package.
+   * Use this option to override the version of the TypeScript compiler API extractor should use.
    *
-   * @alpha
+   * @beta
    */
-  typescriptLibPackagePath?: string;
+  typescriptCompilerFolder?: string;
 }
 
 /**
@@ -127,7 +126,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         entry: undefined,
         apiReviewFolder: undefined,
         apiJsonFolder: undefined,
-        typescriptLibPackagePath: BaseCmdTask.getPackagePath('typescript')
+        typescriptCompilerFolder: BaseCmdTask.getPackagePath('typescript')
       }
     );
   }
@@ -205,7 +204,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
           logWarning: (message: string) => this.logWarning(message),
           logError: (message: string) => this.logError(message)
         },
-        typescriptLibPackagePath: this.taskConfig.typescriptLibPackagePath
+        typescriptCompilerFolder: this.taskConfig.typescriptCompilerFolder
       };
 
       const extractor: Extractor = new Extractor(extractorConfig, extractorOptions);

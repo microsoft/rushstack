@@ -65,12 +65,16 @@ export interface IExtractorOptions {
   localBuild?: boolean;
 
   /**
-   * If specified, use typings specified in the project's compilerOptions -> lib option
-   * from this TypeScript compiler package.
+   * By default API Extractor uses its own TypeScript compiler version to analyze your project.
+   * This can often cause compiler errors due to incompatibilities between different TS versions.
+   * Use this option to specify the folder path for your compiler version.
    *
-   * @alpha
+   * @remarks
+   * This option only applies when compiler.config.configType is set to "tsconfig"
+   *
+   * @beta
    */
-  typescriptLibPackagePath?: string;
+  typescriptCompilerFolder?: string;
 }
 
 /**
@@ -187,7 +191,7 @@ export class Extractor {
           this._absoluteRootFolder
         );
 
-        this._updateCommandLineForTypescriptLibPackage(commandLine, options);
+        this._updateCommandLineForTypescriptPackage(commandLine, options);
 
         const normalizedEntryPointFile: string = path.normalize(
           path.resolve(this._absoluteRootFolder, this.actualConfig.project.entryPointSourceFile)
@@ -458,27 +462,34 @@ export class Extractor {
     return path.relative(this._absoluteRootFolder, absolutePath).replace(/\\/g, '/');
   }
 
-  private _updateCommandLineForTypescriptLibPackage(
+  /**
+   * Update the parsed command line to use paths from the specified TS compiler folder, if
+   * a TS compiler folder is specified.
+   */
+  private _updateCommandLineForTypescriptPackage(
     commandLine: ts.ParsedCommandLine,
     options: IExtractorOptions
   ): void {
-    if (options.typescriptLibPackagePath) {
+    const DEFAULT_BUILTIN_LIBRARY: string = 'lib.d.ts';
+    const OTHER_BUILTIN_LIBRARIES: string[] = ['lib.es5.d.ts', 'lib.es6.d.ts'];
+
+    if (options.typescriptCompilerFolder) {
       commandLine.options.noLib = true;
-      const compilerLibDirectory: string = path.join(options.typescriptLibPackagePath, 'lib');
+      const compilerLibFolder: string = path.join(options.typescriptCompilerFolder, 'lib');
 
       let foundBaseLib: boolean = false;
       const filesToAdd: string[]  = [];
       for (const libFilename of commandLine.options.lib || []) {
-        if (libFilename === 'lib.d.ts') {
+        if (libFilename === DEFAULT_BUILTIN_LIBRARY) {
           // Ignore the default lib - it'll get added later
           continue;
         }
 
-        if (libFilename === 'lib.es5.d.ts' || libFilename === 'lib.es6.d.ts') {
+        if (OTHER_BUILTIN_LIBRARIES.indexOf(libFilename) !== -1) {
           foundBaseLib = true;
         }
 
-        const libPath: string = path.join(compilerLibDirectory, libFilename.toLowerCase());
+        const libPath: string = path.join(compilerLibFolder, libFilename);
         if (!FileSystem.exists(libPath)) {
           throw new Error(`lib ${libFilename} does not exist in the compiler specified in typescriptLibPackage`);
         }
@@ -488,7 +499,7 @@ export class Extractor {
 
       if (!foundBaseLib) {
         // If we didn't find another version of the base lib library, include the default
-        filesToAdd.push(path.join(compilerLibDirectory, 'lib.d.ts'));
+        filesToAdd.push(path.join(compilerLibFolder, 'lib.d.ts'));
       }
 
       if (!commandLine.fileNames) {

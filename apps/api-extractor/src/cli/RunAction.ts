@@ -28,7 +28,7 @@ export class RunAction extends CommandLineAction {
   private _parser: ApiExtractorCommandLine;
   private _configFileParameter: CommandLineStringParameter;
   private _localParameter: CommandLineFlagParameter;
-  private _typescriptLibPackagePath: CommandLineStringParameter;
+  private _typescriptCompilerFolder: CommandLineStringParameter;
 
   constructor(parser: ApiExtractorCommandLine) {
     super({
@@ -56,11 +56,12 @@ export class RunAction extends CommandLineAction {
         + ' review file is automatically copied in a local build.'
     });
 
-    this._typescriptLibPackagePath = this.defineStringParameter({
-      parameterLongName: '--typescript-lib-package',
+    this._typescriptCompilerFolder = this.defineStringParameter({
+      parameterLongName: '--typescript-compiler-folder',
       argumentName: 'PATH',
-      description: 'If specified, use typings specified in the project\'s compilerOptions -> lib option'
-        + ' from this TypeScript compiler package. This option is experimental.'
+      description: 'By default API Extractor uses its own TypeScript compiler version to analyze your project.'
+        + ' This can often cause compiler errors due to incompatibilities between different TS versions.'
+        + ' Use "--typescript-compiler-folder" to specify the folder path for your compiler version.'
     });
   }
 
@@ -68,28 +69,28 @@ export class RunAction extends CommandLineAction {
     const lookup: PackageJsonLookup = new PackageJsonLookup();
     let configFilename: string;
 
-    let typescriptLibPackagePath: string | undefined = this._typescriptLibPackagePath.value;
-    if (typescriptLibPackagePath) {
-      typescriptLibPackagePath = path.normalize(typescriptLibPackagePath);
+    let typescriptCompilerFolder: string | undefined = this._typescriptCompilerFolder.value;
+    if (typescriptCompilerFolder) {
+      typescriptCompilerFolder = path.normalize(typescriptCompilerFolder);
 
-      if (FileSystem.exists(typescriptLibPackagePath)) {
-        typescriptLibPackagePath = lookup.tryGetPackageFolderFor(typescriptLibPackagePath);
-        const typescriptLibPackageJson: IPackageJson | undefined = typescriptLibPackagePath
-          ? lookup.tryLoadPackageJsonFor(typescriptLibPackagePath)
+      if (FileSystem.exists(typescriptCompilerFolder)) {
+        typescriptCompilerFolder = lookup.tryGetPackageFolderFor(typescriptCompilerFolder);
+        const typescriptCompilerPackageJson: IPackageJson | undefined = typescriptCompilerFolder
+          ? lookup.tryLoadPackageJsonFor(typescriptCompilerFolder)
           : undefined;
-        if (!typescriptLibPackageJson) {
+        if (!typescriptCompilerPackageJson) {
           throw new Error(
-            `The path specified in the ${this._typescriptLibPackagePath.longName} parameter is not a package.`
+            `The path specified in the ${this._typescriptCompilerFolder.longName} parameter is not a package.`
           );
-        } else if (typescriptLibPackageJson.name !== 'typescript') {
+        } else if (typescriptCompilerPackageJson.name !== 'typescript') {
           throw new Error(
-            `The path specified in the ${this._typescriptLibPackagePath.longName} parameter is not a TypeScript`
+            `The path specified in the ${this._typescriptCompilerFolder.longName} parameter is not a TypeScript`
             + ' compiler package.'
           );
         }
       } else {
         throw new Error(
-          `The path specified in the ${this._typescriptLibPackagePath.longName} parameter does not exist.`
+          `The path specified in the ${this._typescriptCompilerFolder.longName} parameter does not exist.`
         );
       }
     }
@@ -123,7 +124,7 @@ export class RunAction extends CommandLineAction {
       config,
       {
         localBuild: this._localParameter.value,
-        typescriptLibPackagePath: typescriptLibPackagePath
+        typescriptCompilerFolder: typescriptCompilerFolder
       }
     );
 
