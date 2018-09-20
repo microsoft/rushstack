@@ -9,7 +9,7 @@ import {
   JsonFile,
   IPackageJson,
   FileSystem,
-  FileConstants
+  PackageJsonLookup
 } from '@microsoft/node-core-library';
 import { GulpTask } from '@microsoft/gulp-core-build';
 
@@ -89,6 +89,17 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
   protected _packageBinPath: string;
   protected _errorHasBeenLogged: boolean;
 
+  public static getPackagePath(packageName: string): string | undefined {
+    const packageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(packageName);
+    return packageJsonPath ? path.dirname(packageJsonPath) : undefined;
+  }
+
+  private static _getPackageJsonPath(packageName: string): string | undefined {
+    const lookup: PackageJsonLookup = new PackageJsonLookup();
+    const mainEntryPath: string = require.resolve(packageName);
+    return lookup.tryGetPackageJsonFilePathFor(mainEntryPath);
+  }
+
   constructor(name: string, options: IBaseTaskOptions<TTaskConfig>) {
     super(name, options.initialTaskConfig);
 
@@ -97,18 +108,13 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
   }
 
   public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {
-    let binaryPackagePath: string = require.resolve(this._packageName);
-    let packageJsonPath: string;
-    while (!FileSystem.exists(packageJsonPath = path.join(binaryPackagePath, FileConstants.PackageJson))) {
-      const tempBinaryPackagePath: string = path.dirname(binaryPackagePath);
-      if (binaryPackagePath === tempBinaryPackagePath) {
-        // We've hit the disk root
-        completeCallback(`Unable to find the package.json file for ${this._packageName}.`);
-        return;
-      }
-
-      binaryPackagePath = tempBinaryPackagePath;
+    const packageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(this._packageName);
+    if (!packageJsonPath) {
+      completeCallback(`Unable to find the package.json file for ${this._packageName}.`);
+      return;
     }
+
+    let binaryPackagePath: string = path.dirname(packageJsonPath);
 
     if (this.taskConfig.overridePackagePath) {
       // The package version is being overridden
