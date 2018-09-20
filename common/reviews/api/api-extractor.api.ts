@@ -214,6 +214,8 @@ interface IExtractorOptions {
   compilerProgram?: ts.Program;
   customLogger?: Partial<ILogger>;
   localBuild?: boolean;
+  // @alpha
+  typescriptLibPackagePath?: string;
 }
 
 // @public

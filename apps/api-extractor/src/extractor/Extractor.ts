@@ -63,6 +63,14 @@ export interface IExtractorOptions {
    * The default value is false.
    */
   localBuild?: boolean;
+
+  /**
+   * If specified, use typings specified in the project's compilerOptions -> lib option
+   * from this TypeScript compiler package.
+   *
+   * @alpha
+   */
+  typescriptLibPackagePath?: string;
 }
 
 /**
@@ -79,7 +87,7 @@ export class Extractor {
   private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
     './api-extractor-defaults.json'));
 
-  private static _outputFileExtensionRegExp: RegExp = /\.d\.ts$/i;
+  private static _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;
 
   private static _defaultLogger: ILogger = {
     logVerbose: (message: string) => console.log('(Verbose) ' + message),
@@ -124,7 +132,7 @@ export class Extractor {
           throw new Error('Input file is not an absolute path: ' + inputFilePath);
         }
 
-        if (Extractor._outputFileExtensionRegExp.test(inputFilePath)) {
+        if (Extractor._declarationFileExtensionRegExp.test(inputFilePath)) {
           analysisFilePaths.push(inputFilePath);
         }
       }
@@ -173,15 +181,22 @@ export class Extractor {
           tsconfig = JsonFile.load(path.join(this._absoluteRootFolder, 'tsconfig.json'));
         }
 
-        const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(tsconfig,
-          ts.sys, this._absoluteRootFolder);
+        const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(
+          tsconfig,
+          ts.sys,
+          this._absoluteRootFolder
+        );
+
+        this._updateCommandLineForTypescriptLibPackage(commandLine, options);
 
         const normalizedEntryPointFile: string = path.normalize(
-          path.resolve(this._absoluteRootFolder, this.actualConfig.project.entryPointSourceFile));
+          path.resolve(this._absoluteRootFolder, this.actualConfig.project.entryPointSourceFile)
+        );
 
-        // Append the normalizedEntryPointFile and remove any source files from the list
-        const analysisFilePaths: string[] = Extractor.generateFilePathsForAnalysis(commandLine.fileNames
-          .concat(normalizedEntryPointFile));
+        // Append the normalizedEntryPointFile and remove any non-declaration files from the list
+        const analysisFilePaths: string[] = Extractor.generateFilePathsForAnalysis(
+          commandLine.fileNames.concat(normalizedEntryPointFile)
+        );
 
         this._program = ts.createProgram(analysisFilePaths, commandLine.options);
 
@@ -262,7 +277,7 @@ export class Extractor {
       throw new Error('The configuration object wasn\'t normalized properly');
     }
 
-    if (!Extractor._outputFileExtensionRegExp.test(projectConfig.entryPointSourceFile)) {
+    if (!Extractor._declarationFileExtensionRegExp.test(projectConfig.entryPointSourceFile)) {
       throw new Error('The entry point is not a declaration file: ' + projectConfig.entryPointSourceFile);
     }
 
@@ -441,5 +456,48 @@ export class Extractor {
       throw new Error('Expected absolute path: ' + absolutePath);
     }
     return path.relative(this._absoluteRootFolder, absolutePath).replace(/\\/g, '/');
+  }
+
+  private _updateCommandLineForTypescriptLibPackage(
+    commandLine: ts.ParsedCommandLine,
+    options: IExtractorOptions
+  ): void {
+    if (options.typescriptLibPackagePath) {
+      commandLine.options.noLib = true;
+      const compilerLibDirectory: string = path.join(options.typescriptLibPackagePath, 'lib');
+
+      let foundBaseLib: boolean = false;
+      const filesToAdd: string[]  = [];
+      for (const libFilename of commandLine.options.lib || []) {
+        if (libFilename === 'lib.d.ts') {
+          // Ignore the default lib - it'll get added later
+          continue;
+        }
+
+        if (libFilename === 'lib.es5.d.ts' || libFilename === 'lib.es6.d.ts') {
+          foundBaseLib = true;
+        }
+
+        const libPath: string = path.join(compilerLibDirectory, libFilename.toLowerCase());
+        if (!FileSystem.exists(libPath)) {
+          throw new Error(`lib ${libFilename} does not exist in the compiler specified in typescriptLibPackage`);
+        }
+
+        filesToAdd.push(libPath);
+      }
+
+      if (!foundBaseLib) {
+        // If we didn't find another version of the base lib library, include the default
+        filesToAdd.push(path.join(compilerLibDirectory, 'lib.d.ts'));
+      }
+
+      if (!commandLine.fileNames) {
+        commandLine.fileNames = [];
+      }
+
+      commandLine.fileNames.push(...filesToAdd);
+
+      commandLine.options.lib = undefined;
+    }
   }
 }
