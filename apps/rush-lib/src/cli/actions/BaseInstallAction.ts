@@ -13,6 +13,7 @@ import { PurgeManager } from '../../logic/PurgeManager';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
+import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
@@ -57,6 +58,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected abstract buildInstallOptions(): IInstallManagerOptions;
 
   protected run(): Promise<void> {
+    VersionMismatchFinder.enforceConsistentVersions(this.rushConfiguration);
+
     const stopwatch: Stopwatch = Stopwatch.start();
 
     SetupChecks.validate(this.rushConfiguration);

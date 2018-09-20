@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
+
+import { RushConfiguration } from './RushConfiguration';
 import { RushConfigurationProject } from './RushConfigurationProject';
+import { RushConstants } from '../logic/RushConstants';
 
 /**
  * @public
@@ -17,6 +21,63 @@ export class VersionMismatchFinder {
   private _allowedAlternativeVersion:  Map<string, ReadonlyArray<string>>;
   private _mismatches: Map<string, Map<string, string[]>>;
   private _projects: RushConfigurationProject[];
+
+  public static rushCheck(rushConfiguration: RushConfiguration): void {
+    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, true);
+  }
+
+  public static enforceConsistentVersions(rushConfiguration: RushConfiguration): void {
+    VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, false);
+  }
+
+  private static _checkForInconsistentVersions(
+    rushConfiguration: RushConfiguration,
+    isRushCheckCommand: boolean): void {
+
+    if (rushConfiguration.enforceConsistentVersions || isRushCheckCommand) {
+      // Collect all the preferred versions into a single table
+      const allPreferredVersions: { [dependency: string]: string } = {};
+
+      rushConfiguration.commonVersions.getAllPreferredVersions().forEach((version: string, dependency: string) => {
+        allPreferredVersions[dependency] = version;
+      });
+
+      // Create a fake project for the purposes of reporting conflicts with preferredVersions
+      // or xstitchPreferredVersions from common-versions.json
+      const projects: RushConfigurationProject[] = [...rushConfiguration.projects];
+
+      projects.push({
+        packageName: 'preferred versions from ' + RushConstants.commonVersionsFilename,
+        packageJson: { dependencies: allPreferredVersions }
+      } as RushConfigurationProject);
+
+      const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
+        projects,
+        rushConfiguration.commonVersions.allowedAlternativeVersions
+      );
+
+      // Iterate over the list. For any dependency with mismatching versions, print the projects
+      mismatchFinder.getMismatches().forEach((dependency: string) => {
+        console.log(colors.yellow(dependency));
+        mismatchFinder.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
+          console.log(`  ${version}`);
+          mismatchFinder.getConsumersOfMismatch(dependency, version)!.forEach((project: string) => {
+            console.log(`   - ${project}`);
+          });
+        });
+        console.log();
+      });
+
+      if (mismatchFinder.numberOfMismatches) {
+        console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
+        process.exit(1);
+      } else {
+        if (isRushCheckCommand) {
+          console.log(colors.green(`Found no mis-matching dependencies!`));
+        }
+      }
+    }
+  }
 
   constructor(projects: RushConfigurationProject[], allowedAlternativeVersions?:  Map<string, ReadonlyArray<string>>) {
     this._projects = projects;
