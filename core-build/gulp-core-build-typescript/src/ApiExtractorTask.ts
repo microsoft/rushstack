@@ -14,6 +14,8 @@ import {
   IExtractorConfig
 } from '@microsoft/api-extractor';
 
+import { BaseCmdTask } from './BaseCmdTask';
+
 /** @public */
 export interface IApiExtractorTaskConfig {
   /**
@@ -100,6 +102,14 @@ export interface IApiExtractorTaskConfig {
    * except definitions marked as \@beta, \@alpha, or \@internal.
    */
   publishFolderForPublic?: string;
+
+  /**
+   * If specified, use typings specified in the project's compilerOptions -> lib option
+   * from this TypeScript compiler package.
+   *
+   * @alpha
+   */
+  typescriptLibPackagePath?: string;
 }
 
 /**
@@ -116,7 +126,8 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         enabled: false,
         entry: undefined,
         apiReviewFolder: undefined,
-        apiJsonFolder: undefined
+        apiJsonFolder: undefined,
+        typescriptLibPackagePath: BaseCmdTask.getPackagePath('typescript')
       }
     );
   }
@@ -193,7 +204,8 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
           logInfo: (message: string) => this.log(message),
           logWarning: (message: string) => this.logWarning(message),
           logError: (message: string) => this.logError(message)
-        }
+        },
+        typescriptLibPackagePath: this.taskConfig.typescriptLibPackagePath
       };
 
       const extractor: Extractor = new Extractor(extractorConfig, extractorOptions);
