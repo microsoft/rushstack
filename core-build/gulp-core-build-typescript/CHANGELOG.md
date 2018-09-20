@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 18 Sep 2018 21:04:55 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Sep 2018 23:57:21 GMT and should not be manually modified.
+
+## 6.0.2
+Thu, 20 Sep 2018 23:57:21 GMT
+
+### Patches
+
+- Include support for the typescriptCompilerFolder api-extractor option.
 
 ## 6.0.1
 Tue, 18 Sep 2018 21:04:55 GMT

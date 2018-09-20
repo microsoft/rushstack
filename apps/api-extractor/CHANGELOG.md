@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 18 Sep 2018 21:04:55 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Sep 2018 23:57:21 GMT and should not be manually modified.
+
+## 5.12.0
+Thu, 20 Sep 2018 23:57:21 GMT
+
+### Minor changes
+
+- Add new feature: Support using a different version of the TypeScript compiler.
 
 ## 5.11.2
 Tue, 18 Sep 2018 21:04:55 GMT
