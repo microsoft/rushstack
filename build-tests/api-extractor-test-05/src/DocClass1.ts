@@ -16,6 +16,7 @@ export class SystemEvent {
  *
  * @remarks
  * These are some remarks.
+ * @defaultvalue a default value for this function
  * @public
  */
 export class DocClass1 {
