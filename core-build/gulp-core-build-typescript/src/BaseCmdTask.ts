@@ -139,7 +139,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
       return;
     }
 
-    let binaryPackagePath: string = path.dirname(packageJsonPath);
+    const binaryPackagePath: string = path.dirname(packageJsonPath);
 
     // Print the version
     const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
