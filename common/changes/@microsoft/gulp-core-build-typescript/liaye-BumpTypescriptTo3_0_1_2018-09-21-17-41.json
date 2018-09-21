@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Upgrade Typescript to 3.0.1",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "ipip2005@users.noreply.github.com"
+}
