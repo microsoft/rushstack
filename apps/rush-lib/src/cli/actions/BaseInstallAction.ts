@@ -58,7 +58,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected abstract buildInstallOptions(): IInstallManagerOptions;
 
   protected run(): Promise<void> {
-    VersionMismatchFinder.enforceConsistentVersions(this.rushConfiguration);
+    VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration);
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
