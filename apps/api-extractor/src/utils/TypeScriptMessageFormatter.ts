@@ -3,11 +3,11 @@
 
 import * as ts from 'typescript';
 
-export class TypeScriptMessageSerializer {
+export class TypeScriptMessageFormatter {
   /**
    * Serialize a TypeScript diagnostic message or message chain.
    */
-  public static serialize(messageText: string | ts.DiagnosticMessageChain): string {
+  public static format(messageText: string | ts.DiagnosticMessageChain): string {
     const serializedErrors: string[] = [];
     for (
       let wrappedMessageText: string | ts.DiagnosticMessageChain | undefined = messageText;

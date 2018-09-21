@@ -24,7 +24,7 @@ import { ApiJsonGenerator } from '../generators/ApiJsonGenerator';
 import { ApiFileGenerator } from '../generators/ApiFileGenerator';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/dtsRollup/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
-import { TypeScriptMessageSerializer } from '../utils/TypeScriptMessageSerializer';
+import { TypeScriptMessageFormatter } from '../utils/TypeScriptMessageFormatter';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -206,7 +206,7 @@ export class Extractor {
         this._program = ts.createProgram(analysisFilePaths, commandLine.options);
 
         if (commandLine.errors.length > 0) {
-          const errorText: string = TypeScriptMessageSerializer.serialize(commandLine.errors[0].messageText);
+          const errorText: string = TypeScriptMessageFormatter.format(commandLine.errors[0].messageText);
           throw new Error(`Error parsing tsconfig.json content: ${errorText}`);
         }
 
