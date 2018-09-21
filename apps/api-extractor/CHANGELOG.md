@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 20 Sep 2018 23:57:21 GMT and should not be manually modified.
+This log was last generated on Fri, 21 Sep 2018 16:04:42 GMT and should not be manually modified.
+
+## 5.12.1
+Fri, 21 Sep 2018 16:04:42 GMT
+
+### Patches
+
+- Fix an issue where TypeScript errors are often logged as "[Object object]" instead of the actual error message.
 
 ## 5.12.0
 Thu, 20 Sep 2018 23:57:21 GMT
