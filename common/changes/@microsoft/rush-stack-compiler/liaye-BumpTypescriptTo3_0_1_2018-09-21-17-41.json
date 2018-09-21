@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler",
+      "comment": "Upgrade Typescript to 3.0.1",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler",
+  "email": "ipip2005@users.noreply.github.com"
+}

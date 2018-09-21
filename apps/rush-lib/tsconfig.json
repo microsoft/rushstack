@@ -3,7 +3,8 @@
   "compilerOptions": {
     "types": [
       "jest"
-    ]
+    ],
+    "skipLibCheck": true
   },
   "include": [
     "./typings/tsd.d.ts",

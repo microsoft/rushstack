@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-library-build",
+      "comment": " bump TS to 3+",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/node-library-build",
+  "email": "ipip2005@users.noreply.github.com"
+}
