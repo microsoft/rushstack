@@ -5,22 +5,22 @@ import * as ts from 'typescript';
 
 export class TypeScriptMessageFormatter {
   /**
-   * Serialize a TypeScript diagnostic message or message chain.
+   * Format a TypeScript diagnostic message or message chain.
    */
   public static format(messageText: string | ts.DiagnosticMessageChain): string {
-    const serializedErrors: string[] = [];
+    const formattedErrors: string[] = [];
     for (
       let wrappedMessageText: string | ts.DiagnosticMessageChain | undefined = messageText;
       wrappedMessageText !== undefined;
       wrappedMessageText = (wrappedMessageText as ts.DiagnosticMessageChain).next
     ) {
       if (typeof wrappedMessageText === 'string') {
-        serializedErrors.push(wrappedMessageText);
+        formattedErrors.push(wrappedMessageText);
       } else {
-        serializedErrors.push(wrappedMessageText.messageText);
+        formattedErrors.push(wrappedMessageText.messageText);
       }
     }
 
-    return serializedErrors.join('; ');
+    return formattedErrors.join('; ');
   }
 }
