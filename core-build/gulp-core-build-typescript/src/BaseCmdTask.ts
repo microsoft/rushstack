@@ -108,14 +108,6 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
   }
 
   public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {
-    const packageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(this._packageName);
-    if (!packageJsonPath) {
-      completeCallback(`Unable to find the package.json file for ${this._packageName}.`);
-      return;
-    }
-
-    let binaryPackagePath: string = path.dirname(packageJsonPath);
-
     if (this.taskConfig.overridePackagePath) {
       // The package version is being overridden
       if (!FileSystem.exists(this.taskConfig.overridePackagePath)) {
@@ -125,9 +117,16 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
         );
         return;
       }
-
-      binaryPackagePath = this.taskConfig.overridePackagePath;
     }
+
+    const targetPackage: string = this.taskConfig.overridePackagePath ? path.resolve(this.taskConfig.overridePackagePath) : this._packageName;
+    const packageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(targetPackage);
+    if (!packageJsonPath) {
+      completeCallback(`Unable to find the package.json file for ${this._packageName}.`);
+      return;
+    }
+
+    let binaryPackagePath: string = path.dirname(packageJsonPath);
 
     // Print the version
     const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
