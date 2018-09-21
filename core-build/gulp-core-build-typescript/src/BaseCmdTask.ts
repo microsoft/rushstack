@@ -129,10 +129,11 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
       binaryPackagePath = this.taskConfig.overridePackagePath;
 
       // try to get the package at the override
-      const overriddenPackageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(path.resolve(this.taskConfig.overridePackagePath));
-      if (overriddenPackageJsonPath) {
+      const newPackageAbsPath: string = path.resolve(this.taskConfig.overridePackagePath);
+      const newPackageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(newPackageAbsPath);
+      if (newPackageJsonPath) {
         // if we managed to get a package here, we can use its package.json instead
-        packageJsonPath = overriddenPackageJsonPath;
+        packageJsonPath = newPackageJsonPath;
       }
     }
 
