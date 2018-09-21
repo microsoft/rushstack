@@ -15,6 +15,7 @@ import { AstPackage } from './ast/AstPackage';
 import { DocItemLoader } from './DocItemLoader';
 import { ILogger } from './extractor/ILogger';
 import { IExtractorPoliciesConfig, IExtractorValidationRulesConfig } from './extractor/IExtractorConfig';
+import { TypeScriptMessageSerializer } from './utils/TypeScriptMessageSerializer';
 
 /**
  * Options for ExtractorContext constructor.
@@ -102,7 +103,8 @@ export class ExtractorContext {
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
     // compile errors that would result from a full compilation.
     for (const diagnostic of options.program.getSemanticDiagnostics()) {
-      this.reportError('TypeScript: ' + diagnostic.messageText, diagnostic.file, diagnostic.start);
+      const errorText: string = TypeScriptMessageSerializer.serialize(diagnostic.messageText);
+      this.reportError(`TypeScript: ${errorText}`, diagnostic.file, diagnostic.start);
     }
 
     this.typeChecker = options.program.getTypeChecker();
