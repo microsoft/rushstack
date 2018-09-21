@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": " bump TS to 3+",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/web-library-build",
+  "email": "ipip2005@users.noreply.github.com"
+}
