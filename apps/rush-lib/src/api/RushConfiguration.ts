@@ -743,6 +743,16 @@ export class RushConfiguration {
     return this._versionPolicyConfiguration;
   }
 
+  public getCurrentProjectFromPath(currentFolderPath: string): RushConfigurationProject | undefined {
+    const resolvedPath: string = path.resolve(currentFolderPath);
+    for (const project of this.projects) {
+      if (path.relative(project.projectFolder, resolvedPath).indexOf('..') !== 0) {
+        return project;
+      }
+    }
+    return undefined;
+  }
+
   /**
    * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
    * instead.
