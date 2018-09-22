@@ -108,13 +108,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
   }
 
   public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {
-    const packageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(this._packageName);
-    if (!packageJsonPath) {
-      completeCallback(`Unable to find the package.json file for ${this._packageName}.`);
-      return;
-    }
-
-    let binaryPackagePath: string = path.dirname(packageJsonPath);
+    let packageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(this._packageName);
 
     if (this.taskConfig.overridePackagePath) {
       // The package version is being overridden
@@ -126,8 +120,26 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> extend
         return;
       }
 
-      binaryPackagePath = this.taskConfig.overridePackagePath;
+      // try to get the package at the override
+      const newPackageAbsPath: string = path.resolve(this.taskConfig.overridePackagePath);
+      const newPackageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(newPackageAbsPath);
+      if (newPackageJsonPath) {
+        // if we managed to get a package here, we can use its package.json instead
+        packageJsonPath = newPackageJsonPath;
+      } else {
+        this.logWarning(
+          `Could not locate a package.json for ${this._packageName} at ${this.taskConfig.overridePackagePath}.` +
+          '  Attempting to use the package.json for the default package instead.'
+        );
+      }
     }
+
+    if (!packageJsonPath) {
+      completeCallback(`Unable to find the package.json file for ${this._packageName}.`);
+      return;
+    }
+
+    const binaryPackagePath: string = path.dirname(packageJsonPath);
 
     // Print the version
     const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
