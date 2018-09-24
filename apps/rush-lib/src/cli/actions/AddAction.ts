@@ -3,38 +3,20 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import * as child_process from 'child_process';
-import * as colors from 'colors';
 import * as semver from 'semver';
-
-import inquirer = require('inquirer');
 
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 import {
-  FileSystem,
   JsonFile,
   FileConstants
 } from '@microsoft/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import {
-  IChangeFile,
-  IChangeInfo
-} from '../../api/ChangeManagement';
-import { VersionControl } from '../../utilities/VersionControl';
-import { ChangeFile } from '../../api/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { ChangeFiles } from '../../logic/ChangeFiles';
-import {
-  VersionPolicy,
-  IndividualVersionPolicy,
-  LockStepVersionPolicy,
-  VersionPolicyDefinitionName
-} from '../../api/VersionPolicy';
 import { InstallManager, IInstallManagerOptions } from '../../logic/InstallManager';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { Utilities } from '../../utilities/Utilities';
@@ -122,12 +104,12 @@ export class AddAction extends BaseRushAction {
     const implicitlyPinned: Map<string, string>
       = InstallManager.collectImplicitlyPreferredVersions(this.rushConfiguration);
 
-    const version = this._getNormalizedVersionSpec(
+    const version: string = this._getNormalizedVersionSpec(
       packageName, initialVersion, implicitlyPinned.get(packageName));
 
     if (this._devDependencyFlag.value) {
       project.packageJson.devDependencies
-        = this._updateDependency(project.packageJson.devDependencies, packageName, version)
+        = this._updateDependency(project.packageJson.devDependencies, packageName, version);
     } else {
       project.packageJson.dependencies
         = this._updateDependency(project.packageJson.dependencies, packageName, version);
