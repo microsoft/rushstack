@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "6.0.4",
+      "tag": "@microsoft/gulp-core-build-typescript_v6.0.4",
+      "date": "Mon, 24 Sep 2018 16:04:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed overridePackagePath not loading correct version of package."
+          }
+        ]
+      }
+    },
+    {
       "version": "6.0.3",
       "tag": "@microsoft/gulp-core-build-typescript_v6.0.3",
       "date": "Fri, 21 Sep 2018 16:04:42 GMT",

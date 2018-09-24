@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 21 Sep 2018 16:04:42 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Sep 2018 16:04:28 GMT and should not be manually modified.
+
+## 6.0.4
+Mon, 24 Sep 2018 16:04:28 GMT
+
+### Patches
+
+- Fixed overridePackagePath not loading correct version of package.
 
 ## 6.0.3
 Fri, 21 Sep 2018 16:04:42 GMT
