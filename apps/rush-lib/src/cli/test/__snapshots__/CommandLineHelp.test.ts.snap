@@ -15,6 +15,7 @@ proven turnkey solution for monorepo management, Rush is for you.
 
 Positional arguments:
   <command>
+    add           Adds a dependency to the package.json and runs rush upgrade.
     change        Records changes made to projects, indicating how the 
                   package version number should be bumped for the next 
                   publish.
@@ -48,6 +49,35 @@ Optional arguments:
                   the tool
 
 For detailed help about a specific command, use: rush <command> -h
+"
+`;
+
+exports[`CommandLineHelp prints the help for "rush add" 1`] = `
+"usage: rush add [-h] -p PACKAGE_NAME [-v VERSION_RANGE] [--exact] [--caret]
+                [--dev] [-c] [-n]
+                
+
+Blah.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -p PACKAGE_NAME, --package PACKAGE_NAME
+                        (Required) The name of the package which should be 
+                        added as a dependency
+  -v VERSION_RANGE, --version VERSION_RANGE
+  --exact               If specified, the version specifier inserted into the 
+                        package.json will be a locked, exact version.
+  --caret               If specified, the version specifier inserted into the 
+                        package.json will be a prepended with a \\"caret\\" 
+                        specifier (\\"^\\").
+  --dev                 If specified, the package will be added as a 
+                        \\"devDependency\\" to the package.json
+  -c, --make-consistent
+                        If specified, other packages with this dependency 
+                        will have their package.json files updated to point 
+                        at the specified depdendency
+  -n, --no-install      If specified, the \\"rush update\\" command will not be 
+                        run after updating the package.json files.
 "
 `;
 

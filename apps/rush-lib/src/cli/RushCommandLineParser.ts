@@ -14,6 +14,7 @@ import { CommandJson } from '../api/CommandLineJson';
 import { Utilities } from '../utilities/Utilities';
 import { BaseScriptAction } from '../cli/scriptActions/BaseScriptAction';
 
+import { AddAction } from './actions/AddAction';
 import { ChangeAction } from './actions/ChangeAction';
 import { CheckAction } from './actions/CheckAction';
 import { UpdateAction } from './actions/UpdateAction';
@@ -109,6 +110,7 @@ export class RushCommandLineParser extends CommandLineParser {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
       }
 
+      this.addAction(new AddAction(this));
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
       this.addAction(new InstallAction(this));
