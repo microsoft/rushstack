@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.12.2",
+      "tag": "@microsoft/api-extractor_v5.12.2",
+      "date": "Mon, 24 Sep 2018 23:06:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow doc comments to use TSDoc's \"@defaultvalue\" tag (but the value is not yet passed to the documentation pipeline)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.12.1",
       "tag": "@microsoft/api-extractor_v5.12.1",
       "date": "Fri, 21 Sep 2018 16:04:42 GMT",

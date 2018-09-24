@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 21 Sep 2018 16:04:42 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Sep 2018 23:06:40 GMT and should not be manually modified.
+
+## 5.12.2
+Mon, 24 Sep 2018 23:06:40 GMT
+
+### Patches
+
+- Allow doc comments to use TSDoc's "@defaultvalue" tag (but the value is not yet passed to the documentation pipeline)
 
 ## 5.12.1
 Fri, 21 Sep 2018 16:04:42 GMT
