@@ -156,6 +156,8 @@ class RushConfiguration {
   readonly eventHooks: EventHooks;
   findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
+  // (undocumented)
+  getCurrentProjectFromPath(currentFolderPath: string): RushConfigurationProject | undefined;
   getProjectByName(projectName: string): RushConfigurationProject | undefined;
   readonly gitAllowedEmailRegExps: string[];
   readonly gitSampleEmail: string;
