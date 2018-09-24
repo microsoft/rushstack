@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-webpack",
-  "version": "3.4.25",
+  "version": "3.4.26",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler": "0.1.7",
-    "@microsoft/node-library-build": "5.0.11",
+    "@microsoft/node-library-build": "5.0.12",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
     "@types/source-map": "0.5.0",
