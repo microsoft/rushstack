@@ -104,6 +104,8 @@ export class AddAction extends BaseRushAction {
     const implicitlyPinned: Map<string, string>
       = InstallManager.collectImplicitlyPreferredVersions(this.rushConfiguration);
 
+    console.log(`implicitlyPinned size: ${implicitlyPinned.size}`);
+
     const version: string = this._getNormalizedVersionSpec(
       packageName, initialVersion, implicitlyPinned.get(packageName));
 
@@ -149,6 +151,11 @@ export class AddAction extends BaseRushAction {
     packageName: string,
     initialSpec: string | undefined,
     implicitlyPinnedVersion: string | undefined): string {
+    console.log(`_getNormalizedVersionSpec()`);
+    console.log(`packageName: ${packageName}`);
+    console.log(`initialSpec: ${initialSpec}`);
+    console.log(`implicitlyPinnedVersion: ${implicitlyPinnedVersion}`);
+
     // if ensureConsistentVersions => reuse the pinned version
     // else, query the registry and use the latest that satisfies semver spec
     if (initialSpec && implicitlyPinnedVersion && initialSpec === implicitlyPinnedVersion) {
@@ -161,16 +168,17 @@ export class AddAction extends BaseRushAction {
       }
     }
 
-    const allVersions: string =
-      Utilities.executeCommandAndCaptureOutput(this.rushConfiguration.packageManagerToolFilename,
-      ['view', initialSpec ? `${packageName}@${initialSpec}` : packageName, 'versions'],
-        this.rushConfiguration.commonTempFolder);
-
-    const versionList: Array<string> = JSON.parse(allVersions).sort(semver.compare);
-
     let selectedVersion: string | undefined;
 
     if (initialSpec) {
+      const allVersions: string =
+        Utilities.executeCommandAndCaptureOutput(this.rushConfiguration.packageManagerToolFilename,
+          ['view', packageName, 'versions', '--json'],
+          this.rushConfiguration.commonTempFolder);
+
+      let versionList: Array<string> = JSON.parse(allVersions);
+      versionList = versionList.sort((a: string, b: string) => { return semver.gt(a, b) ? -1 : 1; });
+
       for (const version of versionList) {
         if (semver.satisfies(version, initialSpec)) {
           selectedVersion = version;
@@ -181,7 +189,9 @@ export class AddAction extends BaseRushAction {
         throw new Error(`Cannot find version for ${packageName} that satisfies "${initialSpec}"`);
       }
     } else {
-        selectedVersion = versionList[0];
+        selectedVersion = Utilities.executeCommandAndCaptureOutput(this.rushConfiguration.packageManagerToolFilename,
+          ['view', `${packageName}@latest`, 'version'],
+          this.rushConfiguration.commonTempFolder).trim();
     }
 
     if (this._caretFlag.value) {
