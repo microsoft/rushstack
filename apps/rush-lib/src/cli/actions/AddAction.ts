@@ -20,6 +20,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { InstallManager, IInstallManagerOptions } from '../../logic/InstallManager';
 import { PurgeManager } from '../../logic/PurgeManager';
 import { Utilities } from '../../utilities/Utilities';
+import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
 
 export class AddAction extends BaseRushAction {
   private _exactFlag: CommandLineFlagParameter;
@@ -117,6 +118,43 @@ export class AddAction extends BaseRushAction {
         = this._updateDependency(project.packageJson.dependencies, packageName, version);
     }
 
+    if (this.rushConfiguration.enforceConsistentVersions) {
+      // we need to do a mismatch check
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this.rushConfiguration);
+
+      const mismatches: Array<string> = mismatchFinder.getMismatches();
+      if (mismatches.length) {
+        if (!this._makeConsistentFlag.value) {
+          return Promise.reject(new Error(`Adding "${packageName}@${version}" to ${project.packageName}`
+            + ` causes mismatched dependencies. Use the --make-consistent flag to update other packages to use this`
+            + ` version, or do not specify the --version flag.`));
+        }
+
+        // otherwise we need to go update a bunch of other projects
+        for (const mismatchedVersion of mismatchFinder.getVersionsOfMismatch(packageName)!) {
+          for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
+            if (packageName !== project.packageName) {
+              const consumerProject: RushConfigurationProject = this.rushConfiguration.getProjectByName(consumer)!;
+
+              if (consumerProject.packageJson.devDependencies
+                && consumerProject.packageJson.devDependencies[packageName]) {
+                consumerProject.packageJson.devDependencies
+                  = this._updateDependency(consumerProject.packageJson.devDependencies, packageName, version);
+              } else {
+                consumerProject.packageJson.dependencies
+                  = this._updateDependency(consumerProject.packageJson.dependencies, packageName, version);
+              }
+
+              // overwrite existing file
+              const consumerPackageJsonPath: string
+                = path.join(consumerProject.projectFolder, FileConstants.PackageJson);
+              JsonFile.save(consumerProject.packageJson, consumerPackageJsonPath);
+            }
+          }
+        }
+      }
+    }
+
     // overwrite existing file
     JsonFile.save(project.packageJson, path.join(project.projectFolder, FileConstants.PackageJson));
 
@@ -162,15 +200,13 @@ export class AddAction extends BaseRushAction {
       return initialSpec;
     }
 
-    if (this.rushConfiguration.enforceConsistentVersions) {
-      if (implicitlyPinnedVersion) {
-        return implicitlyPinnedVersion;
-      }
+    if (this.rushConfiguration.enforceConsistentVersions && !initialSpec && implicitlyPinnedVersion) {
+      return implicitlyPinnedVersion;
     }
 
     let selectedVersion: string | undefined;
 
-    if (initialSpec) {
+    if (initialSpec && initialSpec !== 'latest') {
       const allVersions: string =
         Utilities.executeCommandAndCaptureOutput(this.rushConfiguration.packageManagerToolFilename,
           ['view', packageName, 'versions', '--json'],

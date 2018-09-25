@@ -30,31 +30,36 @@ export class VersionMismatchFinder {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, false);
   }
 
+  public static getMismatches(rushConfiguration: RushConfiguration): VersionMismatchFinder {
+    // Collect all the preferred versions into a single table
+    const allPreferredVersions: { [dependency: string]: string } = {};
+
+    rushConfiguration.commonVersions.getAllPreferredVersions().forEach((version: string, dependency: string) => {
+      allPreferredVersions[dependency] = version;
+    });
+
+    // Create a fake project for the purposes of reporting conflicts with preferredVersions
+    // or xstitchPreferredVersions from common-versions.json
+    const projects: RushConfigurationProject[] = [...rushConfiguration.projects];
+
+    projects.push({
+      packageName: 'preferred versions from ' + RushConstants.commonVersionsFilename,
+      packageJson: { dependencies: allPreferredVersions }
+    } as RushConfigurationProject);
+
+    return new VersionMismatchFinder(
+      projects,
+      rushConfiguration.commonVersions.allowedAlternativeVersions
+    );
+  }
+
   private static _checkForInconsistentVersions(
     rushConfiguration: RushConfiguration,
     isRushCheckCommand: boolean): void {
 
     if (rushConfiguration.enforceConsistentVersions || isRushCheckCommand) {
-      // Collect all the preferred versions into a single table
-      const allPreferredVersions: { [dependency: string]: string } = {};
-
-      rushConfiguration.commonVersions.getAllPreferredVersions().forEach((version: string, dependency: string) => {
-        allPreferredVersions[dependency] = version;
-      });
-
-      // Create a fake project for the purposes of reporting conflicts with preferredVersions
-      // or xstitchPreferredVersions from common-versions.json
-      const projects: RushConfigurationProject[] = [...rushConfiguration.projects];
-
-      projects.push({
-        packageName: 'preferred versions from ' + RushConstants.commonVersionsFilename,
-        packageJson: { dependencies: allPreferredVersions }
-      } as RushConfigurationProject);
-
-      const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
-        projects,
-        rushConfiguration.commonVersions.allowedAlternativeVersions
-      );
+      const mismatchFinder: VersionMismatchFinder
+        = VersionMismatchFinder.getMismatches(rushConfiguration);
 
       // Iterate over the list. For any dependency with mismatching versions, print the projects
       mismatchFinder.getMismatches().forEach((dependency: string) => {
