@@ -15,36 +15,95 @@ import { VersionMismatchFinder } from '../api/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
 
+/**
+ * The type of SemVer range specifier that is prepended to the version
+ */
 export const enum SemVerStyle {
   Exact = 'exact',
   Caret = 'caret',
   Tilde = 'tilde'
 }
 
+/**
+ * The type of dependency that this is. Note: we don't support PeerDependencies
+ */
 export const enum DependencyKind {
   DevDependency = 'devDependency',
   Dependency = 'dependency'
 }
 
+/**
+ * Configuration options for adding or updating a dependency in a single project
+ */
 export interface IUpdateProjectOptions {
+  /**
+   * The project which will have its package.json updated
+   */
   project: RushConfigurationProject;
+  /**
+   * The name of the dependency to be added or updated in the project
+   */
   packageName: string;
+  /**
+   * The new SemVer specifier that should be added to the project's package.json
+   */
   newVersion: string;
+  /**
+   * The type of dependency that should be updated. If left empty, this will be auto-detected.
+   * If it cannot be auto-detected an exception will be thrown.
+   */
   dependencyKind?: DependencyKind;
+  /**
+   * If specified, the package.json will only be updated in memory, but the changes will not
+   * be written to disk.
+   */
   doNotSave?: boolean;
 }
 
+/**
+ * Options for adding a dependency to a particular project.
+ */
 export interface IDependencyIntegratorOptions {
+  /**
+   * The project whose package.json should get updated
+   */
   currentProject: RushConfigurationProject;
+  /**
+   * The name of the dependency to be added
+   */
   packageName: string;
+  /**
+   * The initial version specifier.
+   * If undefined, the latest version will be used (that doesn't break ensureConsistentVersions).
+   * If specified, the latest version meeting the SemVer specifier will be used as the basis.
+   */
   initialVersion: string | undefined;
+  /**
+   * Whether or not this dependency should be added as a devDependency or a regular dependency.
+   */
   devDependency: boolean;
+  /**
+   * If specified, other packages that use this dependency will also have their package.json's updated.
+   */
   updateOtherPackages: boolean;
-  skipInstall: boolean;
+  /**
+   * If specified, "rush update" will not be run after updating the package.json file(s).
+   */
+  skipUpdate: boolean;
+  /**
+   * If specified, "rush update" will be run in debug mode.
+   */
   debugInstall: boolean;
+  /**
+   * The style of range that should be used if the version is automatically detected.
+   */
   rangeStyle: SemVerStyle;
 }
 
+/**
+ * A helper class for managing the dependencies of various package.json files.
+ * @internal
+ */
 export class DependencyIntegrator {
   private _rushConfiguration: RushConfiguration;
 
@@ -52,6 +111,9 @@ export class DependencyIntegrator {
     this._rushConfiguration = rushConfiguration;
   }
 
+  /**
+   * Adds a dependency to a particular project. The core business logic for "rush add".
+   */
   public run(options: IDependencyIntegratorOptions): Promise<void> {
     const {
       currentProject,
@@ -59,7 +121,7 @@ export class DependencyIntegrator {
       initialVersion,
       devDependency,
       updateOtherPackages,
-      skipInstall,
+      skipUpdate,
       debugInstall,
       rangeStyle
     } = options;
@@ -116,7 +178,7 @@ export class DependencyIntegrator {
 
     this.updateProjects(packageUpdates);
 
-    if (skipInstall) {
+    if (skipUpdate) {
       return Promise.resolve();
     }
 
@@ -143,12 +205,18 @@ export class DependencyIntegrator {
       });
   }
 
+  /**
+   * Updates several projects' package.json files
+   */
   public updateProjects(projectUpdates: Array<IUpdateProjectOptions>): void {
     for (const update of projectUpdates) {
       this.updateProject(update);
     }
   }
 
+  /**
+   * Updates a single project's package.json file
+   */
   public updateProject(options: IUpdateProjectOptions): void {
     let { dependencyKind } = options;
     const {

@@ -53,11 +53,18 @@ For detailed help about a specific command, use: rush <command> -h
 `;
 
 exports[`CommandLineHelp prints the help for "rush add" 1`] = `
-"usage: rush add [-h] -p PACKAGE_NAME [-v VERSION_RANGE] [--exact] [--caret]
-                [--dev] [-c] [-n]
+"usage: rush add [-h] -p PACKAGE_NAME [-v VERSION_RANGE] [-e] [-c] [-d] [-m]
+                [-s]
                 
 
-Blah.
+Adds a dependency on a certain package to the current project (detected using 
+the current working directory) and then runs rush update. If no version is 
+specified, a version will be automatically detected (typically either the 
+latest version or a version that won't break the ensureConsistentVersions 
+policy). If a version range is specified, the latest version in the range 
+will be used. The version will be automatically prepended with a tilde, 
+unless the --exact or --caret flags are used. The --make-consistent flag can 
+be used to update all packages with the dependency.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -65,18 +72,21 @@ Optional arguments:
                         (Required) The name of the package which should be 
                         added as a dependency
   -v VERSION_RANGE, --version VERSION_RANGE
-  --exact               If specified, the version specifier inserted into the 
+                        An optional version specifier. If specified, the 
+                        largest version satisfying this range will be added 
+                        to the package.json.
+  -e, --exact           If specified, the SemVer specifier added to the 
                         package.json will be a locked, exact version.
-  --caret               If specified, the version specifier inserted into the 
+  -c, --caret           If specified, the SemVer specifier added to the 
                         package.json will be a prepended with a \\"caret\\" 
                         specifier (\\"^\\").
-  --dev                 If specified, the package will be added as a 
+  -d, --dev             If specified, the package will be added as a 
                         \\"devDependency\\" to the package.json
-  -c, --make-consistent
+  -m, --make-consistent
                         If specified, other packages with this dependency 
-                        will have their package.json files updated to point 
-                        at the specified depdendency
-  -n, --no-install      If specified, the \\"rush update\\" command will not be 
+                        will have their package.json files updated to use the 
+                        same version of the dependency.
+  -s, --skip-update     If specified, the \\"rush update\\" command will not be 
                         run after updating the package.json files.
 "
 `;

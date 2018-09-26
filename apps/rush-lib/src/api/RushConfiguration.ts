@@ -4,7 +4,13 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';
-import { JsonFile, JsonSchema, PackageName, FileSystem } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  JsonSchema,
+  Path,
+  PackageName,
+  FileSystem
+} from '@microsoft/node-core-library';
 
 import { Rush } from '../api/Rush';
 import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
@@ -743,10 +749,15 @@ export class RushConfiguration {
     return this._versionPolicyConfiguration;
   }
 
-  public getCurrentProjectFromPath(currentFolderPath: string): RushConfigurationProject | undefined {
+  /**
+   * Returns the project for which the specified path is underneath that project's folder.
+   * If the path is not under any project's folder, returns undefined.
+   * @beta
+   */
+  public getProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined {
     const resolvedPath: string = path.resolve(currentFolderPath);
     for (const project of this.projects) {
-      if (path.relative(project.projectFolder, resolvedPath).indexOf('..') !== 0) {
+      if (Path.isUnder(project.projectFolder, resolvedPath)) {
         return project;
       }
     }

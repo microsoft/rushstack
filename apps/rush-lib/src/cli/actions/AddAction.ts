@@ -18,13 +18,19 @@ export class AddAction extends BaseRushAction {
   private _caretFlag: CommandLineFlagParameter;
   private _devDependencyFlag: CommandLineFlagParameter;
   private _makeConsistentFlag: CommandLineFlagParameter;
-  private _noInstallFlag: CommandLineFlagParameter;
+  private _skipUpdateFlag: CommandLineFlagParameter;
   private _packageName: CommandLineStringParameter;
   private _versionSpecifier: CommandLineStringParameter;
 
   constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
-      'Blah.'
+      'Adds a dependency on a certain package to the current project (detected using the current'
+      + ' working directory) and then runs rush update. If no version is specified, a version will'
+      + ' be automatically detected (typically either the latest version or a version that won\'t break'
+      + ' the ensureConsistentVersions policy). If a version range is specified, the latest version'
+      + ' in the range will be used. The version will be automatically prepended with a tilde, unless'
+      + ' the --exact or --caret flags are used. The --make-consistent flag can be used to update'
+      + ' all packages with the dependency.'
     ];
     super({
       actionName: 'add',
@@ -47,32 +53,36 @@ export class AddAction extends BaseRushAction {
       parameterLongName: '--version',
       parameterShortName: '-v',
       argumentName: 'VERSION_RANGE',
-      description: ''
+      description: 'An optional version specifier. If specified, the largest version satisfying this range'
+        + ' will be added to the package.json.'
     });
     this._exactFlag = this.defineFlagParameter({
       parameterLongName: '--exact',
-      description: 'If specified, the version specifier inserted into the'
+      parameterShortName: '-e',
+      description: 'If specified, the SemVer specifier added to the'
         + ' package.json will be a locked, exact version.'
     });
     this._caretFlag = this.defineFlagParameter({
       parameterLongName: '--caret',
-      description: 'If specified, the version specifier inserted into the'
+      parameterShortName: '-c',
+      description: 'If specified, the SemVer specifier added to the'
         + ' package.json will be a prepended with a "caret" specifier ("^").'
     });
     this._devDependencyFlag = this.defineFlagParameter({
       parameterLongName: '--dev',
+      parameterShortName: '-d',
       description: 'If specified, the package will be added as a "devDependency"'
         + ' to the package.json'
     });
     this._makeConsistentFlag = this.defineFlagParameter({
       parameterLongName: '--make-consistent',
-      parameterShortName: '-c',
+      parameterShortName: '-m',
       description: 'If specified, other packages with this dependency will have their package.json'
-        + ' files updated to point at the specified depdendency'
+        + ' files updated to use the same version of the dependency.'
     });
-    this._noInstallFlag = this.defineFlagParameter({
-      parameterLongName: '--no-install',
-      parameterShortName: '-n',
+    this._skipUpdateFlag = this.defineFlagParameter({
+      parameterLongName: '--skip-update',
+      parameterShortName: '-s',
       description: 'If specified, the "rush update" command will not be run after updating the'
         + ' package.json files.'
     });
@@ -80,7 +90,7 @@ export class AddAction extends BaseRushAction {
 
   public run(): Promise<void> {
     const project: RushConfigurationProject | undefined
-      = this.rushConfiguration.getCurrentProjectFromPath(process.cwd());
+      = this.rushConfiguration.getProjectForPath(process.cwd());
 
     if (!project) {
       return Promise.reject(new Error('Not currently in a project folder'));
@@ -96,7 +106,7 @@ export class AddAction extends BaseRushAction {
       initialVersion: this._versionSpecifier.value,
       devDependency: this._devDependencyFlag.value,
       updateOtherPackages: this._makeConsistentFlag.value,
-      skipInstall: this._noInstallFlag.value,
+      skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
       rangeStyle: this._caretFlag.value ? SemVerStyle.Caret
         : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde)
