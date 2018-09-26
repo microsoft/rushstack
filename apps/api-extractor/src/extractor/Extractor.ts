@@ -76,6 +76,20 @@ export interface IExtractorOptions {
    * @beta
    */
   typescriptCompilerFolder?: string;
+
+  /**
+   * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
+   * recommended and may cause api-extractor to produce incomplete or incorrect declarations, but it
+   * may be required when dependencies contain declarations that are incompatible with newer versions
+   * of TypeScript. If this option is used, it is strongly recommended that broken dependencies be
+   * fixed or upgraded.
+   *
+   * @remarks
+   * This option only applies when compiler.config.configType is set to "tsconfig"
+   *
+   * @beta
+   */
+  skipLibCheck?: boolean;
 }
 
 /**
@@ -191,6 +205,10 @@ export class Extractor {
           ts.sys,
           this._absoluteRootFolder
         );
+
+        if (!commandLine.options.skipLibCheck && options.skipLibCheck) {
+          commandLine.options.skipLibCheck = true;
+        }
 
         this._updateCommandLineForTypescriptPackage(commandLine, options);
 

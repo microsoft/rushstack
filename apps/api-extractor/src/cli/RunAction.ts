@@ -29,6 +29,7 @@ export class RunAction extends CommandLineAction {
   private _configFileParameter: CommandLineStringParameter;
   private _localParameter: CommandLineFlagParameter;
   private _typescriptCompilerFolder: CommandLineStringParameter;
+  private _skipLibCheck: CommandLineFlagParameter;
 
   constructor(parser: ApiExtractorCommandLine) {
     super({
@@ -62,6 +63,15 @@ export class RunAction extends CommandLineAction {
       description: 'By default API Extractor uses its own TypeScript compiler version to analyze your project.'
         + ' This can often cause compiler errors due to incompatibilities between different TS versions.'
         + ' Use "--typescript-compiler-folder" to specify the folder path for your compiler version.'
+    });
+
+    this._skipLibCheck = this.defineFlagParameter({
+      parameterLongName: '--skip-lib-check',
+      description: 'This flag causes the typechecker to be invoked with the --skipLibCheck option. This option is not'
+        + ' recommended and may cause api-extractor to produce incomplete or incorrect declarations, but it '
+        + ' may be required when dependencies contain declarations that are incompatible with newer versions'
+        + ' of TypeScript. If this option is used, it is strongly recommended that broken dependencies be'
+        + ' fixed or upgraded.'
     });
   }
 
@@ -124,7 +134,8 @@ export class RunAction extends CommandLineAction {
       config,
       {
         localBuild: this._localParameter.value,
-        typescriptCompilerFolder: typescriptCompilerFolder
+        typescriptCompilerFolder: typescriptCompilerFolder,
+        skipLibCheck: this._skipLibCheck.value
       }
     );
 
