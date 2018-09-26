@@ -112,12 +112,10 @@ export interface IApiExtractorTaskConfig {
 
   /**
    * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
-   * recommended and may cause api-extractor to produce incomplete or incorrect declarations, but it
-   * may be required when dependencies contain declarations that are incompatible with newer versions
-   * of TypeScript. If this option is used, it is strongly recommended that broken dependencies be
-   * fixed or upgraded.
-   *
-   * @beta
+   * recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it
+   * may be required when dependencies contain declarations that are incompatible with the TypeScript engine
+   * that API Extractor uses for its analysis. If this option is used, it is strongly recommended that broken
+   * dependencies be fixed or upgraded.
    */
   skipLibCheck?: boolean;
 }
@@ -194,9 +192,8 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         apiJsonFile: {
           enabled: true,
           outputFolder: this.taskConfig.apiJsonFolder
-        },
-        skipLibCheck: this.taskConfig.skipLibCheck
-      } as IExtractorConfig;
+        }
+      };
 
       if (this.taskConfig.generateDtsRollup) {
         extractorConfig.dtsRollup = {
@@ -216,7 +213,8 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
           logWarning: (message: string) => this.logWarning(message),
           logError: (message: string) => this.logError(message)
         },
-        typescriptCompilerFolder: this.taskConfig.typescriptCompilerFolder
+        typescriptCompilerFolder: this.taskConfig.typescriptCompilerFolder,
+        skipLibCheck: this.taskConfig.skipLibCheck
       };
 
       const extractor: Extractor = new Extractor(extractorConfig, extractorOptions);
