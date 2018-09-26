@@ -87,7 +87,7 @@ export class DependencyIntegrator {
     currentProjectUpdate.doNotSave = false;
     const packageUpdates: Array<IUpdateProjectOptions> = [currentProjectUpdate];
 
-    if (this._rushConfiguration.enforceConsistentVersions) {
+    if (this._rushConfiguration.ensureConsistentVersions) {
       // we need to do a mismatch check
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this._rushConfiguration);
 
@@ -214,7 +214,7 @@ export class DependencyIntegrator {
       return initialSpec;
     }
 
-    if (this._rushConfiguration.enforceConsistentVersions && !initialSpec && implicitlyPinnedVersion) {
+    if (this._rushConfiguration.ensureConsistentVersions && !initialSpec && implicitlyPinnedVersion) {
       console.log(colors.grey('The enforceConsistentVersions policy is currently active.'));
       console.log(`Using the implicitly preferred version ${colors.magenta(implicitlyPinnedVersion)}`);
       return implicitlyPinnedVersion;
