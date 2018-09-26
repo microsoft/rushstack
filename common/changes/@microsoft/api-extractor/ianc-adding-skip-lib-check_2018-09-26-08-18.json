@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Create a new experimental option that causes the typechecker to be invoked with --skipLibCheck.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "iclanton@users.noreply.github.com"
+}
