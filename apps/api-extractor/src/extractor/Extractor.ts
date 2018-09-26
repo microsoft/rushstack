@@ -206,6 +206,10 @@ export class Extractor {
 
         if (!commandLine.options.skipLibCheck && options.skipLibCheck) {
           commandLine.options.skipLibCheck = true;
+          console.log(colors.cyan(
+            'API Extractor was invoked with skipLibCheck. This is not recommended and may cause ' +
+            'incorrect type analysis.'
+          ));
         }
 
         this._updateCommandLineForTypescriptPackage(commandLine, options);
