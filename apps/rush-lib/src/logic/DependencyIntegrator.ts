@@ -3,7 +3,8 @@ import * as semver from 'semver';
 
 import {
   JsonFile,
-  FileConstants
+  FileConstants,
+  IPackageJson
 } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -17,6 +18,19 @@ export const enum SemVerStyle {
   Exact = 'exact',
   Caret = 'caret',
   Tilde = 'tilde'
+}
+
+export const enum DependencyKind {
+  DevDependency = 'devDependency',
+  Dependency = 'dependency'
+}
+
+export interface IUpdateProjectOptions {
+  project: RushConfigurationProject;
+  packageName: string;
+  newVersion: string;
+  dependencyKind?: DependencyKind;
+  doNotSave?: boolean;
 }
 
 export interface IDependencyIntegratorOptions {
@@ -57,13 +71,17 @@ export class DependencyIntegrator {
     const version: string = this._getNormalizedVersionSpec(
       packageName, initialVersion, implicitlyPinned.get(packageName), rangeStyle);
 
-    if (devDependency) {
-      currentProject.packageJson.devDependencies
-        = this._updateDependency(currentProject.packageJson.devDependencies, packageName, version);
-    } else {
-      currentProject.packageJson.dependencies
-        = this._updateDependency(currentProject.packageJson.dependencies, packageName, version);
-    }
+    const currentProjectUpdate: IUpdateProjectOptions = {
+      project: currentProject,
+      packageName,
+      newVersion: version,
+      dependencyKind: devDependency ? DependencyKind.DevDependency : DependencyKind.Dependency,
+      doNotSave: true
+    };
+    this.updateProject(currentProjectUpdate);
+
+    currentProjectUpdate.doNotSave = false;
+    const packageUpdates: Array<IUpdateProjectOptions> = [currentProjectUpdate];
 
     if (this._rushConfiguration.enforceConsistentVersions) {
       // we need to do a mismatch check
@@ -80,30 +98,19 @@ export class DependencyIntegrator {
         // otherwise we need to go update a bunch of other projects
         for (const mismatchedVersion of mismatchFinder.getVersionsOfMismatch(packageName)!) {
           for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
-            if (packageName !== currentProject.packageName) {
-              const consumerProject: RushConfigurationProject = this._rushConfiguration.getProjectByName(consumer)!;
-
-              if (consumerProject.packageJson.devDependencies
-                && consumerProject.packageJson.devDependencies[packageName]) {
-                consumerProject.packageJson.devDependencies
-                  = this._updateDependency(consumerProject.packageJson.devDependencies, packageName, version);
-              } else {
-                consumerProject.packageJson.dependencies
-                  = this._updateDependency(consumerProject.packageJson.dependencies, packageName, version);
-              }
-
-              // overwrite existing file
-              const consumerPackageJsonPath: string
-                = path.join(consumerProject.projectFolder, FileConstants.PackageJson);
-              JsonFile.save(consumerProject.packageJson, consumerPackageJsonPath);
+            if (consumer !== currentProject.packageName) {
+              packageUpdates.push({
+                project: this._rushConfiguration.getProjectByName(consumer)!,
+                packageName: packageName,
+                newVersion: version
+              });
             }
           }
         }
       }
     }
 
-    // overwrite existing file
-    JsonFile.save(currentProject.packageJson, path.join(currentProject.projectFolder, FileConstants.PackageJson));
+    this.updateProjects(packageUpdates);
 
     if (skipInstall) {
       return Promise.resolve();
@@ -130,6 +137,52 @@ export class DependencyIntegrator {
         purgeManager.deleteAll();
         throw error;
       });
+  }
+
+  public updateProjects(projectUpdates: Array<IUpdateProjectOptions>): void {
+    for (const update of projectUpdates) {
+      this.updateProject(update);
+    }
+  }
+
+  public updateProject(options: IUpdateProjectOptions): void {
+    let { dependencyKind } = options;
+    const {
+      project,
+      packageName,
+      newVersion,
+      doNotSave
+    } = options;
+    const packageJson: IPackageJson = project.packageJson;
+
+    let oldDependencyKind: DependencyKind | undefined = undefined;
+    if (packageJson.dependencies && packageJson.dependencies[packageName]) {
+      oldDependencyKind = DependencyKind.Dependency;
+    } else if (packageJson.devDependencies && packageJson.devDependencies[packageName]) {
+      oldDependencyKind = DependencyKind.DevDependency;
+    }
+
+    if (!dependencyKind && !oldDependencyKind) {
+      throw new Error(`Cannot auto-detect dependency type of "${packageName}" for project "${project.packageName}"`);
+    }
+
+    if (!dependencyKind) {
+      dependencyKind = oldDependencyKind;
+    }
+
+    // update the dependency
+    if (dependencyKind === DependencyKind.Dependency) {
+      packageJson.dependencies = this._updateDependency(packageJson.dependencies, packageName, newVersion);
+    } else if (dependencyKind === DependencyKind.DevDependency) {
+      packageJson.devDependencies = this._updateDependency(packageJson.devDependencies, packageName, newVersion);
+    }
+
+    if (!doNotSave) {
+      // overwrite existing file
+      const packageJsonPath: string
+        = path.join(project.projectFolder, FileConstants.PackageJson);
+        JsonFile.save(project.packageJson, packageJsonPath);
+    }
   }
 
   private _getNormalizedVersionSpec(
