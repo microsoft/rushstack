@@ -109,6 +109,17 @@ export interface IApiExtractorTaskConfig {
    * @beta
    */
   typescriptCompilerFolder?: string;
+
+  /**
+   * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
+   * recommended and may cause api-extractor to produce incomplete or incorrect declarations, but it
+   * may be required when dependencies contain declarations that are incompatible with newer versions
+   * of TypeScript. If this option is used, it is strongly recommended that broken dependencies be
+   * fixed or upgraded.
+   *
+   * @beta
+   */
+  skipLibCheck?: boolean;
 }
 
 /**
@@ -183,7 +194,8 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         apiJsonFile: {
           enabled: true,
           outputFolder: this.taskConfig.apiJsonFolder
-        }
+        },
+        skipLibCheck: this.taskConfig.skipLibCheck
       } as IExtractorConfig;
 
       if (this.taskConfig.generateDtsRollup) {
