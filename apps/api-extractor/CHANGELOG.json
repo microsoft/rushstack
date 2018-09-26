@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.13.0",
+      "tag": "@microsoft/api-extractor_v5.13.0",
+      "date": "Wed, 26 Sep 2018 21:39:40 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new command line option --skip-lib-check"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.12.2",
       "tag": "@microsoft/api-extractor_v5.12.2",
       "date": "Mon, 24 Sep 2018 23:06:40 GMT",
