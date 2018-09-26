@@ -48,6 +48,7 @@ export class ApiDocumentation {
     '@alpha',
     '@beta',
     '@betadocumentation',
+    '@defaultvalue',
     '@eventproperty',
     '@internal',
     '@internalremarks',
@@ -339,6 +340,12 @@ export class ApiDocumentation {
           case '@override':
             tokenizer.getToken();
             this.isOverride = true;
+            break;
+          case '@defaultvalue':
+            // Accept this for now, but don't process it.
+            // We'll implement it fully when the TSDoc engine is merged.
+            tokenizer.getToken();
+            DocElementParser.parse(this, tokenizer);
             break;
           default:
             tokenizer.getToken();

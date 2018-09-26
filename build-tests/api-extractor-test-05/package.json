@@ -12,8 +12,8 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "5.11.2",
-    "@microsoft/api-documenter": "1.5.24",
+    "@microsoft/api-extractor": "5.12.2",
+    "@microsoft/api-documenter": "1.5.28",
     "@types/jest": "21.1.10",
     "@types/node": "8.5.8",
     "fs-extra": "~5.0.0",

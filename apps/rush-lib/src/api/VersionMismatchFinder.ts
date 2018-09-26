@@ -26,7 +26,7 @@ export class VersionMismatchFinder {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, true);
   }
 
-  public static enforceConsistentVersions(rushConfiguration: RushConfiguration): void {
+  public static ensureConsistentVersions(rushConfiguration: RushConfiguration): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, false);
   }
 
@@ -57,7 +57,7 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     isRushCheckCommand: boolean): void {
 
-    if (rushConfiguration.enforceConsistentVersions || isRushCheckCommand) {
+    if (rushConfiguration.ensureConsistentVersions || isRushCheckCommand) {
       const mismatchFinder: VersionMismatchFinder
         = VersionMismatchFinder.getMismatches(rushConfiguration);
 

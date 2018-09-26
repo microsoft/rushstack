@@ -1,6 +1,27 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 18 Sep 2018 21:04:55 GMT and should not be manually modified.
+This log was last generated on Mon, 24 Sep 2018 23:06:40 GMT and should not be manually modified.
+
+## 5.12.2
+Mon, 24 Sep 2018 23:06:40 GMT
+
+### Patches
+
+- Allow doc comments to use TSDoc's "@defaultvalue" tag (but the value is not yet passed to the documentation pipeline)
+
+## 5.12.1
+Fri, 21 Sep 2018 16:04:42 GMT
+
+### Patches
+
+- Fix an issue where TypeScript errors are often logged as "[Object object]" instead of the actual error message.
+
+## 5.12.0
+Thu, 20 Sep 2018 23:57:21 GMT
+
+### Minor changes
+
+- Add new feature: Support using a different version of the TypeScript compiler.
 
 ## 5.11.2
 Tue, 18 Sep 2018 21:04:55 GMT
