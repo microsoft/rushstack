@@ -46,6 +46,10 @@
     "publishFolderForPublic": {
       "description": "This setting is only used if \"dtsRollupTrimming\" is true. It indicates the folder where \"npm publish\" will be run for a public release. The default value is \"./dist/public\". A public release will contain all definitions that are reachable from the entry point, except definitions marked as @beta, @alpha, or @internal.",
       "type": "string"
+    },
+    "skipLibCheck": {
+      "description": "This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it may be required when dependencies contain declarations that are incompatible with the TypeScript engine that API Extractor uses for its analysis. If this option is used, it is strongly recommended that broken dependencies be fixed or upgraded.",
+      "type": "boolean"
     }
   },
   "required": [ "enabled" ],

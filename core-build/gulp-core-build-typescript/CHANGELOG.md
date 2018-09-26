@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Mon, 24 Sep 2018 23:06:40 GMT and should not be manually modified.
+This log was last generated on Wed, 26 Sep 2018 21:39:40 GMT and should not be manually modified.
+
+## 6.1.0
+Wed, 26 Sep 2018 21:39:40 GMT
+
+### Minor changes
+
+- Expose new api-extractor skipLibCheck option.
 
 ## 6.0.5
 Mon, 24 Sep 2018 23:06:40 GMT
