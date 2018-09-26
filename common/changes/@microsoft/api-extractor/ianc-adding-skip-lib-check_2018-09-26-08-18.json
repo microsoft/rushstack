@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Create a new experimental option that causes the typechecker to be invoked with --skipLibCheck.",
+      "comment": "Add new command line option --skip-lib-check",
       "type": "minor"
     }
   ],
