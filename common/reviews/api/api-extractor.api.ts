@@ -214,6 +214,9 @@ interface IExtractorOptions {
   compilerProgram?: ts.Program;
   customLogger?: Partial<ILogger>;
   localBuild?: boolean;
+  skipLibCheck?: boolean;
+  // @beta
+  typescriptCompilerFolder?: string;
 }
 
 // @public

@@ -41,6 +41,10 @@
       "description": "The minimum folder depth for the projectFolder field.  The default value is 1, i.e. no slashes in the path name.",
       "type": "number"
     },
+    "ensureConsistentVersions": {
+      "description": "If true, consistent version specifiers for dependencies will be enforced (i.e. \"rush check\" is run before some commands).",
+      "type": "boolean"
+    },
     "hotfixChangeEnabled": {
       "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default.",
       "type": "boolean"

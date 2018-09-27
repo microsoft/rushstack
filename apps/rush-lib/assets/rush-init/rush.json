@@ -60,6 +60,16 @@
   "nodeSupportedVersionRange": ">=8.9.4 <9.0.0",
 
   /**
+   * If you would like the version specifiers for your dependencies to be consistent, then
+   * uncomment this line. Note this is effectively like running "rush check" before the following:
+   *   rush install, rush update, rush link, rush version, rush publish
+   * In some cases you may want this turned on, but need to allow some packages to use a different
+   * version. In those cases, you will need to add an entry to the "allowedAlternateVersions"
+   * section of the common-versions.json.
+   */
+   /*[LINE "HYPOTHETICAL"]*/ "ensureConsistentVersions": true,
+
+  /**
    * Large monorepos can become intimidating for newcomers if project folder paths don't follow
    * a consistent and recognizable pattern.  When the system allows nested folder trees,
    * we've found that teams will often use subfolders to create islands that isolate

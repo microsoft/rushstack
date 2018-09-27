@@ -14,6 +14,8 @@ import {
   IExtractorConfig
 } from '@microsoft/api-extractor';
 
+import { BaseCmdTask } from './BaseCmdTask';
+
 /** @public */
 export interface IApiExtractorTaskConfig {
   /**
@@ -100,6 +102,22 @@ export interface IApiExtractorTaskConfig {
    * except definitions marked as \@beta, \@alpha, or \@internal.
    */
   publishFolderForPublic?: string;
+
+  /**
+   * Use this option to override the version of the TypeScript compiler API extractor should use.
+   *
+   * @beta
+   */
+  typescriptCompilerFolder?: string;
+
+  /**
+   * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
+   * recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it
+   * may be required when dependencies contain declarations that are incompatible with the TypeScript engine
+   * that API Extractor uses for its analysis. If this option is used, it is strongly recommended that broken
+   * dependencies be fixed or upgraded.
+   */
+  skipLibCheck?: boolean;
 }
 
 /**
@@ -116,7 +134,8 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         enabled: false,
         entry: undefined,
         apiReviewFolder: undefined,
-        apiJsonFolder: undefined
+        apiJsonFolder: undefined,
+        typescriptCompilerFolder: BaseCmdTask.getPackagePath('typescript')
       }
     );
   }
@@ -174,7 +193,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
           enabled: true,
           outputFolder: this.taskConfig.apiJsonFolder
         }
-      } as IExtractorConfig;
+      };
 
       if (this.taskConfig.generateDtsRollup) {
         extractorConfig.dtsRollup = {
@@ -193,7 +212,9 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
           logInfo: (message: string) => this.log(message),
           logWarning: (message: string) => this.logWarning(message),
           logError: (message: string) => this.logError(message)
-        }
+        },
+        typescriptCompilerFolder: this.taskConfig.typescriptCompilerFolder,
+        skipLibCheck: this.taskConfig.skipLibCheck
       };
 
       const extractor: Extractor = new Extractor(extractorConfig, extractorOptions);
