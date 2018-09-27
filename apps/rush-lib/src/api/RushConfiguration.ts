@@ -752,7 +752,6 @@ export class RushConfiguration {
   /**
    * Returns the project for which the specified path is underneath that project's folder.
    * If the path is not under any project's folder, returns undefined.
-   * @beta
    */
   public getProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined {
     const resolvedPath: string = path.resolve(currentFolderPath);

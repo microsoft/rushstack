@@ -1,12 +1,8 @@
-import * as colors from 'colors';
-import * as path from 'path';
-import * as semver from 'semver';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
-import {
-  JsonFile,
-  FileConstants,
-  IPackageJson
-} from '@microsoft/node-core-library';
+import * as colors from 'colors';
+import * as semver from 'semver';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { InstallManager, IInstallManagerOptions } from './InstallManager';
@@ -14,6 +10,7 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionMismatchFinder } from '../api/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
+import { DependencyType, PackageJsonEditor, Dependency } from '../api/PackageJsonEditor';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -25,45 +22,9 @@ export const enum SemVerStyle {
 }
 
 /**
- * The type of dependency that this is. Note: we don't support PeerDependencies
- */
-export const enum DependencyKind {
-  DevDependency = 'devDependency',
-  Dependency = 'dependency'
-}
-
-/**
- * Configuration options for adding or updating a dependency in a single project
- */
-export interface IUpdateProjectOptions {
-  /**
-   * The project which will have its package.json updated
-   */
-  project: RushConfigurationProject;
-  /**
-   * The name of the dependency to be added or updated in the project
-   */
-  packageName: string;
-  /**
-   * The new SemVer specifier that should be added to the project's package.json
-   */
-  newVersion: string;
-  /**
-   * The type of dependency that should be updated. If left empty, this will be auto-detected.
-   * If it cannot be auto-detected an exception will be thrown.
-   */
-  dependencyKind?: DependencyKind;
-  /**
-   * If specified, the package.json will only be updated in memory, but the changes will not
-   * be written to disk.
-   */
-  doNotSave?: boolean;
-}
-
-/**
  * Options for adding a dependency to a particular project.
  */
-export interface IDependencyIntegratorOptions {
+export interface IPackageJsonUpdaterRushAddOptions {
   /**
    * The project whose package.json should get updated
    */
@@ -101,10 +62,33 @@ export interface IDependencyIntegratorOptions {
 }
 
 /**
+ * Configuration options for adding or updating a dependency in a single project
+ */
+export interface IUpdateProjectOptions {
+  /**
+   * The project which will have its package.json updated
+   */
+  project: RushConfigurationProject;
+  /**
+   * The name of the dependency to be added or updated in the project
+   */
+  packageName: string;
+  /**
+   * The new SemVer specifier that should be added to the project's package.json
+   */
+  newVersion: string;
+  /**
+   * The type of dependency that should be updated. If left empty, this will be auto-detected.
+   * If it cannot be auto-detected an exception will be thrown.
+   */
+  dependencyType?: DependencyType;
+}
+
+/**
  * A helper class for managing the dependencies of various package.json files.
  * @internal
  */
-export class DependencyIntegrator {
+export class PackageJsonUpdater {
   private _rushConfiguration: RushConfiguration;
 
   public constructor(rushConfiguration: RushConfiguration) {
@@ -114,7 +98,7 @@ export class DependencyIntegrator {
   /**
    * Adds a dependency to a particular project. The core business logic for "rush add".
    */
-  public run(options: IDependencyIntegratorOptions): Promise<void> {
+  public doRushAdd(options: IPackageJsonUpdaterRushAddOptions): Promise<void> {
     const {
       currentProject,
       packageName,
@@ -141,13 +125,11 @@ export class DependencyIntegrator {
       project: currentProject,
       packageName,
       newVersion: version,
-      dependencyKind: devDependency ? DependencyKind.DevDependency : DependencyKind.Dependency,
-      doNotSave: true
+      dependencyType: devDependency ? DependencyType.DevDependency : DependencyType.Dependency
     };
     this.updateProject(currentProjectUpdate);
 
-    currentProjectUpdate.doNotSave = false;
-    const packageUpdates: Array<IUpdateProjectOptions> = [currentProjectUpdate];
+    const otherPackageUpdates: Array<IUpdateProjectOptions> = [];
 
     if (this._rushConfiguration.ensureConsistentVersions) {
       // we need to do a mismatch check
@@ -165,7 +147,7 @@ export class DependencyIntegrator {
         for (const mismatchedVersion of mismatchFinder.getVersionsOfMismatch(packageName)!) {
           for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
             if (consumer !== currentProject.packageName) {
-              packageUpdates.push({
+              otherPackageUpdates.push({
                 project: this._rushConfiguration.getProjectByName(consumer)!,
                 packageName: packageName,
                 newVersion: version
@@ -176,7 +158,13 @@ export class DependencyIntegrator {
       }
     }
 
-    this.updateProjects(packageUpdates);
+    this.updateProjects(otherPackageUpdates);
+
+    for (const project of this._rushConfiguration.projects) {
+      if (project.packageJsonEditor.saveIfModified()) {
+        console.log(colors.green('Wrote ') + project.packageJsonEditor.filePath);
+      }
+    }
 
     if (skipUpdate) {
       return Promise.resolve();
@@ -218,45 +206,26 @@ export class DependencyIntegrator {
    * Updates a single project's package.json file
    */
   public updateProject(options: IUpdateProjectOptions): void {
-    let { dependencyKind } = options;
+    let { dependencyType } = options;
     const {
       project,
       packageName,
-      newVersion,
-      doNotSave
+      newVersion
     } = options;
-    const packageJson: IPackageJson = project.packageJson;
+    const packageJson: PackageJsonEditor = project.packageJsonEditor;
 
-    let oldDependencyKind: DependencyKind | undefined = undefined;
-    if (packageJson.dependencies && packageJson.dependencies[packageName]) {
-      oldDependencyKind = DependencyKind.Dependency;
-    } else if (packageJson.devDependencies && packageJson.devDependencies[packageName]) {
-      oldDependencyKind = DependencyKind.DevDependency;
-    }
+    const oldDependency: Dependency | undefined = packageJson.getDependency(packageName);
+    const oldDependencyType: DependencyType | undefined = oldDependency ? oldDependency.dependencyType : undefined;
 
-    if (!dependencyKind && !oldDependencyKind) {
+    if (!dependencyType && !oldDependencyType) {
       throw new Error(`Cannot auto-detect dependency type of "${packageName}" for project "${project.packageName}"`);
     }
 
-    if (!dependencyKind) {
-      dependencyKind = oldDependencyKind;
+    if (!dependencyType) {
+      dependencyType = oldDependencyType;
     }
 
-    // update the dependency
-    if (dependencyKind === DependencyKind.Dependency) {
-      packageJson.dependencies = this._updateDependency(packageJson.dependencies, packageName, newVersion);
-    } else if (dependencyKind === DependencyKind.DevDependency) {
-      packageJson.devDependencies = this._updateDependency(packageJson.devDependencies, packageName, newVersion);
-    }
-
-    if (!doNotSave) {
-      // overwrite existing file
-      const packageJsonPath: string
-        = path.join(project.projectFolder, FileConstants.PackageJson);
-      JsonFile.save(project.packageJson, packageJsonPath);
-
-      console.log(colors.green('Wrote ') + packageJsonPath);
-    }
+    packageJson.addOrUpdateDependency(packageName, newVersion, dependencyType!);
   }
 
   private _getNormalizedVersionSpec(
@@ -342,14 +311,5 @@ export class DependencyIntegrator {
       console.log(colors.gray('Prepending ~ specifier to version.'));
       return '~' + selectedVersion!;
     }
-  }
-
-  private _updateDependency(dependencies: { [key: string]: string } | undefined,
-    packageName: string, version: string):  { [key: string]: string } {
-    if (!dependencies) {
-      dependencies = {};
-    }
-    dependencies[packageName] = version!;
-    return dependencies;
   }
 }

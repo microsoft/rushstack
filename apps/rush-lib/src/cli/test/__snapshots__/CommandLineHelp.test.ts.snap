@@ -53,8 +53,8 @@ For detailed help about a specific command, use: rush <command> -h
 `;
 
 exports[`CommandLineHelp prints the help for "rush add" 1`] = `
-"usage: rush add [-h] -p PACKAGE_NAME [-v VERSION_RANGE] [-e] [-c] [-d] [-m]
-                [-s]
+"usage: rush add [-h] -p PACKAGE_NAME [-v VERSION_RANGE] [--exact] [--caret]
+                [-d] [-m] [-s]
                 
 
 Adds a dependency on a certain package to the current project (detected using 
@@ -75,9 +75,9 @@ Optional arguments:
                         An optional version specifier. If specified, the 
                         largest version satisfying this range will be added 
                         to the package.json.
-  -e, --exact           If specified, the SemVer specifier added to the 
+  --exact               If specified, the SemVer specifier added to the 
                         package.json will be a locked, exact version.
-  -c, --caret           If specified, the SemVer specifier added to the 
+  --caret               If specified, the SemVer specifier added to the 
                         package.json will be a prepended with a \\"caret\\" 
                         specifier (\\"^\\").
   -d, --dev             If specified, the package will be added as a 

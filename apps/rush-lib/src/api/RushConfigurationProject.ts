@@ -12,6 +12,7 @@ import {
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
+import { PackageJsonEditor } from './PackageJsonEditor';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -37,6 +38,7 @@ export class RushConfigurationProject {
   private _projectRelativeFolder: string;
   private _reviewCategory: string;
   private _packageJson: IPackageJson;
+  private _packageJsonEditor: PackageJsonEditor;
   private _tempProjectName: string;
   private _unscopedTempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
@@ -96,6 +98,8 @@ export class RushConfigurationProject {
       throw new Error(`The package name "${this._packageName}" specified in rush.json does not`
         + ` match the name "${this._packageJson.name}" from package.json`);
     }
+
+    this._packageJsonEditor = PackageJsonEditor.load(packageJsonFilename);
 
     this._tempProjectName = tempProjectName;
 
@@ -172,9 +176,18 @@ export class RushConfigurationProject {
 
   /**
    * The parsed NPM "package.json" file from projectFolder.
+   * Will be deprecated soon in favor of packageJsonEditor
    */
   public get packageJson(): IPackageJson {
     return this._packageJson;
+  }
+
+  /**
+   * A useful wrapper around the package.json file for making modifications
+   * @alpha
+   */
+  public get packageJsonEditor(): PackageJsonEditor {
+    return this._packageJsonEditor;
   }
 
   /**

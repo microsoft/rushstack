@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as semver from 'semver';
 
 import {
   CommandLineFlagParameter,
@@ -11,7 +12,8 @@ import {
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { DependencyIntegrator, SemVerStyle } from '../../logic/DependencyIntegrator';
+import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater';
+import { PackageName } from '@microsoft/node-core-library';
 
 export class AddAction extends BaseRushAction {
   private _exactFlag: CommandLineFlagParameter;
@@ -58,13 +60,11 @@ export class AddAction extends BaseRushAction {
     });
     this._exactFlag = this.defineFlagParameter({
       parameterLongName: '--exact',
-      parameterShortName: '-e',
       description: 'If specified, the SemVer specifier added to the'
         + ' package.json will be a locked, exact version.'
     });
     this._caretFlag = this.defineFlagParameter({
       parameterLongName: '--caret',
-      parameterShortName: '-c',
       description: 'If specified, the SemVer specifier added to the'
         + ' package.json will be a prepended with a "caret" specifier ("^").'
     });
@@ -93,17 +93,28 @@ export class AddAction extends BaseRushAction {
       = this.rushConfiguration.getProjectForPath(process.cwd());
 
     if (!project) {
-      return Promise.reject(new Error('Not currently in a project folder'));
+      return Promise.reject(new Error('The "rush add" command must be invoked under a project'
+        + ' folder that is registered in rush.json.'));
     }
 
     if (this._caretFlag.value && this._exactFlag.value) {
       return Promise.reject(new Error('Only one of --caret and --exact should be specified'));
     }
 
-    return new DependencyIntegrator(this.rushConfiguration).run({
+    const packageName: string = this._packageName.value!;
+    if (!PackageName.isValidName(packageName)) {
+      return Promise.reject(new Error(`The package name "${packageName}" is not valid.`));
+    }
+
+    const version: string | undefined = this._versionSpecifier.value;
+    if (version && !semver.validRange(version) && !semver.valid(version)) {
+      return Promise.reject(new Error(`The SemVer specifier "${version}" is not valid.`));
+    }
+
+    return new PackageJsonUpdater(this.rushConfiguration).doRushAdd({
       currentProject: project,
-      packageName: this._packageName.value!,
-      initialVersion: this._versionSpecifier.value,
+      packageName: packageName,
+      initialVersion: version,
       devDependency: this._devDependencyFlag.value,
       updateOtherPackages: this._makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
