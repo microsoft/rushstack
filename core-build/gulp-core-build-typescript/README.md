@@ -147,8 +147,8 @@ To use these tasks in your build setup, simply import the package and add the ta
 # Examples
 Some examples of build packages that use this task:
 
-* [@microsoft/web-library-build](https://github.com/Microsoft/web-library-build)
-* [@microsoft/node-library-build](https://github.com/Microsoft/node-library-build)
+* [@microsoft/web-library-build](../web-library-build)
+* [@microsoft/node-library-build](../node-library-build)
 
 # Configuring task options
 
