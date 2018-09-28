@@ -53,7 +53,7 @@ For detailed help about a specific command, use: rush <command> -h
 `;
 
 exports[`CommandLineHelp prints the help for "rush add" 1`] = `
-"usage: rush add [-h] -p PACKAGE_NAME [--exact] [--caret] [--dev] [-m] [-s]
+"usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--dev] [-m] [-s]
 
 Adds a specified package as a dependency of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\". If 
@@ -67,7 +67,7 @@ dependency.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
-  -p PACKAGE_NAME, --package PACKAGE_NAME
+  -p PACKAGE, --package PACKAGE
                         (Required) The name of the package which should be 
                         added as a dependency. Also, the version specifier 
                         can be appended after an \\"@\\" sign (similar to NPM's 
