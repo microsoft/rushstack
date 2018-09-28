@@ -92,16 +92,21 @@ export class AddAction extends BaseRushAction {
       return Promise.reject(new Error('Only one of "--caret" and "--exact" should be specified'));
     }
 
-    const packageName: string = this._packageName.value!;
-    if (!PackageName.isValidName(packageName)) {
-      return Promise.reject(new Error(`The package name "${packageName}" is not valid.`));
+    let version: string | undefined = undefined;
+    let packageName: string | undefined = this._packageName.value!;
+    const parts: Array<string> = packageName.split('@');
+
+    if (parts[0] === '') {
+      // this is a scoped package
+      packageName = '@' + parts[1];
+      version = parts[2];
+    } else {
+      packageName = parts[0];
+      version = parts[1];
     }
 
-    let version: string | undefined = undefined;
-    const scopedPackage: boolean = packageName.charAt(0) === '@';
-    const parts: Array<string> = packageName.split('@');
-    if (parts.length === 3) {
-      version = parts[scopedPackage ? 2 : 1];
+    if (!PackageName.isValidName(packageName)) {
+      return Promise.reject(new Error(`The package name "${packageName}" is not valid.`));
     }
 
     if (version && !semver.validRange(version) && !semver.valid(version)) {

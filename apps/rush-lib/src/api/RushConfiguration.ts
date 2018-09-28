@@ -756,7 +756,7 @@ export class RushConfiguration {
   public tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined {
     const resolvedPath: string = path.resolve(currentFolderPath);
     for (const project of this.projects) {
-      if (Path.isUnder(project.projectFolder, resolvedPath)) {
+      if (Path.isUnderOrEqual(resolvedPath, project.projectFolder)) {
         return project;
       }
     }
