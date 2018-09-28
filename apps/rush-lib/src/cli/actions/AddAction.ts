@@ -27,7 +27,7 @@ export class AddAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
       'Adds a specified package as a dependency of the current project (as determined by the current working directory)'
-      + ' and then runs "rush update".If no version is specified, a version will be automatically detected (typically'
+      + ' and then runs "rush update". If no version is specified, a version will be automatically detected (typically'
       + ' either the latest version or a version that won\'t break the ensureConsistentVersions policy). If a version'
       + ' range is specified, the latest version in the range will be used. The version will be automatically prepended'
       + ' with a tilde, unless the "--exact" or "--caret" flags are used. The "--make-consistent" flag can be used to'
@@ -63,8 +63,8 @@ export class AddAction extends BaseRushAction {
     });
     this._devDependencyFlag = this.defineFlagParameter({
       parameterLongName: '--dev',
-      description: 'If specified, the package will be added as a "devDependency"'
-        + ' to the package.json'
+      description: 'If specified, the package will be added to the "devDependencies" section of'
+        + ' the package.json'
     });
     this._makeConsistentFlag = this.defineFlagParameter({
       parameterLongName: '--make-consistent',
@@ -90,7 +90,7 @@ export class AddAction extends BaseRushAction {
     }
 
     if (this._caretFlag.value && this._exactFlag.value) {
-      return Promise.reject(new Error('Only one of --caret and --exact should be specified'));
+      return Promise.reject(new Error('Only one of "--caret" and "--exact" should be specified'));
     }
 
     const packageName: string = this._packageName.value!;

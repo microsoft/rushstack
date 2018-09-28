@@ -56,7 +56,7 @@ exports[`CommandLineHelp prints the help for "rush add" 1`] = `
 "usage: rush add [-h] -p PACKAGE_NAME [--exact] [--caret] [--dev] [-m] [-s]
 
 Adds a specified package as a dependency of the current project (as 
-determined by the current working directory) and then runs \\"rush update\\".If 
+determined by the current working directory) and then runs \\"rush update\\". If 
 no version is specified, a version will be automatically detected (typically 
 either the latest version or a version that won't break the 
 ensureConsistentVersions policy). If a version range is specified, the latest 
@@ -78,8 +78,8 @@ Optional arguments:
   --caret               If specified, the SemVer specifier added to the 
                         package.json will be a prepended with a \\"caret\\" 
                         specifier (\\"^\\").
-  --dev                 If specified, the package will be added as a 
-                        \\"devDependency\\" to the package.json
+  --dev                 If specified, the package will be added to the 
+                        \\"devDependencies\\" section of the package.json
   -m, --make-consistent
                         If specified, other packages with this dependency 
                         will have their package.json files updated to use the 

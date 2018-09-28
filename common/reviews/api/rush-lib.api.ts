@@ -72,6 +72,33 @@ class CommonVersionsConfiguration {
   readonly xstitchPreferredVersions: Map<string, string>;
 }
 
+// @beta (undocumented)
+class Dependency {
+  constructor(name: string, version: string, type: DependencyType, onChange: () => void);
+  // (undocumented)
+  readonly dependencyType: DependencyType;
+  // (undocumented)
+  readonly name: string;
+  // (undocumented)
+  setDependencyType(newType: DependencyType): void;
+  // (undocumented)
+  setVersion(newVersion: string): void;
+  // (undocumented)
+  readonly version: string;
+}
+
+// @beta (undocumented)
+enum DependencyType {
+  // (undocumented)
+  Dev = "devDependencies",
+  // (undocumented)
+  Optional = "optionalDependencies",
+  // (undocumented)
+  Peer = "peerDependencies",
+  // (undocumented)
+  Regular = "dependencies"
+}
+
 // @public
 enum EnvironmentVariableNames {
   RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
@@ -122,6 +149,28 @@ class LockStepVersionPolicy extends VersionPolicy {
   readonly nextBump: BumpType;
   update(newVersionString: string): boolean;
   validate(versionString: string, packageName: string): void;
+  readonly version: string;
+}
+
+// @beta (undocumented)
+class PackageJsonEditor {
+  // (undocumented)
+  addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
+  // (undocumented)
+  readonly filePath: string;
+  // (undocumented)
+  forEachDependency(cb: (dependency: Dependency) => void): void;
+  // (undocumented)
+  static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
+  // (undocumented)
+  getDependency(packageName: string): Dependency | undefined;
+  // (undocumented)
+  static load(filepath: string): PackageJsonEditor;
+  // (undocumented)
+  readonly name: string;
+  // (undocumented)
+  saveIfModified(): boolean;
+  // (undocumented)
   readonly version: string;
 }
 
@@ -203,7 +252,6 @@ class RushConfigurationProject {
   // @beta
   readonly isMainProject: boolean;
   readonly packageJson: IPackageJson;
-  // WARNING: The type "PackageJsonEditor" needs to be exported by the package (e.g. added to index.ts)
   // @alpha
   readonly packageJsonEditor: PackageJsonEditor;
   readonly packageName: string;
