@@ -165,7 +165,7 @@ class PackageJsonEditor {
   // (undocumented)
   getDependency(packageName: string): PackageJsonDependency | undefined;
   // (undocumented)
-  static load(filepath: string): PackageJsonEditor;
+  static load(filePath: string): PackageJsonEditor;
   // (undocumented)
   readonly name: string;
   // (undocumented)
