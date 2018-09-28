@@ -115,9 +115,11 @@ export class PackageJsonEditor {
         = new PackageJsonDependency(packageName, newVersion, dependencyType, this._onChange.bind(this));
       this._dependencies.set(packageName, dependency);
     }
+    this._modified = true;
   }
 
   public saveIfModified(): boolean {
+    console.log(this.filePath + ': ' + this._modified);
     if (this._modified) {
       JsonFile.save(this._normalize(), this._filepath);
       this._modified = false;
@@ -129,6 +131,7 @@ export class PackageJsonEditor {
   private constructor(filepath: string, data: IPackageJson) {
     this._filepath = filepath;
     this._data = data;
+    this._modified = false;
 
     this._dependencies = new Map<string, PackageJsonDependency>();
     this._peerDependencies = new Map<string, PackageJsonDependency>();
