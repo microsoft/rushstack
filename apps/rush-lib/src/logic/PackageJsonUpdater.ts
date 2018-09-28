@@ -217,8 +217,12 @@ export class PackageJsonUpdater {
     } = options;
     const packageJson: PackageJsonEditor = project.packageJsonEditor;
 
-    const oldDependency: PackageJsonDependency | undefined = packageJson.getDependency(packageName);
-    const oldDependencyType: DependencyType | undefined = oldDependency ? oldDependency.dependencyType : undefined;
+    const oldDependency: PackageJsonDependency | undefined = packageJson.tryGetDependency(packageName);
+    const oldDevDependency: PackageJsonDependency | undefined = packageJson.tryGetDevDependency(packageName);
+
+    const oldDependencyType: DependencyType | undefined =
+      oldDevDependency ? oldDevDependency.dependencyType :
+      oldDependency ? oldDependency.dependencyType : undefined;
 
     dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 

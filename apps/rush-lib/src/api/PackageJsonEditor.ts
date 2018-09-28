@@ -56,11 +56,6 @@ export class PackageJsonDependency {
   public get dependencyType(): DependencyType {
     return this._type;
   }
-
-  public setDependencyType(newType: DependencyType): void {
-    this._type = newType;
-    this._onChange();
-  }
 }
 
 /**
@@ -106,23 +101,22 @@ export class PackageJsonEditor {
     return [...this._devDependencies.values()];
   }
 
-  public getDependency(packageName: string): PackageJsonDependency | undefined {
+  public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
     return this._dependencies.get(packageName);
   }
 
-  public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
-    if (dependencyType === DependencyType.Peer) {
-      throw new Error(`PackageJsonEditor.addOrUpdateDependency() cannot be used to modify peer dependencies.`);
-    }
+  public tryGetDevDependency(packageName: string): PackageJsonDependency | undefined {
+    return this._devDependencies.get(packageName);
+  }
 
-    if (this._dependencies.has(packageName)) {
-      const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
-      dependency.setVersion(newVersion);
-      dependency.setDependencyType(dependencyType);
-    } else {
-      const dependency: PackageJsonDependency
+  public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
+    const dependency: PackageJsonDependency
         = new PackageJsonDependency(packageName, newVersion, dependencyType, this._onChange.bind(this));
+
+    if (dependencyType === DependencyType.Regular || dependencyType === DependencyType.Optional) {
       this._dependencies.set(packageName, dependency);
+    } else {
+      this._devDependencies.set(packageName, dependency);
     }
     this._modified = true;
   }
