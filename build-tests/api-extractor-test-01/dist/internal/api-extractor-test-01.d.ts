@@ -10,7 +10,6 @@
  */
 
 /// <reference types="jest" />
-import { ReexportedClass2 as ReexportedClass } from '.';
 
 /**
  * Example of an abstract class that is directly exported.
@@ -202,6 +201,15 @@ export declare interface IMergedInterfaceReferencee {
  * @public
  */
 export declare interface ISimpleInterface {
+}
+
+/**
+ * This class gets aliased twice before being exported from the package.
+ * @public
+ */
+export declare class ReexportedClass {
+    getSelfReference(): ReexportedClass;
+    getValue(): string;
 }
 
 /**

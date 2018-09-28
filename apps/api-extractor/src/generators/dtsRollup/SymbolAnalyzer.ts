@@ -320,11 +320,13 @@ export class SymbolAnalyzer {
       .replace(/['"]\s*$/, '');
 
     // Does it start with something like "./" or "../"?
-    // If not, then assume it's an import from an external package
-    if (!/^\.\.?\//.test(path)) {
+    // Or is it a fixed string like "." or ".."?
+    if (/^\.\.?(\/|$)/.test(path)) {
+      // Yes, so there is no module specifier
+      return undefined;
+    } else {
+      // No, so we can assume it's an import from an external package
       return path;
     }
-
-    return undefined;
   }
 }
