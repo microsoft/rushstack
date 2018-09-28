@@ -71,8 +71,6 @@ export class PackageJsonEditor {
   private readonly _data: IPackageJson;
   private readonly _dependencies: Map<string, PackageJsonDependency>;
   private readonly _peerDependencies: Map<string, PackageJsonDependency>;
-
-  private _onChange: () => void;
   private _modified: boolean;
 
   public static load(filepath: string): PackageJsonEditor {
@@ -114,7 +112,7 @@ export class PackageJsonEditor {
       dependency.setDependencyType(dependencyType);
     } else {
       const dependency: PackageJsonDependency
-        = new PackageJsonDependency(packageName, newVersion, dependencyType, this._onChange);
+        = new PackageJsonDependency(packageName, newVersion, dependencyType, this._onChange.bind(this));
       this._dependencies.set(packageName, dependency);
     }
   }
@@ -140,9 +138,7 @@ export class PackageJsonEditor {
     const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
     const peerDependencies: { [key: string]: string } = data.peerDependencies || {};
 
-    this._onChange = () => {
-      this._modified = true;
-    };
+    this._onChange = this._onChange.bind(this);
 
     Object.keys(dependencies || {}).forEach((dependency: string) => {
       if (devDependencies[dependency]) {
@@ -174,6 +170,10 @@ export class PackageJsonEditor {
       this._peerDependencies.set(dependency,
         new PackageJsonDependency(dependency, peerDependencies[dependency], DependencyType.Peer, this._onChange));
     });
+  }
+
+  private _onChange(): void {
+    this._modified = true;
   }
 
   private _normalize(): IPackageJson {
