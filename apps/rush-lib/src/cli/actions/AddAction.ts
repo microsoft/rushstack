@@ -109,7 +109,7 @@ export class AddAction extends BaseRushAction {
       return Promise.reject(new Error(`The package name "${packageName}" is not valid.`));
     }
 
-    if (version && !semver.validRange(version) && !semver.valid(version)) {
+    if (version && version !== 'latest' && !semver.validRange(version) && !semver.valid(version)) {
       return Promise.reject(new Error(`The SemVer specifier "${version}" is not valid.`));
     }
 
