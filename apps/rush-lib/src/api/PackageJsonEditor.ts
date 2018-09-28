@@ -119,7 +119,6 @@ export class PackageJsonEditor {
   }
 
   public saveIfModified(): boolean {
-    console.log(this.filePath + ': ' + this._modified);
     if (this._modified) {
       JsonFile.save(this._normalize(), this._filepath);
       this._modified = false;
