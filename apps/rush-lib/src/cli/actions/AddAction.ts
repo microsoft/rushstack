@@ -48,7 +48,9 @@ export class AddAction extends BaseRushAction {
       required: true,
       argumentName: 'PACKAGE',
       description: '(Required) The name of the package which should be added as a dependency.'
-        + ' Also, the version specifier can be appended after an "@" sign (similar to NPM\'s semantics).'
+        + ' A SemVer version specifier can be appended after an "@" sign.  WARNING: Symbol characters'
+        + ' are usually interpreted by your shell, so it\'s recommended to use quotes.'
+        + ' For example, write "rush add --project "example@^1.2.3"" instead of "rush add --project example@^1.2.3".'
     });
     this._exactFlag = this.defineFlagParameter({
       parameterLongName: '--exact',
