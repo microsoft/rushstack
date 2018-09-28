@@ -10,7 +10,7 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionMismatchFinder } from '../api/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
-import { DependencyType, PackageJsonEditor, Dependency } from '../api/PackageJsonEditor';
+import { DependencyType, PackageJsonEditor, PackageJsonDependency } from '../api/PackageJsonEditor';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -214,7 +214,7 @@ export class PackageJsonUpdater {
     } = options;
     const packageJson: PackageJsonEditor = project.packageJsonEditor;
 
-    const oldDependency: Dependency | undefined = packageJson.getDependency(packageName);
+    const oldDependency: PackageJsonDependency | undefined = packageJson.getDependency(packageName);
     const oldDependencyType: DependencyType | undefined = oldDependency ? oldDependency.dependencyType : undefined;
 
     if (!dependencyType && !oldDependencyType) {

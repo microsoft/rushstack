@@ -6,7 +6,7 @@ import * as colors from 'colors';
 import { RushConfiguration } from './RushConfiguration';
 import { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
-import { Dependency, DependencyType, PackageJsonEditor } from './PackageJsonEditor';
+import { PackageJsonDependency, DependencyType, PackageJsonEditor } from './PackageJsonEditor';
 
 /**
  * @public
@@ -135,7 +135,7 @@ export class VersionMismatchFinder {
         // patterns consistent, but on the other hand different projects may have different
         // levels of compatibility -- we should wait for someone to actually request this feature
         // before we get into that.)
-        project.packageJsonEditor.forEachDependency((dependency: Dependency) => {
+        project.packageJsonEditor.forEachDependency((dependency: PackageJsonDependency) => {
           if (dependency.dependencyType !== DependencyType.Peer
             && !project.cyclicDependencyProjects.has(dependency.name)) {
 

@@ -82,7 +82,7 @@ export class AddAction extends BaseRushAction {
 
   public run(): Promise<void> {
     const project: RushConfigurationProject | undefined
-      = this.rushConfiguration.getProjectForPath(process.cwd());
+      = this.rushConfiguration.tryGetProjectForPath(process.cwd());
 
     if (!project) {
       return Promise.reject(new Error('The "rush add" command must be invoked under a project'
