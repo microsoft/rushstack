@@ -180,7 +180,7 @@ export class PackageJsonUpdater {
       fullUpgrade: false,
       recheckShrinkwrap: false,
       networkConcurrency: undefined,
-      collectLogFile: true
+      collectLogFile: false
     };
 
     return installManager.doInstall(installManagerOptions)
