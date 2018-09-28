@@ -22,7 +22,6 @@ export class AddAction extends BaseRushAction {
   private _makeConsistentFlag: CommandLineFlagParameter;
   private _skipUpdateFlag: CommandLineFlagParameter;
   private _packageName: CommandLineStringParameter;
-  private _versionSpecifier: CommandLineStringParameter;
 
   constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
@@ -47,7 +46,7 @@ export class AddAction extends BaseRushAction {
       parameterLongName: '--package',
       parameterShortName: '-p',
       required: true,
-      argumentName: 'PACKAGE_NAME',
+      argumentName: 'PACKAGE',
       description: '(Required) The name of the package which should be added as a dependency.'
         + ' Also, the version specifier can be appended after an "@" sign (similar to NPM\'s semantics).'
     });
@@ -98,7 +97,13 @@ export class AddAction extends BaseRushAction {
       return Promise.reject(new Error(`The package name "${packageName}" is not valid.`));
     }
 
-    const version: string | undefined = this._versionSpecifier.value;
+    let version: string | undefined = undefined;
+    const scopedPackage: boolean = packageName.charAt(0) === '@';
+    const parts: Array<string> = packageName.split('@');
+    if (parts.length === 3) {
+      version = parts[scopedPackage ? 2 : 1];
+    }
+
     if (version && !semver.validRange(version) && !semver.valid(version)) {
       return Promise.reject(new Error(`The SemVer specifier "${version}" is not valid.`));
     }
