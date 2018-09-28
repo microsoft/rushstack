@@ -19,7 +19,7 @@
     "baseCommand": {
       "type": "object",
       "additionalProperties": true,
-      "required": [ "commandKind", "name", "summary", "description" ],
+      "required": [ "commandKind", "name", "summary" ],
       "properties": {
         "commandKind": {
           "title": "Command Kind",
@@ -134,7 +134,7 @@
         },
         "longName": {
           "title": "Long Name",
-          "description": "The name the parameter (e.g. \"--verbose\").  This is a required field.",
+          "description": "The name of the parameter (e.g. \"--verbose\").  This is a required field.",
           "type": "string",
           "pattern": "^-(-[a-z0-9]+)+$"
         },

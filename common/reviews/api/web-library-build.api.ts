@@ -5,14 +5,6 @@ export function _isJestEnabled(rootFolder: string): boolean;
 export function addSuppression(suppression: string | RegExp): void;
 
 // @public
-class ApiExtractorTask extends ApiExtractorBaseTask {
-  // (undocumented)
-  protected updateExtractorConfig(extractorConfig: IExtractorConfig): void;
-  // (undocumented)
-  protected updateExtractorOptions(extractorOptions: IExtractorOptions, entryPointFile: string): void;
-}
-
-// @public
 class CleanFlagTask extends CleanTask {
   constructor();
   // (undocumented)
@@ -174,12 +166,6 @@ interface IExecutable {
   onRegister?: () => void;
 }
 
-// @public (undocumented)
-interface IFixupSettingsOptions {
-  // (undocumented)
-  mustBeCommonJsOrEsnext: boolean;
-}
-
 // @alpha
 interface IJestConfig {
   cache?: boolean;
@@ -201,12 +187,6 @@ export function initialize(gulp: typeof Gulp): void;
 interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
   removeCommentsFromJavaScript?: boolean;
   staticMatch?: string[];
-}
-
-// @public (undocumented)
-interface ITsConfigFile<T> {
-  // (undocumented)
-  compilerOptions: T;
 }
 
 // @public (undocumented)
@@ -309,28 +289,6 @@ class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
 }
 
 // @public
-class TypeScriptConfiguration {
-  static fixupSettings(compilerOptions: ts.Settings, logWarning: (msg: string) => void, options?: Partial<IFixupSettingsOptions>): void;
-  static getGulpTypescriptOptions(buildConfig: IBuildConfig): ITsConfigFile<ts.Settings>;
-  static getTsConfigFile(config: IBuildConfig): ITsConfigFile<ts.Settings>;
-  static getTypescriptCompiler(): any;
-  static setBaseConfig(config: ITsConfigFile<ts.Settings>): void;
-  static setTypescriptCompiler(typescriptOverride: any): void;
-}
-
-// @public (undocumented)
-class TypeScriptTask extends GulpTask<ITypeScriptTaskConfig> {
-  constructor();
-  // (undocumented)
-  executeTask(gulp: gulpType.Gulp, completeCallback: (error?: string) => void): void;
-  // (undocumented)
-  getCleanMatch(buildConfig: IBuildConfig, taskConfig?: ITypeScriptTaskConfig): string[];
-  // (undocumented)
-  loadSchema(): Object;
-  mergeConfig(config: ITypeScriptTaskConfig): void;
-}
-
-// @public
 class ValidateShrinkwrapTask extends GulpTask<void> {
   constructor();
   executeTask(gulp: gulpType.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void;
@@ -360,7 +318,6 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
 
 // WARNING: Unsupported export: preCopy
 // WARNING: Unsupported export: postCopy
-// WARNING: Unsupported export: compileTsTasks
 // WARNING: Unsupported export: buildTasks
 // WARNING: Unsupported export: bundleTasks
 // WARNING: Unsupported export: testTasks
@@ -372,14 +329,9 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
 // WARNING: Unsupported export: clean
 // WARNING: Unsupported export: copyStaticAssets
 // WARNING: Unsupported export: jest
-// WARNING: Unsupported export: apiExtractor
-// WARNING: Unsupported export: typescript
-// WARNING: Unsupported export: tslint
-// WARNING: Unsupported export: text
-// WARNING: Unsupported export: removeTripleSlash
 // WARNING: Unsupported export: tscCmd
 // WARNING: Unsupported export: tslintCmd
-// WARNING: Unsupported export: apiExtractorStandalone
+// WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: sass
 // WARNING: Unsupported export: karma
 // WARNING: Unsupported export: webpack

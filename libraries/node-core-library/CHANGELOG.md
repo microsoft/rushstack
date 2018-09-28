@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Wed, 29 Aug 2018 06:36:50 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Sep 2018 01:25:26 GMT and should not be manually modified.
+
+## 3.0.1
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
 
 ## 3.0.0
 Wed, 29 Aug 2018 06:36:50 GMT

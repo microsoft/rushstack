@@ -9,7 +9,6 @@ import * as colors from 'colors';
 import * as HttpType from 'http';
 import * as HttpsType from 'https';
 import * as pathType from 'path';
-import * as gUtilType from 'gulp-util';
 import * as ExpressType from 'express';
 
 import {
@@ -116,7 +115,6 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     const https = require('https');
     /* tslint:enable:typedef */
 
-    const gutil: typeof gUtilType = require('gulp-util');
     const path: typeof pathType = require('path');
     const openBrowser: boolean = (process.argv.indexOf('--nobrowser') === -1);
     const portArgumentIndex: number = process.argv.indexOf('--port');
@@ -167,7 +165,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         // Load the apis.
         for (const apiMapEntry in apiMap) {
           if (apiMap.hasOwnProperty(apiMapEntry)) {
-            console.log(`Registring api: ${ gutil.colors.green(apiMapEntry) }`);
+            console.log(`Registring api: ${ colors.green(apiMapEntry) }`);
             app.get(apiMapEntry, apiMap[apiMapEntry]);
           }
         }

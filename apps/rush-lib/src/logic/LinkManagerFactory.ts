@@ -8,11 +8,17 @@ import { PnpmLinkManager } from './pnpm/PnpmLinkManager';
 
 export class LinkManagerFactory {
   public static getLinkManager(rushConfiguration: RushConfiguration): BaseLinkManager {
-    if (rushConfiguration.packageManager === 'npm') {
-      return new NpmLinkManager(rushConfiguration);
-    } else if (rushConfiguration.packageManager === 'pnpm') {
-      return new PnpmLinkManager(rushConfiguration);
+
+    switch (rushConfiguration.packageManager) {
+      case 'npm':
+        return new NpmLinkManager(rushConfiguration);
+      case 'pnpm':
+        return new PnpmLinkManager(rushConfiguration);
+      case 'yarn':
+        // Yarn uses the same node_modules structure as NPM
+        return new NpmLinkManager(rushConfiguration);
     }
-    throw new Error(`Invalid package manager: ${rushConfiguration.packageManager}`);
+
+    throw new Error(`Unsupported package manager: ${rushConfiguration.packageManager}`);
   }
 }

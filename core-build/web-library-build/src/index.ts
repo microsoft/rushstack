@@ -14,7 +14,7 @@ import {
   setConfig,
   getConfig
 } from '@microsoft/gulp-core-build';
-import { apiExtractor, tscCmd, tslintCmd, text } from '@microsoft/gulp-core-build-typescript';
+import { apiExtractor, tscCmd, tslintCmd } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
 import { karma } from '@microsoft/gulp-core-build-karma';
 import { webpack } from '@microsoft/gulp-core-build-webpack';
@@ -48,10 +48,9 @@ setConfig({
 });
 
 // Define default task groups.
-export const compileTsTasks: IExecutable = parallel(tscCmd, text);
 export const buildTasks: IExecutable = task(
   'build',
-  serial(preCopy, sass, parallel(tslintCmd, compileTsTasks), apiExtractor, postCopy)
+  serial(preCopy, sass, parallel(tslintCmd, tscCmd), apiExtractor, postCopy)
 );
 export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
 export const testTasks: IExecutable = task('test', serial(buildTasks, karma, jest));
@@ -67,11 +66,12 @@ task('test-watch', watch(sourceMatch, testTasks));
 // For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)
 task('serve',
   serial(
-  serve,
-  watch(
-    sourceMatch, serial(preCopy, sass, compileTsTasks,
-      postCopy, webpack, postProcessSourceMapsTask, reload)
-  ))
+    serve,
+    watch(
+      sourceMatch,
+      serial(preCopy, sass, tscCmd, postCopy, webpack, postProcessSourceMapsTask, reload)
+    )
+  )
 );
 
 task('default', defaultTasks);

@@ -1,6 +1,58 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 30 Aug 2018 22:47:34 GMT and should not be manually modified.
+This log was last generated on Wed, 26 Sep 2018 21:39:40 GMT and should not be manually modified.
+
+## 1.5.29
+Wed, 26 Sep 2018 21:39:40 GMT
+
+*Version update only*
+
+## 1.5.28
+Mon, 24 Sep 2018 23:06:40 GMT
+
+*Version update only*
+
+## 1.5.27
+Mon, 24 Sep 2018 16:04:28 GMT
+
+*Version update only*
+
+## 1.5.26
+Fri, 21 Sep 2018 16:04:42 GMT
+
+*Version update only*
+
+## 1.5.25
+Thu, 20 Sep 2018 23:57:21 GMT
+
+*Version update only*
+
+## 1.5.24
+Tue, 18 Sep 2018 21:04:55 GMT
+
+*Version update only*
+
+## 1.5.23
+Mon, 10 Sep 2018 23:23:01 GMT
+
+*Version update only*
+
+## 1.5.22
+Thu, 06 Sep 2018 01:25:25 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 1.5.21
+Tue, 04 Sep 2018 21:34:10 GMT
+
+*Version update only*
+
+## 1.5.20
+Mon, 03 Sep 2018 16:04:45 GMT
+
+*Version update only*
 
 ## 1.5.19
 Thu, 30 Aug 2018 22:47:34 GMT

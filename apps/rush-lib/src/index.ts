@@ -12,7 +12,8 @@ export {
 
 export {
   RushConfiguration,
-  PackageManager
+  PackageManager,
+  PnpmOptionsConfiguration
 } from './api/RushConfiguration';
 
 export {
@@ -31,6 +32,12 @@ export {
 export {
   CommonVersionsConfiguration
 } from './api/CommonVersionsConfiguration';
+
+export {
+  PackageJsonEditor,
+  PackageJsonDependency,
+  DependencyType
+} from './api/PackageJsonEditor';
 
 export {
   EventHooks,

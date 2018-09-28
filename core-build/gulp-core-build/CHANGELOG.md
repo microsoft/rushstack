@@ -1,6 +1,48 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 30 Aug 2018 19:23:16 GMT and should not be manually modified.
+This log was last generated on Wed, 26 Sep 2018 21:39:40 GMT and should not be manually modified.
+
+## 3.8.23
+Wed, 26 Sep 2018 21:39:40 GMT
+
+*Version update only*
+
+## 3.8.22
+Mon, 24 Sep 2018 23:06:40 GMT
+
+*Version update only*
+
+## 3.8.21
+Fri, 21 Sep 2018 16:04:42 GMT
+
+*Version update only*
+
+## 3.8.20
+Thu, 20 Sep 2018 23:57:21 GMT
+
+*Version update only*
+
+## 3.8.19
+Tue, 18 Sep 2018 21:04:56 GMT
+
+*Version update only*
+
+## 3.8.18
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 3.8.17
+Tue, 04 Sep 2018 21:34:10 GMT
+
+*Version update only*
+
+## 3.8.16
+Mon, 03 Sep 2018 16:04:46 GMT
+
+*Version update only*
 
 ## 3.8.15
 Thu, 30 Aug 2018 19:23:16 GMT

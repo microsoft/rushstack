@@ -28,10 +28,6 @@
  * @public
  */
 export declare interface IPublicComplexInterface {
-    /**
-     * Example of trimming an indexer.
-     * @internal
-     */
     /* Excluded from this release type: __index */
     /* Excluded from this release type: __new */
 }

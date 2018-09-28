@@ -2,6 +2,66 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.2.1",
+      "tag": "@microsoft/rush_v5.2.1",
+      "date": "Thu, 13 Sep 2018 21:57:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush init\" failed because its \".gitignore\" template was excluded from the package"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.0",
+      "tag": "@microsoft/rush_v5.2.0",
+      "date": "Thu, 13 Sep 2018 19:34:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a \"rush init\" command for scaffolding new monorepo folders"
+          },
+          {
+            "comment": "Allow \"rush scan\" to be used without a rush.json configuration"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.1.0",
+      "tag": "@microsoft/rush_v5.1.0",
+      "date": "Sat, 08 Sep 2018 20:57:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update \"repository\" field in package.json"
+          },
+          {
+            "comment": "Add support for PNPM's --strict-peer-dependencies feature"
+          },
+          {
+            "comment": "Add support for the Yarn package manager (this is a \"beta\" feature; please report any issues you encounter!)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.6",
+      "tag": "@microsoft/rush_v5.0.6",
+      "date": "Fri, 31 Aug 2018 23:10:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add \"--prefer-frozen-shrinkwrap false\" to the \"pnpm install\" command line as a workaround for https://github.com/pnpm/pnpm/issues/1342"
+          },
+          {
+            "comment": "Skip validation of the Git email address if Git is not installed, or if rush.json isn't in a Git working directory, or if no policy was defined"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.0.5",
       "tag": "@microsoft/rush_v5.0.5",
       "date": "Wed, 29 Aug 2018 07:05:22 GMT",

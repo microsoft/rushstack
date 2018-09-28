@@ -39,7 +39,7 @@ import { Utilities } from '../utilities/Utilities';
 import { Rush } from '../api/Rush';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 
-const MAX_INSTALL_ATTEMPTS: number = 5;
+const MAX_INSTALL_ATTEMPTS: number = 2;
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.
@@ -55,6 +55,10 @@ export interface CreateOptions { // tslint:disable-line:interface-name
 }
 
 export interface IInstallManagerOptions {
+  /**
+   * Whether the global "--debug" flag was specified.
+   */
+  debug: boolean;
   /**
    * Whether or not Rush will automatically update the shrinkwrap file.
    * True for "rush update", false for "rush install".
@@ -222,7 +226,7 @@ export class InstallManager {
                 this._rushConfiguration.committedShrinkwrapFilename);
             } catch (ex) {
               console.log();
-              console.log('Unable to load the shrinkwrap file: ' + ex.message);
+              console.log(`Unable to load the ${this._shrinkwrapFilePhrase}: ${ex.message}`);
 
               if (!options.allowShrinkwrapUpdates) {
                 console.log();
@@ -240,7 +244,8 @@ export class InstallManager {
           if (!shrinkwrapIsUpToDate) {
             if (!options.allowShrinkwrapUpdates) {
               console.log();
-              console.log(colors.red('The shrinkwrap file is out of date.  You need to run "rush update".'));
+              console.log(colors.red(`The ${this._shrinkwrapFilePhrase} is out of date.`
+                + `  You need to run "rush update".`));
               throw new AlreadyReportedError();
             }
           }
@@ -611,7 +616,9 @@ export class InstallManager {
 
     if (shrinkwrapWarnings.length > 0) {
       console.log();
-      console.log(colors.yellow(Utilities.wrapWords(`The shrinkwrap file is missing the following dependencies:`)));
+      console.log(colors.yellow(Utilities.wrapWords(
+        `The ${this._shrinkwrapFilePhrase} is missing the following dependencies:`)));
+
       for (const shrinkwrapWarning of shrinkwrapWarnings) {
         console.log(colors.yellow('  ' + shrinkwrapWarning));
       }
@@ -757,6 +764,17 @@ export class InstallManager {
             }
           }
 
+          if (this._rushConfiguration.packageManager === 'yarn') {
+            // Yarn does not correctly detect changes to a tarball, so we need to forcibly clear its cache
+            const yarnRushTempCacheFolder: string = path.join(
+              this._rushConfiguration.yarnCacheFolder, 'v2', 'npm-@rush-temp'
+            );
+            if (FileSystem.exists(yarnRushTempCacheFolder)) {
+              console.log('Deleting ' + yarnRushTempCacheFolder);
+              Utilities.dangerouslyDeletePath(yarnRushTempCacheFolder);
+            }
+          }
+
           // Run "npm install" in the common folder
 
           // NOTE:
@@ -775,14 +793,14 @@ export class InstallManager {
           // is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
           // people would have different node_modules based on their system.
 
-          const installArgs: string[] = ['install', '--no-optional'];
+          const installArgs: string[] = [ 'install' ];
           this._pushConfigurationArgs(installArgs, options);
 
           console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
             + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
 
-          if (options.collectLogFile || options.networkConcurrency) {
-            // Show the full command-line when diagnostic options are specified
+          // If any diagnostic options were specified, then show the full command-line
+          if (options.debug || options.collectLogFile || options.networkConcurrency || options.debug) {
             console.log(os.EOL + colors.green('Invoking package manager: ')
               + FileSystem.getRealPath(packageManagerFilename) + ' ' + installArgs.join(' ') + os.EOL);
           }
@@ -952,6 +970,7 @@ export class InstallManager {
    */
   private _pushConfigurationArgs(args: string[], options: IInstallManagerOptions): void {
     if (this._rushConfiguration.packageManager === 'npm') {
+      args.push('--no-optional');
       args.push('--cache', this._rushConfiguration.npmCacheFolder);
       args.push('--tmp', this._rushConfiguration.npmTmpFolder);
 
@@ -959,6 +978,7 @@ export class InstallManager {
         args.push('--verbose');
       }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
+      args.push('--no-optional');
       args.push('--store', this._rushConfiguration.pnpmStoreFolder);
 
       // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
@@ -968,9 +988,29 @@ export class InstallManager {
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
 
+      // Ensure that Rush's tarball dependencies get synchronized properly with the shrinkwrap.yaml file.
+      // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
+      args.push('--no-prefer-frozen-shrinkwrap');
+
       if (options.collectLogFile) {
         args.push('--reporter', 'ndjson');
       }
+
+      if (options.networkConcurrency) {
+        args.push('--network-concurrency', options.networkConcurrency.toString());
+      }
+
+      if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
+        args.push('--strict-peer-dependencies');
+      }
+    } else if (this._rushConfiguration.packageManager === 'yarn') {
+      args.push('--ignore-optional');
+      args.push('--link-folder', 'yarn-link');
+      args.push('--cache-folder', this._rushConfiguration.yarnCacheFolder);
+
+      // Without this option, Yarn will sometimes stop and ask for user input on STDIN
+      // (e.g. "Which command would you like to run?").
+      args.push('--non-interactive');
 
       if (options.networkConcurrency) {
         args.push('--network-concurrency', options.networkConcurrency.toString());
@@ -1057,12 +1097,16 @@ export class InstallManager {
     for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {
       if (!this._rushConfiguration.findProjectByTempName(tempProjectName)) {
         console.log(os.EOL + colors.yellow(Utilities.wrapWords(
-          `Your NPM shrinkwrap file references a project "${tempProjectName}" which no longer exists.`))
+          `Your ${this._shrinkwrapFilePhrase} references a project "${tempProjectName}" which no longer exists.`))
           + os.EOL);
         return true;  // found one
       }
     }
 
     return false;  // none found
+  }
+
+  private get _shrinkwrapFilePhrase(): string {
+    return this._rushConfiguration.shrinkwrapFilePhrase;
   }
 }

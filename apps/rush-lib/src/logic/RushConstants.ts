@@ -73,6 +73,11 @@ export namespace RushConstants {
   export const pnpmFileFilename: string = 'pnpmfile.js';
 
   /**
+   * The filename ("shrinkwrap.yaml") used to store state for pnpm
+   */
+  export const yarnShrinkwrapFilename: string = 'yarn.lock';
+
+  /**
    * The folder name ("node_modules") where NPM installs its packages.
    */
   export const nodeModulesFolderName: string = 'node_modules';

@@ -1,6 +1,58 @@
 # Change Log - @microsoft/package-deps-hash
 
-This log was last generated on Thu, 30 Aug 2018 22:47:34 GMT and should not be manually modified.
+This log was last generated on Wed, 26 Sep 2018 21:39:40 GMT and should not be manually modified.
+
+## 2.2.78
+Wed, 26 Sep 2018 21:39:40 GMT
+
+*Version update only*
+
+## 2.2.77
+Mon, 24 Sep 2018 23:06:40 GMT
+
+*Version update only*
+
+## 2.2.76
+Mon, 24 Sep 2018 16:04:28 GMT
+
+*Version update only*
+
+## 2.2.75
+Fri, 21 Sep 2018 16:04:42 GMT
+
+*Version update only*
+
+## 2.2.74
+Thu, 20 Sep 2018 23:57:22 GMT
+
+*Version update only*
+
+## 2.2.73
+Tue, 18 Sep 2018 21:04:56 GMT
+
+*Version update only*
+
+## 2.2.72
+Mon, 10 Sep 2018 23:23:01 GMT
+
+*Version update only*
+
+## 2.2.71
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 2.2.70
+Tue, 04 Sep 2018 21:34:10 GMT
+
+*Version update only*
+
+## 2.2.69
+Mon, 03 Sep 2018 16:04:46 GMT
+
+*Version update only*
 
 ## 2.2.68
 Thu, 30 Aug 2018 22:47:34 GMT

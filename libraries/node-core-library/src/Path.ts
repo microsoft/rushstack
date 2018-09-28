@@ -10,6 +10,8 @@ import * as path from 'path';
  * @public
  */
 export class Path {
+  private static _relativePathRegex: RegExp = /^[.\/\\]+$/;
+
   /**
    * Returns true if childPath refers to a location under parentFolderPath.
    * @remarks
@@ -21,6 +23,11 @@ export class Path {
     // "../.." or "..\\..", which consists entirely of periods and slashes.
     // (Note that something like "....t" is actually a valid filename, but "...." is not.)
     const relativePath: string = path.relative(childPath, parentFolderPath);
-    return /^[.\/\\]+$/.test(relativePath);
+    return Path._relativePathRegex.test(relativePath);
+  }
+
+  public static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean {
+    const relativePath: string = path.relative(childPath, parentFolderPath);
+    return relativePath === '' || Path._relativePathRegex.test(relativePath);
   }
 }

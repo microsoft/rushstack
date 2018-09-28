@@ -1,6 +1,38 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 29 Aug 2018 07:05:22 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Sep 2018 21:57:21 GMT and should not be manually modified.
+
+## 5.2.1
+Thu, 13 Sep 2018 21:57:21 GMT
+
+### Updates
+
+- Fix an issue where "rush init" failed because its ".gitignore" template was excluded from the package
+
+## 5.2.0
+Thu, 13 Sep 2018 19:34:37 GMT
+
+### Updates
+
+- Add a "rush init" command for scaffolding new monorepo folders
+- Allow "rush scan" to be used without a rush.json configuration
+
+## 5.1.0
+Sat, 08 Sep 2018 20:57:32 GMT
+
+### Updates
+
+- Update "repository" field in package.json
+- Add support for PNPM's --strict-peer-dependencies feature
+- Add support for the Yarn package manager (this is a "beta" feature; please report any issues you encounter!)
+
+## 5.0.6
+Fri, 31 Aug 2018 23:10:31 GMT
+
+### Updates
+
+- Add "--prefer-frozen-shrinkwrap false" to the "pnpm install" command line as a workaround for https://github.com/pnpm/pnpm/issues/1342
+- Skip validation of the Git email address if Git is not installed, or if rush.json isn't in a Git working directory, or if no policy was defined
 
 ## 5.0.5
 Wed, 29 Aug 2018 07:05:22 GMT

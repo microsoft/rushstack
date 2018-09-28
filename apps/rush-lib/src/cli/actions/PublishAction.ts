@@ -257,7 +257,7 @@ export class PublishAction extends BaseRushAction {
           }
         }
 
-        // Create and push appropriate git tags.
+        // Create and push appropriate Git tags.
         this._gitAddTags(git, orderedChanges);
         git.push(tempBranch);
 

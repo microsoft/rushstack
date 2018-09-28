@@ -1,6 +1,55 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 29 Aug 2018 06:36:50 GMT and should not be manually modified.
+This log was last generated on Wed, 26 Sep 2018 21:39:40 GMT and should not be manually modified.
+
+## 5.13.0
+Wed, 26 Sep 2018 21:39:40 GMT
+
+### Minor changes
+
+- Add new command line option --skip-lib-check
+
+## 5.12.2
+Mon, 24 Sep 2018 23:06:40 GMT
+
+### Patches
+
+- Allow doc comments to use TSDoc's "@defaultvalue" tag (but the value is not yet passed to the documentation pipeline)
+
+## 5.12.1
+Fri, 21 Sep 2018 16:04:42 GMT
+
+### Patches
+
+- Fix an issue where TypeScript errors are often logged as "[Object object]" instead of the actual error message.
+
+## 5.12.0
+Thu, 20 Sep 2018 23:57:21 GMT
+
+### Minor changes
+
+- Add new feature: Support using a different version of the TypeScript compiler.
+
+## 5.11.2
+Tue, 18 Sep 2018 21:04:55 GMT
+
+### Patches
+
+- Fix an issue where parameters mentioned in comments were attempting to be analyzed by api-extractor.
+
+## 5.11.1
+Thu, 06 Sep 2018 01:25:25 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 5.11.0
+Mon, 03 Sep 2018 16:04:45 GMT
+
+### Minor changes
+
+- Upgrade api-extractor to internally use TypeScript 3.0.
 
 ## 5.10.8
 Wed, 29 Aug 2018 06:36:50 GMT

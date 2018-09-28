@@ -2,6 +2,194 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "6.1.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v6.1.0",
+      "date": "Wed, 26 Sep 2018 21:39:40 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose new api-extractor skipLibCheck option."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.12.2` to `5.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.22` to `3.8.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.8` to `0.1.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.5",
+      "tag": "@microsoft/gulp-core-build-typescript_v6.0.5",
+      "date": "Mon, 24 Sep 2018 23:06:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.12.1` to `5.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.21` to `3.8.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.7` to `0.1.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.4",
+      "tag": "@microsoft/gulp-core-build-typescript_v6.0.4",
+      "date": "Mon, 24 Sep 2018 16:04:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixed overridePackagePath not loading correct version of package."
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.3",
+      "tag": "@microsoft/gulp-core-build-typescript_v6.0.3",
+      "date": "Fri, 21 Sep 2018 16:04:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.12.0` to `5.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.20` to `3.8.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.6` to `0.1.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.2",
+      "tag": "@microsoft/gulp-core-build-typescript_v6.0.2",
+      "date": "Thu, 20 Sep 2018 23:57:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include support for the typescriptCompilerFolder api-extractor option."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.11.2` to `5.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.19` to `3.8.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.5` to `0.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.1",
+      "tag": "@microsoft/gulp-core-build-typescript_v6.0.1",
+      "date": "Tue, 18 Sep 2018 21:04:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.11.1` to `5.11.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.18` to `3.8.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.4` to `0.1.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.0.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v6.0.0",
+      "date": "Mon, 10 Sep 2018 23:23:01 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Remove the old TypeScript, TSLint, Text, and RemoveTripleSlash tasks."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.2",
+      "tag": "@microsoft/gulp-core-build-typescript_v5.0.2",
+      "date": "Thu, 06 Sep 2018 01:25:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update \"repository\" field in package.json"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.11.0` to `5.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.17` to `3.8.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.0.0` to `3.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.3` to `0.1.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.1",
+      "tag": "@microsoft/gulp-core-build-typescript_v5.0.1",
+      "date": "Tue, 04 Sep 2018 21:34:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.16` to `3.8.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.2` to `0.1.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v5.0.0",
+      "date": "Mon, 03 Sep 2018 16:04:45 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Replace the old api-extractor task with the new one that uses tsconfig.json instead of a runtime configuration."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `5.10.8` to `5.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.15` to `3.8.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.1` to `0.1.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.11.12",
       "tag": "@microsoft/gulp-core-build-typescript_v4.11.12",
       "date": "Thu, 30 Aug 2018 22:47:34 GMT",

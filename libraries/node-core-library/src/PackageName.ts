@@ -48,6 +48,7 @@ export class PackageName {
 
   /**
    * This attempts to parse a package name that may include a scope component.
+   * The packageName must not be an empty string.
    * @remarks
    * This function will not throw an exception.
    *
@@ -135,7 +136,9 @@ export class PackageName {
 
   /**
    * Same as {@link PackageName.tryParse}, except this throws an exception if the input
-   * cannot be parsed
+   * cannot be parsed.
+   * @remarks
+   * The packageName must not be an empty string.
    */
   public static parse(packageName: string): IParsedPackageName {
     const result: IParsedPackageNameOrError = PackageName.tryParse(packageName);
@@ -171,6 +174,7 @@ export class PackageName {
 
   /**
    * Throws an exception if the specified name is not a valid package name.
+   * The packageName must not be an empty string.
    */
   public static validate(packageName: string): void {
     PackageName.parse(packageName);

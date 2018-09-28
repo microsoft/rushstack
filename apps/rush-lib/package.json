@@ -1,10 +1,10 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.0.5",
+  "version": "5.2.1",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/rush-lib"
   },
   "engines": {
     "node": ">=5.6.0"
@@ -21,12 +21,13 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.0.0",
-    "@microsoft/package-deps-hash": "2.2.68",
-    "@microsoft/stream-collator": "2.2.68",
-    "@microsoft/ts-command-line": "4.2.1",
+    "@microsoft/node-core-library": "3.0.1",
+    "@microsoft/package-deps-hash": "2.2.78",
+    "@microsoft/stream-collator": "2.2.78",
+    "@microsoft/ts-command-line": "4.2.2",
     "@pnpm/link-bins": "~1.0.1",
     "@pnpm/logger": "~1.0.1",
+    "@yarnpkg/lockfile": "~1.0.2",
     "builtins": "~1.0.3",
     "colors": "~1.2.1",
     "git-repo-info": "~1.1.4",
@@ -49,8 +50,8 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.1.1",
-    "@microsoft/node-library-build": "5.0.4",
+    "@microsoft/rush-stack-compiler": "0.1.9",
+    "@microsoft/node-library-build": "5.0.14",
     "@types/node": "8.5.8",
     "@types/node-fetch": "1.6.9",
     "@types/tar": "4.0.0",
@@ -59,7 +60,7 @@
     "@types/glob": "5.0.30",
     "@types/jest": "21.1.10",
     "@types/js-yaml": "3.9.1",
-    "@types/lodash": "4.14.74",
+    "@types/lodash": "4.14.116",
     "@types/minimatch": "2.0.29",
     "@types/semver": "5.3.33"
   }

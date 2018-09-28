@@ -247,7 +247,6 @@ export class Executable {
    * @param filename - The name of the executable file.  This string must not contain any
    * command-line arguments.  If the name contains any path delimiters, then the shell's
    * default PATH will not be searched.
-   * @param filename - the name of the executable, which may be missing the path or file extension
    * @param options - optional other parameters
    * @returns the absolute path of the executable, or undefined if it was not found
    */
