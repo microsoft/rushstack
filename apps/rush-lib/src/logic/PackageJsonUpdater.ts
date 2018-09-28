@@ -143,16 +143,10 @@ export class PackageJsonUpdater {
             + ` version, or do not specify a SemVer range.`));
         }
 
-        const allowedAlternates: ReadonlyArray<string> | undefined
-          = this._rushConfiguration.commonVersions.allowedAlternativeVersions.get(packageName);
-
         // otherwise we need to go update a bunch of other projects
         for (const mismatchedVersion of mismatchFinder.getVersionsOfMismatch(packageName)!) {
           for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
-            const isAllowedMismatch: boolean =
-              !!allowedAlternates && (allowedAlternates.indexOf(mismatchedVersion) !== -1);
-
-            if (consumer !== currentProject.packageName && !isAllowedMismatch) {
+            if (consumer !== currentProject.packageName) {
               otherPackageUpdates.push({
                 project: this._rushConfiguration.getProjectByName(consumer)!,
                 packageName: packageName,
