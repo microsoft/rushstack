@@ -118,7 +118,7 @@ export class PackageJsonUpdater {
 
     console.log();
     console.log(colors.green(`Updating projects to use `)
-      + packageName + '@' + colors.magenta(version));
+      + packageName + '@' + colors.cyan(version));
     console.log();
 
     const currentProjectUpdate: IUpdateProjectOptions = {
@@ -228,6 +228,16 @@ export class PackageJsonUpdater {
     packageJson.addOrUpdateDependency(packageName, newVersion, dependencyType!);
   }
 
+  /**
+   * Selects an appropriate version number for a particular package, given an optional initial SemVer spec.
+   * If ensureConsistentVersions, tries to pick a version that will be consistent.
+   * Otherwise, will choose the latest semver matching the initialSpec and append the proper range style.
+   * @param packageName - the name of the package to be used
+   * @param initialSpec - a semver pattern that should be used to find the latest version matching the spec
+   * @param implicitlyPinnedVersion - the implicityly preferred (aka common/primary) version of the package in use
+   * @param rangeStyle - if this version is selected by querying registry, then this range specifier is prepended to
+   *   the selected version.
+   */
   private _getNormalizedVersionSpec(
     packageName: string,
     initialSpec: string | undefined,
@@ -236,7 +246,7 @@ export class PackageJsonUpdater {
 
     console.log(colors.gray(`Determining new version for dependency: ${packageName}`));
     if (initialSpec) {
-      console.log(`Specified version selector: ${colors.magenta(initialSpec)}`);
+      console.log(`Specified version selector: ${colors.cyan(initialSpec)}`);
     } else {
       console.log(`No version selector specified, will be automatically determined.`);
     }
@@ -245,24 +255,29 @@ export class PackageJsonUpdater {
     // if ensureConsistentVersions => reuse the pinned version
     // else, query the registry and use the latest that satisfies semver spec
     if (initialSpec && implicitlyPinnedVersion && initialSpec === implicitlyPinnedVersion) {
-      console.log(colors.green('The specified version ')
-        + colors.magenta(initialSpec)
-        + colors.green(' has been selected as it matches the implicitly preferred version.'));
+      console.log(colors.green('Assigning "')
+        + colors.cyan(initialSpec)
+        + colors.green('" because it matches what other projects are using in this repo.'));
       return initialSpec;
     }
 
     if (this._rushConfiguration.ensureConsistentVersions && !initialSpec && implicitlyPinnedVersion) {
-      console.log(colors.grey('The enforceConsistentVersions policy is currently active.'));
-      console.log(`Using the implicitly preferred version ${colors.magenta(implicitlyPinnedVersion)}`);
+      console.log(`Assigning the version range "${colors.cyan(implicitlyPinnedVersion)}" for "${packageName}" because`
+        + ` it is already used by other projects in this repo.`);
       return implicitlyPinnedVersion;
     }
 
     let selectedVersion: string | undefined;
 
+    if (this._rushConfiguration.packageManager === 'yarn') {
+      throw new Error('The yarn package manager is not currently supported by the "rush add" command.');
+    }
+
     if (initialSpec && initialSpec !== 'latest') {
       console.log(colors.gray('Finding newest version that satisfies the selector: ') + initialSpec);
       console.log();
       console.log(`Querying registry for all versions of ${packageName}...`);
+
       const allVersions: string =
         Utilities.executeCommandAndCaptureOutput(this._rushConfiguration.packageManagerToolFilename,
           ['view', packageName, 'versions', '--json'],
@@ -276,16 +291,16 @@ export class PackageJsonUpdater {
       for (const version of versionList) {
         if (semver.satisfies(version, initialSpec)) {
           selectedVersion = version;
-          console.log(`Found latest version: ${colors.magenta(selectedVersion)}`);
+          console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
           break;
         }
       }
       if (!selectedVersion) {
-        throw new Error(`Cannot find version for ${packageName} that satisfies '${initialSpec}'`);
+        throw new Error(`Unable to find a version of ${packageName} that satisfies the version range "${initialSpec}"`);
       }
     } else {
       if (initialSpec !== 'latest') {
-        console.log(colors.gray(`The enforceConsistentVersions policy is NOT active,`
+        console.log(colors.gray(`The ensureConsistentVersions policy is NOT active,`
           + ` therefore using the latest version.`));
         console.log();
       }
@@ -296,19 +311,21 @@ export class PackageJsonUpdater {
         this._rushConfiguration.commonTempFolder).trim();
       console.log();
 
-      console.log(`Found latest version: ${colors.magenta(selectedVersion)}`);
+      console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
     }
 
     console.log();
 
     if (rangeStyle === SemVerStyle.Caret) {
-      console.log(colors.gray('The --caret flag was specified, prepending ^ specifier to version.'));
+      console.log(colors.grey(`Assigning version "^${selectedVersion}" for "${packageName}" because the "--caret"`
+        + ` flag was specified.`));
       return '^' + selectedVersion;
     } else if (rangeStyle === SemVerStyle.Exact) {
-      console.log(colors.gray('The --exact flag was specified, not prepending a specifier to version.'));
+      console.log(colors.grey(`Assigning version "${selectedVersion}" for "${packageName}" because the "--exact"`
+        + ` flag was specified.`));
       return selectedVersion;
     } else {
-      console.log(colors.gray('Prepending ~ specifier to version.'));
+      console.log(colors.gray(`Assigning version "~${selectedVersion}" for "${packageName}".`));
       return '~' + selectedVersion!;
     }
   }

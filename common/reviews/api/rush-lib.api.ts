@@ -157,7 +157,6 @@ class RushConfiguration {
   findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
   getProjectByName(projectName: string): RushConfigurationProject | undefined;
-  // @beta
   getProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
   readonly gitAllowedEmailRegExps: string[];
   readonly gitSampleEmail: string;
@@ -204,6 +203,9 @@ class RushConfigurationProject {
   // @beta
   readonly isMainProject: boolean;
   readonly packageJson: IPackageJson;
+  // WARNING: The type "PackageJsonEditor" needs to be exported by the package (e.g. added to index.ts)
+  // @alpha
+  readonly packageJsonEditor: PackageJsonEditor;
   readonly packageName: string;
   readonly projectFolder: string;
   readonly projectRelativeFolder: string;

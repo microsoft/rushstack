@@ -26,13 +26,12 @@ export class AddAction extends BaseRushAction {
 
   constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
-      'Adds a dependency on a certain package to the current project (detected using the current'
-      + ' working directory) and then runs rush update. If no version is specified, a version will'
-      + ' be automatically detected (typically either the latest version or a version that won\'t break'
-      + ' the ensureConsistentVersions policy). If a version range is specified, the latest version'
-      + ' in the range will be used. The version will be automatically prepended with a tilde, unless'
-      + ' the --exact or --caret flags are used. The --make-consistent flag can be used to update'
-      + ' all packages with the dependency.'
+      'Adds a specified package as a dependency of the current project (as determined by the current working directory)'
+      + ' and then runs "rush update".If no version is specified, a version will be automatically detected (typically'
+      + ' either the latest version or a version that won\'t break the ensureConsistentVersions policy). If a version'
+      + ' range is specified, the latest version in the range will be used. The version will be automatically prepended'
+      + ' with a tilde, unless the "--exact" or "--caret" flags are used. The "--make-consistent" flag can be used to'
+      + ' update all packages with the dependency.'
     ];
     super({
       actionName: 'add',
@@ -49,19 +48,13 @@ export class AddAction extends BaseRushAction {
       parameterShortName: '-p',
       required: true,
       argumentName: 'PACKAGE_NAME',
-      description: '(Required) The name of the package which should be added as a dependency'
-    });
-    this._versionSpecifier = this.defineStringParameter({
-      parameterLongName: '--version',
-      parameterShortName: '-v',
-      argumentName: 'VERSION_RANGE',
-      description: 'An optional version specifier. If specified, the largest version satisfying this range'
-        + ' will be added to the package.json.'
+      description: '(Required) The name of the package which should be added as a dependency.'
+        + ' Also, the version specifier can be appended after an "@" sign (similar to NPM\'s semantics).'
     });
     this._exactFlag = this.defineFlagParameter({
       parameterLongName: '--exact',
       description: 'If specified, the SemVer specifier added to the'
-        + ' package.json will be a locked, exact version.'
+        + ' package.json will be an exact version (e.g. without tilde or caret).'
     });
     this._caretFlag = this.defineFlagParameter({
       parameterLongName: '--caret',
@@ -70,7 +63,6 @@ export class AddAction extends BaseRushAction {
     });
     this._devDependencyFlag = this.defineFlagParameter({
       parameterLongName: '--dev',
-      parameterShortName: '-d',
       description: 'If specified, the package will be added as a "devDependency"'
         + ' to the package.json'
     });

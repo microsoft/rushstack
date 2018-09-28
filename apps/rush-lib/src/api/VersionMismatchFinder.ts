@@ -31,6 +31,10 @@ export class VersionMismatchFinder {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, false);
   }
 
+  /**
+   * Populates a version mismatch finder object given a Rush Configuration.
+   * Intentionally considers preferred versions.
+   */
   public static getMismatches(rushConfiguration: RushConfiguration): VersionMismatchFinder {
     // Collect all the preferred versions into a single table
     const allPreferredVersions: { [dependency: string]: string } = {};
