@@ -125,7 +125,7 @@ export class PackageJsonUpdater {
       project: currentProject,
       packageName,
       newVersion: version,
-      dependencyType: devDependency ? DependencyType.DevDependency : DependencyType.Dependency
+      dependencyType: devDependency ? DependencyType.Dev : DependencyType.Regular
     };
     this.updateProject(currentProjectUpdate);
 
@@ -139,8 +139,8 @@ export class PackageJsonUpdater {
       if (mismatches.length) {
         if (!updateOtherPackages) {
           return Promise.reject(new Error(`Adding '${packageName}@${version}' to ${currentProject.packageName}`
-            + ` causes mismatched dependencies. Use the --make-consistent flag to update other packages to use this`
-            + ` version, or do not specify the --version flag.`));
+            + ` causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use this`
+            + ` version, or do not specify the "--version" flag.`));
         }
 
         // otherwise we need to go update a bunch of other projects

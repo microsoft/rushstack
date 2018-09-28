@@ -136,7 +136,7 @@ export class VersionMismatchFinder {
         // levels of compatibility -- we should wait for someone to actually request this feature
         // before we get into that.)
         project.packageJsonEditor.forEachDependency((dependency: Dependency) => {
-          if (dependency.dependencyType !== DependencyType.PeerOnly
+          if (dependency.dependencyType !== DependencyType.Peer
             && !project.cyclicDependencyProjects.has(dependency.name)) {
 
             const version: string = dependency.version!;

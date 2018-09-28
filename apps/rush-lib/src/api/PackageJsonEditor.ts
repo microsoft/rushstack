@@ -5,44 +5,40 @@ import {
   JsonFile
 } from '@microsoft/node-core-library';
 
+/**
+ * @beta
+ */
 export const enum DependencyType {
-  Dependency = 'dependency',
-  DevDependency = 'devDependency',
-  OptionalDependency = 'optionalDependency',
-  PeerOnly = 'peerDependency'
+  Regular = 'dependencies',
+  Dev = 'devDependencies',
+  Optional = 'optionalDependencies',
+  Peer = 'peerDependencies'
 }
 
+/**
+ * @beta
+ */
 export class Dependency {
   private _type: DependencyType;
   private _name: string;
-  private _version: string | undefined;
-  private _peerVersion: string | undefined;
+  private _version: string;
   private _onChange: () => void;
 
   public constructor(name: string,
-    version: string | undefined,
+    version: string,
     type: DependencyType,
-    peerVersion: string | undefined,
     onChange: () => void) {
     this._name = name;
     this._version = version;
     this._type = type;
-    this._peerVersion = peerVersion;
     this._onChange = onChange;
-
-    if (this._version && this._type === DependencyType.PeerOnly) {
-      throw new Error(`Cannot specify a primary version if the dependency type is peer-only.`);
-    }
-    if (!this._peerVersion && this._type === DependencyType.PeerOnly) {
-      throw new Error(`Must specify a peer version if the dependency type if peer-only.`);
-    }
   }
 
   public get name(): string {
     return this._name;
   }
 
-  public get version(): string | undefined {
+  public get version(): string {
     return this._version;
   }
 
@@ -62,16 +58,16 @@ export class Dependency {
     this._type = newType;
     this._onChange();
   }
-
-  public get peerVersion(): string | undefined {
-    return this._peerVersion;
-  }
 }
 
+/**
+ * @beta
+ */
 export class PackageJsonEditor {
   private readonly _filepath: string;
   private readonly _data: IPackageJson;
   private readonly _dependencies: Map<string, Dependency>;
+  private readonly _peerDependencies: Map<string, Dependency>;
 
   private _onChange: () => void;
   private _modified: boolean;
@@ -105,13 +101,17 @@ export class PackageJsonEditor {
   }
 
   public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
+    if (dependencyType === DependencyType.Peer) {
+      throw new Error(`This function cannot be used to modify peer dependencies.`);
+    }
+
     if (this._dependencies.has(packageName)) {
       const dependency: Dependency = this._dependencies.get(packageName)!;
       dependency.setVersion(newVersion);
       dependency.setDependencyType(dependencyType);
     } else {
       const dependency: Dependency
-        = new Dependency(packageName, newVersion, dependencyType, undefined, this._onChange);
+        = new Dependency(packageName, newVersion, dependencyType, this._onChange);
       this._dependencies.set(packageName, dependency);
     }
   }
@@ -130,6 +130,7 @@ export class PackageJsonEditor {
     this._data = data;
 
     this._dependencies = new Map<string, Dependency>();
+    this._peerDependencies = new Map<string, Dependency>();
 
     const dependencies: { [key: string]: string } = data.dependencies || {};
     const devDependencies: { [key: string]: string } = data.devDependencies || {};
@@ -148,8 +149,8 @@ export class PackageJsonEditor {
         throw new Error(`The package "${dependency}" is listed as both a dev and a regular dependency`);
       }
 
-      this._dependencies.set(dependency, new Dependency(dependency, dependencies[dependency],
-        DependencyType.Dependency, peerDependencies[dependency], this._onChange));
+      this._dependencies.set(dependency,
+        new Dependency(dependency, dependencies[dependency], DependencyType.Regular, this._onChange));
     });
 
     Object.keys(devDependencies || {}).forEach((dependency: string) => {
@@ -157,20 +158,18 @@ export class PackageJsonEditor {
         throw new Error(`The package "${dependency}" is listed as both a dev and an optional dependency`);
       }
 
-      this._dependencies.set(dependency, new Dependency(dependency, devDependencies[dependency],
-        DependencyType.Dependency, peerDependencies[dependency], this._onChange));
+      this._dependencies.set(dependency,
+        new Dependency(dependency, devDependencies[dependency], DependencyType.Dev, this._onChange));
     });
 
     Object.keys(optionalDependencies || {}).forEach((dependency: string) => {
       this._dependencies.set(dependency, new Dependency(dependency, optionalDependencies[dependency],
-        DependencyType.OptionalDependency, peerDependencies[dependency], this._onChange));
+        DependencyType.Optional, this._onChange));
     });
 
     Object.keys(peerDependencies || {}).forEach((dependency: string) => {
-      if (!this._dependencies.has(dependency)) {
-        this._dependencies.set(dependency, new Dependency(dependency, undefined,
-          DependencyType.PeerOnly, peerDependencies[dependency], this._onChange));
-      }
+      this._peerDependencies.set(dependency,
+        new Dependency(dependency, peerDependencies[dependency], DependencyType.Peer, this._onChange));
     });
   }
 
@@ -185,33 +184,36 @@ export class PackageJsonEditor {
     for (const packageName of keys) {
       const dependency: Dependency = this._dependencies.get(packageName)!;
 
-      if (dependency.dependencyType === DependencyType.Dependency) {
+      if (dependency.dependencyType === DependencyType.Regular) {
         if (!this._data.dependencies) {
           this._data.dependencies = {};
         }
-        this._data.dependencies[dependency.name] = dependency.version!;
+        this._data.dependencies[dependency.name] = dependency.version;
       }
 
-      if (dependency.dependencyType === DependencyType.DevDependency) {
+      if (dependency.dependencyType === DependencyType.Dev) {
         if (!this._data.devDependencies) {
           this._data.devDependencies = {};
         }
-        this._data.devDependencies[dependency.name] = dependency.version!;
+        this._data.devDependencies[dependency.name] = dependency.version;
       }
 
-      if (dependency.dependencyType === DependencyType.OptionalDependency) {
+      if (dependency.dependencyType === DependencyType.Optional) {
         if (!this._data.optionalDependencies) {
           this._data.optionalDependencies = {};
         }
-        this._data.optionalDependencies[dependency.name] = dependency.version!;
+        this._data.optionalDependencies[dependency.name] = dependency.version;
       }
+    }
 
-      if (dependency.peerVersion) {
-        if (!this._data.peerDependencies) {
-          this._data.peerDependencies = {};
-        }
-        this._data.peerDependencies[dependency.name] = dependency.peerVersion;
+    const peerKeys: Array<string> = [...this._peerDependencies.keys()].sort();
+
+    for (const packageName of peerKeys) {
+      const dependency: Dependency = this._peerDependencies.get(packageName)!;
+      if (!this._data.peerDependencies) {
+        this._data.peerDependencies = {};
       }
+      this._data.peerDependencies[dependency.name] = dependency.version;
     }
 
     return this._data;

@@ -34,6 +34,12 @@ export {
 } from './api/CommonVersionsConfiguration';
 
 export {
+  PackageJsonEditor,
+  Dependency,
+  DependencyType
+} from './api/PackageJsonEditor';
+
+export {
   EventHooks,
   Event
 } from './api/EventHooks';

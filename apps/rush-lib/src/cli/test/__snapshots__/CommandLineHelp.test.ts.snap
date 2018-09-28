@@ -53,34 +53,32 @@ For detailed help about a specific command, use: rush <command> -h
 `;
 
 exports[`CommandLineHelp prints the help for "rush add" 1`] = `
-"usage: rush add [-h] -p PACKAGE_NAME [-v VERSION_RANGE] [--exact] [--caret]
-                [-d] [-m] [-s]
-                
+"usage: rush add [-h] -p PACKAGE_NAME [--exact] [--caret] [--dev] [-m] [-s]
 
-Adds a dependency on a certain package to the current project (detected using 
-the current working directory) and then runs rush update. If no version is 
-specified, a version will be automatically detected (typically either the 
-latest version or a version that won't break the ensureConsistentVersions 
-policy). If a version range is specified, the latest version in the range 
-will be used. The version will be automatically prepended with a tilde, 
-unless the --exact or --caret flags are used. The --make-consistent flag can 
-be used to update all packages with the dependency.
+Adds a specified package as a dependency of the current project (as 
+determined by the current working directory) and then runs \\"rush update\\".If 
+no version is specified, a version will be automatically detected (typically 
+either the latest version or a version that won't break the 
+ensureConsistentVersions policy). If a version range is specified, the latest 
+version in the range will be used. The version will be automatically 
+prepended with a tilde, unless the \\"--exact\\" or \\"--caret\\" flags are used. The 
+\\"--make-consistent\\" flag can be used to update all packages with the 
+dependency.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
   -p PACKAGE_NAME, --package PACKAGE_NAME
                         (Required) The name of the package which should be 
-                        added as a dependency
-  -v VERSION_RANGE, --version VERSION_RANGE
-                        An optional version specifier. If specified, the 
-                        largest version satisfying this range will be added 
-                        to the package.json.
+                        added as a dependency. Also, the version specifier 
+                        can be appended after an \\"@\\" sign (similar to NPM's 
+                        semantics).
   --exact               If specified, the SemVer specifier added to the 
-                        package.json will be a locked, exact version.
+                        package.json will be an exact version (e.g. without 
+                        tilde or caret).
   --caret               If specified, the SemVer specifier added to the 
                         package.json will be a prepended with a \\"caret\\" 
                         specifier (\\"^\\").
-  -d, --dev             If specified, the package will be added as a 
+  --dev                 If specified, the package will be added as a 
                         \\"devDependency\\" to the package.json
   -m, --make-consistent
                         If specified, other packages with this dependency 
