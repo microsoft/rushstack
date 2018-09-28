@@ -73,21 +73,6 @@ class CommonVersionsConfiguration {
 }
 
 // @beta (undocumented)
-class Dependency {
-  constructor(name: string, version: string, type: DependencyType, onChange: () => void);
-  // (undocumented)
-  readonly dependencyType: DependencyType;
-  // (undocumented)
-  readonly name: string;
-  // (undocumented)
-  setDependencyType(newType: DependencyType): void;
-  // (undocumented)
-  setVersion(newVersion: string): void;
-  // (undocumented)
-  readonly version: string;
-}
-
-// @beta (undocumented)
 enum DependencyType {
   // (undocumented)
   Dev = "devDependencies",
@@ -153,17 +138,32 @@ class LockStepVersionPolicy extends VersionPolicy {
 }
 
 // @beta (undocumented)
+class PackageJsonDependency {
+  constructor(name: string, version: string, type: DependencyType, onChange: () => void);
+  // (undocumented)
+  readonly dependencyType: DependencyType;
+  // (undocumented)
+  readonly name: string;
+  // (undocumented)
+  setDependencyType(newType: DependencyType): void;
+  // (undocumented)
+  setVersion(newVersion: string): void;
+  // (undocumented)
+  readonly version: string;
+}
+
+// @beta (undocumented)
 class PackageJsonEditor {
   // (undocumented)
   addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
   // (undocumented)
   readonly filePath: string;
   // (undocumented)
-  forEachDependency(cb: (dependency: Dependency) => void): void;
+  forEachDependency(cb: (dependency: PackageJsonDependency) => void): void;
   // (undocumented)
   static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
   // (undocumented)
-  getDependency(packageName: string): Dependency | undefined;
+  getDependency(packageName: string): PackageJsonDependency | undefined;
   // (undocumented)
   static load(filepath: string): PackageJsonEditor;
   // (undocumented)
@@ -206,7 +206,6 @@ class RushConfiguration {
   findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
   getProjectByName(projectName: string): RushConfigurationProject | undefined;
-  getProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
   readonly gitAllowedEmailRegExps: string[];
   readonly gitSampleEmail: string;
   readonly hotfixChangeEnabled: boolean;
@@ -237,6 +236,7 @@ class RushConfiguration {
   readonly tempShrinkwrapFilename: string;
   readonly tempShrinkwrapPreinstallFilename: string;
   static tryFindRushJsonLocation(verbose?: boolean): string | undefined;
+  tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
   // @beta (undocumented)
   readonly versionPolicyConfiguration: VersionPolicyConfiguration;
   readonly yarnCacheFolder: string;
@@ -251,8 +251,9 @@ class RushConfigurationProject {
   readonly downstreamDependencyProjects: string[];
   // @beta
   readonly isMainProject: boolean;
+  // @deprecated
   readonly packageJson: IPackageJson;
-  // @alpha
+  // @beta
   readonly packageJsonEditor: PackageJsonEditor;
   readonly packageName: string;
   readonly projectFolder: string;

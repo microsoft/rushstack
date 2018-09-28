@@ -176,7 +176,7 @@ export class RushConfigurationProject {
 
   /**
    * The parsed NPM "package.json" file from projectFolder.
-   * Will be deprecated soon in favor of packageJsonEditor
+   * @deprecated Use packageJsonEditor instead
    */
   public get packageJson(): IPackageJson {
     return this._packageJson;
@@ -184,7 +184,7 @@ export class RushConfigurationProject {
 
   /**
    * A useful wrapper around the package.json file for making modifications
-   * @alpha
+   * @beta
    */
   public get packageJsonEditor(): PackageJsonEditor {
     return this._packageJsonEditor;

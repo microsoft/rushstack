@@ -35,7 +35,7 @@ export {
 
 export {
   PackageJsonEditor,
-  Dependency,
+  PackageJsonDependency,
   DependencyType
 } from './api/PackageJsonEditor';
 

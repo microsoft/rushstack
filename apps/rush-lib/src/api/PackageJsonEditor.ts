@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as semver from 'semver';
 
 import {
@@ -18,7 +21,7 @@ export const enum DependencyType {
 /**
  * @beta
  */
-export class Dependency {
+export class PackageJsonDependency {
   private _type: DependencyType;
   private _name: string;
   private _version: string;
@@ -66,8 +69,8 @@ export class Dependency {
 export class PackageJsonEditor {
   private readonly _filepath: string;
   private readonly _data: IPackageJson;
-  private readonly _dependencies: Map<string, Dependency>;
-  private readonly _peerDependencies: Map<string, Dependency>;
+  private readonly _dependencies: Map<string, PackageJsonDependency>;
+  private readonly _peerDependencies: Map<string, PackageJsonDependency>;
 
   private _onChange: () => void;
   private _modified: boolean;
@@ -92,11 +95,11 @@ export class PackageJsonEditor {
     return this._filepath;
   }
 
-  public getDependency(packageName: string): Dependency | undefined {
+  public getDependency(packageName: string): PackageJsonDependency | undefined {
     return this._dependencies.get(packageName);
   }
 
-  public forEachDependency(cb: (dependency: Dependency) => void): void {
+  public forEachDependency(cb: (dependency: PackageJsonDependency) => void): void {
     this._dependencies.forEach(cb);
   }
 
@@ -106,12 +109,12 @@ export class PackageJsonEditor {
     }
 
     if (this._dependencies.has(packageName)) {
-      const dependency: Dependency = this._dependencies.get(packageName)!;
+      const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
       dependency.setVersion(newVersion);
       dependency.setDependencyType(dependencyType);
     } else {
-      const dependency: Dependency
-        = new Dependency(packageName, newVersion, dependencyType, this._onChange);
+      const dependency: PackageJsonDependency
+        = new PackageJsonDependency(packageName, newVersion, dependencyType, this._onChange);
       this._dependencies.set(packageName, dependency);
     }
   }
@@ -129,8 +132,8 @@ export class PackageJsonEditor {
     this._filepath = filepath;
     this._data = data;
 
-    this._dependencies = new Map<string, Dependency>();
-    this._peerDependencies = new Map<string, Dependency>();
+    this._dependencies = new Map<string, PackageJsonDependency>();
+    this._peerDependencies = new Map<string, PackageJsonDependency>();
 
     const dependencies: { [key: string]: string } = data.dependencies || {};
     const devDependencies: { [key: string]: string } = data.devDependencies || {};
@@ -150,7 +153,7 @@ export class PackageJsonEditor {
       }
 
       this._dependencies.set(dependency,
-        new Dependency(dependency, dependencies[dependency], DependencyType.Regular, this._onChange));
+        new PackageJsonDependency(dependency, dependencies[dependency], DependencyType.Regular, this._onChange));
     });
 
     Object.keys(devDependencies || {}).forEach((dependency: string) => {
@@ -159,17 +162,17 @@ export class PackageJsonEditor {
       }
 
       this._dependencies.set(dependency,
-        new Dependency(dependency, devDependencies[dependency], DependencyType.Dev, this._onChange));
+        new PackageJsonDependency(dependency, devDependencies[dependency], DependencyType.Dev, this._onChange));
     });
 
     Object.keys(optionalDependencies || {}).forEach((dependency: string) => {
-      this._dependencies.set(dependency, new Dependency(dependency, optionalDependencies[dependency],
+      this._dependencies.set(dependency, new PackageJsonDependency(dependency, optionalDependencies[dependency],
         DependencyType.Optional, this._onChange));
     });
 
     Object.keys(peerDependencies || {}).forEach((dependency: string) => {
       this._peerDependencies.set(dependency,
-        new Dependency(dependency, peerDependencies[dependency], DependencyType.Peer, this._onChange));
+        new PackageJsonDependency(dependency, peerDependencies[dependency], DependencyType.Peer, this._onChange));
     });
   }
 
@@ -182,7 +185,7 @@ export class PackageJsonEditor {
     const keys: Array<string> = [...this._dependencies.keys()].sort();
 
     for (const packageName of keys) {
-      const dependency: Dependency = this._dependencies.get(packageName)!;
+      const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
 
       if (dependency.dependencyType === DependencyType.Regular) {
         if (!this._data.dependencies) {
@@ -209,7 +212,7 @@ export class PackageJsonEditor {
     const peerKeys: Array<string> = [...this._peerDependencies.keys()].sort();
 
     for (const packageName of peerKeys) {
-      const dependency: Dependency = this._peerDependencies.get(packageName)!;
+      const dependency: PackageJsonDependency = this._peerDependencies.get(packageName)!;
       if (!this._data.peerDependencies) {
         this._data.peerDependencies = {};
       }
