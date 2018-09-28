@@ -138,7 +138,7 @@ export class PackageJsonEditor {
     const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
     const peerDependencies: { [key: string]: string } = data.peerDependencies || {};
 
-    this._onChange = this._onChange.bind(this);
+    const _onChange: () => void = this._onChange.bind(this);
 
     Object.keys(dependencies || {}).forEach((dependency: string) => {
       if (devDependencies[dependency]) {
@@ -149,7 +149,7 @@ export class PackageJsonEditor {
       }
 
       this._dependencies.set(dependency,
-        new PackageJsonDependency(dependency, dependencies[dependency], DependencyType.Regular, this._onChange));
+        new PackageJsonDependency(dependency, dependencies[dependency], DependencyType.Regular, _onChange));
     });
 
     Object.keys(devDependencies || {}).forEach((dependency: string) => {
@@ -158,17 +158,17 @@ export class PackageJsonEditor {
       }
 
       this._dependencies.set(dependency,
-        new PackageJsonDependency(dependency, devDependencies[dependency], DependencyType.Dev, this._onChange));
+        new PackageJsonDependency(dependency, devDependencies[dependency], DependencyType.Dev, _onChange));
     });
 
     Object.keys(optionalDependencies || {}).forEach((dependency: string) => {
-      this._dependencies.set(dependency, new PackageJsonDependency(dependency, optionalDependencies[dependency],
-        DependencyType.Optional, this._onChange));
+      this._dependencies.set(dependency,
+        new PackageJsonDependency(dependency, optionalDependencies[dependency], DependencyType.Optional, _onChange));
     });
 
     Object.keys(peerDependencies || {}).forEach((dependency: string) => {
       this._peerDependencies.set(dependency,
-        new PackageJsonDependency(dependency, peerDependencies[dependency], DependencyType.Peer, this._onChange));
+        new PackageJsonDependency(dependency, peerDependencies[dependency], DependencyType.Peer, _onChange));
     });
   }
 
