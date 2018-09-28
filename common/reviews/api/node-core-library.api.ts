@@ -278,7 +278,6 @@ class PackageName {
 // @public
 class Path {
   static isUnder(childPath: string, parentFolderPath: string): boolean;
-  // (undocumented)
   static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;
 }
 
