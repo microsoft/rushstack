@@ -125,13 +125,13 @@ export class PackageJsonUpdater {
       project: currentProject,
       packageName,
       newVersion: version,
-      dependencyType: devDependency ? DependencyType.Dev : DependencyType.Regular
+      dependencyType: devDependency ? DependencyType.Dev : undefined
     };
     this.updateProject(currentProjectUpdate);
 
     const otherPackageUpdates: Array<IUpdateProjectOptions> = [];
 
-    if (this._rushConfiguration.ensureConsistentVersions) {
+    if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
       // we need to do a mismatch check
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this._rushConfiguration);
 
@@ -183,6 +183,9 @@ export class PackageJsonUpdater {
       collectLogFile: false
     };
 
+    console.log();
+    console.log(colors.green('Running "rush update"'));
+    console.log();
     return installManager.doInstall(installManagerOptions)
       .then(() => {
         purgeManager.deleteAll();
@@ -217,14 +220,7 @@ export class PackageJsonUpdater {
     const oldDependency: PackageJsonDependency | undefined = packageJson.getDependency(packageName);
     const oldDependencyType: DependencyType | undefined = oldDependency ? oldDependency.dependencyType : undefined;
 
-    if (!dependencyType && !oldDependencyType) {
-      throw new Error(`The IUpdateProjectOptions.dependencyType option cannot be omitted, because`
-        + ` project "${project.packageName}" does not have an existing dependency on "${packageName}"`);
-    }
-
-    if (!dependencyType) {
-      dependencyType = oldDependencyType;
-    }
+    dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 
     packageJson.addOrUpdateDependency(packageName, newVersion, dependencyType!);
   }

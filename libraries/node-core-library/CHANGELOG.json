@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.1.0",
+      "tag": "@microsoft/node-core-library_v3.1.0",
+      "date": "Fri, 28 Sep 2018 16:05:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `Path.isUnderOrEquals()`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.1",
       "tag": "@microsoft/node-core-library_v3.0.1",
       "date": "Thu, 06 Sep 2018 01:25:26 GMT",
