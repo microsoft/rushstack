@@ -87,7 +87,8 @@ export class VersionMismatchFinder {
     }
   }
 
-  constructor(projects: IVersionMismatchFinderProject[], allowedAlternativeVersions?:  Map<string, ReadonlyArray<string>>) {
+  constructor(projects: IVersionMismatchFinderProject[],
+    allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>) {
     this._projects = projects;
     this._mismatches = new Map<string, Map<string, string[]>>();
     this._allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
