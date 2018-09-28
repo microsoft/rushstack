@@ -144,14 +144,17 @@ export class PackageJsonUpdater {
         }
 
         // otherwise we need to go update a bunch of other projects
-        for (const mismatchedVersion of mismatchFinder.getVersionsOfMismatch(packageName)!) {
-          for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
-            if (consumer !== currentProject.packageName) {
-              otherPackageUpdates.push({
-                project: this._rushConfiguration.getProjectByName(consumer)!,
-                packageName: packageName,
-                newVersion: version
-              });
+        const mismatchedVersions: Array<string> | undefined = mismatchFinder.getVersionsOfMismatch(packageName);
+        if (mismatchedVersions) {
+          for (const mismatchedVersion of mismatchedVersions) {
+            for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
+              if (consumer !== currentProject.packageName) {
+                otherPackageUpdates.push({
+                  project: this._rushConfiguration.getProjectByName(consumer)!,
+                  packageName: packageName,
+                  newVersion: version
+                });
+              }
             }
           }
         }
