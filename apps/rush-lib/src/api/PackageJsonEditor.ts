@@ -98,12 +98,16 @@ export class PackageJsonEditor {
     return this._filePath;
   }
 
-  public getDependency(packageName: string): PackageJsonDependency | undefined {
-    return this._dependencies.get(packageName);
+  public get dependencyList(): Array<PackageJsonDependency> {
+    return [...this._dependencies.values()];
   }
 
-  public forEachDependency(cb: (dependency: PackageJsonDependency) => void): void {
-    this._dependencies.forEach(cb);
+  public get devDependencyList(): Array<PackageJsonDependency> {
+    return [...this._devDependencies.values()];
+  }
+
+  public getDependency(packageName: string): PackageJsonDependency | undefined {
+    return this._dependencies.get(packageName);
   }
 
   public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {

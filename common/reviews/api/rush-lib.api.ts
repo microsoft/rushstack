@@ -157,9 +157,11 @@ class PackageJsonEditor {
   // (undocumented)
   addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
   // (undocumented)
-  readonly filePath: string;
+  readonly dependencyList: Array<PackageJsonDependency>;
   // (undocumented)
-  forEachDependency(cb: (dependency: PackageJsonDependency) => void): void;
+  readonly devDependencyList: Array<PackageJsonDependency>;
+  // (undocumented)
+  readonly filePath: string;
   // (undocumented)
   static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
   // (undocumented)
