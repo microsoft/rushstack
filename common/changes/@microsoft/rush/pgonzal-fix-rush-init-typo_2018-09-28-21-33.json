@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an incorrect default in the \"rush init\" template comments",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
