@@ -140,7 +140,7 @@ export class PackageJsonUpdater {
         if (!updateOtherPackages) {
           return Promise.reject(new Error(`Adding '${packageName}@${version}' to ${currentProject.packageName}`
             + ` causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use this`
-            + ` version, or do not specify the "--version" flag.`));
+            + ` version, or do not specify a SemVer range.`));
         }
 
         // otherwise we need to go update a bunch of other projects
@@ -218,7 +218,8 @@ export class PackageJsonUpdater {
     const oldDependencyType: DependencyType | undefined = oldDependency ? oldDependency.dependencyType : undefined;
 
     if (!dependencyType && !oldDependencyType) {
-      throw new Error(`Cannot auto-detect dependency type of "${packageName}" for project "${project.packageName}"`);
+      throw new Error(`The IUpdateProjectOptions.dependencyType option cannot be omitted, because`
+        + ` project "${project.packageName}" does not have an existing dependency on "${packageName}"`);
     }
 
     if (!dependencyType) {
@@ -248,7 +249,7 @@ export class PackageJsonUpdater {
     if (initialSpec) {
       console.log(`Specified version selector: ${colors.cyan(initialSpec)}`);
     } else {
-      console.log(`No version selector specified, will be automatically determined.`);
+      console.log(`No version selector was specified, so the version will be determined automatically.`);
     }
     console.log();
 
@@ -257,7 +258,7 @@ export class PackageJsonUpdater {
     if (initialSpec && implicitlyPinnedVersion && initialSpec === implicitlyPinnedVersion) {
       console.log(colors.green('Assigning "')
         + colors.cyan(initialSpec)
-        + colors.green('" because it matches what other projects are using in this repo.'));
+        + colors.green(`" for "${packageName}" because it matches what other projects are using in this repo.`));
       return initialSpec;
     }
 
@@ -270,13 +271,13 @@ export class PackageJsonUpdater {
     let selectedVersion: string | undefined;
 
     if (this._rushConfiguration.packageManager === 'yarn') {
-      throw new Error('The yarn package manager is not currently supported by the "rush add" command.');
+      throw new Error('The Yarn package manager is not currently supported by the "rush add" command.');
     }
 
     if (initialSpec && initialSpec !== 'latest') {
       console.log(colors.gray('Finding newest version that satisfies the selector: ') + initialSpec);
       console.log();
-      console.log(`Querying registry for all versions of ${packageName}...`);
+      console.log(`Querying registry for all versions of "${packageName}"...`);
 
       const allVersions: string =
         Utilities.executeCommandAndCaptureOutput(this._rushConfiguration.packageManagerToolFilename,
@@ -296,15 +297,16 @@ export class PackageJsonUpdater {
         }
       }
       if (!selectedVersion) {
-        throw new Error(`Unable to find a version of ${packageName} that satisfies the version range "${initialSpec}"`);
+        throw new Error(`Unable to find a version of "${packageName}" that satisfies`
+          + ` the version range "${initialSpec}"`);
       }
     } else {
       if (initialSpec !== 'latest') {
-        console.log(colors.gray(`The ensureConsistentVersions policy is NOT active,`
-          + ` therefore using the latest version.`));
+        console.log(colors.gray(`The "ensureConsistentVersions" policy is NOT active,`
+          + ` so we will assign the latest version.`));
         console.log();
       }
-      console.log(`Querying NPM registry for latest version of ${packageName}...`);
+      console.log(`Querying NPM registry for latest version of "${packageName}"...`);
 
       selectedVersion = Utilities.executeCommandAndCaptureOutput(this._rushConfiguration.packageManagerToolFilename,
         ['view', `${packageName}@latest`, 'version'],
