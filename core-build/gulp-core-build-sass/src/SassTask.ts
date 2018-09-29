@@ -79,8 +79,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     );
   }
 
-  let sassTsExtName: string = `.${this.taskConfig.moduleExportName}.ts`;
-
   public loadSchema(): Object {
     return require('./sass.schema.json');
   }
@@ -198,7 +196,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
     tasks.push(baseTask.pipe(clone())
       .pipe(texttojs({
-        ext: sassTsExtName,
+        ext: `.${this.taskConfig.sassSyntax}.ts`,
         isExtensionAppended: false,
         template: (file: gulpUtil.File): string => {
           const content: string = file.contents!.toString();
@@ -254,7 +252,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
           if (this.taskConfig.dropCssFiles) {
             lines = lines.concat([
-              `require('./${path.basename(file.path, sassTsExtName)}.css');`,
+              `require('./${path.basename(file.path, `.${this.taskConfig.sassSyntax}.ts`)}.css');`,
               exportClassNames
             ]);
           } else if (!!content) {
@@ -283,7 +281,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   }
 
   private _generateModuleStub(cssFileName: string, json: Object): void {
-    cssFileName = cssFileName.replace('.css', sassTsExtName);
+    cssFileName = cssFileName.replace('.css', `.${this.taskConfig.sassSyntax}.ts`);
     _classMaps[cssFileName] = json;
   }
 
