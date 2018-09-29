@@ -68,7 +68,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         preamble: '/* tslint:disable */',
         postamble: '/* tslint:enable */',
         sassMatch: [
-          'src/**/*.sass',
           'src/**/*.scss'
         ],
         useCSSModules: false,
