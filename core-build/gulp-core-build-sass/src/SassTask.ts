@@ -124,9 +124,9 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
     } else {
       const moduleSrcPattern: string[] = srcPattern.map((value: string) => {
-        return value.replace('.sass', '.module.sass').replace('.scss', '.module.scss'));
+        return value.replace(/(\.s(a|c)ss)/, '.module$1');
       }
-      
+
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
       return merge(this._processFiles(gulp, srcPattern, completeCallback, postCSSPlugins,
