@@ -12,8 +12,6 @@ import * as path from 'path';
 const merge = require('merge2');
 /* tslint:enable:typedef */
 
-const scssTsExtName: string = '.scss.ts';
-
 export interface ISassTaskConfig {
   /** An optional parameter for text to include in the generated typescript file. */
   preamble?: string;
@@ -22,14 +20,14 @@ export interface ISassTaskConfig {
   /** An array of glob patterns for locating SASS files. */
   sassMatch?: string[];
   /**
-   * If this option is specified, ALL files will be treated as a module.scss and will
+   * If this option is specified, ALL files will be treated as module.sass or module.scss and will
    * automatically generate a corresponding TypeScript file. All classes will be
    * appended with a hash to help ensure uniqueness on a page. This file can be
    * imported directly, and will contain an object describing the mangled class names.
    */
   useCSSModules?: boolean;
   /**
-   * If false, we will set the CSS property naming warning to verbose message while the module is generating
+   * If false, we will set the CSS property naming warning to verbose message while the module generates
    * to prevent task exit with exitcode: 1.
    * Default value is true
    */
@@ -40,11 +38,15 @@ export interface ISassTaskConfig {
    */
   dropCssFiles?: boolean;
   /**
-   * If files are matched by sassMatch which do not end in .module.scss, log a warning.
+   * An optional parameter for setting SASS syntax.
+   */
+  sassSyntax?: string;
+  /**
+   * If files are matched by sassMatch which do not end in .module.sass or .module.scss, log a warning.
    */
   warnOnNonCSSModules?: boolean;
   /**
-   * If this option is specified, module css will be exported using the name provided. If an
+   * If this option is specified, module CSS will be exported using the name provided. If an
    * empty value is specified, the styles will be exported using 'export =', rather than a
    * named export. By default we use the 'default' export name.
    */
@@ -55,6 +57,7 @@ const _classMaps: { [file: string]: Object } = {};
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
   public cleanMatch: string[] = [
+    'src/**/*.sass.ts',
     'src/**/*.scss.ts'
   ];
 
@@ -65,15 +68,19 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         preamble: '/* tslint:disable */',
         postamble: '/* tslint:enable */',
         sassMatch: [
+          'src/**/*.sass',
           'src/**/*.scss'
         ],
         useCSSModules: false,
+        sassSyntax: 'scss',
         warnOnCssInvalidPropertyName: true,
         dropCssFiles: false,
         warnOnNonCSSModules: false
       }
     );
   }
+
+  let sassTsExtName: string = `.${this.taskConfig.moduleExportName}.ts`;
 
   public loadSchema(): Object {
     return require('./sass.schema.json');
@@ -109,18 +116,17 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     const srcPattern: string[] = this.taskConfig.sassMatch.slice(0);
 
     const checkFilenameForCSSModule: (file: gulpUtil.File) => void = (file: gulpUtil.File) => {
-      if (!path.basename(file.path).match(/module\.scss$/)) {
-
+      if (!path.basename(file.path).match(/module\.s(a|c)ss$/)) {
         const filePath: string = path.relative(this.buildConfig.rootPath, file.path);
-        this.logWarning(`${filePath}: filename should end with module.scss`);
+        this.logWarning(`${filePath}: filename should end with module.sass or module.scss`);
       }
     };
 
     if (this.taskConfig.useCSSModules) {
-      this.logVerbose('Generating css modules.');
+      this.logVerbose('Generating CSS modules.');
       return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
     } else {
-      const moduleSrcPattern: string[] = srcPattern.map((value: string) => value.replace('.scss', '.module.scss'));
+      const moduleSrcPattern: string[] = srcPattern.map((value: string) => value.replace('.sass', '.module.sass').replace('.scss', '.module.scss'));
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
       return merge(this._processFiles(gulp, srcPattern, completeCallback, postCSSPlugins,
@@ -193,7 +199,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
     tasks.push(baseTask.pipe(clone())
       .pipe(texttojs({
-        ext: scssTsExtName,
+        ext: sassTsExtName,
         isExtensionAppended: false,
         template: (file: gulpUtil.File): string => {
           const content: string = file.contents!.toString();
@@ -249,7 +255,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
           if (this.taskConfig.dropCssFiles) {
             lines = lines.concat([
-              `require('./${path.basename(file.path, scssTsExtName)}.css');`,
+              `require('./${path.basename(file.path, sassTsExtName)}.css');`,
               exportClassNames
             ]);
           } else if (!!content) {
@@ -278,7 +284,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   }
 
   private _generateModuleStub(cssFileName: string, json: Object): void {
-    cssFileName = cssFileName.replace('.css', '.scss.ts');
+    cssFileName = cssFileName.replace('.css', sassTsExtName);
     _classMaps[cssFileName] = json;
   }
 

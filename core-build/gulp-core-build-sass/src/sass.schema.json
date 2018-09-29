@@ -23,15 +23,21 @@
     },
 
     "sassMatch": {
-      "title": "Sass File Glob Pattern",
+      "title": "SASS File Glob Pattern",
       "description": "An array of glob patterns for locating SASS files.",
-      "type": "string"
+      "type": "array"
     },
 
     "useCSSModules": {
       "title": "Use CSS Modules",
-      "description": "If this option is specified, files ending with .module.scss extension will automatically generate a corresponding TypeScript file. All classes will be appended with a hash to help ensure uniqueness on a page. This file can be imported directly, and will contain an object describing the mangled class names.",
+      "description": "If this option is specified, files ending with .module.sass or .module.scss extension will automatically generate a corresponding TypeScript file. All classes will be appended with a hash to help ensure uniqueness on a page. This file can be imported directly, and will contain an object describing the mangled class names.",
       "type": "boolean"
+    },
+
+    "sassSyntax": {
+      "title": "SASS syntax",
+      "description": "An optional parameter for setting SASS syntax.",
+      "type": "string"
     },
 
     "warnOnCssInvalidPropertyName ": {
