@@ -125,7 +125,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     } else {
       const moduleSrcPattern: string[] = srcPattern.map((value: string) => {
         return value.replace(/(\.s(a|c)ss)/, '.module$1');
-      }
+      });
 
       moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
 
