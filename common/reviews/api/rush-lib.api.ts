@@ -145,8 +145,6 @@ class PackageJsonDependency {
   // (undocumented)
   readonly name: string;
   // (undocumented)
-  setDependencyType(newType: DependencyType): void;
-  // (undocumented)
   setVersion(newVersion: string): void;
   // (undocumented)
   readonly version: string;
@@ -157,19 +155,23 @@ class PackageJsonEditor {
   // (undocumented)
   addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
   // (undocumented)
-  readonly filePath: string;
+  readonly dependencyList: Array<PackageJsonDependency>;
   // (undocumented)
-  forEachDependency(cb: (dependency: PackageJsonDependency) => void): void;
+  readonly devDependencyList: Array<PackageJsonDependency>;
+  // (undocumented)
+  readonly filePath: string;
   // (undocumented)
   static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
   // (undocumented)
-  getDependency(packageName: string): PackageJsonDependency | undefined;
-  // (undocumented)
-  static load(filepath: string): PackageJsonEditor;
+  static load(filePath: string): PackageJsonEditor;
   // (undocumented)
   readonly name: string;
   // (undocumented)
   saveIfModified(): boolean;
+  // (undocumented)
+  tryGetDependency(packageName: string): PackageJsonDependency | undefined;
+  // (undocumented)
+  tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
   // (undocumented)
   readonly version: string;
 }

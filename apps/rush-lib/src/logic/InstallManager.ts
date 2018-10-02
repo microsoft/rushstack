@@ -800,7 +800,7 @@ export class InstallManager {
             + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
 
           // If any diagnostic options were specified, then show the full command-line
-          if (options.debug || options.collectLogFile || options.networkConcurrency || options.debug) {
+          if (options.debug || options.collectLogFile || options.networkConcurrency) {
             console.log(os.EOL + colors.green('Invoking package manager: ')
               + FileSystem.getRealPath(packageManagerFilename) + ' ' + installArgs.join(' ') + os.EOL);
           }

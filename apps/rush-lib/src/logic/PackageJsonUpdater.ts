@@ -125,13 +125,13 @@ export class PackageJsonUpdater {
       project: currentProject,
       packageName,
       newVersion: version,
-      dependencyType: devDependency ? DependencyType.Dev : DependencyType.Regular
+      dependencyType: devDependency ? DependencyType.Dev : undefined
     };
     this.updateProject(currentProjectUpdate);
 
     const otherPackageUpdates: Array<IUpdateProjectOptions> = [];
 
-    if (this._rushConfiguration.ensureConsistentVersions) {
+    if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
       // we need to do a mismatch check
       const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this._rushConfiguration);
 
@@ -144,14 +144,17 @@ export class PackageJsonUpdater {
         }
 
         // otherwise we need to go update a bunch of other projects
-        for (const mismatchedVersion of mismatchFinder.getVersionsOfMismatch(packageName)!) {
-          for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
-            if (consumer !== currentProject.packageName) {
-              otherPackageUpdates.push({
-                project: this._rushConfiguration.getProjectByName(consumer)!,
-                packageName: packageName,
-                newVersion: version
-              });
+        const mismatchedVersions: Array<string> | undefined = mismatchFinder.getVersionsOfMismatch(packageName);
+        if (mismatchedVersions) {
+          for (const mismatchedVersion of mismatchedVersions) {
+            for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
+              if (consumer !== currentProject.packageName) {
+                otherPackageUpdates.push({
+                  project: this._rushConfiguration.getProjectByName(consumer)!,
+                  packageName: packageName,
+                  newVersion: version
+                });
+              }
             }
           }
         }
@@ -180,9 +183,12 @@ export class PackageJsonUpdater {
       fullUpgrade: false,
       recheckShrinkwrap: false,
       networkConcurrency: undefined,
-      collectLogFile: true
+      collectLogFile: false
     };
 
+    console.log();
+    console.log(colors.green('Running "rush update"'));
+    console.log();
     return installManager.doInstall(installManagerOptions)
       .then(() => {
         purgeManager.deleteAll();
@@ -214,17 +220,14 @@ export class PackageJsonUpdater {
     } = options;
     const packageJson: PackageJsonEditor = project.packageJsonEditor;
 
-    const oldDependency: PackageJsonDependency | undefined = packageJson.getDependency(packageName);
-    const oldDependencyType: DependencyType | undefined = oldDependency ? oldDependency.dependencyType : undefined;
+    const oldDependency: PackageJsonDependency | undefined = packageJson.tryGetDependency(packageName);
+    const oldDevDependency: PackageJsonDependency | undefined = packageJson.tryGetDevDependency(packageName);
 
-    if (!dependencyType && !oldDependencyType) {
-      throw new Error(`The IUpdateProjectOptions.dependencyType option cannot be omitted, because`
-        + ` project "${project.packageName}" does not have an existing dependency on "${packageName}"`);
-    }
+    const oldDependencyType: DependencyType | undefined =
+      oldDevDependency ? oldDevDependency.dependencyType :
+      oldDependency ? oldDependency.dependencyType : undefined;
 
-    if (!dependencyType) {
-      dependencyType = oldDependencyType;
-    }
+    dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 
     packageJson.addOrUpdateDependency(packageName, newVersion, dependencyType!);
   }

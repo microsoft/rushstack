@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.3.0",
+      "tag": "@microsoft/rush_v5.3.0",
+      "date": "Fri, 28 Sep 2018 20:36:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add \"ensureConsistentVersions\" configuration which runs \"rush check\" before certain commands"
+          },
+          {
+            "comment": "Add a new command \"rush add\" for managing package.json dependencies"
+          },
+          {
+            "comment": "Rush now detects some package.json errors such as the same package name being listed in both \"dependencies\" and \"optionalDependencies\""
+          },
+          {
+            "comment": "Update \"rush link\" to use relative paths when creating symlinks, to facilitate building Docker images"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.1",
       "tag": "@microsoft/rush_v5.2.1",
       "date": "Thu, 13 Sep 2018 21:57:21 GMT",

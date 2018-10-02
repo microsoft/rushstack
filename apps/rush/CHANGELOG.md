@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 13 Sep 2018 21:57:21 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Sep 2018 20:36:48 GMT and should not be manually modified.
+
+## 5.3.0
+Fri, 28 Sep 2018 20:36:48 GMT
+
+### Updates
+
+- Add "ensureConsistentVersions" configuration which runs "rush check" before certain commands
+- Add a new command "rush add" for managing package.json dependencies
+- Rush now detects some package.json errors such as the same package name being listed in both "dependencies" and "optionalDependencies"
+- Update "rush link" to use relative paths when creating symlinks, to facilitate building Docker images
 
 ## 5.2.1
 Thu, 13 Sep 2018 21:57:21 GMT

@@ -4,9 +4,15 @@
 import * as colors from 'colors';
 
 import { RushConfiguration } from './RushConfiguration';
-import { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { PackageJsonDependency, DependencyType, PackageJsonEditor } from './PackageJsonEditor';
+
+export interface IVersionMismatchFinderProject {
+  packageName: string;
+  cyclicDependencyProjects: Set<string>;
+  packageJsonEditor: PackageJsonEditor;
+  skipRushCheck?: boolean;
+}
 
 /**
  * @public
@@ -21,7 +27,7 @@ export class VersionMismatchFinder {
   */
   private _allowedAlternativeVersion:  Map<string, ReadonlyArray<string>>;
   private _mismatches: Map<string, Map<string, string[]>>;
-  private _projects: RushConfigurationProject[];
+  private _projects: IVersionMismatchFinderProject[];
 
   public static rushCheck(rushConfiguration: RushConfiguration): void {
     VersionMismatchFinder._checkForInconsistentVersions(rushConfiguration, true);
@@ -45,13 +51,14 @@ export class VersionMismatchFinder {
 
     // Create a fake project for the purposes of reporting conflicts with preferredVersions
     // or xstitchPreferredVersions from common-versions.json
-    const projects: RushConfigurationProject[] = [...rushConfiguration.projects];
+    const projects: IVersionMismatchFinderProject[] = [...rushConfiguration.projects];
 
     projects.push({
       packageName: 'preferred versions from ' + RushConstants.commonVersionsFilename,
+      cyclicDependencyProjects: new Set<string>(),
       packageJsonEditor: PackageJsonEditor.fromObject(
         { dependencies: allPreferredVersions } as any, 'preferred-versions.json') // tslint:disable-line:no-any
-    } as RushConfigurationProject);
+    });
 
     return new VersionMismatchFinder(
       projects,
@@ -80,7 +87,8 @@ export class VersionMismatchFinder {
     }
   }
 
-  constructor(projects: RushConfigurationProject[], allowedAlternativeVersions?:  Map<string, ReadonlyArray<string>>) {
+  constructor(projects: IVersionMismatchFinderProject[],
+    allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>) {
     this._projects = projects;
     this._mismatches = new Map<string, Map<string, string[]>>();
     this._allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
@@ -126,7 +134,7 @@ export class VersionMismatchFinder {
   }
 
   private _analyze(): void {
-    this._projects.forEach((project: RushConfigurationProject) => {
+    this._projects.forEach((project: IVersionMismatchFinderProject) => {
       if (!project.skipRushCheck) {
         // NOTE: We do not consider peer dependencies here.  The purpose of "rush check" is
         // mainly to avoid side-by-side duplicates in the node_modules folder, whereas
@@ -135,7 +143,12 @@ export class VersionMismatchFinder {
         // patterns consistent, but on the other hand different projects may have different
         // levels of compatibility -- we should wait for someone to actually request this feature
         // before we get into that.)
-        project.packageJsonEditor.forEachDependency((dependency: PackageJsonDependency) => {
+        const dependencies: Array<PackageJsonDependency> = [
+          ...project.packageJsonEditor.dependencyList,
+          ...project.packageJsonEditor.devDependencyList
+        ];
+
+        dependencies.forEach((dependency: PackageJsonDependency) => {
           if (dependency.dependencyType !== DependencyType.Peer
             && !project.cyclicDependencyProjects.has(dependency.name)) {
 

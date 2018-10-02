@@ -61,9 +61,12 @@
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
-   * uncomment this line. Note this is effectively like running "rush check" before the following:
+   * uncomment this line. This is effectively similar to running "rush check" before any
+   * of the following commands:
+   *
    *   rush install, rush update, rush link, rush version, rush publish
-   * In some cases you may want this turned on, but need to allow some packages to use a different
+   *
+   * In some cases you may want this turned on, but need to allow certain packages to use a different
    * version. In those cases, you will need to add an entry to the "allowedAlternateVersions"
    * section of the common-versions.json.
    */
@@ -87,7 +90,7 @@
    * that brings people together, and maybe also identifies poor coding practices (e.g. file
    * references that reach into other project's folders without using NodeJS module resolution).
    *
-   * The defaults are projectFolderMinDepth=2 and projectFolderMaxDepth=2.
+   * The defaults are projectFolderMinDepth=1 and projectFolderMaxDepth=2.
    *
    * To remove these restrictions, you could set projectFolderMinDepth=1
    * and set projectFolderMaxDepth to a large number.
