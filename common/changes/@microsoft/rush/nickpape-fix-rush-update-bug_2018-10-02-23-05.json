@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix an issue where after running \"rush add\", \"rush update\" was not detecting any changes.",
+      "comment": "Fix an issue where after running \"rush add\" (after successfully running \"rush install\"), the new package was not being installed or linked.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
