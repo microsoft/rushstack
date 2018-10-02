@@ -12,7 +12,6 @@ import {
   ModifierTagSet,
   DocBlockTag,
   StandardTags,
-  Excerpt,
   StandardModifierTagSet,
   DocComment,
   DocSection,
@@ -94,14 +93,6 @@ export class ApiDocumentation {
    * have ReleaseTag.Internal.
    */
   public incompleteLinks: IMarkupApiLink[];
-
-  /**
-   * A list of 'Token' objects that have been recognized as \@inheritdoc tokens that will be processed
-   * after the basic documentation for all API items is complete. We postpone the processing
-   * because we need ReleaseTag information before we can determine whether an \@inheritdoc token
-   * is valid.
-   */
-  private incompleteInheritdocs: {}[];
 
   /**
    * A "release tag" is an AEDoc tag which indicates whether this definition
@@ -190,7 +181,7 @@ export class ApiDocumentation {
    */
   public failedToParse: boolean;
 
-  public readonly reportError: (message: string) => void;
+  public readonly reportError: (message: string, startIndex?: number) => void;
 
   private _parserContext: ParserContext | undefined;
   private _docComment: DocComment | undefined;
@@ -198,11 +189,11 @@ export class ApiDocumentation {
   constructor(inputTextRange: TextRange,
     referenceResolver: IReferenceResolver,
     context: ExtractorContext,
-    errorLogger: (message: string) => void,
+    errorLogger: (message: string, startIndex?: number) => void,
     warnings: string[]) {
 
-    this.reportError = (message: string) => {
-      errorLogger(message);
+    this.reportError = (message: string, startIndex?: number) => {
+      errorLogger(message, startIndex);
       this.failedToParse = true;
     };
 
@@ -221,7 +212,6 @@ export class ApiDocumentation {
     this.deprecatedMessage = [];
     this.remarks = [];
     this.incompleteLinks = [];
-    this.incompleteInheritdocs = [];
     this.releaseTag = ReleaseTag.None;
 
     this._parserContext = undefined;
@@ -270,15 +260,11 @@ export class ApiDocumentation {
     this._docComment = this._parserContext.docComment;
 
     for (const message of this._parserContext.log.messages) {
-      this._reportError(message.unformattedText, message.tokenSequence);
+      this.reportError(message.unformattedText, message.textRange.pos);
     }
 
     this._parseModifierTags();
     this._parseSections();
-  }
-
-  private _reportError(message: string, excerpt?: Excerpt): void {
-    this.reportError(message);
   }
 
   private _parseModifierTags(): void {
@@ -325,8 +311,7 @@ export class ApiDocumentation {
     const node: DocBlockTag | undefined = modifierTagSet.tryGetTag(tagDefinition);
     if (node) {
       if (this.releaseTag !== ReleaseTag.None) {
-        this._reportError('More than one release tag was specified (@alpha, @beta, @public, @internal)',
-          node.excerpt);
+        this.reportError('More than one release tag was specified (@alpha, @beta, @public, @internal)');
         return false;
       }
       this.releaseTag = releaseTag;
@@ -440,8 +425,11 @@ export class ApiDocumentation {
                 linkText += '.' + apiItemReference.memberName;
               }
             }
+            const linkElement: IMarkupApiLink = Markup.createApiLinkFromText(linkText, apiItemReference);
+            result.push(linkElement);
+
             // The link will get resolved later in _completeLinks()
-            this.incompleteLinks.push(Markup.createApiLinkFromText(linkText, apiItemReference));
+            this.incompleteLinks.push(linkElement);
           }
         }
         break;
@@ -483,7 +471,7 @@ export class ApiDocumentation {
   // This is a temporary adapter until we fully generalize IApiItemReference to support TSDoc declaration references
   private _tryCreateApiItemReference(declarationReference: DocDeclarationReference): IApiItemReference | undefined {
     if (declarationReference.importPath) {
-      this._reportError(`API Extractor does not yet support TSDoc declaration references containing an import path:`
+      this.reportError(`API Extractor does not yet support TSDoc declaration references containing an import path:`
         + ` "(declarationReference.importPath)"`);
       return undefined;
     }
@@ -491,12 +479,12 @@ export class ApiDocumentation {
     const memberReferences: ReadonlyArray<DocMemberReference> = declarationReference.memberReferences;
     if (memberReferences.length > 2) {
       // This will get be fixed soon
-      this._reportError('API Extractor does not yet support TSDoc declaration references containing'
+      this.reportError('API Extractor does not yet support TSDoc declaration references containing'
         + ' more than 2 levels of nesting');
       return undefined;
     }
     if (memberReferences.length === 0) {
-      this._reportError('API Extractor does not yet support TSDoc declaration references without a member reference');
+      this.reportError('API Extractor does not yet support TSDoc declaration references without a member reference');
       return undefined;
     }
 
@@ -510,7 +498,7 @@ export class ApiDocumentation {
     if (declarationReference.packageName) {
       const parsedPackageName: IParsedPackageNameOrError = PackageName.tryParse(declarationReference.packageName);
       if (parsedPackageName.error) {
-        this._reportError(`Invalid package name ${declarationReference.packageName}: ${parsedPackageName.error}`);
+        this.reportError(`Invalid package name ${declarationReference.packageName}: ${parsedPackageName.error}`);
         return undefined;
       }
 
@@ -542,12 +530,12 @@ export class ApiDocumentation {
 
   private _tryGetMemberReferenceIdentifier(memberReference: DocMemberReference): string | undefined {
     if (!memberReference.memberIdentifier) {
-      this._reportError('API Extractor currently only supports TSDoc member references using identifiers');
+      this.reportError('API Extractor currently only supports TSDoc member references using identifiers');
       return undefined;
     }
 
     if (memberReference.memberIdentifier.hasQuotes) {
-      this._reportError('API Extractor does not yet support TSDoc member references using quotes');
+      this.reportError('API Extractor does not yet support TSDoc member references using quotes');
       return undefined;
     }
 

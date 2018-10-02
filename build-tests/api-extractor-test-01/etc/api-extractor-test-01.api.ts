@@ -1,12 +1,3 @@
-// @internal
-class _TypeReferencesInAedoc {
-  getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
-  // (undocumented)
-  getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
-  // (undocumented)
-  getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
-}
-
 // @public
 class AbstractClass {
   // (undocumented)
@@ -108,6 +99,14 @@ class ReexportedClass {
   getSelfReference(): ReexportedClass2;
   // (undocumented)
   getValue(): string;
+}
+
+// @public
+class TypeReferencesInAedoc {
+  getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
+  getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
+  // (undocumented)
+  getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
 }
 
 // @public

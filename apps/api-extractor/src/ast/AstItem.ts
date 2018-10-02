@@ -438,8 +438,11 @@ export abstract class AstItem {
    * Reports an error through the ApiErrorHandler interface that was registered with the Extractor,
    * adding the filename and line number information for the declaration of this AstItem.
    */
-  protected reportError(message: string): void {
-    this.context.reportError(message, this._errorNode.getSourceFile(), this._errorNode.getStart());
+  protected reportError(message: string, startIndex?: number): void {
+    if (!startIndex) {
+      startIndex = this._errorNode.getStart();
+    }
+    this.context.reportError(message, this._errorNode.getSourceFile(), startIndex);
   }
 
   /**

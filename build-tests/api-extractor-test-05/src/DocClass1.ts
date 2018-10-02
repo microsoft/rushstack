@@ -64,7 +64,7 @@ export class DocClass1 {
   }
 
   /**
-   * Example: "{ \\"maxItemsToShow\\": 123 }"
+   * Example: "\{ \\"maxItemsToShow\\": 123 \}"
    *
    * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\-_]+$/
    */
