@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an issue where after running \"rush add\", \"rush update\" was not detecting any changes.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
