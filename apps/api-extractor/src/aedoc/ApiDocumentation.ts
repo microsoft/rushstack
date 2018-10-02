@@ -27,6 +27,9 @@ import {
   DocHtmlStartTag,
   DocHtmlEndTag,
   DocInlineTag,
+  DocLinkTag,
+  DocDeclarationReference,
+  DocMemberReference,
   DocNodeTransforms
 } from '@microsoft/tsdoc';
 import { AstPackage } from '../ast/AstPackage';
@@ -43,6 +46,8 @@ import {
 import { Markup } from '../markup/Markup';
 import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 import { AedocDefinitions } from './AedocDefinitions';
+import { IApiItemReference } from '../api/ApiItem';
+import { PackageName, IParsedPackageNameOrError } from '@microsoft/node-core-library';
 
 /**
  * A dependency for ApiDocumentation constructor that abstracts away the function
@@ -411,9 +416,28 @@ export class ApiDocumentation {
         result.push(Markup.createHtmlTag(`</${docHtmlEndTag.elementName}>`));
         break;
       case DocNodeKind.InlineTag:
-        // TODO: Process inline tags correctly
         const docInlineTag: DocInlineTag = node as DocInlineTag;
         Markup.appendTextElements(result, '{' + docInlineTag.tagName + '}');
+        break;
+      case DocNodeKind.LinkTag:
+        const docLinkTag: DocLinkTag = node as DocLinkTag;
+        if (docLinkTag.urlDestination) {
+          result.push(Markup.createWebLinkFromText(docLinkTag.linkText || docLinkTag.urlDestination,
+            docLinkTag.urlDestination));
+        } else if (docLinkTag.codeDestination) {
+          const apiItemReference: IApiItemReference | undefined
+            = this._tryCreateApiItemReference(docLinkTag.codeDestination);
+          if (apiItemReference) {
+            let linkText: string | undefined = docLinkTag.linkText;
+            if (!linkText) {
+              linkText = apiItemReference.exportName;
+              if (apiItemReference.memberName) {
+                linkText += '.' + apiItemReference.memberName;
+              }
+            }
+            result.push(Markup.createApiLinkFromText(linkText, apiItemReference));
+          }
+        }
         break;
       case DocNodeKind.Paragraph:
         if (result.length > 0) {
@@ -448,6 +472,80 @@ export class ApiDocumentation {
       default:
         this.reportError('Unsupported TSDoc element: ' + node.kind);
     }
+  }
+
+  // This is a temporary adapter until we fully generalize IApiItemReference to support TSDoc declaration references
+  private _tryCreateApiItemReference(declarationReference: DocDeclarationReference): IApiItemReference | undefined {
+    if (declarationReference.importPath) {
+      this._reportError(`API Extractor does not yet support TSDoc declaration references containing an import path:`
+        + ` "(declarationReference.importPath)"`);
+      return undefined;
+    }
+
+    const memberReferences: ReadonlyArray<DocMemberReference> = declarationReference.memberReferences;
+    if (memberReferences.length > 2) {
+      // This will get be fixed soon
+      this._reportError('API Extractor does not yet support TSDoc declaration references containing'
+        + ' more than 2 levels of nesting');
+      return undefined;
+    }
+    if (memberReferences.length === 0) {
+      this._reportError('API Extractor does not yet support TSDoc declaration references without a member reference');
+      return undefined;
+    }
+
+    const apiItemReference: IApiItemReference = {
+      scopeName: '',
+      packageName: '',
+      exportName: '',
+      memberName: ''
+    };
+
+    if (declarationReference.packageName) {
+      const parsedPackageName: IParsedPackageNameOrError = PackageName.tryParse(declarationReference.packageName);
+      if (parsedPackageName.error) {
+        this._reportError(`Invalid package name ${declarationReference.packageName}: ${parsedPackageName.error}`);
+        return undefined;
+      }
+
+      apiItemReference.scopeName = parsedPackageName.scope;
+      apiItemReference.packageName = parsedPackageName.unscopedName;
+    } else {
+
+      // If the package name is unspecified, assume it is the current package
+      apiItemReference.scopeName = this.context.parsedPackageName.scope;
+      apiItemReference.packageName = this.context.parsedPackageName.unscopedName;
+    }
+
+    let identifier: string | undefined = this._tryGetMemberReferenceIdentifier(memberReferences[0]);
+    if (!identifier) {
+      return undefined;
+    }
+    apiItemReference.exportName = identifier;
+
+    if (memberReferences.length > 1) {
+      identifier = this._tryGetMemberReferenceIdentifier(memberReferences[1]);
+      if (!identifier) {
+        return undefined;
+      }
+      apiItemReference.memberName = identifier;
+    }
+
+    return apiItemReference;
+  }
+
+  private _tryGetMemberReferenceIdentifier(memberReference: DocMemberReference): string | undefined {
+    if (!memberReference.memberIdentifier) {
+      this._reportError('API Extractor currently only supports TSDoc member references using identifiers');
+      return undefined;
+    }
+
+    if (memberReference.memberIdentifier.hasQuotes) {
+      this._reportError('API Extractor does not yet support TSDoc member references using quotes');
+      return undefined;
+    }
+
+    return memberReference.memberIdentifier.identifier;
   }
 
   /**

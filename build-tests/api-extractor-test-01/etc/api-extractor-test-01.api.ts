@@ -1,6 +1,7 @@
 // @internal
 class _TypeReferencesInAedoc {
   getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
+  // (undocumented)
   getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
   // (undocumented)
   getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
