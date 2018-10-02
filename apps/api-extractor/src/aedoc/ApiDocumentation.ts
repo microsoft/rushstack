@@ -48,6 +48,7 @@ import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 import { AedocDefinitions } from './AedocDefinitions';
 import { IApiItemReference } from '../api/ApiItem';
 import { PackageName, IParsedPackageNameOrError } from '@microsoft/node-core-library';
+import { AstItemKind } from '../ast/AstItem';
 
 /**
  * A dependency for ApiDocumentation constructor that abstracts away the function
@@ -79,11 +80,11 @@ export class ApiDocumentation {
   /**
    * docCommentTokens that are parsed into Doc Elements.
    */
-  public readonly summary: MarkupElement[];
-  public readonly deprecatedMessage: MarkupBasicElement[];
-  public readonly remarks: MarkupElement[];
-  public readonly returnsMessage: MarkupBasicElement[];
-  public readonly parameters: { [name: string]: IAedocParameter; };
+  public summary: MarkupElement[];
+  public deprecatedMessage: MarkupBasicElement[];
+  public remarks: MarkupElement[];
+  public returnsMessage: MarkupBasicElement[];
+  public parameters: { [name: string]: IAedocParameter; };
 
   /**
    * A list of \@link elements to be post-processed after all basic documentation has been created
@@ -268,6 +269,10 @@ export class ApiDocumentation {
     this._parserContext = tsdocParser.parseRange(inputTextRange);
     this._docComment = this._parserContext.docComment;
 
+    for (const message of this._parserContext.log.messages) {
+      this._reportError(message.unformattedText, message.tokenSequence);
+    }
+
     this._parseModifierTags();
     this._parseSections();
   }
@@ -435,7 +440,8 @@ export class ApiDocumentation {
                 linkText += '.' + apiItemReference.memberName;
               }
             }
-            result.push(Markup.createApiLinkFromText(linkText, apiItemReference));
+            // The link will get resolved later in _completeLinks()
+            this.incompleteLinks.push(Markup.createApiLinkFromText(linkText, apiItemReference));
           }
         }
         break;
@@ -591,6 +597,68 @@ export class ApiDocumentation {
    * for all API items.
    */
   private _completeInheritdocs(warnings: string[]): void {
-    // ...
+    if (!this._docComment || !this._docComment.inheritDocTag) {
+      return;
+    }
+    if (!this._docComment.inheritDocTag.declarationReference) {
+      return;
+    }
+    const apiItemReference: IApiItemReference | undefined = this._tryCreateApiItemReference(
+      this._docComment.inheritDocTag.declarationReference);
+    if (!apiItemReference) {
+      return;
+    }
+
+    const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(apiItemReference);
+
+    // Atempt to locate the apiDefinitionRef
+    const resolvedAstItem: ResolvedApiItem | undefined = this.referenceResolver.resolve(
+      apiDefinitionRef,
+      this.context.package,
+      warnings
+    );
+
+    // If no resolvedAstItem found then nothing to inherit
+    // But for the time being set the summary to a text object
+    if (!resolvedAstItem) {
+      this.summary.push(...Markup.createTextElements(
+        `See documentation for ${this._docComment.inheritDocTag.tagContent}`));
+      return;
+    }
+
+    // We are going to copy the resolvedAstItem's documentation
+    // We must make sure it's documentation can be completed,
+    // if we cannot, an error will be reported viathe documentation error handler.
+    // This will only be the case our resolvedAstItem was created from a local
+    // AstItem. Resolutions from JSON will have an undefined 'astItem' property.
+    // Example: a circular reference will report an error.
+    if (resolvedAstItem.astItem) {
+      resolvedAstItem.astItem.completeInitialization();
+    }
+
+    // inheritdoc found, copy over IApiBaseDefinition properties
+    this.summary = resolvedAstItem.summary;
+    this.remarks = resolvedAstItem.remarks;
+
+    // Copy over detailed properties if neccessary
+    // Add additional cases if needed
+    switch (resolvedAstItem.kind) {
+      case AstItemKind.Function:
+        this.parameters = resolvedAstItem.params || { };
+        this.returnsMessage = resolvedAstItem.returnsMessage || [];
+        break;
+      case AstItemKind.Method:
+      case AstItemKind.Constructor:
+        this.parameters = resolvedAstItem.params || { };
+        this.returnsMessage = resolvedAstItem.returnsMessage || [];
+        break;
+    }
+
+    // Check if inheritdoc is depreacted
+    // We need to check if this documentation has a deprecated message
+    // but it may not appear until after this token.
+    if (resolvedAstItem.deprecatedMessage && resolvedAstItem.deprecatedMessage.length > 0) {
+      this.isDocInheritedDeprecated = true;
+    }
   }
 }
