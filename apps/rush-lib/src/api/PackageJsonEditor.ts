@@ -93,11 +93,11 @@ export class PackageJsonEditor {
     return this._filePath;
   }
 
-  public get dependencyList(): Array<PackageJsonDependency> {
+  public get dependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._dependencies.values()];
   }
 
-  public get devDependencyList(): Array<PackageJsonDependency> {
+  public get devDependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._devDependencies.values()];
   }
 
