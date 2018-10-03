@@ -150,7 +150,8 @@
     //  "travis@example\\.org"
     // ],
     "allowedEmailRegExps": [
-      "[^@]+@users\\.noreply\\.github\\.com"
+      "[^@]+@users\\.noreply\\.github\\.com",
+      "travis@example\\.org"
     ],
 
     /**
