@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-load-themed-styles",
+      "comment": "Update documentation",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-load-themed-styles",
+  "email": "pgonzal@users.noreply.github.com"
+}
