@@ -2,7 +2,7 @@
 
 # RushConfiguration.rushJsonFolder property
 
-The folder that contains rush.json for this project.
+The absolute path of the folder that contains rush.json for this project.
 
 **Signature:**
 ```javascript

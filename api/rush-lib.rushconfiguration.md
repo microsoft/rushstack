@@ -16,6 +16,7 @@ This represents the Rush configuration for a repository, based on the "rush.json
 |  [`commonScriptsFolder`](./rush-lib.rushconfiguration.commonscriptsfolder.md) |  | `string` | The folder where automation scripts are stored. This is always a subfolder called "scripts" under the common folder. Example: "C:\\MyRepo\\common\\scripts" |
 |  [`commonTempFolder`](./rush-lib.rushconfiguration.commontempfolder.md) |  | `string` | The folder where temporary files will be stored. This is always a subfolder called "temp" under the common folder. Example: "C:\\MyRepo\\common\\temp" |
 |  [`commonVersions`](./rush-lib.rushconfiguration.commonversions.md) |  | `CommonVersionsConfiguration` | Settings from the common-versions.json config file. |
+|  [`ensureConsistentVersions`](./rush-lib.rushconfiguration.ensureconsistentversions.md) |  | `boolean` | If true, then consistent version specifiers for dependencies will be enforced. I.e. "rush check" is run before some commands. |
 |  [`eventHooks`](./rush-lib.rushconfiguration.eventhooks.md) |  | `EventHooks` | The rush hooks. It allows customized scripts to run at the specified point. |
 |  [`gitAllowedEmailRegExps`](./rush-lib.rushconfiguration.gitallowedemailregexps.md) |  | `string[]` | \[Part of the "gitPolicy" feature.\] A list of regular expressions describing allowable email patterns for Git commits. They are case-insensitive anchored JavaScript RegExps. Example: ".\*@example.com" This array will never be undefined. |
 |  [`gitSampleEmail`](./rush-lib.rushconfiguration.gitsampleemail.md) |  | `string` | \[Part of the "gitPolicy" feature.\] An example valid email address that conforms to one of the allowedEmailRegExps. Example: "foxtrot@example.com" This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used. |
@@ -32,8 +33,8 @@ This represents the Rush configuration for a repository, based on the "rush.json
 |  [`projects`](./rush-lib.rushconfiguration.projects.md) |  | `RushConfigurationProject[]` |  |
 |  [`projectsByName`](./rush-lib.rushconfiguration.projectsbyname.md) |  | `Map<string, RushConfigurationProject>` |  |
 |  [`repositoryUrl`](./rush-lib.rushconfiguration.repositoryurl.md) |  | `string` | The remote url of the repository. It helps 'Rush change' finds the right remote to compare against. |
-|  [`rushJsonFile`](./rush-lib.rushconfiguration.rushjsonfile.md) |  | `string` | The Rush configuration file |
-|  [`rushJsonFolder`](./rush-lib.rushconfiguration.rushjsonfolder.md) |  | `string` | The folder that contains rush.json for this project. |
+|  [`rushJsonFile`](./rush-lib.rushconfiguration.rushjsonfile.md) |  | `string` | The absolute path to the "rush.json" configuration file that was loaded to construct this object. |
+|  [`rushJsonFolder`](./rush-lib.rushconfiguration.rushjsonfolder.md) |  | `string` | The absolute path of the folder that contains rush.json for this project. |
 |  [`rushLinkJsonFilename`](./rush-lib.rushconfiguration.rushlinkjsonfilename.md) |  | `string` | The filename of the build dependency data file. By default this is called 'rush-link.json' resides in the Rush common folder. Its data structure is defined by IRushLinkJson.<p/>Example: "C:\\MyRepo\\common\\temp\\rush-link.json" |
 |  [`rushUserFolder`](./rush-lib.rushconfiguration.rushuserfolder.md) |  | `string` | The absolute path to Rush's storage in the home directory for the current user. On Windows, it would be something like "C:\\Users\\YourName.rush". |
 |  [`shrinkwrapFilePhrase`](./rush-lib.rushconfiguration.shrinkwrapfilephrase.md) |  | `string` | Returns an English phrase such as "shrinkwrap file" that can be used in logging messages to refer to the shrinkwrap file using appropriate terminology for the currently selected package manager. |
@@ -53,4 +54,5 @@ This represents the Rush configuration for a repository, based on the "rush.json
 |  [`loadFromConfigurationFile(rushJsonFilename)`](./rush-lib.rushconfiguration.loadfromconfigurationfile.md) |  | `RushConfiguration` | Loads the configuration data from an Rush.json configuration file and returns an RushConfiguration object. |
 |  [`loadFromDefaultLocation()`](./rush-lib.rushconfiguration.loadfromdefaultlocation.md) |  | `RushConfiguration` |  |
 |  [`tryFindRushJsonLocation(verbose)`](./rush-lib.rushconfiguration.tryfindrushjsonlocation.md) |  | `string | undefined` | Find the rush.json location and return the path, or undefined if a rush.json can't be found. |
+|  [`tryGetProjectForPath(currentFolderPath)`](./rush-lib.rushconfiguration.trygetprojectforpath.md) |  | `RushConfigurationProject | undefined` | Returns the project for which the specified path is underneath that project's folder. If the path is not under any project's folder, returns undefined. |
 

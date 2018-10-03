@@ -16,6 +16,8 @@ A library for writing scripts that interact with the Rush tool.
 |  [`EventHooks`](./rush-lib.eventhooks.md) | **_(BETA)_** This class represents Rush event hooks configured for this repo. Hooks are customized script actions that Rush executes when specific events occur. The actions are expressed as a command-line that is executed using the operating system shell. |
 |  [`IndividualVersionPolicy`](./rush-lib.individualversionpolicy.md) | **_(BETA)_** This policy indicates all related projects get version bump driven by their own changes. |
 |  [`LockStepVersionPolicy`](./rush-lib.lockstepversionpolicy.md) | **_(BETA)_** This policy indicates all related projects should use the same version. |
+|  [`PackageJsonDependency`](./rush-lib.packagejsondependency.md) | **_(BETA)_**  |
+|  [`PackageJsonEditor`](./rush-lib.packagejsoneditor.md) | **_(BETA)_**  |
 |  [`PnpmOptionsConfiguration`](./rush-lib.pnpmoptionsconfiguration.md) | Options that are only used when the PNPM package manager is selected. |
 |  [`Rush`](./rush-lib.rush.md) | General operations for the Rush engine. |
 |  [`RushConfiguration`](./rush-lib.rushconfiguration.md) | This represents the Rush configuration for a repository, based on the "rush.json" configuration file. |
@@ -28,6 +30,7 @@ A library for writing scripts that interact with the Rush tool.
 |  Enumeration | Description |
 |  --- | --- |
 |  [`BumpType`](./rush-lib.bumptype.md) | **_(BETA)_** Type of version bumps |
+|  [`DependencyType`](./rush-lib.dependencytype.md) | **_(BETA)_**  |
 |  [`EnvironmentVariableNames`](./rush-lib.environmentvariablenames.md) | Names of environment variables used by Rush. |
 |  [`Event`](./rush-lib.event.md) | **_(BETA)_** Events happen during Rush runs. |
 |  [`VersionPolicyDefinitionName`](./rush-lib.versionpolicydefinitionname.md) | **_(BETA)_** Version policy base type names |

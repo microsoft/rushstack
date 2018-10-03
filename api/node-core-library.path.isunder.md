@@ -2,7 +2,7 @@
 
 # Path.isUnder method
 
-Returns true if childPath refers to a location under parentFolderPath.
+Returns true if "childPath" is located inside the "parentFolderPath" folder or one of its child folders. Note that "parentFolderPath" is not considered to be under itself. The "childPath" can refer to any type of file system object.
 
 **Signature:**
 ```javascript
@@ -12,7 +12,7 @@ static isUnder(childPath: string, parentFolderPath: string): boolean;
 
 ## Remarks
 
-The indicated file/folder objects are not required to actually exist on disk. If the paths are relative, they will first be resolved using path.resolve().
+The indicated file/folder objects are not required to actually exist on disk. For example, "parentFolderPath" is interpreted as a folder name even if it refers to a file. If the paths are relative, they will first be resolved using path.resolve().
 
 ## Parameters
 

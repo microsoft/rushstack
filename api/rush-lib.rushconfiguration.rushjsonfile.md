@@ -2,7 +2,7 @@
 
 # RushConfiguration.rushJsonFile property
 
-The Rush configuration file
+The absolute path to the "rush.json" configuration file that was loaded to construct this object.
 
 **Signature:**
 ```javascript
