@@ -4,7 +4,8 @@
 import {
   TSDocParserConfiguration,
   TSDocTagDefinition,
-  TSDocTagSyntaxKind
+  TSDocTagSyntaxKind,
+  StandardTags
 } from '@microsoft/tsdoc';
 
 export class AedocDefinitions {
@@ -30,7 +31,33 @@ export class AedocDefinitions {
         AedocDefinitions.betaDocumentation,
         AedocDefinitions.internalRemarks,
         AedocDefinitions.preapprovedTag
-      ]);
+      ], true);
+
+      configuration.setSupportForTags(
+        [
+          StandardTags.alpha,
+          StandardTags.beta,
+          StandardTags.defaultValue,
+          StandardTags.deprecated,
+          StandardTags.eventProperty,
+          StandardTags.example,
+          StandardTags.inheritDoc,
+          StandardTags.internal,
+          StandardTags.link,
+          StandardTags.override,
+          StandardTags.packageDocumentation,
+          StandardTags.param,
+          StandardTags.privateRemarks,
+          StandardTags.public,
+          StandardTags.readonly,
+          StandardTags.remarks,
+          StandardTags.returns,
+          StandardTags.sealed,
+          StandardTags.virtual
+        ],
+        true
+      );
+
       AedocDefinitions._parserConfiguration = configuration;
     }
     return AedocDefinitions._parserConfiguration;
