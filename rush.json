@@ -145,9 +145,12 @@
      * IMPORTANT: Because these are regular expressions encoded as JSON string literals,
      * RegExp escapes need two backspashes, and ordinary periods should be "\\.".
      */
+    // "allowedEmailRegExps": [
+    //  "[^@]+@users\\.noreply\\.github\\.com",
+    //  "travis@example\\.org"
+    // ],
     "allowedEmailRegExps": [
-      "[^@]+@users\\.noreply\\.github\\.com",
-      "travis@example\\.org"
+      "[^@]+@users\\.noreply\\.github\\.com"
     ],
 
     /**
