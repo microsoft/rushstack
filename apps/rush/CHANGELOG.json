@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.3.1",
+      "tag": "@microsoft/rush_v5.3.1",
+      "date": "Wed, 03 Oct 2018 00:01:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where after running \"rush add\" (after successfully running \"rush install\"), the new package was not being installed or linked."
+          },
+          {
+            "comment": "Fix an incorrect default in the \"rush init\" template comments"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.0",
       "tag": "@microsoft/rush_v5.3.0",
       "date": "Fri, 28 Sep 2018 20:36:48 GMT",
