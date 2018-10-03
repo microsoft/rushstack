@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Helper functions for working with the Map<K,V> data type.
+ * Helper functions for working with the `Map<K, V>` data type.
  *
  * @public
  */
