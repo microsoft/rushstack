@@ -24,6 +24,7 @@ export interface ICopyStaticAssetsTaskConfig {
  * @internalremarks
  *
  * Example:
+ * ```
  *  IN:
  *    setConfig({
  *      includeExtensions: ['template.html'],
@@ -40,7 +41,7 @@ export interface ICopyStaticAssetsTaskConfig {
  *      2. excluding specific extensions (i.e. 'png')
  *      3. including specific globs (i.e. '/assets/goodAsset.png')
  *      4. excluding specific globs (i.e. '/assets/badAsset.gif')
- *
+ * ```
  * @public
  */
 export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {

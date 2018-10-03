@@ -40,22 +40,19 @@ export interface ILoadThemedStylesLoaderOptions {
 export class LoadThemedStylesLoader {
   private static _loadedThemedStylesPath: string = loadedThemedStylesPath;
 
-  /**
-   * Use this property to override the path to the @microsoft/load-themed-styles package.
-   */
   public static set loadedThemedStylesPath(value: string) {
     LoadThemedStylesLoader._loadedThemedStylesPath = value;
   }
 
   /**
-   * Use this property to get the path to the loader package (defaults to the path to @microsoft/load-themed-styles).
+   * Use this property to override the path to the `@microsoft/load-themed-styles` package.
    */
   public static get loadedThemedStylesPath(): string {
     return LoadThemedStylesLoader._loadedThemedStylesPath;
   }
 
   /**
-   * Reset the path to the @microsoft/load-themed-styles package to the default.
+   * Reset the path to the `@microsoft/load-themed-styles package` to the default.
    */
   public static resetLoadedThemedStylesPath(): void {
     LoadThemedStylesLoader._loadedThemedStylesPath = loadedThemedStylesPath;
