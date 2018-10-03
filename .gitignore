@@ -57,8 +57,11 @@ jspm_packages/
 
 # Common toolchain intermediate files
 lib
+lib-amd
+lib-es6
 dist
 temp
+*.scss.ts
 
 # Rush files
 common/temp/**
