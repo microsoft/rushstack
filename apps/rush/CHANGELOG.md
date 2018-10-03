@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 28 Sep 2018 20:36:48 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Oct 2018 00:01:18 GMT and should not be manually modified.
+
+## 5.3.1
+Wed, 03 Oct 2018 00:01:18 GMT
+
+### Updates
+
+- Fix an issue where after running "rush add" (after successfully running "rush install"), the new package was not being installed or linked.
+- Fix an incorrect default in the "rush init" template comments
 
 ## 5.3.0
 Fri, 28 Sep 2018 20:36:48 GMT
