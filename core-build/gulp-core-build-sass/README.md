@@ -39,11 +39,6 @@ If this is false, then we do not create `.css` files in the `lib` directory.
 
 **Default:** `false`
 
-### sassSyntax
-An optional parameter for setting SASS syntax.
-
-**Default:** `scss`
-
 ### warnOnNonCSSModules
 If files are matched by sassMatch which do not end in `.module.sass` or `.module.scss`, log a warning.
 
