@@ -2,7 +2,7 @@
 
 # IJsonFileStringifyOptions.newlineConversion property
 
-If true, then "\\n" will be used for newlines instead of the default "\\r\\n".
+If true, then `\n` will be used for newlines instead of the default `\r\n`<!-- -->.
 
 **Signature:**
 ```javascript

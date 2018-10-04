@@ -14,8 +14,6 @@ static tryResolve(filename: string, options?: IExecutableResolveOptions): string
 
 the absolute path of the executable, or undefined if it was not found
 
-## Remarks
-
 ## Parameters
 
 |  Parameter | Type | Description |

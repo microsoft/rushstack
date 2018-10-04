@@ -2,7 +2,7 @@
 
 # RushConfiguration.commonFolder property
 
-The fully resolved path for the "common" folder where Rush will store settings that affect all Rush projects. This is always a subfolder of the folder containing "rush.json". Example: "C:\\MyRepo\\common"
+The fully resolved path for the "common" folder where Rush will store settings that affect all Rush projects. This is always a subfolder of the folder containing "rush.json". Example: `C:\MyRepo\common`
 
 **Signature:**
 ```javascript

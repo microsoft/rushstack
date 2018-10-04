@@ -11,4 +11,4 @@ onSet: (source: ProtectableMap<K, V>, key: K, value: V) => V
 
 ## Remarks
 
-If this hook is provided, the function MUST return the \`value\` parameter. This provides the opportunity to modify the value before it is added to the map.
+If this hook is provided, the function MUST return the `value` parameter. This provides the opportunity to modify the value before it is added to the map.

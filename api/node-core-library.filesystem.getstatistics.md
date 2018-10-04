@@ -2,7 +2,7 @@
 
 # FileSystem.getStatistics method
 
-Gets the statistics for a particular filesystem object. If the path is a link, this function follows the link and returns statistics about the link target. Behind the scenes it uses \`fs.statSync()\`.
+Gets the statistics for a particular filesystem object. If the path is a link, this function follows the link and returns statistics about the link target. Behind the scenes it uses `fs.statSync()`<!-- -->.
 
 **Signature:**
 ```javascript

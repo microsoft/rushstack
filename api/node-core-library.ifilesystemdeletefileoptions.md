@@ -8,5 +8,5 @@ The options for FileSystem.deleteFile()
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [`throwIfNotExists`](./node-core-library.ifilesystemdeletefileoptions.throwifnotexists.md) | `boolean` | If true, will throw an exception if the file did not exist before \`deleteFile()\` was called. Defaults to \`false\`. |
+|  [`throwIfNotExists`](./node-core-library.ifilesystemdeletefileoptions.throwifnotexists.md) | `boolean` | If true, will throw an exception if the file did not exist before `deleteFile()` was called. Defaults to `false`<!-- -->. |
 

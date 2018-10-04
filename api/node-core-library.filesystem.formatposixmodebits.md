@@ -12,11 +12,11 @@ static formatPosixModeBits(modeBits: PosixModeBits): string;
 
 ## Remarks
 
-For example, \`PosixModeBits.AllRead \| PosixModeBits.AllWrite\` would be formatted as "-rw-rw-rw-".
+For example, `PosixModeBits.AllRead | PosixModeBits.AllWrite` would be formatted as "-rw-rw-rw-".
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  `modeBits` | `PosixModeBits` | POSIX-style file mode bits specified using the[PosixModeBits](./node-core-library.posixmodebits.md) enum |
+|  `modeBits` | `PosixModeBits` | POSIX-style file mode bits specified using the [PosixModeBits](./node-core-library.posixmodebits.md) enum |
 

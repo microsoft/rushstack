@@ -2,7 +2,7 @@
 
 # RushConfiguration.rushUserFolder property
 
-The absolute path to Rush's storage in the home directory for the current user. On Windows, it would be something like "C:\\Users\\YourName.rush".
+The absolute path to Rush's storage in the home directory for the current user. On Windows, it would be something like `C:\Users\YourName\.rush`<!-- -->.
 
 **Signature:**
 ```javascript

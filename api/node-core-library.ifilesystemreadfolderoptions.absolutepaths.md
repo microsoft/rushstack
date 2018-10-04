@@ -2,7 +2,7 @@
 
 # IFileSystemReadFolderOptions.absolutePaths property
 
-If true, returns the absolute paths of the files in the folder. Defaults to \`false\`.
+If true, returns the absolute paths of the files in the folder. Defaults to `false`<!-- -->.
 
 **Signature:**
 ```javascript

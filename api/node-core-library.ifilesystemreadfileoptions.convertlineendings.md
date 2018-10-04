@@ -2,7 +2,7 @@
 
 # IFileSystemReadFileOptions.convertLineEndings property
 
-If specified, will normalize line endings to the specified style of newline. Defaults to \`NewlineKind.None\`.
+If specified, will normalize line endings to the specified style of newline. Defaults to `NewlineKind.None`<!-- -->.
 
 **Signature:**
 ```javascript

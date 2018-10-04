@@ -2,7 +2,7 @@
 
 # FileSystem.createHardLink method
 
-Creates a hard link. Behind the scenes it uses \`fs.linkSync()\`.
+Creates a hard link. Behind the scenes it uses `fs.linkSync()`<!-- -->.
 
 **Signature:**
 ```javascript

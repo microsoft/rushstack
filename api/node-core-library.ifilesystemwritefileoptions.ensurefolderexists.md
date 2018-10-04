@@ -2,7 +2,7 @@
 
 # IFileSystemWriteFileOptions.ensureFolderExists property
 
-If true, will ensure the folder is created before writing the file. Defaults to \`false\`.
+If true, will ensure the folder is created before writing the file. Defaults to `false`<!-- -->.
 
 **Signature:**
 ```javascript

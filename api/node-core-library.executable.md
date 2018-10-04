@@ -23,4 +23,4 @@ The NodeJS child\_process API provides a solution for launching child processes,
 
 The Executable API provides a pure JavaScript implementation of primitive shell-like functionality for searching the default PATH, appending default file extensions on Windows, and executing a file that may contain a POSIX shebang. This primitive functionality is sufficient (and recommended) for most tooling scenarios.
 
-If you need additional shell features such as wildcard globbing, environment variable expansion, piping, or built-in commands, then we recommend to use the \`@microsoft/rushell\` library instead. Rushell is a pure JavaScript shell with a standard syntax that is guaranteed to work consistently across all platforms.
+If you need additional shell features such as wildcard globbing, environment variable expansion, piping, or built-in commands, then we recommend to use the `@microsoft/rushell` library instead. Rushell is a pure JavaScript shell with a standard syntax that is guaranteed to work consistently across all platforms.

@@ -2,7 +2,7 @@
 
 # IFileSystemCreateLinkOptions interface
 
-The options for \`FileSystem.createSymbolicLinkJunction()\`, \`createSymbolicLinkFile()\`, \`createSymbolicLinkFolder()\`, and \`createHardLink()\`.
+The options for `FileSystem.createSymbolicLinkJunction()`<!-- -->, `createSymbolicLinkFile()`<!-- -->, `createSymbolicLinkFolder()`<!-- -->, and `createHardLink()`<!-- -->.
 
 ## Properties
 

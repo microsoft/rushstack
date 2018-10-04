@@ -2,7 +2,7 @@
 
 # FileSystem.copyFile method
 
-Copies a file from one location to another. By default, destinationPath is overwritten if it already exists. Behind the scenes it uses \`fs.copyFileSync()\`.
+Copies a file from one location to another. By default, destinationPath is overwritten if it already exists. Behind the scenes it uses `fs.copyFileSync()`<!-- -->.
 
 **Signature:**
 ```javascript

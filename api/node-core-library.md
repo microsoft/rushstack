@@ -15,11 +15,11 @@ Core libraries that every NodeJS toolchain project should use.
 |  [`JsonFile`](./node-core-library.jsonfile.md) | Utilities for reading/writing JSON files. |
 |  [`JsonSchema`](./node-core-library.jsonschema.md) | Represents a JSON schema that can be used to validate JSON data files loaded by the JsonFile class. |
 |  [`LockFile`](./node-core-library.lockfile.md) | A helper utility for working with file-based locks. This class should only be used for locking resources across processes, but should not be used for attempting to lock a resource in the same process. |
-|  [`MapExtensions`](./node-core-library.mapextensions.md) | Helper functions for working with the Map&lt;K,V&gt; data type. |
+|  [`MapExtensions`](./node-core-library.mapextensions.md) | Helper functions for working with the `Map<K, V>` data type. |
 |  [`PackageJsonLookup`](./node-core-library.packagejsonlookup.md) | This class provides methods for finding the nearest "package.json" for a folder and retrieving the name of the package. The results are cached. |
 |  [`PackageName`](./node-core-library.packagename.md) | Various functions for working with package names that may include scopes. |
 |  [`Path`](./node-core-library.path.md) | Common operations for manipulating file and directory paths. |
-|  [`ProtectableMap`](./node-core-library.protectablemap.md) | The ProtectableMap provides an easy way for an API to expose a Map&lt;K, V&gt; property while intercepting and validating any write operations that are performed by consumers of the API. |
+|  [`ProtectableMap`](./node-core-library.protectablemap.md) | The ProtectableMap provides an easy way for an API to expose a `Map<K, V>` property while intercepting and validating any write operations that are performed by consumers of the API. |
 |  [`Text`](./node-core-library.text.md) | Operations for working with strings that contain text. |
 
 ## Interfaces
@@ -29,12 +29,12 @@ Core libraries that every NodeJS toolchain project should use.
 |  [`IExecutableResolveOptions`](./node-core-library.iexecutableresolveoptions.md) | **_(BETA)_** Options for Executable.tryResolve(). |
 |  [`IExecutableSpawnSyncOptions`](./node-core-library.iexecutablespawnsyncoptions.md) | **_(BETA)_** Options for Executable.execute(). |
 |  [`IFileSystemCopyFileOptions`](./node-core-library.ifilesystemcopyfileoptions.md) | The options for FileSystem.copyFile() |
-|  [`IFileSystemCreateLinkOptions`](./node-core-library.ifilesystemcreatelinkoptions.md) | The options for \`FileSystem.createSymbolicLinkJunction()\`, \`createSymbolicLinkFile()\`, \`createSymbolicLinkFolder()\`, and \`createHardLink()\`. |
+|  [`IFileSystemCreateLinkOptions`](./node-core-library.ifilesystemcreatelinkoptions.md) | The options for `FileSystem.createSymbolicLinkJunction()`<!-- -->, `createSymbolicLinkFile()`<!-- -->, `createSymbolicLinkFolder()`<!-- -->, and `createHardLink()`<!-- -->. |
 |  [`IFileSystemDeleteFileOptions`](./node-core-library.ifilesystemdeletefileoptions.md) | The options for FileSystem.deleteFile() |
 |  [`IFileSystemMoveOptions`](./node-core-library.ifilesystemmoveoptions.md) | The options for FileSystem.move() |
 |  [`IFileSystemReadFileOptions`](./node-core-library.ifilesystemreadfileoptions.md) | The options for FileSystem.readFile() |
 |  [`IFileSystemReadFolderOptions`](./node-core-library.ifilesystemreadfolderoptions.md) | The options for FileSystem.readFolder() |
-|  [`IFileSystemUpdateTimeParameters`](./node-core-library.ifilesystemupdatetimeparameters.md) | The parameters for \`updateTimes()\`. Both times must be specified. |
+|  [`IFileSystemUpdateTimeParameters`](./node-core-library.ifilesystemupdatetimeparameters.md) | The parameters for `updateTimes()`<!-- -->. Both times must be specified. |
 |  [`IFileSystemWriteFileOptions`](./node-core-library.ifilesystemwritefileoptions.md) | The options for FileSystem.writeFile() |
 |  [`IFileWriterFlags`](./node-core-library.ifilewriterflags.md) | Interface which represents the flags about which mode the file should be opened in. |
 |  [`IJsonFileSaveOptions`](./node-core-library.ijsonfilesaveoptions.md) | Options for JsonFile.saveJsonFile() |

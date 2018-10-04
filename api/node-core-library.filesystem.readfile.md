@@ -2,7 +2,7 @@
 
 # FileSystem.readFile method
 
-Reads the contents of a file into a string. Behind the scenes it uses \`fs.readFileSync()\`.
+Reads the contents of a file into a string. Behind the scenes it uses `fs.readFileSync()`<!-- -->.
 
 **Signature:**
 ```javascript
@@ -15,5 +15,5 @@ static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  `filePath` | `string` | The relative or absolute path to the file whose contents should be read. |
-|  `options` | `IFileSystemReadFileOptions` | Optional settings that can change the behavior. Type: \`IReadFileOptions\` |
+|  `options` | `IFileSystemReadFileOptions` | Optional settings that can change the behavior. Type: `IReadFileOptions` |
 

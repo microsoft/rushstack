@@ -2,7 +2,7 @@
 
 # IFileSystemUpdateTimeParameters interface
 
-The parameters for \`updateTimes()\`. Both times must be specified.
+The parameters for `updateTimes()`<!-- -->. Both times must be specified.
 
 ## Properties
 

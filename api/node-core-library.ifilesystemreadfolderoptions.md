@@ -8,5 +8,5 @@ The options for FileSystem.readFolder()
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [`absolutePaths`](./node-core-library.ifilesystemreadfolderoptions.absolutepaths.md) | `boolean` | If true, returns the absolute paths of the files in the folder. Defaults to \`false\`. |
+|  [`absolutePaths`](./node-core-library.ifilesystemreadfolderoptions.absolutepaths.md) | `boolean` | If true, returns the absolute paths of the files in the folder. Defaults to `false`<!-- -->. |
 

@@ -11,4 +11,4 @@ committedShrinkwrapFilename: string
 
 ## Remarks
 
-This property merely reports the filename; the file itself may not actually exist. Example: "C:\\MyRepo\\common\\npm-shrinkwrap.json" or "C:\\MyRepo\\common\\shrinkwrap.yaml"
+This property merely reports the filename; the file itself may not actually exist. Example: `C:\MyRepo\common\npm-shrinkwrap.json` or `C:\MyRepo\common\shrinkwrap.yaml`

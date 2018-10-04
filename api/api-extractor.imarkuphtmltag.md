@@ -2,7 +2,7 @@
 
 # IMarkupHtmlTag interface
 
-Represents an HTML tag such as \`<td>\` or \`</td>\` or \`<img src="example.gif" />\`.
+Represents an HTML tag such as `<td>` or `</td>` or `<img src="example.gif" />`<!-- -->.
 
 ## Properties
 

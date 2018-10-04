@@ -2,7 +2,7 @@
 
 # MapExtensions class
 
-Helper functions for working with the Map&lt;K,V&gt; data type.
+Helper functions for working with the `Map<K, V>` data type.
 
 ## Methods
 

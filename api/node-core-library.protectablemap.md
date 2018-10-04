@@ -2,7 +2,7 @@
 
 # ProtectableMap class
 
-The ProtectableMap provides an easy way for an API to expose a Map&lt;K, V&gt; property while intercepting and validating any write operations that are performed by consumers of the API.
+The ProtectableMap provides an easy way for an API to expose a `Map<K, V>` property while intercepting and validating any write operations that are performed by consumers of the API.
 
 ## Properties
 
@@ -27,4 +27,4 @@ The ProtectableMap provides an easy way for an API to expose a Map&lt;K, V&gt; p
 
 The ProtectableMap itself is intended to be a private object that only its owner can access directly. Any operations performed directly on the ProtectableMap will bypass the hooks and any validation they perform. The public property that is exposed to API consumers should return [ProtectableMap.protectedView](./node-core-library.protectablemap.protectedview.md) instead.
 
-For example, suppose you want to share your Map&lt;string,number&gt; data structure, but you want to enforce that the key must always be an upper case string: You could use the onSet() hook to validate the keys and throw an exception if the key is not uppercase.
+For example, suppose you want to share your `Map<string, number>` data structure, but you want to enforce that the key must always be an upper case string: You could use the onSet() hook to validate the keys and throw an exception if the key is not uppercase.

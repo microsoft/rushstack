@@ -2,7 +2,7 @@
 
 # RushConfiguration.packageManagerToolFilename property
 
-The absolute path to the locally installed NPM tool. If "rush install" has not been run, then this file may not exist yet. Example: "C:\\MyRepo\\common\\temp\\npm-local\\node\_modules.bin\\npm"
+The absolute path to the locally installed NPM tool. If "rush install" has not been run, then this file may not exist yet. Example: `C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm`
 
 **Signature:**
 ```javascript

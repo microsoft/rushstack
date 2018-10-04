@@ -2,7 +2,7 @@
 
 # FileSystem.changePosixModeBits method
 
-Changes the permissions (i.e. file mode bits) for a filesystem object. Behind the scenes it uses \`fs.chmodSync()\`.
+Changes the permissions (i.e. file mode bits) for a filesystem object. Behind the scenes it uses `fs.chmodSync()`<!-- -->.
 
 **Signature:**
 ```javascript

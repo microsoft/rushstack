@@ -2,7 +2,7 @@
 
 # FileSystem.updateTimes method
 
-Updates the accessed and modified timestamps of the filesystem object referenced by path. Behind the scenes it uses \`fs.utimesSync()\`. The caller should specify both times in the \`times\` parameter.
+Updates the accessed and modified timestamps of the filesystem object referenced by path. Behind the scenes it uses `fs.utimesSync()`<!-- -->. The caller should specify both times in the `times` parameter.
 
 **Signature:**
 ```javascript

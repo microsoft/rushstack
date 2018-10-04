@@ -11,4 +11,4 @@ value: string | undefined
 
 ## Remarks
 
-The return value will be \`undefined\` if the command-line has not been parsed yet, or if the parameter was omitted and has no default value.
+The return value will be `undefined` if the command-line has not been parsed yet, or if the parameter was omitted and has no default value.

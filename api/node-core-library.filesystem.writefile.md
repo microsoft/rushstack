@@ -2,7 +2,7 @@
 
 # FileSystem.writeFile method
 
-Writes a text string to a file on disk, overwriting the file if it already exists. Behind the scenes it uses \`fs.writeFileSync()\`.
+Writes a text string to a file on disk, overwriting the file if it already exists. Behind the scenes it uses `fs.writeFileSync()`<!-- -->.
 
 **Signature:**
 ```javascript
@@ -20,5 +20,5 @@ Throws an error if the folder doesn't exist, unless ensureFolder=true.
 |  --- | --- | --- |
 |  `filePath` | `string` | The absolute or relative path of the file. |
 |  `contents` | `string | Buffer` | The text that should be written to the file. |
-|  `options` | `IFileSystemWriteFileOptions` | Optional settings that can change the behavior. Type: \`IWriteFileOptions\` |
+|  `options` | `IFileSystemWriteFileOptions` | Optional settings that can change the behavior. Type: `IWriteFileOptions` |
 

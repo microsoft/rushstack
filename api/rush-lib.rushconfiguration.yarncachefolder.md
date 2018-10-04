@@ -4,7 +4,7 @@
 
 The local folder that will store the Yarn package cache.
 
-Example: "C:\\MyRepo\\common\\temp\\yarn-cache"
+Example: `C:\MyRepo\common\temp\yarn-cache`
 
 **Signature:**
 ```javascript

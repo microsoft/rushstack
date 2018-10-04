@@ -2,7 +2,7 @@
 
 # FileSystem.move method
 
-Moves a file. The folder must exist, unless the \`ensureFolderExists\` option is provided. Behind the scenes it uses \`fs-extra.moveSync()\`
+Moves a file. The folder must exist, unless the `ensureFolderExists` option is provided. Behind the scenes it uses `fs-extra.moveSync()`
 
 **Signature:**
 ```javascript

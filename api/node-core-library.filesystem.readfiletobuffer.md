@@ -2,7 +2,7 @@
 
 # FileSystem.readFileToBuffer method
 
-Reads the contents of a file into a buffer. Behind the scenes is uses \`fs.readFileSync()\`.
+Reads the contents of a file into a buffer. Behind the scenes is uses `fs.readFileSync()`<!-- -->.
 
 **Signature:**
 ```javascript

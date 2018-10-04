@@ -2,7 +2,7 @@
 
 # Text.ensureTrailingNewline method
 
-Returns the input string with a trailing '\\n' character appended, if not already present.
+Returns the input string with a trailing `\n` character appended, if not already present.
 
 **Signature:**
 ```javascript

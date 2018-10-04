@@ -16,6 +16,6 @@ A full package name such as "@example/some-library".
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  `scope` | `string` | Must be either an empty string, or a scope name such as "\\@example" |
+|  `scope` | `string` | Must be either an empty string, or a scope name such as "@example" |
 |  `unscopedName` | `string` | Must be a nonempty package name that does not contain a scope |
 

@@ -11,4 +11,4 @@ tempShrinkwrapPreinstallFilename: string
 
 ## Remarks
 
-This property merely reports the filename; the file itself may not actually exist. Example: "C:\\MyRepo\\common\\temp\\npm-shrinkwrap-preinstall.json" or "C:\\MyRepo\\common\\temp\\shrinkwrap-preinstall.yaml"
+This property merely reports the filename; the file itself may not actually exist. Example: `C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json` or `C:\MyRepo\common\temp\shrinkwrap-preinstall.yaml`

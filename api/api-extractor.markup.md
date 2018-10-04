@@ -15,6 +15,7 @@ Provides various operations for working with MarkupElement objects.
 
 |  Method | Access Modifier | Returns | Description |
 |  --- | --- | --- | --- |
+|  [`appendTextElements(output, text, options)`](./api-extractor.markup.appendtextelements.md) |  | `void` | Appends text content to the `output` array. If the last item in the array is a compatible IMarkupText element, the text will be merged into it. Otherwise, a new IMarkupText element will be created. |
 |  [`createApiLink(textElements, target)`](./api-extractor.markup.createapilink.md) |  | `IMarkupApiLink` | Constructs an IMarkupApiLink element that represents a hyperlink to the specified API object. The hyperlink is applied to an existing stream of markup elements. |
 |  [`createApiLinkFromText(text, target)`](./api-extractor.markup.createapilinkfromtext.md) |  | `IMarkupApiLink` | Constructs an IMarkupApiLink element that represents a hyperlink to the specified API object. The hyperlink is applied to a plain text string. |
 |  [`createCode(code, highlighter)`](./api-extractor.markup.createcode.md) |  | `IMarkupHighlightedText` | Constructs an IMarkupHighlightedText element representing a program code text with optional syntax highlighting |

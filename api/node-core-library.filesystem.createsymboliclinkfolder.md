@@ -2,7 +2,7 @@
 
 # FileSystem.createSymbolicLinkFolder method
 
-Creates a symbolic link to a folder (on Windows this requires elevated permissionsBits). Behind the scenes it uses \`fs.symlinkSync()\`.
+Creates a symbolic link to a folder (on Windows this requires elevated permissionsBits). Behind the scenes it uses `fs.symlinkSync()`<!-- -->.
 
 **Signature:**
 ```javascript

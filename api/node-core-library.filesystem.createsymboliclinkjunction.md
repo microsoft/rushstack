@@ -2,7 +2,7 @@
 
 # FileSystem.createSymbolicLinkJunction method
 
-Creates a Windows "directory junction". Behaves like \`createSymbolicLinkToFile()\` on other platforms. Behind the scenes it uses \`fs.symlinkSync()\`.
+Creates a Windows "directory junction". Behaves like `createSymbolicLinkToFile()` on other platforms. Behind the scenes it uses `fs.symlinkSync()`<!-- -->.
 
 **Signature:**
 ```javascript

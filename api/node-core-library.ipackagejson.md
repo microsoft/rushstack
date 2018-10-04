@@ -27,4 +27,4 @@ An interface for accessing common fields from a package.json file.
 
 ## Remarks
 
-More fields may be added to this interface in the future. Most fields are optional. For documentation about this file format, see the [CommonJS Packages specification](http://wiki.commonjs.org/wiki/Packages/1.0) and the [NPM manual page](https://docs.npmjs.com/files/package.json)<!-- -->.
+More fields may be added to this interface in the future. Most fields are optional. For documentation about this file format, see the [ CommonJS Packages specification](http://wiki.commonjs.org/wiki/Packages/1.0) and the [ NPM manual page](https://docs.npmjs.com/files/package.json)<!-- -->.

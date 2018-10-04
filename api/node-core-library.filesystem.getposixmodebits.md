@@ -2,7 +2,7 @@
 
 # FileSystem.getPosixModeBits method
 
-Retrieves the permissions (i.e. file mode bits) for a filesystem object. Behind the scenes it uses \`fs.chmodSync()\`.
+Retrieves the permissions (i.e. file mode bits) for a filesystem object. Behind the scenes it uses `fs.chmodSync()`<!-- -->.
 
 **Signature:**
 ```javascript

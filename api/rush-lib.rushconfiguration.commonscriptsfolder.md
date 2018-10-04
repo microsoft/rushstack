@@ -2,7 +2,7 @@
 
 # RushConfiguration.commonScriptsFolder property
 
-The folder where automation scripts are stored. This is always a subfolder called "scripts" under the common folder. Example: "C:\\MyRepo\\common\\scripts"
+The folder where automation scripts are stored. This is always a subfolder called "scripts" under the common folder. Example: `C:\MyRepo\common\scripts`
 
 **Signature:**
 ```javascript

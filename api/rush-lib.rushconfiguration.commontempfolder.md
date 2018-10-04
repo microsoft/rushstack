@@ -2,7 +2,7 @@
 
 # RushConfiguration.commonTempFolder property
 
-The folder where temporary files will be stored. This is always a subfolder called "temp" under the common folder. Example: "C:\\MyRepo\\common\\temp"
+The folder where temporary files will be stored. This is always a subfolder called "temp" under the common folder. Example: `C:\MyRepo\common\temp`
 
 **Signature:**
 ```javascript

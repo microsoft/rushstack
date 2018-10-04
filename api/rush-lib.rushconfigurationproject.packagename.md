@@ -4,7 +4,7 @@
 
 The name of the NPM package. An error is reported if this name is not identical to packageJson.name.
 
-Example: "@scope/MyProject"
+Example: `@scope/MyProject`
 
 **Signature:**
 ```javascript

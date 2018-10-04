@@ -4,7 +4,7 @@
 
 The full path of the folder that contains the project to be built by Rush.
 
-Example: "C:\\MyRepo\\libraries\\my-project"
+Example: `C:\MyRepo\libraries\my-project`
 
 **Signature:**
 ```javascript

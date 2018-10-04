@@ -4,7 +4,7 @@
 
 The local folder where PNPM stores a global installation for every installed package
 
-Example: "C:\\MyRepo\\common\\temp\\pnpm-store"
+Example: `C:\MyRepo\common\temp\pnpm-store`
 
 **Signature:**
 ```javascript

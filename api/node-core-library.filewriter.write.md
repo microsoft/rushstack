@@ -2,7 +2,7 @@
 
 # FileWriter.write method
 
-Writes some text to the given file handle. Throws if the file handle has been closed. Behind the scenes it uses \`fs.writeSync()\`.
+Writes some text to the given file handle. Throws if the file handle has been closed. Behind the scenes it uses `fs.writeSync()`<!-- -->.
 
 **Signature:**
 ```javascript

@@ -4,7 +4,7 @@
 
 The unscoped temporary project name
 
-Example: "my-project-2"
+Example: `my-project-2`
 
 **Signature:**
 ```javascript

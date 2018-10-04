@@ -2,7 +2,7 @@
 
 # FileWriter.close method
 
-Closes the file handle permanently. No operations can be made on this file handle after calling this. Behind the scenes it uses \`fs.closeSync()\` and releases the file descriptor to be re-used.
+Closes the file handle permanently. No operations can be made on this file handle after calling this. Behind the scenes it uses `fs.closeSync()` and releases the file descriptor to be re-used.
 
 **Signature:**
 ```javascript

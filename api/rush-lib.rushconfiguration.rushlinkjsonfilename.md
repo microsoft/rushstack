@@ -4,7 +4,7 @@
 
 The filename of the build dependency data file. By default this is called 'rush-link.json' resides in the Rush common folder. Its data structure is defined by IRushLinkJson.
 
-Example: "C:\\MyRepo\\common\\temp\\rush-link.json"
+Example: `C:\MyRepo\common\temp\rush-link.json`
 
 **Signature:**
 ```javascript
