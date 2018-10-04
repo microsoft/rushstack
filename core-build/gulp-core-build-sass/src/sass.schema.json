@@ -34,12 +34,6 @@
       "type": "boolean"
     },
 
-    "sassSyntax": {
-      "title": "SASS syntax",
-      "description": "An optional parameter for setting SASS syntax.",
-      "type": "string"
-    },
-
     "warnOnCssInvalidPropertyName ": {
       "title": "Safety delver the CSS module compile warning",
       "description": "If false, CSS module compile warning will be change verbose type to avoid build task exit with exitcode:1",

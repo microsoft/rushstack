@@ -131,6 +131,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "clean-css",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "colors",
       "allowedCategories": [ "libraries" ]
     },
@@ -379,6 +383,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "node-sass",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "npm-package-arg",
       "allowedCategories": [ "libraries" ]
     },
@@ -396,6 +404,10 @@
     },
     {
       "name": "phantomjs-prebuilt",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "postcss",
       "allowedCategories": [ "libraries" ]
     },
     {

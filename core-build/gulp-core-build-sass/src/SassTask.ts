@@ -1,24 +1,40 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { GulpTask } from '@microsoft/gulp-core-build';
-import * as Gulp from 'gulp';
-import * as gulpUtil from 'gulp-util';
-import { EOL } from 'os';
-import { splitStyles } from '@microsoft/load-themed-styles';
-import through2 = require('through2');
 import * as path from 'path';
-/* tslint:disable:typedef */
-const merge = require('merge2');
-/* tslint:enable:typedef */
+import * as Gulp from 'gulp';
+import { EOL } from 'os';
+
+import { GulpTask } from '@microsoft/gulp-core-build';
+import { splitStyles } from '@microsoft/load-themed-styles';
+import {
+  FileSystem,
+  JsonFile
+} from '@microsoft/node-core-library';
+import * as glob from 'glob';
+import * as nodeSass from 'node-sass';
+import * as postcss from 'postcss';
+import * as CleanCss from 'clean-css';
+import * as autoprefixer from 'autoprefixer';
+import * as cssModules from 'postcss-modules';
+import * as crypto from 'crypto';
 
 export interface ISassTaskConfig {
-  /** An optional parameter for text to include in the generated typescript file. */
+  /**
+   * An optional parameter for text to include in the generated typescript file.
+   */
   preamble?: string;
-  /** An optional parameter for text to include at the end of the generated typescript file. */
+
+  /**
+   * An optional parameter for text to include at the end of the generated typescript file.
+   */
   postamble?: string;
-  /** An array of glob patterns for locating SASS files. */
+
+  /**
+   * An array of glob patterns for locating files.
+   */
   sassMatch?: string[];
+
   /**
    * If this option is specified, ALL files will be treated as module.sass or module.scss and will
    * automatically generate a corresponding TypeScript file. All classes will be
@@ -26,25 +42,25 @@ export interface ISassTaskConfig {
    * imported directly, and will contain an object describing the mangled class names.
    */
   useCSSModules?: boolean;
+
   /**
    * If false, we will set the CSS property naming warning to verbose message while the module generates
    * to prevent task exit with exitcode: 1.
    * Default value is true
    */
   warnOnCssInvalidPropertyName?: boolean;
+
   /**
    * If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded
    * into the TypeScript file
    */
   dropCssFiles?: boolean;
-  /**
-   * An optional parameter for setting SASS syntax.
-   */
-  sassSyntax?: string;
+
   /**
    * If files are matched by sassMatch which do not end in .module.sass or .module.scss, log a warning.
    */
   warnOnNonCSSModules?: boolean;
+
   /**
    * If this option is specified, module CSS will be exported using the name provided. If an
    * empty value is specified, the styles will be exported using 'export =', rather than a
@@ -61,6 +77,17 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     'src/**/*.scss.ts'
   ];
 
+  private _postCSSPlugins: postcss.AcceptedPlugin[] = [
+    autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
+  ];
+
+  private _modulePostCssAdditionalPlugins: postcss.AcceptedPlugin[] = [
+    cssModules({
+      getJSON: this._generateModuleStub.bind(this),
+      generateScopedName: this._generateScopedName.bind(this)
+    })
+  ];
+
   constructor() {
     super(
       'sass',
@@ -68,10 +95,10 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         preamble: '/* tslint:disable */',
         postamble: '/* tslint:enable */',
         sassMatch: [
-          'src/**/*.scss'
+          'src/**/*.scss',
+          'src/**/*.sass'
         ],
         useCSSModules: false,
-        sassSyntax: 'scss',
         warnOnCssInvalidPropertyName: true,
         dropCssFiles: false,
         warnOnNonCSSModules: false
@@ -80,220 +107,221 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   }
 
   public loadSchema(): Object {
-    return require('./sass.schema.json');
+    return JsonFile.load(path.join(__dirname, 'sass.schema.json'));
   }
 
-  public executeTask(
-    gulp: typeof Gulp,
-    completeCallback: (error?: string) => void
-  ): Promise<{}> | NodeJS.ReadWriteStream | void {
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): Promise<void> | undefined {
 
     if (!this.taskConfig.sassMatch) {
       completeCallback('taskConfig.sassMatch must be defined');
       return;
     }
 
-    /* tslint:disable:typedef */
-    const autoprefixer = require('autoprefixer');
-    const cssModules = require('postcss-modules');
-    /* tslint:enable:typedef */
+    const srcPatterns: string[] = this.taskConfig.useCSSModules
+      ? [
+          ...this.taskConfig.sassMatch.map((value: string) => value.replace(/(\.s(a|c)ss)/, '.module$1')),
+          ...this.taskConfig.sassMatch.map((value: string) => `!${value}`)
+        ]
+      : this.taskConfig.sassMatch;
 
-    /* tslint:disable:no-any */
-    const postCSSPlugins: any[] = [
-      autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
-    ];
-    const modulePostCssPlugins: any[] = postCSSPlugins.slice(0);
-    /* tslint:enable:no-any */
-
-    modulePostCssPlugins.push(cssModules({
-      getJSON: this._generateModuleStub.bind(this),
-      generateScopedName: this.generateScopedName.bind(this)
-    }));
-
-    const srcPattern: string[] = this.taskConfig.sassMatch.slice(0);
-
-    const checkFilenameForCSSModule: (file: gulpUtil.File) => void = (file: gulpUtil.File) => {
-      if (!path.basename(file.path).match(/module\.s(a|c)ss$/)) {
-        const filePath: string = path.relative(this.buildConfig.rootPath, file.path);
-        this.logWarning(`${filePath}: filename should end with module.sass or module.scss`);
-      }
-    };
-
-    if (this.taskConfig.useCSSModules) {
-      this.logVerbose('Generating CSS modules.');
-      return this._processFiles(gulp, srcPattern, completeCallback, modulePostCssPlugins);
-    } else {
-      const moduleSrcPattern: string[] = srcPattern.map((value: string) => {
-        return value.replace(/(\.s(a|c)ss)/, '.module$1');
-      });
-
-      moduleSrcPattern.forEach((value: string) => srcPattern.push(`!${value}`));
-
-      return merge(this._processFiles(gulp, srcPattern, completeCallback, postCSSPlugins,
-        this.taskConfig.warnOnNonCSSModules ? checkFilenameForCSSModule : undefined),
-        this._processFiles(gulp, moduleSrcPattern, completeCallback, modulePostCssPlugins));
-    }
-  }
-
-  private _processFiles(
-    gulp: typeof Gulp,
-    srcPattern: string[],
-    /* tslint:disable:no-any */
-    completeCallback: (error?: string) => void,
-    postCSSPlugins: any[],
-    /* tslint:enable:no-any */
-    checkFile?: (file: gulpUtil.File) => void
-  ): NodeJS.ReadWriteStream {
-    /* tslint:disable:typedef */
-    const cleancss = require('gulp-clean-css');
-    const clipEmptyFiles = require('gulp-clip-empty-files');
-    const clone = require('gulp-clone');
-    const postcss = require('gulp-postcss');
-    const sass = require('gulp-sass');
-    const texttojs = require('gulp-texttojs');
-    const sourcemaps = require('gulp-sourcemaps');
-    /* tslint:enable:typedef */
-
-    const tasks: NodeJS.ReadWriteStream[] = [];
-
-    const srcStream: NodeJS.ReadWriteStream = gulp.src(srcPattern);
-
-    const checkedStream: NodeJS.ReadWriteStream = (checkFile ?
-      srcStream.pipe(through2.obj(
-        // tslint:disable-next-line:no-function-expression
-        function (file: gulpUtil.File, encoding: string, callback: (p?: Object) => void): void {
-          // tslint:disable-next-line:no-unused-expression
-
-          checkFile(file);
-          this.push(file);
-          callback();
-        }
-      ))
-      : srcStream);
-
-    let baseTask: NodeJS.ReadWriteStream = checkedStream;
-    if (!this.buildConfig.production) {
-      baseTask = baseTask.pipe(sourcemaps.init());
-    }
-
-    baseTask = baseTask
-      .pipe(sass.sync({
-        importer: (url: string, prev: string, done: boolean): Object => ({ file: _patchSassUrl(url) })
-      }).on('error', function (error: Error): void {
-        sass.logError.call(this, error);
-        completeCallback('Errors found in sass file(s).');
-      }))
-      .pipe(postcss(postCSSPlugins))
-      .pipe(cleancss({
-        advanced: false
-      }))
-      .pipe(clipEmptyFiles());
-
-    if (!this.buildConfig.production) {
-      baseTask = baseTask.pipe(sourcemaps.write());
-    }
-
-    if (this.taskConfig.dropCssFiles) {
-      tasks.push(baseTask.pipe(clone()).pipe(gulp.dest(this.buildConfig.libFolder)));
-    }
-
-    tasks.push(baseTask.pipe(clone())
-      .pipe(texttojs({
-        ext: `.${this.taskConfig.sassSyntax}.ts`,
-        isExtensionAppended: false,
-        template: (file: gulpUtil.File): string => {
-          const content: string = file.contents!.toString();
-          const classNames: Object = _classMaps[file.path];
-          let exportClassNames: string = '';
-
-          if (classNames) {
-            const classNamesLines: string[] = [
-              'const styles = {'
-            ];
-
-            const classKeys: string[] = Object.keys(classNames);
-            classKeys.forEach((key: string, index: number) => {
-              const value: string = classNames[key];
-              let line: string = '';
-              if (key.indexOf('-') !== -1) {
-                const message: string = `The local CSS class '${key}' is not camelCase and will not be type-safe.`;
-                this.taskConfig.warnOnCssInvalidPropertyName ?
-                  this.logWarning(message) :
-                  this.logVerbose(message);
-                line = `  '${key}': '${value}'`;
-              } else {
-                line = `  ${key}: '${value}'`;
-              }
-
-              if ((index + 1) <= classKeys.length) {
-                line += ',';
-              }
-
-              classNamesLines.push(line);
-            });
-
-            let exportString: string = 'export default styles;';
-
-            if (this.taskConfig.moduleExportName === '') {
-              exportString = 'export = styles;';
-            } else if (!!this.taskConfig.moduleExportName) {
-              exportString = `export const ${this.taskConfig.moduleExportName} = styles;`;
-            }
-
-            classNamesLines.push(
-              '};',
-              '',
-              exportString
-            );
-
-            exportClassNames = classNamesLines.join(EOL);
-          }
-
-          let lines: string[] = [];
-
-          lines.push(this.taskConfig.preamble || '');
-
-          if (this.taskConfig.dropCssFiles) {
-            lines = lines.concat([
-              `require('./${path.basename(file.path, `.${this.taskConfig.sassSyntax}.ts`)}.css');`,
-              exportClassNames
-            ]);
-          } else if (!!content) {
-            lines = lines.concat([
-              'import { loadStyles } from \'@microsoft/load-themed-styles\';',
-              '',
-              exportClassNames,
-              '',
-              `loadStyles(${JSON.stringify(splitStyles(content))});`
-            ]);
-          }
-
-          lines.push(this.taskConfig.postamble || '');
-
-          return (
-            lines
-              .join(EOL)
-              .replace(new RegExp(`(${EOL}){3,}`, 'g'), `${EOL}${EOL}`)
-              .replace(new RegExp(`(${EOL})+$`, 'm'), EOL)
-          );
-        }
-      }))
-      .pipe(gulp.dest('src')));
-
-    return merge(tasks);
+    return this._globAll(...srcPatterns).then((matches: string[]) => {
+      return Promise.all(matches.map((match) => this._processFile(match)));
+    }).then(() => completeCallback()).catch((error) => completeCallback(error));
   }
 
   private _generateModuleStub(cssFileName: string, json: Object): void {
-    cssFileName = cssFileName.replace('.css', `.${this.taskConfig.sassSyntax}.ts`);
     _classMaps[cssFileName] = json;
   }
 
-  private generateScopedName(name: string, fileName: string, css: string): string {
-    /* tslint:disable:typedef */
-    const crypto = require('crypto');
-    /* tslint:enable:typedef */
-
+  private _generateScopedName(name: string, fileName: string, css: string): string {
     return name + '_' + crypto.createHmac('sha1', fileName).update(css).digest('hex').substring(0, 8);
+  }
+
+  private _processFile(filePath: string): Promise<void> {
+    const isFileModuleCss: boolean = !!filePath.match(/\.module\.s(a|c)ss/);
+    const processAsModuleCss: boolean = isFileModuleCss || !!this.taskConfig.useCSSModules;
+
+    if (!isFileModuleCss && !this.taskConfig.useCSSModules) {
+      // If the file doesn't end with .module.scss and we don't treat all files as module-scss, warn
+      const relativeFilePath: string = path.relative(this.buildConfig.rootPath, filePath);
+      this.logWarning(`${relativeFilePath}: filename should end with module.sass or module.scss`);
+    }
+
+    let cssOutputPath: string | undefined = undefined;
+    let cssOutputPathAbsolute: string | undefined = undefined;
+    if (this.taskConfig.dropCssFiles) {
+      const srcRelativePath: string = path.relative(
+        path.join(this.buildConfig.rootPath, this.buildConfig.srcFolder),
+        filePath
+      );
+      cssOutputPath = path.join(this.buildConfig.libFolder, srcRelativePath);
+      cssOutputPath = cssOutputPath.replace(/\.s(c|a)ss$/, '.css');
+      cssOutputPathAbsolute = path.join(this.buildConfig.rootPath, cssOutputPath);
+    }
+
+    return new Promise((resolve: (result: nodeSass.Result) => void, reject: (error: Error) => void) => {
+      nodeSass.render(
+        {
+          file: filePath,
+          importer: (url: string) => ({ file: _patchSassUrl(url) }),
+          sourceMap: this.taskConfig.dropCssFiles,
+          outFile: cssOutputPath
+        },
+        (error, result) => {
+          if (error) {
+            this.fileError(filePath, error.line, error.column, error.name, error.message);
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        }
+      );
+    }).then((result: nodeSass.Result) => {
+      const options: postcss.ProcessOptions = {
+        from: filePath
+      };
+      if (result.map && !this.buildConfig.production) {
+        options.map = {
+          prev: result.map.toString()
+        };
+      }
+
+      const plugins: postcss.AcceptedPlugin[] = [
+        ...this._postCSSPlugins,
+        ...(processAsModuleCss ? this._modulePostCssAdditionalPlugins : [])
+      ];
+      return postcss(plugins).process(result.css.toString(), options).then((postCssResult) => postCssResult);
+    }).then((result: postcss.Result) => {
+      const cleanCssOptions: CleanCss.Options = {
+        advanced: false
+      };
+      if (result.map) {
+        cleanCssOptions.sourceMap = result.map.toString();
+      }
+
+      const cleanCss: CleanCss =  new CleanCss(cleanCssOptions);
+      return cleanCss.minify(result.css.toString());
+    }).then((result: CleanCss.Output) => {
+      if (cssOutputPathAbsolute) {
+        const generatedFileLines: string[] = [
+          result.styles.toString()
+        ];
+        if (result.sourceMap && !this.buildConfig.production) {
+          const encodedSourceMap: string = Buffer.from(result.sourceMap.toString()).toString('base64');
+          generatedFileLines.push(...[
+            `/*# sourceMappingURL=data:application/json;base64,${encodedSourceMap} */`
+          ]);
+        }
+
+        FileSystem.writeFile(cssOutputPathAbsolute, generatedFileLines.join(EOL), { ensureFolderExists: true });
+      }
+
+      const scssTsOutputPath: string = `${filePath}.ts`;
+      const classNames: Object = _classMaps[filePath];
+      let exportClassNames: string = '';
+      const content: string | undefined = result.styles;
+
+      if (classNames) {
+        const classNamesLines: string[] = [
+          'const styles = {'
+        ];
+
+        const classKeys: string[] = Object.keys(classNames);
+        classKeys.forEach((key: string, index: number) => {
+          const value: string = classNames[key];
+          let line: string = '';
+          if (key.indexOf('-') !== -1) {
+            const message: string = `The local CSS class '${key}' is not camelCase and will not be type-safe.`;
+            this.taskConfig.warnOnCssInvalidPropertyName ?
+              this.logWarning(message) :
+              this.logVerbose(message);
+            line = `  '${key}': '${value}'`;
+          } else {
+            line = `  ${key}: '${value}'`;
+          }
+
+          if ((index + 1) <= classKeys.length) {
+            line += ',';
+          }
+
+          classNamesLines.push(line);
+        });
+
+        let exportString: string = 'export default styles;';
+
+        if (this.taskConfig.moduleExportName === '') {
+          exportString = 'export = styles;';
+        } else if (!!this.taskConfig.moduleExportName) {
+          exportString = `export const ${this.taskConfig.moduleExportName} = styles;`;
+        }
+
+        classNamesLines.push(
+          '};',
+          '',
+          exportString
+        );
+
+        exportClassNames = classNamesLines.join(EOL);
+      }
+
+      let lines: string[] = [];
+
+      lines.push(this.taskConfig.preamble || '');
+
+      if (cssOutputPathAbsolute) {
+        lines = lines.concat([
+          `require('./${path.basename(cssOutputPathAbsolute)}');`,
+          exportClassNames
+        ]);
+      } else if (!!content) {
+        lines = lines.concat([
+          'import { loadStyles } from \'@microsoft/load-themed-styles\';',
+          '',
+          exportClassNames,
+          '',
+          `loadStyles(${JSON.stringify(splitStyles(content))});`
+        ]);
+      }
+
+      lines.push(this.taskConfig.postamble || '');
+
+      const generatedTsFile: string = (
+        lines
+          .join(EOL)
+          .replace(new RegExp(`(${EOL}){3,}`, 'g'), `${EOL}${EOL}`)
+          .replace(new RegExp(`(${EOL})+$`, 'm'), EOL)
+      );
+
+      FileSystem.writeFile(scssTsOutputPath, generatedTsFile);
+    });
+  }
+
+  private _globAll(...patterns: string[]): Promise<string[]> {
+    return Promise.all(patterns.map((pattern) =>
+      new Promise((resolve: (matches: string[]) => void, reject: (error: Error) => void) => {
+        if (!path.isAbsolute(pattern)) {
+          pattern = path.join(this.buildConfig.rootPath, pattern);
+        }
+
+        glob(pattern, { root: this.buildConfig.rootPath }, (error: Error, matches: string[]) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(matches);
+          }
+        });
+      }
+    ))).then((matchSets: string[][]) => {
+      const result: { [path: string]: boolean } = {};
+      for (const matchSet of matchSets) {
+        for (const match of matchSet) {
+          const normalizedMatch: string = path.resolve(match);
+          result[normalizedMatch] = true;
+        }
+      }
+
+      return Object.keys(result);
+    });
   }
 }
 
