@@ -137,7 +137,7 @@ export class NpmLinkManager extends BaseLinkManager {
 
     // TODO: Validate that the project's package.json still matches the common folder
     const localProjectPackage: NpmPackage = NpmPackage.createLinkedNpmPackage(
-      project.packageJson.name,
+      project.packageJsonEditor.name,
       commonProjectPackage.version,
       commonProjectPackage.dependencies,
       project.projectFolder
@@ -180,7 +180,7 @@ export class NpmLinkManager extends BaseLinkManager {
           this._rushConfiguration.getProjectByName(dependency.name);
 
         if (matchedRushPackage) {
-          const matchedVersion: string = matchedRushPackage.packageJson.version;
+          const matchedVersion: string = matchedRushPackage.packageJsonEditor.version;
 
           // The dependency name matches an Rush project, but are there any other reasons not
           // to create a local link?
