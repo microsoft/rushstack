@@ -117,14 +117,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       return;
     }
 
-    const srcPatterns: string[] = this.taskConfig.useCSSModules
-      ? [
-          ...this.taskConfig.sassMatch.map((value: string) => value.replace(/(\.s(a|c)ss)/, '.module$1')),
-          ...this.taskConfig.sassMatch.map((value: string) => `!${value}`)
-        ]
-      : this.taskConfig.sassMatch;
-
-    return this._globAll(...srcPatterns).then((matches: string[]) => {
+    return this._globAll(...this.taskConfig.sassMatch).then((matches: string[]) => {
       return Promise.all(matches.map((match) => this._processFile(match)));
     }).then(() => completeCallback()).catch((error) => completeCallback(error));
   }
