@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Change \"rush check\" so that it considers \"cyclicDependencyProjects\" and ensures they are consistent or listed in \"allowedAlternateVersions\"",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nickpape-msft@users.noreply.github.com"
+}
