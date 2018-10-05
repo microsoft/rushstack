@@ -89,7 +89,7 @@ export class ApiDefinitionReference {
   public toExportString(): string {
     let result: string = this.toScopePackageString();
     if (result) {
-      result += ':';
+      result += '#';
     }
     return result + `${this.exportName}`;
   }
@@ -98,7 +98,7 @@ export class ApiDefinitionReference {
    * Stringifies the ApiDefinitionReferenceOptions up and including the
    * scope, package, export and member name.
    *
-   * Example output: '@microsoft/Utilities.Parse.parseJsonToString'
+   * Example output: '@microsoft/Utilities#Parse.parseJsonToString'
    */
   public toMemberString(): string {
     return this.toExportString() + `.${this.memberName}`;

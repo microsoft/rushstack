@@ -431,7 +431,7 @@ export class Markup {
     let result: string = apiItemReference.exportName;
     if (apiItemReference.packageName) {
         // Example: "my-library:SomeClass"
-        result = apiItemReference.packageName + ':' + result;
+        result = apiItemReference.packageName + '#' + result;
 
       if (apiItemReference.scopeName) {
         // Example: "@ms/my-library:SomeClass"
