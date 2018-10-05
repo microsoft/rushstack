@@ -252,7 +252,13 @@ export class PublishAction extends BaseRushAction {
           if (change.changeType && change.changeType > ChangeType.dependency) {
             const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
             if (project) {
-              this._npmPublish(change.packageName, project.projectFolder);
+              if (!this._packageExists(project)) {
+                this._npmPublish(change.packageName, project.projectFolder);
+              } else {
+                console.log(`Skip ${change.packageName}. Package exists.`);
+              }
+            } else {
+              console.log(`Skip ${change.packageName}. Failed to find its project.`);
             }
           }
         }
