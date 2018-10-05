@@ -20,6 +20,7 @@ groups:
       - pgonzal
       - qz2017
       - patmill
+      - aditima
 
   api-approvers:
     conditions:
@@ -32,6 +33,7 @@ groups:
       - pgonzal
       - qz2017
       - mpasarin
+      - aditima
 
   general-approvers:
     conditions:
@@ -51,6 +53,7 @@ groups:
       - nickpape-msft
       - pgonzal
       - qz2017
+      - aditima
 
   load-themed-styles-approvers:
     conditions:
@@ -63,3 +66,4 @@ groups:
       - pgonzal
       - qz2017
       - dzearing
+      - aditima

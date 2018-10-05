@@ -157,6 +157,27 @@ export interface IApiProperty extends IApiBaseDefinition {
   isStatic: boolean;
 
   /**
+   * Whether the item was marked as "\@eventproperty", which indicates an event object that event
+   * handlers can be attached to.
+   */
+  isEventProperty: boolean;
+
+  /**
+   * Indicates that the item was marked as "\@sealed" and must not be extended.
+   */
+  isSealed: boolean;
+
+  /**
+   * Indicates that the item was marked as "\@virtual" and may be extended.
+   */
+  isVirtual: boolean;
+
+  /**
+   * Indicates that the item was marked as "\@override" and is overriding a base definition.
+   */
+  isOverride: boolean;
+
+  /**
    * The data type of this property
    */
   type: string;
@@ -191,6 +212,21 @@ export interface IApiMethod extends IApiBaseDefinition {
    * for a class member, whether it is static
    */
   isStatic: boolean;
+
+  /**
+   * Indicates that the item was marked as "\@sealed" and must not be extended.
+   */
+  isSealed: boolean;
+
+  /**
+   * Indicates that the item was marked as "\@virtual" and may be extended.
+   */
+  isVirtual: boolean;
+
+  /**
+   * Indicates that the item was marked as "\@override" and is overriding a base definition.
+   */
+  isOverride: boolean;
 
   /**
    * a mapping of parameter name to IApiParameter
@@ -246,6 +282,21 @@ export interface IApiConstructor extends IApiBaseDefinition {
   signature: string;
 
   /**
+   * Indicates that the item was marked as "\@sealed" and must not be extended.
+   */
+  isSealed: boolean;
+
+  /**
+   * Indicates that the item was marked as "\@virtual" and may be extended.
+   */
+  isVirtual: boolean;
+
+  /**
+   * Indicates that the item was marked as "\@override" and is overriding a base definition.
+   */
+  isOverride: boolean;
+
+  /**
    * parameters of the function
    */
   parameters: IApiNameMap<IApiParameter>;
@@ -279,6 +330,11 @@ export interface IApiClass extends IApiBaseDefinition {
    * Generic type parameters for this class
    */
   typeParameters?: string[];
+
+  /**
+   * Indicates that the item was marked as "\@sealed" and must not be extended.
+   */
+  isSealed: boolean;
 }
 
 /**
@@ -336,6 +392,11 @@ export interface IApiInterface extends IApiBaseDefinition {
    * Generic type parameters for this interface
    */
   typeParameters?: string[];
+
+  /**
+   * Indicates that the item was marked as "\@sealed" and must not be extended.
+   */
+  isSealed: boolean;
 }
 
 /**

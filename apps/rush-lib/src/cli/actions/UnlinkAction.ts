@@ -1,21 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 
 import { Utilities } from '../../utilities/Utilities';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
+import { FileSystem } from '@microsoft/node-core-library';
 
 export class UnlinkAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'unlink',
-      summary: 'Delete node_modules symlinks for all projects',
+      summary: 'Delete node_modules symlinks for all projects in the repo',
       documentation: 'This removes the symlinks created by the "rush link" command. This is useful for'
-       + ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard npm'
+       + ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard NPM'
        + ' commands on a project.',
        parser
     });
@@ -33,7 +33,7 @@ export class UnlinkAction extends BaseRushAction {
     let didAnything: boolean = false;
     for (const rushProject of this.rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
-      if (fsx.existsSync(localModuleFolder)) {
+      if (FileSystem.exists(localModuleFolder)) {
         console.log('Purging ' + localModuleFolder);
         Utilities.dangerouslyDeletePath(localModuleFolder);
         didAnything = true;

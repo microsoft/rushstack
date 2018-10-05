@@ -122,11 +122,13 @@ export class DocItem {
   }
 
   public getApiReference(): IApiItemReference {
-    const reference: IApiItemReference = {
+    const reference: IApiItemReference & { moreHierarchies: string[]; } = {
       scopeName: '',
       packageName: '',
       exportName: '',
-      memberName: ''
+      memberName: '',
+      // TODO: quick fix for api ref inside namespace, need to adjust IApiItemReference later
+      moreHierarchies: []
     };
     let i: number = 0;
     for (const docItem of this.getHierarchy()) {
@@ -142,7 +144,9 @@ export class DocItem {
           reference.memberName = docItem.name;
           break;
         default:
-          throw new Error('Unable to create API reference for ' + this.name);
+          reference.moreHierarchies.push(docItem.name);
+          break;
+          // throw new Error('Unable to create API reference for ' + this.name);
       }
       ++i;
     }
@@ -156,6 +160,16 @@ export class DocItem {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Visits this DocItem and every child DocItem in a preorder traversal.
+   */
+  public forEach(callback: (docItem: DocItem) => void): void {
+    callback(this);
+    for (const child of this.children) {
+      child.forEach(callback);
+    }
   }
 }
 
@@ -186,13 +200,8 @@ export interface IDocItemSetResolveResult {
 export class DocItemSet {
   public readonly docPackagesByName: Map<string, DocItem> = new Map<string, DocItem>();
   public readonly docPackages: DocItem[] = [];
-  private _calculated: boolean = false;
 
   public loadApiJsonFile(apiJsonFilename: string): void {
-    if (this._calculated) {
-      throw new Error('calculateReferences() was already called');
-    }
-
     const apiPackage: IApiPackage = ApiJsonFile.loadFromFile(apiJsonFilename);
 
     const docItem: DocItem = new DocItem(apiPackage, apiPackage.name, this, undefined);
@@ -200,20 +209,13 @@ export class DocItemSet {
     this.docPackages.push(docItem);
   }
 
-  public calculateReferences(): void {
-    if (this._calculated) {
-      return;
-    }
-    for (const docPackage of this.docPackages) {
-      this._calculateReferences(docPackage);
-    }
-  }
-
   /**
    * Attempts to find the DocItem described by an IApiItemReference.  If no matching item is
    * found, then undefined is returned.
    */
-  public resolveApiItemReference(reference: IApiItemReference): IDocItemSetResolveResult {
+  public resolveApiItemReference(
+    reference: IApiItemReference & { moreHierarchies?: string[]; }
+  ): IDocItemSetResolveResult {
     const result: IDocItemSetResolveResult = {
       docItem: undefined,
       closestMatch: undefined
@@ -223,7 +225,11 @@ export class DocItemSet {
 
     let current: DocItem | undefined = undefined;
 
-    for (const nameToMatch of [packageName, reference.exportName, reference.memberName]) {
+    for (const nameToMatch of [
+      packageName, reference.exportName, reference.memberName,
+      // TODO: quick fix for api ref inside namespace, need to adjust IApiItemReference later
+      ...(reference.moreHierarchies || [])
+    ]) {
       if (!nameToMatch) {
         // Success, since we ran out of stuff to match
         break;
@@ -249,11 +255,12 @@ export class DocItemSet {
     return result;
   }
 
-  private _calculateReferences(docItem: DocItem): void {
-    // (Calculate base classes and child classes)
-
-    for (const child of docItem.children) {
-      this._calculateReferences(child);
+  /**
+   * Visits every DocItem in the tree.
+   */
+  public forEach(callback: (docItem: DocItem) => void): void {
+    for (const docPackage of this.docPackages) {
+      docPackage.forEach(callback);
     }
   }
 }

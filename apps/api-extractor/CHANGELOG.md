@@ -1,6 +1,164 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 04 May 2018 00:42:38 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Sep 2018 16:05:35 GMT and should not be manually modified.
+
+## 5.13.1
+Fri, 28 Sep 2018 16:05:35 GMT
+
+*Version update only*
+
+## 5.13.0
+Wed, 26 Sep 2018 21:39:40 GMT
+
+### Minor changes
+
+- Add new command line option --skip-lib-check
+
+## 5.12.2
+Mon, 24 Sep 2018 23:06:40 GMT
+
+### Patches
+
+- Allow doc comments to use TSDoc's "@defaultvalue" tag (but the value is not yet passed to the documentation pipeline)
+
+## 5.12.1
+Fri, 21 Sep 2018 16:04:42 GMT
+
+### Patches
+
+- Fix an issue where TypeScript errors are often logged as "[Object object]" instead of the actual error message.
+
+## 5.12.0
+Thu, 20 Sep 2018 23:57:21 GMT
+
+### Minor changes
+
+- Add new feature: Support using a different version of the TypeScript compiler.
+
+## 5.11.2
+Tue, 18 Sep 2018 21:04:55 GMT
+
+### Patches
+
+- Fix an issue where parameters mentioned in comments were attempting to be analyzed by api-extractor.
+
+## 5.11.1
+Thu, 06 Sep 2018 01:25:25 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 5.11.0
+Mon, 03 Sep 2018 16:04:45 GMT
+
+### Minor changes
+
+- Upgrade api-extractor to internally use TypeScript 3.0.
+
+## 5.10.8
+Wed, 29 Aug 2018 06:36:50 GMT
+
+*Version update only*
+
+## 5.10.7
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
+
+## 5.10.6
+Wed, 22 Aug 2018 20:58:58 GMT
+
+*Version update only*
+
+## 5.10.5
+Wed, 22 Aug 2018 16:03:25 GMT
+
+*Version update only*
+
+## 5.10.4
+Tue, 21 Aug 2018 16:04:38 GMT
+
+### Patches
+
+- fix namespace name for export statement`
+
+## 5.10.3
+Thu, 09 Aug 2018 21:03:22 GMT
+
+*Version update only*
+
+## 5.10.2
+Thu, 09 Aug 2018 16:04:24 GMT
+
+### Patches
+
+- Update lodash.
+
+## 5.10.1
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 5.10.0
+Tue, 17 Jul 2018 16:02:52 GMT
+
+### Minor changes
+
+- Add support for new "@eventproperty" AEDoc tag, which indicates that a class/interface property should be documented as an event
+
+## 5.9.1
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 5.9.0
+Sat, 23 Jun 2018 02:21:20 GMT
+
+### Minor changes
+
+- Add new IMarkupHtmlTag API
+- AEDoc now allows HTML tags inside doc comments, which can be disabled using a backslash escape
+
+## 5.8.1
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 5.8.0
+Tue, 19 Jun 2018 19:35:11 GMT
+
+### Minor changes
+
+- For namespaceSupport=permissive, allow arbitrary nesting of namespaces
+
+### Patches
+
+- Fix an issue where multi-line type literals sometimes had inconsistent newlines in the *.api.json file
+
+## 5.7.3
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 5.7.2
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
+
+## 5.7.1
+Tue, 15 May 2018 02:26:45 GMT
+
+*Version update only*
+
+## 5.7.0
+Tue, 15 May 2018 00:18:10 GMT
+
+### Minor changes
+
+- Add support for new AEDoc tags @sealed, @virtual, and @override
 
 ## 5.6.8
 Fri, 04 May 2018 00:42:38 GMT

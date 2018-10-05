@@ -2,6 +2,429 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.2.56",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.56",
+      "date": "Fri, 28 Sep 2018 16:05:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.23` to `3.8.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.0.1` to `3.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.9` to `0.1.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.14` to `5.0.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.55",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.55",
+      "date": "Wed, 26 Sep 2018 21:39:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.22` to `3.8.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.8` to `0.1.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.13` to `5.0.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.54",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.54",
+      "date": "Mon, 24 Sep 2018 23:06:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.21` to `3.8.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.7` to `0.1.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.12` to `5.0.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.53",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.53",
+      "date": "Mon, 24 Sep 2018 16:04:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.11` to `5.0.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.52",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.52",
+      "date": "Fri, 21 Sep 2018 16:04:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.20` to `3.8.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.6` to `0.1.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.10` to `5.0.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.51",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.51",
+      "date": "Thu, 20 Sep 2018 23:57:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.19` to `3.8.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.5` to `0.1.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.9` to `5.0.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.50",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.50",
+      "date": "Tue, 18 Sep 2018 21:04:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.18` to `3.8.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.4` to `0.1.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.8` to `5.0.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.49",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.49",
+      "date": "Mon, 10 Sep 2018 23:23:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.7` to `5.0.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.48",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.48",
+      "date": "Thu, 06 Sep 2018 01:25:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update \"repository\" field in package.json"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.17` to `3.8.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.0.0` to `3.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.3` to `0.1.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.47",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.47",
+      "date": "Tue, 04 Sep 2018 21:34:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.16` to `3.8.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.2` to `0.1.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.46",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.46",
+      "date": "Mon, 03 Sep 2018 16:04:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.15` to `3.8.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.1` to `0.1.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.45",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.45",
+      "date": "Thu, 30 Aug 2018 19:23:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.14` to `3.8.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.1.0` to `0.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.0` to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.44",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.44",
+      "date": "Thu, 30 Aug 2018 18:45:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.13` to `3.8.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.43",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.43",
+      "date": "Wed, 29 Aug 2018 21:43:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.12` to `3.8.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.0.1` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.0.1` to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.42",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.42",
+      "date": "Wed, 29 Aug 2018 06:36:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.11` to `3.8.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.2.1` to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.41",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.41",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.10` to `3.8.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.2.0` to `2.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.40",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.40",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.9` to `3.8.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.1.1` to `2.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.39",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.39",
+      "date": "Wed, 22 Aug 2018 16:03:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.8` to `3.8.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.1.0` to `2.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.38",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.38",
+      "date": "Thu, 09 Aug 2018 21:03:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.7` to `3.8.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.0.0` to `2.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.37",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.37",
+      "date": "Tue, 07 Aug 2018 22:27:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade gulp-open to elimiante security warning"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.6` to `3.8.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.36",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.36",
+      "date": "Thu, 26 Jul 2018 16:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.5` to `3.8.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.5.0` to `2.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.35",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.35",
+      "date": "Tue, 03 Jul 2018 21:03:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.4` to `3.8.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.4.1` to `1.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.34",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.34",
+      "date": "Thu, 21 Jun 2018 08:27:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.3` to `3.8.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.33",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.33",
+      "date": "Wed, 13 Jun 2018 16:05:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Pass the hostname from serve.json to gulpConnect.server()"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.32",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.32",
+      "date": "Fri, 08 Jun 2018 08:43:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.2` to `3.8.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.31",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.31",
+      "date": "Thu, 31 May 2018 01:39:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.1` to `3.8.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.30",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.30",
+      "date": "Tue, 15 May 2018 02:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.0` to `3.8.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.29",
       "tag": "@microsoft/gulp-core-build-serve_v3.2.29",
       "date": "Fri, 11 May 2018 22:43:14 GMT",

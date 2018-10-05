@@ -33,6 +33,8 @@ class CommandLineChoiceParameter extends CommandLineParameter {
   // @internal
   _setValue(data: any): void;
   readonly alternatives: ReadonlyArray<string>;
+  // @override
+  appendToArgList(argList: string[]): void;
   readonly defaultValue: string | undefined;
   readonly kind: CommandLineParameterKind;
   readonly value: string | undefined;
@@ -44,6 +46,8 @@ class CommandLineFlagParameter extends CommandLineParameter {
   constructor(definition: ICommandLineFlagDefinition);
   // @internal
   _setValue(data: any): void;
+  // @override
+  appendToArgList(argList: string[]): void;
   readonly kind: CommandLineParameterKind;
   readonly value: boolean;
 }
@@ -56,6 +60,8 @@ class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
   _getSupplementaryNotes(supplementaryNotes: string[]): void;
   // @internal
   _setValue(data: any): void;
+  // @override
+  appendToArgList(argList: string[]): void;
   readonly defaultValue: number | undefined;
   readonly kind: CommandLineParameterKind;
   readonly value: number | undefined;
@@ -71,6 +77,7 @@ class CommandLineParameter {
   _parserKey: string;
   // @internal
   abstract _setValue(data: any): void;
+  abstract appendToArgList(argList: string[]): void;
   readonly description: string;
   readonly environmentVariable: string | undefined;
   readonly kind: CommandLineParameterKind;
@@ -135,6 +142,7 @@ class CommandLineParser extends CommandLineParameterProvider {
   selectedAction: CommandLineAction | undefined;
   readonly toolDescription: string;
   readonly toolFilename: string;
+  tryGetAction(actionName: string): CommandLineAction | undefined;
 }
 
 // @public
@@ -143,6 +151,8 @@ class CommandLineStringListParameter extends CommandLineParameterWithArgument {
   constructor(definition: ICommandLineStringListDefinition);
   // @internal
   _setValue(data: any): void;
+  // @override
+  appendToArgList(argList: string[]): void;
   readonly kind: CommandLineParameterKind;
   readonly values: ReadonlyArray<string>;
 }
@@ -155,6 +165,8 @@ class CommandLineStringParameter extends CommandLineParameterWithArgument {
   _getSupplementaryNotes(supplementaryNotes: string[]): void;
   // @internal
   _setValue(data: any): void;
+  // @override
+  appendToArgList(argList: string[]): void;
   readonly defaultValue: string | undefined;
   readonly kind: CommandLineParameterKind;
   readonly value: string | undefined;

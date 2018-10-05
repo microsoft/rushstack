@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as fs from 'fs';
+import { FileSystem } from '@microsoft/node-core-library';
+
 import { Extractor } from './extractor/Extractor';
 
 /**
@@ -37,15 +38,8 @@ export class ExternalApiHelper {
       rootDir: entryPointFolder
     };
 
-    let outputPath: string = path.resolve(rootDir, libFolder);
-    if (!fs.existsSync(outputPath)) {
-      fs.mkdirSync(outputPath);
-    }
-
-    outputPath = path.join(outputPath, 'external-api-json');
-    if (!fs.existsSync(outputPath)) {
-      fs.mkdirSync(outputPath);
-    }
+    const outputPath: string = path.resolve(rootDir, libFolder, 'external-api-json');
+    FileSystem.ensureFolder(outputPath);
 
     const extractor: Extractor = new Extractor({
       compiler: {

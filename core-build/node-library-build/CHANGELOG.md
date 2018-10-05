@@ -1,6 +1,214 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Fri, 11 May 2018 22:43:14 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Sep 2018 16:05:35 GMT and should not be manually modified.
+
+## 5.0.15
+Fri, 28 Sep 2018 16:05:35 GMT
+
+*Version update only*
+
+## 5.0.14
+Wed, 26 Sep 2018 21:39:40 GMT
+
+*Version update only*
+
+## 5.0.13
+Mon, 24 Sep 2018 23:06:40 GMT
+
+*Version update only*
+
+## 5.0.12
+Mon, 24 Sep 2018 16:04:28 GMT
+
+*Version update only*
+
+## 5.0.11
+Fri, 21 Sep 2018 16:04:42 GMT
+
+*Version update only*
+
+## 5.0.10
+Thu, 20 Sep 2018 23:57:21 GMT
+
+*Version update only*
+
+## 5.0.9
+Tue, 18 Sep 2018 21:04:55 GMT
+
+*Version update only*
+
+## 5.0.8
+Mon, 10 Sep 2018 23:23:01 GMT
+
+*Version update only*
+
+## 5.0.7
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 5.0.6
+Tue, 04 Sep 2018 21:34:10 GMT
+
+*Version update only*
+
+## 5.0.5
+Mon, 03 Sep 2018 16:04:46 GMT
+
+*Version update only*
+
+## 5.0.4
+Thu, 30 Aug 2018 22:47:34 GMT
+
+*Version update only*
+
+## 5.0.3
+Thu, 30 Aug 2018 19:23:16 GMT
+
+*Version update only*
+
+## 5.0.2
+Thu, 30 Aug 2018 18:45:12 GMT
+
+*Version update only*
+
+## 5.0.1
+Wed, 29 Aug 2018 21:43:23 GMT
+
+*Version update only*
+
+## 5.0.0
+Wed, 29 Aug 2018 06:36:50 GMT
+
+### Breaking changes
+
+- Updating the way typescript and tslint are invoked.
+
+## 4.4.11
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
+
+## 4.4.10
+Wed, 22 Aug 2018 20:58:58 GMT
+
+*Version update only*
+
+## 4.4.9
+Wed, 22 Aug 2018 16:03:25 GMT
+
+*Version update only*
+
+## 4.4.8
+Tue, 21 Aug 2018 16:04:38 GMT
+
+*Version update only*
+
+## 4.4.7
+Thu, 09 Aug 2018 21:58:02 GMT
+
+*Version update only*
+
+## 4.4.6
+Thu, 09 Aug 2018 21:03:22 GMT
+
+*Version update only*
+
+## 4.4.5
+Thu, 09 Aug 2018 16:04:24 GMT
+
+*Version update only*
+
+## 4.4.4
+Tue, 07 Aug 2018 22:27:31 GMT
+
+*Version update only*
+
+## 4.4.3
+Thu, 26 Jul 2018 23:53:43 GMT
+
+*Version update only*
+
+## 4.4.2
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 4.4.1
+Wed, 25 Jul 2018 21:02:57 GMT
+
+*Version update only*
+
+## 4.4.0
+Fri, 20 Jul 2018 16:04:52 GMT
+
+### Minor changes
+
+- Upgrading mocha-related pack ages to remove dependency on a version of "growl" with NSP warnings.
+
+## 4.3.50
+Tue, 17 Jul 2018 16:02:52 GMT
+
+*Version update only*
+
+## 4.3.49
+Fri, 13 Jul 2018 19:04:50 GMT
+
+*Version update only*
+
+## 4.3.48
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 4.3.47
+Fri, 29 Jun 2018 02:56:51 GMT
+
+*Version update only*
+
+## 4.3.46
+Sat, 23 Jun 2018 02:21:20 GMT
+
+*Version update only*
+
+## 4.3.45
+Fri, 22 Jun 2018 16:05:15 GMT
+
+*Version update only*
+
+## 4.3.44
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 4.3.43
+Tue, 19 Jun 2018 19:35:11 GMT
+
+*Version update only*
+
+## 4.3.42
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 4.3.41
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
+
+## 4.3.40
+Tue, 15 May 2018 02:26:45 GMT
+
+*Version update only*
+
+## 4.3.39
+Tue, 15 May 2018 00:18:10 GMT
+
+*Version update only*
 
 ## 4.3.38
 Fri, 11 May 2018 22:43:14 GMT

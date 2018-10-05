@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 
 import { PackageJsonLookup } from './PackageJsonLookup';
 import { Text } from './Text';
+import { FileSystem } from './FileSystem';
+import { PosixModeBits } from './PosixModeBits';
 
 /**
  * Implements a unit testing strategy that generates output files, and then
@@ -47,9 +48,9 @@ export class FileDiffTest {
     }
 
     const diffTestPath: string = path.join(packageJsonFolderPath, 'temp', 'diff-tests', testModule);
-    fsx.mkdirsSync(diffTestPath);
+    FileSystem.ensureFolder(diffTestPath);
 
-    fsx.emptyDirSync(diffTestPath);
+    FileSystem.ensureEmptyFolder(diffTestPath);
 
     return diffTestPath;
   }
@@ -62,8 +63,8 @@ export class FileDiffTest {
    * whitespace when saving.
    */
   public static assertEqual(actualFilePath: string, expectedFilePath: string): void {
-    const actualContent: string = fsx.readFileSync(actualFilePath).toString('utf8');
-    const expectedContent: string = fsx.readFileSync(expectedFilePath).toString('utf8');
+    const actualContent: string = FileSystem.readFile(actualFilePath);
+    const expectedContent: string = FileSystem.readFile(expectedFilePath);
 
     // NOTE: "\s" also matches "\r" and "\n"
     const normalizedActual: string = FileDiffTest._getNormalizedContent(actualContent);
@@ -72,12 +73,17 @@ export class FileDiffTest {
     if (normalizedActual !== normalizedExpected) {
       // Copy the expected file into the same folder as the actual file for easier comparisons
       const expectedCopyFilename: string = path.join(path.dirname(actualFilePath), path.basename(expectedFilePath));
-      if (fsx.existsSync(expectedCopyFilename)) {
+      if (FileSystem.exists(expectedCopyFilename)) {
         throw new Error('The FileDiffTest failed, but the expected output cannot be copied because'
           + ' the file already exists:\n' + expectedCopyFilename);
       }
-      fsx.copySync(expectedFilePath, expectedCopyFilename);
-      fsx.chmodSync(expectedCopyFilename, 292); // 292 = 444 octal = "rrr"
+      FileSystem.copyFile({
+        sourcePath: expectedFilePath,
+        destinationPath: expectedCopyFilename
+      });
+
+      // Set to read-only so that developer doesn't accidentally modify the wrong file
+      FileSystem.changePosixModeBits(expectedCopyFilename, PosixModeBits.AllRead);
 
       throw new Error('The test output file does not match the expected input:\n'
         + actualFilePath);

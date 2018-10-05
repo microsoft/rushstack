@@ -1,6 +1,217 @@
 # Change Log - @microsoft/loader-set-webpack-public-path
 
-This log was last generated on Fri, 11 May 2018 22:43:14 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Sep 2018 16:05:35 GMT and should not be manually modified.
+
+## 3.2.80
+Fri, 28 Sep 2018 16:05:35 GMT
+
+*Version update only*
+
+## 3.2.79
+Wed, 26 Sep 2018 21:39:40 GMT
+
+*Version update only*
+
+## 3.2.78
+Mon, 24 Sep 2018 23:06:40 GMT
+
+*Version update only*
+
+## 3.2.77
+Mon, 24 Sep 2018 16:04:28 GMT
+
+*Version update only*
+
+## 3.2.76
+Fri, 21 Sep 2018 16:04:42 GMT
+
+*Version update only*
+
+## 3.2.75
+Thu, 20 Sep 2018 23:57:22 GMT
+
+*Version update only*
+
+## 3.2.74
+Tue, 18 Sep 2018 21:04:55 GMT
+
+*Version update only*
+
+## 3.2.73
+Mon, 10 Sep 2018 23:23:01 GMT
+
+*Version update only*
+
+## 3.2.72
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 3.2.71
+Tue, 04 Sep 2018 21:34:10 GMT
+
+*Version update only*
+
+## 3.2.70
+Mon, 03 Sep 2018 16:04:46 GMT
+
+*Version update only*
+
+## 3.2.69
+Thu, 30 Aug 2018 22:47:34 GMT
+
+*Version update only*
+
+## 3.2.68
+Thu, 30 Aug 2018 19:23:16 GMT
+
+*Version update only*
+
+## 3.2.67
+Thu, 30 Aug 2018 18:45:12 GMT
+
+*Version update only*
+
+## 3.2.66
+Wed, 29 Aug 2018 21:43:23 GMT
+
+*Version update only*
+
+## 3.2.65
+Wed, 29 Aug 2018 06:36:50 GMT
+
+*Version update only*
+
+## 3.2.64
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
+
+## 3.2.63
+Wed, 22 Aug 2018 20:58:58 GMT
+
+*Version update only*
+
+## 3.2.62
+Wed, 22 Aug 2018 16:03:25 GMT
+
+*Version update only*
+
+## 3.2.61
+Tue, 21 Aug 2018 16:04:38 GMT
+
+*Version update only*
+
+## 3.2.60
+Thu, 09 Aug 2018 21:58:02 GMT
+
+*Version update only*
+
+## 3.2.59
+Thu, 09 Aug 2018 21:03:22 GMT
+
+*Version update only*
+
+## 3.2.58
+Thu, 09 Aug 2018 16:04:24 GMT
+
+### Patches
+
+- Update lodash.
+
+## 3.2.57
+Tue, 07 Aug 2018 22:27:31 GMT
+
+*Version update only*
+
+## 3.2.56
+Thu, 26 Jul 2018 23:53:43 GMT
+
+*Version update only*
+
+## 3.2.55
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 3.2.54
+Wed, 25 Jul 2018 21:02:57 GMT
+
+*Version update only*
+
+## 3.2.53
+Fri, 20 Jul 2018 16:04:52 GMT
+
+*Version update only*
+
+## 3.2.52
+Tue, 17 Jul 2018 16:02:52 GMT
+
+*Version update only*
+
+## 3.2.51
+Fri, 13 Jul 2018 19:04:50 GMT
+
+*Version update only*
+
+## 3.2.50
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 3.2.49
+Fri, 29 Jun 2018 02:56:51 GMT
+
+*Version update only*
+
+## 3.2.48
+Sat, 23 Jun 2018 02:21:20 GMT
+
+*Version update only*
+
+## 3.2.47
+Fri, 22 Jun 2018 16:05:15 GMT
+
+*Version update only*
+
+## 3.2.46
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 3.2.45
+Tue, 19 Jun 2018 19:35:11 GMT
+
+*Version update only*
+
+## 3.2.44
+Wed, 13 Jun 2018 16:05:21 GMT
+
+*Version update only*
+
+## 3.2.43
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 3.2.42
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
+
+## 3.2.41
+Tue, 15 May 2018 02:26:45 GMT
+
+*Version update only*
+
+## 3.2.40
+Tue, 15 May 2018 00:18:10 GMT
+
+*Version update only*
 
 ## 3.2.39
 Fri, 11 May 2018 22:43:14 GMT

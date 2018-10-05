@@ -1,23 +1,8 @@
 {
+  "extends": "./node_modules/@microsoft/rush-stack-compiler/includes/tsconfig-web.json",
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "jsx": "react",
-    "declaration": true,
-    "sourceMap": true,
-    "experimentalDecorators": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node",
-    "typeRoots": [
-      "./node_modules/@types"
-    ],
     "types": [
-      "jest",
-      "node"
-    ],
-    "lib": [
-      "es5",
-      "es2015.collection"
+      "jest"
     ]
   }
 }

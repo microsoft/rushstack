@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as ts from 'typescript';
 import lodash = require('lodash');
@@ -10,7 +9,8 @@ import colors = require('colors');
 import {
   JsonFile,
   JsonSchema,
-  Path
+  Path,
+  FileSystem
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
@@ -24,6 +24,7 @@ import { ApiJsonGenerator } from '../generators/ApiJsonGenerator';
 import { ApiFileGenerator } from '../generators/ApiFileGenerator';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/dtsRollup/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
+import { TypeScriptMessageFormatter } from '../utils/TypeScriptMessageFormatter';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -63,6 +64,30 @@ export interface IExtractorOptions {
    * The default value is false.
    */
   localBuild?: boolean;
+
+  /**
+   * By default API Extractor uses its own TypeScript compiler version to analyze your project.
+   * This can often cause compiler errors due to incompatibilities between different TS versions.
+   * Use this option to specify the folder path for your compiler version.
+   *
+   * @remarks
+   * This option only applies when compiler.config.configType is set to "tsconfig"
+   *
+   * @beta
+   */
+  typescriptCompilerFolder?: string;
+
+  /**
+   * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
+   * recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it
+   * may be required when dependencies contain declarations that are incompatible with the TypeScript engine
+   * that API Extractor uses for its analysis. If this option is used, it is strongly recommended that broken
+   * dependencies be fixed or upgraded.
+   *
+   * @remarks
+   * This option only applies when compiler.config.configType is set to "tsconfig"
+   */
+  skipLibCheck?: boolean;
 }
 
 /**
@@ -79,7 +104,7 @@ export class Extractor {
   private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
     './api-extractor-defaults.json'));
 
-  private static _outputFileExtensionRegExp: RegExp = /\.d\.ts$/i;
+  private static _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;
 
   private static _defaultLogger: ILogger = {
     logVerbose: (message: string) => console.log('(Verbose) ' + message),
@@ -124,7 +149,7 @@ export class Extractor {
           throw new Error('Input file is not an absolute path: ' + inputFilePath);
         }
 
-        if (Extractor._outputFileExtensionRegExp.test(inputFilePath)) {
+        if (Extractor._declarationFileExtensionRegExp.test(inputFilePath)) {
           analysisFilePaths.push(inputFilePath);
         }
       }
@@ -161,7 +186,7 @@ export class Extractor {
     switch (this.actualConfig.compiler.configType) {
       case 'tsconfig':
         const rootFolder: string = this.actualConfig.compiler.rootFolder;
-        if (!fsx.existsSync(rootFolder)) {
+        if (!FileSystem.exists(rootFolder)) {
           throw new Error('The root folder does not exist: ' + rootFolder);
         }
 
@@ -173,20 +198,36 @@ export class Extractor {
           tsconfig = JsonFile.load(path.join(this._absoluteRootFolder, 'tsconfig.json'));
         }
 
-        const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(tsconfig,
-          ts.sys, this._absoluteRootFolder);
+        const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(
+          tsconfig,
+          ts.sys,
+          this._absoluteRootFolder
+        );
+
+        if (!commandLine.options.skipLibCheck && options.skipLibCheck) {
+          commandLine.options.skipLibCheck = true;
+          console.log(colors.cyan(
+            'API Extractor was invoked with skipLibCheck. This is not recommended and may cause ' +
+            'incorrect type analysis.'
+          ));
+        }
+
+        this._updateCommandLineForTypescriptPackage(commandLine, options);
 
         const normalizedEntryPointFile: string = path.normalize(
-          path.resolve(this._absoluteRootFolder, this.actualConfig.project.entryPointSourceFile));
+          path.resolve(this._absoluteRootFolder, this.actualConfig.project.entryPointSourceFile)
+        );
 
-        // Append the normalizedEntryPointFile and remove any source files from the list
-        const analysisFilePaths: string[] = Extractor.generateFilePathsForAnalysis(commandLine.fileNames
-          .concat(normalizedEntryPointFile));
+        // Append the normalizedEntryPointFile and remove any non-declaration files from the list
+        const analysisFilePaths: string[] = Extractor.generateFilePathsForAnalysis(
+          commandLine.fileNames.concat(normalizedEntryPointFile)
+        );
 
         this._program = ts.createProgram(analysisFilePaths, commandLine.options);
 
         if (commandLine.errors.length > 0) {
-          throw new Error('Error parsing tsconfig.json content: ' + commandLine.errors[0].messageText);
+          const errorText: string = TypeScriptMessageFormatter.format(commandLine.errors[0].messageText);
+          throw new Error(`Error parsing tsconfig.json content: ${errorText}`);
         }
 
         break;
@@ -202,7 +243,7 @@ export class Extractor {
         if (!rootDir) {
           throw new Error('The provided compiler state does not specify a root folder');
         }
-        if (!fsx.existsSync(rootDir)) {
+        if (!FileSystem.exists(rootDir)) {
           throw new Error('The rootDir does not exist: ' + rootDir);
         }
         this._absoluteRootFolder = path.resolve(rootDir);
@@ -262,7 +303,7 @@ export class Extractor {
       throw new Error('The configuration object wasn\'t normalized properly');
     }
 
-    if (!Extractor._outputFileExtensionRegExp.test(projectConfig.entryPointSourceFile)) {
+    if (!Extractor._declarationFileExtensionRegExp.test(projectConfig.entryPointSourceFile)) {
       throw new Error('The entry point is not a declaration file: ' + projectConfig.entryPointSourceFile);
     }
 
@@ -290,7 +331,6 @@ export class Extractor {
       const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
 
       this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
-      fsx.mkdirsSync(path.dirname(apiJsonFilename));
       jsonGenerator.writeJsonFile(apiJsonFilename, context);
     }
 
@@ -309,12 +349,13 @@ export class Extractor {
       const actualApiReviewContent: string = generator.generateApiFileContent(context);
 
       // Write the actual file
-      fsx.mkdirsSync(path.dirname(actualApiReviewPath));
-      fsx.writeFileSync(actualApiReviewPath, actualApiReviewContent);
+      FileSystem.writeFile(actualApiReviewPath, actualApiReviewContent, {
+        ensureFolderExists: true
+      });
 
       // Compare it against the expected file
-      if (fsx.existsSync(expectedApiReviewPath)) {
-        const expectedApiReviewContent: string = fsx.readFileSync(expectedApiReviewPath).toString();
+      if (FileSystem.exists(expectedApiReviewPath)) {
+        const expectedApiReviewContent: string = FileSystem.readFile(expectedApiReviewPath);
 
         if (!ApiFileGenerator.areEquivalentApiFileContents(actualApiReviewContent, expectedApiReviewContent)) {
           if (!this._localBuild) {
@@ -330,7 +371,7 @@ export class Extractor {
             this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
               + ` Updating ${expectedApiReviewShortPath}`);
 
-            fsx.writeFileSync(expectedApiReviewPath, actualApiReviewContent);
+            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent);
           }
         } else {
           this._monitoredLogger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
@@ -433,8 +474,6 @@ export class Extractor {
 
     this._monitoredLogger.logVerbose(`Writing package typings: ${mainDtsRollupFullPath}`);
 
-    fsx.mkdirsSync(path.dirname(mainDtsRollupFullPath));
-
     dtsRollupGenerator.writeTypingsFile(mainDtsRollupFullPath, dtsKind);
 }
 
@@ -443,5 +482,55 @@ export class Extractor {
       throw new Error('Expected absolute path: ' + absolutePath);
     }
     return path.relative(this._absoluteRootFolder, absolutePath).replace(/\\/g, '/');
+  }
+
+  /**
+   * Update the parsed command line to use paths from the specified TS compiler folder, if
+   * a TS compiler folder is specified.
+   */
+  private _updateCommandLineForTypescriptPackage(
+    commandLine: ts.ParsedCommandLine,
+    options: IExtractorOptions
+  ): void {
+    const DEFAULT_BUILTIN_LIBRARY: string = 'lib.d.ts';
+    const OTHER_BUILTIN_LIBRARIES: string[] = ['lib.es5.d.ts', 'lib.es6.d.ts'];
+
+    if (options.typescriptCompilerFolder) {
+      commandLine.options.noLib = true;
+      const compilerLibFolder: string = path.join(options.typescriptCompilerFolder, 'lib');
+
+      let foundBaseLib: boolean = false;
+      const filesToAdd: string[]  = [];
+      for (const libFilename of commandLine.options.lib || []) {
+        if (libFilename === DEFAULT_BUILTIN_LIBRARY) {
+          // Ignore the default lib - it'll get added later
+          continue;
+        }
+
+        if (OTHER_BUILTIN_LIBRARIES.indexOf(libFilename) !== -1) {
+          foundBaseLib = true;
+        }
+
+        const libPath: string = path.join(compilerLibFolder, libFilename);
+        if (!FileSystem.exists(libPath)) {
+          throw new Error(`lib ${libFilename} does not exist in the compiler specified in typescriptLibPackage`);
+        }
+
+        filesToAdd.push(libPath);
+      }
+
+      if (!foundBaseLib) {
+        // If we didn't find another version of the base lib library, include the default
+        filesToAdd.push(path.join(compilerLibFolder, 'lib.d.ts'));
+      }
+
+      if (!commandLine.fileNames) {
+        commandLine.fileNames = [];
+      }
+
+      commandLine.fileNames.push(...filesToAdd);
+
+      commandLine.options.lib = undefined;
+    }
   }
 }

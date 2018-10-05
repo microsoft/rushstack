@@ -11,3 +11,4 @@
 /// <reference path="read-package-tree/read-package-tree.d.ts" />
 /// <reference path="strict-uri-encode/strict-uri-encode.d.ts" />
 /// <reference path="wordwrap/wordwrap.d.ts" />
+/// <reference path="yarnpkg-lockfile/yarnpkg-lockfile.d.ts" />

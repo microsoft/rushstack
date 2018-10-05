@@ -72,6 +72,11 @@ export interface IPackageJson {
   description?: string;
 
   /**
+   * The URL of the project's repository.
+   */
+  repository?: string;
+
+  /**
    * The URL to the project's web page.
    */
   homepage?: string;

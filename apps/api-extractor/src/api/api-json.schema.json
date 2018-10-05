@@ -61,12 +61,33 @@
     },
 
     //---------------------------------------------------------------------------------------------
+    "markupHtmlTag": {
+      "description": "An HTML tag such as \"<td>\" or \"</td>\" or \"<img src=\"example.gif\" />\".",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of markup element",
+          "type": "string",
+          "enum": [ "html-tag" ]
+        },
+        "token": {
+          "description": "A string containing the HTML tag",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "token" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
     "markupLinkTextElement": {
       "description": "Represents markup that can be used as the link text for a hyperlink",
       "type": "object",
       "oneOf": [
         { "$ref": "#/definitions/markupText" },
-        { "$ref": "#/definitions/markupHighlightedText" }
+        { "$ref": "#/definitions/markupHighlightedText" },
+        { "$ref": "#/definitions/markupHtmlTag" }
       ]
     },
 
@@ -421,6 +442,18 @@
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
           "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isSealed": {
+          "description": "If present, indicates that the item was marked as \"@sealed\" and must not be extended",
+          "type": "boolean"
+        },
+        "isVirtual": {
+          "description": "If present, indicates that the item was marked as \"@virtual\" and may be extended",
+          "type": "boolean"
+        },
+        "isOverride": {
+          "description": "If present, indicates that the item was marked as \"@override\" and is overriding a base definition",
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -456,6 +489,10 @@
           "description": "For a class member, whether it is static",
           "type": "boolean"
         },
+        "isEventProperty": {
+          "description": "Whether the item was marked as \"@eventproperty\", which indicates an event object that event handlers can be attached to",
+          "type": "boolean"
+        },
         "type": {
           "description": "The data type of this property",
           "type": "string"
@@ -480,10 +517,22 @@
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
           "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isSealed": {
+          "description": "If present, indicates that the item was marked as \"@sealed\" and must not be extended",
+          "type": "boolean"
+        },
+        "isVirtual": {
+          "description": "If present, indicates that the item was marked as \"@virtual\" and may be extended",
+          "type": "boolean"
+        },
+        "isOverride": {
+          "description": "If present, indicates that the item was marked as \"@override\" and is overriding a base definition",
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
-      "required": [ "kind", "isOptional", "isReadOnly", "isStatic", "type", "summary", "isBeta" ]
+      "required": [ "kind", "isOptional", "isReadOnly", "isStatic", "isEventProperty", "type", "summary", "isBeta" ]
     },
 
     //---------------------------------------------------------------------------------------------
@@ -633,6 +682,18 @@
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
           "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isSealed": {
+          "description": "If present, indicates that the item was marked as \"@sealed\" and must not be extended",
+          "type": "boolean"
+        },
+        "isVirtual": {
+          "description": "If present, indicates that the item was marked as \"@virtual\" and may be extended",
+          "type": "boolean"
+        },
+        "isOverride": {
+          "description": "If present, indicates that the item was marked as \"@override\" and is overriding a base definition",
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -791,6 +852,10 @@
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
           "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isSealed": {
+          "description": "If present, indicates that the item was marked as \"@sealed\" and must not be extended",
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -943,6 +1008,10 @@
           "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
           "type": "array",
           "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isSealed": {
+          "description": "If present, indicates that the item was marked as \"@sealed\" and must not be extended",
+          "type": "boolean"
         }
       },
       "additionalProperties": false,

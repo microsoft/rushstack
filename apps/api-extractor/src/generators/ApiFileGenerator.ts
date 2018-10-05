@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
-import { Text } from '@microsoft/node-core-library';
+import { Text, FileSystem } from '@microsoft/node-core-library';
 import { ExtractorContext } from '../ExtractorContext';
 import { AstStructuredType } from '../ast/AstStructuredType';
 import { AstEnum } from '../ast/AstEnum';
@@ -60,7 +59,7 @@ export class ApiFileGenerator extends AstItemVisitor {
    */
   public writeApiFile(reportFilename: string, context: ExtractorContext): void {
     const fileContent: string = this.generateApiFileContent(context);
-    fs.writeFileSync(reportFilename, fileContent);
+    FileSystem.writeFile(reportFilename, fileContent);
   }
 
   public generateApiFileContent(context: ExtractorContext): string {
@@ -190,41 +189,51 @@ export class ApiFileGenerator extends AstItemVisitor {
     if (astItem instanceof AstPackage && !astItem.documentation.summary.length) {
       lines.push('(No @packagedocumentation comment for this package)');
     } else {
-      let footer: string = '';
+      const footerParts: string[] = [];
       switch (astItem.documentation.releaseTag) {
         case ReleaseTag.Internal:
-          footer += '@internal';
+          footerParts.push('@internal');
           break;
         case ReleaseTag.Alpha:
-          footer += '@alpha';
+          footerParts.push('@alpha');
           break;
         case ReleaseTag.Beta:
-          footer += '@beta';
+          footerParts.push('@beta');
           break;
         case ReleaseTag.Public:
-          footer += '@public';
+          footerParts.push('@public');
           break;
+      }
+
+      if (astItem.documentation.isSealed) {
+        footerParts.push('@sealed');
+      }
+
+      if (astItem.documentation.isVirtual) {
+        footerParts.push('@virtual');
+      }
+
+      if (astItem.documentation.isOverride) {
+        footerParts.push('@override');
+      }
+
+      if (astItem.documentation.isEventProperty) {
+        footerParts.push('@eventproperty');
       }
 
       // deprecatedMessage is initialized by default,
       // this ensures it has contents before adding '@deprecated'
       if (astItem.documentation.deprecatedMessage.length > 0) {
-        if (footer) {
-          footer += ' ';
-        }
-        footer += '@deprecated';
+        footerParts.push('@deprecated');
       }
 
       // If we are anywhere inside a TypeLiteral, _insideTypeLiteral is greater than 0
       if (this._insideTypeLiteral === 0 && astItem.needsDocumentation) {
-        if (footer) {
-          footer += ' ';
-        }
-        footer += '(undocumented)';
+        footerParts.push('(undocumented)');
       }
 
-      if (footer) {
-        lines.push(footer);
+      if (footerParts.length > 0) {
+        lines.push(footerParts.join(' '));
       }
     }
 

@@ -2,23 +2,26 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson } from '@microsoft/node-core-library';
+import {
+  IPackageJson,
+  FileConstants
+} from '@microsoft/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 
-import { BumpType, LockStepVersionPolicy } from '../../data/VersionPolicy';
-import { VersionPolicyConfiguration } from '../../data/VersionPolicyConfiguration';
-import { RushConfiguration } from '../../data/RushConfiguration';
-import { Utilities } from '../../utilities/Utilities';
+import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
+import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionControl } from '../../utilities/VersionControl';
-import { VersionMismatchFinder } from '../../data/VersionMismatchFinder';
-import { RushCommandLineParser } from './RushCommandLineParser';
-import { GitPolicy } from '../logic/GitPolicy';
+import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
-import { VersionManager } from '../logic/VersionManager';
-import { Git } from '../logic/Git';
+import { VersionManager } from '../../logic/VersionManager';
+import { PublishGit } from '../../logic/PublishGit';
+import { Git } from '../../logic/Git';
 
 export class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy: CommandLineFlagParameter;
@@ -91,35 +94,34 @@ export class VersionAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    if (!this._bypassPolicy.value) {
-      if (!GitPolicy.check(this.rushConfiguration)) {
-        process.exit(1);
-        return Promise.resolve();
-      }
-    }
-    this._validateInput();
+    return Promise.resolve().then(() => {
+      PolicyValidator.validatePolicy(this.rushConfiguration, this._bypassPolicy.value);
+      const userEmail: string = Git.getGitEmail(this.rushConfiguration);
 
-    this._versionManager = new VersionManager(this.rushConfiguration, this._getUserEmail());
-    if (this._ensureVersionPolicy.value) {
-      this._overwritePolicyVersionIfNeeded();
-      const tempBranch: string = 'version/ensure-' + new Date().getTime();
-      this._versionManager.ensure(this._versionPolicy.value, true,
-        !!this._overrideVersion.value || !!this._prereleaseIdentifier.value);
+      this._validateInput();
 
-      const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
-      if (updatedPackages.size > 0) {
-        console.log(`${updatedPackages.size} packages are getting updated.`);
+      this._versionManager = new VersionManager(this.rushConfiguration, userEmail);
+
+      if (this._ensureVersionPolicy.value) {
+        this._overwritePolicyVersionIfNeeded();
+        const tempBranch: string = 'version/ensure-' + new Date().getTime();
+        this._versionManager.ensure(this._versionPolicy.value, true,
+          !!this._overrideVersion.value || !!this._prereleaseIdentifier.value);
+
+        const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
+        if (updatedPackages.size > 0) {
+          console.log(`${updatedPackages.size} packages are getting updated.`);
+          this._gitProcess(tempBranch);
+        }
+      } else if (this._bumpVersion.value) {
+        const tempBranch: string = 'version/bump-' + new Date().getTime();
+        this._versionManager.bump(this._versionPolicy.value,
+          this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
+          this._prereleaseIdentifier.value,
+          true);
         this._gitProcess(tempBranch);
       }
-    } else if (this._bumpVersion.value) {
-      const tempBranch: string = 'version/bump-' + new Date().getTime();
-      this._versionManager.bump(this._versionPolicy.value,
-        this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
-        this._prereleaseIdentifier.value,
-        true);
-      this._gitProcess(tempBranch);
-    }
-    return Promise.resolve();
+    });
   }
 
   private _overwritePolicyVersionIfNeeded(): void {
@@ -188,16 +190,11 @@ export class VersionAction extends BaseRushAction {
     }
   }
 
-  private _getUserEmail(): string {
-    return Utilities.executeCommandAndCaptureOutput('git',
-        ['config', 'user.email'], '.').trim();
-  }
-
   private _gitProcess(tempBranch: string): void {
     // Validate the result before commit.
     this._validateResult();
 
-    const git: Git = new Git(this._targetBranch.value);
+    const git: PublishGit = new PublishGit(this._targetBranch.value);
 
     // Make changes in temp branch.
     git.checkout(tempBranch, true);
@@ -219,7 +216,7 @@ export class VersionAction extends BaseRushAction {
 
     // Commit the package.json and change files updates.
     const packageJsonUpdated: boolean = uncommittedChanges.some((changePath) => {
-      return changePath.indexOf('package.json') > 0;
+      return changePath.indexOf(FileConstants.PackageJson) > 0;
     });
 
     if (packageJsonUpdated) {

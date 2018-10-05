@@ -1,6 +1,210 @@
 # Change Log - @microsoft/stream-collator
 
-This log was last generated on Fri, 11 May 2018 22:43:14 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Sep 2018 16:05:35 GMT and should not be manually modified.
+
+## 2.2.79
+Fri, 28 Sep 2018 16:05:35 GMT
+
+*Version update only*
+
+## 2.2.78
+Wed, 26 Sep 2018 21:39:40 GMT
+
+*Version update only*
+
+## 2.2.77
+Mon, 24 Sep 2018 23:06:40 GMT
+
+*Version update only*
+
+## 2.2.76
+Mon, 24 Sep 2018 16:04:28 GMT
+
+*Version update only*
+
+## 2.2.75
+Fri, 21 Sep 2018 16:04:42 GMT
+
+*Version update only*
+
+## 2.2.74
+Thu, 20 Sep 2018 23:57:22 GMT
+
+*Version update only*
+
+## 2.2.73
+Tue, 18 Sep 2018 21:04:56 GMT
+
+*Version update only*
+
+## 2.2.72
+Mon, 10 Sep 2018 23:23:01 GMT
+
+*Version update only*
+
+## 2.2.71
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 2.2.70
+Tue, 04 Sep 2018 21:34:10 GMT
+
+*Version update only*
+
+## 2.2.69
+Mon, 03 Sep 2018 16:04:46 GMT
+
+*Version update only*
+
+## 2.2.68
+Thu, 30 Aug 2018 22:47:34 GMT
+
+*Version update only*
+
+## 2.2.67
+Thu, 30 Aug 2018 19:23:16 GMT
+
+*Version update only*
+
+## 2.2.66
+Thu, 30 Aug 2018 18:45:12 GMT
+
+*Version update only*
+
+## 2.2.65
+Wed, 29 Aug 2018 21:43:23 GMT
+
+*Version update only*
+
+## 2.2.64
+Wed, 29 Aug 2018 06:36:50 GMT
+
+*Version update only*
+
+## 2.2.63
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
+
+## 2.2.62
+Wed, 22 Aug 2018 20:58:58 GMT
+
+*Version update only*
+
+## 2.2.61
+Wed, 22 Aug 2018 16:03:25 GMT
+
+*Version update only*
+
+## 2.2.60
+Tue, 21 Aug 2018 16:04:38 GMT
+
+*Version update only*
+
+## 2.2.59
+Thu, 09 Aug 2018 21:58:02 GMT
+
+*Version update only*
+
+## 2.2.58
+Thu, 09 Aug 2018 21:03:22 GMT
+
+*Version update only*
+
+## 2.2.57
+Thu, 09 Aug 2018 16:04:24 GMT
+
+*Version update only*
+
+## 2.2.56
+Tue, 07 Aug 2018 22:27:31 GMT
+
+*Version update only*
+
+## 2.2.55
+Thu, 26 Jul 2018 23:53:43 GMT
+
+*Version update only*
+
+## 2.2.54
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 2.2.53
+Wed, 25 Jul 2018 21:02:57 GMT
+
+*Version update only*
+
+## 2.2.52
+Fri, 20 Jul 2018 16:04:52 GMT
+
+*Version update only*
+
+## 2.2.51
+Tue, 17 Jul 2018 16:02:52 GMT
+
+*Version update only*
+
+## 2.2.50
+Fri, 13 Jul 2018 19:04:50 GMT
+
+*Version update only*
+
+## 2.2.49
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 2.2.48
+Fri, 29 Jun 2018 02:56:51 GMT
+
+*Version update only*
+
+## 2.2.47
+Sat, 23 Jun 2018 02:21:20 GMT
+
+*Version update only*
+
+## 2.2.46
+Fri, 22 Jun 2018 16:05:15 GMT
+
+*Version update only*
+
+## 2.2.45
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 2.2.44
+Tue, 19 Jun 2018 19:35:11 GMT
+
+*Version update only*
+
+## 2.2.43
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 2.2.42
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
+
+## 2.2.41
+Tue, 15 May 2018 02:26:45 GMT
+
+*Version update only*
+
+## 2.2.40
+Tue, 15 May 2018 00:18:10 GMT
+
+*Version update only*
 
 ## 2.2.39
 Fri, 11 May 2018 22:43:14 GMT

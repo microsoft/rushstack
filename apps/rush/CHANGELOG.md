@@ -1,6 +1,154 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 26 Mar 2018 19:12:42 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Oct 2018 00:01:18 GMT and should not be manually modified.
+
+## 5.3.1
+Wed, 03 Oct 2018 00:01:18 GMT
+
+### Updates
+
+- Fix an issue where after running "rush add" (after successfully running "rush install"), the new package was not being installed or linked.
+- Fix an incorrect default in the "rush init" template comments
+
+## 5.3.0
+Fri, 28 Sep 2018 20:36:48 GMT
+
+### Updates
+
+- Add "ensureConsistentVersions" configuration which runs "rush check" before certain commands
+- Add a new command "rush add" for managing package.json dependencies
+- Rush now detects some package.json errors such as the same package name being listed in both "dependencies" and "optionalDependencies"
+- Update "rush link" to use relative paths when creating symlinks, to facilitate building Docker images
+
+## 5.2.1
+Thu, 13 Sep 2018 21:57:21 GMT
+
+### Updates
+
+- Fix an issue where "rush init" failed because its ".gitignore" template was excluded from the package
+
+## 5.2.0
+Thu, 13 Sep 2018 19:34:37 GMT
+
+### Updates
+
+- Add a "rush init" command for scaffolding new monorepo folders
+- Allow "rush scan" to be used without a rush.json configuration
+
+## 5.1.0
+Sat, 08 Sep 2018 20:57:32 GMT
+
+### Updates
+
+- Update "repository" field in package.json
+- Add support for PNPM's --strict-peer-dependencies feature
+- Add support for the Yarn package manager (this is a "beta" feature; please report any issues you encounter!)
+
+## 5.0.6
+Fri, 31 Aug 2018 23:10:31 GMT
+
+### Updates
+
+- Add "--prefer-frozen-shrinkwrap false" to the "pnpm install" command line as a workaround for https://github.com/pnpm/pnpm/issues/1342
+- Skip validation of the Git email address if Git is not installed, or if rush.json isn't in a Git working directory, or if no policy was defined
+
+## 5.0.5
+Wed, 29 Aug 2018 07:05:22 GMT
+
+### Updates
+
+- Fix an issue where rush install will fail if git isn't installed.
+- Fix an issue where "rush -h" didn't print help for the "build" and "rebuild" commands, unless invoked under a Rush folder
+- Improve command-line help for "rush build"
+- Fix regression causing "ERROR: EEXIST: file already exists"
+
+## 5.0.4
+Thu, 23 Aug 2018 00:08:41 GMT
+
+### Updates
+
+- Fix capitalization of new "filePath" API property
+
+## 5.0.3
+Wed, 22 Aug 2018 20:58:58 GMT
+
+### Updates
+
+- git st
+- When saving config files, Rush should include the "$schema" directive
+- Fix a regression where "rush version" sometimes failed with "The value for entries[0].comments.dependency[0].author is undefined"
+- When updating common-versions.json and version-policies.json, preserve the existing comments and whitespace
+
+## 5.0.2
+Sat, 18 Aug 2018 01:27:39 GMT
+
+*Version update only*
+
+## 5.0.1
+Sat, 18 Aug 2018 01:21:59 GMT
+
+### Updates
+
+- Fix typo in rush error message
+- Add a flag to "rush install" which runs the package manager in a verbose logging mode.
+- Remove package.json from rush-lib constants. Add public API for creating changefiles.
+- Fix an issue where "rush version" would fail with a useless error message if the Git user email is not specified.
+- Update lodash.
+- Add a "--network-concurrency" command-line option to help troubleshoot the ECONNRESET error that people occasionally have reported ( https://github.com/pnpm/pnpm/issues/1230 )
+
+## 5.0.0
+Sat, 30 Jun 2018 00:57:22 GMT
+
+### Updates
+
+- Update peerDependencies when bumping package versions (issue #668)
+- Add allowedAlternativeVersions setting to common-versions.json config file
+- Fix an issue where PNPM shrinkwrap file parser did not handle relative/absolute version paths correctly
+- Print each project's build time during the summary
+- Fix an issue where the common/temp/.npmrc file could contain missing environment variable tokens
+- Rush now creates common/scripts/install-run.js and install-run-rush.js scripts to formalize how CI jobs bootstrap tooling dependencies
+- Enable the "rush rebuild" and "rush build" commands to work without a Git repository
+- Add support for RUSH_TEMP_FOLDER environment variable to customize the location of Rush's commonTempFolder
+- Fix an issue where if package-deps.json fails to parse, the build fails
+- Improve "rush link" to create node_modules/.bin launchers for local project dependencies (not just installed external dependencies)
+- Update rush.json schema to allow requested versions (e.g. Rush or the package manager) to be a prerelease SemVer pattern
+- Fix annoyance where "rush update" (formerly "rush generate") would always change the integrity hash for tarball entries in shrinkwrap.yaml
+- Fix an issue where Rush's .npmrc configuration was not honored when spawned via an NPM lifecycle script; in general the process environment is now more isolated
+- Rush now warns when phantom node_modules folders are found
+- Relax the rush.json version check for rush-lib; future versions are now accepted as long as the major/minor parts match
+- Fix a regression where builds would sometimes fail with a zero exit code due to NodeJS's handling of uncaught Promise rejections
+- Improve "rush check" to ignore peer dependencies, since they don't need to be consistent with everything else (and generally won't be)
+- (Breaking change) Replace pinned-versions.json with a more general common-versions.json that can track other cross-project dependency versions
+- (Breaking change) In common-versions.json, rename the "pinned versions" concept to "preferred versions", and separate the XStitch versions into their own field
+- Report an error if the package manager version is too old
+- (Breaking change) Redesign command-line.json config file to support other command types
+- (Breaking change) Rename custom-commands.json to be command-line.json
+- Add support for "global" commands in custom-commands.json
+- When using PNPM, remove some NPM bug workarounds that probably caused problems for "pnpm install"
+- Add a lock file to avoid race conditions when the Rush version selector is installing rush-lib
+- Fix a problem where the "rush-recycler" folder was not getting cleaned on macOS
+- (Breaking change) Remove unused RushConfiguration.homeFolder API
+- Add RUSH_PREVIEW_VERSION environment variable for piloting new versions of Rush
+- Add new command "rush purge" for cleaning up temporary files
+- Fix an issue where rush-recycler wasn't emptied if a folder exceeded the Windows MAX_PATH
+- Minor improvements for logging
+- When installing tools, always copy the repo's .npmrc file to the target folder
+- (Breaking change) Replace the "rush generate" command with a new command "rush update"
+- (Breaking change) Replace "rush install --clean" and "--full-clean" with "rush install --purge"
+- Improve lifecycle script execution to support Unix slashes in the command name when running on Windows
+- Add "rushx" binary for single-project commands
+- (Breaking change) Eliminate extra letters from shortened command line options (renamed "-cpo" to "-o", and removed "-vp" and "-pn")
+- Add check for unpublished releases
+- Add a "--to-version-policy" option for "rush rebuild" to allow building only a particular version policy
+- Add --release-type parameter to "rush publish" to be able to create different tarballs based on release type
+- Add "--ensure-version-policy" option for "rush version" to support updating the versions directly
+
+## 4.3.3
+Thu, 31 May 2018 21:57:13 GMT
+
+### Updates
+
+- Remove the old undocumented "rush purge" command, since it conflicts with Rush 5
 
 ## 4.3.2
 Mon, 26 Mar 2018 19:12:42 GMT

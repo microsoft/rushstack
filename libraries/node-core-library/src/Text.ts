@@ -2,6 +2,33 @@
 // See LICENSE in the project root for license information.
 
 /**
+ * The allowed types of encodings, as supported by Node.js
+ * @public
+ */
+export const enum Encoding {
+  Utf8 = 'utf8'
+}
+
+/**
+ * Enumeration controlling conversion of newline characters.
+ * @public
+ */
+export const enum NewlineKind {
+  /**
+   * Windows-style newlines
+   */
+  CrLf = '\r\n',
+
+  /**
+   * POSIX-style newlines
+   *
+   * @remarks
+   * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
+   */
+  Lf = '\n'
+}
+
+/**
  * Operations for working with strings that contain text.
  *
  * @remarks
@@ -12,6 +39,7 @@
  */
 export class Text {
   private static readonly _newLineRegEx: RegExp = /\r\n|\n\r|\r|\n/g;
+  private static readonly _newLineAtEndRegEx: RegExp = /(\r\n|\n\r|\r|\n)$/;
 
   /**
    * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
@@ -32,10 +60,59 @@ export class Text {
   }
 
   /**
-   * Converts all newlines in the provided string to use Unix-style LF end of line characters.
+   * Converts all newlines in the provided string to use POSIX-style LF end of line characters.
+   *
+   * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
   public static convertToLf(input: string): string {
     return input.replace(Text._newLineRegEx, '\n');
   }
 
+  /**
+   * Append spaces to the end of a string to ensure the result has a minimum length.
+   * @remarks
+   * If the string length already exceeds the minimum length, then the string is unchanged.
+   * The string is not truncated.
+   */
+  public static padEnd(s: string, minimumLength: number): string {
+    let result: string = s;
+    while (result.length < minimumLength) {
+      result += ' ';
+    }
+    return result;
+  }
+
+  /**
+   * If the string is longer than maximumLength characters, truncate it to that length
+   * using "..." to indicate the truncation.
+   *
+   * @remarks
+   * For example truncateWithEllipsis('1234578', 5) would produce '12...'.
+   */
+  public static truncateWithEllipsis(s: string, maximumLength: number): string {
+    if (maximumLength < 0) {
+      throw new Error('The maximumLength cannot be a negative number');
+    }
+
+    if (s.length <= maximumLength) {
+      return s;
+    }
+
+    if (s.length <= 3) {
+      return s.substring(0, maximumLength);
+    }
+
+    return s.substring(0, maximumLength - 3) + '...';
+  }
+
+  /**
+   * Returns the input string with a trailing '\n' character appended, if not already present.
+   */
+  public static ensureTrailingNewline(s: string, newlineKind: NewlineKind = NewlineKind.Lf): string {
+    // Is there already a newline?
+    if (Text._newLineAtEndRegEx.test(s)) {
+      return s; // yes, no change
+    }
+    return s + newlineKind; // no, add it
+  }
 }

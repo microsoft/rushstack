@@ -2,12 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import * as fsx from 'fs-extra';
+import * as fs from 'fs';
 import * as os from 'os';
 import * as rimraf from 'rimraf';
 import * as tty from 'tty';
 import * as path from 'path';
-import { JsonFile, IPackageJson } from '@microsoft/node-core-library';
+import * as wordwrap from 'wordwrap';
+import {
+  JsonFile,
+  IPackageJson,
+  FileSystem,
+  FileConstants
+} from '@microsoft/node-core-library';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -18,9 +24,37 @@ export interface IEnvironment {
 }
 
 /**
+ * Options for Utilities.installPackageInDirectory().
+ */
+export interface IInstallPackageInDirectoryOptions {
+  directory: string;
+  packageName: string;
+  version: string;
+  tempPackageTitle: string;
+  maxInstallAttempts: number;
+  commonRushConfigFolder: string | undefined;
+  suppressOutput?: boolean;
+}
+
+/**
  * @public
  */
 export class Utilities {
+  /**
+   * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
+   * this looks something like "/usr/username/"
+   */
+  public static getHomeDirectory(): string {
+    const unresolvedUserFolder: string | undefined
+      = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    const homeFolder: string = path.resolve(unresolvedUserFolder);
+    if (!FileSystem.exists(homeFolder)) {
+      throw new Error('Unable to determine the current user\'s home directory');
+    }
+
+    return homeFolder;
+  }
+
   /**
    * NodeJS equivalent of performance.now().
    */
@@ -79,7 +113,7 @@ export class Utilities {
   }
 
   /**
-   * Creates the specified folder by calling fsx.mkdirsSync(), but using a
+   * Creates the specified folder by calling FileSystem.ensureFolder(), but using a
    * retry loop to recover from temporary locks that may be held by other processes.
    * If the folder already exists, no error occurs.
    */
@@ -90,14 +124,14 @@ export class Utilities {
       return;
     }
 
-    // We need to do a simple "fs.mkdirSync(localModulesFolder)" here,
+    // We need to do a simple "FileSystem.ensureFolder(localModulesFolder)" here,
     // however if the folder we deleted above happened to contain any files,
     // then there seems to be some OS process (virus scanner?) that holds
     // a lock on the folder for a split second, which causes mkdirSync to
     // fail.  To workaround that, retry for up to 7 seconds before giving up.
     const maxWaitTimeMs: number = 7 * 1000;
 
-    return Utilities.retryUntilTimeout(() => fsx.mkdirsSync(folderName),
+    return Utilities.retryUntilTimeout(() => FileSystem.ensureFolder(folderName),
                                        maxWaitTimeMs,
                                        (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
                                                         'from a process such as your text editor, command prompt, ' +
@@ -112,7 +146,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fsx.Stats = fsx.lstatSync(filePath);
+      const lstat: fs.Stats = FileSystem.getLinkStatistics(filePath);
       exists = lstat.isFile();
     } catch (e) { /* no-op */ }
 
@@ -126,7 +160,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fsx.Stats = fsx.lstatSync(directoryPath);
+      const lstat: fs.Stats = FileSystem.getLinkStatistics(directoryPath);
       exists = lstat.isDirectory();
     } catch (e) { /* no-op */ }
 
@@ -153,7 +187,7 @@ export class Utilities {
   public static deleteFile(filePath: string): void {
     if (Utilities.fileExists(filePath)) {
       console.log(`Deleting: ${filePath}`);
-      fsx.unlinkSync(filePath);
+      FileSystem.deleteFile(filePath);
     }
   }
 
@@ -165,17 +199,17 @@ export class Utilities {
    * timestamp is compared.
    */
   public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean {
-    if (!fsx.existsSync(outputFilename)) {
+    if (!FileSystem.exists(outputFilename)) {
       return false;
     }
-    const outputStats: fsx.Stats = fsx.statSync(outputFilename);
+    const outputStats: fs.Stats = FileSystem.getStatistics(outputFilename);
 
     for (const inputFilename of inputFilenames) {
-      if (!fsx.existsSync(inputFilename)) {
+      if (!FileSystem.exists(inputFilename)) {
         return false;
       }
 
-      const inputStats: fsx.Stats = fsx.statSync(inputFilename);
+      const inputStats: fs.Stats = FileSystem.getStatistics(inputFilename);
       if (outputStats.mtime < inputStats.mtime) {
         return false;
       }
@@ -193,6 +227,22 @@ export class Utilities {
       return stdout.columns;
     }
     return 80;
+  }
+
+  /**
+   * Applies word wrapping.  If maxLineLength is unspecified, then it defaults to the console
+   * width.
+   */
+  public static wrapWords(text: string, maxLineLength?: number, indent?: number): string {
+    if (!indent) {
+      indent = 0;
+    }
+    if (!maxLineLength) {
+      maxLineLength = Utilities.getConsoleWidth();
+    }
+
+    const wrap: (textToWrap: string) => string = wordwrap.soft(indent, maxLineLength);
+    return wrap(text);
   }
 
   /**
@@ -266,44 +316,21 @@ export class Utilities {
   }
 
   /**
-   * Executes the command with the specified command-line parameters, and waits for it to complete.
-   * The current directory will be set to the specified workingDirectory.
-   */
-  public static executeCommandAsync(command: string, args: string[], workingDirectory: string,
-    environment?: IEnvironment): child_process.ChildProcess {
-    // This is a workaround for GitHub issue #25330.  It is not as complete as the workaround above,
-    // but there doesn't seem to be an easy asynchronous solution.
-    // https://github.com/nodejs/node-v0.x-archive/issues/25330
-    if (fsx.existsSync(command + '.cmd')) {
-      command += '.cmd';
-    }
-
-    // This is needed since we specify shell=true below:
-    const escapedCommand: string = Utilities.escapeShellParameter(command);
-    const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
-
-    return child_process.spawn(escapedCommand, escapedArgs, {
-      cwd: workingDirectory,
-      shell: true,
-      env: Utilities._createEnvironmentForRushCommand('', environment)
-    });
-  }
-
-  /**
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
    * @param workingDirectory - working directory for running this command
    * @param initCwd = the folder containing a local .npmrc, which will be used
    *        for the INIT_CWD environment variable
-   * @param environment - environment variables for running this command
-   * @beta
+   * @param handleOutput - if true, hide the process's output, but if there is a nonzero exit code
+   *   then show the stderr
    */
   public static executeLifecycleCommand(
-    command: string,
-    workingDirectory: string,
-    initCwd: string,
-    captureOutput: boolean = false
-  ): child_process.SpawnSyncReturns<Buffer> {
+    command: string, options: {
+      workingDirectory: string,
+      initCwd: string,
+      handleOutput: boolean
+    }
+  ): number {
     let shellCommand: string = process.env.comspec || 'cmd';
     let commandFlags: string = '/d /s /c';
     let useShell: boolean = true;
@@ -313,20 +340,22 @@ export class Utilities {
       useShell = false;
     }
 
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(initCwd);
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
 
     const result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
       shellCommand,
       [commandFlags, command],
       {
-        cwd: workingDirectory,
+        cwd: options.workingDirectory,
         shell: useShell,
         env: environment,
-        stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
 
-    Utilities._processResult(result);
-    return result;
+    if (options.handleOutput) {
+      Utilities._processResult(result);
+    }
+    return result.status;
   }
 
   /**
@@ -335,7 +364,7 @@ export class Utilities {
    * @param workingDirectory - working directory for running this command
    * @param initCwd = the folder containing a local .npmrc, which will be used
    *        for the INIT_CWD environment variable
-   * @param environment - environment variables for running this command
+   * @param captureOutput - if true, map stdio to 'pipe' instead of the parent process's streams
    * @beta
    */
   public static executeLifecycleCommandAsync(
@@ -379,36 +408,118 @@ export class Utilities {
   /**
    * Installs a package by name and version in the specified directory.
    */
-  public static installPackageInDirectory(
-    directory: string,
-    packageName: string,
-    version: string,
-    tempPackageTitle: string,
-    maxInstallAttempts: number,
-    suppressOutput: boolean = false
-  ): void {
-    if (fsx.existsSync(directory)) {
+  public static installPackageInDirectory(options: IInstallPackageInDirectoryOptions): void {
+    const directory: string = path.resolve(options.directory);
+    if (FileSystem.exists(directory)) {
       console.log('Deleting old files from ' + directory);
     }
-    fsx.emptyDirSync(directory);
+    FileSystem.ensureEmptyFolder(directory);
 
     const npmPackageJson: IPackageJson = {
       dependencies: {
-        [packageName]: version
+        [options.packageName]: options.version
       },
       description: 'Temporary file generated by the Rush tool',
-      name: tempPackageTitle,
+      name: options.tempPackageTitle,
       private: true,
       version: '0.0.0'
     };
-    JsonFile.save(npmPackageJson, path.join(directory, 'package.json'));
+    JsonFile.save(npmPackageJson, path.join(directory, FileConstants.PackageJson));
+
+    if (options.commonRushConfigFolder) {
+      Utilities.syncNpmrc(options.commonRushConfigFolder, directory);
+    }
 
     console.log(os.EOL + 'Running "npm install" in ' + directory);
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
-    Utilities.executeCommandWithRetry(maxInstallAttempts, 'npm', ['install'], directory,
+    Utilities.executeCommandWithRetry(options.maxInstallAttempts, 'npm', ['install'], directory,
       Utilities._createEnvironmentForRushCommand(''),
-      suppressOutput);
+      options.suppressOutput);
+  }
+
+  public static withFinally<T>(options: { promise: Promise<T>, finally: () => void }): Promise<T> {
+    return options.promise
+      .then<T>((result: T) => {
+        try {
+          options.finally();
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        return result;
+      })
+      .catch<T>((error: Error) => {
+        try {
+          options.finally();
+        } catch (innerError) {
+          return Promise.reject(innerError);
+        }
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * As a workaround, syncNpmrc() copies the .npmrc file to the target folder, and also trims
+   * unusable lines from the .npmrc file.  If the source .npmrc file not exist, then syncNpmrc()
+   * will delete an .npmrc that is found in the target folder.
+   *
+   * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
+   * the .npmrc file to provide different authentication tokens for different registry.
+   * However, if the environment variable is undefined, it expands to an empty string, which
+   * produces a valid-looking mapping with an invalid URL that causes an error.  Instead,
+   * we'd prefer to skip that line and continue looking in other places such as the user's
+   * home directory.
+   *
+   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _syncNpmrc() FROM scripts/install-run.ts
+   */
+  public static syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
+    const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
+    const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
+    try {
+      if (FileSystem.exists(sourceNpmrcPath)) {
+        console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`);
+        let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
+        npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
+        const resultLines: string[] = [];
+        // Trim out lines that reference environment variables that aren't defined
+        for (const line of npmrcFileLines) {
+          // This finds environment variable tokens that look like "${VAR_NAME}"
+          const regex: RegExp = /\$\{([^\}]+)\}/g;
+          const environmentVariables: string[] | null = line.match(regex);
+          let lineShouldBeTrimmed: boolean = false;
+          if (environmentVariables) {
+            for (const token of environmentVariables) {
+              // Remove the leading "${" and the trailing "}" from the token
+              const environmentVariableName: string = token.substring(2, token.length - 1);
+              if (!process.env[environmentVariableName]) {
+                lineShouldBeTrimmed = true;
+                break;
+              }
+            }
+          }
+
+          if (lineShouldBeTrimmed) {
+            // Example output:
+            // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
+            resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+          } else {
+            resultLines.push(line);
+          }
+        }
+
+        FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+      } else if (FileSystem.exists(targetNpmrcPath)) {
+        // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
+        console.log(`Deleting ${targetNpmrcPath}`);
+        FileSystem.deleteFile(targetNpmrcPath);
+      }
+    } catch (e) {
+      throw new Error(`Error syncing .npmrc file: ${e}`);
+    }
+  }
+
+  public static getRushConfigNotFoundError(): Error {
+    return new Error('Unable to find rush.json configuration file');
   }
 
   /**

@@ -1,10 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
+import * as colors from 'colors';
 import * as path from 'path';
 
-import { Text, PackageName } from '@microsoft/node-core-library';
+import {
+  PackageName,
+  FileSystem,
+  NewlineKind
+} from '@microsoft/node-core-library';
 import {
   IApiClass,
   IApiEnum,
@@ -21,7 +25,8 @@ import {
   IMarkupTable,
   Markup,
   MarkupBasicElement,
-  MarkupStructuredElement
+  MarkupStructuredElement,
+  IMarkupTableRow
 } from '@microsoft/api-extractor';
 
 import {
@@ -71,6 +76,11 @@ export class MarkdownDocumenter {
     const apiPackage: IApiPackage = docPackage.apiItem as IApiPackage;
 
     markupPage.elements.push(...apiPackage.summary);
+
+    const namespacesTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Namespaces'),
+      Markup.createTextElements('Description')
+    ]);
 
     const classesTable: IMarkupTable = Markup.createTable([
       Markup.createTextElements('Class'),
@@ -148,12 +158,26 @@ export class MarkdownDocumenter {
           );
           this._writeEnumPage(docChild);
           break;
+        case 'namespace':
+          namespacesTable.rows.push(
+            Markup.createTableRow([
+              docItemTitle,
+              docChildDescription
+            ])
+          );
+          this._writePackagePage(docChild);
+          break;
       }
     }
 
     if (apiPackage.remarks && apiPackage.remarks.length) {
       markupPage.elements.push(Markup.createHeading1('Remarks'));
       markupPage.elements.push(...apiPackage.remarks);
+    }
+
+    if (namespacesTable.rows.length > 0) {
+      markupPage.elements.push(Markup.createHeading1('Namespaces'));
+      markupPage.elements.push(namespacesTable);
     }
 
     if (classesTable.rows.length > 0) {
@@ -202,6 +226,13 @@ export class MarkdownDocumenter {
       Markup.createTextElements('Description')
     ]);
 
+    const eventsTable: IMarkupTable = Markup.createTable([
+      Markup.createTextElements('Property'),
+      Markup.createTextElements('Access Modifier'),
+      Markup.createTextElements('Type'),
+      Markup.createTextElements('Description')
+    ]);
+
     const methodsTable: IMarkupTable = Markup.createTable([
       Markup.createTextElements('Method'),
       Markup.createTextElements('Access Modifier'),
@@ -220,14 +251,18 @@ export class MarkdownDocumenter {
               docMember.getApiReference())
           ];
 
-          propertiesTable.rows.push(
-            Markup.createTableRow([
-              propertyTitle,
-              [],
-              [Markup.createCode(apiMember.type, 'javascript')],
-              apiMember.summary
-            ])
-          );
+          const row: IMarkupTableRow = Markup.createTableRow([
+            propertyTitle,
+            [],
+            [Markup.createCode(apiMember.type, 'javascript')],
+            apiMember.summary
+          ]);
+
+          if (apiMember.isEventProperty) {
+            eventsTable.rows.push(row);
+          } else {
+            propertiesTable.rows.push(row);
+          }
           this._writePropertyPage(docMember);
           break;
 
@@ -268,6 +303,11 @@ export class MarkdownDocumenter {
           this._writeMethodPage(docMember);
           break;
       }
+    }
+
+    if (eventsTable.rows.length > 0) {
+      markupPage.elements.push(Markup.createHeading1('Events'));
+      markupPage.elements.push(eventsTable);
     }
 
     if (propertiesTable.rows.length > 0) {
@@ -586,18 +626,22 @@ export class MarkdownDocumenter {
       onRenderApiLink: (args: IMarkdownRenderApiLinkArgs) => {
         const resolveResult: IDocItemSetResolveResult = this._docItemSet.resolveApiItemReference(args.reference);
         if (!resolveResult.docItem) {
-          throw new Error('Unresolved: ' + JSON.stringify(args.reference));
+          // Eventually we should introduce a warnings file
+          console.error(colors.yellow('Warning: Unresolved hyperlink to '
+            + Markup.formatApiItemReference(args.reference)));
+        } else {
+          // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
+          // unless they start with "./" or "../".
+          const docFilename: string = './' + this._getFilenameForDocItem(resolveResult.docItem);
+          args.prefix = '[';
+          args.suffix = '](' + docFilename + ')';
         }
-
-        // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
-        // unless they start with "./" or "../".
-        const docFilename: string = './' + this._getFilenameForDocItem(resolveResult.docItem);
-        args.prefix = '[';
-        args.suffix = '](' + docFilename + ')';
       }
     });
 
-    fsx.writeFileSync(filename, Text.convertToCrLf(content));
+    FileSystem.writeFile(filename, content, {
+      convertLineEndings: NewlineKind.CrLf
+    });
   }
 
   private _getFilenameForDocItem(docItem: DocItem): string {
@@ -614,6 +658,6 @@ export class MarkdownDocumenter {
 
   private _deleteOldOutputFiles(): void {
     console.log('Deleting old output from ' + this._outputFolder);
-    fsx.emptyDirSync(this._outputFolder);
+    FileSystem.ensureEmptyFolder(this._outputFolder);
   }
 }

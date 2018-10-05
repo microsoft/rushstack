@@ -3,29 +3,28 @@
 
 import * as colors from 'colors';
 import { EOL } from 'os';
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
+import { JsonFile, FileSystem } from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
   ChangeType
-} from '../../data/ChangeManagement';
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
+} from '../../api/ChangeManagement';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Npm } from '../../utilities/Npm';
-import { RushCommandLineParser } from './RushCommandLineParser';
-import { PublishUtilities } from '../logic/PublishUtilities';
-import { ChangelogGenerator } from '../logic/ChangelogGenerator';
-import { GitPolicy } from '../logic/GitPolicy';
-import { PrereleaseToken } from '../logic/PrereleaseToken';
-import { ChangeManager } from '../logic/ChangeManager';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { PublishUtilities } from '../../logic/PublishUtilities';
+import { ChangelogGenerator } from '../../logic/ChangelogGenerator';
+import { PrereleaseToken } from '../../logic/PrereleaseToken';
+import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
-import { Git } from '../logic/Git';
+import { PublishGit } from '../../logic/PublishGit';
 import { VersionControl } from '../../utilities/VersionControl';
-import { JsonFile } from '@microsoft/node-core-library';
+import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -174,29 +173,28 @@ export class PublishAction extends BaseRushAction {
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
   protected run(): Promise<void> {
-    if (!GitPolicy.check(this.rushConfiguration)) {
-      process.exit(1);
-      return Promise.resolve();
-    }
-    const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
+    return Promise.resolve().then(() => {
+      PolicyValidator.validatePolicy(this.rushConfiguration, false);
 
-    if (this._regenerateChangelogs.value) {
-      console.log('Regenerating changelogs');
-      ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
-      return Promise.resolve();
-    }
+      const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
-    this._validate();
+      if (this._regenerateChangelogs.value) {
+        console.log('Regenerating changelogs');
+        ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
+        return Promise.resolve();
+      }
 
-    if (this._includeAll.value) {
-      this._publishAll(allPackages);
-    } else {
-      this._prereleaseToken = new PrereleaseToken(this._prereleaseName.value, this._suffix.value);
-      this._publishChanges(allPackages);
-    }
+      this._validate();
 
-    console.log(EOL + colors.green('Rush publish finished successfully.'));
-    return Promise.resolve();
+      if (this._includeAll.value) {
+        this._publishAll(allPackages);
+      } else {
+        this._prereleaseToken = new PrereleaseToken(this._prereleaseName.value, this._suffix.value);
+        this._publishChanges(allPackages);
+      }
+
+      console.log(EOL + colors.green('Rush publish finished successfully.'));
+    });
   }
 
   /**
@@ -225,7 +223,7 @@ export class PublishAction extends BaseRushAction {
 
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.changes;
-      const git: Git = new Git(this._targetBranch.value);
+      const git: PublishGit = new PublishGit(this._targetBranch.value);
       const tempBranch: string = 'publish-' + new Date().getTime();
 
       // Make changes in temp branch.
@@ -265,7 +263,7 @@ export class PublishAction extends BaseRushAction {
           }
         }
 
-        // Create and push appropriate git tags.
+        // Create and push appropriate Git tags.
         this._gitAddTags(git, orderedChanges);
         git.push(tempBranch);
 
@@ -286,7 +284,7 @@ export class PublishAction extends BaseRushAction {
     console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
     let updated: boolean = false;
-    const git: Git = new Git(this._targetBranch.value);
+    const git: PublishGit = new PublishGit(this._targetBranch.value);
 
     allPackages.forEach((packageConfig, packageName) => {
       if (packageConfig.shouldPublish &&
@@ -310,7 +308,7 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _gitAddTags(git: Git, orderedChanges: IChangeInfo[]): void {
+  private _gitAddTags(git: PublishGit, orderedChanges: IChangeInfo[]): void {
     for (const change of orderedChanges) {
       if (
         change.changeType &&
@@ -396,8 +394,11 @@ export class PublishAction extends BaseRushAction {
       const destFolder: string = this._releaseFolder.value ?
        this._releaseFolder.value : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');
 
-      fsx.copySync(tarballPath, path.join(destFolder, tarballName));
-      fsx.unlinkSync(tarballPath);
+      FileSystem.move({
+        sourcePath: tarballPath,
+        destinationPath: path.join(destFolder, tarballName),
+        overwrite: true
+      });
     }
   }
 
@@ -405,7 +406,7 @@ export class PublishAction extends BaseRushAction {
     const apiConfigPath: string = path.join(project.projectFolder,
       'config', 'api-extractor.json');
 
-    if (fsx.existsSync(apiConfigPath)) {
+    if (FileSystem.exists(apiConfigPath)) {
       // Read api-extractor.json file
       const apiConfig: {} = JsonFile.load(apiConfigPath);
       /* tslint:disable:no-string-literal */
@@ -424,9 +425,12 @@ export class PublishAction extends BaseRushAction {
         if (fromApiFolder) {
           const fromApiFolderPath: string = path.join(project.projectFolder, fromApiFolder);
           const toApiFolderPath: string = path.join(project.projectFolder, toApiFolder);
-          if (fsx.existsSync(fromApiFolderPath) && fsx.existsSync(toApiFolderPath)) {
-            fsx.readdirSync(fromApiFolderPath).forEach(fileName => {
-              fsx.copySync(path.join(fromApiFolderPath, fileName), path.join(toApiFolderPath, fileName));
+          if (FileSystem.exists(fromApiFolderPath) && FileSystem.exists(toApiFolderPath)) {
+            FileSystem.readFolder(fromApiFolderPath).forEach(fileName => {
+              FileSystem.copyFile({
+                sourcePath: path.join(fromApiFolderPath, fileName),
+                destinationPath: path.join(toApiFolderPath, fileName)
+              });
               console.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
             });
           }

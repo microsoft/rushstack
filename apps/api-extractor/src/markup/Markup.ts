@@ -17,6 +17,7 @@ import {
   IMarkupHeading2,
   IMarkupPage,
   IMarkupHighlightedText,
+  IMarkupHtmlTag,
   MarkupLinkTextElement,
   IMarkupNoteBox,
   IMarkupCodeBox,
@@ -110,6 +111,7 @@ export class Markup {
         if (result.length > 0) {
           result.push(Markup.PARAGRAPH);
         }
+
         result.push(...Markup.createTextElements(paragraph, options));
       }
     }
@@ -194,6 +196,19 @@ export class Markup {
       text: code,
       highlighter: highlighter || 'plain'
     } as IMarkupHighlightedText;
+  }
+
+  /**
+   * Constructs an IMarkupHtmlTag element representing an opening or closing HTML tag.
+   */
+  public static createHtmlTag(token: string): IMarkupHtmlTag {
+    if (token.length === 0) {
+      throw new Error('The code parameter is missing');
+    }
+    return {
+      kind: 'html-tag',
+      token: token
+    } as IMarkupHtmlTag;
   }
 
   /**
@@ -404,6 +419,8 @@ export class Markup {
         case 'heading1':
         case 'heading2':
           buffer.text += element.text;
+          break;
+        case 'html-tag':
           break;
         case 'note-box':
           buffer.text += Markup.extractTextContent(element.elements);

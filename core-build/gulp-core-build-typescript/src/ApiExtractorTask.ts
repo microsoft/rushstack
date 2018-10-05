@@ -1,18 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as Gulp from 'gulp';
 import * as path from 'path';
-import * as ts from 'typescript';
 import { GulpTask } from '@microsoft/gulp-core-build';
+import {
+  FileSystem,
+  JsonFile
+} from '@microsoft/node-core-library';
 import {
   Extractor,
   IExtractorOptions,
   IExtractorConfig
 } from '@microsoft/api-extractor';
-import { TypeScriptConfiguration } from './TypeScriptConfiguration';
-import gulpTypeScript = require('gulp-typescript');
+
+import { BaseCmdTask } from './BaseCmdTask';
 
 /** @public */
 export interface IApiExtractorTaskConfig {
@@ -100,13 +102,29 @@ export interface IApiExtractorTaskConfig {
    * except definitions marked as \@beta, \@alpha, or \@internal.
    */
   publishFolderForPublic?: string;
+
+  /**
+   * Use this option to override the version of the TypeScript compiler API extractor should use.
+   *
+   * @beta
+   */
+  typescriptCompilerFolder?: string;
+
+  /**
+   * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
+   * recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it
+   * may be required when dependencies contain declarations that are incompatible with the TypeScript engine
+   * that API Extractor uses for its analysis. If this option is used, it is strongly recommended that broken
+   * dependencies be fixed or upgraded.
+   */
+  skipLibCheck?: boolean;
 }
 
 /**
  * The ApiExtractorTask uses the api-extractor tool to analyze a project for public APIs. api-extractor will detect
  * common problems and generate a report of the exported public API. The task uses the entry point of a project to
  * find the aliased exports of the project. An api-extractor.ts file is generated for the project in the temp folder.
- * @public
+ * @alpha
  */
 export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
   constructor() {
@@ -116,13 +134,14 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         enabled: false,
         entry: undefined,
         apiReviewFolder: undefined,
-        apiJsonFolder: undefined
+        apiJsonFolder: undefined,
+        typescriptCompilerFolder: BaseCmdTask.getPackagePath('typescript')
       }
     );
   }
 
   public loadSchema(): Object {
-    return require('./schemas/api-extractor.schema.json');
+    return JsonFile.load(path.resolve(__dirname, 'schemas', 'api-extractor.schema.json'));
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void {
@@ -156,23 +175,11 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         entryPointFile = path.join(this.buildConfig.rootPath, this.taskConfig.entry);
       }
 
-      const typingsFilePath: string = path.join(this.buildConfig.rootPath, 'typings/tsd.d.ts');
-      const otherFiles: string[] = fsx.existsSync(typingsFilePath) ? [typingsFilePath] : [];
-
-      // tslint:disable-next-line:no-any
-      const gulpTypeScriptSettings: gulpTypeScript.Settings =
-        TypeScriptConfiguration.getGulpTypescriptOptions(this.buildConfig).compilerOptions;
-
-      TypeScriptConfiguration.fixupSettings(gulpTypeScriptSettings, this.logWarning, { mustBeCommonJsOrEsnext: true });
-
-      const compilerOptions: ts.CompilerOptions = gulpTypeScript.createProject(gulpTypeScriptSettings).options;
-
-      const analysisFileList: string[] = Extractor.generateFilePathsForAnalysis(otherFiles.concat(entryPointFile));
-
-      const compilerProgram: ts.Program = ts.createProgram(analysisFileList, compilerOptions);
-
       const extractorConfig: IExtractorConfig = {
-        compiler: { configType: 'runtime' },
+        compiler: {
+          configType: 'tsconfig',
+          rootFolder: this.buildConfig.rootPath
+        },
         project: {
           entryPointSourceFile: entryPointFile,
           externalJsonFileFolders: [ path.join(__dirname, 'external-api-json') ]
@@ -199,14 +206,15 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
       }
 
       const extractorOptions: IExtractorOptions = {
-        compilerProgram: compilerProgram,
         localBuild: !this.buildConfig.production,
         customLogger: {
           logVerbose: (message: string) => this.logVerbose(message),
           logInfo: (message: string) => this.log(message),
           logWarning: (message: string) => this.logWarning(message),
           logError: (message: string) => this.logError(message)
-        }
+        },
+        typescriptCompilerFolder: this.taskConfig.typescriptCompilerFolder,
+        skipLibCheck: this.taskConfig.skipLibCheck
       };
 
       const extractor: Extractor = new Extractor(extractorConfig, extractorOptions);
@@ -232,7 +240,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
       return false;
     }
 
-    if (!fsx.existsSync(this.taskConfig.entry)) {
+    if (!FileSystem.exists(this.taskConfig.entry)) {
       this.logError(`Entry file ${this.taskConfig.entry} does not exist.`);
       return false;
     }

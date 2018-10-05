@@ -2,6 +2,333 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "5.13.1",
+      "tag": "@microsoft/api-extractor_v5.13.1",
+      "date": "Fri, 28 Sep 2018 16:05:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.0.1` to `3.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.13.0",
+      "tag": "@microsoft/api-extractor_v5.13.0",
+      "date": "Wed, 26 Sep 2018 21:39:40 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new command line option --skip-lib-check"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.12.2",
+      "tag": "@microsoft/api-extractor_v5.12.2",
+      "date": "Mon, 24 Sep 2018 23:06:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow doc comments to use TSDoc's \"@defaultvalue\" tag (but the value is not yet passed to the documentation pipeline)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.12.1",
+      "tag": "@microsoft/api-extractor_v5.12.1",
+      "date": "Fri, 21 Sep 2018 16:04:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where TypeScript errors are often logged as \"[Object object]\" instead of the actual error message."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.12.0",
+      "tag": "@microsoft/api-extractor_v5.12.0",
+      "date": "Thu, 20 Sep 2018 23:57:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new feature: Support using a different version of the TypeScript compiler."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.11.2",
+      "tag": "@microsoft/api-extractor_v5.11.2",
+      "date": "Tue, 18 Sep 2018 21:04:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where parameters mentioned in comments were attempting to be analyzed by api-extractor."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.11.1",
+      "tag": "@microsoft/api-extractor_v5.11.1",
+      "date": "Thu, 06 Sep 2018 01:25:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update \"repository\" field in package.json"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.0.0` to `3.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.1` to `4.2.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.11.0",
+      "tag": "@microsoft/api-extractor_v5.11.0",
+      "date": "Mon, 03 Sep 2018 16:04:45 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade api-extractor to internally use TypeScript 3.0."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.8",
+      "tag": "@microsoft/api-extractor_v5.10.8",
+      "date": "Wed, 29 Aug 2018 06:36:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.2.1` to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.7",
+      "tag": "@microsoft/api-extractor_v5.10.7",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.2.0` to `2.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.0` to `4.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.6",
+      "tag": "@microsoft/api-extractor_v5.10.6",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.1.1` to `2.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.5",
+      "tag": "@microsoft/api-extractor_v5.10.5",
+      "date": "Wed, 22 Aug 2018 16:03:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.1.0` to `2.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.4",
+      "tag": "@microsoft/api-extractor_v5.10.4",
+      "date": "Tue, 21 Aug 2018 16:04:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix namespace name for export statement`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.3",
+      "tag": "@microsoft/api-extractor_v5.10.3",
+      "date": "Thu, 09 Aug 2018 21:03:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.0.0` to `2.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.2",
+      "tag": "@microsoft/api-extractor_v5.10.2",
+      "date": "Thu, 09 Aug 2018 16:04:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update lodash."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.1",
+      "tag": "@microsoft/api-extractor_v5.10.1",
+      "date": "Thu, 26 Jul 2018 16:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.5.0` to `2.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.10.0",
+      "tag": "@microsoft/api-extractor_v5.10.0",
+      "date": "Tue, 17 Jul 2018 16:02:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for new \"@eventproperty\" AEDoc tag, which indicates that a class/interface property should be documented as an event"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.9.1",
+      "tag": "@microsoft/api-extractor_v5.9.1",
+      "date": "Tue, 03 Jul 2018 21:03:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.4.1` to `1.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.9.0",
+      "tag": "@microsoft/api-extractor_v5.9.0",
+      "date": "Sat, 23 Jun 2018 02:21:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new IMarkupHtmlTag API"
+          },
+          {
+            "comment": "AEDoc now allows HTML tags inside doc comments, which can be disabled using a backslash escape"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.8.1",
+      "tag": "@microsoft/api-extractor_v5.8.1",
+      "date": "Thu, 21 Jun 2018 08:27:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.4.0` to `1.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.8.0",
+      "tag": "@microsoft/api-extractor_v5.8.0",
+      "date": "Tue, 19 Jun 2018 19:35:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "For namespaceSupport=permissive, allow arbitrary nesting of namespaces"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Fix an issue where multi-line type literals sometimes had inconsistent newlines in the *.api.json file"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.7.3",
+      "tag": "@microsoft/api-extractor_v5.7.3",
+      "date": "Fri, 08 Jun 2018 08:43:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.3.2` to `1.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.1.0` to `4.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.7.2",
+      "tag": "@microsoft/api-extractor_v5.7.2",
+      "date": "Thu, 31 May 2018 01:39:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.3.1` to `1.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.7.1",
+      "tag": "@microsoft/api-extractor_v5.7.1",
+      "date": "Tue, 15 May 2018 02:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.3.0` to `1.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.7.0",
+      "tag": "@microsoft/api-extractor_v5.7.0",
+      "date": "Tue, 15 May 2018 00:18:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for new AEDoc tags @sealed, @virtual, and @override"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.6.8",
       "tag": "@microsoft/api-extractor_v5.6.8",
       "date": "Fri, 04 May 2018 00:42:38 GMT",

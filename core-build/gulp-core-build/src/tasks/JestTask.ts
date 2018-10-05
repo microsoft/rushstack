@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 import * as path from 'path';
-import * as fsx from 'fs-extra';
 import { GulpTask} from './GulpTask';
 import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
 import * as globby from 'globby';
+import { FileSystem } from '@microsoft/node-core-library';
 
 /**
  * Configuration for JestTask
@@ -22,11 +22,6 @@ export interface IJestConfig {
    * Indicate whether Jest cache is enabled or not.
    */
   cache?: boolean;
-
-  /**
-   * The directory where Jest should store its cached information.
-   */
-  cacheDirectory?: string;
 
   /**
    * Same as Jest CLI option collectCoverageFrom
@@ -78,7 +73,7 @@ const DEFAULT_JEST_CONFIG_FILE_NAME: string = 'jest.config.json';
  */
 export function _isJestEnabled(rootFolder: string): boolean {
   const taskConfigFile: string = path.join(rootFolder, 'config', 'jest.json');
-  if (!fsx.existsSync(taskConfigFile)) {
+  if (!FileSystem.exists(taskConfigFile)) {
     return false;
   }
   const taskConfig: {} = require(taskConfigFile);
@@ -130,7 +125,7 @@ export class JestTask extends GulpTask<IJestConfig> {
     const jestConfig: any = {
       ci: this.buildConfig.production,
       cache: !!this.taskConfig.cache,
-      config: fsx.existsSync(configFileFullPath) ? configFileFullPath : undefined,
+      config: FileSystem.exists(configFileFullPath) ? configFileFullPath : undefined,
       collectCoverageFrom: this.taskConfig.collectCoverageFrom,
       coverage: this.taskConfig.coverage,
       coverageReporters: this.taskConfig.coverageReporters,
@@ -151,13 +146,9 @@ export class JestTask extends GulpTask<IJestConfig> {
       // Jest's module resolution for finding jest-environment-jsdom is broken.  See this issue:
       // https://github.com/facebook/jest/issues/5913
       // As a workaround, resolve it for Jest:
-      testEnvironment: require.resolve('jest-environment-jsdom')
+      testEnvironment: require.resolve('jest-environment-jsdom'),
+      cacheDirectory: path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder, 'jest-cache')
     };
-
-    if (this.taskConfig.cacheDirectory) {
-      // tslint:disable-next-line:no-string-literal
-      jestConfig['cacheDirectory'] = this.taskConfig.cacheDirectory;
-    }
 
     // suppress 'Running coverage on untested files...' warning
     const oldTTY: true | undefined = process.stdout.isTTY;
@@ -204,8 +195,11 @@ export class JestTask extends GulpTask<IJestConfig> {
     const snapDestFile: string = destinationFile.replace(/\.test\..+\.snap$/, extension);
     const testFileName: string = path.basename(snapDestFile, '.snap');
     const testFile: string = path.resolve(path.dirname(snapDestFile), '..', testFileName); // Up from `__snapshots__`.
-    if (fsx.existsSync(testFile)) {
-      fsx.copySync(snapSourceFile, snapDestFile);
+    if (FileSystem.exists(testFile)) {
+      FileSystem.copyFile({
+        sourcePath: snapSourceFile,
+        destinationPath: snapDestFile
+      });
       return true;
     } else {
       return false;

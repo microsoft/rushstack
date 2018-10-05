@@ -1,4 +1,10 @@
 // @public
+class Executable {
+  static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
+  static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
+}
+
+// @public
 enum FileConstants {
   PackageJson = "package.json"
 }
@@ -11,19 +17,124 @@ class FileDiffTest {
 }
 
 // @public
+class FileSystem {
+  static changePosixModeBits(path: string, mode: PosixModeBits): void;
+  static copyFile(options: IFileSystemCopyFileOptions): void;
+  static createHardLink(options: IFileSystemCreateLinkOptions): void;
+  static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
+  static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void;
+  static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
+  static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): void;
+  static deleteFolder(folderPath: string): void;
+  static ensureEmptyFolder(folderPath: string): void;
+  static ensureFolder(folderPath: string): void;
+  static exists(path: string): boolean;
+  static formatPosixModeBits(modeBits: PosixModeBits): string;
+  static getLinkStatistics(path: string): fs.Stats;
+  static getPosixModeBits(path: string): PosixModeBits;
+  static getRealPath(linkPath: string): string;
+  static getStatistics(path: string): fs.Stats;
+  static move(options: IFileSystemMoveOptions): void;
+  static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
+  static readFileToBuffer(filePath: string): Buffer;
+  static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): Array<string>;
+  static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
+  static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
+}
+
+// @public
+class FileWriter {
+  close(): void;
+  static open(path: string, flags?: IFileWriterFlags): FileWriter;
+  write(text: string): void;
+}
+
+// @public
 enum FolderConstants {
   Git = ".git",
   NodeModules = "node_modules"
 }
 
+// @beta
+interface IExecutableResolveOptions {
+  currentWorkingDirectory?: string;
+  environment?: NodeJS.ProcessEnv;
+}
+
+// @beta
+interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
+  input?: string;
+  maxBuffer?: number;
+  stdio?: ExecutableStdioMapping;
+  timeoutMs?: number;
+}
+
+// @public
+interface IFileSystemCopyFileOptions {
+  destinationPath: string;
+  sourcePath: string;
+}
+
+// @public
+interface IFileSystemCreateLinkOptions {
+  linkTargetPath: string;
+  newLinkPath: string;
+}
+
+// @public
+interface IFileSystemDeleteFileOptions {
+  throwIfNotExists?: boolean;
+}
+
+// @public
+interface IFileSystemMoveOptions {
+  destinationPath: string;
+  ensureFolderExists?: boolean;
+  overwrite?: boolean;
+  sourcePath: string;
+}
+
+// @public
+interface IFileSystemReadFileOptions {
+  convertLineEndings?: NewlineKind;
+  encoding?: Encoding;
+}
+
+// @public
+interface IFileSystemReadFolderOptions {
+  absolutePaths?: boolean;
+}
+
+// @public
+interface IFileSystemUpdateTimeParameters {
+  accessedTime: number | Date;
+  modifiedTime: number | Date;
+}
+
+// @public
+interface IFileSystemWriteFileOptions {
+  convertLineEndings?: NewlineKind;
+  encoding?: Encoding;
+  ensureFolderExists?: boolean;
+}
+
+// @public
+interface IFileWriterFlags {
+  append?: boolean;
+  exclusive?: boolean;
+}
+
 // @public
 interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
+  ensureFolderExists?: boolean;
   onlyIfChanged?: boolean;
+  updateExistingFile?: boolean;
 }
 
 // @public
 interface IJsonFileStringifyOptions {
-  unixNewlines?: boolean;
+  newlineConversion?: NewlineKind;
+  prettyFormatting?: boolean;
 }
 
 // @public
@@ -54,6 +165,7 @@ interface IPackageJson {
   optionalDependencies?: IPackageJsonDependencyTable;
   peerDependencies?: IPackageJsonDependencyTable;
   private?: boolean;
+  repository?: string;
   scripts?: IPackageJsonScriptTable;
   // @beta
   tsdoc?: IPackageJsonTsdocConfiguration;
@@ -106,6 +218,7 @@ class JsonFile {
   static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any;
   static save(jsonObject: Object, jsonFilename: string, options?: IJsonFileSaveOptions): boolean;
   static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string;
+  static updateString(previousJson: string, newJsonObject: Object, options?: IJsonFileStringifyOptions): string;
   static validateNoUndefinedMembers(jsonObject: Object): void;
 }
 
@@ -136,6 +249,12 @@ class MapExtensions {
 }
 
 // @public
+enum NewlineKind {
+  CrLf = "\r\n",
+  Lf = "\n"
+}
+
+// @public
 class PackageJsonLookup {
   constructor(parameters?: IPackageJsonLookupParameters);
   clearCache(): void;
@@ -159,6 +278,24 @@ class PackageName {
 // @public
 class Path {
   static isUnder(childPath: string, parentFolderPath: string): boolean;
+  static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;
+}
+
+// @public
+enum PosixModeBits {
+  AllExecute = 73,
+  AllRead = 292,
+  AllWrite = 146,
+  GroupExecute = 8,
+  GroupRead = 32,
+  GroupWrite = 16,
+  None = 0,
+  OthersExecute = 1,
+  OthersRead = 4,
+  OthersWrite = 2,
+  UserExecute = 64,
+  UserRead = 256,
+  UserWrite = 128
 }
 
 // @public
@@ -178,6 +315,11 @@ class ProtectableMap<K, V> {
 class Text {
   static convertToCrLf(input: string): string;
   static convertToLf(input: string): string;
+  static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
+  static padEnd(s: string, minimumLength: number): string;
   static replaceAll(input: string, searchValue: string, replaceValue: string): string;
+  static truncateWithEllipsis(s: string, maximumLength: number): string;
 }
 
+// WARNING: Unsupported export: ExecutableStdioStreamMapping
+// WARNING: Unsupported export: ExecutableStdioMapping

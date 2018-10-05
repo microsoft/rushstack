@@ -1,6 +1,11 @@
 // DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
+    {
+      "name": "@microsoft/api-documenter",
+      "allowedCategories": [ "tests" ]
+    },
     {
       "name": "@microsoft/api-extractor",
       "allowedCategories": [ "libraries", "tests" ]
@@ -47,7 +52,7 @@
     },
     {
       "name": "@microsoft/node-library-build",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/package-deps-hash",
@@ -59,11 +64,11 @@
     },
     {
       "name": "@microsoft/rush-stack",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/set-webpack-public-path-plugin",
@@ -91,6 +96,10 @@
     },
     {
       "name": "@pnpm/logger",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@yarnpkg/lockfile",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -127,6 +136,10 @@
     },
     {
       "name": "deasync",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "decomment",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -254,6 +267,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "https-proxy-agent",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "inquirer",
       "allowedCategories": [ "libraries" ]
     },
@@ -283,6 +300,10 @@
     },
     {
       "name": "js-yaml",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jsdom",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -343,6 +364,10 @@
     },
     {
       "name": "mocha",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "node-fetch",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -416,6 +441,10 @@
     {
       "name": "through2",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ts-jest",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "tslint",

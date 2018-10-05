@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as colors from 'colors';
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import yaml = require('js-yaml');
 
@@ -10,6 +9,7 @@ import { DocItemSet } from '../utils/DocItemSet';
 import { IYamlTocItem } from './IYamlTocFile';
 import { IYamlItem } from './IYamlApiFile';
 import { YamlDocumenter } from './YamlDocumenter';
+import { Text, FileSystem } from '@microsoft/node-core-library';
 
 interface ISnippetsFile {
   /**
@@ -25,13 +25,26 @@ interface ISnippetsFile {
 export class OfficeYamlDocumenter extends YamlDocumenter {
   private _snippets: ISnippetsFile;
 
+  // Default API Set URL when no product match is found.
+  private _apiSetUrlDefault: string = '/javascript/office/javascript-api-for-office';
+
+  // Hash set of API Set URLs based on product.
+  private _apiSetUrls: Object = {
+    'Excel': '/javascript/office/requirement-sets/excel-api-requirement-sets',
+    'OneNote': '/javascript/office/requirement-sets/onenote-api-requirement-sets',
+    'Visio': '/javascript/office/overview/visio-javascript-reference-overview',
+    'Outlook': '/javascript/office/requirement-sets/outlook-api-requirement-sets',
+    'Word': '/javascript/office/requirement-sets/word-api-requirement-sets'
+  };
+
   public constructor(docItemSet: DocItemSet, inputFolder: string) {
     super(docItemSet);
 
     const snippetsFilePath: string = path.join(inputFolder, 'snippets.yaml');
 
     console.log('Loading snippets from ' + snippetsFilePath);
-    const snippetsContent: string = fsx.readFileSync(snippetsFilePath).toString();
+
+    const snippetsContent: string = FileSystem.readFile(snippetsFilePath);
     this._snippets = yaml.load(snippetsContent, { filename: snippetsFilePath });
   }
 
@@ -55,30 +68,40 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
   protected onCustomizeYamlItem(yamlItem: IYamlItem): void { // override
     const nameWithoutPackage: string = yamlItem.uid.replace(/^[^.]+\./, '');
+    if (yamlItem.summary) {
+      yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
+      yamlItem.summary = this._fixBoldAndItalics(yamlItem.summary);
+      yamlItem.summary = this._fixCodeTicks(yamlItem.summary);
+    }
+    if (yamlItem.remarks) {
+      yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
+      yamlItem.remarks = this._fixBoldAndItalics(yamlItem.remarks);
+      yamlItem.remarks = this._fixCodeTicks(yamlItem.remarks);
+      yamlItem.remarks = this._fixEscapedCode(yamlItem.remarks);
+    }
+    if (yamlItem.syntax && yamlItem.syntax.parameters) {
+      yamlItem.syntax.parameters.forEach(part => {
+          if (part.description) {
+            part.description = this._fixCodeTicks(part.description);
+            part.description = this._fixBoldAndItalics(part.description);
+          }
+      });
+    }
 
     const snippets: string[] | undefined = this._snippets[nameWithoutPackage];
     if (snippets) {
       delete this._snippets[nameWithoutPackage];
-
-      if (!yamlItem.remarks) {
-        yamlItem.remarks = '';
-      }
-
-      yamlItem.remarks += '\n\n#### Examples\n';
-      for (const snippet of snippets) {
-        if (snippet.search(/await/) === -1) {
-          yamlItem.remarks += '\n```javascript\n' + snippet + '\n```\n';
-        } else {
-          yamlItem.remarks += '\n```typescript\n' + snippet + '\n```\n';
+      const snippetText: string = this._generateExampleSnippetText(snippets);
+      if (yamlItem.remarks) {
+        yamlItem.remarks += snippetText;
+      } else if (yamlItem.syntax && yamlItem.syntax.return) {
+        if (!yamlItem.syntax.return.description) {
+          yamlItem.syntax.return.description = '';
         }
+        yamlItem.syntax.return.description += snippetText;
+      } else {
+        yamlItem.remarks = snippetText;
       }
-    }
-
-    if (yamlItem.summary) {
-      yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
-    }
-    if (yamlItem.remarks) {
-      yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
     }
   }
 
@@ -89,18 +112,54 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     // Hyperlink it like this:
     // \[ [API set: ExcelApi 1.1](http://bing.com?type=excel) \]
     markup = markup.replace(/Api/, 'API');
-    if (uid.search(/Excel/i) !== -1) {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=excel) \\]`);
-    } else if (uid.search(/OneNote/i) !== -1) {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=onenote) \\]`);
-    } else if (uid.search(/Visio/i) !== -1) {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=visio) \\]`);
-    } else if (uid.search(/Outlook/i) !== -1) {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=outlook) \\]`);
-    } else if (uid.search(/Word/i) !== -1) {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com?type=word) \\]`);
-    } else {
-      return markup.replace(/\\\[(API set:[^\]]+)\\\]/, `\\[ [$1](http://bing.com) \\]`);
+    return markup.replace(/\\\[(API set:[^\]]+)\\\]/, '\\[ [$1](' + this._getApiSetUrl(uid) + ') \\]');
+  }
+
+  // Gets the link to the API set based on product context. Seeks a case-insensitve match in the hash set.
+  private _getApiSetUrl(uid: string): string {
+    for (const key of Object.keys(this._apiSetUrls)) {
+      const regexp: RegExp = new RegExp(key, 'i');
+      if (regexp.test(uid)) {
+          return this._apiSetUrls[key];
+      }
     }
+    return this._apiSetUrlDefault; // match not found.
+  }
+
+  private _fixBoldAndItalics(text: string): string {
+    return Text.replaceAll(text, '\\*', '*');
+  }
+
+  private _fixCodeTicks(text: string): string {
+    return Text.replaceAll(text, '\\`', '`');
+  }
+
+  private _fixEscapedCode(text: string): string {
+    const backtickIndex: number = text.indexOf('`');
+    if (text.indexOf('`', backtickIndex) > 0) {
+      text = Text.replaceAll(text, '=&gt;', '=>');
+      let x: number = text.indexOf('\\', backtickIndex);
+      while (x >= 0) {
+        text = text.replace(/\\([^\\])/, '$1');
+        x = text.indexOf('\\', x + 1);
+      }
+    }
+    return text;
+  }
+
+  private _generateExampleSnippetText(snippets: string[]): string {
+    const text: string[] = ['\n#### Examples\n'];
+    for (const snippet of snippets) {
+      if (snippet.search(/await/) === -1) {
+        text.push('```javascript');
+
+      } else {
+        text.push('```typescript');
+      }
+
+      text.push(snippet);
+      text.push('```');
+    }
+    return text.join('\n');
   }
 }

@@ -1,36 +1,36 @@
 {
   "name": "@microsoft/gulp-core-build-serve",
-  "version": "3.2.29",
+  "version": "3.2.56",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/gulp-core-build-serve"
   },
   "scripts": {
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.8.0",
+    "@microsoft/gulp-core-build": "3.8.24",
+    "@microsoft/node-core-library": "3.1.0",
     "@types/node": "8.5.8",
     "colors": "~1.2.1",
     "deasync": "~0.1.7",
     "express": "~4.16.2",
     "gulp": "~3.9.1",
     "gulp-connect": "~5.5.0",
-    "gulp-open": "~2.0.0",
-    "gulp-util": "~3.0.7",
+    "gulp-open": "~3.0.1",
     "node-forge": "~0.7.1",
     "sudo": "~1.0.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.38",
+    "@microsoft/rush-stack-compiler": "0.1.10",
+    "@microsoft/node-library-build": "5.0.15",
     "@types/express": "4.11.0",
     "@types/express-serve-static-core": "4.11.0",
     "@types/gulp": "3.8.32",
-    "@types/gulp-util": "3.0.30",
     "@types/mime": "0.0.29",
     "@types/node-forge": "0.6.8",
     "@types/orchestrator": "0.0.30",

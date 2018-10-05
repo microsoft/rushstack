@@ -1,33 +1,122 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { setTimeout } from 'timers';
+import { FileSystem } from './FileSystem';
+import { FileWriter } from './FileWriter';
+
+/**
+ * http://man7.org/linux/man-pages/man5/proc.5.html
+ * (22) starttime  %llu
+ * The time the process started after system boot. In kernels before Linux 2.6, this value was
+ * expressed in jiffies. Since Linux 2.6, the value is expressed in clock ticks (divide by
+ * sysconf(_SC_CLK_TCK)).
+ * The format for this field was %lu before Linux 2.6.
+ */
+const procStatStartTimePos: number = 22;
+
+/**
+ * Parses the process start time from the contents of a linux /proc/[pid]/stat file.
+ * @param stat The contents of a linux /proc/[pid]/stat file.
+ * @returns The process start time in jiffies, or undefined if stat has an unexpected format.
+ */
+export function getProcessStartTimeFromProcStat (stat: string): string | undefined {
+  // Parse the value at position procStatStartTimePos.
+  // We cannot just split stat on spaces, because value 2 may contain spaces.
+  // For example, when running the following Shell commands:
+  // > cp "$(which bash)" ./'bash 2)('
+  // > ./'bash 2)(' -c 'OWNPID=$BASHPID;cat /proc/$OWNPID/stat'
+  // 59389 (bash 2)() S 59358 59389 59358 34818 59389 4202496 329 0 0 0 0 0 0 0 20 0 1 0
+  // > rm -rf ./'bash 2)('
+  // The output shows a stat file such that value 2 contains spaces.
+  // To still umambiguously parse such output we assume no values after the second ends with a right parenthesis...
+
+  // trimRight to remove the trailing line terminator.
+  let values: string[] = stat.trimRight().split(' ');
+  let i: number = values.length - 1;
+  while (i >= 0 &&
+    // charAt returns an empty string if the index is out of bounds.
+    values[i].charAt(values[i].length - 1) !== ')'
+    ) {
+    i -= 1;
+  }
+  // i is the index of the last part of the second value (but i need not be 1).
+  if (i < 1) {
+    // Format of stat has changed.
+    return undefined;
+  }
+  const value2: string = values.slice(1, i + 1).join(' ');
+  values = [values[0], value2].concat(values.slice(i + 1));
+  if (values.length < procStatStartTimePos) {
+    // Older version of linux, or non-standard configuration of linux.
+    return undefined;
+  }
+  const startTimeJiffies: string = values[procStatStartTimePos - 1];
+  // In theory, the representations of start time returned by `cat /proc/[pid]/stat` and `ps -o lstart` can change
+  // while the system is running, but we assume this does not happen.
+  // So the caller can safely use this value as part of a unique process id (on the machine, without comparing
+  // accross reboots).
+  return startTimeJiffies;
+}
 
 /**
  * Helper function that is exported for unit tests only.
  * Returns undefined if the process doesn't exist with that pid.
  */
 export function getProcessStartTime(pid: number): string | undefined {
+  const pidString: string = pid.toString();
+  if (pid < 0 || pidString.indexOf('e') >= 0 || pidString.indexOf('E') >= 0) {
+    throw new Error(`"pid" is negative or too large`);
+  }
   let args: string[];
   if (process.platform === 'darwin') {
-    args = [`-p ${pid.toString()}`, '-o lstart'];
+    args = [`-p ${pidString}`, '-o lstart'];
   } else if (process.platform === 'linux') {
-    args = ['-p', pid.toString(), '-o', 'lstart'];
+    args = ['-p', pidString, '-o', 'lstart'];
   } else {
     throw new Error(`Unsupported system: ${process.platform}`);
   }
 
-  const psResult: string = child_process.spawnSync('ps', args).stdout.toString();
+  const psResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync('ps', args, {
+    encoding: 'utf8'
+  });
+  const psStdout: string = psResult.stdout;
 
-  // there was an error executing psresult
-  if (!psResult) {
+  // If no process with PID pid exists then the exit code is non-zero on linux but stdout is not empty.
+  // But if no process exists we do not want to fall back on /proc/*/stat to determine the process
+  // start time, so we we additionally test for !psStdout. NOTE: !psStdout evaluates to true if
+  // zero bytes are written to stdout.
+  if (psResult.status !== 0 && !psStdout && process.platform === 'linux') {
+    // Try to read /proc/[pid]/stat and get the value at position procStatStartTimePos.
+    let stat: undefined|string;
+    try {
+      stat = FileSystem.readFile(`/proc/${pidString}/stat`);
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        throw error;
+      }
+      // Either no process with PID pid exists, or this version/configuration of linux is non-standard.
+      // We assume the former.
+      return undefined;
+    }
+    if (stat !== undefined) {
+      const startTimeJiffies: string|undefined = getProcessStartTimeFromProcStat(stat);
+      if (startTimeJiffies === undefined) {
+        throw new Error(`Could not retrieve the start time of process ${pidString} from the OS because the `
+          + `contents of /proc/${pidString}/stat have an unexpected format`);
+      }
+      return startTimeJiffies;
+    }
+  }
+
+  // there was an error executing ps (zero bytes were written to stdout).
+  if (!psStdout) {
     throw new Error(`Unexpected output from "ps" command`);
   }
 
-  const psSplit: string[] = psResult.split('\n');
+  const psSplit: string[] = psStdout.split('\n');
 
   // successfuly able to run "ps", but no process was found
   if (psSplit[1] === '') {
@@ -78,7 +167,7 @@ export class LockFile {
    * @param resourceName - the name of the resource we are locking on. Should be an alphabetic string.
    */
   public static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefined {
-    fsx.mkdirsSync(resourceDir);
+    FileSystem.ensureFolder(resourceDir);
     if (process.platform === 'win32') {
       return LockFile._tryAcquireWindows(resourceDir, resourceName);
     } else if (process.platform === 'linux' || process.platform === 'darwin') {
@@ -138,7 +227,7 @@ export class LockFile {
     }
 
     const pidLockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
-    let lockFileDescriptor: number | undefined;
+    let lockFileHandle: FileWriter | undefined;
 
     let lockFile: LockFile;
 
@@ -146,16 +235,16 @@ export class LockFile {
       // open in write mode since if this file exists, it cannot be from the current process
       // TODO: This will malfunction if the same process tries to acquire two locks on the same file.
       // We should ideally maintain a dictionary of normalized acquired filenames
-      lockFileDescriptor = fsx.openSync(pidLockFilePath, 'w');
-      fsx.writeSync(lockFileDescriptor, startTime);
+      lockFileHandle = FileWriter.open(pidLockFilePath);
+      lockFileHandle.write(startTime);
 
-      const currentBirthTimeMs: number = fsx.statSync(pidLockFilePath).birthtime.getTime();
+      const currentBirthTimeMs: number = FileSystem.getStatistics(pidLockFilePath).birthtime.getTime();
 
       let smallestBirthTimeMs: number = currentBirthTimeMs;
       let smallestBirthTimePid: string = pid.toString();
 
       // now, scan the directory for all lockfiles
-      const files: string[] = fsx.readdirSync(resourceDir);
+      const files: string[] = FileSystem.readFolder(resourceDir);
 
       // look for anything ending with # then numbers and ".lock"
       const lockFileRegExp: RegExp = /^(.+)#([0-9]+)\.lock$/;
@@ -176,21 +265,21 @@ export class LockFile {
           const otherPidCurrentStartTime: string | undefined = LockFile._getStartTime(parseInt(otherPid, 10));
 
           let otherPidOldStartTime: string | undefined;
+          let otherBirthtimeMs: number | undefined;
           try {
-            otherPidOldStartTime = fsx.readFileSync(fileInFolderPath).toString();
+            otherPidOldStartTime = FileSystem.readFile(fileInFolderPath);
+            // check the timestamp of the file
+            otherBirthtimeMs = FileSystem.getStatistics(fileInFolderPath).birthtime.getTime();
           } catch (err) {
             // this means the file is probably deleted already
           }
-
-          // check the timestamp of the file
-          const otherBirthtimeMs: number = fsx.statSync(fileInFolderPath).birthtime.getTime();
 
           // if the otherPidOldStartTime is invalid, then we should look at the timestamp,
           // if this file was created after us, ignore it
           // if it was created within 1 second before us, then it could be good, so we
           //  will conservatively fail
           // otherwise it is an old lock file and will be deleted
-          if (otherPidOldStartTime === '') {
+          if (otherPidOldStartTime === '' && otherBirthtimeMs !== undefined) {
             if (otherBirthtimeMs > currentBirthTimeMs) {
               // ignore this file, he will be unable to get the lock since this process
               // will hold it
@@ -210,14 +299,14 @@ export class LockFile {
           // this means the process is no longer executing, delete the file
           if (!otherPidCurrentStartTime || otherPidOldStartTime !== otherPidCurrentStartTime) {
             // console.log(`Other pid ${otherPid} is no longer executing!`);
-            fsx.removeSync(fileInFolderPath);
+            FileSystem.deleteFile(fileInFolderPath);
             continue;
           }
 
           // console.log(`Pid ${otherPid} lockfile has birth time: ${otherBirthtimeMs}`);
           // console.log(`Pid ${pid} lockfile has birth time: ${currentBirthTimeMs}`);
           // this is a lockfile pointing at something valid
-          if (otherBirthtimeMs < smallestBirthTimeMs) {
+          if (otherBirthtimeMs !== undefined && otherBirthtimeMs < smallestBirthTimeMs) {
             smallestBirthTimeMs = otherBirthtimeMs;
             smallestBirthTimePid = otherPid;
           }
@@ -230,13 +319,13 @@ export class LockFile {
       }
 
       // we have the lock!
-      lockFile = new LockFile(lockFileDescriptor, pidLockFilePath, dirtyWhenAcquired);
-      lockFileDescriptor = undefined; // we have handed the descriptor off to the instance
+      lockFile = new LockFile(lockFileHandle, pidLockFilePath, dirtyWhenAcquired);
+      lockFileHandle = undefined; // we have handed the descriptor off to the instance
     } finally {
-      if (lockFileDescriptor) {
+      if (lockFileHandle) {
         // ensure our lock is closed
-        fsx.closeSync(lockFileDescriptor);
-        fsx.removeSync(pidLockFilePath);
+        lockFileHandle.close();
+        FileSystem.deleteFile(pidLockFilePath);
       }
     }
     return lockFile;
@@ -250,11 +339,11 @@ export class LockFile {
     const lockFilePath: string = LockFile.getLockFilePath(resourceDir, resourceName);
     let dirtyWhenAcquired: boolean = false;
 
-    let fileDescriptor: number | undefined;
+    let fileHandle: FileWriter | undefined;
     let lockFile: LockFile;
 
     try {
-      if (fsx.existsSync(lockFilePath)) {
+      if (FileSystem.exists(lockFilePath)) {
         dirtyWhenAcquired = true;
 
         // If the lockfile is held by an process with an exclusive lock, then removing it will
@@ -262,12 +351,12 @@ export class LockFile {
 
         // Otherwise, the lockfile is sitting on disk, but nothing is holding it, implying that
         // the last process to hold it died.
-        fsx.unlinkSync(lockFilePath);
+        FileSystem.deleteFile(lockFilePath);
       }
 
       try {
         // Attempt to open an exclusive lockfile
-        fileDescriptor = fsx.openSync(lockFilePath, 'wx');
+        fileHandle = FileWriter.open(lockFilePath, { exclusive: true });
       } catch (error) {
         // we tried to delete the lock, but something else is holding it,
         // (probably an active process), therefore we are unable to create a lock
@@ -275,11 +364,11 @@ export class LockFile {
       }
 
       // Ensure we can hand off the file descriptor to the lockfile
-      lockFile = new LockFile(fileDescriptor, lockFilePath, dirtyWhenAcquired);
-      fileDescriptor = undefined;
+      lockFile = new LockFile(fileHandle, lockFilePath, dirtyWhenAcquired);
+      fileHandle = undefined;
     } finally {
-      if (fileDescriptor) {
-        fsx.closeSync(fileDescriptor);
+      if (fileHandle) {
+        fileHandle.close();
       }
     }
 
@@ -295,9 +384,9 @@ export class LockFile {
       throw new Error(`The lock for file "${path.basename(this._filePath)}" has already been released.`);
     }
 
-    fsx.closeSync(this._fileDescriptor!);
-    fsx.removeSync(this._filePath);
-    this._fileDescriptor = undefined;
+    this._fileWriter!.close();
+    FileSystem.deleteFile(this._filePath);
+    this._fileWriter = undefined;
   }
 
   /**
@@ -319,11 +408,11 @@ export class LockFile {
    * Returns true if this lock is currently being held.
    */
   public get isReleased(): boolean {
-    return this._fileDescriptor === undefined;
+    return this._fileWriter === undefined;
   }
 
   private constructor(
-    private _fileDescriptor: number | undefined,
+    private _fileWriter: FileWriter | undefined,
     private _filePath: string,
     private _dirtyWhenAcquired: boolean) {
   }

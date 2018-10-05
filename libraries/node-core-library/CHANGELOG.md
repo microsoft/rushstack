@@ -1,6 +1,103 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 04 May 2018 00:42:38 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Sep 2018 16:05:35 GMT and should not be manually modified.
+
+## 3.1.0
+Fri, 28 Sep 2018 16:05:35 GMT
+
+### Minor changes
+
+- Add `Path.isUnderOrEquals()`
+
+## 3.0.1
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 3.0.0
+Wed, 29 Aug 2018 06:36:50 GMT
+
+### Breaking changes
+
+- (Breaking API change) The FileSystem move/copy/createLink operations now require the source/target parameters to be explicitly specified, to avoid confusion
+
+## 2.2.1
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
+
+## 2.2.0
+Wed, 22 Aug 2018 20:58:58 GMT
+
+### Minor changes
+
+- Add features to JsonFile API to update an existing JSON file while preserving comments and whitespace
+
+## 2.1.1
+Wed, 22 Aug 2018 16:03:25 GMT
+
+### Patches
+
+- Fix an issue where Executable.spawnSync() was returning SpawnSyncReturns<Buffer> instead of SpawnSyncReturns<string>
+- Fix an issue where Executable.spawnSync() did not support command paths containing spaces
+
+## 2.1.0
+Thu, 09 Aug 2018 21:03:22 GMT
+
+### Minor changes
+
+- Add a new API "Executable" for spawning child processes
+
+## 2.0.0
+Thu, 26 Jul 2018 16:04:17 GMT
+
+### Breaking changes
+
+- Replace IFileModeBits with a more flexible PosixModeBits enum
+- Rename FileSystem.changePermissionBits() to changePosixModeBits()
+
+### Minor changes
+
+- Add new APIs FileSystem.getPosixModeBits() and FileSystem.formatPosixModeBits()
+
+## 1.5.0
+Tue, 03 Jul 2018 21:03:31 GMT
+
+### Minor changes
+
+- Add a FileSystem API that wraps and replaces fs and fs-extra
+
+## 1.4.1
+Thu, 21 Jun 2018 08:27:29 GMT
+
+### Patches
+
+- issue #705: fallback on linux to /proc/{n}/stat if 'ps -p 1 -o lstart' is not supported
+
+## 1.4.0
+Fri, 08 Jun 2018 08:43:52 GMT
+
+### Minor changes
+
+- Add Text.truncateWithEllipsis() API
+
+## 1.3.2
+Thu, 31 May 2018 01:39:33 GMT
+
+### Patches
+
+- Add missing "repository" property in IPackageJSON.
+
+## 1.3.1
+Tue, 15 May 2018 02:26:45 GMT
+
+### Patches
+
+- Fix an issue where the PackageName class could not parse the package name "Base64"
 
 ## 1.3.0
 Fri, 04 May 2018 00:42:38 GMT

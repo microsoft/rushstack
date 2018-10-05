@@ -2,6 +2,341 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.3.1",
+      "tag": "@microsoft/rush_v5.3.1",
+      "date": "Wed, 03 Oct 2018 00:01:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where after running \"rush add\" (after successfully running \"rush install\"), the new package was not being installed or linked."
+          },
+          {
+            "comment": "Fix an incorrect default in the \"rush init\" template comments"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.0",
+      "tag": "@microsoft/rush_v5.3.0",
+      "date": "Fri, 28 Sep 2018 20:36:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add \"ensureConsistentVersions\" configuration which runs \"rush check\" before certain commands"
+          },
+          {
+            "comment": "Add a new command \"rush add\" for managing package.json dependencies"
+          },
+          {
+            "comment": "Rush now detects some package.json errors such as the same package name being listed in both \"dependencies\" and \"optionalDependencies\""
+          },
+          {
+            "comment": "Update \"rush link\" to use relative paths when creating symlinks, to facilitate building Docker images"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.1",
+      "tag": "@microsoft/rush_v5.2.1",
+      "date": "Thu, 13 Sep 2018 21:57:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush init\" failed because its \".gitignore\" template was excluded from the package"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.2.0",
+      "tag": "@microsoft/rush_v5.2.0",
+      "date": "Thu, 13 Sep 2018 19:34:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a \"rush init\" command for scaffolding new monorepo folders"
+          },
+          {
+            "comment": "Allow \"rush scan\" to be used without a rush.json configuration"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.1.0",
+      "tag": "@microsoft/rush_v5.1.0",
+      "date": "Sat, 08 Sep 2018 20:57:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update \"repository\" field in package.json"
+          },
+          {
+            "comment": "Add support for PNPM's --strict-peer-dependencies feature"
+          },
+          {
+            "comment": "Add support for the Yarn package manager (this is a \"beta\" feature; please report any issues you encounter!)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.6",
+      "tag": "@microsoft/rush_v5.0.6",
+      "date": "Fri, 31 Aug 2018 23:10:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add \"--prefer-frozen-shrinkwrap false\" to the \"pnpm install\" command line as a workaround for https://github.com/pnpm/pnpm/issues/1342"
+          },
+          {
+            "comment": "Skip validation of the Git email address if Git is not installed, or if rush.json isn't in a Git working directory, or if no policy was defined"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.5",
+      "tag": "@microsoft/rush_v5.0.5",
+      "date": "Wed, 29 Aug 2018 07:05:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where rush install will fail if git isn't installed."
+          },
+          {
+            "comment": "Fix an issue where \"rush -h\" didn't print help for the \"build\" and \"rebuild\" commands, unless invoked under a Rush folder"
+          },
+          {
+            "comment": "Improve command-line help for \"rush build\""
+          },
+          {
+            "comment": "Fix regression causing \"ERROR: EEXIST: file already exists\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.4",
+      "tag": "@microsoft/rush_v5.0.4",
+      "date": "Thu, 23 Aug 2018 00:08:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix capitalization of new \"filePath\" API property"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.3",
+      "tag": "@microsoft/rush_v5.0.3",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "git st"
+          },
+          {
+            "comment": "When saving config files, Rush should include the \"$schema\" directive"
+          },
+          {
+            "comment": "Fix a regression where \"rush version\" sometimes failed with \"The value for entries[0].comments.dependency[0].author is undefined\""
+          },
+          {
+            "comment": "When updating common-versions.json and version-policies.json, preserve the existing comments and whitespace"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.1.1` to `2.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `4.4.9` to `4.4.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.2",
+      "tag": "@microsoft/rush_v5.0.2",
+      "date": "Sat, 18 Aug 2018 01:27:39 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.0.1",
+      "tag": "@microsoft/rush_v5.0.1",
+      "date": "Sat, 18 Aug 2018 01:21:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix typo in rush error message"
+          },
+          {
+            "comment": "Add a flag to \"rush install\" which runs the package manager in a verbose logging mode."
+          },
+          {
+            "comment": "Remove package.json from rush-lib constants. Add public API for creating changefiles."
+          },
+          {
+            "comment": "Fix an issue where \"rush version\" would fail with a useless error message if the Git user email is not specified."
+          },
+          {
+            "comment": "Update lodash."
+          },
+          {
+            "comment": "Add a \"--network-concurrency\" command-line option to help troubleshoot the ECONNRESET error that people occasionally have reported ( https://github.com/pnpm/pnpm/issues/1230 )"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.0.0",
+      "tag": "@microsoft/rush_v5.0.0",
+      "date": "Sat, 30 Jun 2018 00:57:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update peerDependencies when bumping package versions (issue #668)"
+          },
+          {
+            "comment": "Add allowedAlternativeVersions setting to common-versions.json config file"
+          },
+          {
+            "comment": "Fix an issue where PNPM shrinkwrap file parser did not handle relative/absolute version paths correctly"
+          },
+          {
+            "comment": "Print each project's build time during the summary"
+          },
+          {
+            "comment": "Fix an issue where the common/temp/.npmrc file could contain missing environment variable tokens"
+          },
+          {
+            "comment": "Rush now creates common/scripts/install-run.js and install-run-rush.js scripts to formalize how CI jobs bootstrap tooling dependencies"
+          },
+          {
+            "comment": "Enable the \"rush rebuild\" and \"rush build\" commands to work without a Git repository"
+          },
+          {
+            "comment": "Add support for RUSH_TEMP_FOLDER environment variable to customize the location of Rush's commonTempFolder"
+          },
+          {
+            "comment": "Fix an issue where if package-deps.json fails to parse, the build fails"
+          },
+          {
+            "comment": "Improve \"rush link\" to create node_modules/.bin launchers for local project dependencies (not just installed external dependencies)"
+          },
+          {
+            "comment": "Update rush.json schema to allow requested versions (e.g. Rush or the package manager) to be a prerelease SemVer pattern"
+          },
+          {
+            "comment": "Fix annoyance where \"rush update\" (formerly \"rush generate\") would always change the integrity hash for tarball entries in shrinkwrap.yaml"
+          },
+          {
+            "comment": "Fix an issue where Rush's .npmrc configuration was not honored when spawned via an NPM lifecycle script; in general the process environment is now more isolated"
+          },
+          {
+            "comment": "Rush now warns when phantom node_modules folders are found"
+          },
+          {
+            "comment": "Relax the rush.json version check for rush-lib; future versions are now accepted as long as the major/minor parts match"
+          },
+          {
+            "comment": "Fix a regression where builds would sometimes fail with a zero exit code due to NodeJS's handling of uncaught Promise rejections"
+          },
+          {
+            "comment": "Improve \"rush check\" to ignore peer dependencies, since they don't need to be consistent with everything else (and generally won't be)"
+          },
+          {
+            "comment": "(Breaking change) Replace pinned-versions.json with a more general common-versions.json that can track other cross-project dependency versions"
+          },
+          {
+            "comment": "(Breaking change) In common-versions.json, rename the \"pinned versions\" concept to \"preferred versions\", and separate the XStitch versions into their own field"
+          },
+          {
+            "comment": "Report an error if the package manager version is too old"
+          },
+          {
+            "comment": "(Breaking change) Redesign command-line.json config file to support other command types"
+          },
+          {
+            "comment": "(Breaking change) Rename custom-commands.json to be command-line.json"
+          },
+          {
+            "comment": "Add support for \"global\" commands in custom-commands.json"
+          },
+          {
+            "comment": "When using PNPM, remove some NPM bug workarounds that probably caused problems for \"pnpm install\""
+          },
+          {
+            "comment": "Add a lock file to avoid race conditions when the Rush version selector is installing rush-lib"
+          },
+          {
+            "comment": "Fix a problem where the \"rush-recycler\" folder was not getting cleaned on macOS"
+          },
+          {
+            "comment": "(Breaking change) Remove unused RushConfiguration.homeFolder API"
+          },
+          {
+            "comment": "Add RUSH_PREVIEW_VERSION environment variable for piloting new versions of Rush"
+          },
+          {
+            "comment": "Add new command \"rush purge\" for cleaning up temporary files"
+          },
+          {
+            "comment": "Fix an issue where rush-recycler wasn't emptied if a folder exceeded the Windows MAX_PATH"
+          },
+          {
+            "comment": "Minor improvements for logging"
+          },
+          {
+            "comment": "When installing tools, always copy the repo's .npmrc file to the target folder"
+          },
+          {
+            "comment": "(Breaking change) Replace the \"rush generate\" command with a new command \"rush update\""
+          },
+          {
+            "comment": "(Breaking change) Replace \"rush install --clean\" and \"--full-clean\" with \"rush install --purge\""
+          },
+          {
+            "comment": "Improve lifecycle script execution to support Unix slashes in the command name when running on Windows"
+          },
+          {
+            "comment": "Add \"rushx\" binary for single-project commands"
+          },
+          {
+            "comment": "(Breaking change) Eliminate extra letters from shortened command line options (renamed \"-cpo\" to \"-o\", and removed \"-vp\" and \"-pn\")"
+          },
+          {
+            "comment": "Add check for unpublished releases"
+          },
+          {
+            "comment": "Add a \"--to-version-policy\" option for \"rush rebuild\" to allow building only a particular version policy"
+          },
+          {
+            "comment": "Add --release-type parameter to \"rush publish\" to be able to create different tarballs based on release type"
+          },
+          {
+            "comment": "Add \"--ensure-version-policy\" option for \"rush version\" to support updating the versions directly"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.3.3",
+      "tag": "@microsoft/rush_v4.3.3",
+      "date": "Thu, 31 May 2018 21:57:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove the old undocumented \"rush purge\" command, since it conflicts with Rush 5"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.3.2",
       "tag": "@microsoft/rush_v4.3.2",
       "date": "Mon, 26 Mar 2018 19:12:42 GMT",

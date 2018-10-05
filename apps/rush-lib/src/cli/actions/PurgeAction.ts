@@ -7,10 +7,9 @@ import * as os from 'os';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
-import { Event } from '../../data/EventHooks';
-import { RushCommandLineParser } from './RushCommandLineParser';
+import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Stopwatch } from '../../utilities/Stopwatch';
-import { PurgeManager } from '../logic/PurgeManager';
+import { PurgeManager } from '../../logic/PurgeManager';
 
 export class PurgeAction extends BaseRushAction {
   private _unsafeParameter: CommandLineFlagParameter;
@@ -19,7 +18,8 @@ export class PurgeAction extends BaseRushAction {
     super({
       actionName: 'purge',
       summary: 'For diagnostic purposes, use this command to delete caches and other temporary files used by Rush',
-      documentation: 'The "rush purge" command is used to delete temporary files created by Rush.',
+      documentation: 'The "rush purge" command is used to delete temporary files created by Rush.  This is'
+        + ' useful if you are having problems and suspect that cache files may be corrupt.',
       parser
     });
   }
@@ -37,8 +37,6 @@ export class PurgeAction extends BaseRushAction {
     return Promise.resolve().then(() => {
       const stopwatch: Stopwatch = Stopwatch.start();
 
-      this.eventHooksManager.handle(Event.preRushInstall);
-
       const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration);
 
       if (this._unsafeParameter.value!) {
@@ -53,5 +51,4 @@ export class PurgeAction extends BaseRushAction {
         + ` (${stopwatch.toString()})`));
     });
   }
-
 }

@@ -1,6 +1,239 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Fri, 11 May 2018 22:43:14 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Sep 2018 16:05:35 GMT and should not be manually modified.
+
+## 4.4.8
+Fri, 28 Sep 2018 16:05:35 GMT
+
+*Version update only*
+
+## 4.4.7
+Wed, 26 Sep 2018 21:39:40 GMT
+
+*Version update only*
+
+## 4.4.6
+Mon, 24 Sep 2018 23:06:40 GMT
+
+*Version update only*
+
+## 4.4.5
+Mon, 24 Sep 2018 16:04:28 GMT
+
+*Version update only*
+
+## 4.4.4
+Fri, 21 Sep 2018 16:04:42 GMT
+
+*Version update only*
+
+## 4.4.3
+Thu, 20 Sep 2018 23:57:21 GMT
+
+*Version update only*
+
+## 4.4.2
+Tue, 18 Sep 2018 21:04:55 GMT
+
+*Version update only*
+
+## 4.4.1
+Mon, 10 Sep 2018 23:23:01 GMT
+
+*Version update only*
+
+## 4.4.0
+Thu, 06 Sep 2018 21:04:43 GMT
+
+### Minor changes
+
+- Upgrade PostCSS related packages to newest versions.
+
+## 4.3.54
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 4.3.53
+Tue, 04 Sep 2018 21:34:10 GMT
+
+*Version update only*
+
+## 4.3.52
+Mon, 03 Sep 2018 16:04:46 GMT
+
+*Version update only*
+
+## 4.3.51
+Fri, 31 Aug 2018 00:11:01 GMT
+
+### Patches
+
+- Include @types/gulp as a non-dev dependency.
+
+## 4.3.50
+Thu, 30 Aug 2018 22:47:34 GMT
+
+*Version update only*
+
+## 4.3.49
+Thu, 30 Aug 2018 19:23:16 GMT
+
+*Version update only*
+
+## 4.3.48
+Thu, 30 Aug 2018 18:45:12 GMT
+
+*Version update only*
+
+## 4.3.47
+Thu, 30 Aug 2018 04:42:01 GMT
+
+*Version update only*
+
+## 4.3.46
+Thu, 30 Aug 2018 04:24:41 GMT
+
+*Version update only*
+
+## 4.3.45
+Wed, 29 Aug 2018 21:43:23 GMT
+
+*Version update only*
+
+## 4.3.44
+Wed, 29 Aug 2018 20:34:33 GMT
+
+*Version update only*
+
+## 4.3.43
+Wed, 29 Aug 2018 06:36:50 GMT
+
+*Version update only*
+
+## 4.3.42
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
+
+## 4.3.41
+Wed, 22 Aug 2018 20:58:58 GMT
+
+*Version update only*
+
+## 4.3.40
+Wed, 22 Aug 2018 16:03:25 GMT
+
+*Version update only*
+
+## 4.3.39
+Tue, 21 Aug 2018 16:04:38 GMT
+
+*Version update only*
+
+## 4.3.38
+Thu, 09 Aug 2018 21:58:02 GMT
+
+*Version update only*
+
+## 4.3.37
+Thu, 09 Aug 2018 21:03:22 GMT
+
+*Version update only*
+
+## 4.3.36
+Thu, 09 Aug 2018 16:04:24 GMT
+
+*Version update only*
+
+## 4.3.35
+Tue, 07 Aug 2018 22:27:31 GMT
+
+*Version update only*
+
+## 4.3.34
+Thu, 26 Jul 2018 23:53:43 GMT
+
+*Version update only*
+
+## 4.3.33
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 4.3.32
+Wed, 25 Jul 2018 21:02:57 GMT
+
+*Version update only*
+
+## 4.3.31
+Fri, 20 Jul 2018 16:04:52 GMT
+
+*Version update only*
+
+## 4.3.30
+Tue, 17 Jul 2018 16:02:52 GMT
+
+*Version update only*
+
+## 4.3.29
+Fri, 13 Jul 2018 19:04:50 GMT
+
+*Version update only*
+
+## 4.3.28
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 4.3.27
+Fri, 29 Jun 2018 02:56:51 GMT
+
+*Version update only*
+
+## 4.3.26
+Sat, 23 Jun 2018 02:21:20 GMT
+
+*Version update only*
+
+## 4.3.25
+Fri, 22 Jun 2018 16:05:15 GMT
+
+*Version update only*
+
+## 4.3.24
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 4.3.23
+Tue, 19 Jun 2018 19:35:11 GMT
+
+*Version update only*
+
+## 4.3.22
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 4.3.21
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
+
+## 4.3.20
+Tue, 15 May 2018 02:26:45 GMT
+
+*Version update only*
+
+## 4.3.19
+Tue, 15 May 2018 00:18:10 GMT
+
+*Version update only*
 
 ## 4.3.18
 Fri, 11 May 2018 22:43:14 GMT

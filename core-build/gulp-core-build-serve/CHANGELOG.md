@@ -1,6 +1,149 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Fri, 11 May 2018 22:43:14 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Sep 2018 16:05:35 GMT and should not be manually modified.
+
+## 3.2.56
+Fri, 28 Sep 2018 16:05:35 GMT
+
+*Version update only*
+
+## 3.2.55
+Wed, 26 Sep 2018 21:39:40 GMT
+
+*Version update only*
+
+## 3.2.54
+Mon, 24 Sep 2018 23:06:40 GMT
+
+*Version update only*
+
+## 3.2.53
+Mon, 24 Sep 2018 16:04:28 GMT
+
+*Version update only*
+
+## 3.2.52
+Fri, 21 Sep 2018 16:04:42 GMT
+
+*Version update only*
+
+## 3.2.51
+Thu, 20 Sep 2018 23:57:21 GMT
+
+*Version update only*
+
+## 3.2.50
+Tue, 18 Sep 2018 21:04:55 GMT
+
+*Version update only*
+
+## 3.2.49
+Mon, 10 Sep 2018 23:23:01 GMT
+
+*Version update only*
+
+## 3.2.48
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 3.2.47
+Tue, 04 Sep 2018 21:34:10 GMT
+
+*Version update only*
+
+## 3.2.46
+Mon, 03 Sep 2018 16:04:45 GMT
+
+*Version update only*
+
+## 3.2.45
+Thu, 30 Aug 2018 19:23:16 GMT
+
+*Version update only*
+
+## 3.2.44
+Thu, 30 Aug 2018 18:45:12 GMT
+
+*Version update only*
+
+## 3.2.43
+Wed, 29 Aug 2018 21:43:23 GMT
+
+*Version update only*
+
+## 3.2.42
+Wed, 29 Aug 2018 06:36:50 GMT
+
+*Version update only*
+
+## 3.2.41
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
+
+## 3.2.40
+Wed, 22 Aug 2018 20:58:58 GMT
+
+*Version update only*
+
+## 3.2.39
+Wed, 22 Aug 2018 16:03:25 GMT
+
+*Version update only*
+
+## 3.2.38
+Thu, 09 Aug 2018 21:03:22 GMT
+
+*Version update only*
+
+## 3.2.37
+Tue, 07 Aug 2018 22:27:31 GMT
+
+### Patches
+
+- Upgrade gulp-open to elimiante security warning
+
+## 3.2.36
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 3.2.35
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 3.2.34
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 3.2.33
+Wed, 13 Jun 2018 16:05:21 GMT
+
+### Patches
+
+- Pass the hostname from serve.json to gulpConnect.server()
+
+## 3.2.32
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 3.2.31
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
+
+## 3.2.30
+Tue, 15 May 2018 02:26:45 GMT
+
+*Version update only*
 
 ## 3.2.29
 Fri, 11 May 2018 22:43:14 GMT

@@ -11,6 +11,13 @@ export {
   FileConstants,
   FolderConstants
 } from './Constants';
+export {
+  ExecutableStdioStreamMapping,
+  ExecutableStdioMapping,
+  IExecutableResolveOptions,
+  IExecutableSpawnSyncOptions,
+  Executable
+} from './Executable';
 export { FileDiffTest } from './FileDiffTest';
 export {
   IPackageJson,
@@ -35,6 +42,7 @@ export {
 export {
   MapExtensions
 } from './MapExtensions';
+export { PosixModeBits } from './PosixModeBits';
 export {
   ProtectableMap,
   IProtectableMapParameters
@@ -45,4 +53,19 @@ export {
 } from './PackageJsonLookup';
 export { PackageName, IParsedPackageName, IParsedPackageNameOrError } from './PackageName';
 export { Path } from './Path';
-export { Text } from './Text';
+export { Text, NewlineKind } from './Text';
+export {
+  FileSystem,
+  IFileSystemReadFolderOptions,
+  IFileSystemWriteFileOptions,
+  IFileSystemReadFileOptions,
+  IFileSystemMoveOptions,
+  IFileSystemCopyFileOptions,
+  IFileSystemDeleteFileOptions,
+  IFileSystemUpdateTimeParameters,
+  IFileSystemCreateLinkOptions
+} from './FileSystem';
+export {
+  FileWriter,
+  IFileWriterFlags
+} from './FileWriter';

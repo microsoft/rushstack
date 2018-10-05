@@ -1,6 +1,233 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Fri, 11 May 2018 22:43:14 GMT and should not be manually modified.
+This log was last generated on Fri, 28 Sep 2018 16:05:35 GMT and should not be manually modified.
+
+## 1.8.15
+Fri, 28 Sep 2018 16:05:35 GMT
+
+*Version update only*
+
+## 1.8.14
+Wed, 26 Sep 2018 21:39:40 GMT
+
+*Version update only*
+
+## 1.8.13
+Mon, 24 Sep 2018 23:06:40 GMT
+
+*Version update only*
+
+## 1.8.12
+Mon, 24 Sep 2018 16:04:28 GMT
+
+*Version update only*
+
+## 1.8.11
+Fri, 21 Sep 2018 16:04:42 GMT
+
+*Version update only*
+
+## 1.8.10
+Thu, 20 Sep 2018 23:57:21 GMT
+
+*Version update only*
+
+## 1.8.9
+Tue, 18 Sep 2018 21:04:55 GMT
+
+*Version update only*
+
+## 1.8.8
+Mon, 10 Sep 2018 23:23:01 GMT
+
+*Version update only*
+
+## 1.8.7
+Thu, 06 Sep 2018 01:25:26 GMT
+
+### Patches
+
+- Update "repository" field in package.json
+
+## 1.8.6
+Tue, 04 Sep 2018 21:34:10 GMT
+
+*Version update only*
+
+## 1.8.5
+Mon, 03 Sep 2018 16:04:46 GMT
+
+*Version update only*
+
+## 1.8.4
+Thu, 30 Aug 2018 22:47:34 GMT
+
+*Version update only*
+
+## 1.8.3
+Thu, 30 Aug 2018 19:23:16 GMT
+
+### Patches
+
+- Fix an issue where the "lib-es6" directory wasn't published.
+
+## 1.8.2
+Thu, 30 Aug 2018 18:45:12 GMT
+
+*Version update only*
+
+## 1.8.1
+Thu, 30 Aug 2018 04:42:01 GMT
+
+### Patches
+
+- Fix a build issue.
+
+## 1.8.0
+Thu, 30 Aug 2018 04:24:41 GMT
+
+### Minor changes
+
+- Add esnext-flavor output.
+
+## 1.7.84
+Wed, 29 Aug 2018 21:43:23 GMT
+
+*Version update only*
+
+## 1.7.83
+Wed, 29 Aug 2018 20:34:33 GMT
+
+### Patches
+
+- Fix an issue where the lib-amd folder was missing.
+
+## 1.7.82
+Wed, 29 Aug 2018 06:36:50 GMT
+
+*Version update only*
+
+## 1.7.81
+Thu, 23 Aug 2018 18:18:53 GMT
+
+### Patches
+
+- Republish all packages in web-build-tools to resolve GitHub issue #782
+
+## 1.7.80
+Wed, 22 Aug 2018 20:58:58 GMT
+
+*Version update only*
+
+## 1.7.79
+Wed, 22 Aug 2018 16:03:25 GMT
+
+*Version update only*
+
+## 1.7.78
+Tue, 21 Aug 2018 16:04:38 GMT
+
+*Version update only*
+
+## 1.7.77
+Thu, 09 Aug 2018 21:58:02 GMT
+
+*Version update only*
+
+## 1.7.76
+Thu, 09 Aug 2018 21:03:22 GMT
+
+*Version update only*
+
+## 1.7.75
+Thu, 09 Aug 2018 16:04:24 GMT
+
+*Version update only*
+
+## 1.7.74
+Tue, 07 Aug 2018 22:27:31 GMT
+
+*Version update only*
+
+## 1.7.73
+Thu, 26 Jul 2018 23:53:43 GMT
+
+*Version update only*
+
+## 1.7.72
+Thu, 26 Jul 2018 16:04:17 GMT
+
+*Version update only*
+
+## 1.7.71
+Wed, 25 Jul 2018 21:02:57 GMT
+
+*Version update only*
+
+## 1.7.70
+Fri, 20 Jul 2018 16:04:52 GMT
+
+*Version update only*
+
+## 1.7.69
+Tue, 17 Jul 2018 16:02:52 GMT
+
+*Version update only*
+
+## 1.7.68
+Fri, 13 Jul 2018 19:04:50 GMT
+
+*Version update only*
+
+## 1.7.67
+Tue, 03 Jul 2018 21:03:31 GMT
+
+*Version update only*
+
+## 1.7.66
+Fri, 29 Jun 2018 02:56:51 GMT
+
+*Version update only*
+
+## 1.7.65
+Sat, 23 Jun 2018 02:21:20 GMT
+
+*Version update only*
+
+## 1.7.64
+Fri, 22 Jun 2018 16:05:15 GMT
+
+*Version update only*
+
+## 1.7.63
+Thu, 21 Jun 2018 08:27:29 GMT
+
+*Version update only*
+
+## 1.7.62
+Tue, 19 Jun 2018 19:35:11 GMT
+
+*Version update only*
+
+## 1.7.61
+Fri, 08 Jun 2018 08:43:52 GMT
+
+*Version update only*
+
+## 1.7.60
+Thu, 31 May 2018 01:39:33 GMT
+
+*Version update only*
+
+## 1.7.59
+Tue, 15 May 2018 02:26:45 GMT
+
+*Version update only*
+
+## 1.7.58
+Tue, 15 May 2018 00:18:10 GMT
+
+*Version update only*
 
 ## 1.7.57
 Fri, 11 May 2018 22:43:14 GMT

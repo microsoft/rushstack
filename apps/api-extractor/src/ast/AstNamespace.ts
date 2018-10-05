@@ -31,7 +31,13 @@ export class AstNamespace extends AstModule {
   constructor(options: IAstItemOptions) {
     super(options);
     this.kind = AstItemKind.Namespace;
-    this.name = options.declarationSymbol.name;
+
+    // NOTE: For this.name, we keep the default this.exportSymbol.name because when we used
+    // options.declarationSymbol.name, this case was mishandled:
+    //
+    //  import { sub } from './sub'; export { sub };
+    //
+    // For details, see: https://github.com/Microsoft/web-build-tools/pull/773
 
     const exportSymbols: ts.Symbol[] = this.typeChecker.getExportsOfModule(this.declarationSymbol);
     if (exportSymbols) {

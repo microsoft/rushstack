@@ -1,16 +1,16 @@
 {
   "name": "@microsoft/rush-lib",
-  "version": "5.0.0-dev.17",
+  "version": "5.3.1",
   "description": "A library for writing scripts that interact with the Rush tool",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/rush-lib"
   },
   "engines": {
     "node": ">=5.6.0"
   },
   "engineStrict": true,
-  "homepage": "http://aka.ms/rush",
+  "homepage": "https://rushjs.io",
   "main": "lib/index.js",
   "typings": "dist/rush-lib.d.ts",
   "tsdoc": {
@@ -21,23 +21,25 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "1.3.0",
-    "@microsoft/package-deps-hash": "2.2.38",
-    "@microsoft/stream-collator": "2.2.39",
-    "@microsoft/ts-command-line": "4.1.0",
+    "@microsoft/node-core-library": "3.1.0",
+    "@microsoft/package-deps-hash": "2.2.79",
+    "@microsoft/stream-collator": "2.2.79",
+    "@microsoft/ts-command-line": "4.2.2",
     "@pnpm/link-bins": "~1.0.1",
     "@pnpm/logger": "~1.0.1",
+    "@yarnpkg/lockfile": "~1.0.2",
     "builtins": "~1.0.3",
     "colors": "~1.2.1",
-    "fs-extra": "~5.0.0",
     "git-repo-info": "~1.1.4",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
+    "https-proxy-agent": "~2.2.1",
     "inquirer": "~1.2.1",
     "js-yaml": "~3.9.1",
     "jju": "~1.3.0",
-    "lodash": "~4.15.0",
+    "lodash": "~4.17.5",
     "minimatch": "~3.0.2",
+    "node-fetch": "~2.1.2",
     "npm-package-arg": "~5.1.2",
     "read-package-tree": "~5.1.5",
     "rimraf": "~2.5.4",
@@ -48,16 +50,17 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "4.3.38",
-    "@types/fs-extra": "5.0.1",
+    "@microsoft/rush-stack-compiler": "0.1.10",
+    "@microsoft/node-library-build": "5.0.15",
     "@types/node": "8.5.8",
+    "@types/node-fetch": "1.6.9",
     "@types/tar": "4.0.0",
     "@types/z-schema": "3.16.31",
     "gulp": "~3.9.1",
     "@types/glob": "5.0.30",
     "@types/jest": "21.1.10",
     "@types/js-yaml": "3.9.1",
-    "@types/lodash": "4.14.74",
+    "@types/lodash": "4.14.116",
     "@types/minimatch": "2.0.29",
     "@types/semver": "5.3.33"
   }

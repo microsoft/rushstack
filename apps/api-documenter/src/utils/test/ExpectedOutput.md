@@ -38,3 +38,4 @@ HTML escape: &amp;quot;
 
 3 or more hyphens: - -- \-\-\- \-\-\-- \-\-\--- \-\-\-\-\-\-
 
+<b>bold</b>

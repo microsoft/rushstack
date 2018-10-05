@@ -57,40 +57,37 @@ enum BumpType {
 }
 
 // @public
-class ChangeFile {
-  // WARNING: The type "IChangeFile" needs to be exported by the package (e.g. added to index.ts)
-  // @internal
-  constructor(changeFileData: IChangeFile, rushConfiguration: RushConfiguration);
-  addChange(data: IChangeInfo): void;
-  generatePath(): string;
-  getChanges(packageName: string): IChangeInfo[];
-  writeSync(): void;
-}
-
-// @public
-enum ChangeType {
-  // (undocumented)
-  dependency = 1,
-  // (undocumented)
-  hotfix = 2,
-  // (undocumented)
-  major = 5,
-  // (undocumented)
-  minor = 4,
-  // (undocumented)
-  none = 0,
-  // (undocumented)
-  patch = 3
+class ChangeManager {
+  static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 
 // @public
 class CommonVersionsConfiguration {
   readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
+  readonly filePath: string;
   getAllPreferredVersions(): Map<string, string>;
   static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
   readonly preferredVersions: Map<string, string>;
   save(): void;
   readonly xstitchPreferredVersions: Map<string, string>;
+}
+
+// @beta (undocumented)
+enum DependencyType {
+  // (undocumented)
+  Dev = "devDependencies",
+  // (undocumented)
+  Optional = "optionalDependencies",
+  // (undocumented)
+  Peer = "peerDependencies",
+  // (undocumented)
+  Regular = "dependencies"
+}
+
+// @public
+enum EnvironmentVariableNames {
+  RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
+  RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER"
 }
 
 // @beta
@@ -107,20 +104,6 @@ class EventHooks {
   // @internal
   constructor(eventHooksJson: IEventHooksJson);
   get(event: Event): string[];
-}
-
-// @public
-interface IChangeInfo {
-  author?: string;
-  changes?: IChangeInfo[];
-  changeType?: ChangeType;
-  comment?: string;
-  commit?: string;
-  newRangeDependency?: string;
-  newVersion?: string;
-  order?: number;
-  packageName: string;
-  type?: string;
 }
 
 // @beta
@@ -154,9 +137,57 @@ class LockStepVersionPolicy extends VersionPolicy {
   readonly version: string;
 }
 
+// @beta (undocumented)
+class PackageJsonDependency {
+  constructor(name: string, version: string, type: DependencyType, onChange: () => void);
+  // (undocumented)
+  readonly dependencyType: DependencyType;
+  // (undocumented)
+  readonly name: string;
+  // (undocumented)
+  setVersion(newVersion: string): void;
+  // (undocumented)
+  readonly version: string;
+}
+
+// @beta (undocumented)
+class PackageJsonEditor {
+  // (undocumented)
+  addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
+  // (undocumented)
+  readonly dependencyList: ReadonlyArray<PackageJsonDependency>;
+  // (undocumented)
+  readonly devDependencyList: ReadonlyArray<PackageJsonDependency>;
+  // (undocumented)
+  readonly filePath: string;
+  // (undocumented)
+  static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
+  // (undocumented)
+  static load(filePath: string): PackageJsonEditor;
+  // (undocumented)
+  readonly name: string;
+  // (undocumented)
+  saveIfModified(): boolean;
+  // (undocumented)
+  tryGetDependency(packageName: string): PackageJsonDependency | undefined;
+  // (undocumented)
+  tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
+  // (undocumented)
+  readonly version: string;
+}
+
+// @public
+class PnpmOptionsConfiguration {
+  // WARNING: The type "IPnpmOptionsJson" needs to be exported by the package (e.g. added to index.ts)
+  // @internal
+  constructor(json: IPnpmOptionsJson);
+  readonly strictPeerDependencies: boolean;
+}
+
 // @public
 class Rush {
   static launch(launcherVersion: string, isManaged: boolean): void;
+  static launchRushX(launcherVersion: string, isManaged: boolean): void;
   // @public
   static readonly version: string;
 }
@@ -168,17 +199,17 @@ class RushConfiguration {
   readonly committedShrinkwrapFilename: string;
   readonly commonFolder: string;
   readonly commonRushConfigFolder: string;
+  readonly commonScriptsFolder: string;
   readonly commonTempFolder: string;
   readonly commonVersions: CommonVersionsConfiguration;
+  readonly ensureConsistentVersions: boolean;
   // @beta
   readonly eventHooks: EventHooks;
   findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-  static getHomeDirectory(): string;
   getProjectByName(projectName: string): RushConfigurationProject | undefined;
   readonly gitAllowedEmailRegExps: string[];
   readonly gitSampleEmail: string;
-  readonly homeFolder: string;
   readonly hotfixChangeEnabled: boolean;
   static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
   // (undocumented)
@@ -188,6 +219,7 @@ class RushConfiguration {
   readonly packageManager: PackageManager;
   readonly packageManagerToolFilename: string;
   readonly packageManagerToolVersion: string;
+  readonly pnpmOptions: PnpmOptionsConfiguration;
   readonly pnpmStoreFolder: string;
   readonly projectFolderMaxDepth: number;
   readonly projectFolderMinDepth: number;
@@ -200,12 +232,16 @@ class RushConfiguration {
   readonly rushJsonFolder: string;
   readonly rushLinkJsonFilename: string;
   readonly rushUserFolder: string;
+  readonly shrinkwrapFilePhrase: string;
   // @beta
   readonly telemetryEnabled: boolean;
   readonly tempShrinkwrapFilename: string;
+  readonly tempShrinkwrapPreinstallFilename: string;
   static tryFindRushJsonLocation(verbose?: boolean): string | undefined;
+  tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
   // @beta (undocumented)
   readonly versionPolicyConfiguration: VersionPolicyConfiguration;
+  readonly yarnCacheFolder: string;
 }
 
 // @public
@@ -217,7 +253,10 @@ class RushConfigurationProject {
   readonly downstreamDependencyProjects: string[];
   // @beta
   readonly isMainProject: boolean;
+  // @deprecated
   readonly packageJson: IPackageJson;
+  // @beta
+  readonly packageJsonEditor: PackageJsonEditor;
   readonly packageName: string;
   readonly projectFolder: string;
   readonly projectRelativeFolder: string;

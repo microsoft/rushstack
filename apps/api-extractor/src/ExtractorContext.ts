@@ -2,14 +2,20 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import * as fsx from 'fs-extra';
 import * as path from 'path';
-import { PackageJsonLookup, IPackageJson, PackageName, IParsedPackageName } from '@microsoft/node-core-library';
+import {
+  PackageJsonLookup,
+  IPackageJson,
+  PackageName,
+  IParsedPackageName,
+  FileSystem
+} from '@microsoft/node-core-library';
 
 import { AstPackage } from './ast/AstPackage';
 import { DocItemLoader } from './DocItemLoader';
 import { ILogger } from './extractor/ILogger';
 import { IExtractorPoliciesConfig, IExtractorValidationRulesConfig } from './extractor/IExtractorConfig';
+import { TypeScriptMessageFormatter } from './utils/TypeScriptMessageFormatter';
 
 /**
  * Options for ExtractorContext constructor.
@@ -97,12 +103,13 @@ export class ExtractorContext {
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
     // compile errors that would result from a full compilation.
     for (const diagnostic of options.program.getSemanticDiagnostics()) {
-      this.reportError('TypeScript: ' + diagnostic.messageText, diagnostic.file, diagnostic.start);
+      const errorText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
+      this.reportError(`TypeScript: ${errorText}`, diagnostic.file, diagnostic.start);
     }
 
     this.typeChecker = options.program.getTypeChecker();
 
-    const rootFile: ts.SourceFile = options.program.getSourceFile(options.entryPointFile);
+    const rootFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);
     if (!rootFile) {
       throw new Error('Unable to load file: ' + options.entryPointFile);
     }
@@ -160,14 +167,13 @@ export class ExtractorContext {
       return;
     }
 
-    const files: string[] = fsx.readdirSync(externalJsonCollectionPath);
-    files.forEach(file => {
+    FileSystem.readFolder(externalJsonCollectionPath, {
+      absolutePaths: true
+    }).forEach(file => {
       if (path.extname(file) === '.json') {
-        const externalJsonFilePath: string = path.join(externalJsonCollectionPath, file);
-
         // Example: "C:\Example\my-package.json" --> "my-package"
         const packageName: string = path.parse(file).name;
-        this.docItemLoader.loadPackageIntoCache(externalJsonFilePath, packageName);
+        this.docItemLoader.loadPackageIntoCache(file, packageName);
       }
     });
   }

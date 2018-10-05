@@ -9,14 +9,11 @@
     "build": "gulp --clean"
   },
   "devDependencies": {
-    "@types/chai": "3.4.34",
-    "chai": "~3.5.0",
+    "ts-jest": "~22.4.6",
     "@types/jest": "21.1.10",
-    "@types/node": "8.5.8"
-  },
-  "dependencies": {
-    "@microsoft/load-themed-styles": "1.7.57",
-    "@microsoft/web-library-build": "4.4.43",
+    "@microsoft/rush-stack-compiler": "0.1.10",
+    "@microsoft/load-themed-styles": "1.8.15",
+    "@microsoft/web-library-build": "6.0.7",
     "gulp": "~3.9.1"
   }
 }

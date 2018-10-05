@@ -5,10 +5,10 @@ import * as path from 'path';
 import * as semver from 'semver';
 
 import { LockFile } from '@microsoft/node-core-library';
-
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
-
-import * as rushLib from '@microsoft/rush-lib';
+import { _LastInstallFlag } from '@microsoft/rush-lib';
+import { RushCommandSelector } from './RushCommandSelector';
+import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
@@ -16,16 +16,18 @@ export class RushVersionSelector {
   private _rushDirectory: string;
   private _currentPackageVersion: string;
 
-  constructor(homeDirectory: string, currentPackageVersion: string) {
-    this._rushDirectory = path.join(homeDirectory, '.rush');
+  constructor(currentPackageVersion: string) {
+    this._rushDirectory = path.join(Utilities.getHomeDirectory(), '.rush');
     this._currentPackageVersion = currentPackageVersion;
   }
 
-  public ensureRushVersionInstalled(version: string): Promise<void> {
+  public ensureRushVersionInstalled(version: string,
+    configuration: MinimalRushConfiguration | undefined): Promise<void> {
+
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushDirectory, `rush-${version}`);
 
-    const installMarker: rushLib._LastInstallFlag = new rushLib._LastInstallFlag(
+    const installMarker: _LastInstallFlag = new _LastInstallFlag(
       expectedRushPath,
       { node: process.versions.node }
     );
@@ -47,14 +49,21 @@ export class RushVersionSelector {
             if (installMarker.isValid()) {
               console.log('Another process performed the installation.');
             } else {
-              Utilities.installPackageInDirectory(
-                expectedRushPath,
-                isLegacyRushVersion ? '@microsoft/rush' : '@microsoft/rush-lib',
-                version,
-                'rush-local-install',
-                MAX_INSTALL_ATTEMPTS,
-                true
-              );
+              Utilities.installPackageInDirectory({
+                directory: expectedRushPath,
+                packageName: isLegacyRushVersion ? '@microsoft/rush' : '@microsoft/rush-lib',
+                version: version,
+                tempPackageTitle: 'rush-local-install',
+                maxInstallAttempts: MAX_INSTALL_ATTEMPTS,
+                // This is using a local configuration to install a package in a shared global location.
+                // Generally that's a bad practice, but in this case if we can successfully install
+                // the package at all, we can reasonably assume it's good for all the repositories.
+                // In particular, we'll assume that two different NPM registries cannot have two
+                // different implementations of the same version of the same package.
+                // This was needed for: https://github.com/Microsoft/web-build-tools/issues/691
+                commonRushConfigFolder: configuration ? configuration.commonRushConfigFolder : undefined,
+                suppressOutput: true
+              });
 
               console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}.`);
 
@@ -69,6 +78,9 @@ export class RushVersionSelector {
 
     return installPromise.then(() => {
       if (semver.lt(version, '3.0.20')) {
+        // In old versions, requiring the entry point invoked the command-line parser immediately,
+        // so fail if "rushx" was used
+        RushCommandSelector.failIfNotInvokedAsRush(version);
         require(path.join(
           expectedRushPath,
           'node_modules',
@@ -78,6 +90,9 @@ export class RushVersionSelector {
           'rush'
         ));
       } else if (semver.lt(version, '4.0.0')) {
+        // In old versions, requiring the entry point invoked the command-line parser immediately,
+        // so fail if "rushx" was used
+        RushCommandSelector.failIfNotInvokedAsRush(version);
         require(path.join(
           expectedRushPath,
           'node_modules',
@@ -87,7 +102,8 @@ export class RushVersionSelector {
           'start'
         ));
       } else {
-        const rushCliEntrypoint: typeof rushLib = require(path.join(
+        // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
+        const rushCliEntrypoint: { } = require(path.join(
           expectedRushPath,
           'node_modules',
           '@microsoft',
@@ -95,7 +111,7 @@ export class RushVersionSelector {
           'lib',
           'index'
         ));
-        rushCliEntrypoint.Rush.launch(this._currentPackageVersion, true);
+        RushCommandSelector.execute(this._currentPackageVersion, true, rushCliEntrypoint);
       }
     });
   }

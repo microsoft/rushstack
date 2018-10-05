@@ -49,6 +49,7 @@ interface IApiBaseDefinition {
 interface IApiClass extends IApiBaseDefinition {
   extends?: string;
   implements?: string;
+  isSealed: boolean;
   kind: 'class';
   members: IApiNameMap<ApiMember>;
   typeParameters?: string[];
@@ -56,6 +57,9 @@ interface IApiClass extends IApiBaseDefinition {
 
 // @alpha
 interface IApiConstructor extends IApiBaseDefinition {
+  isOverride: boolean;
+  isSealed: boolean;
+  isVirtual: boolean;
   kind: 'constructor';
   parameters: IApiNameMap<IApiParameter>;
   signature: string;
@@ -87,6 +91,7 @@ interface IApiFunction extends IApiBaseDefinition {
 interface IApiInterface extends IApiBaseDefinition {
   extends?: string;
   implements?: string;
+  isSealed: boolean;
   kind: 'interface';
   members: IApiNameMap<ApiMember>;
   typeParameters?: string[];
@@ -104,7 +109,10 @@ interface IApiItemReference {
 interface IApiMethod extends IApiBaseDefinition {
   accessModifier: ApiAccessModifier;
   isOptional: boolean;
+  isOverride: boolean;
+  isSealed: boolean;
   isStatic: boolean;
+  isVirtual: boolean;
   kind: 'method';
   parameters: IApiNameMap<IApiParameter>;
   returnValue: IApiReturnValue;
@@ -147,9 +155,13 @@ interface IApiParameter {
 
 // @alpha
 interface IApiProperty extends IApiBaseDefinition {
+  isEventProperty: boolean;
   isOptional: boolean;
+  isOverride: boolean;
   isReadOnly: boolean;
+  isSealed: boolean;
   isStatic: boolean;
+  isVirtual: boolean;
   kind: 'property';
   signature: string;
   type: string;
@@ -202,6 +214,9 @@ interface IExtractorOptions {
   compilerProgram?: ts.Program;
   customLogger?: Partial<ILogger>;
   localBuild?: boolean;
+  skipLibCheck?: boolean;
+  // @beta
+  typescriptCompilerFolder?: string;
 }
 
 // @public
@@ -284,6 +299,12 @@ interface IMarkupHighlightedText {
 }
 
 // @public
+interface IMarkupHtmlTag {
+  kind: 'html-tag';
+  token: string;
+}
+
+// @public
 interface IMarkupLineBreak {
   kind: 'break';
 }
@@ -357,6 +378,7 @@ class Markup {
   static createCodeBox(code: string, highlighter: MarkupHighlighter): IMarkupCodeBox;
   static createHeading1(text: string): IMarkupHeading1;
   static createHeading2(text: string): IMarkupHeading2;
+  static createHtmlTag(token: string): IMarkupHtmlTag;
   static createNoteBox(textElements: MarkupBasicElement[]): IMarkupNoteBox;
   static createNoteBoxFromText(text: string): IMarkupNoteBox;
   static createPage(title: string): IMarkupPage;

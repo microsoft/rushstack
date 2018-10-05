@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
@@ -13,23 +12,24 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
+import { FileSystem } from '@microsoft/node-core-library';
 
-import { RushConfigurationProject } from '../../data/RushConfigurationProject';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
   IChangeFile,
   IChangeInfo
-} from '../../data/ChangeManagement';
+} from '../../api/ChangeManagement';
 import { VersionControl } from '../../utilities/VersionControl';
-import { ChangeFile } from '../../data/ChangeFile';
+import { ChangeFile } from '../../api/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
-import { RushCommandLineParser } from './RushCommandLineParser';
-import { ChangeFiles } from '../logic/ChangeFiles';
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { ChangeFiles } from '../../logic/ChangeFiles';
 import {
   VersionPolicy,
   IndividualVersionPolicy,
   LockStepVersionPolicy,
   VersionPolicyDefinitionName
-} from '../../data/VersionPolicy';
+} from '../../api/VersionPolicy';
 
 export class ChangeAction extends BaseRushAction {
   private _sortedProjectList: string[];
@@ -117,7 +117,7 @@ export class ChangeAction extends BaseRushAction {
 
     return this._promptLoop()
       .catch((error: Error) => {
-        throw new Error(`There was an error creating the changefile: ${error.toString()}`);
+        throw new Error(`There was an error creating the change file: ${error.toString()}`);
       });
   }
 
@@ -174,7 +174,7 @@ export class ChangeAction extends BaseRushAction {
   private _validateChangeFile(changedPackages: string[]): void {
     const files: string[] = this._getChangeFiles();
     if (files.length === 0) {
-      throw new Error(`No change file is found. Run 'rush change' to generate a change file.`);
+      throw new Error(`No change file is found. Run "rush change" to generate a change file.`);
     }
     ChangeFiles.validate(files, changedPackages);
   }
@@ -228,7 +228,7 @@ export class ChangeAction extends BaseRushAction {
         });
     } else {
       this._warnUncommittedChanges();
-      // We are done, collect their e-mail
+      // We are done, collect their email
       return this._detectOrAskForEmail().then((email: string) => {
         this._changeFileData.forEach((changeFile: IChangeFile) => {
           changeFile.email = email;
@@ -372,7 +372,7 @@ export class ChangeAction extends BaseRushAction {
         .toString()
         .replace(/(\r\n|\n|\r)/gm, '');
     } catch (err) {
-      console.log('There was an issue detecting your git email...');
+      console.log('There was an issue detecting your Git email...');
       email = undefined;
     }
 
@@ -393,7 +393,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   /**
-   * Asks the user for their e-mail address
+   * Asks the user for their email address
    */
   private _promptForEmail(): Promise<string> {
     return this._prompt([
@@ -436,7 +436,7 @@ export class ChangeAction extends BaseRushAction {
     const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
     const filePath: string = changeFile.generatePath();
 
-    if (fsx.existsSync(filePath)) {
+    if (FileSystem.exists(filePath)) {
       // prompt about overwrite
       this._prompt([
         {
@@ -461,8 +461,9 @@ export class ChangeAction extends BaseRushAction {
    * Writes a file to disk, ensuring the directory structure up to that point exists
    */
   private _writeFile(fileName: string, output: string): void {
-    fsx.mkdirsSync(path.dirname(fileName));
-    fsx.writeFileSync(fileName, output);
+    FileSystem.writeFile(fileName, output, {
+      ensureFolderExists: true
+    });
     console.log('Created file: ' + fileName);
   }
 }
