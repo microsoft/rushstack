@@ -1,5 +1,5 @@
 {
-  "title": "SASS Task Configuration",
+  "title": "Sass Task Configuration",
   "description": "Defines configuration for the SASS compilation task",
 
   "type": "object",
@@ -23,7 +23,7 @@
     },
 
     "sassMatch": {
-      "title": "SASS File Glob Pattern",
+      "title": "Sass File Glob Pattern",
       "description": "An array of glob patterns for locating SASS files.",
       "type": "array"
     },

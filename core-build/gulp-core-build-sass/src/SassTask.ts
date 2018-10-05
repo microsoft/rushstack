@@ -9,7 +9,8 @@ import { GulpTask } from '@microsoft/gulp-core-build';
 import { splitStyles } from '@microsoft/load-themed-styles';
 import {
   FileSystem,
-  JsonFile
+  JsonFile,
+  PromiseUtilities
 } from '@microsoft/node-core-library';
 import * as glob from 'glob';
 import * as nodeSass from 'node-sass';
@@ -21,12 +22,12 @@ import * as crypto from 'crypto';
 
 export interface ISassTaskConfig {
   /**
-   * An optional parameter for text to include in the generated typescript file.
+   * An optional parameter for text to include in the generated TypeScript file.
    */
   preamble?: string;
 
   /**
-   * An optional parameter for text to include at the end of the generated typescript file.
+   * An optional parameter for text to include at the end of the generated TypeScript file.
    */
   postamble?: string;
 
@@ -110,16 +111,14 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     return JsonFile.load(path.join(__dirname, 'sass.schema.json'));
   }
 
-  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): Promise<void> | undefined {
-
+  public executeTask(gulp: typeof Gulp): Promise<void> | undefined {
     if (!this.taskConfig.sassMatch) {
-      completeCallback('taskConfig.sassMatch must be defined');
-      return;
+      return Promise.reject(new Error('taskConfig.sassMatch must be defined'));
     }
 
     return this._globAll(...this.taskConfig.sassMatch).then((matches: string[]) => {
       return Promise.all(matches.map((match) => this._processFile(match)));
-    }).then(() => completeCallback()).catch((error) => completeCallback(error));
+    }).then(() => { /* collapse void[] to void */ });
   }
 
   private _generateModuleStub(cssFileName: string, json: Object): void {
@@ -152,30 +151,24 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       cssOutputPathAbsolute = path.join(this.buildConfig.rootPath, cssOutputPath);
     }
 
-    return new Promise((resolve: (result: nodeSass.Result) => void, reject: (error: Error) => void) => {
-      nodeSass.render(
-        {
-          file: filePath,
-          importer: (url: string) => ({ file: _patchSassUrl(url) }),
-          sourceMap: this.taskConfig.dropCssFiles,
-          outFile: cssOutputPath
-        },
-        (error, result) => {
-          if (error) {
-            this.fileError(filePath, error.line, error.column, error.name, error.message);
-            reject(error);
-          } else {
-            resolve(result);
-          }
-        }
-      );
+    return PromiseUtilities.promiseify(
+      nodeSass.render,
+      {
+        file: filePath,
+        importer: (url: string) => ({ file: _patchSassUrl(url) }),
+        sourceMap: this.taskConfig.dropCssFiles,
+        outFile: cssOutputPath
+      }
+    ).catch((error: nodeSass.SassError) => {
+      this.fileError(filePath, error.line, error.column, error.name, error.message);
+      throw new Error(error.message);
     }).then((result: nodeSass.Result) => {
       const options: postcss.ProcessOptions = {
         from: filePath
       };
       if (result.map && !this.buildConfig.production) {
         options.map = {
-          prev: result.map.toString()
+          prev: result.map.toString() // Pass the source map through to postcss
         };
       }
 
@@ -183,13 +176,13 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         ...this._postCSSPlugins,
         ...(processAsModuleCss ? this._modulePostCssAdditionalPlugins : [])
       ];
-      return postcss(plugins).process(result.css.toString(), options).then((postCssResult) => postCssResult);
+      return postcss(plugins).process(result.css.toString(), options) as PromiseLike<postcss.Result>;
     }).then((result: postcss.Result) => {
       const cleanCssOptions: CleanCss.Options = {
         advanced: false
       };
       if (result.map) {
-        cleanCssOptions.sourceMap = result.map.toString();
+        cleanCssOptions.sourceMap = result.map.toString(); // Pass the source map through to cleancss
       }
 
       const cleanCss: CleanCss =  new CleanCss(cleanCssOptions);
@@ -245,7 +238,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         if (this.taskConfig.moduleExportName === '') {
           exportString = 'export = styles;';
         } else if (!!this.taskConfig.moduleExportName) {
-          exportString = `export const ${this.taskConfig.moduleExportName} = styles;`;
+          // exportString = `export const ${this.taskConfig.moduleExportName} = styles;`;
         }
 
         classNamesLines.push(
@@ -263,7 +256,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
       if (cssOutputPathAbsolute) {
         lines = lines.concat([
-          `require('./${path.basename(cssOutputPathAbsolute)}');`,
+          `require(${JSON.stringify(`./${path.basename(cssOutputPathAbsolute)}`)});`,
           exportClassNames
         ]);
       } else if (!!content) {
@@ -291,20 +284,11 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
   private _globAll(...patterns: string[]): Promise<string[]> {
     return Promise.all(patterns.map((pattern) =>
-      new Promise((resolve: (matches: string[]) => void, reject: (error: Error) => void) => {
-        if (!path.isAbsolute(pattern)) {
-          pattern = path.join(this.buildConfig.rootPath, pattern);
-        }
-
-        glob(pattern, { root: this.buildConfig.rootPath }, (error: Error, matches: string[]) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(matches);
-          }
-        });
-      }
-    ))).then((matchSets: string[][]) => {
+      PromiseUtilities.promiseify(
+        glob,
+        path.isAbsolute(pattern) ? pattern : path.join(this.buildConfig.rootPath, pattern),
+        { root: this.buildConfig.rootPath })
+    )).then((matchSets: string[][]) => {
       const result: { [path: string]: boolean } = {};
       for (const matchSet of matchSets) {
         for (const match of matchSet) {
