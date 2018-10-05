@@ -456,6 +456,7 @@ export class Markup {
           break;
         case 'code':
         case 'code-box':
+          buffer.text += element.text;
           break;
         case 'heading1':
         case 'heading2':
