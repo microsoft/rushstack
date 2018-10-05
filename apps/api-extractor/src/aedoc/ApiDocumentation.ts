@@ -550,8 +550,12 @@ export class ApiDocumentation {
     }
 
     if (memberReference.memberIdentifier.hasQuotes) {
-      this.reportError('API Extractor does not yet support TSDoc member references using quotes');
-      return undefined;
+      // Allow quotes if the identifier is being quoted because it is a system name.
+      // (What's not supported is special characters in the identifier.)
+      if (!/[_a-z][_a-z0-0]*/i.test(memberReference.memberIdentifier.identifier)) {
+        this.reportError('API Extractor does not yet support TSDoc member references using quotes');
+        return undefined;
+      }
     }
 
     return memberReference.memberIdentifier.identifier;
