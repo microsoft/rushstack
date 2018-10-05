@@ -149,20 +149,22 @@ export class VersionMismatchFinder {
         ];
 
         dependencies.forEach((dependency: PackageJsonDependency) => {
-          if (dependency.dependencyType !== DependencyType.Peer
-            && !project.cyclicDependencyProjects.has(dependency.name)) {
-
+          if (dependency.dependencyType !== DependencyType.Peer) {
             const version: string = dependency.version!;
+
+            const isCyclic: boolean = project.cyclicDependencyProjects.has(dependency.name);
 
             if (this._isVersionAllowedAlternative(dependency.name, version)) {
               return;
             }
 
-            if (!this._mismatches.has(dependency.name)) {
-              this._mismatches.set(dependency.name, new Map<string, string[]>());
+            const name: string = dependency.name + (isCyclic ? ' (cyclic)' : '');
+
+            if (!this._mismatches.has(name)) {
+              this._mismatches.set(name, new Map<string, string[]>());
             }
 
-            const dependencyVersions: Map<string, string[]> = this._mismatches.get(dependency.name)!;
+            const dependencyVersions: Map<string, string[]> = this._mismatches.get(name)!;
 
             if (!dependencyVersions.has(version)) {
               dependencyVersions.set(version, []);
