@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IParsedPackageName, PackageName } from '@microsoft/node-core-library';
+import { PackageName } from '@microsoft/node-core-library';
 import { IApiItemReference } from './api/ApiItem';
 
 /**
@@ -43,22 +43,6 @@ export interface IApiDefinitionReferenceParts {
  */
 export class ApiDefinitionReference {
   /**
-   * Splits an API reference expression into two parts, first part is the scopename/packageName and
-   * the second part is the exportName.memberName.
-   */
-  private static _packageRegEx: RegExp = /^([^:]*)\:(.*)$/;
-
-  /**
-   * Splits the exportName.memberName into two respective parts.
-   */
-  private static _memberRegEx: RegExp = /^([^.|:]*)(?:\.(\w+))?$/;
-
-  /**
-   * Used to ensure that the export name contains only text characters.
-   */
-  private static _exportRegEx: RegExp =  /^\w+/;
-
-  /**
    * {@inheritdoc IApiDefinitionReferenceParts.scopeName}
    */
   public scopeName: string;
@@ -81,55 +65,6 @@ export class ApiDefinitionReference {
    */
   public static createFromParts(parts: IApiDefinitionReferenceParts): ApiDefinitionReference {
     return new ApiDefinitionReference(parts);
-  }
-
-  /**
-   * Takes an API reference expression of the form '@scopeName/packageName:exportName.memberName'
-   * and deconstructs it into an IApiDefinitionReference interface object.
-   * @returns the ApiDefinitionReference, or undefined if an error was reported.
-   */
-  public static createFromString(apiReferenceExpr: string,
-    reportError: (message: string) => void): ApiDefinitionReference | undefined {
-    if (!apiReferenceExpr || apiReferenceExpr.split(' ').length > 1) {
-      reportError('An API item reference must use the notation: "@scopeName/packageName:exportName.memberName"');
-      return undefined;
-    }
-
-    const apiDefRefParts: IApiDefinitionReferenceParts = {
-      scopeName: '',
-      packageName: '',
-      exportName: '',
-      memberName: ''
-    };
-
-    // E.g. @microsoft/sp-core-library:Guid.equals
-    let parts: string[] | null = apiReferenceExpr.match(ApiDefinitionReference._packageRegEx);
-    if (parts) {
-      // parts[1] is of the form ‘@microsoft/sp-core-library’ or ‘sp-core-library’
-      const parsedPackageName: IParsedPackageName = PackageName.parse(parts[1]);
-      apiDefRefParts.scopeName = parsedPackageName.scope;
-      apiDefRefParts.packageName = parsedPackageName.unscopedName;
-      apiReferenceExpr = parts[2]; // e.g. Guid.equals
-    }
-
-    // E.g. Guid.equals
-    parts = apiReferenceExpr.match(ApiDefinitionReference._memberRegEx);
-    if (parts) {
-      apiDefRefParts.exportName = parts[1]; // e.g. Guid, can never be undefined
-      apiDefRefParts.memberName = parts[2] ? parts[2] : ''; // e.g. equals
-    } else {
-      // the export name is required
-      reportError(`The API item reference contains an invalid "exportName.memberName"`
-        + ` expression: "${apiReferenceExpr}"`);
-      return undefined;
-    }
-
-    if (!apiReferenceExpr.match(ApiDefinitionReference._exportRegEx)) {
-      reportError(`The API item reference contains invalid characters: "${apiReferenceExpr}"`);
-      return undefined;
-    }
-
-    return ApiDefinitionReference.createFromParts(apiDefRefParts);
   }
 
   /**
