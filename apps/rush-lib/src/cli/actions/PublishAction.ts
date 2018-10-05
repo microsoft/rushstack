@@ -330,7 +330,6 @@ export class PublishAction extends BaseRushAction {
         const registryUrl: string = this._registryUrl.value;
         env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
         registry = registryUrl.substring(registryUrl.indexOf('//'));
-        args.push(`--registry`, `${registryUrl}`);
       }
 
       if (this._npmAuthToken.value) {
