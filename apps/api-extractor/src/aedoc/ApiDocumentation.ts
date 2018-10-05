@@ -325,18 +325,22 @@ export class ApiDocumentation {
       return;
     }
 
-    this._renderAsMarkupElementsInto(this.summary, this._docComment.summarySection);
+    this._renderAsMarkupElementsInto(this.summary, this._docComment.summarySection,
+      'the summary section', false);
 
     if (this._docComment.remarksBlock) {
-      this._renderAsMarkupElementsInto(this.remarks, this._docComment.remarksBlock);
+      this._renderAsMarkupElementsInto(this.remarks, this._docComment.remarksBlock,
+        'the remarks section', true);
     }
 
     if (this._docComment.deprecatedBlock) {
-      this._renderAsMarkupElementsInto(this.deprecatedMessage, this._docComment.deprecatedBlock);
+      this._renderAsMarkupElementsInto(this.deprecatedMessage, this._docComment.deprecatedBlock,
+        'a deprecation notice', false);
     }
 
     if (this._docComment.returnsBlock) {
-      this._renderAsMarkupElementsInto(this.returnsMessage, this._docComment.returnsBlock);
+      this._renderAsMarkupElementsInto(this.returnsMessage, this._docComment.returnsBlock,
+        'a return value description', false);
     }
 
     for (const paramBlock of this._docComment.paramBlocks) {
@@ -344,37 +348,44 @@ export class ApiDocumentation {
         name: paramBlock.parameterName,
         description: []
       };
-      this._renderAsMarkupElementsInto(aedocParameter.description, paramBlock);
+      this._renderAsMarkupElementsInto(aedocParameter.description, paramBlock,
+        'a parameter description', false);
 
       this.parameters[paramBlock.parameterName] = aedocParameter;
     }
   }
 
-  private _renderAsMarkupElementsInto(result: MarkupElement[], node: DocNode): void {
+  private _renderAsMarkupElementsInto(result: MarkupElement[], node: DocNode, sectionName: string,
+    allowStructuredContent: boolean): void {
     switch (node.kind) {
       case DocNodeKind.Block:
       case DocNodeKind.Section:
       case DocNodeKind.ParamBlock:
         const docSection: DocSection = node as DocSection;
         for (const childNode of docSection.nodes) {
-          this._renderAsMarkupElementsInto(result, childNode);
+          this._renderAsMarkupElementsInto(result, childNode, sectionName, allowStructuredContent);
         }
         break;
       case DocNodeKind.BlockTag:
         // If an unrecognized TSDoc block tag appears in the content, don't render it
         break;
       case DocNodeKind.CodeFence:
-        const docCodeFence: DocCodeFence = node as DocCodeFence;
-        let markupHighlighter: MarkupHighlighter = 'plain';
-        switch (docCodeFence.language.toUpperCase()) {
-          case 'TS':
-          case 'TYPESCRIPT':
-          case 'JS':
-          case 'JAVASCRIPT':
-            markupHighlighter = 'javascript';
-            break;
+        if (allowStructuredContent) {
+          const docCodeFence: DocCodeFence = node as DocCodeFence;
+          let markupHighlighter: MarkupHighlighter = 'plain';
+          switch (docCodeFence.language.toUpperCase()) {
+            case 'TS':
+            case 'TYPESCRIPT':
+            case 'JS':
+            case 'JAVASCRIPT':
+              markupHighlighter = 'javascript';
+              break;
+          }
+          result.push(Markup.createCodeBox(docCodeFence.code, markupHighlighter));
+        } else {
+          this._reportIncorrectStructuredContent('a fenced code block', sectionName);
+          return;
         }
-        result.push(Markup.createCodeBox(docCodeFence.code, markupHighlighter));
         break;
       case DocNodeKind.CodeSpan:
         const docCodeSpan: DocCodeSpan = node as DocCodeSpan;
@@ -453,7 +464,7 @@ export class ApiDocumentation {
         }
         const docParagraph: DocParagraph = node as DocParagraph;
         for (const childNode of DocNodeTransforms.trimSpacesInParagraph(docParagraph).nodes) {
-          this._renderAsMarkupElementsInto(result, childNode);
+          this._renderAsMarkupElementsInto(result, childNode, sectionName, allowStructuredContent);
         }
         break;
       case DocNodeKind.PlainText:
@@ -466,6 +477,10 @@ export class ApiDocumentation {
       default:
         this.reportError('Unsupported TSDoc element: ' + node.kind);
     }
+  }
+
+  private _reportIncorrectStructuredContent(constructName: string, sectionName: string): void {
+    this.reportError(`Structured content such as ${constructName} cannot be used in ${sectionName}`);
   }
 
   // This is a temporary adapter until we fully generalize IApiItemReference to support TSDoc declaration references
