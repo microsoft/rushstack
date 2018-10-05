@@ -69,3 +69,7 @@ export {
   FileWriter,
   IFileWriterFlags
 } from './FileWriter';
+export {
+  PromiseUtilities,
+  callback
+} from './PromiseUtilities';
