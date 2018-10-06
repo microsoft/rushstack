@@ -130,10 +130,15 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
   }
 
   private _processFile(filePath: string): Promise<void> {
+    // Ignore files that start with underscores
+    if (path.basename(filePath).match(/^\_/)) {
+      return Promise.resolve();
+    }
+
     const isFileModuleCss: boolean = !!filePath.match(/\.module\.s(a|c)ss/);
     const processAsModuleCss: boolean = isFileModuleCss || !!this.taskConfig.useCSSModules;
 
-    if (!isFileModuleCss && !this.taskConfig.useCSSModules) {
+    if (!isFileModuleCss && !this.taskConfig.useCSSModules && this.taskConfig.warnOnNonCSSModules) {
       // If the file doesn't end with .module.scss and we don't treat all files as module-scss, warn
       const relativeFilePath: string = path.relative(this.buildConfig.rootPath, filePath);
       this.logWarning(`${relativeFilePath}: filename should end with module.sass or module.scss`);
@@ -157,6 +162,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         file: filePath,
         importer: (url: string) => ({ file: _patchSassUrl(url) }),
         sourceMap: this.taskConfig.dropCssFiles,
+        sourceMapContents: true,
+        omitSourceMapUrl: true,
         outFile: cssOutputPath
       }
     ).catch((error: nodeSass.SassError) => {
