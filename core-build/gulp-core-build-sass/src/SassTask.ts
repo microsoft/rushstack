@@ -160,7 +160,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       nodeSass.render,
       {
         file: filePath,
-        importer: (url: string) => ({ file: _patchSassUrl(url) }),
+        importer: (url: string) => ({ file: this._patchSassUrl(url) }),
         sourceMap: this.taskConfig.dropCssFiles,
         sourceMapContents: true,
         omitSourceMapUrl: true,
@@ -307,14 +307,14 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       return Object.keys(result);
     });
   }
-}
 
-function _patchSassUrl(url: string): string {
-  if (url[0] === '~') {
-    url = 'node_modules/' + url.substr(1);
-  } else if (url === 'stdin') {
-    url = '';
+  private _patchSassUrl(url: string): string {
+    if (url[0] === '~') {
+      url = 'node_modules/' + url.substr(1);
+    } else if (url === 'stdin') {
+      url = '';
+    }
+
+    return url;
   }
-
-  return url;
 }
