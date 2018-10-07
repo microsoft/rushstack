@@ -22,7 +22,7 @@ import {
   DocEscapedText,
   DocNode,
   DocParagraph,
-  DocCodeFence,
+  DocFencedCode,
   DocHtmlStartTag,
   DocHtmlEndTag,
   DocInlineTag,
@@ -369,9 +369,21 @@ export class ApiDocumentation {
       case DocNodeKind.BlockTag:
         // If an unrecognized TSDoc block tag appears in the content, don't render it
         break;
-      case DocNodeKind.CodeFence:
+      case DocNodeKind.CodeSpan:
+        const docCodeSpan: DocCodeSpan = node as DocCodeSpan;
+        result.push(Markup.createCode(docCodeSpan.code));
+        break;
+      case DocNodeKind.ErrorText:
+        const docErrorText: DocErrorText = node as DocErrorText;
+        Markup.appendTextElements(result, docErrorText.text);
+        break;
+      case DocNodeKind.EscapedText:
+        const docEscapedText: DocEscapedText = node as DocEscapedText;
+        Markup.appendTextElements(result, docEscapedText.text);
+        break;
+      case DocNodeKind.FencedCode:
         if (allowStructuredContent) {
-          const docCodeFence: DocCodeFence = node as DocCodeFence;
+          const docCodeFence: DocFencedCode = node as DocFencedCode;
           let markupHighlighter: MarkupHighlighter = 'plain';
           switch (docCodeFence.language.toUpperCase()) {
             case 'TS':
@@ -386,18 +398,6 @@ export class ApiDocumentation {
           this._reportIncorrectStructuredContent('a fenced code block', sectionName);
           return;
         }
-        break;
-      case DocNodeKind.CodeSpan:
-        const docCodeSpan: DocCodeSpan = node as DocCodeSpan;
-        result.push(Markup.createCode(docCodeSpan.code));
-        break;
-      case DocNodeKind.ErrorText:
-        const docErrorText: DocErrorText = node as DocErrorText;
-        Markup.appendTextElements(result, docErrorText.text);
-        break;
-      case DocNodeKind.EscapedText:
-        const docEscapedText: DocEscapedText = node as DocEscapedText;
-        Markup.appendTextElements(result, docEscapedText.text);
         break;
       case DocNodeKind.HtmlStartTag:
         const docHtmlStartTag: DocHtmlStartTag = node as DocHtmlStartTag;
