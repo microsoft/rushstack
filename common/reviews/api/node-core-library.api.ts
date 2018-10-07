@@ -298,6 +298,11 @@ enum PosixModeBits {
   UserWrite = 128
 }
 
+// @beta
+class PromiseUtilities {
+  static promiseify<TResult, TError>(fn: (cb: callback<TResult, TError>) => void): Promise<TResult>;
+}
+
 // @public
 class ProtectableMap<K, V> {
   constructor(parameters: IProtectableMapParameters<K, V>);
@@ -323,3 +328,4 @@ class Text {
 
 // WARNING: Unsupported export: ExecutableStdioStreamMapping
 // WARNING: Unsupported export: ExecutableStdioMapping
+// WARNING: Unsupported export: callback

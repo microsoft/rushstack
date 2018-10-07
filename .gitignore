@@ -62,6 +62,7 @@ lib-es6
 dist
 temp
 *.scss.ts
+*.sass.ts
 
 # Rush files
 common/temp/**
