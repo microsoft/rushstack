@@ -140,9 +140,23 @@ export class ExtractorContext {
     if (sourceFile && start) {
       const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(start);
 
+      let filename2: string = sourceFile.fileName
+        .replace(/\/lib\//g, '/src/')
+        .replace(/\.d\.ts$/g, '.ts');
+
+      if (!FileSystem.exists(filename2)) {
+        filename2 = sourceFile.fileName
+        .replace(/\/lib\//g, '/src/')
+        .replace(/\.d\.ts$/g, '.tsx');
+
+        if (!FileSystem.exists(filename2)) {
+          filename2 = sourceFile.fileName;
+        }
+      }
+
       // If the file is under the packageFolder, then show a relative path
-      const relativePath: string = path.relative(this.packageFolder, sourceFile.fileName);
-      const shownPath: string = relativePath.substr(0, 2) === '..' ? sourceFile.fileName : relativePath;
+      const relativePath: string = path.relative(this.packageFolder, filename2);
+      const shownPath: string = relativePath.substr(0, 2) === '..' ? filename2 : relativePath;
 
       // Format the error so that VS Code can follow it.  For example:
       // "src\MyClass.ts(15,1): The JSDoc tag "@blah" is not supported by AEDoc"

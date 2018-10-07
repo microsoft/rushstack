@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Better support for indented syntax and, likewise, `.sass` extension.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-sass",
+  "email": "jareha@gmail.com"
+}
