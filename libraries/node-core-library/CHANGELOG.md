@@ -1,6 +1,17 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 28 Sep 2018 16:05:35 GMT and should not be manually modified.
+This log was last generated on Sun, 07 Oct 2018 06:15:56 GMT and should not be manually modified.
+
+## 3.2.0
+Sun, 07 Oct 2018 06:15:56 GMT
+
+### Minor changes
+
+- Introduce promiseify utility function.
+
+### Patches
+
+- Update documentation
 
 ## 3.1.0
 Fri, 28 Sep 2018 16:05:35 GMT

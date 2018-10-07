@@ -2,6 +2,40 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.5.0",
+      "tag": "@microsoft/gulp-core-build-sass_v4.5.0",
+      "date": "Sun, 07 Oct 2018 06:15:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Refactor task to no longer use Gulp."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Better support for indented syntax and, likewise, `.sass` extension."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.24` to `3.8.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.15` to `1.8.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.1.0` to `3.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.10` to `0.1.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.15` to `5.0.16`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.4.8",
       "tag": "@microsoft/gulp-core-build-sass_v4.4.8",
       "date": "Fri, 28 Sep 2018 16:05:35 GMT",

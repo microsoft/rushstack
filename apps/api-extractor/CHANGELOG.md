@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 28 Sep 2018 16:05:35 GMT and should not be manually modified.
+This log was last generated on Sun, 07 Oct 2018 06:15:56 GMT and should not be manually modified.
+
+## 6.0.0
+Sun, 07 Oct 2018 06:15:56 GMT
+
+### Breaking changes
+
+- (Breaking change) API Extractor 6 introduces support for TSDoc doc comment syntax!  Please see https://api-extractor.com/ for documentation.  To learn more about the TSDoc standard, check out https://github.com/Microsoft/tsdoc
 
 ## 5.13.1
 Fri, 28 Sep 2018 16:05:35 GMT
