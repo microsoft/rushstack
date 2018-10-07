@@ -64,6 +64,47 @@ export class Markup {
   };
 
   /**
+   * Appends text content to the `output` array.  If the last item in the array is a
+   * compatible IMarkupText element, the text will be merged into it.  Otherwise, a new
+   * IMarkupText element will be created.
+   */
+  public static appendTextElements(output: MarkupElement[], text: string, options?: IMarkupCreateTextOptions): void  {
+    if (text.length > 0) {
+      if (output.length > 0) {
+        const lastElement: MarkupElement = output[output.length - 1];
+        if (lastElement.kind === 'text') {
+          const lastTextElement: IMarkupText = lastElement as IMarkupText;
+          if (!options) {
+            options = { };
+          }
+
+          if ((!!lastTextElement.bold === !!options.bold)
+            && (!!lastTextElement.italics === !!options.italics)) {
+            lastTextElement.text += text;
+            return;
+          }
+        }
+      }
+
+      // We can't append to the previous element, so start a new one
+      const result: IMarkupText = {
+        kind: 'text',
+        text: text
+      } as IMarkupText;
+
+      if (options) {
+        if (options.bold) {
+          result.bold = true;
+        }
+        if (options.italics) {
+          result.italics = true;
+        }
+      }
+      output.push(result);
+    }
+  }
+
+  /**
    * Constructs an IMarkupText element representing the specified text string, with
    * optional formatting.
    *
@@ -390,7 +431,7 @@ export class Markup {
     let result: string = apiItemReference.exportName;
     if (apiItemReference.packageName) {
         // Example: "my-library:SomeClass"
-        result = apiItemReference.packageName + ':' + result;
+        result = apiItemReference.packageName + '#' + result;
 
       if (apiItemReference.scopeName) {
         // Example: "@ms/my-library:SomeClass"
@@ -415,6 +456,7 @@ export class Markup {
           break;
         case 'code':
         case 'code-box':
+          buffer.text += element.text;
           break;
         case 'heading1':
         case 'heading2':

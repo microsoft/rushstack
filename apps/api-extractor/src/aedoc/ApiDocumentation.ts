@@ -2,17 +2,52 @@
 // See LICENSE in the project root for license information.
 
 /* tslint:disable:no-bitwise */
+/* tslint:disable:member-ordering */
 
+import {
+  TSDocParser,
+  TSDocTagDefinition,
+  TextRange,
+  ParserContext,
+  ModifierTagSet,
+  DocBlockTag,
+  StandardTags,
+  StandardModifierTagSet,
+  DocComment,
+  DocSection,
+  DocNodeKind,
+  DocPlainText,
+  DocCodeSpan,
+  DocErrorText,
+  DocEscapedText,
+  DocNode,
+  DocParagraph,
+  DocFencedCode,
+  DocHtmlStartTag,
+  DocHtmlEndTag,
+  DocInlineTag,
+  DocLinkTag,
+  DocDeclarationReference,
+  DocMemberReference,
+  DocNodeTransforms
+} from '@microsoft/tsdoc';
 import { AstPackage } from '../ast/AstPackage';
-import { DocElementParser } from './DocElementParser';
 import { ApiDefinitionReference, IApiDefinitionReferenceParts } from '../ApiDefinitionReference';
-import { Token, TokenType } from './Token';
-import { Tokenizer } from './Tokenizer';
 import { ExtractorContext } from '../ExtractorContext';
 import { ResolvedApiItem } from '../ResolvedApiItem';
 import { ReleaseTag } from './ReleaseTag';
-import { MarkupElement, MarkupBasicElement, IMarkupApiLink } from '../markup/MarkupElement';
+import {
+  MarkupElement,
+  MarkupBasicElement,
+  IMarkupApiLink,
+  MarkupHighlighter
+} from '../markup/MarkupElement';
 import { Markup } from '../markup/Markup';
+import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
+import { AedocDefinitions } from './AedocDefinitions';
+import { IApiItemReference } from '../api/ApiItem';
+import { PackageName, IParsedPackageNameOrError } from '@microsoft/node-core-library';
+import { AstItemKind } from '../ast/AstItem';
 
 /**
  * A dependency for ApiDocumentation constructor that abstracts away the function
@@ -41,44 +76,7 @@ export interface IAedocParameter {
 }
 
 export class ApiDocumentation {
-  // For guidance about using these tags, please see this documentation:
-  // https://github.com/Microsoft/web-build-tools/wiki/API-Extractor-~-AEDoc-tags
-  private static _allowedRegularAedocTags: string[] = [
-    // (alphabetical order)
-    '@alpha',
-    '@beta',
-    '@betadocumentation',
-    '@defaultvalue',
-    '@eventproperty',
-    '@internal',
-    '@internalremarks',
-    '@override',
-    '@packagedocumentation',
-    '@param',
-    '@preapproved',
-    '@public',
-    '@returns',
-    '@deprecated',
-    '@readonly',
-    '@remarks',
-    '@sealed',
-    '@virtual'
-  ];
-
-  private static _allowedInlineAedocTags: string[] = [
-    // (alphabetical order)
-    '@inheritdoc',
-    '@link'
-  ];
-
   /**
-   * The original AEDoc comment, with the "/**" characters already removed.
-   *
-   * Example: "This is a summary. \{\@link a\} \@remarks These are remarks."
-   */
-  public originalAedoc: string;
-
-   /**
    * docCommentTokens that are parsed into Doc Elements.
    */
   public summary: MarkupElement[];
@@ -95,14 +93,6 @@ export class ApiDocumentation {
    * have ReleaseTag.Internal.
    */
   public incompleteLinks: IMarkupApiLink[];
-
-  /**
-   * A list of 'Token' objects that have been recognized as \@inheritdoc tokens that will be processed
-   * after the basic documentation for all API items is complete. We postpone the processing
-   * because we need ReleaseTag information before we can determine whether an \@inheritdoc token
-   * is valid.
-   */
-  public incompleteInheritdocs: Token[];
 
   /**
    * A "release tag" is an AEDoc tag which indicates whether this definition
@@ -191,20 +181,22 @@ export class ApiDocumentation {
    */
   public failedToParse: boolean;
 
-  public readonly reportError: (message: string) => void;
+  public readonly reportError: (message: string, startIndex?: number) => void;
 
-  constructor(originalAedoc: string,
+  private _parserContext: ParserContext | undefined;
+  private _docComment: DocComment | undefined;
+
+  constructor(inputTextRange: TextRange,
     referenceResolver: IReferenceResolver,
     context: ExtractorContext,
-    errorLogger: (message: string) => void,
+    errorLogger: (message: string, startIndex?: number) => void,
     warnings: string[]) {
 
-    this.reportError = (message: string) => {
-      errorLogger(message);
+    this.reportError = (message: string, startIndex?: number) => {
+      errorLogger(message, startIndex);
       this.failedToParse = true;
     };
 
-    this.originalAedoc = originalAedoc;
     this.referenceResolver = referenceResolver;
     this.context = context;
     this.reportError = errorLogger;
@@ -215,7 +207,40 @@ export class ApiDocumentation {
     this.isVirtual = false;
     this.isOverride = false;
 
-    this._parseDocs();
+    this.summary = [];
+    this.returnsMessage = [];
+    this.deprecatedMessage = [];
+    this.remarks = [];
+    this.incompleteLinks = [];
+    this.releaseTag = ReleaseTag.None;
+
+    this._parserContext = undefined;
+    this._docComment = undefined;
+
+    if (!inputTextRange.isEmpty()) {
+      this._parseDocs(inputTextRange);
+    }
+  }
+
+  /**
+   * Returns true if an AEDoc comment was parsed for the API item.
+   */
+  public get aedocCommentFound(): boolean {
+    if (this._parserContext) {
+      return this._parserContext.tokens.length > 0;
+    }
+    return false;
+  }
+
+  /**
+   * Returns the original AEDoc comment
+   */
+  public emitNormalizedComment(): string {
+    if (this._parserContext) {
+      const content: string = this._parserContext.lines.map(x => x.toString()).join('\n');
+      return TypeScriptHelpers.formatJSDocContent(content);
+    }
+    return '';
   }
 
   /**
@@ -229,163 +254,42 @@ export class ApiDocumentation {
     this._completeInheritdocs(warnings);
   }
 
-  protected _parseDocs(): void {
-    this.summary = [];
-    this.returnsMessage = [];
-    this.deprecatedMessage = [];
-    this.remarks = [];
-    this.incompleteLinks = [];
-    this.incompleteInheritdocs = [];
-    this.releaseTag = ReleaseTag.None;
-    const tokenizer: Tokenizer = new Tokenizer(this.originalAedoc, this.reportError);
-    this.summary = DocElementParser.parseAndNormalize(this, tokenizer);
+  private _parseDocs(inputTextRange: TextRange): void {
+    const tsdocParser: TSDocParser = new TSDocParser(AedocDefinitions.parserConfiguration);
+    this._parserContext = tsdocParser.parseRange(inputTextRange);
+    this._docComment = this._parserContext.docComment;
 
-    let releaseTagCount: number = 0;
-    let parsing: boolean = true;
-
-      while (parsing) {
-      const token: Token | undefined = tokenizer.peekToken();
-      if (!token) {
-        parsing = false; // end of stream
-        // Report error if @inheritdoc is deprecated but no @deprecated tag present here
-        if (this.isDocInheritedDeprecated && this.deprecatedMessage.length === 0) {
-          // if this documentation inherits docs from a deprecated API item, then
-          // this documentation must either have a deprecated message or it must
-          // not use the @inheritdoc and copy+paste the documentation
-          this.reportError(`A deprecation message must be included after the @deprecated tag.`);
-        }
-        break;
-      }
-
-      if (token.type === TokenType.BlockTag) {
-        switch (token.tag) {
-          case '@remarks':
-            tokenizer.getToken();
-            this._checkInheritDocStatus(token.tag);
-            this.remarks = DocElementParser.parseAndNormalize(this, tokenizer);
-            break;
-          case '@returns':
-            tokenizer.getToken();
-            this._checkInheritDocStatus(token.tag);
-            this.returnsMessage = DocElementParser.parseAndNormalize(this, tokenizer);
-            break;
-          case '@param':
-            tokenizer.getToken();
-            this._checkInheritDocStatus(token.tag);
-            const param: IAedocParameter | undefined = this._parseParam(tokenizer);
-            if (param) {
-               this.parameters[param.name] = param;
-            }
-            break;
-          case '@deprecated':
-            tokenizer.getToken();
-            this.deprecatedMessage = DocElementParser.parseAndNormalize(this, tokenizer);
-            if (!this.deprecatedMessage || this.deprecatedMessage.length === 0) {
-              this.reportError(`deprecated description required after @deprecated AEDoc tag.`);
-            }
-            break;
-          case '@internalremarks':
-            // parse but discard
-            tokenizer.getToken();
-            DocElementParser.parse(this, tokenizer);
-            break;
-          case '@public':
-            tokenizer.getToken();
-            this.releaseTag = ReleaseTag.Public;
-            ++releaseTagCount;
-            break;
-          case '@internal':
-            tokenizer.getToken();
-            this.releaseTag = ReleaseTag.Internal;
-            ++releaseTagCount;
-            break;
-          case '@alpha':
-            tokenizer.getToken();
-            this.releaseTag = ReleaseTag.Alpha;
-            ++releaseTagCount;
-            break;
-          case '@beta':
-            tokenizer.getToken();
-            this.releaseTag = ReleaseTag.Beta;
-            ++releaseTagCount;
-            break;
-          case '@preapproved':
-            tokenizer.getToken();
-            this.preapproved = true;
-            break;
-          case '@packagedocumentation':
-            tokenizer.getToken();
-            this.isPackageDocumentation = true;
-            break;
-          case '@readonly':
-            tokenizer.getToken();
-            this.hasReadOnlyTag = true;
-            break;
-          case '@betadocumentation':
-            tokenizer.getToken();
-            this.isDocBeta = true;
-            break;
-          case '@eventproperty':
-            tokenizer.getToken();
-            this.isEventProperty = true;
-            break;
-          case '@sealed':
-            tokenizer.getToken();
-            this.isSealed = true;
-            break;
-         case '@virtual':
-            tokenizer.getToken();
-            this.isVirtual = true;
-            break;
-          case '@override':
-            tokenizer.getToken();
-            this.isOverride = true;
-            break;
-          case '@defaultvalue':
-            // Accept this for now, but don't process it.
-            // We'll implement it fully when the TSDoc engine is merged.
-            tokenizer.getToken();
-            DocElementParser.parse(this, tokenizer);
-            break;
-          default:
-            tokenizer.getToken();
-            this._reportBadAedocTag(token);
-        }
-      } else if (token.type === TokenType.InlineTag) {
-        switch (token.tag) {
-          case '@inheritdoc':
-            DocElementParser.parse(this, tokenizer);
-            break;
-          case '@link':
-            DocElementParser.parse(this, tokenizer);
-            break;
-          default:
-            tokenizer.getToken();
-            this._reportBadAedocTag(token);
-            break;
-        }
-      } else if (token.type === TokenType.Text)  {
-        tokenizer.getToken();
-
-        if (token.text.trim().length !== 0) {
-          // Shorten "This is too long text" to "This is..."
-          const MAX_LENGTH: number = 40;
-          let problemText: string = token.text.trim();
-          if (problemText.length > MAX_LENGTH) {
-            problemText = problemText.substr(0, MAX_LENGTH - 3).trim() + '...';
-          }
-          this.reportError(`Unexpected text in AEDoc comment: "${problemText}"`);
-        }
-      } else {
-        tokenizer.getToken();
-        // This would be a program bug
-        this.reportError(`Unexpected token: ${token.type} ${token.tag} "${token.text}"`);
-      }
+    for (const message of this._parserContext.log.messages) {
+      this.reportError(message.unformattedText, message.textRange.pos);
     }
 
-    if (releaseTagCount > 1) {
-      this.reportError('More than one release tag (@alpha, @beta, etc) was specified');
+    this._parseModifierTags();
+    this._parseSections();
+  }
+
+  private _parseModifierTags(): void {
+    if (!this._docComment) {
+      return;
     }
+    const modifierTagSet: StandardModifierTagSet = this._docComment.modifierTagSet;
+
+    // The first function call that encounters a duplicate will return false.
+    // When there are duplicates, the broadest release tag wins.
+    // tslint:disable-next-line:no-unused-expression
+    this._parseReleaseTag(modifierTagSet, StandardTags.public, ReleaseTag.Public)
+      && this._parseReleaseTag(modifierTagSet, StandardTags.beta, ReleaseTag.Beta)
+      && this._parseReleaseTag(modifierTagSet, StandardTags.alpha, ReleaseTag.Alpha)
+      && this._parseReleaseTag(modifierTagSet, StandardTags.internal, ReleaseTag.Internal);
+
+    this.preapproved = modifierTagSet.hasTag(AedocDefinitions.preapprovedTag);
+
+    this.isPackageDocumentation = modifierTagSet.isPackageDocumentation();
+    this.hasReadOnlyTag = modifierTagSet.isReadonly();
+    this.isDocBeta = modifierTagSet.hasTag(AedocDefinitions.betaDocumentation);
+    this.isEventProperty = modifierTagSet.isEventProperty();
+    this.isSealed = modifierTagSet.isSealed();
+    this.isVirtual = modifierTagSet.isVirtual();
+    this.isOverride = modifierTagSet.isOverride();
 
     if (this.preapproved && this.releaseTag !== ReleaseTag.Internal) {
       this.reportError('The @preapproved tag may only be applied to @internal definitions');
@@ -401,38 +305,260 @@ export class ApiDocumentation {
     }
   }
 
-  protected _parseParam(tokenizer: Tokenizer): IAedocParameter | undefined {
-    const paramDescriptionToken: Token | undefined = tokenizer.getToken();
-    if (!paramDescriptionToken) {
-      this.reportError('The @param tag is missing a parameter description');
+  private _parseReleaseTag(modifierTagSet: ModifierTagSet, tagDefinition: TSDocTagDefinition,
+    releaseTag: ReleaseTag): boolean {
+
+    const node: DocBlockTag | undefined = modifierTagSet.tryGetTag(tagDefinition);
+    if (node) {
+      if (this.releaseTag !== ReleaseTag.None) {
+        this.reportError('More than one release tag was specified (@alpha, @beta, @public, @internal)');
+        return false;
+      }
+      this.releaseTag = releaseTag;
+    }
+
+    return true;
+  }
+
+  private _parseSections(): void {
+    if (!this._docComment) {
+      return;
+    }
+
+    this._renderAsMarkupElementsInto(this.summary, this._docComment.summarySection,
+      'the summary section', false);
+
+    if (this._docComment.remarksBlock) {
+      this._renderAsMarkupElementsInto(this.remarks, this._docComment.remarksBlock,
+        'the remarks section', true);
+    }
+
+    if (this._docComment.deprecatedBlock) {
+      this._renderAsMarkupElementsInto(this.deprecatedMessage, this._docComment.deprecatedBlock,
+        'a deprecation notice', false);
+    }
+
+    if (this._docComment.returnsBlock) {
+      this._renderAsMarkupElementsInto(this.returnsMessage, this._docComment.returnsBlock,
+        'a return value description', false);
+    }
+
+    for (const paramBlock of this._docComment.paramBlocks) {
+      const aedocParameter: IAedocParameter = {
+        name: paramBlock.parameterName,
+        description: []
+      };
+      this._renderAsMarkupElementsInto(aedocParameter.description, paramBlock,
+        'a parameter description', false);
+
+      this.parameters[paramBlock.parameterName] = aedocParameter;
+    }
+  }
+
+  private _renderAsMarkupElementsInto(result: MarkupElement[], node: DocNode, sectionName: string,
+    allowStructuredContent: boolean): void {
+    switch (node.kind) {
+      case DocNodeKind.Block:
+      case DocNodeKind.Section:
+      case DocNodeKind.ParamBlock:
+        const docSection: DocSection = node as DocSection;
+        for (const childNode of docSection.nodes) {
+          this._renderAsMarkupElementsInto(result, childNode, sectionName, allowStructuredContent);
+        }
+        break;
+      case DocNodeKind.BlockTag:
+        // If an unrecognized TSDoc block tag appears in the content, don't render it
+        break;
+      case DocNodeKind.CodeSpan:
+        const docCodeSpan: DocCodeSpan = node as DocCodeSpan;
+        result.push(Markup.createCode(docCodeSpan.code));
+        break;
+      case DocNodeKind.ErrorText:
+        const docErrorText: DocErrorText = node as DocErrorText;
+        Markup.appendTextElements(result, docErrorText.text);
+        break;
+      case DocNodeKind.EscapedText:
+        const docEscapedText: DocEscapedText = node as DocEscapedText;
+        Markup.appendTextElements(result, docEscapedText.text);
+        break;
+      case DocNodeKind.FencedCode:
+        if (allowStructuredContent) {
+          const docCodeFence: DocFencedCode = node as DocFencedCode;
+          let markupHighlighter: MarkupHighlighter = 'plain';
+          switch (docCodeFence.language.toUpperCase()) {
+            case 'TS':
+            case 'TYPESCRIPT':
+            case 'JS':
+            case 'JAVASCRIPT':
+              markupHighlighter = 'javascript';
+              break;
+          }
+          result.push(Markup.createCodeBox(docCodeFence.code, markupHighlighter));
+        } else {
+          this._reportIncorrectStructuredContent('a fenced code block', sectionName);
+          return;
+        }
+        break;
+      case DocNodeKind.HtmlStartTag:
+        const docHtmlStartTag: DocHtmlStartTag = node as DocHtmlStartTag;
+        let htmlStartTag: string = '<';
+        htmlStartTag += docHtmlStartTag.elementName;
+        for (const attribute of docHtmlStartTag.htmlAttributes) {
+          htmlStartTag += ` ${attribute.attributeName}=${attribute.attributeValue}`;
+        }
+        if (docHtmlStartTag.selfClosingTag) {
+          htmlStartTag += '/';
+        }
+        htmlStartTag += '>';
+        result.push(Markup.createHtmlTag(htmlStartTag));
+        break;
+      case DocNodeKind.HtmlEndTag:
+        const docHtmlEndTag: DocHtmlEndTag = node as DocHtmlEndTag;
+        result.push(Markup.createHtmlTag(`</${docHtmlEndTag.elementName}>`));
+        break;
+      case DocNodeKind.InlineTag:
+        const docInlineTag: DocInlineTag = node as DocInlineTag;
+        Markup.appendTextElements(result, '{' + docInlineTag.tagName + '}');
+        break;
+      case DocNodeKind.LinkTag:
+        const docLinkTag: DocLinkTag = node as DocLinkTag;
+        if (docLinkTag.urlDestination) {
+          result.push(Markup.createWebLinkFromText(docLinkTag.linkText || docLinkTag.urlDestination,
+            docLinkTag.urlDestination));
+        } else if (docLinkTag.codeDestination) {
+          const apiItemReference: IApiItemReference | undefined
+            = this._tryCreateApiItemReference(docLinkTag.codeDestination);
+          if (apiItemReference) {
+            let linkText: string | undefined = docLinkTag.linkText;
+            if (!linkText) {
+              linkText = apiItemReference.exportName;
+              if (apiItemReference.memberName) {
+                linkText += '.' + apiItemReference.memberName;
+              }
+            }
+            const linkElement: IMarkupApiLink = Markup.createApiLinkFromText(linkText, apiItemReference);
+            result.push(linkElement);
+
+            // The link will get resolved later in _completeLinks()
+            this.incompleteLinks.push(linkElement);
+          }
+        }
+        break;
+      case DocNodeKind.Paragraph:
+        if (result.length > 0) {
+          switch (result[result.length - 1].kind) {
+            case 'code-box':
+            case 'heading1':
+            case 'heading2':
+            case 'note-box':
+            case 'page':
+            case 'paragraph':
+            case 'table':
+              // Don't put a Markup.PARAGRAPH after a structural element,
+              // since it is implicit.
+              break;
+            default:
+              result.push(Markup.PARAGRAPH);
+              break;
+          }
+        }
+        const docParagraph: DocParagraph = node as DocParagraph;
+        for (const childNode of DocNodeTransforms.trimSpacesInParagraph(docParagraph).nodes) {
+          this._renderAsMarkupElementsInto(result, childNode, sectionName, allowStructuredContent);
+        }
+        break;
+      case DocNodeKind.PlainText:
+        const docPlainText: DocPlainText = node as DocPlainText;
+        Markup.appendTextElements(result, docPlainText.text);
+        break;
+      case DocNodeKind.SoftBreak:
+        Markup.appendTextElements(result, ' ');
+        break;
+      default:
+        this.reportError('Unsupported TSDoc element: ' + node.kind);
+    }
+  }
+
+  private _reportIncorrectStructuredContent(constructName: string, sectionName: string): void {
+    this.reportError(`Structured content such as ${constructName} cannot be used in ${sectionName}`);
+  }
+
+  // This is a temporary adapter until we fully generalize IApiItemReference to support TSDoc declaration references
+  private _tryCreateApiItemReference(declarationReference: DocDeclarationReference): IApiItemReference | undefined {
+    if (declarationReference.importPath) {
+      this.reportError(`API Extractor does not yet support TSDoc declaration references containing an import path:`
+        + ` "(declarationReference.importPath)"`);
       return undefined;
     }
-    const hyphenIndex: number = paramDescriptionToken ? paramDescriptionToken.text.indexOf('-') : -1;
-    if (hyphenIndex < 0) {
-      this.reportError('The @param tag is missing the hyphen that delimits the parameter name '
-        + ' and description');
-      return undefined;
-    } else {
-      const name: string = paramDescriptionToken.text.slice(0, hyphenIndex).trim();
-      const comment: string = paramDescriptionToken.text.substr(hyphenIndex + 1).trim();
 
-      if (!comment) {
-        this.reportError('The @param tag is missing a parameter description');
+    const memberReferences: ReadonlyArray<DocMemberReference> = declarationReference.memberReferences;
+    if (memberReferences.length > 2) {
+      // This will get be fixed soon
+      this.reportError('API Extractor does not yet support TSDoc declaration references containing'
+        + ' more than 2 levels of nesting');
+      return undefined;
+    }
+    if (memberReferences.length === 0) {
+      this.reportError('API Extractor does not yet support TSDoc declaration references without a member reference');
+      return undefined;
+    }
+
+    const apiItemReference: IApiItemReference = {
+      scopeName: '',
+      packageName: '',
+      exportName: '',
+      memberName: ''
+    };
+
+    if (declarationReference.packageName) {
+      const parsedPackageName: IParsedPackageNameOrError = PackageName.tryParse(declarationReference.packageName);
+      if (parsedPackageName.error) {
+        this.reportError(`Invalid package name ${declarationReference.packageName}: ${parsedPackageName.error}`);
         return undefined;
       }
 
-      const commentTextElements: MarkupBasicElement[] = Markup.createTextElements(comment);
-      // Full param description may contain additional Tokens (Ex: @link)
-      const remainingElements: MarkupBasicElement[] = DocElementParser.parse(this, tokenizer);
-      const descriptionElements: MarkupBasicElement[] = commentTextElements.concat(remainingElements);
-      Markup.normalize(descriptionElements);
+      apiItemReference.scopeName = parsedPackageName.scope;
+      apiItemReference.packageName = parsedPackageName.unscopedName;
+    } else {
 
-      const paramDocElement: IAedocParameter = {
-        name: name,
-        description: descriptionElements
-      };
-      return paramDocElement;
+      // If the package name is unspecified, assume it is the current package
+      apiItemReference.scopeName = this.context.parsedPackageName.scope;
+      apiItemReference.packageName = this.context.parsedPackageName.unscopedName;
     }
+
+    let identifier: string | undefined = this._tryGetMemberReferenceIdentifier(memberReferences[0]);
+    if (!identifier) {
+      return undefined;
+    }
+    apiItemReference.exportName = identifier;
+
+    if (memberReferences.length > 1) {
+      identifier = this._tryGetMemberReferenceIdentifier(memberReferences[1]);
+      if (!identifier) {
+        return undefined;
+      }
+      apiItemReference.memberName = identifier;
+    }
+
+    return apiItemReference;
+  }
+
+  private _tryGetMemberReferenceIdentifier(memberReference: DocMemberReference): string | undefined {
+    if (!memberReference.memberIdentifier) {
+      this.reportError('API Extractor currently only supports TSDoc member references using identifiers');
+      return undefined;
+    }
+
+    if (memberReference.memberIdentifier.hasQuotes) {
+      // Allow quotes if the identifier is being quoted because it is a system name.
+      // (What's not supported is special characters in the identifier.)
+      if (!/[_a-z][_a-z0-0]*/i.test(memberReference.memberIdentifier.identifier)) {
+        this.reportError('API Extractor does not yet support TSDoc member references using quotes');
+        return undefined;
+      }
+    }
+
+    return memberReference.memberIdentifier.identifier;
   }
 
   /**
@@ -478,41 +604,68 @@ export class ApiDocumentation {
    * for all API items.
    */
   private _completeInheritdocs(warnings: string[]): void {
-    for ( ; ; ) {
-      const token: Token | undefined = this.incompleteInheritdocs.pop();
-      if (!token) {
+    if (!this._docComment || !this._docComment.inheritDocTag) {
+      return;
+    }
+    if (!this._docComment.inheritDocTag.declarationReference) {
+      return;
+    }
+    const apiItemReference: IApiItemReference | undefined = this._tryCreateApiItemReference(
+      this._docComment.inheritDocTag.declarationReference);
+    if (!apiItemReference) {
+      return;
+    }
+
+    const apiDefinitionRef: ApiDefinitionReference = ApiDefinitionReference.createFromParts(apiItemReference);
+
+    // Atempt to locate the apiDefinitionRef
+    const resolvedAstItem: ResolvedApiItem | undefined = this.referenceResolver.resolve(
+      apiDefinitionRef,
+      this.context.package,
+      warnings
+    );
+
+    // If no resolvedAstItem found then nothing to inherit
+    // But for the time being set the summary to a text object
+    if (!resolvedAstItem) {
+      this.summary.push(...Markup.createTextElements(
+        `See documentation for ${this._docComment.inheritDocTag.tagContent}`));
+      return;
+    }
+
+    // We are going to copy the resolvedAstItem's documentation
+    // We must make sure it's documentation can be completed,
+    // if we cannot, an error will be reported viathe documentation error handler.
+    // This will only be the case our resolvedAstItem was created from a local
+    // AstItem. Resolutions from JSON will have an undefined 'astItem' property.
+    // Example: a circular reference will report an error.
+    if (resolvedAstItem.astItem) {
+      resolvedAstItem.astItem.completeInitialization();
+    }
+
+    // inheritdoc found, copy over IApiBaseDefinition properties
+    this.summary = resolvedAstItem.summary;
+    this.remarks = resolvedAstItem.remarks;
+
+    // Copy over detailed properties if neccessary
+    // Add additional cases if needed
+    switch (resolvedAstItem.kind) {
+      case AstItemKind.Function:
+        this.parameters = resolvedAstItem.params || { };
+        this.returnsMessage = resolvedAstItem.returnsMessage || [];
         break;
-      }
-
-      DocElementParser.parseInheritDoc(this, token, warnings);
-    }
-  }
-
-  private _reportBadAedocTag(token: Token): void {
-    const supportsRegular: boolean = ApiDocumentation._allowedRegularAedocTags.indexOf(token.tag) >= 0;
-    const supportsInline: boolean = ApiDocumentation._allowedInlineAedocTags.indexOf(token.tag) >= 0;
-
-    if (!supportsRegular && !supportsInline) {
-      this.reportError(`The JSDoc tag \"${token.tag}\" is not supported by AEDoc`);
-      return;
+      case AstItemKind.Method:
+      case AstItemKind.Constructor:
+        this.parameters = resolvedAstItem.params || { };
+        this.returnsMessage = resolvedAstItem.returnsMessage || [];
+        break;
     }
 
-    if (token.type === TokenType.InlineTag && !supportsInline) {
-      this.reportError(`The AEDoc tag \"${token.tag}\" must use the inline tag notation (i.e. with curly braces)`);
-      return;
-    }
-    if (token.type === TokenType.BlockTag && !supportsRegular) {
-      this.reportError(`The AEDoc tag \"${token.tag}\" must use the block tag notation (i.e. no curly braces)`);
-      return;
-    }
-
-    this.reportError(`The AEDoc tag \"${token.tag}\" is not supported in this context`);
-    return;
-  }
-
-  private _checkInheritDocStatus(aedocTag: string): void {
-    if (this.isDocInherited) {
-      this.reportError(`The ${aedocTag} tag may not be used because this state is provided by the @inheritdoc target`);
+    // Check if inheritdoc is depreacted
+    // We need to check if this documentation has a deprecated message
+    // but it may not appear until after this token.
+    if (resolvedAstItem.deprecatedMessage && resolvedAstItem.deprecatedMessage.length > 0) {
+      this.isDocInheritedDeprecated = true;
     }
   }
 }

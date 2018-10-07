@@ -200,10 +200,6 @@
           ],
           "remarks": [
             {
-              "kind": "text",
-              "text": ""
-            },
-            {
               "kind": "html-tag",
               "token": "<table>"
             },
@@ -262,10 +258,6 @@
             {
               "kind": "html-tag",
               "token": "</table>"
-            },
-            {
-              "kind": "text",
-              "text": ""
             }
           ],
           "isBeta": false,

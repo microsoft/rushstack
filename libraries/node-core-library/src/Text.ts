@@ -106,7 +106,7 @@ export class Text {
   }
 
   /**
-   * Returns the input string with a trailing '\n' character appended, if not already present.
+   * Returns the input string with a trailing `\n` character appended, if not already present.
    */
   public static ensureTrailingNewline(s: string, newlineKind: NewlineKind = NewlineKind.Lf): string {
     // Is there already a newline?

@@ -87,6 +87,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/tsdoc",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/web-library-build",
       "allowedCategories": [ "libraries", "tests" ]
     },

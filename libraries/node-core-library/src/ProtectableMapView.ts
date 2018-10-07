@@ -4,7 +4,7 @@
 import { ProtectableMap, IProtectableMapParameters } from './ProtectableMap';
 
 /**
- * The internal wrapper used by ProtectableMap.  It extends the real Map<K, V> base class,
+ * The internal wrapper used by ProtectableMap.  It extends the real `Map<K, V>` base class,
  * but hooks the destructive operations (clear/delete/set) to give the owner a chance
  * to block them.
  *

@@ -418,7 +418,7 @@ export class RushConfiguration {
   /**
    * The fully resolved path for the "common" folder where Rush will store settings that
    * affect all Rush projects.  This is always a subfolder of the folder containing "rush.json".
-   * Example: "C:\MyRepo\common"
+   * Example: `C:\MyRepo\common`
    */
   public get commonFolder(): string {
     return this._commonFolder;
@@ -426,11 +426,11 @@ export class RushConfiguration {
 
   /**
    * The folder where Rush's additional config files are stored.  This folder is always a
-   * subfolder called "config\rush" inside the common folder.  (The "common\config" folder
+   * subfolder called `config\rush` inside the common folder.  (The `common\config` folder
    * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
    * Rush will report an error if this this folder contains any unrecognized files.
    *
-   * Example: "C:\MyRepo\common\config\rush"
+   * Example: `C:\MyRepo\common\config\rush`
    */
   public get commonRushConfigFolder(): string {
     return this._commonRushConfigFolder;
@@ -439,7 +439,7 @@ export class RushConfiguration {
   /**
    * The folder where temporary files will be stored.  This is always a subfolder called "temp"
    * under the common folder.
-   * Example: "C:\MyRepo\common\temp"
+   * Example: `C:\MyRepo\common\temp`
    */
   public get commonTempFolder(): string {
     return this._commonTempFolder;
@@ -448,7 +448,7 @@ export class RushConfiguration {
   /**
    * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
    * under the common folder.
-   * Example: "C:\MyRepo\common\scripts"
+   * Example: `C:\MyRepo\common\scripts`
    */
   public get commonScriptsFolder(): string {
     return this._commonScriptsFolder;
@@ -460,7 +460,7 @@ export class RushConfiguration {
    * reliably handle multiple processes.  (For example, if a build box is running
    * "rush install" simultaneously for two different working folders, it may fail randomly.)
    *
-   * Example: "C:\MyRepo\common\temp\npm-cache"
+   * Example: `C:\MyRepo\common\temp\npm-cache`
    */
   public get npmCacheFolder(): string {
     return this._npmCacheFolder;
@@ -471,7 +471,7 @@ export class RushConfiguration {
    * Rush does not rely on the global default folder, because it may be on a different
    * hard disk.
    *
-   * Example: "C:\MyRepo\common\temp\npm-tmp"
+   * Example: `C:\MyRepo\common\temp\npm-tmp`
    */
   public get npmTmpFolder(): string {
     return this._npmTmpFolder;
@@ -480,7 +480,7 @@ export class RushConfiguration {
   /**
    * The local folder where PNPM stores a global installation for every installed package
    *
-   * Example: "C:\MyRepo\common\temp\pnpm-store"
+   * Example: `C:\MyRepo\common\temp\pnpm-store`
    */
   public get pnpmStoreFolder(): string {
     return this._pnpmStoreFolder;
@@ -489,7 +489,7 @@ export class RushConfiguration {
   /**
    * The local folder that will store the Yarn package cache.
    *
-   * Example: "C:\MyRepo\common\temp\yarn-cache"
+   * Example: `C:\MyRepo\common\temp\yarn-cache`
    */
   public get yarnCacheFolder(): string {
     return this._yarnCacheFolder;
@@ -500,7 +500,7 @@ export class RushConfiguration {
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
    * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\npm-shrinkwrap.json" or "C:\MyRepo\common\shrinkwrap.yaml"
+   * Example: `C:\MyRepo\common\npm-shrinkwrap.json` or `C:\MyRepo\common\shrinkwrap.yaml`
    */
   public get committedShrinkwrapFilename(): string {
     return this._committedShrinkwrapFilename;
@@ -511,7 +511,7 @@ export class RushConfiguration {
    * This file may get rewritten by the package manager during installation.
    * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap.json" or "C:\MyRepo\common\temp\shrinkwrap.yaml"
+   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap.json` or `C:\MyRepo\common\temp\shrinkwrap.yaml`
    */
   public get tempShrinkwrapFilename(): string {
     return this._tempShrinkwrapFilename;
@@ -523,8 +523,8 @@ export class RushConfiguration {
    * modified tempShrinkwrapFilename.
    * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: "C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json"
-   * or "C:\MyRepo\common\temp\shrinkwrap-preinstall.yaml"
+   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json`
+   * or `C:\MyRepo\common\temp\shrinkwrap-preinstall.yaml`
    */
   public get tempShrinkwrapPreinstallFilename(): string {
     return this._tempShrinkwrapPreinstallFilename;
@@ -547,7 +547,7 @@ export class RushConfiguration {
 
   /**
    * The absolute path to Rush's storage in the home directory for the current user.  On Windows,
-   * it would be something like "C:\Users\YourName\.rush".
+   * it would be something like `C:\Users\YourName\.rush`.
    */
   public get rushUserFolder(): string {
     return this._rushUserFolder;
@@ -558,7 +558,7 @@ export class RushConfiguration {
    * called 'rush-link.json' resides in the Rush common folder.
    * Its data structure is defined by IRushLinkJson.
    *
-   * Example: "C:\MyRepo\common\temp\rush-link.json"
+   * Example: `C:\MyRepo\common\temp\rush-link.json`
    */
   public get rushLinkJsonFilename(): string {
     return this._rushLinkJsonFilename;
@@ -574,7 +574,7 @@ export class RushConfiguration {
   /**
    * The absolute path to the locally installed NPM tool.  If "rush install" has not
    * been run, then this file may not exist yet.
-   * Example: "C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm"
+   * Example: `C:\MyRepo\common\temp\npm-local\node_modules\.bin\npm`
    */
   public get packageManagerToolFilename(): string {
     return this._packageManagerToolFilename;
@@ -611,7 +611,7 @@ export class RushConfiguration {
    * [Part of the "gitPolicy" feature.]
    * A list of regular expressions describing allowable email patterns for Git commits.
    * They are case-insensitive anchored JavaScript RegExps.
-   * Example: ".*@example\.com"
+   * Example: `".*@example\.com"`
    * This array will never be undefined.
    */
   public get gitAllowedEmailRegExps(): string[] {
@@ -621,7 +621,7 @@ export class RushConfiguration {
   /**
    * [Part of the "gitPolicy" feature.]
    * An example valid email address that conforms to one of the allowedEmailRegExps.
-   * Example: "foxtrot@example\.com"
+   * Example: `"foxtrot@example\.com"`
    * This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used.
    */
   public get gitSampleEmail(): string {
@@ -704,7 +704,7 @@ export class RushConfiguration {
   /**
    * This is used e.g. by command-line interfaces such as "rush build --to example".
    * If "example" is not a project name, then it also looks for a scoped name
-   * like "@something/example".  If exactly one project matches this heuristic, it
+   * like `@something/example`.  If exactly one project matches this heuristic, it
    * is returned.  Otherwise, undefined is returned.
    */
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined {

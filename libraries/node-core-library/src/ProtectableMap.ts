@@ -30,7 +30,7 @@ export interface IProtectableMapParameters<K, V> {
 }
 
 /**
- * The ProtectableMap provides an easy way for an API to expose a Map<K, V> property
+ * The ProtectableMap provides an easy way for an API to expose a `Map<K, V>` property
  * while intercepting and validating any write operations that are performed by
  * consumers of the API.
  *
@@ -40,7 +40,7 @@ export interface IProtectableMapParameters<K, V> {
  * bypass the hooks and any validation they perform.  The public property that is exposed
  * to API consumers should return {@link ProtectableMap.protectedView} instead.
  *
- * For example, suppose you want to share your Map<string,number> data structure,
+ * For example, suppose you want to share your `Map<string, number>` data structure,
  * but you want to enforce that the key must always be an upper case string:
  * You could use the onSet() hook to validate the keys and throw an exception
  * if the key is not uppercase.

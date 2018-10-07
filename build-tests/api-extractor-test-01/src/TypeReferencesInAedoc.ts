@@ -3,7 +3,7 @@
 
 /**
  * This class has links such as {@link TypeReferencesInAedoc}.
- * @internal
+ * @public
  */
 export class TypeReferencesInAedoc {
   /**
@@ -15,13 +15,13 @@ export class TypeReferencesInAedoc {
     return this;
   }
 
-  /** {@inheritdoc api-extractor-test-01:TypeReferencesInAedoc.getValue} */
+  /** {@inheritdoc api-extractor-test-01#TypeReferencesInAedoc.getValue} */
   public getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc {
     return this;
   }
 
   /**
-   * @param {arg} - Malformed param reference.
+   * @param arg - Malformed param reference.
    */
   public getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc {
     return this;

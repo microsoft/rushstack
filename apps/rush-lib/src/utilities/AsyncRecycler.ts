@@ -33,7 +33,7 @@ export class AsyncRecycler {
 
   /**
    * The full path of the recycler folder.
-   * Example: "C:\MyRepo\common\rush-recycler"
+   * Example: `C:\MyRepo\common\rush-recycler`
    */
   public get recyclerFolder(): string {
     return this._recyclerFolder;

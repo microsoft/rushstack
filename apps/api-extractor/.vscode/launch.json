@@ -53,7 +53,21 @@
         "-d",
         "run",
         "-l"
-      ]
+      ],
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test-05",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-05",
+      "args": [
+        "-d",
+        "run",
+        "-l"
+      ],
+      "sourceMaps": false
     },
     {
       "type": "node",

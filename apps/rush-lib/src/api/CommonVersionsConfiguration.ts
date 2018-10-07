@@ -118,12 +118,12 @@ export class CommonVersionsConfiguration {
    * version, however generally it can be any SemVer range specifier (e.g. "~1.2.3"), and it
    * will narrow any (compatible) SemVer range specifier.
    *
-   * For example, suppose local project A depends on an external package B, and B asks
-   * for C@^1.0.0, which normally would select C@1.5.0.  If we specify C@~1.2.3 as our preferred version,
-   * and it selects C@1.2.9, then that will be installed for B instead of C@1.5.0.  Whereas if the
-   * preferred version was C@~2.0.0 then it would have no effect, because this is incompatible
-   * with C@^1.0.0.  A compatible parent dependency will take precedence over the preferred version;
-   * for example  if A had a direct dependency on C@1.2.2, then B would get C@1.2.2 regardless of the
+   * For example, suppose local project `A` depends on an external package `B`, and `B` asks
+   * for `C@^1.0.0`, which normally would select `C@1.5.0`.  If we specify `C@~1.2.3` as our preferred version,
+   * and it selects `C@1.2.9`, then that will be installed for B instead of `C@1.5.0`.  Whereas if the
+   * preferred version was `C@~2.0.0` then it would have no effect, because this is incompatible
+   * with `C@^1.0.0`.  A compatible parent dependency will take precedence over the preferred version;
+   * for example if `A` had a direct dependency on `C@1.2.2`, then `B` would get `C@1.2.2` regardless of the
    * preferred version.
    *
    * Rush's implementation relies on the package manager's heuristic for avoiding duplicates by
