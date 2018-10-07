@@ -195,6 +195,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       const cleanCss: CleanCss =  new CleanCss(cleanCssOptions);
       return cleanCss.minify(result.css.toString());
     }).then((result: CleanCss.Output) => {
+      try {
       if (cssOutputPathAbsolute) {
         const generatedFileLines: string[] = [
           result.styles.toString()
@@ -285,7 +286,12 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
           .replace(new RegExp(`(${EOL})+$`, 'm'), EOL)
       );
 
+      this.log(`Writing ${scssTsOutputPath}`);
       FileSystem.writeFile(scssTsOutputPath, generatedTsFile);
+      this.log(`Wrote ${scssTsOutputPath}`);
+      } catch (e) {
+        this.log('ERROR ' + e);
+      }
     });
   }
 
