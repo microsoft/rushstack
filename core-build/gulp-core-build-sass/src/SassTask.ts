@@ -293,8 +293,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     return Promise.all(patterns.map((pattern) =>
       PromiseUtilities.promiseify(
         glob,
-        path.isAbsolute(pattern) ? pattern : path.join(this.buildConfig.rootPath, pattern),
-        { root: this.buildConfig.rootPath })
+        path.isAbsolute(pattern) ? pattern : path.join(this.buildConfig.rootPath, pattern)
+      )
     )).then((matchSets: string[][]) => {
       const result: { [path: string]: boolean } = {};
       for (const matchSet of matchSets) {
