@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix a recent regression where \"rush link\" was failing for NPM/Yarn because hard links don't support relative paths",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
