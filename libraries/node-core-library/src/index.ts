@@ -70,6 +70,6 @@ export {
   IFileWriterFlags
 } from './FileWriter';
 export {
-  PromiseUtilities,
+  LegacyAdapters,
   callback
-} from './PromiseUtilities';
+} from './LegacyAdapters';

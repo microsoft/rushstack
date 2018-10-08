@@ -12,7 +12,8 @@ import {
   JsonFile,
   PackageName,
   FileSystem,
-  FileConstants
+  FileConstants,
+  LegacyAdapters
 } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
@@ -44,7 +45,10 @@ interface IQueueItem {
 
 export class NpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
-    return this._readPackageTree(this._rushConfiguration.commonTempFolder).then(
+    return LegacyAdapters.promiseify<readPackageTree.PackageNode, Error, string>(
+      readPackageTree,
+      this._rushConfiguration.commonTempFolder
+    ).then(
       (npmPackage: readPackageTree.PackageNode) => {
         const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
 
@@ -60,20 +64,6 @@ export class NpmLinkManager extends BaseLinkManager {
 
         console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
         JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-      }
-    );
-  }
-
-  private _readPackageTree(rootFolderPath: string): Promise<readPackageTree.PackageNode> {
-    return new Promise(
-      (resolve: (rootNode: readPackageTree.PackageNode) => void, reject: (error: Error) => void): void => {
-        readPackageTree(rootFolderPath, (error: Error | undefined, rootNode: readPackageTree.PackageNode) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(rootNode);
-          }
-        });
       }
     );
   }
