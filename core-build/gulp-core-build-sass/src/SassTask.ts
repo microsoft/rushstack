@@ -10,7 +10,7 @@ import { splitStyles } from '@microsoft/load-themed-styles';
 import {
   FileSystem,
   JsonFile,
-  PromiseUtilities
+  LegacyAdapters
 } from '@microsoft/node-core-library';
 import * as glob from 'glob';
 import * as nodeSass from 'node-sass';
@@ -156,7 +156,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       cssOutputPathAbsolute = path.join(this.buildConfig.rootPath, cssOutputPath);
     }
 
-    return PromiseUtilities.promiseify(
+    return LegacyAdapters.promiseify(
       nodeSass.render,
       {
         file: filePath,
@@ -291,7 +291,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
   private _globAll(...patterns: string[]): Promise<string[]> {
     return Promise.all(patterns.map((pattern) =>
-      PromiseUtilities.promiseify(
+      LegacyAdapters.promiseify(
         glob,
         path.isAbsolute(pattern) ? pattern : path.join(this.buildConfig.rootPath, pattern)
       )

@@ -8,7 +8,7 @@ export type callback<TResult, TError> = (error: TError, result: TResult) => void
  *
  * @beta
  */
-export class PromiseUtilities {
+export class LegacyAdapters {
   /**
    * This function wraps a function with a callback in a promise.
    */
