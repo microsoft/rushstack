@@ -43,8 +43,10 @@ export abstract class BaseLinkManager {
       } else {
         // For files, we use a Windows "hard link", because creating a symbolic link requires
         // administrator permission.
+
+        // NOTE: We cannot use the relative path for hard links
         FileSystem.createHardLink({
-          linkTargetPath: targetRelativePath,
+          linkTargetPath: options.linkTargetPath,
           newLinkPath: options.newLinkPath
         });
       }
