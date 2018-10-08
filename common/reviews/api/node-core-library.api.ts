@@ -232,6 +232,12 @@ class JsonSchema {
   validateObjectWithCallback(jsonObject: Object, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
 }
 
+// @beta
+class LegacyAdapters {
+  static convertCallbackToPromise<TResult, TError>(fn: (cb: callback<TResult, TError>) => void): Promise<TResult>;
+  static scrubError(error: Error | string | any): Error;
+}
+
 // @public
 class LockFile {
   static acquire(resourceDir: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
@@ -296,11 +302,6 @@ enum PosixModeBits {
   UserExecute = 64,
   UserRead = 256,
   UserWrite = 128
-}
-
-// @beta
-class PromiseUtilities {
-  static promiseify<TResult, TError>(fn: (cb: callback<TResult, TError>) => void): Promise<TResult>;
 }
 
 // @public

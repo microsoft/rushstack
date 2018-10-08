@@ -4,7 +4,8 @@
 import * as path from 'path';
 import {
   JsonFile,
-  FileSystem
+  FileSystem,
+  LegacyAdapters
 } from '@microsoft/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
@@ -76,29 +77,20 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
     }
 
     const resolvedLibFolders: string[] = libFolders.map((libFolder) => path.join(this.buildConfig.rootPath, libFolder));
-    const promises: Promise<void>[] = (this.taskConfig.staticMatch || []).map((pattern) => {
-      return new Promise((resolve: () => void, reject: (error: Error) => void) => {
-        glob(
-          path.join(globEscape(this.buildConfig.rootPath), pattern),
-          (error: Error | undefined, matchPaths: string[]) => {
-            if (error) {
-              reject(error);
-            } else {
-              for (const matchPath of matchPaths) {
-                const fileContents: string = FileSystem.readFile(matchPath);
-                const relativePath: string = path.relative(srcPath, matchPath);
-                for (const resolvedLibFolder of resolvedLibFolders) {
-                  const destPath: string = path.join(resolvedLibFolder, relativePath);
-                  FileSystem.writeFile(destPath, fileContents, { ensureFolderExists: true });
-                }
-              }
-
-              resolve();
+    const promises: Promise<void>[] = (this.taskConfig.staticMatch || []).map((pattern) =>
+      LegacyAdapters.convertCallbackToPromise(glob, path.join(globEscape(this.buildConfig.rootPath), pattern)).then(
+        (matchPaths: string[]) => {
+          for (const matchPath of matchPaths) {
+            const fileContents: string = FileSystem.readFile(matchPath);
+            const relativePath: string = path.relative(srcPath, matchPath);
+            for (const resolvedLibFolder of resolvedLibFolders) {
+              const destPath: string = path.join(resolvedLibFolder, relativePath);
+              FileSystem.writeFile(destPath, fileContents, { ensureFolderExists: true });
             }
           }
-        );
-      });
-    });
+        }
+      )
+    );
 
     let completeCallbackCalled: boolean = false;
     let completeCallbackError: string | undefined;
@@ -160,29 +152,21 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
       return Promise.reject('Unable to determine outDir from TypesScript configuration.');
     }
 
-    return new Promise((resolve: () => void, reject: (error: Error) => void) => {
-      glob(
-        path.join(globEscape(tsConfig.options.outDir), '**', '*.js'),
-        (error: Error | undefined, matches: string[]) => {
-          if (error) {
-            reject(error);
-          } else {
-            for (const match of matches) {
-              const sourceText: string = FileSystem.readFile(match);
-              const decommentedText: string = decomment(
-                sourceText,
-                {
-                  // This option preserves comments that start with /*!, /**! or //! - typically copyright comments
-                  safe: true
-                }
-              );
-              FileSystem.writeFile(match, decommentedText);
-            }
-
-            resolve();
+    return LegacyAdapters.convertCallbackToPromise(
+      glob,
+      path.join(globEscape(tsConfig.options.outDir), '**', '*.js')
+    ).then((matches: string[]) => {
+      for (const match of matches) {
+        const sourceText: string = FileSystem.readFile(match);
+        const decommentedText: string = decomment(
+          sourceText,
+          {
+            // This option preserves comments that start with /*!, /**! or //! - typically copyright comments
+            safe: true
           }
-        }
-      );
+        );
+        FileSystem.writeFile(match, decommentedText);
+      }
     });
   }
 }
