@@ -156,7 +156,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       cssOutputPathAbsolute = path.join(this.buildConfig.rootPath, cssOutputPath);
     }
 
-    return LegacyAdapters.promiseify(
+    return LegacyAdapters.convertCallbackToPromise(
       nodeSass.render,
       {
         file: filePath,
@@ -291,7 +291,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
   private _globAll(...patterns: string[]): Promise<string[]> {
     return Promise.all(patterns.map((pattern) =>
-      LegacyAdapters.promiseify(
+      LegacyAdapters.convertCallbackToPromise(
         glob,
         path.isAbsolute(pattern) ? pattern : path.join(this.buildConfig.rootPath, pattern)
       )

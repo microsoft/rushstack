@@ -234,7 +234,8 @@ class JsonSchema {
 
 // @beta
 class LegacyAdapters {
-  static promiseify<TResult, TError>(fn: (cb: callback<TResult, TError>) => void): Promise<TResult>;
+  static convertCallbackToPromise<TResult, TError>(fn: (cb: callback<TResult, TError>) => void): Promise<TResult>;
+  static scrubError(error: Error | string | any): Error;
 }
 
 // @public

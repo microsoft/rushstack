@@ -45,7 +45,7 @@ interface IQueueItem {
 
 export class NpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
-    return LegacyAdapters.promiseify<readPackageTree.PackageNode, Error, string>(
+    return LegacyAdapters.convertCallbackToPromise<readPackageTree.PackageNode, Error, string>(
       readPackageTree,
       this._rushConfiguration.commonTempFolder
     ).then(

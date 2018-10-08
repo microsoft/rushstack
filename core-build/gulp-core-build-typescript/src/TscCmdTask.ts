@@ -78,7 +78,7 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
 
     const resolvedLibFolders: string[] = libFolders.map((libFolder) => path.join(this.buildConfig.rootPath, libFolder));
     const promises: Promise<void>[] = (this.taskConfig.staticMatch || []).map((pattern) =>
-      LegacyAdapters.promiseify(glob, path.join(globEscape(this.buildConfig.rootPath), pattern)).then(
+      LegacyAdapters.convertCallbackToPromise(glob, path.join(globEscape(this.buildConfig.rootPath), pattern)).then(
         (matchPaths: string[]) => {
           for (const matchPath of matchPaths) {
             const fileContents: string = FileSystem.readFile(matchPath);
@@ -152,7 +152,7 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
       return Promise.reject('Unable to determine outDir from TypesScript configuration.');
     }
 
-    return LegacyAdapters.promiseify(
+    return LegacyAdapters.convertCallbackToPromise(
       glob,
       path.join(globEscape(tsConfig.options.outDir), '**', '*.js')
     ).then((matches: string[]) => {
