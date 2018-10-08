@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.3.2",
+      "tag": "@microsoft/rush_v5.3.2",
+      "date": "Mon, 08 Oct 2018 23:19:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Change \"rush check\" so that it considers \"cyclicDependencyProjects\" and ensures they are consistent or listed in \"allowedAlternateVersions\""
+          },
+          {
+            "comment": "Fix a recent regression where \"rush link\" was failing for NPM/Yarn because hard links don't support relative paths"
+          },
+          {
+            "comment": "Make sure npm package does not exist before publishing"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.1",
       "tag": "@microsoft/rush_v5.3.1",
       "date": "Wed, 03 Oct 2018 00:01:18 GMT",

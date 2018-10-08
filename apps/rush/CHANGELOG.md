@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 03 Oct 2018 00:01:18 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Oct 2018 23:19:51 GMT and should not be manually modified.
+
+## 5.3.2
+Mon, 08 Oct 2018 23:19:51 GMT
+
+### Updates
+
+- Change "rush check" so that it considers "cyclicDependencyProjects" and ensures they are consistent or listed in "allowedAlternateVersions"
+- Fix a recent regression where "rush link" was failing for NPM/Yarn because hard links don't support relative paths
+- Make sure npm package does not exist before publishing
 
 ## 5.3.1
 Wed, 03 Oct 2018 00:01:18 GMT
