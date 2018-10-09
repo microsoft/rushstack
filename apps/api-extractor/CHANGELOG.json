@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.0.2",
+      "tag": "@microsoft/api-extractor_v6.0.2",
+      "date": "Tue, 09 Oct 2018 06:58:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where API Extractor was sometimes reporting incorrect line numbers"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.0.1",
       "tag": "@microsoft/api-extractor_v6.0.1",
       "date": "Mon, 08 Oct 2018 16:04:27 GMT",

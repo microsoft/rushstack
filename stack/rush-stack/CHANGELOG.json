@@ -2,6 +2,21 @@
   "name": "@microsoft/rush-stack",
   "entries": [
     {
+      "version": "0.1.13",
+      "tag": "@microsoft/rush-stack_v0.1.13",
+      "date": "Tue, 09 Oct 2018 06:58:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.12` to `0.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.12` to `0.1.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.12",
       "tag": "@microsoft/rush-stack_v0.1.12",
       "date": "Mon, 08 Oct 2018 16:04:27 GMT",

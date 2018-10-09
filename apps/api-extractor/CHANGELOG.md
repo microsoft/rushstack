@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 08 Oct 2018 16:04:27 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Oct 2018 06:58:01 GMT and should not be manually modified.
+
+## 6.0.2
+Tue, 09 Oct 2018 06:58:01 GMT
+
+### Patches
+
+- Fix a regression where API Extractor was sometimes reporting incorrect line numbers
 
 ## 6.0.1
 Mon, 08 Oct 2018 16:04:27 GMT
