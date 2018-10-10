@@ -26,15 +26,15 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
   private _snippets: ISnippetsFile;
 
   // Default API Set URL when no product match is found.
-  private _apiSetUrlDefault: string = '/javascript/office/javascript-api-for-office';
+  private _apiSetUrlDefault: string = '/office/dev/add-ins/reference/javascript-api-for-office';
 
   // Hash set of API Set URLs based on product.
   private _apiSetUrls: Object = {
-    'Excel': '/javascript/office/requirement-sets/excel-api-requirement-sets',
-    'OneNote': '/javascript/office/requirement-sets/onenote-api-requirement-sets',
-    'Visio': '/javascript/office/overview/visio-javascript-reference-overview',
-    'Outlook': '/javascript/office/requirement-sets/outlook-api-requirement-sets',
-    'Word': '/javascript/office/requirement-sets/word-api-requirement-sets'
+    'Excel': '/office/dev/add-ins/reference/requirement-sets/excel-api-requirement-sets',
+    'OneNote': '/office/dev/add-ins/reference/requirement-sets/onenote-api-requirement-sets',
+    'Visio': '/office/dev/add-ins/reference/overview/visio-javascript-reference-overview',
+    'Outlook': '/office/dev/add-ins/reference/requirement-sets/outlook-api-requirement-sets',
+    'Word': '/office/dev/add-ins/reference/requirement-sets/word-api-requirement-sets'
   };
 
   public constructor(docItemSet: DocItemSet, inputFolder: string) {
