@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 08 Oct 2018 23:19:51 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Oct 2018 23:58:16 GMT and should not be manually modified.
+
+## 5.3.3
+Thu, 11 Oct 2018 23:58:16 GMT
+
+### Updates
+
+- Remove warning for NodeJS 10 now that it is stable (LTS)
 
 ## 5.3.2
 Mon, 08 Oct 2018 23:19:51 GMT
