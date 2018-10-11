@@ -3,14 +3,5 @@
 
 /**
  * This class gets aliased twice before being exported from the package.
- * @public
  */
-export class ReexportedClass2 {
-  public getSelfReference(): ReexportedClass2 {
-    return this;
-  }
-
-  public getValue(): string {
-    return 'Hello, world!';
-  }
-}
+export { ReexportedClass1 as ReexportedClass2 } from './ReexportedClass1';
