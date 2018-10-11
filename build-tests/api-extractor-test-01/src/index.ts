@@ -102,6 +102,6 @@ export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExpor
  * Test the alias-following logic:  This class gets aliased twice before being
  * exported from the package.
  */
-export { ReexportedClass1 as ReexportedClass } from './ReexportedClass1';
+export { ReexportedClass3 as ReexportedClass } from './ReexportedClass3/ReexportedClass3';
 
 export { TypeReferencesInAedoc } from './TypeReferencesInAedoc';
