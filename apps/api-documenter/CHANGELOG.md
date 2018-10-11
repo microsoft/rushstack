@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 09 Oct 2018 06:58:01 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Oct 2018 21:04:51 GMT and should not be manually modified.
+
+## 1.5.34
+Thu, 11 Oct 2018 21:04:51 GMT
+
+### Patches
+
+- Update URLs in OfficeYamlDocumenter
 
 ## 1.5.33
 Tue, 09 Oct 2018 06:58:01 GMT
