@@ -2,6 +2,21 @@
   "name": "@microsoft/resolve-chunk-plugin",
   "entries": [
     {
+      "version": "2.0.40",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.40",
+      "date": "Thu, 11 Oct 2018 23:26:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.13` to `0.1.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.18` to `5.0.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.39",
       "tag": "@microsoft/resolve-chunk-plugin_v2.0.39",
       "date": "Tue, 09 Oct 2018 06:58:02 GMT",
