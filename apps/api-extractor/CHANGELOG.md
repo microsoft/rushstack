@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 09 Oct 2018 06:58:01 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Oct 2018 23:26:07 GMT and should not be manually modified.
+
+## 6.0.3
+Thu, 11 Oct 2018 23:26:07 GMT
+
+### Patches
+
+- Fix an issue where `import x from "."` was sometimes not processed correctly
 
 ## 6.0.2
 Tue, 09 Oct 2018 06:58:01 GMT

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-stack-compiler",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain",
   "license": "MIT",
   "repository": {
@@ -16,7 +16,7 @@
     "build": ""
   },
   "dependencies": {
-    "@microsoft/api-extractor": "6.0.2",
+    "@microsoft/api-extractor": "6.0.3",
     "tslint": "~5.9.1",
     "tslint-microsoft-contrib": "~5.2.1",
     "typescript": "~2.4.1"
