@@ -115,15 +115,22 @@ export class RunAction extends CommandLineAction {
       // at the project root
       const packageFolder: string | undefined = lookup.tryGetPackageFolderFor('.');
 
-      if (packageFolder) {
-        configFilename = path.join(packageFolder, AE_CONFIG_FILENAME);
-      } else {
-        // If there is no package, then try the current directory
-        configFilename = path.join(process.cwd(), AE_CONFIG_FILENAME);
-      }
+      // If there is no package, then try the current directory
+      const baseFolder: string = packageFolder ? packageFolder : process.cwd();
 
-      if (!FileSystem.exists(configFilename)) {
-        throw new Error(`Unable to find an ${AE_CONFIG_FILENAME} file`);
+      // First try the standard "config" subfolder:
+      configFilename = path.join(baseFolder, 'config', AE_CONFIG_FILENAME);
+      if (FileSystem.exists(configFilename)) {
+        if (FileSystem.exists(path.join(baseFolder, AE_CONFIG_FILENAME))) {
+          throw new Error(`Found conflicting ${AE_CONFIG_FILENAME} files in "." and "./config" folders`);
+        }
+      } else {
+        // Otherwise try the top-level folder
+        configFilename = path.join(baseFolder, AE_CONFIG_FILENAME);
+
+        if (!FileSystem.exists(configFilename)) {
+          throw new Error(`Unable to find an ${AE_CONFIG_FILENAME} file`);
+        }
       }
 
       console.log(`Using configuration from ${configFilename}` + os.EOL + os.EOL);
