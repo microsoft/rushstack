@@ -79,7 +79,7 @@ export class AstNamespace extends AstModule {
 
       const declaration: ts.Declaration = declarations[0];
 
-      if (declaration.parent && declaration.parent.flags !== ts.NodeFlags.Const) {
+      if (declaration.parent && (declaration.parent.flags & ts.NodeFlags.Const) === 0) {
         this.reportWarning(`Export "${exportSymbol.name}" is missing the "const" ` +
           'modifier. Currently the "namespace" block only supports constant variables.');
         continue;
@@ -89,11 +89,6 @@ export class AstNamespace extends AstModule {
       if (!propertySignature.type || allowedTypes.indexOf(propertySignature.type.getText()) < 0) {
         this.reportWarning(`Export "${exportSymbol.name}" must specify and be of type` +
           '"string", "number" or "boolean"');
-        continue;
-      }
-
-      if (!propertySignature.initializer) {
-        this.reportWarning(`Export "${exportSymbol.name}" must have an initialized value`);
         continue;
       }
 
