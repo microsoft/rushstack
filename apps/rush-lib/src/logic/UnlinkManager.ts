@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import * as path from 'path';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -22,32 +21,28 @@ export class UnlinkManager {
    * Delete flag file and all the existing node_modules
    * symlinks
    */
-  public unlink(): void {
+  public unlink(): boolean {
     this._deleteFlagFile();
-    this._deleteSymlinks();
+    return this._deleteSymlinks();
   }
 
   /**
    * Delete all the node_modules symlinks of configured Rush
    * projects
    * */
-  private _deleteSymlinks(): void {
-    let didAnything: boolean = false;
+  private _deleteSymlinks(): boolean {
+    let didDeleteSymlinks: boolean = false;
 
     for (const rushProject of this._rushConfiguration.projects) {
       const localModuleFolder: string = path.join(rushProject.projectFolder, 'node_modules');
       if (FileSystem.exists(localModuleFolder)) {
         console.log('Purging ' + localModuleFolder);
         Utilities.dangerouslyDeletePath(localModuleFolder);
-        didAnything = true;
+        didDeleteSymlinks = true;
       }
     }
 
-    if (!didAnything) {
-      console.log('Nothing to do.');
-    } else {
-      console.log(os.EOL + 'Done.');
-    }
+    return didDeleteSymlinks;
   }
 
   /**
