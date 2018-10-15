@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Make rush purge also call rush unlink",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "rbotto.figueira@gmail.com"
+}
