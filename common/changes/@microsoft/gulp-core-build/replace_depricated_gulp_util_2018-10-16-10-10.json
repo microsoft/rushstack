@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Replace deprecated dependency gulp-util",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "semenyak.nik@mail.ru"
+}
