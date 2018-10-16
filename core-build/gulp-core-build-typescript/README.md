@@ -100,7 +100,7 @@ Default: `['src/**/*.ts', 'src/**/*.tsx']`
 ### reporter
 A function which reports errors to the proper location. It should conform to the following interface:
 
-`((result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;)`
+`((result: lintTypes.LintResult, file: Vinyl, options: ITSLintTaskConfig) => void;)`
 
 Defaults to using the base GulpTask's this.fileError() function.
 
