@@ -13,6 +13,7 @@ import {
   DocBlockTag,
   StandardTags,
   StandardModifierTagSet,
+  DocBlock,
   DocComment,
   DocSection,
   DocNodeKind,
@@ -359,8 +360,11 @@ export class ApiDocumentation {
     allowStructuredContent: boolean): void {
     switch (node.kind) {
       case DocNodeKind.Block:
-      case DocNodeKind.Section:
       case DocNodeKind.ParamBlock:
+        const docBlock: DocBlock = node as DocBlock;
+        this._renderAsMarkupElementsInto(result, docBlock.content, sectionName, allowStructuredContent);
+        break;
+      case DocNodeKind.Section:
         const docSection: DocSection = node as DocSection;
         for (const childNode of docSection.nodes) {
           this._renderAsMarkupElementsInto(result, childNode, sectionName, allowStructuredContent);
@@ -379,7 +383,7 @@ export class ApiDocumentation {
         break;
       case DocNodeKind.EscapedText:
         const docEscapedText: DocEscapedText = node as DocEscapedText;
-        Markup.appendTextElements(result, docEscapedText.text);
+        Markup.appendTextElements(result, docEscapedText.decodedText);
         break;
       case DocNodeKind.FencedCode:
         if (allowStructuredContent) {
@@ -402,9 +406,9 @@ export class ApiDocumentation {
       case DocNodeKind.HtmlStartTag:
         const docHtmlStartTag: DocHtmlStartTag = node as DocHtmlStartTag;
         let htmlStartTag: string = '<';
-        htmlStartTag += docHtmlStartTag.elementName;
+        htmlStartTag += docHtmlStartTag.name;
         for (const attribute of docHtmlStartTag.htmlAttributes) {
-          htmlStartTag += ` ${attribute.attributeName}=${attribute.attributeValue}`;
+          htmlStartTag += ` ${attribute.name}=${attribute.value}`;
         }
         if (docHtmlStartTag.selfClosingTag) {
           htmlStartTag += '/';
@@ -414,7 +418,7 @@ export class ApiDocumentation {
         break;
       case DocNodeKind.HtmlEndTag:
         const docHtmlEndTag: DocHtmlEndTag = node as DocHtmlEndTag;
-        result.push(Markup.createHtmlTag(`</${docHtmlEndTag.elementName}>`));
+        result.push(Markup.createHtmlTag(`</${docHtmlEndTag.name}>`));
         break;
       case DocNodeKind.InlineTag:
         const docInlineTag: DocInlineTag = node as DocInlineTag;
@@ -628,8 +632,12 @@ export class ApiDocumentation {
     // If no resolvedAstItem found then nothing to inherit
     // But for the time being set the summary to a text object
     if (!resolvedAstItem) {
+      let unresolvedAstItemName: string = apiDefinitionRef.exportName;
+      if (apiDefinitionRef.memberName) {
+        unresolvedAstItemName += '.' + apiDefinitionRef.memberName;
+      }
       this.summary.push(...Markup.createTextElements(
-        `See documentation for ${this._docComment.inheritDocTag.tagContent}`));
+        `See documentation for ${unresolvedAstItemName}`));
       return;
     }
 
