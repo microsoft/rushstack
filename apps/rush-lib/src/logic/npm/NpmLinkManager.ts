@@ -296,7 +296,7 @@ export class NpmLinkManager extends BaseLinkManager {
             throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
               + ` was not found in the common folder -- do you need to run "rush install"?`);
           } else {
-            console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
+            console.log('Skipping optional dependency: ' + dependency.name);
           }
         }
       }
