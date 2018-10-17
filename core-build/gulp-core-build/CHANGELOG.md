@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 17 Oct 2018 14:43:24 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Oct 2018 21:04:49 GMT and should not be manually modified.
+
+## 3.8.30
+Wed, 17 Oct 2018 21:04:49 GMT
+
+### Patches
+
+- Remove use of a deprecated Buffer API.
 
 ## 3.8.29
 Wed, 17 Oct 2018 14:43:24 GMT
