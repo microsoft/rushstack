@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.8.30",
+      "tag": "@microsoft/gulp-core-build_v3.8.30",
+      "date": "Wed, 17 Oct 2018 21:04:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove use of a deprecated Buffer API."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.3.0` to `3.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.15` to `0.1.16`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.29",
       "tag": "@microsoft/gulp-core-build_v3.8.29",
       "date": "Wed, 17 Oct 2018 14:43:24 GMT",
