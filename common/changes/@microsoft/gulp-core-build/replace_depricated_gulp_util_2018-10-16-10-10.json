@@ -3,9 +3,9 @@
     {
       "packageName": "@microsoft/gulp-core-build",
       "comment": "Replace deprecated dependency gulp-util",
-      "type": "minor"
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/gulp-core-build",
-  "email": "semenyak.nik@mail.ru"
+  "email": "18479777+semenyakNik@users.noreply.github.com"
 }
