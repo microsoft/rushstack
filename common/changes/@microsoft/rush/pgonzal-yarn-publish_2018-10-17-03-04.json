@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an issue where \"rush publish\" invoked the wrong command when using Yarn",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
