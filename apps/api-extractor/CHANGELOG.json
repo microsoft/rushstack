@@ -2,6 +2,24 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.0.4",
+      "tag": "@microsoft/api-extractor_v6.0.4",
+      "date": "Wed, 17 Oct 2018 14:43:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where namespaces were sometimes incorrectly handled in \"conservative\" mode"
+          },
+          {
+            "comment": "Update the command line to look for api-extractor.json in both the \"./config\" folder and the project folder"
+          },
+          {
+            "comment": "Allow type references in namespaces when namespaceSupport=conservative"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.0.3",
       "tag": "@microsoft/api-extractor_v6.0.3",
       "date": "Thu, 11 Oct 2018 23:26:07 GMT",
