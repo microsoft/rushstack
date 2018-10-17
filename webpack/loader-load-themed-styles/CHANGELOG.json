@@ -2,6 +2,101 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.7.87",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.87",
+      "date": "Thu, 11 Oct 2018 23:26:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.18` to `1.8.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.13` to `0.1.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.18` to `5.0.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.86",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.86",
+      "date": "Tue, 09 Oct 2018 06:58:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.17` to `1.8.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.12` to `0.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.17` to `5.0.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.85",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.85",
+      "date": "Mon, 08 Oct 2018 16:04:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.16` to `1.8.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.11` to `0.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.16` to `5.0.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.84",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.84",
+      "date": "Sun, 07 Oct 2018 06:15:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.15` to `1.8.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.10` to `0.1.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.15` to `5.0.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.7.83",
+      "tag": "@microsoft/loader-load-themed-styles_v1.7.83",
+      "date": "Fri, 28 Sep 2018 16:05:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.14` to `1.8.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.9` to `0.1.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.14` to `5.0.15`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.7.82",
       "tag": "@microsoft/loader-load-themed-styles_v1.7.82",
       "date": "Wed, 26 Sep 2018 21:39:40 GMT",

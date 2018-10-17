@@ -1,6 +1,6 @@
 # @microsoft/gulp-core-build-sass
 
-`gulp-core-build-sass` is a `gulp-core-build` subtask which processes scss files using SASS, runs them through postcss, and produces commonjs/amd modules which are injected using the `@microsoft/load-themed-styles` package.
+`gulp-core-build-sass` is a `gulp-core-build` subtask which processes sass and scss files using SASS, runs them through postcss, and produces commonjs/amd modules which are injected using the `@microsoft/load-themed-styles` package.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-sass.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-sass)
 [![Build Status](https://travis-ci.org/Microsoft/gulp-core-build-sass.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build-sass) [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-sass.svg)](https://david-dm.org/Microsoft/gulp-core-build-sass)
@@ -27,7 +27,7 @@ An array of glob patterns for locating SASS files.
 **Default:** `['src/**/*.scss']`
 
 ### useCSSModules
-If this option is specified, ALL files will be treated as a `module.scss` and will
+If this option is specified, ALL files will be treated as `module.sass` or `module.scss` and will
 automatically generate a corresponding TypeScript file. All classes will be
 appended with a hash to help ensure uniqueness on a page. This file can be
 imported directly, and will contain an object describing the mangled class names.
@@ -40,7 +40,7 @@ If this is false, then we do not create `.css` files in the `lib` directory.
 **Default:** `false`
 
 ### warnOnNonCSSModules
-If files are matched by sassMatch which do not end in .module.scss, log a warning.
+If files are matched by sassMatch which do not end in `.module.sass` or `.module.scss`, log a warning.
 
 **Default:** `false`
 

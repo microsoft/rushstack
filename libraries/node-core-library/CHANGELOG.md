@@ -1,6 +1,31 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 06 Sep 2018 01:25:26 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Oct 2018 16:04:27 GMT and should not be manually modified.
+
+## 3.3.0
+Mon, 08 Oct 2018 16:04:27 GMT
+
+### Minor changes
+
+- Renaming PromiseUtilities to LegacyAdapters
+
+## 3.2.0
+Sun, 07 Oct 2018 06:15:56 GMT
+
+### Minor changes
+
+- Introduce promiseify utility function.
+
+### Patches
+
+- Update documentation
+
+## 3.1.0
+Fri, 28 Sep 2018 16:05:35 GMT
+
+### Minor changes
+
+- Add `Path.isUnderOrEquals()`
 
 ## 3.0.1
 Thu, 06 Sep 2018 01:25:26 GMT

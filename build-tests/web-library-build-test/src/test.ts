@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import test from './test.scss';
+import testScss from './test.scss';
+import testSass from './test.sass';
 import testFunction from './preCopyTest';
 
 /** @public */
@@ -16,7 +17,8 @@ export function add(num1: number, num2: number): number {
 
 /** @public */
 export function logClass(): void {
-  console.log(test.foo);
+  console.log(testScss.foo);
+  console.log(testSass.foo);
 }
 
 testFunction();

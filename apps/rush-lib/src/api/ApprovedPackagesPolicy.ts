@@ -56,7 +56,7 @@ export class ApprovedPackagesPolicy {
   }
 
   /**
-   * A list of NPM package scopes that will be excluded from review (e.g. \"@types\")
+   * A list of NPM package scopes that will be excluded from review (e.g. `@types`)
    */
   public get ignoredNpmScopes(): Set<string> {
     return this._ignoredNpmScopes;
@@ -82,7 +82,7 @@ export class ApprovedPackagesPolicy {
    * The intent is that the file will be stored in Git and tracked by a branch policy that notifies
    * reviewers when a PR attempts to modify the file.
    *
-   * Example filename: "C:\MyRepo\common\config\rush\browser-approved-packages.json"
+   * Example filename: `C:\MyRepo\common\config\rush\browser-approved-packages.json`
    */
   public get browserApprovedPackages(): ApprovedPackagesConfiguration {
     return this._browserApprovedPackages;
@@ -98,7 +98,7 @@ export class ApprovedPackagesPolicy {
    * The intent is that the file will be stored in Git and tracked by a branch policy that notifies
    * reviewers when a PR attempts to modify the file.
    *
-   * Example filename: "C:\MyRepo\common\config\rush\browser-approved-packages.json"
+   * Example filename: `C:\MyRepo\common\config\rush\browser-approved-packages.json`
    */
   public get nonbrowserApprovedPackages(): ApprovedPackagesConfiguration {
     return this._nonbrowserApprovedPackages;

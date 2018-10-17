@@ -4,7 +4,7 @@
 import * as os  from 'os';
 import * as path from 'path';
 import * as ts from 'typescript';
-import { JsonFile, IJsonSchemaErrorInfo } from '@microsoft/node-core-library';
+import { JsonFile, IJsonSchemaErrorInfo, NewlineKind } from '@microsoft/node-core-library';
 
 import { ExtractorContext } from '../ExtractorContext';
 import { AstStructuredType } from '../ast/AstStructuredType';
@@ -48,7 +48,12 @@ export class ApiJsonGenerator extends AstItemVisitor {
     this.visit(context.package, this.jsonOutput);
 
     // Write the output before validating the schema, so we can debug it
-    JsonFile.save(this.jsonOutput, reportFilename, { ensureFolderExists: true });
+    JsonFile.save(this.jsonOutput, reportFilename,
+      {
+        ensureFolderExists: true,
+        newlineConversion: NewlineKind.CrLf
+      }
+    );
 
     // Validate that the output conforms to our JSON schema
     ApiJsonFile.jsonSchema.validateObjectWithCallback(this.jsonOutput, (errorInfo: IJsonSchemaErrorInfo) => {

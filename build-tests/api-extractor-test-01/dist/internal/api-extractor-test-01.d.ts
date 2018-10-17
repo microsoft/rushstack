@@ -52,7 +52,7 @@ export declare class AmbientConsumer {
      */
     builtinDefinition2(): Promise<void>;
     /**
-     * Configured via tsconfig.json's "lib" setting, which specifies "@types/jest".
+     * Configured via tsconfig.json's "lib" setting, which specifies `@types/jest`.
      * The emitted index.d.ts gets a reference like this:  <reference types="jest" />
      */
     definitelyTyped(): jest.Context;
@@ -214,21 +214,21 @@ export declare class ReexportedClass {
 
 /**
  * This class has links such as {@link TypeReferencesInAedoc}.
- * @internal
+ * @public
  */
-export declare class _TypeReferencesInAedoc {
+export declare class TypeReferencesInAedoc {
     /**
      * Returns a value
      * @param arg1 - The input parameter of type {@link TypeReferencesInAedoc}.
      * @returns An object of type {@link TypeReferencesInAedoc}.
      */
-    getValue(arg1: _TypeReferencesInAedoc): _TypeReferencesInAedoc;
-    /** {@inheritdoc api-extractor-test-01:TypeReferencesInAedoc.getValue} */
-    getValue2(arg1: _TypeReferencesInAedoc): _TypeReferencesInAedoc;
+    getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
+    /** {@inheritdoc api-extractor-test-01#TypeReferencesInAedoc.getValue} */
+    getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
     /**
-     * @param {arg} - Malformed param reference.
+     * @param arg - Malformed param reference.
      */
-    getValue3(arg1: _TypeReferencesInAedoc): _TypeReferencesInAedoc;
+    getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
 }
 
 /**

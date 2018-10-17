@@ -371,6 +371,7 @@ interface IMarkupWebLink {
 
 // @public
 class Markup {
+  static appendTextElements(output: MarkupElement[], text: string, options?: IMarkupCreateTextOptions): void;
   static BREAK: IMarkupLineBreak;
   static createApiLink(textElements: MarkupLinkTextElement[], target: IApiItemReference): IMarkupApiLink;
   static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink;

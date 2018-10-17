@@ -1,6 +1,49 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 13 Sep 2018 21:57:21 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Oct 2018 03:19:43 GMT and should not be manually modified.
+
+## 5.3.4
+Wed, 17 Oct 2018 03:19:43 GMT
+
+### Updates
+
+- Make rush purge also call rush unlink
+- Fix an issue where "rush publish" invoked the wrong command when using Yarn
+- Install optional dependencies, except w/ npm<5.0.0
+
+## 5.3.3
+Thu, 11 Oct 2018 23:58:16 GMT
+
+### Updates
+
+- Remove warning for NodeJS 10 now that it is stable (LTS)
+
+## 5.3.2
+Mon, 08 Oct 2018 23:19:51 GMT
+
+### Updates
+
+- Change "rush check" so that it considers "cyclicDependencyProjects" and ensures they are consistent or listed in "allowedAlternateVersions"
+- Fix a recent regression where "rush link" was failing for NPM/Yarn because hard links don't support relative paths
+- Make sure npm package does not exist before publishing
+
+## 5.3.1
+Wed, 03 Oct 2018 00:01:18 GMT
+
+### Updates
+
+- Fix an issue where after running "rush add" (after successfully running "rush install"), the new package was not being installed or linked.
+- Fix an incorrect default in the "rush init" template comments
+
+## 5.3.0
+Fri, 28 Sep 2018 20:36:48 GMT
+
+### Updates
+
+- Add "ensureConsistentVersions" configuration which runs "rush check" before certain commands
+- Add a new command "rush add" for managing package.json dependencies
+- Rush now detects some package.json errors such as the same package name being listed in both "dependencies" and "optionalDependencies"
+- Update "rush link" to use relative paths when creating symlinks, to facilitate building Docker images
 
 ## 5.2.1
 Thu, 13 Sep 2018 21:57:21 GMT

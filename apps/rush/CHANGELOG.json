@@ -2,6 +2,90 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.3.4",
+      "tag": "@microsoft/rush_v5.3.4",
+      "date": "Wed, 17 Oct 2018 03:19:43 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make rush purge also call rush unlink"
+          },
+          {
+            "comment": "Fix an issue where \"rush publish\" invoked the wrong command when using Yarn"
+          },
+          {
+            "comment": "Install optional dependencies, except w/ npm<5.0.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.3",
+      "tag": "@microsoft/rush_v5.3.3",
+      "date": "Thu, 11 Oct 2018 23:58:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove warning for NodeJS 10 now that it is stable (LTS)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.2",
+      "tag": "@microsoft/rush_v5.3.2",
+      "date": "Mon, 08 Oct 2018 23:19:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Change \"rush check\" so that it considers \"cyclicDependencyProjects\" and ensures they are consistent or listed in \"allowedAlternateVersions\""
+          },
+          {
+            "comment": "Fix a recent regression where \"rush link\" was failing for NPM/Yarn because hard links don't support relative paths"
+          },
+          {
+            "comment": "Make sure npm package does not exist before publishing"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.1",
+      "tag": "@microsoft/rush_v5.3.1",
+      "date": "Wed, 03 Oct 2018 00:01:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where after running \"rush add\" (after successfully running \"rush install\"), the new package was not being installed or linked."
+          },
+          {
+            "comment": "Fix an incorrect default in the \"rush init\" template comments"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.0",
+      "tag": "@microsoft/rush_v5.3.0",
+      "date": "Fri, 28 Sep 2018 20:36:48 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add \"ensureConsistentVersions\" configuration which runs \"rush check\" before certain commands"
+          },
+          {
+            "comment": "Add a new command \"rush add\" for managing package.json dependencies"
+          },
+          {
+            "comment": "Rush now detects some package.json errors such as the same package name being listed in both \"dependencies\" and \"optionalDependencies\""
+          },
+          {
+            "comment": "Update \"rush link\" to use relative paths when creating symlinks, to facilitate building Docker images"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.1",
       "tag": "@microsoft/rush_v5.2.1",
       "date": "Thu, 13 Sep 2018 21:57:21 GMT",

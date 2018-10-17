@@ -228,7 +228,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * This function is called once to execute the task. It calls executeTask() and handles the return
    * value from that function. It also provides some utilities such as logging how long each
    * task takes to execute.
-   * @param config - the buildConfig which is applied to the task instance before execution\
+   * @param config - the buildConfig which is applied to the task instance before execution
    * @returns a Promise which is completed when the task is finished executing
    */
   public execute(config: IBuildConfig): Promise<void> {

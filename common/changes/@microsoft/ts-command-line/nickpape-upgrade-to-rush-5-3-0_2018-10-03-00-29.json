@@ -2,10 +2,10 @@
   "changes": [
     {
       "comment": "",
-      "packageName": "@microsoft/rush",
+      "packageName": "@microsoft/ts-command-line",
       "type": "none"
     }
   ],
-  "packageName": "@microsoft/rush",
+  "packageName": "@microsoft/ts-command-line",
   "email": "nickpape-msft@users.noreply.github.com"
 }

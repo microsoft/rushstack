@@ -72,6 +72,18 @@ class CommonVersionsConfiguration {
   readonly xstitchPreferredVersions: Map<string, string>;
 }
 
+// @beta (undocumented)
+enum DependencyType {
+  // (undocumented)
+  Dev = "devDependencies",
+  // (undocumented)
+  Optional = "optionalDependencies",
+  // (undocumented)
+  Peer = "peerDependencies",
+  // (undocumented)
+  Regular = "dependencies"
+}
+
 // @public
 enum EnvironmentVariableNames {
   RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
@@ -122,6 +134,45 @@ class LockStepVersionPolicy extends VersionPolicy {
   readonly nextBump: BumpType;
   update(newVersionString: string): boolean;
   validate(versionString: string, packageName: string): void;
+  readonly version: string;
+}
+
+// @beta (undocumented)
+class PackageJsonDependency {
+  constructor(name: string, version: string, type: DependencyType, onChange: () => void);
+  // (undocumented)
+  readonly dependencyType: DependencyType;
+  // (undocumented)
+  readonly name: string;
+  // (undocumented)
+  setVersion(newVersion: string): void;
+  // (undocumented)
+  readonly version: string;
+}
+
+// @beta (undocumented)
+class PackageJsonEditor {
+  // (undocumented)
+  addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
+  // (undocumented)
+  readonly dependencyList: ReadonlyArray<PackageJsonDependency>;
+  // (undocumented)
+  readonly devDependencyList: ReadonlyArray<PackageJsonDependency>;
+  // (undocumented)
+  readonly filePath: string;
+  // (undocumented)
+  static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
+  // (undocumented)
+  static load(filePath: string): PackageJsonEditor;
+  // (undocumented)
+  readonly name: string;
+  // (undocumented)
+  saveIfModified(): boolean;
+  // (undocumented)
+  tryGetDependency(packageName: string): PackageJsonDependency | undefined;
+  // (undocumented)
+  tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
+  // (undocumented)
   readonly version: string;
 }
 
@@ -187,6 +238,7 @@ class RushConfiguration {
   readonly tempShrinkwrapFilename: string;
   readonly tempShrinkwrapPreinstallFilename: string;
   static tryFindRushJsonLocation(verbose?: boolean): string | undefined;
+  tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
   // @beta (undocumented)
   readonly versionPolicyConfiguration: VersionPolicyConfiguration;
   readonly yarnCacheFolder: string;
@@ -201,7 +253,10 @@ class RushConfigurationProject {
   readonly downstreamDependencyProjects: string[];
   // @beta
   readonly isMainProject: boolean;
+  // @deprecated
   readonly packageJson: IPackageJson;
+  // @beta
+  readonly packageJsonEditor: PackageJsonEditor;
   readonly packageName: string;
   readonly projectFolder: string;
   readonly projectRelativeFolder: string;

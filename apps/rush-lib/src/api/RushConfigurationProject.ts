@@ -12,6 +12,7 @@ import {
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
+import { PackageJsonEditor } from './PackageJsonEditor';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -37,6 +38,7 @@ export class RushConfigurationProject {
   private _projectRelativeFolder: string;
   private _reviewCategory: string;
   private _packageJson: IPackageJson;
+  private _packageJsonEditor: PackageJsonEditor;
   private _tempProjectName: string;
   private _unscopedTempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
@@ -97,6 +99,8 @@ export class RushConfigurationProject {
         + ` match the name "${this._packageJson.name}" from package.json`);
     }
 
+    this._packageJsonEditor = PackageJsonEditor.load(packageJsonFilename);
+
     this._tempProjectName = tempProjectName;
 
     // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
@@ -120,7 +124,7 @@ export class RushConfigurationProject {
    * The name of the NPM package.  An error is reported if this name is not
    * identical to packageJson.name.
    *
-   * Example: "@scope/MyProject"
+   * Example: `@scope/MyProject`
    */
   public get packageName(): string {
     return this._packageName;
@@ -129,7 +133,7 @@ export class RushConfigurationProject {
   /**
    * The full path of the folder that contains the project to be built by Rush.
    *
-   * Example: "C:\MyRepo\libraries\my-project"
+   * Example: `C:\MyRepo\libraries\my-project`
    */
   public get projectFolder(): string {
     return this._projectFolder;
@@ -138,7 +142,7 @@ export class RushConfigurationProject {
   /**
    * The relative path of the folder that contains the project to be built by Rush.
    *
-   * Example: "libraries\my-project"
+   * Example: `libraries\my-project`
    */
   public get projectRelativeFolder(): string {
     return this._projectRelativeFolder;
@@ -172,17 +176,26 @@ export class RushConfigurationProject {
 
   /**
    * The parsed NPM "package.json" file from projectFolder.
+   * @deprecated Use packageJsonEditor instead
    */
   public get packageJson(): IPackageJson {
     return this._packageJson;
   }
 
   /**
+   * A useful wrapper around the package.json file for making modifications
+   * @beta
+   */
+  public get packageJsonEditor(): PackageJsonEditor {
+    return this._packageJsonEditor;
+  }
+
+  /**
    * The unique name for the temporary project that will be generated in the Common folder.
-   * For example, if the project name is "@scope/MyProject", the temporary project name
-   * might be "@rush-temp/MyProject-2".
+   * For example, if the project name is `@scope/MyProject`, the temporary project name
+   * might be `@rush-temp/MyProject-2`.
    *
-   * Example: "@rush-temp/MyProject-2"
+   * Example: `@rush-temp/MyProject-2`
    */
   public get tempProjectName(): string {
     return this._tempProjectName;
@@ -191,7 +204,7 @@ export class RushConfigurationProject {
   /**
    * The unscoped temporary project name
    *
-   * Example: "my-project-2"
+   * Example: `my-project-2`
    */
   public get unscopedTempProjectName(): string {
     return this._unscopedTempProjectName;

@@ -78,7 +78,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     const commonPackage: BasePackage = BasePackage.createVirtualTempPackage(packageJsonFilename, installFolderName);
 
     const localPackage: BasePackage = BasePackage.createLinkedPackage(
-      project.packageJson.name,
+      project.packageJsonEditor.name,
       commonPackage.version,
       project.projectFolder
     );
@@ -94,7 +94,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       if (matchedRushPackage) {
         // We found a suitable match, so place a new local package that
         // symlinks to the Rush project
-        const matchedVersion: string = matchedRushPackage.packageJson.version;
+        const matchedVersion: string = matchedRushPackage.packageJsonEditor.version;
 
         let localLinks: string[] = rushLinkJson.localLinks[localPackage.name];
         if (!localLinks) {

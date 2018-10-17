@@ -46,13 +46,13 @@ export namespace RushConstants {
 
   /**
    * The folder name ("temp") under the common folder where temporary files will be stored.
-   * Example: "C:\MyRepo\common\temp"
+   * Example: `C:\MyRepo\common\temp`
    */
   export const rushTempFolderName: string = 'temp';
 
   /**
    * The folder name ("projects") where temporary projects will be stored.
-   * Example: "C:\MyRepo\common\temp\projects"
+   * Example: `C:\MyRepo\common\temp\projects`
    */
   export const rushTempProjectsFolderName: string = 'projects';
 

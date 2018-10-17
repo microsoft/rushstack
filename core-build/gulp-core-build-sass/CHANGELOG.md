@@ -1,6 +1,37 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Wed, 26 Sep 2018 21:39:40 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Oct 2018 23:26:07 GMT and should not be manually modified.
+
+## 4.5.3
+Thu, 11 Oct 2018 23:26:07 GMT
+
+*Version update only*
+
+## 4.5.2
+Tue, 09 Oct 2018 06:58:02 GMT
+
+*Version update only*
+
+## 4.5.1
+Mon, 08 Oct 2018 16:04:27 GMT
+
+*Version update only*
+
+## 4.5.0
+Sun, 07 Oct 2018 06:15:56 GMT
+
+### Minor changes
+
+- Refactor task to no longer use Gulp.
+
+### Patches
+
+- Better support for indented syntax and, likewise, `.sass` extension.
+
+## 4.4.8
+Fri, 28 Sep 2018 16:05:35 GMT
+
+*Version update only*
 
 ## 4.4.7
 Wed, 26 Sep 2018 21:39:40 GMT

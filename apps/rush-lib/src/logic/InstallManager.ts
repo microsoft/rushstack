@@ -37,6 +37,7 @@ import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
 import { Stopwatch } from '../utilities/Stopwatch';
 import { Utilities } from '../utilities/Utilities';
 import { Rush } from '../api/Rush';
+import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 
 const MAX_INSTALL_ATTEMPTS: number = 2;
@@ -46,6 +47,7 @@ const MAX_INSTALL_ATTEMPTS: number = 2;
  * As a temporary workaround, augment the type.
  */
 import { CreateOptions } from 'tar';
+
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
    * "Set to true to omit writing mtime values for entries. Note that this prevents using other
@@ -117,10 +119,15 @@ export class InstallManager {
     const versionsForDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
-      InstallManager._collectVersionsForDependencies(versionsForDependencies, project.packageJson.dependencies,
-        project.cyclicDependencyProjects, rushConfiguration);
-      InstallManager._collectVersionsForDependencies(versionsForDependencies, project.packageJson.devDependencies,
-        project.cyclicDependencyProjects, rushConfiguration);
+      InstallManager._collectVersionsForDependencies(versionsForDependencies,
+        project.packageJsonEditor.dependencyList,
+        project.cyclicDependencyProjects,
+        rushConfiguration);
+
+      InstallManager._collectVersionsForDependencies(versionsForDependencies,
+        project.packageJsonEditor.devDependencyList,
+        project.cyclicDependencyProjects,
+        rushConfiguration);
     });
 
     // If any dependency has more than one version, then filter it out (since we don't know which version
@@ -147,47 +154,45 @@ export class InstallManager {
 
   // Helper for collectImplicitlyPreferredVersions()
   private static _collectVersionsForDependencies(versionsForDependencies: Map<string, Set<string>>,
-    dependencies: { [dep: string]: string } | undefined,
+    dependencies: ReadonlyArray<PackageJsonDependency>,
     cyclicDependencies: Set<string>, rushConfiguration: RushConfiguration): void {
 
     const allowedAlternativeVersions: Map<string, ReadonlyArray<string>>
       = rushConfiguration.commonVersions.allowedAlternativeVersions;
 
-    if (dependencies) {
-      Object.keys(dependencies).forEach((dependency: string) => {
-        const versionSpecifier: string = dependencies[dependency];
-        const alternativesForThisDependency: ReadonlyArray<string> = allowedAlternativeVersions.get(dependency) || [];
+    for (const dependency of dependencies) {
+      const alternativesForThisDependency: ReadonlyArray<string>
+        = allowedAlternativeVersions.get(dependency.name) || [];
 
-        // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
-        // that appear across the repo.  If there is only one version specifier, then that's the "preferred" one.
-        // However, there are a few cases where additional version specifiers can be safely ignored.
-        let ignoreVersion: boolean = false;
+      // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
+      // that appear across the repo.  If there is only one version specifier, then that's the "preferred" one.
+      // However, there are a few cases where additional version specifiers can be safely ignored.
+      let ignoreVersion: boolean = false;
 
-        // 1. If the version specifier was listed in "allowedAlternativeVersions", then it's never a candidate.
-        //    (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
-        //    otherwise the rule would be difficult to explain.)
-        if (alternativesForThisDependency.indexOf(versionSpecifier) > 0) {
-          ignoreVersion = true;
-        } else {
-          // Is it a local project?
-          const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(dependency);
-          if (localProject) {
-            // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
-            //    never even see it.
-            // However there are two ways that a local project can NOT be symlinked:
-            // - if the local project doesn't satisfy the referenced semver specifier; OR
-            // - if the local project was specified in "cyclicDependencyProjects" in rush.json
-            if (semver.satisfies(localProject.packageJson.version, versionSpecifier)
-              && !cyclicDependencies.has(dependency)) {
-              ignoreVersion = true;
-            }
+      // 1. If the version specifier was listed in "allowedAlternativeVersions", then it's never a candidate.
+      //    (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
+      //    otherwise the rule would be difficult to explain.)
+      if (alternativesForThisDependency.indexOf(dependency.version) > 0) {
+        ignoreVersion = true;
+      } else {
+        // Is it a local project?
+        const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(dependency.name);
+        if (localProject) {
+          // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
+          //    never even see it.
+          // However there are two ways that a local project can NOT be symlinked:
+          // - if the local project doesn't satisfy the referenced semver specifier; OR
+          // - if the local project was specified in "cyclicDependencyProjects" in rush.json
+          if (semver.satisfies(localProject.packageJsonEditor.version, dependency.version)
+            && !cyclicDependencies.has(dependency.name)) {
+            ignoreVersion = true;
           }
         }
 
         if (!ignoreVersion) {
-          InstallManager._updateVersionsForDependencies(versionsForDependencies, dependency, versionSpecifier);
+          InstallManager._updateVersionsForDependencies(versionsForDependencies, dependency.name, dependency.version);
         }
-      });
+      }
     }
   }
 
@@ -445,7 +450,7 @@ export class InstallManager {
     );
 
     for (const rushProject of sortedRushProjects) {
-      const packageJson: IPackageJson = rushProject.packageJson;
+      const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
       const tarballFile: string = this._getTarballFilePath(rushProject);
@@ -464,30 +469,30 @@ export class InstallManager {
         dependencies: {}
       };
 
-      // If there are any optional dependencies, copy them over directly
-      if (packageJson.optionalDependencies) {
-        tempPackageJson.optionalDependencies = packageJson.optionalDependencies;
-      }
-
       // Collect pairs of (packageName, packageVersion) to be added as temp package dependencies
       const pairs: { packageName: string, packageVersion: string }[] = [];
 
-      // If there are devDependencies, we need to merge them with the regular
-      // dependencies.  If the same library appears in both places, then the
-      // regular dependency takes precedence over the devDependency.
-      // It also takes precedence over a duplicate in optionalDependencies,
-      // but NPM will take care of that for us.  (Frankly any kind of duplicate
-      // should be an error, but NPM is pretty lax about this.)
-      if (packageJson.devDependencies) {
-        for (const packageName of Object.keys(packageJson.devDependencies)) {
-          pairs.push({ packageName: packageName, packageVersion: packageJson.devDependencies[packageName] });
+      for (const dependency of packageJson.dependencyList) {
+
+        // If there are any optional dependencies, copy them over directly
+        if (dependency.dependencyType === DependencyType.Optional) {
+          if (!tempPackageJson.optionalDependencies) {
+            tempPackageJson.optionalDependencies = {};
+          }
+          tempPackageJson.optionalDependencies[dependency.name] = dependency.version;
+        } else {
+          pairs.push({ packageName: dependency.name, packageVersion: dependency.version });
         }
       }
 
-      if (packageJson.dependencies) {
-        for (const packageName of Object.keys(packageJson.dependencies)) {
-          pairs.push({ packageName: packageName, packageVersion: packageJson.dependencies[packageName] });
-        }
+      for (const dependency of packageJson.devDependencyList) {
+        // If there are devDependencies, we need to merge them with the regular
+        // dependencies.  If the same library appears in both places, then the
+        // regular dependency takes precedence over the devDependency.
+        // It also takes precedence over a duplicate in optionalDependencies,
+        // but NPM will take care of that for us.  (Frankly any kind of duplicate
+        // should be an error, but NPM is pretty lax about this.)
+        pairs.push({ packageName: dependency.name, packageVersion: dependency.version });
       }
 
       for (const pair of pairs) {
@@ -503,7 +508,7 @@ export class InstallManager {
           if (!rushProject.cyclicDependencyProjects.has(pair.packageName)) {
 
             // Also, don't locally link if the SemVer doesn't match
-            const localProjectVersion: string = localProject.packageJson.version;
+            const localProjectVersion: string = localProject.packageJsonEditor.version;
             if (semver.satisfies(localProjectVersion, pair.packageVersion)) {
 
               // We will locally link this package
@@ -776,23 +781,6 @@ export class InstallManager {
           }
 
           // Run "npm install" in the common folder
-
-          // NOTE:
-          // we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
-          // work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
-          // which is an optional second-order dependency. Optional dependencies work by attempting to install
-          // the package, but removes the package if the install failed.
-          // This means that someone running generate on a Mac WILL have fsevents included in their shrinkwrap.
-          // When someone using Windows attempts to install from the shrinkwrap, the install will fail.
-          //
-          // If someone generates the shrinkwrap using Windows, then fsevents will NOT be listed in the shrinkwrap.
-          // When someone using Mac attempts to install from the shrinkwrap, (as of NPM 4), they will NOT have the
-          // optional dependency installed.
-          //
-          // One possible solution would be to have the shrinkwrap include information about whether the dependency
-          // is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
-          // people would have different node_modules based on their system.
-
           const installArgs: string[] = [ 'install' ];
           this._pushConfigurationArgs(installArgs, options);
 
@@ -800,7 +788,7 @@ export class InstallManager {
             + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
 
           // If any diagnostic options were specified, then show the full command-line
-          if (options.debug || options.collectLogFile || options.networkConcurrency || options.debug) {
+          if (options.debug || options.collectLogFile || options.networkConcurrency) {
             console.log(os.EOL + colors.green('Invoking package manager: ')
               + FileSystem.getRealPath(packageManagerFilename) + ' ' + installArgs.join(' ') + os.EOL);
           }
@@ -970,7 +958,27 @@ export class InstallManager {
    */
   private _pushConfigurationArgs(args: string[], options: IInstallManagerOptions): void {
     if (this._rushConfiguration.packageManager === 'npm') {
-      args.push('--no-optional');
+      if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '5.0.0')) {
+        // NOTE:
+        //
+        // When using an npm version older than v5.0.0, we do NOT install optional dependencies for
+        // Rush, because npm does not generate the shrinkwrap file consistently across platforms.
+        //
+        // Consider the "fsevents" package. This is a Mac specific package
+        // which is an optional second-order dependency. Optional dependencies work by attempting to install
+        // the package, but removes the package if the install failed.
+        // This means that someone running generate on a Mac WILL have fsevents included in their shrinkwrap.
+        // When someone using Windows attempts to install from the shrinkwrap, the install will fail.
+        //
+        // If someone generates the shrinkwrap using Windows, then fsevents will NOT be listed in the shrinkwrap.
+        // When someone using Mac attempts to install from the shrinkwrap, they will NOT have the
+        // optional dependency installed.
+        //
+        // This issue has been fixed as of npm v5.0.0: https://github.com/npm/npm/releases/tag/v5.0.0
+        //
+        // For more context, see https://github.com/Microsoft/web-build-tools/issues/761#issuecomment-428689600
+        args.push('--no-optional');
+      }
       args.push('--cache', this._rushConfiguration.npmCacheFolder);
       args.push('--tmp', this._rushConfiguration.npmTmpFolder);
 
@@ -978,7 +986,6 @@ export class InstallManager {
         args.push('--verbose');
       }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
-      args.push('--no-optional');
       args.push('--store', this._rushConfiguration.pnpmStoreFolder);
 
       // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
@@ -1004,7 +1011,6 @@ export class InstallManager {
         args.push('--strict-peer-dependencies');
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
-      args.push('--ignore-optional');
       args.push('--link-folder', 'yarn-link');
       args.push('--cache-folder', this._rushConfiguration.yarnCacheFolder);
 

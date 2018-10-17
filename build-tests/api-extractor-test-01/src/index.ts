@@ -39,7 +39,7 @@ export class AmbientConsumer {
   }
 
   /**
-   * Configured via tsconfig.json's "lib" setting, which specifies "@types/jest".
+   * Configured via tsconfig.json's "lib" setting, which specifies `@types/jest`.
    * The emitted index.d.ts gets a reference like this:  <reference types="jest" />
    */
   public definitelyTyped(): jest.Context {
@@ -102,6 +102,6 @@ export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExpor
  * Test the alias-following logic:  This class gets aliased twice before being
  * exported from the package.
  */
-export { ReexportedClass1 as ReexportedClass } from './ReexportedClass1';
+export { ReexportedClass3 as ReexportedClass } from './ReexportedClass3/ReexportedClass3';
 
-export { TypeReferencesInAedoc as _TypeReferencesInAedoc } from './TypeReferencesInAedoc';
+export { TypeReferencesInAedoc } from './TypeReferencesInAedoc';

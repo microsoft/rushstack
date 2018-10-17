@@ -108,9 +108,9 @@ export class BasePackage {
    * Used by "npm link" to simulate a temp project that is missing from the common/node_modules
    * folder (e.g. because it was added after the shrinkwrap file was regenerated).
    * @param packageJsonFilename - Filename of the source package.json
-   *        Example: c:\MyRepo\common\temp\projects\project1\package.json
+   *        Example: `C:\MyRepo\common\temp\projects\project1\package.json`
    * @param targetFolderName - Filename where it should have been installed
-   *        Example: c:\MyRepo\common\temp\node_modules\@rush-temp\project1
+   *        Example: `C:\MyRepo\common\temp\node_modules\@rush-temp\project1`
    */
   public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): BasePackage {
     const packageJson: IRushTempPackageJson = JsonFile.load(packageJsonFilename);

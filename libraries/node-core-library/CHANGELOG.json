@@ -2,6 +2,47 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.3.0",
+      "tag": "@microsoft/node-core-library_v3.3.0",
+      "date": "Mon, 08 Oct 2018 16:04:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Renaming PromiseUtilities to LegacyAdapters"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.0",
+      "tag": "@microsoft/node-core-library_v3.2.0",
+      "date": "Sun, 07 Oct 2018 06:15:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce promiseify utility function."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.0",
+      "tag": "@microsoft/node-core-library_v3.1.0",
+      "date": "Fri, 28 Sep 2018 16:05:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add `Path.isUnderOrEquals()`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.1",
       "tag": "@microsoft/node-core-library_v3.0.1",
       "date": "Thu, 06 Sep 2018 01:25:26 GMT",

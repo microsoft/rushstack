@@ -12,7 +12,8 @@ import {
   JsonFile,
   PackageName,
   FileSystem,
-  FileConstants
+  FileConstants,
+  LegacyAdapters
 } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
@@ -44,7 +45,10 @@ interface IQueueItem {
 
 export class NpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
-    return this._readPackageTree(this._rushConfiguration.commonTempFolder).then(
+    return LegacyAdapters.convertCallbackToPromise<readPackageTree.PackageNode, Error, string>(
+      readPackageTree,
+      this._rushConfiguration.commonTempFolder
+    ).then(
       (npmPackage: readPackageTree.PackageNode) => {
         const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
 
@@ -60,20 +64,6 @@ export class NpmLinkManager extends BaseLinkManager {
 
         console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
         JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
-      }
-    );
-  }
-
-  private _readPackageTree(rootFolderPath: string): Promise<readPackageTree.PackageNode> {
-    return new Promise(
-      (resolve: (rootNode: readPackageTree.PackageNode) => void, reject: (error: Error) => void): void => {
-        readPackageTree(rootFolderPath, (error: Error | undefined, rootNode: readPackageTree.PackageNode) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(rootNode);
-          }
-        });
       }
     );
   }
@@ -137,7 +127,7 @@ export class NpmLinkManager extends BaseLinkManager {
 
     // TODO: Validate that the project's package.json still matches the common folder
     const localProjectPackage: NpmPackage = NpmPackage.createLinkedNpmPackage(
-      project.packageJson.name,
+      project.packageJsonEditor.name,
       commonProjectPackage.version,
       commonProjectPackage.dependencies,
       project.projectFolder
@@ -180,7 +170,7 @@ export class NpmLinkManager extends BaseLinkManager {
           this._rushConfiguration.getProjectByName(dependency.name);
 
         if (matchedRushPackage) {
-          const matchedVersion: string = matchedRushPackage.packageJson.version;
+          const matchedVersion: string = matchedRushPackage.packageJsonEditor.version;
 
           // The dependency name matches an Rush project, but are there any other reasons not
           // to create a local link?
@@ -306,7 +296,7 @@ export class NpmLinkManager extends BaseLinkManager {
             throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
               + ` was not found in the common folder -- do you need to run "rush install"?`);
           } else {
-            console.log(colors.yellow('Skipping optional dependency: ' + dependency.name));
+            console.log('Skipping optional dependency: ' + dependency.name);
           }
         }
       }

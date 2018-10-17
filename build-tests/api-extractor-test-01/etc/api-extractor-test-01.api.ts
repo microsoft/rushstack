@@ -1,15 +1,3 @@
-// WARNING: Unable to find referenced export "api-extractor-test-01:TypeReferencesInAedoc"
-// @internal
-class _TypeReferencesInAedoc {
-  // WARNING: Unable to find referenced export "api-extractor-test-01:TypeReferencesInAedoc"
-  // WARNING: Unable to find referenced export "api-extractor-test-01:TypeReferencesInAedoc"
-  getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
-  // WARNING: Unable to find referenced export "api-extractor-test-01:TypeReferencesInAedoc"
-  getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
-  // (undocumented)
-  getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
-}
-
 // @public
 class AbstractClass {
   // (undocumented)
@@ -108,9 +96,17 @@ interface ISimpleInterface {
 // @public
 class ReexportedClass {
   // (undocumented)
-  getSelfReference(): ReexportedClass2;
+  getSelfReference(): ReexportedClass1;
   // (undocumented)
   getValue(): string;
+}
+
+// @public
+class TypeReferencesInAedoc {
+  getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
+  getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
+  // (undocumented)
+  getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
 }
 
 // @public
