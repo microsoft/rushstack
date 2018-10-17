@@ -1,6 +1,15 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 11 Oct 2018 23:26:07 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Oct 2018 14:43:24 GMT and should not be manually modified.
+
+## 6.0.4
+Wed, 17 Oct 2018 14:43:24 GMT
+
+### Patches
+
+- Fix a regression where namespaces were sometimes incorrectly handled in "conservative" mode
+- Update the command line to look for api-extractor.json in both the "./config" folder and the project folder
+- Allow type references in namespaces when namespaceSupport=conservative
 
 ## 6.0.3
 Thu, 11 Oct 2018 23:26:07 GMT
