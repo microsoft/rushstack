@@ -406,8 +406,8 @@ export class ChangeAction extends BaseRushAction {
         }
       }
     ])
-      .then((answers) => {
-        return answers.email;
+      .then(({ email }) => {
+        return email;
       });
   }
 

@@ -57,7 +57,7 @@
    * Specify a SemVer range to ensure developers use a NodeJS version that is appropriate
    * for your repo.
    */
-  "nodeSupportedVersionRange": ">=6.9.0 <7.0.0 || >=8.9.4 <9.0.0",
+  "nodeSupportedVersionRange": ">=8.9.4 <9.0.0 || >=10.12.0 <11.0.0",
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
