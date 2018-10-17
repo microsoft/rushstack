@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "Make rush purge also call rush unlink",
+      "comment": "Remove use of a deprecated Buffer API.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
-  "email": "rbotto.figueira@gmail.com"
+  "email": "iclanton@users.noreply.github.com"
 }
