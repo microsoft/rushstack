@@ -49,7 +49,7 @@ class StreamTask extends GulpTask<IConfig> {
 
       const file: gutil.File = new gutil.File({
         path: 'test.js',
-        contents: new Buffer('test')
+        contents: Buffer.from('test')
       });
 
       stream.push(file);

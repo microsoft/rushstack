@@ -188,7 +188,7 @@ export class JsonFile {
 
     const newJson: string = JsonFile.updateString(jsonToUpdate, jsonObject, options);
 
-    const newBuffer: Buffer = new Buffer(newJson); // utf8 encoding happens here
+    const newBuffer: Buffer = Buffer.from(newJson); // utf8 encoding happens here
 
     if (options.onlyIfChanged) {
       // Has the file changed?
