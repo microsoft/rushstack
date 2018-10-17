@@ -554,7 +554,7 @@ export class InstallManager {
 
           // compare the extracted package.json with the one we are about to write
           const oldBuffer: Buffer = FileSystem.readFileToBuffer(tempPackageJsonFilename);
-          const newBuffer: Buffer = new Buffer(JsonFile.stringify(tempPackageJson));
+          const newBuffer: Buffer = Buffer.from(JsonFile.stringify(tempPackageJson));
 
           if (Buffer.compare(oldBuffer, newBuffer) === 0) {
             shouldOverwrite = false;
