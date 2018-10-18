@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.0.6",
+      "tag": "@microsoft/api-extractor_v6.0.6",
+      "date": "Thu, 18 Oct 2018 01:32:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix isAbsolute check for mainDtsRollupPath"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.0.5",
       "tag": "@microsoft/api-extractor_v6.0.5",
       "date": "Wed, 17 Oct 2018 21:04:49 GMT",
