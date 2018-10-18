@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Replace deprecated dependency gulp-util",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-webpack",
+  "email": "pgonzal@users.noreply.github.com"
+}
