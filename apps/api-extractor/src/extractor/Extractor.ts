@@ -475,7 +475,7 @@ export class Extractor {
     this._monitoredLogger.logVerbose(`Writing package typings: ${mainDtsRollupFullPath}`);
 
     dtsRollupGenerator.writeTypingsFile(mainDtsRollupFullPath, dtsKind);
-}
+  }
 
   private _getShortFilePath(absolutePath: string): string {
     if (!path.isAbsolute(absolutePath)) {
