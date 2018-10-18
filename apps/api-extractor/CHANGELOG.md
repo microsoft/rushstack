@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 17 Oct 2018 21:04:49 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Oct 2018 01:32:20 GMT and should not be manually modified.
+
+## 6.0.6
+Thu, 18 Oct 2018 01:32:20 GMT
+
+### Patches
+
+- Fix isAbsolute check for mainDtsRollupPath
 
 ## 6.0.5
 Wed, 17 Oct 2018 21:04:49 GMT
