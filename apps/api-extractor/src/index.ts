@@ -9,9 +9,9 @@
  * @packagedocumentation
  */
 
-export { ExternalApiHelper } from './ExternalApiHelper';
+export { ReleaseTag } from './aedoc/ReleaseTag';
 
-export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './extractor/Extractor';
+export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './api/Extractor';
 export {
   IExtractorTsconfigCompilerConfig,
   IExtractorRuntimeCompilerConfig,
@@ -23,11 +23,97 @@ export {
   IExtractorApiJsonFileConfig,
   IExtractorDtsRollupConfig,
   IExtractorConfig
-} from './extractor/IExtractorConfig';
+} from './api/IExtractorConfig';
 
-export { ILogger } from './extractor/ILogger';
+export { ILogger } from './api/ILogger';
 
-export * from './api/ApiItem';
-export { ApiJsonFile } from './api/ApiJsonFile';
-export * from './markup/MarkupElement';
-export { Markup, IMarkupCreateTextOptions } from './markup/Markup';
+export { IndentedWriter } from './api/IndentedWriter';
+
+export {
+  Constructor,
+  PropertiesOf
+} from './api/mixins/Mixin';
+export {
+  IApiDeclarationMixinOptions,
+  ApiDeclarationMixin
+} from './api/mixins/ApiDeclarationMixin';
+export {
+  IApiFunctionLikeMixinOptions,
+  ApiFunctionLikeMixin
+} from './api/mixins/ApiFunctionLikeMixin';
+export {
+  IApiItemContainerMixinOptions,
+  ApiItemContainerMixin
+} from './api/mixins/ApiItemContainerMixin';
+export {
+  IApiReleaseTagMixinOptions,
+  ApiReleaseTagMixin
+} from './api/mixins/ApiReleaseTagMixin';
+export {
+  IApiResultTypeMixinOptions,
+  ApiResultTypeMixin
+} from './api/mixins/ApiResultTypeMixin';
+export {
+  IApiStaticMixinOptions,
+  ApiStaticMixin
+} from './api/mixins/ApiStaticMixin';
+
+export {
+  IApiClassOptions,
+  ApiClass
+} from './api/model/ApiClass';
+export {
+  IApiDocumentedItemOptions,
+  ApiDocumentedItem
+} from './api/model/ApiDocumentedItem';
+export {
+  IApiEntryPointOptions,
+  ApiEntryPoint
+} from './api/model/ApiEntryPoint';
+export {
+  IApiInterfaceOptions,
+  ApiInterface
+} from './api/model/ApiInterface';
+export {
+  ApiItemKind,
+  IApiItemOptions,
+  ApiItem
+} from './api/model/ApiItem';
+export {
+  IApiMethodOptions,
+  ApiMethod
+} from './api/model/ApiMethod';
+export {
+  IApiMethodSignatureOptions,
+  ApiMethodSignature
+} from './api/model/ApiMethodSignature';
+export {
+  ApiModel
+} from './api/model/ApiModel';
+export {
+  IApiNamespaceOptions,
+  ApiNamespace
+} from './api/model/ApiNamespace';
+export {
+  IApiPackageOptions,
+  ApiPackage
+} from './api/model/ApiPackage';
+export {
+  IApiParameterOptions,
+  ApiParameter
+} from './api/model/ApiParameter';
+export {
+  IApiPropertyOptions,
+  ApiProperty
+} from './api/model/ApiProperty';
+export {
+  IApiPropertyItemOptions,
+  ApiPropertyItem
+} from './api/model/ApiPropertyItem';
+export {
+  IApiPropertySignatureOptions,
+  ApiPropertySignature
+} from './api/model/ApiPropertySignature';
+export {
+  IResolveDeclarationReferenceResult
+} from './api/model/DeclarationReferenceResolver';

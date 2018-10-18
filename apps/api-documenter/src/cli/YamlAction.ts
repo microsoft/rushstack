@@ -7,10 +7,10 @@ import {
 
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
-import { DocItemSet } from '../utils/DocItemSet';
 
-import { YamlDocumenter } from '../yaml/YamlDocumenter';
-import { OfficeYamlDocumenter } from '../yaml/OfficeYamlDocumenter';
+import { YamlDocumenter } from '../documenters/YamlDocumenter';
+import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
+import { ApiModel } from '@microsoft/api-extractor';
 
 export class YamlAction extends BaseAction {
   private _officeParameter: CommandLineFlagParameter;
@@ -35,11 +35,11 @@ export class YamlAction extends BaseAction {
   }
 
   protected onExecute(): Promise<void> { // override
-    const docItemSet: DocItemSet = this.buildDocItemSet();
+    const apiModel: ApiModel = this.buildApiModel();
 
     const yamlDocumenter: YamlDocumenter = this._officeParameter.value
-       ? new OfficeYamlDocumenter(docItemSet, this.inputFolder)
-       : new YamlDocumenter(docItemSet);
+       ? new OfficeYamlDocumenter(apiModel, this.inputFolder)
+       : new YamlDocumenter(apiModel);
 
     yamlDocumenter.generateFiles(this.outputFolder);
     return Promise.resolve();

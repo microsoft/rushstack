@@ -10,6 +10,11 @@ export class Sort {
   /**
    * Compares `x` and `y` using the JavaScript `>` and `<` operators.  This function is suitable for usage as
    * the callback for `array.sort()`.
+   *
+   * @remarks
+   *
+   * The JavaScript ordering is generalized so that `undefined` \< `null` \< all other values.
+   *
    * @returns -1 if `x` is smaller than `y`, 1 if `x` is greater than `y`, or 0 if the values are equal.
    *
    * @example
@@ -24,18 +29,32 @@ export class Sort {
     if (x === y) {
       return 0;
     }
+
+    // Undefined is smaller than anything else
     if (x === undefined) {
       return -1;
     }
-    if (x === null) {
+    if (y === undefined) {
+      return 1;
+    }
+
+    // Null is smaller than anything except undefined
+    if (x === null) { // tslint:disable-line:no-null-keyword
       return -1;
     }
+    if (y === null) { // tslint:disable-line:no-null-keyword
+      return 1;
+    }
+
+    // These comparisons always return false if either of the arguments is "undefined".
+    // These comparisons return nonsense for "null" (true for "null > -1", but false for "null < 0" and "null > 0")
     if (x < y) {
       return -1;
     }
     if (x > y) {
       return 1;
     }
+
     return 0;
   }
 
