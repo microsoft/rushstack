@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "6.1.8",
+  "version": "6.1.9",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@microsoft/api-extractor": "6.0.6",
-    "@microsoft/gulp-core-build": "3.8.31",
+    "@microsoft/gulp-core-build": "3.8.32",
     "@microsoft/node-core-library": "3.3.1",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
