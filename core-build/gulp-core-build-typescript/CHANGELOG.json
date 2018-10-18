@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "6.1.9",
+      "tag": "@microsoft/gulp-core-build-typescript_v6.1.9",
+      "date": "Thu, 18 Oct 2018 05:30:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace deprecated dependency gulp-util"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.31` to `3.8.32`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.1.8",
       "tag": "@microsoft/gulp-core-build-typescript_v6.1.8",
       "date": "Thu, 18 Oct 2018 01:32:21 GMT",

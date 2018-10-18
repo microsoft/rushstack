@@ -2,6 +2,21 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.2.64",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.64",
+      "date": "Thu, 18 Oct 2018 05:30:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.31` to `3.8.32`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.22` to `5.0.23`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.63",
       "tag": "@microsoft/gulp-core-build-serve_v3.2.63",
       "date": "Thu, 18 Oct 2018 01:32:21 GMT",

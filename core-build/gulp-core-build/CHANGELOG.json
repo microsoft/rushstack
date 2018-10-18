@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.8.32",
+      "tag": "@microsoft/gulp-core-build_v3.8.32",
+      "date": "Thu, 18 Oct 2018 05:30:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace deprecated dependency gulp-util"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.31",
       "tag": "@microsoft/gulp-core-build_v3.8.31",
       "date": "Thu, 18 Oct 2018 01:32:21 GMT",

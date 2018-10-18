@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-webpack
 
-This log was last generated on Thu, 18 Oct 2018 01:32:21 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Oct 2018 05:30:14 GMT and should not be manually modified.
+
+## 3.4.37
+Thu, 18 Oct 2018 05:30:14 GMT
+
+### Patches
+
+- Replace deprecated dependency gulp-util
 
 ## 3.4.36
 Thu, 18 Oct 2018 01:32:21 GMT
