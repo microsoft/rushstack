@@ -41,6 +41,11 @@
           "title": "Custom Command Description",
           "description": "A detailed description of the command, which appears when requesting help for the command (e.g. \"rush --help my-command\"). If omitted, the summary will be used.",
           "type": "string"
+        },
+        "safeForSimultaneousRushProcesses": {
+          "title": "Safe For Simultaneous Rush Processes",
+          "description": "Can this command trigger additional rush processes, useful if you want a rush command to trigger another rush command.",
+          "type": "boolean"
         }
       }
     },
@@ -78,6 +83,7 @@
             "name": { "$ref": "#/definitions/anything" },
             "summary": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
+            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
             "ignoreMissingScript": { "$ref": "#/definitions/anything" }
@@ -114,6 +120,7 @@
             "name": { "$ref": "#/definitions/anything" },
             "summary": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
+            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
 
             "shellCommand": { "$ref": "#/definitions/anything" }
           }

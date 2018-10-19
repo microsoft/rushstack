@@ -12,6 +12,7 @@ export interface IBaseCommandJson {
    * If omitted, the summary will be used instead.
    */
   description?: string;
+  safeForSimultaneousRushProcesses: boolean;
 }
 
 /**
