@@ -23,4 +23,14 @@ export class TypeScriptMessageFormatter {
 
     return formattedErrors.join('; ');
   }
+
+  /**
+   * Returns a string such as this, based on the context information in the provided node:
+   *   "[C:\Folder\File.ts#123]"
+   */
+  public static formatFileAndLineNumber(node: ts.Node): string {
+    const sourceFile: ts.SourceFile = node.getSourceFile();
+    const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(node.getStart());
+    return `[${sourceFile.fileName}#${lineAndCharacter.line}]`;
+  }
 }

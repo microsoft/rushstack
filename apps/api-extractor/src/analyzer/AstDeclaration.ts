@@ -3,7 +3,7 @@
 
 import * as ts from 'typescript';
 import { AstSymbol } from './AstSymbol';
-import { Span } from '../../utils/Span';
+import { Span } from './Span';
 
 /**
  * Constructor parameters for AstDeclaration

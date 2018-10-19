@@ -4,7 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import { PrettyPrinter } from './PrettyPrinter';
+import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
 
 export class TypeScriptHelpers {
   /**
@@ -90,7 +90,7 @@ export class TypeScriptHelpers {
   public static getSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol {
     const symbol: ts.Symbol | undefined = TypeScriptHelpers.tryGetSymbolForDeclaration(declaration);
     if (!symbol) {
-      throw new Error(PrettyPrinter.formatFileAndLineNumber(declaration) + ': '
+      throw new Error(TypeScriptMessageFormatter.formatFileAndLineNumber(declaration) + ': '
         + 'Unable to determine semantic information for this declaration');
     }
     return symbol;

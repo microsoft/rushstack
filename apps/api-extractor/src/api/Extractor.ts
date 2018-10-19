@@ -15,16 +15,13 @@ import {
 import {
   IExtractorConfig,
   IExtractorProjectConfig,
-  IExtractorApiJsonFileConfig,
   IExtractorDtsRollupConfig
 } from './IExtractorConfig';
-import { ExtractorContext } from '../ExtractorContext';
 import { ILogger } from './ILogger';
-import { ApiJsonGenerator } from '../generators/ApiJsonGenerator';
-import { ApiFileGenerator } from '../generators/ApiFileGenerator';
-import { DtsRollupGenerator, DtsRollupKind } from '../generators/dtsRollup/DtsRollupGenerator';
+import { ExtractorContext } from '../analyzer/ExtractorContext';
+import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
-import { TypeScriptMessageFormatter } from '../utils/TypeScriptMessageFormatter';
+import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -99,10 +96,10 @@ export class Extractor {
    * The JSON Schema for API Extractor config file (api-extractor-config.schema.json).
    */
   public static jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, './api-extractor.schema.json'));
+    path.join(__dirname, '../schemas/api-extractor.schema.json'));
 
   private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
-    './api-extractor-defaults.json'));
+    '../schemas/api-extractor-defaults.json'));
 
   private static _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;
 
@@ -315,77 +312,6 @@ export class Extractor {
       validationRules: this.actualConfig.validationRules
     });
 
-    for (const externalJsonFileFolder of projectConfig.externalJsonFileFolders || []) {
-      context.loadExternalPackages(path.resolve(this._absoluteRootFolder, externalJsonFileFolder));
-    }
-
-    const packageBaseName: string = path.basename(context.packageName);
-
-    const apiJsonFileConfig: IExtractorApiJsonFileConfig = this.actualConfig.apiJsonFile;
-
-    if (apiJsonFileConfig.enabled) {
-      const outputFolder: string = path.resolve(this._absoluteRootFolder,
-        apiJsonFileConfig.outputFolder);
-
-      const jsonGenerator: ApiJsonGenerator = new ApiJsonGenerator();
-      const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
-
-      this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
-      jsonGenerator.writeJsonFile(apiJsonFilename, context);
-    }
-
-    if (this.actualConfig.apiReviewFile.enabled) {
-      const generator: ApiFileGenerator = new ApiFileGenerator();
-      const apiReviewFilename: string = packageBaseName + '.api.ts';
-
-      const actualApiReviewPath: string = path.resolve(this._absoluteRootFolder,
-        this.actualConfig.apiReviewFile.tempFolder, apiReviewFilename);
-      const actualApiReviewShortPath: string = this._getShortFilePath(actualApiReviewPath);
-
-      const expectedApiReviewPath: string = path.resolve(this._absoluteRootFolder,
-        this.actualConfig.apiReviewFile.apiReviewFolder, apiReviewFilename);
-      const expectedApiReviewShortPath: string = this._getShortFilePath(expectedApiReviewPath);
-
-      const actualApiReviewContent: string = generator.generateApiFileContent(context);
-
-      // Write the actual file
-      FileSystem.writeFile(actualApiReviewPath, actualApiReviewContent, {
-        ensureFolderExists: true
-      });
-
-      // Compare it against the expected file
-      if (FileSystem.exists(expectedApiReviewPath)) {
-        const expectedApiReviewContent: string = FileSystem.readFile(expectedApiReviewPath);
-
-        if (!ApiFileGenerator.areEquivalentApiFileContents(actualApiReviewContent, expectedApiReviewContent)) {
-          if (!this._localBuild) {
-            // For production, issue a warning that will break the CI build.
-            this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
-              // @microsoft/gulp-core-build seems to run JSON.stringify() on the error messages for some reason,
-              // so try to avoid escaped characters:
-              + ` Please overwrite ${expectedApiReviewShortPath} with a`
-              + ` copy of ${actualApiReviewShortPath}`
-              + ' and then request an API review. See the Git repository README.md for more info.');
-          } else {
-            // For a local build, just copy the file automatically.
-            this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
-              + ` Updating ${expectedApiReviewShortPath}`);
-
-            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent);
-          }
-        } else {
-          this._monitoredLogger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
-        }
-      } else {
-        // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
-        // For example, when projects were moved into category folders, the relative path for
-        // the API review files ended up in the wrong place.
-        this._monitoredLogger.logError(`The API review file has not been set up.`
-          + ` Do this by copying ${actualApiReviewShortPath}`
-          + ` to ${expectedApiReviewShortPath} and committing it.`);
-      }
-    }
-
     this._generateRollupDtsFiles(context);
 
     if (this._localBuild) {
@@ -475,13 +401,6 @@ export class Extractor {
     this._monitoredLogger.logVerbose(`Writing package typings: ${mainDtsRollupFullPath}`);
 
     dtsRollupGenerator.writeTypingsFile(mainDtsRollupFullPath, dtsKind);
-  }
-
-  private _getShortFilePath(absolutePath: string): string {
-    if (!path.isAbsolute(absolutePath)) {
-      throw new Error('Expected absolute path: ' + absolutePath);
-    }
-    return path.relative(this._absoluteRootFolder, absolutePath).replace(/\\/g, '/');
   }
 
   /**

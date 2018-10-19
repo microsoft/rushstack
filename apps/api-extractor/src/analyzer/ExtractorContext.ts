@@ -7,20 +7,17 @@ import {
   PackageJsonLookup,
   IPackageJson,
   PackageName,
-  IParsedPackageName,
-  FileSystem
+  IParsedPackageName
 } from '@microsoft/node-core-library';
 
-import { AstPackage } from './ast/AstPackage';
-import { DocItemLoader } from './DocItemLoader';
-import { ILogger } from './extractor/ILogger';
-import { IExtractorPoliciesConfig, IExtractorValidationRulesConfig } from './extractor/IExtractorConfig';
-import { TypeScriptMessageFormatter } from './utils/TypeScriptMessageFormatter';
+import { ILogger } from '../api/ILogger';
+import { IExtractorPoliciesConfig, IExtractorValidationRulesConfig } from '../api/IExtractorConfig';
+import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 
 /**
  * Options for ExtractorContext constructor.
  */
-export interface IExtractorContextOptions {
+export interface IExtractorContextParameters {
   /**
    * Configuration for the TypeScript compiler.  The most important options to set are:
    *
@@ -52,7 +49,6 @@ export interface IExtractorContextOptions {
  */
 export class ExtractorContext {
   public typeChecker: ts.TypeChecker;
-  public package: AstPackage;
 
   /**
    * The parsed package.json file for this package.
@@ -61,17 +57,13 @@ export class ExtractorContext {
 
   public readonly parsedPackageName: IParsedPackageName;
 
-  /**
-   * One DocItemLoader is needed per analyzer to look up external API members
-   * as needed.
-   */
-  public readonly docItemLoader: DocItemLoader;
-
   public readonly packageJsonLookup: PackageJsonLookup;
 
   public readonly policies: IExtractorPoliciesConfig;
 
   public readonly validationRules: IExtractorValidationRulesConfig;
+
+  public readonly entryPointSourceFile: ts.SourceFile;
 
   // If the entry point is "C:\Folder\project\src\index.ts" and the nearest package.json
   // is "C:\Folder\project\package.json", then the packageFolder is "C:\Folder\project"
@@ -79,15 +71,15 @@ export class ExtractorContext {
 
   private _logger: ILogger;
 
-  constructor(options: IExtractorContextOptions) {
+  constructor(parameters: IExtractorContextParameters) {
     this.packageJsonLookup = new PackageJsonLookup();
 
-    this.policies = options.policies;
-    this.validationRules = options.validationRules;
+    this.policies = parameters.policies;
+    this.validationRules = parameters.validationRules;
 
-    const folder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
+    const folder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(parameters.entryPointFile);
     if (!folder) {
-      throw new Error('Unable to find a package.json for entry point: ' + options.entryPointFile);
+      throw new Error('Unable to find a package.json for entry point: ' + parameters.entryPointFile);
     }
     this._packageFolder = folder;
 
@@ -95,28 +87,24 @@ export class ExtractorContext {
 
     this.parsedPackageName = PackageName.parse(this.packageJson.name);
 
-    this.docItemLoader = new DocItemLoader(this._packageFolder);
-
-    this._logger = options.logger;
+    this._logger = parameters.logger;
 
     // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
     // compile errors that would result from a full compilation.
-    for (const diagnostic of options.program.getSemanticDiagnostics()) {
+    for (const diagnostic of parameters.program.getSemanticDiagnostics()) {
       const errorText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
       this.reportError(`TypeScript: ${errorText}`, diagnostic.file, diagnostic.start);
     }
 
-    this.typeChecker = options.program.getTypeChecker();
+    this.typeChecker = parameters.program.getTypeChecker();
 
-    const rootFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);
-    if (!rootFile) {
-      throw new Error('Unable to load file: ' + options.entryPointFile);
+    const entryPointSourceFile: ts.SourceFile | undefined = parameters.program.getSourceFile(parameters.entryPointFile);
+    if (!entryPointSourceFile) {
+      throw new Error('Unable to load file: ' + parameters.entryPointFile);
     }
 
-    this.package = new AstPackage(this, rootFile); // construct members
-    this.package.completeInitialization(); // creates ApiDocumentation
-    this.package.visitTypeReferencesForAstItem();
+    this.entryPointSourceFile = entryPointSourceFile;
   }
 
   /**
@@ -151,30 +139,5 @@ export class ExtractorContext {
     } else {
       this._logger.logError(message);
     }
-  }
-
-  /**
-   * Scans for external package api files and loads them into the docItemLoader member before
-   * any API analysis begins.
-   *
-   * @param externalJsonCollectionPath - an absolute path to to the folder that contains all the external
-   * api json files.
-   * Ex: if externalJsonPath is './resources', then in that folder
-   * are 'es6-collections.api.json', etc.
-   */
-  public loadExternalPackages(externalJsonCollectionPath: string): void {
-    if (!externalJsonCollectionPath) {
-      return;
-    }
-
-    FileSystem.readFolder(externalJsonCollectionPath, {
-      absolutePaths: true
-    }).forEach(file => {
-      if (path.extname(file) === '.json') {
-        // Example: "C:\Example\my-package.json" --> "my-package"
-        const packageName: string = path.parse(file).name;
-        this.docItemLoader.loadPackageIntoCache(file, packageName);
-      }
-    });
   }
 }

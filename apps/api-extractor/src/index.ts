@@ -9,9 +9,7 @@
  * @packagedocumentation
  */
 
-export { ExternalApiHelper } from './ExternalApiHelper';
-
-export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './extractor/Extractor';
+export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './api/Extractor';
 export {
   IExtractorTsconfigCompilerConfig,
   IExtractorRuntimeCompilerConfig,
@@ -23,11 +21,6 @@ export {
   IExtractorApiJsonFileConfig,
   IExtractorDtsRollupConfig,
   IExtractorConfig
-} from './extractor/IExtractorConfig';
+} from './api/IExtractorConfig';
 
-export { ILogger } from './extractor/ILogger';
-
-export * from './api/ApiItem';
-export { ApiJsonFile } from './api/ApiJsonFile';
-export * from './markup/MarkupElement';
-export { Markup, IMarkupCreateTextOptions } from './markup/Markup';
+export { ILogger } from './api/ILogger';

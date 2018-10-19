@@ -5,7 +5,7 @@
 
 import * as ts from 'typescript';
 
-import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
+import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstImport } from './AstImport';
 
 /**

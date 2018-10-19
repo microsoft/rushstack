@@ -7,18 +7,18 @@ import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { FileSystem, NewlineKind } from '@microsoft/node-core-library';
 
-import { ExtractorContext } from '../../ExtractorContext';
-import { IndentedWriter } from '../../utils/IndentedWriter';
-import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
-import { Span, SpanModification } from '../../utils/Span';
-import { ReleaseTag } from '../../aedoc/ReleaseTag';
-import { AstSymbolTable } from './AstSymbolTable';
-import { AstEntryPoint } from './AstEntryPoint';
-import { AstSymbol } from './AstSymbol';
-import { AstImport } from './AstImport';
+import { ExtractorContext } from '../analyzer/ExtractorContext';
+import { IndentedWriter } from './IndentedWriter';
+import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
+import { Span, SpanModification } from '../analyzer/Span';
+import { ReleaseTag } from '../aedoc/ReleaseTag';
+import { AstSymbolTable } from '../analyzer/AstSymbolTable';
+import { AstEntryPoint } from '../analyzer/AstEntryPoint';
+import { AstSymbol } from '../analyzer/AstSymbol';
+import { AstImport } from '../analyzer/AstImport';
 import { DtsEntry } from './DtsEntry';
-import { AstDeclaration } from './AstDeclaration';
-import { SymbolAnalyzer } from './SymbolAnalyzer';
+import { AstDeclaration } from '../analyzer/AstDeclaration';
+import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -80,8 +80,7 @@ export class DtsRollupGenerator {
     }
 
     // Build the entry point
-    const sourceFile: ts.SourceFile = this._context.package.getDeclaration().getSourceFile();
-    this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(sourceFile);
+    this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(this._context.entryPointSourceFile);
 
     const exportedAstSymbols: AstSymbol[] = [];
 
@@ -215,11 +214,11 @@ export class DtsRollupGenerator {
     indentedWriter.clear();
 
     // If there is a @packagedocumentation header, put it first:
-    const packageDocumentation: string = this._context.package.documentation.emitNormalizedComment();
-    if (packageDocumentation) {
-      indentedWriter.writeLine(packageDocumentation);
-      indentedWriter.writeLine();
-    }
+    // const packageDocumentation: string = this._context.package.documentation.emitNormalizedComment();
+    // if (packageDocumentation) {
+    //  indentedWriter.writeLine(packageDocumentation);
+    //  indentedWriter.writeLine();
+    // }
 
     // Emit the triple slash directives
     for (const typeDirectiveReference of this._dtsTypeDefinitionReferences) {

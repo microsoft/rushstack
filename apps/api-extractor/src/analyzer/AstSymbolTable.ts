@@ -8,7 +8,7 @@ import { PackageJsonLookup } from '@microsoft/node-core-library';
 
 import { AstDeclaration } from './AstDeclaration';
 import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
-import { TypeScriptHelpers } from '../../utils/TypeScriptHelpers';
+import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstImport } from './AstImport';
 import { AstEntryPoint, IExportedMember } from './AstEntryPoint';
