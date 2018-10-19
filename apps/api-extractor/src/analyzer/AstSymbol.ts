@@ -43,7 +43,7 @@ export class AstSymbol {
 
   /**
    * If this symbol was imported from another package, that information is tracked here.
-   * Otherwies, the value is undefined.
+   * Otherwise, the value is undefined.
    */
   public readonly astImport: AstImport | undefined;
 
