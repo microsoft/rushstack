@@ -9,12 +9,15 @@ export type Mixin<TBase, TMixin> = TBase & Constructor<TMixin>;
 export interface ApiMembersMixin {
   readonly members: ReadonlyArray<ApiItem>;
   addMember(member: ApiItem): void;
+
+  /** @override */
+  serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void;
 }
 
 const _members: unique symbol = Symbol('members');
 const _membersSorted: unique symbol = Symbol('members');
 
-export function ApiMembersMixin<TBaseClass extends Constructor>(baseClass: TBaseClass):
+export function ApiMembersMixin<TBaseClass extends Constructor<ApiItem>>(baseClass: TBaseClass):
   Mixin<TBaseClass, ApiMembersMixin> {
 
   abstract class MixedClass extends baseClass implements ApiMembersMixin {
@@ -40,6 +43,22 @@ export function ApiMembersMixin<TBaseClass extends Constructor>(baseClass: TBase
 
       return this[_members];
     }
+
+    /** @override */
+    public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void {
+      super.serializeInto(jsonObject);
+
+      const memberObjects: Partial<SerializedApiItem<IApiItemParameters>>[] = [];
+
+      for (const member of this.members) {
+        const memberJsonObject: Partial<SerializedApiItem<IApiItemParameters>> = {};
+        member.serializeInto(memberJsonObject);
+        memberObjects.push(memberJsonObject);
+      }
+
+      jsonObject.members = memberObjects as SerializedApiItem<IApiItemParameters>[];
+    }
+
   }
 
   return MixedClass;
@@ -47,4 +66,5 @@ export function ApiMembersMixin<TBaseClass extends Constructor>(baseClass: TBase
 
 export type ApiItemContainer = ApiItem & ApiMembersMixin;
 
-import { ApiItem } from './ApiItem';
+// Circular import
+import { ApiItem, SerializedApiItem, IApiItemParameters } from './ApiItem';

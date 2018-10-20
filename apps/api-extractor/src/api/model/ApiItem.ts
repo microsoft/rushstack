@@ -35,18 +35,10 @@ export class ApiItem {
     this._name = parameters.name;
   }
 
+  /** @virtual */
   public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void {
     jsonObject.kind = this.kind;
     jsonObject.name = this.name;
-    const memberObjects: Partial<SerializedApiItem<IApiItemParameters>>[] = [];
-
-    for (const member of this.members) {
-      const memberJsonObject: Partial<SerializedApiItem<IApiItemParameters>> = {};
-      member.serializeInto(memberJsonObject);
-      memberObjects.push(memberJsonObject);
-    }
-
-    jsonObject.members = memberObjects as SerializedApiItem<IApiItemParameters>[];
   }
 
   public get name(): string {

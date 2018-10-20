@@ -111,8 +111,6 @@ export class ModelBuilder {
       apiItem = new ApiMethod(this._createApiItemParameters(astDeclaration, exportedName));
       parentApiItem.addMember(apiItem);
     }
-
-    this._processChildDeclarations(astDeclaration, exportedName, apiItem);
   }
 
   private _processApiNamespace(astDeclaration: AstDeclaration, exportedName: string | undefined,

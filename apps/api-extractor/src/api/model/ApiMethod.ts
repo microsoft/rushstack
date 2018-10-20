@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItem, ApiItemKind } from './ApiItem';
-import { ApiMembersMixin } from './Mixins';
 
-export class ApiMethod extends ApiMembersMixin(ApiItem) {
+export class ApiMethod extends ApiItem {
   /** @override */
   public get kind(): ApiItemKind {
     return ApiItemKind.Method;
