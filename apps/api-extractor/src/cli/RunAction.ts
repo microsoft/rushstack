@@ -25,7 +25,6 @@ import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 const AE_CONFIG_FILENAME: string = 'api-extractor.json';
 
 export class RunAction extends CommandLineAction {
-  private _parser: ApiExtractorCommandLine;
   private _configFileParameter: CommandLineStringParameter;
   private _localParameter: CommandLineFlagParameter;
   private _typescriptCompilerFolder: CommandLineStringParameter;
@@ -37,7 +36,6 @@ export class RunAction extends CommandLineAction {
       summary: 'Invoke API Extractor on a project',
       documentation: 'Invoke API Extractor on a project'
     });
-    this._parser = parser;
   }
 
   protected onDefineParameters(): void { // override

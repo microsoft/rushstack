@@ -22,6 +22,7 @@ import { ExtractorContext } from '../analyzer/ExtractorContext';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
+import { ModelBuilder } from '../generators/ModelBuilder';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -311,6 +312,11 @@ export class Extractor {
       policies: this.actualConfig.policies,
       validationRules: this.actualConfig.validationRules
     });
+
+    if (this.actualConfig.apiReviewFile.enabled) {
+      const modelBuilder: ModelBuilder = new ModelBuilder(context);
+      modelBuilder.process();
+    }
 
     this._generateRollupDtsFiles(context);
 

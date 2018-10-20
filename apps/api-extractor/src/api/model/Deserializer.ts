@@ -8,7 +8,6 @@ import { ApiMethod } from './ApiMethod';
 import { ApiModel } from './ApiModel';
 import { ApiNamespace } from './ApiNamespace';
 import { ApiPackage } from './ApiPackage';
-import { ApiParameter } from './ApiParameter';
 
 export class Deserializer {
   public static deserialize(jsonObject: SerializedApiItem<IApiItemParameters>): ApiItem {
@@ -20,13 +19,13 @@ export class Deserializer {
       case ApiItemKind.Method:
         return new ApiMethod(jsonObject);
       case ApiItemKind.Model:
-        return new ApiModel(jsonObject);
+        return new ApiModel();
       case ApiItemKind.Namespace:
         return new ApiNamespace(jsonObject);
       case ApiItemKind.Package:
         return new ApiPackage(jsonObject);
       case ApiItemKind.Parameter:
-        return new ApiParameter(jsonObject);
+        // return new ApiParameter(jsonObject);
       default:
         throw new Error(`Failed to deserialize unsupported API item type ${JSON.stringify(jsonObject.kind)}`);
     }

@@ -2,12 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItem, ApiItemKind } from './ApiItem';
+import { ApiMembersMixin } from './Mixins';
 
-export class ApiEntryPoint extends ApiItem {
-  public readonly kind: ApiItemKind = ApiItemKind.EntryPoint;
+export class ApiEntryPoint extends ApiMembersMixin(ApiItem) {
+  /** @override */
+  public get kind(): ApiItemKind {
+    return ApiItemKind.EntryPoint;
+  }
 
   /** @override */
-  protected getSortKey(): string {
+  public getSortKey(): string {
     return this.name;
   }
 }

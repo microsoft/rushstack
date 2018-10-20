@@ -2,10 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItem, ApiItemKind } from './ApiItem';
+import { ApiMembersMixin } from './Mixins';
 import { ApiPackage } from './ApiPackage';
 
-export class ApiModel extends ApiItem {
-  public readonly kind: ApiItemKind = ApiItemKind.Model;
+export class ApiModel extends ApiMembersMixin(ApiItem) {
+  public constructor() {
+    super({ name: 'MODEL' });
+  }
 
   public loadPackage(apiJsonFilename: string): ApiPackage {
     const apiPackage: ApiPackage = ApiPackage.loadFromJsonFile(apiJsonFilename);
@@ -14,7 +17,12 @@ export class ApiModel extends ApiItem {
   }
 
   /** @override */
-  protected getSortKey(): string {
+  public get kind(): ApiItemKind {
+    return ApiItemKind.Method;
+  }
+
+  /** @override */
+  public getSortKey(): string {
     return this.name;
   }
 }

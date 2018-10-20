@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Deserializer } from './Deserializer';
-
 export const enum ApiItemKind {
   Class = 'Class',
   EntryPoint = 'EntryPoint',
@@ -10,7 +8,8 @@ export const enum ApiItemKind {
   Model = 'Model',
   Namespace = 'Namespace',
   Package = 'Package',
-  Parameter = 'Parameter'
+  Parameter = 'Parameter',
+  None = 'None'
 }
 
 export interface IApiItemParameters {
@@ -24,14 +23,11 @@ export interface ISerializedMetadata {
 
 export type SerializedApiItem<T extends IApiItemParameters> = T & ISerializedMetadata;
 
-export abstract class ApiItem {
-  public abstract readonly kind: ApiItemKind;
-
-  private _members: ApiItem[];
-  private _name: string;
-  private _membersSorted: boolean;
+export class ApiItem {
+  private readonly _name: string;
 
   public static deserialize(jsonObject: SerializedApiItem<IApiItemParameters>): ApiItem {
+    // tslint:disable-next-line:no-use-before-declare
     return Deserializer.deserialize(jsonObject);
   }
 
@@ -57,19 +53,21 @@ export abstract class ApiItem {
     return this._name;
   }
 
-  public addMember(member: ApiItem): void {
-    this._members.push(member);
-    this._membersSorted = false;
-  }
-
+  /** @virtual */
   public get members(): ReadonlyArray<ApiItem> {
-    if (!this._membersSorted) {
-      this._members.sort((x, y) => x.getSortKey().localeCompare(y.getSortKey()));
-      this._membersSorted = true;
-    }
-
-    return this._members;
+    return [];
   }
 
-  protected abstract getSortKey(): string;
+  /** @virtual */
+  public get kind(): ApiItemKind {
+    throw new Error('ApiItem.kind was not implemented by the child class');
+  }
+
+  /** @virtual */
+  public getSortKey(): string {
+    throw new Error('ApiItem.getSortKey was not implemented by the child class');
+  }
 }
+
+// Circular import
+import { Deserializer } from './Deserializer';
