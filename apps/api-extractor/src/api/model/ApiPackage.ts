@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItem, ApiItemKind, IApiItemParameters, SerializedApiItem } from './ApiItem';
-import { ApiMembersMixin } from './Mixins';
+import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { JsonFile } from '@microsoft/node-core-library';
 
-export class ApiPackage extends ApiMembersMixin(ApiItem) {
+export class ApiPackage extends ApiItemContainerMixin(ApiItem) {
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
     const jsonObject: { } = JsonFile.load(apiJsonFilename);
     return ApiItem.deserialize(jsonObject as SerializedApiItem<IApiItemParameters>) as ApiPackage;
@@ -14,6 +14,11 @@ export class ApiPackage extends ApiMembersMixin(ApiItem) {
   /** @override */
   public get kind(): ApiItemKind {
     return ApiItemKind.Package;
+  }
+
+  /** @override */
+  public get canonicalSelector(): string {
+    return '0';
   }
 
   /** @override */

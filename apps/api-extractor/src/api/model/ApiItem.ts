@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as tsdoc from '@microsoft/tsdoc';
+
 export const enum ApiItemKind {
   Class = 'Class',
   EntryPoint = 'EntryPoint',
@@ -41,8 +43,18 @@ export class ApiItem {
     jsonObject.name = this.name;
   }
 
+  /** @virtual */
+  public get kind(): ApiItemKind {
+    throw new Error('ApiItem.kind was not implemented by the child class');
+  }
+
   public get name(): string {
     return this._name;
+  }
+
+  /** @virtual */
+  public get canonicalSelector(): string {
+    throw new Error('ApiItem.kind was not implemented by the child class');
   }
 
   /** @virtual */
@@ -51,13 +63,8 @@ export class ApiItem {
   }
 
   /** @virtual */
-  public get kind(): ApiItemKind {
-    throw new Error('ApiItem.kind was not implemented by the child class');
-  }
-
-  /** @virtual */
   public getSortKey(): string {
-    throw new Error('ApiItem.getSortKey was not implemented by the child class');
+    return `${this.name}:${this.canonicalSelector}`;
   }
 }
 

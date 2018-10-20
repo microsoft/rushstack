@@ -4,7 +4,7 @@
 import { SerializedApiItem, IApiItemParameters, ApiItem, ApiItemKind } from './ApiItem';
 import { ApiClass } from './ApiClass';
 import { ApiEntryPoint } from './ApiEntryPoint';
-import { ApiMethod } from './ApiMethod';
+import { ApiMethod, IApiMethodParameters } from './ApiMethod';
 import { ApiModel } from './ApiModel';
 import { ApiNamespace } from './ApiNamespace';
 import { ApiPackage } from './ApiPackage';
@@ -17,7 +17,7 @@ export class Deserializer {
       case ApiItemKind.EntryPoint:
         return new ApiEntryPoint(jsonObject);
       case ApiItemKind.Method:
-        return new ApiMethod(jsonObject);
+        return new ApiMethod(jsonObject as SerializedApiItem<IApiMethodParameters>);
       case ApiItemKind.Model:
         return new ApiModel();
       case ApiItemKind.Namespace:

@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItem, ApiItemKind } from './ApiItem';
-import { ApiMembersMixin } from './Mixins';
+import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { ApiPackage } from './ApiPackage';
 
-export class ApiModel extends ApiMembersMixin(ApiItem) {
+export class ApiModel extends ApiItemContainerMixin(ApiItem) {
   public constructor() {
     super({ name: 'MODEL' });
   }
@@ -21,6 +21,10 @@ export class ApiModel extends ApiMembersMixin(ApiItem) {
     return ApiItemKind.Method;
   }
 
+  /** @override */
+  public get canonicalSelector(): string {
+    return '0';
+  }
   /** @override */
   public getSortKey(): string {
     return this.name;

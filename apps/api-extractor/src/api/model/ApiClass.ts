@@ -2,12 +2,21 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItem, ApiItemKind } from './ApiItem';
-import { ApiMembersMixin } from './Mixins';
+import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 
-export class ApiClass extends ApiMembersMixin(ApiItem) {
+export class ApiClass extends ApiItemContainerMixin(ApiItem) {
+  public static getCanonicalSelector(): string {
+    return 'class';
+  }
+
   /** @override */
   public get kind(): ApiItemKind {
     return ApiItemKind.Class;
+  }
+
+  /** @override */
+  public get canonicalSelector(): string {
+    return ApiClass.getCanonicalSelector();
   }
 
   /** @override */
