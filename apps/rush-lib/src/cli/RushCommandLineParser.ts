@@ -198,6 +198,7 @@ export class RushCommandLineParser extends CommandLineParser {
             actionName: command.name,
             summary: command.summary,
             documentation: command.description || command.summary,
+            safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
 
             parser: this,
             commandLineConfiguration: commandLineConfiguration,
@@ -211,6 +212,7 @@ export class RushCommandLineParser extends CommandLineParser {
             actionName: command.name,
             summary: command.summary,
             documentation: command.description || command.summary,
+            safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
 
             parser: this,
             commandLineConfiguration: commandLineConfiguration,

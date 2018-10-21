@@ -41,6 +41,11 @@
           "title": "Custom Command Description",
           "description": "A detailed description of the command, which appears when requesting help for the command (e.g. \"rush --help my-command\"). If omitted, the summary will be used.",
           "type": "string"
+        },
+        "safeForSimultaneousRushProcesses": {
+          "title": "Safe For Simultaneous Rush Processes",
+          "description": "By default, Rush operations acquire a lock file which prevents multiple commands from executing simultaneously in the same repo folder.  (For example, it would be a mistake to run \"rush install\" and \"rush build\" at the same time.)  If your command makes sense to run concurrently with other operations, set safeForSimultaneousRushProcesses=true to disable this protection.  In particular, this is needed for custom scripts that invoke other Rush commands.",
+          "type": "boolean"
         }
       }
     },
@@ -78,6 +83,7 @@
             "name": { "$ref": "#/definitions/anything" },
             "summary": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
+            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
             "ignoreMissingScript": { "$ref": "#/definitions/anything" }
@@ -114,6 +120,7 @@
             "name": { "$ref": "#/definitions/anything" },
             "summary": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
+            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
 
             "shellCommand": { "$ref": "#/definitions/anything" }
           }
