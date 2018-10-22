@@ -4,14 +4,18 @@
 import { ApiItem, ApiItemKind } from './ApiItem';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 
-export class ApiEntryPoint extends ApiItemContainerMixin(ApiItem) {
+export class ApiInterface extends ApiItemContainerMixin(ApiItem) {
+  public static getCanonicalReference(name: string): string {
+    return `(${name}:interface)`;
+  }
+
   /** @override */
   public get kind(): ApiItemKind {
-    return ApiItemKind.EntryPoint;
+    return ApiItemKind.Interface;
   }
 
   /** @override */
   public get canonicalReference(): string {
-    return this.name;
+    return ApiInterface.getCanonicalReference(this.name);
   }
 }

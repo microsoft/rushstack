@@ -13,6 +13,8 @@ import { ApiEntryPoint } from '../api/model/ApiEntryPoint';
 import { ApiMethod } from '../api/model/ApiMethod';
 import { ApiNamespace } from '../api/model/ApiNamespace';
 import { IApiItemContainer } from '../api/mixins/ApiItemContainerMixin';
+import { ApiInterface } from '../api/model/ApiInterface';
+import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
@@ -58,12 +60,20 @@ export class ModelBuilder {
         this._processApiClass(astDeclaration, exportedName, parentApiItem);
         break;
 
+      case ts.SyntaxKind.InterfaceDeclaration:
+        this._processApiInterface(astDeclaration, exportedName, parentApiItem);
+        break;
+
       case ts.SyntaxKind.MethodDeclaration:
         this._processApiMethod(astDeclaration, exportedName, parentApiItem);
         break;
 
       case ts.SyntaxKind.ModuleDeclaration:
         this._processApiNamespace(astDeclaration, exportedName, parentApiItem);
+        break;
+
+      case ts.SyntaxKind.PropertySignature:
+        this._processApiPropertySignature(astDeclaration, exportedName, parentApiItem);
         break;
 
       case ts.SyntaxKind.MethodSignature:
@@ -73,9 +83,7 @@ export class ModelBuilder {
       case ts.SyntaxKind.EnumMember:
       case ts.SyntaxKind.FunctionDeclaration:
       case ts.SyntaxKind.IndexSignature:
-      case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.PropertyDeclaration:
-      case ts.SyntaxKind.PropertySignature:
       case ts.SyntaxKind.TypeAliasDeclaration:
       case ts.SyntaxKind.VariableDeclaration:
       default:
@@ -93,9 +101,9 @@ export class ModelBuilder {
     parentApiItem: IApiItemContainer): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
-    const selector: string = ApiClass.getCanonicalReference(name);
+    const canonicalReference: string = ApiClass.getCanonicalReference(name);
 
-    let apiClass: ApiClass | undefined = parentApiItem.tryGetMember(name, selector) as ApiClass;
+    let apiClass: ApiClass | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiClass;
 
     if (apiClass === undefined) {
       apiClass = new ApiClass({ name });
@@ -103,6 +111,22 @@ export class ModelBuilder {
     }
 
     this._processChildDeclarations(astDeclaration, exportedName, apiClass);
+  }
+
+  private _processApiInterface(astDeclaration: AstDeclaration, exportedName: string | undefined,
+    parentApiItem: IApiItemContainer): void {
+
+    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const canonicalReference: string = ApiInterface.getCanonicalReference(name);
+
+    let apiInterface: ApiClass | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiInterface;
+
+    if (apiInterface === undefined) {
+      apiInterface = new ApiInterface({ name });
+      parentApiItem.addMember(apiInterface);
+    }
+
+    this._processChildDeclarations(astDeclaration, exportedName, apiInterface);
   }
 
   private _processApiMethod(astDeclaration: AstDeclaration, exportedName: string | undefined,
@@ -122,9 +146,9 @@ export class ModelBuilder {
     }
 
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
-    const selector: string = ApiMethod.getCanonicalReference(name, isStatic, overloadIndex);
+    const canonicalReference: string = ApiMethod.getCanonicalReference(name, isStatic, overloadIndex);
 
-    let apiMethod: ApiMethod | undefined = parentApiItem.tryGetMember(name, selector) as ApiMethod;
+    let apiMethod: ApiMethod | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiMethod;
 
     if (apiMethod === undefined) {
       apiMethod = new ApiMethod({ name, isStatic, overloadIndex });
@@ -136,9 +160,9 @@ export class ModelBuilder {
     parentApiItem: IApiItemContainer): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
-    const selector: string = ApiNamespace.getCanonicalReference(name);
+    const canonicalReference: string = ApiNamespace.getCanonicalReference(name);
 
-    let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMember(name, selector) as ApiNamespace;
+    let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiNamespace;
 
     if (apiNamespace === undefined) {
       apiNamespace = new ApiNamespace({ name });
@@ -146,6 +170,24 @@ export class ModelBuilder {
     }
 
     this._processChildDeclarations(astDeclaration, exportedName, apiNamespace);
+  }
+
+  private _processApiPropertySignature(astDeclaration: AstDeclaration, exportedName: string | undefined,
+    parentApiItem: IApiItemContainer): void {
+
+    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const canonicalReference: string = ApiPropertySignature.getCanonicalReference(name);
+
+    let apiPropertySignature: ApiPropertySignature | undefined
+      = parentApiItem.tryGetMember(canonicalReference) as ApiNamespace;
+
+    if (apiPropertySignature === undefined) {
+      apiPropertySignature = new ApiPropertySignature({ name });
+      parentApiItem.addMember(apiPropertySignature);
+    } else {
+      // If the property was already declared before (via a merged interface declaration),
+      // we assume its signature is identical, because the language requires that.
+    }
   }
 
   private _getOverloadIndex(astDeclaration: AstDeclaration): number {

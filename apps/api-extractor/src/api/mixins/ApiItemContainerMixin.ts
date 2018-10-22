@@ -9,7 +9,7 @@ export interface ApiItemContainerMixin {
   readonly members: ReadonlyArray<ApiItem>;
   addMember(member: ApiItem): void;
 
-  tryGetMember(name: string, canonicalReference: string): ApiItem | undefined;
+  tryGetMember(canonicalReference: string): ApiItem | undefined;
 
   /** @override */
   serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void;
@@ -20,8 +20,7 @@ export interface IApiItemContainer extends ApiItemContainerMixin, ApiItem {
 
 const _members: unique symbol = Symbol('_members');
 const _membersSorted: unique symbol = Symbol('_membersSorted');
-const _membersByKey: unique symbol = Symbol('_membersByKey');
-const _getKey: unique symbol = Symbol('_getKey');
+const _membersByCanonicalReference: unique symbol = Symbol('_membersByCanonicalReference');
 
 export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(baseClass: TBaseClass):
   Mixin<TBaseClass, ApiItemContainerMixin> {
@@ -29,17 +28,13 @@ export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(b
   abstract class MixedClass extends baseClass implements ApiItemContainerMixin {
     public readonly [_members]: ApiItem[];
     public [_membersSorted]: boolean;
-    public [_membersByKey]: Map<string, ApiItem>;
-
-    public static [_getKey](name: string, canonicalReference: string): string {
-      return `${name}:${canonicalReference}`;
-    }
+    public [_membersByCanonicalReference]: Map<string, ApiItem>;
 
     // tslint:disable-next-line:no-any
     constructor(...args: any[]) {
       super(...args);
       this[_members] = [];
-      this[_membersByKey] = new Map<string, ApiItem>();
+      this[_membersByCanonicalReference] = new Map<string, ApiItem>();
     }
 
     public get members(): ReadonlyArray<ApiItem> {
@@ -52,20 +47,17 @@ export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(b
     }
 
     public addMember(member: ApiItem): void {
-      const key: string = MixedClass[_getKey](member.name, member.canonicalReference);
-
-      if (this[_membersByKey].has(key)) {
+      if (this[_membersByCanonicalReference].has(member.canonicalReference)) {
         throw new Error('Another member has already been added with the same name and canonicalReference');
       }
 
       this[_members].push(member);
       this[_membersSorted] = false;
-      this[_membersByKey].set(key, member);
+      this[_membersByCanonicalReference].set(member.canonicalReference, member);
     }
 
-    public tryGetMember(name: string, canonicalReference: string): ApiItem | undefined {
-      const key: string = MixedClass[_getKey](name, canonicalReference);
-      return this[_membersByKey].get(key);
+    public tryGetMember(canonicalReference: string): ApiItem | undefined {
+      return this[_membersByCanonicalReference].get(canonicalReference);
     }
 
     /** @override */

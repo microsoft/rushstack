@@ -21,11 +21,6 @@ export class ApiPackage extends ApiItemContainerMixin(ApiItem) {
     return this.name;
   }
 
-  /** @override */
-  public getSortKey(): string {
-    return this.name;
-  }
-
   public saveToJsonFile(apiJsonFilename: string): void {
     const jsonObject: { } = { };
     this.serializeInto(jsonObject);

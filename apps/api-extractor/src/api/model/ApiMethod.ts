@@ -31,9 +31,4 @@ export class ApiMethod extends ApiFunctionLikeMixin(ApiStaticMixin(ApiItem)) {
   public get canonicalReference(): string {
     return ApiMethod.getCanonicalReference(this.name, this.isStatic, this.overloadIndex);
   }
-
-  /** @override */
-  public getSortKey(): string {
-    return this.name;
-  }
 }

@@ -2,16 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItem, ApiItemKind } from './ApiItem';
-import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 
-export class ApiEntryPoint extends ApiItemContainerMixin(ApiItem) {
+export class ApiPropertySignature extends ApiItem {
+  public static getCanonicalReference(name: string): string {
+    return name;
+  }
+
   /** @override */
   public get kind(): ApiItemKind {
-    return ApiItemKind.EntryPoint;
+    return ApiItemKind.PropertySignature;
   }
 
   /** @override */
   public get canonicalReference(): string {
-    return this.name;
+    return ApiPropertySignature.getCanonicalReference(this.name);
   }
 }

@@ -17,9 +17,4 @@ export class ApiNamespace extends ApiItemContainerMixin(ApiItem) {
   public get canonicalReference(): string {
     return ApiNamespace.getCanonicalReference(this.name);
   }
-
-  /** @override */
-  public getSortKey(): string {
-    return this.name;
-  }
 }

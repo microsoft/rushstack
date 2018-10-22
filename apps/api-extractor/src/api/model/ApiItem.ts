@@ -4,11 +4,12 @@
 export const enum ApiItemKind {
   Class = 'Class',
   EntryPoint = 'EntryPoint',
+  Interface = 'Interface',
   Method = 'Method',
   Model = 'Model',
   Namespace = 'Namespace',
   Package = 'Package',
-  Parameter = 'Parameter',
+  PropertySignature = 'PropertySignature',
   None = 'None'
 }
 
@@ -18,6 +19,7 @@ export interface IApiItemParameters {
 
 export interface ISerializedMetadata {
   kind: ApiItemKind;
+  canonicalReference: string;
   members: ReadonlyArray<SerializedApiItem<IApiItemParameters>>;
 }
 
@@ -39,6 +41,7 @@ export class ApiItem {
   public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void {
     jsonObject.kind = this.kind;
     jsonObject.name = this.name;
+    jsonObject.canonicalReference = this.canonicalReference;
   }
 
   /** @virtual */
@@ -62,7 +65,7 @@ export class ApiItem {
 
   /** @virtual */
   public getSortKey(): string {
-    return `${this.name}:${this.canonicalReference}`;
+    return this.canonicalReference;
   }
 }
 
