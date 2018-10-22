@@ -2,7 +2,15 @@
 // See LICENSE in the project root for license information.s
 
 import { Constructor, Mixin } from './Mixin';
-import { ApiItem, SerializedApiItem, IApiItemOptions } from '../model/ApiItem';
+import { ApiItem, IApiItemJson } from '../model/ApiItem';
+
+export interface IApiItemContainerMixinJson extends IApiItemJson {
+  members: IApiItemJson[];
+}
+
+const _members: unique symbol = Symbol('_members');
+const _membersSorted: unique symbol = Symbol('_membersSorted');
+const _membersByCanonicalReference: unique symbol = Symbol('_membersByCanonicalReference');
 
 // tslint:disable-next-line:interface-name
 export interface ApiItemContainerMixin {
@@ -12,15 +20,8 @@ export interface ApiItemContainerMixin {
   tryGetMember(canonicalReference: string): ApiItem | undefined;
 
   /** @override */
-  serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemOptions>>): void;
+  serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
-
-export interface IApiItemContainer extends ApiItemContainerMixin, ApiItem {
-}
-
-const _members: unique symbol = Symbol('_members');
-const _membersSorted: unique symbol = Symbol('_membersSorted');
-const _membersByCanonicalReference: unique symbol = Symbol('_membersByCanonicalReference');
 
 export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(baseClass: TBaseClass):
   Mixin<TBaseClass, ApiItemContainerMixin> {
@@ -61,20 +62,23 @@ export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(b
     }
 
     /** @override */
-    public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemOptions>>): void {
+    public serializeInto(jsonObject: Partial<IApiItemContainerMixinJson>): void {
       super.serializeInto(jsonObject);
 
-      const memberObjects: Partial<SerializedApiItem<IApiItemOptions>>[] = [];
+      const memberObjects: IApiItemJson[] = [];
 
       for (const member of this.members) {
-        const memberJsonObject: Partial<SerializedApiItem<IApiItemOptions>> = {};
+        const memberJsonObject: Partial<IApiItemJson> = {};
         member.serializeInto(memberJsonObject);
-        memberObjects.push(memberJsonObject);
+        memberObjects.push(memberJsonObject as IApiItemJson);
       }
 
-      jsonObject.members = memberObjects as SerializedApiItem<IApiItemOptions>[];
+      jsonObject.members = memberObjects;
     }
   }
 
   return MixedClass;
+}
+
+export interface IApiItemContainer extends ApiItemContainerMixin, ApiItem {
 }

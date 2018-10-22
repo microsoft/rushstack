@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SerializedApiItem, IApiItemOptions, ApiItem, ApiItemKind } from './ApiItem';
+import { IApiItemJson, IApiItemOptions, ApiItem, ApiItemKind } from './ApiItem';
 import { ApiClass } from './ApiClass';
 import { ApiEntryPoint } from './ApiEntryPoint';
-import { ApiMethod, IApiMethodOptions } from './ApiMethod';
+import { ApiMethod } from './ApiMethod';
 import { ApiModel } from './ApiModel';
 import { ApiNamespace } from './ApiNamespace';
 import { ApiPackage } from './ApiPackage';
@@ -12,24 +12,33 @@ import { ApiInterface } from './ApiInterface';
 import { ApiPropertySignature } from './ApiPropertySignature';
 
 export class Deserializer {
-  public static deserialize(jsonObject: SerializedApiItem<IApiItemOptions>): ApiItem {
+  public static deserialize(jsonObject: IApiItemJson): ApiItem {
+    const options: Partial<IApiItemOptions> = { };
+
     switch (jsonObject.kind) {
       case ApiItemKind.Class:
-        return new ApiClass(jsonObject);
+        ApiClass.onDeserializeInto(options, jsonObject);
+        return new ApiClass(options as any); // tslint:disable-line:no-any
       case ApiItemKind.EntryPoint:
-        return new ApiEntryPoint(jsonObject);
+        ApiEntryPoint.onDeserializeInto(options, jsonObject);
+        return new ApiEntryPoint(options as any); // tslint:disable-line:no-any
       case ApiItemKind.Interface:
-        return new ApiInterface(jsonObject);
+        ApiInterface.onDeserializeInto(options, jsonObject);
+        return new ApiInterface(options as any); // tslint:disable-line:no-any
       case ApiItemKind.Method:
-        return new ApiMethod(jsonObject as SerializedApiItem<IApiMethodOptions>);
+        ApiMethod.onDeserializeInto(options, jsonObject);
+        return new ApiMethod(options as any); // tslint:disable-line:no-any
       case ApiItemKind.Model:
         return new ApiModel();
       case ApiItemKind.Namespace:
-        return new ApiNamespace(jsonObject);
+        ApiNamespace.onDeserializeInto(options, jsonObject);
+        return new ApiNamespace(options as any); // tslint:disable-line:no-any
       case ApiItemKind.Package:
-        return new ApiPackage(jsonObject);
+        ApiPackage.onDeserializeInto(options, jsonObject);
+        return new ApiPackage(options as any); // tslint:disable-line:no-any
       case ApiItemKind.PropertySignature:
-        return new ApiPropertySignature(jsonObject);
+        ApiPropertySignature.onDeserializeInto(options, jsonObject);
+        return new ApiPropertySignature(options as any); // tslint:disable-line:no-any
       default:
         throw new Error(`Failed to deserialize unsupported API item type ${JSON.stringify(jsonObject.kind)}`);
     }

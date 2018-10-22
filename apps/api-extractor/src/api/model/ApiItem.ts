@@ -17,20 +17,23 @@ export interface IApiItemOptions {
   name: string;
 }
 
-export interface ISerializedMetadata {
+export interface IApiItemJson {
+  name: string;
   kind: ApiItemKind;
   canonicalReference: string;
-  members: ReadonlyArray<SerializedApiItem<IApiItemOptions>>;
 }
-
-export type SerializedApiItem<T extends IApiItemOptions> = T & ISerializedMetadata;
 
 export class ApiItem {
   private readonly _name: string;
 
-  public static deserialize(jsonObject: SerializedApiItem<IApiItemOptions>): ApiItem {
+  public static deserialize(jsonObject: IApiItemJson): ApiItem {
     // tslint:disable-next-line:no-use-before-declare
     return Deserializer.deserialize(jsonObject);
+  }
+
+  /** @virtual */
+  public static onDeserializeInto(options: Partial<IApiItemOptions>, jsonObject: IApiItemJson): void {
+    options.name = jsonObject.name;
   }
 
   public constructor(options: IApiItemOptions) {
@@ -38,7 +41,7 @@ export class ApiItem {
   }
 
   /** @virtual */
-  public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemOptions>>): void {
+  public serializeInto(jsonObject: Partial<IApiItemJson>): void {
     jsonObject.kind = this.kind;
     jsonObject.name = this.name;
     jsonObject.canonicalReference = this.canonicalReference;

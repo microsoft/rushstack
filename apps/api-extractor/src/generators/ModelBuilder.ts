@@ -15,6 +15,7 @@ import { ApiNamespace } from '../api/model/ApiNamespace';
 import { IApiItemContainer } from '../api/mixins/ApiItemContainerMixin';
 import { ApiInterface } from '../api/model/ApiInterface';
 import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
+import { ApiParameter } from '../api/mixins/ApiFunctionLikeMixin';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
@@ -152,6 +153,13 @@ export class ModelBuilder {
 
     if (apiMethod === undefined) {
       apiMethod = new ApiMethod({ name, isStatic, overloadIndex });
+
+      for (const parameter of methodDeclaration.parameters) {
+        apiMethod.addParameter(new ApiParameter({
+          name: parameter.name.getText() || ''
+        }));
+      }
+
       parentApiItem.addMember(apiMethod);
     }
   }
