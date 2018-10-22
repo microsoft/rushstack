@@ -2,20 +2,20 @@
 // See LICENSE in the project root for license information.s
 
 import { Constructor, Mixin } from './Mixin';
-import { ApiItem, SerializedApiItem, IApiItemParameters } from '../model/ApiItem';
+import { ApiItem, SerializedApiItem, IApiItemOptions } from '../model/ApiItem';
 
 // tslint:disable-next-line:interface-name
 export interface ApiStaticMixin {
   readonly isStatic: boolean;
 
   /** @override */
-  serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void;
+  serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemOptions>>): void;
 }
 
 export interface IApiStatic extends ApiStaticMixin, ApiItem {
 }
 
-export interface IApiStaticMixinParameters {
+export interface IApiStaticMixinOptions {
   isStatic: boolean;
 }
 
@@ -29,12 +29,12 @@ export function ApiStaticMixin<TBaseClass extends Constructor<ApiItem>>(baseClas
     constructor(...args: any[]) {
       super(...args);
 
-      const parameters: IApiStaticMixinParameters = args[0];
-      this.isStatic = parameters.isStatic;
+      const options: IApiStaticMixinOptions = args[0];
+      this.isStatic = options.isStatic;
     }
 
     /** @override */
-    public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters & IApiStaticMixinParameters>>): void {
+    public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemOptions & IApiStaticMixinOptions>>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.isStatic = this.isStatic;

@@ -4,14 +4,14 @@
 import { AstSymbol } from './AstSymbol';
 
 /**
- * Constructor parameters for AstEntryPoint
+ * Constructor options for AstEntryPoint
  */
 export interface IExportedMember {
   readonly name: string;
   readonly astSymbol: AstSymbol;
 }
 
-export interface IAstEntryPointParameters {
+export interface IAstEntryPointOptions {
   readonly exportedMembers: ReadonlyArray<IExportedMember>;
 }
 
@@ -23,7 +23,7 @@ export interface IAstEntryPointParameters {
 export class AstEntryPoint {
   public readonly exportedMembers: ReadonlyArray<IExportedMember>;
 
-  public constructor(parameters: IAstEntryPointParameters) {
-    this.exportedMembers = parameters.exportedMembers;
+  public constructor(options: IAstEntryPointOptions) {
+    this.exportedMembers = options.exportedMembers;
   }
 }

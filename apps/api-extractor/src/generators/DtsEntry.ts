@@ -4,9 +4,9 @@
 import { AstSymbol } from '../analyzer/AstSymbol';
 
 /**
- * Constructor parameters for DtsEntry
+ * Constructor options for DtsEntry
  */
-export interface IDtsEntryParameters {
+export interface IDtsEntryOptions {
   readonly astSymbol: AstSymbol;
   readonly originalName: string;
   readonly exported: boolean;
@@ -41,10 +41,10 @@ export class DtsEntry {
 
   private _sortKey: string | undefined = undefined;
 
-  public constructor(parameters: IDtsEntryParameters) {
-    this.astSymbol = parameters.astSymbol;
-    this.originalName = parameters.originalName;
-    this.exported = parameters.exported;
+  public constructor(options: IDtsEntryOptions) {
+    this.astSymbol = options.astSymbol;
+    this.originalName = options.originalName;
+    this.exported = options.exported;
   }
 
   /**

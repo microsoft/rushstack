@@ -6,9 +6,9 @@ import { AstImport } from './AstImport';
 import { AstDeclaration } from './AstDeclaration';
 
 /**
- * Constructor parameters for AstSymbol
+ * Constructor options for AstSymbol
  */
-export interface IAstSymbolParameters {
+export interface IAstSymbolOptions {
   readonly followedSymbol: ts.Symbol;
   readonly localName: string;
   readonly astImport: AstImport | undefined;
@@ -80,13 +80,13 @@ export class AstSymbol {
   // Being "analyzed" is a property of the root symbol.
   private _analyzed: boolean = false;
 
-  public constructor(parameters: IAstSymbolParameters) {
-    this.followedSymbol = parameters.followedSymbol;
-    this.localName = parameters.localName;
-    this.astImport = parameters.astImport;
-    this.nominal = parameters.nominal;
-    this.parentAstSymbol = parameters.parentAstSymbol;
-    this.rootAstSymbol = parameters.rootAstSymbol || this;
+  public constructor(options: IAstSymbolOptions) {
+    this.followedSymbol = options.followedSymbol;
+    this.localName = options.localName;
+    this.astImport = options.astImport;
+    this.nominal = options.nominal;
+    this.parentAstSymbol = options.parentAstSymbol;
+    this.rootAstSymbol = options.rootAstSymbol || this;
     this._astDeclarations = [];
   }
 

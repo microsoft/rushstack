@@ -6,9 +6,9 @@ import { AstSymbol } from './AstSymbol';
 import { Span } from './Span';
 
 /**
- * Constructor parameters for AstDeclaration
+ * Constructor options for AstDeclaration
  */
-export interface IAstDeclarationParameters {
+export interface IAstDeclarationOptions {
   readonly declaration: ts.Declaration;
   readonly astSymbol: AstSymbol;
   readonly parent: AstDeclaration | undefined;
@@ -45,10 +45,10 @@ export class AstDeclaration {
 
   private readonly _analyzedReferencedAstSymbolsSet: Set<AstSymbol> = new Set<AstSymbol>();
 
-  public constructor(parameters: IAstDeclarationParameters) {
-    this.declaration = parameters.declaration;
-    this.astSymbol = parameters.astSymbol;
-    this.parent = parameters.parent;
+  public constructor(options: IAstDeclarationOptions) {
+    this.declaration = options.declaration;
+    this.astSymbol = options.astSymbol;
+    this.parent = options.parent;
 
     this.astSymbol._notifyDeclarationAttach(this);
 

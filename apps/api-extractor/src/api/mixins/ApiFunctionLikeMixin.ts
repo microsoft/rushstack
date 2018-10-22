@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { Constructor, Mixin } from './Mixin';
-import { ApiItem, SerializedApiItem, IApiItemParameters } from '../model/ApiItem';
+import { ApiItem, SerializedApiItem, IApiItemOptions } from '../model/ApiItem';
 
 // tslint:disable-next-line:interface-name
 export interface ApiFunctionLikeMixin {
@@ -12,7 +12,7 @@ export interface ApiFunctionLikeMixin {
 export interface IApiFunctionLike extends ApiFunctionLikeMixin, ApiItem {
 }
 
-export interface IApiFunctionLikeParameters {
+export interface IApiFunctionLikeOptions {
   overloadIndex: number;
 }
 
@@ -26,13 +26,13 @@ export function ApiFunctionLikeMixin<TBaseClass extends Constructor<ApiItem>>(ba
     constructor(...args: any[]) {
       super(...args);
 
-      const parameters: IApiFunctionLikeParameters = args[0];
-      this.overloadIndex = parameters.overloadIndex;
+      const options: IApiFunctionLikeOptions = args[0];
+      this.overloadIndex = options.overloadIndex;
     }
 
     /** @override */
-    public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters
-      & IApiFunctionLikeParameters>>): void {
+    public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemOptions
+      & IApiFunctionLikeOptions>>): void {
 
       super.serializeInto(jsonObject);
 

@@ -17,7 +17,7 @@ import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatt
 /**
  * Options for ExtractorContext constructor.
  */
-export interface IExtractorContextParameters {
+export interface IExtractorContextOptions {
   /**
    * Configuration for the TypeScript compiler.  The most important options to set are:
    *
@@ -71,15 +71,15 @@ export class ExtractorContext {
 
   private _logger: ILogger;
 
-  constructor(parameters: IExtractorContextParameters) {
+  constructor(options: IExtractorContextOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
-    this.policies = parameters.policies;
-    this.validationRules = parameters.validationRules;
+    this.policies = options.policies;
+    this.validationRules = options.validationRules;
 
-    const folder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(parameters.entryPointFile);
+    const folder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
     if (!folder) {
-      throw new Error('Unable to find a package.json for entry point: ' + parameters.entryPointFile);
+      throw new Error('Unable to find a package.json for entry point: ' + options.entryPointFile);
     }
     this._packageFolder = folder;
 
@@ -87,21 +87,21 @@ export class ExtractorContext {
 
     this.parsedPackageName = PackageName.parse(this.packageJson.name);
 
-    this._logger = parameters.logger;
+    this._logger = options.logger;
 
     // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
     // compile errors that would result from a full compilation.
-    for (const diagnostic of parameters.program.getSemanticDiagnostics()) {
+    for (const diagnostic of options.program.getSemanticDiagnostics()) {
       const errorText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
       this.reportError(`TypeScript: ${errorText}`, diagnostic.file, diagnostic.start);
     }
 
-    this.typeChecker = parameters.program.getTypeChecker();
+    this.typeChecker = options.program.getTypeChecker();
 
-    const entryPointSourceFile: ts.SourceFile | undefined = parameters.program.getSourceFile(parameters.entryPointFile);
+    const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);
     if (!entryPointSourceFile) {
-      throw new Error('Unable to load file: ' + parameters.entryPointFile);
+      throw new Error('Unable to load file: ' + options.entryPointFile);
     }
 
     this.entryPointSourceFile = entryPointSourceFile;

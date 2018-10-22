@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SerializedApiItem, IApiItemParameters, ApiItem, ApiItemKind } from './ApiItem';
+import { SerializedApiItem, IApiItemOptions, ApiItem, ApiItemKind } from './ApiItem';
 import { ApiClass } from './ApiClass';
 import { ApiEntryPoint } from './ApiEntryPoint';
-import { ApiMethod, IApiMethodParameters } from './ApiMethod';
+import { ApiMethod, IApiMethodOptions } from './ApiMethod';
 import { ApiModel } from './ApiModel';
 import { ApiNamespace } from './ApiNamespace';
 import { ApiPackage } from './ApiPackage';
@@ -12,7 +12,7 @@ import { ApiInterface } from './ApiInterface';
 import { ApiPropertySignature } from './ApiPropertySignature';
 
 export class Deserializer {
-  public static deserialize(jsonObject: SerializedApiItem<IApiItemParameters>): ApiItem {
+  public static deserialize(jsonObject: SerializedApiItem<IApiItemOptions>): ApiItem {
     switch (jsonObject.kind) {
       case ApiItemKind.Class:
         return new ApiClass(jsonObject);
@@ -21,7 +21,7 @@ export class Deserializer {
       case ApiItemKind.Interface:
         return new ApiInterface(jsonObject);
       case ApiItemKind.Method:
-        return new ApiMethod(jsonObject as SerializedApiItem<IApiMethodParameters>);
+        return new ApiMethod(jsonObject as SerializedApiItem<IApiMethodOptions>);
       case ApiItemKind.Model:
         return new ApiModel();
       case ApiItemKind.Namespace:

@@ -13,32 +13,32 @@ export const enum ApiItemKind {
   None = 'None'
 }
 
-export interface IApiItemParameters {
+export interface IApiItemOptions {
   name: string;
 }
 
 export interface ISerializedMetadata {
   kind: ApiItemKind;
   canonicalReference: string;
-  members: ReadonlyArray<SerializedApiItem<IApiItemParameters>>;
+  members: ReadonlyArray<SerializedApiItem<IApiItemOptions>>;
 }
 
-export type SerializedApiItem<T extends IApiItemParameters> = T & ISerializedMetadata;
+export type SerializedApiItem<T extends IApiItemOptions> = T & ISerializedMetadata;
 
 export class ApiItem {
   private readonly _name: string;
 
-  public static deserialize(jsonObject: SerializedApiItem<IApiItemParameters>): ApiItem {
+  public static deserialize(jsonObject: SerializedApiItem<IApiItemOptions>): ApiItem {
     // tslint:disable-next-line:no-use-before-declare
     return Deserializer.deserialize(jsonObject);
   }
 
-  public constructor(parameters: IApiItemParameters) {
-    this._name = parameters.name;
+  public constructor(options: IApiItemOptions) {
+    this._name = options.name;
   }
 
   /** @virtual */
-  public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void {
+  public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemOptions>>): void {
     jsonObject.kind = this.kind;
     jsonObject.name = this.name;
     jsonObject.canonicalReference = this.canonicalReference;

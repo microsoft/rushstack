@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { Constructor, Mixin } from './Mixin';
-import { ApiItem, SerializedApiItem, IApiItemParameters } from '../model/ApiItem';
+import { ApiItem, SerializedApiItem, IApiItemOptions } from '../model/ApiItem';
 
 // tslint:disable-next-line:interface-name
 export interface ApiItemContainerMixin {
@@ -12,7 +12,7 @@ export interface ApiItemContainerMixin {
   tryGetMember(canonicalReference: string): ApiItem | undefined;
 
   /** @override */
-  serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void;
+  serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemOptions>>): void;
 }
 
 export interface IApiItemContainer extends ApiItemContainerMixin, ApiItem {
@@ -61,18 +61,18 @@ export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(b
     }
 
     /** @override */
-    public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void {
+    public serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemOptions>>): void {
       super.serializeInto(jsonObject);
 
-      const memberObjects: Partial<SerializedApiItem<IApiItemParameters>>[] = [];
+      const memberObjects: Partial<SerializedApiItem<IApiItemOptions>>[] = [];
 
       for (const member of this.members) {
-        const memberJsonObject: Partial<SerializedApiItem<IApiItemParameters>> = {};
+        const memberJsonObject: Partial<SerializedApiItem<IApiItemOptions>> = {};
         member.serializeInto(memberJsonObject);
         memberObjects.push(memberJsonObject);
       }
 
-      jsonObject.members = memberObjects as SerializedApiItem<IApiItemParameters>[];
+      jsonObject.members = memberObjects as SerializedApiItem<IApiItemOptions>[];
     }
   }
 

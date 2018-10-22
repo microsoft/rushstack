@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Constructor parameters for AstImport
+ * Constructor options for AstImport
  */
-export interface IAstImportParameters {
+export interface IAstImportOptions {
   readonly modulePath: string;
   readonly exportName: string;
 }
@@ -39,9 +39,9 @@ export class AstImport {
    */
   public readonly key: string;
 
-  public constructor(parameters: IAstImportParameters) {
-    this.modulePath = parameters.modulePath;
-    this.exportName = parameters.exportName;
+  public constructor(options: IAstImportOptions) {
+    this.modulePath = options.modulePath;
+    this.exportName = options.exportName;
 
     this.key = `${this.modulePath}:${this.exportName}`;
   }

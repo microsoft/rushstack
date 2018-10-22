@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItem, ApiItemKind, IApiItemParameters } from './ApiItem';
-import { ApiStaticMixin, IApiStaticMixinParameters } from '../mixins/StaticMixin';
-import { ApiFunctionLikeMixin, IApiFunctionLikeParameters } from '../mixins/ApiFunctionLikeMixin';
+import { ApiItem, ApiItemKind, IApiItemOptions } from './ApiItem';
+import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/StaticMixin';
+import { ApiFunctionLikeMixin, IApiFunctionLikeOptions } from '../mixins/ApiFunctionLikeMixin';
 
-export interface IApiMethodParameters extends IApiFunctionLikeParameters, IApiStaticMixinParameters,
-  IApiItemParameters {
+export interface IApiMethodOptions extends IApiFunctionLikeOptions, IApiStaticMixinOptions,
+  IApiItemOptions {
 }
 
 export class ApiMethod extends ApiFunctionLikeMixin(ApiStaticMixin(ApiItem)) {
@@ -18,8 +18,8 @@ export class ApiMethod extends ApiFunctionLikeMixin(ApiStaticMixin(ApiItem)) {
     }
   }
 
-  public constructor(parameters: IApiMethodParameters) {
-    super(parameters);
+  public constructor(options: IApiMethodOptions) {
+    super(options);
   }
 
   /** @override */
