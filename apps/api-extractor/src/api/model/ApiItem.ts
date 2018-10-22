@@ -11,6 +11,7 @@ export const enum ApiItemKind {
   Model = 'Model',
   Namespace = 'Namespace',
   Package = 'Package',
+  Parameter = 'Parameter',
   PropertySignature = 'PropertySignature',
   None = 'None'
 }

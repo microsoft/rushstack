@@ -15,8 +15,8 @@ import { ApiNamespace } from '../api/model/ApiNamespace';
 import { IApiItemContainer } from '../api/mixins/ApiItemContainerMixin';
 import { ApiInterface } from '../api/model/ApiInterface';
 import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
-import { ApiParameter } from '../api/mixins/ApiFunctionLikeMixin';
 import { Span } from '../analyzer/Span';
+import { ApiParameter } from '../api/model/ApiParameter';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
@@ -167,8 +167,11 @@ export class ModelBuilder {
       apiMethod = new ApiMethod({ name, signature, isStatic, overloadIndex });
 
       for (const parameter of methodDeclaration.parameters) {
+        const parameterSignature: string = parameter.getText().trim();
+
         apiMethod.addParameter(new ApiParameter({
-          name: parameter.name.getText() || ''
+          name: parameter.name.getText() || '',
+          signature: parameterSignature
         }));
       }
 

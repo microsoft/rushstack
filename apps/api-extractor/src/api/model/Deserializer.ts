@@ -10,6 +10,7 @@ import { ApiNamespace } from './ApiNamespace';
 import { ApiPackage } from './ApiPackage';
 import { ApiInterface } from './ApiInterface';
 import { ApiPropertySignature } from './ApiPropertySignature';
+import { ApiParameter } from './ApiParameter';
 
 export class Deserializer {
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
@@ -36,6 +37,9 @@ export class Deserializer {
       case ApiItemKind.Package:
         ApiPackage.onDeserializeInto(options, jsonObject);
         return new ApiPackage(options as any); // tslint:disable-line:no-any
+      case ApiItemKind.Parameter:
+        ApiParameter.onDeserializeInto(options, jsonObject);
+        return new ApiParameter(options as any); // tslint:disable-line:no-any
       case ApiItemKind.PropertySignature:
         ApiPropertySignature.onDeserializeInto(options, jsonObject);
         return new ApiPropertySignature(options as any); // tslint:disable-line:no-any

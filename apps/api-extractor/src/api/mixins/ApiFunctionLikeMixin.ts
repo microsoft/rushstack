@@ -3,22 +3,7 @@
 
 import { Mixin } from './Mixin';
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
-
-export interface IApiParameterOptions {
-  name: string;
-}
-
-export class ApiParameter {
-  public readonly name: string;
-
-  public constructor(options: IApiParameterOptions) {
-    this.name = options.name;
-  }
-}
-
-export interface IApiParameterJson {
-  name: string;
-}
+import { ApiParameter } from '../model/ApiParameter';
 
 export interface IApiFunctionLikeOptions extends IApiItemOptions {
   overloadIndex: number;
@@ -27,7 +12,7 @@ export interface IApiFunctionLikeOptions extends IApiItemOptions {
 
 export interface IApiFunctionLikeJson extends IApiItemJson {
   overloadIndex: number;
-  parameters: IApiParameterJson[];
+  parameters: IApiItemJson[];
 }
 
 const _overloadIndex: unique symbol = Symbol('_overloadIndex');
@@ -56,9 +41,7 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
       options.parameters = [];
 
       for (const parameterObject of jsonObject.parameters) {
-        options.parameters.push(new ApiParameter({
-          name: parameterObject.name
-        }));
+        options.parameters.push(ApiItem.deserialize(parameterObject) as ApiParameter);
       }
     }
 
@@ -90,11 +73,11 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
 
       jsonObject.overloadIndex = this.overloadIndex;
 
-      const parameterObjects: IApiParameterJson[] = [];
+      const parameterObjects: IApiItemJson[] = [];
       for (const parameter of this.parameters) {
-        parameterObjects.push({
-          name: parameter.name
-        });
+        const parameterJsonObject: Partial<IApiItemJson> = {};
+        parameter.serializeInto(parameterJsonObject);
+        parameterObjects.push(parameterJsonObject as IApiItemJson);
       }
 
       jsonObject.parameters = parameterObjects;
