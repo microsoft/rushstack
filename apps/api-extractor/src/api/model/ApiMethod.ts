@@ -3,12 +3,14 @@
 
 import { ApiItem, ApiItemKind, IApiItemParameters } from './ApiItem';
 import { ApiStaticMixin, IApiStaticMixinParameters } from '../mixins/StaticMixin';
+import { ApiFunctionLikeMixin, IApiFunctionLikeParameters } from '../mixins/ApiFunctionLikeMixin';
 
-export interface IApiMethodParameters extends IApiStaticMixinParameters, IApiItemParameters {
+export interface IApiMethodParameters extends IApiFunctionLikeParameters, IApiStaticMixinParameters,
+  IApiItemParameters {
 }
 
-export class ApiMethod extends ApiStaticMixin(ApiItem) {
-  public static getCanonicalSelector(name: string, isStatic: boolean, overloadIndex: number): string {
+export class ApiMethod extends ApiFunctionLikeMixin(ApiStaticMixin(ApiItem)) {
+  public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
       return `(${name}:static,${overloadIndex})`;
     } else {
@@ -26,8 +28,8 @@ export class ApiMethod extends ApiStaticMixin(ApiItem) {
   }
 
   /** @override */
-  public get canonicalSelector(): string {
-    return ApiMethod.getCanonicalSelector(this.name, this.isStatic, 0);
+  public get canonicalReference(): string {
+    return ApiMethod.getCanonicalReference(this.name, this.isStatic, this.overloadIndex);
   }
 
   /** @override */

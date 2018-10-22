@@ -7,27 +7,25 @@ import { AstSymbolTable } from '../analyzer/AstSymbolTable';
 import { AstEntryPoint } from '../analyzer/AstEntryPoint';
 import { ApiModel } from '../api/model/ApiModel';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiItem, IApiItemParameters } from '../api/model/ApiItem';
 import { ApiClass } from '../api/model/ApiClass';
 import { ApiPackage } from '../api/model/ApiPackage';
 import { ApiEntryPoint } from '../api/model/ApiEntryPoint';
 import { ApiMethod } from '../api/model/ApiMethod';
 import { ApiNamespace } from '../api/model/ApiNamespace';
-import { AstSymbol } from '../analyzer/AstSymbol';
 import { IApiItemContainer } from '../api/mixins/ApiItemContainerMixin';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
   private readonly _astSymbolTable: AstSymbolTable;
   private _astEntryPoint: AstEntryPoint | undefined;
-  private _apiModel: ApiModel;
-  private _apiItemsBySymbol: Map<AstSymbol, ApiItem>;
+  private readonly _apiModel: ApiModel;
+  private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
 
   public constructor(context: ExtractorContext) {
     this._context = context;
     this._astSymbolTable = new AstSymbolTable(this._context.typeChecker, this._context.packageJsonLookup);
     this._apiModel = new ApiModel();
-    this._apiItemsBySymbol = new Map<AstSymbol, ApiItem>();
+    this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
   }
 
   public process(): void {
@@ -95,7 +93,7 @@ export class ModelBuilder {
     parentApiItem: IApiItemContainer): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
-    const selector: string = ApiClass.getCanonicalSelector();
+    const selector: string = ApiClass.getCanonicalReference(name);
 
     let apiClass: ApiClass | undefined = parentApiItem.tryGetMember(name, selector) as ApiClass;
 
@@ -123,12 +121,13 @@ export class ModelBuilder {
       }
     }
 
-    const selector: string = ApiMethod.getCanonicalSelector(name, isStatic, 0);
+    const overloadIndex: number = this._getOverloadIndex(astDeclaration);
+    const selector: string = ApiMethod.getCanonicalReference(name, isStatic, overloadIndex);
 
     let apiMethod: ApiMethod | undefined = parentApiItem.tryGetMember(name, selector) as ApiMethod;
 
     if (apiMethod === undefined) {
-      apiMethod = new ApiMethod({ name, isStatic });
+      apiMethod = new ApiMethod({ name, isStatic, overloadIndex });
       parentApiItem.addMember(apiMethod);
     }
   }
@@ -137,7 +136,7 @@ export class ModelBuilder {
     parentApiItem: IApiItemContainer): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
-    const selector: string = ApiNamespace.getCanonicalSelector();
+    const selector: string = ApiNamespace.getCanonicalReference(name);
 
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMember(name, selector) as ApiNamespace;
 
@@ -149,4 +148,32 @@ export class ModelBuilder {
     this._processChildDeclarations(astDeclaration, exportedName, apiNamespace);
   }
 
+  private _getOverloadIndex(astDeclaration: AstDeclaration): number {
+    const allDeclarations: ReadonlyArray<AstDeclaration> = astDeclaration.astSymbol.astDeclarations;
+    if (allDeclarations.length === 1) {
+      return 0; // trivial case
+    }
+
+    let overloadIndex: number | undefined = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+
+    if (overloadIndex === undefined) {
+      let nextIndex: number = 0;
+      for (const other of allDeclarations) {
+        // Filter out other declarations that are not overloads.  For example, an overloaded function can also
+        // be a namespace.
+        if (other.declaration.kind === astDeclaration.declaration.kind) {
+          this._cachedOverloadIndexesByDeclaration.set(other, nextIndex);
+          ++nextIndex;
+        }
+      }
+      overloadIndex = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+    }
+
+    if (overloadIndex === undefined) {
+      // This should never happen
+      throw new Error('Error calculating overload index for declaration');
+    }
+
+    return overloadIndex;
+  }
 }

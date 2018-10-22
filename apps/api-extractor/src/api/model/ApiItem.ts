@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as tsdoc from '@microsoft/tsdoc';
-
 export const enum ApiItemKind {
   Class = 'Class',
   EntryPoint = 'EntryPoint',
@@ -53,7 +51,7 @@ export class ApiItem {
   }
 
   /** @virtual */
-  public get canonicalSelector(): string {
+  public get canonicalReference(): string {
     throw new Error('ApiItem.kind was not implemented by the child class');
   }
 
@@ -64,7 +62,7 @@ export class ApiItem {
 
   /** @virtual */
   public getSortKey(): string {
-    return `${this.name}:${this.canonicalSelector}`;
+    return `${this.name}:${this.canonicalReference}`;
   }
 }
 

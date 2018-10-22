@@ -2,13 +2,14 @@
 // See LICENSE in the project root for license information.s
 
 import { Constructor, Mixin } from './Mixin';
+import { ApiItem, SerializedApiItem, IApiItemParameters } from '../model/ApiItem';
 
 // tslint:disable-next-line:interface-name
 export interface ApiItemContainerMixin {
   readonly members: ReadonlyArray<ApiItem>;
   addMember(member: ApiItem): void;
 
-  tryGetMember(name: string, canonicalSelector: string): ApiItem | undefined;
+  tryGetMember(name: string, canonicalReference: string): ApiItem | undefined;
 
   /** @override */
   serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void;
@@ -30,8 +31,8 @@ export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(b
     public [_membersSorted]: boolean;
     public [_membersByKey]: Map<string, ApiItem>;
 
-    public static [_getKey](name: string, canonicalSelector: string): string {
-      return `${name}:${canonicalSelector}`;
+    public static [_getKey](name: string, canonicalReference: string): string {
+      return `${name}:${canonicalReference}`;
     }
 
     // tslint:disable-next-line:no-any
@@ -51,10 +52,10 @@ export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(b
     }
 
     public addMember(member: ApiItem): void {
-      const key: string = MixedClass[_getKey](member.name, member.canonicalSelector);
+      const key: string = MixedClass[_getKey](member.name, member.canonicalReference);
 
       if (this[_membersByKey].has(key)) {
-        throw new Error('Another member has already been added with the same name and canonicalSelector');
+        throw new Error('Another member has already been added with the same name and canonicalReference');
       }
 
       this[_members].push(member);
@@ -62,8 +63,8 @@ export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(b
       this[_membersByKey].set(key, member);
     }
 
-    public tryGetMember(name: string, canonicalSelector: string): ApiItem | undefined {
-      const key: string = MixedClass[_getKey](name, canonicalSelector);
+    public tryGetMember(name: string, canonicalReference: string): ApiItem | undefined {
+      const key: string = MixedClass[_getKey](name, canonicalReference);
       return this[_membersByKey].get(key);
     }
 
@@ -85,6 +86,3 @@ export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(b
 
   return MixedClass;
 }
-
-// Circular import
-import { ApiItem, SerializedApiItem, IApiItemParameters } from '../model/ApiItem';

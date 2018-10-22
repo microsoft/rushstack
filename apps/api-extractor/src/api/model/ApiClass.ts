@@ -5,8 +5,8 @@ import { ApiItem, ApiItemKind } from './ApiItem';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 
 export class ApiClass extends ApiItemContainerMixin(ApiItem) {
-  public static getCanonicalSelector(): string {
-    return 'class';
+  public static getCanonicalReference(name: string): string {
+    return `(${name}:class)`;
   }
 
   /** @override */
@@ -15,8 +15,8 @@ export class ApiClass extends ApiItemContainerMixin(ApiItem) {
   }
 
   /** @override */
-  public get canonicalSelector(): string {
-    return ApiClass.getCanonicalSelector();
+  public get canonicalReference(): string {
+    return ApiClass.getCanonicalReference(this.name);
   }
 
   /** @override */

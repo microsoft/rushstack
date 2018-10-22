@@ -5,8 +5,8 @@ import { ApiItem, ApiItemKind } from './ApiItem';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 
 export class ApiNamespace extends ApiItemContainerMixin(ApiItem) {
-  public static getCanonicalSelector(): string {
-    return 'namespace';
+  public static getCanonicalReference(name: string): string {
+    return `(${name}:namespace)`;
   }
     /** @override */
   public get kind(): ApiItemKind {
@@ -14,8 +14,8 @@ export class ApiNamespace extends ApiItemContainerMixin(ApiItem) {
   }
 
   /** @override */
-  public get canonicalSelector(): string {
-    return 'namespace'
+  public get canonicalReference(): string {
+    return ApiNamespace.getCanonicalReference(this.name);
   }
 
   /** @override */

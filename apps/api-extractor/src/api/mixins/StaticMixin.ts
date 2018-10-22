@@ -2,10 +2,14 @@
 // See LICENSE in the project root for license information.s
 
 import { Constructor, Mixin } from './Mixin';
+import { ApiItem, SerializedApiItem, IApiItemParameters } from '../model/ApiItem';
 
 // tslint:disable-next-line:interface-name
 export interface ApiStaticMixin {
   readonly isStatic: boolean;
+
+  /** @override */
+  serializeInto(jsonObject: Partial<SerializedApiItem<IApiItemParameters>>): void;
 }
 
 export interface IApiStatic extends ApiStaticMixin, ApiItem {
@@ -39,6 +43,3 @@ export function ApiStaticMixin<TBaseClass extends Constructor<ApiItem>>(baseClas
 
   return MixedClass;
 }
-
-// Circular import
-import { ApiItem, SerializedApiItem, IApiItemParameters } from '../model/ApiItem';
