@@ -1,5 +1,3 @@
-const { supportsColor } = require('colors/lib/system/supports-color');
-
 import { ITerminalProvider, Severity } from './ITerminalProvider';
 
 /**
@@ -27,6 +25,8 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
   }
 
   public get supportsColor(): boolean {
-    return supportsColor();
+    // If the console doesn't actually support colors, the colors library won't
+    // return color characters when the Terminal formats text.
+    return true;
   }
 }
