@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItem, ApiItemKind, IApiItemOptions } from './ApiItem';
+import { ApiItemKind } from './ApiItem';
+import { ApiDeclaration, IApiDeclarationOptions } from './ApiDeclaration';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/StaticMixin';
 import { ApiFunctionLikeMixin, IApiFunctionLikeOptions } from '../mixins/ApiFunctionLikeMixin';
 
 export interface IApiMethodOptions extends IApiFunctionLikeOptions, IApiStaticMixinOptions,
-  IApiItemOptions {
+  IApiDeclarationOptions {
 }
 
-export class ApiMethod extends ApiFunctionLikeMixin(ApiStaticMixin(ApiItem)) {
+export class ApiMethod extends ApiFunctionLikeMixin(ApiStaticMixin(ApiDeclaration)) {
   public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
       return `(${name}:static,${overloadIndex})`;

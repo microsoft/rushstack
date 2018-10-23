@@ -111,7 +111,7 @@ export class ModelBuilder {
     let apiClass: ApiClass | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiClass;
 
     if (apiClass === undefined) {
-      apiClass = new ApiClass({ name });
+      apiClass = new ApiClass({ name, signature: '' });
       parentApiItem.addMember(apiClass);
     }
 
@@ -127,7 +127,7 @@ export class ModelBuilder {
     let apiInterface: ApiClass | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiInterface;
 
     if (apiInterface === undefined) {
-      apiInterface = new ApiInterface({ name });
+      apiInterface = new ApiInterface({ name, signature: '' });
       parentApiItem.addMember(apiInterface);
     }
 
@@ -156,7 +156,7 @@ export class ModelBuilder {
     let apiMethod: ApiMethod | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiMethod;
 
     if (apiMethod === undefined) {
-      apiMethod = new ApiMethod({ name, isStatic, overloadIndex });
+      apiMethod = new ApiMethod({ name, signature: '', isStatic, overloadIndex });
 
       for (const parameter of methodDeclaration.parameters) {
         apiMethod.addParameter(new ApiParameter({
@@ -177,7 +177,7 @@ export class ModelBuilder {
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiNamespace;
 
     if (apiNamespace === undefined) {
-      apiNamespace = new ApiNamespace({ name });
+      apiNamespace = new ApiNamespace({ name, signature: '' });
       parentApiItem.addMember(apiNamespace);
     }
 
@@ -194,7 +194,7 @@ export class ModelBuilder {
       = parentApiItem.tryGetMember(canonicalReference) as ApiNamespace;
 
     if (apiPropertySignature === undefined) {
-      apiPropertySignature = new ApiPropertySignature({ name });
+      apiPropertySignature = new ApiPropertySignature({ name, signature: '' });
       parentApiItem.addMember(apiPropertySignature);
     } else {
       // If the property was already declared before (via a merged interface declaration),

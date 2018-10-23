@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItem, ApiItemKind } from './ApiItem';
+import { ApiItemKind } from './ApiItem';
+import { ApiDeclaration } from './ApiDeclaration';
 
-export class ApiPropertySignature extends ApiItem {
+export class ApiPropertySignature extends ApiDeclaration {
   public static getCanonicalReference(name: string): string {
     return name;
   }
