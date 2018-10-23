@@ -16,6 +16,7 @@ import { IApiItemContainer } from '../api/mixins/ApiItemContainerMixin';
 import { ApiInterface } from '../api/model/ApiInterface';
 import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
 import { ApiParameter } from '../api/mixins/ApiFunctionLikeMixin';
+import { Span } from '../analyzer/Span';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
@@ -111,7 +112,10 @@ export class ModelBuilder {
     let apiClass: ApiClass | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiClass;
 
     if (apiClass === undefined) {
-      apiClass = new ApiClass({ name, signature: '' });
+      const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
+        ts.SyntaxKind.FirstPunctuation);  // FirstPunctuation = "{"
+
+      apiClass = new ApiClass({ name, signature });
       parentApiItem.addMember(apiClass);
     }
 
@@ -127,7 +131,10 @@ export class ModelBuilder {
     let apiInterface: ApiClass | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiInterface;
 
     if (apiInterface === undefined) {
-      apiInterface = new ApiInterface({ name, signature: '' });
+      const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
+        ts.SyntaxKind.FirstPunctuation); // FirstPunctuation = "{"
+
+      apiInterface = new ApiInterface({ name, signature });
       parentApiItem.addMember(apiInterface);
     }
 
@@ -156,7 +163,8 @@ export class ModelBuilder {
     let apiMethod: ApiMethod | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiMethod;
 
     if (apiMethod === undefined) {
-      apiMethod = new ApiMethod({ name, signature: '', isStatic, overloadIndex });
+      const signature: string = astDeclaration.declaration.getText();
+      apiMethod = new ApiMethod({ name, signature, isStatic, overloadIndex });
 
       for (const parameter of methodDeclaration.parameters) {
         apiMethod.addParameter(new ApiParameter({
@@ -177,7 +185,10 @@ export class ModelBuilder {
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiNamespace;
 
     if (apiNamespace === undefined) {
-      apiNamespace = new ApiNamespace({ name, signature: '' });
+      const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
+        ts.SyntaxKind.ModuleBlock); // ModuleBlock = the "{ ... }" block
+
+      apiNamespace = new ApiNamespace({ name, signature });
       parentApiItem.addMember(apiNamespace);
     }
 
@@ -194,7 +205,8 @@ export class ModelBuilder {
       = parentApiItem.tryGetMember(canonicalReference) as ApiNamespace;
 
     if (apiPropertySignature === undefined) {
-      apiPropertySignature = new ApiPropertySignature({ name, signature: '' });
+      const signature: string = astDeclaration.declaration.getText();
+      apiPropertySignature = new ApiPropertySignature({ name, signature });
       parentApiItem.addMember(apiPropertySignature);
     } else {
       // If the property was already declared before (via a merged interface declaration),
@@ -229,5 +241,27 @@ export class ModelBuilder {
     }
 
     return overloadIndex;
+  }
+
+  // Used for classes and interfaces, this returns the declaration text stopping before a token such as "{"
+  private _getSignatureBeforeNodeKind(declaration: ts.Declaration, nodeKind: ts.SyntaxKind): string {
+    const span: Span = new Span(declaration);
+
+    let done: boolean = false;
+    for (const childSpan of span.children) {
+      if (childSpan.kind === nodeKind) {
+        // We reached the token (e.g. "{")
+        done = true;
+      }
+      if (done) {
+        childSpan.modification.skipAll();
+      }
+
+      // Also discard any comments
+      if (childSpan.kind === ts.SyntaxKind.JSDocComment) {
+        childSpan.modification.skipAll();
+      }
+    }
+    return span.getModifiedText().trim();
   }
 }
