@@ -1,8 +1,9 @@
-import * as x from 'colors';
-import { ITerminalProvider, Severity } from "./ITerminalProvider";
+const { supportsColor } = require('colors/lib/system/supports-color');
+
+import { ITerminalProvider, Severity } from './ITerminalProvider';
 
 export class ConsoleTerminalProvider implements ITerminalProvider {
-  public write(data: string, severity: Severity) {
+  public write(data: string, severity: Severity): void {
     switch (severity) {
       case Severity.error: {
         console.error(data);
@@ -22,11 +23,11 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
     }
   }
 
-  public get width(): number {
-    return 0;
+  public get width(): number | undefined {
+    return process.stdout.rows;
   }
 
   public get supportsColor(): boolean {
-    x.
+    return supportsColor();
   }
 }

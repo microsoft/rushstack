@@ -475,7 +475,10 @@
       "packageName": "@microsoft/rush-stack-compiler",
       "projectFolder": "stack/rush-stack-compiler",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build"
+      ]
     },
 
     // "webpack" folder (alphabetical order)

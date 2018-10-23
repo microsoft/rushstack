@@ -5,7 +5,7 @@ export enum Severity {
 }
 
 export interface ITerminalProvider {
-  write(data: string, severity: Severity);
   supportsColor: boolean;
-  width: number;
+  width: number | undefined;
+  write(data: string, severity: Severity): void;
 }
