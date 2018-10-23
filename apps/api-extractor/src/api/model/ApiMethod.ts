@@ -3,7 +3,7 @@
 
 import { ApiItemKind } from './ApiItem';
 import { ApiDeclaration, IApiDeclarationOptions } from './ApiDeclaration';
-import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/StaticMixin';
+import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { ApiFunctionLikeMixin, IApiFunctionLikeOptions } from '../mixins/ApiFunctionLikeMixin';
 
 export interface IApiMethodOptions extends IApiFunctionLikeOptions, IApiStaticMixinOptions,
