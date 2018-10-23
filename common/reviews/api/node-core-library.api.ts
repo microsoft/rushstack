@@ -1,3 +1,13 @@
+// @beta (undocumented)
+class ConsoleTerminalProvider implements ITerminalProvider {
+  // (undocumented)
+  readonly supportsColor: boolean;
+  // (undocumented)
+  readonly width: number | undefined;
+  // (undocumented)
+  write(data: string, severity: Severity): void;
+}
+
 // @public
 class Executable {
   static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
@@ -18,6 +28,7 @@ class FileDiffTest {
 
 // @public
 class FileSystem {
+  static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
   static changePosixModeBits(path: string, mode: PosixModeBits): void;
   static copyFile(options: IFileSystemCopyFileOptions): void;
   static createHardLink(options: IFileSystemCreateLinkOptions): void;
@@ -40,6 +51,17 @@ class FileSystem {
   static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): Array<string>;
   static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
   static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
+}
+
+// @beta (undocumented)
+class FileTerminalProvider implements ITerminalProvider {
+  constructor(filePath: string);
+  // (undocumented)
+  readonly supportsColor: boolean;
+  // (undocumented)
+  readonly width: number | undefined;
+  // (undocumented)
+  write(data: string): void;
 }
 
 // @public
@@ -211,6 +233,16 @@ interface IProtectableMapParameters<K, V> {
   onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
+// @beta (undocumented)
+interface ITerminalProvider {
+  // (undocumented)
+  supportsColor: boolean;
+  // (undocumented)
+  width: number | undefined;
+  // (undocumented)
+  write(data: string, severity: Severity): void;
+}
+
 // @public
 class JsonFile {
   static load(jsonFilename: string): any;
@@ -317,12 +349,38 @@ class ProtectableMap<K, V> {
   readonly size: number;
 }
 
+// @beta (undocumented)
+enum Severity {
+  // (undocumented)
+  error = 2,
+  // (undocumented)
+  log = 0,
+  // (undocumented)
+  warn = 1
+}
+
+// @beta
+class Terminal {
+  constructor(provider: ITerminalProvider, verboseEnabled?: boolean);
+  // (undocumented)
+  registerProvider(provider: ITerminalProvider): void;
+  // (undocumented)
+  unregisterProvider(provider: ITerminalProvider): void;
+  // (undocumented)
+  verboseEnabled: boolean;
+  write(message: string): void;
+  writeError(message: string): void;
+  writeVerbose(message: string): void;
+  writeWarning(message: string): void;
+}
+
 // @public
 class Text {
   static convertToCrLf(input: string): string;
   static convertToLf(input: string): string;
   static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
-  static padEnd(s: string, minimumLength: number): string;
+  static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
+  static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
   static replaceAll(input: string, searchValue: string, replaceValue: string): string;
   static truncateWithEllipsis(s: string, maximumLength: number): string;
 }
