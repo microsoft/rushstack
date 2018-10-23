@@ -4,9 +4,6 @@
 import { Mixin } from './Mixin';
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 
-export interface IApiStatic extends ApiStaticMixin, ApiItem {
-}
-
 export interface IApiStaticMixinOptions extends IApiItemOptions {
   isStatic: boolean;
 }
@@ -59,4 +56,7 @@ export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass
   }
 
   return MixedClass;
+}
+
+export interface IApiStatic extends ApiStaticMixin, ApiItem {
 }

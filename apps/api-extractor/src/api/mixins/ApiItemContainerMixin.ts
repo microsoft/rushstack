@@ -4,12 +4,12 @@
 import { Mixin } from './Mixin';
 import { ApiItem, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../model/ApiItem';
 
-export interface IApiItemContainerJson extends IApiItemJson {
-  members: IApiItemJson[];
+export interface IApiItemContainerMixinOptions extends IApiItemOptions {
+  members?: ApiItem[];
 }
 
-export interface IApiItemContainerOptions extends IApiItemOptions {
-  members?: ApiItem[];
+export interface IApiItemContainerJson extends IApiItemJson {
+  members: IApiItemJson[];
 }
 
 const _members: unique symbol = Symbol('_members');
@@ -36,7 +36,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     public [_membersByCanonicalReference]: Map<string, ApiItem>;
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiItemContainerOptions>,
+    public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
       jsonObject: IApiItemContainerJson): void {
 
       baseClass.onDeserializeInto(options, jsonObject);
@@ -50,7 +50,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     // tslint:disable-next-line:no-any
     constructor(...args: any[]) {
       super(...args);
-      const options: IApiItemContainerOptions = args[0] as IApiItemContainerOptions;
+      const options: IApiItemContainerMixinOptions = args[0] as IApiItemContainerMixinOptions;
 
       this[_members] = [];
       this[_membersByCanonicalReference] = new Map<string, ApiItem>();

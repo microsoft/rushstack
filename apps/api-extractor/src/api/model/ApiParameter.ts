@@ -1,10 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind } from './ApiItem';
-import { ApiDeclaration } from './ApiDeclaration';
+import { ApiItemKind, ApiItem } from './ApiItem';
+import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 
-export class ApiParameter extends ApiDeclaration {
+export interface IApiParameterOptions extends IApiDeclarationMixinOptions {
+}
+
+export class ApiParameter extends ApiDeclarationMixin(ApiItem) {
+  public constructor(options: IApiParameterOptions) {
+    super(options);
+  }
+
   /** @override */
   public get kind(): ApiItemKind {
     return ApiItemKind.Parameter;

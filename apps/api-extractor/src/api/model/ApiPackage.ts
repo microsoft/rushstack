@@ -2,13 +2,20 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItem, ApiItemKind, IApiItemJson } from './ApiItem';
-import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
+import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { JsonFile } from '@microsoft/node-core-library';
+
+export interface IApiPackageOptions extends IApiItemContainerMixinOptions {
+}
 
 export class ApiPackage extends ApiItemContainerMixin(ApiItem) {
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
     const jsonObject: { } = JsonFile.load(apiJsonFilename);
     return ApiItem.deserialize(jsonObject as IApiItemJson) as ApiPackage;
+  }
+
+  public constructor(options: IApiPackageOptions) {
+    super(options);
   }
 
   /** @override */

@@ -5,7 +5,7 @@ import { Mixin } from './Mixin';
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 import { ApiParameter } from '../model/ApiParameter';
 
-export interface IApiFunctionLikeOptions extends IApiItemOptions {
+export interface IApiFunctionLikeMixinOptions extends IApiItemOptions {
   overloadIndex: number;
   parameters?: ApiParameter[];
 }
@@ -34,7 +34,9 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
     public readonly [_parameters]: ApiParameter[];
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiFunctionLikeOptions>, jsonObject: IApiFunctionLikeJson): void {
+    public static onDeserializeInto(options: Partial<IApiFunctionLikeMixinOptions>,
+      jsonObject: IApiFunctionLikeJson): void {
+
       baseClass.onDeserializeInto(options, jsonObject);
 
       options.overloadIndex = jsonObject.overloadIndex;
@@ -49,7 +51,7 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
     constructor(...args: any[]) {
       super(...args);
 
-      const options: IApiFunctionLikeOptions = args[0];
+      const options: IApiFunctionLikeMixinOptions = args[0];
       this[_overloadIndex] = options.overloadIndex;
 
       this[_parameters] = options.parameters || [];
