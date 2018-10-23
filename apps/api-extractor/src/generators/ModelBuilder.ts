@@ -50,6 +50,10 @@ export class ModelBuilder {
 
     apiPackage.saveToJsonFile('d:\\serialize.json');
 
+    const test: ApiModel = new ApiModel();
+    const testPackage: ApiPackage = test.loadPackage('d:\\serialize.json');
+    testPackage.saveToJsonFile('d:\\serialize2.json');
+
     debugger;
   }
 

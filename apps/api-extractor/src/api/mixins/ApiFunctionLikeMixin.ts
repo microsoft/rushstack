@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { Constructor, Mixin } from './Mixin';
-import { ApiItem, IApiItemJson } from '../model/ApiItem';
+import { Mixin } from './Mixin';
+import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 
 export interface IApiParameterOptions {
   name: string;
@@ -20,8 +20,9 @@ export interface IApiParameterJson {
   name: string;
 }
 
-export interface IApiFunctionLikeOptions {
+export interface IApiFunctionLikeOptions extends IApiItemOptions {
   overloadIndex: number;
+  parameters?: ApiParameter[];
 }
 
 export interface IApiFunctionLikeJson extends IApiItemJson {
@@ -40,12 +41,26 @@ export interface ApiFunctionLikeMixin {
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
-export function ApiFunctionLikeMixin<TBaseClass extends Constructor<ApiItem>>(baseClass: TBaseClass):
+export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
   Mixin<TBaseClass, ApiFunctionLikeMixin> {
 
   abstract class MixedClass extends baseClass implements ApiFunctionLikeMixin {
     public readonly [_overloadIndex]: number;
     public readonly [_parameters]: ApiParameter[];
+
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiFunctionLikeOptions>, jsonObject: IApiFunctionLikeJson): void {
+      baseClass.onDeserializeInto(options, jsonObject);
+
+      options.overloadIndex = jsonObject.overloadIndex;
+      options.parameters = [];
+
+      for (const parameterObject of jsonObject.parameters) {
+        options.parameters.push(new ApiParameter({
+          name: parameterObject.name
+        }));
+      }
+    }
 
     // tslint:disable-next-line:no-any
     constructor(...args: any[]) {
@@ -54,7 +69,7 @@ export function ApiFunctionLikeMixin<TBaseClass extends Constructor<ApiItem>>(ba
       const options: IApiFunctionLikeOptions = args[0];
       this[_overloadIndex] = options.overloadIndex;
 
-      this[_parameters] = [];
+      this[_parameters] = options.parameters || [];
     }
 
     public get overloadIndex(): number {

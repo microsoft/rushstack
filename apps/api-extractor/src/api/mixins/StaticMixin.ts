@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { Constructor, Mixin } from './Mixin';
-import { ApiItem, IApiItemJson } from '../model/ApiItem';
+import { Mixin } from './Mixin';
+import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 
 export interface IApiStatic extends ApiStaticMixin, ApiItem {
 }
 
-export interface IApiStaticMixinOptions {
+export interface IApiStaticMixinOptions extends IApiItemOptions {
   isStatic: boolean;
 }
 
@@ -25,11 +25,18 @@ export interface ApiStaticMixin {
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
-export function ApiStaticMixin<TBaseClass extends Constructor<ApiItem>>(baseClass: TBaseClass):
+export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
   Mixin<TBaseClass, ApiStaticMixin> {
 
   abstract class MixedClass extends baseClass implements ApiStaticMixin {
     public [_isStatic]: boolean;
+
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiStaticMixinOptions>, jsonObject: IApiStaticMixinJson): void {
+      baseClass.onDeserializeInto(options, jsonObject);
+
+      options.isStatic = jsonObject.isStatic;
+    }
 
     // tslint:disable-next-line:no-any
     constructor(...args: any[]) {

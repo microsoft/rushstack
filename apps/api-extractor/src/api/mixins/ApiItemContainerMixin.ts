@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { Constructor, Mixin } from './Mixin';
-import { ApiItem, IApiItemJson } from '../model/ApiItem';
+import { Mixin } from './Mixin';
+import { ApiItem, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../model/ApiItem';
 
-export interface IApiItemContainerMixinJson extends IApiItemJson {
+export interface IApiItemContainerJson extends IApiItemJson {
   members: IApiItemJson[];
+}
+
+export interface IApiItemContainerOptions extends IApiItemOptions {
+  members?: ApiItem[];
 }
 
 const _members: unique symbol = Symbol('_members');
@@ -23,7 +27,7 @@ export interface ApiItemContainerMixin {
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
-export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(baseClass: TBaseClass):
+export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
   Mixin<TBaseClass, ApiItemContainerMixin> {
 
   abstract class MixedClass extends baseClass implements ApiItemContainerMixin {
@@ -31,11 +35,31 @@ export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(b
     public [_membersSorted]: boolean;
     public [_membersByCanonicalReference]: Map<string, ApiItem>;
 
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiItemContainerOptions>,
+      jsonObject: IApiItemContainerJson): void {
+
+      baseClass.onDeserializeInto(options, jsonObject);
+
+      options.members = [];
+      for (const memberObject of jsonObject.members) {
+        options.members.push(ApiItem.deserialize(memberObject));
+      }
+    }
+
     // tslint:disable-next-line:no-any
     constructor(...args: any[]) {
       super(...args);
+      const options: IApiItemContainerOptions = args[0] as IApiItemContainerOptions;
+
       this[_members] = [];
       this[_membersByCanonicalReference] = new Map<string, ApiItem>();
+
+      if (options.members) {
+        for (const member of options.members) {
+          this.addMember(member);
+        }
+      }
     }
 
     public get members(): ReadonlyArray<ApiItem> {
@@ -62,7 +86,7 @@ export function ApiItemContainerMixin<TBaseClass extends Constructor<ApiItem>>(b
     }
 
     /** @override */
-    public serializeInto(jsonObject: Partial<IApiItemContainerMixinJson>): void {
+    public serializeInto(jsonObject: Partial<IApiItemContainerJson>): void {
       super.serializeInto(jsonObject);
 
       const memberObjects: IApiItemJson[] = [];

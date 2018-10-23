@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Constructor, PropertiesOf } from '../mixins/Mixin';
+
 export const enum ApiItemKind {
   Class = 'Class',
   EntryPoint = 'EntryPoint',
@@ -71,6 +73,9 @@ export class ApiItem {
     return this.canonicalReference;
   }
 }
+
+// For mixins
+export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<typeof ApiItem> { }
 
 // Circular import
 import { Deserializer } from './Deserializer';
