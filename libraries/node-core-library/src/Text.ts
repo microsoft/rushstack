@@ -69,17 +69,43 @@ export class Text {
   }
 
   /**
-   * Append spaces to the end of a string to ensure the result has a minimum length.
+   * Append characters to the end of a string to ensure the result has a minimum length.
    * @remarks
    * If the string length already exceeds the minimum length, then the string is unchanged.
    * The string is not truncated.
    */
-  public static padEnd(s: string, minimumLength: number): string {
-    let result: string = s;
-    while (result.length < minimumLength) {
-      result += ' ';
+  public static padEnd(s: string, minimumLength: number, paddingCharacter: string = ' '): string {
+    if (paddingCharacter.length !== 1) {
+      throw new Error('The paddingCharacter parameter must be a single character.');
     }
-    return result;
+
+    if (s.length < minimumLength) {
+      const paddingArray: string[] = new Array(minimumLength - s.length);
+      paddingArray.unshift(s);
+      return paddingArray.join(paddingCharacter);
+    } else {
+      return s;
+    }
+  }
+
+  /**
+   * Append characters to the start of a string to ensure the result has a minimum length.
+   * @remarks
+   * If the string length already exceeds the minimum length, then the string is unchanged.
+   * The string is not truncated.
+   */
+  public static padStart(s: string, minimumLength: number, paddingCharacter: string = ' '): string {
+    if (paddingCharacter.length !== 1) {
+      throw new Error('The paddingCharacter parameter must be a single character.');
+    }
+
+    if (s.length < minimumLength) {
+      const paddingArray: string[] = new Array(minimumLength - s.length);
+      paddingArray.push(s);
+      return paddingArray.join(paddingCharacter);
+    } else {
+      return s;
+    }
   }
 
   /**
