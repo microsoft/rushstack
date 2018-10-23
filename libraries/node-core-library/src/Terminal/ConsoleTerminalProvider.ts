@@ -2,22 +2,21 @@ const { supportsColor } = require('colors/lib/system/supports-color');
 
 import { ITerminalProvider, Severity } from './ITerminalProvider';
 
+/**
+ * @beta
+ */
 export class ConsoleTerminalProvider implements ITerminalProvider {
   public write(data: string, severity: Severity): void {
     switch (severity) {
+      case Severity.warn:
       case Severity.error: {
-        console.error(data);
-        break;
-      }
-
-      case Severity.warn: {
-        console.warn(data);
+        process.stderr.write(data);
         break;
       }
 
       case Severity.log:
       default: {
-        console.log(data);
+        process.stdout.write(data);
         break;
       }
     }

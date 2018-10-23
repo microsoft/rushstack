@@ -73,3 +73,10 @@ export {
   LegacyAdapters,
   callback
 } from './LegacyAdapters';
+export { Terminal } from './Terminal/Terminal';
+export {
+  ITerminalProvider,
+  Severity
+} from './Terminal/ITerminalProvider';
+export { ConsoleTerminalProvider } from './Terminal/ConsoleTerminalProvider';
+export { FileTerminalProvider } from './Terminal/FileTerminalProvider';
