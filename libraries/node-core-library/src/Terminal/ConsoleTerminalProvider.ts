@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import { ITerminalProvider, Severity } from './ITerminalProvider';
 
 /**
@@ -21,7 +24,7 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
   }
 
   public get width(): number | undefined {
-    return process.stdout.rows;
+    return process.stdout.columns;
   }
 
   public get supportsColor(): boolean {
