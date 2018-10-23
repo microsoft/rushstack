@@ -18,7 +18,7 @@ import {
   logEndSubtask,
   logStartSubtask
 } from '../logging';
-import gutil = require('gulp-util');
+import Vinyl = require('vinyl');
 import gulp = require('gulp');
 import through2 = require('through2');
 
@@ -282,7 +282,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
 
           // Make sure the stream is completely read
           stream.pipe(through2.obj(
-            (file: gutil.File,
+            (file: Vinyl,
               encoding: string,
               callback: (p?: Object) => void) => {
                 callback();

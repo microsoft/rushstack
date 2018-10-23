@@ -6,7 +6,6 @@
 /// <reference path="rimraf/rimraf.d.ts" />
 /// <reference path="builtins/builtins.d.ts" />
 /// <reference path="glob-escape/glob-escape.d.ts" />
-/// <reference path="inquirer/inquirer.d.ts" />
 /// <reference path="npm-package-arg/npm-package-arg.d.ts" />
 /// <reference path="read-package-tree/read-package-tree.d.ts" />
 /// <reference path="strict-uri-encode/strict-uri-encode.d.ts" />

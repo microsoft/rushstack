@@ -1,6 +1,28 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 11 Oct 2018 23:26:07 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Oct 2018 05:30:14 GMT and should not be manually modified.
+
+## 6.1.9
+Thu, 18 Oct 2018 05:30:14 GMT
+
+### Patches
+
+- Replace deprecated dependency gulp-util
+
+## 6.1.8
+Thu, 18 Oct 2018 01:32:21 GMT
+
+*Version update only*
+
+## 6.1.7
+Wed, 17 Oct 2018 21:04:49 GMT
+
+*Version update only*
+
+## 6.1.6
+Wed, 17 Oct 2018 14:43:24 GMT
+
+*Version update only*
 
 ## 6.1.5
 Thu, 11 Oct 2018 23:26:07 GMT

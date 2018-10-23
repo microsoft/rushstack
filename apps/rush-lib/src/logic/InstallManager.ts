@@ -554,7 +554,7 @@ export class InstallManager {
 
           // compare the extracted package.json with the one we are about to write
           const oldBuffer: Buffer = FileSystem.readFileToBuffer(tempPackageJsonFilename);
-          const newBuffer: Buffer = new Buffer(JsonFile.stringify(tempPackageJson));
+          const newBuffer: Buffer = Buffer.from(JsonFile.stringify(tempPackageJson));
 
           if (Buffer.compare(oldBuffer, newBuffer) === 0) {
             shouldOverwrite = false;
@@ -781,23 +781,6 @@ export class InstallManager {
           }
 
           // Run "npm install" in the common folder
-
-          // NOTE:
-          // we do NOT install optional dependencies for Rush, as it seems that optional dependencies do not
-          // work properly with shrinkwrap. Consider the "fsevents" package. This is a Mac specific package
-          // which is an optional second-order dependency. Optional dependencies work by attempting to install
-          // the package, but removes the package if the install failed.
-          // This means that someone running generate on a Mac WILL have fsevents included in their shrinkwrap.
-          // When someone using Windows attempts to install from the shrinkwrap, the install will fail.
-          //
-          // If someone generates the shrinkwrap using Windows, then fsevents will NOT be listed in the shrinkwrap.
-          // When someone using Mac attempts to install from the shrinkwrap, (as of NPM 4), they will NOT have the
-          // optional dependency installed.
-          //
-          // One possible solution would be to have the shrinkwrap include information about whether the dependency
-          // is optional or not, but it does not appear to do so. Also, this would result in strange behavior where
-          // people would have different node_modules based on their system.
-
           const installArgs: string[] = [ 'install' ];
           this._pushConfigurationArgs(installArgs, options);
 
@@ -975,7 +958,27 @@ export class InstallManager {
    */
   private _pushConfigurationArgs(args: string[], options: IInstallManagerOptions): void {
     if (this._rushConfiguration.packageManager === 'npm') {
-      args.push('--no-optional');
+      if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '5.0.0')) {
+        // NOTE:
+        //
+        // When using an npm version older than v5.0.0, we do NOT install optional dependencies for
+        // Rush, because npm does not generate the shrinkwrap file consistently across platforms.
+        //
+        // Consider the "fsevents" package. This is a Mac specific package
+        // which is an optional second-order dependency. Optional dependencies work by attempting to install
+        // the package, but removes the package if the install failed.
+        // This means that someone running generate on a Mac WILL have fsevents included in their shrinkwrap.
+        // When someone using Windows attempts to install from the shrinkwrap, the install will fail.
+        //
+        // If someone generates the shrinkwrap using Windows, then fsevents will NOT be listed in the shrinkwrap.
+        // When someone using Mac attempts to install from the shrinkwrap, they will NOT have the
+        // optional dependency installed.
+        //
+        // This issue has been fixed as of npm v5.0.0: https://github.com/npm/npm/releases/tag/v5.0.0
+        //
+        // For more context, see https://github.com/Microsoft/web-build-tools/issues/761#issuecomment-428689600
+        args.push('--no-optional');
+      }
       args.push('--cache', this._rushConfiguration.npmCacheFolder);
       args.push('--tmp', this._rushConfiguration.npmTmpFolder);
 
@@ -983,7 +986,6 @@ export class InstallManager {
         args.push('--verbose');
       }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
-      args.push('--no-optional');
       args.push('--store', this._rushConfiguration.pnpmStoreFolder);
 
       // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
@@ -1009,7 +1011,6 @@ export class InstallManager {
         args.push('--strict-peer-dependencies');
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
-      args.push('--ignore-optional');
       args.push('--link-folder', 'yarn-link');
       args.push('--cache-folder', this._rushConfiguration.yarnCacheFolder);
 

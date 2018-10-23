@@ -19,9 +19,11 @@ import { Utilities } from '../../utilities/Utilities';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
-   * If true, no locking mechanism will be enforced when this action is run.
-   * Note this defaults to false (which is a safer assumption in case this value
-   *  is omitted).
+   * By default, Rush operations acquire a lock file which prevents multiple commands from executing simultaneously
+   * in the same repo folder.  (For example, it would be a mistake to run "rush install" and "rush build" at the
+   * same time.)  If your command makes sense to run concurrently with other operations,
+   * set safeForSimultaneousRushProcesses=true to disable this protection.  In particular, this is needed for
+   * custom scripts that invoke other Rush commands.
    */
   safeForSimultaneousRushProcesses?: boolean;
 

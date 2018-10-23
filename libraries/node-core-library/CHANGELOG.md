@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Mon, 08 Oct 2018 16:04:27 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Oct 2018 21:04:49 GMT and should not be manually modified.
+
+## 3.3.1
+Wed, 17 Oct 2018 21:04:49 GMT
+
+### Patches
+
+- Remove use of a deprecated Buffer API.
 
 ## 3.3.0
 Mon, 08 Oct 2018 16:04:27 GMT

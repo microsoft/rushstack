@@ -346,9 +346,15 @@ export class PublishAction extends BaseRushAction {
         args.push(`--force`);
       }
 
+      // TODO: Yarn's "publish" command line is fairly different from NPM and PNPM.  The right thing to do here
+      // would be to remap our options to the Yarn equivalents.  But until we get around to that, we'll simply invoke
+      // whatever NPM binary happens to be installed in the global path.
+      const packageManagerToolFilename: string = this.rushConfiguration.packageManager === 'yarn'
+        ? 'npm' : this.rushConfiguration.packageManagerToolFilename;
+
       PublishUtilities.execCommand(
         !!this._publish.value,
-        this.rushConfiguration.packageManagerToolFilename,
+        packageManagerToolFilename,
         args,
         packagePath,
         env);

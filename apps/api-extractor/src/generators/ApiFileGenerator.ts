@@ -155,7 +155,11 @@ export class ApiFileGenerator extends AstItemVisitor {
   protected visitAstModuleVariable(astModuleVariable: AstModuleVariable): void {
     this._writeAedocSynopsis(astModuleVariable);
 
-    this._indentedWriter.write(`${astModuleVariable.name}: ${astModuleVariable.type} = ${astModuleVariable.value};`);
+    if (astModuleVariable.value) {
+      this._indentedWriter.write(`${astModuleVariable.name}: ${astModuleVariable.type} = ${astModuleVariable.value};`);
+    } else {
+      this._indentedWriter.write(`${astModuleVariable.name}: ${astModuleVariable.type};`);
+    }
   }
 
   protected visitAstMember(astMember: AstMember): void {

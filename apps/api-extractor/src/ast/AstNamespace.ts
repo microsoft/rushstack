@@ -79,21 +79,24 @@ export class AstNamespace extends AstModule {
 
       const declaration: ts.Declaration = declarations[0];
 
-      if (declaration.parent && declaration.parent.flags !== ts.NodeFlags.Const) {
+      if (declaration.parent && (declaration.parent.flags & ts.NodeFlags.Const) === 0) {
         this.reportWarning(`Export "${exportSymbol.name}" is missing the "const" ` +
           'modifier. Currently the "namespace" block only supports constant variables.');
         continue;
       }
 
       const propertySignature: ts.PropertySignature = declaration as ts.PropertySignature;
-      if (!propertySignature.type || allowedTypes.indexOf(propertySignature.type.getText()) < 0) {
-        this.reportWarning(`Export "${exportSymbol.name}" must specify and be of type` +
-          '"string", "number" or "boolean"');
+
+      if (!propertySignature.type) {
+        this.reportWarning(`Export "${exportSymbol.name}" must specify a type`);
         continue;
       }
 
-      if (!propertySignature.initializer) {
-        this.reportWarning(`Export "${exportSymbol.name}" must have an initialized value`);
+      // Note that we also allow type references that refer to one of the supported primitive types
+      if (propertySignature.type.kind !== ts.SyntaxKind.TypeReference
+        && allowedTypes.indexOf(propertySignature.type.getText()) < 0) {
+        this.reportWarning(`Export "${exportSymbol.name}" must be of type` +
+          ' "string", "number" or "boolean" when API Extractor is configured for conservative namespaces');
         continue;
       }
 

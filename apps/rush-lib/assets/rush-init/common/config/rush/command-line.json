@@ -47,6 +47,16 @@
       "description": "This is an example custom command that runs separately for each project",
 
       /**
+       * By default, Rush operations acquire a lock file which prevents multiple commands from executing simultaneously
+       * in the same repo folder.  (For example, it would be a mistake to run "rush install" and "rush build" at the
+       * same time.)  If your command makes sense to run concurrently with other operations,
+       * set "safeForSimultaneousRushProcesses" to true to disable this protection.
+       *
+       * In particular, this is needed for custom scripts that invoke other Rush commands.
+       */
+      "safeForSimultaneousRushProcesses": false,
+
+      /**
        * (Required) If true, then this command is safe to be run in parallel, i.e. executed
        * simultaneously for multiple projects.  Similar to "rush build", regardless of parallelism
        * projects will not start processing until their dependencies have completed processing.
@@ -71,6 +81,8 @@
       "name": "my-global-command",
       "summary": "Example global custom command",
       "description": "This is an example custom command that runs once for the entire repo",
+
+      "safeForSimultaneousRushProcesses": false,
 
       /**
        * A script that will be invoked using the OS shell. The working directory will be the folder

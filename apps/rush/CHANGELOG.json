@@ -2,6 +2,36 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.3.4",
+      "tag": "@microsoft/rush_v5.3.4",
+      "date": "Wed, 17 Oct 2018 03:19:43 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make rush purge also call rush unlink"
+          },
+          {
+            "comment": "Fix an issue where \"rush publish\" invoked the wrong command when using Yarn"
+          },
+          {
+            "comment": "Install optional dependencies, except w/ npm<5.0.0"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.3",
+      "tag": "@microsoft/rush_v5.3.3",
+      "date": "Thu, 11 Oct 2018 23:58:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove warning for NodeJS 10 now that it is stable (LTS)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.2",
       "tag": "@microsoft/rush_v5.3.2",
       "date": "Mon, 08 Oct 2018 23:19:51 GMT",

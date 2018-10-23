@@ -10,6 +10,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { PurgeManager } from '../../logic/PurgeManager';
+import { UnlinkManager } from '../../logic/UnlinkManager';
 
 export class PurgeAction extends BaseRushAction {
   private _unsafeParameter: CommandLineFlagParameter;
@@ -37,7 +38,10 @@ export class PurgeAction extends BaseRushAction {
     return Promise.resolve().then(() => {
       const stopwatch: Stopwatch = Stopwatch.start();
 
+      const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
       const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration);
+
+      unlinkManager.unlink();
 
       if (this._unsafeParameter.value!) {
         purgeManager.purgeUnsafe();

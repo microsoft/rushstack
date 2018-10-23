@@ -1,6 +1,22 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 08 Oct 2018 23:19:51 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Oct 2018 03:19:43 GMT and should not be manually modified.
+
+## 5.3.4
+Wed, 17 Oct 2018 03:19:43 GMT
+
+### Updates
+
+- Make rush purge also call rush unlink
+- Fix an issue where "rush publish" invoked the wrong command when using Yarn
+- Install optional dependencies, except w/ npm<5.0.0
+
+## 5.3.3
+Thu, 11 Oct 2018 23:58:16 GMT
+
+### Updates
+
+- Remove warning for NodeJS 10 now that it is stable (LTS)
 
 ## 5.3.2
 Mon, 08 Oct 2018 23:19:51 GMT
