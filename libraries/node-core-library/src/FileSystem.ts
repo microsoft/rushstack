@@ -375,6 +375,33 @@ export class FileSystem {
   }
 
   /**
+   * Writes a text string to a file on disk, appending to the file if it already exists.
+   * Behind the scenes it uses `fs.appendFileSync()`.
+   * @remarks
+   * Throws an error if the folder doesn't exist, unless ensureFolder=true.
+   * @param filePath - The absolute or relative path of the file.
+   * @param contents - The text that should be written to the file.
+   * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
+   */
+  public static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
+    options = {
+      ensureFolderExists: false,
+      convertLineEndings: undefined,
+      encoding: Encoding.Utf8,
+      ...options
+    };
+
+    if (options.ensureFolderExists) {
+      const folderPath: string = pathUtilities.dirname(filePath);
+      FileSystem.ensureFolder(folderPath);
+    }
+
+    contents = FileSystem._convertLineEndings(contents.toString(), options.convertLineEndings);
+
+    fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
+  }
+
+  /**
    * Reads the contents of a file into a string.
    * Behind the scenes it uses `fs.readFileSync()`.
    * @param filePath - The relative or absolute path to the file whose contents should be read.
