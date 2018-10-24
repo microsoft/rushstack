@@ -12,8 +12,20 @@ import {
   ConsoleTerminalProvider
 } from '../../index';
 import { createColorGrid } from './createColorGrid';
+import { Colors } from '../Colors';
 
 const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 for (const line of createColorGrid()) {
   terminal.writeLine(...line);
 }
+
+terminal.writeLine();
+
+terminal.write('Normal text...');
+terminal.writeLine(Colors.green('done'));
+
+terminal.writeError('Error...');
+terminal.writeErrorLine(Colors.green('done'));
+
+terminal.writeWarning('Warning...');
+terminal.writeWarningLine(Colors.green('done'));

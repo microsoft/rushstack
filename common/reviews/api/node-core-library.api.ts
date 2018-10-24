@@ -115,7 +115,13 @@ enum FolderConstants {
 // @beta (undocumented)
 interface IColorableSequence {
   // (undocumented)
-  __computed: string;
+  backgroundColor?: ColorValue;
+  // (undocumented)
+  foregroundColor?: ColorValue;
+  // (undocumented)
+  isEol?: boolean;
+  // (undocumented)
+  text: string;
 }
 
 // @beta

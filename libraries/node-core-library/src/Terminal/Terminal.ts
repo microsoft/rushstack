@@ -9,13 +9,8 @@ import {
   IColorableSequence,
   ColorValue,
   Colors,
-  eolSequence,
-  foregroundColorSymbol,
-  backgroundColorSymbol,
-  textSymbol,
-  isEolSymbol
+  eolSequence
 } from './Colors';
-import { ConsoleTerminalProvider } from './ConsoleTerminalProvider';
 
 /**
  * This class facilitates writing to a console.
@@ -65,7 +60,7 @@ export class Terminal {
       messageParts.map(
         (part): IColorableSequence => ({
           ...Colors._normalizeStringOrColorableSequence(part),
-          [foregroundColorSymbol]: ColorValue.Yellow
+          foregroundColor: ColorValue.Yellow
         })
       ),
       TerminalProviderSeverity.warning
@@ -84,7 +79,7 @@ export class Terminal {
         ...messageParts.map(
           (part): IColorableSequence => ({
             ...Colors._normalizeStringOrColorableSequence(part),
-            [foregroundColorSymbol]: ColorValue.Yellow
+            foregroundColor: ColorValue.Yellow
           })
         ),
         eolSequence
@@ -104,7 +99,7 @@ export class Terminal {
       messageParts.map(
         (part): IColorableSequence => ({
           ...Colors._normalizeStringOrColorableSequence(part),
-          [foregroundColorSymbol]: ColorValue.Red
+          foregroundColor: ColorValue.Red
         })
       ),
       TerminalProviderSeverity.error
@@ -123,7 +118,7 @@ export class Terminal {
         ...messageParts.map(
           (part): IColorableSequence => ({
             ...Colors._normalizeStringOrColorableSequence(part),
-            [foregroundColorSymbol]: ColorValue.Red
+            foregroundColor: ColorValue.Red
           })
         ),
         eolSequence
@@ -190,8 +185,8 @@ export class Terminal {
     let segmentsToJoin: string[] = [];
     let lastSegmentWasEol: boolean = false;
     for (let i: number = 0; i < segments.length; i++) {
-      let segment: IColorableSequence = Colors._normalizeStringOrColorableSequence(segments[i]);
-      lastSegmentWasEol = !!segment[isEolSymbol];
+      const segment: IColorableSequence = Colors._normalizeStringOrColorableSequence(segments[i]);
+      lastSegmentWasEol = !!segment.isEol;
       if (lastSegmentWasEol) {
         lines.push(segmentsToJoin.join(''));
         segmentsToJoin = [];
@@ -200,7 +195,7 @@ export class Terminal {
         if (withColor) {
           const startColorCodes: number[] = [];
           const endColorCodes: number[] = [];
-          switch (segment[foregroundColorSymbol]) {
+          switch (segment.foregroundColor) {
             case ColorValue.Black: {
               startColorCodes.push(30);
               endColorCodes.push(39);
@@ -256,7 +251,7 @@ export class Terminal {
             }
           }
 
-          switch (segment[backgroundColorSymbol]) {
+          switch (segment.backgroundColor) {
             case ColorValue.Black: {
               startColorCodes.push(40);
               endColorCodes.push(49);
@@ -321,7 +316,7 @@ export class Terminal {
             ]);
           }
 
-          segmentsToJoin.push(segment[textSymbol]);
+          segmentsToJoin.push(segment.text);
 
           for (let j: number = endColorCodes.length - 1; j >= 0; j--) {
             const code: number = endColorCodes[j];
@@ -332,7 +327,7 @@ export class Terminal {
             ]);
           }
         } else {
-          segmentsToJoin.push(segment[textSymbol]);
+          segmentsToJoin.push(segment.text);
         }
       }
     }
