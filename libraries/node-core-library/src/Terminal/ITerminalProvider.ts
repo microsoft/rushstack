@@ -13,5 +13,6 @@ export enum TerminalProviderSeverity {
  */
 export interface ITerminalProvider {
   supportsColor: boolean;
+  eolCharacter: string;
   write(data: string, severity: TerminalProviderSeverity): void;
 }

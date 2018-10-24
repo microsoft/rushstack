@@ -76,7 +76,6 @@ export {
 export { StringBuilder } from './StringBuilder';
 export { Terminal } from './Terminal/Terminal';
 export {
-  ColorValue,
   Colors,
   IColorableSequence
 } from './Terminal/Colors';

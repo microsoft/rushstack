@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { EOL } from 'os';
 import { enabled as supportsColor } from 'colors/safe';
 
 import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
@@ -40,6 +41,10 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
         break;
       }
     }
+  }
+
+  public get eolCharacter(): string {
+    return EOL;
   }
 
   public get supportsColor(): boolean {

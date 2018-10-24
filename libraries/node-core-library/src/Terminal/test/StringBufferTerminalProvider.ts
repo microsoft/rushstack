@@ -44,6 +44,10 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     }
   }
 
+  public get eolCharacter(): string {
+    return '[n]';
+  }
+
   public get supportsColor(): boolean {
     return this._supportsColor;
   }
@@ -65,6 +69,6 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   }
 
   private _normalizeOutput(s: string): string { // tslint:disable-line:export-name
-    return s.replace(/\u001b/g, '[x]').replace(/\n/g, '[n]').replace(/\r/g, '[r]');
+    return s.replace(/\u001b/g, '[x]').replace(/\n/g, '[-n-]').replace(/\r/g, '[-r-]');
   }
 }

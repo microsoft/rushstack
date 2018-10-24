@@ -1,10 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { EOL } from 'os';
-
-import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
-import { IColorableSequence, ColorValue } from './Colors';
+import {
+  ITerminalProvider,
+  TerminalProviderSeverity
+} from './ITerminalProvider';
+import {
+  IColorableSequence,
+  ColorValue,
+  Colors,
+  eolSequence,
+  foregroundColorSymbol,
+  backgroundColorSymbol,
+  textSymbol,
+  isEolSymbol
+} from './Colors';
+import { ConsoleTerminalProvider } from './ConsoleTerminalProvider';
 
 /**
  * This class facilitates writing to a console.
@@ -40,7 +51,7 @@ export class Terminal {
    * Write a generic message to the terminal, followed by a newline
    */
   public writeLine(...messageParts: (string | IColorableSequence)[]): void {
-    this.write(...messageParts, { text: EOL });
+    this.write(...messageParts, eolSequence);
   }
 
   /**
@@ -52,7 +63,10 @@ export class Terminal {
   public writeWarning(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(
       messageParts.map(
-        (part) => ({ ...(typeof part === 'string' ? { text: part } : part), foregroundColor: ColorValue.Yellow })
+        (part): IColorableSequence => ({
+          ...Colors._normalizeStringOrColorableSequence(part),
+          [foregroundColorSymbol]: ColorValue.Yellow
+        })
       ),
       TerminalProviderSeverity.warning
     );
@@ -68,9 +82,12 @@ export class Terminal {
     this._writeSegmentsToProviders(
       [
         ...messageParts.map(
-          (part) => ({ ...(typeof part === 'string' ? { text: part } : part), foregroundColor: ColorValue.Yellow })
+          (part): IColorableSequence => ({
+            ...Colors._normalizeStringOrColorableSequence(part),
+            [foregroundColorSymbol]: ColorValue.Yellow
+          })
         ),
-        { text: EOL }
+        eolSequence
       ],
       TerminalProviderSeverity.warning
     );
@@ -85,7 +102,10 @@ export class Terminal {
   public writeError(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(
       messageParts.map(
-        (part) => ({ ...(typeof part === 'string' ? { text: part } : part), foregroundColor: ColorValue.Red })
+        (part): IColorableSequence => ({
+          ...Colors._normalizeStringOrColorableSequence(part),
+          [foregroundColorSymbol]: ColorValue.Red
+        })
       ),
       TerminalProviderSeverity.error
     );
@@ -101,9 +121,12 @@ export class Terminal {
     this._writeSegmentsToProviders(
       [
         ...messageParts.map(
-          (part) => ({ ...(typeof part === 'string' ? { text: part } : part), foregroundColor: ColorValue.Yellow })
+          (part): IColorableSequence => ({
+            ...Colors._normalizeStringOrColorableSequence(part),
+            [foregroundColorSymbol]: ColorValue.Red
+          })
         ),
-        { text: EOL }
+        eolSequence
       ],
       TerminalProviderSeverity.error
     );
@@ -120,171 +143,208 @@ export class Terminal {
    * Write a verbose-level message followed by a newline.
    */
   public writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void {
-    this.writeVerbose(...messageParts, { text: EOL });
+    this.writeVerbose(...messageParts, eolSequence);
   }
 
   private _writeSegmentsToProviders(
     segments: (string | IColorableSequence)[],
     severity: TerminalProviderSeverity
   ): void {
-    let withColor: string;
-    let withoutColor: string;
+
+    const withColorText: { [eolChar: string]: string } = {};
+    const withoutColorText: { [eolChar: string]: string } = {};
+    let withColorLines: string[] | undefined;
+    let withoutColorLines: string[] | undefined;
 
     this._providers.forEach((provider) => {
-      const textToWrite: string = provider.supportsColor
-        ? (withColor || (withColor = this._serializeFormattableTextSegments(segments, true)))
-        : (withoutColor || (withoutColor = this._serializeFormattableTextSegments(segments, false)));
+      const eol: string = provider.eolCharacter;
+      let textToWrite: string;
+      if (provider.supportsColor) {
+        if (!withColorLines) {
+          withColorLines = this._serializeFormattableTextSegments(segments, true);
+        }
+
+        if (!withColorText[eol]) {
+          withColorText[eol] = withColorLines.join(eol);
+        }
+
+        textToWrite = withColorText[eol];
+      } else {
+        if (!withoutColorLines) {
+          withoutColorLines = this._serializeFormattableTextSegments(segments, false);
+        }
+
+        if (!withoutColorText[eol]) {
+          withoutColorText[eol] = withoutColorLines.join(eol);
+        }
+
+        textToWrite = withoutColorText[eol];
+      }
+
       provider.write(textToWrite, severity);
     });
   }
 
-  private _serializeFormattableTextSegments(segments: (string | IColorableSequence)[], withColor: boolean): string {
-    const segmentsToJoin: string[] = [];
+  private _serializeFormattableTextSegments(segments: (string | IColorableSequence)[], withColor: boolean): string[] {
+    const lines: string[] = [];
+    let segmentsToJoin: string[] = [];
+    let lastSegmentWasEol: boolean = false;
     for (let i: number = 0; i < segments.length; i++) {
-      let segment: string | IColorableSequence = segments[i];
-      if (withColor) {
-        if (typeof segment === 'string') {
-          segment = { text: segment };
-        }
-
-        const startColorCodes: number[] = [];
-        const endColorCodes: number[] = [];
-        switch (segment.foregroundColor) {
-          case ColorValue.Black: {
-            startColorCodes.push(30);
-            endColorCodes.push(39);
-            break;
-          }
-
-          case ColorValue.Red: {
-            startColorCodes.push(31);
-            endColorCodes.push(39);
-            break;
-          }
-
-          case ColorValue.Green: {
-            startColorCodes.push(32);
-            endColorCodes.push(39);
-            break;
-          }
-
-          case ColorValue.Yellow: {
-            startColorCodes.push(33);
-            endColorCodes.push(39);
-            break;
-          }
-
-          case ColorValue.Blue: {
-            startColorCodes.push(34);
-            endColorCodes.push(39);
-            break;
-          }
-
-          case ColorValue.Magenta: {
-            startColorCodes.push(35);
-            endColorCodes.push(39);
-            break;
-          }
-
-          case ColorValue.Cyan: {
-            startColorCodes.push(36);
-            endColorCodes.push(39);
-            break;
-          }
-
-          case ColorValue.White: {
-            startColorCodes.push(37);
-            endColorCodes.push(39);
-            break;
-          }
-
-          case ColorValue.Gray: {
-            startColorCodes.push(90);
-            endColorCodes.push(39);
-            break;
-          }
-        }
-
-        switch (segment.backgroundColor) {
-          case ColorValue.Black: {
-            startColorCodes.push(40);
-            endColorCodes.push(49);
-            break;
-          }
-
-          case ColorValue.Red: {
-            startColorCodes.push(41);
-            endColorCodes.push(49);
-            break;
-          }
-
-          case ColorValue.Green: {
-            startColorCodes.push(42);
-            endColorCodes.push(49);
-            break;
-          }
-
-          case ColorValue.Yellow: {
-            startColorCodes.push(43);
-            endColorCodes.push(49);
-            break;
-          }
-
-          case ColorValue.Blue: {
-            startColorCodes.push(44);
-            endColorCodes.push(49);
-            break;
-          }
-
-          case ColorValue.Magenta: {
-            startColorCodes.push(45);
-            endColorCodes.push(49);
-            break;
-          }
-
-          case ColorValue.Cyan: {
-            startColorCodes.push(46);
-            endColorCodes.push(49);
-            break;
-          }
-
-          case ColorValue.White: {
-            startColorCodes.push(47);
-            endColorCodes.push(49);
-            break;
-          }
-
-          case ColorValue.Gray: {
-            startColorCodes.push(100);
-            endColorCodes.push(49);
-            break;
-          }
-        }
-
-        for (let j: number = 0; j < startColorCodes.length; j++) {
-          const code: number = startColorCodes[j];
-          segmentsToJoin.push(...[
-            '\u001b[',
-            code.toString(),
-            'm'
-          ]);
-        }
-
-        segmentsToJoin.push(segment.text);
-
-        for (let j: number = endColorCodes.length - 1; j >= 0; j--) {
-          const code: number = endColorCodes[j];
-          segmentsToJoin.push(...[
-            '\u001b[',
-            code.toString(),
-            'm'
-          ]);
-        }
+      let segment: IColorableSequence = Colors._normalizeStringOrColorableSequence(segments[i]);
+      lastSegmentWasEol = !!segment[isEolSymbol];
+      if (lastSegmentWasEol) {
+        lines.push(segmentsToJoin.join(''));
+        segmentsToJoin = [];
       } else {
-        segmentsToJoin.push(typeof segment === 'string' ? segment : segment.text);
+
+        if (withColor) {
+          const startColorCodes: number[] = [];
+          const endColorCodes: number[] = [];
+          switch (segment[foregroundColorSymbol]) {
+            case ColorValue.Black: {
+              startColorCodes.push(30);
+              endColorCodes.push(39);
+              break;
+            }
+
+            case ColorValue.Red: {
+              startColorCodes.push(31);
+              endColorCodes.push(39);
+              break;
+            }
+
+            case ColorValue.Green: {
+              startColorCodes.push(32);
+              endColorCodes.push(39);
+              break;
+            }
+
+            case ColorValue.Yellow: {
+              startColorCodes.push(33);
+              endColorCodes.push(39);
+              break;
+            }
+
+            case ColorValue.Blue: {
+              startColorCodes.push(34);
+              endColorCodes.push(39);
+              break;
+            }
+
+            case ColorValue.Magenta: {
+              startColorCodes.push(35);
+              endColorCodes.push(39);
+              break;
+            }
+
+            case ColorValue.Cyan: {
+              startColorCodes.push(36);
+              endColorCodes.push(39);
+              break;
+            }
+
+            case ColorValue.White: {
+              startColorCodes.push(37);
+              endColorCodes.push(39);
+              break;
+            }
+
+            case ColorValue.Gray: {
+              startColorCodes.push(90);
+              endColorCodes.push(39);
+              break;
+            }
+          }
+
+          switch (segment[backgroundColorSymbol]) {
+            case ColorValue.Black: {
+              startColorCodes.push(40);
+              endColorCodes.push(49);
+              break;
+            }
+
+            case ColorValue.Red: {
+              startColorCodes.push(41);
+              endColorCodes.push(49);
+              break;
+            }
+
+            case ColorValue.Green: {
+              startColorCodes.push(42);
+              endColorCodes.push(49);
+              break;
+            }
+
+            case ColorValue.Yellow: {
+              startColorCodes.push(43);
+              endColorCodes.push(49);
+              break;
+            }
+
+            case ColorValue.Blue: {
+              startColorCodes.push(44);
+              endColorCodes.push(49);
+              break;
+            }
+
+            case ColorValue.Magenta: {
+              startColorCodes.push(45);
+              endColorCodes.push(49);
+              break;
+            }
+
+            case ColorValue.Cyan: {
+              startColorCodes.push(46);
+              endColorCodes.push(49);
+              break;
+            }
+
+            case ColorValue.White: {
+              startColorCodes.push(47);
+              endColorCodes.push(49);
+              break;
+            }
+
+            case ColorValue.Gray: {
+              startColorCodes.push(100);
+              endColorCodes.push(49);
+              break;
+            }
+          }
+
+          for (let j: number = 0; j < startColorCodes.length; j++) {
+            const code: number = startColorCodes[j];
+            segmentsToJoin.push(...[
+              '\u001b[',
+              code.toString(),
+              'm'
+            ]);
+          }
+
+          segmentsToJoin.push(segment[textSymbol]);
+
+          for (let j: number = endColorCodes.length - 1; j >= 0; j--) {
+            const code: number = endColorCodes[j];
+            segmentsToJoin.push(...[
+              '\u001b[',
+              code.toString(),
+              'm'
+            ]);
+          }
+        } else {
+          segmentsToJoin.push(segment[textSymbol]);
+        }
       }
     }
 
-    return segmentsToJoin.join('');
+    if (segmentsToJoin.length > 0) {
+      lines.push(segmentsToJoin.join(''));
+    }
+
+    if (lastSegmentWasEol) {
+      lines.push('');
+    }
+
+    return lines;
   }
 }

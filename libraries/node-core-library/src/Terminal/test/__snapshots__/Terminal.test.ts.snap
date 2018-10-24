@@ -40,7 +40,7 @@ exports[`01 color enabled 01 basic terminal functions 01 write 05 writes a messa
 
 exports[`01 color enabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages 4`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 02 writeLine 01 writes a single message 1`] = `"test message[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 02 writeLine 01 writes a single message 1`] = `"test message[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 01 writes a single message 2`] = `""`;
 
@@ -48,7 +48,7 @@ exports[`01 color enabled 01 basic terminal functions 02 writeLine 01 writes a s
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 01 writes a single message 4`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 1`] = `"message 1message 2[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 1`] = `"message 1message 2[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 2`] = `""`;
 
@@ -56,7 +56,7 @@ exports[`01 color enabled 01 basic terminal functions 02 writeLine 02 writes mul
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 4`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `"[x][32mmessage 1[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `"[x][32mmessage 1[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 2`] = `""`;
 
@@ -64,7 +64,7 @@ exports[`01 color enabled 01 basic terminal functions 02 writeLine 03 writes a m
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 4`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `"[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `"[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 2`] = `""`;
 
@@ -72,7 +72,7 @@ exports[`01 color enabled 01 basic terminal functions 02 writeLine 04 writes a m
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 4`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `"message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `"message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 2`] = `""`;
 
@@ -124,7 +124,7 @@ exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 01 wri
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 2`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 3`] = `"[x][33mtest message[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 3`] = `"[x][33mtest message[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 4`] = `""`;
 
@@ -132,7 +132,7 @@ exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 02 wri
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 2`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 3`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 3`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 4`] = `""`;
 
@@ -140,7 +140,7 @@ exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 03 wri
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 2`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 3`] = `"[x][33mmessage 1[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 3`] = `"[x][33mmessage 1[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 4`] = `""`;
 
@@ -148,7 +148,7 @@ exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 04 wri
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 2`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 3`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 3`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 4`] = `""`;
 
@@ -156,7 +156,7 @@ exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 05 wri
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 2`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 3`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 3`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 4`] = `""`;
 
@@ -206,7 +206,7 @@ exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 01 write
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 3`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 4`] = `"[x][33mtest message[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 4`] = `"[x][31mtest message[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 1`] = `""`;
 
@@ -214,7 +214,7 @@ exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 02 write
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 3`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 4`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 4`] = `"[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 1`] = `""`;
 
@@ -222,7 +222,7 @@ exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 03 write
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 3`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 4`] = `"[x][33mmessage 1[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 4`] = `"[x][31mmessage 1[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 1`] = `""`;
 
@@ -230,7 +230,7 @@ exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 04 write
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 3`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 4`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 4`] = `"[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `""`;
 
@@ -238,7 +238,7 @@ exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 05 write
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 3`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 4`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 4`] = `"[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 01 writes a single message 1`] = `""`;
 
@@ -282,7 +282,7 @@ exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 05 writes 
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 1`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 2`] = `"test message[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 2`] = `"test message[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 3`] = `""`;
 
@@ -290,7 +290,7 @@ exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 01 wri
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 1`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 2`] = `"message 1message 2[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 2`] = `"message 1message 2[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 3`] = `""`;
 
@@ -298,7 +298,7 @@ exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 02 wri
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 1`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 2`] = `"[x][32mmessage 1[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 2`] = `"[x][32mmessage 1[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 3`] = `""`;
 
@@ -306,7 +306,7 @@ exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 wri
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 1`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 2`] = `"[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 2`] = `"[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 3`] = `""`;
 
@@ -314,19 +314,19 @@ exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 wri
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `""`;
 
-exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 2`] = `"message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[r][n]"`;
+exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 2`] = `"message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n]"`;
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 3`] = `""`;
 
 exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 4`] = `""`;
 
-exports[`01 color enabled 05 writes to multiple streams 1`] = `"message 1message 2[x][32mmessage 1[x][39mtest message[r][n]test messagemessage 1message 2[r][n][x][32mmessage 1[x][39m[r][n][x][32mmessage 1[x][39m[x][31mmessage 2[x][39mmessage 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39mmessage 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[r][n][x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[r][n]"`;
+exports[`01 color enabled 05 writes to multiple streams 1`] = `"message 1message 2[x][32mmessage 1[x][39mtest message[n]test messagemessage 1message 2[n][x][32mmessage 1[x][39m[n][x][32mmessage 1[x][39m[x][31mmessage 2[x][39mmessage 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39mmessage 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n][x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]"`;
 
 exports[`01 color enabled 05 writes to multiple streams 2`] = `""`;
 
-exports[`01 color enabled 05 writes to multiple streams 3`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[r][n][x][33mmessage 1[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mtest message[x][39m[r][n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[r][n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[r][n][x][33mmessage 1[x][39m[r][n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m"`;
+exports[`01 color enabled 05 writes to multiple streams 3`] = `"[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n][x][33mmessage 1[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mtest message[x][39m[n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[n][x][33mmessage 1[x][39m[n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m"`;
 
-exports[`01 color enabled 05 writes to multiple streams 4`] = `"[x][31mtest message[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[r][n][x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][33mtest message[x][39m[r][n][x][33mmessage 1[x][39m[r][n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[r][n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[r][n][x][31mmessage 1[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m"`;
+exports[`01 color enabled 05 writes to multiple streams 4`] = `"[x][31mtest message[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m[n][x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mtest message[x][39m[n][x][31mmessage 1[x][39m[n][x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n][x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n][x][31mmessage 1[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m"`;
 
 exports[`02 color disabled 01 basic terminal functions 01 write 01 writes a single message 1`] = `"test message"`;
 
@@ -368,7 +368,7 @@ exports[`02 color disabled 01 basic terminal functions 01 write 05 writes a mess
 
 exports[`02 color disabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages 4`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 02 writeLine 01 writes a single message 1`] = `"test message[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 02 writeLine 01 writes a single message 1`] = `"test message[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 01 writes a single message 2`] = `""`;
 
@@ -376,7 +376,7 @@ exports[`02 color disabled 01 basic terminal functions 02 writeLine 01 writes a 
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 01 writes a single message 4`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 1`] = `"message 1message 2[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 1`] = `"message 1message 2[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 2`] = `""`;
 
@@ -384,7 +384,7 @@ exports[`02 color disabled 01 basic terminal functions 02 writeLine 02 writes mu
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 4`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `"message 1[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `"message 1[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 2`] = `""`;
 
@@ -392,7 +392,7 @@ exports[`02 color disabled 01 basic terminal functions 02 writeLine 03 writes a 
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 4`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `"message 1message 2[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `"message 1message 2[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 2`] = `""`;
 
@@ -400,7 +400,7 @@ exports[`02 color disabled 01 basic terminal functions 02 writeLine 04 writes a 
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 4`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `"message 1message 2message 3message 4[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `"message 1message 2message 3message 4[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 2`] = `""`;
 
@@ -452,7 +452,7 @@ exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 01 wr
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 2`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 3`] = `"test message[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 3`] = `"test message[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 4`] = `""`;
 
@@ -460,7 +460,7 @@ exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 02 wr
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 2`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 3`] = `"message 1message 2[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 3`] = `"message 1message 2[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 4`] = `""`;
 
@@ -468,7 +468,7 @@ exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 03 wr
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 2`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 3`] = `"message 1[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 3`] = `"message 1[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 4`] = `""`;
 
@@ -476,7 +476,7 @@ exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 04 wr
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 2`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 3`] = `"message 1message 2[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 3`] = `"message 1message 2[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 4`] = `""`;
 
@@ -484,7 +484,7 @@ exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 05 wr
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 2`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 3`] = `"message 1message 2message 3message 4[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 3`] = `"message 1message 2message 3message 4[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 4`] = `""`;
 
@@ -534,7 +534,7 @@ exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 01 writ
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 3`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 4`] = `"test message[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 4`] = `"test message[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 1`] = `""`;
 
@@ -542,7 +542,7 @@ exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 02 writ
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 3`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 4`] = `"message 1message 2[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 4`] = `"message 1message 2[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 1`] = `""`;
 
@@ -550,7 +550,7 @@ exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 03 writ
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 3`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 4`] = `"message 1[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 4`] = `"message 1[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 1`] = `""`;
 
@@ -558,7 +558,7 @@ exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 04 writ
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 3`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 4`] = `"message 1message 2[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 4`] = `"message 1message 2[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `""`;
 
@@ -566,7 +566,7 @@ exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 05 writ
 
 exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 3`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 4`] = `"message 1message 2message 3message 4[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 4`] = `"message 1message 2message 3message 4[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 01 writes a single message 1`] = `""`;
 
@@ -610,7 +610,7 @@ exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 05 writes
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 1`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 2`] = `"test message[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 2`] = `"test message[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 3`] = `""`;
 
@@ -618,7 +618,7 @@ exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 01 wr
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 1`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 2`] = `"message 1message 2[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 2`] = `"message 1message 2[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 3`] = `""`;
 
@@ -626,7 +626,7 @@ exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 02 wr
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 1`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 2`] = `"message 1[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 2`] = `"message 1[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 3`] = `""`;
 
@@ -634,7 +634,7 @@ exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 03 wr
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 1`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 2`] = `"message 1message 2[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 2`] = `"message 1message 2[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 3`] = `""`;
 
@@ -642,16 +642,16 @@ exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 04 wr
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `""`;
 
-exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 2`] = `"message 1message 2message 3message 4[r][n]"`;
+exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 2`] = `"message 1message 2message 3message 4[n]"`;
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 3`] = `""`;
 
 exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 4`] = `""`;
 
-exports[`02 color disabled 05 writes to multiple streams 1`] = `"message 1message 2message 1test message[r][n]test messagemessage 1message 2[r][n]message 1[r][n]message 1message 2message 1message 2message 3message 4message 1message 2message 3message 4[r][n]message 1message 2[r][n]"`;
+exports[`02 color disabled 05 writes to multiple streams 1`] = `"message 1message 2message 1test message[n]test messagemessage 1message 2[n]message 1[n]message 1message 2message 1message 2message 3message 4message 1message 2message 3message 4[n]message 1message 2[n]"`;
 
 exports[`02 color disabled 05 writes to multiple streams 2`] = `""`;
 
-exports[`02 color disabled 05 writes to multiple streams 3`] = `"message 1message 2message 3message 4message 1message 2[r][n]message 1message 1message 2test message[r][n]message 1message 2[r][n]message 1message 2message 3message 4[r][n]message 1[r][n]message 1message 2"`;
+exports[`02 color disabled 05 writes to multiple streams 3`] = `"message 1message 2message 3message 4message 1message 2[n]message 1message 1message 2test message[n]message 1message 2[n]message 1message 2message 3message 4[n]message 1[n]message 1message 2"`;
 
-exports[`02 color disabled 05 writes to multiple streams 4`] = `"test messagemessage 1message 2message 1message 2message 3message 4[r][n]message 1message 2test message[r][n]message 1[r][n]message 1message 2[r][n]message 1message 2[r][n]message 1message 1message 2message 3message 4"`;
+exports[`02 color disabled 05 writes to multiple streams 4`] = `"test messagemessage 1message 2message 1message 2message 3message 4[n]message 1message 2test message[n]message 1[n]message 1message 2[n]message 1message 2[n]message 1message 1message 2message 3message 4"`;

@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 /**
- * This file is a little program that prints all of the colors to the console
+ * This file is a little program that prints all of the colors to the console.
+ *
+ * Run this program with `node write-colors.js`
  */
 
 import {

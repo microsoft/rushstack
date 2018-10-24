@@ -12,7 +12,7 @@ import {
 
 export function createColorGrid(): IColorableSequence[][] {
   const foregroundFunctions: ((text: string | IColorableSequence) => IColorableSequence)[] = [
-    (text: string | IColorableSequence) => ({ ...(typeof text === 'string' ? { text } : text) }),
+    (text) => Colors._normalizeStringOrColorableSequence(text),
     Colors.black,
     Colors.white,
     Colors.gray,
@@ -25,7 +25,7 @@ export function createColorGrid(): IColorableSequence[][] {
   ];
 
   const backgroundFunctions: ((text: string | IColorableSequence) => IColorableSequence)[] = [
-    (text: string | IColorableSequence) => ({ ...(typeof text === 'string' ? { text } : text) }),
+    (text) => Colors._normalizeStringOrColorableSequence(text),
     Colors.blackBackground,
     Colors.whiteBackground,
     Colors.grayBackground,

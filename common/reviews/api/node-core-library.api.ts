@@ -1,5 +1,7 @@
 // @beta (undocumented)
 class Colors {
+  // @internal (undocumented)
+  static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
   // (undocumented)
   static black(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
@@ -39,31 +41,11 @@ class Colors {
 }
 
 // @beta (undocumented)
-enum ColorValue {
-  // (undocumented)
-  Black = 0,
-  // (undocumented)
-  Blue = 4,
-  // (undocumented)
-  Cyan = 6,
-  // (undocumented)
-  Gray = 8,
-  // (undocumented)
-  Green = 2,
-  // (undocumented)
-  Magenta = 5,
-  // (undocumented)
-  Red = 1,
-  // (undocumented)
-  White = 7,
-  // (undocumented)
-  Yellow = 3
-}
-
-// @beta (undocumented)
 class ConsoleTerminalProvider implements ITerminalProvider {
   // WARNING: The type "IConsoleTerminalProviderOptions" needs to be exported by the package (e.g. added to index.ts)
   constructor(options?: Partial<IConsoleTerminalProviderOptions>);
+  // (undocumented)
+  readonly eolCharacter: string;
   // (undocumented)
   readonly supportsColor: boolean;
   // (undocumented)
@@ -133,11 +115,7 @@ enum FolderConstants {
 // @beta (undocumented)
 interface IColorableSequence {
   // (undocumented)
-  backgroundColor?: ColorValue;
-  // (undocumented)
-  foregroundColor?: ColorValue;
-  // (undocumented)
-  text: string;
+  __computed: string;
 }
 
 // @beta
@@ -298,6 +276,8 @@ interface IProtectableMapParameters<K, V> {
 
 // @beta (undocumented)
 interface ITerminalProvider {
+  // (undocumented)
+  eolCharacter: string;
   // (undocumented)
   supportsColor: boolean;
   // (undocumented)
