@@ -9,36 +9,30 @@ import {
   JsonFile,
   IPackageJson,
   FileSystem,
-  PackageJsonLookup
+  PackageJsonLookup,
+  Terminal
 } from '@microsoft/node-core-library';
 import { Constants } from './Constants';
 
-export interface IBaseCmdTaskConfig {
+/**
+ * @beta
+ */
+export interface IBaseCmdTaskOptions {
   /**
    * Optional list of custom args to pass to the tool
    */
   customArgs?: string[];
-
-  /**
-   * The path to the package if the task should override the version of the package.
-   */
-  overridePackagePath?: string;
-
-  /**
-   * The directory in which the tool should be invoked.
-   */
-  buildDirectory?: string;
 }
 
 /**
  * Options for a CmdTask.
- * @public
+ * @beta
  */
 export interface IBaseTaskOptions<TTaskConfig> {
-  /**
+    /**
    * The initial config of the task.
    */
-  initialTaskConfig?: TTaskConfig;
+  taskOptions: TTaskConfig;
 
   /**
    * The name of the package to resolve.
@@ -54,9 +48,9 @@ export interface IBaseTaskOptions<TTaskConfig> {
 /**
  * This base task provides support for finding and then executing a binary in a node package.
  *
- * @alpha
+ * @beta
  */
-export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> {
+export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskOptions> {
   private static __nodePath: string | undefined; // tslint:disable-line:variable-name
   private static get _nodePath(): string | undefined {
     if (!BaseCmdTask.__nodePath) {
@@ -86,9 +80,9 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> {
   }
 
   protected _constants: Constants;
+  protected _terminal: Terminal;
+  protected _options: IBaseTaskOptions<TTaskConfig>;
 
-  private _packageName: string;
-  private _packageBinPath: string;
   private _errorHasBeenLogged: boolean;
 
   public static getPackagePath(packageName: string): string | undefined {
@@ -102,27 +96,33 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> {
     return lookup.tryGetPackageJsonFilePathFor(mainEntryPath);
   }
 
-  constructor(constants: Constants, packageName: string, packageBinPath: string) {
+  constructor(
+    constants: Constants,
+    terminal: Terminal,
+    options: IBaseTaskOptions<TTaskConfig>
+  ) {
     this._constants = constants;
+    this._terminal = terminal;
+    this._options = options;
   }
 
   protected invokeCmd(): Promise<void> {
-    let packageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(this._packageName);
+    const packageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(this._options.packageName);
 
     if (!packageJsonPath) {
-      return Promise.reject(new Error(`Unable to find the package.json file for ${this._packageName}.`));
+      return Promise.reject(new Error(`Unable to find the package.json file for ${this._options}.`));
     }
 
     const binaryPackagePath: string = path.dirname(packageJsonPath);
 
     // Print the version
     const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
-    console.log(`${this._packageName} version: ${packageJson.version}`);
+    this._terminal.writeLine(`${this._options} version: ${packageJson.version}`);
 
-    const binaryPath: string = path.resolve(binaryPackagePath, this._packageBinPath);
+    const binaryPath: string = path.resolve(binaryPackagePath, this._options.packageBinPath);
     if (!FileSystem.exists(binaryPath)) {
       return Promise.reject(new Error(
-        `The binary is missing. This indicates that ${this._packageName} is not ` +
+        `The binary is missing. This indicates that ${this._options} is not ` +
         'installed correctly.'
       ));
     }
@@ -156,11 +156,11 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> {
   }
 
   protected _onData(data: Buffer): void {
-    console.log(data.toString().trim());
+    this._terminal.writeLine(data.toString().trim());
   }
 
   protected _onError(data: Buffer): void {
-    console.error(data.toString().trim());
+    this._terminal.writeError(data.toString().trim());
   }
 
   protected _onClose(code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void): void {
@@ -172,6 +172,6 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskConfig> {
   }
 
   protected _getArgs(): string[] {
-    return [];
+    return this._options.taskOptions.customArgs || [];
   }
 }

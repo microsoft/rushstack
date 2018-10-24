@@ -6,12 +6,17 @@ import * as path from 'path';
 const SRC_FOLDER_NAME: string = 'src';
 const LIB_FOLDER_NAME: string = 'lib';
 const DIST_FOLDER_NAME: string = 'dist';
+const TEMP_FOLDER_NAME: string = 'temp';
 
+/**
+ * @beta
+ */
 export class Constants {
   private _projectFolderPath: string;
   private _srcFolderPath: string;
   private _libFolderPath: string;
   private _distFolderPath: string;
+  private _tempFolderPath: string;
 
   public constructor(projectFolderPath: string) {
     this._projectFolderPath = projectFolderPath;
@@ -43,5 +48,13 @@ export class Constants {
     }
 
     return this._distFolderPath;
+  }
+
+  public get tempFolderPath(): string {
+    if (!this._tempFolderPath) {
+      this._tempFolderPath = path.join(this._projectFolderPath, TEMP_FOLDER_NAME);
+    }
+
+    return this._tempFolderPath;
   }
 }

@@ -4,36 +4,28 @@
 import * as path from 'path';
 import {
   JsonFile,
-  FileSystem,
-  LegacyAdapters
+  Terminal
 } from '@microsoft/node-core-library';
-import * as glob from 'glob';
-import * as globEscape from 'glob-escape';
-import * as typescript from 'typescript';
-import * as decomment from 'decomment';
 
 import {
   BaseCmdTask,
-  IBaseCmdTaskConfig
+  IBaseCmdTaskOptions
 } from './BaseCmdTask';
-import { TsParseConfigHost } from './TsParseConfigHost';
 import { Constants } from './Constants';
 
 /**
- * @public
+ * @beta
  */
-export interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
-}
-
-/**
- * @alpha
- */
-export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
-  constructor(constants: Constants) {
+export class TscCmdTask extends BaseCmdTask<IBaseCmdTaskOptions> {
+  constructor(taskOptions: IBaseCmdTaskOptions, constants: Constants, terminal: Terminal) {
     super(
       constants,
-      'typescript',
-      path.join('bin', 'tsc')
+      terminal,
+      {
+        packageName: 'typeScript',
+        packageBinPath: path.join('bin', 'tsc'),
+        taskOptions
+      }
     );
   }
 
@@ -53,9 +45,9 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
       if (!!trimmedLine) {
         if (trimmedLine.match(/\serror\s/i)) {
           // If the line looks like an error, log it as an error
-          console.error(trimmedLine);
+          this._terminal.writeErrorLine(trimmedLine);
         } else {
-          console.log(trimmedLine);
+          this._terminal.writeLine(trimmedLine);
         }
       }
     }

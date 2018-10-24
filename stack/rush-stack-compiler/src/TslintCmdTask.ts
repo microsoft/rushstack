@@ -2,18 +2,30 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, Terminal } from '@microsoft/node-core-library';
 import * as TSLint from 'tslint';
 
 import {
   BaseCmdTask,
-  IBaseCmdTaskConfig
+  IBaseCmdTaskOptions
 } from './BaseCmdTask';
+import { Constants } from './Constants';
+
+export type WriteFileIssueFunction = (
+  filePath: string,
+  line: number,
+  column: number,
+  errorCode: string,
+  message: string
+) => void;
 
 /**
  * @public
  */
-export interface ITslintCmdTaskConfig extends IBaseCmdTaskConfig {
+export interface ITslintCmdTaskConfig extends IBaseCmdTaskOptions {
+  fileError: WriteFileIssueFunction;
+  fileWarning: WriteFileIssueFunction;
+
   /**
    * If true, displays warnings as errors. Defaults to false.
    */
@@ -21,18 +33,17 @@ export interface ITslintCmdTaskConfig extends IBaseCmdTaskConfig {
 }
 
 /**
- * @alpha
+ * @beta
  */
 export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
-  constructor() {
+  constructor(taskOptions: ITslintCmdTaskConfig, constants: Constants, terminal: Terminal) {
     super(
-      'tslint',
+      constants,
+      terminal,
       {
-        initialTaskConfig: {
-          displayAsError: false
-        },
         packageName: 'tslint',
-        packageBinPath: path.join('bin', 'tslint')
+        packageBinPath: path.join('bin', 'tslint'),
+        taskOptions
       }
     );
   }
@@ -41,15 +52,15 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'tslint-cmd.schema.json'));
   }
 
-  public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {
+  public invoke(): Promise<void> {
     if (this._customFormatterSpecified) {
-      this.logVerbose(
+      this._terminal.writeVerboseLine(
         'A custom formatter has been specified in customArgs, so the default TSLint error logging ' +
         'has been disabled.'
       );
     }
 
-    return super.executeTask(gulp, completeCallback);
+    return super.invokeCmd();
   }
 
   protected _getArgs(): string[] {
@@ -64,14 +75,14 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
     }
 
     args.push(...[
-      '--project', this._buildDirectory
+      '--project', this._constants.srcFolderPath
     ]);
 
     return args;
   }
 
   protected _onClose(code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void): void {
-    if (this.taskConfig.displayAsError) {
+    if (this._options.taskOptions.displayAsError) {
       super._onClose(code, hasErrors, resolve, reject);
     } else {
       resolve();
@@ -87,13 +98,15 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
         column: number,
         errorCode: string,
         message: string
-      ) => void = this.taskConfig.displayAsError ? this.fileError.bind(this) : this.fileWarning.bind(this);
+      ) => void = this._options.taskOptions.displayAsError
+        ? this._options.taskOptions.fileError
+        : this._options.taskOptions.fileWarning;
 
       // TSLint errors are logged to stdout
       try {
         const errors: TSLint.IRuleFailureJson[] = JSON.parse(dataStr);
         for (const error of errors) {
-          const pathFromRoot: string = path.relative(this.buildConfig.rootPath, error.name);
+          const pathFromRoot: string = path.relative(this._constants.projectFolderPath, error.name);
           tslintErrorLogFn(
             pathFromRoot,
             error.startPosition.line + 1,
@@ -106,7 +119,7 @@ export class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
         // If we fail to parse the JSON, it's likely TSLint encountered an error parsing the config file,
         // or it experienced an inner error. In this case, log the output as an error regardless of the
         // displayAsError value
-        this.logError(dataStr);
+        this._terminal.writeErrorLine(dataStr);
       }
     }
   }
