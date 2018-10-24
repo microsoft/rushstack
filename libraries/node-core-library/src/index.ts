@@ -84,5 +84,3 @@ export {
   Severity
 } from './Terminal/ITerminalProvider';
 export { ConsoleTerminalProvider } from './Terminal/ConsoleTerminalProvider';
-export { FileTerminalProvider } from './Terminal/FileTerminalProvider';
-export { StringBufferTerminalProvider } from './Terminal/StringBufferTerminalProvider';

@@ -115,17 +115,6 @@ class FileSystem {
   static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
 }
 
-// @beta (undocumented)
-class FileTerminalProvider implements ITerminalProvider {
-  constructor(filePath: string);
-  // (undocumented)
-  readonly supportsColor: boolean;
-  // (undocumented)
-  readonly width: number | undefined;
-  // (undocumented)
-  write(data: string): void;
-}
-
 // @public
 class FileWriter {
   close(): void;
@@ -429,25 +418,6 @@ enum Severity {
   log = 0,
   // (undocumented)
   warn = 1
-}
-
-// @beta (undocumented)
-class StringBufferTerminalProvider implements ITerminalProvider {
-  constructor(supportsColor?: boolean);
-  // (undocumented)
-  clear(): void;
-  // (undocumented)
-  getErrorOutput(): string;
-  // (undocumented)
-  getOutput(): string;
-  // (undocumented)
-  getWarningOutput(): string;
-  // (undocumented)
-  readonly supportsColor: boolean;
-  // (undocumented)
-  readonly width: number | undefined;
-  // (undocumented)
-  write(data: string, severity: Severity): void;
 }
 
 // @beta
