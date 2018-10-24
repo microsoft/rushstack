@@ -73,3 +73,17 @@ export {
   LegacyAdapters,
   callback
 } from './LegacyAdapters';
+export { StringBuilder } from './StringBuilder';
+export { Terminal } from './Terminal/Terminal';
+export {
+  Colors,
+  IColorableSequence
+} from './Terminal/Colors';
+export {
+  ITerminalProvider,
+  TerminalProviderSeverity
+} from './Terminal/ITerminalProvider';
+export {
+  ConsoleTerminalProvider,
+  IConsoleTerminalProviderOptions
+} from './Terminal/ConsoleTerminalProvider';
