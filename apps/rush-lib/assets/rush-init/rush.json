@@ -204,21 +204,37 @@
   },
 
   /**
-   * Variations of dependencies which may be installed other than the default.
-   * The actual dependency configuration for a variant is specified under
-   * /common/config/rush/variants/<variant_name>
-   * and can include an alternate common-versions.json file.
-   * After running "rush change --variant <variant_name>", a shrinkwrap file will be produced
-   * under the folder for the variant, and should be committed via Git.
+   * Installation variants allow you to maintain a parallel set of configuration files that can be
+   * used to build the entire monorepo with an alternate set of dependencies.  For example, suppose
+   * you upgrade all your projects to use a new release of an important framework, but during a transition period
+   * you intend to maintain compability with the old release.  In this situation, you probably want your
+   * CI validation to build the entire repo twice: once with the old release, and once with the new release.
+   *
+   * Rush "installation variants" correspond to sets of config files located under this folder:
+   *
+   *   common/config/rush/variants/<variant_name>
+   *
+   * The variant folder can contain an alternate common-versions.json file.  Its "preferredVersions" field can be used
+   * to select older versions of dependencies (within a loose SemVer range specified in your package.json files).
+   * To install a variant, run "rush install --variant <variant_name>".
+   *
+   * For more details and instructions, see this article:  https://rushjs.io/pages/advanced/installation_variants/
    */
-  /*[BEGIN "HYPOTHETICAL"]*/
   "variants": [
+    /*[BEGIN "HYPOTHETICAL"]*/
     {
-      "variantName": "test",
-      "description": "A variant of dependencies used when testing."
+      /**
+       * The folder name for this variant.
+       */
+      "variantName": "old-sdk",
+
+      /**
+       * An informative description
+       */
+      "description": "Build this repo using the previous release of the SDK"
     }
+    /*[END "HYPOTHETICAL"]*/
   ],
-  /*[END "HYPOTHETICAL"]*/
 
   /**
    * Rush can collect anonymous telemetry about everyday developer activity such as

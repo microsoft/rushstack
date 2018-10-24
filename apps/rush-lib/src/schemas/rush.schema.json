@@ -105,13 +105,13 @@
       "additionalProperties": false
     },
     "variants": {
-      "description": "A list of allowed installation variants for this repository.",
+      "description": "Defines the list of installation variants for this repository. For more details about this feature, see this article: https://rushjs.io/pages/advanced/installation_variants/",
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
           "variantName": {
-            "description": "The name of the variant. Maps to /common/rush/variants/{name} under the repository root.",
+            "description": "The name of the variant. Maps to common/rush/variants/{name} under the repository root.",
             "type": "string"
           },
           "description": {

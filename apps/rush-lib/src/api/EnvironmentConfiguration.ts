@@ -10,7 +10,7 @@ import * as os from 'os';
 export const enum EnvironmentVariableNames {
   /**
    * This variable overrides the temporary folder used by Rush.
-   * The default value is "common/temp" under the repoistory root.
+   * The default value is "common/temp" under the repository root.
    */
   RUSH_TEMP_FOLDER = 'RUSH_TEMP_FOLDER',
 
@@ -22,8 +22,9 @@ export const enum EnvironmentVariableNames {
   RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION',
 
   /**
-   * This variable selects an alternate 'variant' for Rush to use when installing
-   * and linking package dependencies.
+   * This variable selects a specific installation variant for Rush to use when installing
+   * and linking package dependencies.  For more information, see this article:
+   * https://rushjs.io/pages/advanced/installation_variants/
    */
   RUSH_VARIANT = 'RUSH_VARIANT'
 }
