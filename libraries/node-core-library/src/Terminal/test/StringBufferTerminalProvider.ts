@@ -2,14 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import { ITerminalProvider, Severity } from '../ITerminalProvider';
+import { StringBuilder } from '../../StringBuilder';
 
 /**
  * @beta
  */
 export class StringBufferTerminalProvider implements ITerminalProvider {
-  private _standardBuffer: string[] = [];
-  private _warningBuffer: string[] = [];
-  private _errorBuffer: string[] = [];
+  private _standardBuffer: StringBuilder = new StringBuilder();
+  private _warningBuffer: StringBuilder = new StringBuilder();
+  private _errorBuffer: StringBuilder = new StringBuilder();
 
   private _supportsColor: boolean;
 
@@ -20,18 +21,18 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   public write(data: string, severity: Severity): void {
     switch (severity) {
       case Severity.warn: {
-        this._warningBuffer.push(data);
+        this._warningBuffer.append(data);
         break;
       }
 
       case Severity.error: {
-        this._errorBuffer.push(data);
+        this._errorBuffer.append(data);
         break;
       }
 
       case Severity.log:
       default: {
-        this._standardBuffer.push(data);
+        this._standardBuffer.append(data);
         break;
       }
     }
@@ -45,28 +46,16 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     return this._supportsColor;
   }
 
-  public clear(): void {
-    this._standardBuffer = [];
-    this._warningBuffer = [];
-    this._errorBuffer = [];
-  }
-
   public getOutput(): string {
-    const combinedBuffer: string = this._normalizeOutput(this._standardBuffer.join(''));
-    this._standardBuffer = [combinedBuffer];
-    return combinedBuffer;
+    return this._normalizeOutput(this._standardBuffer.toString());
   }
 
   public getErrorOutput(): string {
-    const combinedBuffer: string = this._normalizeOutput(this._errorBuffer.join(''));
-    this._standardBuffer = [combinedBuffer];
-    return combinedBuffer;
+    return this._normalizeOutput(this._errorBuffer.toString());
   }
 
   public getWarningOutput(): string {
-    const combinedBuffer: string = this._normalizeOutput(this._warningBuffer.join(''));
-    this._standardBuffer = [combinedBuffer];
-    return combinedBuffer;
+    return this._normalizeOutput(this._warningBuffer.toString());
   }
 
   private _normalizeOutput(s: string): string { // tslint:disable-line:export-name

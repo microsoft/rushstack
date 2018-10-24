@@ -421,6 +421,13 @@ enum Severity {
 }
 
 // @beta
+class StringBuilder {
+  constructor();
+  append(text: string): void;
+  toString(): string;
+}
+
+// @beta
 class Terminal {
   constructor(provider: ITerminalProvider, verboseEnabled?: boolean);
   // (undocumented)
