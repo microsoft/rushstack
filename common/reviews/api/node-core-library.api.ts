@@ -69,7 +69,7 @@ class ConsoleTerminalProvider implements ITerminalProvider {
   // (undocumented)
   verboseEnabled: boolean;
   // (undocumented)
-  write(data: string, severity: Severity): void;
+  write(data: string, severity: TerminalProviderSeverity): void;
 }
 
 // @public
@@ -301,7 +301,7 @@ interface ITerminalProvider {
   // (undocumented)
   supportsColor: boolean;
   // (undocumented)
-  write(data: string, severity: Severity): void;
+  write(data: string, severity: TerminalProviderSeverity): void;
 }
 
 // @public
@@ -410,18 +410,6 @@ class ProtectableMap<K, V> {
   readonly size: number;
 }
 
-// @beta (undocumented)
-enum Severity {
-  // (undocumented)
-  error = 2,
-  // (undocumented)
-  log = 0,
-  // (undocumented)
-  verbose = 3,
-  // (undocumented)
-  warning = 1
-}
-
 // @beta
 class StringBuilder {
   constructor();
@@ -444,6 +432,18 @@ class Terminal {
   writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
   writeWarning(...messageParts: (string | IColorableSequence)[]): void;
   writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
+}
+
+// @beta (undocumented)
+enum TerminalProviderSeverity {
+  // (undocumented)
+  error = 2,
+  // (undocumented)
+  log = 0,
+  // (undocumented)
+  verbose = 3,
+  // (undocumented)
+  warning = 1
 }
 
 // @public

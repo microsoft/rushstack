@@ -3,7 +3,7 @@
 
 import { EOL } from 'os';
 
-import { ITerminalProvider, Severity } from './ITerminalProvider';
+import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 import { IColorableSequence, ColorValue } from './Colors';
 
 /**
@@ -33,7 +33,7 @@ export class Terminal {
    * Write a generic message to the terminal
    */
   public write(...messageParts: (string | IColorableSequence)[]): void {
-    this._writeSegmentsToProviders(messageParts, Severity.log);
+    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.log);
   }
 
   /**
@@ -54,7 +54,7 @@ export class Terminal {
       messageParts.map(
         (part) => ({ ...(typeof part === 'string' ? { text: part } : part), foregroundColor: ColorValue.Yellow })
       ),
-      Severity.warning
+      TerminalProviderSeverity.warning
     );
   }
 
@@ -72,7 +72,7 @@ export class Terminal {
         ),
         { text: EOL }
       ],
-      Severity.warning
+      TerminalProviderSeverity.warning
     );
   }
 
@@ -87,7 +87,7 @@ export class Terminal {
       messageParts.map(
         (part) => ({ ...(typeof part === 'string' ? { text: part } : part), foregroundColor: ColorValue.Red })
       ),
-      Severity.error
+      TerminalProviderSeverity.error
     );
   }
 
@@ -105,7 +105,7 @@ export class Terminal {
         ),
         { text: EOL }
       ],
-      Severity.error
+      TerminalProviderSeverity.error
     );
   }
 
@@ -113,7 +113,7 @@ export class Terminal {
    * Write a verbose-level message.
    */
   public writeVerbose(...messageParts: (string | IColorableSequence)[]): void {
-    this._writeSegmentsToProviders(messageParts, Severity.verbose);
+    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.verbose);
   }
 
   /**
@@ -123,7 +123,10 @@ export class Terminal {
     this.writeVerbose(...messageParts, { text: EOL });
   }
 
-  private _writeSegmentsToProviders(segments: (string | IColorableSequence)[], severity: Severity): void {
+  private _writeSegmentsToProviders(
+    segments: (string | IColorableSequence)[],
+    severity: TerminalProviderSeverity
+  ): void {
     let withColor: string;
     let withoutColor: string;
 

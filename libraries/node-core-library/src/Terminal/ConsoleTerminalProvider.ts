@@ -3,7 +3,7 @@
 
 import { enabled as supportsColor } from 'colors/safe';
 
-import { ITerminalProvider, Severity } from './ITerminalProvider';
+import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 
 export interface IConsoleTerminalProviderOptions {
   verboseEnabled: boolean;
@@ -19,22 +19,22 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
     this.verboseEnabled = !!options.verboseEnabled;
   }
 
-  public write(data: string, severity: Severity): void {
+  public write(data: string, severity: TerminalProviderSeverity): void {
     switch (severity) {
-      case Severity.warning:
-      case Severity.error: {
+      case TerminalProviderSeverity.warning:
+      case TerminalProviderSeverity.error: {
         process.stderr.write(data);
         break;
       }
 
-      case Severity.verbose: {
+      case TerminalProviderSeverity.verbose: {
         if (this.verboseEnabled) {
           process.stdout.write(data);
         }
         break;
       }
 
-      case Severity.log:
+      case TerminalProviderSeverity.log:
       default: {
         process.stdout.write(data);
         break;

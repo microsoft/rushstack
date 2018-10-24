@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalProvider, Severity } from '../ITerminalProvider';
+import { ITerminalProvider, TerminalProviderSeverity } from '../ITerminalProvider';
 import { StringBuilder } from '../../StringBuilder';
 
 /**
@@ -19,24 +19,24 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     this._supportsColor = supportsColor;
   }
 
-  public write(data: string, severity: Severity): void {
+  public write(data: string, severity: TerminalProviderSeverity): void {
     switch (severity) {
-      case Severity.warning: {
+      case TerminalProviderSeverity.warning: {
         this._warningBuffer.append(data);
         break;
       }
 
-      case Severity.error: {
+      case TerminalProviderSeverity.error: {
         this._errorBuffer.append(data);
         break;
       }
 
-      case Severity.verbose: {
+      case TerminalProviderSeverity.verbose: {
         this._verboseBuffer.append(data);
         break;
       }
 
-      case Severity.log:
+      case TerminalProviderSeverity.log:
       default: {
         this._standardBuffer.append(data);
         break;

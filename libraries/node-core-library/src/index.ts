@@ -82,6 +82,6 @@ export {
 } from './Terminal/Colors';
 export {
   ITerminalProvider,
-  Severity
+  TerminalProviderSeverity
 } from './Terminal/ITerminalProvider';
 export { ConsoleTerminalProvider } from './Terminal/ConsoleTerminalProvider';

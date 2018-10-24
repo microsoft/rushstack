@@ -1,7 +1,7 @@
 /**
  * @beta
  */
-export enum Severity {
+export enum TerminalProviderSeverity {
   log,
   warning,
   error,
@@ -13,5 +13,5 @@ export enum Severity {
  */
 export interface ITerminalProvider {
   supportsColor: boolean;
-  write(data: string, severity: Severity): void;
+  write(data: string, severity: TerminalProviderSeverity): void;
 }
