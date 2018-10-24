@@ -1,4 +1,4 @@
-// @beta (undocumented)
+// @beta
 class Colors {
   // @internal (undocumented)
   static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
@@ -42,7 +42,6 @@ class Colors {
 
 // @beta (undocumented)
 class ConsoleTerminalProvider implements ITerminalProvider {
-  // WARNING: The type "IConsoleTerminalProviderOptions" needs to be exported by the package (e.g. added to index.ts)
   constructor(options?: Partial<IConsoleTerminalProviderOptions>);
   // (undocumented)
   readonly eolCharacter: string;
@@ -122,6 +121,11 @@ interface IColorableSequence {
   isEol?: boolean;
   // (undocumented)
   text: string;
+}
+
+// @beta
+interface IConsoleTerminalProviderOptions {
+  verboseEnabled: boolean;
 }
 
 // @beta
@@ -280,13 +284,10 @@ interface IProtectableMapParameters<K, V> {
   onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
-// @beta (undocumented)
+// @beta
 interface ITerminalProvider {
-  // (undocumented)
   eolCharacter: string;
-  // (undocumented)
   supportsColor: boolean;
-  // (undocumented)
   write(data: string, severity: TerminalProviderSeverity): void;
 }
 
@@ -406,9 +407,7 @@ class StringBuilder {
 // @beta
 class Terminal {
   constructor(provider: ITerminalProvider);
-  // (undocumented)
   registerProvider(provider: ITerminalProvider): void;
-  // (undocumented)
   unregisterProvider(provider: ITerminalProvider): void;
   write(...messageParts: (string | IColorableSequence)[]): void;
   writeError(...messageParts: (string | IColorableSequence)[]): void;

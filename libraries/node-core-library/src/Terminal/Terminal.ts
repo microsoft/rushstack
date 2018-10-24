@@ -25,10 +25,16 @@ export class Terminal {
     this._providers.add(provider);
   }
 
+  /**
+   * Subscribe a new terminal provider.
+   */
   public registerProvider(provider: ITerminalProvider): void {
     this._providers.add(provider);
   }
 
+  /**
+   * Unsubscribe a terminal provider. If the provider isn't subscribed, this function does nothing.
+   */
   public unregisterProvider(provider: ITerminalProvider): void {
     if (this._providers.has(provider)) {
       this._providers.delete(provider);

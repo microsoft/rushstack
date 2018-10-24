@@ -83,4 +83,7 @@ export {
   ITerminalProvider,
   TerminalProviderSeverity
 } from './Terminal/ITerminalProvider';
-export { ConsoleTerminalProvider } from './Terminal/ConsoleTerminalProvider';
+export {
+  ConsoleTerminalProvider,
+  IConsoleTerminalProviderOptions
+} from './Terminal/ConsoleTerminalProvider';

@@ -6,7 +6,15 @@ import { enabled as supportsColor } from 'colors/safe';
 
 import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 
+/**
+ * Options to be provided to a {@link ConsoleTerminalProvider}
+ *
+ * @beta
+ */
 export interface IConsoleTerminalProviderOptions {
+  /**
+   * If true, print verbose logging messages
+   */
   verboseEnabled: boolean;
 }
 

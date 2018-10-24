@@ -31,6 +31,12 @@ export enum ColorValue {
 }
 
 /**
+ * The static functions on this class are used to produce colored text
+ * for use with the node-core-library terminal.
+ *
+ * @example
+ * terminal.writeLine(Colors.green('Green Text!'), ' ', Colors.blue('Blue Text!'));
+ *
  * @beta
  */
 export class Colors {
