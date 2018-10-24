@@ -15,7 +15,7 @@ describe('JsonSchema', () => {
 
   const schema: JsonSchema = JsonSchema.fromFile(schemaPath);
 
-  it('loadAndValidate successfully validates a JSON file', () => {
+  test('loadAndValidate successfully validates a JSON file', () => {
     const jsonPath: string = path.resolve(path.join(__dirname, './test-data/test.json'));
     const jsonObject: Object = JsonFile.loadAndValidate(jsonPath, schema);
     expect(jsonObject).toMatchObject(
@@ -30,7 +30,7 @@ describe('JsonSchema', () => {
     );
   });
 
-  it('validateObjectWithCallback successfully reports a compound validation error', () => {
+  test('validateObjectWithCallback successfully reports a compound validation error', () => {
     const jsonPath2: string = path.resolve(path.join(__dirname, './test-data/test2.json'));
     const jsonObject2: Object = JsonFile.load(jsonPath2);
 

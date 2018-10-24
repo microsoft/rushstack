@@ -1,3 +1,58 @@
+// @beta
+class Colors {
+  // @internal (undocumented)
+  static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static black(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static blackBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static blue(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static blueBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static cyan(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static cyanBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static gray(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static grayBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static green(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static greenBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static magenta(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static magentaBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static red(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static redBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static white(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static whiteBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static yellow(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static yellowBackground(text: string | IColorableSequence): IColorableSequence;
+}
+
+// @beta (undocumented)
+class ConsoleTerminalProvider implements ITerminalProvider {
+  constructor(options?: Partial<IConsoleTerminalProviderOptions>);
+  // (undocumented)
+  readonly eolCharacter: string;
+  // (undocumented)
+  readonly supportsColor: boolean;
+  // (undocumented)
+  verboseEnabled: boolean;
+  // (undocumented)
+  write(data: string, severity: TerminalProviderSeverity): void;
+}
+
 // @public
 class Executable {
   static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
@@ -18,6 +73,7 @@ class FileDiffTest {
 
 // @public
 class FileSystem {
+  static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
   static changePosixModeBits(path: string, mode: PosixModeBits): void;
   static copyFile(options: IFileSystemCopyFileOptions): void;
   static createHardLink(options: IFileSystemCreateLinkOptions): void;
@@ -53,6 +109,23 @@ class FileWriter {
 enum FolderConstants {
   Git = ".git",
   NodeModules = "node_modules"
+}
+
+// @beta (undocumented)
+interface IColorableSequence {
+  // (undocumented)
+  backgroundColor?: ColorValue;
+  // (undocumented)
+  foregroundColor?: ColorValue;
+  // (undocumented)
+  isEol?: boolean;
+  // (undocumented)
+  text: string;
+}
+
+// @beta
+interface IConsoleTerminalProviderOptions {
+  verboseEnabled: boolean;
 }
 
 // @beta
@@ -211,6 +284,13 @@ interface IProtectableMapParameters<K, V> {
   onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
+// @beta
+interface ITerminalProvider {
+  eolCharacter: string;
+  supportsColor: boolean;
+  write(data: string, severity: TerminalProviderSeverity): void;
+}
+
 // @public
 class JsonFile {
   static load(jsonFilename: string): any;
@@ -317,12 +397,47 @@ class ProtectableMap<K, V> {
   readonly size: number;
 }
 
+// @beta
+class StringBuilder {
+  constructor();
+  append(text: string): void;
+  toString(): string;
+}
+
+// @beta
+class Terminal {
+  constructor(provider: ITerminalProvider);
+  registerProvider(provider: ITerminalProvider): void;
+  unregisterProvider(provider: ITerminalProvider): void;
+  write(...messageParts: (string | IColorableSequence)[]): void;
+  writeError(...messageParts: (string | IColorableSequence)[]): void;
+  writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
+  writeLine(...messageParts: (string | IColorableSequence)[]): void;
+  writeVerbose(...messageParts: (string | IColorableSequence)[]): void;
+  writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
+  writeWarning(...messageParts: (string | IColorableSequence)[]): void;
+  writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
+}
+
+// @beta (undocumented)
+enum TerminalProviderSeverity {
+  // (undocumented)
+  error = 2,
+  // (undocumented)
+  log = 0,
+  // (undocumented)
+  verbose = 3,
+  // (undocumented)
+  warning = 1
+}
+
 // @public
 class Text {
   static convertToCrLf(input: string): string;
   static convertToLf(input: string): string;
   static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
-  static padEnd(s: string, minimumLength: number): string;
+  static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
+  static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
   static replaceAll(input: string, searchValue: string, replaceValue: string): string;
   static truncateWithEllipsis(s: string, maximumLength: number): string;
 }

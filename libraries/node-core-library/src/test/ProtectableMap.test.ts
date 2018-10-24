@@ -44,7 +44,7 @@ class ExampleApi {
 }
 
 describe('ProtectableMap', () => {
-  it('Protected operations', () => {
+  test('Protected operations', () => {
     const exampleApi: ExampleApi = new ExampleApi();
     exampleApi.studentAgesByName.clear();
 
@@ -63,7 +63,7 @@ describe('ProtectableMap', () => {
     expect(exampleApi.studentAgesByName.has('CHARLIE')).toEqual(false);
   });
 
-  it('Unprotected operations', () => {
+  test('Unprotected operations', () => {
     const exampleApi: ExampleApi = new ExampleApi();
 
     exampleApi.doUnprotectedOperations();
@@ -73,7 +73,7 @@ describe('ProtectableMap', () => {
     expect(exampleApi.studentAgesByName.get('Dave')).toEqual(-123);
   });
 
-  it('Error case', () => {
+  test('Error case', () => {
     const exampleApi: ExampleApi = new ExampleApi();
     expect(() => {
       exampleApi.studentAgesByName.set('Jane', 23);
