@@ -1,4 +1,66 @@
 // @beta (undocumented)
+class Colors {
+  // (undocumented)
+  static black(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static blackBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static blue(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static blueBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static cyan(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static cyanBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static gray(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static grayBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static green(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static greenBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static magenta(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static magentaBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static red(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static redBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static white(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static whiteBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static yellow(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static yellowBackground(text: string | IColorableSequence): IColorableSequence;
+}
+
+// @beta (undocumented)
+enum ColorValue {
+  // (undocumented)
+  Black = 0,
+  // (undocumented)
+  Blue = 4,
+  // (undocumented)
+  Cyan = 6,
+  // (undocumented)
+  Gray = 8,
+  // (undocumented)
+  Green = 2,
+  // (undocumented)
+  Magenta = 5,
+  // (undocumented)
+  Red = 1,
+  // (undocumented)
+  White = 7,
+  // (undocumented)
+  Yellow = 3
+}
+
+// @beta (undocumented)
 class ConsoleTerminalProvider implements ITerminalProvider {
   // (undocumented)
   readonly supportsColor: boolean;
@@ -75,6 +137,16 @@ class FileWriter {
 enum FolderConstants {
   Git = ".git",
   NodeModules = "node_modules"
+}
+
+// @beta (undocumented)
+interface IColorableSequence {
+  // (undocumented)
+  backgroundColor?: ColorValue;
+  // (undocumented)
+  foregroundColor?: ColorValue;
+  // (undocumented)
+  text: string;
 }
 
 // @beta
@@ -359,6 +431,25 @@ enum Severity {
   warn = 1
 }
 
+// @beta (undocumented)
+class StringBufferTerminalProvider implements ITerminalProvider {
+  constructor(supportsColor?: boolean);
+  // (undocumented)
+  clear(): void;
+  // (undocumented)
+  getErrorOutput(): string;
+  // (undocumented)
+  getOutput(): string;
+  // (undocumented)
+  getWarningOutput(): string;
+  // (undocumented)
+  readonly supportsColor: boolean;
+  // (undocumented)
+  readonly width: number | undefined;
+  // (undocumented)
+  write(data: string, severity: Severity): void;
+}
+
 // @beta
 class Terminal {
   constructor(provider: ITerminalProvider, verboseEnabled?: boolean);
@@ -368,10 +459,14 @@ class Terminal {
   unregisterProvider(provider: ITerminalProvider): void;
   // (undocumented)
   verboseEnabled: boolean;
-  write(message: string): void;
-  writeError(message: string): void;
-  writeVerbose(message: string): void;
-  writeWarning(message: string): void;
+  write(...messageParts: (string | IColorableSequence)[]): void;
+  writeError(...messageParts: (string | IColorableSequence)[]): void;
+  writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
+  writeLine(...messageParts: (string | IColorableSequence)[]): void;
+  writeVerbose(...messageParts: (string | IColorableSequence)[]): void;
+  writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
+  writeWarning(...messageParts: (string | IColorableSequence)[]): void;
+  writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
 }
 
 // @public

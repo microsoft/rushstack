@@ -75,8 +75,14 @@ export {
 } from './LegacyAdapters';
 export { Terminal } from './Terminal/Terminal';
 export {
+  ColorValue,
+  Colors,
+  IColorableSequence
+} from './Terminal/Colors';
+export {
   ITerminalProvider,
   Severity
 } from './Terminal/ITerminalProvider';
 export { ConsoleTerminalProvider } from './Terminal/ConsoleTerminalProvider';
 export { FileTerminalProvider } from './Terminal/FileTerminalProvider';
+export { StringBufferTerminalProvider } from './Terminal/StringBufferTerminalProvider';

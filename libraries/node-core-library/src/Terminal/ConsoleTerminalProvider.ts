@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { enabled as supportsColor } from 'colors/safe';
+
 import { ITerminalProvider, Severity } from './ITerminalProvider';
 
 /**
@@ -24,12 +26,10 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
   }
 
   public get width(): number | undefined {
-    return process.stdout.columns;
+    return undefined;
   }
 
   public get supportsColor(): boolean {
-    // If the console doesn't actually support colors, the colors library won't
-    // return color characters when the Terminal formats text.
-    return true;
+    return supportsColor;
   }
 }

@@ -23,7 +23,7 @@ export class FileTerminalProvider implements ITerminalProvider {
   }
 
   public get width(): number | undefined {
-    return Number.MAX_VALUE;
+    return undefined;
   }
 
   public get supportsColor(): boolean {

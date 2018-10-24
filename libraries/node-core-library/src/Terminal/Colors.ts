@@ -1,13 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * @beta
+ */
 export interface IColorableSequence {
   text: string;
-  foregroundColor?: Color;
-  backgroundColor?: Color;
+  foregroundColor?: ColorValue;
+  backgroundColor?: ColorValue;
 }
 
-export enum Color {
+/**
+ * @beta
+ */
+export enum ColorValue {
   Black,
   Red,
   Green,
@@ -19,130 +25,133 @@ export enum Color {
   Gray
 }
 
+/**
+ * @beta
+ */
 export class Colors {
   public static black(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      foregroundColor: Color.Black
+      foregroundColor: ColorValue.Black
     };
   }
 
   public static red(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      foregroundColor: Color.Red
+      foregroundColor: ColorValue.Red
     };
   }
 
   public static green(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      foregroundColor: Color.Green
+      foregroundColor: ColorValue.Green
     };
   }
 
   public static yellow(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      foregroundColor: Color.Yellow
+      foregroundColor: ColorValue.Yellow
     };
   }
 
   public static blue(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      foregroundColor: Color.Blue
+      foregroundColor: ColorValue.Blue
     };
   }
 
   public static magenta(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      foregroundColor: Color.Magenta
+      foregroundColor: ColorValue.Magenta
     };
   }
 
   public static cyan(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      foregroundColor: Color.Cyan
+      foregroundColor: ColorValue.Cyan
     };
   }
 
   public static white(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      foregroundColor: Color.White
+      foregroundColor: ColorValue.White
     };
   }
 
   public static gray(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      foregroundColor: Color.Gray
+      foregroundColor: ColorValue.Gray
     };
   }
 
   public static blackBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      backgroundColor: Color.Black
+      backgroundColor: ColorValue.Black
     };
   }
 
   public static redBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      backgroundColor: Color.Red
+      backgroundColor: ColorValue.Red
     };
   }
 
   public static greenBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      backgroundColor: Color.Green
+      backgroundColor: ColorValue.Green
     };
   }
 
   public static yellowBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      backgroundColor: Color.Yellow
+      backgroundColor: ColorValue.Yellow
     };
   }
 
   public static blueBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      backgroundColor: Color.Blue
+      backgroundColor: ColorValue.Blue
     };
   }
 
   public static magentaBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      backgroundColor: Color.Magenta
+      backgroundColor: ColorValue.Magenta
     };
   }
 
   public static cyanBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      backgroundColor: Color.Cyan
+      backgroundColor: ColorValue.Cyan
     };
   }
 
   public static whiteBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      backgroundColor: Color.White
+      backgroundColor: ColorValue.White
     };
   }
 
   public static grayBackground(text: string | IColorableSequence): IColorableSequence {
     return {
       ...(typeof text === 'string' ? { text } : text),
-      backgroundColor: Color.Gray
+      backgroundColor: ColorValue.Gray
     };
   }
 }
