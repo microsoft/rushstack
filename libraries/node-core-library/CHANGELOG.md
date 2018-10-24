@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Wed, 17 Oct 2018 21:04:49 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Oct 2018 16:03:10 GMT and should not be manually modified.
+
+## 3.4.0
+Wed, 24 Oct 2018 16:03:10 GMT
+
+### Minor changes
+
+- Adding Terminal API.
 
 ## 3.3.1
 Wed, 17 Oct 2018 21:04:49 GMT
