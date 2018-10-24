@@ -49,6 +49,9 @@ export class Terminal {
 
   /**
    * Write a warning message to the console with yellow text.
+   *
+   * @remarks
+   * The yellow color takes precedence over any other foreground colors set.
    */
   public writeWarning(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(
@@ -61,6 +64,9 @@ export class Terminal {
 
   /**
    * Write a warning message to the console with yellow text, followed by a newline.
+   *
+   * @remarks
+   * The yellow color takes precedence over any other foreground colors set.
    */
   public writeWarningLine(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(
@@ -76,6 +82,9 @@ export class Terminal {
 
   /**
    * Write an error message to the console with red text.
+   *
+   * @remarks
+   * The red color takes precedence over any other foreground colors set.
    */
   public writeError(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(
@@ -88,6 +97,9 @@ export class Terminal {
 
   /**
    * Write an error message to the console with red text, followed by a newline.
+   *
+   * @remarks
+   * The red color takes precedence over any other foreground colors set.
    */
   public writeErrorLine(...messageParts: (string | IColorableSequence)[]): void {
     this._writeSegmentsToProviders(
@@ -102,7 +114,7 @@ export class Terminal {
   }
 
   /**
-   * Write a verbose-level message. Messages are only written if verbose mode is turned on.
+   * Write a verbose-level message.
    */
   public writeVerbose(...messageParts: (string | IColorableSequence)[]): void {
     if (this.verboseEnabled) {
@@ -111,7 +123,7 @@ export class Terminal {
   }
 
   /**
-   * Write a verbose-level message followed by a newline. Messages are only written if verbose mode is turned on.
+   * Write a verbose-level message followed by a newline.
    */
   public writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void {
     this.writeVerbose(...messageParts, { text: EOL });
