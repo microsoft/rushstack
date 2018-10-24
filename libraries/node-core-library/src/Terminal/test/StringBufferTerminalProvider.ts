@@ -9,6 +9,7 @@ import { StringBuilder } from '../../StringBuilder';
  */
 export class StringBufferTerminalProvider implements ITerminalProvider {
   private _standardBuffer: StringBuilder = new StringBuilder();
+  private _verboseBuffer: StringBuilder = new StringBuilder();
   private _warningBuffer: StringBuilder = new StringBuilder();
   private _errorBuffer: StringBuilder = new StringBuilder();
 
@@ -20,13 +21,18 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
 
   public write(data: string, severity: Severity): void {
     switch (severity) {
-      case Severity.warn: {
+      case Severity.warning: {
         this._warningBuffer.append(data);
         break;
       }
 
       case Severity.error: {
         this._errorBuffer.append(data);
+        break;
+      }
+
+      case Severity.verbose: {
+        this._verboseBuffer.append(data);
         break;
       }
 
@@ -38,16 +44,16 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     }
   }
 
-  public get width(): number | undefined {
-    return process.stdout.columns;
-  }
-
   public get supportsColor(): boolean {
     return this._supportsColor;
   }
 
   public getOutput(): string {
     return this._normalizeOutput(this._standardBuffer.toString());
+  }
+
+  public getVerbose(): string {
+    return this._normalizeOutput(this._verboseBuffer.toString());
   }
 
   public getErrorOutput(): string {

@@ -10,6 +10,7 @@ let provider: StringBufferTerminalProvider;
 
 function verifyProvider(): void {
   expect(provider.getOutput()).toMatchSnapshot();
+  expect(provider.getVerbose()).toMatchSnapshot();
   expect(provider.getWarningOutput()).toMatchSnapshot();
   expect(provider.getErrorOutput()).toMatchSnapshot();
 }
@@ -182,14 +183,8 @@ describe('01 color enabled', () => {
         verifyProvider();
       });
     });
-  });
 
-  describe('02 verbose turned off', () => {
-    beforeEach(() => {
-      terminal.verboseEnabled = false;
-    });
-
-    describe('01 writeVerbose', () => {
+    describe('07 writeVerbose', () => {
       test('01 writes a single message', () => {
         terminal.writeVerbose('test message');
         verifyProvider();
@@ -216,7 +211,7 @@ describe('01 color enabled', () => {
       });
     });
 
-    describe('02 writeVerboseLine', () => {
+    describe('08 writeVerboseLine', () => {
       test('01 writes a single message', () => {
         terminal.writeVerboseLine('test message');
         verifyProvider();
@@ -242,84 +237,6 @@ describe('01 color enabled', () => {
         verifyProvider();
       });
     });
-  });
-
-  describe('02 verbose turned on', () => {
-    beforeEach(() => {
-      terminal.verboseEnabled = true;
-    });
-
-    describe('01 writeVerbose', () => {
-      test('01 writes a single message', () => {
-        terminal.writeVerbose('test message');
-        verifyProvider();
-      });
-
-      test('02 writes multiple messages', () => {
-        terminal.writeVerbose('message 1', 'message 2');
-        verifyProvider();
-      });
-
-      test('03 writes a message with colors', () => {
-        terminal.writeVerbose(Colors.green('message 1'));
-        verifyProvider();
-      });
-
-      test('04 writes a multiple messages with colors', () => {
-        terminal.writeVerbose(Colors.green('message 1'), Colors.red('message 2'));
-        verifyProvider();
-      });
-
-      test('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeVerbose('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-        verifyProvider();
-      });
-    });
-
-    describe('02 writeVerboseLine', () => {
-      test('01 writes a single message', () => {
-        terminal.writeVerboseLine('test message');
-        verifyProvider();
-      });
-
-      test('02 writes multiple messages', () => {
-        terminal.writeVerboseLine('message 1', 'message 2');
-        verifyProvider();
-      });
-
-      test('03 writes a message with colors', () => {
-        terminal.writeVerboseLine(Colors.green('message 1'));
-        verifyProvider();
-      });
-
-      test('04 writes a multiple messages with colors', () => {
-        terminal.writeVerboseLine(Colors.green('message 1'), Colors.red('message 2'));
-        verifyProvider();
-      });
-
-      test('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeVerboseLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-        verifyProvider();
-      });
-    });
-  });
-
-  test('04 toggling verbose on and off', () => {
-    terminal.writeVerboseLine('SHOULD NOT BE PRINTED');
-    terminal.verboseEnabled = true;
-    terminal.writeVerboseLine('SHOULD BE PRINTED');
-    terminal.verboseEnabled = false;
-    terminal.writeVerboseLine('SHOULD NOT BE PRINTED');
-    terminal.writeVerboseLine('SHOULD NOT BE PRINTED');
-    terminal.writeVerboseLine('SHOULD NOT BE PRINTED');
-    terminal.verboseEnabled = true;
-    terminal.writeVerboseLine('SHOULD BE PRINTED');
-    terminal.writeVerboseLine('SHOULD BE PRINTED');
-    terminal.writeVerboseLine('SHOULD BE PRINTED');
-    terminal.verboseEnabled = false;
-    terminal.writeVerboseLine('SHOULD NOT BE PRINTED');
-
-    verifyProvider();
   });
 
   test('05 writes to multiple streams', () => {
@@ -524,14 +441,8 @@ describe('02 color disabled', () => {
         verifyProvider();
       });
     });
-  });
 
-  describe('02 verbose turned off', () => {
-    beforeEach(() => {
-      terminal.verboseEnabled = false;
-    });
-
-    describe('01 writeVerbose', () => {
+    describe('07 writeVerbose', () => {
       test('01 writes a single message', () => {
         terminal.writeVerbose('test message');
         verifyProvider();
@@ -558,7 +469,7 @@ describe('02 color disabled', () => {
       });
     });
 
-    describe('02 writeVerboseLine', () => {
+    describe('08 writeVerboseLine', () => {
       test('01 writes a single message', () => {
         terminal.writeVerboseLine('test message');
         verifyProvider();
@@ -584,84 +495,6 @@ describe('02 color disabled', () => {
         verifyProvider();
       });
     });
-  });
-
-  describe('02 verbose turned on', () => {
-    beforeEach(() => {
-      terminal.verboseEnabled = true;
-    });
-
-    describe('01 writeVerbose', () => {
-      test('01 writes a single message', () => {
-        terminal.writeVerbose('test message');
-        verifyProvider();
-      });
-
-      test('02 writes multiple messages', () => {
-        terminal.writeVerbose('message 1', 'message 2');
-        verifyProvider();
-      });
-
-      test('03 writes a message with colors', () => {
-        terminal.writeVerbose(Colors.green('message 1'));
-        verifyProvider();
-      });
-
-      test('04 writes a multiple messages with colors', () => {
-        terminal.writeVerbose(Colors.green('message 1'), Colors.red('message 2'));
-        verifyProvider();
-      });
-
-      test('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeVerbose('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-        verifyProvider();
-      });
-    });
-
-    describe('02 writeVerboseLine', () => {
-      test('01 writes a single message', () => {
-        terminal.writeVerboseLine('test message');
-        verifyProvider();
-      });
-
-      test('02 writes multiple messages', () => {
-        terminal.writeVerboseLine('message 1', 'message 2');
-        verifyProvider();
-      });
-
-      test('03 writes a message with colors', () => {
-        terminal.writeVerboseLine(Colors.green('message 1'));
-        verifyProvider();
-      });
-
-      test('04 writes a multiple messages with colors', () => {
-        terminal.writeVerboseLine(Colors.green('message 1'), Colors.red('message 2'));
-        verifyProvider();
-      });
-
-      test('05 writes a messages with colors interspersed with non-colored messages', () => {
-        terminal.writeVerboseLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-        verifyProvider();
-      });
-    });
-  });
-
-  test('04 toggling verbose on and off', () => {
-    terminal.writeVerboseLine('SHOULD NOT BE PRINTED');
-    terminal.verboseEnabled = true;
-    terminal.writeVerboseLine('SHOULD BE PRINTED');
-    terminal.verboseEnabled = false;
-    terminal.writeVerboseLine('SHOULD NOT BE PRINTED');
-    terminal.writeVerboseLine('SHOULD NOT BE PRINTED');
-    terminal.writeVerboseLine('SHOULD NOT BE PRINTED');
-    terminal.verboseEnabled = true;
-    terminal.writeVerboseLine('SHOULD BE PRINTED');
-    terminal.writeVerboseLine('SHOULD BE PRINTED');
-    terminal.writeVerboseLine('SHOULD BE PRINTED');
-    terminal.verboseEnabled = false;
-    terminal.writeVerboseLine('SHOULD NOT BE PRINTED');
-
-    verifyProvider();
   });
 
   test('05 writes to multiple streams', () => {

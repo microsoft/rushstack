@@ -12,15 +12,11 @@ import { IColorableSequence, ColorValue } from './Colors';
  * @beta
  */
 export class Terminal {
-  public verboseEnabled: boolean;
-
   private _providers: Set<ITerminalProvider>;
 
-  public constructor(provider: ITerminalProvider, verboseEnabled: boolean = false) {
+  public constructor(provider: ITerminalProvider) {
     this._providers = new Set<ITerminalProvider>();
     this._providers.add(provider);
-
-    this.verboseEnabled = verboseEnabled;
   }
 
   public registerProvider(provider: ITerminalProvider): void {
@@ -58,7 +54,7 @@ export class Terminal {
       messageParts.map(
         (part) => ({ ...(typeof part === 'string' ? { text: part } : part), foregroundColor: ColorValue.Yellow })
       ),
-      Severity.warn
+      Severity.warning
     );
   }
 
@@ -76,7 +72,7 @@ export class Terminal {
         ),
         { text: EOL }
       ],
-      Severity.warn
+      Severity.warning
     );
   }
 
@@ -117,9 +113,7 @@ export class Terminal {
    * Write a verbose-level message.
    */
   public writeVerbose(...messageParts: (string | IColorableSequence)[]): void {
-    if (this.verboseEnabled) {
-      this._writeSegmentsToProviders(messageParts, Severity.log);
-    }
+    this._writeSegmentsToProviders(messageParts, Severity.verbose);
   }
 
   /**

@@ -62,10 +62,12 @@ enum ColorValue {
 
 // @beta (undocumented)
 class ConsoleTerminalProvider implements ITerminalProvider {
+  // WARNING: The type "IConsoleTerminalProviderOptions" needs to be exported by the package (e.g. added to index.ts)
+  constructor(options?: Partial<IConsoleTerminalProviderOptions>);
   // (undocumented)
   readonly supportsColor: boolean;
   // (undocumented)
-  readonly width: number | undefined;
+  verboseEnabled: boolean;
   // (undocumented)
   write(data: string, severity: Severity): void;
 }
@@ -299,8 +301,6 @@ interface ITerminalProvider {
   // (undocumented)
   supportsColor: boolean;
   // (undocumented)
-  width: number | undefined;
-  // (undocumented)
   write(data: string, severity: Severity): void;
 }
 
@@ -417,7 +417,9 @@ enum Severity {
   // (undocumented)
   log = 0,
   // (undocumented)
-  warn = 1
+  verbose = 3,
+  // (undocumented)
+  warning = 1
 }
 
 // @beta
@@ -429,13 +431,11 @@ class StringBuilder {
 
 // @beta
 class Terminal {
-  constructor(provider: ITerminalProvider, verboseEnabled?: boolean);
+  constructor(provider: ITerminalProvider);
   // (undocumented)
   registerProvider(provider: ITerminalProvider): void;
   // (undocumented)
   unregisterProvider(provider: ITerminalProvider): void;
-  // (undocumented)
-  verboseEnabled: boolean;
   write(...messageParts: (string | IColorableSequence)[]): void;
   writeError(...messageParts: (string | IColorableSequence)[]): void;
   writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;

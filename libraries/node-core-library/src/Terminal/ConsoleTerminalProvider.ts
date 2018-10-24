@@ -5,15 +5,32 @@ import { enabled as supportsColor } from 'colors/safe';
 
 import { ITerminalProvider, Severity } from './ITerminalProvider';
 
+export interface IConsoleTerminalProviderOptions {
+  verboseEnabled: boolean;
+}
+
 /**
  * @beta
  */
 export class ConsoleTerminalProvider implements ITerminalProvider {
+  public verboseEnabled: boolean = false;
+
+  public constructor(options: Partial<IConsoleTerminalProviderOptions> = {}) {
+    this.verboseEnabled = !!options.verboseEnabled;
+  }
+
   public write(data: string, severity: Severity): void {
     switch (severity) {
-      case Severity.warn:
+      case Severity.warning:
       case Severity.error: {
         process.stderr.write(data);
+        break;
+      }
+
+      case Severity.verbose: {
+        if (this.verboseEnabled) {
+          process.stdout.write(data);
+        }
         break;
       }
 
@@ -23,10 +40,6 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
         break;
       }
     }
-  }
-
-  public get width(): number | undefined {
-    return undefined;
   }
 
   public get supportsColor(): boolean {
