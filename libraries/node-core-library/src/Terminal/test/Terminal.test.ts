@@ -9,10 +9,12 @@ let terminal: Terminal;
 let provider: StringBufferTerminalProvider;
 
 function verifyProvider(): void {
-  expect(provider.getOutput()).toMatchSnapshot();
-  expect(provider.getVerbose()).toMatchSnapshot();
-  expect(provider.getWarningOutput()).toMatchSnapshot();
-  expect(provider.getErrorOutput()).toMatchSnapshot();
+  expect({
+    log: provider.getOutput(),
+    warning: provider.getWarningOutput(),
+    error: provider.getErrorOutput(),
+    verbose: provider.getVerbose()
+  }).toMatchSnapshot();
 }
 
 describe('01 color enabled', () => {
@@ -240,35 +242,45 @@ describe('01 color enabled', () => {
   });
 
   test('05 writes to multiple streams', () => {
-    terminal.writeError('test message');
-    terminal.writeError(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarning('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-    terminal.write('message 1', 'message 2');
-    terminal.write(Colors.green('message 1'));
-    terminal.writeErrorLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-    terminal.writeWarningLine('message 1', 'message 2');
-    terminal.writeLine('test message');
-    terminal.writeError('message 1', 'message 2');
-    terminal.writeErrorLine('test message');
-    terminal.write('test message');
-    terminal.writeErrorLine(Colors.green('message 1'));
-    terminal.writeErrorLine(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeErrorLine('message 1', 'message 2');
-    terminal.writeWarning(Colors.green('message 1'));
-    terminal.writeLine('message 1', 'message 2');
-    terminal.writeWarning('message 1', 'message 2');
-    terminal.writeWarningLine('test message');
-    terminal.writeLine(Colors.green('message 1'));
-    terminal.writeError(Colors.green('message 1'));
-    terminal.write(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarningLine(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarningLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-    terminal.writeWarningLine(Colors.green('message 1'));
     terminal.write('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-    terminal.writeLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeWarningLine('message 1', 'message 2');
+    terminal.writeVerbose('test message');
+    terminal.writeVerbose(Colors.green('message 1'));
+    terminal.writeLine(Colors.green('message 1'));
     terminal.writeError('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeErrorLine('test message');
+    terminal.writeVerboseLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeVerboseLine('test message');
     terminal.writeWarning(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeWarning('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeError('message 1', 'message 2');
+    terminal.write(Colors.green('message 1'));
+    terminal.writeVerbose('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeErrorLine('message 1', 'message 2');
+    terminal.write(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeVerbose('message 1', 'message 2');
+    terminal.writeVerboseLine(Colors.green('message 1'));
     terminal.writeLine(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeError(Colors.green('message 1'));
+    terminal.writeWarningLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.write('test message');
+    terminal.writeWarningLine('test message');
+    terminal.writeVerboseLine(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeVerboseLine('message 1', 'message 2');
+    terminal.writeErrorLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeWarning('message 1', 'message 2');
+    terminal.writeErrorLine(Colors.green('message 1'));
+    terminal.write('message 1', 'message 2');
+    terminal.writeVerbose(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeWarning(Colors.green('message 1'));
+    terminal.writeLine('test message');
+    terminal.writeError('test message');
+    terminal.writeLine('message 1', 'message 2');
+    terminal.writeErrorLine(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeError(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeWarningLine(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeWarningLine(Colors.green('message 1'));
     verifyProvider();
   });
 });
@@ -498,35 +510,45 @@ describe('02 color disabled', () => {
   });
 
   test('05 writes to multiple streams', () => {
-    terminal.writeError('test message');
-    terminal.writeError(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarning('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-    terminal.write('message 1', 'message 2');
-    terminal.write(Colors.green('message 1'));
-    terminal.writeErrorLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-    terminal.writeWarningLine('message 1', 'message 2');
-    terminal.writeLine('test message');
-    terminal.writeError('message 1', 'message 2');
-    terminal.writeErrorLine('test message');
-    terminal.write('test message');
-    terminal.writeErrorLine(Colors.green('message 1'));
-    terminal.writeErrorLine(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeErrorLine('message 1', 'message 2');
-    terminal.writeWarning(Colors.green('message 1'));
-    terminal.writeLine('message 1', 'message 2');
-    terminal.writeWarning('message 1', 'message 2');
-    terminal.writeWarningLine('test message');
-    terminal.writeLine(Colors.green('message 1'));
-    terminal.writeError(Colors.green('message 1'));
-    terminal.write(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarningLine(Colors.green('message 1'), Colors.red('message 2'));
-    terminal.writeWarningLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-    terminal.writeWarningLine(Colors.green('message 1'));
     terminal.write('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
-    terminal.writeLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeWarningLine('message 1', 'message 2');
+    terminal.writeVerbose('test message');
+    terminal.writeVerbose(Colors.green('message 1'));
+    terminal.writeLine(Colors.green('message 1'));
     terminal.writeError('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeErrorLine('test message');
+    terminal.writeVerboseLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeVerboseLine('test message');
     terminal.writeWarning(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeWarning('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeError('message 1', 'message 2');
+    terminal.write(Colors.green('message 1'));
+    terminal.writeVerbose('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeErrorLine('message 1', 'message 2');
+    terminal.write(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeVerbose('message 1', 'message 2');
+    terminal.writeVerboseLine(Colors.green('message 1'));
     terminal.writeLine(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeError(Colors.green('message 1'));
+    terminal.writeWarningLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.write('test message');
+    terminal.writeWarningLine('test message');
+    terminal.writeVerboseLine(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeVerboseLine('message 1', 'message 2');
+    terminal.writeErrorLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeLine('message 1', Colors.green('message 2'), 'message 3', Colors.red('message 4'));
+    terminal.writeWarning('message 1', 'message 2');
+    terminal.writeErrorLine(Colors.green('message 1'));
+    terminal.write('message 1', 'message 2');
+    terminal.writeVerbose(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeWarning(Colors.green('message 1'));
+    terminal.writeLine('test message');
+    terminal.writeError('test message');
+    terminal.writeLine('message 1', 'message 2');
+    terminal.writeErrorLine(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeError(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeWarningLine(Colors.green('message 1'), Colors.red('message 2'));
+    terminal.writeWarningLine(Colors.green('message 1'));
     verifyProvider();
   });
 });
