@@ -52,20 +52,24 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   }
 
   public getOutput(): string {
-    const combinedBuffer: string = this._standardBuffer.join('');
+    const combinedBuffer: string = this._normalizeOutput(this._standardBuffer.join(''));
     this._standardBuffer = [combinedBuffer];
     return combinedBuffer;
   }
 
   public getErrorOutput(): string {
-    const combinedBuffer: string = this._errorBuffer.join('');
+    const combinedBuffer: string = this._normalizeOutput(this._errorBuffer.join(''));
     this._standardBuffer = [combinedBuffer];
     return combinedBuffer;
   }
 
   public getWarningOutput(): string {
-    const combinedBuffer: string = this._warningBuffer.join('');
+    const combinedBuffer: string = this._normalizeOutput(this._warningBuffer.join(''));
     this._standardBuffer = [combinedBuffer];
     return combinedBuffer;
+  }
+
+  private _normalizeOutput(s: string): string { // tslint:disable-line:export-name
+    return s.replace(/\u001b/g, '[x]').replace(/\n/g, '[n]').replace(/\r/g, '[r]');
   }
 }
