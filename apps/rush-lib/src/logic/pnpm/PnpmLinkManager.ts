@@ -31,8 +31,7 @@ export class PnpmLinkManager extends BaseLinkManager {
   protected _linkProjects(): Promise<void> {
     try {
       const rushLinkJson: IRushLinkJson = {
-        localLinks: {},
-        ...(this._variant ? { variant: this._variant } : {})
+        localLinks: {}
       };
 
       let promise: Promise<void> = Promise.resolve();

@@ -323,9 +323,7 @@ export class InstallManager {
           })
             .then(() => {
               if (!options.noLink) {
-                const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration, {
-                  variant: options.variant
-                });
+                const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
                 return linkManager.createSymlinksForProjects(false);
               } else {
                 console.log(os.EOL

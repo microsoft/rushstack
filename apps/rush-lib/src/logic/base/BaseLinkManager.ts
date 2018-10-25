@@ -12,7 +12,6 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { BasePackage } from './BasePackage';
-import { Variants } from '../../api/Variants';
 
 export enum SymlinkKind {
   File,
@@ -23,13 +22,8 @@ export interface IBaseLinkManagerCreateSymlinkOptions extends IFileSystemCreateL
   symlinkKind: SymlinkKind;
 }
 
-export interface IBaseLinkManagerOptions {
-  variant?: Variants.IVariantName;
-}
-
 export abstract class BaseLinkManager {
   protected _rushConfiguration: RushConfiguration;
-  protected _variant: Variants.IVariantName;
 
   protected static _createSymlink(options: IBaseLinkManagerCreateSymlinkOptions): void {
     const newLinkFolder: string = path.dirname(options.newLinkPath);
@@ -178,10 +172,8 @@ export abstract class BaseLinkManager {
     }
   }
 
-  constructor(rushConfiguration: RushConfiguration, options: IBaseLinkManagerOptions) {
+  constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
-
-    this._variant = options.variant;
   }
 
   /**

@@ -56,8 +56,7 @@ export class NpmLinkManager extends BaseLinkManager {
         commonPackageLookup.loadTree(commonRootPackage);
 
         const rushLinkJson: IRushLinkJson = {
-          localLinks: {},
-          ...(this._variant ? { variant: this._variant } : {})
+          localLinks: {}
         };
 
         for (const rushProject of this._rushConfiguration.projects) {
