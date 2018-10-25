@@ -1,11 +1,6 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 25 Oct 2018 23:24:51 GMT and should not be manually modified.
-
-## 5.5.0
-Thu, 25 Oct 2018 23:24:51 GMT
-
-*Version update only*
+This log was last generated on Thu, 25 Oct 2018 23:20:40 GMT and should not be manually modified.
 
 ## 5.4.0
 Thu, 25 Oct 2018 23:20:40 GMT
