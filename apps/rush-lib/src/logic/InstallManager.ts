@@ -18,7 +18,8 @@ import {
   IPackageJson,
   MapExtensions,
   FileSystem,
-  FileConstants
+  FileConstants,
+  Sort
 } from '@microsoft/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
@@ -449,9 +450,7 @@ export class InstallManager {
     // To make the common/package.json file more readable, sort alphabetically
     // according to rushProject.tempProjectName instead of packageName.
     const sortedRushProjects: RushConfigurationProject[] = this._rushConfiguration.projects.slice(0);
-    sortedRushProjects.sort(
-      (a: RushConfigurationProject, b: RushConfigurationProject) => a.tempProjectName.localeCompare(b.tempProjectName)
-    );
+    Sort.sortBy(sortedRushProjects, x => x.tempProjectName);
 
     for (const rushProject of sortedRushProjects) {
       const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
@@ -480,7 +479,7 @@ export class InstallManager {
       // (A given packageName will never appear more than once in this list.)
       for (const dependency of packageJson.dependencyList) {
 
-        // If there are any optional dependencies, copy them directly into the optionalDependencies field.
+        // If there are any optional dependencies, copy directly into the optionalDependencies field.
         if (dependency.dependencyType === DependencyType.Optional) {
           if (!tempPackageJson.optionalDependencies) {
             tempPackageJson.optionalDependencies = {};
@@ -497,12 +496,9 @@ export class InstallManager {
         // want right now for development, not the range that you support for consumers).
         tempDependencies.set(dependency.name, dependency.version);
       }
-      const sortedTempDependencyNames: string[] = [... tempDependencies.keys()];
-      sortedTempDependencyNames.sort(); // alphabetize them to minimize churn in the tarball
+      Sort.sortMapKeys(tempDependencies);
 
-      for (const packageName of sortedTempDependencyNames) {
-        const packageVersion: string = tempDependencies.get(packageName)!;
-
+      for (const [packageName, packageVersion] of tempDependencies.entries()) {
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
