@@ -278,13 +278,6 @@ class RushConfigurationProject {
 }
 
 // @beta
-module Variants {
-  // (undocumented)
-  VARIANT_PARAMETER: ICommandLineStringDefinition;
-
-}
-
-// @beta
 class VersionPolicy {
   // WARNING: The type "IVersionPolicyJson" needs to be exported by the package (e.g. added to index.ts)
   // @internal

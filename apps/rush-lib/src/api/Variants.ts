@@ -5,7 +5,6 @@ import {
 
 /**
  * Namespace for utilities relating to the Variants feature.
- * @beta
  */
 export namespace Variants {
   /**

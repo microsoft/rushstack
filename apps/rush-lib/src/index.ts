@@ -66,4 +66,3 @@ export {
 
 export { Rush } from './api/Rush';
 
-export { Variants } from './api/Variants';
