@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Improve sorting of @rush-temp projects, which may reduce churn of hashes in the shrinkwrap file",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
