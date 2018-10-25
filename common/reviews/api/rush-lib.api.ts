@@ -212,7 +212,7 @@ class RushConfiguration {
   findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
   getCommittedShrinkwrapFilename(variant?: string | undefined): string;
   getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
-  getPnpmFilename(variant?: string | undefined): string;
+  getPnpmfilePath(variant?: string | undefined): string;
   getProjectByName(projectName: string): RushConfigurationProject | undefined;
   readonly gitAllowedEmailRegExps: string[];
   readonly gitSampleEmail: string;

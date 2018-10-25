@@ -77,7 +77,7 @@ export namespace RushConstants {
   /**
    * The filename ("pnpmfile.js") used to add custom configuration to PNPM
    */
-  export const pnpmFileFilename: string = 'pnpmfile.js';
+  export const pnpmfileFilename: string = 'pnpmfile.js';
 
   /**
    * The filename ("shrinkwrap.yaml") used to store state for pnpm

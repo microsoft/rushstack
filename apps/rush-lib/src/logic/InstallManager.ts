@@ -483,9 +483,9 @@ export class InstallManager {
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {
       const committedPnpmFilePath: string =
-        this._rushConfiguration.getPnpmFilename(this._options.variant);
+        this._rushConfiguration.getPnpmfilePath(this._options.variant);
       const tempPnpmFilePath: string
-        = path.join(this._rushConfiguration.commonTempFolder, RushConstants.pnpmFileFilename);
+        = path.join(this._rushConfiguration.commonTempFolder, RushConstants.pnpmfileFilename);
 
       // ensure that we remove any old one that may be hanging around
       this._syncFile(committedPnpmFilePath, tempPnpmFilePath);
@@ -750,7 +750,7 @@ export class InstallManager {
 
         if (this._rushConfiguration.packageManager === 'pnpm') {
           // If the repo is using pnpmfile.js, consider that also
-          const pnpmFileFilename: string = this._rushConfiguration.getPnpmFilename(options.variant);
+          const pnpmFileFilename: string = this._rushConfiguration.getPnpmfilePath(options.variant);
 
           if (FileSystem.exists(pnpmFileFilename)) {
             potentiallyChangedFiles.push(pnpmFileFilename);

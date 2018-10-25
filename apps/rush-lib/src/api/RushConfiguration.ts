@@ -382,7 +382,7 @@ export class RushConfiguration {
           break;
         case 'pnpm':
           knownSet.add(RushConstants.pnpmShrinkwrapFilename.toUpperCase());
-          knownSet.add(RushConstants.pnpmFileFilename.toUpperCase());
+          knownSet.add(RushConstants.pnpmfileFilename.toUpperCase());
           break;
         case 'yarn':
           knownSet.add(RushConstants.yarnShrinkwrapFilename.toUpperCase());
@@ -791,15 +791,17 @@ export class RushConfiguration {
   }
 
   /**
-   * Gets the PNPM file name for a specific variant.
+   * Gets the absolute path for "pnpmfile.js" for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
+   * @remarks
+   * The file path is returned even if PNPM is not configured as the package manager.
    */
-  public getPnpmFilename(variant?: string | undefined): string {
+  public getPnpmfilePath(variant?: string | undefined): string {
     const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
 
     return path.join(
       variantConfigFolderPath,
-      RushConstants.pnpmFileFilename);
+      RushConstants.pnpmfileFilename);
   }
 
   /**
