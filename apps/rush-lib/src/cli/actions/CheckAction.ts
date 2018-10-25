@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
@@ -27,6 +28,15 @@ export class CheckAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
+    const variant: Variants.IVariantName = this.rushConfiguration.currentInstalledVariant();
+
+    if (!this._variant.value && variant) {
+      console.log(colors.yellow(
+        `Variant '${variant}' has been installed, but 'rush check' is currently checking the default variant. ` +
+        `Use 'rush check --variant '${ variant }' to check the current installation.`
+      ));
+    }
+
     VersionMismatchFinder.rushCheck(this.rushConfiguration, {
       variant: this._variant.value
     });
