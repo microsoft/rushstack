@@ -119,9 +119,6 @@ export namespace RushConstants {
    */
   export const commandLineFilename: string = 'command-line.json';
 
-  /**
-   * @beta
-   */
   export const versionPoliciesFilename: string = 'version-policies.json';
 
   /**

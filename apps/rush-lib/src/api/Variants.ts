@@ -9,7 +9,6 @@ import {
 export namespace Variants {
   /**
    * Provides the parameter configuration for '--variant'.
-   * @beta
    */
   export const VARIANT_PARAMETER: ICommandLineStringDefinition = {
     parameterLongName: '--variant',

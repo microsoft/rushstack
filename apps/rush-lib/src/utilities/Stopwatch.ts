@@ -5,7 +5,6 @@ import { Utilities } from './Utilities';
 
 /**
  * Used with the Stopwatch class.
- * @public
  */
 export enum StopwatchState {
   Stopped = 1,
@@ -15,7 +14,6 @@ export enum StopwatchState {
 /**
  * Represents a typical timer/stopwatch which keeps track
  * of elapsed time in between two events.
- * @public
  */
 export class Stopwatch {
   private _startTime: number | undefined;

@@ -117,7 +117,6 @@ export interface IRushConfigurationJson {
 
 /**
  * This represents the JSON data structure for the "rush-link.json" data file.
- * @public
  */
 export interface IRushLinkJson {
   localLinks: {
@@ -127,7 +126,6 @@ export interface IRushLinkJson {
 
 /**
  * This represents the JSON data structure for the "current-variant.json" data file.
- * @public
  */
 export interface ICurrentVariantJson {
   variant: string | null; // Use `null` instead of `undefined` because `undefined` is not handled by JSON.

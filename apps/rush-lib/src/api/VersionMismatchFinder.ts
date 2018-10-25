@@ -27,9 +27,6 @@ export interface IVersionMismatchFinderGetMismatchesOptions {
   variant?: string | undefined;
 }
 
-/**
- * @public
- */
 export class VersionMismatchFinder {
  /* store it like this:
   * {

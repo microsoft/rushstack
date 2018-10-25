@@ -36,9 +36,6 @@ export interface IInstallPackageInDirectoryOptions {
   suppressOutput?: boolean;
 }
 
-/**
- * @public
- */
 export class Utilities {
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
@@ -365,7 +362,6 @@ export class Utilities {
    * @param initCwd = the folder containing a local .npmrc, which will be used
    *        for the INIT_CWD environment variable
    * @param captureOutput - if true, map stdio to 'pipe' instead of the parent process's streams
-   * @beta
    */
   public static executeLifecycleCommandAsync(
     command: string,

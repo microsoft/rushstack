@@ -14,7 +14,6 @@ import {
 
 /**
  * This class represents a single change file.
- * @public
  */
 export class ChangeFile {
   private _changeFileData: IChangeFile;

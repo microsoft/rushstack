@@ -19,7 +19,6 @@ import {
 
 /**
  * Custom Commands and Options for the Rush Command Line
- * @public
  */
 export class CommandLineConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
