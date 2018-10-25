@@ -23,7 +23,6 @@ import { VersionManager } from '../../logic/VersionManager';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
-import { Variants } from '../../api/Variants';
 
 export class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy: CommandLineFlagParameter;
@@ -34,7 +33,6 @@ export class VersionAction extends BaseRushAction {
   private _targetBranch: CommandLineStringParameter;
   private _overwriteBump: CommandLineStringParameter;
   private _prereleaseIdentifier: CommandLineStringParameter;
-  private _variant: CommandLineStringParameter;
 
   private _versionManager: VersionManager;
 
@@ -94,7 +92,6 @@ export class VersionAction extends BaseRushAction {
         'This setting increases to new prerelease id when "--bump" is provided but only replaces the ' +
         'prerelease name when "--ensure-version-policy" is provided.'
     });
-    this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
 
   protected run(): Promise<void> {
@@ -185,7 +182,9 @@ export class VersionAction extends BaseRushAction {
     const rushConfig: RushConfiguration =
       RushConfiguration.loadFromConfigurationFile(this.rushConfiguration.rushJsonFile);
 
-    const commonVersions: CommonVersionsConfiguration = rushConfig.getCommonVersions(this._variant.value);
+    const commonVersions: CommonVersionsConfiguration = rushConfig.getCommonVersions(
+      /* Always use the default variant */
+    );
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
       rushConfig.projects,
