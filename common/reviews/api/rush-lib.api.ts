@@ -87,7 +87,8 @@ enum DependencyType {
 // @public
 enum EnvironmentVariableNames {
   RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
-  RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER"
+  RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
+  RUSH_VARIANT = "RUSH_VARIANT"
 }
 
 // @beta
@@ -186,7 +187,6 @@ class PnpmOptionsConfiguration {
 class Rush {
   static launch(launcherVersion: string, isManaged: boolean): void;
   static launchRushX(launcherVersion: string, isManaged: boolean): void;
-  // @public
   static readonly version: string;
 }
 
@@ -194,17 +194,24 @@ class Rush {
 class RushConfiguration {
   readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
   readonly changesFolder: string;
+  // @deprecated
   readonly committedShrinkwrapFilename: string;
   readonly commonFolder: string;
   readonly commonRushConfigFolder: string;
   readonly commonScriptsFolder: string;
   readonly commonTempFolder: string;
+  // @deprecated
   readonly commonVersions: CommonVersionsConfiguration;
+  readonly currentInstalledVariant: string | undefined;
+  readonly currentVariantJsonFilename: string;
   readonly ensureConsistentVersions: boolean;
   // @beta
   readonly eventHooks: EventHooks;
   findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
   findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
+  getCommittedShrinkwrapFilename(variant?: string | undefined): string;
+  getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
+  getPnpmfilePath(variant?: string | undefined): string;
   getProjectByName(projectName: string): RushConfigurationProject | undefined;
   readonly gitAllowedEmailRegExps: string[];
   readonly gitSampleEmail: string;

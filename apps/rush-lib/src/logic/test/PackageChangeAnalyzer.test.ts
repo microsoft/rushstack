@@ -36,7 +36,9 @@ describe('PackageChangeAnalyzer', () => {
         projectRelativeFolder: packageAPath
       }],
       rushJsonFolder: '',
-      committedShrinkwrapFilename: 'common/config/rush/shrinkwrap.yaml'
+      getCommittedShrinkwrapFilename(): string {
+        return 'common/config/rush/shrinkwrap.yaml';
+      }
     } as any; // tslint:disable-line:no-any
 
     const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);

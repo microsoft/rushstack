@@ -7,7 +7,9 @@ import { NpmLinkManager } from './npm/NpmLinkManager';
 import { PnpmLinkManager } from './pnpm/PnpmLinkManager';
 
 export class LinkManagerFactory {
-  public static getLinkManager(rushConfiguration: RushConfiguration): BaseLinkManager {
+  public static getLinkManager(
+    rushConfiguration: RushConfiguration
+  ): BaseLinkManager {
 
     switch (rushConfiguration.packageManager) {
       case 'npm':

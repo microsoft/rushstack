@@ -18,7 +18,6 @@ import { Utilities } from './Utilities';
  * For deleting large folders, AsyncRecycler is significantly faster than Utilities.dangerouslyDeletePath().
  * It works by moving one or more folders into a temporary "recycler" folder, and then launches a separate
  * background process to recursively delete that folder.
- * @public
  */
 export class AsyncRecycler {
   private _recyclerFolder: string;

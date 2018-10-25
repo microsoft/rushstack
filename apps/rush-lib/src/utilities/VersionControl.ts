@@ -3,9 +3,6 @@
 
 import * as child_process from 'child_process';
 
-/**
- * @public
- */
 export class VersionControl {
   public static getChangedFolders(targetBranch?: string): Array<string | undefined> | undefined {
     const branchName: string = targetBranch ? targetBranch : 'origin/master';
