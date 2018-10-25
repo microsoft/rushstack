@@ -54,6 +54,7 @@ export {
 export { PackageName, IParsedPackageName, IParsedPackageNameOrError } from './PackageName';
 export { Path } from './Path';
 export { Text, NewlineKind } from './Text';
+export { Sort } from './Sort';
 export {
   FileSystem,
   IFileSystemReadFolderOptions,

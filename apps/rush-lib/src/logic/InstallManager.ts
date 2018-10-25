@@ -18,7 +18,8 @@ import {
   IPackageJson,
   MapExtensions,
   FileSystem,
-  FileConstants
+  FileConstants,
+  Sort
 } from '@microsoft/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
@@ -111,7 +112,8 @@ export class InstallManager {
   private _commonTempFolderRecycler: AsyncRecycler;
 
   /**
-   * Returns a map of all direct dependencies that only have a single semantic version specifier
+   * Returns a map of all direct dependencies that only have a single semantic version specifier.
+   * Returns a map: dependency name --> version specifier
    */
   public static collectImplicitlyPreferredVersions(rushConfiguration: RushConfiguration): Map<string, string> {
     // First, collect all the direct dependencies of all local projects, and their versions:
@@ -381,6 +383,7 @@ export class InstallManager {
       shrinkwrapIsUpToDate = false;
     }
 
+    // dependency name --> version specifier
     const allExplicitPreferredVersions: Map<string, string> = this._rushConfiguration.commonVersions
       .getAllPreferredVersions();
 
@@ -429,6 +432,8 @@ export class InstallManager {
     // Find the implicitly preferred versions
     // These are any first-level dependencies for which we only consume a single version range
     // (e.g. every package that depends on react uses an identical specifier)
+
+    // dependency name --> version specifier
     const allPreferredVersions: Map<string, string> =
       InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration);
 
@@ -445,9 +450,7 @@ export class InstallManager {
     // To make the common/package.json file more readable, sort alphabetically
     // according to rushProject.tempProjectName instead of packageName.
     const sortedRushProjects: RushConfigurationProject[] = this._rushConfiguration.projects.slice(0);
-    sortedRushProjects.sort(
-      (a: RushConfigurationProject, b: RushConfigurationProject) => a.tempProjectName.localeCompare(b.tempProjectName)
-    );
+    Sort.sortBy(sortedRushProjects, x => x.tempProjectName);
 
     for (const rushProject of sortedRushProjects) {
       const packageJson: PackageJsonEditor = rushProject.packageJsonEditor;
@@ -469,65 +472,66 @@ export class InstallManager {
         dependencies: {}
       };
 
-      // Collect pairs of (packageName, packageVersion) to be added as temp package dependencies
-      const pairs: { packageName: string, packageVersion: string }[] = [];
+      // Collect pairs of (packageName, packageVersion) to be added as dependencies of the @rush-temp package.json
+      const tempDependencies: Map<string, string> = new Map<string, string>();
 
+      // These can be regular, optional, or peer dependencies (but NOT dev dependencies).
+      // (A given packageName will never appear more than once in this list.)
       for (const dependency of packageJson.dependencyList) {
 
-        // If there are any optional dependencies, copy them over directly
+        // If there are any optional dependencies, copy directly into the optionalDependencies field.
         if (dependency.dependencyType === DependencyType.Optional) {
           if (!tempPackageJson.optionalDependencies) {
             tempPackageJson.optionalDependencies = {};
           }
           tempPackageJson.optionalDependencies[dependency.name] = dependency.version;
         } else {
-          pairs.push({ packageName: dependency.name, packageVersion: dependency.version });
+          tempDependencies.set(dependency.name, dependency.version);
         }
       }
 
       for (const dependency of packageJson.devDependencyList) {
-        // If there are devDependencies, we need to merge them with the regular
-        // dependencies.  If the same library appears in both places, then the
-        // regular dependency takes precedence over the devDependency.
-        // It also takes precedence over a duplicate in optionalDependencies,
-        // but NPM will take care of that for us.  (Frankly any kind of duplicate
-        // should be an error, but NPM is pretty lax about this.)
-        pairs.push({ packageName: dependency.name, packageVersion: dependency.version });
+        // If there are devDependencies, we need to merge them with the regular dependencies.  If the same
+        // library appears in both places, then the dev dependency wins (because presumably it's saying what you
+        // want right now for development, not the range that you support for consumers).
+        tempDependencies.set(dependency.name, dependency.version);
       }
+      Sort.sortMapKeys(tempDependencies);
 
-      for (const pair of pairs) {
+      for (const [packageName, packageVersion] of tempDependencies.entries()) {
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
         // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
         const localProject: RushConfigurationProject | undefined =
-          this._rushConfiguration.getProjectByName(pair.packageName);
-        if (localProject) {
+          this._rushConfiguration.getProjectByName(packageName);
 
+        if (localProject) {
           // Don't locally link if it's listed in the cyclicDependencyProjects
-          if (!rushProject.cyclicDependencyProjects.has(pair.packageName)) {
+          if (!rushProject.cyclicDependencyProjects.has(packageName)) {
 
             // Also, don't locally link if the SemVer doesn't match
             const localProjectVersion: string = localProject.packageJsonEditor.version;
-            if (semver.satisfies(localProjectVersion, pair.packageVersion)) {
+            if (semver.satisfies(localProjectVersion, packageVersion)) {
 
-              // We will locally link this package
+              // We will locally link this package, so instead add it to our special "rushDependencies"
+              // field in the package.json file.
               if (!tempPackageJson.rushDependencies) {
                 tempPackageJson.rushDependencies = {};
               }
-              tempPackageJson.rushDependencies[pair.packageName] = pair.packageVersion;
+              tempPackageJson.rushDependencies[packageName] = packageVersion;
               continue;
             }
           }
         }
 
         // We will NOT locally link this package; add it as a regular dependency.
-        tempPackageJson.dependencies![pair.packageName] = pair.packageVersion;
+        tempPackageJson.dependencies![packageName] = packageVersion;
 
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.tryEnsureCompatibleDependency(pair.packageName, pair.packageVersion,
+          if (!shrinkwrapFile.tryEnsureCompatibleDependency(packageName, packageVersion,
             rushProject.tempProjectName)) {
-              shrinkwrapWarnings.push(`"${pair.packageName}" (${pair.packageVersion}) required by`
+              shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
                 + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;
           }
