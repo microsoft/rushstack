@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 24 Oct 2018 16:03:10 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Oct 2018 08:56:02 GMT and should not be manually modified.
+
+## 6.0.8
+Thu, 25 Oct 2018 08:56:02 GMT
+
+### Patches
+
+- Fix issue where `DocErrorText.text` returned `[object Object]` instead of the text 
 
 ## 6.0.7
 Wed, 24 Oct 2018 16:03:10 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.0.8",
+      "tag": "@microsoft/api-extractor_v6.0.8",
+      "date": "Thu, 25 Oct 2018 08:56:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix issue where `DocErrorText.text` returned `[object Object]` instead of the text "
+          }
+        ]
+      }
+    },
+    {
       "version": "6.0.7",
       "tag": "@microsoft/api-extractor_v6.0.7",
       "date": "Wed, 24 Oct 2018 16:03:10 GMT",
