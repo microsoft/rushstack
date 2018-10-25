@@ -48,7 +48,6 @@ const MAX_INSTALL_ATTEMPTS: number = 2;
  * As a temporary workaround, augment the type.
  */
 import { CreateOptions } from 'tar';
-import { Variants } from '../api/Variants';
 
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
@@ -105,7 +104,7 @@ export interface IInstallManagerOptions {
   /**
    * The variant to consider when performing installations and validating shrinkwrap updates.
    */
-  variant?: Variants.IVariantName;
+  variant?: string | undefined;
 }
 
 /**
@@ -124,7 +123,7 @@ export class InstallManager {
   public static collectImplicitlyPreferredVersions(
     rushConfiguration: RushConfiguration,
     options: {
-      variant?: Variants.IVariantName
+      variant?: string | undefined
     } = {}
   ): Map<string, string> {
     // First, collect all the direct dependencies of all local projects, and their versions:
@@ -180,7 +179,7 @@ export class InstallManager {
     versionsForDependencies: Map<string, Set<string>>;
     dependencies: ReadonlyArray<PackageJsonDependency>;
     cyclicDependencies: Set<string>;
-    variant: Variants.IVariantName;
+    variant: string | undefined;
     }): void {
     const {
       variant,
@@ -425,7 +424,7 @@ export class InstallManager {
    */
   private _createTempModulesAndCheckShrinkwrap(options: {
     shrinkwrapFile: BaseShrinkwrapFile | undefined;
-    variant: Variants.IVariantName;
+    variant: string | undefined;
   }): boolean {
     const {
       shrinkwrapFile,

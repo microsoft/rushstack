@@ -7,7 +7,6 @@ import { RushConfiguration } from './RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { PackageJsonDependency, DependencyType, PackageJsonEditor } from './PackageJsonEditor';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
-import { Variants } from './Variants';
 
 export interface IVersionMismatchFinderProject {
   packageName: string;
@@ -17,15 +16,15 @@ export interface IVersionMismatchFinderProject {
 }
 
 export interface IVersionMismatchFinderRushCheckOptions {
-  variant?: Variants.IVariantName;
+  variant?: string | undefined;
 }
 
 export interface IVersionMismatchFinderEnsureConsistentVersionsOptions {
-  variant?: Variants.IVariantName;
+  variant?: string | undefined;
 }
 
 export interface IVersionMismatchFinderGetMismatchesOptions {
-  variant?: Variants.IVariantName;
+  variant?: string | undefined;
 }
 
 /**
@@ -101,7 +100,7 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     options: {
       isRushCheckCommand: boolean;
-      variant?: Variants.IVariantName;
+      variant?: string | undefined;
     }): void {
 
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {

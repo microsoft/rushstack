@@ -9,12 +9,6 @@ import {
  */
 export namespace Variants {
   /**
-   * The type using for the 'variant' value tracked by commands.
-   * @beta
-   */
-  export type IVariantName = string | undefined;
-
-  /**
    * Provides the parameter configuration for '--variant'.
    * @beta
    */

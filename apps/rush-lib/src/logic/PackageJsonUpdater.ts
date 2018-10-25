@@ -11,7 +11,6 @@ import { VersionMismatchFinder } from '../api/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
 import { DependencyType, PackageJsonEditor, PackageJsonDependency } from '../api/PackageJsonEditor';
-import { Variants } from '../api/Variants';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -63,7 +62,7 @@ export interface IPackageJsonUpdaterRushAddOptions {
   /**
    * The variant to consider when performing installations and validating shrinkwrap updates.
    */
-  variant?: Variants.IVariantName;
+  variant?: string | undefined;
 }
 
 /**

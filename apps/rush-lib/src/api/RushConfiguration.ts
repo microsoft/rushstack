@@ -21,7 +21,6 @@ import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { Utilities } from '../utilities/Utilities';
-import { Variants } from './Variants';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -727,8 +726,8 @@ export class RushConfiguration {
    * determines which variant, if any, was last specified when performing "rush install"
    * or "rush update".
    */
-  public get currentInstalledVariant(): Variants.IVariantName {
-    let variant: Variants.IVariantName;
+  public get currentInstalledVariant(): string | undefined {
+    let variant: string | undefined;
 
     if (FileSystem.exists(this._currentVariantJsonFilename)) {
       const currentVariantJson: ICurrentVariantJson = JsonFile.load(this._currentVariantJsonFilename);
@@ -751,7 +750,7 @@ export class RushConfiguration {
    * Gets the settings from the common-versions.json config file for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getCommonVersions(variant?: Variants.IVariantName): CommonVersionsConfiguration {
+  public getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration {
     const commonVersionsFilename: string = path.join(this.commonRushConfigFolder,
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
       RushConstants.commonVersionsFilename);
@@ -762,7 +761,7 @@ export class RushConfiguration {
    * Gets the committed shrinkwrap file name for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getCommittedShrinkwrapFilename(variant?: Variants.IVariantName): string {
+  public getCommittedShrinkwrapFilename(variant?: string | undefined): string {
     if (variant) {
       if (!this._variants[variant]) {
         throw new Error(
@@ -795,7 +794,7 @@ export class RushConfiguration {
    * Gets the PNPM file name for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
-  public getPnpmFilename(variant?: Variants.IVariantName): string {
+  public getPnpmFilename(variant?: string | undefined): string {
     const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
 
     return path.join(
@@ -1096,7 +1095,7 @@ export class RushConfiguration {
     });
   }
 
-  private _getVariantConfigFolderPath(variant?: Variants.IVariantName): string {
+  private _getVariantConfigFolderPath(variant?: string | undefined): string {
     if (variant) {
       if (!this._variants[variant]) {
         throw new Error(

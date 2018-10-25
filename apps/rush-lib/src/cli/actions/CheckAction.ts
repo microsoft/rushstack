@@ -28,7 +28,7 @@ export class CheckAction extends BaseRushAction {
   }
 
   protected run(): Promise<void> {
-    const variant: Variants.IVariantName = this.rushConfiguration.currentInstalledVariant();
+    const variant: string | undefined = this.rushConfiguration.currentInstalledVariant;
 
     if (!this._variant.value && variant) {
       console.log(colors.yellow(
