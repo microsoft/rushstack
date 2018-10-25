@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Wed, 24 Oct 2018 16:03:10 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Oct 2018 23:20:40 GMT and should not be manually modified.
+
+## 3.5.0
+Thu, 25 Oct 2018 23:20:40 GMT
+
+### Minor changes
+
+- Add Sort API
 
 ## 3.4.0
 Wed, 24 Oct 2018 16:03:10 GMT

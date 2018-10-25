@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.5.0",
+      "tag": "@microsoft/node-core-library_v3.5.0",
+      "date": "Thu, 25 Oct 2018 23:20:40 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add Sort API"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.0",
       "tag": "@microsoft/node-core-library_v3.4.0",
       "date": "Wed, 24 Oct 2018 16:03:10 GMT",
