@@ -154,9 +154,7 @@ class PackageJsonDependency {
 class PackageJsonEditor {
   // (undocumented)
   addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
-  // (undocumented)
   readonly dependencyList: ReadonlyArray<PackageJsonDependency>;
-  // (undocumented)
   readonly devDependencyList: ReadonlyArray<PackageJsonDependency>;
   // (undocumented)
   readonly filePath: string;

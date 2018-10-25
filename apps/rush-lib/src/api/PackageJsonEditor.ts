@@ -93,10 +93,16 @@ export class PackageJsonEditor {
     return this._filePath;
   }
 
+  /**
+   * The list of dependencies of type DependencyType.Regular, DependencyType.Optional, or DependencyType.Peer.
+   */
   public get dependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._dependencies.values()];
   }
 
+  /**
+   * The list of dependencies of type DependencyType.Dev.
+   */
   public get devDependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._devDependencies.values()];
   }
