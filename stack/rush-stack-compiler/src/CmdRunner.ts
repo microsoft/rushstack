@@ -64,33 +64,7 @@ export interface IRunCmdOptions {
  * @beta
  */
 export class CmdRunner<TTaskConfig extends IRushStackCompilerBaseOptions> {
-  private static __nodePath: string | undefined; // tslint:disable-line:variable-name
-  private static get _nodePath(): string | undefined {
-    if (!CmdRunner.__nodePath) {
-      try {
-        if (os.platform() === 'win32') {
-          // We're on Windows
-          const whereOutput: string = childProcess.execSync('where node', { stdio: [] }).toString();
-          const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
-
-          // take the first result, see https://github.com/Microsoft/web-build-tools/issues/759
-          CmdRunner.__nodePath = lines[0];
-        } else {
-          // We aren't on Windows - assume we're on *NIX or Darwin
-          CmdRunner.__nodePath = childProcess.execSync('which node', { stdio: [] }).toString();
-        }
-      } catch (e) {
-        return undefined;
-      }
-
-      CmdRunner.__nodePath = CmdRunner.__nodePath.trim();
-      if (!FileSystem.exists(CmdRunner.__nodePath)) {
-        return undefined;
-      }
-    }
-
-    return CmdRunner.__nodePath;
-  }
+  private static readonly _nodePath: string = process.execPath;
 
   private _constants: StandardBuildFolders;
   private _terminal: Terminal;
