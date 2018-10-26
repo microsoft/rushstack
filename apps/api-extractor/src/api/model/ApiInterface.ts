@@ -1,14 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind, ApiItem } from './ApiItem';
+import { ApiItemKind } from './ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
+import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 
-export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiDeclarationMixinOptions {
+export interface IApiInterfaceOptions extends
+  IApiItemContainerMixinOptions,
+  IApiDeclarationMixinOptions,
+  IApiDocumentedItemOptions {
 }
 
-export class ApiInterface extends ApiItemContainerMixin(ApiDeclarationMixin(ApiItem)) {
+export class ApiInterface extends ApiItemContainerMixin(ApiDeclarationMixin(ApiDocumentedItem)) {
   public static getCanonicalReference(name: string): string {
     return `(${name}:interface)`;
   }

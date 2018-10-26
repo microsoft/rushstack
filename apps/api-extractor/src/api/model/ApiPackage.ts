@@ -4,11 +4,14 @@
 import { ApiItem, ApiItemKind, IApiItemJson } from './ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { JsonFile } from '@microsoft/node-core-library';
+import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 
-export interface IApiPackageOptions extends IApiItemContainerMixinOptions {
+export interface IApiPackageOptions extends
+  IApiItemContainerMixinOptions,
+  IApiDocumentedItemOptions {
 }
 
-export class ApiPackage extends ApiItemContainerMixin(ApiItem) {
+export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
     const jsonObject: { } = JsonFile.load(apiJsonFilename);
     return ApiItem.deserialize(jsonObject as IApiItemJson) as ApiPackage;

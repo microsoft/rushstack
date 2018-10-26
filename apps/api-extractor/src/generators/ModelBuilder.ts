@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import * as tsdoc from '@microsoft/tsdoc';
+
 import { ExtractorContext } from '../analyzer/ExtractorContext';
 import { AstSymbolTable } from '../analyzer/AstSymbolTable';
 import { AstEntryPoint } from '../analyzer/AstEntryPoint';
@@ -17,23 +19,33 @@ import { ApiInterface } from '../api/model/ApiInterface';
 import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
 import { Span } from '../analyzer/Span';
 import { ApiParameter } from '../api/model/ApiParameter';
+import { AedocDefinitions } from '../aedoc/AedocDefinitions';
+import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
+  private readonly _tsdocParser: tsdoc.TSDocParser;
   private readonly _astSymbolTable: AstSymbolTable;
   private _astEntryPoint: AstEntryPoint | undefined;
-  private readonly _apiModel: ApiModel;
   private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
+  private readonly _apiModel: ApiModel;
 
   public constructor(context: ExtractorContext) {
     this._context = context;
+    this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.parserConfiguration);
     this._astSymbolTable = new AstSymbolTable(this._context.typeChecker, this._context.packageJsonLookup);
-    this._apiModel = new ApiModel();
     this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
+    this._apiModel = new ApiModel();
   }
 
   public process(): void {
-    const apiPackage: ApiPackage = new ApiPackage({ name: this._context.packageName });
+    const docComment: tsdoc.DocComment | undefined = this._tryParsePackageDocumentation(
+      this._context.entryPointSourceFile);
+
+    const apiPackage: ApiPackage = new ApiPackage({
+      name: this._context.packageName,
+      docComment: docComment
+    });
     this._apiModel.addMember(apiPackage);
 
     const apiEntryPoint: ApiEntryPoint = new ApiEntryPoint({ name: '' });
@@ -114,8 +126,9 @@ export class ModelBuilder {
     if (apiClass === undefined) {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.FirstPunctuation);  // FirstPunctuation = "{"
+      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
 
-      apiClass = new ApiClass({ name, signature });
+      apiClass = new ApiClass({ name, signature, docComment });
       parentApiItem.addMember(apiClass);
     }
 
@@ -133,8 +146,9 @@ export class ModelBuilder {
     if (apiInterface === undefined) {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.FirstPunctuation); // FirstPunctuation = "{"
+      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
 
-      apiInterface = new ApiInterface({ name, signature });
+      apiInterface = new ApiInterface({ name, signature, docComment });
       parentApiItem.addMember(apiInterface);
     }
 
@@ -164,7 +178,9 @@ export class ModelBuilder {
 
     if (apiMethod === undefined) {
       const signature: string = astDeclaration.declaration.getText();
-      apiMethod = new ApiMethod({ name, signature, isStatic, overloadIndex });
+      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+
+      apiMethod = new ApiMethod({ name, signature, docComment, isStatic, overloadIndex });
 
       for (const parameter of methodDeclaration.parameters) {
         const parameterSignature: string = parameter.getText().trim();
@@ -190,8 +206,9 @@ export class ModelBuilder {
     if (apiNamespace === undefined) {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.ModuleBlock); // ModuleBlock = the "{ ... }" block
+      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
 
-      apiNamespace = new ApiNamespace({ name, signature });
+      apiNamespace = new ApiNamespace({ name, signature, docComment });
       parentApiItem.addMember(apiNamespace);
     }
 
@@ -209,7 +226,9 @@ export class ModelBuilder {
 
     if (apiPropertySignature === undefined) {
       const signature: string = astDeclaration.declaration.getText();
-      apiPropertySignature = new ApiPropertySignature({ name, signature });
+      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+
+      apiPropertySignature = new ApiPropertySignature({ name, signature, docComment });
       parentApiItem.addMember(apiPropertySignature);
     } else {
       // If the property was already declared before (via a merged interface declaration),
@@ -266,5 +285,87 @@ export class ModelBuilder {
       }
     }
     return span.getModifiedText().trim();
+  }
+
+  private _tryParsePackageDocumentation(sourceFile: ts.SourceFile): tsdoc.DocComment | undefined {
+    // The @packageDocumentation comment is special because it is not attached to an AST
+    // definition.  Instead, it is part of the "trivia" tokens that the compiler treats
+    // as irrelevant white space.
+    //
+    // WARNING: If the comment doesn't precede an export statement, the compiler will omit
+    // it from the *.d.ts file, and API Extractor won't find it.  If this happens, you need
+    // to rearrange your statements to ensure it is passed through.
+    //
+    // This implementation assumes that the "@packageDocumentation" will be in the first TSDoc comment
+    // that appears in the entry point *.d.ts file.  We could possibly look in other places,
+    // but the above warning suggests enforcing a standardized layout.  This design choice is open
+    // to feedback.
+    let packageCommentRange: ts.TextRange | undefined = undefined; // empty string
+
+    for (const commentRange of ts.getLeadingCommentRanges(sourceFile.text, sourceFile.getFullStart()) || []) {
+      if (commentRange.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+        const commentBody: string = sourceFile.text.substring(commentRange.pos, commentRange.end);
+
+        // Choose the first JSDoc-style comment
+        if (/^\s*\/\*\*/.test(commentBody)) {
+          // But only if it looks like it's trying to be @packageDocumentation
+          // (The TSDoc parser will validate this more rigorously)
+          if (/\@packageDocumentation/i.test(commentBody)) {
+            packageCommentRange = commentRange;
+          }
+          break;
+        }
+      }
+    }
+
+    if (!packageCommentRange) {
+      // If we didn't find the @packageDocumentation tag in the expected place, is it in some
+      // wrong place?  This sanity check helps people to figure out why there comment isn't working.
+      for (const statement of sourceFile.statements) {
+        const ranges: ts.CommentRange[] = [];
+        ranges.push(...ts.getLeadingCommentRanges(sourceFile.text, statement.getFullStart()) || []);
+        ranges.push(...ts.getTrailingCommentRanges(sourceFile.text, statement.getEnd()) || []);
+
+        for (const commentRange of ranges) {
+          const commentBody: string = sourceFile.text.substring(commentRange.pos, commentRange.end);
+
+          if (/\@packageDocumentation/i.test(commentBody)) {
+            this._context.reportError(
+              'The @packageDocumentation comment must appear at the top of entry point *.d.ts file',
+              sourceFile, commentRange.pos
+            );
+            break;
+          }
+        }
+      }
+    }
+
+    if (packageCommentRange === undefined) {
+      return undefined;
+    }
+
+    return this._parseTsdocComment(sourceFile.text, packageCommentRange);
+  }
+
+  private _tryParseDocumentation(astDeclaration: AstDeclaration): tsdoc.DocComment | undefined {
+    const declaration: ts.Declaration = astDeclaration.declaration;
+    const sourceFileText: string = declaration.getSourceFile().text;
+    const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || [];
+
+    if (ranges.length === 0) {
+      return undefined;
+    }
+
+    // We use the JSDoc comment block that is closest to the definition, i.e.
+    // the last one preceding it
+    return this._parseTsdocComment(sourceFileText, ranges[ranges.length - 1]);
+  }
+
+  private _parseTsdocComment(sourceFile: string, textRange: ts.TextRange): tsdoc.DocComment | undefined {
+    const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFile,
+      textRange.pos, textRange.end);
+
+    const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
+    return parserContext.docComment;
   }
 }
