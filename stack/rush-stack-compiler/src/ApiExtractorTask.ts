@@ -4,7 +4,7 @@
 import * as path from 'path';
 import {
   FileSystem,
-  Terminal
+  ITerminalProvider
 } from '@microsoft/node-core-library';
 import {
   Extractor,
@@ -13,6 +13,8 @@ import {
 } from '@microsoft/api-extractor';
 
 import { Constants } from './Constants';
+import { RushStackCompilerTask } from './RushStackCompilerTask';
+import { ToolPaths } from './ToolPaths';
 
 /**
  * @public
@@ -107,13 +109,6 @@ export interface IApiExtractorTaskConfig {
   publishFolderForPublic?: string;
 
   /**
-   * Use this option to override the version of the TypeScript compiler API extractor should use.
-   *
-   * @beta
-   */
-  typescriptCompilerFolder?: string;
-
-  /**
    * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
    * recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it
    * may be required when dependencies contain declarations that are incompatible with the TypeScript engine
@@ -129,15 +124,9 @@ export interface IApiExtractorTaskConfig {
  * find the aliased exports of the project. An api-extractor.ts file is generated for the project in the temp folder.
  * @beta
  */
-export class ApiExtractorTask  {
-  private _constants: Constants;
-  private _terminal: Terminal;
-  private _options: IApiExtractorTaskConfig;
-
-  constructor(options: IApiExtractorTaskConfig, constants: Constants, terminal: Terminal) {
-    this._constants = constants;
-    this._terminal = terminal;
-    this._options = options;
+export class ApiExtractorTask extends RushStackCompilerTask<IApiExtractorTaskConfig> {
+  constructor(taskOptions: IApiExtractorTaskConfig, constants: Constants, terminalProvider: ITerminalProvider) {
+    super(taskOptions, constants, terminalProvider);
   }
 
   public invoke(): Promise<void> {
@@ -145,26 +134,26 @@ export class ApiExtractorTask  {
       return Promise.resolve();
     }
 
-    if (!this._options.entry) {
+    if (!this._taskOptions.entry) {
       return Promise.reject(new Error('entry must be defined'));
     }
 
-    if (!this._options.apiJsonFolder) {
+    if (!this._taskOptions.apiJsonFolder) {
       return Promise.reject(new Error('apiJsonFolder must be defined'));
     }
 
-    if (!this._options.apiReviewFolder) {
+    if (!this._taskOptions.apiReviewFolder) {
       return Promise.reject(new Error('apiReviewFolder must be defined'));
     }
 
     try {
       let entryPointFile: string;
 
-      if (this._options.entry === 'src/index.ts') {
+      if (this._taskOptions.entry === 'src/index.ts') {
         // backwards compatibility for legacy projects that used *.ts files as their entry point
         entryPointFile = path.join(this._constants.projectFolderPath, 'lib/index.d.ts');
       } else {
-        entryPointFile = path.join(this._constants.projectFolderPath, this._options.entry);
+        entryPointFile = path.join(this._constants.projectFolderPath, this._taskOptions.entry);
       }
 
       const extractorConfig: IExtractorConfig = {
@@ -178,35 +167,35 @@ export class ApiExtractorTask  {
         },
         apiReviewFile: {
           enabled: true,
-          apiReviewFolder: this._options.apiReviewFolder,
+          apiReviewFolder: this._taskOptions.apiReviewFolder,
           tempFolder: this._constants.tempFolderPath
         },
         apiJsonFile: {
           enabled: true,
-          outputFolder: this._options.apiJsonFolder
+          outputFolder: this._taskOptions.apiJsonFolder
         }
       };
 
-      if (this._options.generateDtsRollup) {
+      if (this._taskOptions.generateDtsRollup) {
         extractorConfig.dtsRollup = {
           enabled: true,
-          trimming: !!this._options.dtsRollupTrimming,
-          publishFolderForInternal: this._options.publishFolderForInternal,
-          publishFolderForBeta: this._options.publishFolderForBeta,
-          publishFolderForPublic: this._options.publishFolderForPublic
+          trimming: !!this._taskOptions.dtsRollupTrimming,
+          publishFolderForInternal: this._taskOptions.publishFolderForInternal,
+          publishFolderForBeta: this._taskOptions.publishFolderForBeta,
+          publishFolderForPublic: this._taskOptions.publishFolderForPublic
         };
       }
 
       const extractorOptions: IExtractorOptions = {
-        localBuild: !this._options.localBuild,
+        localBuild: !this._taskOptions.localBuild,
         customLogger: {
           logVerbose: this._terminal.writeVerboseLine,
           logInfo: this._terminal.writeLine,
           logWarning: this._terminal.writeWarningLine,
           logError: this._terminal.writeErrorLine
         },
-        typescriptCompilerFolder: this._options.typescriptCompilerFolder,
-        skipLibCheck: this._options.skipLibCheck
+        typescriptCompilerFolder: ToolPaths.typescriptPackagePath,
+        skipLibCheck: this._taskOptions.skipLibCheck
       };
 
       const extractor: Extractor = new Extractor(extractorConfig, extractorOptions);
@@ -222,18 +211,18 @@ export class ApiExtractorTask  {
   }
 
   private _validateConfiguration(): boolean {
-    if (!this._options.entry) {
+    if (!this._taskOptions.entry) {
       this._terminal.writeErrorLine('Missing or empty "entry" field in api-extractor.json');
       return false;
     }
 
-    if (!this._options.apiReviewFolder) {
+    if (!this._taskOptions.apiReviewFolder) {
       this._terminal.writeErrorLine('Missing or empty "apiReviewFolder" field in api-extractor.json');
       return false;
     }
 
-    if (!FileSystem.exists(this._options.entry)) {
-      this._terminal.writeErrorLine(`Entry file ${this._options.entry} does not exist.`);
+    if (!FileSystem.exists(this._taskOptions.entry)) {
+      this._terminal.writeErrorLine(`Entry file ${this._taskOptions.entry} does not exist.`);
       return false;
     }
 

@@ -191,7 +191,6 @@ interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
 
 // @public (undocumented)
 interface ITslintCmdTaskConfig extends IBaseCmdTaskConfig {
-  customArgs?: string[];
   displayAsError?: boolean;
 }
 

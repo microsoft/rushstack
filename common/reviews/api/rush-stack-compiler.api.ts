@@ -1,15 +1,13 @@
 // @beta
-class ApiExtractorTask {
-  constructor(options: IApiExtractorTaskConfig, constants: Constants, terminal: Terminal);
+class ApiExtractorTask extends RushStackCompilerTask<IApiExtractorTaskConfig> {
+  constructor(taskOptions: IApiExtractorTaskConfig, constants: Constants, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;
 }
 
 // @beta
-class BaseCmdTask<TTaskConfig extends IBaseCmdTaskOptions> {
+class CmdRunner<TTaskConfig extends IBaseCmdTaskOptions> {
   constructor(constants: Constants, terminal: Terminal, options: IBaseTaskOptions<TTaskConfig>);
-  // (undocumented)
-  protected _constants: Constants;
   // (undocumented)
   protected _getArgs(): string[];
   // (undocumented)
@@ -19,13 +17,7 @@ class BaseCmdTask<TTaskConfig extends IBaseCmdTaskOptions> {
   // (undocumented)
   protected _onError(data: Buffer): void;
   // (undocumented)
-  protected _options: IBaseTaskOptions<TTaskConfig>;
-  // (undocumented)
-  protected _terminal: Terminal;
-  // (undocumented)
-  static getPackagePath(packageName: string): string | undefined;
-  // (undocumented)
-  protected invokeCmd(): Promise<void>;
+  runCmd(options: IRunCmdOptions): Promise<void>;
 }
 
 // @beta (undocumented)
@@ -60,8 +52,6 @@ interface IApiExtractorTaskConfig {
   // @beta
   publishFolderForPublic?: string;
   skipLibCheck?: boolean;
-  // @beta
-  typescriptCompilerFolder?: string;
 }
 
 // @beta (undocumented)
@@ -72,8 +62,22 @@ interface IBaseCmdTaskOptions {
 // @beta
 interface IBaseTaskOptions<TTaskConfig> {
   packageBinPath: string;
-  packageName: string;
+  // (undocumented)
+  packageJson: IPackageJson;
+  packagePath: string;
   taskOptions: TTaskConfig;
+}
+
+// @beta (undocumented)
+interface IRunCmdOptions {
+  // (undocumented)
+  args: string[];
+  // (undocumented)
+  onClose?: (code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void) => void;
+  // (undocumented)
+  onData?: (data: Buffer) => void;
+  // (undocumented)
+  onError?: (data: Buffer) => void;
 }
 
 // @public (undocumented)
@@ -86,29 +90,17 @@ interface ITslintCmdTaskConfig extends IBaseCmdTaskOptions {
 }
 
 // @beta (undocumented)
-class TscCmdTask extends BaseCmdTask<IBaseCmdTaskOptions> {
-  constructor(taskOptions: IBaseCmdTaskOptions, constants: Constants, terminal: Terminal);
-  // (undocumented)
-  protected _onData(data: Buffer): void;
+class TscCmdTask extends RushStackCompilerTask<IBaseCmdTaskOptions> {
+  constructor(taskOptions: IBaseCmdTaskOptions, constants: Constants, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;
-  // (undocumented)
-  loadSchema(): Object;
 }
 
 // @beta (undocumented)
-class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
-  constructor(taskOptions: ITslintCmdTaskConfig, constants: Constants, terminal: Terminal);
-  // (undocumented)
-  protected _getArgs(): string[];
-  // (undocumented)
-  protected _onClose(code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void): void;
-  // (undocumented)
-  protected _onData(data: Buffer): void;
+class TslintCmdTask extends RushStackCompilerTask<ITslintCmdTaskConfig> {
+  constructor(taskOptions: ITslintCmdTaskConfig, constants: Constants, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;
-  // (undocumented)
-  loadSchema(): Object;
 }
 
 // WARNING: Unsupported export: WriteFileIssueFunction

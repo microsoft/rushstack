@@ -6,10 +6,8 @@ import * as path from 'path';
 import * as os from 'os';
 
 import {
-  JsonFile,
   IPackageJson,
   FileSystem,
-  PackageJsonLookup,
   Terminal
 } from '@microsoft/node-core-library';
 import { Constants } from './Constants';
@@ -37,7 +35,12 @@ export interface IBaseTaskOptions<TTaskConfig> {
   /**
    * The name of the package to resolve.
    */
-  packageName: string;
+  packagePath: string;
+
+  /**
+   *
+   */
+  packageJson: IPackageJson;
 
   /**
    * The path to the binary to invoke inside the package.
@@ -46,14 +49,24 @@ export interface IBaseTaskOptions<TTaskConfig> {
 }
 
 /**
+ * @beta
+ */
+export interface IRunCmdOptions {
+  args: string[];
+  onData?: (data: Buffer) => void;
+  onError?: (data: Buffer) => void;
+  onClose?: (code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void) => void;
+}
+
+/**
  * This base task provides support for finding and then executing a binary in a node package.
  *
  * @beta
  */
-export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskOptions> {
+export class CmdRunner<TTaskConfig extends IBaseCmdTaskOptions> {
   private static __nodePath: string | undefined; // tslint:disable-line:variable-name
   private static get _nodePath(): string | undefined {
-    if (!BaseCmdTask.__nodePath) {
+    if (!CmdRunner.__nodePath) {
       try {
         if (os.platform() === 'win32') {
           // We're on Windows
@@ -61,40 +74,28 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskOptions> {
           const lines: string[] = whereOutput.split(os.EOL).filter((line) => !!line);
 
           // take the first result, see https://github.com/Microsoft/web-build-tools/issues/759
-          BaseCmdTask.__nodePath = lines[0];
+          CmdRunner.__nodePath = lines[0];
         } else {
           // We aren't on Windows - assume we're on *NIX or Darwin
-          BaseCmdTask.__nodePath = childProcess.execSync('which node', { stdio: [] }).toString();
+          CmdRunner.__nodePath = childProcess.execSync('which node', { stdio: [] }).toString();
         }
       } catch (e) {
         return undefined;
       }
 
-      BaseCmdTask.__nodePath = BaseCmdTask.__nodePath.trim();
-      if (!FileSystem.exists(BaseCmdTask.__nodePath)) {
+      CmdRunner.__nodePath = CmdRunner.__nodePath.trim();
+      if (!FileSystem.exists(CmdRunner.__nodePath)) {
         return undefined;
       }
     }
 
-    return BaseCmdTask.__nodePath;
+    return CmdRunner.__nodePath;
   }
 
-  protected _constants: Constants;
-  protected _terminal: Terminal;
-  protected _options: IBaseTaskOptions<TTaskConfig>;
-
+  private _constants: Constants;
+  private _terminal: Terminal;
+  private _options: IBaseTaskOptions<TTaskConfig>;
   private _errorHasBeenLogged: boolean;
-
-  public static getPackagePath(packageName: string): string | undefined {
-    const packageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(packageName);
-    return packageJsonPath ? path.dirname(packageJsonPath) : undefined;
-  }
-
-  private static _getPackageJsonPath(packageName: string): string | undefined {
-    const lookup: PackageJsonLookup = new PackageJsonLookup();
-    const mainEntryPath: string = require.resolve(packageName);
-    return lookup.tryGetPackageJsonFilePathFor(mainEntryPath);
-  }
 
   constructor(
     constants: Constants,
@@ -106,20 +107,24 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskOptions> {
     this._options = options;
   }
 
-  protected invokeCmd(): Promise<void> {
-    const packageJsonPath: string | undefined = BaseCmdTask._getPackageJsonPath(this._options.packageName);
+  public runCmd(options: IRunCmdOptions): Promise<void> {
+    const {
+      args,
+      onData = this._onData.bind(this),
+      onError = this._onError.bind(this),
+      onClose = this._onClose.bind(this)
+    }: IRunCmdOptions = options;
 
-    if (!packageJsonPath) {
+    const packageJson: IPackageJson | undefined = this._options.packageJson;
+
+    if (!packageJson) {
       return Promise.reject(new Error(`Unable to find the package.json file for ${this._options}.`));
     }
 
-    const binaryPackagePath: string = path.dirname(packageJsonPath);
-
     // Print the version
-    const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
     this._terminal.writeLine(`${this._options} version: ${packageJson.version}`);
 
-    const binaryPath: string = path.resolve(binaryPackagePath, this._options.packageBinPath);
+    const binaryPath: string = path.resolve(this._options.packagePath, this._options.packageBinPath);
     if (!FileSystem.exists(binaryPath)) {
       return Promise.reject(new Error(
         `The binary is missing. This indicates that ${this._options} is not ` +
@@ -128,7 +133,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskOptions> {
     }
 
     return new Promise((resolve: () => void, reject: (error: Error) => void) => {
-      const nodePath: string | undefined = BaseCmdTask._nodePath;
+      const nodePath: string | undefined = CmdRunner._nodePath;
       if (!nodePath) {
         reject(new Error('Unable to find node executable'));
         return;
@@ -137,7 +142,7 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskOptions> {
       // Invoke the tool and watch for log messages
       const spawnResult: childProcess.ChildProcess = childProcess.spawn(
         nodePath,
-        [binaryPath, ...this._getArgs()],
+        [binaryPath, ...args],
         {
           cwd: this._constants.projectFolderPath,
           env: process.env,
@@ -145,13 +150,13 @@ export abstract class BaseCmdTask<TTaskConfig extends IBaseCmdTaskOptions> {
         }
       );
 
-      spawnResult.stdout.on('data', this._onData.bind(this));
+      spawnResult.stdout.on('data', onData);
       spawnResult.stderr.on('data', (data: Buffer) => {
         this._errorHasBeenLogged = true;
-        this._onError(data);
+        onError(data);
       });
 
-      spawnResult.on('close', (code) => this._onClose(code, this._errorHasBeenLogged, resolve, reject));
+      spawnResult.on('close', (code) => onClose(code, this._errorHasBeenLogged, resolve, reject));
     });
   }
 
