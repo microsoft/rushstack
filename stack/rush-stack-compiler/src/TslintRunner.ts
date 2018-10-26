@@ -7,11 +7,11 @@ import * as TSLint from 'tslint';
 
 import {
   CmdRunner,
-  IBaseCmdTaskOptions
-} from './BaseCmdTask';
+  IRushStackCompilerBaseOptions
+} from './CmdRunner';
 import { Constants } from './Constants';
 import { ToolPaths } from './ToolPaths';
-import { RushStackCompilerTask } from './RushStackCompilerTask';
+import { RushStackCompilerBase } from './RushStackCompilerBase';
 
 export type WriteFileIssueFunction = (
   filePath: string,
@@ -24,7 +24,7 @@ export type WriteFileIssueFunction = (
 /**
  * @public
  */
-export interface ITslintCmdTaskConfig extends IBaseCmdTaskOptions {
+export interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
   fileError: WriteFileIssueFunction;
   fileWarning: WriteFileIssueFunction;
 
@@ -37,10 +37,10 @@ export interface ITslintCmdTaskConfig extends IBaseCmdTaskOptions {
 /**
  * @beta
  */
-export class TslintCmdTask extends RushStackCompilerTask<ITslintCmdTaskConfig> {
-  private _cmdRunner: CmdRunner<ITslintCmdTaskConfig>;
+export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
+  private _cmdRunner: CmdRunner<ITslintRunnerConfig>;
 
-  constructor(taskOptions: ITslintCmdTaskConfig, constants: Constants, terminalProvider: ITerminalProvider) {
+  constructor(taskOptions: ITslintRunnerConfig, constants: Constants, terminalProvider: ITerminalProvider) {
     super(taskOptions, constants, terminalProvider);
     this._cmdRunner = new CmdRunner(
       this._constants,
@@ -73,7 +73,7 @@ export class TslintCmdTask extends RushStackCompilerTask<ITslintCmdTaskConfig> {
     }
 
     args.push(...[
-      '--project', this._constants.srcFolderPath
+      '--project', this._constants.projectFolderPath
     ]);
 
     return this._cmdRunner.runCmd({

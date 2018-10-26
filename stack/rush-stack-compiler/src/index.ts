@@ -1,6 +1,6 @@
 export * from './Constants';
-export * from './BaseCmdTask';
+export * from './CmdRunner';
 
-export * from './ApiExtractorTask';
-export * from './TscCmdTask';
-export * from './TslintCmdTask';
+export * from './ApiExtractorRunner';
+export * from './TypescriptCompiler';
+export * from './TslintRunner';

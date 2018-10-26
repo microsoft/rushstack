@@ -13,7 +13,7 @@ import {
 } from '@microsoft/api-extractor';
 
 import { Constants } from './Constants';
-import { RushStackCompilerTask } from './RushStackCompilerTask';
+import { RushStackCompilerBase } from './RushStackCompilerBase';
 import { ToolPaths } from './ToolPaths';
 
 /**
@@ -124,7 +124,7 @@ export interface IApiExtractorTaskConfig {
  * find the aliased exports of the project. An api-extractor.ts file is generated for the project in the temp folder.
  * @beta
  */
-export class ApiExtractorTask extends RushStackCompilerTask<IApiExtractorTaskConfig> {
+export class ApiExtractorRunner extends RushStackCompilerBase<IApiExtractorTaskConfig> {
   constructor(taskOptions: IApiExtractorTaskConfig, constants: Constants, terminalProvider: ITerminalProvider) {
     super(taskOptions, constants, terminalProvider);
   }
@@ -206,6 +206,7 @@ export class ApiExtractorTask extends RushStackCompilerTask<IApiExtractorTaskCon
 
       return Promise.resolve();
     } catch (e) {
+      debugger;
       return Promise.reject(e);
     }
   }

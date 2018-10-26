@@ -26,6 +26,8 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
 
   public constructor(options: Partial<IConsoleTerminalProviderOptions> = {}) {
     this.verboseEnabled = !!options.verboseEnabled;
+
+    this.write = this.write.bind(this);
   }
 
   public write(data: string, severity: TerminalProviderSeverity): void {

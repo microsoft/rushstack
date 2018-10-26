@@ -1,12 +1,12 @@
 // @beta
-class ApiExtractorTask extends RushStackCompilerTask<IApiExtractorTaskConfig> {
+class ApiExtractorRunner extends RushStackCompilerBase<IApiExtractorTaskConfig> {
   constructor(taskOptions: IApiExtractorTaskConfig, constants: Constants, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;
 }
 
 // @beta
-class CmdRunner<TTaskConfig extends IBaseCmdTaskOptions> {
+class CmdRunner<TTaskConfig extends IRushStackCompilerBaseOptions> {
   constructor(constants: Constants, terminal: Terminal, options: IBaseTaskOptions<TTaskConfig>);
   // (undocumented)
   protected _getArgs(): string[];
@@ -54,11 +54,6 @@ interface IApiExtractorTaskConfig {
   skipLibCheck?: boolean;
 }
 
-// @beta (undocumented)
-interface IBaseCmdTaskOptions {
-  customArgs?: string[];
-}
-
 // @beta
 interface IBaseTaskOptions<TTaskConfig> {
   packageBinPath: string;
@@ -80,8 +75,13 @@ interface IRunCmdOptions {
   onError?: (data: Buffer) => void;
 }
 
+// @beta (undocumented)
+interface IRushStackCompilerBaseOptions {
+  customArgs?: string[];
+}
+
 // @public (undocumented)
-interface ITslintCmdTaskConfig extends IBaseCmdTaskOptions {
+interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
   displayAsError?: boolean;
   // (undocumented)
   fileError: WriteFileIssueFunction;
@@ -90,17 +90,19 @@ interface ITslintCmdTaskConfig extends IBaseCmdTaskOptions {
 }
 
 // @beta (undocumented)
-class TscCmdTask extends RushStackCompilerTask<IBaseCmdTaskOptions> {
-  constructor(taskOptions: IBaseCmdTaskOptions, constants: Constants, terminalProvider: ITerminalProvider);
+class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
+  constructor(taskOptions: ITslintRunnerConfig, constants: Constants, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;
 }
 
 // @beta (undocumented)
-class TslintCmdTask extends RushStackCompilerTask<ITslintCmdTaskConfig> {
-  constructor(taskOptions: ITslintCmdTaskConfig, constants: Constants, terminalProvider: ITerminalProvider);
+class TypescriptCompiler extends RushStackCompilerBase<IRushStackCompilerBaseOptions> {
+  constructor(taskOptions: IRushStackCompilerBaseOptions, constants: Constants, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;
+  // (undocumented)
+  typescript: typeof typescript;
 }
 
 // WARNING: Unsupported export: WriteFileIssueFunction

@@ -1,23 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as Gulp from 'gulp';
 import * as path from 'path';
-import { GulpTask } from '@microsoft/gulp-core-build';
-import {
-  FileSystem,
-  JsonFile
-} from '@microsoft/node-core-library';
-import {
-  Extractor,
-  IExtractorOptions,
-  IExtractorConfig
-} from '@microsoft/api-extractor';
+import { JsonFile } from '@microsoft/node-core-library';
+import { ApiExtractorRunner } from '@microsoft/rush-stack-compiler';
 
-import { BaseCmdTask } from './BaseCmdTask';
+import { RSCTask, IRSCTaskConfig } from './RSCTask';
 
 /** @public */
-export interface IApiExtractorTaskConfig {
+export interface IApiExtractorTaskConfig extends IRSCTaskConfig {
   /**
    * Indicates whether the task should be run.
    */
@@ -104,13 +95,6 @@ export interface IApiExtractorTaskConfig {
   publishFolderForPublic?: string;
 
   /**
-   * Use this option to override the version of the TypeScript compiler API extractor should use.
-   *
-   * @beta
-   */
-  typescriptCompilerFolder?: string;
-
-  /**
    * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
    * recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it
    * may be required when dependencies contain declarations that are incompatible with the TypeScript engine
@@ -126,7 +110,7 @@ export interface IApiExtractorTaskConfig {
  * find the aliased exports of the project. An api-extractor.ts file is generated for the project in the temp folder.
  * @alpha
  */
-export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
+export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
   constructor() {
     super(
       'api-extractor',
@@ -134,8 +118,7 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
         enabled: false,
         entry: undefined,
         apiReviewFolder: undefined,
-        apiJsonFolder: undefined,
-        typescriptCompilerFolder: BaseCmdTask.getPackagePath('typescript')
+        apiJsonFolder: undefined
       }
     );
   }
@@ -144,107 +127,25 @@ export class ApiExtractorTask extends GulpTask<IApiExtractorTaskConfig>  {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'api-extractor.schema.json'));
   }
 
-  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream | void {
-    if (!this.taskConfig.enabled || !this._validateConfiguration()) {
-      completeCallback();
-      return;
-    }
+  public executeTask(): Promise<void> {
+    this.initializeRushStackCompiler();
 
-    if (!this.taskConfig.entry) {
-      completeCallback('taskConfig.entry must be defined');
-      return;
-    }
-
-    if (!this.taskConfig.apiJsonFolder) {
-      completeCallback('taskConfig.apiJsonFolder must be defined');
-      return;
-    }
-
-    if (!this.taskConfig.apiReviewFolder) {
-      completeCallback('taskConfig.apiReviewFolder must be defined');
-      return;
-    }
-
-    try {
-      let entryPointFile: string;
-
-      if (this.taskConfig.entry === 'src/index.ts') {
-        // backwards compatibility for legacy projects that used *.ts files as their entry point
-        entryPointFile = path.join(this.buildConfig.rootPath, 'lib/index.d.ts');
-      } else {
-        entryPointFile = path.join(this.buildConfig.rootPath, this.taskConfig.entry);
-      }
-
-      const extractorConfig: IExtractorConfig = {
-        compiler: {
-          configType: 'tsconfig',
-          rootFolder: this.buildConfig.rootPath
-        },
-        project: {
-          entryPointSourceFile: entryPointFile,
-          externalJsonFileFolders: [ path.join(__dirname, 'external-api-json') ]
-        },
-        apiReviewFile: {
-          enabled: true,
-          apiReviewFolder: this.taskConfig.apiReviewFolder,
-          tempFolder: this.buildConfig.tempFolder
-        },
-        apiJsonFile: {
-          enabled: true,
-          outputFolder: this.taskConfig.apiJsonFolder
-        }
-      };
-
-      if (this.taskConfig.generateDtsRollup) {
-        extractorConfig.dtsRollup = {
-          enabled: true,
-          trimming: !!this.taskConfig.dtsRollupTrimming,
-          publishFolderForInternal: this.taskConfig.publishFolderForInternal,
-          publishFolderForBeta: this.taskConfig.publishFolderForBeta,
-          publishFolderForPublic: this.taskConfig.publishFolderForPublic
-        };
-      }
-
-      const extractorOptions: IExtractorOptions = {
-        localBuild: !this.buildConfig.production,
-        customLogger: {
-          logVerbose: (message: string) => this.logVerbose(message),
-          logInfo: (message: string) => this.log(message),
-          logWarning: (message: string) => this.logWarning(message),
-          logError: (message: string) => this.logError(message)
-        },
-        typescriptCompilerFolder: this.taskConfig.typescriptCompilerFolder,
+    const apiExtractorRunner: ApiExtractorRunner = new this._rushStackComipler.ApiExtractorRunner(
+      {
+        entry: this.taskConfig.entry,
+        apiReviewFolder: this.taskConfig.apiReviewFolder,
+        apiJsonFolder: this.taskConfig.apiJsonFolder,
+        generateDtsRollup: this.taskConfig.generateDtsRollup,
+        dtsRollupTrimming: this.taskConfig.dtsRollupTrimming,
+        publishFolderForInternal: this.taskConfig.publishFolderForInternal,
+        publishFolderForBeta: this.taskConfig.publishFolderForBeta,
+        publishFolderForPublic: this.taskConfig.publishFolderForPublic,
         skipLibCheck: this.taskConfig.skipLibCheck
-      };
+      },
+      this._rushStackCompilerConstants,
+      this._terminalProvider
+    );
 
-      const extractor: Extractor = new Extractor(extractorConfig, extractorOptions);
-
-      // NOTE: processProject() returns false if errors or warnings occurred, however we
-      // already handle this above via our customLogger
-      extractor.processProject();
-    } catch (e) {
-      completeCallback(e.message);
-      return;
-    }
-
-    completeCallback();
-  }
-
-  private _validateConfiguration(): boolean {
-    if (!this.taskConfig.entry) {
-      this.logError('Missing or empty "entry" field in api-extractor.json');
-      return false;
-    }
-    if (!this.taskConfig.apiReviewFolder) {
-      this.logError('Missing or empty "apiReviewFolder" field in api-extractor.json');
-      return false;
-    }
-
-    if (!FileSystem.exists(this.taskConfig.entry)) {
-      this.logError(`Entry file ${this.taskConfig.entry} does not exist.`);
-      return false;
-    }
-
-    return true;
+    return apiExtractorRunner.invoke();
   }
 }

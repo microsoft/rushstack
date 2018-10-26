@@ -2,32 +2,32 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  ITerminalProvider
-} from '@microsoft/node-core-library';
+import * as typescript from 'typescript';
+import { ITerminalProvider } from '@microsoft/node-core-library';
 
 import {
   CmdRunner,
-  IBaseCmdTaskOptions
-} from './BaseCmdTask';
+  IRushStackCompilerBaseOptions
+} from './CmdRunner';
 import { Constants } from './Constants';
 import { ToolPaths } from './ToolPaths';
-import { RushStackCompilerTask } from './RushStackCompilerTask';
+import { RushStackCompilerBase } from './RushStackCompilerBase';
 
 /**
  * @beta
  */
-export class TscCmdTask extends RushStackCompilerTask<IBaseCmdTaskOptions> {
-  private _cmdRunner: CmdRunner<IBaseCmdTaskOptions>;
+export class TypescriptCompiler extends RushStackCompilerBase<IRushStackCompilerBaseOptions> {
+  public typescript: typeof typescript = typescript;
+  private _cmdRunner: CmdRunner<IRushStackCompilerBaseOptions>;
 
-  constructor(taskOptions: IBaseCmdTaskOptions, constants: Constants, terminalProvider: ITerminalProvider) {
+  constructor(taskOptions: IRushStackCompilerBaseOptions, constants: Constants, terminalProvider: ITerminalProvider) {
     super(taskOptions, constants, terminalProvider);
     this._cmdRunner = new CmdRunner(
       this._constants,
       this._terminal,
       {
         packagePath: ToolPaths.typescriptPackagePath,
-        packageJson: ToolPaths.tslintPackageJson,
+        packageJson: ToolPaths.typescriptPackageJson,
         packageBinPath: path.join('bin', 'tsc'),
         taskOptions
       }

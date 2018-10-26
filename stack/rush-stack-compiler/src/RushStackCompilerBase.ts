@@ -4,7 +4,7 @@
 import { Constants } from './Constants';
 import { ITerminalProvider, Terminal } from '@microsoft/node-core-library';
 
-export abstract class RushStackCompilerTask<TOptions> {
+export abstract class RushStackCompilerBase<TOptions> {
   protected _constants: Constants;
   protected _terminal: Terminal;
   protected _taskOptions: TOptions;

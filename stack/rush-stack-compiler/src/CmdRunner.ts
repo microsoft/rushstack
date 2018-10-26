@@ -15,7 +15,7 @@ import { Constants } from './Constants';
 /**
  * @beta
  */
-export interface IBaseCmdTaskOptions {
+export interface IRushStackCompilerBaseOptions {
   /**
    * Optional list of custom args to pass to the tool
    */
@@ -63,7 +63,7 @@ export interface IRunCmdOptions {
  *
  * @beta
  */
-export class CmdRunner<TTaskConfig extends IBaseCmdTaskOptions> {
+export class CmdRunner<TTaskConfig extends IRushStackCompilerBaseOptions> {
   private static __nodePath: string | undefined; // tslint:disable-line:variable-name
   private static get _nodePath(): string | undefined {
     if (!CmdRunner.__nodePath) {
@@ -122,7 +122,7 @@ export class CmdRunner<TTaskConfig extends IBaseCmdTaskOptions> {
     }
 
     // Print the version
-    this._terminal.writeLine(`${this._options} version: ${packageJson.version}`);
+    this._terminal.writeLine(`${packageJson.name} version: ${packageJson.version}`);
 
     const binaryPath: string = path.resolve(this._options.packagePath, this._options.packageBinPath);
     if (!FileSystem.exists(binaryPath)) {

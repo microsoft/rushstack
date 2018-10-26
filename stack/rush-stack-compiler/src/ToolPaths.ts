@@ -21,12 +21,12 @@ export class ToolPaths {
   }
 
   public static get typescriptPackageJson(): IPackageJson {
-    return JsonFile.load(ToolPaths.typescriptPackagePath);
+    return JsonFile.load(path.join(ToolPaths.typescriptPackagePath, 'package.json'));
   }
 
   public static get tslintPackagePath(): string {
     if (!ToolPaths._tslintPackagePath) {
-      ToolPaths._typescriptPackagePath = ToolPaths._getPackagePath('tslint');
+      ToolPaths._tslintPackagePath = ToolPaths._getPackagePath('tslint');
 
       if (!ToolPaths._tslintPackagePath) {
         throw new Error('Unable to find "tslint" package.');
@@ -37,7 +37,7 @@ export class ToolPaths {
   }
 
   public static get tslintPackageJson(): IPackageJson {
-    return JsonFile.load(ToolPaths.tslintPackagePath);
+    return JsonFile.load(path.join(ToolPaths.tslintPackagePath, 'package.json'));
   }
 
   private static _getPackagePath(packageName: string): string | undefined {
