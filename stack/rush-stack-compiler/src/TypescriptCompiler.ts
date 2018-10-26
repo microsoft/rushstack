@@ -5,37 +5,33 @@ import * as path from 'path';
 import * as typescript from 'typescript';
 import { ITerminalProvider } from '@microsoft/node-core-library';
 
-import {
-  CmdRunner,
-  IRushStackCompilerBaseOptions
-} from './CmdRunner';
+import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
 import { RushStackCompilerBase } from './RushStackCompilerBase';
 
 /**
  * @beta
  */
-export class TypescriptCompiler extends RushStackCompilerBase<IRushStackCompilerBaseOptions> {
+export class TypescriptCompiler extends RushStackCompilerBase<{}> {
   public typescript: typeof typescript = typescript;
-  private _cmdRunner: CmdRunner<IRushStackCompilerBaseOptions>;
+  private _cmdRunner: CmdRunner;
 
-  constructor(taskOptions: IRushStackCompilerBaseOptions, rootPath: string, terminalProvider: ITerminalProvider) {
-    super(taskOptions, rootPath, terminalProvider);
+  constructor(rootPath: string, terminalProvider: ITerminalProvider) {
+    super({}, rootPath, terminalProvider);
     this._cmdRunner = new CmdRunner(
       this._standardBuildFolders,
       this._terminal,
       {
         packagePath: ToolPaths.typescriptPackagePath,
         packageJson: ToolPaths.typescriptPackageJson,
-        packageBinPath: path.join('bin', 'tsc'),
-        taskOptions
+        packageBinPath: path.join('bin', 'tsc')
       }
     );
   }
 
   public invoke(): Promise<void> {
     return this._cmdRunner.runCmd({
-      args: this._taskOptions.customArgs || [],
+      args: [],
       onData: (data: Buffer) => {
         // Log lines separately
         const dataLines: (string | undefined)[] = data.toString().split('\n');

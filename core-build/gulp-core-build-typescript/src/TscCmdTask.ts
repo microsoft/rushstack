@@ -33,11 +33,6 @@ export interface ITscCmdTaskConfig extends IRSCTaskConfig {
    * generated `.d.ts` files. Defaults to false.
    */
   removeCommentsFromJavaScript?: boolean;
-
-  /**
-   * Optional list of custom args to pass to the tool
-   */
-  customArgs?: string[];
 }
 
 /**
@@ -97,9 +92,6 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     );
 
     const typescriptCompiler: TypescriptCompiler = new this._rushStackCompiler.TypescriptCompiler(
-      {
-       customArgs: this.taskConfig.customArgs
-      },
       this.buildFolder,
       this._terminalProvider
     );
@@ -113,7 +105,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
 
     if (this.taskConfig.removeCommentsFromJavaScript === true) {
       buildPromise = buildPromise.then(
-        () => this._removeComments(this.taskConfig.customArgs || [], typescriptCompiler.typescript)
+        () => this._removeComments(typescriptCompiler.typescript)
       );
     }
 
@@ -136,18 +128,16 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     }
   }
 
-  private _removeComments(commandLineArgs: string[], typescript: typeof Typescript): Promise<void> {
+  private _removeComments(typescript: typeof Typescript): Promise<void> {
     const configFilePath: string | undefined = typescript.findConfigFile(this.buildConfig.rootPath, FileSystem.exists);
     if (!configFilePath) {
       return Promise.reject(new Error('Unable to resolve tsconfig file to determine outDir.'));
     }
 
-    const commandLine: Typescript.ParsedCommandLine = typescript.parseCommandLine(commandLineArgs);
     const tsConfig: Typescript.ParsedCommandLine = typescript.parseJsonConfigFileContent(
       JsonFile.load(configFilePath),
       new TsParseConfigHost(),
-      path.dirname(configFilePath),
-      commandLine.options
+      path.dirname(configFilePath)
     );
     if (!tsConfig || !tsConfig.options.outDir) {
       return Promise.reject('Unable to determine outDir from TypesScript configuration.');

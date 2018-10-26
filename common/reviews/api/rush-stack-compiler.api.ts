@@ -25,7 +25,7 @@ interface IApiExtractorTaskConfig {
 }
 
 // @public (undocumented)
-interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
+interface ITslintRunnerConfig {
   displayAsError?: boolean;
   // (undocumented)
   fileError: WriteFileIssueFunction;
@@ -52,11 +52,9 @@ class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
   invoke(): Promise<void>;
 }
 
-// WARNING: The type "IRushStackCompilerBaseOptions" needs to be exported by the package (e.g. added to index.ts)
 // @beta (undocumented)
-class TypescriptCompiler extends RushStackCompilerBase<IRushStackCompilerBaseOptions> {
-  // WARNING: The type "IRushStackCompilerBaseOptions" needs to be exported by the package (e.g. added to index.ts)
-  constructor(taskOptions: IRushStackCompilerBaseOptions, rootPath: string, terminalProvider: ITerminalProvider);
+class TypescriptCompiler extends RushStackCompilerBase<{}> {
+  constructor(rootPath: string, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;
   // (undocumented)

@@ -185,14 +185,12 @@ export function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
 interface ITscCmdTaskConfig extends IRSCTaskConfig {
-  customArgs?: string[];
   removeCommentsFromJavaScript?: boolean;
   staticMatch?: string[];
 }
 
 // @public (undocumented)
 interface ITslintCmdTaskConfig extends IRSCTaskConfig {
-  customArgs?: string[];
   displayAsError?: boolean;
 }
 

@@ -18,11 +18,6 @@ export interface ITslintCmdTaskConfig extends IRSCTaskConfig {
    * If true, displays warnings as errors. Defaults to false.
    */
   displayAsError?: boolean;
-
-  /**
-   * Optional list of custom args to pass to the tool
-   */
-  customArgs?: string[];
 }
 
 /**
@@ -47,7 +42,6 @@ export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
 
     const tslintRunner: TslintRunner = new this._rushStackCompiler.TslintRunner(
       {
-        customArgs: this.taskConfig.customArgs,
         displayAsError: this.taskConfig.displayAsError,
 
         fileError: this.fileError.bind(this),

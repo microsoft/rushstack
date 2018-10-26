@@ -5,10 +5,7 @@ import * as path from 'path';
 import { ITerminalProvider } from '@microsoft/node-core-library';
 import * as TSLint from 'tslint';
 
-import {
-  CmdRunner,
-  IRushStackCompilerBaseOptions
-} from './CmdRunner';
+import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
 import { RushStackCompilerBase } from './RushStackCompilerBase';
 
@@ -23,7 +20,7 @@ export type WriteFileIssueFunction = (
 /**
  * @public
  */
-export interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
+export interface ITslintRunnerConfig {
   fileError: WriteFileIssueFunction;
   fileWarning: WriteFileIssueFunction;
 
@@ -37,7 +34,7 @@ export interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
  * @beta
  */
 export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
-  private _cmdRunner: CmdRunner<ITslintRunnerConfig>;
+  private _cmdRunner: CmdRunner;
 
   constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
     super(taskOptions, rootPath, terminalProvider);
@@ -47,19 +44,16 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
       {
         packagePath: ToolPaths.tslintPackagePath,
         packageJson: ToolPaths.tslintPackageJson,
-        packageBinPath: path.join('bin', 'tslint'),
-        taskOptions
+        packageBinPath: path.join('bin', 'tslint')
       }
     );
   }
 
   public invoke(): Promise<void> {
-    const args: string[] = this._taskOptions.customArgs || [];
-
-    args.push(...[
+    const args: string[] = [
       '--format', 'json',
       '--project', this._standardBuildFolders.projectFolderPath
-    ]);
+    ];
 
     return this._cmdRunner.runCmd({
       args: args,

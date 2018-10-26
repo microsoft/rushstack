@@ -3,7 +3,6 @@
 
 import * as childProcess from 'child_process';
 import * as path from 'path';
-import * as os from 'os';
 
 import {
   IPackageJson,
@@ -13,25 +12,10 @@ import {
 import { StandardBuildFolders } from './StandardBuildFolders';
 
 /**
- * @beta
- */
-export interface IRushStackCompilerBaseOptions {
-  /**
-   * Optional list of custom args to pass to the tool
-   */
-  customArgs?: string[];
-}
-
-/**
  * Options for a CmdTask.
  * @beta
  */
-export interface IBaseTaskOptions<TTaskConfig> {
-    /**
-   * The initial config of the task.
-   */
-  taskOptions: TTaskConfig;
-
+export interface IBaseTaskOptions {
   /**
    * The name of the package to resolve.
    */
@@ -63,18 +47,18 @@ export interface IRunCmdOptions {
  *
  * @beta
  */
-export class CmdRunner<TTaskConfig extends IRushStackCompilerBaseOptions> {
+export class CmdRunner {
   private static readonly _nodePath: string = process.execPath;
 
   private _standardBuildFolders: StandardBuildFolders;
   private _terminal: Terminal;
-  private _options: IBaseTaskOptions<TTaskConfig>;
+  private _options: IBaseTaskOptions;
   private _errorHasBeenLogged: boolean;
 
   constructor(
     constants: StandardBuildFolders,
     terminal: Terminal,
-    options: IBaseTaskOptions<TTaskConfig>
+    options: IBaseTaskOptions
   ) {
     this._standardBuildFolders = constants;
     this._terminal = terminal;
@@ -148,9 +132,5 @@ export class CmdRunner<TTaskConfig extends IRushStackCompilerBaseOptions> {
     } else {
       resolve();
     }
-  }
-
-  protected _getArgs(): string[] {
-    return this._options.taskOptions.customArgs || [];
   }
 }
