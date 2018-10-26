@@ -14,6 +14,11 @@ import { GCBTerminalProvider } from './GCBTerminalProvider';
 
 export interface IRSCTaskConfig extends Object {
   buildDirectory: string;
+
+  /**
+   * This is the name of the rush-stack-compiler package, or the name of the package that
+   * extends the configuration of rush-stack-compiler. This defaults to "\@microsoft/rush-stack-compiler"
+   */
   rushStackCompilerPackageName?: string;
 }
 

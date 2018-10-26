@@ -62,4 +62,3 @@ class TypescriptCompiler extends RushStackCompilerBase<{}> {
 }
 
 // WARNING: Unsupported export: WriteFileIssueFunction
-// (No @packagedocumentation comment for this package)
