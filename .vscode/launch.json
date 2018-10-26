@@ -22,6 +22,28 @@
 			"outDir": null
 		},
 		{
+			"name": "Rush Debug",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/apps/rush-lib/lib/start.js",
+			"stopOnEntry": true,
+			"args": [
+				"update",
+				"--variant",
+				"test"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+        "--debug"
+			],
+			"env": {
+				"NODE_ENV": "development"
+			},
+			"sourceMaps": true
+		},
+		{
 			"name": "Attach",
 			"type": "node",
 			"request": "attach",

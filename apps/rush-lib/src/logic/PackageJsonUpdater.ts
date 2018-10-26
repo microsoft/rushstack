@@ -59,6 +59,10 @@ export interface IPackageJsonUpdaterRushAddOptions {
    * The style of range that should be used if the version is automatically detected.
    */
   rangeStyle: SemVerStyle;
+  /**
+   * The variant to consider when performing installations and validating shrinkwrap updates.
+   */
+  variant?: string | undefined;
 }
 
 /**
@@ -107,11 +111,14 @@ export class PackageJsonUpdater {
       updateOtherPackages,
       skipUpdate,
       debugInstall,
-      rangeStyle
+      rangeStyle,
+      variant
     } = options;
 
     const implicitlyPinned: Map<string, string>
-      = InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration);
+      = InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration, {
+        variant
+      });
 
     const version: string = this._getNormalizedVersionSpec(
       packageName, initialVersion, implicitlyPinned.get(packageName), rangeStyle);
@@ -133,7 +140,9 @@ export class PackageJsonUpdater {
 
     if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
       // we need to do a mismatch check
-      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this._rushConfiguration);
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this._rushConfiguration, {
+        variant: variant
+      });
 
       const mismatches: Array<string> = mismatchFinder.getMismatches();
       if (mismatches.length) {
@@ -174,7 +183,6 @@ export class PackageJsonUpdater {
     }
 
     const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration);
-    const installManager: InstallManager = new InstallManager(this._rushConfiguration, purgeManager);
     const installManagerOptions: IInstallManagerOptions = {
       debug: debugInstall,
       allowShrinkwrapUpdates: true,
@@ -183,13 +191,18 @@ export class PackageJsonUpdater {
       fullUpgrade: false,
       recheckShrinkwrap: false,
       networkConcurrency: undefined,
-      collectLogFile: false
+      collectLogFile: false,
+      variant: variant
     };
+    const installManager: InstallManager = new InstallManager(
+      this._rushConfiguration,
+      purgeManager,
+      installManagerOptions);
 
     console.log();
     console.log(colors.green('Running "rush update"'));
     console.log();
-    return installManager.doInstall(installManagerOptions)
+    return installManager.doInstall()
       .then(() => {
         purgeManager.deleteAll();
       })

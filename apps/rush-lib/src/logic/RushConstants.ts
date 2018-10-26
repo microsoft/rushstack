@@ -57,6 +57,13 @@ export namespace RushConstants {
   export const rushTempProjectsFolderName: string = 'projects';
 
   /**
+   * The folder name ("variants") under which named variant configurations for
+   * alternate dependency sets may be found.
+   * Example: "C:\MyRepo\common\config\rush\variants"
+   */
+  export const rushVariantsFolderName: string = 'variants';
+
+  /**
    * The filename ("npm-shrinkwrap.json") used to store state for the "npm shrinkwrap"
    * command.
    */
@@ -70,7 +77,7 @@ export namespace RushConstants {
   /**
    * The filename ("pnpmfile.js") used to add custom configuration to PNPM
    */
-  export const pnpmFileFilename: string = 'pnpmfile.js';
+  export const pnpmfileFilename: string = 'pnpmfile.js';
 
   /**
    * The filename ("shrinkwrap.yaml") used to store state for pnpm
@@ -112,9 +119,6 @@ export namespace RushConstants {
    */
   export const commandLineFilename: string = 'command-line.json';
 
-  /**
-   * @beta
-   */
   export const versionPoliciesFilename: string = 'version-policies.json';
 
   /**

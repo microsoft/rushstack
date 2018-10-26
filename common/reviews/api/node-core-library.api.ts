@@ -397,6 +397,15 @@ class ProtectableMap<K, V> {
   readonly size: number;
 }
 
+// @public
+class Sort {
+  static compareByValue(x: any, y: any): number;
+  static isSorted<T>(array: T[], comparer?: (x: any, y: any) => number): boolean;
+  static isSortedBy<T>(array: T[], keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): boolean;
+  static sortBy<T>(array: T[], keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): void;
+  static sortMapKeys<K, V>(map: Map<K, V>, keyComparer?: (x: K, y: K) => number): void;
+}
+
 // @beta
 class StringBuilder {
   constructor();

@@ -5,7 +5,8 @@ import * as semver from 'semver';
 
 import {
   IPackageJson,
-  JsonFile
+  JsonFile,
+  Sort
 } from '@microsoft/node-core-library';
 
 /**
@@ -93,10 +94,16 @@ export class PackageJsonEditor {
     return this._filePath;
   }
 
+  /**
+   * The list of dependencies of type DependencyType.Regular, DependencyType.Optional, or DependencyType.Peer.
+   */
   public get dependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._dependencies.values()];
   }
 
+  /**
+   * The list of dependencies of type DependencyType.Dev.
+   */
   public get devDependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._devDependencies.values()];
   }
@@ -148,11 +155,11 @@ export class PackageJsonEditor {
 
     try {
       Object.keys(dependencies || {}).forEach((packageName: string) => {
-        if (optionalDependencies[packageName]) {
+        if (Object.prototype.hasOwnProperty.call(optionalDependencies, packageName)) {
           throw new Error(`The package "${packageName}" cannot be listed in both `
             + `"dependencies" and "optionalDependencies"`);
         }
-        if (peerDependencies[packageName]) {
+        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
           throw new Error(`The package "${packageName}" cannot be listed in both `
             + `"dependencies" and "peerDependencies"`);
         }
@@ -162,7 +169,7 @@ export class PackageJsonEditor {
       });
 
       Object.keys(optionalDependencies || {}).forEach((packageName: string) => {
-        if (peerDependencies[packageName]) {
+        if (Object.prototype.hasOwnProperty.call(peerDependencies, packageName)) {
           throw new Error(`The package "${packageName}" cannot be listed in both `
             + `"optionalDependencies" and "peerDependencies"`);
         }
@@ -180,6 +187,9 @@ export class PackageJsonEditor {
         this._devDependencies.set(packageName,
           new PackageJsonDependency(packageName, devDependencies[packageName], DependencyType.Dev, _onChange));
       });
+
+      Sort.sortMapKeys(this._dependencies);
+      Sort.sortMapKeys(this._devDependencies);
 
     } catch (e) {
       throw new Error(`Error loading "${filepath}": ${e.message}`);

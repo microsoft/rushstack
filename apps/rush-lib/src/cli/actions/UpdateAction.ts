@@ -61,7 +61,8 @@ export class UpdateAction extends BaseInstallAction {
       fullUpgrade: this._fullParameter.value!,
       recheckShrinkwrap: this._recheckParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
-      collectLogFile: this._debugPackageManagerParameter.value!
+      collectLogFile: this._debugPackageManagerParameter.value!,
+      variant: this._variant.value
     };
   }
 }

@@ -4,9 +4,6 @@
 import { Utilities } from './Utilities';
 import * as semver from 'semver';
 
-/**
- * @public
- */
 export class Npm {
   public static publishedVersions(
     packageName: string,

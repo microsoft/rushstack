@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-stack-compiler",
-  "version": "0.1.17",
+  "version": "0.1.20",
   "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain",
   "license": "MIT",
   "repository": {
@@ -16,8 +16,8 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "6.0.6",
-    "@microsoft/node-core-library": "3.3.1",
+    "@microsoft/api-extractor": "6.0.9",
+    "@microsoft/node-core-library": "3.5.0",
     "@types/node": "8.5.8",
     "tslint-microsoft-contrib": "~5.2.1",
     "tslint": "~5.9.1",

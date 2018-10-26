@@ -6,7 +6,6 @@ import { IInstallManagerOptions } from '../../logic/InstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class InstallAction extends BaseInstallAction {
-
   constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'install',
@@ -34,7 +33,8 @@ export class InstallAction extends BaseInstallAction {
       fullUpgrade: false,
       recheckShrinkwrap: false,
       networkConcurrency: this._networkConcurrencyParameter.value,
-      collectLogFile: this._debugPackageManagerParameter.value!
+      collectLogFile: this._debugPackageManagerParameter.value!,
+      variant: this._variant.value
     };
   }
 }
