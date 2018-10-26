@@ -206,7 +206,6 @@ export class ApiExtractorRunner extends RushStackCompilerBase<IApiExtractorTaskC
 
       return Promise.resolve();
     } catch (e) {
-      debugger;
       return Promise.reject(e);
     }
   }
