@@ -162,8 +162,7 @@ export class ApiExtractorRunner extends RushStackCompilerBase<IApiExtractorTaskC
           rootFolder: this._constants.projectFolderPath
         },
         project: {
-          entryPointSourceFile: entryPointFile,
-          externalJsonFileFolders: [ path.join(__dirname, 'external-api-json') ]
+          entryPointSourceFile: entryPointFile
         },
         apiReviewFile: {
           enabled: true,
