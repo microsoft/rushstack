@@ -127,6 +127,10 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'api-extractor.schema.json'));
   }
 
+  public isEnabled(): boolean {
+    return !!this.taskConfig.enabled;
+  }
+
   public executeTask(): Promise<void> {
     this.initializeRushStackCompiler();
 
