@@ -66,7 +66,7 @@ export interface IRunCmdOptions {
 export class CmdRunner<TTaskConfig extends IRushStackCompilerBaseOptions> {
   private static readonly _nodePath: string = process.execPath;
 
-  private _constants: StandardBuildFolders;
+  private _standardBuildFolders: StandardBuildFolders;
   private _terminal: Terminal;
   private _options: IBaseTaskOptions<TTaskConfig>;
   private _errorHasBeenLogged: boolean;
@@ -76,7 +76,7 @@ export class CmdRunner<TTaskConfig extends IRushStackCompilerBaseOptions> {
     terminal: Terminal,
     options: IBaseTaskOptions<TTaskConfig>
   ) {
-    this._constants = constants;
+    this._standardBuildFolders = constants;
     this._terminal = terminal;
     this._options = options;
   }
@@ -118,7 +118,7 @@ export class CmdRunner<TTaskConfig extends IRushStackCompilerBaseOptions> {
         nodePath,
         [binaryPath, ...args],
         {
-          cwd: this._constants.projectFolderPath,
+          cwd: this._standardBuildFolders.projectFolderPath,
           env: process.env,
           stdio: 'pipe'
         }
