@@ -100,7 +100,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
       {
        customArgs: this.taskConfig.customArgs
       },
-      this.buildConfig.rootPath,
+      this.buildFolder,
       this._terminalProvider
     );
     const basePromise: Promise<void> | undefined = typescriptCompiler.invoke();

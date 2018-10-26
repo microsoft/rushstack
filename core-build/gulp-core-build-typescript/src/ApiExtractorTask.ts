@@ -146,7 +146,7 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
         publishFolderForPublic: this.taskConfig.publishFolderForPublic,
         skipLibCheck: this.taskConfig.skipLibCheck
       },
-      this.buildConfig.rootPath,
+      this.buildFolder,
       this._terminalProvider
     );
 

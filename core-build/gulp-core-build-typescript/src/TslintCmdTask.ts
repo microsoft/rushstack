@@ -53,7 +53,7 @@ export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
         fileError: this.fileError.bind(this),
         fileWarning: this.fileWarning.bind(this)
       },
-      this.buildConfig.rootPath,
+      this.buildFolder,
       this._terminalProvider
     );
 

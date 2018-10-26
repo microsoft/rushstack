@@ -13,6 +13,7 @@ import * as RushStackCompiler from '@microsoft/rush-stack-compiler';
 import { GCBTerminalProvider } from './GCBTerminalProvider';
 
 export interface IRSCTaskConfig extends Object {
+  buildDirectory: string;
   rushStackCompilerPackageName?: string;
 }
 
@@ -70,5 +71,9 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
     }
 
     this._rushStackCompiler = require(path.join(this._rushStackCompilerPackagePath, main));
+  }
+
+  protected get buildFolder(): string {
+    return this.taskConfig.buildDirectory || this.buildConfig.rootPath;
   }
 }
