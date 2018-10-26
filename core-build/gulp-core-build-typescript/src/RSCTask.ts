@@ -19,8 +19,7 @@ export interface IRSCTaskConfig extends Object {
 export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTask<TTaskConfig> {
   protected _terminalProvider: GCBTerminalProvider = new GCBTerminalProvider(this);
 
-  protected _rushStackComipler: typeof RushStackCompiler;
-  protected _rushStackCompilerConstants: RushStackCompiler.Constants;
+  protected _rushStackCompiler: typeof RushStackCompiler;
 
   private __rushStackCompilerPackagePath: string | undefined; // tslint:disable-line:variable-name
   private get _rushStackCompilerPackagePath(): string {
@@ -70,7 +69,6 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
       );
     }
 
-    this._rushStackComipler = require(path.join(this._rushStackCompilerPackagePath, main));
-    this._rushStackCompilerConstants = new this._rushStackComipler.Constants(this.buildConfig.rootPath);
+    this._rushStackCompiler = require(path.join(this._rushStackCompilerPackagePath, main));
   }
 }

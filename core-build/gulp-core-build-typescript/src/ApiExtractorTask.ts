@@ -134,7 +134,7 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
   public executeTask(): Promise<void> {
     this.initializeRushStackCompiler();
 
-    const apiExtractorRunner: ApiExtractorRunner = new this._rushStackComipler.ApiExtractorRunner(
+    const apiExtractorRunner: ApiExtractorRunner = new this._rushStackCompiler.ApiExtractorRunner(
       {
         entry: this.taskConfig.entry,
         apiReviewFolder: this.taskConfig.apiReviewFolder,
@@ -146,7 +146,7 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
         publishFolderForPublic: this.taskConfig.publishFolderForPublic,
         skipLibCheck: this.taskConfig.skipLibCheck
       },
-      this._rushStackCompilerConstants,
+      this.buildConfig.rootPath,
       this._terminalProvider
     );
 

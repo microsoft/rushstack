@@ -9,7 +9,6 @@ import {
   CmdRunner,
   IRushStackCompilerBaseOptions
 } from './CmdRunner';
-import { Constants } from './Constants';
 import { ToolPaths } from './ToolPaths';
 import { RushStackCompilerBase } from './RushStackCompilerBase';
 
@@ -40,10 +39,10 @@ export interface ITslintRunnerConfig extends IRushStackCompilerBaseOptions {
 export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
   private _cmdRunner: CmdRunner<ITslintRunnerConfig>;
 
-  constructor(taskOptions: ITslintRunnerConfig, constants: Constants, terminalProvider: ITerminalProvider) {
-    super(taskOptions, constants, terminalProvider);
+  constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
+    super(taskOptions, rootPath, terminalProvider);
     this._cmdRunner = new CmdRunner(
-      this._constants,
+      this._standardBuildFolders,
       this._terminal,
       {
         packagePath: ToolPaths.tslintPackagePath,
@@ -73,7 +72,7 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
     }
 
     args.push(...[
-      '--project', this._constants.projectFolderPath
+      '--project', this._standardBuildFolders.projectFolderPath
     ]);
 
     return this._cmdRunner.runCmd({
@@ -95,7 +94,7 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
           try {
             const errors: TSLint.IRuleFailureJson[] = JSON.parse(dataStr);
             for (const error of errors) {
-              const pathFromRoot: string = path.relative(this._constants.projectFolderPath, error.name);
+              const pathFromRoot: string = path.relative(this._standardBuildFolders.projectFolderPath, error.name);
               tslintErrorLogFn(
                 pathFromRoot,
                 error.startPosition.line + 1,

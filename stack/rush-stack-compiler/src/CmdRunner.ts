@@ -10,7 +10,7 @@ import {
   FileSystem,
   Terminal
 } from '@microsoft/node-core-library';
-import { Constants } from './Constants';
+import { StandardBuildFolders } from './StandardBuildFolders';
 
 /**
  * @beta
@@ -92,13 +92,13 @@ export class CmdRunner<TTaskConfig extends IRushStackCompilerBaseOptions> {
     return CmdRunner.__nodePath;
   }
 
-  private _constants: Constants;
+  private _constants: StandardBuildFolders;
   private _terminal: Terminal;
   private _options: IBaseTaskOptions<TTaskConfig>;
   private _errorHasBeenLogged: boolean;
 
   constructor(
-    constants: Constants,
+    constants: StandardBuildFolders,
     terminal: Terminal,
     options: IBaseTaskOptions<TTaskConfig>
   ) {

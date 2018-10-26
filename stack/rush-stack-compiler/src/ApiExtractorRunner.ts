@@ -12,7 +12,6 @@ import {
   IExtractorConfig
 } from '@microsoft/api-extractor';
 
-import { Constants } from './Constants';
 import { RushStackCompilerBase } from './RushStackCompilerBase';
 import { ToolPaths } from './ToolPaths';
 
@@ -125,8 +124,8 @@ export interface IApiExtractorTaskConfig {
  * @beta
  */
 export class ApiExtractorRunner extends RushStackCompilerBase<IApiExtractorTaskConfig> {
-  constructor(taskOptions: IApiExtractorTaskConfig, constants: Constants, terminalProvider: ITerminalProvider) {
-    super(taskOptions, constants, terminalProvider);
+  constructor(taskOptions: IApiExtractorTaskConfig, rootPath: string, terminalProvider: ITerminalProvider) {
+    super(taskOptions, rootPath, terminalProvider);
   }
 
   public invoke(): Promise<void> {
@@ -151,15 +150,15 @@ export class ApiExtractorRunner extends RushStackCompilerBase<IApiExtractorTaskC
 
       if (this._taskOptions.entry === 'src/index.ts') {
         // backwards compatibility for legacy projects that used *.ts files as their entry point
-        entryPointFile = path.join(this._constants.projectFolderPath, 'lib/index.d.ts');
+        entryPointFile = path.join(this._standardBuildFolders.projectFolderPath, 'lib/index.d.ts');
       } else {
-        entryPointFile = path.join(this._constants.projectFolderPath, this._taskOptions.entry);
+        entryPointFile = path.join(this._standardBuildFolders.projectFolderPath, this._taskOptions.entry);
       }
 
       const extractorConfig: IExtractorConfig = {
         compiler: {
           configType: 'tsconfig',
-          rootFolder: this._constants.projectFolderPath
+          rootFolder: this._standardBuildFolders.projectFolderPath
         },
         project: {
           entryPointSourceFile: entryPointFile
@@ -167,7 +166,7 @@ export class ApiExtractorRunner extends RushStackCompilerBase<IApiExtractorTaskC
         apiReviewFile: {
           enabled: true,
           apiReviewFolder: this._taskOptions.apiReviewFolder,
-          tempFolder: this._constants.tempFolderPath
+          tempFolder: this._standardBuildFolders.tempFolderPath
         },
         apiJsonFile: {
           enabled: true,

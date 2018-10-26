@@ -45,7 +45,7 @@ export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
   public executeTask(): Promise<void> {
     this.initializeRushStackCompiler();
 
-    const tslintRunner: TslintRunner = new this._rushStackComipler.TslintRunner(
+    const tslintRunner: TslintRunner = new this._rushStackCompiler.TslintRunner(
       {
         customArgs: this.taskConfig.customArgs,
         displayAsError: this.taskConfig.displayAsError,
@@ -53,7 +53,7 @@ export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
         fileError: this.fileError.bind(this),
         fileWarning: this.fileWarning.bind(this)
       },
-      this._rushStackCompilerConstants,
+      this.buildConfig.rootPath,
       this._terminalProvider
     );
 

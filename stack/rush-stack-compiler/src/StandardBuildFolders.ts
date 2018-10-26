@@ -11,7 +11,7 @@ const TEMP_FOLDER_NAME: string = 'temp';
 /**
  * @beta
  */
-export class Constants {
+export class StandardBuildFolders {
   private _projectFolderPath: string;
   private _srcFolderPath: string;
   private _libFolderPath: string;

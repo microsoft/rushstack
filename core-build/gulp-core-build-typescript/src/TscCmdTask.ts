@@ -96,11 +96,11 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
       )
     );
 
-    const typescriptCompiler: TypescriptCompiler = new this._rushStackComipler.TypescriptCompiler(
+    const typescriptCompiler: TypescriptCompiler = new this._rushStackCompiler.TypescriptCompiler(
       {
        customArgs: this.taskConfig.customArgs
       },
-      this._rushStackCompilerConstants,
+      this.buildConfig.rootPath,
       this._terminalProvider
     );
     const basePromise: Promise<void> | undefined = typescriptCompiler.invoke();

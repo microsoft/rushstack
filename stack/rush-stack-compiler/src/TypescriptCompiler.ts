@@ -9,7 +9,6 @@ import {
   CmdRunner,
   IRushStackCompilerBaseOptions
 } from './CmdRunner';
-import { Constants } from './Constants';
 import { ToolPaths } from './ToolPaths';
 import { RushStackCompilerBase } from './RushStackCompilerBase';
 
@@ -20,10 +19,10 @@ export class TypescriptCompiler extends RushStackCompilerBase<IRushStackCompiler
   public typescript: typeof typescript = typescript;
   private _cmdRunner: CmdRunner<IRushStackCompilerBaseOptions>;
 
-  constructor(taskOptions: IRushStackCompilerBaseOptions, constants: Constants, terminalProvider: ITerminalProvider) {
-    super(taskOptions, constants, terminalProvider);
+  constructor(taskOptions: IRushStackCompilerBaseOptions, rootPath: string, terminalProvider: ITerminalProvider) {
+    super(taskOptions, rootPath, terminalProvider);
     this._cmdRunner = new CmdRunner(
-      this._constants,
+      this._standardBuildFolders,
       this._terminal,
       {
         packagePath: ToolPaths.typescriptPackagePath,
