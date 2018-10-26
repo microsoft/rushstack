@@ -23,18 +23,6 @@ export class Terminal {
   public constructor(provider: ITerminalProvider) {
     this._providers = new Set<ITerminalProvider>();
     this._providers.add(provider);
-
-    // Bind the public members to "this"
-    this.registerProvider = this.registerProvider.bind(this);
-    this.unregisterProvider = this.unregisterProvider.bind(this);
-    this.write = this.write.bind(this);
-    this.writeLine = this.writeLine.bind(this);
-    this.writeWarning = this.writeWarning.bind(this);
-    this.writeWarningLine = this.writeWarningLine.bind(this);
-    this.writeError = this.writeError.bind(this);
-    this.writeErrorLine = this.writeErrorLine.bind(this);
-    this.writeVerbose = this.writeVerbose.bind(this);
-    this.writeVerboseLine = this.writeVerboseLine.bind(this);
   }
 
   /**

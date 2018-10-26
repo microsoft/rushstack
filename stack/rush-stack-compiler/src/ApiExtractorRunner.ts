@@ -189,10 +189,10 @@ export class ApiExtractorRunner extends RushStackCompilerBase<IApiExtractorTaskC
       const extractorOptions: IExtractorOptions = {
         localBuild: !this._taskOptions.localBuild,
         customLogger: {
-          logVerbose: this._terminal.writeVerboseLine,
-          logInfo: this._terminal.writeLine,
-          logWarning: this._terminal.writeWarningLine,
-          logError: this._terminal.writeErrorLine
+          logVerbose: this._terminal.writeVerboseLine.bind(this._terminal),
+          logInfo: this._terminal.writeLine.bind(this._terminal),
+          logWarning: this._terminal.writeWarningLine.bind(this._terminal),
+          logError: this._terminal.writeErrorLine.bind(this._terminal)
         },
         typescriptCompilerFolder: ToolPaths.typescriptPackagePath,
         skipLibCheck: this._taskOptions.skipLibCheck
