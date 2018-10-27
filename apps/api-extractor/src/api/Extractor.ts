@@ -10,7 +10,9 @@ import {
   JsonFile,
   JsonSchema,
   Path,
-  FileSystem
+  FileSystem,
+  IPackageJson,
+  FileConstants
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
@@ -98,6 +100,32 @@ export class Extractor {
    */
   public static jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../schemas/api-extractor.schema.json'));
+
+  /**
+   * Returns the version number of the API Extractor NPM package.
+   */
+  public static get version(): string {
+    return Extractor._getPackageJson().version;
+  }
+
+  /**
+   * Returns the package name of the API Extractor NPM package.
+   */
+  public static get packageName(): string {
+    return Extractor._getPackageJson().name;
+  }
+
+  private static _getPackageJson(): IPackageJson {
+    if (Extractor._apiExtractorPackageJson === undefined) {
+      const packageJsonFilename: string = path.resolve(path.join(
+        __dirname, '..', '..', FileConstants.PackageJson)
+      );
+      Extractor._apiExtractorPackageJson = JsonFile.load(packageJsonFilename) as IPackageJson;
+    }
+    return Extractor._apiExtractorPackageJson;
+  }
+
+  private static _apiExtractorPackageJson: IPackageJson | undefined;
 
   private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
     '../schemas/api-extractor-defaults.json'));

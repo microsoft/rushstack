@@ -5,10 +5,44 @@ import { ApiItem, ApiItemKind, IApiItemJson } from './ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { JsonFile } from '@microsoft/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
+import { Extractor } from '../Extractor';
 
 export interface IApiPackageOptions extends
   IApiItemContainerMixinOptions,
   IApiDocumentedItemOptions {
+}
+
+export enum ApiJsonSchemaVersion {
+  /**
+   * The initial release.
+   */
+  V_1000 = 1000
+}
+
+export interface IApiPackageMetadataJson {
+  /**
+   * The NPM package name for the tool that wrote the *.api.json file.
+   * For informational purposes only.
+   */
+  toolPackage: string;
+  /**
+   * The NPM package version for the tool that wrote the *.api.json file.
+   * For informational purposes only.
+   */
+  toolVersion: string;
+
+  /**
+   * The *.api.json schema version.  Used for determining whether the file format is
+   * supported, and for backwards compatibility.
+   */
+  schemaVersion: ApiJsonSchemaVersion;
+}
+
+export interface IApiPackageJson extends IApiItemJson {
+  /**
+   * A file header that stores metadata about the tool that wrote the *.api.json file.
+   */
+  metadata: IApiPackageMetadataJson;
 }
 
 export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
@@ -32,7 +66,13 @@ export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
   }
 
   public saveToJsonFile(apiJsonFilename: string): void {
-    const jsonObject: { } = { };
+    const jsonObject: IApiPackageJson = {
+      metadata: {
+        toolPackage: Extractor.packageName,
+        toolVersion: Extractor.version,
+        schemaVersion: ApiJsonSchemaVersion.V_1000
+      }
+    } as IApiPackageJson;
     this.serializeInto(jsonObject);
     JsonFile.save(jsonObject, apiJsonFilename);
   }

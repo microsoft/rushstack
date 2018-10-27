@@ -6,7 +6,9 @@ class Extractor {
   analyzeProject(options?: IAnalyzeProjectOptions): void;
   static generateFilePathsForAnalysis(inputFilePaths: string[]): string[];
   static jsonSchema: JsonSchema;
+  static readonly packageName: string;
   processProject(options?: IAnalyzeProjectOptions): boolean;
+  static readonly version: string;
 }
 
 // @public
