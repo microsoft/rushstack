@@ -423,6 +423,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "resolve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "rimraf",
       "allowedCategories": [ "libraries" ]
     },

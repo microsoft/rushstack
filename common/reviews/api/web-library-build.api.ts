@@ -184,14 +184,13 @@ interface IJestConfig {
 export function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
-interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
+interface ITscCmdTaskConfig extends IRSCTaskConfig {
   removeCommentsFromJavaScript?: boolean;
   staticMatch?: string[];
 }
 
 // @public (undocumented)
-interface ITslintCmdTaskConfig extends IBaseCmdTaskConfig {
-  customArgs?: string[];
+interface ITslintCmdTaskConfig extends IRSCTaskConfig {
   displayAsError?: boolean;
 }
 
@@ -263,27 +262,21 @@ enum TestResultState {
 }
 
 // @alpha (undocumented)
-class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
+class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
   constructor();
   // (undocumented)
   protected _onData(data: Buffer): void;
   // (undocumented)
-  executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined;
+  executeTask(): Promise<void>;
   // (undocumented)
   loadSchema(): Object;
 }
 
 // @alpha (undocumented)
-class TslintCmdTask extends BaseCmdTask<ITslintCmdTaskConfig> {
+class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
   constructor();
   // (undocumented)
-  protected _getArgs(): string[];
-  // (undocumented)
-  protected _onClose(code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void): void;
-  // (undocumented)
-  protected _onData(data: Buffer): void;
-  // (undocumented)
-  executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined;
+  executeTask(): Promise<void>;
   // (undocumented)
   loadSchema(): Object;
 }

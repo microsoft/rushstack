@@ -13,12 +13,20 @@
     "rush-tslint": "./bin/rush-tslint"
   },
   "scripts": {
-    "build": ""
+    "build": "gulp --clean"
   },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "dependencies": {
     "@microsoft/api-extractor": "6.0.9",
-    "tslint": "~5.9.1",
+    "@microsoft/node-core-library": "3.5.0",
+    "@types/node": "8.5.8",
     "tslint-microsoft-contrib": "~5.2.1",
+    "tslint": "~5.9.1",
     "typescript": "~2.4.1"
+  },
+  "devDependencies": {
+    "@microsoft/node-library-build": "5.0.16",
+    "gulp": "~3.9.1"
   }
 }

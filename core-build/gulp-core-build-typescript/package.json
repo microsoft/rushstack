@@ -13,22 +13,21 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "6.0.9",
     "@microsoft/gulp-core-build": "3.8.35",
     "@microsoft/node-core-library": "3.5.0",
-    "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
     "decomment": "~0.9.1",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
-    "gulp": "~3.9.1",
-    "tslint": "~5.9.1",
-    "tslint-microsoft-contrib": "~5.2.1",
-    "typescript": "~2.4.1"
+    "resolve": "~1.8.1"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "6.0.9",
     "@microsoft/rush-stack-compiler": "0.1.20",
     "@microsoft/node-library-build": "5.0.16",
-    "@types/glob": "5.0.30"
+    "@types/glob": "5.0.30",
+    "@types/resolve": "0.0.8",
+    "gulp": "~3.9.1",
+    "typescript": "~2.4.1"
   }
 }
