@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler",
+      "comment": "Bump TypeScript to 3.0.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler",
+  "email": "iclanton@users.noreply.github.com"
+}
