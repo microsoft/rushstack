@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`01 Demo from docs 1`] = `
+"begin
+  one
+  two
+end"
+`;
+
+exports[`02 Indent something 1`] = `
+"abc
+  d
+e
+"
+`;

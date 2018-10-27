@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { StringBuilder } from '@microsoft/node-core-library';
+
 /**
   * A utility for writing indented text.  In the current implementation,
   * IndentedWriter builds up an internal string buffer, which can be obtained
@@ -11,11 +13,11 @@
   *
   *   writer.write('begin\n');
   *   writer.increaseIndent();
-  *   writer.Write('one\ntwo\n');
+  *   writer.write('one\ntwo\n');
   *   writer.decreaseIndent();
   *   writer.increaseIndent();
   *   writer.decreaseIndent();
-  *   writer.Write('end');
+  *   writer.write('end');
   *
   * ...would produce this output:
   *
@@ -31,7 +33,7 @@ export class IndentedWriter {
    */
   public spacing: string = '  ';
 
-  private _output: string;
+  private _output: StringBuilder;
   private _indentStack: string[];
   private _indentText: string;
   private _needsIndent: boolean;
@@ -45,7 +47,7 @@ export class IndentedWriter {
    * Does not reset the "spacing" configuration.
    */
   public clear(): void {
-    this._output = '';
+    this._output = new StringBuilder();
     this._indentStack = [];
     this._indentText = '';
     this._needsIndent = true;
@@ -55,7 +57,7 @@ export class IndentedWriter {
    * Retrieves the indented output.
    */
   public toString(): string {
-    return this._output;
+    return this._output.toString();
   }
 
   /**
@@ -121,14 +123,14 @@ export class IndentedWriter {
    */
   private _writeLinePart(message: string): void {
     if (this._needsIndent) {
-      this._output += this._indentText;
+      this._output.append(this._indentText);
       this._needsIndent = false;
     }
-    this._output += message.replace(/\r/g, '');
+    this._output.append(message.replace(/\r/g, ''));
   }
 
   private _writeNewLine(): void {
-    this._output += '\n';
+    this._output.append('\n');
     this._needsIndent = true;
   }
 
