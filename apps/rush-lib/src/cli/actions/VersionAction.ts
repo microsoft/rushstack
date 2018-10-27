@@ -22,6 +22,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { VersionManager } from '../../logic/VersionManager';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
+import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 
 export class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy: CommandLineFlagParameter;
@@ -180,9 +181,14 @@ export class VersionAction extends BaseRushAction {
     // Load the config from file to avoid using inconsistent in-memory data.
     const rushConfig: RushConfiguration =
       RushConfiguration.loadFromConfigurationFile(this.rushConfiguration.rushJsonFile);
+
+    const commonVersions: CommonVersionsConfiguration = rushConfig.getCommonVersions(
+      /* Always use the default variant */
+    );
+
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
       rushConfig.projects,
-      rushConfig.commonVersions.allowedAlternativeVersions
+      commonVersions.allowedAlternativeVersions
     );
     if (mismatchFinder.numberOfMismatches) {
       throw new Error('Unable to finish version bump because inconsistencies were encountered.' +

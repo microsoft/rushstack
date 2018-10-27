@@ -4,7 +4,11 @@
 import * as colors from 'colors';
 import * as os from 'os';
 
-import { CommandLineFlagParameter, CommandLineIntegerParameter } from '@microsoft/ts-command-line';
+import {
+  CommandLineFlagParameter,
+  CommandLineIntegerParameter,
+  CommandLineStringParameter
+} from '@microsoft/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
 import { Event } from '../../api/EventHooks';
@@ -14,11 +18,13 @@ import { SetupChecks } from '../../logic/SetupChecks';
 import { StandardScriptUpdater } from '../../logic/StandardScriptUpdater';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { Variants } from '../../api/Variants';
 
 /**
  * This is the common base class for InstallAction and UpdateAction.
  */
 export abstract class BaseInstallAction extends BaseRushAction {
+  protected _variant: CommandLineStringParameter;
   protected _purgeParameter: CommandLineFlagParameter;
   protected _bypassPolicyParameter: CommandLineFlagParameter;
   protected _noLinkParameter: CommandLineFlagParameter;
@@ -53,12 +59,15 @@ export abstract class BaseInstallAction extends BaseRushAction {
       description: 'Activates verbose logging for the package manager. You will probably want to pipe'
         + ' the output of Rush to a file when using this command.'
     });
+    this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
 
   protected abstract buildInstallOptions(): IInstallManagerOptions;
 
   protected run(): Promise<void> {
-    VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration);
+    VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, {
+      variant: this._variant.value
+    });
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
@@ -73,7 +82,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
 
     const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration);
-    const installManager: InstallManager = new InstallManager(this.rushConfiguration, purgeManager);
 
     if (this._purgeParameter.value!) {
       console.log('The --purge flag was specified, so performing "rush purge"');
@@ -90,7 +98,13 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
 
-    return installManager.doInstall(installManagerOptions)
+    const installManager: InstallManager = new InstallManager(
+      this.rushConfiguration,
+      purgeManager,
+      installManagerOptions
+    );
+
+    return installManager.doInstall()
       .then(() => {
         purgeManager.deleteAll();
         stopwatch.stop();

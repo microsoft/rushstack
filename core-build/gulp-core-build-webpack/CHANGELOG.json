@@ -2,6 +2,114 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "3.4.43",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.43",
+      "date": "Sat, 27 Oct 2018 03:45:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.37` to `3.8.38`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.3.0` to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.1` to `6.0.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.42",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.42",
+      "date": "Sat, 27 Oct 2018 02:17:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.36` to `3.8.37`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.2.0` to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.0` to `6.0.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.41",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.41",
+      "date": "Sat, 27 Oct 2018 00:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.35` to `3.8.36`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.20` to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.26` to `6.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.40",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.40",
+      "date": "Thu, 25 Oct 2018 23:20:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.34` to `3.8.35`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.19` to `0.1.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.25` to `5.0.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.39",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.39",
+      "date": "Thu, 25 Oct 2018 08:56:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.33` to `3.8.34`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.18` to `0.1.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.24` to `5.0.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.38",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.38",
+      "date": "Wed, 24 Oct 2018 16:03:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.32` to `3.8.33`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.17` to `0.1.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.23` to `5.0.24`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.37",
       "tag": "@microsoft/gulp-core-build-webpack_v3.4.37",
       "date": "Thu, 18 Oct 2018 05:30:14 GMT",

@@ -9,19 +9,20 @@ import {
 } from '@microsoft/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
-import * as typescript from 'typescript';
+import * as Typescript from 'typescript';
 import * as decomment from 'decomment';
+import { TypescriptCompiler } from '@microsoft/rush-stack-compiler';
 
 import {
-  BaseCmdTask,
-  IBaseCmdTaskConfig
-} from './BaseCmdTask';
+  RSCTask,
+  IRSCTaskConfig
+} from './RSCTask';
 import { TsParseConfigHost } from './TsParseConfigHost';
 
 /**
  * @public
  */
-export interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
+export interface ITscCmdTaskConfig extends IRSCTaskConfig {
   /**
    * Glob matches for files to be passed through the build.
    */
@@ -37,21 +38,17 @@ export interface ITscCmdTaskConfig extends IBaseCmdTaskConfig {
 /**
  * @alpha
  */
-export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
+export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
   constructor() {
     super(
       'tsc',
       {
-        initialTaskConfig: {
-          staticMatch: [
-            'src/**/*.js',
-            'src/**/*.json',
-            'src/**/*.jsx'
-          ],
-          removeCommentsFromJavaScript: false
-        },
-        packageName: 'typescript',
-        packageBinPath: path.join('bin', 'tsc')
+        staticMatch: [
+          'src/**/*.js',
+          'src/**/*.json',
+          'src/**/*.jsx'
+        ],
+        removeCommentsFromJavaScript: false
       }
     );
   }
@@ -60,7 +57,9 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
     return JsonFile.load(path.resolve(__dirname, 'schemas', 'tsc-cmd.schema.json'));
   }
 
-  public executeTask(gulp: Object, completeCallback: (error?: string) => void): Promise<void> | undefined {
+  public executeTask(): Promise<void> {
+    this.initializeRushStackCompiler();
+
     // Static passthrough files.
     const srcPath: string = path.join(this.buildConfig.rootPath, this.buildConfig.srcFolder);
     const libFolders: string[] = [this.buildConfig.libFolder];
@@ -92,15 +91,11 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
       )
     );
 
-    let completeCallbackCalled: boolean = false;
-    let completeCallbackError: string | undefined;
-    const basePromise: Promise<void> | undefined = super.executeTask(
-      gulp,
-      (error?: string) => {
-        completeCallbackCalled = true;
-        completeCallbackError = error;
-      }
+    const typescriptCompiler: TypescriptCompiler = new this._rushStackCompiler.TypescriptCompiler(
+      this.buildFolder,
+      this._terminalProvider
     );
+    const basePromise: Promise<void> | undefined = typescriptCompiler.invoke();
 
     if (basePromise) {
       promises.push(basePromise);
@@ -109,14 +104,12 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
     let buildPromise: Promise<void> = Promise.all(promises).then(() => { /* collapse void[] to void */ });
 
     if (this.taskConfig.removeCommentsFromJavaScript === true) {
-      buildPromise = buildPromise.then(() => this._removeComments(this._getArgs()));
+      buildPromise = buildPromise.then(
+        () => this._removeComments(typescriptCompiler.typescript)
+      );
     }
 
-    return buildPromise.then(() => {
-      if (completeCallbackCalled) {
-        completeCallback(completeCallbackError);
-      }
-    });
+    return buildPromise;
   }
 
   protected _onData(data: Buffer): void {
@@ -135,18 +128,16 @@ export class TscCmdTask extends BaseCmdTask<ITscCmdTaskConfig> {
     }
   }
 
-  private _removeComments(commandLineArgs: string[]): Promise<void> {
+  private _removeComments(typescript: typeof Typescript): Promise<void> {
     const configFilePath: string | undefined = typescript.findConfigFile(this.buildConfig.rootPath, FileSystem.exists);
     if (!configFilePath) {
       return Promise.reject(new Error('Unable to resolve tsconfig file to determine outDir.'));
     }
 
-    const commandLine: typescript.ParsedCommandLine = typescript.parseCommandLine(commandLineArgs);
-    const tsConfig: typescript.ParsedCommandLine = typescript.parseJsonConfigFileContent(
+    const tsConfig: Typescript.ParsedCommandLine = typescript.parseJsonConfigFileContent(
       JsonFile.load(configFilePath),
       new TsParseConfigHost(),
-      path.dirname(configFilePath),
-      commandLine.options
+      path.dirname(configFilePath)
     );
     if (!tsConfig || !tsConfig.options.outDir) {
       return Promise.reject('Unable to determine outDir from TypesScript configuration.');

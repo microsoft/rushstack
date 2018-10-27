@@ -2,6 +2,44 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.4.0",
+      "tag": "@microsoft/rush_v5.4.0",
+      "date": "Thu, 25 Oct 2018 23:20:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove use of a deprecated Buffer API."
+          },
+          {
+            "comment": "Fix an issue with \"rush change\" on NodeJS 10."
+          },
+          {
+            "comment": "Fix an issue where \"rush install\" sometimes would incorrectly ask for \"rush update\", when using the Yarn package manager"
+          },
+          {
+            "comment": "Improve sorting of @rush-temp projects, which may reduce churn of hashes in the shrinkwrap file"
+          },
+          {
+            "comment": "Expose safeForSimultaneousRushProcesses to custom commands"
+          },
+          {
+            "comment": "Add 'variants' feature and command-line parameter"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.4.0` to `3.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.19` to `0.1.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `5.0.25` to `5.0.26`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.4",
       "tag": "@microsoft/rush_v5.3.4",
       "date": "Wed, 17 Oct 2018 03:19:43 GMT",

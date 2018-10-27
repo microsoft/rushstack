@@ -1,0 +1,739 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`01 color enabled 01 basic terminal functions 01 write 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "test message",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 01 write 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "message 1message 2",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 01 write 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "[x][32mmessage 1[x][39m",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 02 writeLine 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "test message[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "message 1message 2[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "[x][32mmessage 1[x][39m[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 03 writeWarning 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "[x][33mtest message[x][39m",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 03 writeWarning 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 03 writeWarning 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "[x][33mmessage 1[x][39m",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 03 writeWarning 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 03 writeWarning 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "[x][33mtest message[x][39m[n]",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n]",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "[x][33mmessage 1[x][39m[n]",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n]",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[n]",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 05 writeError 01 writes a single message 1`] = `
+Object {
+  "error": "[x][31mtest message[x][39m",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 05 writeError 02 writes multiple messages 1`] = `
+Object {
+  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 05 writeError 03 writes a message with colors 1`] = `
+Object {
+  "error": "[x][31mmessage 1[x][39m",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 1`] = `
+Object {
+  "error": "[x][31mtest message[x][39m[n]",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 1`] = `
+Object {
+  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n]",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 1`] = `
+Object {
+  "error": "[x][31mmessage 1[x][39m[n]",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n]",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m[n]",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "test message",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1message 2",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "[x][32mmessage 1[x][39m",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "test message[n]",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1message 2[n]",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "[x][32mmessage 1[x][39m[n]",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n]",
+  "warning": "",
+}
+`;
+
+exports[`01 color enabled 05 writes to multiple streams 1`] = `
+Object {
+  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m[x][31mtest message[x][39m[n][x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n][x][31mmessage 1[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m[n][x][31mmessage 1[x][39m[n][x][31mtest message[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n][x][31mmessage 1[x][39m[x][31mmessage 2[x][39m",
+  "log": "message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[x][32mmessage 1[x][39m[n][x][32mmessage 1[x][39m[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]test messagemessage 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n]message 1message 2test message[n]message 1message 2[n]",
+  "verbose": "test message[x][32mmessage 1[x][39mmessage 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n]test message[n]message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39mmessage 1message 2[x][32mmessage 1[x][39m[n][x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]message 1message 2[n][x][32mmessage 1[x][39m[x][31mmessage 2[x][39m",
+  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[n][x][33mtest message[x][39m[n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 1[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n][x][33mmessage 1[x][39m[n]",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 01 write 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "test message",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 01 write 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "message 1message 2",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 01 write 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "message 1",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "message 1message 2",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "message 1message 2message 3message 4",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 02 writeLine 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "test message[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 02 writeLine 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "message 1message 2[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "message 1[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "message 1message 2[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "message 1message 2message 3message 4[n]",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 03 writeWarning 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "test message",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 03 writeWarning 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "message 1message 2",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 03 writeWarning 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "message 1",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 03 writeWarning 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "message 1message 2",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 03 writeWarning 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "message 1message 2message 3message 4",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "test message[n]",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "message 1message 2[n]",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "message 1[n]",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "message 1message 2[n]",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 04 writeWarningLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "message 1message 2message 3message 4[n]",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 05 writeError 01 writes a single message 1`] = `
+Object {
+  "error": "test message",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 05 writeError 02 writes multiple messages 1`] = `
+Object {
+  "error": "message 1message 2",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 05 writeError 03 writes a message with colors 1`] = `
+Object {
+  "error": "message 1",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "message 1message 2",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "message 1message 2message 3message 4",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 1`] = `
+Object {
+  "error": "test message[n]",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 1`] = `
+Object {
+  "error": "message 1message 2[n]",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 1`] = `
+Object {
+  "error": "message 1[n]",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "message 1message 2[n]",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "message 1message 2message 3message 4[n]",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "test message",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1message 2",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1message 2",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 07 writeVerbose 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1message 2message 3message 4",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 01 writes a single message 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "test message[n]",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 02 writes multiple messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1message 2[n]",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 03 writes a message with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1[n]",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 04 writes a multiple messages with colors 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1message 2[n]",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 01 basic terminal functions 08 writeVerboseLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "message 1message 2message 3message 4[n]",
+  "warning": "",
+}
+`;
+
+exports[`02 color disabled 05 writes to multiple streams 1`] = `
+Object {
+  "error": "message 1message 2message 3message 4test message[n]message 1message 2message 1message 2[n]message 1message 1message 2message 3message 4[n]message 1[n]test messagemessage 1message 2[n]message 1message 2",
+  "log": "message 1message 2message 3message 4message 1[n]message 1message 1message 2message 1message 2[n]test messagemessage 1message 2message 3message 4[n]message 1message 2test message[n]message 1message 2[n]",
+  "verbose": "test messagemessage 1message 1message 2message 3message 4[n]test message[n]message 1message 2message 3message 4message 1message 2message 1[n]message 1message 2[n]message 1message 2[n]message 1message 2",
+  "warning": "message 1message 2[n]message 1message 2message 1message 2message 3message 4message 1message 2message 3message 4[n]test message[n]message 1message 2message 1message 1message 2[n]message 1[n]",
+}
+`;

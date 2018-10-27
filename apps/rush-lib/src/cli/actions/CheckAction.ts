@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { Variants } from '../../api/Variants';
+import { CommandLineStringParameter } from '@microsoft/ts-command-line';
 
 export class CheckAction extends BaseRushAction {
+  private _variant: CommandLineStringParameter;
+
   constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'check',
@@ -19,11 +24,22 @@ export class CheckAction extends BaseRushAction {
   }
 
   protected onDefineParameters(): void {
-    // abstract
+    this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
 
   protected run(): Promise<void> {
-    VersionMismatchFinder.rushCheck(this.rushConfiguration);
+    const variant: string | undefined = this.rushConfiguration.currentInstalledVariant;
+
+    if (!this._variant.value && variant) {
+      console.log(colors.yellow(
+        `Variant '${variant}' has been installed, but 'rush check' is currently checking the default variant. ` +
+        `Use 'rush check --variant '${ variant }' to check the current installation.`
+      ));
+    }
+
+    VersionMismatchFinder.rushCheck(this.rushConfiguration, {
+      variant: this._variant.value
+    });
     return Promise.resolve();
   }
 }

@@ -6,30 +6,37 @@ import * as path from 'path';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 describe('CommandLineHelp', () => {
+  let oldCwd: string | undefined;
 
-  const oldCwd: string = process.cwd();
-  const localCwd: string = path.join(__dirname, 'repo');
+  let parser: RushCommandLineParser;
 
-  try {
+  beforeEach(() => {
+    oldCwd = process.cwd();
+    const localCwd: string = path.join(__dirname, 'repo');
+
     process.chdir(localCwd);
 
-    const parser: RushCommandLineParser = new RushCommandLineParser();
+    // This call may terminate the entire test run because it invokes process.exit()
+    // if it encounters errors.
+    // TODO Remove the calls to process.exit() or override them for testing.
+    parser = new RushCommandLineParser();
+  });
 
-    it('prints the global help', () => {
-      const helpText: string = colors.stripColors(parser.renderHelpText());
-      expect(helpText).toMatchSnapshot();
-    });
+  it('prints the global help', () => {
+    const helpText: string = colors.stripColors(parser.renderHelpText());
+    expect(helpText).toMatchSnapshot();
+  });
 
+  it(`prints the help for each action`, () => {
     for (const action of parser.actions) {
-      it(`prints the help for "rush ${action.actionName}"`, () => {
-        const helpText: string = colors.stripColors(action.renderHelpText());
-        expect(helpText).toMatchSnapshot();
-      });
+      const helpText: string = colors.stripColors(action.renderHelpText());
+      expect(helpText).toMatchSnapshot(action.actionName);
     }
+  });
 
-  } finally {
-    process.chdir(oldCwd);
-  }
-
-  expect(true).toBeTruthy();
+  afterEach(() => {
+    if (oldCwd) {
+      process.chdir(oldCwd);
+    }
+  });
 });

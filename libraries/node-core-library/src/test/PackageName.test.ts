@@ -6,15 +6,15 @@ import { PackageName } from '../PackageName';
 describe('PackageName', () => {
   describe('Test', () => {
 
-    it('isValidName() positive test', () => {
+    test('isValidName() positive test', () => {
       expect(PackageName.isValidName('@microsoft/node-core-library')).toEqual(true);
     });
 
-    it('isValidName() negative test', () => {
+    test('isValidName() negative test', () => {
       expect(PackageName.isValidName('@microsoft/node-core-library/path')).toEqual(false);
     });
 
-    it('tryParse() tests', () => {
+    test('tryParse() tests', () => {
       expect(
         PackageName.tryParse('@microsoft/node-core-library')
       ).toEqual(
@@ -108,13 +108,13 @@ describe('PackageName', () => {
     });
   });
 
-  it('parse() test', () => {
+  test('parse() test', () => {
     expect(
       () => { PackageName.parse('@'); }
     ).toThrowError('The scope must be followed by a slash');
   });
 
-  it('combineParts() tests', () => {
+  test('combineParts() tests', () => {
     expect(PackageName.combineParts('@microsoft', 'node-core-library'))
       .toEqual('@microsoft/node-core-library');
 
@@ -122,7 +122,7 @@ describe('PackageName', () => {
       .toEqual('node-core-library');
   });
 
-  it('combineParts() errors', () => {
+  test('combineParts() errors', () => {
     expect(() => {
       PackageName.combineParts('', '@microsoft/node-core-library');
     }).toThrowError('The unscopedName cannot start with an "@" character');

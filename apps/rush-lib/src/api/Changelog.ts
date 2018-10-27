@@ -1,8 +1,9 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 /**
  * Interface respresenting a changelog json object for a package used to represent the parsed
  * content of CHANGELOG.json
- *
- * @beta
  */
 export interface IChangelog {
   /**
@@ -18,8 +19,6 @@ export interface IChangelog {
 
 /**
  * Interface representing a single published entry in the changelog.
- *
- * @beta
  */
 export interface IChangeLogEntry {
   /**
@@ -56,8 +55,6 @@ export interface IChangeLogEntry {
 
 /**
  * Interface representing a single changelog comment within an entry.
- *
- * @beta
  */
 export interface IChangeLogComment {
   /**

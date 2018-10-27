@@ -64,7 +64,6 @@ export class Rush {
   /**
    * The currently executing version of the "rush-lib" library.
    * This is the same as the Rush tool version for that release.
-   * @public
    */
   public static get version(): string {
     if (!Rush._version) {
