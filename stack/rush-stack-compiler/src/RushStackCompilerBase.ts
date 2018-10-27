@@ -7,7 +7,7 @@ import { ITerminalProvider, Terminal } from '@microsoft/node-core-library';
 /**
  * @beta
  */
-export abstract class RushStackCompilerBase<TOptions> {
+export abstract class RushStackCompilerBase<TOptions = {}> {
   protected _standardBuildFolders: StandardBuildFolders;
   protected _terminal: Terminal;
   protected _taskOptions: TOptions;

@@ -1,27 +1,8 @@
 // @beta
-class ApiExtractorRunner extends RushStackCompilerBase<IApiExtractorTaskConfig> {
-  constructor(taskOptions: IApiExtractorTaskConfig, rootPath: string, terminalProvider: ITerminalProvider);
+class ApiExtractorRunner extends RushStackCompilerBase {
+  constructor(extractorConfig: IExtractorConfig, extractorOptions: IExtractorOptions, rootPath: string, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;
-}
-
-// @public (undocumented)
-interface IApiExtractorTaskConfig {
-  apiJsonFolder?: string;
-  apiReviewFolder?: string;
-  // @beta
-  dtsRollupTrimming: boolean;
-  entry?: string;
-  // @beta
-  generateDtsRollup?: boolean;
-  localBuild?: boolean;
-  // @beta
-  publishFolderForBeta?: string;
-  // @beta
-  publishFolderForInternal?: string;
-  // @beta
-  publishFolderForPublic?: string;
-  skipLibCheck?: boolean;
 }
 
 // @public (undocumented)
@@ -34,7 +15,7 @@ interface ITslintRunnerConfig {
 }
 
 // @beta (undocumented)
-class RushStackCompilerBase<TOptions> {
+class RushStackCompilerBase<TOptions = {}> {
   constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider);
   // WARNING: The type "StandardBuildFolders" needs to be exported by the package (e.g. added to index.ts)
   // (undocumented)
@@ -53,7 +34,7 @@ class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
 }
 
 // @beta (undocumented)
-class TypescriptCompiler extends RushStackCompilerBase<{}> {
+class TypescriptCompiler extends RushStackCompilerBase {
   constructor(rootPath: string, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;

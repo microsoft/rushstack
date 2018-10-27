@@ -2,8 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  FileSystem
+} from '@microsoft/node-core-library';
 import { ApiExtractorRunner } from '@microsoft/rush-stack-compiler';
+import { IExtractorConfig, IExtractorOptions } from '@microsoft/api-extractor';
 
 import { RSCTask, IRSCTaskConfig } from './RSCTask';
 
@@ -134,22 +138,90 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
   public executeTask(): Promise<void> {
     this.initializeRushStackCompiler();
 
-    const apiExtractorRunner: ApiExtractorRunner = new this._rushStackCompiler.ApiExtractorRunner(
-      {
-        entry: this.taskConfig.entry,
+    if (!this._validateConfiguration()) {
+      return Promise.resolve();
+    }
+
+    if (!this.taskConfig.entry) {
+      return Promise.reject(new Error('entry must be defined'));
+    }
+
+    if (!this.taskConfig.apiJsonFolder) {
+      return Promise.reject(new Error('apiJsonFolder must be defined'));
+    }
+
+    if (!this.taskConfig.apiReviewFolder) {
+      return Promise.reject(new Error('apiReviewFolder must be defined'));
+    }
+
+    let entryPointFile: string;
+    if (this.taskConfig.entry === 'src/index.ts') {
+      // backwards compatibility for legacy projects that used *.ts files as their entry point
+      entryPointFile = path.join(this.buildConfig.rootPath, 'lib/index.d.ts');
+    } else {
+      entryPointFile = path.join(this.buildConfig.rootPath, this.taskConfig.entry);
+    }
+
+    const extractorConfig: IExtractorConfig = {
+      compiler: {
+        configType: 'tsconfig',
+        rootFolder: this.buildConfig.rootPath
+      },
+      project: {
+        entryPointSourceFile: entryPointFile
+      },
+      apiReviewFile: {
+        enabled: true,
         apiReviewFolder: this.taskConfig.apiReviewFolder,
-        apiJsonFolder: this.taskConfig.apiJsonFolder,
-        generateDtsRollup: this.taskConfig.generateDtsRollup,
-        dtsRollupTrimming: this.taskConfig.dtsRollupTrimming,
+        tempFolder: path.join(this.buildConfig.rootPath, this.buildConfig.tempFolder)
+      },
+      apiJsonFile: {
+        enabled: true,
+        outputFolder: this.taskConfig.apiJsonFolder
+      }
+    };
+
+    if (this.taskConfig.generateDtsRollup) {
+      extractorConfig.dtsRollup = {
+        enabled: true,
+        trimming: !!this.taskConfig.dtsRollupTrimming,
         publishFolderForInternal: this.taskConfig.publishFolderForInternal,
         publishFolderForBeta: this.taskConfig.publishFolderForBeta,
-        publishFolderForPublic: this.taskConfig.publishFolderForPublic,
-        skipLibCheck: this.taskConfig.skipLibCheck
-      },
+        publishFolderForPublic: this.taskConfig.publishFolderForPublic
+      };
+    }
+
+    const extractorOptions: IExtractorOptions = {
+      localBuild: !this.buildConfig.production,
+      skipLibCheck: this.taskConfig.skipLibCheck
+    };
+
+    const apiExtractorRunner: ApiExtractorRunner = new this._rushStackCompiler.ApiExtractorRunner(
+      extractorConfig,
+      extractorOptions,
       this.buildFolder,
       this._terminalProvider
     );
 
     return apiExtractorRunner.invoke();
+  }
+
+  private _validateConfiguration(): boolean {
+    if (!this.taskConfig.entry) {
+      this.logError('Missing or empty "entry" field in api-extractor.json');
+      return false;
+    }
+
+    if (!this.taskConfig.apiReviewFolder) {
+      this.logError('Missing or empty "apiReviewFolder" field in api-extractor.json');
+      return false;
+    }
+
+    if (!FileSystem.exists(this.taskConfig.entry)) {
+      this.logError(`Entry file ${this.taskConfig.entry} does not exist.`);
+      return false;
+    }
+
+    return true;
   }
 }

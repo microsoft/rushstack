@@ -12,7 +12,7 @@ import { RushStackCompilerBase } from './RushStackCompilerBase';
 /**
  * @beta
  */
-export class TypescriptCompiler extends RushStackCompilerBase<{}> {
+export class TypescriptCompiler extends RushStackCompilerBase {
   public typescript: typeof typescript = typescript;
   private _cmdRunner: CmdRunner;
 
