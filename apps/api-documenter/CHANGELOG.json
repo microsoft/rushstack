@@ -2,6 +2,21 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.44",
+      "tag": "@microsoft/api-documenter_v1.5.44",
+      "date": "Sat, 27 Oct 2018 02:17:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.2.0` to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.0` to `6.0.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.43",
       "tag": "@microsoft/api-documenter_v1.5.43",
       "date": "Sat, 27 Oct 2018 00:26:56 GMT",
