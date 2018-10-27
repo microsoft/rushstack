@@ -58,7 +58,7 @@
   "devDependencies": {
     "@microsoft/rush-stack-compiler": "0.3.0",
     "@types/z-schema": "3.16.31",
-    "@microsoft/node-library-build": "6.0.0",
+    "@microsoft/node-library-build": "6.0.1",
     "chai": "~3.5.0"
   }
 }
