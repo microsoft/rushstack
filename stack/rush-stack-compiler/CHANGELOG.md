@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler
 
-This log was last generated on Thu, 25 Oct 2018 23:20:40 GMT and should not be manually modified.
+This log was last generated on Sat, 27 Oct 2018 00:26:56 GMT and should not be manually modified.
+
+## 0.2.0
+Sat, 27 Oct 2018 00:26:56 GMT
+
+### Minor changes
+
+- Initial TypeScript compilation tasks.
 
 ## 0.1.20
 Thu, 25 Oct 2018 23:20:40 GMT

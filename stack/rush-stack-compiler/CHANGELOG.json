@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@microsoft/rush-stack-compiler_v0.2.0",
+      "date": "Sat, 27 Oct 2018 00:26:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial TypeScript compilation tasks."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.20",
       "tag": "@microsoft/rush-stack-compiler_v0.1.20",
       "date": "Thu, 25 Oct 2018 23:20:40 GMT",
