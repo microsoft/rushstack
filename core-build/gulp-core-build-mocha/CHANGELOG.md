@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build-mocha
 
-This log was last generated on Sat, 27 Oct 2018 02:17:18 GMT and should not be manually modified.
+This log was last generated on Sat, 27 Oct 2018 03:45:51 GMT and should not be manually modified.
+
+## 3.5.30
+Sat, 27 Oct 2018 03:45:51 GMT
+
+*Version update only*
 
 ## 3.5.29
 Sat, 27 Oct 2018 02:17:18 GMT

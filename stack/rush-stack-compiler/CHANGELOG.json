@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@microsoft/rush-stack-compiler_v0.4.0",
+      "date": "Sat, 27 Oct 2018 03:45:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Bump TypeScript to 3.0."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@microsoft/rush-stack-compiler_v0.3.0",
       "date": "Sat, 27 Oct 2018 02:17:18 GMT",
