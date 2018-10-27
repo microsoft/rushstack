@@ -26,7 +26,7 @@
     "typescript": "~2.7.2"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "5.0.16",
+    "@microsoft/node-library-build": "6.0.0",
     "gulp": "~3.9.1"
   }
 }
