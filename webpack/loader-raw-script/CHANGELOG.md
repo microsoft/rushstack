@@ -1,6 +1,11 @@
 # Change Log - @microsoft/loader-raw-script
 
-This log was last generated on Sat, 27 Oct 2018 00:26:56 GMT and should not be manually modified.
+This log was last generated on Sat, 27 Oct 2018 02:17:18 GMT and should not be manually modified.
+
+## 1.2.91
+Sat, 27 Oct 2018 02:17:18 GMT
+
+*Version update only*
 
 ## 1.2.90
 Sat, 27 Oct 2018 00:26:56 GMT

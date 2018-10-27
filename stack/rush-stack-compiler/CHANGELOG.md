@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler
 
-This log was last generated on Sat, 27 Oct 2018 00:26:56 GMT and should not be manually modified.
+This log was last generated on Sat, 27 Oct 2018 02:17:18 GMT and should not be manually modified.
+
+## 0.3.0
+Sat, 27 Oct 2018 02:17:18 GMT
+
+### Minor changes
+
+- Bump TypeScript to 2.7.
 
 ## 0.2.0
 Sat, 27 Oct 2018 00:26:56 GMT
