@@ -19,6 +19,7 @@ import { AstImport } from '../analyzer/AstImport';
 import { DtsEntry } from './DtsEntry';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
+import { PackageDocComment } from '../aedoc/PackageDocComment';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -206,12 +207,15 @@ export class DtsRollupGenerator {
     indentedWriter.spacing = '';
     indentedWriter.clear();
 
-    // If there is a @packagedocumentation header, put it first:
-    // const packageDocumentation: string = this._context.package.documentation.emitNormalizedComment();
-    // if (packageDocumentation) {
-    //  indentedWriter.writeLine(packageDocumentation);
-    //  indentedWriter.writeLine();
-    // }
+    const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment
+      .tryFindInSourceFile(this._context.entryPointSourceFile, this._context);
+
+    if (packageDocCommentTextRange) {
+      const packageDocComment: string = this._context.entryPointSourceFile.text.substring(
+        packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
+      indentedWriter.writeLine(packageDocComment);
+      indentedWriter.writeLine();
+    }
 
     // Emit the triple slash directives
     for (const typeDirectiveReference of this._dtsTypeDefinitionReferences) {

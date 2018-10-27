@@ -12,7 +12,8 @@ import {
   Path,
   FileSystem,
   IPackageJson,
-  FileConstants
+  FileConstants,
+  NewlineKind
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
@@ -356,7 +357,10 @@ export class Extractor {
       const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
 
       this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
-      apiPackage.saveToJsonFile(apiJsonFilename);
+      apiPackage.saveToJsonFile(apiJsonFilename, {
+        newlineConversion: NewlineKind.CrLf,
+        ensureFolderExists: true
+      });
     }
 
     this._generateRollupDtsFiles(context);

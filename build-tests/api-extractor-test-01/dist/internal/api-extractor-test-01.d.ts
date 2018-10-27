@@ -1,11 +1,11 @@
 /**
  * api-extractor-test-01
- * 
+ *
  * @remarks
  * This library is consumed by api-extractor-test-02 and api-extractor-test-03.
  * It tests the basic types of definitions, and all the weird cases for following
  * chains of type aliases.
- * 
+ *
  * @packagedocumentation
  */
 

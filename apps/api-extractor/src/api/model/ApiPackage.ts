@@ -3,7 +3,7 @@
 
 import { ApiItem, ApiItemKind, IApiItemJson } from './ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { JsonFile } from '@microsoft/node-core-library';
+import { JsonFile, IJsonFileSaveOptions } from '@microsoft/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { Extractor } from '../Extractor';
 
@@ -65,7 +65,7 @@ export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
     return this.name;
   }
 
-  public saveToJsonFile(apiJsonFilename: string): void {
+  public saveToJsonFile(apiJsonFilename: string, options?: IJsonFileSaveOptions): void {
     const jsonObject: IApiPackageJson = {
       metadata: {
         toolPackage: Extractor.packageName,
@@ -74,6 +74,6 @@ export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
       }
     } as IApiPackageJson;
     this.serializeInto(jsonObject);
-    JsonFile.save(jsonObject, apiJsonFilename);
+    JsonFile.save(jsonObject, apiJsonFilename, options);
   }
 }

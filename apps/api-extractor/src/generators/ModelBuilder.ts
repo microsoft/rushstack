@@ -21,6 +21,7 @@ import { Span } from '../analyzer/Span';
 import { ApiParameter } from '../api/model/ApiParameter';
 import { AedocDefinitions } from '../aedoc/AedocDefinitions';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
+import { PackageDocComment } from '../aedoc/PackageDocComment';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
@@ -43,12 +44,18 @@ export class ModelBuilder {
   }
 
   public buildApiPackage(): ApiPackage {
-    const docComment: tsdoc.DocComment | undefined = this._tryParsePackageDocumentation(
-      this._context.entryPointSourceFile);
+    let packageDocComment: tsdoc.DocComment | undefined = undefined;
+
+    const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
+      this._context.entryPointSourceFile, this._context);
+
+    if (packageDocCommentTextRange) {
+      packageDocComment = this._parseTsdocComment(this._context.entryPointSourceFile.text, packageDocCommentTextRange);
+    }
 
     const apiPackage: ApiPackage = new ApiPackage({
       name: this._context.packageName,
-      docComment: docComment
+      docComment: packageDocComment
     });
     this._apiModel.addMember(apiPackage);
 
@@ -283,66 +290,6 @@ export class ModelBuilder {
       }
     }
     return span.getModifiedText().trim();
-  }
-
-  private _tryParsePackageDocumentation(sourceFile: ts.SourceFile): tsdoc.DocComment | undefined {
-    // The @packageDocumentation comment is special because it is not attached to an AST
-    // definition.  Instead, it is part of the "trivia" tokens that the compiler treats
-    // as irrelevant white space.
-    //
-    // WARNING: If the comment doesn't precede an export statement, the compiler will omit
-    // it from the *.d.ts file, and API Extractor won't find it.  If this happens, you need
-    // to rearrange your statements to ensure it is passed through.
-    //
-    // This implementation assumes that the "@packageDocumentation" will be in the first TSDoc comment
-    // that appears in the entry point *.d.ts file.  We could possibly look in other places,
-    // but the above warning suggests enforcing a standardized layout.  This design choice is open
-    // to feedback.
-    let packageCommentRange: ts.TextRange | undefined = undefined; // empty string
-
-    for (const commentRange of ts.getLeadingCommentRanges(sourceFile.text, sourceFile.getFullStart()) || []) {
-      if (commentRange.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
-        const commentBody: string = sourceFile.text.substring(commentRange.pos, commentRange.end);
-
-        // Choose the first JSDoc-style comment
-        if (/^\s*\/\*\*/.test(commentBody)) {
-          // But only if it looks like it's trying to be @packageDocumentation
-          // (The TSDoc parser will validate this more rigorously)
-          if (/\@packageDocumentation/i.test(commentBody)) {
-            packageCommentRange = commentRange;
-          }
-          break;
-        }
-      }
-    }
-
-    if (!packageCommentRange) {
-      // If we didn't find the @packageDocumentation tag in the expected place, is it in some
-      // wrong place?  This sanity check helps people to figure out why there comment isn't working.
-      for (const statement of sourceFile.statements) {
-        const ranges: ts.CommentRange[] = [];
-        ranges.push(...ts.getLeadingCommentRanges(sourceFile.text, statement.getFullStart()) || []);
-        ranges.push(...ts.getTrailingCommentRanges(sourceFile.text, statement.getEnd()) || []);
-
-        for (const commentRange of ranges) {
-          const commentBody: string = sourceFile.text.substring(commentRange.pos, commentRange.end);
-
-          if (/\@packageDocumentation/i.test(commentBody)) {
-            this._context.reportError(
-              'The @packageDocumentation comment must appear at the top of entry point *.d.ts file',
-              sourceFile, commentRange.pos
-            );
-            break;
-          }
-        }
-      }
-    }
-
-    if (packageCommentRange === undefined) {
-      return undefined;
-    }
-
-    return this._parseTsdocComment(sourceFile.text, packageCommentRange);
   }
 
   private _tryParseDocumentation(astDeclaration: AstDeclaration): tsdoc.DocComment | undefined {
