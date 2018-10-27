@@ -12,7 +12,7 @@ export interface IApiDeclarationMixinJson extends IApiItemJson {
   signature: string;
 }
 
-const _signature: unique symbol = Symbol('_signature');
+const _signature: unique symbol = Symbol('ApiDeclarationMixin._signature');
 
 // tslint:disable-next-line:interface-name
 export interface ApiDeclarationMixin {

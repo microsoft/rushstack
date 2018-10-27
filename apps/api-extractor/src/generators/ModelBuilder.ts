@@ -61,11 +61,11 @@ export class ModelBuilder {
       }
     }
 
-    apiPackage.saveToJsonFile('d:\\serialize.json');
+    apiPackage.saveToJsonFile('c:\\GitRepos\\serialize.json');
 
     const test: ApiModel = new ApiModel();
-    const testPackage: ApiPackage = test.loadPackage('d:\\serialize.json');
-    testPackage.saveToJsonFile('d:\\serialize2.json');
+    const testPackage: ApiPackage = test.loadPackage('c:\\GitRepos\\serialize.json');
+    testPackage.saveToJsonFile('c:\\GitRepos\\serialize2.json');
 
     debugger;
   }

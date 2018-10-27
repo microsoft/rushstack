@@ -26,7 +26,16 @@ export interface IApiItemJson {
   canonicalReference: string;
 }
 
+/**
+ * PRIVATE
+ * Allows ApiItemContainerMixin to assign the parent.
+ */
+// tslint:disable-next-line:variable-name
+export const ApiItem_parent: unique symbol = Symbol('ApiItem._parent');
+
 export class ApiItem {
+  public [ApiItem_parent]: ApiItem | undefined;
+
   private readonly _name: string;
 
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
@@ -64,7 +73,21 @@ export class ApiItem {
     throw new Error('ApiItem.kind was not implemented by the child class');
   }
 
-  /** @virtual */
+  /**
+   * If this item was added to a ApiItemContainerMixin item, then this returns the parent item.
+   * Otherwise it returns undefined.
+   * @virtual
+   */
+  public get parent(): ApiItem | undefined {
+    return this[ApiItem_parent];
+  }
+
+  /**
+   * This property supports a visitor pattern for walking the tree.
+   * For items with ApiItemContainerMixin, it returns the contained items.
+   * Otherwise it returns an empty array.
+   * @virtual
+   */
   public get members(): ReadonlyArray<ApiItem> {
     return [];
   }

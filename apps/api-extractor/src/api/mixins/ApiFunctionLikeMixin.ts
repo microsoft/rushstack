@@ -15,8 +15,8 @@ export interface IApiFunctionLikeJson extends IApiItemJson {
   parameters: IApiItemJson[];
 }
 
-const _overloadIndex: unique symbol = Symbol('_overloadIndex');
-const _parameters: unique symbol = Symbol('_parameters');
+const _overloadIndex: unique symbol = Symbol('ApiFunctionLikeMixin._overloadIndex');
+const _parameters: unique symbol = Symbol('ApiFunctionLikeMixin._parameters');
 
 // tslint:disable-next-line:interface-name
 export interface ApiFunctionLikeMixin {

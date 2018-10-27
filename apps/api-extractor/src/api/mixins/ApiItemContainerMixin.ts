@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { Mixin } from './Mixin';
-import { ApiItem, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../model/ApiItem';
+import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../model/ApiItem';
 
 export interface IApiItemContainerMixinOptions extends IApiItemOptions {
   members?: ApiItem[];
@@ -12,9 +12,9 @@ export interface IApiItemContainerJson extends IApiItemJson {
   members: IApiItemJson[];
 }
 
-const _members: unique symbol = Symbol('_members');
-const _membersSorted: unique symbol = Symbol('_membersSorted');
-const _membersByCanonicalReference: unique symbol = Symbol('_membersByCanonicalReference');
+const _members: unique symbol = Symbol('ApiItemContainerMixin._members');
+const _membersSorted: unique symbol = Symbol('ApiItemContainerMixin._membersSorted');
+const _membersByCanonicalReference: unique symbol = Symbol('ApiItemContainerMixin._membersByCanonicalReference');
 
 // tslint:disable-next-line:interface-name
 export interface ApiItemContainerMixin {
@@ -76,9 +76,16 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
         throw new Error('Another member has already been added with the same name and canonicalReference');
       }
 
+      const existingParent: ApiItem | undefined = member[ApiItem_parent];
+      if (existingParent !== undefined) {
+        throw new Error(`This item has already been added to another container: "${existingParent.name}"`);
+      }
+
       this[_members].push(member);
       this[_membersSorted] = false;
       this[_membersByCanonicalReference].set(member.canonicalReference, member);
+
+      member[ApiItem_parent] = this;
     }
 
     public tryGetMember(canonicalReference: string): ApiItem | undefined {

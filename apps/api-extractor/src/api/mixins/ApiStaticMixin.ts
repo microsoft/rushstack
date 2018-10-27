@@ -12,7 +12,7 @@ export interface IApiStaticMixinJson extends IApiItemJson {
   isStatic: boolean;
 }
 
-const _isStatic: unique symbol = Symbol('_isStatic');
+const _isStatic: unique symbol = Symbol('ApiStaticMixin._isStatic');
 
 // tslint:disable-next-line:interface-name
 export interface ApiStaticMixin {
