@@ -158,6 +158,7 @@ dependencies:
   ts-jest: 22.4.6
   tslint: 5.11.0
   tslint-microsoft-contrib: 5.2.1
+  typescript: 3.0.3
   uglify-js: 3.0.28
   vinyl: 2.2.0
   webpack: 3.11.0
@@ -8969,13 +8970,6 @@ packages:
     hasBin: true
     resolution:
       integrity: sha1-+DlfhdRZJ2BnyYiqQYN6j4KHCEQ=
-  /typescript/2.7.2:
-    dev: false
-    engines:
-      node: '>=4.2.0'
-    hasBin: true
-    resolution:
-      integrity: sha512-p5TCYZDAO0m4G344hD+wx/LATebLWZNkkh2asWUFqSsD2OrDNhbAHuSjobrmsUmdzjJjEeZVU9g1h3O6vpstnw==
   /typescript/3.0.3:
     dev: false
     engines:
@@ -9713,11 +9707,11 @@ packages:
       '@types/jest': 21.1.10
       '@types/node': 8.5.8
       fs-extra: 5.0.0
-      typescript: 2.7.2
+      typescript: 3.0.3
     dev: false
     name: '@rush-temp/api-extractor-test-01'
     resolution:
-      integrity: sha512-UgejrUxIpdS0gOTPv1x+PAHvQS4XXQpLBpDRuCOC4AhtivvbZzmRr/IwbTz+IgoImeHHxrIAvRkHuhR+cWxUvg==
+      integrity: sha512-JfhNqSpD4IW2nWiC1imyYZn1S8ZqJzJMqEqGPPOwccl19QJUjriaKNQs7HGSfXJdVYUiR4cLEZiAMWoS7/0TQg==
       tarball: 'file:projects/api-extractor-test-01.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-02.tgz':
@@ -9726,11 +9720,11 @@ packages:
       '@types/semver': 5.3.33
       fs-extra: 5.0.0
       semver: 5.3.0
-      typescript: 2.7.2
+      typescript: 3.0.3
     dev: false
     name: '@rush-temp/api-extractor-test-02'
     resolution:
-      integrity: sha512-iZba+aPVVlUOpxjPYzsA2CMtCcZtT2RZBZ+yQSohR8fTLv9IYiryYA7Nh+moOrdthu1uV4MuODEg8YyfV1Bhwg==
+      integrity: sha512-1AMdBCbo/LJK5IVLCstkay3tSSslSeLmzdATfF0P/291iDcPMAWR42rPZRLG8EkIACctVzd/UVDlbIculp7ezA==
       tarball: 'file:projects/api-extractor-test-02.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-03.tgz':
@@ -9738,21 +9732,21 @@ packages:
       '@types/jest': 21.1.10
       '@types/node': 8.5.8
       fs-extra: 5.0.0
-      typescript: 2.7.2
+      typescript: 3.0.3
     dev: false
     name: '@rush-temp/api-extractor-test-03'
     resolution:
-      integrity: sha512-IYtziadSMDpYwedQJ75gF2AV9nSbrERdwmd3paER/AWV0k/FKuW/5OUPyOTpjvfxF3ltWgEq3H52oXgegpF0jw==
+      integrity: sha512-EA6WmDPNrn6tOo2PVani+Jc7ljKwAjUGcYwlNCvgCJVUmv62dtOi8KrqzK2XlfenP7cs3sApBXHu69yrS3Aj0A==
       tarball: 'file:projects/api-extractor-test-03.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-04.tgz':
     dependencies:
       fs-extra: 5.0.0
-      typescript: 2.7.2
+      typescript: 3.0.3
     dev: false
     name: '@rush-temp/api-extractor-test-04'
     resolution:
-      integrity: sha512-0345EvlUaa/7rjGnM6T2j76O+FZ0pH79yCDdhQnqExiixMKuJTCZRJNNsby0W2seb+c/rcSM1LK7x06Lj2QhsQ==
+      integrity: sha512-biB7pr2PDJb+sQrK1nK+rV5xpTXVFQYoJLq6U1zNLegUcFBlyARD0sQPdToQg/SxZRRlu5Sgiuj9kfQg4ULJOA==
       tarball: 'file:projects/api-extractor-test-04.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-05.tgz':
@@ -9760,11 +9754,11 @@ packages:
       '@types/jest': 21.1.10
       '@types/node': 8.5.8
       fs-extra: 5.0.0
-      typescript: 2.7.2
+      typescript: 3.0.3
     dev: false
     name: '@rush-temp/api-extractor-test-05'
     resolution:
-      integrity: sha512-o67OXVBFlDsTGnPqsK+OdYNs8iE/QJbt6FwwhTv32/NPmNOTbZCOHFHTkNN5nxfXvpMGb1m3xTcdeAtFJcr9UQ==
+      integrity: sha512-WZ+hVlZZgVQUXFk9gtRZj3ouCyUi4XMcQoWL030XcvKLcAaGZ9hlCTrwul/D70lOXSsyWSM4HgeP7wmakh9KUw==
       tarball: 'file:projects/api-extractor-test-05.tgz'
     version: 0.0.0
   'file:projects/api-extractor.tgz':
@@ -9786,7 +9780,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-4bMzdZuj8R/BEZQPZ5HlfCnliAaY7tKKhTpV82+rGUGHgLxbxV7uREQM6EtwgrN551FABGEMV9WQoZUCXdDR8w==
+      integrity: sha512-oU5stl9gQwVZeBTTakjG1kwIoOAcHtu8Gj3tqSw7vtpstybIW69LMb1rEgug7QcGKqvFu9U5dszVsrsjjf/y5w==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-karma.tgz':
@@ -9902,11 +9896,11 @@ packages:
       resolve: 1.8.1
       tslint: 5.9.1
       tslint-microsoft-contrib: /tslint-microsoft-contrib/5.2.1/tslint@5.9.1
-      typescript: 2.7.2
+      typescript: 3.0.3
     dev: false
     name: '@rush-temp/gulp-core-build-typescript'
     resolution:
-      integrity: sha512-aY7htHt4YKv4Iq8Vra+NfVx1Mtu+V0m7TxzueeHCxFdCzRVz2fJBIXRFOqUkkssWFTOO8cXIrlNmqa+Kw4ypGw==
+      integrity: sha512-wOpjlHr4mgpQzRuPVnrI64n4bytktrlBNxJqzq3ieBUVdpb1urLzQ0KtccMhXAaxDNEmaoAwq3970dsTxnxx9A==
       tarball: 'file:projects/gulp-core-build-typescript.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-webpack.tgz':
@@ -10156,11 +10150,11 @@ packages:
       gulp: 3.9.1
       tslint: 5.11.0
       tslint-microsoft-contrib: /tslint-microsoft-contrib/5.2.1/tslint@5.11.0
-      typescript: 2.7.2
+      typescript: 3.0.3
     dev: false
     name: '@rush-temp/rush-stack-compiler'
     resolution:
-      integrity: sha512-7rTCgAdra/Eb4fHuUTZ/s6RqQ4r6LNF4SH9iSydQknNuTnwB0iTCS+r0eJqu++2/qCzkWqIHpGPgwzp/xY02Ow==
+      integrity: sha512-YlwVsv76xFL+RLouAlWGCnWIkxLKbW2VQV+zst5RH3W6gMUxPZske17KjKMHmlN1ugXCBc4YOv8ERGbu53ejGQ==
       tarball: 'file:projects/rush-stack-compiler.tgz'
     version: 0.0.0
   'file:projects/rush-stack-library-test.tgz':
@@ -10450,6 +10444,7 @@ specifiers:
   ts-jest: ~22.4.6
   tslint: ~5.11.0
   tslint-microsoft-contrib: ~5.2.1
+  typescript: ~3.0.3
   uglify-js: ~3.0.28
   vinyl: ~2.2.0
   webpack: ~3.11.0

@@ -37,7 +37,6 @@
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
      "typescript": [
-      "~3.0.1"
     ]
   }
 }
