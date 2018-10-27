@@ -38,7 +38,11 @@ export class ModelBuilder {
     this._apiModel = new ApiModel();
   }
 
-  public process(): void {
+  public get apiModel(): ApiModel {
+    return this._apiModel;
+  }
+
+  public buildApiPackage(): ApiPackage {
     const docComment: tsdoc.DocComment | undefined = this._tryParsePackageDocumentation(
       this._context.entryPointSourceFile);
 
@@ -61,16 +65,10 @@ export class ModelBuilder {
       }
     }
 
-    apiPackage.saveToJsonFile('c:\\GitRepos\\serialize.json');
-
-    const test: ApiModel = new ApiModel();
-    const testPackage: ApiPackage = test.loadPackage('c:\\GitRepos\\serialize.json');
-    testPackage.saveToJsonFile('c:\\GitRepos\\serialize2.json');
-
-    debugger;
+    return apiPackage;
   }
 
-  public _processDeclaration(astDeclaration: AstDeclaration, exportedName: string | undefined,
+  private _processDeclaration(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: IApiItemContainer): void {
 
     switch (astDeclaration.declaration.kind) {

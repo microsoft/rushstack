@@ -3,8 +3,6 @@
 
   "project": {
     // ("entryPointSourceFile" is required)
-
-    "externalJsonFileFolders": [ ]
   },
 
   "policies": {

@@ -17,7 +17,8 @@ import {
 import {
   IExtractorConfig,
   IExtractorProjectConfig,
-  IExtractorDtsRollupConfig
+  IExtractorDtsRollupConfig,
+  IExtractorApiJsonFileConfig
 } from './IExtractorConfig';
 import { ILogger } from './ILogger';
 import { ExtractorContext } from '../analyzer/ExtractorContext';
@@ -25,6 +26,7 @@ import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenera
 import { MonitoredLogger } from './MonitoredLogger';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { ModelBuilder } from '../generators/ModelBuilder';
+import { ApiPackage } from './model/ApiPackage';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -341,9 +343,20 @@ export class Extractor {
       validationRules: this.actualConfig.validationRules
     });
 
-    if (this.actualConfig.apiReviewFile.enabled) {
-      const modelBuilder: ModelBuilder = new ModelBuilder(context);
-      modelBuilder.process();
+    const modelBuilder: ModelBuilder = new ModelBuilder(context);
+    const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
+
+    const packageBaseName: string = path.basename(context.packageName);
+
+    const apiJsonFileConfig: IExtractorApiJsonFileConfig = this.actualConfig.apiJsonFile;
+
+    if (apiJsonFileConfig.enabled) {
+      const outputFolder: string = path.resolve(this._absoluteRootFolder, apiJsonFileConfig.outputFolder);
+
+      const apiJsonFilename: string = path.join(outputFolder, packageBaseName + '.api.json');
+
+      this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
+      apiPackage.saveToJsonFile(apiJsonFilename);
     }
 
     this._generateRollupDtsFiles(context);

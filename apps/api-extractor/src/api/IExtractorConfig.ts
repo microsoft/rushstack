@@ -63,13 +63,6 @@ export interface IExtractorProjectConfig {
    * need to parse implementation code.
    */
   entryPointSourceFile: string;
-
-  /**
-   * Indicates folders containing additional APJ JSON files (*.api.json) that will be
-   * consulted during the analysis.  This is useful for providing annotations for
-   * external packages that were not built using API Extractor.
-   */
-  externalJsonFileFolders?: string[];
 }
 
 /**

@@ -54,10 +54,6 @@
         "entryPointSourceFile": {
           "description": "Specifies the TypeScript source file that will be treated as the entry point for compilation.",
           "type": "string"
-        },
-        "externalJsonFileFolders": {
-          "description": "Indicates folders containing additional APJ JSON files (*.api.json) that will be consulted during the analysis.  This is useful for providing annotations for external packages that were not built using API Extractor.",
-          "type": "string"
         }
       },
       "required": [ "entryPointSourceFile" ],

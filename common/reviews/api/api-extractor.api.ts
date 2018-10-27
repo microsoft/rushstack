@@ -76,7 +76,6 @@ interface IExtractorPoliciesConfig {
 // @public
 interface IExtractorProjectConfig {
   entryPointSourceFile: string;
-  externalJsonFileFolders?: string[];
 }
 
 // @public
