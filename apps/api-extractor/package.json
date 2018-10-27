@@ -43,11 +43,11 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.3.0",
+    "@microsoft/rush-stack-compiler": "0.4.0",
     "tslint-microsoft-contrib": "~5.2.1",
     "@types/lodash": "4.14.116",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "6.0.1",
+    "@microsoft/node-library-build": "6.0.2",
     "@types/jest": "21.1.10"
   }
 }
