@@ -318,7 +318,7 @@ packages:
       '@pnpm/types': 1.8.0
       '@types/mz': 0.0.32
       '@types/node': 10.12.0
-      '@types/ramda': 0.25.39
+      '@types/ramda': 0.25.40
       '@zkochan/cmd-shim': 2.2.4
       arr-flatten: 1.1.0
       is-windows: 1.0.2
@@ -342,7 +342,7 @@ packages:
       '@pnpm/types': 1.8.0
       '@types/mz': 0.0.32
       '@types/node': 10.12.0
-      '@types/ramda': 0.25.39
+      '@types/ramda': 0.25.40
       '@zkochan/cmd-shim': 2.2.4
       arr-flatten: 1.1.0
       is-windows: 1.0.2
@@ -568,10 +568,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-vShOV8hPEyXacCur/IKlMoGQwMU=
-  /@types/ramda/0.25.39:
+  /@types/ramda/0.25.40:
     dev: false
     resolution:
-      integrity: sha512-GJr1BOUjtdLexxQLhflMw1tCDav3csdUTC7twHx0GZUF9RTWGnJkYnUFAZE5cv1YnefgZabdfC8GvtJgVmQL7A==
+      integrity: sha512-2wJUkK/jY//CECZZrFb1LBreCkwuA9RY4P1GpGV35vLg/cJQUFs0dSUEvQANPjnoa4Kv8hsVFvM0v8xS5cPydg==
   /@types/resolve/0.0.8:
     dependencies:
       '@types/node': 8.5.8
@@ -2309,14 +2309,14 @@ packages:
       node: '>=0.10'
     resolution:
       integrity: sha1-hTz6D3y+L+1d4gMmuN1YEDX24vA=
-  /data-urls/1.0.1:
+  /data-urls/1.1.0:
     dependencies:
       abab: 2.0.0
       whatwg-mimetype: 2.2.0
       whatwg-url: 7.0.0
     dev: false
     resolution:
-      integrity: sha512-0HdcMZzK6ubMUnsMmQmG0AcLQPvbvb47R0+7CCZQCYgcd8OUWG91CG7sM6GoXgjz+WLl4ArFzHtBMy/QqSF4eg==
+      integrity: sha512-YTWYI9se1P55u58gL5GkQHW4P6VJBJ5iBT+B5a7i2Tjadhv52paJG0qHX4A0OR6/t52odI64KP2YvFpkDOi3eQ==
   /date-now/0.1.4:
     dev: false
     resolution:
@@ -5229,7 +5229,7 @@ packages:
       array-equal: 1.0.0
       cssom: 0.3.4
       cssstyle: 0.3.1
-      data-urls: 1.0.1
+      data-urls: 1.1.0
       domexception: 1.0.1
       escodegen: 1.11.0
       html-encoding-sniffer: 1.0.2
@@ -8616,12 +8616,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-dkpaEa9QVhkhsTPztE5hhofg9cM=
-  /time-stamp/2.1.0:
+  /time-stamp/2.2.0:
     dev: false
     engines:
       node: '>=0.10.0'
     resolution:
-      integrity: sha512-lJbq6KsFhZJtN3fPUVje1tq/hHsJOKUUcUj/MGCiQR6qWBDcyi5kxL9J7/RnaEChCn0+L/DUN2WvemDrkk4i3Q==
+      integrity: sha512-zxke8goJQpBeEgD82CXABeMh0LSJcj7CXEd0OHOg45HgcofF7pxNwZm9+RknpxpDhwN4gFpySkApKfFYfRQnUA==
   /timers-browserify/2.0.10:
     dependencies:
       setimmediate: 1.0.5
@@ -9267,7 +9267,7 @@ packages:
       mime: 1.6.0
       path-is-absolute: 1.0.1
       range-parser: 1.2.0
-      time-stamp: 2.1.0
+      time-stamp: 2.2.0
     dev: false
     engines:
       node: '>=0.6'
@@ -9281,7 +9281,7 @@ packages:
       mime: 1.6.0
       path-is-absolute: 1.0.1
       range-parser: 1.2.0
-      time-stamp: 2.1.0
+      time-stamp: 2.2.0
       webpack: 3.11.0
     dev: false
     engines:
@@ -9846,7 +9846,6 @@ packages:
     dependencies:
       '@microsoft/node-library-build': 6.0.0
       '@types/glob': 5.0.30
-      '@types/gulp': 3.8.32
       '@types/node': 8.5.8
       '@types/resolve': 0.0.8
       decomment: 0.9.2
@@ -9854,8 +9853,6 @@ packages:
       glob-escape: 0.0.2
       gulp: 3.9.1
       resolve: 1.8.1
-      tslint: 5.9.1
-      tslint-microsoft-contrib: /tslint-microsoft-contrib/5.2.1/tslint@5.9.1
       typescript: 2.7.2
     dev: false
     name: '@rush-temp/gulp-core-build-typescript'
