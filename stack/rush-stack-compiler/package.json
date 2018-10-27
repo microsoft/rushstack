@@ -22,11 +22,12 @@
     "@microsoft/node-core-library": "3.5.0",
     "@types/node": "8.5.8",
     "tslint-microsoft-contrib": "~5.2.1",
-    "tslint": "~5.9.1",
-    "typescript": "~2.4.1"
+    "tslint": "~5.11.0",
+    "typescript": "~2.7.2"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "5.0.16",
+    "@microsoft/node-library-build": "6.0.0",
+    "@microsoft/rush-stack-compiler": "0.2.0",
     "gulp": "~3.9.1"
   }
 }
