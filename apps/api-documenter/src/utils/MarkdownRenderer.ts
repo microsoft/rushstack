@@ -3,9 +3,8 @@
 
 import {
   IMarkupText,
-  MarkupElement,
-  IApiItemReference
-} from '@microsoft/api-extractor';
+  MarkupElement
+} from './MarkupElement';
 
 /**
  * Helper class used by MarkdownPageRenderer
@@ -56,35 +55,9 @@ class SimpleWriter {
 interface IRenderContext {
   writer: SimpleWriter;
   insideTable: boolean;
-  options: IMarkdownRendererOptions;
   depth: number;
 }
 
-export interface IMarkdownRenderApiLinkArgs {
-  /**
-   * The IApiItemReference being rendered.
-   */
-  readonly reference: IApiItemReference;
-  /**
-   * The callback can assign text here that will be inserted before the link text.
-   * Example: "["
-   */
-  prefix: string;
-
-  /**
-   * The callback can assign text here that will be inserted after the link text.
-   * Example: "](./TargetPage.md)"
-   */
-  suffix: string;
-}
-
-export interface IMarkdownRendererOptions {
-  /**
-   * This callback receives an IMarkupApiLink, and returns the rendered markdown content.
-   * If the callback is not provided, an error occurs if an IMarkupApiLink is encountered.
-   */
-  onRenderApiLink?: (args: IMarkdownRenderApiLinkArgs) => void;
-}
 
 /**
  * Renders MarkupElement content in the Markdown file format.
@@ -92,13 +65,12 @@ export interface IMarkdownRendererOptions {
  */
 export class MarkdownRenderer {
 
-  public static renderElements(elements: MarkupElement[], options: IMarkdownRendererOptions): string {
+  public static renderElements(elements: MarkupElement[]): string {
     const writer: SimpleWriter = new SimpleWriter();
 
     const context: IRenderContext = {
       writer: writer,
       insideTable: false,
-      options: options,
       depth: 0
     };
 
@@ -243,30 +215,9 @@ export class MarkdownRenderer {
           writer.write('`');
           break;
         case 'api-link':
-          if (!context.options.onRenderApiLink) {
-            throw new Error('IMarkupApiLink cannot be rendered because a renderApiLink handler was not provided');
-          }
-
-          const args: IMarkdownRenderApiLinkArgs = {
-            reference: element.target,
-            prefix: '',
-            suffix: ''
-          };
-
-          // NOTE: The onRenderApiLink() callback will assign values to the args.prefix
-          // and args.suffix properties, which are used below.  (It is modeled this way because
-          // MarkdownRenderer._writeElements() may need to emit different escaping e.g. depending
-          // on what characters were written by writer.write(args.prefix).)
-          context.options.onRenderApiLink(args);
-
-          if (args.prefix) {
-            writer.write(args.prefix);
-          }
+          writer.write('[');
           MarkdownRenderer._writeElements(element.elements, context);
-          if (args.suffix) {
-            writer.write(args.suffix);
-          }
-
+          writer.write(`](${element.target})`);
           break;
         case 'web-link':
           writer.write('[');

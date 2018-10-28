@@ -3,7 +3,8 @@
 
 import * as path from 'path';
 import { FileDiffTest, FileSystem } from '@microsoft/node-core-library';
-import { IMarkupPage, Markup } from '@microsoft/api-extractor';
+import { Markup } from '../Markup';
+import { IMarkupPage } from '../MarkupElement';
 
 import { MarkdownRenderer } from '../MarkdownRenderer';
 
@@ -65,7 +66,7 @@ describe('MarkdownPageRenderer', () => {
     ]);
 
     const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
-    FileSystem.writeFile(outputFilename, MarkdownRenderer.renderElements([markupPage], { }));
+    FileSystem.writeFile(outputFilename, MarkdownRenderer.renderElements([markupPage]));
 
     FileDiffTest.assertEqual(outputFilename, path.join(__dirname, 'ExpectedOutput.md'));
 

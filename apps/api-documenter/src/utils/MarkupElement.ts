@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IApiItemReference } from '../api/ApiItem';
-
 // ----------------------------------------------------------------------------
 
 /**
@@ -106,8 +104,8 @@ export interface IMarkupApiLink {
   /** The link text */
   elements: MarkupLinkTextElement[];
 
-  /** The API item that will serve as the hyperlink target */
-  target: IApiItemReference;
+  /** The string that will serve as the target for the Markdown-style hyperlink */
+  target: string;
 }
 
 /**
@@ -121,7 +119,7 @@ export interface IMarkupWebLink {
   /** The link text */
   elements: MarkupLinkTextElement[];
 
-  /** The internet URL that will serve as the hyperlink target */
+  /** The internet URL that will serve as target for the HTML-style hyperlink */
   targetUrl: string;
 }
 

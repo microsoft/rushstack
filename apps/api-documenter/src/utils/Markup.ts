@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PackageName } from '@microsoft/node-core-library';
 import {
   MarkupElement,
   MarkupBasicElement,
@@ -23,8 +22,6 @@ import {
   IMarkupCodeBox,
   MarkupHighlighter
 } from './MarkupElement';
-
-import { IApiItemReference } from '../api/ApiItem';
 
 /**
  * Options for {@link Markup.createTextElements}
@@ -166,17 +163,10 @@ export class Markup {
    * @param textElements - the markup sequence that will serve as the link text
    * @param target - the API object that the hyperlink will point to
    */
-  public static createApiLink(textElements: MarkupLinkTextElement[], target: IApiItemReference): IMarkupApiLink {
+  public static createApiLink(textElements: MarkupLinkTextElement[], target: string): IMarkupApiLink {
     if (!textElements.length) {
       throw new Error('Missing text for link');
     }
-
-    if (!target.packageName || target.packageName.length < 1) {
-      throw new Error('The IApiItemReference.packageName cannot be empty');
-    }
-
-    // Validate that the scopeName and packageName are formatted correctly
-    PackageName.combineParts(target.scopeName, target.packageName);
 
     return {
       kind: 'api-link',
@@ -191,7 +181,7 @@ export class Markup {
    * @param text - the text string that will serve as the link text
    * @param target - the API object that the hyperlink will point to
    */
-  public static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink {
+  public static createApiLinkFromText(text: string, target: string): IMarkupApiLink {
     return Markup.createApiLink(Markup.createTextElements(text), target);
   }
 
@@ -355,149 +345,6 @@ export class Markup {
       title: Markup._trimRawText(title),
       elements: []
     } as IMarkupPage;
-  }
-
-  /**
-   * Extracts plain text from the provided markup elements, discarding any formatting.
-   *
-   * @remarks
-   * The returned string is suitable for counting words or extracting search keywords.
-   * Its formatting is not guaranteed, and may change in future updates of this API.
-   *
-   * API Extractor determines whether an API is "undocumented" by using extractTextContent()
-   * to extract the text from its summary, and then counting the number of words.
-   */
-  public static extractTextContent(elements: MarkupElement[]): string {
-    // Pass a buffer, since "+=" uses less memory than "+"
-    const buffer: { text: string } = { text: '' };
-    Markup._extractTextContent(elements, buffer);
-    return buffer.text;
-  }
-
-  /**
-   * Use this to clean up a MarkupElement sequence, assuming the sequence is now in
-   * its final form.
-   *
-   * @remarks
-   * The following operations are performed:
-   *
-   * 1. Remove leading/trailing white space around paragraphs
-   *
-   * 2. Remove redundant paragraph elements
-   */
-  public static normalize<T extends MarkupElement>(elements: T[]): void {
-    let i: number = 0;
-
-    while (i < elements.length) {
-      const element: T = elements[i];
-      const previousElement: T | undefined = i - 1 >= 0 ? elements[i - 1] : undefined;
-      const nextElement: T | undefined = i + 1 < elements.length ? elements[i + 1] : undefined;
-
-      const paragraphBefore: boolean = !!(previousElement && previousElement.kind === 'paragraph');
-      const paragraphAfter: boolean = !!(nextElement && nextElement.kind === 'paragraph');
-
-      if (element.kind === 'paragraph') {
-        if (i === 0 || i === elements.length - 1 || paragraphBefore) {
-          // Delete this element.  We do not update i because the "previous" item
-          // is unchanged on the next loop.
-          elements.splice(i, 1);
-          continue;
-        }
-      } else if (element.kind === 'text') {
-        const textElement: IMarkupText = element as IMarkupText;
-        if (paragraphBefore || i === 0) {
-          textElement.text = textElement.text.replace(/^\s+/, ''); // trim left
-        }
-
-        if (paragraphAfter || i === elements.length - 1) {
-          textElement.text = textElement.text.replace(/\s+$/, ''); // trim right
-        }
-      }
-
-      ++i;
-    }
-  }
-
-  /**
-   * This formats an IApiItemReference as its AEDoc notation.
-   *
-   * @remarks
-   * Depending on the provided components, example return values might look like
-   * "\@ms/my-library:SomeClass.someProperty", "my-library:SomeClass", "SomeClass",
-   * or "SomeClass.someProperty".
-   */
-  public static formatApiItemReference(apiItemReference: IApiItemReference): string {
-    // Example: "SomeClass"
-    let result: string = apiItemReference.exportName;
-    if (apiItemReference.packageName) {
-        // Example: "my-library:SomeClass"
-        result = apiItemReference.packageName + '#' + result;
-
-      if (apiItemReference.scopeName) {
-        // Example: "@ms/my-library:SomeClass"
-        result = apiItemReference.scopeName + '/' + result;
-      }
-    }
-    if (apiItemReference.memberName) {
-        // Example: "@ms/my-library:SomeClass.someProperty"
-        result += '.' + apiItemReference.memberName;
-    }
-    return result;
-  }
-
-  private static _extractTextContent(elements: MarkupElement[], buffer: { text: string }): void {
-    for (const element of elements) {
-      switch (element.kind) {
-        case 'api-link':
-          buffer.text += Markup.extractTextContent(element.elements);
-          break;
-        case 'break':
-          buffer.text += '\n';
-          break;
-        case 'code':
-        case 'code-box':
-          buffer.text += element.text;
-          break;
-        case 'heading1':
-        case 'heading2':
-          buffer.text += element.text;
-          break;
-        case 'html-tag':
-          break;
-        case 'note-box':
-          buffer.text += Markup.extractTextContent(element.elements);
-          break;
-        case 'page':
-          buffer.text += element.title + '\n';
-          buffer.text += Markup.extractTextContent(element.elements);
-          break;
-        case 'paragraph':
-          buffer.text += '\n\n';
-          break;
-        case 'table':
-          if (element.header) {
-            buffer.text += Markup.extractTextContent([element.header]);
-          }
-          buffer.text += Markup.extractTextContent(element.rows);
-          break;
-        case 'table-cell':
-          buffer.text += Markup.extractTextContent(element.elements);
-          buffer.text += '\n';
-          break;
-        case 'table-row':
-          buffer.text += Markup.extractTextContent(element.cells);
-          buffer.text += '\n';
-          break;
-        case 'text':
-          buffer.text += element.text;
-          break;
-        case 'web-link':
-          buffer.text += Markup.extractTextContent(element.elements);
-          break;
-        default:
-          throw new Error('Unsupported element kind');
-      }
-    }
   }
 
   private static _trimRawText(text: string): string {
