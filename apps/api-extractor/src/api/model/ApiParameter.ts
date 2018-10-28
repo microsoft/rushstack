@@ -7,9 +7,11 @@ import { ApiItemKind, ApiItem } from './ApiItem';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem } from './ApiDocumentedItem';
 
+/** @public */
 export interface IApiParameterOptions extends IApiDeclarationMixinOptions {
 }
 
+/** @public */
 export class ApiParameter extends ApiDeclarationMixin(ApiItem) {
   public constructor(options: IApiParameterOptions) {
     super(options);

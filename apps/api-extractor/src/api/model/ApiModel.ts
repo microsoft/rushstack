@@ -5,6 +5,7 @@ import { ApiItem, ApiItemKind } from './ApiItem';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { ApiPackage } from './ApiPackage';
 
+/** @public */
 export class ApiModel extends ApiItemContainerMixin(ApiItem) {
   public constructor() {
     super({ name: 'MODEL' });

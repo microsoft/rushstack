@@ -5,11 +5,13 @@ import { ApiItemKind } from './ApiItem';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 
+/** @public */
 export interface IApiPropertySignatureOptions extends
   IApiDeclarationMixinOptions,
   IApiDocumentedItemOptions {
 }
 
+/** @public */
 export class ApiPropertySignature extends ApiDeclarationMixin(ApiDocumentedItem) {
   public static getCanonicalReference(name: string): string {
     return name;

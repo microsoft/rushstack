@@ -3,6 +3,7 @@
 
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
 
+/** @public */
 export const enum ApiItemKind {
   Class = 'Class',
   EntryPoint = 'EntryPoint',
@@ -16,6 +17,7 @@ export const enum ApiItemKind {
   None = 'None'
 }
 
+/** @public */
 export interface IApiItemOptions {
   name: string;
 }
@@ -33,6 +35,7 @@ export interface IApiItemJson {
 // tslint:disable-next-line:variable-name
 export const ApiItem_parent: unique symbol = Symbol('ApiItem._parent');
 
+/** @public */
 export class ApiItem {
   public [ApiItem_parent]: ApiItem | undefined;
 

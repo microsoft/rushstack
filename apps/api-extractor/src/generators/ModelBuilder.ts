@@ -14,7 +14,6 @@ import { ApiPackage } from '../api/model/ApiPackage';
 import { ApiEntryPoint } from '../api/model/ApiEntryPoint';
 import { ApiMethod } from '../api/model/ApiMethod';
 import { ApiNamespace } from '../api/model/ApiNamespace';
-import { IApiItemContainer } from '../api/mixins/ApiItemContainerMixin';
 import { ApiInterface } from '../api/model/ApiInterface';
 import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
 import { Span } from '../analyzer/Span';
@@ -22,6 +21,7 @@ import { ApiParameter } from '../api/model/ApiParameter';
 import { AedocDefinitions } from '../aedoc/AedocDefinitions';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
+import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
@@ -76,7 +76,7 @@ export class ModelBuilder {
   }
 
   private _processDeclaration(astDeclaration: AstDeclaration, exportedName: string | undefined,
-    parentApiItem: IApiItemContainer): void {
+    parentApiItem: ApiItemContainerMixin): void {
 
     switch (astDeclaration.declaration.kind) {
       case ts.SyntaxKind.ClassDeclaration:
@@ -114,14 +114,14 @@ export class ModelBuilder {
   }
 
   private _processChildDeclarations(astDeclaration: AstDeclaration, exportedName: string | undefined,
-    parentApiItem: IApiItemContainer): void {
+    parentApiItem: ApiItemContainerMixin): void {
     for (const childDeclaration of astDeclaration.children) {
       this._processDeclaration(childDeclaration, undefined, parentApiItem);
     }
   }
 
   private _processApiClass(astDeclaration: AstDeclaration, exportedName: string | undefined,
-    parentApiItem: IApiItemContainer): void {
+    parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const canonicalReference: string = ApiClass.getCanonicalReference(name);
@@ -141,7 +141,7 @@ export class ModelBuilder {
   }
 
   private _processApiInterface(astDeclaration: AstDeclaration, exportedName: string | undefined,
-    parentApiItem: IApiItemContainer): void {
+    parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const canonicalReference: string = ApiInterface.getCanonicalReference(name);
@@ -161,7 +161,7 @@ export class ModelBuilder {
   }
 
   private _processApiMethod(astDeclaration: AstDeclaration, exportedName: string | undefined,
-    parentApiItem: IApiItemContainer): void {
+    parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
@@ -201,7 +201,7 @@ export class ModelBuilder {
   }
 
   private _processApiNamespace(astDeclaration: AstDeclaration, exportedName: string | undefined,
-    parentApiItem: IApiItemContainer): void {
+    parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const canonicalReference: string = ApiNamespace.getCanonicalReference(name);
@@ -221,7 +221,7 @@ export class ModelBuilder {
   }
 
   private _processApiPropertySignature(astDeclaration: AstDeclaration, exportedName: string | undefined,
-    parentApiItem: IApiItemContainer): void {
+    parentApiItem: ApiItemContainerMixin): void {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const canonicalReference: string = ApiPropertySignature.getCanonicalReference(name);

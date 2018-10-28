@@ -23,4 +23,66 @@ export {
   IExtractorConfig
 } from './api/IExtractorConfig';
 
+export {
+  IApiDeclarationMixinOptions,
+  ApiDeclarationMixin
+} from './api/mixins/ApiDeclarationMixin';
+export {
+  IApiFunctionLikeMixinOptions,
+  ApiFunctionLikeMixin
+} from './api/mixins/ApiFunctionLikeMixin';
+export {
+  IApiItemContainerMixinOptions,
+  ApiItemContainerMixin
+} from './api/mixins/ApiItemContainerMixin';
+export {
+  IApiStaticMixinOptions,
+  ApiStaticMixin
+} from './api/mixins/ApiStaticMixin';
+
+export {
+  IApiClassOptions,
+  ApiClass
+} from './api/model/ApiClass';
+export {
+  IApiDocumentedItemOptions,
+  ApiDocumentedItem
+} from './api/model/ApiDocumentedItem';
+export {
+  IApiEntryPointOptions,
+  ApiEntryPoint
+} from './api/model/ApiEntryPoint';
+export {
+  IApiInterfaceOptions,
+  ApiInterface
+} from './api/model/ApiInterface';
+export {
+  ApiItemKind,
+  IApiItemOptions,
+  ApiItem
+} from './api/model/ApiItem';
+export {
+  IApiMethodOptions,
+  ApiMethod
+} from './api/model/ApiMethod';
+export {
+  ApiModel
+} from './api/model/ApiModel';
+export {
+  IApiNamespaceOptions,
+  ApiNamespace
+} from './api/model/ApiNamespace';
+export {
+  IApiPackageOptions,
+  ApiPackage
+} from './api/model/ApiPackage';
+export {
+  IApiParameterOptions,
+  ApiParameter
+} from './api/model/ApiParameter';
+export {
+  IApiPropertySignatureOptions,
+  ApiPropertySignature
+} from './api/model/ApiPropertySignature';
+
 export { ILogger } from './api/ILogger';

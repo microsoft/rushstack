@@ -4,6 +4,7 @@
 import { Mixin } from './Mixin';
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 
+/** @public */
 export interface IApiStaticMixinOptions extends IApiItemOptions {
   isStatic: boolean;
 }
@@ -14,14 +15,16 @@ export interface IApiStaticMixinJson extends IApiItemJson {
 
 const _isStatic: unique symbol = Symbol('ApiStaticMixin._isStatic');
 
+/** @public */
 // tslint:disable-next-line:interface-name
-export interface ApiStaticMixin {
+export interface ApiStaticMixin extends ApiItem {
   readonly isStatic: boolean;
 
   /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
+/** @public */
 export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
   Mixin<TBaseClass, ApiStaticMixin> {
 
@@ -56,7 +59,4 @@ export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass
   }
 
   return MixedClass;
-}
-
-export interface IApiStatic extends ApiStaticMixin, ApiItem {
 }

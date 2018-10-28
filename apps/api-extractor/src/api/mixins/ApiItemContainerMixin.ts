@@ -4,6 +4,7 @@
 import { Mixin } from './Mixin';
 import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../model/ApiItem';
 
+/** @public */
 export interface IApiItemContainerMixinOptions extends IApiItemOptions {
   members?: ApiItem[];
 }
@@ -16,8 +17,9 @@ const _members: unique symbol = Symbol('ApiItemContainerMixin._members');
 const _membersSorted: unique symbol = Symbol('ApiItemContainerMixin._membersSorted');
 const _membersByCanonicalReference: unique symbol = Symbol('ApiItemContainerMixin._membersByCanonicalReference');
 
+/** @public */
 // tslint:disable-next-line:interface-name
-export interface ApiItemContainerMixin {
+export interface ApiItemContainerMixin extends ApiItem {
   readonly members: ReadonlyArray<ApiItem>;
   addMember(member: ApiItem): void;
 
@@ -27,6 +29,7 @@ export interface ApiItemContainerMixin {
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
+/** @public */
 export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
   Mixin<TBaseClass, ApiItemContainerMixin> {
 
@@ -109,7 +112,4 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
   }
 
   return MixedClass;
-}
-
-export interface IApiItemContainer extends ApiItemContainerMixin, ApiItem {
 }

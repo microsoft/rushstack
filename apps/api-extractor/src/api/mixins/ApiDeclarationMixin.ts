@@ -4,6 +4,7 @@
 import { Mixin } from './Mixin';
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 
+/** @public */
 export interface IApiDeclarationMixinOptions extends IApiItemOptions {
   signature: string;
 }
@@ -14,14 +15,16 @@ export interface IApiDeclarationMixinJson extends IApiItemJson {
 
 const _signature: unique symbol = Symbol('ApiDeclarationMixin._signature');
 
+/** @public */
 // tslint:disable-next-line:interface-name
-export interface ApiDeclarationMixin {
+export interface ApiDeclarationMixin extends ApiItem {
   readonly signature: string;
 
   /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
+/** @public */
 export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
   Mixin<TBaseClass, ApiDeclarationMixin> {
 
@@ -58,7 +61,4 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
   }
 
   return MixedClass;
-}
-
-export interface IApiDeclaration extends ApiDeclarationMixin, ApiItem {
 }

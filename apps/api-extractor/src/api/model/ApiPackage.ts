@@ -7,6 +7,7 @@ import { JsonFile, IJsonFileSaveOptions } from '@microsoft/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { Extractor } from '../Extractor';
 
+/** @public */
 export interface IApiPackageOptions extends
   IApiItemContainerMixinOptions,
   IApiDocumentedItemOptions {
@@ -45,6 +46,7 @@ export interface IApiPackageJson extends IApiItemJson {
   metadata: IApiPackageMetadataJson;
 }
 
+/** @public */
 export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
     const jsonObject: { } = JsonFile.load(apiJsonFilename);

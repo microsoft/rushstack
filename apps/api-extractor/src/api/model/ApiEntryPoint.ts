@@ -4,9 +4,11 @@
 import { ApiItem, ApiItemKind } from './ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 
+/** @public */
 export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions {
 }
 
+/** @public */
 export class ApiEntryPoint extends ApiItemContainerMixin(ApiItem) {
   public constructor(options: IApiEntryPointOptions) {
     super(options);

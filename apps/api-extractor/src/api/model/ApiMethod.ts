@@ -7,6 +7,7 @@ import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin
 import { ApiFunctionLikeMixin, IApiFunctionLikeMixinOptions } from '../mixins/ApiFunctionLikeMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 
+/** @public */
 export interface IApiMethodOptions extends
   IApiFunctionLikeMixinOptions,
   IApiStaticMixinOptions,
@@ -14,6 +15,7 @@ export interface IApiMethodOptions extends
   IApiDocumentedItemOptions {
 }
 
+/** @public */
 export class ApiMethod extends ApiFunctionLikeMixin(ApiStaticMixin(ApiDeclarationMixin(ApiDocumentedItem))) {
   public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {

@@ -6,12 +6,14 @@ import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 
+/** @public */
 export interface IApiInterfaceOptions extends
   IApiItemContainerMixinOptions,
   IApiDeclarationMixinOptions,
   IApiDocumentedItemOptions {
 }
 
+/** @public */
 export class ApiInterface extends ApiItemContainerMixin(ApiDeclarationMixin(ApiDocumentedItem)) {
   public static getCanonicalReference(name: string): string {
     return `(${name}:interface)`;

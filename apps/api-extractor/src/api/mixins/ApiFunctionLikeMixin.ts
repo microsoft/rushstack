@@ -5,6 +5,7 @@ import { Mixin } from './Mixin';
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 import { ApiParameter } from '../model/ApiParameter';
 
+/** @public */
 export interface IApiFunctionLikeMixinOptions extends IApiItemOptions {
   overloadIndex: number;
   parameters?: ApiParameter[];
@@ -18,14 +19,16 @@ export interface IApiFunctionLikeJson extends IApiItemJson {
 const _overloadIndex: unique symbol = Symbol('ApiFunctionLikeMixin._overloadIndex');
 const _parameters: unique symbol = Symbol('ApiFunctionLikeMixin._parameters');
 
+/** @public */
 // tslint:disable-next-line:interface-name
-export interface ApiFunctionLikeMixin {
+export interface ApiFunctionLikeMixin extends ApiItem {
   readonly overloadIndex: number;
   readonly parameters: ReadonlyArray<ApiParameter>;
   addParameter(parameter: ApiParameter): void;
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
+/** @public */
 export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
   Mixin<TBaseClass, ApiFunctionLikeMixin> {
 
@@ -87,7 +90,4 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
   }
 
   return MixedClass;
-}
-
-export interface IApiFunctionLike extends ApiFunctionLikeMixin, ApiItem {
 }

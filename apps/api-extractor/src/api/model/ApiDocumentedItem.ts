@@ -5,6 +5,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { ApiItem, IApiItemOptions, IApiItemJson } from './ApiItem';
 import { AedocDefinitions } from '../../aedoc/AedocDefinitions';
 
+/** @public */
 export interface IApiDocumentedItemOptions extends IApiItemOptions {
   docComment: tsdoc.DocComment | undefined;
 }
@@ -13,6 +14,7 @@ export interface IApiDocumentedItemJson extends IApiItemJson {
   docComment: string;
 }
 
+/** @public */
 export class ApiDocumentedItem extends ApiItem {
   private _tsdocComment: tsdoc.DocComment | undefined;
 
