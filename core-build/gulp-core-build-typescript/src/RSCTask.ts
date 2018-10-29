@@ -18,8 +18,11 @@ export interface IRSCTaskConfig extends Object {
   /**
    * This is the name of the rush-stack-compiler package, or the name of the package that
    * extends the configuration of rush-stack-compiler. This defaults to "\@microsoft/rush-stack-compiler"
+   *
+   * If multiple package names are specified, the tool attempts to resolve each in order. If none
+   * can be resolved, an exception is thrown.
    */
-  rushStackCompilerPackageName?: string;
+  rushStackCompilerPackageName?: string | string[];
 }
 
 export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTask<TTaskConfig> {
@@ -30,25 +33,40 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
   private __rushStackCompilerPackagePath: string | undefined; // tslint:disable-line:variable-name
   private get _rushStackCompilerPackagePath(): string {
     if (!this.__rushStackCompilerPackagePath) {
-      try {
-        this.__rushStackCompilerPackagePath = resolve.sync(
-          this.taskConfig.rushStackCompilerPackageName!,
-          {
-            basedir: this.buildConfig.rootPath,
-            packageFilter: (pkg: IPackageJson) => {
-              pkg.main = 'package.json';
-              return pkg;
+      if (!this.taskConfig.rushStackCompilerPackageName) {
+        throw new Error('At least one rushStackCompilerPackageName must be specified.');
+      }
+
+      const packageNames: string[] = typeof this.taskConfig.rushStackCompilerPackageName === 'string'
+        ? [this.taskConfig.rushStackCompilerPackageName]
+        : this.taskConfig.rushStackCompilerPackageName!;
+
+      for (const packageName of packageNames) {
+        try {
+          this.__rushStackCompilerPackagePath = resolve.sync(
+            packageName,
+            {
+              basedir: this.buildConfig.rootPath,
+              packageFilter: (pkg: IPackageJson) => {
+                pkg.main = 'package.json';
+                return pkg;
+              }
             }
+          );
+
+          if (!this.__rushStackCompilerPackagePath) {
+            continue;
           }
-        );
 
-        if (!this.__rushStackCompilerPackagePath) {
-          throw new Error();
+          this.__rushStackCompilerPackagePath = path.dirname(this.__rushStackCompilerPackagePath);
+          break;
+        } catch (e) {
+          continue;
         }
+      }
 
-        this.__rushStackCompilerPackagePath = path.dirname(this.__rushStackCompilerPackagePath);
-      } catch (e) {
-        throw new Error(`Unable to find "${this.taskConfig.rushStackCompilerPackageName}" package.`);
+      if (!this.__rushStackCompilerPackagePath) {
+        throw new Error(`Unable to resolve the compiler package (looked for ${packageNames.join(', ')})`);
       }
     }
 
