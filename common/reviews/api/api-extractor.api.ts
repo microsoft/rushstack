@@ -383,3 +383,5 @@ interface ILogger {
   logWarning(message: string): void;
 }
 
+// WARNING: Unsupported export: Constructor
+// WARNING: Unsupported export: PropertiesOf

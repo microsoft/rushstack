@@ -24,6 +24,10 @@ export {
 } from './api/IExtractorConfig';
 
 export {
+  Constructor,
+  PropertiesOf
+} from './api/mixins/Mixin';
+export {
   IApiDeclarationMixinOptions,
   ApiDeclarationMixin
 } from './api/mixins/ApiDeclarationMixin';

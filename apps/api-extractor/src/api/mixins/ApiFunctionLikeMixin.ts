@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { Mixin } from './Mixin';
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 import { ApiParameter } from '../model/ApiParameter';
 
@@ -30,7 +29,7 @@ export interface ApiFunctionLikeMixin extends ApiItem {
 
 /** @public */
 export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  Mixin<TBaseClass, ApiFunctionLikeMixin> {
+  TBaseClass & (new (...args: any[]) => ApiFunctionLikeMixin) {
 
   abstract class MixedClass extends baseClass implements ApiFunctionLikeMixin {
     public readonly [_overloadIndex]: number;

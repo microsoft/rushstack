@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { Mixin } from './Mixin';
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 
 /** @public */
@@ -26,7 +25,7 @@ export interface ApiDeclarationMixin extends ApiItem {
 
 /** @public */
 export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  Mixin<TBaseClass, ApiDeclarationMixin> {
+  TBaseClass & (new (...args: any[]) => ApiDeclarationMixin) {
 
   abstract class MixedClass extends baseClass implements ApiDeclarationMixin {
     public [_signature]: string;
