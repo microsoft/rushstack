@@ -95,6 +95,18 @@ export class ApiItem {
     return [];
   }
 
+  /**
+   * Returns the chain of ancestors, starting from the root of the tree, and ending with the this item.
+   */
+  public getHierarchy(): ReadonlyArray<ApiItem> {
+    const hierarchy: ApiItem[] = [];
+    for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
+      hierarchy.push(current);
+    }
+    hierarchy.reverse();
+    return hierarchy;
+  }
+
   /** @virtual */
   public getSortKey(): string {
     return this.canonicalReference;
