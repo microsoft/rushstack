@@ -192,7 +192,8 @@ export class PackageJsonUpdater {
       recheckShrinkwrap: false,
       networkConcurrency: undefined,
       collectLogFile: false,
-      variant: variant
+      variant: variant,
+      withHooks: false
     };
     const installManager: InstallManager = new InstallManager(
       this._rushConfiguration,
@@ -238,7 +239,7 @@ export class PackageJsonUpdater {
 
     const oldDependencyType: DependencyType | undefined =
       oldDevDependency ? oldDevDependency.dependencyType :
-      oldDependency ? oldDependency.dependencyType : undefined;
+        oldDependency ? oldDependency.dependencyType : undefined;
 
     dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 

@@ -30,6 +30,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _noLinkParameter: CommandLineFlagParameter;
   protected _networkConcurrencyParameter: CommandLineIntegerParameter;
   protected _debugPackageManagerParameter: CommandLineFlagParameter;
+  protected _withHooksParameter: CommandLineFlagParameter;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -60,6 +61,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
         + ' the output of Rush to a file when using this command.'
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
+    this._withHooksParameter = this.defineFlagParameter({
+      parameterLongName: '--with-hooks',
+      description: 'If specified, will copy over git hooks from "common/git-hooks" folder into the'
+        + ' git config directory. Each file should be an applicably named, such as "pre-commit.sh".'
+    });
   }
 
   protected abstract buildInstallOptions(): IInstallManagerOptions;

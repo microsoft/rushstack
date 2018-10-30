@@ -19,7 +19,9 @@ import {
   MapExtensions,
   FileSystem,
   FileConstants,
-  Sort
+  Sort,
+  FolderConstants,
+  PosixModeBits
 } from '@microsoft/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
@@ -102,10 +104,16 @@ export interface IInstallManagerOptions {
    * If specified when using PNPM, the logs will be in /common/temp/pnpm.log
    */
   collectLogFile: boolean;
+
   /**
    * The variant to consider when performing installations and validating shrinkwrap updates.
    */
   variant?: string | undefined;
+
+  /**
+   * Whether to copy over git hooks into the git config when installing.
+   */
+  withHooks: boolean;
 }
 
 /**
@@ -178,10 +186,10 @@ export class InstallManager {
   private static _collectVersionsForDependencies(
     rushConfiguration: RushConfiguration,
     options: {
-    versionsForDependencies: Map<string, Set<string>>;
-    dependencies: ReadonlyArray<PackageJsonDependency>;
-    cyclicDependencies: Set<string>;
-    variant: string | undefined;
+      versionsForDependencies: Map<string, Set<string>>;
+      dependencies: ReadonlyArray<PackageJsonDependency>;
+      cyclicDependencies: Set<string>;
+      variant: string | undefined;
     }): void {
     const {
       variant,
@@ -255,6 +263,26 @@ export class InstallManager {
       PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
 
       ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
+
+      if (options.withHooks) {
+        const source: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
+        const destination: string = path.join(this._rushConfiguration.rushJsonFolder, FolderConstants.Git, 'hooks');
+
+        if (FileSystem.exists(source) && FileSystem.exists(destination)) {
+          FileSystem.readFolder(source).forEach(filename => {
+
+            const match: RegExpMatchArray | null = filename.match(/[a-z\-]+/);
+            if (match !== null) {
+              FileSystem.copyFile({
+                sourcePath: path.join(source, filename),
+                destinationPath: path.join(destination, match[0])
+              });
+              FileSystem.changePosixModeBits(path.join(destination, match[0]), PosixModeBits.UserExecute);
+            }
+
+          });
+        }
+      }
 
       // Ensure that the package manager is installed
       return this.ensureLocalPackageManager()
@@ -603,8 +631,8 @@ export class InstallManager {
         if (shrinkwrapFile) {
           if (!shrinkwrapFile.tryEnsureCompatibleDependency(packageName, packageVersion,
             rushProject.tempProjectName)) {
-              shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
-                + ` "${rushProject.packageName}"`);
+            shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
+              + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;
           }
         }
@@ -864,7 +892,7 @@ export class InstallManager {
           }
 
           // Run "npm install" in the common folder
-          const installArgs: string[] = [ 'install' ];
+          const installArgs: string[] = ['install'];
           this._pushConfigurationArgs(installArgs, options);
 
           console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
@@ -991,9 +1019,9 @@ export class InstallManager {
     }
 
     return fetch.default(queryUrl, {
-        headers: headers,
-        agent: agent
-      })
+      headers: headers,
+      agent: agent
+    })
       .then((response: fetch.Response) => {
         if (!response.ok) {
           return Promise.reject(new Error('Failed to query'));
@@ -1018,9 +1046,9 @@ export class InstallManager {
             // Make sure the tarball wasn't deleted from the CDN
             headers.set('accept', '*/*');
             return fetch.default(url, {
-                headers: headers,
-                agent: agent
-              })
+              headers: headers,
+              agent: agent
+            })
               .then<boolean>((response2: fetch.Response) => {
                 if (!response2.ok) {
                   if (response2.status === 404) {
@@ -1114,7 +1142,7 @@ export class InstallManager {
   private _syncFile(sourcePath: string, destinationPath: string): void {
     if (FileSystem.exists(sourcePath)) {
       console.log('Updating ' + destinationPath);
-      FileSystem.copyFile({sourcePath, destinationPath});
+      FileSystem.copyFile({ sourcePath, destinationPath });
     } else {
       if (FileSystem.exists(destinationPath)) {
         console.log('Deleting ' + destinationPath);

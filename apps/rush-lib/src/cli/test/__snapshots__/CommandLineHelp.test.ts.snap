@@ -259,7 +259,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
-                    [--variant VARIANT]
+                    [--variant VARIANT] [--with-hooks]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -296,6 +296,10 @@ Optional arguments:
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively 
                         specified via the RUSH_VARIANT environment variable.
+  --with-hooks          If specified, will copy over git hooks from 
+                        \\"common/git-hooks\\" folder into the git config 
+                        directory. Each file should be an applicably named, 
+                        such as \\"pre-commit.sh\\".
 "
 `;
 
@@ -477,7 +481,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
-                   [--variant VARIANT] [--full] [--recheck]
+                   [--variant VARIANT] [--with-hooks] [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -513,6 +517,10 @@ Optional arguments:
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively 
                         specified via the RUSH_VARIANT environment variable.
+  --with-hooks          If specified, will copy over git hooks from 
+                        \\"common/git-hooks\\" folder into the git config 
+                        directory. Each file should be an applicably named, 
+                        such as \\"pre-commit.sh\\".
   --full                Normally \\"rush update\\" tries to preserve your 
                         existing installed versions and only makes the 
                         minimum updates needed to satisfy the package.json 
