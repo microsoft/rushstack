@@ -6,6 +6,7 @@ import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/
 import { JsonFile, IJsonFileSaveOptions } from '@microsoft/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { Extractor } from '../Extractor';
+import { ApiEntryPoint } from './ApiEntryPoint';
 
 /** @public */
 export interface IApiPackageOptions extends
@@ -65,6 +66,18 @@ export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
   /** @override */
   public get canonicalReference(): string {
     return this.name;
+  }
+
+  public get entryPoints(): ReadonlyArray<ApiEntryPoint> {
+    return this.members as ReadonlyArray<ApiEntryPoint>;
+  }
+
+  /** @override */
+  public addMember(member: ApiEntryPoint): void {
+    if (member.kind !== ApiItemKind.EntryPoint) {
+      throw new Error('Only items of type ApiEntryPoint may be added to an ApiPackage');
+    }
+    super.addMember(member);
   }
 
   public saveToJsonFile(apiJsonFilename: string, options?: IJsonFileSaveOptions): void {

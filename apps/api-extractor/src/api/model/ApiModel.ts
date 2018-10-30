@@ -19,11 +19,23 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
 
   /** @override */
   public get kind(): ApiItemKind {
-    return ApiItemKind.Method;
+    return ApiItemKind.Model;
   }
 
   /** @override */
   public get canonicalReference(): string {
     return this.name;
+  }
+
+  public get packages(): ReadonlyArray<ApiPackage> {
+    return this.members as ReadonlyArray<ApiPackage>;
+  }
+
+  /** @override */
+  public addMember(member: ApiPackage): void {
+    if (member.kind !== ApiItemKind.Package) {
+      throw new Error('Only items of type ApiPackage may be added to an ApiModel');
+    }
+    super.addMember(member);
   }
 }

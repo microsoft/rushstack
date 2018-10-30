@@ -144,11 +144,15 @@ class ApiMethod extends ApiMethod_base {
 class ApiModel extends ApiModel_base {
   constructor();
   // @override (undocumented)
+  addMember(member: ApiPackage): void;
+  // @override (undocumented)
   readonly canonicalReference: string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
   // (undocumented)
   loadPackage(apiJsonFilename: string): ApiPackage;
+  // (undocumented)
+  readonly packages: ReadonlyArray<ApiPackage>;
 }
 
 // @public (undocumented)
@@ -166,7 +170,11 @@ class ApiNamespace extends ApiNamespace_base {
 class ApiPackage extends ApiPackage_base {
   constructor(options: IApiPackageOptions);
   // @override (undocumented)
+  addMember(member: ApiEntryPoint): void;
+  // @override (undocumented)
   readonly canonicalReference: string;
+  // (undocumented)
+  readonly entryPoints: ReadonlyArray<ApiEntryPoint>;
   // @override (undocumented)
   readonly kind: ApiItemKind;
   // (undocumented)

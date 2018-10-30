@@ -25,7 +25,7 @@ export interface ApiDeclarationMixin extends ApiItem {
 
 /** @public */
 export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiDeclarationMixin) {
+  TBaseClass & (new (...args: any[]) => ApiDeclarationMixin) { // tslint:disable-line:no-any
 
   abstract class MixedClass extends baseClass implements ApiDeclarationMixin {
     public [_signature]: string;

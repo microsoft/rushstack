@@ -25,7 +25,7 @@ export interface ApiStaticMixin extends ApiItem {
 
 /** @public */
 export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiStaticMixin) {
+  TBaseClass & (new (...args: any[]) => ApiStaticMixin) { // tslint:disable-line:no-any
 
   abstract class MixedClass extends baseClass implements ApiStaticMixin {
     public [_isStatic]: boolean;

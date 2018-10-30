@@ -29,7 +29,7 @@ export interface ApiFunctionLikeMixin extends ApiItem {
 
 /** @public */
 export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiFunctionLikeMixin) {
+  TBaseClass & (new (...args: any[]) => ApiFunctionLikeMixin) { // tslint:disable-line:no-any
 
   abstract class MixedClass extends baseClass implements ApiFunctionLikeMixin {
     public readonly [_overloadIndex]: number;
