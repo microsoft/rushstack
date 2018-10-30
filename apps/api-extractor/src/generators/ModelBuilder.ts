@@ -22,6 +22,8 @@ import { AedocDefinitions } from '../aedoc/AedocDefinitions';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
+import { ReleaseTag } from '../aedoc/ReleaseTag';
+import { ApiReleaseTagMixin } from '../api/mixins/ApiReleaseTagMixin';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
@@ -132,8 +134,9 @@ export class ModelBuilder {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.FirstPunctuation);  // FirstPunctuation = "{"
       const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
 
-      apiClass = new ApiClass({ name, signature, docComment });
+      apiClass = new ApiClass({ name, signature, docComment, releaseTag });
       parentApiItem.addMember(apiClass);
     }
 
@@ -152,8 +155,9 @@ export class ModelBuilder {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.FirstPunctuation); // FirstPunctuation = "{"
       const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
 
-      apiInterface = new ApiInterface({ name, signature, docComment });
+      apiInterface = new ApiInterface({ name, signature, docComment, releaseTag });
       parentApiItem.addMember(apiInterface);
     }
 
@@ -184,8 +188,9 @@ export class ModelBuilder {
     if (apiMethod === undefined) {
       const signature: string = astDeclaration.declaration.getText();
       const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
 
-      apiMethod = new ApiMethod({ name, signature, docComment, isStatic, overloadIndex });
+      apiMethod = new ApiMethod({ name, signature, docComment, releaseTag, isStatic, overloadIndex });
 
       for (const parameter of methodDeclaration.parameters) {
         const parameterSignature: string = parameter.getText().trim();
@@ -212,8 +217,9 @@ export class ModelBuilder {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.ModuleBlock); // ModuleBlock = the "{ ... }" block
       const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
 
-      apiNamespace = new ApiNamespace({ name, signature, docComment });
+      apiNamespace = new ApiNamespace({ name, signature, docComment, releaseTag });
       parentApiItem.addMember(apiNamespace);
     }
 
@@ -232,8 +238,9 @@ export class ModelBuilder {
     if (apiPropertySignature === undefined) {
       const signature: string = astDeclaration.declaration.getText();
       const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
 
-      apiPropertySignature = new ApiPropertySignature({ name, signature, docComment });
+      apiPropertySignature = new ApiPropertySignature({ name, signature, docComment, releaseTag });
       parentApiItem.addMember(apiPropertySignature);
     } else {
       // If the property was already declared before (via a merged interface declaration),
@@ -290,6 +297,57 @@ export class ModelBuilder {
       }
     }
     return span.getModifiedText().trim();
+  }
+
+  private _determineReleaseTag(docComment: tsdoc.DocComment | undefined,
+    parentApiItem?: ApiItemContainerMixin): ReleaseTag {
+
+    let releaseTag: ReleaseTag = ReleaseTag.None;
+
+    if (docComment) {
+      const modifierTagSet: tsdoc.StandardModifierTagSet = docComment.modifierTagSet;
+      let inconsistentReleaseTags: boolean = false;
+
+      if (modifierTagSet.isPublic()) {
+        releaseTag = ReleaseTag.Public;
+      }
+      if (modifierTagSet.isBeta()) {
+        if (releaseTag !== ReleaseTag.None) {
+          inconsistentReleaseTags = true;
+        } else {
+          releaseTag = ReleaseTag.Beta;
+        }
+      }
+      if (modifierTagSet.isAlpha()) {
+        if (releaseTag !== ReleaseTag.None) {
+          inconsistentReleaseTags = true;
+        } else {
+          releaseTag = ReleaseTag.Alpha;
+        }
+      }
+      if (modifierTagSet.isInternal()) {
+        if (releaseTag !== ReleaseTag.None) {
+          inconsistentReleaseTags = true;
+        } else {
+          releaseTag = ReleaseTag.Internal;
+        }
+      }
+
+      if (inconsistentReleaseTags) {
+        // TODO: Report error message
+        this._context.reportError('Inconsistent release tags', undefined, undefined);
+      }
+    }
+
+    if (releaseTag !== ReleaseTag.None) {
+      return releaseTag;
+    }
+
+    if (parentApiItem && ApiReleaseTagMixin.isBaseClassOf(parentApiItem)) {
+      return parentApiItem.releaseTag;
+    }
+
+    return ReleaseTag.Public;
   }
 
   private _tryParseDocumentation(astDeclaration: AstDeclaration): tsdoc.DocComment | undefined {

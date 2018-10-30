@@ -5,16 +5,18 @@ import { ApiItemKind } from './ApiItem';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
+import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 
 /** @public */
 export interface IApiClassOptions extends
-  IApiItemContainerMixinOptions,
   IApiDeclarationMixinOptions,
+  IApiItemContainerMixinOptions,
+  IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
 }
 
 /** @public */
-export class ApiClass extends ApiItemContainerMixin(ApiDeclarationMixin(ApiDocumentedItem)) {
+export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
   public static getCanonicalReference(name: string): string {
     return `(${name}:class)`;
   }

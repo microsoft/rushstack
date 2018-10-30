@@ -4,15 +4,17 @@
 import { ApiItemKind } from './ApiItem';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
+import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 
 /** @public */
 export interface IApiPropertySignatureOptions extends
   IApiDeclarationMixinOptions,
+  IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
 }
 
 /** @public */
-export class ApiPropertySignature extends ApiDeclarationMixin(ApiDocumentedItem) {
+export class ApiPropertySignature extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
   public static getCanonicalReference(name: string): string {
     return name;
   }
