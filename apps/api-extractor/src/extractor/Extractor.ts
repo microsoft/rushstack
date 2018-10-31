@@ -160,7 +160,7 @@ export class Extractor {
 
   /**
    * Invokes the API Extractor engine, using the api extractor configuration file.
-   * @param apifile - Path to api extractor json config file.
+   * @param jsonConfigFile - Path to api extractor json config file.
    * @param options - IExtractor options.
    */
   public static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractorOptions): void {

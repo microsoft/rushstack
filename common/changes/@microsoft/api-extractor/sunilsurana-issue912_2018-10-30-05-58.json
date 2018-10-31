@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Fix for issue 912. Adding lib support to read json config file.",
+      "comment": "Added an api to invoke api extractor processor by supplying api extractor json config file.",
       "type": "minor"
     }
   ],
