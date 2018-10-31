@@ -22,6 +22,7 @@ interface ITsconfig {
 }
 
 export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTask<TTaskConfig> {
+  private static _rushStackCompilerPackagePathCache: { [buildFolder: string]: string } = {};
   private static __packageJsonLookup: PackageJsonLookup | undefined; // tslint:disable-line:variable-name
   private static get _packageJsonLookup(): PackageJsonLookup {
     if (!RSCTask.__packageJsonLookup) {
@@ -35,14 +36,15 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
 
   protected _rushStackCompiler: typeof RushStackCompiler;
 
-  private __rushStackCompilerPackagePath: string | undefined; // tslint:disable-line:variable-name
   private get _rushStackCompilerPackagePath(): string {
-    if (!this.__rushStackCompilerPackagePath) {
+    if (!RSCTask._rushStackCompilerPackagePathCache[this.buildFolder]) {
       const projectTsconfigPath: string = path.join(this.buildFolder, 'tsconfig.json');
-      this.__rushStackCompilerPackagePath = this._resolveRushStackCompilerFromTsconfig(projectTsconfigPath);
+      RSCTask._rushStackCompilerPackagePathCache[this.buildFolder] = this._resolveRushStackCompilerFromTsconfig(
+        projectTsconfigPath
+      );
     }
 
-    return this.__rushStackCompilerPackagePath;
+    return RSCTask._rushStackCompilerPackagePathCache[this.buildFolder];
   }
 
   protected initializeRushStackCompiler(): void {
