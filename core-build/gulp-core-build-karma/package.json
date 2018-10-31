@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "4.6.36",
+  "version": "4.6.37",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler": "0.4.1",
-    "@microsoft/node-library-build": "6.0.3",
+    "@microsoft/node-library-build": "6.0.4",
     "@types/gulp": "3.8.32",
     "@types/karma": "0.13.33",
     "@types/log4js": "0.0.33",
