@@ -22,7 +22,7 @@ interface ITsconfig {
 }
 
 export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTask<TTaskConfig> {
-  private static _rushStackCompilerPackagePathCache: { [buildFolder: string]: string } = {};
+  private static _rushStackCompilerPackagePathCache: Map<string, string> = new Map<string, string>();
   private static __packageJsonLookup: PackageJsonLookup | undefined; // tslint:disable-line:variable-name
   private static get _packageJsonLookup(): PackageJsonLookup {
     if (!RSCTask.__packageJsonLookup) {
@@ -37,14 +37,15 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
   protected _rushStackCompiler: typeof RushStackCompiler;
 
   private get _rushStackCompilerPackagePath(): string {
-    if (!RSCTask._rushStackCompilerPackagePathCache[this.buildFolder]) {
+    if (!RSCTask._rushStackCompilerPackagePathCache.has(this.buildFolder)) {
       const projectTsconfigPath: string = path.join(this.buildFolder, 'tsconfig.json');
-      RSCTask._rushStackCompilerPackagePathCache[this.buildFolder] = this._resolveRushStackCompilerFromTsconfig(
-        projectTsconfigPath
+      RSCTask._rushStackCompilerPackagePathCache.set(
+        this.buildFolder,
+        this._resolveRushStackCompilerFromTsconfig(projectTsconfigPath)
       );
     }
 
-    return RSCTask._rushStackCompilerPackagePathCache[this.buildFolder];
+    return RSCTask._rushStackCompilerPackagePathCache.get(this.buildFolder)!;
   }
 
   protected initializeRushStackCompiler(): void {
@@ -86,8 +87,9 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
 
     if (!tsconfig.extends) {
       throw new Error(
-        `tsconfig.json file ${tsconfigPath} is missing an "extends" field and @microsoft/rush-stack-compiler was ` +
-        'not found along the extends chain'
+        'Rush Stack determines your TypeScript compiler by following the "extends" field in your tsconfig.json ' +
+        'file, until it reaches a package folder that depends on @microsoft/rush-stack-compiler. This lookup ' +
+        `failed when it reached this file: ${tsconfigPath}`
       );
     }
 
