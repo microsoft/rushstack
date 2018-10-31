@@ -1,6 +1,11 @@
 # Change Log - @microsoft/stream-collator
 
-This log was last generated on Sat, 27 Oct 2018 03:45:51 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Oct 2018 17:00:55 GMT and should not be manually modified.
+
+## 3.0.9
+Wed, 31 Oct 2018 17:00:55 GMT
+
+*Version update only*
 
 ## 3.0.8
 Sat, 27 Oct 2018 03:45:51 GMT

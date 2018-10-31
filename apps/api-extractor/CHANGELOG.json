@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.1.0",
+      "tag": "@microsoft/api-extractor_v6.1.0",
+      "date": "Wed, 31 Oct 2018 17:00:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added an api to invoke api extractor processor by supplying api extractor json config file."
+          }
+        ]
+      }
+    },
+    {
       "version": "6.0.9",
       "tag": "@microsoft/api-extractor_v6.0.9",
       "date": "Thu, 25 Oct 2018 23:20:40 GMT",
