@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 25 Oct 2018 23:20:40 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Oct 2018 17:00:54 GMT and should not be manually modified.
+
+## 6.1.0
+Wed, 31 Oct 2018 17:00:54 GMT
+
+### Minor changes
+
+- Added an api to invoke api extractor processor by supplying api extractor json config file.
 
 ## 6.0.9
 Thu, 25 Oct 2018 23:20:40 GMT
