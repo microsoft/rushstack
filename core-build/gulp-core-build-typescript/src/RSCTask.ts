@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as resolve from 'resolve';
 
 import {
   JsonFile,
@@ -91,7 +92,29 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
       );
     }
 
-    const resolvedTsconfig: string = path.resolve(path.dirname(tsconfigPath), tsconfig.extends);
-    return this._resolveRushStackCompilerFromTsconfig(resolvedTsconfig);
+    let baseTsconfigPath: string;
+    if (path.isAbsolute(tsconfig.extends)) {
+      // Absolute path
+      baseTsconfigPath = tsconfig.extends;
+    } else if (tsconfig.extends.match(/^\./)) {
+      // Relative path
+      baseTsconfigPath = path.resolve(path.dirname(tsconfigPath), tsconfig.extends);
+    } else {
+      // Package path
+      baseTsconfigPath = resolve.sync(
+        tsconfig.extends,
+        {
+          basedir: this.buildConfig.rootPath,
+          packageFilter: (pkg: IPackageJson) => {
+            return {
+              ...pkg,
+              main: 'package.json'
+            };
+          }
+        }
+      );
+    }
+
+    return this._resolveRushStackCompilerFromTsconfig(baseTsconfigPath);
   }
 }
