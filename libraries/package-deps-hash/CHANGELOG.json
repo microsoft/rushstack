@@ -2,6 +2,18 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.2.95",
+      "tag": "@microsoft/package-deps-hash_v2.2.95",
+      "date": "Wed, 31 Oct 2018 21:17:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.3` to `6.0.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.94",
       "tag": "@microsoft/package-deps-hash_v2.2.94",
       "date": "Wed, 31 Oct 2018 17:00:55 GMT",

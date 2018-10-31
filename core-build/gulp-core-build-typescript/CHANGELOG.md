@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 31 Oct 2018 17:00:55 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Oct 2018 21:17:50 GMT and should not be manually modified.
+
+## 7.1.0
+Wed, 31 Oct 2018 21:17:50 GMT
+
+### Minor changes
+
+- Update the way rush-stack-compiler is resolved. Now it's resolved by looking at the "extends" properties of tsconfig.json
 
 ## 7.0.3
 Wed, 31 Oct 2018 17:00:55 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "7.1.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.1.0",
+      "date": "Wed, 31 Oct 2018 21:17:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update the way rush-stack-compiler is resolved. Now it's resolved by looking at the \"extends\" properties of tsconfig.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.3",
       "tag": "@microsoft/gulp-core-build-typescript_v7.0.3",
       "date": "Wed, 31 Oct 2018 17:00:55 GMT",
