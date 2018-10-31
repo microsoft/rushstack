@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Update the way rush-stack-compiler is resolved. Now it's resolved by looking at the \"extends\" properties of tsconfig.json",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "iclanton@users.noreply.github.com"
+}
