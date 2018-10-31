@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Fix issue where broken hyperlinks sometimes appear in docs.microsoft.com due to matching of IYamlItem.fullName",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "pgonzal@users.noreply.github.com"
+}
