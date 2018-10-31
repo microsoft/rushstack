@@ -8,7 +8,8 @@ import {
   JsonFile,
   IPackageJson,
   FileSystem,
-  PackageJsonLookup
+  PackageJsonLookup,
+  Terminal
 } from '@microsoft/node-core-library';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import * as RushStackCompiler from '@microsoft/rush-stack-compiler';
@@ -34,6 +35,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
   }
 
   protected _terminalProvider: GCBTerminalProvider = new GCBTerminalProvider(this);
+  protected _terminal: Terminal = new Terminal(this._terminalProvider);
 
   protected _rushStackCompiler: typeof RushStackCompiler;
 
@@ -66,12 +68,16 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
   }
 
   private _resolveRushStackCompilerFromTsconfig(tsconfigPath: string): string {
+    this._terminal.writeVerboseLine(`Examining ${tsconfigPath}`);
+
     // First, see if the package we're in is rush-stack-compiler
     const packageJsonPath: string | undefined = RSCTask._packageJsonLookup.tryGetPackageJsonFilePathFor(tsconfigPath);
     if (packageJsonPath) {
       const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
       if (packageJson.name === '@microsoft/rush-stack-compiler') {
-        return path.dirname(packageJsonPath);
+        const packagePath: string = path.dirname(packageJsonPath);
+        this._terminal.writeVerboseLine(`Found rush-stack compiler at ${packagePath}/`);
+        return packagePath;
       }
     }
 
@@ -95,12 +101,15 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
     }
 
     let baseTsconfigPath: string;
+    let extendsPathKind: string;
     if (path.isAbsolute(tsconfig.extends)) {
       // Absolute path
       baseTsconfigPath = tsconfig.extends;
+      extendsPathKind = 'an absolute path';
     } else if (tsconfig.extends.match(/^\./)) {
       // Relative path
       baseTsconfigPath = path.resolve(path.dirname(tsconfigPath), tsconfig.extends);
+      extendsPathKind = 'a relative path';
     } else {
       // Package path
       baseTsconfigPath = resolve.sync(
@@ -114,9 +123,15 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
             };
           }
         }
-      );
-    }
+        );
+        extendsPathKind = 'a package path';
+      }
 
-    return this._resolveRushStackCompilerFromTsconfig(baseTsconfigPath);
-  }
+      this._terminal.writeVerboseLine(
+        `Found tsconfig.extends property ${tsconfig.extends}. It appears ` +
+        `to be ${extendsPathKind}. Resolved to ${baseTsconfigPath}`
+      );
+
+      return this._resolveRushStackCompilerFromTsconfig(baseTsconfigPath);
+    }
 }
