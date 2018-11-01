@@ -72,6 +72,15 @@ export declare class ClassExportedAsDefault {
 }
 
 /**
+ * @public
+ */
+export declare class ClassWithSymbols {
+    readonly [unexportedCustomSymbol]: number;
+    readonly [locallyExportedCustomSymbol]: string;
+    [fullyExportedCustomSymbol](): void;
+}
+
+/**
  * This class illustrates some cases involving type literals.
  * @public
  */
@@ -128,6 +137,8 @@ export declare class ForgottenExportConsumer2 {
 export declare class ForgottenExportConsumer3 {
     test2(): IForgottenDirectDependency | undefined;
 }
+
+declare const fullyExportedCustomSymbol: unique symbol;
 
 /**
  * This class is directly consumed by ForgottenExportConsumer3.

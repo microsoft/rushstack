@@ -92,6 +92,8 @@ export {
   default as ClassExportedAsDefault
 } from './DefaultExportEdgeCase';
 
+export { ClassWithSymbols, fullyExportedCustomSymbol } from './EcmaScriptSymbols';
+
 export { ForgottenExportConsumer1 } from './ForgottenExportConsumer1';
 export { ForgottenExportConsumer2 } from './ForgottenExportConsumer2';
 export { ForgottenExportConsumer3 } from './ForgottenExportConsumer3';
