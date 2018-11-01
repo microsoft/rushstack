@@ -342,6 +342,11 @@ export class DtsRollupGenerator {
           const listPrefix: string = list.getSourceFile().text
             .substring(list.getStart(), list.declarations[0].getStart());
           span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
+
+          if (dtsEntry.exported) {
+            span.modification.prefix = 'export ' + span.modification.prefix;
+          }
+
           span.modification.suffix = ';';
         }
         break;

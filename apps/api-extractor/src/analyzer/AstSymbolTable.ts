@@ -197,6 +197,7 @@ export class AstSymbolTable {
       // is this a reference to another AstSymbol?
       case ts.SyntaxKind.TypeReference: // general type references
       case ts.SyntaxKind.ExpressionWithTypeArguments: // special case for e.g. the "extends" keyword
+      case ts.SyntaxKind.ComputedPropertyName:  // used for EcmaScript "symbols", e.g. "[toPrimitive]".
         {
           // Sometimes the type reference will involve multiple identifiers, e.g. "a.b.C".
           // In this case, we only need to worry about importing the first identifier,
