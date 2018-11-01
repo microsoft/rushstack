@@ -24,8 +24,12 @@ interface ITsconfig {
 }
 
 export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTask<TTaskConfig> {
+
+  // For a given folder (that contains a tsconfig.json file), return the
   private static _rushStackCompilerPackagePathCache: Map<string, string> = new Map<string, string>();
+
   private static __packageJsonLookup: PackageJsonLookup | undefined; // tslint:disable-line:variable-name
+
   private static get _packageJsonLookup(): PackageJsonLookup {
     if (!RSCTask.__packageJsonLookup) {
       RSCTask.__packageJsonLookup = new PackageJsonLookup();
@@ -42,9 +46,11 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
   private get _rushStackCompilerPackagePath(): string {
     if (!RSCTask._rushStackCompilerPackagePathCache.has(this.buildFolder)) {
       const projectTsconfigPath: string = path.join(this.buildFolder, 'tsconfig.json');
+
+      const visitedTsconfigPaths: Set<string> = new Set<string>();
       RSCTask._rushStackCompilerPackagePathCache.set(
         this.buildFolder,
-        this._resolveRushStackCompilerFromTsconfig(projectTsconfigPath)
+        this._resolveRushStackCompilerFromTsconfig(projectTsconfigPath, visitedTsconfigPaths)
       );
     }
 
@@ -67,10 +73,21 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
     return this.taskConfig.buildDirectory || this.buildConfig.rootPath;
   }
 
-  // Load each tsconfig.json and follow the "extends" field until we reach the end of the chain.
-  // We expect to find @microsoft/rush-stack-compiler in the package folder where the chain ends.
-  private _resolveRushStackCompilerFromTsconfig(tsconfigPath: string): string {
+  /**
+   * Determine which compiler should be used to compile a given project.
+   *
+   * @remarks
+   * We load the tsconfig.json file, and follow its "extends" field until we reach the end of the chain.
+   * We expect the last extended file to be under an installed @microsoft/rush-stack-compiler package,
+   * which determines which typescript/tslint/api-extractor versions should be invoked.
+   *
+   * @param tsconfigPath - The path of a tsconfig.json file to analyze
+   * @returns The absolute path of the folder containing "@microsoft/rush-stack-compiler" which should be used
+   * to compile this tsconfig.json project
+   */
+  private _resolveRushStackCompilerFromTsconfig(tsconfigPath: string, visitedTsconfigPaths: Set<string>): string {
     this._terminal.writeVerboseLine(`Examining ${tsconfigPath}`);
+    visitedTsconfigPaths.add(tsconfigPath);
 
     if (!FileSystem.exists(tsconfigPath)) {
       throw new Error(`tsconfig.json file (${tsconfigPath}) does not exist.`);
@@ -135,6 +152,10 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
       `to be ${extendsPathKind}. Resolved to ${baseTsconfigPath}`
     );
 
-    return this._resolveRushStackCompilerFromTsconfig(baseTsconfigPath);
+    if (visitedTsconfigPaths.has(baseTsconfigPath)) {
+      throw new Error(`The file "${baseTsconfigPath}" has an "extends" field that creates a circular reference`);
+    }
+
+    return this._resolveRushStackCompilerFromTsconfig(baseTsconfigPath, visitedTsconfigPaths);
   }
 }
