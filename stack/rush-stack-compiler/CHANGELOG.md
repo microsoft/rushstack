@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler
 
-This log was last generated on Thu, 01 Nov 2018 19:32:52 GMT and should not be manually modified.
+This log was last generated on Thu, 01 Nov 2018 21:33:51 GMT and should not be manually modified.
+
+## 0.4.3
+Thu, 01 Nov 2018 21:33:51 GMT
+
+### Patches
+
+- Fix a regression where @microsoft/rush-stack-compiler could not compile itself
 
 ## 0.4.2
 Thu, 01 Nov 2018 19:32:52 GMT

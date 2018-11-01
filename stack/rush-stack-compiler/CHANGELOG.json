@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler",
   "entries": [
     {
+      "version": "0.4.3",
+      "tag": "@microsoft/rush-stack-compiler_v0.4.3",
+      "date": "Thu, 01 Nov 2018 21:33:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where @microsoft/rush-stack-compiler could not compile itself"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.2",
       "tag": "@microsoft/rush-stack-compiler_v0.4.2",
       "date": "Thu, 01 Nov 2018 19:32:52 GMT",

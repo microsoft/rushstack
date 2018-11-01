@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.8.41",
+      "tag": "@microsoft/gulp-core-build_v3.8.41",
+      "date": "Thu, 01 Nov 2018 21:33:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.2` to `0.4.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.40",
       "tag": "@microsoft/gulp-core-build_v3.8.40",
       "date": "Thu, 01 Nov 2018 19:32:52 GMT",
