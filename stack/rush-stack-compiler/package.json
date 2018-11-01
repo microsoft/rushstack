@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-stack-compiler",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain",
   "license": "MIT",
   "repository": {

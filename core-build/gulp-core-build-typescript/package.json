@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "7.1.1",
+  "version": "7.1.2",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.8.40",
+    "@microsoft/gulp-core-build": "3.8.41",
     "@microsoft/node-core-library": "3.5.0",
     "@types/node": "8.5.8",
     "decomment": "~0.9.1",
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "6.1.1",
-    "@microsoft/rush-stack-compiler": "0.4.2",
+    "@microsoft/rush-stack-compiler": "0.4.3",
     "@microsoft/node-library-build": "6.0.2",
     "@types/glob": "5.0.30",
     "gulp": "~3.9.1",
