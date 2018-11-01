@@ -29,6 +29,12 @@ class AmbientConsumer {
 class ClassExportedAsDefault {
 }
 
+// @public (undocumented)
+class ClassWithSymbols {
+  // (undocumented)
+  readonly __computed: number;
+}
+
 // @public
 class ClassWithTypeLiterals {
   method1(vector: {
@@ -112,3 +118,4 @@ class TypeReferencesInAedoc {
 // @public
 export function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
 
+// WARNING: Unsupported export: fullyExportedCustomSymbol

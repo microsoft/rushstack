@@ -2,6 +2,74 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "7.1.2",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.1.2",
+      "date": "Thu, 01 Nov 2018 21:33:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where @microsoft/rush-stack-compiler could not compile itself"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.40` to `3.8.41`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.2` to `0.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.1",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.1.1",
+      "date": "Thu, 01 Nov 2018 19:32:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.39` to `3.8.40`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.1.0` to `6.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.1.0",
+      "date": "Wed, 31 Oct 2018 21:17:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update the way rush-stack-compiler is resolved. Now it's resolved by looking at the \"extends\" properties of tsconfig.json"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.3",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.0.3",
+      "date": "Wed, 31 Oct 2018 17:00:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.38` to `3.8.39`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.0.9` to `6.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.2",
       "tag": "@microsoft/gulp-core-build-typescript_v7.0.2",
       "date": "Sat, 27 Oct 2018 03:45:51 GMT",

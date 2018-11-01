@@ -1,216 +1,13 @@
-// @public (undocumented)
-class ApiClass extends ApiClass_base {
-  constructor(options: IApiClassOptions);
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // (undocumented)
-  static getCanonicalReference(name: string): string;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
+// @public
+class ApiJsonFile {
+  static jsonSchema: JsonSchema;
+  static loadFromFile(apiJsonFilePath: string): IApiPackage;
 }
 
-// @public (undocumented)
-interface ApiDeclarationMixin extends ApiItem {
-  // WARNING: The type "IApiItemJson" needs to be exported by the package (e.g. added to index.ts)
-  // @override (undocumented)
-  serializeInto(jsonObject: Partial<IApiItemJson>): void;
+// @beta
+class ExternalApiHelper {
   // (undocumented)
-  readonly signature: string;
-}
-
-// @public (undocumented)
-class ApiDocumentedItem extends ApiItem {
-  constructor(options: IApiDocumentedItemOptions);
-  // WARNING: The type "IApiItemJson" needs to be exported by the package (e.g. added to index.ts)
-  // @override (undocumented)
-  static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>, jsonObject: IApiItemJson): void;
-  // WARNING: The type "IApiDocumentedItemJson" needs to be exported by the package (e.g. added to index.ts)
-  // @override (undocumented)
-  serializeInto(jsonObject: Partial<IApiDocumentedItemJson>): void;
-  // (undocumented)
-  readonly tsdocComment: tsdoc.DocComment | undefined;
-}
-
-// @public (undocumented)
-class ApiEntryPoint extends ApiEntryPoint_base {
-  constructor(options: IApiEntryPointOptions);
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
-}
-
-// @public (undocumented)
-interface ApiFunctionLikeMixin extends ApiItem {
-  // (undocumented)
-  addParameter(parameter: ApiParameter): void;
-  // (undocumented)
-  readonly overloadIndex: number;
-  // (undocumented)
-  readonly parameters: ReadonlyArray<ApiParameter>;
-  // WARNING: The type "IApiItemJson" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  serializeInto(jsonObject: Partial<IApiItemJson>): void;
-}
-
-// @public (undocumented)
-class ApiInterface extends ApiInterface_base {
-  constructor(options: IApiInterfaceOptions);
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // (undocumented)
-  static getCanonicalReference(name: string): string;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
-}
-
-// @public (undocumented)
-class ApiItem {
-  // (undocumented)
-  __computed: ApiItem | undefined;
-  constructor(options: IApiItemOptions);
-  // @virtual (undocumented)
-  readonly canonicalReference: string;
-  // WARNING: The type "IApiItemJson" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  static deserialize(jsonObject: IApiItemJson): ApiItem;
-  // @virtual (undocumented)
-  getSortKey(): string;
-  // @virtual (undocumented)
-  readonly kind: ApiItemKind;
-  // @virtual
-  readonly members: ReadonlyArray<ApiItem>;
-  // (undocumented)
-  readonly name: string;
-  // WARNING: The type "IApiItemJson" needs to be exported by the package (e.g. added to index.ts)
-  // @virtual (undocumented)
-  static onDeserializeInto(options: Partial<IApiItemOptions>, jsonObject: IApiItemJson): void;
-  // @virtual
-  readonly parent: ApiItem | undefined;
-  // WARNING: The type "IApiItemJson" needs to be exported by the package (e.g. added to index.ts)
-  // @virtual (undocumented)
-  serializeInto(jsonObject: Partial<IApiItemJson>): void;
-}
-
-// @public (undocumented)
-interface ApiItemContainerMixin extends ApiItem {
-  // (undocumented)
-  addMember(member: ApiItem): void;
-  // (undocumented)
-  readonly members: ReadonlyArray<ApiItem>;
-  // WARNING: The type "IApiItemJson" needs to be exported by the package (e.g. added to index.ts)
-  // @override (undocumented)
-  serializeInto(jsonObject: Partial<IApiItemJson>): void;
-  // (undocumented)
-  tryGetMember(canonicalReference: string): ApiItem | undefined;
-}
-
-// @public (undocumented)
-enum ApiItemKind {
-  // (undocumented)
-  Class = "Class",
-  // (undocumented)
-  EntryPoint = "EntryPoint",
-  // (undocumented)
-  Interface = "Interface",
-  // (undocumented)
-  Method = "Method",
-  // (undocumented)
-  Model = "Model",
-  // (undocumented)
-  Namespace = "Namespace",
-  // (undocumented)
-  None = "None",
-  // (undocumented)
-  Package = "Package",
-  // (undocumented)
-  Parameter = "Parameter",
-  // (undocumented)
-  PropertySignature = "PropertySignature"
-}
-
-// @public (undocumented)
-class ApiMethod extends ApiMethod_base {
-  constructor(options: IApiMethodOptions);
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // (undocumented)
-  static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
-}
-
-// @public (undocumented)
-class ApiModel extends ApiModel_base {
-  constructor();
-  // @override (undocumented)
-  addMember(member: ApiPackage): void;
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
-  // (undocumented)
-  loadPackage(apiJsonFilename: string): ApiPackage;
-  // (undocumented)
-  readonly packages: ReadonlyArray<ApiPackage>;
-}
-
-// @public (undocumented)
-class ApiNamespace extends ApiNamespace_base {
-  constructor(options: IApiNamespaceOptions);
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // (undocumented)
-  static getCanonicalReference(name: string): string;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
-}
-
-// @public (undocumented)
-class ApiPackage extends ApiPackage_base {
-  constructor(options: IApiPackageOptions);
-  // @override (undocumented)
-  addMember(member: ApiEntryPoint): void;
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // (undocumented)
-  readonly entryPoints: ReadonlyArray<ApiEntryPoint>;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
-  // (undocumented)
-  static loadFromJsonFile(apiJsonFilename: string): ApiPackage;
-  // (undocumented)
-  saveToJsonFile(apiJsonFilename: string, options?: IJsonFileSaveOptions): void;
-}
-
-// @public (undocumented)
-class ApiParameter extends ApiParameter_base {
-  constructor(options: IApiParameterOptions);
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
-  readonly tsdocParamBlock: tsdoc.DocParamBlock | undefined;
-}
-
-// @public (undocumented)
-class ApiPropertySignature extends ApiPropertySignature_base {
-  constructor(options: IApiPropertySignatureOptions);
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // (undocumented)
-  static getCanonicalReference(name: string): string;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
-}
-
-// @public (undocumented)
-interface ApiStaticMixin extends ApiItem {
-  // (undocumented)
-  readonly isStatic: boolean;
-  // WARNING: The type "IApiItemJson" needs to be exported by the package (e.g. added to index.ts)
-  // @override (undocumented)
-  serializeInto(jsonObject: Partial<IApiItemJson>): void;
+  static generateApiJson(rootDir: string, libFolder: string, externalPackageFilePath: string): void;
 }
 
 // @public
@@ -221,9 +18,8 @@ class Extractor {
   analyzeProject(options?: IAnalyzeProjectOptions): void;
   static generateFilePathsForAnalysis(inputFilePaths: string[]): string[];
   static jsonSchema: JsonSchema;
-  static readonly packageName: string;
   processProject(options?: IAnalyzeProjectOptions): boolean;
-  static readonly version: string;
+  static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractorOptions): void;
 }
 
 // @public
@@ -237,74 +33,145 @@ interface IAnalyzeProjectOptions {
   projectConfig?: IExtractorProjectConfig;
 }
 
-// @public (undocumented)
-interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiDeclarationMixinOptions, IApiDocumentedItemOptions {
+// @alpha
+interface IApiBaseDefinition {
+  // (undocumented)
+  deprecatedMessage?: MarkupBasicElement[];
+  // (undocumented)
+  isBeta: boolean;
+  kind: string;
+  // (undocumented)
+  remarks: MarkupStructuredElement[];
+  // (undocumented)
+  summary: MarkupBasicElement[];
 }
 
-// @public (undocumented)
-interface IApiDeclarationMixinOptions extends IApiItemOptions {
-  // (undocumented)
+// @alpha
+interface IApiClass extends IApiBaseDefinition {
+  extends?: string;
+  implements?: string;
+  isSealed: boolean;
+  kind: 'class';
+  members: IApiNameMap<ApiMember>;
+  typeParameters?: string[];
+}
+
+// @alpha
+interface IApiConstructor extends IApiBaseDefinition {
+  isOverride: boolean;
+  isSealed: boolean;
+  isVirtual: boolean;
+  kind: 'constructor';
+  parameters: IApiNameMap<IApiParameter>;
   signature: string;
 }
 
-// @public (undocumented)
-interface IApiDocumentedItemOptions extends IApiItemOptions {
+// @alpha
+interface IApiEnum extends IApiBaseDefinition {
+  kind: 'enum';
   // (undocumented)
-  docComment: tsdoc.DocComment | undefined;
+  values: IApiEnumMember[];
 }
 
-// @public (undocumented)
-interface IApiEntryPointOptions extends IApiItemContainerMixinOptions {
-}
-
-// @public (undocumented)
-interface IApiFunctionLikeMixinOptions extends IApiItemOptions {
+// @alpha
+interface IApiEnumMember extends IApiBaseDefinition {
+  kind: 'enum value';
   // (undocumented)
-  overloadIndex: number;
-  // (undocumented)
-  parameters?: ApiParameter[];
+  value: string;
 }
 
-// @public (undocumented)
-interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiDeclarationMixinOptions, IApiDocumentedItemOptions {
+// @alpha
+interface IApiFunction extends IApiBaseDefinition {
+  kind: 'function';
+  parameters: IApiNameMap<IApiParameter>;
+  returnValue: IApiReturnValue;
+  signature: string;
 }
 
-// @public (undocumented)
-interface IApiItemContainerMixinOptions extends IApiItemOptions {
-  // (undocumented)
-  members?: ApiItem[];
+// @alpha
+interface IApiInterface extends IApiBaseDefinition {
+  extends?: string;
+  implements?: string;
+  isSealed: boolean;
+  kind: 'interface';
+  members: IApiNameMap<ApiMember>;
+  typeParameters?: string[];
 }
 
-// @public (undocumented)
-interface IApiItemOptions {
-  // (undocumented)
-  name: string;
+// @alpha
+interface IApiItemReference {
+  exportName: string;
+  memberName: string;
+  packageName: string;
+  scopeName: string;
 }
 
-// @public (undocumented)
-interface IApiMethodOptions extends IApiFunctionLikeMixinOptions, IApiStaticMixinOptions, IApiDeclarationMixinOptions, IApiDocumentedItemOptions {
-}
-
-// @public (undocumented)
-interface IApiNamespaceOptions extends IApiItemContainerMixinOptions, IApiDeclarationMixinOptions, IApiDocumentedItemOptions {
-}
-
-// @public (undocumented)
-interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiDocumentedItemOptions {
-}
-
-// @public (undocumented)
-interface IApiParameterOptions extends IApiDeclarationMixinOptions {
-}
-
-// @public (undocumented)
-interface IApiPropertySignatureOptions extends IApiDeclarationMixinOptions, IApiDocumentedItemOptions {
-}
-
-// @public (undocumented)
-interface IApiStaticMixinOptions extends IApiItemOptions {
-  // (undocumented)
+// @alpha
+interface IApiMethod extends IApiBaseDefinition {
+  accessModifier: ApiAccessModifier;
+  isOptional: boolean;
+  isOverride: boolean;
+  isSealed: boolean;
   isStatic: boolean;
+  isVirtual: boolean;
+  kind: 'method';
+  parameters: IApiNameMap<IApiParameter>;
+  returnValue: IApiReturnValue;
+  signature: string;
+}
+
+// @alpha
+interface IApiNameMap<T> {
+  [name: string]: T;
+}
+
+// @alpha
+interface IApiNamespace extends IApiBaseDefinition {
+  exports: IApiNameMap<ApiItem>;
+  kind: 'namespace';
+}
+
+// @alpha
+interface IApiPackage {
+  // (undocumented)
+  deprecatedMessage?: MarkupBasicElement[];
+  exports: IApiNameMap<ApiItem>;
+  isBeta: boolean;
+  kind: 'package';
+  name: string;
+  // (undocumented)
+  remarks: MarkupStructuredElement[];
+  // (undocumented)
+  summary: MarkupBasicElement[];
+}
+
+// @alpha
+interface IApiParameter {
+  description: MarkupBasicElement[];
+  isOptional: boolean;
+  isSpread: boolean;
+  name: string;
+  type: string;
+}
+
+// @alpha
+interface IApiProperty extends IApiBaseDefinition {
+  isEventProperty: boolean;
+  isOptional: boolean;
+  isOverride: boolean;
+  isReadOnly: boolean;
+  isSealed: boolean;
+  isStatic: boolean;
+  isVirtual: boolean;
+  kind: 'property';
+  signature: string;
+  type: string;
+}
+
+// @alpha
+interface IApiReturnValue {
+  description: MarkupBasicElement[];
+  type: string;
 }
 
 // @public
@@ -361,6 +228,7 @@ interface IExtractorPoliciesConfig {
 // @public
 interface IExtractorProjectConfig {
   entryPointSourceFile: string;
+  externalJsonFileFolders?: string[];
 }
 
 // @public
@@ -391,5 +259,148 @@ interface ILogger {
   logWarning(message: string): void;
 }
 
-// WARNING: Unsupported export: Constructor
-// WARNING: Unsupported export: PropertiesOf
+// @public
+interface IMarkupApiLink {
+  elements: MarkupLinkTextElement[];
+  kind: 'api-link';
+  target: IApiItemReference;
+}
+
+// @public
+interface IMarkupCodeBox {
+  // (undocumented)
+  highlighter: MarkupHighlighter;
+  kind: 'code-box';
+  text: string;
+}
+
+// @public
+interface IMarkupCreateTextOptions {
+  bold?: boolean;
+  italics?: boolean;
+}
+
+// @public
+interface IMarkupHeading1 {
+  kind: 'heading1';
+  text: string;
+}
+
+// @public
+interface IMarkupHeading2 {
+  kind: 'heading2';
+  text: string;
+}
+
+// @public
+interface IMarkupHighlightedText {
+  highlighter: MarkupHighlighter;
+  kind: 'code';
+  text: string;
+}
+
+// @public
+interface IMarkupHtmlTag {
+  kind: 'html-tag';
+  token: string;
+}
+
+// @public
+interface IMarkupLineBreak {
+  kind: 'break';
+}
+
+// @public
+interface IMarkupNoteBox {
+  // (undocumented)
+  elements: MarkupBasicElement[];
+  kind: 'note-box';
+}
+
+// @public
+interface IMarkupPage {
+  // (undocumented)
+  breadcrumb: MarkupBasicElement[];
+  // (undocumented)
+  elements: MarkupStructuredElement[];
+  kind: 'page';
+  // (undocumented)
+  title: string;
+}
+
+// @public
+interface IMarkupParagraph {
+  kind: 'paragraph';
+}
+
+// @public
+interface IMarkupTable {
+  // (undocumented)
+  header?: IMarkupTableRow;
+  kind: 'table';
+  // (undocumented)
+  rows: IMarkupTableRow[];
+}
+
+// @public
+interface IMarkupTableCell {
+  elements: MarkupBasicElement[];
+  kind: 'table-cell';
+}
+
+// @public
+interface IMarkupTableRow {
+  // (undocumented)
+  cells: IMarkupTableCell[];
+  kind: 'table-row';
+}
+
+// @public
+interface IMarkupText {
+  bold?: boolean;
+  italics?: boolean;
+  kind: 'text';
+  text: string;
+}
+
+// @public
+interface IMarkupWebLink {
+  elements: MarkupLinkTextElement[];
+  kind: 'web-link';
+  targetUrl: string;
+}
+
+// @public
+class Markup {
+  static appendTextElements(output: MarkupElement[], text: string, options?: IMarkupCreateTextOptions): void;
+  static BREAK: IMarkupLineBreak;
+  static createApiLink(textElements: MarkupLinkTextElement[], target: IApiItemReference): IMarkupApiLink;
+  static createApiLinkFromText(text: string, target: IApiItemReference): IMarkupApiLink;
+  static createCode(code: string, highlighter?: MarkupHighlighter): IMarkupHighlightedText;
+  static createCodeBox(code: string, highlighter: MarkupHighlighter): IMarkupCodeBox;
+  static createHeading1(text: string): IMarkupHeading1;
+  static createHeading2(text: string): IMarkupHeading2;
+  static createHtmlTag(token: string): IMarkupHtmlTag;
+  static createNoteBox(textElements: MarkupBasicElement[]): IMarkupNoteBox;
+  static createNoteBoxFromText(text: string): IMarkupNoteBox;
+  static createPage(title: string): IMarkupPage;
+  static createTable(headerCellValues?: MarkupBasicElement[][] | undefined): IMarkupTable;
+  static createTableRow(cellValues?: MarkupBasicElement[][] | undefined): IMarkupTableRow;
+  static createTextElements(text: string, options?: IMarkupCreateTextOptions): IMarkupText[];
+  static createTextParagraphs(text: string, options?: IMarkupCreateTextOptions): MarkupBasicElement[];
+  static createWebLink(textElements: MarkupLinkTextElement[], targetUrl: string): IMarkupWebLink;
+  static createWebLinkFromText(text: string, targetUrl: string): IMarkupWebLink;
+  static extractTextContent(elements: MarkupElement[]): string;
+  static formatApiItemReference(apiItemReference: IApiItemReference): string;
+  static normalize<T extends MarkupElement>(elements: T[]): void;
+  static PARAGRAPH: IMarkupParagraph;
+}
+
+// WARNING: Unsupported export: ApiAccessModifier
+// WARNING: Unsupported export: ApiMember
+// WARNING: Unsupported export: ApiItem
+// WARNING: Unsupported export: MarkupHighlighter
+// WARNING: Unsupported export: MarkupLinkTextElement
+// WARNING: Unsupported export: MarkupBasicElement
+// WARNING: Unsupported export: MarkupStructuredElement
+// WARNING: Unsupported export: MarkupElement

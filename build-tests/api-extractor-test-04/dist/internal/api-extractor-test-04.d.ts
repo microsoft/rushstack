@@ -224,4 +224,4 @@ export declare enum RegularEnum {
     _InternalMember = 102
 }
 
-declare const variableDeclaration: string;
+export declare const variableDeclaration: string;

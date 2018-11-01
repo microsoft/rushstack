@@ -2,6 +2,42 @@
   "name": "@microsoft/rush-stack-compiler",
   "entries": [
     {
+      "version": "0.4.3",
+      "tag": "@microsoft/rush-stack-compiler_v0.4.3",
+      "date": "Thu, 01 Nov 2018 21:33:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where @microsoft/rush-stack-compiler could not compile itself"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.2",
+      "tag": "@microsoft/rush-stack-compiler_v0.4.2",
+      "date": "Thu, 01 Nov 2018 19:32:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.1.0` to `6.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.1",
+      "tag": "@microsoft/rush-stack-compiler_v0.4.1",
+      "date": "Wed, 31 Oct 2018 17:00:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.0.9` to `6.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@microsoft/rush-stack-compiler_v0.4.0",
       "date": "Sat, 27 Oct 2018 03:45:51 GMT",
