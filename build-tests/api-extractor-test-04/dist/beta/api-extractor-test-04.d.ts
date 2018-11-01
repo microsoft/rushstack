@@ -121,4 +121,4 @@ export declare enum RegularEnum {
     /* Excluded from this release type: _InternalMember */
 }
 
-declare const variableDeclaration: string;
+export declare const variableDeclaration: string;
