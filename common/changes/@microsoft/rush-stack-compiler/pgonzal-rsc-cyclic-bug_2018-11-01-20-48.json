@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler",
+      "comment": "Fix a regression where @microsoft/rush-stack-compiler could not compile itself",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler",
+  "email": "pgonzal@users.noreply.github.com"
+}
