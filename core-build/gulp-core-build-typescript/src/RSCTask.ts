@@ -25,7 +25,8 @@ interface ITsconfig {
 
 export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTask<TTaskConfig> {
 
-  // For a given folder (that contains a tsconfig.json file), return the
+  // For a given folder that contains a tsconfig.json file, return the absolute path of the folder
+  // containing "@microsoft/rush-stack-compiler"
   private static _rushStackCompilerPackagePathCache: Map<string, string> = new Map<string, string>();
 
   private static __packageJsonLookup: PackageJsonLookup | undefined; // tslint:disable-line:variable-name
