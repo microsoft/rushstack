@@ -2,6 +2,24 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.2.73",
+      "tag": "@microsoft/gulp-core-build-serve_v3.2.73",
+      "date": "Thu, 01 Nov 2018 19:32:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.39` to `3.8.40`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.1` to `0.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.4` to `6.0.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.72",
       "tag": "@microsoft/gulp-core-build-serve_v3.2.72",
       "date": "Wed, 31 Oct 2018 21:17:50 GMT",

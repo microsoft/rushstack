@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.1.1",
+      "tag": "@microsoft/api-extractor_v6.1.1",
+      "date": "Thu, 01 Nov 2018 19:32:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where EcmaScript symbols (\"computed property names\") were missing from .d.ts rollups"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.1.0",
       "tag": "@microsoft/api-extractor_v6.1.0",
       "date": "Wed, 31 Oct 2018 17:00:54 GMT",
