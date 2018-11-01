@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fix an issue where EcmaScript symbols (\"computed property names\") were missing from .d.ts rollups",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "pgonzal@users.noreply.github.com"
+}
