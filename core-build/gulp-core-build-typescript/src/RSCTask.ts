@@ -6,7 +6,10 @@ import * as resolve from 'resolve';
 
 import {
   JsonFile,
-  IPackageJson
+  IPackageJson,
+  FileSystem,
+  PackageJsonLookup,
+  Terminal
 } from '@microsoft/node-core-library';
 import { GulpTask } from '@microsoft/gulp-core-build';
 import * as RushStackCompiler from '@microsoft/rush-stack-compiler';
@@ -14,54 +17,45 @@ import { GCBTerminalProvider } from './GCBTerminalProvider';
 
 export interface IRSCTaskConfig extends Object {
   buildDirectory: string;
+}
 
-  /**
-   * This is the name of the rush-stack-compiler package, or the name of the package that
-   * extends the configuration of rush-stack-compiler. This defaults to "\@microsoft/rush-stack-compiler"
-   */
-  rushStackCompilerPackageName?: string;
+interface ITsconfig {
+  extends?: string;
 }
 
 export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTask<TTaskConfig> {
+
+  // For a given folder that contains a tsconfig.json file, return the absolute path of the folder
+  // containing "@microsoft/rush-stack-compiler"
+  private static _rushStackCompilerPackagePathCache: Map<string, string> = new Map<string, string>();
+
+  private static __packageJsonLookup: PackageJsonLookup | undefined; // tslint:disable-line:variable-name
+
+  private static get _packageJsonLookup(): PackageJsonLookup {
+    if (!RSCTask.__packageJsonLookup) {
+      RSCTask.__packageJsonLookup = new PackageJsonLookup();
+    }
+
+    return RSCTask.__packageJsonLookup;
+  }
+
   protected _terminalProvider: GCBTerminalProvider = new GCBTerminalProvider(this);
+  protected _terminal: Terminal = new Terminal(this._terminalProvider);
 
   protected _rushStackCompiler: typeof RushStackCompiler;
 
-  private __rushStackCompilerPackagePath: string | undefined; // tslint:disable-line:variable-name
   private get _rushStackCompilerPackagePath(): string {
-    if (!this.__rushStackCompilerPackagePath) {
-      try {
-        this.__rushStackCompilerPackagePath = resolve.sync(
-          this.taskConfig.rushStackCompilerPackageName!,
-          {
-            basedir: this.buildConfig.rootPath,
-            packageFilter: (pkg: IPackageJson) => {
-              pkg.main = 'package.json';
-              return pkg;
-            }
-          }
-        );
+    if (!RSCTask._rushStackCompilerPackagePathCache.has(this.buildFolder)) {
+      const projectTsconfigPath: string = path.join(this.buildFolder, 'tsconfig.json');
 
-        if (!this.__rushStackCompilerPackagePath) {
-          throw new Error();
-        }
-
-        this.__rushStackCompilerPackagePath = path.dirname(this.__rushStackCompilerPackagePath);
-      } catch (e) {
-        throw new Error(`Unable to find "${this.taskConfig.rushStackCompilerPackageName}" package.`);
-      }
+      const visitedTsconfigPaths: Set<string> = new Set<string>();
+      RSCTask._rushStackCompilerPackagePathCache.set(
+        this.buildFolder,
+        this._resolveRushStackCompilerFromTsconfig(projectTsconfigPath, visitedTsconfigPaths)
+      );
     }
 
-    return this.__rushStackCompilerPackagePath;
-  }
-
-  constructor(name: string, options: Partial<TTaskConfig>) {
-    super(name,
-      {
-        rushStackCompilerPackageName: '@microsoft/rush-stack-compiler',
-        ...(options as any) // tslint:disable-line:no-any - TS is complaining about the spread operator here
-      }
-    );
+    return RSCTask._rushStackCompilerPackagePathCache.get(this.buildFolder)!;
   }
 
   protected initializeRushStackCompiler(): void {
@@ -70,9 +64,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
     );
     const main: string | undefined = compilerPackageJson.main;
     if (!main) {
-      throw new Error(
-        `Compiler package "${this.taskConfig.rushStackCompilerPackageName}" does not have a "main" entry.`
-      );
+      throw new Error('Compiler package does not have a "main" entry.');
     }
 
     this._rushStackCompiler = require(path.join(this._rushStackCompilerPackagePath, main));
@@ -80,5 +72,91 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
 
   protected get buildFolder(): string {
     return this.taskConfig.buildDirectory || this.buildConfig.rootPath;
+  }
+
+  /**
+   * Determine which compiler should be used to compile a given project.
+   *
+   * @remarks
+   * We load the tsconfig.json file, and follow its "extends" field until we reach the end of the chain.
+   * We expect the last extended file to be under an installed @microsoft/rush-stack-compiler package,
+   * which determines which typescript/tslint/api-extractor versions should be invoked.
+   *
+   * @param tsconfigPath - The path of a tsconfig.json file to analyze
+   * @returns The absolute path of the folder containing "@microsoft/rush-stack-compiler" which should be used
+   * to compile this tsconfig.json project
+   */
+  private _resolveRushStackCompilerFromTsconfig(tsconfigPath: string, visitedTsconfigPaths: Set<string>): string {
+    this._terminal.writeVerboseLine(`Examining ${tsconfigPath}`);
+    visitedTsconfigPaths.add(tsconfigPath);
+
+    if (!FileSystem.exists(tsconfigPath)) {
+      throw new Error(`tsconfig.json file (${tsconfigPath}) does not exist.`);
+    }
+
+    let tsconfig: ITsconfig;
+    try {
+      tsconfig = JsonFile.load(tsconfigPath);
+    } catch (e) {
+      throw new Error(`Error parsing tsconfig.json ${tsconfigPath}: ${e}`);
+    }
+
+    if (!tsconfig.extends) {
+      // Does the chain end with a file in the rush-stack-compiler package?
+      const packageJsonPath: string | undefined = RSCTask._packageJsonLookup.tryGetPackageJsonFilePathFor(tsconfigPath);
+      if (packageJsonPath) {
+        const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
+        if (packageJson.name === '@microsoft/rush-stack-compiler') {
+          const packagePath: string = path.dirname(packageJsonPath);
+          this._terminal.writeVerboseLine(`Found rush-stack compiler at ${packagePath}/`);
+          return packagePath;
+        }
+      }
+
+      throw new Error(
+        'Rush Stack determines your TypeScript compiler by following the "extends" field in your tsconfig.json ' +
+        'file, until it reaches a package folder that depends on @microsoft/rush-stack-compiler. This lookup ' +
+        `failed when it reached this file: ${tsconfigPath}`
+      );
+    }
+
+    // Follow the tsconfig.extends field:
+    let baseTsconfigPath: string;
+    let extendsPathKind: string;
+    if (path.isAbsolute(tsconfig.extends)) {
+      // Absolute path
+      baseTsconfigPath = tsconfig.extends;
+      extendsPathKind = 'an absolute path';
+    } else if (tsconfig.extends.match(/^\./)) {
+      // Relative path
+      baseTsconfigPath = path.resolve(path.dirname(tsconfigPath), tsconfig.extends);
+      extendsPathKind = 'a relative path';
+    } else {
+      // Package path
+      baseTsconfigPath = resolve.sync(
+        tsconfig.extends,
+        {
+          basedir: this.buildConfig.rootPath,
+          packageFilter: (pkg: IPackageJson) => {
+            return {
+              ...pkg,
+              main: 'package.json'
+            };
+          }
+        }
+      );
+      extendsPathKind = 'a package path';
+    }
+
+    this._terminal.writeVerboseLine(
+      `Found tsconfig.extends property ${tsconfig.extends}. It appears ` +
+      `to be ${extendsPathKind}. Resolved to ${baseTsconfigPath}`
+    );
+
+    if (visitedTsconfigPaths.has(baseTsconfigPath)) {
+      throw new Error(`The file "${baseTsconfigPath}" has an "extends" field that creates a circular reference`);
+    }
+
+    return this._resolveRushStackCompilerFromTsconfig(baseTsconfigPath, visitedTsconfigPaths);
   }
 }

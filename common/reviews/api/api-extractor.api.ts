@@ -19,6 +19,7 @@ class Extractor {
   static generateFilePathsForAnalysis(inputFilePaths: string[]): string[];
   static jsonSchema: JsonSchema;
   processProject(options?: IAnalyzeProjectOptions): boolean;
+  static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractorOptions): void;
 }
 
 // @public
