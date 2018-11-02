@@ -394,7 +394,8 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/rush-stack-compiler",
+        "@microsoft/api-extractor"
       ]
     },
     {

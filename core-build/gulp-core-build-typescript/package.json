@@ -23,7 +23,8 @@
     "resolve": "1.8.1"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "6.1.1",
+    "tslint-microsoft-contrib": "~5.2.1",
+    "@microsoft/api-extractor": "6.0.9",
     "@microsoft/node-library-build": "6.0.6",
     "@types/glob": "5.0.30",
     "gulp": "~3.9.1",
