@@ -56,7 +56,19 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
         compilerPath = this._resolveRushStackCompilerFromTsconfig(projectTsconfigPath, visitedTsconfigPaths);
       } catch (e) {
         if (this.taskConfig.allowBuiltinCompiler) {
-          compilerPath = require.resolve('@microsoft/rush-stack-compiler');
+          this._terminal.writeVerboseLine(
+            'Unable to resolve rush-stack-compiler from tsconfig.json. Using built-in compiler'
+          );
+          const builtInCompilerPath: string | undefined = RSCTask._packageJsonLookup.tryGetPackageFolderFor(
+            require.resolve('@microsoft/rush-stack-compiler')
+          );
+          if (!builtInCompilerPath) {
+            throw new Error(
+              'Unable to resolve built-in compiler. Ensure @microsoft/gulp-core-build-typescript is correctly installed'
+            );
+          }
+
+          compilerPath = builtInCompilerPath;
         } else {
           throw e;
         }
