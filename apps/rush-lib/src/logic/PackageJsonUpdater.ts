@@ -192,8 +192,7 @@ export class PackageJsonUpdater {
       recheckShrinkwrap: false,
       networkConcurrency: undefined,
       collectLogFile: false,
-      variant: variant,
-      withHooks: false
+      variant: variant
     };
     const installManager: InstallManager = new InstallManager(
       this._rushConfiguration,

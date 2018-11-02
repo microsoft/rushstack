@@ -109,11 +109,6 @@ export interface IInstallManagerOptions {
    * The variant to consider when performing installations and validating shrinkwrap updates.
    */
   variant?: string | undefined;
-
-  /**
-   * Whether to copy over git hooks into the git config when installing.
-   */
-  withHooks: boolean;
 }
 
 /**
@@ -264,22 +259,30 @@ export class InstallManager {
 
       ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
 
-      if (options.withHooks) {
-        const source: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
-        const destination: string = path.join(this._rushConfiguration.rushJsonFolder, FolderConstants.Git, 'hooks');
+      // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
+      const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
+      const hookDestination: string = path.join(this._rushConfiguration.rushJsonFolder, FolderConstants.Git, 'hooks');
+      if (FileSystem.exists(hookSource)) {
+        console.log(os.EOL + colors.bold('Detected /common/git-hooks, clearing and reinstalling Git hooks'));
+        const hookFilenames: Array<string> = FileSystem.readFolder(hookSource);
 
-        if (FileSystem.exists(source) && FileSystem.exists(destination)) {
-          FileSystem.readFolder(source).forEach(filename => {
+        if (hookFilenames.length === 0) {
+          console.log(colors.yellow('Warning - You have not added any git hooks yet, skipping for now'));
 
-            const match: RegExpMatchArray | null = filename.match(/[a-z\-]+/);
+        } else {
+          // Clear the currently installed git hooks and install fresh copies
+          FileSystem.ensureEmptyFolder(hookDestination);
+          hookFilenames.forEach(filename => {
+
+            const match: RegExpMatchArray | null = filename.match(/^[a-z\-]+/);
             if (match !== null) {
+              console.log(`Installing hook ${match[0]}`);
               FileSystem.copyFile({
-                sourcePath: path.join(source, filename),
-                destinationPath: path.join(destination, match[0])
+                sourcePath: path.join(hookSource, filename),
+                destinationPath: path.join(hookDestination, match[0])
               });
-              FileSystem.changePosixModeBits(path.join(destination, match[0]), PosixModeBits.UserExecute);
+              FileSystem.changePosixModeBits(path.join(hookDestination, match[0]), PosixModeBits.UserExecute);
             }
-
           });
         }
       }
@@ -1001,7 +1004,7 @@ export class InstallManager {
 
   private _queryIfReleaseIsPublished(registryUrl: string): Promise<boolean> {
     let queryUrl: string = registryUrl;
-    if (queryUrl[-1] !== '/') {
+    if (queryUrl[- 1] !== '/') {
       queryUrl += '/';
     }
     // Note that the "@" symbol does not normally get URL-encoded
