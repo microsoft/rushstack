@@ -17,6 +17,8 @@ import { GCBTerminalProvider } from './GCBTerminalProvider';
 
 export interface IRSCTaskConfig extends Object {
   buildDirectory: string;
+
+  allowBuiltinCompiler: boolean;
 }
 
 interface ITsconfig {
@@ -49,13 +51,38 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
       const projectTsconfigPath: string = path.join(this.buildFolder, 'tsconfig.json');
 
       const visitedTsconfigPaths: Set<string> = new Set<string>();
+      let compilerPath: string;
+      try {
+        compilerPath = this._resolveRushStackCompilerFromTsconfig(projectTsconfigPath, visitedTsconfigPaths);
+      } catch (e) {
+        if (this.taskConfig.allowBuiltinCompiler) {
+          compilerPath = require.resolve('@microsoft/rush-stack-compiler');
+        } else {
+          throw e;
+        }
+      }
+
       RSCTask._rushStackCompilerPackagePathCache.set(
         this.buildFolder,
-        this._resolveRushStackCompilerFromTsconfig(projectTsconfigPath, visitedTsconfigPaths)
+        compilerPath
       );
     }
 
     return RSCTask._rushStackCompilerPackagePathCache.get(this.buildFolder)!;
+  }
+
+  protected get buildFolder(): string {
+    return this.taskConfig.buildDirectory || this.buildConfig.rootPath;
+  }
+
+  public constructor(taskName: string, defaultConfig: Partial<TTaskConfig>) {
+    super(
+      taskName,
+      {
+        allowBuiltinCompiler: false,
+        ...(defaultConfig as any) // tslint:disable-line:no-any (the spread operator isn't working here for some reason)
+      } as TTaskConfig
+    );
   }
 
   protected initializeRushStackCompiler(): void {
@@ -68,10 +95,6 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
     }
 
     this._rushStackCompiler = require(path.join(this._rushStackCompilerPackagePath, main));
-  }
-
-  protected get buildFolder(): string {
-    return this.taskConfig.buildDirectory || this.buildConfig.rootPath;
   }
 
   /**
