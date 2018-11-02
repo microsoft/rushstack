@@ -17,7 +17,7 @@
     "@types/node": "8.5.8",
     "api-extractor-test-01": "1.0.0",
     "semver": "~5.3.0",
-    "fs-extra": "~5.0.0",
+    "fs-extra": "~7.0.0",
     "typescript": "~3.0.3"
   }
 }

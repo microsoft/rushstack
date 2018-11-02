@@ -4,7 +4,6 @@
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
-import * as rimraf from 'rimraf';
 import * as tty from 'tty';
 import * as path from 'path';
 import * as wordwrap from 'wordwrap';
@@ -171,7 +170,7 @@ export class Utilities {
    */
   public static dangerouslyDeletePath(folderPath: string): void {
     try {
-      rimraf.sync(folderPath, { disableGlob: true });
+      FileSystem.deleteFolder(folderPath);
     } catch (e) {
       throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
         + ' from a process such as your text editor, command prompt, or "gulp serve"');

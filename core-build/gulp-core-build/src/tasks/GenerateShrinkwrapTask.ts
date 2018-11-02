@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { GulpTask } from './GulpTask';
 import gulpType = require('gulp');
 import * as child_process from 'child_process';
-import * as rimraf from 'rimraf';
 import * as os from 'os';
 import * as path from 'path';
+import { FileSystem } from '@microsoft/node-core-library';
+
+import { GulpTask } from './GulpTask';
 
 /**
  * This provides a convenient way to more consistently generate a shrinkwrap file in
@@ -51,7 +52,7 @@ export class GenerateShrinkwrapTask extends GulpTask<void> {
 
   private _dangerouslyDeletePath(folderPath: string): void {
     try {
-      rimraf.sync(folderPath);
+      FileSystem.deleteFolder(folderPath);
     } catch (e) {
       throw new Error(`${e.message}${os.EOL}Often this is caused by a file lock from a process
        such as your text editor, command prompt, or "gulp serve"`);
