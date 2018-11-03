@@ -261,7 +261,7 @@ enum TestResultState {
   Skipped = 3
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
   constructor();
   // (undocumented)
@@ -272,7 +272,7 @@ class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
   loadSchema(): Object;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
   constructor();
   // (undocumented)

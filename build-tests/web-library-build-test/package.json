@@ -9,7 +9,7 @@
     "build": "gulp --clean"
   },
   "devDependencies": {
-    "ts-jest": "~22.4.6",
+    "ts-jest": "~23.10.4",
     "@types/jest": "23.3.9",
     "@microsoft/rush-stack-compiler": "0.4.3",
     "@microsoft/load-themed-styles": "1.8.33",

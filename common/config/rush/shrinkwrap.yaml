@@ -1,6 +1,6 @@
 dependencies:
+  '@microsoft/api-extractor': 6.0.9
   '@microsoft/node-library-build': 6.0.6
-  '@microsoft/rush-stack-compiler': 0.4.3
   '@microsoft/tsdoc': 0.9.3
   '@pnpm/link-bins': 1.0.3
   '@pnpm/logger': 1.0.2
@@ -153,10 +153,9 @@ dependencies:
   sudo: 1.0.3
   tar: 4.4.6
   through2: 2.0.3
-  ts-jest: 22.4.6
+  ts-jest: 23.10.4
   tslint: 5.11.0
   tslint-microsoft-contrib: 5.2.1
-  typescript: 3.0.3
   uglify-js: 3.0.28
   vinyl: 2.2.0
   webpack: 3.11.0
@@ -178,6 +177,22 @@ packages:
     dev: false
     resolution:
       integrity: sha512-UFMC4ZeFC48Tpvj7C8UgLvtkaUuovQX+5xNWrsIoMG8o2z+XFKjKaN9iVmS84dPwVN00W4wPmqvYoZF3EGAsfw==
+  /@microsoft/api-extractor/6.0.9:
+    dependencies:
+      '@microsoft/node-core-library': 3.5.0
+      '@microsoft/ts-command-line': 4.2.2
+      '@microsoft/tsdoc': 0.9.3
+      '@types/node': 8.5.8
+      '@types/z-schema': 3.16.31
+      colors: 1.2.5
+      jju: 1.3.0
+      lodash: 4.17.11
+      typescript: 3.0.3
+      z-schema: 3.18.4
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha512-QaS2ozlaf17qwtqgFCmMIUBw70E90ccYe9u4R51XBDYKJUBXCj7kLZI64GseXAI1eDJpAjIf1cddyemLB9caww==
   /@microsoft/api-extractor/6.1.1:
     dependencies:
       '@microsoft/node-core-library': 3.5.0
@@ -286,6 +301,18 @@ packages:
     dev: false
     resolution:
       integrity: sha512-QrKj8Ra0HYiVnO7/KW5WrFtc3I/7ZP3WIbnk0wBClHqm9zZPD+Wz1QxLhmhBfzLay2VNlTonG9IbJ06M5uA4Gg==
+  /@microsoft/rush-stack-compiler/0.2.0:
+    dependencies:
+      '@microsoft/api-extractor': 6.0.9
+      '@microsoft/node-core-library': 3.5.0
+      '@types/node': 8.5.8
+      tslint: 5.9.1
+      tslint-microsoft-contrib: /tslint-microsoft-contrib/5.2.1/tslint@5.9.1
+      typescript: 2.4.2
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha512-CTG+XBzGktOhmtSYvKqAUvF4/Xtp3SkgPFlO2NEpg8e69egJD1YS6aGhTL7w03q4Ht/0qgj+QUKWCKQUPrXBEQ==
   /@microsoft/rush-stack-compiler/0.4.3:
     dependencies:
       '@microsoft/api-extractor': 6.1.1
@@ -1047,10 +1074,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-jCpe8kcv2ep0KwTHenUJO6J1fJM=
-  /array-filter/0.0.1:
-    dev: false
-    resolution:
-      integrity: sha1-fajPLiZijtcygDWB/SH2fKzS7uw=
   /array-find-index/1.0.2:
     dev: false
     engines:
@@ -1061,14 +1084,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-ml9pkFGx5wczKPKgCJaLZOopVdI=
-  /array-map/0.0.0:
-    dev: false
-    resolution:
-      integrity: sha1-iKK6tz0c97zVwbEYoAP2b2ZfpmI=
-  /array-reduce/0.0.0:
-    dev: false
-    resolution:
-      integrity: sha1-FziZ0//Rx9k4PkR5Ul2+J4yrXys=
   /array-slice/0.2.3:
     dev: false
     engines:
@@ -1323,22 +1338,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-/WU28rzhODb/o6VFjEkDpZe7O/U=
-  /babel-plugin-transform-es2015-modules-commonjs/6.26.2:
-    dependencies:
-      babel-plugin-transform-strict-mode: 6.24.1
-      babel-runtime: 6.26.0
-      babel-template: 6.26.0
-      babel-types: 6.26.0
-    dev: false
-    resolution:
-      integrity: sha512-CV9ROOHEdrjcwhIaJNBGMBCodN+1cfkwtM1SbUHmvyy35KGT7fohbpOxkE2uLz1o6odKK2Ck/tz47z+VqQfi9Q==
-  /babel-plugin-transform-strict-mode/6.24.1:
-    dependencies:
-      babel-runtime: 6.26.0
-      babel-types: 6.26.0
-    dev: false
-    resolution:
-      integrity: sha1-1fr3qleKZbvlkc9e2uBKDGcCB1g=
   /babel-preset-jest/22.4.4:
     dependencies:
       babel-plugin-jest-hoist: 22.4.4
@@ -1675,6 +1674,14 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-u5iz+ijIMUlmV8blX82VGFrB9ecnUg5qEt55CMZ/YJEhha+d8qpBfOFuutJ6F/VKRXjZoD33b6uvarpPxcl3RA==
+  /bs-logger/0.2.5:
+    dependencies:
+      fast-json-stable-stringify: 2.0.0
+    dev: false
+    engines:
+      node: '>= 6'
+    resolution:
+      integrity: sha512-uFLE0LFMxrH8Z5Hd9QgivvRbrl/NFkOTHzGhlqQxsnmx5JBLrp4bc249afLL+GccyY/8hkcGi2LpVaOzaEY0nQ==
   /bser/2.0.0:
     dependencies:
       node-int64: 0.4.0
@@ -2182,23 +2189,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
-  /cpx/1.5.0:
-    dependencies:
-      babel-runtime: 6.26.0
-      chokidar: 1.7.0
-      duplexer: 0.1.1
-      glob: 7.0.6
-      glob2base: 0.0.12
-      minimatch: 3.0.4
-      mkdirp: 0.5.1
-      resolve: 1.8.1
-      safe-buffer: 5.1.2
-      shell-quote: 1.6.1
-      subarg: 1.0.0
-    dev: false
-    hasBin: true
-    resolution:
-      integrity: sha1-GFvgGFEdhycN7czCkxceN2VauI8=
   /create-ecdh/4.0.3:
     dependencies:
       bn.js: 4.11.8
@@ -3533,14 +3523,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-66Pm4RYbjzdyeuqudYqhFiNBbCIuI9kgRqLPSHIlXHidW8NIQtVdkM1yeZ4lXwuhbTETv3EUGMNHAAw6hiundQ==
-  /fs-extra/6.0.0:
-    dependencies:
-      graceful-fs: 4.1.14
-      jsonfile: 4.0.0
-      universalify: 0.1.2
-    dev: false
-    resolution:
-      integrity: sha512-lk2cUCo8QzbiEWEbt7Cw3m27WMiRG321xsssbcIpfMhpRjrlC08WBOVQqj1/nQYYNnPtyIhP1oqLO3QwT2tPCw==
   /fs-extra/7.0.0:
     dependencies:
       graceful-fs: 4.1.14
@@ -5642,6 +5624,15 @@ packages:
     hasBin: true
     resolution:
       integrity: sha1-Hq3nrMASA0rYTiOWdn6tn6VJWCE=
+  /json5/2.1.0:
+    dependencies:
+      minimist: 1.2.0
+    dev: false
+    engines:
+      node: '>=6'
+    hasBin: true
+    resolution:
+      integrity: sha512-8Mh9h6xViijj36g7Dxi+Y4S6hNGV96vcJZr/SrlHh1LR/pEn/8j/+qIBbs44YKl69Lrfctp4QD+AdWLTMqEZAQ==
   /jsonfile/2.4.0:
     dev: false
     optionalDependencies:
@@ -6275,6 +6266,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-fFEhvcgzuIoJVUF8fYr5KR0YqxD238zgObTps31YdADwPPAp82a4M8TrckkWyx7ekNlf9aBcVn81cFwwXngrJA==
+  /make-error/1.3.5:
+    dev: false
+    resolution:
+      integrity: sha512-c3sIjNUow0+8swNwVpqoH4YCShKNFkMaw6oH1mNS2haDZQqkeZFlHS3dhoeEbKKmJB4vXpJucU6oH75aDYeE9g==
   /make-iterator/1.0.1:
     dependencies:
       kind-of: 6.0.2
@@ -8329,15 +8324,6 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-2kL0l0DAtC2yypcoVxyxkMmO/qM=
-  /shell-quote/1.6.1:
-    dependencies:
-      array-filter: 0.0.1
-      array-map: 0.0.0
-      array-reduce: 0.0.0
-      jsonify: 0.0.0
-    dev: false
-    resolution:
-      integrity: sha1-9HgZSczkAmlxJ0MOo7PFR29IF2c=
   /shellwords/0.1.1:
     dev: false
     resolution:
@@ -8800,12 +8786,6 @@ packages:
     hasBin: true
     resolution:
       integrity: sha1-DHlipq3vp7vUrDZkYKY4VSrhoKI=
-  /subarg/1.0.0:
-    dependencies:
-      minimist: 1.2.0
-    dev: false
-    resolution:
-      integrity: sha1-9izxdYHplrSPyWVpn1TAauJouNI=
   /sudo/1.0.3:
     dependencies:
       inpath: 1.0.2
@@ -9103,46 +9083,46 @@ packages:
     dev: false
     resolution:
       integrity: sha512-m6s2OdQe5wgpFMC+pAJ+q9djG82O2jcHPOI6RNg1yy9rCYR+WD6Nbpl32fDpfC56nirdRy+opFa/Vk7HYhqaew==
-  /ts-jest/22.4.6:
+  /ts-jest/23.10.4:
     dependencies:
-      babel-core: 6.26.3
-      babel-plugin-istanbul: 4.1.6
-      babel-plugin-transform-es2015-modules-commonjs: 6.26.2
-      babel-preset-jest: 22.4.4
-      cpx: 1.5.0
-      fs-extra: 6.0.0
-      jest-config: 22.4.4
-      lodash: 4.17.11
-      pkg-dir: 2.0.0
-      source-map-support: 0.5.9
+      bs-logger: 0.2.5
+      buffer-from: 1.1.1
+      fast-json-stable-stringify: 2.0.0
+      json5: 2.1.0
+      make-error: 1.3.5
+      mkdirp: 0.5.1
+      semver: 5.6.0
       typescript: 2.4.2
-      yargs: 11.1.0
+      yargs-parser: 10.1.0
     dev: false
+    engines:
+      node: '>= 6'
+    hasBin: true
     peerDependencies:
-      jest: ^22.4.0 || ^22.5.0-alpha.1 || ^23.0.0-alpha.1
+      jest: '>=22 <24'
     resolution:
-      integrity: sha512-kYQ6g1G1AU+bOO9rv+SSQXg4WTcni6Wx3AM48iHni0nP1vIuhdNRjKTE9Cxx36Ix/IOV7L85iKu07dgXJzH2pQ==
-  /ts-jest/22.4.6/jest@23.6.0:
+      integrity: sha512-oV/wBwGUS7olSk/9yWMiSIJWbz5xO4zhftnY3gwv6s4SMg6WHF1m8XZNBvQOKQRiTAexZ9754Z13dxBq3Zgssw==
+  /ts-jest/23.10.4/jest@23.6.0:
     dependencies:
-      babel-core: 6.26.3
-      babel-plugin-istanbul: 4.1.6
-      babel-plugin-transform-es2015-modules-commonjs: 6.26.2
-      babel-preset-jest: 22.4.4
-      cpx: 1.5.0
-      fs-extra: 6.0.0
+      bs-logger: 0.2.5
+      buffer-from: 1.1.1
+      fast-json-stable-stringify: 2.0.0
       jest: 23.6.0
-      jest-config: 22.4.4
-      lodash: 4.17.11
-      pkg-dir: 2.0.0
-      source-map-support: 0.5.9
+      json5: 2.1.0
+      make-error: 1.3.5
+      mkdirp: 0.5.1
+      semver: 5.6.0
       typescript: 2.4.2
-      yargs: 11.1.0
+      yargs-parser: 10.1.0
     dev: false
-    id: registry.npmjs.org/ts-jest/22.4.6
+    engines:
+      node: '>= 6'
+    hasBin: true
+    id: registry.npmjs.org/ts-jest/23.10.4
     peerDependencies:
-      jest: ^22.4.0 || ^22.5.0-alpha.1 || ^23.0.0-alpha.1
+      jest: '>=22 <24'
     resolution:
-      integrity: sha512-kYQ6g1G1AU+bOO9rv+SSQXg4WTcni6Wx3AM48iHni0nP1vIuhdNRjKTE9Cxx36Ix/IOV7L85iKu07dgXJzH2pQ==
+      integrity: sha512-oV/wBwGUS7olSk/9yWMiSIJWbz5xO4zhftnY3gwv6s4SMg6WHF1m8XZNBvQOKQRiTAexZ9754Z13dxBq3Zgssw==
   /tslib/1.9.3:
     dev: false
     resolution:
@@ -9159,6 +9139,17 @@ packages:
   /tslint-microsoft-contrib/5.2.1/tslint@5.11.0:
     dependencies:
       tslint: 5.11.0
+      tsutils: /tsutils/2.28.0/typescript@2.4.2
+      typescript: 2.4.2
+    dev: false
+    id: registry.npmjs.org/tslint-microsoft-contrib/5.2.1
+    peerDependencies:
+      tslint: ^5.1.0
+    resolution:
+      integrity: sha512-PDYjvpo0gN9IfMULwKk0KpVOPMhU6cNoT9VwCOLeDl/QS8v8W2yspRpFFuUS7/c5EIH/n8ApMi8TxJAz1tfFUA==
+  /tslint-microsoft-contrib/5.2.1/tslint@5.9.1:
+    dependencies:
+      tslint: 5.9.1
       tsutils: /tsutils/2.28.0/typescript@2.4.2
       typescript: 2.4.2
     dev: false
@@ -9188,6 +9179,27 @@ packages:
     hasBin: true
     resolution:
       integrity: sha1-mPMMAurjzecAYgHkwzywi0hYHu0=
+  /tslint/5.9.1:
+    dependencies:
+      babel-code-frame: 6.26.0
+      builtin-modules: 1.1.1
+      chalk: 2.4.1
+      commander: 2.19.0
+      diff: 3.5.0
+      glob: 7.1.3
+      js-yaml: 3.9.1
+      minimatch: 3.0.4
+      resolve: 1.8.1
+      semver: 5.3.0
+      tslib: 1.9.3
+      tsutils: /tsutils/2.29.0/typescript@2.4.2
+      typescript: 2.4.2
+    dev: false
+    engines:
+      node: '>=4.8.0'
+    hasBin: true
+    resolution:
+      integrity: sha1-ElX4ej/1frCw4fDmEKi0dIBGya4=
   /tsutils/2.28.0/typescript@2.4.2:
     dependencies:
       tslib: 1.9.3
@@ -9828,6 +9840,12 @@ packages:
     dev: false
     resolution:
       integrity: sha1-hFK0u36Dx8GI2AQcGoN8dz1ti7k=
+  /yargs-parser/10.1.0:
+    dependencies:
+      camelcase: 4.1.0
+    dev: false
+    resolution:
+      integrity: sha512-VCIyR1wJoEBZUqk5PA+oOBF6ypbwh5aNB3I50guxAL/quggdfs4TtNHQrSazFA3fYZ+tEqfs0zIGlv0c/rgjbQ==
   /yargs-parser/2.4.1:
     dependencies:
       camelcase: 3.0.0
@@ -9983,11 +10001,12 @@ packages:
       '@types/node': 8.5.8
       colors: 1.2.5
       gulp: 3.9.1
+      jest: 23.6.0
       js-yaml: 3.9.1
     dev: false
     name: '@rush-temp/api-documenter'
     resolution:
-      integrity: sha512-fjSF8tSkhRYl+6wSja3VGteu1z3utWyyKQ667tQ2sy20yv2/0BuCSC7wchlvW+7CjcNvU/GCKETDBuKmcTfMQQ==
+      integrity: sha512-lUO3cypKcevX1irHmyTtcAxuiCTmBeBCfEP7+0bbomW8oJCMTYbnsqjBN+YzKmDaehCViARD1VFtO1ZwLSvl2A==
       tarball: 'file:projects/api-documenter.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-01.tgz':
@@ -10172,7 +10191,9 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-typescript.tgz':
     dependencies:
+      '@microsoft/api-extractor': 6.0.9
       '@microsoft/node-library-build': 6.0.6
+      '@microsoft/rush-stack-compiler': 0.2.0
       '@types/glob': 5.0.30
       '@types/node': 8.5.8
       '@types/resolve': 0.0.8
@@ -10181,11 +10202,12 @@ packages:
       glob-escape: 0.0.2
       gulp: 3.9.1
       resolve: 1.8.1
-      typescript: 3.0.3
+      tslint-microsoft-contrib: 5.2.1
+      typescript: 2.4.2
     dev: false
     name: '@rush-temp/gulp-core-build-typescript'
     resolution:
-      integrity: sha512-qUbfz9iw0uHY71Ukyc/w3A55hMBI+Bs+IWfShwni3Ak62ml4noZzyH5svWpShsLRR+ZmSdy1Pizmr2lbNChj+w==
+      integrity: sha512-xoAQdQFOlN5ao1Law4QtLBPZqgGrr24oCh8OWNf6jQz984hSdudk5hyuT6gU93ScJln+idlp/GwoszpGcXUEqA==
       tarball: 'file:projects/gulp-core-build-typescript.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-webpack.tgz':
@@ -10453,10 +10475,11 @@ packages:
       '@types/node': 8.5.8
       colors: 1.2.5
       gulp: 3.9.1
+      ts-jest: 23.10.4
     dev: false
     name: '@rush-temp/rush-stack'
     resolution:
-      integrity: sha512-/jGPnI5KB0AVNUHtWnG9dk608HyvXL3cq1BPBtfmOoQgXT2drMmDa5CfEWKuwnNOrI/t7kZ1Nr0uf5oeUqmsoA==
+      integrity: sha512-VQmm11kwgeWs7tXUTCyQsQckoo6M/1K2mF3ytnWzcjKK8iPXTmJw47VFyeXnxO+M2tPyoQTyBsTxsGI2F26pSw==
       tarball: 'file:projects/rush-stack.tgz'
     version: 0.0.0
   'file:projects/rush.tgz':
@@ -10483,11 +10506,11 @@ packages:
       '@types/node': 8.5.8
       gulp: 3.9.1
       jest: 23.6.0
-      ts-jest: /ts-jest/22.4.6/jest@23.6.0
+      ts-jest: /ts-jest/23.10.4/jest@23.6.0
     dev: false
     name: '@rush-temp/rushell'
     resolution:
-      integrity: sha512-M4Nlkbxta9yW1um2lmb4esdy4GMGtYmONk6+qyY9jiLj9PeZ9PRleop456ObXZ8WvVy1wqOOFRcgrKx+fmHpZg==
+      integrity: sha512-lOl+jpZ+bMgUUNsSE/+HtEXhvZpa5LoMUhmBzce0jOvsDiybVVcUrn9cJNOA57C1c3/12xg24Dqc9O1oF+7dQw==
       tarball: 'file:projects/rushell.tgz'
     version: 0.0.0
   'file:projects/set-webpack-public-path-plugin.tgz':
@@ -10545,11 +10568,11 @@ packages:
     dependencies:
       '@types/jest': 23.3.9
       gulp: 3.9.1
-      ts-jest: 22.4.6
+      ts-jest: 23.10.4
     dev: false
     name: '@rush-temp/web-library-build-test'
     resolution:
-      integrity: sha512-CL3Ww3M5rMJtghIShSyAPgwZIeZmkpWEnMbz0MtB0krPTSqeSiwYc4zOzDH/x8vXw8sYgFPtTDE7BhUHCFuUFw==
+      integrity: sha512-aF86o/PM5xm664St+6QYEhs9KMwrqZ2Koj6agq+VuEk8flaAZxVI9oyMi+iejI8Yjitp6Fxr+S5t0hOhMCJ+1Q==
       tarball: 'file:projects/web-library-build-test.tgz'
     version: 0.0.0
   'file:projects/web-library-build.tgz':
@@ -10568,8 +10591,8 @@ registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
+  '@microsoft/api-extractor': 6.0.9
   '@microsoft/node-library-build': 6.0.6
-  '@microsoft/rush-stack-compiler': 0.4.3
   '@microsoft/tsdoc': 0.9.3
   '@pnpm/link-bins': ~1.0.1
   '@pnpm/logger': ~1.0.1
@@ -10722,10 +10745,9 @@ specifiers:
   sudo: ~1.0.3
   tar: ~4.4.1
   through2: ~2.0.1
-  ts-jest: ~22.4.6
+  ts-jest: ~23.10.4
   tslint: ~5.11.0
   tslint-microsoft-contrib: ~5.2.1
-  typescript: ~3.0.3
   uglify-js: ~3.0.28
   vinyl: ~2.2.0
   webpack: ~3.11.0
