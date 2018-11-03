@@ -16,12 +16,9 @@ export interface IDocHeadingParameters extends IDocNodeParameters {
 }
 
 /**
- * Represents a heading such as an HTML `<h1>` element.
+ * Represents table, similar to an HTML `<h1>` or `<h2>` element.
  */
 export class DocHeading extends DocNode {
-  /** {@inheritDoc} */
-  public readonly kind: CustomDocNodeKind = CustomDocNodeKind.Heading;
-
   public readonly title: string;
   public readonly level: number;
 
@@ -33,5 +30,14 @@ export class DocHeading extends DocNode {
     super(parameters);
     this.title = parameters.title;
     this.level = parameters.level !== undefined ? parameters.level : 1;
+
+    if (this.level < 1 || this.level > 5) {
+      throw new Error('IDocHeadingParameters.level must be a number between 1 and 5');
+    }
+  }
+
+  /** @override */
+  public get kind(): string {
+    return CustomDocNodeKind.Heading;
   }
 }

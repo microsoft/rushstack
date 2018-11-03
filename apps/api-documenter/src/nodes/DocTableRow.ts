@@ -4,26 +4,62 @@
 import {
   IDocNodeParameters,
   DocNode,
-  DocSection
+  DocSection,
+  DocPlainText
 } from '@microsoft/tsdoc';
 import { CustomDocNodeKind } from './CustomDocNodeKind';
 import { DocTableCell } from './DocTableCell';
+import { DocTable } from './DocTable';
 
 /**
- * Represents a heading such as an HTML `<h1>` element.
+ * Constructor parameters for {@link DocTableRow}.
+ */
+export interface IDocTableRowParameters extends IDocNodeParameters {
+}
+
+/**
+ * Represents table row, similar to an HTML `<tr>` element.
  */
 export class DocTableRow extends DocNode {
-  /** {@inheritDoc} */
-  public readonly kind: CustomDocNodeKind = CustomDocNodeKind.TableRow;
+  private readonly _cells: DocTableCell[];
 
-  private _cells: DocTableCell[];
+  public constructor(parameters: IDocTableRowParameters, cells?: ReadonlyArray<DocTableCell>) {
+    super(parameters);
 
-  public constructor() {
-    super({});
+    this._cells = [];
+    if (cells) {
+      for (const cell of cells) {
+        this.addCell(cell);
+      }
+    }
+  }
+
+  /** @override */
+  public get kind(): string {
+    return CustomDocNodeKind.TableRow;
   }
 
   public get cells(): ReadonlyArray<DocTableCell> {
     return this._cells;
+  }
+
+  public addCell(cell: DocTableCell): void {
+    this._cells.push(cell);
+  }
+
+  public createAndAddCell(): DocTableCell {
+    const newCell: DocTableCell = new DocTableCell({ configuration: this.configuration });
+    this.addCell(newCell);
+    return newCell;
+  }
+
+  public addPlainTextCell(cellContent: string): DocTableCell {
+    const cell: DocTableCell = this.createAndAddCell();
+    cell.content.appendNodeInParagraph(new DocPlainText({
+      configuration: this.configuration,
+      text: cellContent
+    }));
+    return cell;
   }
 
   /** @override */

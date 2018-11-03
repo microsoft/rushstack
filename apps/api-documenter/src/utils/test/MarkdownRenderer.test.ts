@@ -3,73 +3,204 @@
 
 import * as path from 'path';
 import { FileDiffTest, FileSystem } from '@microsoft/node-core-library';
-import { Markup } from '../Markup';
-import { IMarkupPage } from '../MarkupElement';
+import {
+  DocSection,
+  TSDocConfiguration,
+  DocPlainText,
+  StringBuilder,
+  DocParagraph,
+  DocSoftBreak,
+  DocLinkTag,
+  DocHtmlStartTag,
+  DocHtmlEndTag
+} from '@microsoft/tsdoc';
 
 import { MarkdownRenderer } from '../MarkdownRenderer';
+import { CustomDocNodes } from '../../nodes/CustomDocNodeKind';
+import { DocHeading } from '../../nodes/DocHeading';
+import { DocEmphasisSpan } from '../../nodes/DocEmphasisSpan';
+import { DocTable } from '../../nodes/DocTable';
+import { DocTableRow } from '../../nodes/DocTableRow';
+import { DocTableCell } from '../../nodes/DocTableCell';
 
-describe('MarkdownPageRenderer', () => {
-  it('renders markdown', done => {
+test('render Markdown from TSDoc', done => {
+  const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
+  const configuration: TSDocConfiguration = CustomDocNodes.configuration;
 
-    const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
+  const output: DocSection = new DocSection({ configuration });
 
-    const markupPage: IMarkupPage = Markup.createPage('Test page');
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'Simple bold test' }),
+    new DocParagraph({ configuration },
+      [
+        new DocPlainText({ configuration, text: 'This is a ' }),
+        new DocEmphasisSpan({ configuration, bold: true },
+          [
+            new DocPlainText({ configuration, text: 'bold' })
+          ]
+        ),
+        new DocPlainText({ configuration, text: ' word.' })
+      ]
+    )
+  ]);
 
-    markupPage.elements.push(Markup.createHeading1('Simple bold test'));
-    markupPage.elements.push(...Markup.createTextElements('This is a '));
-    markupPage.elements.push(...Markup.createTextElements('bold', { bold: true }));
-    markupPage.elements.push(...Markup.createTextElements(' word.'));
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'All whitespace bold' }),
+    new DocParagraph({ configuration },
+      [
+        new DocEmphasisSpan({ configuration, bold: true },
+          [
+            new DocPlainText({ configuration, text: '  ' })
+          ]
+        )
+      ]
+    )
+  ]);
 
-    markupPage.elements.push(Markup.createHeading1('All whitespace bold'));
-    markupPage.elements.push(...Markup.createTextElements('  ', { bold: true }));
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'Newline bold' }),
+    new DocParagraph({ configuration },
+      [
+        new DocEmphasisSpan({ configuration, bold: true },
+          [
+            new DocPlainText({ configuration, text: 'line 1' }),
+            new DocSoftBreak({ configuration }),
+            new DocPlainText({ configuration, text: 'line 2' })
+          ]
+        )
+      ]
+    )
+  ]);
 
-    markupPage.elements.push(Markup.createHeading1('Newline bold'));
-    markupPage.elements.push(...Markup.createTextElements('line 1\nline 2', { bold: true }));
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'Newline bold with spaces' }),
+    new DocParagraph({ configuration },
+      [
+        new DocEmphasisSpan({ configuration, bold: true },
+          [
+            new DocPlainText({ configuration, text: '  line 1  ' }),
+            new DocSoftBreak({ configuration }),
+            new DocPlainText({ configuration, text: '  line 2  ' }),
+            new DocSoftBreak({ configuration }),
+            new DocPlainText({ configuration, text: '  line 3  ' })
+          ]
+        )
+      ]
+    )
+  ]);
 
-    markupPage.elements.push(Markup.createHeading1('Newline bold with spaces'));
-    markupPage.elements.push(...Markup.createTextElements('  line 1  \n  line 2  \n  line 3  ', { bold: true }));
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'Adjacent bold regions' }),
+    new DocParagraph({ configuration },
+      [
+        new DocEmphasisSpan({ configuration, bold: true },
+          [ new DocPlainText({ configuration, text: 'one' }) ]
+        ),
+        new DocEmphasisSpan({ configuration, bold: true },
+          [ new DocPlainText({ configuration, text: 'two' }) ]
+        ),
+        new DocEmphasisSpan({ configuration, bold: true },
+          [ new DocPlainText({ configuration, text: ' three ' }) ]
+        ),
+        new DocPlainText({ configuration, text: '' }),
+        new DocEmphasisSpan({ configuration, bold: true },
+          [ new DocPlainText({ configuration, text: 'four' }) ]
+        ),
+        new DocPlainText({ configuration, text: 'non-bold' }),
+        new DocEmphasisSpan({ configuration, bold: true },
+          [ new DocPlainText({ configuration, text: 'five' }) ]
+        )
+      ]
+    )
+  ]);
 
-    markupPage.elements.push(Markup.createHeading1('Adjacent bold regions'));
-    markupPage.elements.push(...Markup.createTextElements('one', { bold: true }));
-    markupPage.elements.push(...Markup.createTextElements('two', { bold: true }));
-    markupPage.elements.push(...Markup.createTextElements(' three', { bold: true }));
-    markupPage.elements.push(...Markup.createTextElements('', { bold: false }));
-    markupPage.elements.push(...Markup.createTextElements('four', { bold: true }));
-    markupPage.elements.push(...Markup.createTextElements('non-bold', { bold: false }));
-    markupPage.elements.push(...Markup.createTextElements('five', { bold: true }));
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'Adjacent to other characters' }),
+    new DocParagraph({ configuration },
+      [
+        new DocLinkTag({
+          configuration,
+          tagName: '@link',
+          linkText: 'a link',
+          urlDestination: './index.md'
+        }),
+        new DocEmphasisSpan({ configuration, bold: true },
+          [ new DocPlainText({ configuration, text: 'bold' }) ]
+        ),
+        new DocPlainText({ configuration, text: 'non-bold' }),
+        new DocPlainText({ configuration, text: 'more-non-bold' })
+      ]
+    )
+  ]);
 
-    markupPage.elements.push(Markup.createHeading1('Adjacent to other characters'));
-    // Creates a "[" before the bold text
-    markupPage.elements.push(Markup.createWebLinkFromText('a link', './index.md'));
-    markupPage.elements.push(...Markup.createTextElements('bold', { bold: true }));
-    markupPage.elements.push(...Markup.createTextElements('non-bold', { bold: false }));
-    markupPage.elements.push(...Markup.createTextElements('more-non-bold', { bold: false }));
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'Bad characters' }),
+    new DocParagraph({ configuration },
+      [
+        new DocEmphasisSpan({ configuration, bold: true },
+          [ new DocPlainText({ configuration, text: '*one*two*' }) ]
+        ),
+        new DocEmphasisSpan({ configuration, bold: true },
+          [ new DocPlainText({ configuration, text: 'three*four' }) ]
+        )
+      ]
+    )
+  ]);
 
-    markupPage.elements.push(Markup.createHeading1('Bad characters'));
-    markupPage.elements.push(...Markup.createTextElements('*one*two*', { bold: true }));
-    markupPage.elements.push(...Markup.createTextElements('three*four', { bold: true }));
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'Characters that should be escaped' }),
+    new DocParagraph({ configuration }, [
+      new DocPlainText({ configuration, text: 'Double-encoded JSON: "{ \\"A\\": 123}"' })
+    ]),
+    new DocParagraph({ configuration },
+      [  new DocPlainText({ configuration, text: 'HTML chars: <script>alert("[You] are #1!");</script>' }) ]
+    ),
+    new DocParagraph({ configuration },
+      [  new DocPlainText({ configuration, text: 'HTML escape: &quot;' }) ]
+    ),
+    new DocParagraph({ configuration },
+      [  new DocPlainText({ configuration, text: '3 or more hyphens: - -- --- ---- ----- ------' }) ]
+    )
+  ]);
 
-    markupPage.elements.push(Markup.createHeading1('Characters that should be escaped'));
-    markupPage.elements.push(...Markup.createTextParagraphs(
-      'Double-encoded JSON: "{ \\"A\\": 123}"\n\n'));
-    markupPage.elements.push(...Markup.createTextParagraphs(
-      'HTML chars: <script>alert("[You] are #1!");</script>\n\n'));
-    markupPage.elements.push(...Markup.createTextParagraphs(
-      'HTML escape: &quot;\n\n'));
-    markupPage.elements.push(...Markup.createTextParagraphs(
-      '3 or more hyphens: - -- --- ---- ----- ------\n\n'));
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'HTML tag' }),
+    new DocParagraph({ configuration },
+      [
+        new DocHtmlStartTag({ configuration, name: 'b' }),
+        new DocPlainText({ configuration, text: 'bold' }),
+        new DocHtmlEndTag({ configuration, name: 'b' })
+      ]
+    )
+  ]);
 
-    markupPage.elements.push(...[
-      Markup.createHtmlTag('<b>'),
-      ...Markup.createTextElements('bold'),
-      Markup.createHtmlTag('</b>')
-    ]);
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'Table' }),
+    new DocTable({
+        configuration,
+        headerTitles: [ 'Header 1', 'Header 2' ]
+      }, [
+      new DocTableRow({ configuration }, [
+        new DocTableCell({ configuration }, [
+          new DocParagraph({ configuration },
+            [ new DocPlainText({ configuration, text: 'Cell 1' }) ]
+          )
+        ]),
+        new DocTableCell({ configuration }, [
+          new DocParagraph({ configuration },
+            [ new DocPlainText({ configuration, text: 'Cell 2' }) ]
+          )
+        ])
+      ])
+    ])
+  ]);
 
-    const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
-    FileSystem.writeFile(outputFilename, MarkdownRenderer.renderElements([markupPage]));
+  const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
+  const stringBuilder: StringBuilder = new StringBuilder();
+  MarkdownRenderer.renderNode(stringBuilder, output);
+  FileSystem.writeFile(outputFilename, stringBuilder.toString());
 
-    FileDiffTest.assertEqual(outputFilename, path.join(__dirname, 'ExpectedOutput.md'));
+  FileDiffTest.assertEqual(outputFilename, path.join(__dirname, 'ExpectedOutput.md'));
 
-    done();
-  });
+  done();
 });

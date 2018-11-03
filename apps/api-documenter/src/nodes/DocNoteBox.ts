@@ -15,17 +15,19 @@ export interface IDocNoteBoxParameters extends IDocNodeParameters {
 }
 
 /**
- * Represents a heading such as an HTML `<h1>` element.
+ * Represents a note box, which is typically displayed as a bordered box containing informational text.
  */
 export class DocNoteBox extends DocNode {
-  /** {@inheritDoc} */
-  public readonly kind: CustomDocNodeKind = CustomDocNodeKind.NoteBox;
-
   public readonly content: DocSection;
 
   public constructor(parameters: IDocNoteBoxParameters) {
     super(parameters);
-    this.content = new DocSection();
+    this.content = new DocSection({ configuration: this.configuration });
+  }
+
+  /** @override */
+  public get kind(): string {
+    return CustomDocNodeKind.NoteBox;
   }
 
   /** @override */

@@ -1,8 +1,8 @@
-# Test page
+
 
 ## Simple bold test
 
-This is a **bold** word.
+This is a <b>bold</b> word.
 
 ## All whitespace bold
 
@@ -10,23 +10,23 @@ This is a **bold** word.
 
 ## Newline bold
 
-**line 1 line 2**
+<b>line 1</b> <b>line 2</b>
 
 ## Newline bold with spaces
 
- **line 1 line 2 line 3**
+  <b>line 1</b>    <b>line 2</b>    <b>line 3</b>
 
 ## Adjacent bold regions
 
-**onetwo threefour**<!-- -->non-bold<!-- -->**five**
+<b>one</b><b>two</b> <b>three</b> <b>four</b>non-bold<!-- --><b>five</b>
 
 ## Adjacent to other characters
 
-[a link](./index.md)<!-- -->**bold**<!-- -->non-boldmore-non-bold
+[a link](./index.md)<!-- --><b>bold</b>non-boldmore-non-bold
 
 ## Bad characters
 
-**\*one\*two\*three\*four**
+<b>\*one\*two\*</b><b>three\*four</b>
 
 ## Characters that should be escaped
 
@@ -38,4 +38,13 @@ HTML escape: &amp;quot;
 
 3 or more hyphens: - -- \-\-\- \-\-\-- \-\-\--- \-\-\-\-\-\-
 
+## HTML tag
+
 <b>bold</b>
+
+## Table
+
+|  <p>Header 1</p> | <p>Header 2</p> |
+|  --- | --- |
+|  <p>Cell 1</p> | <p>Cell 2</p> |
+
