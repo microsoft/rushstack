@@ -61,3 +61,10 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
 
   return MixedClass;
 }
+
+/** @public */
+export namespace ApiDeclarationMixin {
+  export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiDeclarationMixin {
+    return apiItem.hasOwnProperty(_signature);
+  }
+}

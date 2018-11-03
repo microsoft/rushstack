@@ -112,3 +112,10 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
   return MixedClass;
 }
+
+/** @public */
+export namespace ApiItemContainerMixin {
+  export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiItemContainerMixin {
+    return apiItem.hasOwnProperty(_members);
+  }
+}

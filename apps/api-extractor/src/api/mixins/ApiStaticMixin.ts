@@ -59,3 +59,10 @@ export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass
 
   return MixedClass;
 }
+
+/** @public */
+export namespace ApiStaticMixin {
+  export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiStaticMixin {
+    return apiItem.hasOwnProperty(_isStatic);
+  }
+}

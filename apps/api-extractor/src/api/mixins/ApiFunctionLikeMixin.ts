@@ -90,3 +90,10 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
 
   return MixedClass;
 }
+
+/** @public */
+export namespace ApiFunctionLikeMixin {
+  export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiFunctionLikeMixin {
+    return apiItem.hasOwnProperty(_parameters);
+  }
+}
