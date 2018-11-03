@@ -1,0 +1,4 @@
+{
+  "rootDir": "..",
+  "preset": "@microsoft/rush-stack/includes/jest-node"
+}

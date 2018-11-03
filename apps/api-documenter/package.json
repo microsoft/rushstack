@@ -9,7 +9,8 @@
   "homepage": "http://aka.ms/extractor",
   "license": "MIT",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "gulp test --clean",
+    "test": "jest --config config/jest-config.json"
   },
   "bin": {
     "api-documenter": "./bin/api-documenter"
@@ -22,11 +23,13 @@
     "js-yaml": "~3.9.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.4.3",
     "@microsoft/node-library-build": "6.0.6",
+    "@microsoft/rush-stack": "0.1.26",
+    "@microsoft/rush-stack-compiler": "0.4.3",
+    "@types/jest": "23.3.9",
     "@types/js-yaml": "3.9.1",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",
-    "@types/jest": "23.3.9"
+    "jest": "~23.6.0"
   }
 }

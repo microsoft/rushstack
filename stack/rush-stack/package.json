@@ -27,7 +27,8 @@
   "dependencies": {
     "@microsoft/node-core-library": "3.5.0",
     "@microsoft/ts-command-line": "4.2.2",
-    "colors": "~1.2.1"
+    "colors": "~1.2.1",
+    "ts-jest": "~23.10.4"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler": "0.4.3",
