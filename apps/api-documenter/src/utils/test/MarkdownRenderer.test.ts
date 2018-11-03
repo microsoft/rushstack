@@ -4,8 +4,13 @@
 import * as path from 'path';
 import { FileDiffTest, FileSystem } from '@microsoft/node-core-library';
 import { IMarkupPage, Markup } from '@microsoft/api-extractor';
+import * as tsdoc from '@microsoft/tsdoc';
 
 import { MarkdownRenderer } from '../MarkdownRenderer';
+
+test('tsdoc repro', () => {
+  expect(tsdoc.DocNodeKind.Block).toEqual('Block');
+});
 
 describe('MarkdownPageRenderer', () => {
   it('renders markdown', done => {
