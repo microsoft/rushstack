@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Remove all dependencies on the \"rimraf\" library",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
