@@ -27,7 +27,7 @@ export class ApiDocumentedItem extends ApiItem {
     const documentedJson: IApiDocumentedItemJson = jsonObject as IApiDocumentedItemJson;
 
     if (documentedJson.docComment) {
-      const tsdocParser: tsdoc.TSDocParser = new tsdoc.TSDocParser(AedocDefinitions.parserConfiguration);
+      const tsdocParser: tsdoc.TSDocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
       const parserContext: tsdoc.ParserContext = tsdocParser.parseString(documentedJson.docComment);
 
       // TODO: Warn about parser errors

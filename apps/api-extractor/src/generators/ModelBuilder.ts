@@ -35,7 +35,7 @@ export class ModelBuilder {
 
   public constructor(context: ExtractorContext) {
     this._context = context;
-    this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.parserConfiguration);
+    this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
     this._astSymbolTable = new AstSymbolTable(this._context.typeChecker, this._context.packageJsonLookup);
     this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
     this._apiModel = new ApiModel();

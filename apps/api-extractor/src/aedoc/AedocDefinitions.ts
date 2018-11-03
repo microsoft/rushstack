@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import {
-  TSDocParserConfiguration,
+  TSDocConfiguration,
   TSDocTagDefinition,
   TSDocTagSyntaxKind,
   StandardTags
@@ -24,9 +24,9 @@ export class AedocDefinitions {
     syntaxKind: TSDocTagSyntaxKind.ModifierTag
   });
 
-  public static get parserConfiguration(): TSDocParserConfiguration {
-    if (!AedocDefinitions._parserConfiguration) {
-      const configuration: TSDocParserConfiguration = new TSDocParserConfiguration();
+  public static get tsdocConfiguration(): TSDocConfiguration {
+    if (!AedocDefinitions._tsdocConfiguration) {
+      const configuration: TSDocConfiguration = new TSDocConfiguration();
       configuration.addTagDefinitions([
         AedocDefinitions.betaDocumentation,
         AedocDefinitions.internalRemarks,
@@ -58,10 +58,10 @@ export class AedocDefinitions {
         true
       );
 
-      AedocDefinitions._parserConfiguration = configuration;
+      AedocDefinitions._tsdocConfiguration = configuration;
     }
-    return AedocDefinitions._parserConfiguration;
+    return AedocDefinitions._tsdocConfiguration;
   }
 
-  private static _parserConfiguration: TSDocParserConfiguration | undefined;
+  private static _tsdocConfiguration: TSDocConfiguration | undefined;
 }

@@ -40,6 +40,10 @@ export {
   ApiItemContainerMixin
 } from './api/mixins/ApiItemContainerMixin';
 export {
+  IApiReleaseTagMixinOptions,
+  ApiReleaseTagMixin
+} from './api/mixins/ApiReleaseTagMixin';
+export {
   IApiStaticMixinOptions,
   ApiStaticMixin
 } from './api/mixins/ApiStaticMixin';

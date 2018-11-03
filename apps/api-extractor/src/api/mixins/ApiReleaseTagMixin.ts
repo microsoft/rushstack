@@ -68,6 +68,7 @@ export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseC
   return MixedClass;
 }
 
+/** @public */
 export namespace ApiReleaseTagMixin {
   export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiReleaseTagMixin {
     return apiItem.hasOwnProperty(_releaseTag);
