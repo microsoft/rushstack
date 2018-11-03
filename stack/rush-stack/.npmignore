@@ -21,5 +21,6 @@
 
 ## Project specific definitions
 # -----------------------------
+!/typings/**
 
 # (Add your exceptions here)
