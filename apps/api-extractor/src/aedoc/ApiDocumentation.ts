@@ -344,7 +344,7 @@ export class ApiDocumentation {
         'a return value description', false);
     }
 
-    for (const paramBlock of this._docComment.paramBlocks) {
+    for (const paramBlock of this._docComment.params.blocks) {
       const aedocParameter: IAedocParameter = {
         name: paramBlock.parameterName,
         description: []
