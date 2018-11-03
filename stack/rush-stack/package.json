@@ -28,13 +28,17 @@
     "@microsoft/node-core-library": "3.5.0",
     "@microsoft/ts-command-line": "4.2.2",
     "colors": "~1.2.1",
-    "ts-jest": "~23.10.4"
+    "@types/jest": "23.3.9",
+    "jest": "~23.6.0",
+    "ts-jest": "~22.4.3",
+    "resolve": "1.8.1"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler": "0.4.3",
     "@microsoft/node-library-build": "6.0.6",
     "@types/node": "8.5.8",
-    "gulp": "~3.9.1"
+    "gulp": "~3.9.1",
+    "@types/resolve": "0.0.8"
   },
   "peerDependencies": {
     "@microsoft/rush-stack-compiler": "0.4.3"

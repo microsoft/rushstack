@@ -26,7 +26,7 @@
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",
     "jest": "~23.6.0",
-    "ts-jest": "~23.10.4"
+    "ts-jest": "~22.4.3"
   },
   "jest": {
     "moduleFileExtensions": [
