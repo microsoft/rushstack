@@ -44,6 +44,9 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
   protected _terminalProvider: GCBTerminalProvider = new GCBTerminalProvider(this);
   protected _terminal: Terminal = new Terminal(this._terminalProvider);
 
+  /**
+   * @internal
+   */
   protected _rushStackCompiler: typeof RushStackCompiler;
 
   private get _rushStackCompilerPackagePath(): string {
