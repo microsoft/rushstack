@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 25 Oct 2018 23:20:40 GMT and should not be manually modified.
+This log was last generated on Mon, 05 Nov 2018 17:04:24 GMT and should not be manually modified.
+
+## 3.5.1
+Mon, 05 Nov 2018 17:04:24 GMT
+
+### Patches
+
+- Remove all dependencies on the "rimraf" library
 
 ## 3.5.0
 Thu, 25 Oct 2018 23:20:40 GMT

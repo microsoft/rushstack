@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "7.2.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.2.0",
+      "date": "Mon, 05 Nov 2018 17:04:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update GCB-TS to ship with a default rush-stack-compiler with TS 2.4."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.41` to `3.8.42`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.0` to `3.5.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.2",
       "tag": "@microsoft/gulp-core-build-typescript_v7.1.2",
       "date": "Thu, 01 Nov 2018 21:33:51 GMT",
