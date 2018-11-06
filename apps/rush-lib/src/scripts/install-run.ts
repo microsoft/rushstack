@@ -436,8 +436,9 @@ function run(): void {
     ...packageBinArgs /* [-f, myproject/lib] */
   ]: string[] = process.argv;
 
-  // override warning about nodePath not being used
-  nodePath;
+  if (!nodePath) {
+    throw new Error('Unexpected exception: could not detect node path');
+  }
 
   if (path.basename(scriptPath).toLowerCase() !== 'install-run.js') {
     // If install-run.js wasn't directly invoked, don't execute the rest of this function. Return control

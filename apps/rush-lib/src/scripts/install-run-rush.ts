@@ -49,8 +49,9 @@ function run(): void {
     ...packageBinArgs /* [build, --to, myproject] */
   ]: string[] = process.argv;
 
-  // override warning about unused variables
-  nodePath || scriptPath;
+  if (!nodePath || !scriptPath) {
+    throw new Error('Unexpected exception: could not detect node path or script path');
+  }
 
   if (process.argv.length < 3) {
     console.log('Usage: install-run-rush.js <command> [args...]');
