@@ -429,12 +429,15 @@ export function runWithErrorAndStatusCode(fn: () => number): void {
 
 function run(): void {
   const [
-    nodePath, /* Ex: /bin/node */ // tslint:disable-line:no-unused-variable
+    nodePath, /* Ex: /bin/node */
     scriptPath, /* /repo/common/scripts/install-run-rush.js */
     rawPackageSpecifier, /* qrcode@^1.2.0 */
     packageBinName, /* qrcode */
     ...packageBinArgs /* [-f, myproject/lib] */
   ]: string[] = process.argv;
+
+  // override warning about nodePath not being used
+  nodePath;
 
   if (path.basename(scriptPath).toLowerCase() !== 'install-run.js') {
     // If install-run.js wasn't directly invoked, don't execute the rest of this function. Return control

@@ -44,10 +44,13 @@ function getRushVersion(): string {
 
 function run(): void {
   const [
-    nodePath, /* Ex: /bin/node */ // tslint:disable-line:no-unused-variable
-    scriptPath, /* /repo/common/scripts/install-run-rush.js */ // tslint:disable-line:no-unused-variable
+    nodePath, /* Ex: /bin/node */
+    scriptPath, /* /repo/common/scripts/install-run-rush.js */
     ...packageBinArgs /* [build, --to, myproject] */
   ]: string[] = process.argv;
+
+  // override warning about unused variables
+  nodePath || scriptPath;
 
   if (process.argv.length < 3) {
     console.log('Usage: install-run-rush.js <command> [args...]');
