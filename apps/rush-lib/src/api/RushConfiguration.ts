@@ -799,7 +799,7 @@ export class RushConfiguration {
     this._yarnCacheFolder = path.resolve(path.join(this._commonTempFolder, 'yarn-cache'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
-    this._rushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');
+    this._rushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush', `node-${process.version}`);
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
 
