@@ -11,6 +11,8 @@ import { ApiPackage } from './ApiPackage';
 import { ApiInterface } from './ApiInterface';
 import { ApiPropertySignature } from './ApiPropertySignature';
 import { ApiParameter } from './ApiParameter';
+import { ApiMethodSignature } from './ApiMethodSignature';
+import { ApiProperty } from './ApiProperty';
 
 export class Deserializer {
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
@@ -29,6 +31,9 @@ export class Deserializer {
       case ApiItemKind.Method:
         ApiMethod.onDeserializeInto(options, jsonObject);
         return new ApiMethod(options as any); // tslint:disable-line:no-any
+      case ApiItemKind.MethodSignature:
+        ApiMethodSignature.onDeserializeInto(options, jsonObject);
+        return new ApiMethodSignature(options as any); // tslint:disable-line:no-any
       case ApiItemKind.Model:
         return new ApiModel();
       case ApiItemKind.Namespace:
@@ -40,6 +45,9 @@ export class Deserializer {
       case ApiItemKind.Parameter:
         ApiParameter.onDeserializeInto(options, jsonObject);
         return new ApiParameter(options as any); // tslint:disable-line:no-any
+      case ApiItemKind.Property:
+        ApiProperty.onDeserializeInto(options, jsonObject);
+        return new ApiProperty(options as any); // tslint:disable-line:no-any
       case ApiItemKind.PropertySignature:
         ApiPropertySignature.onDeserializeInto(options, jsonObject);
         return new ApiPropertySignature(options as any); // tslint:disable-line:no-any

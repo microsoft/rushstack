@@ -4,42 +4,38 @@
 import { ApiItemKind } from './ApiItem';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { ApiFunctionLikeMixin, IApiFunctionLikeMixinOptions } from '../mixins/ApiFunctionLikeMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 
 /** @public */
-export interface IApiMethodOptions extends
+export interface IApiPropertyOptions extends
   IApiDeclarationMixinOptions,
-  IApiFunctionLikeMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiStaticMixinOptions,
   IApiDocumentedItemOptions {
 }
 
 /** @public */
-export class ApiMethod extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(ApiStaticMixin(
-  ApiDocumentedItem)))) {
-
-  public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
+export class ApiProperty extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiStaticMixin(ApiDocumentedItem))) {
+  public static getCanonicalReference(name: string, isStatic: boolean): string {
     if (isStatic) {
-      return `(${name}:static,${overloadIndex})`;
+      return `(${name}:static)`;
     } else {
-      return `(${name}:instance,${overloadIndex})`;
+      return `(${name}:instance)`;
     }
   }
 
-  public constructor(options: IApiMethodOptions) {
+  public constructor(options: IApiPropertyOptions) {
     super(options);
   }
 
   /** @override */
   public get kind(): ApiItemKind {
-    return ApiItemKind.Method;
+    return ApiItemKind.PropertySignature;
   }
 
   /** @override */
   public get canonicalReference(): string {
-    return ApiMethod.getCanonicalReference(this.name, this.isStatic, this.overloadIndex);
+    return ApiProperty.getCanonicalReference(this.name, this.isStatic);
   }
 }

@@ -76,6 +76,10 @@ export {
   ApiMethod
 } from './api/model/ApiMethod';
 export {
+  IApiMethodSignatureOptions,
+  ApiMethodSignature
+} from './api/model/ApiMethodSignature';
+export {
   ApiModel
 } from './api/model/ApiModel';
 export {
@@ -90,6 +94,10 @@ export {
   IApiParameterOptions,
   ApiParameter
 } from './api/model/ApiParameter';
+export {
+  IApiPropertyOptions,
+  ApiProperty
+} from './api/model/ApiProperty';
 export {
   IApiPropertySignatureOptions,
   ApiPropertySignature

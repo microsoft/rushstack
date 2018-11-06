@@ -24,6 +24,8 @@ import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { ApiReleaseTagMixin } from '../api/mixins/ApiReleaseTagMixin';
+import { ApiProperty } from '../api/model/ApiProperty';
+import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
@@ -93,25 +95,31 @@ export class ModelBuilder {
         this._processApiMethod(astDeclaration, exportedName, parentApiItem);
         break;
 
+      case ts.SyntaxKind.MethodSignature:
+        this._processApiMethodSignature(astDeclaration, exportedName, parentApiItem);
+        break;
+
       case ts.SyntaxKind.ModuleDeclaration:
         this._processApiNamespace(astDeclaration, exportedName, parentApiItem);
+        break;
+
+      case ts.SyntaxKind.PropertyDeclaration:
+        this._processApiProperty(astDeclaration, exportedName, parentApiItem);
         break;
 
       case ts.SyntaxKind.PropertySignature:
         this._processApiPropertySignature(astDeclaration, exportedName, parentApiItem);
         break;
 
-      case ts.SyntaxKind.MethodSignature:
       case ts.SyntaxKind.Constructor:
       case ts.SyntaxKind.ConstructSignature:
       case ts.SyntaxKind.EnumDeclaration:
       case ts.SyntaxKind.EnumMember:
       case ts.SyntaxKind.FunctionDeclaration:
       case ts.SyntaxKind.IndexSignature:
-      case ts.SyntaxKind.PropertyDeclaration:
       case ts.SyntaxKind.TypeAliasDeclaration:
       case ts.SyntaxKind.VariableDeclaration:
-      default:
+        default:
     }
   }
 
@@ -205,6 +213,39 @@ export class ModelBuilder {
     }
   }
 
+  private _processApiMethodSignature(astDeclaration: AstDeclaration, exportedName: string | undefined,
+    parentApiItem: ApiItemContainerMixin): void {
+
+    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+
+    const methodSignature: ts.MethodSignature = astDeclaration.declaration as ts.MethodSignature;
+
+    const overloadIndex: number = this._getOverloadIndex(astDeclaration);
+    const canonicalReference: string = ApiMethodSignature.getCanonicalReference(name, overloadIndex);
+
+    let apiMethodSignature: ApiMethodSignature | undefined = parentApiItem.tryGetMember(canonicalReference) as
+      ApiMethodSignature;
+
+    if (apiMethodSignature === undefined) {
+      const signature: string = astDeclaration.declaration.getText();
+      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+
+      apiMethodSignature = new ApiMethodSignature({ name, signature, docComment, releaseTag, overloadIndex });
+
+      for (const parameter of methodSignature.parameters) {
+        const parameterSignature: string = parameter.getText().trim();
+
+        apiMethodSignature.addParameter(new ApiParameter({
+          name: parameter.name.getText() || '',
+          signature: parameterSignature
+        }));
+      }
+
+      parentApiItem.addMember(apiMethodSignature);
+    }
+  }
+
   private _processApiNamespace(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
@@ -226,6 +267,40 @@ export class ModelBuilder {
     this._processChildDeclarations(astDeclaration, exportedName, apiNamespace);
   }
 
+  private _processApiProperty(astDeclaration: AstDeclaration, exportedName: string | undefined,
+    parentApiItem: ApiItemContainerMixin): void {
+
+    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+
+    const propertyDeclaration: ts.PropertyDeclaration = astDeclaration.declaration as ts.PropertyDeclaration;
+
+    let isStatic: boolean = false;
+    if (propertyDeclaration.modifiers) {
+      for (const modifier of propertyDeclaration.modifiers) {
+        if (modifier.kind === ts.SyntaxKind.StaticKeyword) {
+          isStatic = true;
+        }
+      }
+    }
+
+    const canonicalReference: string = ApiProperty.getCanonicalReference(name, isStatic);
+
+    let apiProperty: ApiProperty | undefined
+      = parentApiItem.tryGetMember(canonicalReference) as ApiProperty;
+
+    if (apiProperty === undefined) {
+      const signature: string = astDeclaration.declaration.getText();
+      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+
+      apiProperty = new ApiProperty({ name, signature, docComment, releaseTag, isStatic });
+      parentApiItem.addMember(apiProperty);
+    } else {
+      // If the property was already declared before (via a merged interface declaration),
+      // we assume its signature is identical, because the language requires that.
+    }
+  }
+
   private _processApiPropertySignature(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
@@ -233,7 +308,7 @@ export class ModelBuilder {
     const canonicalReference: string = ApiPropertySignature.getCanonicalReference(name);
 
     let apiPropertySignature: ApiPropertySignature | undefined
-      = parentApiItem.tryGetMember(canonicalReference) as ApiNamespace;
+      = parentApiItem.tryGetMember(canonicalReference) as ApiPropertySignature;
 
     if (apiPropertySignature === undefined) {
       const signature: string = astDeclaration.declaration.getText();

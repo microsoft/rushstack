@@ -27,9 +27,4 @@ export class ApiPropertySignature extends ApiDeclarationMixin(ApiReleaseTagMixin
   public get kind(): ApiItemKind {
     return ApiItemKind.PropertySignature;
   }
-
-  /** @override */
-  public get canonicalReference(): string {
-    return ApiPropertySignature.getCanonicalReference(this.name);
-  }
 }

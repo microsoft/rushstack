@@ -9,10 +9,12 @@ export const enum ApiItemKind {
   EntryPoint = 'EntryPoint',
   Interface = 'Interface',
   Method = 'Method',
+  MethodSignature = 'MethodSignature',
   Model = 'Model',
   Namespace = 'Namespace',
   Package = 'Package',
   Parameter = 'Parameter',
+  Property = 'Property',
   PropertySignature = 'PropertySignature',
   None = 'None'
 }
