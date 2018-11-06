@@ -1,6 +1,76 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Wed, 17 Oct 2018 14:43:24 GMT and should not be manually modified.
+This log was last generated on Mon, 05 Nov 2018 17:04:24 GMT and should not be manually modified.
+
+## 6.0.26
+Mon, 05 Nov 2018 17:04:24 GMT
+
+*Version update only*
+
+## 6.0.25
+Thu, 01 Nov 2018 21:33:52 GMT
+
+*Version update only*
+
+## 6.0.24
+Thu, 01 Nov 2018 19:32:52 GMT
+
+*Version update only*
+
+## 6.0.23
+Wed, 31 Oct 2018 21:17:50 GMT
+
+*Version update only*
+
+## 6.0.22
+Wed, 31 Oct 2018 17:00:55 GMT
+
+*Version update only*
+
+## 6.0.21
+Sat, 27 Oct 2018 03:45:51 GMT
+
+*Version update only*
+
+## 6.0.20
+Sat, 27 Oct 2018 02:17:18 GMT
+
+*Version update only*
+
+## 6.0.19
+Sat, 27 Oct 2018 00:26:56 GMT
+
+*Version update only*
+
+## 6.0.18
+Thu, 25 Oct 2018 23:20:40 GMT
+
+*Version update only*
+
+## 6.0.17
+Thu, 25 Oct 2018 08:56:02 GMT
+
+*Version update only*
+
+## 6.0.16
+Wed, 24 Oct 2018 16:03:10 GMT
+
+*Version update only*
+
+## 6.0.15
+Thu, 18 Oct 2018 05:30:14 GMT
+
+*Version update only*
+
+## 6.0.14
+Thu, 18 Oct 2018 01:32:21 GMT
+
+*Version update only*
+
+## 6.0.13
+Wed, 17 Oct 2018 21:04:49 GMT
+
+*Version update only*
 
 ## 6.0.12
 Wed, 17 Oct 2018 14:43:24 GMT

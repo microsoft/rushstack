@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 17 Oct 2018 03:19:43 GMT and should not be manually modified.
+This log was last generated on Thu, 25 Oct 2018 23:20:40 GMT and should not be manually modified.
+
+## 5.4.0
+Thu, 25 Oct 2018 23:20:40 GMT
+
+### Updates
+
+- Remove use of a deprecated Buffer API.
+- Fix an issue with "rush change" on NodeJS 10.
+- Fix an issue where "rush install" sometimes would incorrectly ask for "rush update", when using the Yarn package manager
+- Improve sorting of @rush-temp projects, which may reduce churn of hashes in the shrinkwrap file
+- Expose safeForSimultaneousRushProcesses to custom commands
+- Add 'variants' feature and command-line parameter
 
 ## 5.3.4
 Wed, 17 Oct 2018 03:19:43 GMT

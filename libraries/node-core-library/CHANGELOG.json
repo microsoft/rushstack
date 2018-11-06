@@ -2,6 +2,54 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.5.1",
+      "tag": "@microsoft/node-core-library_v3.5.1",
+      "date": "Mon, 05 Nov 2018 17:04:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove all dependencies on the \"rimraf\" library"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.0",
+      "tag": "@microsoft/node-core-library_v3.5.0",
+      "date": "Thu, 25 Oct 2018 23:20:40 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add Sort API"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.0",
+      "tag": "@microsoft/node-core-library_v3.4.0",
+      "date": "Wed, 24 Oct 2018 16:03:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Adding Terminal API."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.1",
+      "tag": "@microsoft/node-core-library_v3.3.1",
+      "date": "Wed, 17 Oct 2018 21:04:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove use of a deprecated Buffer API."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.0",
       "tag": "@microsoft/node-core-library_v3.3.0",
       "date": "Mon, 08 Oct 2018 16:04:27 GMT",

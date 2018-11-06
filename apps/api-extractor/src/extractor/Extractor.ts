@@ -158,6 +158,17 @@ export class Extractor {
     return analysisFilePaths;
   }
 
+  /**
+   * Invokes the API Extractor engine, using the api extractor configuration file.
+   * @param jsonConfigFile - Path to api extractor json config file.
+   * @param options - IExtractor options.
+   */
+  public static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractorOptions): void {
+    const configObject: IExtractorConfig = JsonFile.loadAndValidate(jsonConfigFile, Extractor.jsonSchema);
+    const extractor: Extractor = new Extractor(configObject, options);
+    extractor.processProject();
+  }
+
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     // Use the provided config to override the defaults
     const normalized: IExtractorConfig  = lodash.merge(
@@ -439,7 +450,7 @@ export class Extractor {
       } else {
         this._monitoredLogger.logVerbose(`The "mainDtsRollupPath" is: ${mainDtsRollupPath}`);
 
-        if (!path.isAbsolute(mainDtsRollupPath)) {
+        if (path.isAbsolute(mainDtsRollupPath)) {
           this._monitoredLogger.logError('The "mainDtsRollupPath" setting must be a relative path'
             + ' that can be combined with one of the "publishFolder" settings.');
           return;

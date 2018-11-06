@@ -8,7 +8,7 @@ describe('Path', () => {
   describe('Test', () => {
 
     if (os.platform() === 'win32') {
-      it('Windows paths', () => {
+      test('Windows paths', () => {
         expect(Path.isUnder('C:\\a\\b.txt', 'C:\\a')).toEqual(true);
         expect(Path.isUnder('C:\\a\\b.txt', 'C:\\a\\')).toEqual(true);
         expect(Path.isUnder('C:\\a\\b\\c.txt', 'C:\\a')).toEqual(true);
@@ -21,7 +21,7 @@ describe('Path', () => {
       });
     }
 
-    it('POSIX-style paths', () => {
+    test('POSIX-style paths', () => {
       expect(Path.isUnder('/a/b.txt', '/a')).toEqual(true);
       expect(Path.isUnder('/a/b.txt', '/a/')).toEqual(true);
       expect(Path.isUnder('/a/b/c.txt', '/a')).toEqual(true);
@@ -30,12 +30,12 @@ describe('Path', () => {
       expect(Path.isUnder('/a/b.txt', '/b/')).toEqual(false);
       expect(Path.isUnder('/a/b/c.txt', '/b')).toEqual(false);
     });
-    it('Edge cases', () => {
+    test('Edge cases', () => {
       expect(Path.isUnder('/a', '/a')).toEqual(false);
       expect(Path.isUnder('.', '.')).toEqual(false);
       expect(Path.isUnder('', '')).toEqual(false);
     });
-    it('Relative paths', () => {
+    test('Relative paths', () => {
       expect(Path.isUnder('a/b/c', 'a/b')).toEqual(true);
       expect(Path.isUnder('./a/b/c', './a/b')).toEqual(true);
       expect(Path.isUnder('../a/b/c', '../a/b')).toEqual(true);

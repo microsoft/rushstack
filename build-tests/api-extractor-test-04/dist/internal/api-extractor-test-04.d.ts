@@ -83,7 +83,7 @@ export declare const enum ConstEnum {
      * This member is marked as \@internal
      * @internal
      */
-    _InternalMember = "_InternalMember",
+    _InternalMember = "_InternalMember"
 }
 
 /**
@@ -221,7 +221,7 @@ export declare enum RegularEnum {
      * This member is marked as \@internal
      * @internal
      */
-    _InternalMember = 102,
+    _InternalMember = 102
 }
 
-declare const variableDeclaration: string;
+export declare const variableDeclaration: string;

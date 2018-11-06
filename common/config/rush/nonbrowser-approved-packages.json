@@ -271,10 +271,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "gulp-util",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "https-proxy-agent",
       "allowedCategories": [ "libraries" ]
     },
@@ -427,7 +423,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "rimraf",
+      "name": "resolve",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -476,6 +472,10 @@
     },
     {
       "name": "uglify-js",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "vinyl",
       "allowedCategories": [ "libraries" ]
     },
     {

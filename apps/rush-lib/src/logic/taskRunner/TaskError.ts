@@ -3,7 +3,6 @@
 
 /**
  * Encapsulates information about an error
- * @public
  */
 export class TaskError extends Error {
   protected _type: string;
@@ -25,7 +24,6 @@ export class TaskError extends Error {
 
 /**
  * TestTaskError extends TaskError
- * @public
  */
 export class BuildTaskError extends TaskError {
   protected _file: string;

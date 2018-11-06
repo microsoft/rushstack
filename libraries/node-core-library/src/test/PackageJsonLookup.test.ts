@@ -10,7 +10,7 @@ describe('PackageJsonLookup', () => {
 
   describe('basic tests', () => {
 
-    it('tryLoadPackageJsonFor() test', () => {
+    test('tryLoadPackageJsonFor() test', () => {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package');
       const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(sourceFilePath);
@@ -24,7 +24,7 @@ describe('PackageJsonLookup', () => {
       }
     });
 
-    it('tryGetPackageFolderFor() test', () => {
+    test('tryGetPackageFolderFor() test', () => {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package/src/ExampleFile.txt');
 

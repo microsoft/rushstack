@@ -1,6 +1,86 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 17 Oct 2018 14:43:24 GMT and should not be manually modified.
+This log was last generated on Mon, 05 Nov 2018 17:04:24 GMT and should not be manually modified.
+
+## 7.2.0
+Mon, 05 Nov 2018 17:04:24 GMT
+
+### Minor changes
+
+- Update GCB-TS to ship with a default rush-stack-compiler with TS 2.4.
+
+## 7.1.2
+Thu, 01 Nov 2018 21:33:51 GMT
+
+### Patches
+
+- Fix a regression where @microsoft/rush-stack-compiler could not compile itself
+
+## 7.1.1
+Thu, 01 Nov 2018 19:32:52 GMT
+
+*Version update only*
+
+## 7.1.0
+Wed, 31 Oct 2018 21:17:50 GMT
+
+### Minor changes
+
+- Update the way rush-stack-compiler is resolved. Now it's resolved by looking at the "extends" properties of tsconfig.json
+
+## 7.0.3
+Wed, 31 Oct 2018 17:00:55 GMT
+
+*Version update only*
+
+## 7.0.2
+Sat, 27 Oct 2018 03:45:51 GMT
+
+*Version update only*
+
+## 7.0.1
+Sat, 27 Oct 2018 02:17:18 GMT
+
+*Version update only*
+
+## 7.0.0
+Sat, 27 Oct 2018 00:26:56 GMT
+
+### Breaking changes
+
+- Moving logic into rush-stack-compiler.
+
+## 6.1.12
+Thu, 25 Oct 2018 23:20:40 GMT
+
+*Version update only*
+
+## 6.1.11
+Thu, 25 Oct 2018 08:56:02 GMT
+
+*Version update only*
+
+## 6.1.10
+Wed, 24 Oct 2018 16:03:10 GMT
+
+*Version update only*
+
+## 6.1.9
+Thu, 18 Oct 2018 05:30:14 GMT
+
+### Patches
+
+- Replace deprecated dependency gulp-util
+
+## 6.1.8
+Thu, 18 Oct 2018 01:32:21 GMT
+
+*Version update only*
+
+## 6.1.7
+Wed, 17 Oct 2018 21:04:49 GMT
+
+*Version update only*
 
 ## 6.1.6
 Wed, 17 Oct 2018 14:43:24 GMT

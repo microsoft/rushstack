@@ -83,6 +83,14 @@ export interface IPnpmOptionsJson {
 }
 
 /**
+ * Options defining an allowed variant as part of IRushConfigurationJson.
+ */
+export interface IRushVariantOptionsJson {
+  variantName: string;
+  description: string;
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -104,16 +112,23 @@ export interface IRushConfigurationJson {
   hotfixChangeEnabled?: boolean;
   pnpmOptions?: IPnpmOptionsJson;
   ensureConsistentVersions?: boolean;
+  variants?: IRushVariantOptionsJson[];
 }
 
 /**
  * This represents the JSON data structure for the "rush-link.json" data file.
- * @public
  */
 export interface IRushLinkJson {
   localLinks: {
     [name: string]: string[]
   };
+}
+
+/**
+ * This represents the JSON data structure for the "current-variant.json" data file.
+ */
+export interface ICurrentVariantJson {
+  variant: string | null; // Use `null` instead of `undefined` because `undefined` is not handled by JSON.
 }
 
 /**
@@ -169,16 +184,19 @@ export class RushConfiguration {
   private _npmTmpFolder: string;
   private _pnpmStoreFolder: string;
   private _yarnCacheFolder: string;
-  private _committedShrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _tempShrinkwrapPreinstallFilename: string;
   private _rushUserFolder: string;
   private _rushLinkJsonFilename: string;
+  private _currentVariantJsonFilename: string;
   private _packageManagerToolVersion: string;
   private _packageManagerToolFilename: string;
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
   private _ensureConsistentVersions: boolean;
+  private _variants: {
+    [variantName: string]: boolean;
+  };
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -197,8 +215,6 @@ export class RushConfiguration {
 
   // Rush hooks
   private _eventHooks: EventHooks;
-
-  private _commonVersions: CommonVersionsConfiguration;
 
   private _telemetryEnabled: boolean;
 
@@ -364,7 +380,7 @@ export class RushConfiguration {
           break;
         case 'pnpm':
           knownSet.add(RushConstants.pnpmShrinkwrapFilename.toUpperCase());
-          knownSet.add(RushConstants.pnpmFileFilename.toUpperCase());
+          knownSet.add(RushConstants.pnpmfileFilename.toUpperCase());
           break;
         case 'yarn':
           knownSet.add(RushConstants.yarnShrinkwrapFilename.toUpperCase());
@@ -501,9 +517,12 @@ export class RushConfiguration {
    * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
    * Example: `C:\MyRepo\common\npm-shrinkwrap.json` or `C:\MyRepo\common\shrinkwrap.yaml`
+   *
+   * @deprecated Use `getCommittedShrinkwrapFilename` instead, which gets the correct common
+   * shrinkwrap file name for a given active variant.
    */
   public get committedShrinkwrapFilename(): string {
-    return this._committedShrinkwrapFilename;
+    return this.getCommittedShrinkwrapFilename();
   }
 
   /**
@@ -562,6 +581,17 @@ export class RushConfiguration {
    */
   public get rushLinkJsonFilename(): string {
     return this._rushLinkJsonFilename;
+  }
+
+  /**
+   * The filename of the variant dependency data file.  By default this is
+   * called 'current-variant.json' resides in the Rush common folder.
+   * Its data structure is defined by ICurrentVariantJson.
+   *
+   * Example: `C:\MyRepo\common\temp\current-variant.json`
+   */
+  public get currentVariantJsonFilename(): string {
+    return this._currentVariantJsonFilename;
   }
 
   /**
@@ -680,9 +710,30 @@ export class RushConfiguration {
    * If the common-versions.json file is missing, this property will not be undefined.
    * Instead it will be initialized in an empty state, and calling CommonVersionsConfiguration.save()
    * will create the file.
+   *
+   * @deprecated Use `getCommonVersions` instead, which gets the correct common version data
+   * for a given active variant.
    */
   public get commonVersions(): CommonVersionsConfiguration {
-    return this._commonVersions;
+    return this.getCommonVersions();
+  }
+
+  /**
+   * Gets the currently-installed variant, if an installation has occurred.
+   * For Rush operations which do not take a --variant parameter, this method
+   * determines which variant, if any, was last specified when performing "rush install"
+   * or "rush update".
+   */
+  public get currentInstalledVariant(): string | undefined {
+    let variant: string | undefined;
+
+    if (FileSystem.exists(this._currentVariantJsonFilename)) {
+      const currentVariantJson: ICurrentVariantJson = JsonFile.load(this._currentVariantJsonFilename);
+
+      variant = currentVariantJson.variant || undefined;
+    }
+
+    return variant;
   }
 
   /**
@@ -691,6 +742,64 @@ export class RushConfiguration {
    */
   public get eventHooks(): EventHooks {
     return this._eventHooks;
+  }
+
+  /**
+   * Gets the settings from the common-versions.json config file for a specific variant.
+   * @param variant - The name of the current variant in use by the active command.
+   */
+  public getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration {
+    const commonVersionsFilename: string = path.join(this.commonRushConfigFolder,
+      ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
+      RushConstants.commonVersionsFilename);
+    return CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
+  }
+
+  /**
+   * Gets the committed shrinkwrap file name for a specific variant.
+   * @param variant - The name of the current variant in use by the active command.
+   */
+  public getCommittedShrinkwrapFilename(variant?: string | undefined): string {
+    if (variant) {
+      if (!this._variants[variant]) {
+        throw new Error(
+          `Invalid variant name '${variant}'. The provided variant parameter needs to be ` +
+          `one of the following from rush.json: ` +
+          `${Object.keys(this._variants).map((name: string) => `"${name}"`).join(', ')}.`);
+      }
+    }
+
+    const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
+
+    if (this.packageManager === 'pnpm') {
+      return path.join(
+        variantConfigFolderPath,
+        RushConstants.pnpmShrinkwrapFilename);
+    } else if (this.packageManager === 'npm') {
+      return path.join(
+        variantConfigFolderPath,
+        RushConstants.npmShrinkwrapFilename);
+      } else if (this.packageManager === 'yarn') {
+        return path.join(
+          variantConfigFolderPath,
+          RushConstants.yarnShrinkwrapFilename);
+    } else {
+      throw new Error('Invalid package manager.');
+    }
+  }
+
+  /**
+   * Gets the absolute path for "pnpmfile.js" for a specific variant.
+   * @param variant - The name of the current variant in use by the active command.
+   * @remarks
+   * The file path is returned even if PNPM is not configured as the package manager.
+   */
+  public getPnpmfilePath(variant?: string | undefined): string {
+    const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
+
+    return path.join(
+      variantConfigFolderPath,
+      RushConstants.pnpmfileFilename);
   }
 
   /**
@@ -802,6 +911,7 @@ export class RushConfiguration {
     this._rushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush', `node-${process.version}`);
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
+    this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
@@ -833,21 +943,18 @@ export class RushConfiguration {
     }
 
     if (this._packageManager === 'npm') {
-      this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.npmShrinkwrapFilename);
       this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
 
       this._packageManagerToolVersion = rushConfigurationJson.npmVersion!;
       this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
         'npm-local', 'node_modules', '.bin', 'npm'));
     } else if (this._packageManager === 'pnpm') {
-      this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.pnpmShrinkwrapFilename);
       this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.pnpmShrinkwrapFilename);
 
       this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
       this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
         'pnpm-local', 'node_modules', '.bin', 'pnpm'));
     } else {
-      this._committedShrinkwrapFilename = path.join(this._commonRushConfigFolder, RushConstants.yarnShrinkwrapFilename);
       this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.yarnShrinkwrapFilename);
 
       this._packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
@@ -951,9 +1058,25 @@ export class RushConfiguration {
       this._versionPolicyConfiguration.validate(this._projectsByName);
     }
 
-    // Example: "./common/config/rush/common-versions.json"
-    const commonVersionsFilename: string = path.join(this.commonRushConfigFolder, RushConstants.commonVersionsFilename);
-    this._commonVersions = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
+    const variants: {
+      [variantName: string]: boolean;
+    } = {};
+
+    if (rushConfigurationJson.variants) {
+      for (const variantOptions of rushConfigurationJson.variants) {
+        const {
+          variantName
+        } = variantOptions;
+
+        if (variants[variantName]) {
+          throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
+        }
+
+        variants[variantName] = true;
+      }
+    }
+
+    this._variants = variants;
   }
 
   private _populateDownstreamDependencies(
@@ -970,5 +1093,21 @@ export class RushConfiguration {
         depProject.downstreamDependencyProjects.push(packageName);
       }
     });
+  }
+
+  private _getVariantConfigFolderPath(variant?: string | undefined): string {
+    if (variant) {
+      if (!this._variants[variant]) {
+        throw new Error(
+          `Invalid variant name '${variant}'. The provided variant parameter needs to be ` +
+          `one of the following from rush.json: ` +
+          `${Object.keys(this._variants).map((name: string) => `"${name}"`).join(', ')}.`);
+      }
+    }
+
+    return path.join(
+      this._commonRushConfigFolder,
+      ...(variant ? [RushConstants.rushVariantsFolderName, variant] : [])
+    );
   }
 }

@@ -1,6 +1,77 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 17 Oct 2018 14:43:24 GMT and should not be manually modified.
+This log was last generated on Mon, 05 Nov 2018 17:04:24 GMT and should not be manually modified.
+
+## 3.8.42
+Mon, 05 Nov 2018 17:04:24 GMT
+
+### Patches
+
+- Remove all dependencies on the "rimraf" library
+
+## 3.8.41
+Thu, 01 Nov 2018 21:33:52 GMT
+
+*Version update only*
+
+## 3.8.40
+Thu, 01 Nov 2018 19:32:52 GMT
+
+*Version update only*
+
+## 3.8.39
+Wed, 31 Oct 2018 17:00:55 GMT
+
+*Version update only*
+
+## 3.8.38
+Sat, 27 Oct 2018 03:45:51 GMT
+
+*Version update only*
+
+## 3.8.37
+Sat, 27 Oct 2018 02:17:18 GMT
+
+*Version update only*
+
+## 3.8.36
+Sat, 27 Oct 2018 00:26:56 GMT
+
+*Version update only*
+
+## 3.8.35
+Thu, 25 Oct 2018 23:20:40 GMT
+
+*Version update only*
+
+## 3.8.34
+Thu, 25 Oct 2018 08:56:03 GMT
+
+*Version update only*
+
+## 3.8.33
+Wed, 24 Oct 2018 16:03:10 GMT
+
+*Version update only*
+
+## 3.8.32
+Thu, 18 Oct 2018 05:30:14 GMT
+
+### Patches
+
+- Replace deprecated dependency gulp-util
+
+## 3.8.31
+Thu, 18 Oct 2018 01:32:21 GMT
+
+*Version update only*
+
+## 3.8.30
+Wed, 17 Oct 2018 21:04:49 GMT
+
+### Patches
+
+- Remove use of a deprecated Buffer API.
 
 ## 3.8.29
 Wed, 17 Oct 2018 14:43:24 GMT

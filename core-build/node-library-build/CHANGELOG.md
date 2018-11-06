@@ -1,6 +1,78 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Wed, 17 Oct 2018 14:43:24 GMT and should not be manually modified.
+This log was last generated on Mon, 05 Nov 2018 17:04:24 GMT and should not be manually modified.
+
+## 6.0.7
+Mon, 05 Nov 2018 17:04:24 GMT
+
+*Version update only*
+
+## 6.0.6
+Thu, 01 Nov 2018 21:33:51 GMT
+
+*Version update only*
+
+## 6.0.5
+Thu, 01 Nov 2018 19:32:52 GMT
+
+*Version update only*
+
+## 6.0.4
+Wed, 31 Oct 2018 21:17:50 GMT
+
+*Version update only*
+
+## 6.0.3
+Wed, 31 Oct 2018 17:00:55 GMT
+
+*Version update only*
+
+## 6.0.2
+Sat, 27 Oct 2018 03:45:51 GMT
+
+*Version update only*
+
+## 6.0.1
+Sat, 27 Oct 2018 02:17:18 GMT
+
+*Version update only*
+
+## 6.0.0
+Sat, 27 Oct 2018 00:26:56 GMT
+
+### Breaking changes
+
+- Upgrading tasks to use rush-stack-compiler.
+
+## 5.0.26
+Thu, 25 Oct 2018 23:20:40 GMT
+
+*Version update only*
+
+## 5.0.25
+Thu, 25 Oct 2018 08:56:02 GMT
+
+*Version update only*
+
+## 5.0.24
+Wed, 24 Oct 2018 16:03:10 GMT
+
+*Version update only*
+
+## 5.0.23
+Thu, 18 Oct 2018 05:30:14 GMT
+
+*Version update only*
+
+## 5.0.22
+Thu, 18 Oct 2018 01:32:21 GMT
+
+*Version update only*
+
+## 5.0.21
+Wed, 17 Oct 2018 21:04:49 GMT
+
+*Version update only*
 
 ## 5.0.20
 Wed, 17 Oct 2018 14:43:24 GMT

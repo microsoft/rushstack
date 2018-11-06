@@ -1,6 +1,78 @@
 # Change Log - @microsoft/stream-collator
 
-This log was last generated on Wed, 17 Oct 2018 14:43:24 GMT and should not be manually modified.
+This log was last generated on Mon, 05 Nov 2018 17:04:24 GMT and should not be manually modified.
+
+## 3.0.13
+Mon, 05 Nov 2018 17:04:24 GMT
+
+*Version update only*
+
+## 3.0.12
+Thu, 01 Nov 2018 21:33:52 GMT
+
+*Version update only*
+
+## 3.0.11
+Thu, 01 Nov 2018 19:32:52 GMT
+
+*Version update only*
+
+## 3.0.10
+Wed, 31 Oct 2018 21:17:50 GMT
+
+*Version update only*
+
+## 3.0.9
+Wed, 31 Oct 2018 17:00:55 GMT
+
+*Version update only*
+
+## 3.0.8
+Sat, 27 Oct 2018 03:45:51 GMT
+
+*Version update only*
+
+## 3.0.7
+Sat, 27 Oct 2018 02:17:18 GMT
+
+*Version update only*
+
+## 3.0.6
+Sat, 27 Oct 2018 00:26:56 GMT
+
+*Version update only*
+
+## 3.0.5
+Thu, 25 Oct 2018 23:20:40 GMT
+
+*Version update only*
+
+## 3.0.4
+Thu, 25 Oct 2018 08:56:03 GMT
+
+*Version update only*
+
+## 3.0.3
+Wed, 24 Oct 2018 16:03:10 GMT
+
+*Version update only*
+
+## 3.0.2
+Thu, 18 Oct 2018 05:30:14 GMT
+
+*Version update only*
+
+## 3.0.1
+Thu, 18 Oct 2018 01:32:21 GMT
+
+*Version update only*
+
+## 3.0.0
+Wed, 17 Oct 2018 21:04:49 GMT
+
+### Breaking changes
+
+- Removing unused exports that don't work in Node 10.
 
 ## 2.2.84
 Wed, 17 Oct 2018 14:43:24 GMT

@@ -23,6 +23,13 @@ export interface IKarmaTaskConfig {
    *  this RegExp to locate test files.
    */
   testMatch?: RegExp | string;
+
+  /**
+   * If specified, prepend the tests.js file with the specified lines.
+   *
+   * @alpha
+   */
+  additionalTestsJsFileLines?: string[];
 }
 
 export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
@@ -34,7 +41,8 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
       {
         configPath: './karma.config.js',
         testMatch: /.+\.test\.js?$/,
-        failBuildOnErrors: false
+        failBuildOnErrors: false,
+        additionalTestsJsFileLines: []
       }
     );
   }
@@ -119,6 +127,7 @@ export class KarmaTask extends GulpTask<IKarmaTaskConfig> {
 
         // tslint:disable:max-line-length
         const testsJsFileContents: string = [
+          ...(this.taskConfig.additionalTestsJsFileLines || []),
           `var context = require.context('${path.posix.join('..', this.buildConfig.libFolder)}', true, ${normalizedMatch.toString()});`,
           `context.keys().forEach(context);`,
           `module.exports = context;`

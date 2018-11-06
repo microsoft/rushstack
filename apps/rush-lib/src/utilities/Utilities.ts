@@ -4,7 +4,6 @@
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
-import * as rimraf from 'rimraf';
 import * as tty from 'tty';
 import * as path from 'path';
 import * as wordwrap from 'wordwrap';
@@ -36,9 +35,6 @@ export interface IInstallPackageInDirectoryOptions {
   suppressOutput?: boolean;
 }
 
-/**
- * @public
- */
 export class Utilities {
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
@@ -174,7 +170,7 @@ export class Utilities {
    */
   public static dangerouslyDeletePath(folderPath: string): void {
     try {
-      rimraf.sync(folderPath, { disableGlob: true });
+      FileSystem.deleteFolder(folderPath);
     } catch (e) {
       throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
         + ' from a process such as your text editor, command prompt, or "gulp serve"');
@@ -365,7 +361,6 @@ export class Utilities {
    * @param initCwd = the folder containing a local .npmrc, which will be used
    *        for the INIT_CWD environment variable
    * @param captureOutput - if true, map stdio to 'pipe' instead of the parent process's streams
-   * @beta
    */
   public static executeLifecycleCommandAsync(
     command: string,

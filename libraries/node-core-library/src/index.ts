@@ -54,6 +54,7 @@ export {
 export { PackageName, IParsedPackageName, IParsedPackageNameOrError } from './PackageName';
 export { Path } from './Path';
 export { Text, NewlineKind } from './Text';
+export { Sort } from './Sort';
 export {
   FileSystem,
   IFileSystemReadFolderOptions,
@@ -73,3 +74,17 @@ export {
   LegacyAdapters,
   callback
 } from './LegacyAdapters';
+export { StringBuilder } from './StringBuilder';
+export { Terminal } from './Terminal/Terminal';
+export {
+  Colors,
+  IColorableSequence
+} from './Terminal/Colors';
+export {
+  ITerminalProvider,
+  TerminalProviderSeverity
+} from './Terminal/ITerminalProvider';
+export {
+  ConsoleTerminalProvider,
+  IConsoleTerminalProviderOptions
+} from './Terminal/ConsoleTerminalProvider';

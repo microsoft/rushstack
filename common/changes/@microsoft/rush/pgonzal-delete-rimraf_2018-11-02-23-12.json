@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "Remove use of a deprecated Buffer API.",
+      "comment": "Remove all dependencies on the \"rimraf\" library",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
-  "email": "iclanton@users.noreply.github.com"
+  "email": "pgonzal@users.noreply.github.com"
 }

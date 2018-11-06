@@ -10,7 +10,7 @@
     "@types/jest": "21.1.10",
     "@types/node": "8.5.8",
     "api-extractor-test-02": "1.0.0",
-    "fs-extra": "~5.0.0",
-    "typescript": "~2.4.1"
+    "fs-extra": "~7.0.0",
+    "typescript": "~3.0.3"
   }
 }
