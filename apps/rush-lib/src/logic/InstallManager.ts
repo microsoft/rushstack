@@ -341,7 +341,7 @@ export class InstallManager {
    */
   public ensureLocalPackageManager(): Promise<void> {
     // Example: "C:\Users\YourName\.rush"
-    const rushUserFolder: string = this._rushConfiguration.rushUserFolder;
+    const rushUserFolder: string = this._rushConfiguration._rushNodeSpecificUserFolder;
 
     if (!FileSystem.exists(rushUserFolder)) {
       console.log('Creating ' + rushUserFolder);
@@ -925,7 +925,7 @@ export class InstallManager {
 
   private _checkIfReleaseIsPublished(): Promise<boolean> {
     return Promise.resolve().then(() => {
-      const lastCheckFile: string = path.join(this._rushConfiguration.rushUserFolder,
+      const lastCheckFile: string = path.join(this._rushConfiguration._rushNodeSpecificUserFolder,
         'rush-' + Rush.version, 'last-check.flag');
 
       if (FileSystem.exists(lastCheckFile)) {

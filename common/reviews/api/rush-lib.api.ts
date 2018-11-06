@@ -192,6 +192,10 @@ class Rush {
 
 // @public
 class RushConfiguration {
+  // @internal
+  readonly _rushNodeSpecificUserFolder: string;
+  // @internal
+  readonly _rushUserFolder: string;
   readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
   readonly changesFolder: string;
   // @deprecated
@@ -236,7 +240,6 @@ class RushConfiguration {
   readonly rushJsonFile: string;
   readonly rushJsonFolder: string;
   readonly rushLinkJsonFilename: string;
-  readonly rushUserFolder: string;
   readonly shrinkwrapFilePhrase: string;
   // @beta
   readonly telemetryEnabled: boolean;
@@ -244,7 +247,6 @@ class RushConfiguration {
   readonly tempShrinkwrapPreinstallFilename: string;
   static tryFindRushJsonLocation(verbose?: boolean): string | undefined;
   tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
-  readonly versionIndependentRushUserFolder: string;
   // @beta (undocumented)
   readonly versionPolicyConfiguration: VersionPolicyConfiguration;
   readonly yarnCacheFolder: string;

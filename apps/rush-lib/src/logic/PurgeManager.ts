@@ -26,7 +26,7 @@ export class PurgeManager {
     this._commonTempFolderRecycler = new AsyncRecycler(commonAsyncRecyclerPath);
 
     const rushUserAsyncRecyclerPath: string = path.join(
-      this._rushConfiguration.versionIndependentRushUserFolder,
+      this._rushConfiguration._rushUserFolder,
       RushConstants.rushRecyclerFolderName
     );
     this._rushUserFolderRecycler = new AsyncRecycler(rushUserAsyncRecyclerPath);
@@ -64,9 +64,9 @@ export class PurgeManager {
     this.purgeNormal();
 
     // Also delete everything under ~/.rush/node-v4.5.6/ except for the recycler folder itself
-    console.log('Purging ' + this._rushConfiguration.rushUserFolder);
-    this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.rushUserFolder,
-      this._getMembersToExclude(this._rushConfiguration.rushUserFolder));
+    console.log('Purging ' + this._rushConfiguration._rushNodeSpecificUserFolder);
+    this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration._rushNodeSpecificUserFolder,
+      this._getMembersToExclude(this._rushConfiguration._rushNodeSpecificUserFolder));
   }
 
   private _getMembersToExclude(folderToRecycle: string): string[] {
