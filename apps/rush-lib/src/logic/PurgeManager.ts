@@ -19,12 +19,16 @@ export class PurgeManager {
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
 
-    const commonAsyncRecyclerPath: string = path.join(this._rushConfiguration.commonTempFolder,
-      RushConstants.rushRecyclerFolderName);
+    const commonAsyncRecyclerPath: string = path.join(
+      this._rushConfiguration.commonTempFolder,
+      RushConstants.rushRecyclerFolderName
+    );
     this._commonTempFolderRecycler = new AsyncRecycler(commonAsyncRecyclerPath);
 
-    const rushUserAsyncRecyclerPath: string = path.join(this._rushConfiguration.rushUserFolder,
-      RushConstants.rushRecyclerFolderName);
+    const rushUserAsyncRecyclerPath: string = path.join(
+      this._rushConfiguration.versionIndependentRushUserFolder,
+      RushConstants.rushRecyclerFolderName
+    );
     this._rushUserFolderRecycler = new AsyncRecycler(rushUserAsyncRecyclerPath);
   }
 
@@ -59,7 +63,7 @@ export class PurgeManager {
   public purgeUnsafe(): void {
     this.purgeNormal();
 
-    // Also delete everything under ~/.rush except for the recycler folder itself
+    // Also delete everything under ~/.rush/node-v4.5.6/ except for the recycler folder itself
     console.log('Purging ' + this._rushConfiguration.rushUserFolder);
     this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration.rushUserFolder,
       this._getMembersToExclude(this._rushConfiguration.rushUserFolder));
@@ -74,7 +78,7 @@ export class PurgeManager {
     const currentFolderPath: string = path.resolve(__dirname);
 
     // Example:
-    // folderToRecycle = "/home/user/.rush"
+    // folderToRecycle = "/home/user/.rush/node-v4.5.6"
     // relative =  "rush-1.2.3/lib/example.js"
     const relative: string = path.relative(folderToRecycle, currentFolderPath);
 

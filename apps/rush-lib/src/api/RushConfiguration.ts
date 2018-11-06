@@ -187,6 +187,7 @@ export class RushConfiguration {
   private _tempShrinkwrapFilename: string;
   private _tempShrinkwrapPreinstallFilename: string;
   private _rushUserFolder: string;
+  private _versionIndependentRushUserFolder: string;
   private _rushLinkJsonFilename: string;
   private _currentVariantJsonFilename: string;
   private _packageManagerToolVersion: string;
@@ -565,11 +566,19 @@ export class RushConfiguration {
   }
 
   /**
-   * The absolute path to Rush's storage in the home directory for the current user.  On Windows,
-   * it would be something like `C:\Users\YourName\.rush`.
+   * The absolute path to Rush's storage in the home directory for the current user and node version.
+   * On Windows, it would be something like `C:\Users\YourName\.rush\node-v4.5.6\`.
    */
   public get rushUserFolder(): string {
     return this._rushUserFolder;
+  }
+
+  /**
+   * The absolute path to Rush's storage in the home directory for the current user, independent of node version.
+   * On Windows, it would be something like `C:\Users\YourName\.rush\`.
+   */
+  public get versionIndependentRushUserFolder(): string {
+    return this._versionIndependentRushUserFolder;
   }
 
   /**
@@ -908,7 +917,8 @@ export class RushConfiguration {
     this._yarnCacheFolder = path.resolve(path.join(this._commonTempFolder, 'yarn-cache'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
-    this._rushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush', `node-${process.version}`);
+    this._versionIndependentRushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');
+    this._rushUserFolder = path.join(this._versionIndependentRushUserFolder, `node-${process.version}`);
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');

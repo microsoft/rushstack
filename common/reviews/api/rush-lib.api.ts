@@ -244,6 +244,7 @@ class RushConfiguration {
   readonly tempShrinkwrapPreinstallFilename: string;
   static tryFindRushJsonLocation(verbose?: boolean): string | undefined;
   tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
+  readonly versionIndependentRushUserFolder: string;
   // @beta (undocumented)
   readonly versionPolicyConfiguration: VersionPolicyConfiguration;
   readonly yarnCacheFolder: string;
