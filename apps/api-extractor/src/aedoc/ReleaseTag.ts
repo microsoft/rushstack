@@ -2,11 +2,18 @@
 // See LICENSE in the project root for license information.
 
 /**
-  * A "release tag" is an AEDoc tag which indicates whether an AstItem definition
-  * is considered Public API for third party developers, as well as its release
-  * stage (alpha, beta, etc).
-  * @see https://onedrive.visualstudio.com/DefaultCollection/SPPPlat/_git/sp-client
-  *      ?path=/common/docs/ApiPrinciplesAndProcess.md
+  * A "release tag" is a custom TSDoc tag that is applied to an API to communicate the level of support
+  * provided for third-party developers.
+  *
+  * @remarks
+  *
+  * The four release tags are: `@internal`, `@alpha`, `@beta`, and `@public`. They are applied to API items such
+  * as classes, member functions, enums, etc.  The release tag applies recursively to members of a container
+  * (e.g. class or interface). For example, if a class is marked as `@beta`, then all of its members automatically
+  * have this status; you DON'T need add the `@beta` tag to each member function. However, you could add
+  * `@internal` to a member function to give it a different release status.
+  *
+  * @public
   */
 export enum ReleaseTag {
   /**

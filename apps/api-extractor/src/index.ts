@@ -9,6 +9,8 @@
  * @packagedocumentation
  */
 
+export { ReleaseTag } from './aedoc/ReleaseTag';
+
 export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './api/Extractor';
 export {
   IExtractorTsconfigCompilerConfig,
