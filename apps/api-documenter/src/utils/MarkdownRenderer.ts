@@ -13,7 +13,9 @@ import {
   DocParagraph,
   DocFencedCode,
   DocSection,
-  DocNodeTransforms
+  DocNodeTransforms,
+  DocEscapedText,
+  DocErrorText
 } from '@microsoft/tsdoc';
 import { CustomDocNodeKind } from '../nodes/CustomDocNodeKind';
 import { DocHeading } from '../nodes/DocHeading';
@@ -145,48 +147,7 @@ export class MarkdownRenderer {
     switch (docNode.kind) {
       case DocNodeKind.PlainText: {
         const docPlainText: DocPlainText = docNode as DocPlainText;
-        // split out the [ leading whitespace, content, trailing whitespace ]
-        const parts: string[] = docPlainText.text.match(/^(\s*)(.*?)(\s*)$/) || [];
-
-        writer.write(parts[1]);  // write leading whitespace
-
-        const middle: string = parts[2];
-
-        if (middle !== '') {
-          switch (writer.peekLastCharacter()) {
-            case '':
-            case '\n':
-            case ' ':
-            case '[':
-            case '>':
-              // okay to put a symbol
-              break;
-            default:
-              // This is no problem:        "**one** *two* **three**"
-              // But this is trouble:       "**one***two***three**"
-              // The most general solution: "**one**<!-- -->*two*<!-- -->**three**"
-              writer.write('<!-- -->');
-              break;
-          }
-
-          if (context.boldRequested) {
-            writer.write('<b>');
-          }
-          if (context.italicRequested) {
-            writer.write('<i>');
-          }
-
-          writer.write(this._getEscapedText(middle));
-
-          if (context.italicRequested) {
-            writer.write('</i>');
-          }
-          if (context.boldRequested) {
-            writer.write('</b>');
-          }
-        }
-
-        writer.write(parts[3]);  // write trailing whitespace
+        MarkdownRenderer._writePlainText(docPlainText.text, context);
         break;
       }
       case DocNodeKind.HtmlStartTag:
@@ -346,9 +307,66 @@ export class MarkdownRenderer {
         }
         break;
       }
+      case DocNodeKind.EscapedText: {
+        const docEscapedText: DocEscapedText = docNode as DocEscapedText;
+        MarkdownRenderer._writePlainText(docEscapedText.decodedText, context);
+        break;
+      }
+      case DocNodeKind.ErrorText: {
+        const docErrorText: DocErrorText = docNode as DocErrorText;
+        MarkdownRenderer._writePlainText(docErrorText.text, context);
+        break;
+      }
       default:
         throw new Error('Unsupported element kind: ' + docNode.kind);
     }
+  }
+
+  private static _writePlainText(text: string, context: IRenderContext): void {
+    const writer: SimpleWriter = context.writer;
+
+    // split out the [ leading whitespace, content, trailing whitespace ]
+    const parts: string[] = text.match(/^(\s*)(.*?)(\s*)$/) || [];
+
+    writer.write(parts[1]);  // write leading whitespace
+
+    const middle: string = parts[2];
+
+    if (middle !== '') {
+      switch (writer.peekLastCharacter()) {
+        case '':
+        case '\n':
+        case ' ':
+        case '[':
+        case '>':
+          // okay to put a symbol
+          break;
+        default:
+          // This is no problem:        "**one** *two* **three**"
+          // But this is trouble:       "**one***two***three**"
+          // The most general solution: "**one**<!-- -->*two*<!-- -->**three**"
+          writer.write('<!-- -->');
+          break;
+      }
+
+      if (context.boldRequested) {
+        writer.write('<b>');
+      }
+      if (context.italicRequested) {
+        writer.write('<i>');
+      }
+
+      writer.write(MarkdownRenderer._getEscapedText(middle));
+
+      if (context.italicRequested) {
+        writer.write('</i>');
+      }
+      if (context.boldRequested) {
+        writer.write('</b>');
+      }
+    }
+
+    writer.write(parts[3]);  // write trailing whitespace
   }
 
   private static _writeNodes(docNodes: ReadonlyArray<DocNode>, context: IRenderContext): void {

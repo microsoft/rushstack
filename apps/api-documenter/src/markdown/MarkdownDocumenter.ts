@@ -10,44 +10,55 @@ import {
   NewlineKind
 } from '@microsoft/node-core-library';
 import {
-  IApiClass,
-  IApiEnum,
-  IApiEnumMember,
-  IApiFunction,
-  IApiInterface,
-  IApiPackage,
-  ApiMember,
-  IApiProperty,
+  DocSection,
+  DocPlainText,
+  DocLinkTag,
+  DocNode,
+  TSDocConfiguration,
+  StringBuilder,
+  DocNodeKind,
+  DocParagraph,
+  DocCodeSpan,
+  DocFencedCode
+} from '@microsoft/tsdoc';
+import {
+  ApiModel,
   ApiItem,
-  IApiParameter,
-  IApiMethod,
-  IMarkupPage,
-  IMarkupTable,
-  Markup,
-  MarkupBasicElement,
-  MarkupStructuredElement,
-  IMarkupTableRow
+  ApiPackage,
+  ApiItemKind,
+  ApiEntryPoint,
+  ApiReleaseTagMixin,
+  ApiDocumentedItem,
+  ApiClass,
+  ReleaseTag,
+  ApiDeclarationMixin,
+  ApiStaticMixin,
+  ApiResultTypeMixin,
+  ApiPropertyItem
 } from '@microsoft/api-extractor';
 
-import {
-  DocItemSet,
-  DocItem,
-  DocItemKind,
-  IDocItemSetResolveResult
-} from '../utils/DocItemSet';
+import { MarkdownRenderer } from '../utils/MarkdownRenderer';
+import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
+import { DocHeading } from '../nodes/DocHeading';
+import { DocTable } from '../nodes/DocTable';
+import { DocEmphasisSpan } from '../nodes/DocEmphasisSpan';
+import { DocTableRow } from '../nodes/DocTableRow';
+import { DocTableCell } from '../nodes/DocTableCell';
+import { DocNoteBox } from '../nodes/DocNoteBox';
 import { Utilities } from '../utils/Utilities';
-import { MarkdownRenderer, IMarkdownRenderApiLinkArgs } from '../utils/MarkdownRenderer';
 
 /**
  * Renders API documentation in the Markdown file format.
  * For more info:  https://en.wikipedia.org/wiki/Markdown
  */
 export class MarkdownDocumenter {
-  private _docItemSet: DocItemSet;
+  private _apiModel: ApiModel;
   private _outputFolder: string;
+  private _tsdocConfiguration: TSDocConfiguration;
 
-  public constructor(docItemSet: DocItemSet) {
-    this._docItemSet = docItemSet;
+  public constructor(docItemSet: ApiModel) {
+    this._apiModel = docItemSet;
+    this._tsdocConfiguration = CustomDocNodes.configuration;
   }
 
   public generateFiles(outputFolder: string): void {
@@ -56,601 +67,492 @@ export class MarkdownDocumenter {
     console.log();
     this._deleteOldOutputFiles();
 
-    for (const docPackage of this._docItemSet.docPackages) {
-      this._writePackagePage(docPackage);
+    for (const apiPackage of this._apiModel.packages) {
+      console.log(`Writing ${apiPackage.name} package`);
+      this._writeApiItemPage(apiPackage);
+    }
+  }
+
+  private _writeApiItemPage(apiItem: ApiItem): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+    const output: DocSection = new DocSection({ configuration: this._tsdocConfiguration });
+
+    this._writeBreadcrumb(output, apiItem);
+
+    switch (apiItem.kind) {
+      case ApiItemKind.Class:
+        output.appendNode(new DocHeading({ configuration, title: `${apiItem.name} class` }));
+        break;
+      case ApiItemKind.Interface:
+        output.appendNode(new DocHeading({ configuration, title: `${apiItem.name} interface` }));
+        break;
+      case ApiItemKind.Method:
+      case ApiItemKind.MethodSignature:
+        output.appendNode(new DocHeading({ configuration, title: `${apiItem.name} method` }));
+        break;
+      case ApiItemKind.Namespace:
+        output.appendNode(new DocHeading({ configuration, title: `${apiItem.name} namespace` }));
+        break;
+      case ApiItemKind.Package:
+        const unscopedPackageName: string = PackageName.getUnscopedName(apiItem.name);
+        output.appendNode(new DocHeading({ configuration, title: `${unscopedPackageName} package` }));
+        break;
+      case ApiItemKind.Property:
+      case ApiItemKind.PropertySignature:
+        output.appendNode(new DocHeading({ configuration, title: `${apiItem.name} property` }));
+        break;
+      default:
+        throw new Error('Unsupported API item kind: ' + apiItem.kind);
     }
 
+    if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.releaseTag === ReleaseTag.Beta)  {
+        this._writeBetaWarning(output);
+      }
+    }
+
+    if (apiItem instanceof ApiDocumentedItem) {
+      if (apiItem.tsdocComment) {
+        this._appendSection(output, apiItem.tsdocComment.summarySection);
+      }
+    }
+
+    if (ApiDeclarationMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.signature.length > 0) {
+        output.appendNode(
+          new DocParagraph({ configuration }, [
+            new DocEmphasisSpan({ configuration, bold: true}, [
+              new DocPlainText({ configuration, text: 'Signature:' })
+            ])
+          ])
+        );
+        output.appendNode(
+          new DocFencedCode({ configuration, code: apiItem.signature, language: 'typescript' })
+        );
+      }
+    }
+
+    switch (apiItem.kind) {
+      case ApiItemKind.Class:
+        this._writeClassTables(output, apiItem as ApiClass);
+        break;
+      case ApiItemKind.Interface:
+        this._writeInterfaceTables(output, apiItem as ApiClass);
+        break;
+      case ApiItemKind.Method:
+      case ApiItemKind.MethodSignature:
+        break;
+      case ApiItemKind.Namespace:
+        break;
+      case ApiItemKind.Package:
+        this._writePackageTables(output, apiItem as ApiPackage);
+        break;
+      case ApiItemKind.Property:
+      case ApiItemKind.PropertySignature:
+        break;
+      default:
+        throw new Error('Unsupported API item kind: ' + apiItem.kind);
+    }
+
+    if (apiItem instanceof ApiDocumentedItem) {
+      if (apiItem.tsdocComment && apiItem.tsdocComment.remarksBlock) {
+        output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Remarks' }));
+        this._appendSection(output, apiItem.tsdocComment.remarksBlock.content);
+      }
+    }
+
+    const filename: string = path.join(this._outputFolder, this._getFilenameForApiItem(apiItem));
+    const stringBuilder: StringBuilder = new StringBuilder();
+
+    MarkdownRenderer.renderNode(stringBuilder, output);
+
+    FileSystem.writeFile(filename, stringBuilder.toString(), {
+      convertLineEndings: NewlineKind.CrLf
+    });
   }
 
   /**
    * GENERATE PAGE: PACKAGE
    */
-  private _writePackagePage(docPackage: DocItem): void {
-    console.log(`Writing ${docPackage.name} package`);
+  private _writePackageTables(output: DocSection, apiPackage: ApiPackage): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    const unscopedPackageName: string = PackageName.getUnscopedName(docPackage.name);
+    const namespacesTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Namespace', 'Description' ]
+    });
 
-    const markupPage: IMarkupPage = Markup.createPage(`${unscopedPackageName} package`);
-    this._writeBreadcrumb(markupPage, docPackage);
+    const classesTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Class', 'Description' ]
+    });
 
-    const apiPackage: IApiPackage = docPackage.apiItem as IApiPackage;
+    const interfacesTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Interface', 'Description' ]
+    });
 
-    markupPage.elements.push(...apiPackage.summary);
+    const functionsTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Function', 'Description' ]
+    });
 
-    const namespacesTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Namespaces'),
-      Markup.createTextElements('Description')
-    ]);
+    const enumerationsTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Enumeration', 'Description' ]
+    });
 
-    const classesTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Class'),
-      Markup.createTextElements('Description')
-    ]);
+    const apiEntryPoint: ApiEntryPoint = apiPackage.entryPoints[0];
 
-    const interfacesTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Interface'),
-      Markup.createTextElements('Description')
-    ]);
+    for (const apiMember of apiEntryPoint.members) {
 
-    const functionsTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Function'),
-      Markup.createTextElements('Returns'),
-      Markup.createTextElements('Description')
-    ]);
+      const row: DocTableRow = new DocTableRow({ configuration }, [
+        this._createTitleCell(apiMember),
+        this._createDescriptionCell(apiMember)
+      ]);
 
-    const enumerationsTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Enumeration'),
-      Markup.createTextElements('Description')
-    ]);
-
-    for (const docChild of docPackage.children) {
-      const apiChild: ApiItem = docChild.apiItem;
-
-      const docItemTitle: MarkupBasicElement[] = [
-        Markup.createApiLink(
-          [ Markup.createCode(docChild.name, 'javascript') ],
-          docChild.getApiReference())
-      ];
-
-      const docChildDescription: MarkupBasicElement[] = [];
-
-      if (apiChild.isBeta) {
-        docChildDescription.push(...Markup.createTextElements('(BETA)', { italics: true, bold: true }));
-        docChildDescription.push(...Markup.createTextElements(' '));
-      }
-      docChildDescription.push(...apiChild.summary);
-
-      switch (apiChild.kind) {
-        case 'class':
-          classesTable.rows.push(
-            Markup.createTableRow([
-              docItemTitle,
-              docChildDescription
-            ])
-          );
-          this._writeClassPage(docChild);
+      switch (apiMember.kind) {
+        case ApiItemKind.Class:
+          classesTable.addRow(row);
+          this._writeApiItemPage(apiMember);
           break;
-        case 'interface':
-          interfacesTable.rows.push(
-            Markup.createTableRow([
-              docItemTitle,
-              docChildDescription
-            ])
-          );
-          this._writeInterfacePage(docChild);
+
+        case ApiItemKind.Interface:
+          interfacesTable.addRow(row);
+          this._writeApiItemPage(apiMember);
           break;
+
+/*
         case 'function':
-          functionsTable.rows.push(
-            Markup.createTableRow([
-              docItemTitle,
-              apiChild.returnValue ? [Markup.createCode(apiChild.returnValue.type, 'javascript')] : [],
-              docChildDescription
-            ])
-          );
           this._writeFunctionPage(docChild);
           break;
         case 'enum':
-          enumerationsTable.rows.push(
-            Markup.createTableRow([
-              docItemTitle,
-              docChildDescription
-            ])
-          );
           this._writeEnumPage(docChild);
           break;
-        case 'namespace':
-          namespacesTable.rows.push(
-            Markup.createTableRow([
-              docItemTitle,
-              docChildDescription
-            ])
-          );
-          this._writePackagePage(docChild);
+        case ApiItemKind.Namespace:
+          this._writeNamespacePage(docChild);
           break;
+*/
+
       }
     }
 
-    if (apiPackage.remarks && apiPackage.remarks.length) {
-      markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...apiPackage.remarks);
-    }
-
     if (namespacesTable.rows.length > 0) {
-      markupPage.elements.push(Markup.createHeading1('Namespaces'));
-      markupPage.elements.push(namespacesTable);
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Namespaces' }));
+      output.appendNode(namespacesTable);
     }
 
     if (classesTable.rows.length > 0) {
-      markupPage.elements.push(Markup.createHeading1('Classes'));
-      markupPage.elements.push(classesTable);
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Classes' }));
+      output.appendNode(classesTable);
     }
 
     if (interfacesTable.rows.length > 0) {
-      markupPage.elements.push(Markup.createHeading1('Interfaces'));
-      markupPage.elements.push(interfacesTable);
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Interfaces' }));
+      output.appendNode(interfacesTable);
     }
 
     if (functionsTable.rows.length > 0) {
-      markupPage.elements.push(Markup.createHeading1('Functions'));
-      markupPage.elements.push(functionsTable);
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Functions' }));
+      output.appendNode(functionsTable);
     }
 
     if (enumerationsTable.rows.length > 0) {
-      markupPage.elements.push(Markup.createHeading1('Enumerations'));
-      markupPage.elements.push(enumerationsTable);
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Enumerations' }));
+      output.appendNode(enumerationsTable);
     }
-
-    this._writePage(markupPage, docPackage);
   }
 
   /**
    * GENERATE PAGE: CLASS
    */
-  private _writeClassPage(docClass: DocItem): void {
-    const apiClass: IApiClass = docClass.apiItem as IApiClass;
+  private _writeClassTables(output: DocSection, apiClass: ApiClass): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    // TODO: Show concise generic parameters with class name
-    const markupPage: IMarkupPage = Markup.createPage(`${docClass.name} class`);
-    this._writeBreadcrumb(markupPage, docClass);
+    const eventsTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Property', 'Modifiers', 'Type', 'Description' ]
+    });
 
-    if (apiClass.isBeta) {
-      this._writeBetaWarning(markupPage.elements);
-    }
+    const propertiesTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Property', 'Modifiers', 'Type', 'Description' ]
+    });
 
-    markupPage.elements.push(...apiClass.summary);
+    const methodsTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Method', 'Modifiers', 'Description' ]
+    });
 
-    const propertiesTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Property'),
-      Markup.createTextElements('Access Modifier'),
-      Markup.createTextElements('Type'),
-      Markup.createTextElements('Description')
-    ]);
-
-    const eventsTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Property'),
-      Markup.createTextElements('Access Modifier'),
-      Markup.createTextElements('Type'),
-      Markup.createTextElements('Description')
-    ]);
-
-    const methodsTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Method'),
-      Markup.createTextElements('Access Modifier'),
-      Markup.createTextElements('Returns'),
-      Markup.createTextElements('Description')
-    ]);
-
-    for (const docMember of docClass.children) {
-      const apiMember: ApiMember = docMember.apiItem as ApiMember;
+    for (const apiMember of apiClass.members) {
 
       switch (apiMember.kind) {
-        case 'property':
-          const propertyTitle: MarkupBasicElement[] = [
-            Markup.createApiLink(
-              [Markup.createCode(docMember.name, 'javascript')],
-              docMember.getApiReference())
-          ];
+        case ApiItemKind.Method: {
+          methodsTable.addRow(
+            new DocTableRow({ configuration }, [
+              this._createTitleCell(apiMember),
+              this._createModifiersCell(apiMember),
+              this._createDescriptionCell(apiMember)
+            ])
+          );
 
-          const row: IMarkupTableRow = Markup.createTableRow([
-            propertyTitle,
-            [],
-            [Markup.createCode(apiMember.type, 'javascript')],
-            apiMember.summary
-          ]);
+          this._writeApiItemPage(apiMember);
+          break;
+        }
+        case ApiItemKind.Property: {
 
-          if (apiMember.isEventProperty) {
-            eventsTable.rows.push(row);
+          if ((apiMember as ApiPropertyItem).isEventProperty) {
+            eventsTable.addRow(
+              new DocTableRow({ configuration }, [
+                this._createTitleCell(apiMember),
+                this._createModifiersCell(apiMember),
+                this._createResultTypeCell(apiMember),
+                this._createDescriptionCell(apiMember)
+              ])
+            );
           } else {
-            propertiesTable.rows.push(row);
+            propertiesTable.addRow(
+              new DocTableRow({ configuration }, [
+                this._createTitleCell(apiMember),
+                this._createModifiersCell(apiMember),
+                this._createResultTypeCell(apiMember),
+                this._createDescriptionCell(apiMember)
+              ])
+            );
           }
-          this._writePropertyPage(docMember);
+
+          this._writeApiItemPage(apiMember);
           break;
+        }
 
-        case 'constructor':
-          // TODO: Extract constructor into its own section
-          const constructorTitle: MarkupBasicElement[] = [
-            Markup.createApiLink(
-              [Markup.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
-              docMember.getApiReference())
-          ];
-
-          methodsTable.rows.push(
-            Markup.createTableRow([
-              constructorTitle,
-              [],
-              [],
-              apiMember.summary
-            ])
-          );
-          this._writeMethodPage(docMember);
-          break;
-
-        case 'method':
-          const methodTitle: MarkupBasicElement[] = [
-            Markup.createApiLink(
-              [Markup.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
-              docMember.getApiReference())
-          ];
-
-          methodsTable.rows.push(
-            Markup.createTableRow([
-              methodTitle,
-              apiMember.accessModifier ? [Markup.createCode(apiMember.accessModifier, 'javascript')] : [],
-              apiMember.returnValue ? [Markup.createCode(apiMember.returnValue.type, 'javascript')] : [],
-              apiMember.summary
-            ])
-          );
-          this._writeMethodPage(docMember);
-          break;
       }
     }
 
     if (eventsTable.rows.length > 0) {
-      markupPage.elements.push(Markup.createHeading1('Events'));
-      markupPage.elements.push(eventsTable);
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Events' }));
+      output.appendNode(eventsTable);
     }
 
     if (propertiesTable.rows.length > 0) {
-      markupPage.elements.push(Markup.createHeading1('Properties'));
-      markupPage.elements.push(propertiesTable);
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Properties' }));
+      output.appendNode(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
-      markupPage.elements.push(Markup.createHeading1('Methods'));
-      markupPage.elements.push(methodsTable);
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Methods' }));
+      output.appendNode(methodsTable);
     }
-
-    if (apiClass.remarks && apiClass.remarks.length) {
-      markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...apiClass.remarks);
-    }
-
-    this._writePage(markupPage, docClass);
   }
 
   /**
    * GENERATE PAGE: INTERFACE
    */
-  private _writeInterfacePage(docInterface: DocItem): void {
-    const apiInterface: IApiInterface = docInterface.apiItem as IApiInterface;
+  private _writeInterfaceTables(output: DocSection, apiClass: ApiClass): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    // TODO: Show concise generic parameters with class name
-    const markupPage: IMarkupPage = Markup.createPage(`${docInterface.name} interface`);
-    this._writeBreadcrumb(markupPage, docInterface);
+    const eventsTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Property', 'Type', 'Description' ]
+    });
 
-    if (apiInterface.isBeta) {
-      this._writeBetaWarning(markupPage.elements);
-    }
+    const propertiesTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Property', 'Type', 'Description' ]
+    });
 
-    markupPage.elements.push(...apiInterface.summary);
+    const methodsTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Method', 'Description' ]
+    });
 
-    const propertiesTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Property'),
-      Markup.createTextElements('Type'),
-      Markup.createTextElements('Description')
-    ]);
-
-    const methodsTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Method'),
-      Markup.createTextElements('Returns'),
-      Markup.createTextElements('Description')
-    ]);
-
-    for (const docMember of docInterface.children) {
-      const apiMember: ApiMember = docMember.apiItem as ApiMember;
+    for (const apiMember of apiClass.members) {
 
       switch (apiMember.kind) {
-        case 'property':
-          const propertyTitle: MarkupBasicElement[] = [
-            Markup.createApiLink(
-              [Markup.createCode(docMember.name, 'javascript')],
-              docMember.getApiReference())
-          ];
-
-          propertiesTable.rows.push(
-            Markup.createTableRow([
-              propertyTitle,
-              [Markup.createCode(apiMember.type)],
-              apiMember.summary
+        case ApiItemKind.MethodSignature: {
+          methodsTable.addRow(
+            new DocTableRow({ configuration }, [
+              this._createTitleCell(apiMember),
+              this._createDescriptionCell(apiMember)
             ])
           );
-          this._writePropertyPage(docMember);
-          break;
 
-        case 'method':
-          const methodTitle: MarkupBasicElement[] = [
-            Markup.createApiLink(
-              [Markup.createCode(Utilities.getConciseSignature(docMember.name, apiMember), 'javascript')],
-              docMember.getApiReference())
-          ];
-
-          methodsTable.rows.push(
-            Markup.createTableRow([
-              methodTitle,
-              apiMember.returnValue ? [Markup.createCode(apiMember.returnValue.type, 'javascript')] : [],
-              apiMember.summary
-            ])
-          );
-          this._writeMethodPage(docMember);
+          this._writeApiItemPage(apiMember);
           break;
+        }
+        case ApiItemKind.PropertySignature: {
+
+          if ((apiMember as ApiPropertyItem).isEventProperty) {
+            eventsTable.addRow(
+              new DocTableRow({ configuration }, [
+                this._createTitleCell(apiMember),
+                this._createResultTypeCell(apiMember),
+                this._createDescriptionCell(apiMember)
+              ])
+            );
+          } else {
+            propertiesTable.addRow(
+              new DocTableRow({ configuration }, [
+                this._createTitleCell(apiMember),
+                this._createResultTypeCell(apiMember),
+                this._createDescriptionCell(apiMember)
+              ])
+            );
+          }
+
+          this._writeApiItemPage(apiMember);
+          break;
+        }
+
       }
+    }
+
+    if (eventsTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Events' }));
+      output.appendNode(eventsTable);
     }
 
     if (propertiesTable.rows.length > 0) {
-      markupPage.elements.push(Markup.createHeading1('Properties'));
-      markupPage.elements.push(propertiesTable);
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Properties' }));
+      output.appendNode(propertiesTable);
     }
 
     if (methodsTable.rows.length > 0) {
-      markupPage.elements.push(Markup.createHeading1('Methods'));
-      markupPage.elements.push(methodsTable);
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Methods' }));
+      output.appendNode(methodsTable);
     }
-
-    if (apiInterface.remarks && apiInterface.remarks.length) {
-      markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...apiInterface.remarks);
-    }
-
-    this._writePage(markupPage, docInterface);
   }
 
-  /**
-   * GENERATE PAGE: ENUM
-   */
-  private _writeEnumPage(docEnum: DocItem): void {
-    const apiEnum: IApiEnum = docEnum.apiItem as IApiEnum;
+  private _createTitleCell(apiItem: ApiItem): DocTableCell {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    // TODO: Show concise generic parameters with class name
-    const markupPage: IMarkupPage = Markup.createPage(`${docEnum.name} enumeration`);
-    this._writeBreadcrumb(markupPage, docEnum);
-
-    if (apiEnum.isBeta) {
-      this._writeBetaWarning(markupPage.elements);
-    }
-
-    markupPage.elements.push(...apiEnum.summary);
-
-    const membersTable: IMarkupTable = Markup.createTable([
-      Markup.createTextElements('Member'),
-      Markup.createTextElements('Value'),
-      Markup.createTextElements('Description')
+    return new DocTableCell({ configuration }, [
+      new DocParagraph({ configuration }, [
+        new DocLinkTag({
+          configuration,
+          tagName: '@link',
+          linkText: Utilities.getConciseSignature(apiItem),
+          urlDestination: this._getFilenameForApiItem(apiItem)
+        })
+      ])
     ]);
-
-    for (const docEnumMember of docEnum.children) {
-      const apiEnumMember: IApiEnumMember = docEnumMember.apiItem as IApiEnumMember;
-
-      const enumValue: MarkupBasicElement[] = [];
-
-      if (apiEnumMember.value) {
-        enumValue.push(Markup.createCode('= ' + apiEnumMember.value));
-      }
-
-      membersTable.rows.push(
-        Markup.createTableRow([
-          Markup.createTextElements(docEnumMember.name),
-          enumValue,
-          apiEnumMember.summary
-        ])
-      );
-    }
-
-    if (membersTable.rows.length > 0) {
-      markupPage.elements.push(membersTable);
-    }
-
-    this._writePage(markupPage, docEnum);
   }
 
-  /**
-   * GENERATE PAGE: PROPERTY
-   */
-  private _writePropertyPage(docProperty: DocItem): void {
-    const apiProperty: IApiProperty = docProperty.apiItem as IApiProperty;
-    const fullProperyName: string = docProperty.parent!.name + '.' + docProperty.name;
+  private _createDescriptionCell(apiItem: ApiItem): DocTableCell {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    const markupPage: IMarkupPage = Markup.createPage(`${fullProperyName} property`);
-    this._writeBreadcrumb(markupPage, docProperty);
+    const section: DocSection = new DocSection({ configuration });
 
-    if (apiProperty.isBeta) {
-      this._writeBetaWarning(markupPage.elements);
-    }
-
-    markupPage.elements.push(...apiProperty.summary);
-
-    markupPage.elements.push(Markup.PARAGRAPH);
-    markupPage.elements.push(...Markup.createTextElements('Signature:', { bold: true }));
-    markupPage.elements.push(Markup.createCodeBox(docProperty.name + ': ' + apiProperty.type, 'javascript'));
-
-    if (apiProperty.remarks && apiProperty.remarks.length) {
-      markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...apiProperty.remarks);
-    }
-
-    this._writePage(markupPage, docProperty);
-  }
-
-  /**
-   * GENERATE PAGE: METHOD
-   */
-  private _writeMethodPage(docMethod: DocItem): void {
-    const apiMethod: IApiMethod = docMethod.apiItem as IApiMethod;
-
-    const fullMethodName: string = docMethod.parent!.name + '.' + docMethod.name;
-
-    const markupPage: IMarkupPage = Markup.createPage(`${fullMethodName} method`);
-    this._writeBreadcrumb(markupPage, docMethod);
-
-    if (apiMethod.isBeta) {
-      this._writeBetaWarning(markupPage.elements);
-    }
-
-    markupPage.elements.push(...apiMethod.summary);
-
-    markupPage.elements.push(Markup.PARAGRAPH);
-    markupPage.elements.push(...Markup.createTextElements('Signature:', { bold: true }));
-    markupPage.elements.push(Markup.createCodeBox(apiMethod.signature, 'javascript'));
-
-    if (apiMethod.returnValue) {
-      markupPage.elements.push(...Markup.createTextElements('Returns:', { bold: true }));
-      markupPage.elements.push(...Markup.createTextElements(' '));
-      markupPage.elements.push(Markup.createCode(apiMethod.returnValue.type, 'javascript'));
-      markupPage.elements.push(Markup.PARAGRAPH);
-      markupPage.elements.push(...apiMethod.returnValue.description);
-    }
-
-    if (apiMethod.remarks && apiMethod.remarks.length) {
-      markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...apiMethod.remarks);
-    }
-
-    if (Object.keys(apiMethod.parameters).length > 0) {
-      const parametersTable: IMarkupTable = Markup.createTable([
-        Markup.createTextElements('Parameter'),
-        Markup.createTextElements('Type'),
-        Markup.createTextElements('Description')
-      ]);
-
-      markupPage.elements.push(Markup.createHeading1('Parameters'));
-      markupPage.elements.push(parametersTable);
-      for (const parameterName of Object.keys(apiMethod.parameters)) {
-        const apiParameter: IApiParameter = apiMethod.parameters[parameterName];
-          parametersTable.rows.push(Markup.createTableRow([
-            [Markup.createCode(parameterName, 'javascript')],
-            apiParameter.type ? [Markup.createCode(apiParameter.type, 'javascript')] : [],
-            apiParameter.description
-          ])
-        );
+    if (ApiReleaseTagMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.releaseTag === ReleaseTag.Beta) {
+        section.appendNodesInParagraph([
+          new DocEmphasisSpan({ configuration, bold: true, italic: true }, [
+            new DocPlainText({ configuration, text: '(BETA)' })
+          ]),
+          new DocPlainText({ configuration, text: ' ' })
+        ]);
       }
     }
 
-    this._writePage(markupPage, docMethod);
-  }
-
-  /**
-   * GENERATE PAGE: FUNCTION
-   */
-  private _writeFunctionPage(docFunction: DocItem): void {
-    const apiFunction: IApiFunction = docFunction.apiItem as IApiFunction;
-
-    const markupPage: IMarkupPage = Markup.createPage(`${docFunction.name} function`);
-    this._writeBreadcrumb(markupPage, docFunction);
-
-    if (apiFunction.isBeta) {
-      this._writeBetaWarning(markupPage.elements);
-    }
-
-    markupPage.elements.push(...apiFunction.summary);
-
-    markupPage.elements.push(Markup.PARAGRAPH);
-    markupPage.elements.push(...Markup.createTextElements('Signature:', { bold: true }));
-    markupPage.elements.push(Markup.createCodeBox(docFunction.name, 'javascript'));
-
-    if (apiFunction.returnValue) {
-      markupPage.elements.push(...Markup.createTextElements('Returns:', { bold: true }));
-      markupPage.elements.push(...Markup.createTextElements(' '));
-      markupPage.elements.push(Markup.createCode(apiFunction.returnValue.type, 'javascript'));
-      markupPage.elements.push(Markup.PARAGRAPH);
-      markupPage.elements.push(...apiFunction.returnValue.description);
-    }
-
-    if (apiFunction.remarks && apiFunction.remarks.length) {
-      markupPage.elements.push(Markup.createHeading1('Remarks'));
-      markupPage.elements.push(...apiFunction.remarks);
-    }
-
-    if (Object.keys(apiFunction.parameters).length > 0) {
-      const parametersTable: IMarkupTable = Markup.createTable([
-        Markup.createTextElements('Parameter'),
-        Markup.createTextElements('Type'),
-        Markup.createTextElements('Description')
-      ]);
-
-      markupPage.elements.push(Markup.createHeading1('Parameters'));
-      markupPage.elements.push(parametersTable);
-      for (const parameterName of Object.keys(apiFunction.parameters)) {
-        const apiParameter: IApiParameter = apiFunction.parameters[parameterName];
-          parametersTable.rows.push(Markup.createTableRow([
-            [Markup.createCode(parameterName, 'javascript')],
-            apiParameter.type ? [Markup.createCode(apiParameter.type, 'javascript')] : [],
-            apiParameter.description
-          ])
-        );
+    if (apiItem instanceof ApiDocumentedItem) {
+      if (apiItem.tsdocComment !== undefined) {
+        this._appendAndMergeSection(section, apiItem.tsdocComment.summarySection);
       }
     }
 
-    this._writePage(markupPage, docFunction);
+    return new DocTableCell({ configuration }, section.nodes);
   }
 
-  private _writeBreadcrumb(markupPage: IMarkupPage, docItem: DocItem): void {
-    markupPage.breadcrumb.push(Markup.createWebLinkFromText('Home', './index'));
+  private _createModifiersCell(apiItem: ApiItem): DocTableCell {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    for (const hierarchyItem of docItem.getHierarchy()) {
-      markupPage.breadcrumb.push(...Markup.createTextElements(' > '));
-      markupPage.breadcrumb.push(Markup.createApiLinkFromText(
-        hierarchyItem.name, hierarchyItem.getApiReference()));
+    const section: DocSection = new DocSection({ configuration });
+
+    if (ApiStaticMixin.isBaseClassOf(apiItem)) {
+      if (apiItem.isStatic) {
+        section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: 'static' }));
+      }
+    }
+
+    return new DocTableCell({ configuration }, section.nodes);
+  }
+
+  private _createResultTypeCell(apiItem: ApiItem): DocTableCell {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
+    const section: DocSection = new DocSection({ configuration });
+
+    if (ApiResultTypeMixin.isBaseClassOf(apiItem)) {
+      section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: apiItem.resultTypeSignature }));
+    }
+
+    return new DocTableCell({ configuration }, section.nodes);
+  }
+
+  private _writeBreadcrumb(output: DocSection, apiItem: ApiItem): void {
+    output.appendNodeInParagraph(new DocLinkTag({
+      configuration: this._tsdocConfiguration,
+      tagName: '@link',
+      linkText: 'Home',
+      urlDestination: './index'
+    }));
+
+    for (const hierarchyItem of apiItem.getHierarchy()) {
+      switch (hierarchyItem.kind) {
+        case ApiItemKind.Model:
+        case ApiItemKind.EntryPoint:
+          break;
+        default:
+          output.appendNodesInParagraph([
+            new DocPlainText({
+              configuration: this._tsdocConfiguration,
+              text: ' > '
+            }),
+            new DocLinkTag({
+              configuration: this._tsdocConfiguration,
+              tagName: '@link',
+              linkText: hierarchyItem.name,
+              urlDestination: this._getFilenameForApiItem(apiItem)
+            })
+          ]);
+      }
     }
   }
 
-  private _writeBetaWarning(elements: MarkupStructuredElement[]): void {
+  private _writeBetaWarning(output: DocSection): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
     const betaWarning: string = 'This API is provided as a preview for developers and may change'
       + ' based on feedback that we receive.  Do not use this API in a production environment.';
-    elements.push(
-      Markup.createNoteBoxFromText(betaWarning)
+    output.appendNode(
+      new DocNoteBox({ configuration }, [
+        new DocParagraph({ configuration }, [
+          new DocPlainText({ configuration, text: betaWarning })
+        ])
+      ])
     );
   }
 
-  private _writePage(markupPage: IMarkupPage, docItem: DocItem): void { // override
-    const filename: string = path.join(this._outputFolder, this._getFilenameForDocItem(docItem));
-
-    const content: string = MarkdownRenderer.renderElements([markupPage], {
-      onRenderApiLink: (args: IMarkdownRenderApiLinkArgs) => {
-        const resolveResult: IDocItemSetResolveResult = this._docItemSet.resolveApiItemReference(args.reference);
-        if (!resolveResult.docItem) {
-          // Eventually we should introduce a warnings file
-          console.error(colors.yellow('Warning: Unresolved hyperlink to '
-            + Markup.formatApiItemReference(args.reference)));
-        } else {
-          // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
-          // unless they start with "./" or "../".
-          const docFilename: string = './' + this._getFilenameForDocItem(resolveResult.docItem);
-          args.prefix = '[';
-          args.suffix = '](' + docFilename + ')';
-        }
-      }
-    });
-
-    FileSystem.writeFile(filename, content, {
-      convertLineEndings: NewlineKind.CrLf
-    });
+  private _appendSection(output: DocSection, docSection: DocSection): void {
+    for (const node of docSection.nodes) {
+      output.appendNode(node);
+    }
   }
 
-  private _getFilenameForDocItem(docItem: DocItem): string {
+  private _appendAndMergeSection(output: DocSection, docSection: DocSection): void {
+    let firstNode: boolean = true;
+    for (const node of docSection.nodes) {
+      if (firstNode) {
+        if (node.kind === DocNodeKind.Paragraph) {
+          output.appendNodesInParagraph(node.getChildNodes());
+          firstNode = false;
+          continue;
+        }
+      }
+      firstNode = false;
+
+      output.appendNode(node);
+    }
+  }
+
+  private _getFilenameForApiItem(apiItem: ApiItem): string {
     let baseName: string = '';
-    for (const part of docItem.getHierarchy()) {
-      if (part.kind === DocItemKind.Package) {
-        baseName = PackageName.getUnscopedName(part.name);
-      } else {
-        baseName += '.' + part.name;
+    for (const part of apiItem.getHierarchy()) {
+      switch (part.kind) {
+        case ApiItemKind.Package:
+          baseName = PackageName.getUnscopedName(part.name);
+          break;
+        case ApiItemKind.EntryPoint:
+          break;
+        default:
+          baseName += '.' + part.name;
       }
     }
     return baseName.toLowerCase() + '.md';
