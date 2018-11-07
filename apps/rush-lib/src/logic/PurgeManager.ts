@@ -7,17 +7,20 @@ import * as path from 'path';
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
+import { RushGlobalFolders } from '../api/RushGlobalFolders';
 
 /**
  * This class implements the logic for "rush purge"
  */
 export class PurgeManager {
   private _rushConfiguration: RushConfiguration;
+  private _rushGlobalFolders: RushGlobalFolders;
   private _commonTempFolderRecycler: AsyncRecycler;
   private _rushUserFolderRecycler: AsyncRecycler;
 
-  public constructor(rushConfiguration: RushConfiguration) {
+  public constructor(rushConfiguration: RushConfiguration, rushGlobalFolders: RushGlobalFolders) {
     this._rushConfiguration = rushConfiguration;
+    this._rushGlobalFolders = rushGlobalFolders;
 
     const commonAsyncRecyclerPath: string = path.join(
       this._rushConfiguration.commonTempFolder,
@@ -26,7 +29,7 @@ export class PurgeManager {
     this._commonTempFolderRecycler = new AsyncRecycler(commonAsyncRecyclerPath);
 
     const rushUserAsyncRecyclerPath: string = path.join(
-      this._rushConfiguration._rushUserFolder,
+      this._rushGlobalFolders.rushGlobalFolder,
       RushConstants.rushRecyclerFolderName
     );
     this._rushUserFolderRecycler = new AsyncRecycler(rushUserAsyncRecyclerPath);
@@ -64,9 +67,9 @@ export class PurgeManager {
     this.purgeNormal();
 
     // Also delete everything under ~/.rush/node-v4.5.6/ except for the recycler folder itself
-    console.log('Purging ' + this._rushConfiguration._rushNodeSpecificUserFolder);
-    this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushConfiguration._rushNodeSpecificUserFolder,
-      this._getMembersToExclude(this._rushConfiguration._rushNodeSpecificUserFolder));
+    console.log('Purging ' + this._rushGlobalFolders.rushNodeSpecificGlobalFolder);
+    this._rushUserFolderRecycler.moveAllItemsInFolder(this._rushGlobalFolders.rushNodeSpecificGlobalFolder,
+      this._getMembersToExclude(this._rushGlobalFolders.rushNodeSpecificGlobalFolder));
   }
 
   private _getMembersToExclude(folderToRecycle: string): string[] {

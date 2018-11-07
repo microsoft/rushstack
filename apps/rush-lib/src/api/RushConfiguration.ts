@@ -186,8 +186,6 @@ export class RushConfiguration {
   private _yarnCacheFolder: string;
   private _tempShrinkwrapFilename: string;
   private _tempShrinkwrapPreinstallFilename: string;
-  private __rushUserFolder: string; // tslint:disable-line:variable-name
-  private __rushNodeSpecificUserFolder: string; // tslint:disable-line:variable-name
   private _rushLinkJsonFilename: string;
   private _currentVariantJsonFilename: string;
   private _packageManagerToolVersion: string;
@@ -566,24 +564,6 @@ export class RushConfiguration {
   }
 
   /**
-   * The absolute path to Rush's storage in the home directory for the current user, independent of node version.
-   * On Windows, it would be something like `C:\Users\YourName\.rush\`.
-   * @internal
-   */
-  public get _rushUserFolder(): string {
-    return this.__rushUserFolder;
-  }
-
-  /**
-   * The absolute path to Rush's storage in the home directory for the current user and node version.
-   * On Windows, it would be something like `C:\Users\YourName\.rush\node-v3.4.5`.
-   * @internal
-   */
-  public get _rushNodeSpecificUserFolder(): string {
-    return this.__rushNodeSpecificUserFolder;
-  }
-
-  /**
    * The filename of the build dependency data file.  By default this is
    * called 'rush-link.json' resides in the Rush common folder.
    * Its data structure is defined by IRushLinkJson.
@@ -919,12 +899,6 @@ export class RushConfiguration {
     this._yarnCacheFolder = path.resolve(path.join(this._commonTempFolder, 'yarn-cache'));
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
-    this.__rushNodeSpecificUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');
-
-    const normalizedNodeVersion: string = process.version.match(/^[a-z0-9\-\.]+$/i)
-      ? process.version
-      : 'unknown-version';
-    this.__rushUserFolder = path.join(this.__rushNodeSpecificUserFolder, `node-${normalizedNodeVersion}`);
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');

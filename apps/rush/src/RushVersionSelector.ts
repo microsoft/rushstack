@@ -6,7 +6,10 @@ import * as semver from 'semver';
 
 import { LockFile } from '@microsoft/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
-import { _LastInstallFlag } from '@microsoft/rush-lib';
+import {
+  _LastInstallFlag,
+  _RushGlobalFolders
+} from '@microsoft/rush-lib';
 
 import { RushCommandSelector } from './RushCommandSelector';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
@@ -14,23 +17,19 @@ import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
 export class RushVersionSelector {
-  private _rushDirectory: string;
+  private _rushGlobalFolders: _RushGlobalFolders;
   private _currentPackageVersion: string;
 
   constructor(currentPackageVersion: string) {
-    this._rushDirectory = path.join(Utilities.getHomeDirectory(), '.rush');
+    this._rushGlobalFolders = new _RushGlobalFolders();
     this._currentPackageVersion = currentPackageVersion;
   }
 
   public ensureRushVersionInstalled(version: string,
     configuration: MinimalRushConfiguration | undefined): Promise<void> {
 
-    const normalizedNodeVersion: string = process.version.match(/^[a-z0-9\-\.]+$/i)
-      ? process.version
-      : 'unknown-version';
-
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
-    const expectedRushPath: string = path.join(this._rushDirectory, `node-${normalizedNodeVersion}`, `rush-${version}`);
+    const expectedRushPath: string = path.join(this._rushGlobalFolders.rushNodeSpecificGlobalFolder, `rush-${version}`);
 
     const installMarker: _LastInstallFlag = new _LastInstallFlag(
       expectedRushPath,

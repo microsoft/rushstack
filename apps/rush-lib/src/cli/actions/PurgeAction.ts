@@ -39,7 +39,7 @@ export class PurgeAction extends BaseRushAction {
       const stopwatch: Stopwatch = Stopwatch.start();
 
       const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
-      const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration);
+      const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolders);
 
       unlinkManager.unlink();
 

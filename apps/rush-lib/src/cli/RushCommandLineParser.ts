@@ -32,10 +32,12 @@ import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
+import { RushGlobalFolders } from '../api/RushGlobalFolders';
 
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushConfiguration: RushConfiguration;
+  public rushGlobalFolders: RushGlobalFolders;
 
   private _debugParameter: CommandLineFlagParameter;
 
@@ -109,6 +111,8 @@ export class RushCommandLineParser extends CommandLineParser {
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
       }
+
+      this.rushGlobalFolders = new RushGlobalFolders();
 
       this.addAction(new AddAction(this));
       this.addAction(new ChangeAction(this));

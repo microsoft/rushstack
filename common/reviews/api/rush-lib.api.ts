@@ -7,6 +7,13 @@ class _LastInstallFlag {
   readonly path: string;
 }
 
+// @internal
+class _RushGlobalFolders {
+  constructor();
+  readonly rushGlobalFolder: string;
+  readonly rushNodeSpecificGlobalFolder: string;
+}
+
 // @public
 class ApprovedPackagesConfiguration {
   constructor(jsonFilename: string);
@@ -192,10 +199,6 @@ class Rush {
 
 // @public
 class RushConfiguration {
-  // @internal
-  readonly _rushNodeSpecificUserFolder: string;
-  // @internal
-  readonly _rushUserFolder: string;
   readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
   readonly changesFolder: string;
   // @deprecated
