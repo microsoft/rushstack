@@ -1010,7 +1010,7 @@ export class InstallManager {
 
   private _queryIfReleaseIsPublished(registryUrl: string): Promise<boolean> {
     let queryUrl: string = registryUrl;
-    if (queryUrl[- 1] !== '/') {
+    if (queryUrl[-1] !== '/') {
       queryUrl += '/';
     }
     // Note that the "@" symbol does not normally get URL-encoded
