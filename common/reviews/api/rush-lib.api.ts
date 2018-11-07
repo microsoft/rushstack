@@ -7,6 +7,13 @@ class _LastInstallFlag {
   readonly path: string;
 }
 
+// @internal
+class _RushGlobalFolder {
+  constructor();
+  readonly nodeSpecificPath: string;
+  readonly path: string;
+}
+
 // @public
 class ApprovedPackagesConfiguration {
   constructor(jsonFilename: string);
@@ -236,7 +243,6 @@ class RushConfiguration {
   readonly rushJsonFile: string;
   readonly rushJsonFolder: string;
   readonly rushLinkJsonFilename: string;
-  readonly rushUserFolder: string;
   readonly shrinkwrapFilePhrase: string;
   // @beta
   readonly telemetryEnabled: boolean;

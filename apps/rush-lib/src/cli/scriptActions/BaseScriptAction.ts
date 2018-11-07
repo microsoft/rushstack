@@ -4,7 +4,6 @@
 import { CommandLineParameter } from '@microsoft/ts-command-line';
 import { BaseRushAction, IBaseRushActionOptions } from '../actions/BaseRushAction';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
-import { ParameterJson } from '../../api/CommandLineJson';
 import { RushConstants } from '../../logic/RushConstants';
 
 /**

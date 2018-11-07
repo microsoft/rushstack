@@ -25,6 +25,10 @@ export {
 } from './api/RushConfigurationProject';
 
 export {
+  RushGlobalFolder as _RushGlobalFolder
+} from './api/RushGlobalFolder';
+
+export {
   ApprovedPackagesItem,
   ApprovedPackagesConfiguration
 } from './api/ApprovedPackagesConfiguration';

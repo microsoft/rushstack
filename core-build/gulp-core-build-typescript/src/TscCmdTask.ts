@@ -36,7 +36,7 @@ export interface ITscCmdTaskConfig extends IRSCTaskConfig {
 }
 
 /**
- * @alpha
+ * @beta
  */
 export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
   constructor() {

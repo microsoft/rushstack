@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 01 Nov 2018 19:32:52 GMT and should not be manually modified.
+This log was last generated on Mon, 05 Nov 2018 17:04:24 GMT and should not be manually modified.
+
+## 6.1.2
+Mon, 05 Nov 2018 17:04:24 GMT
+
+### Patches
+
+- Upgrade to @microsoft/tsdoc 0.12.0
 
 ## 6.1.1
 Thu, 01 Nov 2018 19:32:52 GMT
