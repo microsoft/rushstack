@@ -11,7 +11,7 @@ import { VersionMismatchFinder } from '../api/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
 import { DependencyType, PackageJsonEditor, PackageJsonDependency } from '../api/PackageJsonEditor';
-import { RushGlobalFolders } from '../api/RushGlobalFolders';
+import { RushGlobalFolder } from '../api/RushGlobalFolder';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -95,11 +95,11 @@ export interface IUpdateProjectOptions {
  */
 export class PackageJsonUpdater {
   private _rushConfiguration: RushConfiguration;
-  private _rushGlobalFolders: RushGlobalFolders;
+  private _rushGlobalFolder: RushGlobalFolder;
 
-  public constructor(rushConfiguration: RushConfiguration, rushGlobalFolders: RushGlobalFolders) {
+  public constructor(rushConfiguration: RushConfiguration, rushGlobalFolder: RushGlobalFolder) {
     this._rushConfiguration = rushConfiguration;
-    this._rushGlobalFolders = rushGlobalFolders;
+    this._rushGlobalFolder = rushGlobalFolder;
   }
 
   /**
@@ -185,7 +185,7 @@ export class PackageJsonUpdater {
       return Promise.resolve();
     }
 
-    const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolders);
+    const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
     const installManagerOptions: IInstallManagerOptions = {
       debug: debugInstall,
       allowShrinkwrapUpdates: true,
@@ -199,7 +199,7 @@ export class PackageJsonUpdater {
     };
     const installManager: InstallManager = new InstallManager(
       this._rushConfiguration,
-      this._rushGlobalFolders,
+      this._rushGlobalFolder,
       purgeManager,
       installManagerOptions
     );

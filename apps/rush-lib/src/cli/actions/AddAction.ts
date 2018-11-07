@@ -115,7 +115,7 @@ export class AddAction extends BaseRushAction {
       return Promise.reject(new Error(`The SemVer specifier "${version}" is not valid.`));
     }
 
-    return new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolders).doRushAdd({
+    return new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder).doRushAdd({
       currentProject: project,
       packageName: packageName,
       initialVersion: version,

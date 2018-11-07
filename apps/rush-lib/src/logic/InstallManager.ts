@@ -49,7 +49,7 @@ const MAX_INSTALL_ATTEMPTS: number = 2;
  * As a temporary workaround, augment the type.
  */
 import { CreateOptions } from 'tar';
-import { RushGlobalFolders } from '../api/RushGlobalFolders';
+import { RushGlobalFolder } from '../api/RushGlobalFolder';
 
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
@@ -114,7 +114,7 @@ export interface IInstallManagerOptions {
  */
 export class InstallManager {
   private _rushConfiguration: RushConfiguration;
-  private _rushGlobalFolders: RushGlobalFolders;
+  private _rushGlobalFolder: RushGlobalFolder;
   private _commonNodeModulesMarker: LastInstallFlag;
   private _commonTempFolderRecycler: AsyncRecycler;
 
@@ -239,12 +239,12 @@ export class InstallManager {
 
   constructor(
     rushConfiguration: RushConfiguration,
-    rushGlobalFolders: RushGlobalFolders,
+    rushGlobalFolder: RushGlobalFolder,
     purgeManager: PurgeManager,
     options: IInstallManagerOptions
   ) {
     this._rushConfiguration = rushConfiguration;
-    this._rushGlobalFolders = rushGlobalFolders;
+    this._rushGlobalFolder = rushGlobalFolder;
     this._commonTempFolderRecycler = purgeManager.commonTempFolderRecycler;
     this._options = options;
 
@@ -349,7 +349,7 @@ export class InstallManager {
    */
   public ensureLocalPackageManager(): Promise<void> {
     // Example: "C:\Users\YourName\.rush"
-    const rushUserFolder: string = this._rushGlobalFolders.rushNodeSpecificGlobalFolder;
+    const rushUserFolder: string = this._rushGlobalFolder.nodeSpecificPath;
 
     if (!FileSystem.exists(rushUserFolder)) {
       console.log('Creating ' + rushUserFolder);
@@ -933,7 +933,7 @@ export class InstallManager {
 
   private _checkIfReleaseIsPublished(): Promise<boolean> {
     return Promise.resolve().then(() => {
-      const lastCheckFile: string = path.join(this._rushGlobalFolders.rushNodeSpecificGlobalFolder,
+      const lastCheckFile: string = path.join(this._rushGlobalFolder.nodeSpecificPath,
         'rush-' + Rush.version, 'last-check.flag');
 
       if (FileSystem.exists(lastCheckFile)) {

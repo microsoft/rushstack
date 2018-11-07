@@ -8,10 +8,10 @@ class _LastInstallFlag {
 }
 
 // @internal
-class _RushGlobalFolders {
+class _RushGlobalFolder {
   constructor();
-  readonly rushGlobalFolder: string;
-  readonly rushNodeSpecificGlobalFolder: string;
+  readonly nodeSpecificPath: string;
+  readonly path: string;
 }
 
 // @public

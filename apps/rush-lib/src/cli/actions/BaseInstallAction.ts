@@ -81,7 +81,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
 
-    const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolders);
+    const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
     if (this._purgeParameter.value!) {
       console.log('The --purge flag was specified, so performing "rush purge"');
@@ -100,7 +100,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManager: InstallManager = new InstallManager(
       this.rushConfiguration,
-      this.rushGlobalFolders,
+      this.rushGlobalFolder,
       purgeManager,
       installManagerOptions
     );

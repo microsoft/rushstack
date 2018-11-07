@@ -9,7 +9,7 @@ import { Utilities } from '../utilities/Utilities';
  *
  * @internal
  */
-export class RushGlobalFolders {
+export class RushGlobalFolder {
   private _rushUserFolder: string;
   private _rushNodeSpecificUserFolder: string;
 
@@ -17,7 +17,7 @@ export class RushGlobalFolders {
    * The absolute path to Rush's storage in the home directory for the current user, independent of node version.
    * On Windows, it would be something like `C:\Users\YourName\.rush\`.
    */
-  public get rushGlobalFolder(): string {
+  public get path(): string {
     return this._rushUserFolder;
   }
 
@@ -25,7 +25,7 @@ export class RushGlobalFolders {
    * The absolute path to Rush's storage in the home directory for the current user and node version.
    * On Windows, it would be something like `C:\Users\YourName\.rush\node-v3.4.5`.
    */
-  public get rushNodeSpecificGlobalFolder(): string {
+  public get nodeSpecificPath(): string {
     return this._rushNodeSpecificUserFolder;
   }
 

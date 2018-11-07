@@ -16,7 +16,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
-import { RushGlobalFolders } from '../../api/RushGlobalFolders';
+import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
@@ -46,8 +46,8 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
     return this._parser.rushConfiguration;
   }
 
-  protected get rushGlobalFolders(): RushGlobalFolders {
-    return this._parser.rushGlobalFolders;
+  protected get rushGlobalFolder(): RushGlobalFolder {
+    return this._parser.rushGlobalFolder;
   }
 
   protected get parser(): RushCommandLineParser {
