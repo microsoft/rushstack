@@ -19,7 +19,9 @@ import {
   MapExtensions,
   FileSystem,
   FileConstants,
-  Sort
+  Sort,
+  FolderConstants,
+  PosixModeBits
 } from '@microsoft/node-core-library';
 
 import { ApprovedPackagesChecker } from '../logic/ApprovedPackagesChecker';
@@ -103,6 +105,7 @@ export interface IInstallManagerOptions {
    * If specified when using PNPM, the logs will be in /common/temp/pnpm.log
    */
   collectLogFile: boolean;
+
   /**
    * The variant to consider when performing installations and validating shrinkwrap updates.
    */
@@ -180,10 +183,10 @@ export class InstallManager {
   private static _collectVersionsForDependencies(
     rushConfiguration: RushConfiguration,
     options: {
-    versionsForDependencies: Map<string, Set<string>>;
-    dependencies: ReadonlyArray<PackageJsonDependency>;
-    cyclicDependencies: Set<string>;
-    variant: string | undefined;
+      versionsForDependencies: Map<string, Set<string>>;
+      dependencies: ReadonlyArray<PackageJsonDependency>;
+      cyclicDependencies: Set<string>;
+      variant: string | undefined;
     }): void {
     const {
       variant,
@@ -263,6 +266,32 @@ export class InstallManager {
       PolicyValidator.validatePolicy(this._rushConfiguration, options.bypassPolicy);
 
       ApprovedPackagesChecker.rewriteConfigFiles(this._rushConfiguration);
+
+      // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
+      const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
+      const hookDestination: string = path.join(this._rushConfiguration.rushJsonFolder, FolderConstants.Git, 'hooks');
+
+      if (FileSystem.exists(hookSource)) {
+        const hookFilenames: Array<string> = FileSystem.readFolder(hookSource);
+        if (hookFilenames.length > 0) {
+          console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
+
+          // Clear the currently installed git hooks and install fresh copies
+          FileSystem.ensureEmptyFolder(hookDestination);
+
+          // Only copy files that look like Git hook names
+          const filteredHookFilenames: string[] = hookFilenames.filter(x => /^[a-z\-]+/.test(x));
+          for (const filename of filteredHookFilenames) {
+            FileSystem.copyFile({
+              sourcePath: path.join(hookSource, filename),
+              destinationPath: path.join(hookDestination, filename)
+            });
+            FileSystem.changePosixModeBits(path.join(hookDestination, filename), PosixModeBits.UserExecute);
+          }
+
+          console.log('Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL);
+        }
+      }
 
       // Ensure that the package manager is installed
       return this.ensureLocalPackageManager()
@@ -611,8 +640,8 @@ export class InstallManager {
         if (shrinkwrapFile) {
           if (!shrinkwrapFile.tryEnsureCompatibleDependency(packageName, packageVersion,
             rushProject.tempProjectName)) {
-              shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
-                + ` "${rushProject.packageName}"`);
+            shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
+              + ` "${rushProject.packageName}"`);
             shrinkwrapIsUpToDate = false;
           }
         }
@@ -872,7 +901,7 @@ export class InstallManager {
           }
 
           // Run "npm install" in the common folder
-          const installArgs: string[] = [ 'install' ];
+          const installArgs: string[] = ['install'];
           this._pushConfigurationArgs(installArgs, options);
 
           console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
@@ -981,7 +1010,7 @@ export class InstallManager {
 
   private _queryIfReleaseIsPublished(registryUrl: string): Promise<boolean> {
     let queryUrl: string = registryUrl;
-    if (queryUrl[-1] !== '/') {
+    if (queryUrl[- 1] !== '/') {
       queryUrl += '/';
     }
     // Note that the "@" symbol does not normally get URL-encoded
@@ -999,9 +1028,9 @@ export class InstallManager {
     }
 
     return fetch.default(queryUrl, {
-        headers: headers,
-        agent: agent
-      })
+      headers: headers,
+      agent: agent
+    })
       .then((response: fetch.Response) => {
         if (!response.ok) {
           return Promise.reject(new Error('Failed to query'));
@@ -1026,9 +1055,9 @@ export class InstallManager {
             // Make sure the tarball wasn't deleted from the CDN
             headers.set('accept', '*/*');
             return fetch.default(url, {
-                headers: headers,
-                agent: agent
-              })
+              headers: headers,
+              agent: agent
+            })
               .then<boolean>((response2: fetch.Response) => {
                 if (!response2.ok) {
                   if (response2.status === 404) {
@@ -1122,7 +1151,7 @@ export class InstallManager {
   private _syncFile(sourcePath: string, destinationPath: string): void {
     if (FileSystem.exists(sourcePath)) {
       console.log('Updating ' + destinationPath);
-      FileSystem.copyFile({sourcePath, destinationPath});
+      FileSystem.copyFile({ sourcePath, destinationPath });
     } else {
       if (FileSystem.exists(destinationPath)) {
         console.log('Deleting ' + destinationPath);

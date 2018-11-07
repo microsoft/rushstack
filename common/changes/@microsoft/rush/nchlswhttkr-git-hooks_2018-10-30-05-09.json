@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Added support for git hooks",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "26531118+nchlswhttkr@users.noreply.github.com"
+}
