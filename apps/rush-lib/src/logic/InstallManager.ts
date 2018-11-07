@@ -270,28 +270,26 @@ export class InstallManager {
       // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
       const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
       const hookDestination: string = path.join(this._rushConfiguration.rushJsonFolder, FolderConstants.Git, 'hooks');
+
       if (FileSystem.exists(hookSource)) {
-        console.log(os.EOL + colors.bold('Detected /common/git-hooks, clearing and reinstalling Git hooks'));
         const hookFilenames: Array<string> = FileSystem.readFolder(hookSource);
+        if (hookFilenames.length > 0) {
+          console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
 
-        if (hookFilenames.length === 0) {
-          console.log(colors.yellow('Warning - You have not added any git hooks yet, skipping for now'));
-
-        } else {
           // Clear the currently installed git hooks and install fresh copies
           FileSystem.ensureEmptyFolder(hookDestination);
-          hookFilenames.forEach(filename => {
 
-            const match: RegExpMatchArray | null = filename.match(/^[a-z\-]+/);
-            if (match !== null) {
-              console.log(`Installing hook ${match[0]}`);
-              FileSystem.copyFile({
-                sourcePath: path.join(hookSource, filename),
-                destinationPath: path.join(hookDestination, match[0])
-              });
-              FileSystem.changePosixModeBits(path.join(hookDestination, match[0]), PosixModeBits.UserExecute);
-            }
-          });
+          // Only copy files that look like Git hook names
+          const filteredHookFilenames: string[] = hookFilenames.filter(x => /^[a-z\-]+/.test(x));
+          for (const filename of filteredHookFilenames) {
+            FileSystem.copyFile({
+              sourcePath: path.join(hookSource, filename),
+              destinationPath: path.join(hookDestination, filename)
+            });
+            FileSystem.changePosixModeBits(path.join(hookDestination, filename), PosixModeBits.UserExecute);
+          }
+
+          console.log('Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL);
         }
       }
 
