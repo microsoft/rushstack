@@ -49,6 +49,7 @@ const MAX_INSTALL_ATTEMPTS: number = 2;
  * As a temporary workaround, augment the type.
  */
 import { CreateOptions } from 'tar';
+import { RushGlobalFolder } from '../api/RushGlobalFolder';
 
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
@@ -113,6 +114,7 @@ export interface IInstallManagerOptions {
  */
 export class InstallManager {
   private _rushConfiguration: RushConfiguration;
+  private _rushGlobalFolder: RushGlobalFolder;
   private _commonNodeModulesMarker: LastInstallFlag;
   private _commonTempFolderRecycler: AsyncRecycler;
 
@@ -235,8 +237,14 @@ export class InstallManager {
     return this._commonNodeModulesMarker;
   }
 
-  constructor(rushConfiguration: RushConfiguration, purgeManager: PurgeManager, options: IInstallManagerOptions) {
+  constructor(
+    rushConfiguration: RushConfiguration,
+    rushGlobalFolder: RushGlobalFolder,
+    purgeManager: PurgeManager,
+    options: IInstallManagerOptions
+  ) {
     this._rushConfiguration = rushConfiguration;
+    this._rushGlobalFolder = rushGlobalFolder;
     this._commonTempFolderRecycler = purgeManager.commonTempFolderRecycler;
     this._options = options;
 
@@ -341,7 +349,7 @@ export class InstallManager {
    */
   public ensureLocalPackageManager(): Promise<void> {
     // Example: "C:\Users\YourName\.rush"
-    const rushUserFolder: string = this._rushConfiguration.rushUserFolder;
+    const rushUserFolder: string = this._rushGlobalFolder.nodeSpecificPath;
 
     if (!FileSystem.exists(rushUserFolder)) {
       console.log('Creating ' + rushUserFolder);
@@ -925,7 +933,7 @@ export class InstallManager {
 
   private _checkIfReleaseIsPublished(): Promise<boolean> {
     return Promise.resolve().then(() => {
-      const lastCheckFile: string = path.join(this._rushConfiguration.rushUserFolder,
+      const lastCheckFile: string = path.join(this._rushGlobalFolder.nodeSpecificPath,
         'rush-' + Rush.version, 'last-check.flag');
 
       if (FileSystem.exists(lastCheckFile)) {
