@@ -37,9 +37,8 @@ describe('Interleaver tests', () => {
   describe('Testing register and close', () => {
     it('cannot be directly instantiated', (done: MochaDone) => {
       assert.throws(() => {
-        /* tslint:disable:no-unused-variable */
         const a: Interleaver = new Interleaver();
-        /* tslint:enable:no-unused-variable */
+        assert.isNotNull(a);
       });
       done();
     });
