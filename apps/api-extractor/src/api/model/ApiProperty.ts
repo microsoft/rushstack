@@ -35,7 +35,7 @@ export class ApiProperty extends ApiDeclarationMixin(ApiReleaseTagMixin(
 
   /** @override */
   public get kind(): ApiItemKind {
-    return ApiItemKind.PropertySignature;
+    return ApiItemKind.Property;
   }
 
   /** @override */
