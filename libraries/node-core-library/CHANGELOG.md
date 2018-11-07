@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Mon, 05 Nov 2018 17:04:24 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Nov 2018 21:04:35 GMT and should not be manually modified.
+
+## 3.5.2
+Wed, 07 Nov 2018 21:04:35 GMT
+
+### Patches
+
+- Upgrade fs-extra to eliminate the "ERROR: ENOTEMPTY: directory not empty, rmdir" error that sometimes occurred with FileSystem.deleteFolder()
 
 ## 3.5.1
 Mon, 05 Nov 2018 17:04:24 GMT

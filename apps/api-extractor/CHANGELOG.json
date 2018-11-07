@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.1.3",
+      "tag": "@microsoft/api-extractor_v6.1.3",
+      "date": "Wed, 07 Nov 2018 21:04:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.1` to `3.5.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.1.2",
       "tag": "@microsoft/api-extractor_v6.1.2",
       "date": "Mon, 05 Nov 2018 17:04:24 GMT",
