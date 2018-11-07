@@ -920,7 +920,11 @@ export class RushConfiguration {
 
     this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
     this.__rushNodeSpecificUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');
-    this.__rushUserFolder = path.join(this.__rushNodeSpecificUserFolder, `node-${process.version}`);
+
+    const normalizedNodeVersion: string = process.version.match(/^[a-z0-9\-\.]+$/i)
+      ? process.version
+      : 'unknown-version';
+    this.__rushUserFolder = path.join(this.__rushNodeSpecificUserFolder, `node-${normalizedNodeVersion}`);
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');

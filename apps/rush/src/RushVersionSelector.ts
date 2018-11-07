@@ -25,8 +25,12 @@ export class RushVersionSelector {
   public ensureRushVersionInstalled(version: string,
     configuration: MinimalRushConfiguration | undefined): Promise<void> {
 
+    const normalizedNodeVersion: string = process.version.match(/^[a-z0-9\-\.]+$/i)
+      ? process.version
+      : 'unknown-version';
+
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
-    const expectedRushPath: string = path.join(this._rushDirectory, `node-${process.version}`, `rush-${version}`);
+    const expectedRushPath: string = path.join(this._rushDirectory, `node-${normalizedNodeVersion}`, `rush-${version}`);
 
     const installMarker: _LastInstallFlag = new _LastInstallFlag(
       expectedRushPath,
