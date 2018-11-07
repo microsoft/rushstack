@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade fs-extra to eliminate the annoying \"ERROR: ENOTEMPTY: directory not empty, rmdir\" error that occasionally occurred during \"rush link\"",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
