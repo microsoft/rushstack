@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler
 
-This log was last generated on Mon, 05 Nov 2018 17:04:24 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Nov 2018 17:03:03 GMT and should not be manually modified.
+
+## 0.5.0
+Wed, 07 Nov 2018 17:03:03 GMT
+
+### Minor changes
+
+- Disable deprecated lint rules in favor of compiler check.
 
 ## 0.4.4
 Mon, 05 Nov 2018 17:04:24 GMT

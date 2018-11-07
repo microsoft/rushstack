@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@microsoft/rush-stack-compiler_v0.5.0",
+      "date": "Wed, 07 Nov 2018 17:03:03 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Disable deprecated lint rules in favor of compiler check."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.4",
       "tag": "@microsoft/rush-stack-compiler_v0.4.4",
       "date": "Mon, 05 Nov 2018 17:04:24 GMT",
