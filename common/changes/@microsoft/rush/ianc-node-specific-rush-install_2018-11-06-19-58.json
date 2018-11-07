@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Install rush and package managers in a node version-specific folder under the user's home directory.",
+      "comment": "Install rush and package managers in a node version-specific folder under the user's home directory",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
