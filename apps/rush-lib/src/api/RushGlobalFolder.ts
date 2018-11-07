@@ -30,10 +30,10 @@ export class RushGlobalFolder {
   }
 
   public constructor() {
-    this._rushNodeSpecificUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');
+    this._rushUserFolder = path.join(Utilities.getHomeDirectory(), '.rush');
     const normalizedNodeVersion: string = process.version.match(/^[a-z0-9\-\.]+$/i)
       ? process.version
       : 'unknown-version';
-    this._rushUserFolder = path.join(this._rushNodeSpecificUserFolder, `node-${normalizedNodeVersion}`);
+    this._rushNodeSpecificUserFolder = path.join(this._rushUserFolder, `node-${normalizedNodeVersion}`);
   }
 }
