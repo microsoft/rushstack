@@ -103,6 +103,10 @@ export {
   ApiProperty
 } from './api/model/ApiProperty';
 export {
+  IApiPropertyItemOptions,
+  ApiPropertyItem
+} from './api/model/ApiPropertyItem';
+export {
   IApiPropertySignatureOptions,
   ApiPropertySignature
 } from './api/model/ApiPropertySignature';

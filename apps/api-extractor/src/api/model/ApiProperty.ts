@@ -4,9 +4,9 @@
 import { ApiItemKind } from './ApiItem';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { ApiResultTypeMixin, IApiResultTypeMixinOptions } from '../mixins/ApiResultTypeMixin';
+import { ApiPropertyItem, IApiPropertyItemOptions } from './ApiPropertyItem';
 
 /** @public */
 export interface IApiPropertyOptions extends
@@ -14,12 +14,13 @@ export interface IApiPropertyOptions extends
   IApiReleaseTagMixinOptions,
   IApiResultTypeMixinOptions,
   IApiStaticMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiPropertyItemOptions {
 }
 
 /** @public */
 export class ApiProperty extends ApiDeclarationMixin(ApiReleaseTagMixin(
-  ApiResultTypeMixin(ApiStaticMixin(ApiDocumentedItem)))) {
+  ApiResultTypeMixin(ApiStaticMixin(ApiPropertyItem)))) {
+
   public static getCanonicalReference(name: string, isStatic: boolean): string {
     if (isStatic) {
       return `(${name}:static)`;

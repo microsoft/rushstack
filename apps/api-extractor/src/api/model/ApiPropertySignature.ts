@@ -3,21 +3,21 @@
 
 import { ApiItemKind } from './ApiItem';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { ApiResultTypeMixin, IApiResultTypeMixinOptions } from '../mixins/ApiResultTypeMixin';
+import { ApiPropertyItem, IApiPropertyItemOptions } from './ApiPropertyItem';
 
 /** @public */
 export interface IApiPropertySignatureOptions extends
   IApiDeclarationMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiResultTypeMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiPropertyItemOptions {
 }
 
 /** @public */
 export class ApiPropertySignature extends ApiDeclarationMixin(ApiReleaseTagMixin(
-  ApiResultTypeMixin(ApiDocumentedItem))) {
+  ApiResultTypeMixin(ApiPropertyItem))) {
 
   public static getCanonicalReference(name: string): string {
     return name;
