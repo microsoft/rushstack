@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Republished since the NPM registry seemed to have trouble serving 5.5.1",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "pgonzal@users.noreply.github.com"
+}
