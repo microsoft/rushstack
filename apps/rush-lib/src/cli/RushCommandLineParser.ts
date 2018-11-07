@@ -10,7 +10,6 @@ import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
-import { CommandJson } from '../api/CommandLineJson';
 import { Utilities } from '../utilities/Utilities';
 import { BaseScriptAction } from '../cli/scriptActions/BaseScriptAction';
 
