@@ -75,7 +75,7 @@ export class ApiItem {
 
   /** @virtual */
   public get canonicalReference(): string {
-    throw new Error('ApiItem.kind was not implemented by the child class');
+    throw new Error('ApiItem.canonicalReference was not implemented by the child class');
   }
 
   /**

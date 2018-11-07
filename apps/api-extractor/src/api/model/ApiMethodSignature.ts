@@ -6,18 +6,20 @@ import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiD
 import { ApiFunctionLikeMixin, IApiFunctionLikeMixinOptions } from '../mixins/ApiFunctionLikeMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
+import { ApiResultTypeMixin, IApiResultTypeMixinOptions } from '../mixins/ApiResultTypeMixin';
 
 /** @public */
 export interface IApiMethodSignatureOptions extends
   IApiDeclarationMixinOptions,
   IApiFunctionLikeMixinOptions,
   IApiReleaseTagMixinOptions,
+  IApiResultTypeMixinOptions,
   IApiDocumentedItemOptions {
 }
 
 /** @public */
 export class ApiMethodSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
-  ApiDocumentedItem))) {
+  ApiResultTypeMixin(ApiDocumentedItem)))) {
 
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;
@@ -30,5 +32,10 @@ export class ApiMethodSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin
   /** @override */
   public get kind(): ApiItemKind {
     return ApiItemKind.MethodSignature;
+  }
+
+  /** @override */
+  public get canonicalReference(): string {
+    return ApiMethodSignature.getCanonicalReference(this.name, this.overloadIndex);
   }
 }

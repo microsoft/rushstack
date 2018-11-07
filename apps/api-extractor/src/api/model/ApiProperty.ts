@@ -6,17 +6,20 @@ import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiD
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
+import { ApiResultTypeMixin, IApiResultTypeMixinOptions } from '../mixins/ApiResultTypeMixin';
 
 /** @public */
 export interface IApiPropertyOptions extends
   IApiDeclarationMixinOptions,
   IApiReleaseTagMixinOptions,
+  IApiResultTypeMixinOptions,
   IApiStaticMixinOptions,
   IApiDocumentedItemOptions {
 }
 
 /** @public */
-export class ApiProperty extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiStaticMixin(ApiDocumentedItem))) {
+export class ApiProperty extends ApiDeclarationMixin(ApiReleaseTagMixin(
+  ApiResultTypeMixin(ApiStaticMixin(ApiDocumentedItem)))) {
   public static getCanonicalReference(name: string, isStatic: boolean): string {
     if (isStatic) {
       return `(${name}:static)`;

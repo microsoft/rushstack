@@ -197,8 +197,10 @@ export class ModelBuilder {
       const signature: string = astDeclaration.declaration.getText();
       const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+      const resultTypeSignature: string = this._getSignatureForTypeNode(methodDeclaration.type);
 
-      apiMethod = new ApiMethod({ name, signature, docComment, releaseTag, isStatic, overloadIndex });
+      apiMethod = new ApiMethod({ name, signature, docComment, releaseTag, resultTypeSignature, isStatic,
+        overloadIndex });
 
       for (const parameter of methodDeclaration.parameters) {
         const parameterSignature: string = parameter.getText().trim();
@@ -230,8 +232,10 @@ export class ModelBuilder {
       const signature: string = astDeclaration.declaration.getText();
       const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+      const resultTypeSignature: string = this._getSignatureForTypeNode(methodSignature.type);
 
-      apiMethodSignature = new ApiMethodSignature({ name, signature, docComment, releaseTag, overloadIndex });
+      apiMethodSignature = new ApiMethodSignature({ name, signature, docComment, releaseTag, resultTypeSignature,
+        overloadIndex });
 
       for (const parameter of methodSignature.parameters) {
         const parameterSignature: string = parameter.getText().trim();
@@ -292,8 +296,9 @@ export class ModelBuilder {
       const signature: string = astDeclaration.declaration.getText();
       const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+      const resultTypeSignature: string = this._getSignatureForTypeNode(propertyDeclaration.type);
 
-      apiProperty = new ApiProperty({ name, signature, docComment, releaseTag, isStatic });
+      apiProperty = new ApiProperty({ name, signature, docComment, releaseTag, resultTypeSignature, isStatic });
       parentApiItem.addMember(apiProperty);
     } else {
       // If the property was already declared before (via a merged interface declaration),
@@ -307,6 +312,8 @@ export class ModelBuilder {
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const canonicalReference: string = ApiPropertySignature.getCanonicalReference(name);
 
+    const propertySignature: ts.PropertySignature = astDeclaration.declaration as ts.PropertySignature;
+
     let apiPropertySignature: ApiPropertySignature | undefined
       = parentApiItem.tryGetMember(canonicalReference) as ApiPropertySignature;
 
@@ -314,8 +321,9 @@ export class ModelBuilder {
       const signature: string = astDeclaration.declaration.getText();
       const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+      const resultTypeSignature: string = this._getSignatureForTypeNode(propertySignature.type);
 
-      apiPropertySignature = new ApiPropertySignature({ name, signature, docComment, releaseTag });
+      apiPropertySignature = new ApiPropertySignature({ name, signature, docComment, releaseTag, resultTypeSignature });
       parentApiItem.addMember(apiPropertySignature);
     } else {
       // If the property was already declared before (via a merged interface declaration),
@@ -372,6 +380,13 @@ export class ModelBuilder {
       }
     }
     return span.getModifiedText().trim();
+  }
+
+  private _getSignatureForTypeNode(type: ts.TypeNode | undefined): string {
+    if (type) {
+      return type.getText();
+    }
+    return '';
   }
 
   private _determineReleaseTag(docComment: tsdoc.DocComment | undefined,

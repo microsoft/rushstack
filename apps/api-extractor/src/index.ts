@@ -46,6 +46,10 @@ export {
   ApiReleaseTagMixin
 } from './api/mixins/ApiReleaseTagMixin';
 export {
+  IApiResultTypeMixinOptions,
+  ApiResultTypeMixin
+} from './api/mixins/ApiResultTypeMixin';
+export {
   IApiStaticMixinOptions,
   ApiStaticMixin
 } from './api/mixins/ApiStaticMixin';
