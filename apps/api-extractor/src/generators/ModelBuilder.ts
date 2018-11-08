@@ -26,6 +26,7 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { ApiReleaseTagMixin } from '../api/mixins/ApiReleaseTagMixin';
 import { ApiProperty } from '../api/model/ApiProperty';
 import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
+import { ApiFunctionLikeMixin } from '../api/mixins/ApiFunctionLikeMixin';
 
 export class ModelBuilder {
   private readonly _context: ExtractorContext;
@@ -203,12 +204,7 @@ export class ModelBuilder {
         overloadIndex });
 
       for (const parameter of methodDeclaration.parameters) {
-        const parameterSignature: string = parameter.getText().trim();
-
-        apiMethod.addParameter(new ApiParameter({
-          name: parameter.name.getText() || '',
-          signature: parameterSignature
-        }));
+        this._processApiParameter(parameter, apiMethod);
       }
 
       parentApiItem.addMember(apiMethod);
@@ -238,16 +234,25 @@ export class ModelBuilder {
         overloadIndex });
 
       for (const parameter of methodSignature.parameters) {
-        const parameterSignature: string = parameter.getText().trim();
+        this._processApiParameter(parameter, apiMethodSignature);
 
-        apiMethodSignature.addParameter(new ApiParameter({
-          name: parameter.name.getText() || '',
-          signature: parameterSignature
-        }));
       }
 
       parentApiItem.addMember(apiMethodSignature);
     }
+  }
+
+  private _processApiParameter(parameterDeclaration: ts.ParameterDeclaration,
+    functionLikeItem: ApiFunctionLikeMixin): void {
+
+    const signature: string = parameterDeclaration.getText().trim();
+    const resultTypeSignature: string = this._getSignatureForTypeNode(parameterDeclaration.type);
+
+    functionLikeItem.addParameter(new ApiParameter({
+      name: parameterDeclaration.name.getText() || '',
+      signature,
+      resultTypeSignature
+    }));
   }
 
   private _processApiNamespace(astDeclaration: AstDeclaration, exportedName: string | undefined,

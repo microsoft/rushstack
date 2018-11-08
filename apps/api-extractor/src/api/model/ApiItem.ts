@@ -79,8 +79,9 @@ export class ApiItem {
   }
 
   /**
-   * If this item was added to a ApiItemContainerMixin item, then this returns the parent item.
-   * Otherwise it returns undefined.
+   * If this item was added to a ApiItemContainerMixin item, then this returns the container item.
+   * If this is an ApiParameter that was added to a method or function, then this returns the function item.
+   * Otherwise, it returns undefined.
    * @virtual
    */
   public get parent(): ApiItem | undefined {

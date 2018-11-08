@@ -4,12 +4,10 @@
 import {
   IDocNodeParameters,
   DocNode,
-  DocSection,
   DocPlainText
 } from '@microsoft/tsdoc';
 import { CustomDocNodeKind } from './CustomDocNodeKind';
 import { DocTableCell } from './DocTableCell';
-import { DocTable } from './DocTable';
 
 /**
  * Constructor parameters for {@link DocTableRow}.

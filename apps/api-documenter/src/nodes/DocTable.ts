@@ -3,8 +3,7 @@
 
 import {
   IDocNodeParameters,
-  DocNode,
-  DocSection
+  DocNode
 } from '@microsoft/tsdoc';
 import { CustomDocNodeKind } from './CustomDocNodeKind';
 import { DocTableRow } from './DocTableRow';

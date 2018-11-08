@@ -3,16 +3,20 @@
 
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { ApiItemKind, ApiItem } from './ApiItem';
+import { ApiItemKind, ApiItem, IApiItemOptions } from './ApiItem';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem } from './ApiDocumentedItem';
+import { ApiResultTypeMixin, IApiResultTypeMixinOptions } from '../mixins/ApiResultTypeMixin';
 
 /** @public */
-export interface IApiParameterOptions extends IApiDeclarationMixinOptions {
+export interface IApiParameterOptions extends
+  IApiDeclarationMixinOptions,
+  IApiResultTypeMixinOptions,
+  IApiItemOptions {
 }
 
 /** @public */
-export class ApiParameter extends ApiDeclarationMixin(ApiItem) {
+export class ApiParameter extends ApiDeclarationMixin(ApiResultTypeMixin(ApiItem)) {
   public constructor(options: IApiParameterOptions) {
     super(options);
   }

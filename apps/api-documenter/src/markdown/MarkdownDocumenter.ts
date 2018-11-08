@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
 import * as path from 'path';
 
 import {
@@ -13,7 +12,6 @@ import {
   DocSection,
   DocPlainText,
   DocLinkTag,
-  DocNode,
   TSDocConfiguration,
   StringBuilder,
   DocNodeKind,
@@ -34,7 +32,8 @@ import {
   ApiDeclarationMixin,
   ApiStaticMixin,
   ApiResultTypeMixin,
-  ApiPropertyItem
+  ApiPropertyItem,
+  ApiFunctionLikeMixin
 } from '@microsoft/api-extractor';
 
 import { MarkdownRenderer } from '../utils/MarkdownRenderer';
@@ -141,6 +140,7 @@ export class MarkdownDocumenter {
         break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
+        this._writeFunctionLikeTables(output, apiItem as ApiFunctionLikeMixin);
         break;
       case ApiItemKind.Namespace:
         break;
@@ -408,6 +408,71 @@ export class MarkdownDocumenter {
     if (methodsTable.rows.length > 0) {
       output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Methods' }));
       output.appendNode(methodsTable);
+    }
+  }
+
+  /**
+   * GENERATE PAGE: FUNCTION-LIKE
+   */
+  private _writeFunctionLikeTables(output: DocSection, apiFunctionLike: ApiFunctionLikeMixin): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
+    if (apiFunctionLike.name === 'example') {
+      debugger;
+    }
+
+    const parametersTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Parameter', 'Type', 'Description' ]
+    });
+
+    for (const apiParameter of apiFunctionLike.parameters) {
+      const parameterDescription: DocSection = new DocSection({ configuration } );
+      if (apiParameter.tsdocParamBlock) {
+        this._appendSection(parameterDescription, apiParameter.tsdocParamBlock.content);
+      }
+
+      parametersTable.addRow(
+        new DocTableRow({ configuration }, [
+          this._createTitleCell(apiParameter),
+          new DocTableCell({configuration}, [
+            new DocParagraph({ configuration }, [
+              new DocCodeSpan({ configuration, code: apiParameter.resultTypeSignature })
+            ])
+          ]),
+          new DocTableCell({configuration}, parameterDescription.nodes)
+        ])
+      );
+    }
+
+    if (parametersTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Parameters' }));
+      output.appendNode(parametersTable);
+    }
+
+    if (ApiResultTypeMixin.isBaseClassOf(apiFunctionLike)) {
+
+      output.appendNode(
+        new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true}, [
+            new DocPlainText({ configuration, text: 'Returns:' })
+          ])
+        ])
+      );
+
+      output.appendNode(
+        new DocParagraph({ configuration }, [
+          new DocCodeSpan({ configuration, code: apiFunctionLike.resultTypeSignature })
+        ])
+      );
+
+      if (apiFunctionLike instanceof ApiDocumentedItem) {
+        if (apiFunctionLike.tsdocComment) {
+          if (apiFunctionLike.tsdocComment.returnsBlock) {
+            this._appendSection(output, apiFunctionLike.tsdocComment.returnsBlock.content);
+          }
+        }
+      }
+
     }
   }
 

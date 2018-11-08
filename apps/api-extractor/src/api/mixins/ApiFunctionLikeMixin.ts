@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
+import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 import { ApiParameter } from '../model/ApiParameter';
 
 /** @public */
@@ -56,7 +56,13 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
       const options: IApiFunctionLikeMixinOptions = args[0];
       this[_overloadIndex] = options.overloadIndex;
 
-      this[_parameters] = options.parameters || [];
+      this[_parameters] = [];
+
+      if (options.parameters) {
+        for (const parameter of options.parameters) {
+          this.addParameter(parameter);
+        }
+      }
     }
 
     public get overloadIndex(): number {
@@ -68,7 +74,14 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
     }
 
     public addParameter(parameter: ApiParameter): void {
+      const existingParent: ApiItem | undefined = parameter[ApiItem_parent];
+      if (existingParent !== undefined) {
+        throw new Error(`This ApiParameter has already been added to another function: "${existingParent.name}"`);
+      }
+
       this[_parameters].push(parameter);
+
+      parameter[ApiItem_parent] = this;
     }
 
     /** @override */

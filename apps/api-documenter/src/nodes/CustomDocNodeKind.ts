@@ -1,4 +1,4 @@
-import { TSDocConfiguration, DocNode, DocNodeKind } from '@microsoft/tsdoc';
+import { TSDocConfiguration, DocNodeKind } from '@microsoft/tsdoc';
 import { DocEmphasisSpan } from './DocEmphasisSpan';
 import { DocHeading } from './DocHeading';
 import { DocNoteBox } from './DocNoteBox';
