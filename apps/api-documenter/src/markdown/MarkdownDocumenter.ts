@@ -164,7 +164,11 @@ export class MarkdownDocumenter {
     const filename: string = path.join(this._outputFolder, this._getFilenameForApiItem(apiItem));
     const stringBuilder: StringBuilder = new StringBuilder();
 
-    MarkdownRenderer.renderNode(stringBuilder, output);
+    MarkdownRenderer.renderNode(stringBuilder, output, {
+      onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => {
+        return '#';
+      }
+    });
 
     FileSystem.writeFile(filename, stringBuilder.toString(), {
       convertLineEndings: NewlineKind.CrLf
@@ -416,10 +420,6 @@ export class MarkdownDocumenter {
    */
   private _writeFunctionLikeTables(output: DocSection, apiFunctionLike: ApiFunctionLikeMixin): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
-
-    if (apiFunctionLike.name === 'example') {
-      debugger;
-    }
 
     const parametersTable: DocTable = new DocTable({ configuration,
       headerTitles: [ 'Parameter', 'Type', 'Description' ]

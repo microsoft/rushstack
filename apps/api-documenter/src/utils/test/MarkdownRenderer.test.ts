@@ -197,7 +197,9 @@ test('render Markdown from TSDoc', done => {
 
   const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
   const stringBuilder: StringBuilder = new StringBuilder();
-  MarkdownRenderer.renderNode(stringBuilder, output);
+  MarkdownRenderer.renderNode(stringBuilder, output, {
+    onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => '#'
+  });
   FileSystem.writeFile(outputFilename, stringBuilder.toString());
 
   FileDiffTest.assertEqual(outputFilename, path.join(__dirname, 'ExpectedOutput.md'));

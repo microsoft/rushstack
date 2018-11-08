@@ -92,6 +92,14 @@ class SimpleWriter {
   }
 }
 
+export interface IMarkdownRendererOptions {
+  /**
+   * Given a DocLinkTag with a codeDestination property, determine the target link that should be emitted
+   * in the "[link text](target URL)" Markdown notation.  If the link cannot be resolved, undefined is returned.
+   */
+  onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => string | undefined;
+}
+
 interface IRenderContext {
   writer: SimpleWriter;
   insideTable: boolean;
@@ -101,6 +109,8 @@ interface IRenderContext {
 
   writingBold: boolean;
   writingItalic: boolean;
+
+  options: IMarkdownRendererOptions;
 }
 
 /**
@@ -109,7 +119,7 @@ interface IRenderContext {
  */
 export class MarkdownRenderer {
 
-  public static renderNode(stringBuilder: StringBuilder, docNode: DocNode): string {
+  public static renderNode(stringBuilder: StringBuilder, docNode: DocNode, options: IMarkdownRendererOptions): string {
     const writer: SimpleWriter = new SimpleWriter(stringBuilder);
 
     const context: IRenderContext = {
@@ -120,7 +130,9 @@ export class MarkdownRenderer {
       italicRequested: false,
 
       writingBold: false,
-      writingItalic: false
+      writingItalic: false,
+
+      options
     };
 
     MarkdownRenderer._writeNode(docNode, context);
@@ -171,11 +183,24 @@ export class MarkdownRenderer {
       }
       case DocNodeKind.LinkTag: {
         const docLinkTag: DocLinkTag = docNode as DocLinkTag;
-        writer.write('[');
-        if (docLinkTag.linkText !== undefined) {
-          writer.write(docLinkTag.linkText.replace(/\s+/g, ' '));
+        if (docLinkTag.linkText !== undefined && docLinkTag.linkText.length > 0) {
+          const encodedLinkText: string = MarkdownRenderer._getEscapedText(docLinkTag.linkText.replace(/\s+/g, ' '));
+          let destination: string | undefined = undefined;
+          if (docLinkTag.codeDestination) {
+            destination = context.options.onResolveTargetForCodeDestination(docLinkTag);
+          } else if (docLinkTag.urlDestination) {
+            destination = docLinkTag.urlDestination;
+          }
+
+          if (destination !== undefined) {
+            writer.write('[');
+            writer.write(encodedLinkText);
+            writer.write(`](${destination})`);
+          } else {
+            writer.write(encodedLinkText);
+          }
         }
-        writer.write(`](${docLinkTag.urlDestination || ''})`);
+
         break;
       }
       case DocNodeKind.Paragraph: {
