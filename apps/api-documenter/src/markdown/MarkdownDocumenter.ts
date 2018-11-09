@@ -38,7 +38,6 @@ import {
   IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor';
 
-import { MarkdownEmitter } from '../markdown/MarkdownEmitter';
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
 import { DocHeading } from '../nodes/DocHeading';
 import { DocTable } from '../nodes/DocTable';
@@ -47,6 +46,7 @@ import { DocTableRow } from '../nodes/DocTableRow';
 import { DocTableCell } from '../nodes/DocTableCell';
 import { DocNoteBox } from '../nodes/DocNoteBox';
 import { Utilities } from '../utils/Utilities';
+import { CustomMarkdownEmitter } from './CustomMarkdownEmitter';
 
 /**
  * Renders API documentation in the Markdown file format.
@@ -55,13 +55,13 @@ import { Utilities } from '../utils/Utilities';
 export class MarkdownDocumenter {
   private readonly _apiModel: ApiModel;
   private readonly _tsdocConfiguration: TSDocConfiguration;
-  private readonly _markdownEmitter: MarkdownEmitter;
+  private readonly _markdownEmitter: CustomMarkdownEmitter;
   private _outputFolder: string;
 
   public constructor(docItemSet: ApiModel) {
     this._apiModel = docItemSet;
     this._tsdocConfiguration = CustomDocNodes.configuration;
-    this._markdownEmitter = new MarkdownEmitter();
+    this._markdownEmitter = new CustomMarkdownEmitter();
   }
 
   public generateFiles(outputFolder: string): void {

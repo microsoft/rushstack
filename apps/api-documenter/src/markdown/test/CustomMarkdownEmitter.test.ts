@@ -15,13 +15,13 @@ import {
   DocHtmlEndTag
 } from '@microsoft/tsdoc';
 
-import { MarkdownEmitter } from '../MarkdownEmitter';
 import { CustomDocNodes } from '../../nodes/CustomDocNodeKind';
 import { DocHeading } from '../../nodes/DocHeading';
 import { DocEmphasisSpan } from '../../nodes/DocEmphasisSpan';
 import { DocTable } from '../../nodes/DocTable';
 import { DocTableRow } from '../../nodes/DocTableRow';
 import { DocTableCell } from '../../nodes/DocTableCell';
+import { CustomMarkdownEmitter } from '../CustomMarkdownEmitter';
 
 test('render Markdown from TSDoc', done => {
   const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
@@ -197,7 +197,7 @@ test('render Markdown from TSDoc', done => {
 
   const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
   const stringBuilder: StringBuilder = new StringBuilder();
-  const markdownEmitter: MarkdownEmitter = new MarkdownEmitter();
+  const markdownEmitter: CustomMarkdownEmitter = new CustomMarkdownEmitter();
   markdownEmitter.emit(stringBuilder, output, {
     onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => '#'
   });
