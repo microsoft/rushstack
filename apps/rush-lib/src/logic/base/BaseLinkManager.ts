@@ -12,6 +12,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { BasePackage } from './BasePackage';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 export enum SymlinkKind {
   File,
@@ -29,15 +30,22 @@ export abstract class BaseLinkManager {
     const newLinkFolder: string = path.dirname(options.newLinkPath);
     FileSystem.ensureFolder(newLinkFolder);
 
-    // Link to the relative path, to avoid going outside containers such as a Docker image
-    const targetRelativePath: string = path.relative(fs.realpathSync(newLinkFolder),
-      options.linkTargetPath);
+    let targetPath: string;
+    if (EnvironmentConfiguration.absoluteSymlinks) {
+        targetPath = options.linkTargetPath;
+    } else {
+      // Link to the relative path, to avoid going outside containers such as a Docker image
+      targetPath = path.relative(
+        fs.realpathSync(newLinkFolder),
+        options.linkTargetPath
+      );
+    }
 
     if (process.platform === 'win32') {
       if (options.symlinkKind === SymlinkKind.Directory) {
         // For directories, we use a Windows "junction".  On Unix, this produces a regular symlink.
         FileSystem.createSymbolicLinkJunction({
-          linkTargetPath: targetRelativePath,
+          linkTargetPath: targetPath,
           newLinkPath: options.newLinkPath
         });
       } else {
@@ -55,12 +63,12 @@ export abstract class BaseLinkManager {
       // we use symbolic links for this case.
       if (options.symlinkKind === SymlinkKind.Directory) {
         FileSystem.createSymbolicLinkFolder({
-          linkTargetPath: targetRelativePath,
+          linkTargetPath: targetPath,
           newLinkPath: options.newLinkPath
         });
       } else {
         FileSystem.createSymbolicLinkFile({
-          linkTargetPath: targetRelativePath,
+          linkTargetPath: targetPath,
           newLinkPath: options.newLinkPath
         });
       }

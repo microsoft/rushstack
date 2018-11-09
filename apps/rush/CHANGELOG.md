@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 07 Nov 2018 21:04:35 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Nov 2018 02:14:11 GMT and should not be manually modified.
+
+## 5.5.2
+Fri, 09 Nov 2018 02:14:11 GMT
+
+### Updates
+
+- Include an environment variable option to create symlinks with absolute paths.
 
 ## 5.5.1
 Wed, 07 Nov 2018 21:04:35 GMT
