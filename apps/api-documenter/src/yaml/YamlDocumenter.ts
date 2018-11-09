@@ -250,7 +250,7 @@ export class YamlDocumenter {
 
     yamlItem.name = this._getYamlItemName(docItem);
 
-    yamlItem.fullName = yamlItem.uid;
+    yamlItem.fullName = yamlItem.name;
     yamlItem.langs = [ 'typeScript' ];
 
     switch (docItem.kind) {
