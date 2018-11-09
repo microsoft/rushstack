@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "7.2.3",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.2.3",
+      "date": "Fri, 09 Nov 2018 23:07:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.44` to `3.8.45`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.2.2",
       "tag": "@microsoft/gulp-core-build-typescript_v7.2.2",
       "date": "Wed, 07 Nov 2018 21:04:35 GMT",

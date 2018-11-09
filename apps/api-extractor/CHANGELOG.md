@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 07 Nov 2018 21:04:35 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Nov 2018 23:07:39 GMT and should not be manually modified.
+
+## 6.1.4
+Fri, 09 Nov 2018 23:07:39 GMT
+
+### Patches
+
+- Upgrade to TSDoc 0.21.2, which improves trimming of link text in `@link` tags
 
 ## 6.1.3
 Wed, 07 Nov 2018 21:04:35 GMT

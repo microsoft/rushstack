@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.1.4",
+      "tag": "@microsoft/api-extractor_v6.1.4",
+      "date": "Fri, 09 Nov 2018 23:07:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to TSDoc 0.21.2, which improves trimming of link text in `@link` tags"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.1.3",
       "tag": "@microsoft/api-extractor_v6.1.3",
       "date": "Wed, 07 Nov 2018 21:04:35 GMT",
