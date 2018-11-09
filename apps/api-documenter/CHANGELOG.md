@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 07 Nov 2018 21:04:35 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Nov 2018 17:03:15 GMT and should not be manually modified.
+
+## 1.5.53
+Fri, 09 Nov 2018 17:03:15 GMT
+
+### Patches
+
+- Removing the OfficeYamlDocumenter logic to correct escape characters within code ticks
+- Fix issue where broken hyperlinks sometimes appear in docs.microsoft.com due to matching of IYamlItem.fullName
 
 ## 1.5.52
 Wed, 07 Nov 2018 21:04:35 GMT
