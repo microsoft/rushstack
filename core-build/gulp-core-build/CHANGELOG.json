@@ -2,6 +2,77 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.8.44",
+      "tag": "@microsoft/gulp-core-build_v3.8.44",
+      "date": "Wed, 07 Nov 2018 21:04:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.1` to `3.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.43",
+      "tag": "@microsoft/gulp-core-build_v3.8.43",
+      "date": "Wed, 07 Nov 2018 17:03:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.4` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.42",
+      "tag": "@microsoft/gulp-core-build_v3.8.42",
+      "date": "Mon, 05 Nov 2018 17:04:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove all dependencies on the \"rimraf\" library"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.0` to `3.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.3` to `0.4.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.41",
+      "tag": "@microsoft/gulp-core-build_v3.8.41",
+      "date": "Thu, 01 Nov 2018 21:33:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.2` to `0.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.40",
+      "tag": "@microsoft/gulp-core-build_v3.8.40",
+      "date": "Thu, 01 Nov 2018 19:32:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.39",
       "tag": "@microsoft/gulp-core-build_v3.8.39",
       "date": "Wed, 31 Oct 2018 17:00:55 GMT",

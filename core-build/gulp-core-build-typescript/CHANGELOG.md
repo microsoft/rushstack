@@ -1,6 +1,35 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 31 Oct 2018 21:17:50 GMT and should not be manually modified.
+This log was last generated on Wed, 07 Nov 2018 21:04:35 GMT and should not be manually modified.
+
+## 7.2.2
+Wed, 07 Nov 2018 21:04:35 GMT
+
+*Version update only*
+
+## 7.2.1
+Wed, 07 Nov 2018 17:03:03 GMT
+
+*Version update only*
+
+## 7.2.0
+Mon, 05 Nov 2018 17:04:24 GMT
+
+### Minor changes
+
+- Update GCB-TS to ship with a default rush-stack-compiler with TS 2.4.
+
+## 7.1.2
+Thu, 01 Nov 2018 21:33:51 GMT
+
+### Patches
+
+- Fix a regression where @microsoft/rush-stack-compiler could not compile itself
+
+## 7.1.1
+Thu, 01 Nov 2018 19:32:52 GMT
+
+*Version update only*
 
 ## 7.1.0
 Wed, 31 Oct 2018 21:17:50 GMT

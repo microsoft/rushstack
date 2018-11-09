@@ -7,6 +7,13 @@ class _LastInstallFlag {
   readonly path: string;
 }
 
+// @internal
+class _RushGlobalFolder {
+  constructor();
+  readonly nodeSpecificPath: string;
+  readonly path: string;
+}
+
 // @public
 class ApprovedPackagesConfiguration {
   constructor(jsonFilename: string);
@@ -86,6 +93,7 @@ enum DependencyType {
 
 // @public
 enum EnvironmentVariableNames {
+  RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
   RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
   RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
   RUSH_VARIANT = "RUSH_VARIANT"
@@ -236,7 +244,6 @@ class RushConfiguration {
   readonly rushJsonFile: string;
   readonly rushJsonFolder: string;
   readonly rushLinkJsonFilename: string;
-  readonly rushUserFolder: string;
   readonly shrinkwrapFilePhrase: string;
   // @beta
   readonly telemetryEnabled: boolean;

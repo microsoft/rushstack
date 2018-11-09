@@ -9,7 +9,7 @@ interface ITslintCmdTaskConfig extends IRSCTaskConfig {
   displayAsError?: boolean;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
   constructor();
   // (undocumented)
@@ -20,7 +20,7 @@ class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
   loadSchema(): Object;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
   constructor();
   // (undocumented)

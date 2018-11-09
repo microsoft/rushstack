@@ -57,7 +57,7 @@
    * Specify a SemVer range to ensure developers use a NodeJS version that is appropriate
    * for your repo.
    */
-  "nodeSupportedVersionRange": ">=8.9.4 <9.0.0 || >=10.12.0 <11.0.0",
+  "nodeSupportedVersionRange": ">=8.9.4 <9.0.0 || >=10.13.0 <11.0.0",
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
@@ -393,7 +393,9 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler",
+        "@microsoft/api-extractor"
       ]
     },
     {

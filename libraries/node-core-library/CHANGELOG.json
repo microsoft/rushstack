@@ -2,6 +2,30 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.5.2",
+      "tag": "@microsoft/node-core-library_v3.5.2",
+      "date": "Wed, 07 Nov 2018 21:04:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade fs-extra to eliminate the \"ERROR: ENOTEMPTY: directory not empty, rmdir\" error that sometimes occurred with FileSystem.deleteFolder()"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.1",
+      "tag": "@microsoft/node-core-library_v3.5.1",
+      "date": "Mon, 05 Nov 2018 17:04:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove all dependencies on the \"rimraf\" library"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.5.0",
       "tag": "@microsoft/node-core-library_v3.5.0",
       "date": "Thu, 25 Oct 2018 23:20:40 GMT",

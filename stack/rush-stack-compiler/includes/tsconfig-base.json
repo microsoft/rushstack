@@ -11,6 +11,7 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
+    "noUnusedLocals": true,
     "types": []
   },
   "include": [
