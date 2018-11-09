@@ -80,6 +80,10 @@ export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
     super.addMember(member);
   }
 
+  public findEntryPointsByPath(importPath: string): ReadonlyArray<ApiEntryPoint> {
+    return this.findMembersByName(importPath) as ReadonlyArray<ApiEntryPoint>;
+  }
+
   public saveToJsonFile(apiJsonFilename: string, options?: IJsonFileSaveOptions): void {
     const jsonObject: IApiPackageJson = {
       metadata: {

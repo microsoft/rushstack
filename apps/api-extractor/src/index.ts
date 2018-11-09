@@ -110,5 +110,8 @@ export {
   IApiPropertySignatureOptions,
   ApiPropertySignature
 } from './api/model/ApiPropertySignature';
+export {
+  IResolveDeclarationReferenceResult
+} from './api/model/DeclarationReferenceResolver';
 
 export { ILogger } from './api/ILogger';

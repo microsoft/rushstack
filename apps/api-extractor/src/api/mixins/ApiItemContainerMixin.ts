@@ -15,14 +15,30 @@ export interface IApiItemContainerJson extends IApiItemJson {
 const _members: unique symbol = Symbol('ApiItemContainerMixin._members');
 const _membersSorted: unique symbol = Symbol('ApiItemContainerMixin._membersSorted');
 const _membersByCanonicalReference: unique symbol = Symbol('ApiItemContainerMixin._membersByCanonicalReference');
+const _membersByName: unique symbol = Symbol('ApiItemContainerMixin._membersByName');
 
 /** @public */
 // tslint:disable-next-line:interface-name
 export interface ApiItemContainerMixin extends ApiItem {
+  /**
+   * Returns the members of this container, sorted alphabetically.
+   */
   readonly members: ReadonlyArray<ApiItem>;
+
+  /**
+   * Adds a new member to the container.
+   *
+   * @remarks
+   * An ApiItem cannot be added to more than one container.
+   */
   addMember(member: ApiItem): void;
 
   tryGetMember(canonicalReference: string): ApiItem | undefined;
+
+  /**
+   * Returns a list of members with the specified name.
+   */
+  findMembersByName(name: string): ReadonlyArray<ApiItem>;
 
   /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
@@ -36,6 +52,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     public readonly [_members]: ApiItem[];
     public [_membersSorted]: boolean;
     public [_membersByCanonicalReference]: Map<string, ApiItem>;
+    public [_membersByName]: Map<string, ApiItem[]> | undefined;
 
     /** @override */
     public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
@@ -84,6 +101,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
       }
 
       this[_members].push(member);
+      this[_membersByName] = undefined; // invalidate the lookup
       this[_membersSorted] = false;
       this[_membersByCanonicalReference].set(member.canonicalReference, member);
 
@@ -92,6 +110,26 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
     public tryGetMember(canonicalReference: string): ApiItem | undefined {
       return this[_membersByCanonicalReference].get(canonicalReference);
+    }
+
+    public findMembersByName(name: string): ReadonlyArray<ApiItem> {
+      // Build the lookup on demand
+      if (this[_membersByName] === undefined) {
+        const map: Map<string, ApiItem[]> = new Map<string, ApiItem[]>();
+
+        for (const member of this[_members]) {
+          let list: ApiItem[] | undefined = map.get(member.name);
+          if (list === undefined) {
+            list = [];
+            map.set(member.name, list);
+          }
+          list.push(member);
+        }
+
+        this[_membersByName] = map;
+      }
+
+      return this[_membersByName]!.get(name) || [];
     }
 
     /** @override */

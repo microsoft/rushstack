@@ -6,7 +6,8 @@ import * as path from 'path';
 import {
   PackageName,
   FileSystem,
-  NewlineKind
+  NewlineKind,
+  Colors
 } from '@microsoft/node-core-library';
 import {
   DocSection,
@@ -33,7 +34,8 @@ import {
   ApiStaticMixin,
   ApiResultTypeMixin,
   ApiPropertyItem,
-  ApiFunctionLikeMixin
+  ApiFunctionLikeMixin,
+  IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor';
 
 import { MarkdownRenderer } from '../utils/MarkdownRenderer';
@@ -166,7 +168,22 @@ export class MarkdownDocumenter {
 
     MarkdownRenderer.renderNode(stringBuilder, output, {
       onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => {
-        return '#';
+        if (docLinkTag.codeDestination) {
+          const result: IResolveDeclarationReferenceResult
+            = this._apiModel.resolveDeclarationReference(docLinkTag.codeDestination, apiItem);
+
+          if (result.resolvedApiItem) {
+            // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
+            // unless they start with "./" or "../".
+            return './' + this._getFilenameForApiItem(result.resolvedApiItem);
+          }
+
+          if (result.errorMessage) {
+            console.log(Colors.red('WARNING: Unable to resolve reference: ' + result.errorMessage));
+          }
+        }
+
+        return undefined;
       }
     });
 

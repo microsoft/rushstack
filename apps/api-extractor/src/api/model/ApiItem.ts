@@ -110,6 +110,19 @@ export class ApiItem {
     return hierarchy;
   }
 
+  /**
+   * If this item is an ApiPackage or has an ApiPackage as one of its parents, then that object is returned.
+   * Otherwise undefined is returned.
+   */
+  public getAssociatedPackage(): ApiPackage | undefined {
+    for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
+      if (current.kind === ApiItemKind.Package) {
+        return current as ApiPackage;
+      }
+    }
+    return undefined;
+  }
+
   /** @virtual */
   public getSortKey(): string {
     return this.canonicalReference;
@@ -121,3 +134,4 @@ export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<
 
 // Circular import
 import { Deserializer } from './Deserializer';
+import { ApiPackage } from './ApiPackage';
