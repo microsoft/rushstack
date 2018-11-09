@@ -2,6 +2,21 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.53",
+      "tag": "@microsoft/api-documenter_v1.5.53",
+      "date": "Fri, 09 Nov 2018 17:03:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removing the OfficeYamlDocumenter logic to correct escape characters within code ticks"
+          },
+          {
+            "comment": "Fix issue where broken hyperlinks sometimes appear in docs.microsoft.com due to matching of IYamlItem.fullName"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.52",
       "tag": "@microsoft/api-documenter_v1.5.52",
       "date": "Wed, 07 Nov 2018 21:04:35 GMT",
