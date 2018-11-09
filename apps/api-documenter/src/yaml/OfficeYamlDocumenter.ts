@@ -77,7 +77,6 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
       yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
       yamlItem.remarks = this._fixBoldAndItalics(yamlItem.remarks);
       yamlItem.remarks = this._fixCodeTicks(yamlItem.remarks);
-      yamlItem.remarks = this._fixEscapedCode(yamlItem.remarks);
     }
     if (yamlItem.syntax && yamlItem.syntax.parameters) {
       yamlItem.syntax.parameters.forEach(part => {
@@ -132,19 +131,6 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
   private _fixCodeTicks(text: string): string {
     return Text.replaceAll(text, '\\`', '`');
-  }
-
-  private _fixEscapedCode(text: string): string {
-    const backtickIndex: number = text.indexOf('`');
-    if (text.indexOf('`', backtickIndex) > 0) {
-      text = Text.replaceAll(text, '=&gt;', '=>');
-      let x: number = text.indexOf('\\', backtickIndex);
-      while (x >= 0) {
-        text = text.replace(/\\([^\\])/, '$1');
-        x = text.indexOf('\\', x + 1);
-      }
-    }
-    return text;
   }
 
   private _generateExampleSnippetText(snippets: string[]): string {
