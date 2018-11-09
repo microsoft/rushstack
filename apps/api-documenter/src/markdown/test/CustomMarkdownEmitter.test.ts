@@ -197,7 +197,8 @@ test('render Markdown from TSDoc', done => {
 
   const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
   const stringBuilder: StringBuilder = new StringBuilder();
-  MarkdownEmitter.renderNode(stringBuilder, output, {
+  const markdownEmitter: MarkdownEmitter = new MarkdownEmitter();
+  markdownEmitter.emit(stringBuilder, output, {
     onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => '#'
   });
   FileSystem.writeFile(outputFilename, stringBuilder.toString());

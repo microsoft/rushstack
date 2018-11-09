@@ -23,74 +23,7 @@ import { DocNoteBox } from '../nodes/DocNoteBox';
 import { DocTable } from '../nodes/DocTable';
 import { DocTableCell } from '../nodes/DocTableCell';
 import { DocEmphasisSpan } from '../nodes/DocEmphasisSpan';
-
-/**
- * Helper class used by MarkdownPageRenderer
- */
-class SimpleWriter {
-  private _builder: StringBuilder;
-  private _latestChunk: string | undefined = undefined;
-  private _previousChunk: string | undefined = undefined;
-
-  public constructor(builder: StringBuilder) {
-    this._builder = builder;
-  }
-
-  public write(s: string): void {
-    if (s.length > 0) {
-      this._previousChunk = this._latestChunk;
-      this._latestChunk = s;
-      this._builder.append(s);
-    }
-  }
-
-  public writeLine(s: string = ''): void {
-    this.write(s);
-    this.write('\n');
-  }
-
-  /**
-   * Adds a newline if the file pointer is not already at the start of the line
-   */
-  public ensureNewLine(): void {
-    if (this.peekLastCharacter() !== '\n') {
-      this.write('\n');
-    }
-  }
-
-  /**
-   * Adds up to two newlines to ensure that there is a blank line above the current line.
-   */
-  public ensureSkippedLine(): void {
-    this.ensureNewLine();
-    if (this.peekSecondLastCharacter() !== '\n') {
-      this.write('\n');
-    }
-  }
-
-  public peekLastCharacter(): string {
-    if (this._latestChunk !== undefined) {
-      return this._latestChunk.substr(-1, 1);
-    }
-    return '';
-  }
-
-  public peekSecondLastCharacter(): string {
-    if (this._latestChunk !== undefined) {
-      if (this._latestChunk.length > 1) {
-        return this._latestChunk.substr(-2, 1);
-      }
-      if (this._previousChunk !== undefined) {
-        return this._previousChunk.substr(-1, 1);
-      }
-    }
-    return '';
-  }
-
-  public toString(): string {
-    return this._builder.toString();
-  }
-}
+import { SimpleWriter } from './SimpleWriter';
 
 export interface IMarkdownEmitterOptions {
   /**
@@ -100,7 +33,7 @@ export interface IMarkdownEmitterOptions {
   onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => string | undefined;
 }
 
-interface IRenderContext {
+interface IMarkdownEmitterContext {
   writer: SimpleWriter;
   insideTable: boolean;
 
@@ -119,11 +52,11 @@ interface IRenderContext {
  */
 export class MarkdownEmitter {
 
-  public static renderNode(stringBuilder: StringBuilder, docNode: DocNode, options: IMarkdownEmitterOptions): string {
+  public emit(stringBuilder: StringBuilder, docNode: DocNode, options: IMarkdownEmitterOptions): string {
     const writer: SimpleWriter = new SimpleWriter(stringBuilder);
 
-    const context: IRenderContext = {
-      writer: writer,
+    const context: IMarkdownEmitterContext = {
+      writer,
       insideTable: false,
 
       boldRequested: false,
@@ -135,14 +68,14 @@ export class MarkdownEmitter {
       options
     };
 
-    MarkdownEmitter._writeNode(docNode, context);
+    this._writeNode(docNode, context);
 
     writer.ensureNewLine(); // finish the last line
 
     return writer.toString();
   }
 
-  private static _getEscapedText(text: string): string {
+  private _getEscapedText(text: string): string {
     const textWithBackslashes: string = text
       .replace(/\\/g, '\\\\')  // first replace the escape character
       .replace(/[*#[\]_|`~]/g, (x) => '\\' + x) // then escape any special characters
@@ -153,13 +86,13 @@ export class MarkdownEmitter {
     return textWithBackslashes;
   }
 
-  private static _writeNode(docNode: DocNode, context: IRenderContext): void {
+  private _writeNode(docNode: DocNode, context: IMarkdownEmitterContext): void {
     const writer: SimpleWriter = context.writer;
 
     switch (docNode.kind) {
       case DocNodeKind.PlainText: {
         const docPlainText: DocPlainText = docNode as DocPlainText;
-        MarkdownEmitter._writePlainText(docPlainText.text, context);
+        this._writePlainText(docPlainText.text, context);
         break;
       }
       case DocNodeKind.HtmlStartTag:
@@ -184,7 +117,7 @@ export class MarkdownEmitter {
       case DocNodeKind.LinkTag: {
         const docLinkTag: DocLinkTag = docNode as DocLinkTag;
         if (docLinkTag.linkText !== undefined && docLinkTag.linkText.length > 0) {
-          const encodedLinkText: string = MarkdownEmitter._getEscapedText(docLinkTag.linkText.replace(/\s+/g, ' '));
+          const encodedLinkText: string = this._getEscapedText(docLinkTag.linkText.replace(/\s+/g, ' '));
           let destination: string | undefined = undefined;
           if (docLinkTag.codeDestination) {
             destination = context.options.onResolveTargetForCodeDestination(docLinkTag);
@@ -208,10 +141,10 @@ export class MarkdownEmitter {
         const trimmedParagraph: DocParagraph = DocNodeTransforms.trimSpacesInParagraph(docParagraph);
         if (context.insideTable) {
           writer.write('<p>');
-          MarkdownEmitter._writeNodes(trimmedParagraph.nodes, context);
+          this._writeNodes(trimmedParagraph.nodes, context);
           writer.write('</p>');
         } else {
-          MarkdownEmitter._writeNodes(trimmedParagraph.nodes, context);
+          this._writeNodes(trimmedParagraph.nodes, context);
           writer.ensureNewLine();
           writer.writeLine();
         }
@@ -230,7 +163,7 @@ export class MarkdownEmitter {
             prefix = '####';
         }
 
-        writer.writeLine(prefix + ' ' + MarkdownEmitter._getEscapedText(docHeading.title));
+        writer.writeLine(prefix + ' ' + this._getEscapedText(docHeading.title));
         writer.writeLine();
         break;
       }
@@ -250,7 +183,7 @@ export class MarkdownEmitter {
         writer.ensureNewLine();
         writer.write('> ');
         // TODO: Handle newlines
-        MarkdownEmitter._writeNode(docNoteBox.content, context);
+        this._writeNode(docNoteBox.content, context);
         writer.ensureNewLine();
         writer.writeLine();
         break;
@@ -281,7 +214,7 @@ export class MarkdownEmitter {
           if (docTable.header) {
             const cell: DocTableCell | undefined = docTable.header.cells[i];
             if (cell) {
-              MarkdownEmitter._writeNode(cell.content, context);
+              this._writeNode(cell.content, context);
             }
           }
           writer.write(' |');
@@ -299,7 +232,7 @@ export class MarkdownEmitter {
           writer.write('| ');
           for (const cell of row.cells) {
             writer.write(' ');
-            MarkdownEmitter._writeNode(cell.content, context);
+            this._writeNode(cell.content, context);
             writer.write(' |');
           }
           writer.writeLine();
@@ -312,7 +245,7 @@ export class MarkdownEmitter {
       }
       case DocNodeKind.Section: {
         const docSection: DocSection = docNode as DocSection;
-        MarkdownEmitter._writeNodes(docSection.nodes, context);
+        this._writeNodes(docSection.nodes, context);
         break;
       }
       case CustomDocNodeKind.EmphasisSpan: {
@@ -321,7 +254,7 @@ export class MarkdownEmitter {
         const oldItalic: boolean = context.italicRequested;
         context.boldRequested = docEmphasisSpan.bold;
         context.italicRequested = docEmphasisSpan.italic;
-        MarkdownEmitter._writeNodes(docEmphasisSpan.nodes, context);
+        this._writeNodes(docEmphasisSpan.nodes, context);
         context.boldRequested = oldBold;
         context.italicRequested = oldItalic;
         break;
@@ -334,12 +267,12 @@ export class MarkdownEmitter {
       }
       case DocNodeKind.EscapedText: {
         const docEscapedText: DocEscapedText = docNode as DocEscapedText;
-        MarkdownEmitter._writePlainText(docEscapedText.decodedText, context);
+        this._writePlainText(docEscapedText.decodedText, context);
         break;
       }
       case DocNodeKind.ErrorText: {
         const docErrorText: DocErrorText = docNode as DocErrorText;
-        MarkdownEmitter._writePlainText(docErrorText.text, context);
+        this._writePlainText(docErrorText.text, context);
         break;
       }
       default:
@@ -347,7 +280,7 @@ export class MarkdownEmitter {
     }
   }
 
-  private static _writePlainText(text: string, context: IRenderContext): void {
+  private _writePlainText(text: string, context: IMarkdownEmitterContext): void {
     const writer: SimpleWriter = context.writer;
 
     // split out the [ leading whitespace, content, trailing whitespace ]
@@ -381,7 +314,7 @@ export class MarkdownEmitter {
         writer.write('<i>');
       }
 
-      writer.write(MarkdownEmitter._getEscapedText(middle));
+      writer.write(this._getEscapedText(middle));
 
       if (context.italicRequested) {
         writer.write('</i>');
@@ -394,9 +327,9 @@ export class MarkdownEmitter {
     writer.write(parts[3]);  // write trailing whitespace
   }
 
-  private static _writeNodes(docNodes: ReadonlyArray<DocNode>, context: IRenderContext): void {
+  private _writeNodes(docNodes: ReadonlyArray<DocNode>, context: IMarkdownEmitterContext): void {
     for (const docNode of docNodes) {
-      MarkdownEmitter._writeNode(docNode, context);
+      this._writeNode(docNode, context);
     }
   }
 

@@ -38,7 +38,7 @@ import {
   IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor';
 
-import { MarkdownEmitter } from '../utils/MarkdownEmitter';
+import { MarkdownEmitter } from '../markdown/MarkdownEmitter';
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
 import { DocHeading } from '../nodes/DocHeading';
 import { DocTable } from '../nodes/DocTable';
@@ -53,13 +53,15 @@ import { Utilities } from '../utils/Utilities';
  * For more info:  https://en.wikipedia.org/wiki/Markdown
  */
 export class MarkdownDocumenter {
-  private _apiModel: ApiModel;
+  private readonly _apiModel: ApiModel;
+  private readonly _tsdocConfiguration: TSDocConfiguration;
+  private readonly _markdownEmitter: MarkdownEmitter;
   private _outputFolder: string;
-  private _tsdocConfiguration: TSDocConfiguration;
 
   public constructor(docItemSet: ApiModel) {
     this._apiModel = docItemSet;
     this._tsdocConfiguration = CustomDocNodes.configuration;
+    this._markdownEmitter = new MarkdownEmitter();
   }
 
   public generateFiles(outputFolder: string): void {
@@ -166,7 +168,7 @@ export class MarkdownDocumenter {
     const filename: string = path.join(this._outputFolder, this._getFilenameForApiItem(apiItem));
     const stringBuilder: StringBuilder = new StringBuilder();
 
-    MarkdownEmitter.renderNode(stringBuilder, output, {
+    this._markdownEmitter.emit(stringBuilder, output, {
       onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => {
         if (docLinkTag.codeDestination) {
           const result: IResolveDeclarationReferenceResult
