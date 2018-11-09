@@ -6,8 +6,7 @@ import * as path from 'path';
 import {
   PackageName,
   FileSystem,
-  NewlineKind,
-  Colors
+  NewlineKind
 } from '@microsoft/node-core-library';
 import {
   DocSection,
@@ -34,8 +33,7 @@ import {
   ApiStaticMixin,
   ApiResultTypeMixin,
   ApiPropertyItem,
-  ApiFunctionLikeMixin,
-  IResolveDeclarationReferenceResult
+  ApiFunctionLikeMixin
 } from '@microsoft/api-extractor';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -61,7 +59,7 @@ export class MarkdownDocumenter {
   public constructor(docItemSet: ApiModel) {
     this._apiModel = docItemSet;
     this._tsdocConfiguration = CustomDocNodes.configuration;
-    this._markdownEmitter = new CustomMarkdownEmitter();
+    this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
   }
 
   public generateFiles(outputFolder: string): void {
@@ -169,23 +167,11 @@ export class MarkdownDocumenter {
     const stringBuilder: StringBuilder = new StringBuilder();
 
     this._markdownEmitter.emit(stringBuilder, output, {
-      onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => {
-        if (docLinkTag.codeDestination) {
-          const result: IResolveDeclarationReferenceResult
-            = this._apiModel.resolveDeclarationReference(docLinkTag.codeDestination, apiItem);
-
-          if (result.resolvedApiItem) {
-            // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
-            // unless they start with "./" or "../".
-            return './' + this._getFilenameForApiItem(result.resolvedApiItem);
-          }
-
-          if (result.errorMessage) {
-            console.log(Colors.red('WARNING: Unable to resolve reference: ' + result.errorMessage));
-          }
-        }
-
-        return undefined;
+      contextApiItem: apiItem,
+      onGetFilenameForApiItem: (apiItemForFilename: ApiItem) => {
+        // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
+        // unless they start with "./" or "../".
+        return './' + this._getFilenameForApiItem(apiItemForFilename);
       }
     });
 

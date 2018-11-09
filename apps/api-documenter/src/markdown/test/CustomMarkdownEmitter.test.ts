@@ -22,6 +22,7 @@ import { DocTable } from '../../nodes/DocTable';
 import { DocTableRow } from '../../nodes/DocTableRow';
 import { DocTableCell } from '../../nodes/DocTableCell';
 import { CustomMarkdownEmitter } from '../CustomMarkdownEmitter';
+import { ApiModel, ApiItem } from '@microsoft/api-extractor';
 
 test('render Markdown from TSDoc', done => {
   const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
@@ -197,9 +198,13 @@ test('render Markdown from TSDoc', done => {
 
   const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
   const stringBuilder: StringBuilder = new StringBuilder();
-  const markdownEmitter: CustomMarkdownEmitter = new CustomMarkdownEmitter();
+  const apiModel: ApiModel = new ApiModel();
+  const markdownEmitter: CustomMarkdownEmitter = new CustomMarkdownEmitter(apiModel);
   markdownEmitter.emit(stringBuilder, output, {
-    onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => '#'
+    contextApiItem: undefined,
+    onGetFilenameForApiItem: (apiItem: ApiItem) => {
+      return '#';
+    }
   });
   FileSystem.writeFile(outputFilename, stringBuilder.toString());
 

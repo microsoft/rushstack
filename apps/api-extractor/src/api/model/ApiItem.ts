@@ -111,6 +111,28 @@ export class ApiItem {
   }
 
   /**
+   * This returns a scoped name such as `"Namespace1.Namespace2.MyClass.myMember()"`.  It does not include the
+   * package name or entry point.
+   */
+  public getScopedNameWithinPackage(): string {
+    const reversedParts: string[] = [];
+
+    for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
+      if (current.kind === ApiItemKind.EntryPoint) {
+        break;
+      }
+      if (reversedParts.length !== 0) {
+        reversedParts.push('.');
+      } else if (ApiFunctionLikeMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
+        reversedParts.push('()');
+      }
+      reversedParts.push(current.name);
+    }
+
+    return reversedParts.reverse().join('');
+  }
+
+  /**
    * If this item is an ApiPackage or has an ApiPackage as one of its parents, then that object is returned.
    * Otherwise undefined is returned.
    */
@@ -135,3 +157,4 @@ export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<
 // Circular import
 import { Deserializer } from './Deserializer';
 import { ApiPackage } from './ApiPackage';
+import { ApiFunctionLikeMixin } from '../mixins/ApiFunctionLikeMixin';

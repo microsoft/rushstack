@@ -20,14 +20,9 @@ import {
 import { SimpleWriter } from './SimpleWriter';
 
 export interface IMarkdownEmitterOptions {
-  /**
-   * Given a DocLinkTag with a codeDestination property, determine the target link that should be emitted
-   * in the "[link text](target URL)" Markdown notation.  If the link cannot be resolved, undefined is returned.
-   */
-  onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => string | undefined;
 }
 
-export interface IMarkdownEmitterContext {
+export interface IMarkdownEmitterContext<TOptions = IMarkdownEmitterOptions> {
   writer: SimpleWriter;
   insideTable: boolean;
 
@@ -37,7 +32,7 @@ export interface IMarkdownEmitterContext {
   writingBold: boolean;
   writingItalic: boolean;
 
-  options: IMarkdownEmitterOptions;
+  options: TOptions;
 }
 
 /**
@@ -113,24 +108,13 @@ export class MarkdownEmitter {
       }
       case DocNodeKind.LinkTag: {
         const docLinkTag: DocLinkTag = docNode as DocLinkTag;
-        if (docLinkTag.linkText !== undefined && docLinkTag.linkText.length > 0) {
-          const encodedLinkText: string = this.getEscapedText(docLinkTag.linkText.replace(/\s+/g, ' '));
-          let destination: string | undefined = undefined;
-          if (docLinkTag.codeDestination) {
-            destination = context.options.onResolveTargetForCodeDestination(docLinkTag);
-          } else if (docLinkTag.urlDestination) {
-            destination = docLinkTag.urlDestination;
-          }
-
-          if (destination !== undefined) {
-            writer.write('[');
-            writer.write(encodedLinkText);
-            writer.write(`](${destination})`);
-          } else {
-            writer.write(encodedLinkText);
-          }
+        if (docLinkTag.codeDestination) {
+          this.writeLinkTagWithCodeDestination(docLinkTag, context);
+        } else if (docLinkTag.urlDestination) {
+          this.writeLinkTagWithUrlDestination(docLinkTag, context);
+        } else if (docLinkTag.linkText) {
+          this.writePlainText(docLinkTag.linkText, context);
         }
-
         break;
       }
       case DocNodeKind.Paragraph: {
@@ -182,6 +166,25 @@ export class MarkdownEmitter {
       default:
         throw new Error('Unsupported element kind: ' + docNode.kind);
     }
+  }
+
+  /** @virtual */
+  protected writeLinkTagWithCodeDestination(docLinkTag: DocLinkTag, context: IMarkdownEmitterContext): void {
+
+    // The subclass needs to implement this to support code destinations
+    throw new Error('writeLinkTagWithCodeDestination()');
+  }
+
+  /** @virtual */
+  protected writeLinkTagWithUrlDestination(docLinkTag: DocLinkTag, context: IMarkdownEmitterContext): void {
+    const linkText: string = docLinkTag.linkText !== undefined ? docLinkTag.linkText
+      : docLinkTag.urlDestination!;
+
+    const encodedLinkText: string = this.getEscapedText(linkText.replace(/\s+/g, ' '));
+
+    context.writer.write('[');
+    context.writer.write(encodedLinkText);
+    context.writer.write(`](${docLinkTag.urlDestination!})`);
   }
 
   protected writePlainText(text: string, context: IMarkdownEmitterContext): void {

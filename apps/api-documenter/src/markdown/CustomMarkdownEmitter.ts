@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
+
 import {
-  DocNode
+  DocNode, DocLinkTag, StringBuilder
 } from '@microsoft/tsdoc';
 import { CustomDocNodeKind } from '../nodes/CustomDocNodeKind';
 import { DocHeading } from '../nodes/DocHeading';
@@ -11,9 +13,27 @@ import { DocTable } from '../nodes/DocTable';
 import { DocTableCell } from '../nodes/DocTableCell';
 import { DocEmphasisSpan } from '../nodes/DocEmphasisSpan';
 import { SimpleWriter } from './SimpleWriter';
-import { MarkdownEmitter, IMarkdownEmitterContext } from './MarkdownEmitter';
+import { MarkdownEmitter, IMarkdownEmitterContext, IMarkdownEmitterOptions } from './MarkdownEmitter';
+import { ApiModel, IResolveDeclarationReferenceResult, ApiItem } from '@microsoft/api-extractor';
+
+export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
+  contextApiItem: ApiItem | undefined;
+
+  onGetFilenameForApiItem: (apiItem: ApiItem) => string | undefined;
+}
 
 export class CustomMarkdownEmitter extends MarkdownEmitter {
+  private _apiModel: ApiModel;
+
+  public constructor (apiModel: ApiModel) {
+    super();
+
+    this._apiModel = apiModel;
+  }
+
+  public emit(stringBuilder: StringBuilder, docNode: DocNode, options: ICustomMarkdownEmitterOptions): string {
+    return super.emit(stringBuilder, docNode, options);
+  }
 
   /** @override */
   protected writeNode(docNode: DocNode, context: IMarkdownEmitterContext): void {
@@ -115,6 +135,40 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
       }
       default:
         super.writeNode(docNode, context);
+    }
+  }
+
+  /** @override */
+  protected writeLinkTagWithCodeDestination(docLinkTag: DocLinkTag,
+    context: IMarkdownEmitterContext<ICustomMarkdownEmitterOptions>): void {
+
+    const options: ICustomMarkdownEmitterOptions = context.options;
+
+    const result: IResolveDeclarationReferenceResult
+      = this._apiModel.resolveDeclarationReference(docLinkTag.codeDestination!, options.contextApiItem);
+
+    if (result.resolvedApiItem) {
+      const filename: string | undefined = options.onGetFilenameForApiItem(result.resolvedApiItem);
+
+      if (filename) {
+        let linkText: string = docLinkTag.linkText || '';
+        if (linkText.length === 0) {
+
+          // Generate a name such as Namespace1.Namespace2.MyClass.myMethod()
+          linkText = result.resolvedApiItem.getScopedNameWithinPackage();
+        }
+        if (linkText.length > 0) {
+          const encodedLinkText: string = this.getEscapedText(linkText.replace(/\s+/g, ' '));
+
+          context.writer.write('[');
+          context.writer.write(encodedLinkText);
+          context.writer.write(`](${filename!})`);
+        } else {
+          console.log(colors.red('WARNING: Unable to determine link text'));
+        }
+      }
+    } else if (result.errorMessage) {
+      console.log(colors.red('WARNING: Unable to resolve reference: ' + result.errorMessage));
     }
   }
 
