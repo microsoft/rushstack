@@ -30,7 +30,8 @@ export const enum EnvironmentVariableNames {
 
   /**
    * If this variable is set to "true", Rush will create symlinks with absolute paths instead
-   * of relative paths.
+   * of relative paths. This can be necessary when a repository is moved during a build or
+   * if parts of a repository are moved into a sandbox.
    */
   RUSH_ABSOLUTE_SYMLINKS = 'RUSH_ABSOLUTE_SYMLINKS'
 }
@@ -57,6 +58,10 @@ export class EnvironmentConfiguration {
     return EnvironmentConfiguration._rushTempFolderOverride;
   }
 
+  /**
+   * If "true", create symlinks with absolute paths instead of relative paths.
+   * See {@link EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS}
+   */
   public static get absoluteSymlinks(): boolean {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._absoluteSymlinks;

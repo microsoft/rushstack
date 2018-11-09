@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Include an env variable option to create symlinks with absolute paths.",
+      "comment": "Include an environment variable option to create symlinks with absolute paths.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
