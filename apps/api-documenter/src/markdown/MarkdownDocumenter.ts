@@ -38,7 +38,7 @@ import {
   IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor';
 
-import { MarkdownRenderer } from '../utils/MarkdownRenderer';
+import { MarkdownEmitter } from '../utils/MarkdownEmitter';
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
 import { DocHeading } from '../nodes/DocHeading';
 import { DocTable } from '../nodes/DocTable';
@@ -166,7 +166,7 @@ export class MarkdownDocumenter {
     const filename: string = path.join(this._outputFolder, this._getFilenameForApiItem(apiItem));
     const stringBuilder: StringBuilder = new StringBuilder();
 
-    MarkdownRenderer.renderNode(stringBuilder, output, {
+    MarkdownEmitter.renderNode(stringBuilder, output, {
       onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => {
         if (docLinkTag.codeDestination) {
           const result: IResolveDeclarationReferenceResult

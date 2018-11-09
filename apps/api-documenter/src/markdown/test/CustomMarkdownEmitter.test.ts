@@ -15,7 +15,7 @@ import {
   DocHtmlEndTag
 } from '@microsoft/tsdoc';
 
-import { MarkdownRenderer } from '../MarkdownRenderer';
+import { MarkdownEmitter } from '../MarkdownEmitter';
 import { CustomDocNodes } from '../../nodes/CustomDocNodeKind';
 import { DocHeading } from '../../nodes/DocHeading';
 import { DocEmphasisSpan } from '../../nodes/DocEmphasisSpan';
@@ -197,7 +197,7 @@ test('render Markdown from TSDoc', done => {
 
   const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
   const stringBuilder: StringBuilder = new StringBuilder();
-  MarkdownRenderer.renderNode(stringBuilder, output, {
+  MarkdownEmitter.renderNode(stringBuilder, output, {
     onResolveTargetForCodeDestination: (docLinkTag: DocLinkTag) => '#'
   });
   FileSystem.writeFile(outputFilename, stringBuilder.toString());

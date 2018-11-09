@@ -92,7 +92,7 @@ class SimpleWriter {
   }
 }
 
-export interface IMarkdownRendererOptions {
+export interface IMarkdownEmitterOptions {
   /**
    * Given a DocLinkTag with a codeDestination property, determine the target link that should be emitted
    * in the "[link text](target URL)" Markdown notation.  If the link cannot be resolved, undefined is returned.
@@ -110,16 +110,16 @@ interface IRenderContext {
   writingBold: boolean;
   writingItalic: boolean;
 
-  options: IMarkdownRendererOptions;
+  options: IMarkdownEmitterOptions;
 }
 
 /**
  * Renders MarkupElement content in the Markdown file format.
  * For more info:  https://en.wikipedia.org/wiki/Markdown
  */
-export class MarkdownRenderer {
+export class MarkdownEmitter {
 
-  public static renderNode(stringBuilder: StringBuilder, docNode: DocNode, options: IMarkdownRendererOptions): string {
+  public static renderNode(stringBuilder: StringBuilder, docNode: DocNode, options: IMarkdownEmitterOptions): string {
     const writer: SimpleWriter = new SimpleWriter(stringBuilder);
 
     const context: IRenderContext = {
@@ -135,7 +135,7 @@ export class MarkdownRenderer {
       options
     };
 
-    MarkdownRenderer._writeNode(docNode, context);
+    MarkdownEmitter._writeNode(docNode, context);
 
     writer.ensureNewLine(); // finish the last line
 
@@ -159,7 +159,7 @@ export class MarkdownRenderer {
     switch (docNode.kind) {
       case DocNodeKind.PlainText: {
         const docPlainText: DocPlainText = docNode as DocPlainText;
-        MarkdownRenderer._writePlainText(docPlainText.text, context);
+        MarkdownEmitter._writePlainText(docPlainText.text, context);
         break;
       }
       case DocNodeKind.HtmlStartTag:
@@ -184,7 +184,7 @@ export class MarkdownRenderer {
       case DocNodeKind.LinkTag: {
         const docLinkTag: DocLinkTag = docNode as DocLinkTag;
         if (docLinkTag.linkText !== undefined && docLinkTag.linkText.length > 0) {
-          const encodedLinkText: string = MarkdownRenderer._getEscapedText(docLinkTag.linkText.replace(/\s+/g, ' '));
+          const encodedLinkText: string = MarkdownEmitter._getEscapedText(docLinkTag.linkText.replace(/\s+/g, ' '));
           let destination: string | undefined = undefined;
           if (docLinkTag.codeDestination) {
             destination = context.options.onResolveTargetForCodeDestination(docLinkTag);
@@ -208,10 +208,10 @@ export class MarkdownRenderer {
         const trimmedParagraph: DocParagraph = DocNodeTransforms.trimSpacesInParagraph(docParagraph);
         if (context.insideTable) {
           writer.write('<p>');
-          MarkdownRenderer._writeNodes(trimmedParagraph.nodes, context);
+          MarkdownEmitter._writeNodes(trimmedParagraph.nodes, context);
           writer.write('</p>');
         } else {
-          MarkdownRenderer._writeNodes(trimmedParagraph.nodes, context);
+          MarkdownEmitter._writeNodes(trimmedParagraph.nodes, context);
           writer.ensureNewLine();
           writer.writeLine();
         }
@@ -230,7 +230,7 @@ export class MarkdownRenderer {
             prefix = '####';
         }
 
-        writer.writeLine(prefix + ' ' + MarkdownRenderer._getEscapedText(docHeading.title));
+        writer.writeLine(prefix + ' ' + MarkdownEmitter._getEscapedText(docHeading.title));
         writer.writeLine();
         break;
       }
@@ -250,7 +250,7 @@ export class MarkdownRenderer {
         writer.ensureNewLine();
         writer.write('> ');
         // TODO: Handle newlines
-        MarkdownRenderer._writeNode(docNoteBox.content, context);
+        MarkdownEmitter._writeNode(docNoteBox.content, context);
         writer.ensureNewLine();
         writer.writeLine();
         break;
@@ -281,7 +281,7 @@ export class MarkdownRenderer {
           if (docTable.header) {
             const cell: DocTableCell | undefined = docTable.header.cells[i];
             if (cell) {
-              MarkdownRenderer._writeNode(cell.content, context);
+              MarkdownEmitter._writeNode(cell.content, context);
             }
           }
           writer.write(' |');
@@ -299,7 +299,7 @@ export class MarkdownRenderer {
           writer.write('| ');
           for (const cell of row.cells) {
             writer.write(' ');
-            MarkdownRenderer._writeNode(cell.content, context);
+            MarkdownEmitter._writeNode(cell.content, context);
             writer.write(' |');
           }
           writer.writeLine();
@@ -312,7 +312,7 @@ export class MarkdownRenderer {
       }
       case DocNodeKind.Section: {
         const docSection: DocSection = docNode as DocSection;
-        MarkdownRenderer._writeNodes(docSection.nodes, context);
+        MarkdownEmitter._writeNodes(docSection.nodes, context);
         break;
       }
       case CustomDocNodeKind.EmphasisSpan: {
@@ -321,7 +321,7 @@ export class MarkdownRenderer {
         const oldItalic: boolean = context.italicRequested;
         context.boldRequested = docEmphasisSpan.bold;
         context.italicRequested = docEmphasisSpan.italic;
-        MarkdownRenderer._writeNodes(docEmphasisSpan.nodes, context);
+        MarkdownEmitter._writeNodes(docEmphasisSpan.nodes, context);
         context.boldRequested = oldBold;
         context.italicRequested = oldItalic;
         break;
@@ -334,12 +334,12 @@ export class MarkdownRenderer {
       }
       case DocNodeKind.EscapedText: {
         const docEscapedText: DocEscapedText = docNode as DocEscapedText;
-        MarkdownRenderer._writePlainText(docEscapedText.decodedText, context);
+        MarkdownEmitter._writePlainText(docEscapedText.decodedText, context);
         break;
       }
       case DocNodeKind.ErrorText: {
         const docErrorText: DocErrorText = docNode as DocErrorText;
-        MarkdownRenderer._writePlainText(docErrorText.text, context);
+        MarkdownEmitter._writePlainText(docErrorText.text, context);
         break;
       }
       default:
@@ -381,7 +381,7 @@ export class MarkdownRenderer {
         writer.write('<i>');
       }
 
-      writer.write(MarkdownRenderer._getEscapedText(middle));
+      writer.write(MarkdownEmitter._getEscapedText(middle));
 
       if (context.italicRequested) {
         writer.write('</i>');
@@ -396,7 +396,7 @@ export class MarkdownRenderer {
 
   private static _writeNodes(docNodes: ReadonlyArray<DocNode>, context: IRenderContext): void {
     for (const docNode of docNodes) {
-      MarkdownRenderer._writeNode(docNode, context);
+      MarkdownEmitter._writeNode(docNode, context);
     }
   }
 
