@@ -18,7 +18,6 @@ export interface IDtsEntryOptions {
  * @remarks
  * The additional contextual state beyond AstSymbol is:
  * - Whether it's an export of this entry point or not
- * - The calculated ReleaseTag, which we use for trimming
  * - The nameForEmit, which may get renamed by DtsRollupGenerator._makeUniqueNames()
  */
 export class DtsEntry {

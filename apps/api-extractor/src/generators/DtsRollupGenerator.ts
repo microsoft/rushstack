@@ -5,7 +5,7 @@
 
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import { FileSystem, NewlineKind } from '@microsoft/node-core-library';
+import { FileSystem, NewlineKind, Sort } from '@microsoft/node-core-library';
 
 import { ExtractorContext } from '../analyzer/ExtractorContext';
 import { IndentedWriter } from './IndentedWriter';
@@ -104,7 +104,7 @@ export class DtsRollupGenerator {
 
     this._makeUniqueNames();
 
-    this._dtsEntries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
+    Sort.sortBy(this._dtsEntries, x => x.getSortKey());
     this._dtsTypeDefinitionReferences.sort();
   }
 
@@ -439,7 +439,7 @@ export class DtsRollupGenerator {
         return releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
     }
 
-    throw new Error(`DtsRollupKind[dtsKind] is not implemented`);
+    throw new Error(`${DtsRollupKind[dtsKind]} is not implemented`);
   }
 
   private _getReleaseTagForAstSymbol(astSymbol: AstSymbol): ReleaseTag {
