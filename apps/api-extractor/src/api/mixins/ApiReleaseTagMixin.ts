@@ -37,12 +37,12 @@ export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseC
 
       baseClass.onDeserializeInto(options, jsonObject);
 
-      const deserialiedReleaseTag: ReleaseTag | undefined = ReleaseTag[jsonObject.releaseTag];
-      if (deserialiedReleaseTag === undefined) {
+      const deserializedReleaseTag: ReleaseTag | undefined = ReleaseTag[jsonObject.releaseTag];
+      if (deserializedReleaseTag === undefined) {
         throw new Error(`Failed to deserialize release tag for ${JSON.stringify(jsonObject.name)}`);
       }
 
-      options.releaseTag = deserialiedReleaseTag;
+      options.releaseTag = deserializedReleaseTag;
     }
 
     // tslint:disable-next-line:no-any

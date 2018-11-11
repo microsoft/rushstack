@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
+import { ApiDocumentedItem } from '../model/ApiDocumentedItem';
 
 /** @public */
 export interface IApiDeclarationMixinOptions extends IApiItemOptions {
@@ -21,6 +22,12 @@ export interface ApiDeclarationMixin extends ApiItem {
 
   /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
+
+  /**
+   * If the API item has certain important modifier tags such as `@sealed`, `@virtual`, or `@override`,
+   * this prepends them as a doc comment above the signature.
+   */
+  getSignatureWithModifiers(): string;
 }
 
 /** @public */
@@ -49,6 +56,33 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
 
     public get signature(): string {
       return this[_signature];
+    }
+
+    public getSignatureWithModifiers(): string {
+      const signature: string = this.signature;
+      const modifierTags: string[] = [];
+
+      if (signature.length > 0) {
+        if (this instanceof ApiDocumentedItem) {
+          if (this.tsdocComment) {
+            if (this.tsdocComment.modifierTagSet.isSealed()) {
+              modifierTags.push('@sealed');
+            }
+            if (this.tsdocComment.modifierTagSet.isVirtual()) {
+              modifierTags.push('@virtual');
+            }
+            if (this.tsdocComment.modifierTagSet.isOverride()) {
+              modifierTags.push('@override');
+            }
+          }
+          if (modifierTags.length > 0) {
+            return '/** ' + modifierTags.join(' ') + ' */\n'
+              + signature;
+          }
+        }
+      }
+
+      return this.signature;
     }
 
     /** @override */
