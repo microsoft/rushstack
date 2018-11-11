@@ -5,11 +5,12 @@ import * as colors from 'colors';
 import * as path from 'path';
 import yaml = require('js-yaml');
 
-import { DocItemSet } from '../utils/DocItemSet';
+import { ApiModel } from '@microsoft/api-extractor';
+import { Text, FileSystem } from '@microsoft/node-core-library';
+
 import { IYamlTocItem } from './IYamlTocFile';
 import { IYamlItem } from './IYamlApiFile';
 import { YamlDocumenter } from './YamlDocumenter';
-import { Text, FileSystem } from '@microsoft/node-core-library';
 
 interface ISnippetsFile {
   /**
@@ -37,8 +38,8 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     'Word': '/office/dev/add-ins/reference/requirement-sets/word-api-requirement-sets'
   };
 
-  public constructor(docItemSet: DocItemSet, inputFolder: string) {
-    super(docItemSet);
+  public constructor(apiModel: ApiModel, inputFolder: string) {
+    super(apiModel);
 
     const snippetsFilePath: string = path.join(inputFolder, 'snippets.yaml');
 
@@ -48,7 +49,8 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     this._snippets = yaml.load(snippetsContent, { filename: snippetsFilePath });
   }
 
-  public generateFiles(outputFolder: string): void { // override
+  /** @override */
+  public generateFiles(outputFolder: string): void {
     super.generateFiles(outputFolder);
 
     // After we generate everything, check for any unused snippets
@@ -58,6 +60,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     }
   }
 
+  /** @override */
   protected onGetTocRoot(): IYamlTocItem { // override
     return {
       name: 'API reference',
@@ -66,23 +69,20 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
     };
   }
 
-  protected onCustomizeYamlItem(yamlItem: IYamlItem): void { // override
+  /** @override */
+  protected onCustomizeYamlItem(yamlItem: IYamlItem): void {
     const nameWithoutPackage: string = yamlItem.uid.replace(/^[^.]+\./, '');
     if (yamlItem.summary) {
       yamlItem.summary = this._fixupApiSet(yamlItem.summary, yamlItem.uid);
       yamlItem.summary = this._fixBoldAndItalics(yamlItem.summary);
-      yamlItem.summary = this._fixCodeTicks(yamlItem.summary);
     }
     if (yamlItem.remarks) {
       yamlItem.remarks = this._fixupApiSet(yamlItem.remarks, yamlItem.uid);
       yamlItem.remarks = this._fixBoldAndItalics(yamlItem.remarks);
-      yamlItem.remarks = this._fixCodeTicks(yamlItem.remarks);
-      yamlItem.remarks = this._fixEscapedCode(yamlItem.remarks);
     }
     if (yamlItem.syntax && yamlItem.syntax.parameters) {
       yamlItem.syntax.parameters.forEach(part => {
           if (part.description) {
-            part.description = this._fixCodeTicks(part.description);
             part.description = this._fixBoldAndItalics(part.description);
           }
       });
@@ -128,23 +128,6 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
   private _fixBoldAndItalics(text: string): string {
     return Text.replaceAll(text, '\\*', '*');
-  }
-
-  private _fixCodeTicks(text: string): string {
-    return Text.replaceAll(text, '\\`', '`');
-  }
-
-  private _fixEscapedCode(text: string): string {
-    const backtickIndex: number = text.indexOf('`');
-    if (text.indexOf('`', backtickIndex) > 0) {
-      text = Text.replaceAll(text, '=&gt;', '=>');
-      let x: number = text.indexOf('\\', backtickIndex);
-      while (x >= 0) {
-        text = text.replace(/\\([^\\])/, '$1');
-        x = text.indexOf('\\', x + 1);
-      }
-    }
-    return text;
   }
 
   private _generateExampleSnippetText(snippets: string[]): string {

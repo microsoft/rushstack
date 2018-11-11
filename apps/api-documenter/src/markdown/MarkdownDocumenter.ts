@@ -56,8 +56,8 @@ export class MarkdownDocumenter {
   private readonly _markdownEmitter: CustomMarkdownEmitter;
   private _outputFolder: string;
 
-  public constructor(docItemSet: ApiModel) {
-    this._apiModel = docItemSet;
+  public constructor(apiModel: ApiModel) {
+    this._apiModel = apiModel;
     this._tsdocConfiguration = CustomDocNodes.configuration;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
   }
@@ -128,7 +128,7 @@ export class MarkdownDocumenter {
           ])
         );
         output.appendNode(
-          new DocFencedCode({ configuration, code: apiItem.signature, language: 'typescript' })
+          new DocFencedCode({ configuration, code: apiItem.getSignatureWithModifiers(), language: 'typescript' })
         );
       }
     }
