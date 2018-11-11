@@ -44,7 +44,7 @@ import { DocTableRow } from '../nodes/DocTableRow';
 import { DocTableCell } from '../nodes/DocTableCell';
 import { DocNoteBox } from '../nodes/DocNoteBox';
 import { Utilities } from '../utils/Utilities';
-import { CustomMarkdownEmitter } from './CustomMarkdownEmitter';
+import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 
 /**
  * Renders API documentation in the Markdown file format.

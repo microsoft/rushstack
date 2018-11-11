@@ -8,8 +8,8 @@ import {
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 
-import { YamlDocumenter } from '../yaml/YamlDocumenter';
-import { OfficeYamlDocumenter } from '../yaml/OfficeYamlDocumenter';
+import { YamlDocumenter } from '../documenters/YamlDocumenter';
+import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
 import { ApiModel } from '@microsoft/api-extractor';
 
 export class YamlAction extends BaseAction {

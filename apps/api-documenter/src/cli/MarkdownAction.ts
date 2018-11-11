@@ -3,7 +3,7 @@
 
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
-import { MarkdownDocumenter } from '../markdown/MarkdownDocumenter';
+import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
 import { ApiModel } from '@microsoft/api-extractor';
 
 export class MarkdownAction extends BaseAction {

@@ -33,11 +33,11 @@ import {
   IYamlItem,
   IYamlSyntax,
   IYamlParameter
-} from './IYamlApiFile';
+} from '../yaml/IYamlApiFile';
 import {
   IYamlTocFile,
   IYamlTocItem
-} from './IYamlTocFile';
+} from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter} from '../markdown/CustomMarkdownEmitter';
 

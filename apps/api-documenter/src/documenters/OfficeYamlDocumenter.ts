@@ -8,8 +8,8 @@ import yaml = require('js-yaml');
 import { ApiModel } from '@microsoft/api-extractor';
 import { Text, FileSystem } from '@microsoft/node-core-library';
 
-import { IYamlTocItem } from './IYamlTocFile';
-import { IYamlItem } from './IYamlApiFile';
+import { IYamlTocItem } from '../yaml/IYamlTocFile';
+import { IYamlItem } from '../yaml/IYamlApiFile';
 import { YamlDocumenter } from './YamlDocumenter';
 
 interface ISnippetsFile {
