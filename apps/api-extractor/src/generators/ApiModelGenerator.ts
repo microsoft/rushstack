@@ -5,8 +5,6 @@ import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
 import { Collector } from '../collector/Collector';
-import { AstSymbolTable } from '../analyzer/AstSymbolTable';
-import { AstEntryPoint } from '../analyzer/AstEntryPoint';
 import { ApiModel } from '../api/model/ApiModel';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { ApiClass } from '../api/model/ApiClass';
@@ -18,9 +16,6 @@ import { ApiInterface } from '../api/model/ApiInterface';
 import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
 import { Span } from '../analyzer/Span';
 import { ApiParameter } from '../api/model/ApiParameter';
-import { AedocDefinitions } from '../aedoc/AedocDefinitions';
-import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
-import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { ApiReleaseTagMixin } from '../api/mixins/ApiReleaseTagMixin';
@@ -30,16 +25,11 @@ import { ApiFunctionLikeMixin } from '../api/mixins/ApiFunctionLikeMixin';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
-  private readonly _tsdocParser: tsdoc.TSDocParser;
-  private readonly _astSymbolTable: AstSymbolTable;
-  private _astEntryPoint: AstEntryPoint | undefined;
   private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
   private readonly _apiModel: ApiModel;
 
   public constructor(collector: Collector) {
     this._collector = collector;
-    this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
-    this._astSymbolTable = new AstSymbolTable(this._collector.typeChecker, this._collector.packageJsonLookup);
     this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
     this._apiModel = new ApiModel();
   }
@@ -49,18 +39,10 @@ export class ApiModelGenerator {
   }
 
   public buildApiPackage(): ApiPackage {
-    let packageDocComment: tsdoc.DocComment | undefined = undefined;
-
-    const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
-      this._collector.entryPointSourceFile, this._collector);
-
-    if (packageDocCommentTextRange) {
-      packageDocComment = this._parseTsdocComment(this._collector.entryPointSourceFile.text,
-        packageDocCommentTextRange);
-    }
+    const packageDocComment: tsdoc.DocComment | undefined = this._collector.package.tsdocComment;
 
     const apiPackage: ApiPackage = new ApiPackage({
-      name: this._collector.packageName,
+      name: this._collector.package.name,
       docComment: packageDocComment
     });
     this._apiModel.addMember(apiPackage);
@@ -68,13 +50,12 @@ export class ApiModelGenerator {
     const apiEntryPoint: ApiEntryPoint = new ApiEntryPoint({ name: '' });
     apiPackage.addMember(apiEntryPoint);
 
-    // Build the entry point
-    this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(this._collector.entryPointSourceFile);
-
     // Create a CollectorEntity for each top-level export
-    for (const exportedMember of this._astEntryPoint.exportedMembers) {
-      for (const astDeclaration of exportedMember.astSymbol.astDeclarations) {
-        this._processDeclaration(astDeclaration, exportedMember.name, apiEntryPoint);
+    for (const entity of this._collector.entities) {
+      for (const astDeclaration of entity.astSymbol.astDeclarations) {
+        if (entity.exported) {
+          this._processDeclaration(astDeclaration, entity.nameForEmit, apiEntryPoint);
+        }
       }
     }
 
@@ -143,7 +124,7 @@ export class ApiModelGenerator {
     if (apiClass === undefined) {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.FirstPunctuation);  // FirstPunctuation = "{"
-      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
 
       apiClass = new ApiClass({ name, signature, docComment, releaseTag });
@@ -164,7 +145,7 @@ export class ApiModelGenerator {
     if (apiInterface === undefined) {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.FirstPunctuation); // FirstPunctuation = "{"
-      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
 
       apiInterface = new ApiInterface({ name, signature, docComment, releaseTag });
@@ -197,7 +178,7 @@ export class ApiModelGenerator {
 
     if (apiMethod === undefined) {
       const signature: string = astDeclaration.declaration.getText();
-      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
       const resultTypeSignature: string = this._getSignatureForTypeNode(methodDeclaration.type);
 
@@ -227,7 +208,7 @@ export class ApiModelGenerator {
 
     if (apiMethodSignature === undefined) {
       const signature: string = astDeclaration.declaration.getText();
-      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
       const resultTypeSignature: string = this._getSignatureForTypeNode(methodSignature.type);
 
@@ -267,7 +248,7 @@ export class ApiModelGenerator {
     if (apiNamespace === undefined) {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.ModuleBlock); // ModuleBlock = the "{ ... }" block
-      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
 
       apiNamespace = new ApiNamespace({ name, signature, docComment, releaseTag });
@@ -300,7 +281,7 @@ export class ApiModelGenerator {
 
     if (apiProperty === undefined) {
       const signature: string = astDeclaration.declaration.getText();
-      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
       const resultTypeSignature: string = this._getSignatureForTypeNode(propertyDeclaration.type);
 
@@ -325,7 +306,7 @@ export class ApiModelGenerator {
 
     if (apiPropertySignature === undefined) {
       const signature: string = astDeclaration.declaration.getText();
-      const docComment: tsdoc.DocComment | undefined = this._tryParseDocumentation(astDeclaration);
+      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
       const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
       const resultTypeSignature: string = this._getSignatureForTypeNode(propertySignature.type);
 
@@ -444,27 +425,5 @@ export class ApiModelGenerator {
     }
 
     return ReleaseTag.Public;
-  }
-
-  private _tryParseDocumentation(astDeclaration: AstDeclaration): tsdoc.DocComment | undefined {
-    const declaration: ts.Declaration = astDeclaration.declaration;
-    const sourceFileText: string = declaration.getSourceFile().text;
-    const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || [];
-
-    if (ranges.length === 0) {
-      return undefined;
-    }
-
-    // We use the JSDoc comment block that is closest to the definition, i.e.
-    // the last one preceding it
-    return this._parseTsdocComment(sourceFileText, ranges[ranges.length - 1]);
-  }
-
-  private _parseTsdocComment(sourceFile: string, textRange: ts.TextRange): tsdoc.DocComment | undefined {
-    const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFile,
-      textRange.pos, textRange.end);
-
-    const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
-    return parserContext.docComment;
   }
 }

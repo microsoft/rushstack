@@ -15,7 +15,6 @@ import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
-import { PackageDocComment } from '../aedoc/PackageDocComment';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -65,13 +64,8 @@ export class DtsRollupGenerator {
     indentedWriter.spacing = '';
     indentedWriter.clear();
 
-    const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment
-      .tryFindInSourceFile(collector.entryPointSourceFile, collector);
-
-    if (packageDocCommentTextRange) {
-      const packageDocComment: string = collector.entryPointSourceFile.text.substring(
-        packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
-      indentedWriter.writeLine(packageDocComment);
+    if (collector.package.tsdocComment) {
+      indentedWriter.writeLine(collector.package.tsdocComment.emitAsTsdoc());
       indentedWriter.writeLine();
     }
 
@@ -215,15 +209,15 @@ export class DtsRollupGenerator {
         if (identifierSymbol) {
           const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(identifierSymbol, collector.typeChecker);
 
-          const referencedentity: CollectorEntity | undefined = collector.tryGetentityBySymbol(followedSymbol);
+          const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityBySymbol(followedSymbol);
 
-          if (referencedentity) {
-            if (!referencedentity.nameForEmit) {
+          if (referencedEntity) {
+            if (!referencedEntity.nameForEmit) {
               // This should never happen
               throw new Error('referencedEntry.uniqueName is undefined');
             }
 
-            span.modification.prefix = referencedentity.nameForEmit;
+            span.modification.prefix = referencedEntity.nameForEmit;
             nameFixup = true;
             // For debugging:
             // span.modification.prefix += '/*R=FIX*/';

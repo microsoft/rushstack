@@ -360,7 +360,7 @@ export class Extractor {
     const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
 
-    const packageBaseName: string = path.basename(collector.packageName);
+    const packageBaseName: string = path.basename(collector.package.name);
 
     const apiJsonFileConfig: IExtractorApiJsonFileConfig = this.actualConfig.apiJsonFile;
 
@@ -388,20 +388,22 @@ export class Extractor {
   }
 
   private _generateRollupDtsFiles(collector: Collector): void {
+    const packageFolder: string = collector.package.packageFolder;
+
     const dtsRollup: IExtractorDtsRollupConfig = this.actualConfig.dtsRollup!;
     if (dtsRollup.enabled) {
       let mainDtsRollupPath: string = dtsRollup.mainDtsRollupPath!;
 
       if (!mainDtsRollupPath) {
         // If the mainDtsRollupPath is not specified, then infer it from the package.json file
-        if (!collector.packageJson.typings) {
+        if (!collector.package.packageJson.typings) {
           this._monitoredLogger.logError('Either the "mainDtsRollupPath" setting must be specified,'
             + ' or else the package.json file must contain a "typings" field.');
           return;
         }
 
         // Resolve the "typings" field relative to package.json itself
-        const resolvedTypings: string = path.resolve(collector.packageFolder, collector.packageJson.typings);
+        const resolvedTypings: string = path.resolve(packageFolder, collector.package.packageJson.typings);
 
         if (dtsRollup.trimming) {
           if (!Path.isUnder(resolvedTypings, dtsRollup.publishFolderForInternal!)) {
@@ -438,19 +440,19 @@ export class Extractor {
 
       if (dtsRollup.trimming) {
         this._generateRollupDtsFile(collector,
-          path.resolve(collector.packageFolder, dtsRollup.publishFolderForPublic!, mainDtsRollupPath),
+          path.resolve(packageFolder, dtsRollup.publishFolderForPublic!, mainDtsRollupPath),
           DtsRollupKind.PublicRelease);
 
         this._generateRollupDtsFile(collector,
-          path.resolve(collector.packageFolder, dtsRollup.publishFolderForBeta!, mainDtsRollupPath),
+          path.resolve(packageFolder, dtsRollup.publishFolderForBeta!, mainDtsRollupPath),
           DtsRollupKind.BetaRelease);
 
         this._generateRollupDtsFile(collector,
-          path.resolve(collector.packageFolder, dtsRollup.publishFolderForInternal!, mainDtsRollupPath),
+          path.resolve(packageFolder, dtsRollup.publishFolderForInternal!, mainDtsRollupPath),
           DtsRollupKind.InternalRelease);
       } else {
         this._generateRollupDtsFile(collector,
-          path.resolve(collector.packageFolder, dtsRollup.publishFolder!, mainDtsRollupPath),
+          path.resolve(packageFolder, dtsRollup.publishFolder!, mainDtsRollupPath),
           DtsRollupKind.InternalRelease); // (no trimming)
       }
     }

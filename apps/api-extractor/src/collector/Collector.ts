@@ -7,8 +7,6 @@ import * as tsdoc from '@microsoft/tsdoc';
 import {
   PackageJsonLookup,
   IPackageJson,
-  PackageName,
-  IParsedPackageName,
   Sort
 } from '@microsoft/node-core-library';
 
@@ -22,6 +20,8 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
+import { CollectorPackage } from './CollectorPackage';
+import { PackageDocComment } from '../aedoc/PackageDocComment';
 
 /**
  * Options for Collector constructor.
@@ -60,36 +60,27 @@ export class Collector {
   public typeChecker: ts.TypeChecker;
   public astSymbolTable: AstSymbolTable;
 
-  /**
-   * The parsed package.json file for this package.
-   */
-  public readonly packageJson: IPackageJson;
-
-  public readonly parsedPackageName: IParsedPackageName;
-
   public readonly packageJsonLookup: PackageJsonLookup;
 
   public readonly policies: IExtractorPoliciesConfig;
-
   public readonly validationRules: IExtractorValidationRulesConfig;
 
-  public readonly entryPointSourceFile: ts.SourceFile;
+  private readonly _program: ts.Program;
 
-  // If the entry point is "C:\Folder\project\src\index.ts" and the nearest package.json
-  // is "C:\Folder\project\package.json", then the packageFolder is "C:\Folder\project"
-  private _packageFolder: string;
+  public readonly package: CollectorPackage;
 
-  private _logger: ILogger;
+  private readonly _logger: ILogger;
 
-  private _tsdocParser: tsdoc.TSDocParser;
+  private readonly _tsdocParser: tsdoc.TSDocParser;
+
   private _astEntryPoint: AstEntryPoint | undefined;
 
-  private _entities: CollectorEntity[] = [];
-  private _entitiesByAstSymbol: Map<AstSymbol, CollectorEntity> = new Map<AstSymbol, CollectorEntity>();
-  private _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
-  private _releaseTagByAstSymbol: Map<AstSymbol, ReleaseTag> = new Map<AstSymbol, ReleaseTag>();
+  private readonly _entities: CollectorEntity[] = [];
+  private readonly _entitiesByAstSymbol: Map<AstSymbol, CollectorEntity> = new Map<AstSymbol, CollectorEntity>();
+  private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
+  private readonly _releaseTagByAstSymbol: Map<AstSymbol, ReleaseTag> = new Map<AstSymbol, ReleaseTag>();
 
-  private _dtsTypeDefinitionReferences: string[] = [];
+  private readonly _dtsTypeDefinitionReferences: string[] = [];
 
   constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
@@ -97,51 +88,31 @@ export class Collector {
     this.policies = options.policies;
     this.validationRules = options.validationRules;
 
-    const folder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
-    if (!folder) {
+    this._logger = options.logger;
+    this._program = options.program;
+
+    const packageFolder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
+    if (!packageFolder) {
       throw new Error('Unable to find a package.json for entry point: ' + options.entryPointFile);
     }
-    this._packageFolder = folder;
 
-    this.packageJson = this.packageJsonLookup.tryLoadPackageJsonFor(this._packageFolder)!;
-
-    this.parsedPackageName = PackageName.parse(this.packageJson.name);
-
-    this._logger = options.logger;
-
-    // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
-    // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
-    // compile errors that would result from a full compilation.
-    for (const diagnostic of options.program.getSemanticDiagnostics()) {
-      const errorText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
-      this.reportError(`TypeScript: ${errorText}`, diagnostic.file, diagnostic.start);
-    }
-
-    this.typeChecker = options.program.getTypeChecker();
+    const packageJson: IPackageJson = this.packageJsonLookup.tryLoadPackageJsonFor(packageFolder)!;
 
     const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);
     if (!entryPointSourceFile) {
       throw new Error('Unable to load file: ' + options.entryPointFile);
     }
 
-    this.entryPointSourceFile = entryPointSourceFile;
+    this.package = new CollectorPackage({
+      packageFolder,
+      packageJson,
+      entryPointSourceFile
+    });
+
+    this.typeChecker = options.program.getTypeChecker();
 
     this._tsdocParser = new tsdoc.TSDocParser();
     this.astSymbolTable = new AstSymbolTable(this.typeChecker, this.packageJsonLookup);
-  }
-
-  /**
-   * Returns the full name of the package being analyzed.
-   */
-  public get packageName(): string {
-    return this.packageJson.name;
-  }
-
-  /**
-   * Returns the folder for the package being analyzed.
-   */
-  public get packageFolder(): string {
-    return this._packageFolder;
   }
 
   /**
@@ -165,16 +136,34 @@ export class Collector {
       throw new Error('DtsRollupGenerator.analyze() was already called');
     }
 
+    // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
+    // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
+    // compile errors that would result from a full compilation.
+    for (const diagnostic of this._program.getSemanticDiagnostics()) {
+      const errorText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
+      this.reportError(`TypeScript: ${errorText}`, diagnostic.file, diagnostic.start);
+    }
+
     // Build the entry point
-    this._astEntryPoint = this.astSymbolTable.fetchEntryPoint(this.entryPointSourceFile);
+    const astEntryPoint: AstEntryPoint = this.astSymbolTable.fetchEntryPoint(this.package.entryPointSourceFile);
+
+    const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
+      this.package.entryPointSourceFile, this);
+
+    if (packageDocCommentTextRange) {
+      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(this.package.entryPointSourceFile.text,
+        packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
+
+      this.package.tsdocComment = this._tsdocParser.parseRange(range).docComment;
+    }
 
     const exportedAstSymbols: AstSymbol[] = [];
 
     // Create a CollectorEntity for each top-level export
-    for (const exportedMember of this._astEntryPoint.exportedMembers) {
+    for (const exportedMember of astEntryPoint.exportedMembers) {
       const astSymbol: AstSymbol = exportedMember.astSymbol;
 
-      this._createentityForSymbol(exportedMember.astSymbol, exportedMember.name);
+      this._createEntityForSymbol(exportedMember.astSymbol, exportedMember.name);
 
       exportedAstSymbols.push(astSymbol);
     }
@@ -184,7 +173,7 @@ export class Collector {
     // are encountered first as exports.
     const alreadySeenAstSymbols: Set<AstSymbol> = new Set<AstSymbol>();
     for (const exportedAstSymbol of exportedAstSymbols) {
-      this._createentityForIndirectReferences(exportedAstSymbol, alreadySeenAstSymbols);
+      this._createEntityForIndirectReferences(exportedAstSymbol, alreadySeenAstSymbols);
     }
 
     this._makeUniqueNames();
@@ -193,11 +182,31 @@ export class Collector {
     this._dtsTypeDefinitionReferences.sort();
   }
 
-  public tryGetentityBySymbol(symbol: ts.Symbol): CollectorEntity | undefined {
+  public getTsdocCommentForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.DocComment | undefined {
+    const declaration: ts.Declaration = astDeclaration.declaration;
+    const sourceFileText: string = declaration.getSourceFile().text;
+    const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || [];
+
+    if (ranges.length === 0) {
+      return undefined;
+    }
+
+    // We use the JSDoc comment block that is closest to the definition, i.e.
+    // the last one preceding it
+    const range: ts.TextRange = ranges[ranges.length - 1];
+
+    const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
+      range.pos, range.end);
+
+    const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
+    return parserContext.docComment;
+  }
+
+  public tryGetEntityBySymbol(symbol: ts.Symbol): CollectorEntity | undefined {
     return this._entitiesBySymbol.get(symbol);
   }
 
-  private _createentityForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
+  private _createEntityForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
     let entity: CollectorEntity | undefined = this._entitiesByAstSymbol.get(astSymbol);
 
     if (!entity) {
@@ -225,7 +234,7 @@ export class Collector {
     }
   }
 
-  private _createentityForIndirectReferences(astSymbol: AstSymbol, alreadySeenAstSymbols: Set<AstSymbol>): void {
+  private _createEntityForIndirectReferences(astSymbol: AstSymbol, alreadySeenAstSymbols: Set<AstSymbol>): void {
     if (alreadySeenAstSymbols.has(astSymbol)) {
       return;
     }
@@ -233,8 +242,8 @@ export class Collector {
 
     astSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
       for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
-        this._createentityForSymbol(referencedAstSymbol, undefined);
-        this._createentityForIndirectReferences(referencedAstSymbol, alreadySeenAstSymbols);
+        this._createEntityForSymbol(referencedAstSymbol, undefined);
+        this._createEntityForIndirectReferences(referencedAstSymbol, alreadySeenAstSymbols);
       }
     });
   }
@@ -283,7 +292,7 @@ export class Collector {
       const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(start);
 
       // If the file is under the packageFolder, then show a relative path
-      const relativePath: string = path.relative(this.packageFolder, sourceFile.fileName);
+      const relativePath: string = path.relative(this.package.packageFolder, sourceFile.fileName);
       const shownPath: string = relativePath.substr(0, 2) === '..' ? sourceFile.fileName : relativePath;
 
       // Format the error so that VS Code can follow it.  For example:
