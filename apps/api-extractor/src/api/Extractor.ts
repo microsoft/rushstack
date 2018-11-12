@@ -26,7 +26,7 @@ import { ExtractorContext } from '../generators/ExtractorContext';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
-import { ModelBuilder } from '../generators/ModelBuilder';
+import { ApiModelGenerator } from '../generators/ApiModelGenerator';
 import { ApiPackage } from './model/ApiPackage';
 
 /**
@@ -357,7 +357,7 @@ export class Extractor {
 
     context.analyze();
 
-    const modelBuilder: ModelBuilder = new ModelBuilder(context);
+    const modelBuilder: ApiModelGenerator = new ApiModelGenerator(context);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
 
     const packageBaseName: string = path.basename(context.packageName);

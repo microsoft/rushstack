@@ -28,7 +28,7 @@ import { ApiProperty } from '../api/model/ApiProperty';
 import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
 import { ApiFunctionLikeMixin } from '../api/mixins/ApiFunctionLikeMixin';
 
-export class ModelBuilder {
+export class ApiModelGenerator {
   private readonly _context: ExtractorContext;
   private readonly _tsdocParser: tsdoc.TSDocParser;
   private readonly _astSymbolTable: AstSymbolTable;
