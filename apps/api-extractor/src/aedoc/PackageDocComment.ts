@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { ExtractorContext } from '../analyzer/ExtractorContext';
+import { ExtractorContext } from '../generators/ExtractorContext';
 
 export class PackageDocComment {
   /**

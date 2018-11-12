@@ -22,7 +22,7 @@ import {
   IExtractorApiJsonFileConfig
 } from './IExtractorConfig';
 import { ILogger } from './ILogger';
-import { ExtractorContext } from '../analyzer/ExtractorContext';
+import { ExtractorContext } from '../generators/ExtractorContext';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';

@@ -4,7 +4,7 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { ExtractorContext } from '../analyzer/ExtractorContext';
+import { ExtractorContext } from './ExtractorContext';
 import { AstSymbolTable } from '../analyzer/AstSymbolTable';
 import { AstEntryPoint } from '../analyzer/AstEntryPoint';
 import { ApiModel } from '../api/model/ApiModel';

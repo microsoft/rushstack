@@ -7,7 +7,7 @@ import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { FileSystem, NewlineKind, Sort } from '@microsoft/node-core-library';
 
-import { ExtractorContext } from '../analyzer/ExtractorContext';
+import { ExtractorContext } from './ExtractorContext';
 import { IndentedWriter } from './IndentedWriter';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
