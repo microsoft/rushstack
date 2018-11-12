@@ -15,7 +15,7 @@ import {
 import { ILogger } from '../api/ILogger';
 import { IExtractorPoliciesConfig, IExtractorValidationRulesConfig } from '../api/IExtractorConfig';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
-import { DtsEntry } from './DtsEntry';
+import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable } from '../analyzer/AstSymbolTable';
 import { AstEntryPoint } from '../analyzer/AstEntryPoint';
 import { AstSymbol } from '../analyzer/AstSymbol';
@@ -24,9 +24,9 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 
 /**
- * Options for ExtractorContext constructor.
+ * Options for Collector constructor.
  */
-export interface IExtractorContextOptions {
+export interface ICollectorOptions {
   /**
    * Configuration for the TypeScript compiler.  The most important options to set are:
    *
@@ -56,7 +56,7 @@ export interface IExtractorContextOptions {
  * TypeScript Compiler API to analyze a project, and constructs the AstItem
  * abstract syntax tree.
  */
-export class ExtractorContext {
+export class Collector {
   public typeChecker: ts.TypeChecker;
   public astSymbolTable: AstSymbolTable;
 
@@ -84,14 +84,14 @@ export class ExtractorContext {
   private _tsdocParser: tsdoc.TSDocParser;
   private _astEntryPoint: AstEntryPoint | undefined;
 
-  private _dtsEntries: DtsEntry[] = [];
-  private _dtsEntriesByAstSymbol: Map<AstSymbol, DtsEntry> = new Map<AstSymbol, DtsEntry>();
-  private _dtsEntriesBySymbol: Map<ts.Symbol, DtsEntry> = new Map<ts.Symbol, DtsEntry>();
+  private _entities: CollectorEntity[] = [];
+  private _entitiesByAstSymbol: Map<AstSymbol, CollectorEntity> = new Map<AstSymbol, CollectorEntity>();
+  private _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
   private _releaseTagByAstSymbol: Map<AstSymbol, ReleaseTag> = new Map<AstSymbol, ReleaseTag>();
 
   private _dtsTypeDefinitionReferences: string[] = [];
 
-  constructor(options: IExtractorContextOptions) {
+  constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
     this.policies = options.policies;
@@ -153,8 +153,8 @@ export class ExtractorContext {
     return this._dtsTypeDefinitionReferences;
   }
 
-  public get dtsEntries(): ReadonlyArray<DtsEntry> {
-    return this._dtsEntries;
+  public get entities(): ReadonlyArray<CollectorEntity> {
+    return this._entities;
   }
 
   /**
@@ -170,62 +170,62 @@ export class ExtractorContext {
 
     const exportedAstSymbols: AstSymbol[] = [];
 
-    // Create a DtsEntry for each top-level export
+    // Create a CollectorEntity for each top-level export
     for (const exportedMember of this._astEntryPoint.exportedMembers) {
       const astSymbol: AstSymbol = exportedMember.astSymbol;
 
-      this._createDtsEntryForSymbol(exportedMember.astSymbol, exportedMember.name);
+      this._createentityForSymbol(exportedMember.astSymbol, exportedMember.name);
 
       exportedAstSymbols.push(astSymbol);
     }
 
-    // Create a DtsEntry for each indirectly referenced export.
+    // Create a CollectorEntity for each indirectly referenced export.
     // Note that we do this *after* the above loop, so that references to exported AstSymbols
     // are encountered first as exports.
     const alreadySeenAstSymbols: Set<AstSymbol> = new Set<AstSymbol>();
     for (const exportedAstSymbol of exportedAstSymbols) {
-      this._createDtsEntryForIndirectReferences(exportedAstSymbol, alreadySeenAstSymbols);
+      this._createentityForIndirectReferences(exportedAstSymbol, alreadySeenAstSymbols);
     }
 
     this._makeUniqueNames();
 
-    Sort.sortBy(this._dtsEntries, x => x.getSortKey());
+    Sort.sortBy(this._entities, x => x.getSortKey());
     this._dtsTypeDefinitionReferences.sort();
   }
 
-  public tryGetDtsEntryBySymbol(symbol: ts.Symbol): DtsEntry | undefined {
-    return this._dtsEntriesBySymbol.get(symbol);
+  public tryGetentityBySymbol(symbol: ts.Symbol): CollectorEntity | undefined {
+    return this._entitiesBySymbol.get(symbol);
   }
 
-  private _createDtsEntryForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
-    let dtsEntry: DtsEntry | undefined = this._dtsEntriesByAstSymbol.get(astSymbol);
+  private _createentityForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
+    let entity: CollectorEntity | undefined = this._entitiesByAstSymbol.get(astSymbol);
 
-    if (!dtsEntry) {
-      dtsEntry = new DtsEntry({
+    if (!entity) {
+      entity = new CollectorEntity({
         astSymbol: astSymbol,
         originalName: exportedName || astSymbol.localName,
         exported: !!exportedName
       });
 
-      this._dtsEntriesByAstSymbol.set(astSymbol, dtsEntry);
-      this._dtsEntriesBySymbol.set(astSymbol.followedSymbol, dtsEntry);
-      this._dtsEntries.push(dtsEntry);
+      this._entitiesByAstSymbol.set(astSymbol, entity);
+      this._entitiesBySymbol.set(astSymbol.followedSymbol, entity);
+      this._entities.push(entity);
 
       this._collectTypeDefinitionReferences(astSymbol);
     } else {
       if (exportedName) {
-        if (!dtsEntry.exported) {
-          throw new Error('Program Bug: DtsEntry should have been marked as exported');
+        if (!entity.exported) {
+          throw new Error('Program Bug: CollectorEntity should have been marked as exported');
         }
-        if (dtsEntry.originalName !== exportedName) {
-          throw new Error(`The symbol ${exportedName} was also exported as ${dtsEntry.originalName};`
+        if (entity.originalName !== exportedName) {
+          throw new Error(`The symbol ${exportedName} was also exported as ${entity.originalName};`
             + ` this is not supported yet`);
         }
       }
     }
   }
 
-  private _createDtsEntryForIndirectReferences(astSymbol: AstSymbol, alreadySeenAstSymbols: Set<AstSymbol>): void {
+  private _createentityForIndirectReferences(astSymbol: AstSymbol, alreadySeenAstSymbols: Set<AstSymbol>): void {
     if (alreadySeenAstSymbols.has(astSymbol)) {
       return;
     }
@@ -233,8 +233,8 @@ export class ExtractorContext {
 
     astSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
       for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
-        this._createDtsEntryForSymbol(referencedAstSymbol, undefined);
-        this._createDtsEntryForIndirectReferences(referencedAstSymbol, alreadySeenAstSymbols);
+        this._createentityForSymbol(referencedAstSymbol, undefined);
+        this._createentityForIndirectReferences(referencedAstSymbol, alreadySeenAstSymbols);
       }
     });
   }
@@ -246,31 +246,31 @@ export class ExtractorContext {
     const usedNames: Set<string> = new Set<string>();
 
     // First collect the explicit package exports
-    for (const dtsEntry of this._dtsEntries) {
-      if (dtsEntry.exported) {
+    for (const entity of this._entities) {
+      if (entity.exported) {
 
-        if (usedNames.has(dtsEntry.originalName)) {
+        if (usedNames.has(entity.originalName)) {
           // This should be impossible
-          throw new Error(`Program bug: a package cannot have two exports with the name ${dtsEntry.originalName}`);
+          throw new Error(`Program bug: a package cannot have two exports with the name ${entity.originalName}`);
         }
 
-        dtsEntry.nameForEmit = dtsEntry.originalName;
+        entity.nameForEmit = entity.originalName;
 
-        usedNames.add(dtsEntry.nameForEmit);
+        usedNames.add(entity.nameForEmit);
       }
     }
 
     // Next generate unique names for the non-exports that will be emitted
-    for (const dtsEntry of this._dtsEntries) {
-      if (!dtsEntry.exported) {
+    for (const entity of this._entities) {
+      if (!entity.exported) {
         let suffix: number = 1;
-        dtsEntry.nameForEmit = dtsEntry.originalName;
+        entity.nameForEmit = entity.originalName;
 
-        while (usedNames.has(dtsEntry.nameForEmit)) {
-          dtsEntry.nameForEmit = `${dtsEntry.originalName}_${++suffix}`;
+        while (usedNames.has(entity.nameForEmit)) {
+          entity.nameForEmit = `${entity.originalName}_${++suffix}`;
         }
 
-        usedNames.add(dtsEntry.nameForEmit);
+        usedNames.add(entity.nameForEmit);
       }
     }
   }

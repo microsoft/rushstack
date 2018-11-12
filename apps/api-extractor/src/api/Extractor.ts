@@ -22,7 +22,7 @@ import {
   IExtractorApiJsonFileConfig
 } from './IExtractorConfig';
 import { ILogger } from './ILogger';
-import { ExtractorContext } from '../generators/ExtractorContext';
+import { Collector } from '../collector/Collector';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
@@ -347,7 +347,7 @@ export class Extractor {
       throw new Error('The entry point is not a declaration file: ' + projectConfig.entryPointSourceFile);
     }
 
-    const context: ExtractorContext = new ExtractorContext({
+    const collector: Collector = new Collector({
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       logger: this._monitoredLogger,
@@ -355,12 +355,12 @@ export class Extractor {
       validationRules: this.actualConfig.validationRules
     });
 
-    context.analyze();
+    collector.analyze();
 
-    const modelBuilder: ApiModelGenerator = new ApiModelGenerator(context);
+    const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
 
-    const packageBaseName: string = path.basename(context.packageName);
+    const packageBaseName: string = path.basename(collector.packageName);
 
     const apiJsonFileConfig: IExtractorApiJsonFileConfig = this.actualConfig.apiJsonFile;
 
@@ -376,7 +376,7 @@ export class Extractor {
       });
     }
 
-    this._generateRollupDtsFiles(context);
+    this._generateRollupDtsFiles(collector);
 
     if (this._localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
@@ -387,21 +387,21 @@ export class Extractor {
     }
   }
 
-  private _generateRollupDtsFiles(context: ExtractorContext): void {
+  private _generateRollupDtsFiles(collector: Collector): void {
     const dtsRollup: IExtractorDtsRollupConfig = this.actualConfig.dtsRollup!;
     if (dtsRollup.enabled) {
       let mainDtsRollupPath: string = dtsRollup.mainDtsRollupPath!;
 
       if (!mainDtsRollupPath) {
         // If the mainDtsRollupPath is not specified, then infer it from the package.json file
-        if (!context.packageJson.typings) {
+        if (!collector.packageJson.typings) {
           this._monitoredLogger.logError('Either the "mainDtsRollupPath" setting must be specified,'
             + ' or else the package.json file must contain a "typings" field.');
           return;
         }
 
         // Resolve the "typings" field relative to package.json itself
-        const resolvedTypings: string = path.resolve(context.packageFolder, context.packageJson.typings);
+        const resolvedTypings: string = path.resolve(collector.packageFolder, collector.packageJson.typings);
 
         if (dtsRollup.trimming) {
           if (!Path.isUnder(resolvedTypings, dtsRollup.publishFolderForInternal!)) {
@@ -437,31 +437,31 @@ export class Extractor {
       }
 
       if (dtsRollup.trimming) {
-        this._generateRollupDtsFile(context,
-          path.resolve(context.packageFolder, dtsRollup.publishFolderForPublic!, mainDtsRollupPath),
+        this._generateRollupDtsFile(collector,
+          path.resolve(collector.packageFolder, dtsRollup.publishFolderForPublic!, mainDtsRollupPath),
           DtsRollupKind.PublicRelease);
 
-        this._generateRollupDtsFile(context,
-          path.resolve(context.packageFolder, dtsRollup.publishFolderForBeta!, mainDtsRollupPath),
+        this._generateRollupDtsFile(collector,
+          path.resolve(collector.packageFolder, dtsRollup.publishFolderForBeta!, mainDtsRollupPath),
           DtsRollupKind.BetaRelease);
 
-        this._generateRollupDtsFile(context,
-          path.resolve(context.packageFolder, dtsRollup.publishFolderForInternal!, mainDtsRollupPath),
+        this._generateRollupDtsFile(collector,
+          path.resolve(collector.packageFolder, dtsRollup.publishFolderForInternal!, mainDtsRollupPath),
           DtsRollupKind.InternalRelease);
       } else {
-        this._generateRollupDtsFile(context,
-          path.resolve(context.packageFolder, dtsRollup.publishFolder!, mainDtsRollupPath),
+        this._generateRollupDtsFile(collector,
+          path.resolve(collector.packageFolder, dtsRollup.publishFolder!, mainDtsRollupPath),
           DtsRollupKind.InternalRelease); // (no trimming)
       }
     }
   }
 
-  private _generateRollupDtsFile(context: ExtractorContext, mainDtsRollupFullPath: string,
+  private _generateRollupDtsFile(collector: Collector, mainDtsRollupFullPath: string,
     dtsKind: DtsRollupKind): void {
 
     this._monitoredLogger.logVerbose(`Writing package typings: ${mainDtsRollupFullPath}`);
 
-    DtsRollupGenerator.writeTypingsFile(context, mainDtsRollupFullPath, dtsKind);
+    DtsRollupGenerator.writeTypingsFile(collector, mainDtsRollupFullPath, dtsKind);
   }
 
   /**

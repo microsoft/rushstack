@@ -4,9 +4,9 @@
 import { AstSymbol } from '../analyzer/AstSymbol';
 
 /**
- * Constructor options for DtsEntry
+ * Constructor options for CollectorEntity
  */
-export interface IDtsEntryOptions {
+export interface ICollectorEntityOptions {
   readonly astSymbol: AstSymbol;
   readonly originalName: string;
   readonly exported: boolean;
@@ -20,7 +20,7 @@ export interface IDtsEntryOptions {
  * - Whether it's an export of this entry point or not
  * - The nameForEmit, which may get renamed by DtsRollupGenerator._makeUniqueNames()
  */
-export class DtsEntry {
+export class CollectorEntity {
   /**
    * The AstSymbol that this entry represents.
    */
@@ -40,7 +40,7 @@ export class DtsEntry {
 
   private _sortKey: string | undefined = undefined;
 
-  public constructor(options: IDtsEntryOptions) {
+  public constructor(options: ICollectorEntityOptions) {
     this.astSymbol = options.astSymbol;
     this.originalName = options.originalName;
     this.exported = options.exported;

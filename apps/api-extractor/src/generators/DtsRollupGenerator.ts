@@ -6,13 +6,13 @@
 import * as ts from 'typescript';
 import { FileSystem, NewlineKind } from '@microsoft/node-core-library';
 
-import { ExtractorContext } from './ExtractorContext';
+import { Collector } from '../collector/Collector';
 import { IndentedWriter } from './IndentedWriter';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstImport } from '../analyzer/AstImport';
-import { DtsEntry } from './DtsEntry';
+import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
@@ -48,10 +48,10 @@ export class DtsRollupGenerator {
    *
    * @param dtsFilename    - The *.d.ts output filename
    */
-  public static writeTypingsFile(context: ExtractorContext, dtsFilename: string, dtsKind: DtsRollupKind): void {
+  public static writeTypingsFile(collector: Collector, dtsFilename: string, dtsKind: DtsRollupKind): void {
     const indentedWriter: IndentedWriter = new IndentedWriter();
 
-    DtsRollupGenerator._generateTypingsFileContent(context, indentedWriter, dtsKind);
+    DtsRollupGenerator._generateTypingsFileContent(collector, indentedWriter, dtsKind);
 
     FileSystem.writeFile(dtsFilename, indentedWriter.toString(), {
       convertLineEndings: NewlineKind.CrLf,
@@ -59,41 +59,41 @@ export class DtsRollupGenerator {
     });
   }
 
-  private static _generateTypingsFileContent(context: ExtractorContext, indentedWriter: IndentedWriter,
+  private static _generateTypingsFileContent(collector: Collector, indentedWriter: IndentedWriter,
     dtsKind: DtsRollupKind): void {
 
     indentedWriter.spacing = '';
     indentedWriter.clear();
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment
-      .tryFindInSourceFile(context.entryPointSourceFile, context);
+      .tryFindInSourceFile(collector.entryPointSourceFile, collector);
 
     if (packageDocCommentTextRange) {
-      const packageDocComment: string = context.entryPointSourceFile.text.substring(
+      const packageDocComment: string = collector.entryPointSourceFile.text.substring(
         packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
       indentedWriter.writeLine(packageDocComment);
       indentedWriter.writeLine();
     }
 
     // Emit the triple slash directives
-    for (const typeDirectiveReference of context.dtsTypeDefinitionReferences) {
+    for (const typeDirectiveReference of collector.dtsTypeDefinitionReferences) {
       // tslint:disable-next-line:max-line-length
       // https://github.com/Microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
       indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
     }
 
     // Emit the imports
-    for (const dtsEntry of context.dtsEntries) {
-      if (dtsEntry.astSymbol.astImport) {
+    for (const entity of collector.entities) {
+      if (entity.astSymbol.astImport) {
 
-        const releaseTag: ReleaseTag = context.getReleaseTagForAstSymbol(dtsEntry.astSymbol);
+        const releaseTag: ReleaseTag = collector.getReleaseTagForAstSymbol(entity.astSymbol);
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-          const astImport: AstImport = dtsEntry.astSymbol.astImport;
+          const astImport: AstImport = entity.astSymbol.astImport;
 
           if (astImport.exportName === '*') {
-            indentedWriter.write(`import * as ${dtsEntry.nameForEmit}`);
-          } else if (dtsEntry.nameForEmit !== astImport.exportName) {
-            indentedWriter.write(`import { ${astImport.exportName} as ${dtsEntry.nameForEmit} }`);
+            indentedWriter.write(`import * as ${entity.nameForEmit}`);
+          } else if (entity.nameForEmit !== astImport.exportName) {
+            indentedWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
           } else {
             indentedWriter.write(`import { ${astImport.exportName} }`);
           }
@@ -103,24 +103,24 @@ export class DtsRollupGenerator {
     }
 
     // Emit the regular declarations
-    for (const dtsEntry of context.dtsEntries) {
-      if (!dtsEntry.astSymbol.astImport) {
+    for (const entity of collector.entities) {
+      if (!entity.astSymbol.astImport) {
 
-        const releaseTag: ReleaseTag = context.getReleaseTagForAstSymbol(dtsEntry.astSymbol);
+        const releaseTag: ReleaseTag = collector.getReleaseTagForAstSymbol(entity.astSymbol);
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
 
           // Emit all the declarations for this entry
-          for (const astDeclaration of dtsEntry.astSymbol.astDeclarations || []) {
+          for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
 
             indentedWriter.writeLine();
 
             const span: Span = new Span(astDeclaration.declaration);
-            DtsRollupGenerator._modifySpan(context, span, dtsEntry, astDeclaration, dtsKind);
+            DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
             indentedWriter.writeLine(span.getModifiedText());
           }
         } else {
           indentedWriter.writeLine();
-          indentedWriter.writeLine(`/* Excluded from this release type: ${dtsEntry.nameForEmit} */`);
+          indentedWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
         }
       }
     }
@@ -129,8 +129,8 @@ export class DtsRollupGenerator {
   /**
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
-  private static _modifySpan(context: ExtractorContext, span: Span, dtsEntry: DtsEntry, astDeclaration: AstDeclaration,
-    dtsKind: DtsRollupKind): void {
+  private static _modifySpan(collector: Collector, span: Span, entity: CollectorEntity,
+    astDeclaration: AstDeclaration, dtsKind: DtsRollupKind): void {
 
     const previousSpan: Span | undefined = span.previousSibling;
 
@@ -169,7 +169,7 @@ export class DtsRollupGenerator {
           replacedModifiers += 'declare ';
         }
 
-        if (dtsEntry.exported) {
+        if (entity.exported) {
           replacedModifiers = 'export ' + replacedModifiers;
         }
 
@@ -201,7 +201,7 @@ export class DtsRollupGenerator {
             .substring(list.getStart(), list.declarations[0].getStart());
           span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
 
-          if (dtsEntry.exported) {
+          if (entity.exported) {
             span.modification.prefix = 'export ' + span.modification.prefix;
           }
 
@@ -211,19 +211,19 @@ export class DtsRollupGenerator {
 
       case ts.SyntaxKind.Identifier:
         let nameFixup: boolean = false;
-        const identifierSymbol: ts.Symbol | undefined = context.typeChecker.getSymbolAtLocation(span.node);
+        const identifierSymbol: ts.Symbol | undefined = collector.typeChecker.getSymbolAtLocation(span.node);
         if (identifierSymbol) {
-          const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(identifierSymbol, context.typeChecker);
+          const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(identifierSymbol, collector.typeChecker);
 
-          const referencedDtsEntry: DtsEntry | undefined = context.tryGetDtsEntryBySymbol(followedSymbol);
+          const referencedentity: CollectorEntity | undefined = collector.tryGetentityBySymbol(followedSymbol);
 
-          if (referencedDtsEntry) {
-            if (!referencedDtsEntry.nameForEmit) {
+          if (referencedentity) {
+            if (!referencedentity.nameForEmit) {
               // This should never happen
               throw new Error('referencedEntry.uniqueName is undefined');
             }
 
-            span.modification.prefix = referencedDtsEntry.nameForEmit;
+            span.modification.prefix = referencedentity.nameForEmit;
             nameFixup = true;
             // For debugging:
             // span.modification.prefix += '/*R=FIX*/';
@@ -246,9 +246,9 @@ export class DtsRollupGenerator {
         // Should we trim this node?
         let trimmed: boolean = false;
         if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
-          childAstDeclaration = context.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
+          childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
 
-          const releaseTag: ReleaseTag = context.getReleaseTagForAstSymbol(childAstDeclaration.astSymbol);
+          const releaseTag: ReleaseTag = collector.getReleaseTagForAstSymbol(childAstDeclaration.astSymbol);
           if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
             const modification: SpanModification = child.modification;
 
@@ -280,7 +280,7 @@ export class DtsRollupGenerator {
         }
 
         if (!trimmed) {
-          DtsRollupGenerator._modifySpan(context, child, dtsEntry, childAstDeclaration, dtsKind);
+          DtsRollupGenerator._modifySpan(collector, child, entity, childAstDeclaration, dtsKind);
         }
       }
     }

@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { ExtractorContext } from '../generators/ExtractorContext';
+import { Collector } from '../collector/Collector';
 
 export class PackageDocComment {
   /**
    * For the given source file, see if it starts with a TSDoc comment containing the `@packageDocumentation` tag.
    */
   public static tryFindInSourceFile(sourceFile: ts.SourceFile,
-    extractorContext: ExtractorContext): ts.TextRange | undefined {
+    collector: Collector): ts.TextRange | undefined {
 
     // The @packageDocumentation comment is special because it is not attached to an AST
     // definition.  Instead, it is part of the "trivia" tokens that the compiler treats
@@ -53,7 +53,7 @@ export class PackageDocComment {
           const commentBody: string = sourceFile.text.substring(commentRange.pos, commentRange.end);
 
           if (/\@packageDocumentation/i.test(commentBody)) {
-            extractorContext.reportError(
+            collector.reportError(
               'The @packageDocumentation comment must appear at the top of entry point *.d.ts file',
               sourceFile, commentRange.pos
             );

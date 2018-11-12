@@ -4,7 +4,7 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { ExtractorContext } from './ExtractorContext';
+import { Collector } from '../collector/Collector';
 import { AstSymbolTable } from '../analyzer/AstSymbolTable';
 import { AstEntryPoint } from '../analyzer/AstEntryPoint';
 import { ApiModel } from '../api/model/ApiModel';
@@ -29,17 +29,17 @@ import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
 import { ApiFunctionLikeMixin } from '../api/mixins/ApiFunctionLikeMixin';
 
 export class ApiModelGenerator {
-  private readonly _context: ExtractorContext;
+  private readonly _collector: Collector;
   private readonly _tsdocParser: tsdoc.TSDocParser;
   private readonly _astSymbolTable: AstSymbolTable;
   private _astEntryPoint: AstEntryPoint | undefined;
   private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
   private readonly _apiModel: ApiModel;
 
-  public constructor(context: ExtractorContext) {
-    this._context = context;
+  public constructor(collector: Collector) {
+    this._collector = collector;
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
-    this._astSymbolTable = new AstSymbolTable(this._context.typeChecker, this._context.packageJsonLookup);
+    this._astSymbolTable = new AstSymbolTable(this._collector.typeChecker, this._collector.packageJsonLookup);
     this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
     this._apiModel = new ApiModel();
   }
@@ -52,14 +52,15 @@ export class ApiModelGenerator {
     let packageDocComment: tsdoc.DocComment | undefined = undefined;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
-      this._context.entryPointSourceFile, this._context);
+      this._collector.entryPointSourceFile, this._collector);
 
     if (packageDocCommentTextRange) {
-      packageDocComment = this._parseTsdocComment(this._context.entryPointSourceFile.text, packageDocCommentTextRange);
+      packageDocComment = this._parseTsdocComment(this._collector.entryPointSourceFile.text,
+        packageDocCommentTextRange);
     }
 
     const apiPackage: ApiPackage = new ApiPackage({
-      name: this._context.packageName,
+      name: this._collector.packageName,
       docComment: packageDocComment
     });
     this._apiModel.addMember(apiPackage);
@@ -68,9 +69,9 @@ export class ApiModelGenerator {
     apiPackage.addMember(apiEntryPoint);
 
     // Build the entry point
-    this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(this._context.entryPointSourceFile);
+    this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(this._collector.entryPointSourceFile);
 
-    // Create a DtsEntry for each top-level export
+    // Create a CollectorEntity for each top-level export
     for (const exportedMember of this._astEntryPoint.exportedMembers) {
       for (const astDeclaration of exportedMember.astSymbol.astDeclarations) {
         this._processDeclaration(astDeclaration, exportedMember.name, apiEntryPoint);
@@ -430,7 +431,7 @@ export class ApiModelGenerator {
 
       if (inconsistentReleaseTags) {
         // TODO: Report error message
-        this._context.reportError('Inconsistent release tags', undefined, undefined);
+        this._collector.reportError('Inconsistent release tags', undefined, undefined);
       }
     }
 
