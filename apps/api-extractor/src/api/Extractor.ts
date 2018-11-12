@@ -355,6 +355,8 @@ export class Extractor {
       validationRules: this.actualConfig.validationRules
     });
 
+    context.analyze();
+
     const modelBuilder: ModelBuilder = new ModelBuilder(context);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
 
@@ -434,35 +436,32 @@ export class Extractor {
         }
       }
 
-      const dtsRollupGenerator: DtsRollupGenerator = new DtsRollupGenerator(context);
-      dtsRollupGenerator.analyze();
-
       if (dtsRollup.trimming) {
-        this._generateRollupDtsFile(dtsRollupGenerator,
+        this._generateRollupDtsFile(context,
           path.resolve(context.packageFolder, dtsRollup.publishFolderForPublic!, mainDtsRollupPath),
           DtsRollupKind.PublicRelease);
 
-        this._generateRollupDtsFile(dtsRollupGenerator,
+        this._generateRollupDtsFile(context,
           path.resolve(context.packageFolder, dtsRollup.publishFolderForBeta!, mainDtsRollupPath),
           DtsRollupKind.BetaRelease);
 
-        this._generateRollupDtsFile(dtsRollupGenerator,
+        this._generateRollupDtsFile(context,
           path.resolve(context.packageFolder, dtsRollup.publishFolderForInternal!, mainDtsRollupPath),
           DtsRollupKind.InternalRelease);
       } else {
-        this._generateRollupDtsFile(dtsRollupGenerator,
+        this._generateRollupDtsFile(context,
           path.resolve(context.packageFolder, dtsRollup.publishFolder!, mainDtsRollupPath),
           DtsRollupKind.InternalRelease); // (no trimming)
       }
     }
   }
 
-  private _generateRollupDtsFile(dtsRollupGenerator: DtsRollupGenerator, mainDtsRollupFullPath: string,
+  private _generateRollupDtsFile(context: ExtractorContext, mainDtsRollupFullPath: string,
     dtsKind: DtsRollupKind): void {
 
     this._monitoredLogger.logVerbose(`Writing package typings: ${mainDtsRollupFullPath}`);
 
-    dtsRollupGenerator.writeTypingsFile(mainDtsRollupFullPath, dtsKind);
+    DtsRollupGenerator.writeTypingsFile(context, mainDtsRollupFullPath, dtsKind);
   }
 
   /**

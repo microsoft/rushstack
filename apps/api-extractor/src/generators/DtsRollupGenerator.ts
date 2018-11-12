@@ -4,17 +4,13 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import * as tsdoc from '@microsoft/tsdoc';
-import { FileSystem, NewlineKind, Sort } from '@microsoft/node-core-library';
+import { FileSystem, NewlineKind } from '@microsoft/node-core-library';
 
 import { ExtractorContext } from './ExtractorContext';
 import { IndentedWriter } from './IndentedWriter';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { AstSymbolTable } from '../analyzer/AstSymbolTable';
-import { AstEntryPoint } from '../analyzer/AstEntryPoint';
-import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstImport } from '../analyzer/AstImport';
 import { DtsEntry } from './DtsEntry';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -47,76 +43,15 @@ export enum DtsRollupKind {
 }
 
 export class DtsRollupGenerator {
-  private _context: ExtractorContext;
-  private _typeChecker: ts.TypeChecker;
-  private _tsdocParser: tsdoc.TSDocParser;
-  private _astSymbolTable: AstSymbolTable;
-  private _astEntryPoint: AstEntryPoint | undefined;
-
-  private _dtsEntries: DtsEntry[] = [];
-  private _dtsEntriesByAstSymbol: Map<AstSymbol, DtsEntry> = new Map<AstSymbol, DtsEntry>();
-  private _dtsEntriesBySymbol: Map<ts.Symbol, DtsEntry> = new Map<ts.Symbol, DtsEntry>();
-  private _releaseTagByAstSymbol: Map<AstSymbol, ReleaseTag> = new Map<AstSymbol, ReleaseTag>();
-
-  /**
-   * A list of names (e.g. "example-library") that should appear in a reference like this:
-   *
-   * /// <reference types="example-library" />
-   */
-  private _dtsTypeDefinitionReferences: string[] = [];
-
-  public constructor(context: ExtractorContext) {
-    this._context = context;
-    this._typeChecker = context.typeChecker;
-    this._tsdocParser = new tsdoc.TSDocParser();
-    this._astSymbolTable = new AstSymbolTable(this._context.typeChecker, this._context.packageJsonLookup);
-  }
-
-  /**
-   * Perform the analysis.  This must be called before writeTypingsFile().
-   */
-  public analyze(): void {
-    if (this._astEntryPoint) {
-      throw new Error('DtsRollupGenerator.analyze() was already called');
-    }
-
-    // Build the entry point
-    this._astEntryPoint = this._astSymbolTable.fetchEntryPoint(this._context.entryPointSourceFile);
-
-    const exportedAstSymbols: AstSymbol[] = [];
-
-    // Create a DtsEntry for each top-level export
-    for (const exportedMember of this._astEntryPoint.exportedMembers) {
-      const astSymbol: AstSymbol = exportedMember.astSymbol;
-
-      this._createDtsEntryForSymbol(exportedMember.astSymbol, exportedMember.name);
-
-      exportedAstSymbols.push(astSymbol);
-    }
-
-    // Create a DtsEntry for each indirectly referenced export.
-    // Note that we do this *after* the above loop, so that references to exported AstSymbols
-    // are encountered first as exports.
-    const alreadySeenAstSymbols: Set<AstSymbol> = new Set<AstSymbol>();
-    for (const exportedAstSymbol of exportedAstSymbols) {
-      this._createDtsEntryForIndirectReferences(exportedAstSymbol, alreadySeenAstSymbols);
-    }
-
-    this._makeUniqueNames();
-
-    Sort.sortBy(this._dtsEntries, x => x.getSortKey());
-    this._dtsTypeDefinitionReferences.sort();
-  }
-
   /**
    * Generates the typings file and writes it to disk.
    *
    * @param dtsFilename    - The *.d.ts output filename
    */
-  public writeTypingsFile(dtsFilename: string, dtsKind: DtsRollupKind): void {
+  public static writeTypingsFile(context: ExtractorContext, dtsFilename: string, dtsKind: DtsRollupKind): void {
     const indentedWriter: IndentedWriter = new IndentedWriter();
 
-    this._generateTypingsFileContent(indentedWriter, dtsKind);
+    DtsRollupGenerator._generateTypingsFileContent(context, indentedWriter, dtsKind);
 
     FileSystem.writeFile(dtsFilename, indentedWriter.toString(), {
       convertLineEndings: NewlineKind.CrLf,
@@ -124,111 +59,34 @@ export class DtsRollupGenerator {
     });
   }
 
-  private _createDtsEntryForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
-    let dtsEntry: DtsEntry | undefined = this._dtsEntriesByAstSymbol.get(astSymbol);
-
-    if (!dtsEntry) {
-      dtsEntry = new DtsEntry({
-        astSymbol: astSymbol,
-        originalName: exportedName || astSymbol.localName,
-        exported: !!exportedName
-      });
-
-      this._dtsEntriesByAstSymbol.set(astSymbol, dtsEntry);
-      this._dtsEntriesBySymbol.set(astSymbol.followedSymbol, dtsEntry);
-      this._dtsEntries.push(dtsEntry);
-
-      this._collectTypeDefinitionReferences(astSymbol);
-    } else {
-      if (exportedName) {
-        if (!dtsEntry.exported) {
-          throw new Error('Program Bug: DtsEntry should have been marked as exported');
-        }
-        if (dtsEntry.originalName !== exportedName) {
-          throw new Error(`The symbol ${exportedName} was also exported as ${dtsEntry.originalName};`
-            + ` this is not supported yet`);
-        }
-      }
-    }
-  }
-
-  private _createDtsEntryForIndirectReferences(astSymbol: AstSymbol, alreadySeenAstSymbols: Set<AstSymbol>): void {
-    if (alreadySeenAstSymbols.has(astSymbol)) {
-      return;
-    }
-    alreadySeenAstSymbols.add(astSymbol);
-
-    astSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-      for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
-        this._createDtsEntryForSymbol(referencedAstSymbol, undefined);
-        this._createDtsEntryForIndirectReferences(referencedAstSymbol, alreadySeenAstSymbols);
-      }
-    });
-  }
-
-  /**
-   * Ensures a unique name for each item in the package typings file.
-   */
-  private _makeUniqueNames(): void {
-    const usedNames: Set<string> = new Set<string>();
-
-    // First collect the explicit package exports
-    for (const dtsEntry of this._dtsEntries) {
-      if (dtsEntry.exported) {
-
-        if (usedNames.has(dtsEntry.originalName)) {
-          // This should be impossible
-          throw new Error(`Program bug: a package cannot have two exports with the name ${dtsEntry.originalName}`);
-        }
-
-        dtsEntry.nameForEmit = dtsEntry.originalName;
-
-        usedNames.add(dtsEntry.nameForEmit);
-      }
-    }
-
-    // Next generate unique names for the non-exports that will be emitted
-    for (const dtsEntry of this._dtsEntries) {
-      if (!dtsEntry.exported) {
-        let suffix: number = 1;
-        dtsEntry.nameForEmit = dtsEntry.originalName;
-
-        while (usedNames.has(dtsEntry.nameForEmit)) {
-          dtsEntry.nameForEmit = `${dtsEntry.originalName}_${++suffix}`;
-        }
-
-        usedNames.add(dtsEntry.nameForEmit);
-      }
-    }
-  }
-
-  private _generateTypingsFileContent(indentedWriter: IndentedWriter, dtsKind: DtsRollupKind): void {
+  private static _generateTypingsFileContent(context: ExtractorContext, indentedWriter: IndentedWriter,
+    dtsKind: DtsRollupKind): void {
 
     indentedWriter.spacing = '';
     indentedWriter.clear();
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment
-      .tryFindInSourceFile(this._context.entryPointSourceFile, this._context);
+      .tryFindInSourceFile(context.entryPointSourceFile, context);
 
     if (packageDocCommentTextRange) {
-      const packageDocComment: string = this._context.entryPointSourceFile.text.substring(
+      const packageDocComment: string = context.entryPointSourceFile.text.substring(
         packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
       indentedWriter.writeLine(packageDocComment);
       indentedWriter.writeLine();
     }
 
     // Emit the triple slash directives
-    for (const typeDirectiveReference of this._dtsTypeDefinitionReferences) {
+    for (const typeDirectiveReference of context.dtsTypeDefinitionReferences) {
       // tslint:disable-next-line:max-line-length
       // https://github.com/Microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
       indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
     }
 
     // Emit the imports
-    for (const dtsEntry of this._dtsEntries) {
+    for (const dtsEntry of context.dtsEntries) {
       if (dtsEntry.astSymbol.astImport) {
 
-        const releaseTag: ReleaseTag = this._getReleaseTagForAstSymbol(dtsEntry.astSymbol);
+        const releaseTag: ReleaseTag = context.getReleaseTagForAstSymbol(dtsEntry.astSymbol);
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
           const astImport: AstImport = dtsEntry.astSymbol.astImport;
 
@@ -245,10 +103,10 @@ export class DtsRollupGenerator {
     }
 
     // Emit the regular declarations
-    for (const dtsEntry of this._dtsEntries) {
+    for (const dtsEntry of context.dtsEntries) {
       if (!dtsEntry.astSymbol.astImport) {
 
-        const releaseTag: ReleaseTag = this._getReleaseTagForAstSymbol(dtsEntry.astSymbol);
+        const releaseTag: ReleaseTag = context.getReleaseTagForAstSymbol(dtsEntry.astSymbol);
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
 
           // Emit all the declarations for this entry
@@ -257,7 +115,7 @@ export class DtsRollupGenerator {
             indentedWriter.writeLine();
 
             const span: Span = new Span(astDeclaration.declaration);
-            this._modifySpan(span, dtsEntry, astDeclaration, dtsKind);
+            DtsRollupGenerator._modifySpan(context, span, dtsEntry, astDeclaration, dtsKind);
             indentedWriter.writeLine(span.getModifiedText());
           }
         } else {
@@ -271,7 +129,7 @@ export class DtsRollupGenerator {
   /**
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
-  private _modifySpan(span: Span, dtsEntry: DtsEntry, astDeclaration: AstDeclaration,
+  private static _modifySpan(context: ExtractorContext, span: Span, dtsEntry: DtsEntry, astDeclaration: AstDeclaration,
     dtsKind: DtsRollupKind): void {
 
     const previousSpan: Span | undefined = span.previousSibling;
@@ -353,11 +211,11 @@ export class DtsRollupGenerator {
 
       case ts.SyntaxKind.Identifier:
         let nameFixup: boolean = false;
-        const identifierSymbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(span.node);
+        const identifierSymbol: ts.Symbol | undefined = context.typeChecker.getSymbolAtLocation(span.node);
         if (identifierSymbol) {
-          const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(identifierSymbol, this._typeChecker);
+          const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(identifierSymbol, context.typeChecker);
 
-          const referencedDtsEntry: DtsEntry | undefined = this._dtsEntriesBySymbol.get(followedSymbol);
+          const referencedDtsEntry: DtsEntry | undefined = context.tryGetDtsEntryBySymbol(followedSymbol);
 
           if (referencedDtsEntry) {
             if (!referencedDtsEntry.nameForEmit) {
@@ -388,9 +246,9 @@ export class DtsRollupGenerator {
         // Should we trim this node?
         let trimmed: boolean = false;
         if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
-          childAstDeclaration = this._astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
+          childAstDeclaration = context.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
 
-          const releaseTag: ReleaseTag = this._getReleaseTagForAstSymbol(childAstDeclaration.astSymbol);
+          const releaseTag: ReleaseTag = context.getReleaseTagForAstSymbol(childAstDeclaration.astSymbol);
           if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
             const modification: SpanModification = child.modification;
 
@@ -422,13 +280,14 @@ export class DtsRollupGenerator {
         }
 
         if (!trimmed) {
-          this._modifySpan(child, dtsEntry, childAstDeclaration, dtsKind);
+          DtsRollupGenerator._modifySpan(context, child, dtsEntry, childAstDeclaration, dtsKind);
         }
       }
     }
   }
 
-  private _shouldIncludeReleaseTag(releaseTag: ReleaseTag, dtsKind: DtsRollupKind): boolean {
+  private static _shouldIncludeReleaseTag(releaseTag: ReleaseTag, dtsKind: DtsRollupKind): boolean {
+
     switch (dtsKind) {
       case DtsRollupKind.InternalRelease:
         return true;
@@ -440,98 +299,5 @@ export class DtsRollupGenerator {
     }
 
     throw new Error(`${DtsRollupKind[dtsKind]} is not implemented`);
-  }
-
-  private _getReleaseTagForAstSymbol(astSymbol: AstSymbol): ReleaseTag {
-    let releaseTag: ReleaseTag | undefined = this._releaseTagByAstSymbol.get(astSymbol);
-    if (releaseTag) {
-      return releaseTag;
-    }
-
-    releaseTag = ReleaseTag.None;
-
-    let current: AstSymbol | undefined = astSymbol;
-    while (current) {
-      for (const astDeclaration of current.astDeclarations) {
-        const declarationReleaseTag: ReleaseTag = this._getReleaseTagForDeclaration(astDeclaration.declaration);
-        if (releaseTag !== ReleaseTag.None && declarationReleaseTag !== releaseTag) {
-          // this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
-          break;
-        }
-
-        releaseTag = declarationReleaseTag;
-      }
-
-      if (releaseTag !== ReleaseTag.None) {
-        break;
-      }
-
-      current = current.parentAstSymbol;
-    }
-
-    if (releaseTag === ReleaseTag.None) {
-      releaseTag = ReleaseTag.Public; // public by default
-    }
-
-    this._releaseTagByAstSymbol.set(astSymbol, releaseTag);
-
-    return releaseTag;
-  }
-
-  // NOTE: THIS IS A TEMPORARY WORKAROUND.
-  // In the near future we will overhaul the AEDoc parser to separate syntactic/semantic analysis,
-  // at which point this will be wired up to the same ApiDocumentation layer used for the API Review files
-  private _getReleaseTagForDeclaration(declaration: ts.Node): ReleaseTag {
-    const sourceFileText: string = declaration.getSourceFile().text;
-
-    for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || []) {
-      // NOTE: This string includes "/**"
-      const commentTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(
-        sourceFileText, commentRange.pos, commentRange.end);
-
-      const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(commentTextRange);
-      const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;
-
-      if (modifierTagSet.isPublic()) {
-        return ReleaseTag.Public;
-      }
-      if (modifierTagSet.isBeta()) {
-        return ReleaseTag.Beta;
-      }
-      if (modifierTagSet.isAlpha()) {
-        return ReleaseTag.Alpha;
-      }
-      if (modifierTagSet.isInternal()) {
-        return ReleaseTag.Internal;
-      }
-    }
-
-    return ReleaseTag.None;
-  }
-
-  private _collectTypeDefinitionReferences(astSymbol: AstSymbol): void {
-    // Are we emitting declarations?
-    if (astSymbol.astImport) {
-      return; // no, it's an import
-    }
-
-    const seenFilenames: Set<string> = new Set<string>();
-
-    for (const astDeclaration of astSymbol.astDeclarations) {
-      const sourceFile: ts.SourceFile = astDeclaration.declaration.getSourceFile();
-      if (sourceFile && sourceFile.fileName) {
-        if (!seenFilenames.has(sourceFile.fileName)) {
-          seenFilenames.add(sourceFile.fileName);
-
-          for (const typeReferenceDirective of sourceFile.typeReferenceDirectives) {
-            const name: string = sourceFile.text.substring(typeReferenceDirective.pos, typeReferenceDirective.end);
-            if (this._dtsTypeDefinitionReferences.indexOf(name) < 0) {
-              this._dtsTypeDefinitionReferences.push(name);
-            }
-          }
-
-        }
-      }
-    }
   }
 }
