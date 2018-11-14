@@ -422,8 +422,32 @@ export class Collector {
 
   private _parseTsdocForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.ParserContext | undefined {
     const declaration: ts.Declaration = astDeclaration.declaration;
+    let nodeForComment: ts.Node = declaration;
+
+    if (ts.isVariableDeclaration(declaration)) {
+      // Variable declarations are special because they can be combined into a list.  For example:
+      //
+      // /** A */ export /** B */ const /** C */ x = 1, /** D **/ [ /** E */ y, z] = [3, 4];
+      //
+      // The compiler will only emit comments A and C in the .d.ts file, so in general there isn't a well-defined
+      // way to document these parts.  API Extractor requires you to break them into separate exports like this:
+      //
+      // /** A */ export const x = 1;
+      //
+      // But _getReleaseTagForDeclaration() still receives a node corresponding to "x", so we need to walk upwards
+      // and find the containing statement in order for getJSDocCommentRanges() to read the comment that we expect.
+      const statement: ts.VariableStatement | undefined = TypeScriptHelpers.findFirstParent(declaration,
+        ts.SyntaxKind.VariableStatement) as ts.VariableStatement | undefined;
+      if (statement !== undefined) {
+        // For a compound declaration, fall back to looking for C instead of A
+        if (statement.declarationList.declarations.length === 1) {
+          nodeForComment = statement;
+        }
+      }
+    }
+
     const sourceFileText: string = declaration.getSourceFile().text;
-    const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || [];
+    const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(nodeForComment, sourceFileText) || [];
 
     if (ranges.length === 0) {
       return undefined;

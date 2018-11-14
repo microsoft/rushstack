@@ -3,6 +3,8 @@
 
 const unexportedCustomSymbol: unique symbol = Symbol('unexportedCustomSymbol');
 export const locallyExportedCustomSymbol: unique symbol = Symbol('locallyExportedCustomSymbol');
+
+/** @public */
 export const fullyExportedCustomSymbol: unique symbol = Symbol('fullyExportedCustomSymbol');
 
 /**
