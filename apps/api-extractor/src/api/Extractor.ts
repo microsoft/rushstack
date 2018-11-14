@@ -28,6 +28,7 @@ import { MonitoredLogger } from './MonitoredLogger';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
 import { ApiPackage } from './model/ApiPackage';
+import { ReviewFileGenerator } from '../generators/ReviewFileGenerator';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -376,6 +377,57 @@ export class Extractor {
       });
     }
 
+    if (this.actualConfig.apiReviewFile.enabled) {
+      const apiReviewFilename: string = packageBaseName + '.api.ts';
+
+      const actualApiReviewPath: string = path.resolve(this._absoluteRootFolder,
+        this.actualConfig.apiReviewFile.tempFolder, apiReviewFilename);
+      const actualApiReviewShortPath: string = this._getShortFilePath(actualApiReviewPath);
+
+      const expectedApiReviewPath: string = path.resolve(this._absoluteRootFolder,
+        this.actualConfig.apiReviewFile.apiReviewFolder, apiReviewFilename);
+      const expectedApiReviewShortPath: string = this._getShortFilePath(expectedApiReviewPath);
+
+      const actualApiReviewContent: string = ReviewFileGenerator.generateReviewFileContent(collector);
+
+      // Write the actual file
+      FileSystem.writeFile(actualApiReviewPath, actualApiReviewContent, {
+        ensureFolderExists: true
+      });
+
+      // Compare it against the expected file
+      if (FileSystem.exists(expectedApiReviewPath)) {
+        const expectedApiReviewContent: string = FileSystem.readFile(expectedApiReviewPath);
+
+        if (!ReviewFileGenerator.areEquivalentApiFileContents(actualApiReviewContent, expectedApiReviewContent)) {
+          if (!this._localBuild) {
+            // For production, issue a warning that will break the CI build.
+            this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
+              // @microsoft/gulp-core-build seems to run JSON.stringify() on the error messages for some reason,
+              // so try to avoid escaped characters:
+              + ` Please overwrite ${expectedApiReviewShortPath} with a`
+              + ` copy of ${actualApiReviewShortPath}`
+              + ' and then request an API review. See the Git repository README.md for more info.');
+          } else {
+            // For a local build, just copy the file automatically.
+            this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
+              + ` Updating ${expectedApiReviewShortPath}`);
+
+            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent);
+          }
+        } else {
+          this._monitoredLogger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
+        }
+      } else {
+        // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
+        // For example, when projects were moved into category folders, the relative path for
+        // the API review files ended up in the wrong place.
+        this._monitoredLogger.logError(`The API review file has not been set up.`
+          + ` Do this by copying ${actualApiReviewShortPath}`
+          + ` to ${expectedApiReviewShortPath} and committing it.`);
+      }
+    }
+
     this._generateRollupDtsFiles(collector);
 
     if (this._localBuild) {
@@ -464,6 +516,14 @@ export class Extractor {
     this._monitoredLogger.logVerbose(`Writing package typings: ${mainDtsRollupFullPath}`);
 
     DtsRollupGenerator.writeTypingsFile(collector, mainDtsRollupFullPath, dtsKind);
+  }
+
+  // Returns a simplified file path for use in error messages
+  private _getShortFilePath(absolutePath: string): string {
+    if (!path.isAbsolute(absolutePath)) {
+      throw new Error('Expected absolute path: ' + absolutePath);
+    }
+    return path.relative(this._absoluteRootFolder, absolutePath).replace(/\\/g, '/');
   }
 
   /**
