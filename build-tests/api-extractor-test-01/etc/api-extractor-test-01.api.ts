@@ -119,3 +119,4 @@ class TypeReferencesInAedoc {
 export function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
 
 // WARNING: Unsupported export: fullyExportedCustomSymbol
+// WARNING: Unsupported export: VARIABLE
