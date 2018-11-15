@@ -25,7 +25,9 @@ import {
   ApiMethod,
   ApiMethodSignature,
   ApiPropertySignature,
-  ApiItemContainerMixin
+  ApiItemContainerMixin,
+  ApiPackage,
+  ApiFunctionLikeMixin
 } from '@microsoft/api-extractor';
 
 import {
@@ -41,7 +43,7 @@ import {
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter} from '../markdown/CustomMarkdownEmitter';
 
-const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, 'typescript.schema.json'));
+const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '..', 'yaml', 'typescript.schema.json'));
 
 /**
  * Writes documentation in the Universal Reference YAML file format, as defined by typescript.schema.json.
@@ -115,7 +117,15 @@ export class YamlDocumenter {
       };
       newYamlFile.items.push(yamlItem);
 
-      const flattenedChildren: ApiItem[] = this._flattenNamespaces(apiItem.members);
+      let children: ReadonlyArray<ApiItem>;
+      if (apiItem.kind === ApiItemKind.Package) {
+        // Skip over the entry point, since it's not part of the documentation hierarchy
+        children = apiItem.members[0].members;
+      } else {
+        children = apiItem.members;
+      }
+
+      const flattenedChildren: ApiItem[] = this._flattenNamespaces(children);
 
       for (const child of flattenedChildren) {
         if (child instanceof ApiDocumentedItem) {
@@ -131,7 +141,7 @@ export class YamlDocumenter {
       const yamlFilePath: string = this._getYamlFilePath(apiItem);
 
       if (apiItem.kind === ApiItemKind.Package) {
-        console.log('Writing ' + this._getYamlFilePath(apiItem));
+        console.log('Writing ' + yamlFilePath);
       }
 
       this._writeYamlFile(newYamlFile, yamlFilePath, 'UniversalReference', yamlApiSchema);
@@ -331,7 +341,11 @@ export class YamlDocumenter {
     }
 
     if (apiItem.kind !== ApiItemKind.Package && !this._shouldEmbed(apiItem.kind)) {
-      yamlItem.package = this._getUid(apiItem.getHierarchy()[0]);
+      const associatedPackage: ApiPackage | undefined = apiItem.getAssociatedPackage();
+      if (!associatedPackage) {
+        throw new Error('Unable to determine associated package for ' + apiItem.name);
+      }
+      yamlItem.package = this._getUid(associatedPackage);
     }
 
     return yamlItem as IYamlItem;
@@ -440,7 +454,7 @@ export class YamlDocumenter {
       }
     });
 
-    return stringBuilder.toString();
+    return stringBuilder.toString().trim();
   }
 
   private _writeYamlFile(dataObject: {}, filePath: string, yamlMimeType: string,
@@ -467,19 +481,31 @@ export class YamlDocumenter {
   }
 
   /**
-   * Calculate the docfx "uid" for the ApiItem
+   * Calculate the DocFX "uid" for the ApiItem
    * Example:  node-core-library.JsonFile.load
    */
   private _getUid(apiItem: ApiItem): string {
     let result: string = '';
     for (const current of apiItem.getHierarchy()) {
+
+      // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
+      let qualifiedName: string = current.name;
+      if (ApiFunctionLikeMixin.isBaseClassOf(apiItem)) {
+        if (apiItem.overloadIndex > 0) {
+          qualifiedName += `_${apiItem.overloadIndex}`;
+        }
+      }
+
       switch (current.kind) {
+        case ApiItemKind.Model:
+        case ApiItemKind.EntryPoint:
+          break;
         case ApiItemKind.Package:
           result += PackageName.getUnscopedName(current.name);
           break;
         default:
           result += '.';
-          result += current.name;
+          result += qualifiedName;
           break;
       }
     }
@@ -592,11 +618,14 @@ export class YamlDocumenter {
 
     for (const current of apiItem.getHierarchy()) {
       switch (current.kind) {
+        case ApiItemKind.Model:
+        case ApiItemKind.EntryPoint:
+          break;
         case ApiItemKind.Package:
           result += PackageName.getUnscopedName(current.name);
           break;
         default:
-          if (current.parent && current.parent.kind === ApiItemKind.Package) {
+          if (current.parent && current.parent.kind === ApiItemKind.EntryPoint) {
             result += '/';
           } else {
             result += '.';
