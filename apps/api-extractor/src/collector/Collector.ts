@@ -416,6 +416,15 @@ export class Collector {
         }
       }
 
+      declarationMetadata.isEventProperty = modifierTagSet.isEventProperty();
+      declarationMetadata.isOverride = modifierTagSet.isOverride();
+      declarationMetadata.isSealed = modifierTagSet.isSealed();
+      declarationMetadata.isVirtual = modifierTagSet.isVirtual();
+
+      // Require the summary to contain at least 10 non-spacing characters
+      declarationMetadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
+        parserContext.docComment.summarySection, 10);
+
       declarationMetadata.declaredReleaseTag = declaredReleaseTag;
     }
   }

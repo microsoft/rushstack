@@ -10,6 +10,9 @@ import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { StringBuilder } from '@microsoft/tsdoc';
 import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
+import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { SymbolMetadata } from '../collector/SymbolMetadata';
+import { ReleaseTag } from '../aedoc/ReleaseTag';
 
 export class ReviewFileGenerator {
   /**
@@ -30,12 +33,12 @@ export class ReviewFileGenerator {
     const output: StringBuilder = new StringBuilder();
 
     for (const entity of collector.entities) {
-      if (!entity.astSymbol.astImport) {
+      if (entity.exported) {
 
         // Emit all the declarations for this entry
         for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
 
-          ReviewFileGenerator._writeAedocSynopsis(output, astDeclaration);
+          ReviewFileGenerator._writeAedocSynopsis(output, collector, astDeclaration);
 
           const span: Span = new Span(astDeclaration.declaration);
           ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration);
@@ -46,7 +49,8 @@ export class ReviewFileGenerator {
     }
 
     if (collector.package.tsdocComment === undefined) {
-      output.append('\n// (No @packageDocumentation comment for this package)\n');
+      output.append('\n');
+      ReviewFileGenerator._writeLineAsComment(output, '(No @packageDocumentation comment for this package)');
     }
 
     return output.toString();
@@ -68,7 +72,6 @@ export class ReviewFileGenerator {
 
       case ts.SyntaxKind.ExportKeyword:
       case ts.SyntaxKind.DefaultKeyword:
-      // case ts.SyntaxKind.DeclareKeyword:
         span.modification.skipAll();
         break;
 
@@ -120,20 +123,64 @@ export class ReviewFileGenerator {
    * whether the item has been documented, and any warnings that were detected
    * by the analysis.
    */
-  private static _writeAedocSynopsis(output: StringBuilder, astDeclaration: AstDeclaration): void {
-    const lines: string[] = [];
+  private static _writeAedocSynopsis(output: StringBuilder, collector: Collector,
+    astDeclaration: AstDeclaration): void {
 
-    // TODO
+    const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+    const symbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
 
-    ReviewFileGenerator._writeLinesAsComments(output, lines);
+    const footerParts: string[] = [];
+
+    switch (symbolMetadata.releaseTag) {
+      case ReleaseTag.Internal:
+        footerParts.push('@internal');
+        break;
+      case ReleaseTag.Alpha:
+        footerParts.push('@alpha');
+        break;
+      case ReleaseTag.Beta:
+        footerParts.push('@beta');
+        break;
+      case ReleaseTag.Public:
+        footerParts.push('@public');
+        break;
+    }
+
+    if (declarationMetadata.isSealed) {
+      footerParts.push('@sealed');
+    }
+
+    if (declarationMetadata.isVirtual) {
+      footerParts.push('@virtual');
+    }
+
+    if (declarationMetadata.isOverride) {
+      footerParts.push('@override');
+    }
+
+    if (declarationMetadata.isEventProperty) {
+      footerParts.push('@eventproperty');
+    }
+
+    if (declarationMetadata.tsdocComment) {
+      if (declarationMetadata.tsdocComment.deprecatedBlock) {
+        footerParts.push('@deprecated');
+      }
+    }
+
+    if (declarationMetadata.needsDocumentation) {
+      footerParts.push('(undocumented)');
+    }
+
+    if (footerParts.length > 0) {
+      ReviewFileGenerator._writeLineAsComment(output, footerParts.join(' '));
+    }
   }
 
-  private static _writeLinesAsComments(output: StringBuilder, lines: string[]): void {
-    for (const line of lines) {
-      output.append('// ');
-      output.append(line);
-      output.append('\n');
-    }
+  private static _writeLineAsComment(output: StringBuilder, line: string): void {
+    output.append('// ');
+    output.append(line);
+    output.append('\n');
   }
 
 }

@@ -13,4 +13,13 @@ export class DeclarationMetadata {
    * a parent.
    */
   public declaredReleaseTag: ReleaseTag = ReleaseTag.None;
+
+  // NOTE: In the future, the Collector may infer or error-correct some of these states.
+  // Generators should rely on these instead of tsdocComment.modifierTagSet.
+  public isEventProperty: boolean;
+  public isOverride: boolean;
+  public isSealed: boolean;
+  public isVirtual: boolean;
+
+  public needsDocumentation: boolean;
 }
