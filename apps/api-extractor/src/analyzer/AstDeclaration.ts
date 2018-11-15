@@ -41,6 +41,11 @@ export class AstDeclaration {
    */
   public readonly parent: AstDeclaration | undefined;
 
+  /**
+   * Additional information applied later by the Collector.
+   */
+  public metadata: unknown;
+
   private readonly _analyzedChildren: AstDeclaration[] = [];
 
   private readonly _analyzedReferencedAstSymbolsSet: Set<AstSymbol> = new Set<AstSymbol>();

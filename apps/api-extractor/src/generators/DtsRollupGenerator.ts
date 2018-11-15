@@ -80,7 +80,7 @@ export class DtsRollupGenerator {
     for (const entity of collector.entities) {
       if (entity.astSymbol.astImport) {
 
-        const releaseTag: ReleaseTag = collector.getReleaseTagForAstSymbol(entity.astSymbol);
+        const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astSymbol).releaseTag;
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
           const astImport: AstImport = entity.astSymbol.astImport;
 
@@ -100,7 +100,7 @@ export class DtsRollupGenerator {
     for (const entity of collector.entities) {
       if (!entity.astSymbol.astImport) {
 
-        const releaseTag: ReleaseTag = collector.getReleaseTagForAstSymbol(entity.astSymbol);
+        const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astSymbol).releaseTag;
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
 
           // Emit all the declarations for this entry
@@ -242,7 +242,7 @@ export class DtsRollupGenerator {
         if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
           childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
 
-          const releaseTag: ReleaseTag = collector.getReleaseTagForAstSymbol(childAstDeclaration.astSymbol);
+          const releaseTag: ReleaseTag = collector.fetchMetadata(childAstDeclaration.astSymbol).releaseTag;
           if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
             const modification: SpanModification = child.modification;
 

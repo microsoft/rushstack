@@ -74,6 +74,11 @@ export class AstSymbol {
    */
   public readonly rootAstSymbol: AstSymbol;
 
+  /**
+   * Additional information applied later by the Collector.
+   */
+  public metadata: unknown;
+
   private readonly _astDeclarations: AstDeclaration[];
 
   // This flag is unused if this is not the root symbol.

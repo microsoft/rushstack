@@ -18,7 +18,6 @@ import { Span } from '../analyzer/Span';
 import { ApiParameter } from '../api/model/ApiParameter';
 import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { ApiReleaseTagMixin } from '../api/mixins/ApiReleaseTagMixin';
 import { ApiProperty } from '../api/model/ApiProperty';
 import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
 import { ApiFunctionLikeMixin } from '../api/mixins/ApiFunctionLikeMixin';
@@ -124,8 +123,9 @@ export class ApiModelGenerator {
     if (apiClass === undefined) {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.FirstPunctuation);  // FirstPunctuation = "{"
-      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
-      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
       apiClass = new ApiClass({ name, signature, docComment, releaseTag });
       parentApiItem.addMember(apiClass);
@@ -145,8 +145,8 @@ export class ApiModelGenerator {
     if (apiInterface === undefined) {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.FirstPunctuation); // FirstPunctuation = "{"
-      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
-      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
       apiInterface = new ApiInterface({ name, signature, docComment, releaseTag });
       parentApiItem.addMember(apiInterface);
@@ -178,8 +178,8 @@ export class ApiModelGenerator {
 
     if (apiMethod === undefined) {
       const signature: string = astDeclaration.declaration.getText();
-      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
-      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
       const resultTypeSignature: string = this._getSignatureForTypeNode(methodDeclaration.type);
 
       apiMethod = new ApiMethod({ name, signature, docComment, releaseTag, resultTypeSignature, isStatic,
@@ -208,8 +208,8 @@ export class ApiModelGenerator {
 
     if (apiMethodSignature === undefined) {
       const signature: string = astDeclaration.declaration.getText();
-      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
-      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
       const resultTypeSignature: string = this._getSignatureForTypeNode(methodSignature.type);
 
       apiMethodSignature = new ApiMethodSignature({ name, signature, docComment, releaseTag, resultTypeSignature,
@@ -248,8 +248,8 @@ export class ApiModelGenerator {
     if (apiNamespace === undefined) {
       const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
         ts.SyntaxKind.ModuleBlock); // ModuleBlock = the "{ ... }" block
-      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
-      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
       apiNamespace = new ApiNamespace({ name, signature, docComment, releaseTag });
       parentApiItem.addMember(apiNamespace);
@@ -281,8 +281,8 @@ export class ApiModelGenerator {
 
     if (apiProperty === undefined) {
       const signature: string = astDeclaration.declaration.getText();
-      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
-      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
       const resultTypeSignature: string = this._getSignatureForTypeNode(propertyDeclaration.type);
 
       apiProperty = new ApiProperty({ name, signature, docComment, releaseTag, resultTypeSignature, isStatic });
@@ -306,8 +306,8 @@ export class ApiModelGenerator {
 
     if (apiPropertySignature === undefined) {
       const signature: string = astDeclaration.declaration.getText();
-      const docComment: tsdoc.DocComment | undefined = this._collector.getTsdocCommentForAstDeclaration(astDeclaration);
-      const releaseTag: ReleaseTag = this._determineReleaseTag(docComment, parentApiItem);
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
       const resultTypeSignature: string = this._getSignatureForTypeNode(propertySignature.type);
 
       apiPropertySignature = new ApiPropertySignature({ name, signature, docComment, releaseTag, resultTypeSignature });
@@ -374,56 +374,5 @@ export class ApiModelGenerator {
       return type.getText();
     }
     return '';
-  }
-
-  private _determineReleaseTag(docComment: tsdoc.DocComment | undefined,
-    parentApiItem?: ApiItemContainerMixin): ReleaseTag {
-
-    let releaseTag: ReleaseTag = ReleaseTag.None;
-
-    if (docComment) {
-      const modifierTagSet: tsdoc.StandardModifierTagSet = docComment.modifierTagSet;
-      let inconsistentReleaseTags: boolean = false;
-
-      if (modifierTagSet.isPublic()) {
-        releaseTag = ReleaseTag.Public;
-      }
-      if (modifierTagSet.isBeta()) {
-        if (releaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
-        } else {
-          releaseTag = ReleaseTag.Beta;
-        }
-      }
-      if (modifierTagSet.isAlpha()) {
-        if (releaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
-        } else {
-          releaseTag = ReleaseTag.Alpha;
-        }
-      }
-      if (modifierTagSet.isInternal()) {
-        if (releaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
-        } else {
-          releaseTag = ReleaseTag.Internal;
-        }
-      }
-
-      if (inconsistentReleaseTags) {
-        // TODO: Report error message
-        this._collector.reportError('Inconsistent release tags', undefined, undefined);
-      }
-    }
-
-    if (releaseTag !== ReleaseTag.None) {
-      return releaseTag;
-    }
-
-    if (parentApiItem && ApiReleaseTagMixin.isBaseClassOf(parentApiItem)) {
-      return parentApiItem.releaseTag;
-    }
-
-    return ReleaseTag.Public;
   }
 }

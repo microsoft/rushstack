@@ -11,7 +11,11 @@ import {
 } from '@microsoft/node-core-library';
 
 import { ILogger } from '../api/ILogger';
-import { IExtractorPoliciesConfig, IExtractorValidationRulesConfig } from '../api/IExtractorConfig';
+import {
+  IExtractorPoliciesConfig,
+  IExtractorValidationRulesConfig,
+  ExtractorValidationRulePolicy
+} from '../api/IExtractorConfig';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable } from '../analyzer/AstSymbolTable';
@@ -22,6 +26,8 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { CollectorPackage } from './CollectorPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
+import { DeclarationMetadata } from './DeclarationMetadata';
+import { SymbolMetadata } from './SymbolMetadata';
 
 /**
  * Options for Collector constructor.
@@ -78,7 +84,6 @@ export class Collector {
   private readonly _entities: CollectorEntity[] = [];
   private readonly _entitiesByAstSymbol: Map<AstSymbol, CollectorEntity> = new Map<AstSymbol, CollectorEntity>();
   private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
-  private readonly _releaseTagByAstSymbol: Map<AstSymbol, ReleaseTag> = new Map<AstSymbol, ReleaseTag>();
 
   private readonly _dtsTypeDefinitionReferences: string[] = [];
 
@@ -174,36 +179,30 @@ export class Collector {
     const alreadySeenAstSymbols: Set<AstSymbol> = new Set<AstSymbol>();
     for (const exportedAstSymbol of exportedAstSymbols) {
       this._createEntityForIndirectReferences(exportedAstSymbol, alreadySeenAstSymbols);
+
+      this.fetchMetadata(exportedAstSymbol);
     }
 
     this._makeUniqueNames();
 
     Sort.sortBy(this._entities, x => x.getSortKey());
     this._dtsTypeDefinitionReferences.sort();
-  }
 
-  public getTsdocCommentForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.DocComment | undefined {
-    const declaration: ts.Declaration = astDeclaration.declaration;
-    const sourceFileText: string = declaration.getSourceFile().text;
-    const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || [];
-
-    if (ranges.length === 0) {
-      return undefined;
-    }
-
-    // We use the JSDoc comment block that is closest to the definition, i.e.
-    // the last one preceding it
-    const range: ts.TextRange = ranges[ranges.length - 1];
-
-    const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
-      range.pos, range.end);
-
-    const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
-    return parserContext.docComment;
   }
 
   public tryGetEntityBySymbol(symbol: ts.Symbol): CollectorEntity | undefined {
     return this._entitiesBySymbol.get(symbol);
+  }
+
+  public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
+  public fetchMetadata(astDeclaration: AstDeclaration): DeclarationMetadata;
+  public fetchMetadata(symbolOrDeclaration: AstSymbol | AstDeclaration): SymbolMetadata | DeclarationMetadata {
+    if (symbolOrDeclaration.metadata === undefined) {
+      const astSymbol: AstSymbol = symbolOrDeclaration instanceof AstSymbol
+        ? symbolOrDeclaration : symbolOrDeclaration.astSymbol;
+      this._fetchSymbolMetadata(astSymbol);
+    }
+    return symbolOrDeclaration.metadata as SymbolMetadata | DeclarationMetadata;
   }
 
   private _createEntityForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
@@ -304,71 +303,140 @@ export class Collector {
     }
   }
 
-  public getReleaseTagForAstSymbol(astSymbol: AstSymbol): ReleaseTag {
-    let releaseTag: ReleaseTag | undefined = this._releaseTagByAstSymbol.get(astSymbol);
-    if (releaseTag) {
-      return releaseTag;
+  private _fetchSymbolMetadata(astSymbol: AstSymbol): void {
+    if (astSymbol.metadata) {
+      return;
     }
 
-    releaseTag = ReleaseTag.None;
+    // When we solve an astSymbol, then we always also solve all of its parents and all of its declarations
+    if (astSymbol.parentAstSymbol && astSymbol.parentAstSymbol.metadata === undefined) {
+      this._fetchSymbolMetadata(astSymbol.parentAstSymbol);
+    }
 
-    let current: AstSymbol | undefined = astSymbol;
-    while (current) {
-      for (const astDeclaration of current.astDeclarations) {
-        const declarationReleaseTag: ReleaseTag = this._getReleaseTagForDeclaration(astDeclaration.declaration);
-        if (releaseTag !== ReleaseTag.None && declarationReleaseTag !== releaseTag) {
-          // this._analyzeWarnings.push('WARNING: Conflicting release tags found for ' + symbol.name);
-          break;
+    for (const astDeclaration of astSymbol.astDeclarations) {
+      this._calculateMetadataForDeclaration(astDeclaration);
+    }
+
+    const symbolMetadata: SymbolMetadata = new SymbolMetadata();
+
+    // Do any of the declarations have a release tag?
+    let effectiveReleaseTag: ReleaseTag = ReleaseTag.None;
+
+    for (const astDeclaration of astSymbol.astDeclarations) {
+      // We know we solved this above
+      const declarationMetadata: DeclarationMetadata = astDeclaration.metadata as DeclarationMetadata;
+
+      const declaredReleaseTag: ReleaseTag = declarationMetadata.declaredReleaseTag;
+
+      if (declaredReleaseTag !== ReleaseTag.None) {
+        if (effectiveReleaseTag !== ReleaseTag.None && effectiveReleaseTag !== declaredReleaseTag) {
+          if (!astSymbol.rootAstSymbol.imported) { // for now, don't report errors for external code
+            // TODO: Report error message
+            this.reportError('Inconsistent release tags between declarations', undefined, undefined);
+          }
+        } else {
+          effectiveReleaseTag = declaredReleaseTag;
         }
-
-        releaseTag = declarationReleaseTag;
       }
-
-      if (releaseTag !== ReleaseTag.None) {
-        break;
-      }
-
-      current = current.parentAstSymbol;
     }
 
-    if (releaseTag === ReleaseTag.None) {
-      releaseTag = ReleaseTag.Public; // public by default
+    // If this declaration doesn't have a release tag, then inherit it from the parent
+    if (effectiveReleaseTag === ReleaseTag.None && astSymbol.parentAstSymbol) {
+      if (astSymbol.parentAstSymbol) {
+        // We know we solved this above
+        const parentSymbolMetadata: SymbolMetadata = astSymbol.parentAstSymbol.metadata as SymbolMetadata;
+
+        effectiveReleaseTag = parentSymbolMetadata.releaseTag;
+      }
     }
 
-    this._releaseTagByAstSymbol.set(astSymbol, releaseTag);
+    if (effectiveReleaseTag === ReleaseTag.None) {
+      if (this.validationRules.missingReleaseTags !== ExtractorValidationRulePolicy.allow) {
+        if (!astSymbol.rootAstSymbol.imported) { // for now, don't report errors for external code
+          // For now, don't report errors for forgotten exports
+          const entity: CollectorEntity | undefined = this._entitiesByAstSymbol.get(astSymbol.rootAstSymbol);
+          if (entity && entity.exported) {
+            // TODO: Report error message
+            this.reportError('Missing release tag', undefined, undefined);
+          }
+        }
+      }
 
-    return releaseTag;
+      effectiveReleaseTag = ReleaseTag.Public;
+    }
+
+    symbolMetadata.releaseTag = effectiveReleaseTag;
+
+    // Update this last when we're sure no exceptions were thrown
+    astSymbol.metadata = symbolMetadata;
   }
 
-  // NOTE: THIS IS A TEMPORARY WORKAROUND.
-  // In the near future we will overhaul the AEDoc parser to separate syntactic/semantic analysis,
-  // at which point this will be wired up to the same ApiDocumentation layer used for the API Review files
-  private _getReleaseTagForDeclaration(declaration: ts.Node): ReleaseTag {
-    const sourceFileText: string = declaration.getSourceFile().text;
+  private _calculateMetadataForDeclaration(astDeclaration: AstDeclaration): void {
+    const declarationMetadata: DeclarationMetadata = new DeclarationMetadata();
+    astDeclaration.metadata = declarationMetadata;
 
-    for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || []) {
-      // NOTE: This string includes "/**"
-      const commentTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(
-        sourceFileText, commentRange.pos, commentRange.end);
+    const parserContext: tsdoc.ParserContext | undefined = this._parseTsdocForAstDeclaration(astDeclaration);
+    if (parserContext) {
+      declarationMetadata.tsdocComment = parserContext.docComment;
 
-      const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(commentTextRange);
       const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;
 
+      let declaredReleaseTag: ReleaseTag = ReleaseTag.None;
+      let inconsistentReleaseTags: boolean = false;
+
       if (modifierTagSet.isPublic()) {
-        return ReleaseTag.Public;
+        declaredReleaseTag = ReleaseTag.Public;
       }
       if (modifierTagSet.isBeta()) {
-        return ReleaseTag.Beta;
+        if (declaredReleaseTag !== ReleaseTag.None) {
+          inconsistentReleaseTags = true;
+        } else {
+          declaredReleaseTag = ReleaseTag.Beta;
+        }
       }
       if (modifierTagSet.isAlpha()) {
-        return ReleaseTag.Alpha;
+        if (declaredReleaseTag !== ReleaseTag.None) {
+          inconsistentReleaseTags = true;
+        } else {
+          declaredReleaseTag = ReleaseTag.Alpha;
+        }
       }
       if (modifierTagSet.isInternal()) {
-        return ReleaseTag.Internal;
+        if (declaredReleaseTag !== ReleaseTag.None) {
+          inconsistentReleaseTags = true;
+        } else {
+          declaredReleaseTag = ReleaseTag.Internal;
+        }
       }
+
+      if (inconsistentReleaseTags) {
+        if (!astDeclaration.astSymbol.rootAstSymbol.imported) { // for now, don't report errors for external code
+          // TODO: Report error message
+          this.reportError('Inconsistent release tags in doc comment', undefined, undefined);
+        }
+      }
+
+      declarationMetadata.declaredReleaseTag = declaredReleaseTag;
+    }
+  }
+
+  private _parseTsdocForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.ParserContext | undefined {
+    const declaration: ts.Declaration = astDeclaration.declaration;
+    const sourceFileText: string = declaration.getSourceFile().text;
+    const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || [];
+
+    if (ranges.length === 0) {
+      return undefined;
     }
 
-    return ReleaseTag.None;
+    // We use the JSDoc comment block that is closest to the definition, i.e.
+    // the last one preceding it
+    const range: ts.TextRange = ranges[ranges.length - 1];
+
+    const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
+      range.pos, range.end);
+
+    return this._tsdocParser.parseRange(tsdocTextRange);
   }
 
   private _collectTypeDefinitionReferences(astSymbol: AstSymbol): void {
