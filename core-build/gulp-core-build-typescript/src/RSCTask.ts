@@ -12,7 +12,7 @@ import {
   Terminal
 } from '@microsoft/node-core-library';
 import { GulpTask } from '@microsoft/gulp-core-build';
-import * as RushStackCompiler from '@microsoft/rush-stack-compiler';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-2.7';
 import { GCBTerminalProvider } from './GCBTerminalProvider';
 
 export interface IRSCTaskConfig extends Object {
@@ -28,7 +28,7 @@ interface ITsconfig {
 export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTask<TTaskConfig> {
 
   // For a given folder that contains a tsconfig.json file, return the absolute path of the folder
-  // containing "@microsoft/rush-stack-compiler"
+  // containing "@microsoft/rush-stack-compiler-*"
   private static _rushStackCompilerPackagePathCache: Map<string, string> = new Map<string, string>();
 
   private static __packageJsonLookup: PackageJsonLookup | undefined; // tslint:disable-line:variable-name
@@ -47,7 +47,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
   /**
    * @internal
    */
-  protected _rushStackCompiler: typeof RushStackCompiler;
+  protected _rushStackCompiler: typeof TRushStackCompiler;
 
   private get _rushStackCompilerPackagePath(): string {
     if (!RSCTask._rushStackCompilerPackagePathCache.has(this.buildFolder)) {
@@ -63,7 +63,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
             'Unable to resolve rush-stack-compiler from tsconfig.json. Using built-in compiler'
           );
           const builtInCompilerPath: string | undefined = RSCTask._packageJsonLookup.tryGetPackageFolderFor(
-            require.resolve('@microsoft/rush-stack-compiler')
+            require.resolve('@microsoft/rush-stack-compiler-2.7')
           );
           if (!builtInCompilerPath) {
             throw new Error(
@@ -117,11 +117,11 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
    *
    * @remarks
    * We load the tsconfig.json file, and follow its "extends" field until we reach the end of the chain.
-   * We expect the last extended file to be under an installed @microsoft/rush-stack-compiler package,
+   * We expect the last extended file to be under an installed @microsoft/rush-stack-compiler-* package,
    * which determines which typescript/tslint/api-extractor versions should be invoked.
    *
    * @param tsconfigPath - The path of a tsconfig.json file to analyze
-   * @returns The absolute path of the folder containing "@microsoft/rush-stack-compiler" which should be used
+   * @returns The absolute path of the folder containing "@microsoft/rush-stack-compiler-*" which should be used
    * to compile this tsconfig.json project
    */
   private _resolveRushStackCompilerFromTsconfig(tsconfigPath: string, visitedTsconfigPaths: Set<string>): string {
@@ -144,7 +144,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
       const packageJsonPath: string | undefined = RSCTask._packageJsonLookup.tryGetPackageJsonFilePathFor(tsconfigPath);
       if (packageJsonPath) {
         const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
-        if (packageJson.name === '@microsoft/rush-stack-compiler') {
+        if (packageJson.name.match(/^@microsoft\/rush-stack-compiler-[0-9\.]+$/)) {
           const packagePath: string = path.dirname(packageJsonPath);
           this._terminal.writeVerboseLine(`Found rush-stack compiler at ${packagePath}/`);
           return packagePath;
@@ -153,8 +153,8 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
 
       throw new Error(
         'Rush Stack determines your TypeScript compiler by following the "extends" field in your tsconfig.json ' +
-        'file, until it reaches a package folder that depends on @microsoft/rush-stack-compiler. This lookup ' +
-        `failed when it reached this file: ${tsconfigPath}`
+        'file, until it reaches a package folder that depends on a variant of @microsoft/rush-stack-compiler-*. ' +
+        `This lookup failed when it reached this file: ${tsconfigPath}`
       );
     }
 
