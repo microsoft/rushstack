@@ -50,4 +50,4 @@ export declare class PublicClass {
 
 /* Excluded from this release type: RegularEnum */
 
-export declare const variableDeclaration: string;
+/* Excluded from this release type: variableDeclaration */
