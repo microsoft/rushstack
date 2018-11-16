@@ -62,7 +62,14 @@ export class DtsRollupGenerator {
    *
    * /// <reference types="example-library" />
    */
-  private _dtsTypeDefinitionReferences: string[] = [];
+  private _dtsTypeReferenceDirectives: string[] = [];
+
+  /**
+   * A list of names (e.g. "runtime-library") that should appear in a reference like this:
+   *
+   * /// <reference lib="runtime-library" />
+   */
+  private _dtsLibReferenceDirectives: string[] = [];
 
   public constructor(context: ExtractorContext) {
     this._context = context;
@@ -105,7 +112,8 @@ export class DtsRollupGenerator {
     this._makeUniqueNames();
 
     this._dtsEntries.sort((a, b) => a.getSortKey().localeCompare(b.getSortKey()));
-    this._dtsTypeDefinitionReferences.sort();
+    this._dtsTypeReferenceDirectives.sort();
+    this._dtsLibReferenceDirectives.sort();
   }
 
   /**
@@ -222,10 +230,14 @@ export class DtsRollupGenerator {
     }
 
     // Emit the triple slash directives
-    for (const typeDirectiveReference of this._dtsTypeDefinitionReferences) {
+    for (const typeDirectiveReference of this._dtsTypeReferenceDirectives) {
       // tslint:disable-next-line:max-line-length
       // https://github.com/Microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
       indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+    }
+
+    for (const libDirectiveReference of this._dtsLibReferenceDirectives) {
+      indentedWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
     }
 
     // Emit the imports
@@ -553,8 +565,15 @@ export class DtsRollupGenerator {
 
           for (const typeReferenceDirective of sourceFile.typeReferenceDirectives) {
             const name: string = sourceFile.text.substring(typeReferenceDirective.pos, typeReferenceDirective.end);
-            if (this._dtsTypeDefinitionReferences.indexOf(name) < 0) {
-              this._dtsTypeDefinitionReferences.push(name);
+            if (this._dtsTypeReferenceDirectives.indexOf(name) < 0) {
+              this._dtsTypeReferenceDirectives.push(name);
+            }
+          }
+
+          for (const libReferenceDirective of sourceFile.libReferenceDirectives) {
+            const name: string = sourceFile.text.substring(libReferenceDirective.pos, libReferenceDirective.end);
+            if (this._dtsLibReferenceDirectives.indexOf(name) < 0) {
+              this._dtsLibReferenceDirectives.push(name);
             }
           }
 

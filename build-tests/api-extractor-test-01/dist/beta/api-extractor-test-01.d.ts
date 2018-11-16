@@ -10,6 +10,7 @@
  */
 
 /// <reference types="jest" />
+/// <reference lib="es2018.intl" />
 
 /**
  * Example of an abstract class that is directly exported.
