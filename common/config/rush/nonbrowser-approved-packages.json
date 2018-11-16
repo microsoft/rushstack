@@ -71,6 +71,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@microsoft/rush-stack-compiler-3.0",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@microsoft/set-webpack-public-path-plugin",
       "allowedCategories": [ "libraries" ]
     },
