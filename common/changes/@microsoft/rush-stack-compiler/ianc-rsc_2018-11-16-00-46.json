@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler",
+      "comment": "Deprecating project.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler",
+  "email": "iclanton@users.noreply.github.com"
+}
