@@ -107,3 +107,5 @@ export { default as IInterfaceAsDefaultExport } from './IInterfaceAsDefaultExpor
 export { ReexportedClass3 as ReexportedClass } from './ReexportedClass3/ReexportedClass3';
 
 export { TypeReferencesInAedoc } from './TypeReferencesInAedoc';
+
+export { VARIABLE } from './variableDeclarations';

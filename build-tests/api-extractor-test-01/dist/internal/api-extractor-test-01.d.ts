@@ -246,6 +246,8 @@ export declare class TypeReferencesInAedoc {
 
 declare const unexportedCustomSymbol: unique symbol;
 
+export declare const VARIABLE: string;
+
 /**
  * Example decorator
  * @public

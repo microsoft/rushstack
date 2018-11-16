@@ -479,9 +479,33 @@ export class DtsRollupGenerator {
   // In the near future we will overhaul the AEDoc parser to separate syntactic/semantic analysis,
   // at which point this will be wired up to the same ApiDocumentation layer used for the API Review files
   private _getReleaseTagForDeclaration(declaration: ts.Node): ReleaseTag {
+    let nodeForComment: ts.Node = declaration;
+
+    if (ts.isVariableDeclaration(declaration)) {
+      // Variable declarations are special because they can be combined into a list.  For example:
+      //
+      // /** A */ export /** B */ const /** C */ x = 1, /** D **/ [ /** E */ y, z] = [3, 4];
+      //
+      // The compiler will only emit comments A and C in the .d.ts file, so in general there isn't a well-defined
+      // way to document these parts.  API Extractor requires you to break them into separate exports like this:
+      //
+      // /** A */ export const x = 1;
+      //
+      // But _getReleaseTagForDeclaration() still receives a node corresponding to "x", so we need to walk upwards
+      // and find the containing statement in order for getJSDocCommentRanges() to read the comment that we expect.
+      const statement: ts.VariableStatement | undefined = TypeScriptHelpers.findFirstParent(declaration,
+        ts.SyntaxKind.VariableStatement) as ts.VariableStatement | undefined;
+      if (statement !== undefined) {
+        // For a compound declaration, fall back to looking for C instead of A
+        if (statement.declarationList.declarations.length === 1) {
+          nodeForComment = statement;
+        }
+      }
+    }
+
     const sourceFileText: string = declaration.getSourceFile().text;
 
-    for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(declaration, sourceFileText) || []) {
+    for (const commentRange of TypeScriptHelpers.getJSDocCommentRanges(nodeForComment, sourceFileText) || []) {
       // NOTE: This string includes "/**"
       const commentTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(
         sourceFileText, commentRange.pos, commentRange.end);
