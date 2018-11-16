@@ -105,13 +105,10 @@ export class AstNamespace extends AstModule {
       // the JSDoc comment Node can be found.
       // If there is no parent or grandparent of this VariableDeclaration then
       // we do not know how to obtain the JSDoc comment.
-      let jsdocNode: ts.Node | undefined = undefined;
       if (!declaration.parent || !declaration.parent.parent ||
         declaration.parent.parent.kind !== ts.SyntaxKind.VariableStatement) {
         this.reportWarning(`Unable to locate the documentation node for "${exportSymbol.name}"; `
           + `this may be an API Extractor bug`);
-      } else {
-        jsdocNode = declaration.parent.parent;
       }
 
       const exportMemberOptions: IAstItemOptions = {

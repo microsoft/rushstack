@@ -357,7 +357,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler"
       ]
     },
     {
@@ -372,7 +373,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler"
       ]
     },
     {
@@ -394,7 +396,6 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler",
         "@microsoft/api-extractor"
       ]
     },
@@ -468,10 +469,7 @@
       "packageName": "@microsoft/rush-stack",
       "projectFolder": "stack/rush-stack",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
-      ]
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/rush-stack-compiler",
@@ -485,7 +483,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler"
       ]
     },
     {
@@ -494,7 +493,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler"
       ]
     },
     {
@@ -503,7 +503,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler"
       ]
     },
     {
@@ -512,7 +513,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler"
       ]
     },
     {
@@ -521,7 +523,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler"
       ]
     },
 

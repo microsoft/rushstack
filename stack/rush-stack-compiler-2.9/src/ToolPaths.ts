@@ -4,6 +4,9 @@
 import { PackageJsonLookup, IPackageJson, JsonFile } from '@microsoft/node-core-library';
 import * as path from 'path';
 
+/**
+ * @beta
+ */
 export class ToolPaths {
   private static _typescriptPackagePath: string | undefined;
   private static _tslintPackagePath: string | undefined;

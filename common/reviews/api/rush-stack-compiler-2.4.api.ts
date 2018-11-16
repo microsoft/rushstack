@@ -27,6 +27,18 @@ class RushStackCompilerBase<TOptions = {}> {
 }
 
 // @beta (undocumented)
+class ToolPaths {
+  // (undocumented)
+  static readonly tslintPackageJson: IPackageJson;
+  // (undocumented)
+  static readonly tslintPackagePath: string;
+  // (undocumented)
+  static readonly typescriptPackageJson: IPackageJson;
+  // (undocumented)
+  static readonly typescriptPackagePath: string;
+}
+
+// @beta (undocumented)
 class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
   constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider);
   // (undocumented)

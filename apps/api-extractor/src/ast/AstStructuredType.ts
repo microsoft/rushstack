@@ -10,7 +10,7 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { Markup } from '../markup/Markup';
 import { AstMethod } from './AstMethod';
 import { AstProperty } from './AstProperty';
-import { AstItem, AstItemKind, IAstItemOptions } from './AstItem';
+import { AstItemKind, IAstItemOptions } from './AstItem';
 import { AstItemContainer } from './AstItemContainer';
 import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 import { PrettyPrinter } from '../utils/PrettyPrinter';
