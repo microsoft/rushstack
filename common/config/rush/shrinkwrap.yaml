@@ -32,10 +32,15 @@ dependencies:
   '@rush-temp/rush-stack': 'file:projects/rush-stack.tgz'
   '@rush-temp/rush-stack-compiler': 'file:projects/rush-stack-compiler.tgz'
   '@rush-temp/rush-stack-compiler-2.4': 'file:projects/rush-stack-compiler-2.4.tgz'
+  '@rush-temp/rush-stack-compiler-2.4-library-test': 'file:projects/rush-stack-compiler-2.4-library-test.tgz'
   '@rush-temp/rush-stack-compiler-2.7': 'file:projects/rush-stack-compiler-2.7.tgz'
+  '@rush-temp/rush-stack-compiler-2.7-library-test': 'file:projects/rush-stack-compiler-2.7-library-test.tgz'
   '@rush-temp/rush-stack-compiler-2.9': 'file:projects/rush-stack-compiler-2.9.tgz'
+  '@rush-temp/rush-stack-compiler-2.9-library-test': 'file:projects/rush-stack-compiler-2.9-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.0': 'file:projects/rush-stack-compiler-3.0.tgz'
+  '@rush-temp/rush-stack-compiler-3.0-library-test': 'file:projects/rush-stack-compiler-3.0-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.1': 'file:projects/rush-stack-compiler-3.1.tgz'
+  '@rush-temp/rush-stack-compiler-3.1-library-test': 'file:projects/rush-stack-compiler-3.1-library-test.tgz'
   '@rush-temp/rush-stack-library-test': 'file:projects/rush-stack-library-test.tgz'
   '@rush-temp/rushell': 'file:projects/rushell.tgz'
   '@rush-temp/set-webpack-public-path-plugin': 'file:projects/set-webpack-public-path-plugin.tgz'
@@ -10149,6 +10154,16 @@ packages:
       integrity: sha512-dTKznzx0nyATJZe6ZQ5EGSjX4f1wD7HcT0t2yGfTuZ1hZsfVgsFI9VJJaJS/cgByNfhEXBH4cLfypHsM9sKhNQ==
       tarball: 'file:projects/rush-lib.tgz'
     version: 0.0.0
+  'file:projects/rush-stack-compiler-2.4-library-test.tgz':
+    dependencies:
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-2.4-library-test'
+    resolution:
+      integrity: sha512-a+gAZpyHB+Gsn0FEVeyxxNcNYEZFfExUD6nv+OqB97sKUFPAABsDTvMA4JMcmc+31ESjM3dPj851hzseIeCddg==
+      tarball: 'file:projects/rush-stack-compiler-2.4-library-test.tgz'
+    version: 0.0.0
   'file:projects/rush-stack-compiler-2.4.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.6
@@ -10163,6 +10178,16 @@ packages:
     resolution:
       integrity: sha512-VldiP5aj84ApDC+N7fSga3ARu4HIQPrKbLqYU3Ck2UzihyWV1/RSWPuWynzd8eeyICJKEbjDaJqVwBkWChyBSw==
       tarball: 'file:projects/rush-stack-compiler-2.4.tgz'
+    version: 0.0.0
+  'file:projects/rush-stack-compiler-2.7-library-test.tgz':
+    dependencies:
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-2.7-library-test'
+    resolution:
+      integrity: sha512-tF8nGIrobNSMDXk2OkammTzNhcmIElyPWkn/soGqubFjnClwQ0V6BzKCx3Q3VqTqo3FEvadYElPAM7ZC4jkQTg==
+      tarball: 'file:projects/rush-stack-compiler-2.7-library-test.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-2.7.tgz':
     dependencies:
@@ -10179,6 +10204,16 @@ packages:
       integrity: sha512-sx8lAS5c78Lx8wrdTR1RQCDIONYwAKvAiGsO9YvFIe+w9oJUDjzIZ22i1LqRKxoRgzkJ6PyPiR5j0tMQhCOQUA==
       tarball: 'file:projects/rush-stack-compiler-2.7.tgz'
     version: 0.0.0
+  'file:projects/rush-stack-compiler-2.9-library-test.tgz':
+    dependencies:
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-2.9-library-test'
+    resolution:
+      integrity: sha512-Q3jeug6sgCuiPIwoblQmJQINgKt7IPuRKdmrhVwLbj2FmKu0d2XMNcJQtumhFipVKg40ntZeg70jFr6HMg2s8g==
+      tarball: 'file:projects/rush-stack-compiler-2.9-library-test.tgz'
+    version: 0.0.0
   'file:projects/rush-stack-compiler-2.9.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.6
@@ -10194,6 +10229,16 @@ packages:
       integrity: sha512-lWdQbzSY8W3Kv7wwbgZU85bKHbGfWpVT1WalKUU25sNsZ8H/TgSjHZ8BOwCoamxLy/LxgRQKktdSw/juL0B6lw==
       tarball: 'file:projects/rush-stack-compiler-2.9.tgz'
     version: 0.0.0
+  'file:projects/rush-stack-compiler-3.0-library-test.tgz':
+    dependencies:
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-3.0-library-test'
+    resolution:
+      integrity: sha512-QVVN1m4KJZvIxX+m1f3w3OebSANUN4iqiqmZMVFYtgK0NlhaBBv4O/kO4Jx8cu+GU/mmBlfw9gaiQ7Mf/CD5mQ==
+      tarball: 'file:projects/rush-stack-compiler-3.0-library-test.tgz'
+    version: 0.0.0
   'file:projects/rush-stack-compiler-3.0.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.6
@@ -10208,6 +10253,16 @@ packages:
     resolution:
       integrity: sha512-7TmC3Fu/nxhAJne0hyiHLjvtxmfYmqqV5Ze/5/EumSwNF/kR0RfIkkM3jN6FwI0z6/E4Gzd26w9Q/auVeY4XVg==
       tarball: 'file:projects/rush-stack-compiler-3.0.tgz'
+    version: 0.0.0
+  'file:projects/rush-stack-compiler-3.1-library-test.tgz':
+    dependencies:
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-3.1-library-test'
+    resolution:
+      integrity: sha512-HvcBl8A2md8wHhj2O7aRoGktOpZbjsUZnh3PSnoGID9QOg0SLKYOANrD8wrE13bwq+BKM+Anq4a8iwPQlsxcjg==
+      tarball: 'file:projects/rush-stack-compiler-3.1-library-test.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-3.1.tgz':
     dependencies:
@@ -10391,10 +10446,15 @@ specifiers:
   '@rush-temp/rush-stack': 'file:./projects/rush-stack.tgz'
   '@rush-temp/rush-stack-compiler': 'file:./projects/rush-stack-compiler.tgz'
   '@rush-temp/rush-stack-compiler-2.4': 'file:./projects/rush-stack-compiler-2.4.tgz'
+  '@rush-temp/rush-stack-compiler-2.4-library-test': 'file:./projects/rush-stack-compiler-2.4-library-test.tgz'
   '@rush-temp/rush-stack-compiler-2.7': 'file:./projects/rush-stack-compiler-2.7.tgz'
+  '@rush-temp/rush-stack-compiler-2.7-library-test': 'file:./projects/rush-stack-compiler-2.7-library-test.tgz'
   '@rush-temp/rush-stack-compiler-2.9': 'file:./projects/rush-stack-compiler-2.9.tgz'
+  '@rush-temp/rush-stack-compiler-2.9-library-test': 'file:./projects/rush-stack-compiler-2.9-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.0': 'file:./projects/rush-stack-compiler-3.0.tgz'
+  '@rush-temp/rush-stack-compiler-3.0-library-test': 'file:./projects/rush-stack-compiler-3.0-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.1': 'file:./projects/rush-stack-compiler-3.1.tgz'
+  '@rush-temp/rush-stack-compiler-3.1-library-test': 'file:./projects/rush-stack-compiler-3.1-library-test.tgz'
   '@rush-temp/rush-stack-library-test': 'file:./projects/rush-stack-library-test.tgz'
   '@rush-temp/rushell': 'file:./projects/rushell.tgz'
   '@rush-temp/set-webpack-public-path-plugin': 'file:./projects/set-webpack-public-path-plugin.tgz'
