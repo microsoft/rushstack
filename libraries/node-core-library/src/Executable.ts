@@ -197,35 +197,34 @@ export class Executable {
           // okay to execute directly
           break;
         case '.BAT':
-        case '.CMD':
-          {
-            Executable._validateArgsForWindowsShell(args);
+        case '.CMD': {
+          Executable._validateArgsForWindowsShell(args);
 
-            // These file types must be invoked via the Windows shell
-            let shellPath: string | undefined = environment.COMSPEC;
-            if (!shellPath || !Executable._canExecute(shellPath, context)) {
-              shellPath = Executable.tryResolve('cmd.exe');
-            }
-            if (!shellPath) {
-              throw new Error(`Unable to execute "${path.basename(resolvedPath)}" `
-                + `because CMD.exe was not found in the PATH`);
-            }
-
-            const shellArgs: string[] = [];
-            // /D: Disable execution of AutoRun commands when starting the new shell context
-            shellArgs.push('/d');
-            // /S: Disable Cmd.exe's parsing of double-quote characters inside the command-line
-            shellArgs.push('/s');
-            // /C: Execute the following command and then exit immediately
-            shellArgs.push('/c');
-
-            // If the path contains special charactrers (e.g. spaces), escape them so that
-            // they don't get interpreted by the shell
-            shellArgs.push(Executable._getEscapedForWindowsShell(resolvedPath));
-            shellArgs.push(...args);
-
-            return child_process.spawnSync(shellPath, shellArgs, spawnOptions);
+          // These file types must be invoked via the Windows shell
+          let shellPath: string | undefined = environment.COMSPEC;
+          if (!shellPath || !Executable._canExecute(shellPath, context)) {
+            shellPath = Executable.tryResolve('cmd.exe');
           }
+          if (!shellPath) {
+            throw new Error(`Unable to execute "${path.basename(resolvedPath)}" `
+              + `because CMD.exe was not found in the PATH`);
+          }
+
+          const shellArgs: string[] = [];
+          // /D: Disable execution of AutoRun commands when starting the new shell context
+          shellArgs.push('/d');
+          // /S: Disable Cmd.exe's parsing of double-quote characters inside the command-line
+          shellArgs.push('/s');
+          // /C: Execute the following command and then exit immediately
+          shellArgs.push('/c');
+
+          // If the path contains special charactrers (e.g. spaces), escape them so that
+          // they don't get interpreted by the shell
+          shellArgs.push(Executable._getEscapedForWindowsShell(resolvedPath));
+          shellArgs.push(...args);
+
+          return child_process.spawnSync(shellPath, shellArgs, spawnOptions);
+        }
         default:
           throw new Error(`Cannot execute "${path.basename(resolvedPath)}" because the file type is not supported`);
       }
