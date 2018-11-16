@@ -198,6 +198,10 @@ export declare class ReexportedClass {
     getValue(): string;
 }
 
+/** @public */
+export declare class ReferenceLibDirective extends Intl.PluralRules {
+}
+
 /**
  * This class has links such as {@link TypeReferencesInAedoc}.
  * @public
