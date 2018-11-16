@@ -139,8 +139,6 @@ export declare class ForgottenExportConsumer3 {
     test2(): IForgottenDirectDependency | undefined;
 }
 
-export declare const fullyExportedCustomSymbol: unique symbol;
-
 /**
  * This class is directly consumed by ForgottenExportConsumer3.
  */
@@ -215,8 +213,6 @@ export declare interface IMergedInterfaceReferencee {
 export declare interface ISimpleInterface {
 }
 
-declare const locallyExportedCustomSymbol: unique symbol;
-
 /**
  * This class gets aliased twice before being exported from the package.
  * @public
@@ -249,9 +245,13 @@ export declare class TypeReferencesInAedoc {
     getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
 }
 
-declare const unexportedCustomSymbol: unique symbol;
-
 export declare const VARIABLE: string;
+
+export declare const fullyExportedCustomSymbol: unique symbol;
+
+declare const locallyExportedCustomSymbol: unique symbol;
+
+declare const unexportedCustomSymbol: unique symbol;
 
 /**
  * Example decorator
