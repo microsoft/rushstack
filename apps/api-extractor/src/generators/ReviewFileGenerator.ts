@@ -133,7 +133,7 @@ export class ReviewFileGenerator {
               childAstDeclaration.astSymbol.localName);
           }
 
-          const aedocSynopsis: string = ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration);
+          const aedocSynopsis: string = ReviewFileGenerator._getAedocSynopsis(collector, childAstDeclaration);
           const indentedAedocSynopsis: string = ReviewFileGenerator._addIndentAfterNewlines(aedocSynopsis,
             child.getIndent());
 
@@ -158,19 +158,21 @@ export class ReviewFileGenerator {
 
     const footerParts: string[] = [];
 
-    switch (symbolMetadata.releaseTag) {
-      case ReleaseTag.Internal:
-        footerParts.push('@internal');
-        break;
-      case ReleaseTag.Alpha:
-        footerParts.push('@alpha');
-        break;
-      case ReleaseTag.Beta:
-        footerParts.push('@beta');
-        break;
-      case ReleaseTag.Public:
-        footerParts.push('@public');
-        break;
+    if (!symbolMetadata.releaseTagSameAsParent) {
+      switch (symbolMetadata.releaseTag) {
+        case ReleaseTag.Internal:
+          footerParts.push('@internal');
+          break;
+        case ReleaseTag.Alpha:
+          footerParts.push('@alpha');
+          break;
+        case ReleaseTag.Beta:
+          footerParts.push('@beta');
+          break;
+        case ReleaseTag.Public:
+          footerParts.push('@public');
+          break;
+      }
     }
 
     if (declarationMetadata.isSealed) {

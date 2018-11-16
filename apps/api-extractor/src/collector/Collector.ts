@@ -332,6 +332,10 @@ export class Collector {
       this._calculateMetadataForDeclaration(astDeclaration);
     }
 
+    // We know we solved parentAstSymbol.metadata above
+    const parentSymbolMetadata: SymbolMetadata | undefined = astSymbol.parentAstSymbol
+      ? astSymbol.parentAstSymbol.metadata as SymbolMetadata : undefined;
+
     const symbolMetadata: SymbolMetadata = new SymbolMetadata();
 
     // Do any of the declarations have a release tag?
@@ -357,10 +361,7 @@ export class Collector {
 
     // If this declaration doesn't have a release tag, then inherit it from the parent
     if (effectiveReleaseTag === ReleaseTag.None && astSymbol.parentAstSymbol) {
-      if (astSymbol.parentAstSymbol) {
-        // We know we solved this above
-        const parentSymbolMetadata: SymbolMetadata = astSymbol.parentAstSymbol.metadata as SymbolMetadata;
-
+      if (parentSymbolMetadata) {
         effectiveReleaseTag = parentSymbolMetadata.releaseTag;
       }
     }
@@ -381,6 +382,10 @@ export class Collector {
     }
 
     symbolMetadata.releaseTag = effectiveReleaseTag;
+    symbolMetadata.releaseTagSameAsParent = false;
+    if (parentSymbolMetadata) {
+      symbolMetadata.releaseTagSameAsParent = symbolMetadata.releaseTag === parentSymbolMetadata.releaseTag;
+    }
 
     // Update this last when we're sure no exceptions were thrown
     astSymbol.metadata = symbolMetadata;
@@ -432,6 +437,8 @@ export class Collector {
         }
       }
 
+      declarationMetadata.declaredReleaseTag = declaredReleaseTag;
+
       declarationMetadata.isEventProperty = modifierTagSet.isEventProperty();
       declarationMetadata.isOverride = modifierTagSet.isOverride();
       declarationMetadata.isSealed = modifierTagSet.isSealed();
@@ -440,8 +447,6 @@ export class Collector {
       // Require the summary to contain at least 10 non-spacing characters
       declarationMetadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
         parserContext.docComment.summarySection, 10);
-
-      declarationMetadata.declaredReleaseTag = declaredReleaseTag;
     }
   }
 
