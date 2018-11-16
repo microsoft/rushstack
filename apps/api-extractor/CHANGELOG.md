@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 16 Nov 2018 00:59:00 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+
+## 6.1.6
+Fri, 16 Nov 2018 21:37:10 GMT
+
+### Patches
+
+- Add support for emitting `/// <reference lib="___" />` directives in .d.ts rollups (GitHub issue #946)
 
 ## 6.1.5
 Fri, 16 Nov 2018 00:59:00 GMT

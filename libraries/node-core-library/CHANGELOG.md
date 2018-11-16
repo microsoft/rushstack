@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Wed, 07 Nov 2018 21:04:35 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+
+## 3.6.0
+Fri, 16 Nov 2018 21:37:10 GMT
+
+### Minor changes
+
+- Add new APIs Sort.sortSet() and Sort.sortSetBy()
 
 ## 3.5.2
 Wed, 07 Nov 2018 21:04:35 GMT

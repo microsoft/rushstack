@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.1.6",
+      "tag": "@microsoft/api-extractor_v6.1.6",
+      "date": "Fri, 16 Nov 2018 21:37:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for emitting `/// <reference lib=\"___\" />` directives in .d.ts rollups (GitHub issue #946)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.2` to `3.6.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.1.5",
       "tag": "@microsoft/api-extractor_v6.1.5",
       "date": "Fri, 16 Nov 2018 00:59:00 GMT",
