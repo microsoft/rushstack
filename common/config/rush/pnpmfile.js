@@ -28,18 +28,11 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-
-  // // The karma types have a missing dependency on typings from the log4js package.
-  // if (packageJson.name === '@types/karma') {
-  //  context.log('Fixed up dependencies for @types/karma');
-  //  packageJson.dependencies['log4js'] = '0.6.38';
-  // }
-
   // tslint-microsoft-contrib, tslint, and ts-jest have peerDependencies on typescript, but now we have two copies
   // in the repo so it doesn't know which one to pick
   // See this issue: https://github.com/pnpm/pnpm/issues/1187
   if (packageJson.name === 'tslint-microsoft-contrib' || packageJson.name === 'tslint' || packageJson.name === 'ts-jest') {
-    packageJson.dependencies['typescript'] = '~2.4.1';
+    packageJson.dependencies['typescript'] = '~3.0.0';
     delete packageJson.peerDependencies['typescript'];
   }
 
