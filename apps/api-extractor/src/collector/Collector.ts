@@ -159,7 +159,8 @@ export class Collector {
       const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(this.package.entryPointSourceFile.text,
         packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
 
-      this.package.tsdocComment = this._tsdocParser.parseRange(range).docComment;
+      this.package.tsdocParserContext = this._tsdocParser.parseRange(range);
+      this.package.tsdocComment = this.package.tsdocParserContext!.docComment;
     }
 
     const exportedAstSymbols: AstSymbol[] = [];
@@ -377,6 +378,7 @@ export class Collector {
 
     const parserContext: tsdoc.ParserContext | undefined = this._parseTsdocForAstDeclaration(astDeclaration);
     if (parserContext) {
+      declarationMetadata.tsdocParserContext = parserContext;
       declarationMetadata.tsdocComment = parserContext.docComment;
 
       const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;

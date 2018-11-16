@@ -35,6 +35,7 @@ export class CollectorPackage {
   public readonly entryPointSourceFile: ts.SourceFile;
 
   public tsdocComment: tsdoc.DocComment | undefined;
+  public tsdocParserContext: tsdoc.ParserContext | undefined;
 
   public constructor(options: ICollectorPackageOptions) {
     this.packageFolder = options.packageFolder;

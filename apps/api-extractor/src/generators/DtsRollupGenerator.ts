@@ -15,6 +15,7 @@ import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
+import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -64,8 +65,8 @@ export class DtsRollupGenerator {
     indentedWriter.spacing = '';
     indentedWriter.clear();
 
-    if (collector.package.tsdocComment) {
-      indentedWriter.writeLine(collector.package.tsdocComment.emitAsTsdoc());
+    if (collector.package.tsdocParserContext) {
+      indentedWriter.writeLine(collector.package.tsdocParserContext.sourceRange.toString());
       indentedWriter.writeLine();
     }
 
@@ -197,6 +198,18 @@ export class DtsRollupGenerator {
 
           if (entity.exported) {
             span.modification.prefix = 'export ' + span.modification.prefix;
+          }
+
+          const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+          if (declarationMetadata.tsdocParserContext) {
+            // Typically the comment for a variable declaration is attached to the outer variable statement
+            // (which may possibly contain multiple variable declarations), so it's not part of the Span.
+            // Instead we need to manually inject it.
+            let originalComment: string = declarationMetadata.tsdocParserContext.sourceRange.toString();
+            if (!/[\r\n]\s*$/.test(originalComment)) {
+              originalComment += '\n';
+            }
+            span.modification.prefix = originalComment + span.modification.prefix;
           }
 
           span.modification.suffix = ';';

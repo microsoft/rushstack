@@ -6,6 +6,7 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
 
 export class DeclarationMetadata {
   public tsdocComment: tsdoc.DocComment | undefined = undefined;
+  public tsdocParserContext: tsdoc.ParserContext | undefined;
 
   /**
    * This is the release tag that was explicitly specified in the original doc comment, if any.
