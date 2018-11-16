@@ -16,6 +16,6 @@
     "@types/jest": "21.1.10",
     "@types/node": "8.5.8",
     "fs-extra": "~7.0.1",
-    "typescript": "~3.0.3"
+    "typescript": "~3.1.6"
   }
 }
