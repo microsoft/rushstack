@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.1.5",
+      "tag": "@microsoft/api-extractor_v6.1.5",
+      "date": "Fri, 16 Nov 2018 00:59:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where .d.ts trimming did not work for exported variable declarations (GitHub #936)"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.1.4",
       "tag": "@microsoft/api-extractor_v6.1.4",
       "date": "Fri, 09 Nov 2018 23:07:39 GMT",

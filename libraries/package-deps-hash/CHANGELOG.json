@@ -2,6 +2,21 @@
   "name": "@microsoft/package-deps-hash",
   "entries": [
     {
+      "version": "2.2.102",
+      "tag": "@microsoft/package-deps-hash_v2.2.102",
+      "date": "Fri, 16 Nov 2018 00:59:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.2` to `0.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.10` to `6.0.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.101",
       "tag": "@microsoft/package-deps-hash_v2.2.101",
       "date": "Fri, 09 Nov 2018 23:07:39 GMT",

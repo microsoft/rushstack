@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 09 Nov 2018 23:07:39 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Nov 2018 00:59:00 GMT and should not be manually modified.
+
+## 6.1.5
+Fri, 16 Nov 2018 00:59:00 GMT
+
+### Patches
+
+- Fix an issue where .d.ts trimming did not work for exported variable declarations (GitHub #936)
 
 ## 6.1.4
 Fri, 09 Nov 2018 23:07:39 GMT
