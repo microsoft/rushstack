@@ -13,6 +13,7 @@ import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
+import { Text } from '@microsoft/node-core-library';
 
 export class ReviewFileGenerator {
   /**
@@ -34,15 +35,14 @@ export class ReviewFileGenerator {
 
     for (const entity of collector.entities) {
       if (entity.exported) {
-
         // Emit all the declarations for this entry
         for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
 
-          ReviewFileGenerator._writeAedocSynopsis(output, collector, astDeclaration);
+          output.append(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
 
           const span: Span = new Span(astDeclaration.declaration);
           ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration);
-          output.append(span.getModifiedText());
+          span.writeModifiedText(output);
           output.append('\n\n');
         }
       }
@@ -63,6 +63,8 @@ export class ReviewFileGenerator {
     astDeclaration: AstDeclaration): void {
 
     let recurseChildren: boolean = true;
+    let sortChildren: boolean = false;
+
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
         span.modification.skipAll();
@@ -73,6 +75,19 @@ export class ReviewFileGenerator {
       case ts.SyntaxKind.ExportKeyword:
       case ts.SyntaxKind.DefaultKeyword:
         span.modification.skipAll();
+        break;
+
+      case ts.SyntaxKind.SyntaxList:
+        if (span.parent) {
+          if (SymbolAnalyzer.isAstDeclaration(span.parent.kind)) {
+            // If the immediate parent is an API declaration, and the immediate children are API declarations,
+            // then sort the children alphabetically
+            sortChildren = true;
+          } else if (span.parent.kind === ts.SyntaxKind.ModuleBlock) {
+            // Namespaces are special because their chain goes ModuleDeclaration -> ModuleBlock -> SyntaxList
+            sortChildren = true;
+          }
+        }
         break;
 
       case ts.SyntaxKind.Identifier:
@@ -111,6 +126,18 @@ export class ReviewFileGenerator {
 
         if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
           childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
+
+          if (sortChildren) {
+            span.modification.sortChildren = true;
+            child.modification.sortKey = Collector.getSortKeyIgnoringUnderscore(
+              childAstDeclaration.astSymbol.localName);
+          }
+
+          const aedocSynopsis: string = ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration);
+          const indentedAedocSynopsis: string = ReviewFileGenerator._addIndentAfterNewlines(aedocSynopsis,
+            child.getIndent());
+
+          child.modification.prefix = indentedAedocSynopsis + child.modification.prefix;
         }
 
         ReviewFileGenerator._modifySpan(collector, child, entity, childAstDeclaration);
@@ -123,8 +150,8 @@ export class ReviewFileGenerator {
    * whether the item has been documented, and any warnings that were detected
    * by the analysis.
    */
-  private static _writeAedocSynopsis(output: StringBuilder, collector: Collector,
-    astDeclaration: AstDeclaration): void {
+  private static _getAedocSynopsis(collector: Collector, astDeclaration: AstDeclaration): string {
+    const output: StringBuilder = new StringBuilder();
 
     const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
     const symbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
@@ -175,12 +202,21 @@ export class ReviewFileGenerator {
     if (footerParts.length > 0) {
       ReviewFileGenerator._writeLineAsComment(output, footerParts.join(' '));
     }
+
+    return output.toString();
   }
 
   private static _writeLineAsComment(output: StringBuilder, line: string): void {
     output.append('// ');
     output.append(line);
     output.append('\n');
+  }
+
+  private static _addIndentAfterNewlines(text: string, indent: string): string {
+    if (text.length === 0 || indent.length === 0) {
+      return text;
+    }
+    return Text.replaceAll(text, '\n', '\n' + indent);
   }
 
 }

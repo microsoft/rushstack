@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AstSymbol } from '../analyzer/AstSymbol';
+import { Collector } from './Collector';
 
 /**
  * Constructor options for CollectorEntity
@@ -64,14 +65,7 @@ export class CollectorEntity {
   public getSortKey(): string {
     if (!this._sortKey) {
       const name: string = this.nameForEmit || this.originalName;
-      if (name.substr(0, 1) === '_') {
-        // Removes the leading underscore, for example: "_example" --> "example*"
-        // This causes internal definitions to sort alphabetically with regular definitions.
-        // The star is appended to preserve uniqueness, since "*" is not a legal  identifier character.
-        this._sortKey = name.substr(1) + '*';
-      } else {
-        this._sortKey = name;
-      }
+      this._sortKey = Collector.getSortKeyIgnoringUnderscore(name);
     }
     return this._sortKey;
   }

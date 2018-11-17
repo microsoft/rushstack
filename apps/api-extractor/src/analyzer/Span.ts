@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import { StringBuilder } from '@microsoft/tsdoc';
+import { Sort } from '@microsoft/node-core-library';
 
 /**
  * Specifies various transformations that will be performed by Span.getModifiedText().
@@ -18,6 +20,18 @@ export class SpanModification {
    * If true, then the Span.separator will be removed from the Span.getModifiedText() output.
    */
   public omitSeparatorAfter: boolean;
+
+  /**
+   * If true, then Span.getModifiedText() will sort the immediate children according to their Span.sortKey
+   * property.  If the Span.sortKey is undefined then those nodes will be emitted last, preserving their relative order.
+   * The separators will also be fixed up to ensure correct indentation.
+   */
+  public sortChildren: boolean;
+
+  /**
+   * Used if the parent span has Span.sortChildren=true.
+   */
+  public sortKey: string | undefined;
 
   private readonly span: Span;
   private _prefix: string | undefined;
@@ -56,6 +70,8 @@ export class SpanModification {
   public reset(): void {
     this.omitChildren = false;
     this.omitSeparatorAfter = false;
+    this.sortChildren = false;
+    this.sortKey = undefined;
     this._prefix = undefined;
     this._suffix = undefined;
   }
@@ -254,6 +270,25 @@ export class Span {
   }
 
   /**
+   * Starting from the first character of this span, walk backwards until we find the start of the line,
+   * and return that whitespace.
+   */
+  public getIndent(): string {
+    const buffer: string = this.node.getSourceFile().text;
+    let lineStartIndex: number = this.startIndex;
+
+    while (lineStartIndex > 0) {
+      const c: number = buffer.charCodeAt(lineStartIndex - 1);
+      if (c !== 32 /* space */ && c !== 9 /* tab */) {
+        break;
+      }
+      --lineStartIndex;
+    }
+
+    return buffer.substring(lineStartIndex, this.startIndex);
+  }
+
+  /**
    * Recursively invokes the callback on this Span and all its children.  The callback
    * can make changes to Span.modification for each node.
    */
@@ -285,21 +320,21 @@ export class Span {
    * Returns the text represented by this Span, after applying all requested modifications.
    */
   public getModifiedText(): string {
-    let result: string = '';
-    result += this.modification.prefix;
+    const output: StringBuilder = new StringBuilder();
 
-    if (!this.modification.omitChildren) {
-      for (const child of this.children) {
-        result += child.getModifiedText();
-      }
-    }
+    this._writeModifiedText({
+      output,
+      separatorOverride: undefined
+    });
 
-    result += this.modification.suffix;
-    if (!this.modification.omitSeparatorAfter) {
-      result += this.separator;
-    }
+    return output.toString();
+  }
 
-    return result;
+  public writeModifiedText(output: StringBuilder): void {
+    this._writeModifiedText({
+      output,
+      separatorOverride: undefined
+    });
   }
 
   /**
@@ -327,6 +362,70 @@ export class Span {
     return result;
   }
 
+  private _writeModifiedText(options: IWriteModifiedTextOptions): void {
+    options.output.append(this.modification.prefix);
+
+    const childCount: number = this.children.length;
+
+    if (!this.modification.omitChildren) {
+      const lastChildIndex: number = childCount - 1;
+
+      if (this.modification.sortChildren && childCount > 1) {
+        // Special case where we sort the child spans and apply separatorOverride
+        const sortedChildren: Span[] = [...this.children];
+        Sort.sortBy(sortedChildren, x => x.modification.sortKey);
+
+        const firstSeparator: string = this.children[0].getLastInnerSeparator();
+        const lastSeparator: string = this.children[lastChildIndex].getLastInnerSeparator();
+
+        const childOptions: IWriteModifiedTextOptions = { ...options };
+        for (let i: number = 0; i < childCount; ++i) {
+          const sortedChild: Span = sortedChildren[i];
+
+          childOptions.separatorOverride = i < lastChildIndex ? firstSeparator : lastSeparator;
+
+          sortedChild._writeModifiedText(childOptions);
+        }
+      } else if (options.separatorOverride) {
+        // Special case where the separatorOverride is passed down to the "last inner separator" span
+        for (let i: number = 0; i < childCount; ++i) {
+          const child: Span = this.children[i];
+
+          if (
+            // Only the last child inherits the separatorOverride, because only it can contain
+            // the "last inner separator" span
+            i < lastChildIndex
+            // If this.separator is specified, then we will write separatorOverride below, so don't pass it along
+            || this.separator
+          ) {
+            const childOptions: IWriteModifiedTextOptions = { ...options };
+            childOptions.separatorOverride = undefined;
+            child._writeModifiedText(childOptions);
+          } else {
+            child._writeModifiedText(options);
+          }
+        }
+      } else {
+        // The normal simple case
+        for (const child of this.children) {
+          child._writeModifiedText(options);
+        }
+      }
+    }
+
+    options.output.append(this.modification.suffix);
+
+    if (options.separatorOverride) {
+      if (this.separator || childCount === 0) {
+        options.output.append(options.separatorOverride);
+      }
+    } else {
+      if (!this.modification.omitSeparatorAfter) {
+        options.output.append(this.separator);
+      }
+    }
+  }
+
   private _getTrimmed(text: string): string {
     const trimmed: string = text.replace(/[\r\n]/g, '\\n');
 
@@ -342,4 +441,9 @@ export class Span {
     }
     return this.node.getSourceFile().text.substring(startIndex, endIndex);
   }
+}
+
+interface IWriteModifiedTextOptions {
+  output: StringBuilder;
+  separatorOverride: string | undefined;
 }

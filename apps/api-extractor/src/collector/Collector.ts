@@ -206,6 +206,20 @@ export class Collector {
     return symbolOrDeclaration.metadata as SymbolMetadata | DeclarationMetadata;
   }
 
+  /**
+   * Removes the leading underscore, for example: "_example" --> "example*"
+   *
+   * @remarks
+   * This causes internal definitions to sort alphabetically with regular definitions.
+   * The star is appended to preserve uniqueness, since "*" is not a legal  identifier character.
+   */
+  public static getSortKeyIgnoringUnderscore(identifier: string): string {
+    if (identifier[0] === '_') {
+      return identifier.substr(1) + '*';
+    }
+    return identifier;
+  }
+
   private _createEntityForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
     let entity: CollectorEntity | undefined = this._entitiesByAstSymbol.get(astSymbol);
 
