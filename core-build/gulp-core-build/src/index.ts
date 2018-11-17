@@ -463,8 +463,10 @@ function _handleTasksListArguments(): void {
 /** @public */
 export const clean: IExecutable = new CleanTask();
 
+/** @public */
 export const copyStaticAssets: CopyStaticAssetsTask = new CopyStaticAssetsTask();
 
+/** @public */
 export const jest: JestTask = new JestTask();
 
 // Register default clean task.
