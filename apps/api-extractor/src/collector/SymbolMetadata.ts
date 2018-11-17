@@ -7,5 +7,5 @@ export class SymbolMetadata {
   public releaseTag: ReleaseTag = ReleaseTag.None;
 
   // If true, then it would be redundant to show this release tag
-  public releaseTagSameAsParent: boolean;
+  public releaseTagSameAsParent: boolean = false;
 }

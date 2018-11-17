@@ -404,9 +404,6 @@ export class Collector {
 
     const parserContext: tsdoc.ParserContext | undefined = this._parseTsdocForAstDeclaration(astDeclaration);
     if (parserContext) {
-      declarationMetadata.tsdocParserContext = parserContext;
-      declarationMetadata.tsdocComment = parserContext.docComment;
-
       const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;
 
       let declaredReleaseTag: ReleaseTag = ReleaseTag.None;
@@ -443,6 +440,9 @@ export class Collector {
           this.reportError('Inconsistent release tags in doc comment', undefined, undefined);
         }
       }
+
+      declarationMetadata.tsdocParserContext = parserContext;
+      declarationMetadata.tsdocComment = parserContext.docComment;
 
       declarationMetadata.declaredReleaseTag = declaredReleaseTag;
 

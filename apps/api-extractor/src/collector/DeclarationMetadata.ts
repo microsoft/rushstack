@@ -6,7 +6,7 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
 
 export class DeclarationMetadata {
   public tsdocComment: tsdoc.DocComment | undefined = undefined;
-  public tsdocParserContext: tsdoc.ParserContext | undefined;
+  public tsdocParserContext: tsdoc.ParserContext | undefined = undefined;
 
   /**
    * This is the release tag that was explicitly specified in the original doc comment, if any.
@@ -17,10 +17,10 @@ export class DeclarationMetadata {
 
   // NOTE: In the future, the Collector may infer or error-correct some of these states.
   // Generators should rely on these instead of tsdocComment.modifierTagSet.
-  public isEventProperty: boolean;
-  public isOverride: boolean;
-  public isSealed: boolean;
-  public isVirtual: boolean;
+  public isEventProperty: boolean = false;
+  public isOverride: boolean = false;
+  public isSealed: boolean = false;
+  public isVirtual: boolean = false;
 
-  public needsDocumentation: boolean;
+  public needsDocumentation: boolean = true;
 }
