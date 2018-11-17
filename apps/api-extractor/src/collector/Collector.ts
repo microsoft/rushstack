@@ -207,17 +207,24 @@ export class Collector {
   }
 
   /**
-   * Removes the leading underscore, for example: "_example" --> "example*"
+   * Removes the leading underscore, for example: "_Example" --> "example*Example*_"
    *
    * @remarks
-   * This causes internal definitions to sort alphabetically with regular definitions.
-   * The star is appended to preserve uniqueness, since "*" is not a legal  identifier character.
+   * This causes internal definitions to sort alphabetically case-insensitive, then case-sensitive, and
+   * initially ignoring the underscore prefix, while still deterministically comparing it.
+   * The star is used as a delimiter because it is not a legal  identifier character.
    */
   public static getSortKeyIgnoringUnderscore(identifier: string): string {
+    let parts: string[];
+
     if (identifier[0] === '_') {
-      return identifier.substr(1) + '*';
+      const withoutUnderscore: string = identifier.substr(1);
+      parts = [withoutUnderscore.toLowerCase(), '*', withoutUnderscore, '*', '_'];
+    } else {
+      parts = [identifier.toLowerCase(), '*', identifier];
     }
-    return identifier;
+
+    return parts.join('');
   }
 
   private _createEntityForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
