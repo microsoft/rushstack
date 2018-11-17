@@ -379,8 +379,14 @@ export class Collector {
           // For now, don't report errors for forgotten exports
           const entity: CollectorEntity | undefined = this._entitiesByAstSymbol.get(astSymbol.rootAstSymbol);
           if (entity && entity.exported) {
-            // TODO: Report error message
-            this.reportError('Missing release tag', undefined, undefined);
+            // We also don't report errors for the default export of an entry point, since its doc comment
+            // isn't easy to obtain from the .d.ts file
+            if (astSymbol.rootAstSymbol.localName !== '_default') {
+              // TODO: Report error message
+              const loc: string = astSymbol.rootAstSymbol.localName + ' in '
+                + astSymbol.rootAstSymbol.astDeclarations[0].declaration.getSourceFile().fileName;
+              this.reportError('Missing release tag for ' + loc, undefined, undefined);
+            }
           }
         }
       }
