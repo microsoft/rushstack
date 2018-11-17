@@ -90,6 +90,28 @@ export class ReviewFileGenerator {
         }
         break;
 
+        case ts.SyntaxKind.VariableDeclaration:
+        if (!span.parent) {
+          // The VariableDeclaration node is part of a VariableDeclarationList, however
+          // the Entry.followedSymbol points to the VariableDeclaration part because
+          // multiple definitions might share the same VariableDeclarationList.
+          //
+          // Since we are emitting a separate declaration for each one, we need to look upwards
+          // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
+          // content (e.g. "var" from "var x=1, y=2").
+          const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node,
+            [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
+          if (!list) {
+            throw new Error('Unsupported variable declaration');
+          }
+          const listPrefix: string = list.getSourceFile().text
+            .substring(list.getStart(), list.declarations[0].getStart());
+          span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
+
+          span.modification.suffix = ';';
+        }
+        break;
+
       case ts.SyntaxKind.Identifier:
         let nameFixup: boolean = false;
         const identifierSymbol: ts.Symbol | undefined = collector.typeChecker.getSymbolAtLocation(span.node);
