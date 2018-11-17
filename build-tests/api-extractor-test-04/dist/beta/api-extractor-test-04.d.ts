@@ -121,4 +121,8 @@ export declare enum RegularEnum {
     /* Excluded from this release type: _InternalMember */
 }
 
+/**
+ * This is a module-scoped variable.
+ * @beta
+ */
 export declare const variableDeclaration: string;

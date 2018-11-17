@@ -131,6 +131,7 @@ export declare class ForgottenExportConsumer2 {
 
 /* Excluded from this release type: ForgottenExportConsumer3 */
 
+/** @public */
 export declare const fullyExportedCustomSymbol: unique symbol;
 
 /**

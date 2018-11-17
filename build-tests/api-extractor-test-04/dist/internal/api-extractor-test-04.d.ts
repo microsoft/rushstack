@@ -224,4 +224,8 @@ export declare enum RegularEnum {
     _InternalMember = 102
 }
 
+/**
+ * This is a module-scoped variable.
+ * @beta
+ */
 export declare const variableDeclaration: string;

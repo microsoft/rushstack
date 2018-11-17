@@ -138,6 +138,7 @@ export declare class ForgottenExportConsumer3 {
     test2(): IForgottenDirectDependency | undefined;
 }
 
+/** @public */
 export declare const fullyExportedCustomSymbol: unique symbol;
 
 /**
