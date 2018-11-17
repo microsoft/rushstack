@@ -225,7 +225,15 @@ export class YamlDocumenter {
 
       tocItems.push(tocItem);
 
-      const childItems: IYamlTocItem[] = this._buildTocItems(apiItem.members);
+      let children: ReadonlyArray<ApiItem>;
+      if (apiItem.kind === ApiItemKind.Package) {
+        // Skip over the entry point, since it's not part of the documentation hierarchy
+        children = apiItem.members[0].members;
+      } else {
+        children = apiItem.members;
+      }
+
+      const childItems: IYamlTocItem[] = this._buildTocItems(children);
       if (childItems.length > 0) {
         tocItem.items = childItems;
       }
