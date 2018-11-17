@@ -23,12 +23,17 @@ export class DocClass1 {
 
   /**
    * This is an overloaded function.
-   * @param x - the number
    * @param a - the first string
    * @param b - the second string
    */
   exampleFunction(a: string, b: string): string;
+
+  /**
+   * This is also an overloaded function.
+   * @param x - the number
+   */
   exampleFunction(x: number): number;
+
   public exampleFunction(x: number | string, y?: string): string | number {
     return x;
   }

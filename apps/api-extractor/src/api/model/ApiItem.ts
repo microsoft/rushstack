@@ -113,12 +113,17 @@ export class ApiItem {
   /**
    * This returns a scoped name such as `"Namespace1.Namespace2.MyClass.myMember()"`.  It does not include the
    * package name or entry point.
+   *
+   * @remarks
+   * If called on an ApiEntrypoint, ApiPackage, or ApiModel item, the result is an empty string.
    */
   public getScopedNameWithinPackage(): string {
     const reversedParts: string[] = [];
 
     for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
-      if (current.kind === ApiItemKind.EntryPoint) {
+      if (current.kind === ApiItemKind.Model
+        || current.kind === ApiItemKind.Package
+        || current.kind === ApiItemKind.EntryPoint) {
         break;
       }
       if (reversedParts.length !== 0) {

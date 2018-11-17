@@ -80,19 +80,21 @@ export class MarkdownDocumenter {
 
     this._writeBreadcrumb(output, apiItem);
 
+    const scopedName: string = apiItem.getScopedNameWithinPackage();
+
     switch (apiItem.kind) {
       case ApiItemKind.Class:
-        output.appendNode(new DocHeading({ configuration, title: `${apiItem.name} class` }));
+        output.appendNode(new DocHeading({ configuration, title: `${scopedName} class` }));
         break;
       case ApiItemKind.Interface:
-        output.appendNode(new DocHeading({ configuration, title: `${apiItem.name} interface` }));
+        output.appendNode(new DocHeading({ configuration, title: `${scopedName} interface` }));
         break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
-        output.appendNode(new DocHeading({ configuration, title: `${apiItem.name} method` }));
+        output.appendNode(new DocHeading({ configuration, title: `${scopedName} method` }));
         break;
       case ApiItemKind.Namespace:
-        output.appendNode(new DocHeading({ configuration, title: `${apiItem.name} namespace` }));
+        output.appendNode(new DocHeading({ configuration, title: `${scopedName} namespace` }));
         break;
       case ApiItemKind.Package:
         const unscopedPackageName: string = PackageName.getUnscopedName(apiItem.name);
@@ -100,7 +102,7 @@ export class MarkdownDocumenter {
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
-        output.appendNode(new DocHeading({ configuration, title: `${apiItem.name} property` }));
+        output.appendNode(new DocHeading({ configuration, title: `${scopedName} property` }));
         break;
       default:
         throw new Error('Unsupported API item kind: ' + apiItem.kind);
@@ -169,9 +171,7 @@ export class MarkdownDocumenter {
     this._markdownEmitter.emit(stringBuilder, output, {
       contextApiItem: apiItem,
       onGetFilenameForApiItem: (apiItemForFilename: ApiItem) => {
-        // NOTE: GitHub's markdown renderer does not resolve relative hyperlinks correctly
-        // unless they start with "./" or "../".
-        return './' + this._getFilenameForApiItem(apiItemForFilename);
+        return this._getLinkFilenameForApiItem(apiItemForFilename);
       }
     });
 
@@ -438,7 +438,11 @@ export class MarkdownDocumenter {
 
       parametersTable.addRow(
         new DocTableRow({ configuration }, [
-          this._createTitleCell(apiParameter),
+          new DocTableCell({configuration}, [
+            new DocParagraph({ configuration }, [
+              new DocPlainText({ configuration, text: apiParameter.name })
+            ])
+          ]),
           new DocTableCell({configuration}, [
             new DocParagraph({ configuration }, [
               new DocCodeSpan({ configuration, code: apiParameter.resultTypeSignature })
@@ -490,7 +494,7 @@ export class MarkdownDocumenter {
           configuration,
           tagName: '@link',
           linkText: Utilities.getConciseSignature(apiItem),
-          urlDestination: this._getFilenameForApiItem(apiItem)
+          urlDestination: this._getLinkFilenameForApiItem(apiItem)
         })
       ])
     ]);
@@ -570,7 +574,7 @@ export class MarkdownDocumenter {
               configuration: this._tsdocConfiguration,
               tagName: '@link',
               linkText: hierarchyItem.name,
-              urlDestination: this._getFilenameForApiItem(apiItem)
+              urlDestination: this._getLinkFilenameForApiItem(hierarchyItem)
             })
           ]);
       }
@@ -614,18 +618,31 @@ export class MarkdownDocumenter {
 
   private _getFilenameForApiItem(apiItem: ApiItem): string {
     let baseName: string = '';
-    for (const part of apiItem.getHierarchy()) {
-      switch (part.kind) {
-        case ApiItemKind.Package:
-          baseName = PackageName.getUnscopedName(part.name);
-          break;
+    for (const hierarchyItem of apiItem.getHierarchy()) {
+      // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
+      let qualifiedName: string = hierarchyItem.name;
+      if (ApiFunctionLikeMixin.isBaseClassOf(hierarchyItem)) {
+        if (hierarchyItem.overloadIndex > 0) {
+          qualifiedName += `_${hierarchyItem.overloadIndex}`;
+        }
+      }
+
+      switch (hierarchyItem.kind) {
+        case ApiItemKind.Model:
         case ApiItemKind.EntryPoint:
           break;
+        case ApiItemKind.Package:
+          baseName = PackageName.getUnscopedName(hierarchyItem.name);
+          break;
         default:
-          baseName += '.' + part.name;
+          baseName += '.' + qualifiedName;
       }
     }
     return baseName.toLowerCase() + '.md';
+  }
+
+  private _getLinkFilenameForApiItem(apiItem: ApiItem): string {
+    return './' + this._getFilenameForApiItem(apiItem);
   }
 
   private _deleteOldOutputFiles(): void {

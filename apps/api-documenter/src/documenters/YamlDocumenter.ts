@@ -494,22 +494,22 @@ export class YamlDocumenter {
    */
   private _getUid(apiItem: ApiItem): string {
     let result: string = '';
-    for (const current of apiItem.getHierarchy()) {
+    for (const hierarchyItem of apiItem.getHierarchy()) {
 
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
-      let qualifiedName: string = current.name;
-      if (ApiFunctionLikeMixin.isBaseClassOf(apiItem)) {
-        if (apiItem.overloadIndex > 0) {
-          qualifiedName += `_${apiItem.overloadIndex}`;
+      let qualifiedName: string = hierarchyItem.name;
+      if (ApiFunctionLikeMixin.isBaseClassOf(hierarchyItem)) {
+        if (hierarchyItem.overloadIndex > 0) {
+          qualifiedName += `_${hierarchyItem.overloadIndex}`;
         }
       }
 
-      switch (current.kind) {
+      switch (hierarchyItem.kind) {
         case ApiItemKind.Model:
         case ApiItemKind.EntryPoint:
           break;
         case ApiItemKind.Package:
-          result += PackageName.getUnscopedName(current.name);
+          result += PackageName.getUnscopedName(hierarchyItem.name);
           break;
         default:
           result += '.';
