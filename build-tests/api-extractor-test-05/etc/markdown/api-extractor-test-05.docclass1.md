@@ -30,6 +30,7 @@ export declare class DocClass1
 |  <p>[exampleFunction(a, b)](./api-extractor-test-05.docclass1.examplefunction.md)</p> |  | <p>This is an overloaded function.</p> |
 |  <p>[exampleFunction(x)](./api-extractor-test-05.docclass1.examplefunction_1.md)</p> |  | <p>This is also an overloaded function.</p> |
 |  <p>[interestingEdgeCases()](./api-extractor-test-05.docclass1.interestingedgecases.md)</p> |  | <p>Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"</p><p>The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/</p> |
+|  <p>[sumWithExample(x, y)](./api-extractor-test-05.docclass1.sumwithexample.md)</p> | <p>`static`</p> | <p>Returns the sum of two numbers.</p> |
 |  <p>[tableExample()](./api-extractor-test-05.docclass1.tableexample.md)</p> |  | <p>An example with tables:</p> |
 
 ## Remarks

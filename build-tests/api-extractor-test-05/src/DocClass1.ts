@@ -75,4 +75,31 @@ export class DocClass1 {
    */
   interestingEdgeCases(): void {
   }
+
+  /**
+   * Returns the sum of two numbers.
+   *
+   * @remarks
+   * This illustrates usage of the `@example` block tag.
+   *
+   * @param x - the first number to add
+   * @param y - the second number to add
+   * @returns the sum of the two numbers
+   *
+   * @example
+   * Here's a simple example:
+   * ```
+   * // Prints "2":
+   * console.log(DocClass1.sumWithExample(1,1));
+   * ```
+   * @example
+   * Here's an example with negative numbers:
+   * ```
+   * // Prints "0":
+   * console.log(DocClass1.sumWithExample(1,-1));
+   * ```
+   */
+  public static sumWithExample(x: number, y: number): number {
+    return x + y;
+  }
 }
