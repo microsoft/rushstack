@@ -19,7 +19,8 @@ import {
   DocCodeSpan,
   DocFencedCode,
   StandardTags,
-  DocBlock
+  DocBlock,
+  DocComment
 } from '@microsoft/tsdoc';
 import {
   ApiModel,
@@ -117,8 +118,27 @@ export class MarkdownDocumenter {
     }
 
     if (apiItem instanceof ApiDocumentedItem) {
-      if (apiItem.tsdocComment) {
-        this._appendSection(output, apiItem.tsdocComment.summarySection);
+      const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
+
+      if (tsdocComment) {
+
+        if (tsdocComment.deprecatedBlock) {
+          output.appendNode(
+            new DocNoteBox({ configuration: this._tsdocConfiguration },
+              [
+                new DocParagraph({ configuration: this._tsdocConfiguration }, [
+                  new DocPlainText({
+                    configuration: this._tsdocConfiguration,
+                    text: 'Warning: This API is now obsolete. '
+                  })
+                ]),
+                ...tsdocComment.deprecatedBlock.content.nodes
+              ]
+            )
+          );
+        }
+
+        this._appendSection(output, tsdocComment.summarySection);
       }
     }
 
@@ -161,15 +181,17 @@ export class MarkdownDocumenter {
     }
 
     if (apiItem instanceof ApiDocumentedItem) {
-      if (apiItem.tsdocComment) {
+      const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
+
+      if (tsdocComment) {
         // Write the @remarks block
-        if (apiItem.tsdocComment.remarksBlock) {
+        if (tsdocComment.remarksBlock) {
           output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Remarks' }));
-          this._appendSection(output, apiItem.tsdocComment.remarksBlock.content);
+          this._appendSection(output, tsdocComment.remarksBlock.content);
         }
 
         // Write the @example blocks
-        const exampleBlocks: DocBlock[] = apiItem.tsdocComment.customBlocks.filter(x => x.blockTag.tagNameWithUpperCase
+        const exampleBlocks: DocBlock[] = tsdocComment.customBlocks.filter(x => x.blockTag.tagNameWithUpperCase
           === StandardTags.example.tagNameWithUpperCase);
 
         let exampleNumber: number = 1;

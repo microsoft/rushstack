@@ -157,6 +157,10 @@ export class IndentedWriter {
    * each line will be indented separately.
    */
   public write(message: string): void {
+    if (message.length === 0) {
+      return;
+    }
+
     // If there are no newline characters, then append the string verbatim
     if (!/[\r\n]/.test(message)) {
       this._writeLinePart(message);
@@ -182,7 +186,9 @@ export class IndentedWriter {
    * Indentation is applied following the semantics of IndentedWriter.write().
    */
   public writeLine(message: string = ''): void {
-    this.write(message);
+    if (message.length > 0) {
+      this.write(message);
+    }
     this._writeNewLine();
   }
 
@@ -200,6 +206,10 @@ export class IndentedWriter {
   }
 
   private _writeNewLine(): void {
+    if (this._atStartOfLine && this._indentText.length > 0) {
+      this._write(this._indentText);
+    }
+
     this._write('\n');
     this._atStartOfLine = true;
   }

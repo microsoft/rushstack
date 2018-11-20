@@ -26,6 +26,12 @@ test('02 Indent something', () => {
   indentedWriter.decreaseIndent();
   indentedWriter.writeLine('e');
 
+  indentedWriter.increaseIndent('>>> ');
+    indentedWriter.writeLine();
+    indentedWriter.writeLine();
+    indentedWriter.writeLine('g');
+  indentedWriter.decreaseIndent();
+
   expect(indentedWriter.toString()).toMatchSnapshot();
 });
 

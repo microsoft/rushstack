@@ -27,6 +27,7 @@ export declare class DocClass1
 
 |  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
 |  --- | --- | --- |
+|  <p>[deprecatedExample()](./api-extractor-test-05.docclass1.deprecatedexample.md)</p> |  |  |
 |  <p>[exampleFunction(a, b)](./api-extractor-test-05.docclass1.examplefunction.md)</p> |  | <p>This is an overloaded function.</p> |
 |  <p>[exampleFunction(x)](./api-extractor-test-05.docclass1.examplefunction_1.md)</p> |  | <p>This is also an overloaded function.</p> |
 |  <p>[interestingEdgeCases()](./api-extractor-test-05.docclass1.interestingedgecases.md)</p> |  | <p>Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"</p><p>The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/</p> |

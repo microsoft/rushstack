@@ -11,6 +11,9 @@ exports[`02 Indent something 1`] = `
 "abc
   d
 e
+>>> 
+>>> 
+>>> g
 "
 `;
 

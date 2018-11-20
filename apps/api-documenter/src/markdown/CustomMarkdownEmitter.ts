@@ -68,10 +68,14 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
       case CustomDocNodeKind.NoteBox: {
         const docNoteBox: DocNoteBox = docNode as DocNoteBox;
         writer.ensureNewLine();
-        writer.write('> ');
-        // TODO: Handle newlines
+
+        writer.increaseIndent('> ');
+
         this.writeNode(docNoteBox.content, context);
         writer.ensureNewLine();
+
+        writer.decreaseIndent();
+
         writer.writeLine();
         break;
       }

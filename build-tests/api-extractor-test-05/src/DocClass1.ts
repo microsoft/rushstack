@@ -77,6 +77,12 @@ export class DocClass1 {
   }
 
   /**
+   * @deprecated Use `otherThing()` instead.
+   */
+  public deprecatedExample(): void {
+  }
+
+  /**
    * Returns the sum of two numbers.
    *
    * @remarks

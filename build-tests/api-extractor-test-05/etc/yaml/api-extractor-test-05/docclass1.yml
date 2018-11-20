@@ -10,6 +10,7 @@ items:
     type: class
     package: api-extractor-test-05
     children:
+      - api-extractor-test-05.DocClass1.deprecatedExample
       - api-extractor-test-05.DocClass1.exampleFunction
       - api-extractor-test-05.DocClass1.exampleFunction_1
       - api-extractor-test-05.DocClass1.interestingEdgeCases
@@ -18,6 +19,20 @@ items:
       - api-extractor-test-05.DocClass1.regularProperty
       - api-extractor-test-05.DocClass1.sumWithExample
       - api-extractor-test-05.DocClass1.tableExample
+  - uid: api-extractor-test-05.DocClass1.deprecatedExample
+    deprecated:
+      content: Use `otherThing()` instead.
+    name: deprecatedExample()
+    fullName: api-extractor-test-05.DocClass1.deprecatedExample
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'deprecatedExample(): void;'
+      return:
+        type:
+          - void
+        description: ''
   - uid: api-extractor-test-05.DocClass1.exampleFunction
     summary: This is an overloaded function.
     name: 'exampleFunction(a, b)'
