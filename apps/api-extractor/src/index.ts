@@ -25,6 +25,10 @@ export {
   IExtractorConfig
 } from './api/IExtractorConfig';
 
+export { ILogger } from './api/ILogger';
+
+export { IndentedWriter } from './api/IndentedWriter';
+
 export {
   Constructor,
   PropertiesOf
@@ -113,5 +117,3 @@ export {
 export {
   IResolveDeclarationReferenceResult
 } from './api/model/DeclarationReferenceResolver';
-
-export { ILogger } from './api/ILogger';

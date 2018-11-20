@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StringBuilder } from '@microsoft/node-core-library';
+import { StringBuilder, IStringBuilder } from '@microsoft/node-core-library';
 
 /**
-  * A utility for writing indented text.  In the current implementation,
-  * IndentedWriter builds up an internal string buffer, which can be obtained
-  * by calling IndentedWriter.getOutput().
+  * A utility for writing indented text.
+  *
+  * @remarks
   *
   * Note that the indentation is inserted at the last possible opportunity.
   * For example, this code...
   *
+  * ```ts
   *   writer.write('begin\n');
   *   writer.increaseIndent();
   *   writer.write('one\ntwo\n');
@@ -18,46 +19,55 @@ import { StringBuilder } from '@microsoft/node-core-library';
   *   writer.increaseIndent();
   *   writer.decreaseIndent();
   *   writer.write('end');
+  * ```
   *
   * ...would produce this output:
   *
+  * ```
   *   begin
   *     one
   *     two
   *   end
+  * ```
+  *
+  * @beta
   */
 export class IndentedWriter {
   /**
    * The text characters used to create one level of indentation.
    * Two spaces by default.
    */
-  public spacing: string = '  ';
+  public defaultIndentPrefix: string = '  ';
 
-  private _output: StringBuilder;
-  private _indentStack: string[];
+  private readonly _builder: IStringBuilder;
+
+  private _latestChunk: string | undefined;
+  private _previousChunk: string | undefined;
+  private _atStartOfLine: boolean;
+
+  private readonly _indentStack: string[];
   private _indentText: string;
-  private _needsIndent: boolean;
 
-  constructor() {
-    this.clear();
-  }
+  public constructor(builder?: IStringBuilder) {
+    this._builder = builder === undefined ? new StringBuilder() : builder;
 
-  /**
-   * Resets the stream, erasing any output and indentation levels.
-   * Does not reset the "spacing" configuration.
-   */
-  public clear(): void {
-    this._output = new StringBuilder();
+    this._latestChunk = undefined;
+    this._previousChunk = undefined;
+    this._atStartOfLine = true;
+
     this._indentStack = [];
     this._indentText = '';
-    this._needsIndent = true;
   }
 
   /**
-   * Retrieves the indented output.
+   * Retrieves the output that was built so far.
    */
+  public getText(): string {
+    return this._builder.toString();
+  }
+
   public toString(): string {
-    return this._output.toString();
+    return this.getText();
   }
 
   /**
@@ -67,8 +77,8 @@ export class IndentedWriter {
    * Each call to IndentedWriter.increaseIndent() must be followed by a
    * corresponding call to IndentedWriter.decreaseIndent().
    */
-  public increaseIndent(): void {
-    this._indentStack.push(this.spacing);
+  public increaseIndent(indentPrefix?: string): void {
+    this._indentStack.push(indentPrefix !== undefined ? indentPrefix : this.defaultIndentPrefix);
     this._updateIndentText();
   }
 
@@ -85,10 +95,60 @@ export class IndentedWriter {
    * A shorthand for ensuring that increaseIndent()/decreaseIndent() occur
    * in pairs.
    */
-  public indentScope(scope: () => void): void {
-    this.increaseIndent();
+  public indentScope(scope: () => void, indentPrefix?: string): void {
+    this.increaseIndent(indentPrefix);
     scope();
     this.decreaseIndent();
+  }
+
+  /**
+   * Adds a newline if the file pointer is not already at the start of the line (or start of the stream).
+   */
+  public ensureNewLine(): void {
+    const lastCharacter: string = this.peekLastCharacter();
+    if (lastCharacter !== '\n' && lastCharacter !== '') {
+      this._writeNewLine();
+    }
+  }
+
+  /**
+   * Adds up to two newlines to ensure that there is a blank line above the current line.
+   */
+  public ensureSkippedLine(): void {
+    if (this.peekLastCharacter() !== '\n') {
+      this._writeNewLine();
+    }
+
+    const secondLastCharacter: string = this.peekSecondLastCharacter();
+    if (secondLastCharacter !== '\n' && secondLastCharacter !== '') {
+      this._writeNewLine();
+    }
+  }
+
+  /**
+   * Returns the last character that was written, or an empty string if no characters have been written yet.
+   */
+  public peekLastCharacter(): string {
+    if (this._latestChunk !== undefined) {
+      return this._latestChunk.substr(-1, 1);
+    }
+    return '';
+  }
+
+  /**
+   * Returns the second to last character that was written, or an empty string if less than one characters
+   * have been written yet.
+   */
+  public peekSecondLastCharacter(): string {
+    if (this._latestChunk !== undefined) {
+      if (this._latestChunk.length > 1) {
+        return this._latestChunk.substr(-2, 1);
+      }
+      if (this._previousChunk !== undefined) {
+        return this._previousChunk.substr(-1, 1);
+      }
+    }
+    return '';
   }
 
   /**
@@ -97,6 +157,13 @@ export class IndentedWriter {
    * each line will be indented separately.
    */
   public write(message: string): void {
+    // If there are no newline characters, then append the string verbatim
+    if (!/[\r\n]/.test(message)) {
+      this._writeLinePart(message);
+      return;
+    }
+
+    // Otherwise split the lines and write each one individually
     let first: boolean = true;
     for (const linePart of message.split('\n')) {
       if (!first) {
@@ -105,7 +172,7 @@ export class IndentedWriter {
         first = false;
       }
       if (linePart) {
-        this._writeLinePart(linePart);
+        this._writeLinePart(linePart.replace(/[\r]/g, ''));
       }
     }
   }
@@ -115,23 +182,32 @@ export class IndentedWriter {
    * Indentation is applied following the semantics of IndentedWriter.write().
    */
   public writeLine(message: string = ''): void {
-    this.write(message + '\n');
+    this.write(message);
+    this._writeNewLine();
   }
 
   /**
    * Writes a string that does not contain any newline characters.
    */
   private _writeLinePart(message: string): void {
-    if (this._needsIndent) {
-      this._output.append(this._indentText);
-      this._needsIndent = false;
+    if (message.length > 0) {
+      if (this._atStartOfLine && this._indentText.length > 0) {
+        this._write(this._indentText);
+      }
+      this._write(message);
+      this._atStartOfLine = false;
     }
-    this._output.append(message.replace(/\r/g, ''));
   }
 
   private _writeNewLine(): void {
-    this._output.append('\n');
-    this._needsIndent = true;
+    this._write('\n');
+    this._atStartOfLine = true;
+  }
+
+  private _write(s: string): void {
+    this._previousChunk = this._latestChunk;
+    this._latestChunk = s;
+    this._builder.append(s);
   }
 
   private _updateIndentText(): void {

@@ -12,9 +12,17 @@ import { DocNoteBox } from '../nodes/DocNoteBox';
 import { DocTable } from '../nodes/DocTable';
 import { DocTableCell } from '../nodes/DocTableCell';
 import { DocEmphasisSpan } from '../nodes/DocEmphasisSpan';
-import { SimpleWriter } from './SimpleWriter';
-import { MarkdownEmitter, IMarkdownEmitterContext, IMarkdownEmitterOptions } from './MarkdownEmitter';
-import { ApiModel, IResolveDeclarationReferenceResult, ApiItem } from '@microsoft/api-extractor';
+import {
+  MarkdownEmitter,
+  IMarkdownEmitterContext,
+  IMarkdownEmitterOptions
+} from './MarkdownEmitter';
+import {
+  ApiModel,
+  IResolveDeclarationReferenceResult,
+  ApiItem,
+  IndentedWriter
+} from '@microsoft/api-extractor';
 
 export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
   contextApiItem: ApiItem | undefined;
@@ -37,7 +45,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
 
   /** @override */
   protected writeNode(docNode: DocNode, context: IMarkdownEmitterContext): void {
-    const writer: SimpleWriter = context.writer;
+    const writer: IndentedWriter = context.writer;
 
     switch (docNode.kind) {
       case CustomDocNodeKind.Heading: {

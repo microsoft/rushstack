@@ -17,13 +17,13 @@ import {
   DocEscapedText,
   DocErrorText
 } from '@microsoft/tsdoc';
-import { SimpleWriter } from './SimpleWriter';
+import { IndentedWriter } from '@microsoft/api-extractor';
 
 export interface IMarkdownEmitterOptions {
 }
 
 export interface IMarkdownEmitterContext<TOptions = IMarkdownEmitterOptions> {
-  writer: SimpleWriter;
+  writer: IndentedWriter;
   insideTable: boolean;
 
   boldRequested: boolean;
@@ -42,7 +42,7 @@ export interface IMarkdownEmitterContext<TOptions = IMarkdownEmitterOptions> {
 export class MarkdownEmitter {
 
   public emit(stringBuilder: StringBuilder, docNode: DocNode, options: IMarkdownEmitterOptions): string {
-    const writer: SimpleWriter = new SimpleWriter(stringBuilder);
+    const writer: IndentedWriter = new IndentedWriter(stringBuilder);
 
     const context: IMarkdownEmitterContext = {
       writer,
@@ -79,7 +79,7 @@ export class MarkdownEmitter {
    * @virtual
    */
   protected writeNode(docNode: DocNode, context: IMarkdownEmitterContext): void {
-    const writer: SimpleWriter = context.writer;
+    const writer: IndentedWriter = context.writer;
 
     switch (docNode.kind) {
       case DocNodeKind.PlainText: {
@@ -188,7 +188,7 @@ export class MarkdownEmitter {
   }
 
   protected writePlainText(text: string, context: IMarkdownEmitterContext): void {
-    const writer: SimpleWriter = context.writer;
+    const writer: IndentedWriter = context.writer;
 
     // split out the [ leading whitespace, content, trailing whitespace ]
     const parts: string[] = text.match(/^(\s*)(.*?)(\s*)$/) || [];

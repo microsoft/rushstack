@@ -7,7 +7,7 @@ import * as ts from 'typescript';
 import { FileSystem, NewlineKind } from '@microsoft/node-core-library';
 
 import { Collector } from '../collector/Collector';
-import { IndentedWriter } from './IndentedWriter';
+import { IndentedWriter } from '../api/IndentedWriter';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
@@ -61,9 +61,6 @@ export class DtsRollupGenerator {
 
   private static _generateTypingsFileContent(collector: Collector, indentedWriter: IndentedWriter,
     dtsKind: DtsRollupKind): void {
-
-    indentedWriter.spacing = '';
-    indentedWriter.clear();
 
     if (collector.package.tsdocParserContext) {
       indentedWriter.writeLine(collector.package.tsdocParserContext.sourceRange.toString());

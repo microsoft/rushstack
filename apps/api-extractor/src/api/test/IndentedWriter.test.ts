@@ -28,3 +28,45 @@ test('02 Indent something', () => {
 
   expect(indentedWriter.toString()).toMatchSnapshot();
 });
+
+test('03 Two kinds of indents', () => {
+  const indentedWriter: IndentedWriter = new IndentedWriter();
+
+  indentedWriter.writeLine('---');
+  indentedWriter.indentScope(() => {
+    indentedWriter.write('a\nb');
+    indentedWriter.indentScope(() => {
+      indentedWriter.write('c\nd\n');
+    });
+    indentedWriter.write('e\n');
+  }, '> ');
+  indentedWriter.writeLine('---');
+
+  expect(indentedWriter.toString()).toMatchSnapshot();
+});
+
+test('04 Edge cases for ensureNewLine()', () => {
+  let indentedWriter: IndentedWriter = new IndentedWriter();
+  indentedWriter.ensureNewLine();
+  indentedWriter.write('line');
+  expect(indentedWriter.toString()).toMatchSnapshot();
+
+  indentedWriter = new IndentedWriter();
+  indentedWriter.write('previous');
+  indentedWriter.ensureNewLine();
+  indentedWriter.write('line');
+  expect(indentedWriter.toString()).toMatchSnapshot();
+});
+
+test('04 Edge cases for ensureSkippedLine()', () => {
+  let indentedWriter: IndentedWriter = new IndentedWriter();
+  indentedWriter.ensureSkippedLine();
+  indentedWriter.write('line');
+  expect(indentedWriter.toString()).toMatchSnapshot();
+
+  indentedWriter = new IndentedWriter();
+  indentedWriter.write('previous');
+  indentedWriter.ensureSkippedLine();
+  indentedWriter.write('line');
+  expect(indentedWriter.toString()).toMatchSnapshot();
+});

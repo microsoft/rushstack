@@ -1,11 +1,15 @@
 // @beta
 interface IRushellExecuteResult {
-  value: string;
+    value: string;
 }
 
 // @beta
-class Rushell {
-  // (undocumented)
-  execute(script: string): IRushellExecuteResult;
+declare class Rushell {
+    // (undocumented)
+    private _evaluateCommand;
+    // (undocumented)
+    private _evaluateNode;
+    // (undocumented)
+    execute(script: string): IRushellExecuteResult;
 }
 

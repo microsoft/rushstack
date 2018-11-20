@@ -284,6 +284,12 @@ interface IProtectableMapParameters<K, V> {
   onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
+// @public
+interface IStringBuilder {
+  append(text: string): void;
+  toString(): string;
+}
+
 // @beta
 interface ITerminalProvider {
   eolCharacter: string;
@@ -406,8 +412,8 @@ class Sort {
   static sortMapKeys<K, V>(map: Map<K, V>, keyComparer?: (x: K, y: K) => number): void;
 }
 
-// @beta
-class StringBuilder {
+// @public
+class StringBuilder implements IStringBuilder {
   constructor();
   append(text: string): void;
   toString(): string;

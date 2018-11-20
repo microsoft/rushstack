@@ -13,3 +13,31 @@ exports[`02 Indent something 1`] = `
 e
 "
 `;
+
+exports[`03 Two kinds of indents 1`] = `
+"---
+> a
+> bc
+>   d
+> e
+---
+"
+`;
+
+exports[`04 Edge cases for ensureNewLine() 1`] = `"line"`;
+
+exports[`04 Edge cases for ensureNewLine() 2`] = `
+"previous
+line"
+`;
+
+exports[`04 Edge cases for ensureSkippedLine() 1`] = `
+"
+line"
+`;
+
+exports[`04 Edge cases for ensureSkippedLine() 2`] = `
+"previous
+
+line"
+`;
