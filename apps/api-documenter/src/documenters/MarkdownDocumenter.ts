@@ -17,7 +17,9 @@ import {
   DocNodeKind,
   DocParagraph,
   DocCodeSpan,
-  DocFencedCode
+  DocFencedCode,
+  StandardTags,
+  DocBlock
 } from '@microsoft/tsdoc';
 import {
   ApiModel,
@@ -159,9 +161,27 @@ export class MarkdownDocumenter {
     }
 
     if (apiItem instanceof ApiDocumentedItem) {
-      if (apiItem.tsdocComment && apiItem.tsdocComment.remarksBlock) {
-        output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Remarks' }));
-        this._appendSection(output, apiItem.tsdocComment.remarksBlock.content);
+      if (apiItem.tsdocComment) {
+        // Write the @remarks block
+        if (apiItem.tsdocComment.remarksBlock) {
+          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Remarks' }));
+          this._appendSection(output, apiItem.tsdocComment.remarksBlock.content);
+        }
+
+        // Write the @example blocks
+        const exampleBlocks: DocBlock[] = apiItem.tsdocComment.customBlocks.filter(x => x.blockTag.tagNameWithUpperCase
+          === StandardTags.example.tagNameWithUpperCase);
+
+        let exampleNumber: number = 1;
+        for (const exampleBlock of exampleBlocks) {
+          const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
+
+          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: heading }));
+
+          this._appendSection(output, exampleBlock.content);
+
+          ++exampleNumber;
+        }
       }
     }
 
