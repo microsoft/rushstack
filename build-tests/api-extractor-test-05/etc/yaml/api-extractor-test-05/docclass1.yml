@@ -4,7 +4,7 @@ items:
     summary: This is an example class.
     remarks: These are some remarks.
     name: DocClass1
-    fullName: api-extractor-test-05.DocClass1
+    fullName: DocClass1
     langs:
       - typeScript
     type: class
@@ -36,7 +36,7 @@ items:
   - uid: api-extractor-test-05.DocClass1.exampleFunction
     summary: This is an overloaded function.
     name: 'exampleFunction(a, b)'
-    fullName: api-extractor-test-05.DocClass1.exampleFunction
+    fullName: exampleFunction
     langs:
       - typeScript
     type: method
@@ -79,7 +79,7 @@ items:
 
       The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/
     name: interestingEdgeCases()
-    fullName: api-extractor-test-05.DocClass1.interestingEdgeCases
+    fullName: interestingEdgeCases
     langs:
       - typeScript
     type: method
@@ -92,7 +92,7 @@ items:
   - uid: api-extractor-test-05.DocClass1.malformedEvent
     summary: This event should have been marked as readonly.
     name: malformedEvent
-    fullName: api-extractor-test-05.DocClass1.malformedEvent
+    fullName: malformedEvent
     langs:
       - typeScript
     type: event
@@ -104,7 +104,7 @@ items:
   - uid: api-extractor-test-05.DocClass1.modifiedEvent
     summary: This event is fired whenever the object is modified.
     name: modifiedEvent
-    fullName: api-extractor-test-05.DocClass1.modifiedEvent
+    fullName: modifiedEvent
     langs:
       - typeScript
     type: event
@@ -116,7 +116,7 @@ items:
   - uid: api-extractor-test-05.DocClass1.regularProperty
     summary: This is a regular property that happens to use the SystemEvent type.
     name: regularProperty
-    fullName: api-extractor-test-05.DocClass1.regularProperty
+    fullName: regularProperty
     langs:
       - typeScript
     type: property
@@ -152,7 +152,7 @@ items:
     summary: 'An example with tables:'
     remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
     name: tableExample()
-    fullName: api-extractor-test-05.DocClass1.tableExample
+    fullName: tableExample
     langs:
       - typeScript
     type: method

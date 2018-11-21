@@ -12,11 +12,11 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "6.1.1",
-    "@microsoft/api-documenter": "1.5.49",
+    "@microsoft/api-extractor": "6.1.6",
+    "@microsoft/api-documenter": "1.5.56",
     "@types/jest": "21.1.10",
     "@types/node": "8.5.8",
-    "fs-extra": "~5.0.0",
+    "fs-extra": "~7.0.1",
     "typescript": "~3.0.3"
   }
 }

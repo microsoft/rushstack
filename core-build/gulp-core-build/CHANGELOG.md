@@ -1,6 +1,38 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 01 Nov 2018 21:33:52 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+
+## 3.8.47
+Fri, 16 Nov 2018 21:37:10 GMT
+
+*Version update only*
+
+## 3.8.46
+Fri, 16 Nov 2018 00:59:00 GMT
+
+*Version update only*
+
+## 3.8.45
+Fri, 09 Nov 2018 23:07:39 GMT
+
+*Version update only*
+
+## 3.8.44
+Wed, 07 Nov 2018 21:04:35 GMT
+
+*Version update only*
+
+## 3.8.43
+Wed, 07 Nov 2018 17:03:03 GMT
+
+*Version update only*
+
+## 3.8.42
+Mon, 05 Nov 2018 17:04:24 GMT
+
+### Patches
+
+- Remove all dependencies on the "rimraf" library
 
 ## 3.8.41
 Thu, 01 Nov 2018 21:33:52 GMT

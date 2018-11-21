@@ -9,6 +9,7 @@ describe('FileDeletionUtility', () => {
     it('can be constructed', () => {
       // tslint:disable-next-line:no-unused-variable
       const test: FileDeletionUtility = new FileDeletionUtility();
+      assert.isNotNull(test);
     });
   });
   describe('isParentDirectory', () => {

@@ -1,6 +1,36 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Thu, 01 Nov 2018 21:33:52 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+
+## 1.8.39
+Fri, 16 Nov 2018 21:37:10 GMT
+
+*Version update only*
+
+## 1.8.38
+Fri, 16 Nov 2018 00:59:00 GMT
+
+*Version update only*
+
+## 1.8.37
+Fri, 09 Nov 2018 23:07:39 GMT
+
+*Version update only*
+
+## 1.8.36
+Wed, 07 Nov 2018 21:04:35 GMT
+
+*Version update only*
+
+## 1.8.35
+Wed, 07 Nov 2018 17:03:03 GMT
+
+*Version update only*
+
+## 1.8.34
+Mon, 05 Nov 2018 17:04:24 GMT
+
+*Version update only*
 
 ## 1.8.33
 Thu, 01 Nov 2018 21:33:52 GMT

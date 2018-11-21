@@ -2,6 +2,76 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.1.6",
+      "tag": "@microsoft/api-extractor_v6.1.6",
+      "date": "Fri, 16 Nov 2018 21:37:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for emitting `/// <reference lib=\"___\" />` directives in .d.ts rollups (GitHub issue #946)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.2` to `3.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.1.5",
+      "tag": "@microsoft/api-extractor_v6.1.5",
+      "date": "Fri, 16 Nov 2018 00:59:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where .d.ts trimming did not work for exported variable declarations (GitHub #936)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.1.4",
+      "tag": "@microsoft/api-extractor_v6.1.4",
+      "date": "Fri, 09 Nov 2018 23:07:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to TSDoc 0.21.2, which improves trimming of link text in `@link` tags"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.1.3",
+      "tag": "@microsoft/api-extractor_v6.1.3",
+      "date": "Wed, 07 Nov 2018 21:04:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.1` to `3.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "6.1.2",
+      "tag": "@microsoft/api-extractor_v6.1.2",
+      "date": "Mon, 05 Nov 2018 17:04:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to @microsoft/tsdoc 0.12.0"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.0` to `3.5.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.1.1",
       "tag": "@microsoft/api-extractor_v6.1.1",
       "date": "Thu, 01 Nov 2018 19:32:52 GMT",

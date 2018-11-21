@@ -26,7 +26,14 @@ export const enum EnvironmentVariableNames {
    * and linking package dependencies.  For more information, see this article:
    * https://rushjs.io/pages/advanced/installation_variants/
    */
-  RUSH_VARIANT = 'RUSH_VARIANT'
+  RUSH_VARIANT = 'RUSH_VARIANT',
+
+  /**
+   * If this variable is set to "true", Rush will create symlinks with absolute paths instead
+   * of relative paths. This can be necessary when a repository is moved during a build or
+   * if parts of a repository are moved into a sandbox.
+   */
+  RUSH_ABSOLUTE_SYMLINKS = 'RUSH_ABSOLUTE_SYMLINKS'
 }
 
 /**
@@ -41,12 +48,23 @@ export class EnvironmentConfiguration {
 
   private static _rushTempFolderOverride: string | undefined;
 
+  private static _absoluteSymlinks: boolean = false;
+
   /**
    * An override for the common/temp folder path.
    */
   public static get rushTempFolderOverride(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._rushTempFolderOverride;
+  }
+
+  /**
+   * If "true", create symlinks with absolute paths instead of relative paths.
+   * See {@link EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS}
+   */
+  public static get absoluteSymlinks(): boolean {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._absoluteSymlinks;
   }
 
   /**
@@ -62,9 +80,15 @@ export class EnvironmentConfiguration {
         // Environment variables are only case-insensitive on Windows
         const normalizedEnvVarName: string = os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
         switch (normalizedEnvVarName) {
-          case EnvironmentVariableNames.RUSH_TEMP_FOLDER:
+          case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
             EnvironmentConfiguration._rushTempFolderOverride = value;
             break;
+          }
+
+          case EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS: {
+            EnvironmentConfiguration._absoluteSymlinks = value === 'true';
+            break;
+          }
 
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
           case EnvironmentVariableNames.RUSH_VARIANT:

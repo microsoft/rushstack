@@ -1,6 +1,39 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 01 Nov 2018 19:32:52 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+
+## 6.1.6
+Fri, 16 Nov 2018 21:37:10 GMT
+
+### Patches
+
+- Add support for emitting `/// <reference lib="___" />` directives in .d.ts rollups (GitHub issue #946)
+
+## 6.1.5
+Fri, 16 Nov 2018 00:59:00 GMT
+
+### Patches
+
+- Fix an issue where .d.ts trimming did not work for exported variable declarations (GitHub #936)
+
+## 6.1.4
+Fri, 09 Nov 2018 23:07:39 GMT
+
+### Patches
+
+- Upgrade to TSDoc 0.21.2, which improves trimming of link text in `@link` tags
+
+## 6.1.3
+Wed, 07 Nov 2018 21:04:35 GMT
+
+*Version update only*
+
+## 6.1.2
+Mon, 05 Nov 2018 17:04:24 GMT
+
+### Patches
+
+- Upgrade to @microsoft/tsdoc 0.12.0
 
 ## 6.1.1
 Thu, 01 Nov 2018 19:32:52 GMT

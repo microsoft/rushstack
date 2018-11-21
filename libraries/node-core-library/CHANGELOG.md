@@ -1,6 +1,27 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 25 Oct 2018 23:20:40 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+
+## 3.6.0
+Fri, 16 Nov 2018 21:37:10 GMT
+
+### Minor changes
+
+- Add new APIs Sort.sortSet() and Sort.sortSetBy()
+
+## 3.5.2
+Wed, 07 Nov 2018 21:04:35 GMT
+
+### Patches
+
+- Upgrade fs-extra to eliminate the "ERROR: ENOTEMPTY: directory not empty, rmdir" error that sometimes occurred with FileSystem.deleteFolder()
+
+## 3.5.1
+Mon, 05 Nov 2018 17:04:24 GMT
+
+### Patches
+
+- Remove all dependencies on the "rimraf" library
 
 ## 3.5.0
 Thu, 25 Oct 2018 23:20:40 GMT

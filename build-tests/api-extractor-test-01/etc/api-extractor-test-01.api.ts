@@ -107,6 +107,10 @@ class ReexportedClass {
   getValue(): string;
 }
 
+// @public (undocumented)
+class ReferenceLibDirective extends Intl.PluralRules {
+}
+
 // @public
 class TypeReferencesInAedoc {
   getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
@@ -119,3 +123,4 @@ class TypeReferencesInAedoc {
 export function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
 
 // WARNING: Unsupported export: fullyExportedCustomSymbol
+// WARNING: Unsupported export: VARIABLE

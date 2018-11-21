@@ -1,6 +1,24 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 25 Oct 2018 23:20:40 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Nov 2018 02:14:11 GMT and should not be manually modified.
+
+## 5.5.2
+Fri, 09 Nov 2018 02:14:11 GMT
+
+### Updates
+
+- Include an environment variable option to create symlinks with absolute paths.
+
+## 5.5.1
+Wed, 07 Nov 2018 21:04:35 GMT
+
+### Updates
+
+- For NodeJS 10, require at least LTS (10.13.0)
+- Install rush and package managers in a node version-specific folder under the user's home directory
+- Added support for git hooks
+- Remove all dependencies on the "rimraf" library
+- Upgrade fs-extra to eliminate the annoying "ERROR: ENOTEMPTY: directory not empty, rmdir" error that occasionally occurred during "rush link"
 
 ## 5.4.0
 Thu, 25 Oct 2018 23:20:40 GMT

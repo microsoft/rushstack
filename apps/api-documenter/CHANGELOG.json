@@ -2,6 +2,135 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.56",
+      "tag": "@microsoft/api-documenter_v1.5.56",
+      "date": "Fri, 16 Nov 2018 21:37:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.1.5` to `6.1.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.2` to `3.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.3` to `0.5.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.11` to `6.0.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.55",
+      "tag": "@microsoft/api-documenter_v1.5.55",
+      "date": "Fri, 16 Nov 2018 00:59:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.1.4` to `6.1.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.2` to `0.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.10` to `6.0.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.54",
+      "tag": "@microsoft/api-documenter_v1.5.54",
+      "date": "Fri, 09 Nov 2018 23:07:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.1.3` to `6.1.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.1` to `0.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.9` to `6.0.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.53",
+      "tag": "@microsoft/api-documenter_v1.5.53",
+      "date": "Fri, 09 Nov 2018 17:03:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Removing the OfficeYamlDocumenter logic to correct escape characters within code ticks"
+          },
+          {
+            "comment": "Fix issue where broken hyperlinks sometimes appear in docs.microsoft.com due to matching of IYamlItem.fullName"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.52",
+      "tag": "@microsoft/api-documenter_v1.5.52",
+      "date": "Wed, 07 Nov 2018 21:04:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.1.2` to `6.1.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.1` to `3.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.0` to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.8` to `6.0.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.51",
+      "tag": "@microsoft/api-documenter_v1.5.51",
+      "date": "Wed, 07 Nov 2018 17:03:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.4` to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.7` to `6.0.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.50",
+      "tag": "@microsoft/api-documenter_v1.5.50",
+      "date": "Mon, 05 Nov 2018 17:04:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.1.1` to `6.1.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.0` to `3.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.3` to `0.4.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.6` to `6.0.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.49",
       "tag": "@microsoft/api-documenter_v1.5.49",
       "date": "Thu, 01 Nov 2018 21:33:52 GMT",
