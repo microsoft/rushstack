@@ -1,4 +1,4 @@
-# @microsoft/rush-stack-copmpiler
+# @microsoft/rush-stack-compiler
 
 This package is an NPM peer dependency that is used with
 [@microsoft/rush-stack](https://www.npmjs.com/package/@microsoft/rush-stack)
