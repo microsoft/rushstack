@@ -23,7 +23,7 @@ items:
     deprecated:
       content: Use `otherThing()` instead.
     name: deprecatedExample()
-    fullName: api-extractor-test-05.DocClass1.deprecatedExample
+    fullName: deprecatedExample()
     langs:
       - typeScript
     type: method
@@ -36,7 +36,7 @@ items:
   - uid: api-extractor-test-05.DocClass1.exampleFunction
     summary: This is an overloaded function.
     name: 'exampleFunction(a, b)'
-    fullName: exampleFunction
+    fullName: 'exampleFunction(a, b)'
     langs:
       - typeScript
     type: method
@@ -58,7 +58,7 @@ items:
   - uid: api-extractor-test-05.DocClass1.exampleFunction_1
     summary: This is also an overloaded function.
     name: exampleFunction(x)
-    fullName: api-extractor-test-05.DocClass1.exampleFunction_1
+    fullName: exampleFunction(x)
     langs:
       - typeScript
     type: method
@@ -79,7 +79,7 @@ items:
 
       The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/
     name: interestingEdgeCases()
-    fullName: interestingEdgeCases
+    fullName: interestingEdgeCases()
     langs:
       - typeScript
     type: method
@@ -129,7 +129,7 @@ items:
     summary: Returns the sum of two numbers.
     remarks: This illustrates usage of the `@example` block tag.
     name: 'sumWithExample(x, y)'
-    fullName: api-extractor-test-05.DocClass1.sumWithExample
+    fullName: 'sumWithExample(x, y)'
     langs:
       - typeScript
     type: method
@@ -152,7 +152,7 @@ items:
     summary: 'An example with tables:'
     remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
     name: tableExample()
-    fullName: tableExample
+    fullName: tableExample()
     langs:
       - typeScript
     type: method

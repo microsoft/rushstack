@@ -136,6 +136,17 @@ export declare namespace EntangledNamespace {
 export declare type ExportedAlias = AlphaClass;
 
 /**
+ * This is an internal class
+ * @internal
+ */
+export declare class InternalClass {
+    /**
+     * This is a comment
+     */
+    undecoratedMember(): void;
+}
+
+/**
  * These are internal constructor parameters for PublicClass's internal constructor.
  * @internal
  */
@@ -157,17 +168,6 @@ export declare interface IPublicComplexInterface {
      * @internal
      */
     new (): any;
-}
-
-/**
- * This is an internal class
- * @internal
- */
-export declare class InternalClass {
-    /**
-     * This is a comment
-     */
-    undecoratedMember(): void;
 }
 
 /**

@@ -85,7 +85,8 @@ export class Collector {
   private readonly _entitiesByAstSymbol: Map<AstSymbol, CollectorEntity> = new Map<AstSymbol, CollectorEntity>();
   private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
 
-  private readonly _dtsTypeDefinitionReferences: string[] = [];
+  private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
+  private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
 
   constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
@@ -123,10 +124,23 @@ export class Collector {
   /**
    * Returns a list of names (e.g. "example-library") that should appear in a reference like this:
    *
+   * ```
    * /// <reference types="example-library" />
+   * ```
    */
-  public get dtsTypeDefinitionReferences(): ReadonlyArray<string> {
-    return this._dtsTypeDefinitionReferences;
+  public get dtsTypeReferenceDirectives(): ReadonlySet<string> {
+    return this._dtsTypeReferenceDirectives;
+  }
+
+  /**
+   * A list of names (e.g. "runtime-library") that should appear in a reference like this:
+   *
+   * ```
+   * /// <reference lib="runtime-library" />
+   * ```
+   */
+  public get dtsLibReferenceDirectives(): ReadonlySet<string> {
+    return this._dtsLibReferenceDirectives;
   }
 
   public get entities(): ReadonlyArray<CollectorEntity> {
@@ -187,8 +201,8 @@ export class Collector {
     this._makeUniqueNames();
 
     Sort.sortBy(this._entities, x => x.getSortKey());
-    this._dtsTypeDefinitionReferences.sort();
-
+    Sort.sortSet(this._dtsTypeReferenceDirectives);
+    Sort.sortSet(this._dtsLibReferenceDirectives);
   }
 
   public tryGetEntityBySymbol(symbol: ts.Symbol): CollectorEntity | undefined {
@@ -241,7 +255,7 @@ export class Collector {
       this._entitiesBySymbol.set(astSymbol.followedSymbol, entity);
       this._entities.push(entity);
 
-      this._collectTypeDefinitionReferences(astSymbol);
+      this._collectReferenceDirectives(astSymbol);
     } else {
       if (exportedName) {
         if (!entity.exported) {
@@ -506,7 +520,7 @@ export class Collector {
     return this._tsdocParser.parseRange(tsdocTextRange);
   }
 
-  private _collectTypeDefinitionReferences(astSymbol: AstSymbol): void {
+  private _collectReferenceDirectives(astSymbol: AstSymbol): void {
     // Are we emitting declarations?
     if (astSymbol.astImport) {
       return; // no, it's an import
@@ -522,9 +536,12 @@ export class Collector {
 
           for (const typeReferenceDirective of sourceFile.typeReferenceDirectives) {
             const name: string = sourceFile.text.substring(typeReferenceDirective.pos, typeReferenceDirective.end);
-            if (this._dtsTypeDefinitionReferences.indexOf(name) < 0) {
-              this._dtsTypeDefinitionReferences.push(name);
-            }
+            this._dtsTypeReferenceDirectives.add(name);
+          }
+
+          for (const libReferenceDirective of sourceFile.libReferenceDirectives) {
+            const name: string = sourceFile.text.substring(libReferenceDirective.pos, libReferenceDirective.end);
+            this._dtsLibReferenceDirectives.add(name);
           }
 
         }
