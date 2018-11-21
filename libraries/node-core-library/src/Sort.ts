@@ -13,7 +13,7 @@ export class Sort {
    *
    * @remarks
    *
-   * The JavaScript ordering is generalized so that `undefined` < `null` < all other values.
+   * The JavaScript ordering is generalized so that `undefined` \< `null` \< all other values.
    *
    * @returns -1 if `x` is smaller than `y`, 1 if `x` is greater than `y`, or 0 if the values are equal.
    *

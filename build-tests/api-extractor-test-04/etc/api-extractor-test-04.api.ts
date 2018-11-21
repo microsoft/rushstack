@@ -25,9 +25,9 @@ interface BetaInterface {
 
 // @beta
 declare const enum ConstEnum {
-    BetaMember2 = "BetaMember2",
     // @alpha
     AlphaMember = "AlphaMember",
+    BetaMember2 = "BetaMember2",
     // @internal
     _InternalMember = "_InternalMember"
 }
@@ -86,9 +86,9 @@ declare class PublicClass {
 
 // @beta
 declare enum RegularEnum {
-    BetaMember = 100,
     // @alpha
     AlphaMember = 101,
+    BetaMember = 100,
     // @internal
     _InternalMember = 102
 }

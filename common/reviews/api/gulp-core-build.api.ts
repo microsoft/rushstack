@@ -251,11 +251,11 @@ declare function task(taskName: string, taskExecutable: IExecutable): IExecutabl
 // @public
 declare enum TestResultState {
     // (undocumented)
-    Passed = 0,
-    // (undocumented)
     Failed = 1,
     // (undocumented)
     FlakyFailed = 2,
+    // (undocumented)
+    Passed = 0,
     // (undocumented)
     Skipped = 3
 }

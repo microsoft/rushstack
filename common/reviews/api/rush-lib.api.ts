@@ -53,18 +53,17 @@ declare class ApprovedPackagesPolicy {
 
 // @beta
 declare enum BumpType {
-    ,
-    ,
-    ,
-    ,
-    ,
     // (undocumented)
-    'major' = 5
-// (undocumented)
-    'minor' = 4// (undocumented)
-    'none' = 0// (undocumented)
-    'patch' = 2// (undocumented)
-    'preminor' = 3// (undocumented)
+    'major' = 5,
+    // (undocumented)
+    'minor' = 4,
+    // (undocumented)
+    'none' = 0,
+    // (undocumented)
+    'patch' = 2,
+    // (undocumented)
+    'preminor' = 3,
+    // (undocumented)
     'prerelease' = 1
 }
 
@@ -109,29 +108,29 @@ declare class CommonVersionsConfiguration {
 // @beta (undocumented)
 declare const enum DependencyType {
     // (undocumented)
-    Regular = "dependencies",
-    // (undocumented)
     Dev = "devDependencies",
     // (undocumented)
     Optional = "optionalDependencies",
     // (undocumented)
-    Peer = "peerDependencies"
+    Peer = "peerDependencies",
+    // (undocumented)
+    Regular = "dependencies"
 }
 
 // @public
 declare const enum EnvironmentVariableNames {
-    RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
+    RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
-    RUSH_VARIANT = "RUSH_VARIANT",
-    RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS"
+    RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
+    RUSH_VARIANT = "RUSH_VARIANT"
 }
 
 // @beta
 declare enum Event {
-    preRushInstall = 1,
+    postRushBuild = 4,
     postRushInstall = 2,
     preRushBuild = 3,
-    postRushBuild = 4
+    preRushInstall = 1
 }
 
 // @beta
@@ -524,8 +523,8 @@ declare class VersionPolicyConfiguration {
 // @beta
 declare enum VersionPolicyDefinitionName {
     // (undocumented)
-    'lockStepVersion' = 0,
+    'individualVersion' = 1,
     // (undocumented)
-    'individualVersion' = 1
+    'lockStepVersion' = 0
 }
 

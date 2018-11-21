@@ -23,8 +23,8 @@ export class SpanModification {
 
   /**
    * If true, then Span.getModifiedText() will sort the immediate children according to their Span.sortKey
-   * property.  If the Span.sortKey is undefined then those nodes will be emitted last, preserving their relative order.
-   * The separators will also be fixed up to ensure correct indentation.
+   * property.  The separators will also be fixed up to ensure correct indentation.  If the Span.sortKey is undefined
+   * for some items, those items will not be moved, i.e. their array indexes will be unchanged.
    */
   public sortChildren: boolean;
 
@@ -368,25 +368,52 @@ export class Span {
     const childCount: number = this.children.length;
 
     if (!this.modification.omitChildren) {
-      const lastChildIndex: number = childCount - 1;
 
       if (this.modification.sortChildren && childCount > 1) {
-        // Special case where we sort the child spans and apply separatorOverride
-        const sortedChildren: Span[] = [...this.children];
-        Sort.sortBy(sortedChildren, x => x.modification.sortKey);
+        // We will only sort the items with a sortKey
+        const sortedSubset: Span[] = this.children.filter(x => x.modification.sortKey !== undefined);
+        const sortedSubsetCount: number = sortedSubset.length;
 
-        const firstSeparator: string = this.children[0].getLastInnerSeparator();
-        const lastSeparator: string = this.children[lastChildIndex].getLastInnerSeparator();
+        // Is there at least one fo them?
+        if (sortedSubsetCount > 1) {
 
-        const childOptions: IWriteModifiedTextOptions = { ...options };
-        for (let i: number = 0; i < childCount; ++i) {
-          const sortedChild: Span = sortedChildren[i];
+          // Remember the separator for the first and last ones
+          const firstSeparator: string = sortedSubset[0].getLastInnerSeparator();
+          const lastSeparator: string = sortedSubset[sortedSubsetCount - 1].getLastInnerSeparator();
 
-          childOptions.separatorOverride = i < lastChildIndex ? firstSeparator : lastSeparator;
+          Sort.sortBy(sortedSubset, x => x.modification.sortKey);
 
-          sortedChild._writeModifiedText(childOptions);
+          const childOptions: IWriteModifiedTextOptions = { ...options };
+
+          let sortedSubsetIndex: number = 0;
+          for (let index: number = 0; index < childCount; ++index) {
+            let current: Span;
+
+            // Is this an item that we sorted?
+            if (this.children[index].modification.sortKey === undefined) {
+              // No, take the next item from the original array
+              current = this.children[index];
+              childOptions.separatorOverride = undefined;
+            } else {
+              // Yes, take the next item from the sortedSubset
+              current = sortedSubset[sortedSubsetIndex++];
+
+              if (sortedSubsetIndex < sortedSubsetCount) {
+                childOptions.separatorOverride = firstSeparator;
+              } else {
+                childOptions.separatorOverride = lastSeparator;
+              }
+            }
+
+            current._writeModifiedText(childOptions);
+          }
+
+          return;
         }
-      } else if (options.separatorOverride) {
+        // (fall through to the other implementations)
+      }
+
+      if (options.separatorOverride !== undefined) {
         // Special case where the separatorOverride is passed down to the "last inner separator" span
         for (let i: number = 0; i < childCount; ++i) {
           const child: Span = this.children[i];
@@ -394,7 +421,7 @@ export class Span {
           if (
             // Only the last child inherits the separatorOverride, because only it can contain
             // the "last inner separator" span
-            i < lastChildIndex
+            i < childCount - 1
             // If this.separator is specified, then we will write separatorOverride below, so don't pass it along
             || this.separator
           ) {
@@ -415,7 +442,7 @@ export class Span {
 
     options.output.append(this.modification.suffix);
 
-    if (options.separatorOverride) {
+    if (options.separatorOverride !== undefined) {
       if (this.separator || childCount === 0) {
         options.output.append(options.separatorOverride);
       }

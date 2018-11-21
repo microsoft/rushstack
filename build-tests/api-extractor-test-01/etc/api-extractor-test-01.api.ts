@@ -56,12 +56,11 @@ declare class ClassWithTypeLiterals {
 
 // @public (undocumented)
 declare const enum ConstEnum {
-    ,
-    ,
     // (undocumented)
-    One = 1// (undocumented)
-    Two = 2
-// (undocumented)
+    One = 1,
+    // (undocumented)
+    Two = 2,
+    // (undocumented)
     Zero = 0
 }
 
@@ -139,10 +138,9 @@ declare class ReferenceLibDirective extends Intl.PluralRules {
 
 // @public (undocumented)
 declare enum RegularEnum {
-    ,
-    ,
-    One = 1Two = 2
-Zero = 0
+    One = 1,
+    Two = 2,
+    Zero = 0
 }
 
 // @public
