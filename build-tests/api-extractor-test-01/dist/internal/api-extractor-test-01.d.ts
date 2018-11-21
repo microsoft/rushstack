@@ -99,6 +99,15 @@ export declare class ClassWithTypeLiterals {
 }
 
 /**
+ * @public
+ */
+export declare const enum ConstEnum {
+    Zero = 0,
+    One = 1,
+    Two = 2
+}
+
+/**
  * Tests a decorator
  * @public
  */
@@ -229,6 +238,24 @@ export declare class ReexportedClass {
 
 /** @public */
 export declare class ReferenceLibDirective extends Intl.PluralRules {
+}
+
+/**
+ * @public
+ */
+export declare enum RegularEnum {
+    /**
+     * These are some docs for Zero
+     */
+    Zero = 0,
+    /**
+     * These are some docs for One
+     */
+    One = 1,
+    /**
+     * These are some docs for Two
+     */
+    Two = 2
 }
 
 /**

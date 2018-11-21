@@ -87,6 +87,8 @@ export { ClassWithTypeLiterals } from './ClassWithTypeLiterals';
 
 export * from './DeclarationMerging';
 
+export * from './Enums';
+
 export {
   DefaultExportEdgeCase,
   default as ClassExportedAsDefault
