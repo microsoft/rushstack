@@ -83,6 +83,8 @@ export class DecoratorTest {
 export { default as AbstractClass } from './AbstractClass';
 export { default as AbstractClass2, AbstractClass3 } from './AbstractClass2';
 
+export { ClassWithAccessModifiers } from './AccessModifiers';
+
 export { ClassWithTypeLiterals } from './ClassWithTypeLiterals';
 
 export * from './DeclarationMerging';
