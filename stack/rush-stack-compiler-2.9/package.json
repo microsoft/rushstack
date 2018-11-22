@@ -17,6 +17,9 @@
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "dependencies": {
     "@microsoft/api-extractor": "6.1.6",
     "@microsoft/node-core-library": "3.6.0",

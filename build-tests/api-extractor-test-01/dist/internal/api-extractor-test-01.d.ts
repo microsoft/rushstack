@@ -10,6 +10,7 @@
  */
 
 /// <reference types="jest" />
+/// <reference lib="es2018.intl" />
 
 /**
  * Example of an abstract class that is directly exported.
@@ -262,6 +263,10 @@ declare const locallyExportedCustomSymbol: unique symbol;
 export declare class ReexportedClass {
     getSelfReference(): ReexportedClass;
     getValue(): string;
+}
+
+/** @public */
+export declare class ReferenceLibDirective extends Intl.PluralRules {
 }
 
 /**
