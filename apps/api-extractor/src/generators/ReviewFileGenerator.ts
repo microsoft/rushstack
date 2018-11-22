@@ -62,6 +62,12 @@ export class ReviewFileGenerator {
   private static _modifySpan(collector: Collector, span: Span, entity: CollectorEntity,
     astDeclaration: AstDeclaration): void {
 
+    // Should we process this declaration at all?
+    if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) { // tslint:disable-line:no-bitwise
+      span.modification.skipAll();
+      return;
+    }
+
     let recurseChildren: boolean = true;
     let sortChildren: boolean = false;
 

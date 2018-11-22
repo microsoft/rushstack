@@ -13,7 +13,6 @@ declare class CleanFlagTask extends CleanTask {
     constructor();
     // (undocumented)
     executeTask(gulp: typeof gulp, completeCallback: (error?: string | Error) => void): void;
-    private _hasRun;
     // (undocumented)
     isEnabled(buildConfig: IBuildConfig): boolean;
 }
@@ -65,8 +64,6 @@ declare function functionalTestRun(name: string, result: TestResultState, durati
 // @public
 declare class GenerateShrinkwrapTask extends GulpTask<void> {
     constructor();
-    // (undocumented)
-    private _dangerouslyDeletePath;
     executeTask(gulp: gulp.Gulp, completeCallback: (error?: string | Error) => void): NodeJS.ReadWriteStream | void;
 }
 
@@ -102,12 +99,10 @@ declare abstract class GulpTask<TTaskConfig> implements IExecutable {
     mergeConfig(taskConfig: Partial<TTaskConfig>): void;
     name: string;
     onRegister(): void;
-    private _readConfigFile;
     readJSONSync(localPath: string): Object | undefined;
     replaceConfig(taskConfig: TTaskConfig): void;
     resolvePath(localPath: string): string;
     readonly schema: Object | undefined;
-    private _schema;
     setConfig(taskConfig: Partial<TTaskConfig>): void;
     taskConfig: TTaskConfig;
 }
@@ -208,10 +203,6 @@ declare class JestTask extends GulpTask<IJestConfig> {
     // (undocumented)
     constructor();
     // (undocumented)
-    private _copyIfMatchExtension;
-    // (undocumented)
-    private _copySnapshots;
-    // (undocumented)
     executeTask(gulp: typeof gulp, completeCallback: (error?: string | Error) => void): void;
     // (undocumented)
     isEnabled(buildConfig: IBuildConfig): boolean;
@@ -264,9 +255,7 @@ declare enum TestResultState {
 declare class ValidateShrinkwrapTask extends GulpTask<void> {
     constructor();
     executeTask(gulp: gulp.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void;
-    // (undocumented)
-    private _validate;
-}
+    }
 
 // @public
 declare function verbose(...args: Array<string>): void;

@@ -30,8 +30,6 @@ declare class SetPublicPathPlugin implements Webpack.Plugin {
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;
     // (undocumented)
-    private _getStartupCode;
-    // (undocumented)
     options: ISetWebpackPublicPathPluginOptions;
 }
 

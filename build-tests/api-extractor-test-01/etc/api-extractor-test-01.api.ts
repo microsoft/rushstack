@@ -30,13 +30,7 @@ class ClassExportedAsDefault {
 
 // @public
 declare class ClassWithAccessModifiers {
-    private constructor();
     defaultPublicMethod(): void;
-    private _privateField;
-    private readonly privateGetter;
-    private privateMethod;
-    private privateSetter;
-    private static privateStaticMethod;
     protected protectedField: number;
     protected readonly protectedGetter: string;
     protected protectedSetter(x: string): void;

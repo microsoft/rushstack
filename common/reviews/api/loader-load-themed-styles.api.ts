@@ -10,8 +10,6 @@ declare class LoadThemedStylesLoader {
     constructor();
     static loadedThemedStylesPath: string;
     // (undocumented)
-    private static _loadedThemedStylesPath;
-    // (undocumented)
     static pitch(this: loader.LoaderContext, remainingRequest: string): string;
     static resetLoadedThemedStylesPath(): void;
 }

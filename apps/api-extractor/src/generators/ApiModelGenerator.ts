@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// tslint:disable:no-bitwise
+
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
@@ -63,6 +65,10 @@ export class ApiModelGenerator {
 
   private _processDeclaration(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
+
+    if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) {
+      return; // trim out private declarations
+    }
 
     switch (astDeclaration.declaration.kind) {
       case ts.SyntaxKind.ClassDeclaration:
@@ -162,15 +168,7 @@ export class ApiModelGenerator {
 
     const methodDeclaration: ts.MethodDeclaration = astDeclaration.declaration as ts.MethodDeclaration;
 
-    let isStatic: boolean = false;
-    if (methodDeclaration.modifiers) {
-      for (const modifier of methodDeclaration.modifiers) {
-        if (modifier.kind === ts.SyntaxKind.StaticKeyword) {
-          isStatic = true;
-        }
-      }
-    }
-
+    const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
     const canonicalReference: string = ApiMethod.getCanonicalReference(name, isStatic, overloadIndex);
 
@@ -265,14 +263,7 @@ export class ApiModelGenerator {
 
     const propertyDeclaration: ts.PropertyDeclaration = astDeclaration.declaration as ts.PropertyDeclaration;
 
-    let isStatic: boolean = false;
-    if (propertyDeclaration.modifiers) {
-      for (const modifier of propertyDeclaration.modifiers) {
-        if (modifier.kind === ts.SyntaxKind.StaticKeyword) {
-          isStatic = true;
-        }
-      }
-    }
+    const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
 
     const canonicalReference: string = ApiProperty.getCanonicalReference(name, isStatic);
 

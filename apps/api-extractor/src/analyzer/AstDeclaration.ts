@@ -42,6 +42,11 @@ export class AstDeclaration {
   public readonly parent: AstDeclaration | undefined;
 
   /**
+   * A bit set of TypeScript modifiers such as "private", "protected", etc.
+   */
+  public readonly modifierFlags: ts.ModifierFlags;
+
+  /**
    * Additional information applied later by the Collector.
    */
   public metadata: unknown;
@@ -60,6 +65,8 @@ export class AstDeclaration {
     if (this.parent) {
       this.parent._notifyChildAttach(this);
     }
+
+    this.modifierFlags = ts.getCombinedModifierFlags(this.declaration);
   }
 
   /**
