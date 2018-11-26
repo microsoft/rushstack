@@ -261,6 +261,8 @@ export interface IExtractorDtsRollupConfig {
  * @public
  */
 export interface IExtractorConfig {
+  extends?: string;
+
   /**
    * Determines how the TypeScript compiler will be invoked.
    * The compiler.configType selects the type of configuration;
