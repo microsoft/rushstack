@@ -400,6 +400,22 @@ export interface IApiInterface extends IApiBaseDefinition {
 }
 
 /**
+ * IApiTypeAlias represents a "type" alias declaration.
+ * @alpha
+ */
+export interface IApiTypeAlias extends IApiBaseDefinition {
+  /**
+   * {@inheritdoc IApiBaseDefinition.kind}
+   */
+  kind: 'type alias';
+
+  /**
+   * The data type of the type alias
+   */
+  type: string;
+}
+
+/**
  * IApiInterface represents an exported interface.
  * @alpha
  */
@@ -486,6 +502,6 @@ export type ApiMember = IApiProperty | IApiMethod | IApiConstructor;
 /**
  * @alpha
  */
-export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor |
+export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor | IApiTypeAlias |
    IApiClass | IApiEnum | IApiEnumMember | IApiInterface | IApiNamespace | IApiPackage |
    IApiModuleVariable;

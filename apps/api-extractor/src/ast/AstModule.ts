@@ -11,6 +11,7 @@ import { AstStructuredType } from './AstStructuredType';
 import { AstEnum } from './AstEnum';
 import { AstFunction } from './AstFunction';
 import { AstModuleVariable } from './AstModuleVariable';
+import { AstTypeAlias } from './AstTypeAlias';
 
 /**
   * This is an abstract base class for AstPackage and AstNamespace.
@@ -46,6 +47,8 @@ export abstract class AstModule extends AstItemContainer {
         this.addMemberItem(new AstEnum(options));
       } else if (followedSymbol.flags & ts.SymbolFlags.BlockScopedVariable) {
         this.addMemberItem(new AstModuleVariable(options));
+      } else if (followedSymbol.flags & ts.SymbolFlags.TypeAlias) {
+        this.addMemberItem(new AstTypeAlias(options));
       } else {
         this.reportWarning(`Unsupported export: ${exportSymbol.name}`);
       }

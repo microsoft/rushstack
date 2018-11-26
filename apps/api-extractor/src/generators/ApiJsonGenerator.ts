@@ -25,6 +25,7 @@ import { IAedocParameter } from '../aedoc/ApiDocumentation';
 import { IApiReturnValue, IApiParameter, IApiNameMap } from '../api/ApiItem';
 import { ApiJsonConverter } from '../api/ApiJsonConverter';
 import { ApiJsonFile } from '../api/ApiJsonFile';
+import { AstTypeAlias } from '../ast/AstTypeAlias';
 
 /**
  * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.json"
@@ -319,6 +320,19 @@ export class ApiJsonGenerator extends AstItemVisitor {
     }
 
     refObject![astMethod.name] = newNode;
+  }
+
+  protected visitAstTypeAlias(astTypeAlias: AstTypeAlias, refObject?: Object): void {
+    const newNode: Object = {
+      kind: ApiJsonConverter.convertKindToJson(astTypeAlias.kind),
+      type: astTypeAlias.type,
+      deprecatedMessage: astTypeAlias.inheritedDeprecatedMessage || [],
+      summary: astTypeAlias.documentation.summary || [],
+      remarks: astTypeAlias.documentation.remarks || [],
+      isBeta: astTypeAlias.inheritedReleaseTag === ReleaseTag.Beta
+    };
+
+    refObject![astTypeAlias.name] = newNode;
   }
 
   private _createParameters(astFunction: AstMethod | AstFunction): IApiNameMap<IApiParameter> {

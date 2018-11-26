@@ -13,6 +13,7 @@ export class ApiJsonConverter {
   private static _KIND_ENUM: string = 'enum';
   private static _KIND_ENUM_VALUE: string = 'enum value';
   private static _KIND_INTERFACE: string = 'interface';
+  private static _KIND_TYPEALIAS: string = 'type alias';
   private static _KIND_FUNCTION: string = 'function';
   private static _KIND_PACKAGE: string = 'package';
   private static _KIND_PROPERTY: string = 'property';
@@ -51,6 +52,8 @@ export class ApiJsonConverter {
         return AstItemKind.Namespace;
       case (this._KIND_MODULEVARIABLE):
         return AstItemKind.ModuleVariable;
+      case (this._KIND_TYPEALIAS):
+        return AstItemKind.TypeAlias;
       default:
         throw new Error('Unsupported kind when converting JSON item kind to API item kind.');
     }
@@ -83,6 +86,8 @@ export class ApiJsonConverter {
         return this._KIND_NAMESPACE;
       case (AstItemKind.ModuleVariable):
         return this._KIND_MODULEVARIABLE;
+      case (AstItemKind.TypeAlias):
+        return this._KIND_TYPEALIAS;
       default:
         throw new Error('Unsupported API item kind when converting to string used in API JSON file.');
     }

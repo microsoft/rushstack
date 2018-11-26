@@ -12,6 +12,7 @@ import { AstMethod } from '../ast/AstMethod';
 import { AstNamespace } from '../ast/AstNamespace';
 import { AstProperty } from '../ast/AstProperty';
 import { AstModuleVariable } from '../ast/AstModuleVariable';
+import { AstTypeAlias } from '../ast/AstTypeAlias';
 
 /**
   * This is a helper class that provides a standard way to walk the AstItem
@@ -37,6 +38,8 @@ export abstract class AstItemVisitor {
       this.visitAstNamespace(astItem as AstNamespace, refObject);
     } else if (astItem instanceof AstModuleVariable) {
       this.visitAstModuleVariable(astItem as AstModuleVariable, refObject);
+    } else if (astItem instanceof AstTypeAlias) {
+      this.visitAstTypeAlias(astItem, refObject);
     } else {
       throw new Error('Not implemented');
     }
@@ -57,6 +60,8 @@ export abstract class AstItemVisitor {
   protected abstract visitAstNamespace(astNamespace: AstNamespace, refObject?: Object): void;
 
   protected abstract visitAstModuleVariable(astModuleVariable: AstModuleVariable, refObject?: Object): void;
+
+  protected abstract visitAstTypeAlias(astTypeAlias: AstTypeAlias, refObject?: Object): void;
 
   protected visitAstMethod(astMethod: AstMethod, refObject?: Object): void {
     this.visitAstMember(astMethod, refObject);

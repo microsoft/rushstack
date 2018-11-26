@@ -1047,7 +1047,8 @@
                 { "$ref": "#/definitions/interfaceApiItem" },
                 { "$ref": "#/definitions/namespaceApiItem" },
                 { "$ref": "#/definitions/enumApiItem" },
-                { "$ref": "#/definitions/functionApiItem" }
+                { "$ref": "#/definitions/functionApiItem" },
+                { "$ref": "#/definitions/typeAliasApiItem" }
               ]
             }
           },
@@ -1072,6 +1073,47 @@
       },
       "additionalProperties": false,
       "required": [ "kind", "exports", "summary", "isBeta" ]
+    },
+
+    //---------------------------------------------------------------------------------------------
+    "typeAliasApiItem": {
+      "description": "A TypeScript TypeAlias definition",
+      "type": "object",
+
+      "properties": {
+        "kind": {
+          "description": "The kind of API definition",
+          "type": "string",
+          "enum": [ "type alias" ]
+        },
+        "type": {
+          "description": "The data type of this type alias",
+          "type": "string"
+        },
+        "summary": {
+          "description": "A short description of the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        },
+        "isBeta": {
+          "description": "Whether the API method is beta",
+          "type": "boolean"
+        },
+
+        // Optional properties:
+        "remarks": {
+          "description": "Detailed additional notes regarding the item",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupStructuredElement" }
+        },
+        "deprecatedMessage": {
+          "description": "If present, indicates that the item is deprecated and describes the recommended alternative",
+          "type": "array",
+          "items": { "$ref": "#/definitions/markupBasicElement" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "kind", "type", "summary", "isBeta"]
     }
   },
 
@@ -1115,7 +1157,8 @@
              { "$ref": "#/definitions/namespaceApiItem" },
              { "$ref": "#/definitions/enumApiItem" },
              { "$ref": "#/definitions/functionApiItem" },
-             { "$ref": "#/definitions/moduleVariableApiItem" }
+             { "$ref": "#/definitions/moduleVariableApiItem" },
+             { "$ref": "#/definitions/typeAliasApiItem" }
            ]
          }
       },

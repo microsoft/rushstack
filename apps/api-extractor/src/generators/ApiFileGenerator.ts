@@ -15,6 +15,7 @@ import { AstNamespace } from '../ast/AstNamespace';
 import { AstModuleVariable } from '../ast/AstModuleVariable';
 import { IndentedWriter } from '../utils/IndentedWriter';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
+import { AstTypeAlias } from '../ast/AstTypeAlias';
 
 /**
  * For a library such as "example-package", ApiFileGenerator generates the "example-package.api.ts"
@@ -179,6 +180,11 @@ export class ApiFileGenerator extends AstItemVisitor {
   protected visitAstFunction(astFunction: AstFunction): void {
     this._writeAedocSynopsis(astFunction);
     this._indentedWriter.write(astFunction.getDeclarationLine());
+  }
+
+  protected visitAstTypeAlias(astTypeAlias: AstTypeAlias, refObject?: Object): void {
+    this._writeAedocSynopsis(astTypeAlias);
+    this._indentedWriter.write(`type ${astTypeAlias.name} = ${astTypeAlias.type};`);
   }
 
   /**

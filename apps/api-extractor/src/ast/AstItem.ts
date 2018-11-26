@@ -75,7 +75,11 @@ export enum AstItemKind {
   /**
    * A Typescript BlockScopedVariable.
    */
-  ModuleVariable = 12
+  ModuleVariable = 12,
+  /**
+   * A Typescript type alias, i.e. the "type" keyword.
+   */
+  TypeAlias = 13
 }
 
 /**
