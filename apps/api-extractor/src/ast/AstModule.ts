@@ -10,6 +10,7 @@ import { TypeScriptHelpers } from '../utils/TypeScriptHelpers';
 import { AstStructuredType } from './AstStructuredType';
 import { AstEnum } from './AstEnum';
 import { AstFunction } from './AstFunction';
+import { AstModuleVariable } from './AstModuleVariable';
 
 /**
   * This is an abstract base class for AstPackage and AstNamespace.
@@ -43,6 +44,8 @@ export abstract class AstModule extends AstItemContainer {
         this.addMemberItem(new AstFunction(options));
       } else if (followedSymbol.flags & ts.SymbolFlags.Enum) {
         this.addMemberItem(new AstEnum(options));
+      } else if (followedSymbol.flags & ts.SymbolFlags.BlockScopedVariable) {
+        this.addMemberItem(new AstModuleVariable(options));
       } else {
         this.reportWarning(`Unsupported export: ${exportSymbol.name}`);
       }

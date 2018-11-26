@@ -452,6 +452,32 @@ export interface IApiPackage {
 }
 
 /**
+ * A variable of module (or namespace)
+ * @alpha
+ */
+export interface IApiModuleVariable extends IApiBaseDefinition {
+  /**
+   * {@inheritdoc IApiBaseDefinition.kind}
+   */
+  kind: 'module variable';
+
+  /**
+   * a text summary of the variable definition
+   */
+  signature: string;
+
+  /**
+   * The data type of the variable
+   */
+  type: string;
+
+  /**
+   * The initialized value of the variable
+   */
+  value: string;
+}
+
+/**
  * A member of a class.
  * @alpha
  */
@@ -461,4 +487,5 @@ export type ApiMember = IApiProperty | IApiMethod | IApiConstructor;
  * @alpha
  */
 export type ApiItem = IApiProperty | ApiMember | IApiFunction | IApiConstructor |
-   IApiClass | IApiEnum | IApiEnumMember | IApiInterface | IApiNamespace | IApiPackage;
+   IApiClass | IApiEnum | IApiEnumMember | IApiInterface | IApiNamespace | IApiPackage |
+   IApiModuleVariable;

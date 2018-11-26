@@ -1114,7 +1114,8 @@
              { "$ref": "#/definitions/interfaceApiItem" },
              { "$ref": "#/definitions/namespaceApiItem" },
              { "$ref": "#/definitions/enumApiItem" },
-             { "$ref": "#/definitions/functionApiItem" }
+             { "$ref": "#/definitions/functionApiItem" },
+             { "$ref": "#/definitions/moduleVariableApiItem" }
            ]
          }
       },
