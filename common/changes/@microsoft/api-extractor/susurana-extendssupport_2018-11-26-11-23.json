@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Support extends feaature for api extractor json config file for easier management of project with multiple packages",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "sunilsurana@users.noreply.github.com"
+}
