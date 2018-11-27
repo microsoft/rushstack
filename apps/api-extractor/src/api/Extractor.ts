@@ -29,6 +29,7 @@ import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatt
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
 import { ApiPackage } from './model/ApiPackage';
 import { ReviewFileGenerator } from '../generators/ReviewFileGenerator';
+import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -421,6 +422,9 @@ export class Extractor {
     }
 
     this._generateRollupDtsFiles(collector);
+
+    // Write the tsdoc-metadata.json file for this project
+    PackageMetadataManager.writeTsdocMetadataFile(collector.package.packageFolder);
 
     if (this._localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
