@@ -74,11 +74,11 @@ export class ExtractorContext {
 
   public readonly validationRules: IExtractorValidationRulesConfig;
 
+  public readonly logger: ILogger;
+
   // If the entry point is "C:\Folder\project\src\index.ts" and the nearest package.json
   // is "C:\Folder\project\package.json", then the packageFolder is "C:\Folder\project"
   private _packageFolder: string;
-
-  private _logger: ILogger;
 
   constructor(options: IExtractorContextOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
@@ -98,7 +98,7 @@ export class ExtractorContext {
 
     this.docItemLoader = new DocItemLoader(this._packageFolder);
 
-    this._logger = options.logger;
+    this.logger = options.logger;
 
     // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
@@ -148,10 +148,10 @@ export class ExtractorContext {
 
       // Format the error so that VS Code can follow it.  For example:
       // "src\MyClass.ts(15,1): The JSDoc tag "@blah" is not supported by AEDoc"
-      this._logger.logError(`${shownPath}(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1}): `
+      this.logger.logError(`${shownPath}(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1}): `
         + message);
     } else {
-      this._logger.logError(message);
+      this.logger.logError(message);
     }
   }
 

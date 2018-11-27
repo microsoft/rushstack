@@ -13,6 +13,7 @@ import { AstSymbol } from './AstSymbol';
 import { AstImport } from './AstImport';
 import { AstEntryPoint, IExportedMember } from './AstEntryPoint';
 import { PackageMetadataManager } from './PackageMetadataManager';
+import { ILogger } from '../../extractor/ILogger';
 
 /**
  * AstSymbolTable is the workhorse that builds AstSymbol and AstDeclaration objects.
@@ -55,11 +56,13 @@ export class AstSymbolTable {
   private readonly _astEntryPointsBySourceFile: Map<ts.SourceFile, AstEntryPoint>
     = new Map<ts.SourceFile, AstEntryPoint>();
 
-  public constructor(program: ts.Program, typeChecker: ts.TypeChecker, packageJsonLookup: PackageJsonLookup) {
+  public constructor(program: ts.Program, typeChecker: ts.TypeChecker, packageJsonLookup: PackageJsonLookup,
+    logger: ILogger) {
+
     this._program = program;
     this._typeChecker = typeChecker;
     this._packageJsonLookup = packageJsonLookup;
-    this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup);
+    this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup, logger);
   }
 
   /**
