@@ -3,20 +3,15 @@
 
 import * as os from 'os';
 import * as colors from 'colors';
-import * as path from 'path';
 import {
-  JsonFile,
-  FileConstants
+  PackageJsonLookup
 } from '@microsoft/node-core-library';
 
 import { RushStackCommandLine } from './cli/RushStackCommandLine';
 
-const myPackageJsonFilename: string = path.resolve(path.join(
-  __dirname, '..', FileConstants.PackageJson)
-);
-const myPackageJson: { version: string } = JsonFile.load(myPackageJsonFilename);
+const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname, '..').version;
 
-console.log(os.EOL + colors.bold(`rush-stack ${myPackageJson.version} `
+console.log(os.EOL + colors.bold(`rush-stack ${currentPackageVersion} `
   + colors.cyan(' - http://rushstack.io') + os.EOL));
 
 const parser: RushStackCommandLine = new RushStackCommandLine();
