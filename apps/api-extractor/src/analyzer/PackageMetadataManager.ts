@@ -11,6 +11,7 @@ import {
   NewlineKind
 } from '@microsoft/node-core-library';
 import { Extractor } from '../api/Extractor';
+import { ILogger } from '../api/ILogger';
 
 /**
  * Represents analyzed information for a package.json file.
@@ -56,6 +57,7 @@ export class PackageMetadataManager {
   public static tsdocMetadataFilename: string = 'tsdoc-metadata.json';
 
   private readonly _packageJsonLookup: PackageJsonLookup;
+  private readonly _logger: ILogger;
   private readonly _packageMetadataByPackageJsonPath: Map<string, PackageMetadata>
     = new Map<string, PackageMetadata>();
 
@@ -86,8 +88,9 @@ export class PackageMetadataManager {
     });
   }
 
-  public constructor(packageJsonLookup: PackageJsonLookup) {
+  public constructor(packageJsonLookup: PackageJsonLookup, logger: ILogger) {
     this._packageJsonLookup = packageJsonLookup;
+    this._logger = logger;
   }
 
   /**
@@ -116,12 +119,10 @@ export class PackageMetadataManager {
       const tsdocMetadataPath: string = path.join(packageJsonFolder,
         'dist', PackageMetadataManager.tsdocMetadataFilename);
 
-        if (FileSystem.exists(tsdocMetadataPath)) {
-        console.log('Found: ' + tsdocMetadataPath);
+      if (FileSystem.exists(tsdocMetadataPath)) {
+        this._logger.logVerbose('Found metadata in ' + tsdocMetadataPath);
         // If the file exists at all, assume it was written by API Extractor
         aedocSupported = true;
-      } else {
-        console.log('NOT FOUND: ' + tsdocMetadataPath);
       }
 
       packageMetadata = new PackageMetadata(packageJsonFilePath, packageJson, aedocSupported);

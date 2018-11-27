@@ -72,11 +72,11 @@ export class Collector {
   public readonly policies: IExtractorPoliciesConfig;
   public readonly validationRules: IExtractorValidationRulesConfig;
 
-  private readonly _program: ts.Program;
+  public readonly logger: ILogger;
 
   public readonly package: CollectorPackage;
 
-  private readonly _logger: ILogger;
+  private readonly _program: ts.Program;
 
   private readonly _tsdocParser: tsdoc.TSDocParser;
 
@@ -95,7 +95,7 @@ export class Collector {
     this.policies = options.policies;
     this.validationRules = options.validationRules;
 
-    this._logger = options.logger;
+    this.logger = options.logger;
     this._program = options.program;
 
     const packageFolder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
@@ -120,7 +120,7 @@ export class Collector {
     this.typeChecker = options.program.getTypeChecker();
 
     this._tsdocParser = new tsdoc.TSDocParser();
-    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup);
+    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup, this.logger);
   }
 
   /**
@@ -334,10 +334,10 @@ export class Collector {
 
       // Format the error so that VS Code can follow it.  For example:
       // "src\MyClass.ts(15,1): The JSDoc tag "@blah" is not supported by AEDoc"
-      this._logger.logError(`${shownPath}(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1}): `
+      this.logger.logError(`${shownPath}(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1}): `
         + message);
     } else {
-      this._logger.logError(message);
+      this.logger.logError(message);
     }
   }
 
