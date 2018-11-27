@@ -71,6 +71,14 @@ export {
   ApiEntryPoint
 } from './api/model/ApiEntryPoint';
 export {
+  IApiEnumOptions,
+  ApiEnum
+} from './api/model/ApiEnum';
+export {
+  IApiEnumMemberOptions,
+  ApiEnumMember
+} from './api/model/ApiEnumMember';
+export {
   IApiInterfaceOptions,
   ApiInterface
 } from './api/model/ApiInterface';

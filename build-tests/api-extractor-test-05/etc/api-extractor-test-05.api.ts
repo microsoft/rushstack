@@ -15,6 +15,13 @@ declare class DocClass1 {
 }
 
 // @public
+declare enum DocEnum {
+    One = 1,
+    Two = 2,
+    Zero = 0
+}
+
+// @public
 declare class SystemEvent {
     addHandler(handler: () => void): void;
 }

@@ -23,6 +23,8 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { ApiProperty } from '../api/model/ApiProperty';
 import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
 import { ApiFunctionLikeMixin } from '../api/mixins/ApiFunctionLikeMixin';
+import { ApiEnum } from '../api/model/ApiEnum';
+import { ApiEnumMember } from '../api/model/ApiEnumMember';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -75,6 +77,14 @@ export class ApiModelGenerator {
         this._processApiClass(astDeclaration, exportedName, parentApiItem);
         break;
 
+      case ts.SyntaxKind.EnumDeclaration:
+        this._processApiEnum(astDeclaration, exportedName, parentApiItem);
+        break;
+
+      case ts.SyntaxKind.EnumMember:
+        this._processApiEnumMember(astDeclaration, exportedName, parentApiItem);
+        break;
+
       case ts.SyntaxKind.InterfaceDeclaration:
         this._processApiInterface(astDeclaration, exportedName, parentApiItem);
         break;
@@ -101,8 +111,6 @@ export class ApiModelGenerator {
 
       case ts.SyntaxKind.Constructor:
       case ts.SyntaxKind.ConstructSignature:
-      case ts.SyntaxKind.EnumDeclaration:
-      case ts.SyntaxKind.EnumMember:
       case ts.SyntaxKind.FunctionDeclaration:
       case ts.SyntaxKind.IndexSignature:
       case ts.SyntaxKind.TypeAliasDeclaration:
@@ -138,6 +146,47 @@ export class ApiModelGenerator {
     }
 
     this._processChildDeclarations(astDeclaration, exportedName, apiClass);
+  }
+
+  private _processApiEnum(astDeclaration: AstDeclaration, exportedName: string | undefined,
+    parentApiItem: ApiItemContainerMixin): void {
+
+    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const canonicalReference: string = ApiEnum.getCanonicalReference(name);
+
+    let apiEnum: ApiEnum | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiEnum;
+
+    if (apiEnum === undefined) {
+      const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
+        ts.SyntaxKind.FirstPunctuation);  // FirstPunctuation = "{"
+
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
+
+      apiEnum = new ApiEnum({ name, signature, docComment, releaseTag });
+      parentApiItem.addMember(apiEnum);
+    }
+
+    this._processChildDeclarations(astDeclaration, exportedName, apiEnum);
+  }
+
+  private _processApiEnumMember(astDeclaration: AstDeclaration, exportedName: string | undefined,
+    parentApiItem: ApiItemContainerMixin): void {
+
+    const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
+    const canonicalReference: string = ApiEnumMember.getCanonicalReference(name);
+
+    let apiEnumMember: ApiEnumMember | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiMethod;
+
+    if (apiEnumMember === undefined) {
+      const signature: string = astDeclaration.declaration.getText();
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
+
+      apiEnumMember = new ApiEnumMember({ name, signature, docComment, releaseTag });
+
+      parentApiItem.addMember(apiEnumMember);
+    }
   }
 
   private _processApiInterface(astDeclaration: AstDeclaration, exportedName: string | undefined,

@@ -36,6 +36,32 @@ class ApiEntryPoint extends ApiEntryPoint_base {
 }
 
 // @public (undocumented)
+class ApiEnum extends ApiEnum_base {
+  constructor(options: IApiEnumOptions);
+  // @override (undocumented)
+  addMember(member: ApiEnumMember): void;
+  // @override (undocumented)
+  readonly canonicalReference: string;
+  // (undocumented)
+  static getCanonicalReference(name: string): string;
+  // @override (undocumented)
+  readonly kind: ApiItemKind;
+  // @override (undocumented)
+  readonly members: ReadonlyArray<ApiEnumMember>;
+}
+
+// @public (undocumented)
+class ApiEnumMember extends ApiEnumMember_base {
+  constructor(options: IApiEnumMemberOptions);
+  // @override (undocumented)
+  readonly canonicalReference: string;
+  // (undocumented)
+  static getCanonicalReference(name: string): string;
+  // @override (undocumented)
+  readonly kind: ApiItemKind;
+}
+
+// @public (undocumented)
 interface ApiFunctionLikeMixin {
 }
 
@@ -91,6 +117,10 @@ enum ApiItemKind {
   Class = "Class",
   // (undocumented)
   EntryPoint = "EntryPoint",
+  // (undocumented)
+  Enum = "Enum",
+  // (undocumented)
+  EnumMember = "EnumMember",
   // (undocumented)
   Interface = "Interface",
   // (undocumented)
@@ -276,6 +306,14 @@ interface IApiDocumentedItemOptions extends IApiItemOptions {
 
 // @public (undocumented)
 interface IApiEntryPointOptions extends IApiItemContainerMixinOptions {
+}
+
+// @public (undocumented)
+interface IApiEnumMemberOptions extends IApiDeclarationMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
+}
+
+// @public (undocumented)
+interface IApiEnumOptions extends IApiDeclarationMixinOptions, IApiItemContainerMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public (undocumented)

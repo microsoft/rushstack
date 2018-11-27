@@ -7,6 +7,8 @@ import { Constructor, PropertiesOf } from '../mixins/Mixin';
 export const enum ApiItemKind {
   Class = 'Class',
   EntryPoint = 'EntryPoint',
+  Enum = 'Enum',
+  EnumMember = 'EnumMember',
   Interface = 'Interface',
   Method = 'Method',
   MethodSignature = 'MethodSignature',

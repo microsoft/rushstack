@@ -165,6 +165,40 @@
           "signature": "export declare class DocClass1"
         },
         {
+          "kind": "Enum",
+          "name": "DocEnum",
+          "canonicalReference": "(DocEnum:enum)",
+          "docComment": "/**\n * Docs for DocEnum\n *\n * @public\n */\n",
+          "releaseTag": "Public",
+          "members": [
+            {
+              "kind": "EnumMember",
+              "name": "One",
+              "canonicalReference": "One",
+              "docComment": "/**\n * These are some docs for One\n */\n",
+              "releaseTag": "Public",
+              "signature": "One = 1"
+            },
+            {
+              "kind": "EnumMember",
+              "name": "Two",
+              "canonicalReference": "Two",
+              "docComment": "/**\n * These are some docs for Two\n */\n",
+              "releaseTag": "Public",
+              "signature": "Two = 2"
+            },
+            {
+              "kind": "EnumMember",
+              "name": "Zero",
+              "canonicalReference": "Zero",
+              "docComment": "/**\n * These are some docs for Zero\n */\n",
+              "releaseTag": "Public",
+              "signature": "Zero = 0"
+            }
+          ],
+          "signature": "export declare enum DocEnum"
+        },
+        {
           "kind": "Class",
           "name": "SystemEvent",
           "canonicalReference": "(SystemEvent:class)",

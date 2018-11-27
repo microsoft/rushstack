@@ -13,6 +13,8 @@ import { ApiPropertySignature } from './ApiPropertySignature';
 import { ApiParameter } from './ApiParameter';
 import { ApiMethodSignature } from './ApiMethodSignature';
 import { ApiProperty } from './ApiProperty';
+import { ApiEnumMember } from './ApiEnumMember';
+import { ApiEnum } from './ApiEnum';
 
 export class Deserializer {
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
@@ -25,6 +27,12 @@ export class Deserializer {
       case ApiItemKind.EntryPoint:
         ApiEntryPoint.onDeserializeInto(options, jsonObject);
         return new ApiEntryPoint(options as any); // tslint:disable-line:no-any
+      case ApiItemKind.Enum:
+        ApiEnum.onDeserializeInto(options, jsonObject);
+        return new ApiEnum(options as any); // tslint:disable-line:no-any
+      case ApiItemKind.EnumMember:
+        ApiEnumMember.onDeserializeInto(options, jsonObject);
+        return new ApiEnumMember(options as any); // tslint:disable-line:no-any
       case ApiItemKind.Interface:
         ApiInterface.onDeserializeInto(options, jsonObject);
         return new ApiInterface(options as any); // tslint:disable-line:no-any

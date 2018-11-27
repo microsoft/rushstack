@@ -246,7 +246,7 @@ export class YamlDocumenter {
       case ApiItemKind.Class:
       case ApiItemKind.Package:
       case ApiItemKind.Interface:
-      // case ApiItemKind.Enum:
+      case ApiItemKind.Enum:
       return false;
     }
     return true;
@@ -292,16 +292,13 @@ export class YamlDocumenter {
     yamlItem.langs = [ 'typeScript' ];
 
     switch (apiItem.kind) {
-      case ApiItemKind.Package:
-        yamlItem.type = 'package';
-        break;
-      /*
       case ApiItemKind.Enum:
         yamlItem.type = 'enum';
         break;
       case ApiItemKind.EnumMember:
         yamlItem.type = 'field';
-        const enumMember: IApiEnumMember = apiItem.apiItem as IApiEnumMember;
+        /*
+        const enumMember: ApiEnumMember = apiItem as ApiEnumMember;
         if (enumMember.value) {
           // NOTE: In TypeScript, enum members can be strings or integers.
           // If it is an integer, then enumMember.value will be a string representation of the integer.
@@ -309,8 +306,8 @@ export class YamlDocumenter {
           // Enum values can also be calculated numbers, however this is not implemented yet.
           yamlItem.numericValue = enumMember.value as any; // tslint:disable-line:no-any
         }
+        */
         break;
-      */
       case ApiItemKind.Class:
         yamlItem.type = 'class';
         this._populateYamlClassOrInterface(yamlItem, apiItem);
@@ -329,6 +326,9 @@ export class YamlDocumenter {
         this._populateYamlFunctionLike(yamlItem, apiItem);
         break;
       */
+      case ApiItemKind.Package:
+        yamlItem.type = 'package';
+        break;
       case ApiItemKind.Property:
         const apiProperty: ApiPropertyItem = apiItem as ApiPropertyItem;
         if (apiProperty.isEventProperty) {
@@ -541,7 +541,7 @@ export class YamlDocumenter {
   private _initApiItemsByTypeNameRecursive(apiItem: ApiItem, ambiguousNames: Set<string>): void {
     switch (apiItem.kind) {
       case ApiItemKind.Class:
-      // case ApiItemKind.Enum:
+      case ApiItemKind.Enum:
       case ApiItemKind.Interface:
         // Attempt to register both the fully qualified name and the short name
         const namesForType: string[] = [apiItem.name];

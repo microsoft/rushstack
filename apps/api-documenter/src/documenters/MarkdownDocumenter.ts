@@ -25,6 +25,7 @@ import {
 import {
   ApiModel,
   ApiItem,
+  ApiEnum,
   ApiPackage,
   ApiItemKind,
   ApiEntryPoint,
@@ -36,7 +37,8 @@ import {
   ApiStaticMixin,
   ApiResultTypeMixin,
   ApiPropertyItem,
-  ApiFunctionLikeMixin
+  ApiFunctionLikeMixin,
+  ApiInterface
 } from '@microsoft/api-extractor';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -88,6 +90,9 @@ export class MarkdownDocumenter {
     switch (apiItem.kind) {
       case ApiItemKind.Class:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} class` }));
+        break;
+      case ApiItemKind.Enum:
+        output.appendNode(new DocHeading({ configuration, title: `${scopedName} enum` }));
         break;
       case ApiItemKind.Interface:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} interface` }));
@@ -161,8 +166,11 @@ export class MarkdownDocumenter {
       case ApiItemKind.Class:
         this._writeClassTables(output, apiItem as ApiClass);
         break;
+      case ApiItemKind.Enum:
+        this._writeEnumTables(output, apiItem as ApiEnum);
+        break;
       case ApiItemKind.Interface:
-        this._writeInterfaceTables(output, apiItem as ApiClass);
+        this._writeInterfaceTables(output, apiItem as ApiInterface);
         break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
@@ -228,24 +236,24 @@ export class MarkdownDocumenter {
   private _writePackageTables(output: DocSection, apiPackage: ApiPackage): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    const namespacesTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Namespace', 'Description' ]
-    });
-
     const classesTable: DocTable = new DocTable({ configuration,
       headerTitles: [ 'Class', 'Description' ]
     });
 
-    const interfacesTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Interface', 'Description' ]
+    const enumerationsTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Enumeration', 'Description' ]
     });
 
     const functionsTable: DocTable = new DocTable({ configuration,
       headerTitles: [ 'Function', 'Description' ]
     });
 
-    const enumerationsTable: DocTable = new DocTable({ configuration,
-      headerTitles: [ 'Enumeration', 'Description' ]
+    const interfacesTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Interface', 'Description' ]
+    });
+
+    const namespacesTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Namespace', 'Description' ]
     });
 
     const apiEntryPoint: ApiEntryPoint = apiPackage.entryPoints[0];
@@ -260,6 +268,11 @@ export class MarkdownDocumenter {
       switch (apiMember.kind) {
         case ApiItemKind.Class:
           classesTable.addRow(row);
+          this._writeApiItemPage(apiMember);
+          break;
+
+        case ApiItemKind.Enum:
+          enumerationsTable.addRow(row);
           this._writeApiItemPage(apiMember);
           break;
 
@@ -283,14 +296,18 @@ export class MarkdownDocumenter {
       }
     }
 
-    if (namespacesTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Namespaces' }));
-      output.appendNode(namespacesTable);
-    }
-
     if (classesTable.rows.length > 0) {
       output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Classes' }));
       output.appendNode(classesTable);
+    }
+
+    if (enumerationsTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Enumerations' }));
+      output.appendNode(enumerationsTable);
+    }
+    if (functionsTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Functions' }));
+      output.appendNode(functionsTable);
     }
 
     if (interfacesTable.rows.length > 0) {
@@ -298,14 +315,9 @@ export class MarkdownDocumenter {
       output.appendNode(interfacesTable);
     }
 
-    if (functionsTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Functions' }));
-      output.appendNode(functionsTable);
-    }
-
-    if (enumerationsTable.rows.length > 0) {
-      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Enumerations' }));
-      output.appendNode(enumerationsTable);
+    if (namespacesTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Namespaces' }));
+      output.appendNode(namespacesTable);
     }
   }
 
@@ -384,6 +396,43 @@ export class MarkdownDocumenter {
     if (methodsTable.rows.length > 0) {
       output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Methods' }));
       output.appendNode(methodsTable);
+    }
+  }
+
+  /**
+   * GENERATE PAGE: ENUM
+   */
+  private _writeEnumTables(output: DocSection, apiEnum: ApiEnum): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
+    const enumMembersTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Member', 'Value', 'Description' ]
+    });
+
+    for (const apiEnumMember of apiEnum.members) {
+      enumMembersTable.addRow(
+        new DocTableRow({ configuration }, [
+
+          new DocTableCell({ configuration }, [
+            new DocParagraph({ configuration }, [
+              new DocPlainText({ configuration, text: Utilities.getConciseSignature(apiEnumMember) })
+            ])
+          ]),
+
+          new DocTableCell({ configuration }, [
+            new DocParagraph({ configuration }, [
+              new DocCodeSpan({ configuration, code: apiEnumMember.signature })
+            ])
+          ]),
+
+          this._createDescriptionCell(apiEnumMember)
+        ])
+      );
+    }
+
+    if (enumMembersTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Enumeration Members' }));
+      output.appendNode(enumMembersTable);
     }
   }
 
