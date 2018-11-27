@@ -31,6 +31,8 @@ export interface IPackageJsonLookupParameters {
  * @public
  */
 export class PackageJsonLookup {
+  private static _loadOwnPackageJsonCache: Map<string, IPackageJson> = new Map<string, IPackageJson>();
+
   private _loadExtraFields: boolean = false;
 
   // Cached the return values for tryGetPackageFolder():
@@ -40,6 +42,39 @@ export class PackageJsonLookup {
   // Cached the return values for getPackageName():
   // packageJsonPath --> packageName
   private _packageJsonCache: Map<string, IPackageJson>;
+
+  /**
+   * A helper for loading the caller's own package.json file.
+   *
+   * @remarks
+   *
+   * This function provides a concise and efficient way for an NPM package to report metadata about itself.
+   * For example, a tool might want to report its version.
+   *
+   * The `loadOwnPackageJson()` caches the result, under the assumption that a tool's own package.json will never
+   * change during the lifetime of the process.
+   *
+   * @example
+   * ```ts
+   * // Report the version of our NPM package
+   * const myPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname, '../..').version;
+   * console.log(`Cool Tool - Version ${myPackageVersion}`);
+   * ```
+   *
+   * @param dirnameOfCaller - The NodeJS `__dirname` macro for the caller.
+   * @param pathToPackageJson - A relative path to the caller's package.json file, omitting the "package.json" part.
+   * @returns This function always returns a valid `IPackageJson` object.  If any problems are encountered during
+   * loading, an exception will be thrown instead.
+   */
+  public static loadOwnPackageJson(dirnameOfCaller: string, pathToPackageJsonFolder: string): IPackageJson {
+    const packageJsonPath: string = path.join(dirnameOfCaller, pathToPackageJsonFolder, FileConstants.PackageJson);
+    let packageJson: IPackageJson | undefined = PackageJsonLookup._loadOwnPackageJsonCache.get(packageJsonPath);
+    if (packageJson === undefined) {
+      packageJson = JsonFile.load(packageJsonPath) as IPackageJson;
+      PackageJsonLookup._loadOwnPackageJsonCache.set(packageJsonPath, packageJson);
+    }
+    return packageJson;
+  }
 
   constructor(parameters?: IPackageJsonLookupParameters) {
     if (parameters) {

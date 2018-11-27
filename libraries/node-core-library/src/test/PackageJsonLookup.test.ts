@@ -10,6 +10,10 @@ describe('PackageJsonLookup', () => {
 
   describe('basic tests', () => {
 
+    test('', () => {
+      expect(PackageJsonLookup.loadOwnPackageJson(__dirname, '../..').name).toEqual('@microsoft/node-core-library');
+    });
+
     test('tryLoadPackageJsonFor() test', () => {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package');

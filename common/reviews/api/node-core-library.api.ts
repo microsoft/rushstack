@@ -350,6 +350,7 @@ enum NewlineKind {
 class PackageJsonLookup {
   constructor(parameters?: IPackageJsonLookupParameters);
   clearCache(): void;
+  static loadOwnPackageJson(dirnameOfCaller: string, pathToPackageJsonFolder: string): IPackageJson;
   loadPackageJson(jsonFilename: string): IPackageJson;
   tryGetPackageFolderFor(fileOrFolderPath: string): string | undefined;
   tryGetPackageJsonFilePathFor(fileOrFolderPath: string): string | undefined;
