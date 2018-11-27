@@ -26,6 +26,7 @@ import { ApiFileGenerator } from '../generators/ApiFileGenerator';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/dtsRollup/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 import { TypeScriptMessageFormatter } from '../utils/TypeScriptMessageFormatter';
+import { PackageMetadataManager } from '../generators/dtsRollup/PackageMetadataManager';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -406,6 +407,9 @@ export class Extractor {
     }
 
     this._generateRollupDtsFiles(context);
+
+    // Write the tsdoc-metadata.json file for this project
+    PackageMetadataManager.writeTsdocMetadataFile(context.packageFolder);
 
     if (this._localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
