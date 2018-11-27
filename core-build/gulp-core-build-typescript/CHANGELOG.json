@@ -2,6 +2,21 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "7.2.5",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.2.5",
+      "date": "Fri, 16 Nov 2018 21:37:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.46` to `3.8.47`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.2` to `3.6.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.2.4",
       "tag": "@microsoft/gulp-core-build-typescript_v7.2.4",
       "date": "Fri, 16 Nov 2018 00:59:00 GMT",

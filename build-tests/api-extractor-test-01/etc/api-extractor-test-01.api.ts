@@ -107,6 +107,10 @@ class ReexportedClass {
   getValue(): string;
 }
 
+// @public (undocumented)
+class ReferenceLibDirective extends Intl.PluralRules {
+}
+
 // @public
 class TypeReferencesInAedoc {
   getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;

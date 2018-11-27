@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.6.0",
+      "tag": "@microsoft/node-core-library_v3.6.0",
+      "date": "Fri, 16 Nov 2018 21:37:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new APIs Sort.sortSet() and Sort.sortSetBy()"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.5.2",
       "tag": "@microsoft/node-core-library_v3.5.2",
       "date": "Wed, 07 Nov 2018 21:04:35 GMT",

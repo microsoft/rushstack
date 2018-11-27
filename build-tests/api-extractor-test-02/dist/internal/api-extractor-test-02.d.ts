@@ -19,18 +19,26 @@ export declare interface GenericInterface<T> {
     member: T;
 }
 
-/** @public */
-export declare function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
-
-/** @public */
-export declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
-
 /**
  * A class that inherits from a type defined in the "semver" module imported from \@types/semver.
  * @public
  */
 export declare class ImportedModuleAsBaseClass extends semver1.SemVer {
 }
+
+/**
+ * Example of a class that inherits from an externally imported class.
+ * @public
+ */
+export declare class SubclassWithImport extends ReexportedClass implements ISimpleInterface {
+    test(): void;
+}
+
+/** @public */
+export declare function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
+
+/** @public */
+export declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
 
 /**
  * A generic parameter that references the "semver" module imported from \@types/semver.
@@ -43,11 +51,3 @@ export declare function importedModuleAsGenericParameter(): GenericInterface<sem
  * @public
  */
 export declare function importedModuleAsReturnType(): semver1.SemVer | undefined;
-
-/**
- * Example of a class that inherits from an externally imported class.
- * @public
- */
-export declare class SubclassWithImport extends ReexportedClass implements ISimpleInterface {
-    test(): void;
-}

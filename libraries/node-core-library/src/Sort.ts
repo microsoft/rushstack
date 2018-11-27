@@ -45,8 +45,8 @@ export class Sort {
    * @example
    *
    * ```ts
-   * let array: string[] = [ 'ccc', 'bb', 'a' ];
-   * Sort.sortBy(array, x => x.length);  // [ 'a', 'bb', 'ccc' ]
+   * let array: string[] = [ 'aaa', 'bb', 'c' ];
+   * Sort.sortBy(array, x => x.length);  // [ 'c', 'bb', 'aaa' ]
    * ```
    */
   // tslint:disable-next-line:no-any
@@ -122,6 +122,70 @@ export class Sort {
     map.clear();
     for (const pair of pairs) {
       map.set(pair[0], pair[1]);
+    }
+  }
+
+  /**
+   * Sorts the entries in a Set object according to the keys.
+   *
+   * @example
+   *
+   * ```ts
+   * let set: Set<string> = new Set<string>();
+   * set.add('aaa');
+   * set.add('bb');
+   * set.add('c');
+   * Sort.sortSetBy(set, x => x.length);
+   * console.log(Array.from(set)); // ['c', 'bb', 'aaa']
+   * ```
+   */
+  // tslint:disable-next-line:no-any
+  public static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any,
+    keyComparer: (x: T, y: T) => number = Sort.compareByValue): void {
+
+    const array: T[] = Array.from(set);
+
+    // Sorting a set is expensive, so first check whether it's already sorted.
+    if (Sort.isSortedBy(array, keySelector, keyComparer)) {
+      return;
+    }
+
+    array.sort((x, y) => keyComparer(keySelector(x), keySelector(y)));
+
+    set.clear();
+    for (const item of array) {
+      set.add(item);
+    }
+  }
+
+  /**
+   * Sorts the entries in a Set object according to the keys.
+   *
+   * @example
+   *
+   * ```ts
+   * let set: Set<string> = new Set<string>();
+   * set.add('zebra');
+   * set.add('goose');
+   * set.add('aardvark');
+   * Sort.sortSet(set);
+   * console.log(Array.from(set)); // ['aardvark', 'goose', 'zebra']
+   * ```
+   */
+  // tslint:disable-next-line:no-any
+  public static sortSet<T>(set: Set<T>, comparer: (x: T, y: T) => number = Sort.compareByValue): void {
+    const array: T[] = Array.from(set);
+
+    // Sorting a set is expensive, so first check whether it's already sorted.
+    if (Sort.isSorted(array, comparer)) {
+      return;
+    }
+
+    array.sort((x, y) => comparer(x, y));
+
+    set.clear();
+    for (const item of array) {
+      set.add(item);
     }
   }
 }

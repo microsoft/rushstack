@@ -18,16 +18,16 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@microsoft/api-extractor": "6.1.5",
-    "@microsoft/node-core-library": "3.5.2",
+    "@microsoft/api-extractor": "6.1.6",
+    "@microsoft/node-core-library": "3.6.0",
     "@types/node": "8.5.8",
     "tslint-microsoft-contrib": "~5.2.1",
     "tslint": "~5.11.0",
     "typescript": "~2.4.2"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.0.6",
-    "@microsoft/rush-stack-compiler": "0.5.3",
+    "@microsoft/node-library-build": "6.0.12",
+    "@microsoft/rush-stack-compiler": "0.5.4",
     "gulp": "~3.9.1"
   }
 }

@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush-stack
 
-This log was last generated on Fri, 16 Nov 2018 00:59:00 GMT and should not be manually modified.
+This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+
+## 0.1.32
+Fri, 16 Nov 2018 21:37:10 GMT
+
+*Version update only*
 
 ## 0.1.31
 Fri, 16 Nov 2018 00:59:00 GMT
