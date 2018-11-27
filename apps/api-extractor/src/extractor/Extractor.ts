@@ -178,7 +178,7 @@ export class Extractor {
     // Set to keep track of config files which have been processed.
     const pathSet: Set<string> = new Set<string>();
     // Get absolute path of config file.
-    let currentConfigFilePath: string = path.resolve(jsonConfigFile);
+    let currentConfigFilePath: string = path.resolve(process.cwd(), jsonConfigFile);
     pathSet.add(currentConfigFilePath);
 
     let extractorConfig: IExtractorConfig = JsonFile.load(jsonConfigFile);
