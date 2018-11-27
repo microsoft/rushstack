@@ -12,8 +12,8 @@ import {
   Path,
   FileSystem,
   IPackageJson,
-  FileConstants,
-  NewlineKind
+  NewlineKind,
+  PackageJsonLookup
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
@@ -120,16 +120,8 @@ export class Extractor {
   }
 
   private static _getPackageJson(): IPackageJson {
-    if (Extractor._apiExtractorPackageJson === undefined) {
-      const packageJsonFilename: string = path.resolve(path.join(
-        __dirname, '..', '..', FileConstants.PackageJson)
-      );
-      Extractor._apiExtractorPackageJson = JsonFile.load(packageJsonFilename) as IPackageJson;
-    }
-    return Extractor._apiExtractorPackageJson;
+    return PackageJsonLookup.loadOwnPackageJson(__dirname, '../..');
   }
-
-  private static _apiExtractorPackageJson: IPackageJson | undefined;
 
   private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
     '../schemas/api-extractor-defaults.json'));
