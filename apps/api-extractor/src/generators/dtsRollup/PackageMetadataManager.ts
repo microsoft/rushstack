@@ -42,6 +42,15 @@ export class PackageMetadata {
 /**
  * This class maintains a cache of analyzed information obtained from package.json
  * files.  It is built on top of the PackageJsonLookup class.
+ *
+ * @remarks
+ *
+ * IMPORTANT: Don't use PackageMetadataManager to analyze source files from the current project:
+ * 1. Files such as tsdoc-metadata.json may not have been built yet, and thus may contain incorrect information.
+ * 2. The current project is not guaranteed to have a package.json file at all.  For example, API Extractor can
+ *    be invoked on a bare .d.ts file.
+ *
+ * Use ts.program.isSourceFileFromExternalLibrary() to test source files before passing the to PackageMetadataManager.
  */
 export class PackageMetadataManager {
   public static tsdocMetadataFilename: string = 'tsdoc-metadata.json';

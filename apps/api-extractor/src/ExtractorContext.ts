@@ -51,7 +51,8 @@ export interface IExtractorContextOptions {
  * abstract syntax tree.
  */
 export class ExtractorContext {
-  public typeChecker: ts.TypeChecker;
+  public readonly program: ts.Program;
+  public readonly typeChecker: ts.TypeChecker;
   public package: AstPackage;
 
   /**
@@ -107,6 +108,7 @@ export class ExtractorContext {
       this.reportError(`TypeScript: ${errorText}`, diagnostic.file, diagnostic.start);
     }
 
+    this.program = options.program;
     this.typeChecker = options.program.getTypeChecker();
 
     const rootFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);

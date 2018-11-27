@@ -22,6 +22,7 @@ import { PackageMetadataManager } from './PackageMetadataManager';
  * is "exported" or not.)
  */
 export class AstSymbolTable {
+  private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
   private readonly _packageJsonLookup: PackageJsonLookup;
   private readonly _packageMetadataManager: PackageMetadataManager;
@@ -54,7 +55,8 @@ export class AstSymbolTable {
   private readonly _astEntryPointsBySourceFile: Map<ts.SourceFile, AstEntryPoint>
     = new Map<ts.SourceFile, AstEntryPoint>();
 
-  public constructor(typeChecker: ts.TypeChecker, packageJsonLookup: PackageJsonLookup) {
+  public constructor(program: ts.Program, typeChecker: ts.TypeChecker, packageJsonLookup: PackageJsonLookup) {
+    this._program = program;
     this._typeChecker = typeChecker;
     this._packageJsonLookup = packageJsonLookup;
     this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup);
@@ -73,16 +75,18 @@ export class AstSymbolTable {
         throw new Error('Unable to find a root declaration for ' + sourceFile.fileName);
       }
 
-      if (!this._packageMetadataManager.isAedocSupportedFor(sourceFile.fileName)) {
-        const packageJsonPath: string | undefined = this._packageJsonLookup
-          .tryGetPackageJsonFilePathFor(sourceFile.fileName);
+      if (this._program.isSourceFileFromExternalLibrary(sourceFile)) {
+        if (!this._packageMetadataManager.isAedocSupportedFor(sourceFile.fileName)) {
+          const packageJsonPath: string | undefined = this._packageJsonLookup
+            .tryGetPackageJsonFilePathFor(sourceFile.fileName);
 
-        if (packageJsonPath) {
-          throw new Error(`Please add a field such as "tsdoc": { "tsdocFlavor": "AEDoc" } to this file:\n`
-            + packageJsonPath);
-        } else {
-          throw new Error(`The specified entry point does not appear to have an associated package.json file:\n`
-            + sourceFile.fileName);
+          if (packageJsonPath) {
+            throw new Error(`Please add a field such as "tsdoc": { "tsdocFlavor": "AEDoc" } to this file:\n`
+              + packageJsonPath);
+          } else {
+            throw new Error(`The specified entry point does not appear to have an associated package.json file:\n`
+              + sourceFile.fileName);
+          }
         }
       }
 
@@ -314,9 +318,11 @@ export class AstSymbolTable {
 
         // If the file is from a package that does not support AEDoc, then we process the
         // symbol itself, but we don't attempt to process any parent/children of it.
-        if (!this._packageMetadataManager.isAedocSupportedFor(
-          followedSymbol.declarations[0].getSourceFile().fileName)) {
-          nominal = true;
+        const followedSymbolSourceFile: ts.SourceFile = followedSymbol.declarations[0].getSourceFile();
+        if (this._program.isSourceFileFromExternalLibrary(followedSymbolSourceFile)) {
+          if (!this._packageMetadataManager.isAedocSupportedFor(followedSymbolSourceFile.fileName)) {
+            nominal = true;
+          }
         }
 
         let parentAstSymbol: AstSymbol | undefined = undefined;

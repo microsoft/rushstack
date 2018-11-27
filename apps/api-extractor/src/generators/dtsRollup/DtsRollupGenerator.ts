@@ -75,7 +75,8 @@ export class DtsRollupGenerator {
     this._context = context;
     this._typeChecker = context.typeChecker;
     this._tsdocParser = new tsdoc.TSDocParser();
-    this._astSymbolTable = new AstSymbolTable(this._context.typeChecker, this._context.packageJsonLookup);
+    this._astSymbolTable = new AstSymbolTable(this._context.program, this._context.typeChecker,
+      this._context.packageJsonLookup);
   }
 
   /**
