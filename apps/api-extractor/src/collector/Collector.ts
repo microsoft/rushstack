@@ -63,8 +63,9 @@ export interface ICollectorOptions {
  * abstract syntax tree.
  */
 export class Collector {
-  public typeChecker: ts.TypeChecker;
-  public astSymbolTable: AstSymbolTable;
+  public readonly program: ts.Program;
+  public readonly typeChecker: ts.TypeChecker;
+  public readonly astSymbolTable: AstSymbolTable;
 
   public readonly packageJsonLookup: PackageJsonLookup;
 
@@ -115,10 +116,11 @@ export class Collector {
       entryPointSourceFile
     });
 
+    this.program = options.program;
     this.typeChecker = options.program.getTypeChecker();
 
     this._tsdocParser = new tsdoc.TSDocParser();
-    this.astSymbolTable = new AstSymbolTable(this.typeChecker, this.packageJsonLookup);
+    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup);
   }
 
   /**
