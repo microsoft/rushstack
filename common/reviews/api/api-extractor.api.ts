@@ -20,6 +20,7 @@ class Extractor {
   static jsonSchema: JsonSchema;
   processProject(options?: IAnalyzeProjectOptions): boolean;
   static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractorOptions): void;
+  static readonly version: string;
 }
 
 // @public
