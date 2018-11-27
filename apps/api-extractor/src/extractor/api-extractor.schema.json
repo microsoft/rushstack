@@ -9,7 +9,7 @@
     },
 
     "extends": {
-      "description": "Optional field. Path to json config file from which config should be extended",
+      "description": "Optional field. Path to json config file from which config should extend",
       "type": "string"
     },
 

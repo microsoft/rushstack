@@ -171,6 +171,7 @@ export class Extractor {
 
   /**
    * Loads the api extractor config file in Extractor Config object.
+   * The jsonConfigFile path specified is relative to project directory path.
    * @param jsonConfigFile - Path to api extractor json config file.
    */
   public static loadConfigObject(jsonConfigFile: string): IExtractorConfig {
@@ -189,7 +190,7 @@ export class Extractor {
       // Check if this file was already processed.
       if (pathSet.has(currentConfigFilePath)) {
         throw new Error('The api extractor config files contains a cycle. '
-        + currentConfigFilePath + ' is being processed again. '
+        + currentConfigFilePath + ' is included twice. '
         + 'Please check the extends values in config files.');
       }
       pathSet.add(currentConfigFilePath);

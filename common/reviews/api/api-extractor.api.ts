@@ -195,7 +195,6 @@ interface IExtractorConfig {
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
   // @beta
   dtsRollup?: IExtractorDtsRollupConfig;
-  // (undocumented)
   extends?: string;
   policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
