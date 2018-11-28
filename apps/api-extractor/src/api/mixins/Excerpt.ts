@@ -52,13 +52,18 @@ export class Excerpt {
 
   public readonly tokens: ReadonlyArray<ExcerptToken>;
 
+  private _text: string | undefined;
+
   public constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange) {
     this.tokens = tokens;
     this.tokenRange = tokenRange;
   }
 
   public get text(): string {
-    return this.tokens.slice(this.tokenRange.startIndex, this.tokenRange.endIndex)
+    if (this._text === undefined) {
+      this._text = this.tokens.slice(this.tokenRange.startIndex, this.tokenRange.endIndex)
       .map(x => x.text).join('');
+    }
+    return this._text;
   }
 }

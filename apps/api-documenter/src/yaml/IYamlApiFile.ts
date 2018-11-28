@@ -45,7 +45,12 @@ export interface IYamlItem {
   isPreview?: boolean;
   langs?: string[];
   name?: string;
-  numericValue?: number;
+  /**
+   * NOTE: In TypeScript, enum members can be strings or integers.
+   * If it is an integer, then enumMember.value will be a string representation of the integer.
+   * If it is a string, then enumMember.value will include the quotation marks.
+   */
+  numericValue?: string;
   package?: string;
   source?: IYamlSource;
   summary?: string;

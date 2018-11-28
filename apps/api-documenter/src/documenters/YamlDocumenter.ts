@@ -26,7 +26,8 @@ import {
   ApiPropertySignature,
   ApiItemContainerMixin,
   ApiPackage,
-  ApiFunctionLikeMixin
+  ApiFunctionLikeMixin,
+  ApiEnumMember
 } from '@microsoft/api-extractor';
 
 import {
@@ -296,16 +297,12 @@ export class YamlDocumenter {
         break;
       case ApiItemKind.EnumMember:
         yamlItem.type = 'field';
-        /*
         const enumMember: ApiEnumMember = apiItem as ApiEnumMember;
-        if (enumMember.value) {
-          // NOTE: In TypeScript, enum members can be strings or integers.
-          // If it is an integer, then enumMember.value will be a string representation of the integer.
-          // If it is a string, then enumMember.value will include the quotation marks.
-          // Enum values can also be calculated numbers, however this is not implemented yet.
-          yamlItem.numericValue = enumMember.value as any; // tslint:disable-line:no-any
+
+        if (enumMember.initializerExcerpt.text.length > 0) {
+          yamlItem.numericValue = enumMember.initializerExcerpt.text;
         }
-        */
+
         break;
       case ApiItemKind.Class:
         yamlItem.type = 'class';
@@ -316,6 +313,7 @@ export class YamlDocumenter {
         this._populateYamlClassOrInterface(yamlItem, apiItem);
         break;
       case ApiItemKind.Method:
+      case ApiItemKind.MethodSignature:
         yamlItem.type = 'method';
         this._populateYamlFunctionLike(yamlItem, apiItem as ApiMethod);
         break;
@@ -329,6 +327,7 @@ export class YamlDocumenter {
         yamlItem.type = 'package';
         break;
       case ApiItemKind.Property:
+      case ApiItemKind.PropertySignature:
         const apiProperty: ApiPropertyItem = apiItem as ApiPropertyItem;
         if (apiProperty.isEventProperty) {
           yamlItem.type = 'event';
