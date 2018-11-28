@@ -314,11 +314,11 @@ export class YamlDocumenter {
     const apiStructure: IApiClass | IApiInterface = docItem.apiItem as IApiClass | IApiInterface;
 
     if (apiStructure.extends) {
-      yamlItem.extends = [ apiStructure.extends ];
+      yamlItem.extends = [ this._linkToUidIfPossible(apiStructure.extends) ];
     }
 
     if (apiStructure.implements) {
-      yamlItem.implements = [ apiStructure.implements ];
+      yamlItem.implements = [ this._linkToUidIfPossible(apiStructure.implements) ];
     }
 
     if (apiStructure.isSealed) {
@@ -547,7 +547,7 @@ export class YamlDocumenter {
     if (hierarchy.length > 0 && hierarchy[0].kind === DocItemKind.Package) {
       hierarchy.shift(); // ignore the package qualifier
     }
-    if (hierarchy.length < 1) {
+    if (hierarchy.length < 2) {
       return undefined;
     }
     return hierarchy.map(x => x.name).join('.');
