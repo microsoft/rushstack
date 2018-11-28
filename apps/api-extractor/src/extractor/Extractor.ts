@@ -191,27 +191,28 @@ export class Extractor {
     let currentConfigFilePath: string = path.resolve(process.cwd(), jsonConfigFile);
     pathSet.add(currentConfigFilePath);
 
+    const originalConfigFileFolder: string = path.dirname(currentConfigFilePath);
+
     let extractorConfig: IExtractorConfig = JsonFile.load(jsonConfigFile);
 
     while (extractorConfig.extends) {
       if (extractorConfig.extends.match(/^\./)) {
         // If extends has relative path.
         // Populate the api extractor config path defined in extends relative to current config path.
-        currentConfigFilePath = path.resolve(path.dirname(currentConfigFilePath), extractorConfig.extends);
+        currentConfigFilePath = path.resolve(originalConfigFileFolder, extractorConfig.extends);
       } else {
         // If extends has package path.
         currentConfigFilePath = resolve.sync(
           extractorConfig.extends,
           {
-            basedir: path.dirname(currentConfigFilePath)
+            basedir: originalConfigFileFolder
           }
         );
       }
       // Check if this file was already processed.
       if (pathSet.has(currentConfigFilePath)) {
-        throw new Error('The api extractor config files contains a cycle. '
-        + currentConfigFilePath + ' is included twice. '
-        + 'Please check the extends values in config files.');
+        throw new Error(`The API Extractor config files contain a cycle. "${currentConfigFilePath}"`
+          + ` is included twice.  Please check the "extends" values in config files.`);
       }
       pathSet.add(currentConfigFilePath);
 
