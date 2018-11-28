@@ -73,6 +73,11 @@ export class ApiModelGenerator {
       return; // trim out private declarations
     }
 
+    const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
+    if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
+      return; // trim out items marked as "@internal" or "@alpha"
+    }
+
     switch (astDeclaration.declaration.kind) {
       case ts.SyntaxKind.ClassDeclaration:
         this._processApiClass(astDeclaration, exportedName, parentApiItem);
