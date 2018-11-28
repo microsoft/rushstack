@@ -18,6 +18,7 @@ class Extractor {
   analyzeProject(options?: IAnalyzeProjectOptions): void;
   static generateFilePathsForAnalysis(inputFilePaths: string[]): string[];
   static jsonSchema: JsonSchema;
+  static loadConfigObject(jsonConfigFile: string): IExtractorConfig;
   processProject(options?: IAnalyzeProjectOptions): boolean;
   static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractorOptions): void;
   static readonly version: string;
@@ -195,6 +196,7 @@ interface IExtractorConfig {
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
   // @beta
   dtsRollup?: IExtractorDtsRollupConfig;
+  extends?: string;
   policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
   validationRules?: IExtractorValidationRulesConfig;
