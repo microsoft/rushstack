@@ -78,21 +78,6 @@ export class AstSymbolTable {
         throw new Error('Unable to find a root declaration for ' + sourceFile.fileName);
       }
 
-      if (this._program.isSourceFileFromExternalLibrary(sourceFile)) {
-        if (!this._packageMetadataManager.isAedocSupportedFor(sourceFile.fileName)) {
-          const packageJsonPath: string | undefined = this._packageJsonLookup
-            .tryGetPackageJsonFilePathFor(sourceFile.fileName);
-
-          if (packageJsonPath) {
-            throw new Error(`Please add a field such as "tsdoc": { "tsdocFlavor": "AEDoc" } to this file:\n`
-              + packageJsonPath);
-          } else {
-            throw new Error(`The specified entry point does not appear to have an associated package.json file:\n`
-              + sourceFile.fileName);
-          }
-        }
-      }
-
       const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(rootFileSymbol) || [];
 
       const exportedMembers: IExportedMember[] = [];
