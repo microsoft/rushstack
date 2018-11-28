@@ -22,7 +22,7 @@ export class ApiPropertyItem extends ApiDeclarationMixin(ApiDocumentedItem) {
   public constructor(options: IApiPropertyItemOptions) {
     super(options);
 
-    this.propertyTypeExcerpt = this.getEmbeddedExcerpt('PropertyType');
+    this.propertyTypeExcerpt = this.getEmbeddedExcerpt('propertyType');
   }
 
   /**

@@ -35,7 +35,7 @@ export class ApiMethod extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiRelea
   public constructor(options: IApiMethodOptions) {
     super(options);
 
-    this.returnTypeExcerpt = this.getEmbeddedExcerpt('ReturnType');
+    this.returnTypeExcerpt = this.getEmbeddedExcerpt('returnType');
   }
 
   /** @override */

@@ -421,9 +421,9 @@ interface IApiStaticMixinOptions extends IApiItemOptions {
 // @public (undocumented)
 interface IDeclarationExcerpt {
   // (undocumented)
-  embeddedExcerptsByName: {
-    [name: string]: IExcerptTokenRange;
-  }
+  embeddedExcerpts: {
+          [name in ExcerptName]?: IExcerptTokenRange;
+      };
   // (undocumented)
   excerptTokens: IExcerptToken[];
 }

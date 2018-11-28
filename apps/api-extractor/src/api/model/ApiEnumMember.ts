@@ -25,7 +25,7 @@ export class ApiEnumMember extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDoc
   public constructor(options: IApiEnumMemberOptions) {
     super(options);
 
-    this.initializerExcerpt = this.getEmbeddedExcerpt('Initializer');
+    this.initializerExcerpt = this.getEmbeddedExcerpt('initializer');
   }
 
   /** @override */

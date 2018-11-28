@@ -29,7 +29,7 @@ export class ApiMethodSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin
   public constructor(options: IApiMethodSignatureOptions) {
     super(options);
 
-    this.returnTypeExcerpt = this.getEmbeddedExcerpt('ReturnType');
+    this.returnTypeExcerpt = this.getEmbeddedExcerpt('returnType');
   }
 
   /** @override */

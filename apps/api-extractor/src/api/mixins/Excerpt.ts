@@ -9,8 +9,15 @@ export const enum ExcerptTokenKind {
   Reference = 'Reference'
 }
 
-/** @public */
-export type ExcerptName = 'ReturnType' | 'ParameterType' | 'PropertyType' | 'Initializer';
+/**
+ * Names used in {@link ApiDeclarationMixin.embeddedExcerptsByName}.
+ *
+ * @remarks
+ * These strings use camelCase because they are property names for IDeclarationExcerpt.embeddedExcerpts.
+ *
+ * @public
+ */
+export type ExcerptName = 'returnType' | 'parameterType' | 'propertyType' | 'initializer';
 
 /** @public */
 export interface IExcerptTokenRange {
@@ -32,7 +39,7 @@ export interface IExcerptToken {
 export interface IDeclarationExcerpt {
   excerptTokens: IExcerptToken[];
 
-  embeddedExcerptsByName: { [name: string]: IExcerptTokenRange };
+  embeddedExcerpts: { [name in ExcerptName]?: IExcerptTokenRange };
 }
 
 /** @public */

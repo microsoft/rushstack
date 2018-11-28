@@ -551,7 +551,7 @@ export class MarkdownDocumenter {
 
     if (ApiDeclarationMixin.isBaseClassOf(apiFunctionLike)) {
 
-      const returnTypeExcerpt: Excerpt | undefined = apiFunctionLike.embeddedExcerptsByName.get('ReturnType');
+      const returnTypeExcerpt: Excerpt | undefined = apiFunctionLike.embeddedExcerptsByName.get('returnType');
       if (returnTypeExcerpt !== undefined) {
 
         output.appendNode(

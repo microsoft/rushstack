@@ -19,6 +19,7 @@ items:
     langs:
       - typeScript
     type: field
+    numericValue: '1'
   - uid: api-extractor-test-05.DocEnum.Two
     summary: These are some docs for Two
     name: Two
@@ -26,6 +27,7 @@ items:
     langs:
       - typeScript
     type: field
+    numericValue: '2'
   - uid: api-extractor-test-05.DocEnum.Zero
     summary: These are some docs for Zero
     name: Zero
@@ -33,3 +35,4 @@ items:
     langs:
       - typeScript
     type: field
+    numericValue: '0'

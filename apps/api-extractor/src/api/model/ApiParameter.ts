@@ -21,7 +21,7 @@ export class ApiParameter extends ApiDeclarationMixin(ApiItem) {
   public constructor(options: IApiParameterOptions) {
     super(options);
 
-    this.parameterTypeExcerpt = this.getEmbeddedExcerpt('ParameterType');
+    this.parameterTypeExcerpt = this.getEmbeddedExcerpt('parameterType');
   }
 
   /** @override */

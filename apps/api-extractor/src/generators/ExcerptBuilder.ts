@@ -45,7 +45,7 @@ export class ExcerptBuilder {
 
     const declarationExcerpt: IDeclarationExcerpt = {
       excerptTokens: [ ],
-      embeddedExcerptsByName: { }
+      embeddedExcerpts: { }
     };
 
     ExcerptBuilder._buildSpan(declarationExcerpt, span, {
@@ -57,7 +57,7 @@ export class ExcerptBuilder {
 
     // For any excerpts that we didn't find, add empty entries
     for (const embeddedExcerptName of remainingExcerptNames) {
-      declarationExcerpt.embeddedExcerptsByName[embeddedExcerptName] = { startIndex: 0, endIndex: 0 };
+      declarationExcerpt.embeddedExcerpts[embeddedExcerptName] = { startIndex: 0, endIndex: 0 };
     }
 
     return declarationExcerpt;
@@ -115,7 +115,7 @@ export class ExcerptBuilder {
 
     // Are we building a excerpt?  If so, add it.
     if (excerptStartIndex !== undefined) {
-      declarationExcerpt.embeddedExcerptsByName[embeddedExcerptName!] = {
+      declarationExcerpt.embeddedExcerpts[embeddedExcerptName!] = {
         startIndex: excerptStartIndex,
         endIndex: declarationExcerpt.excerptTokens.length
       };

@@ -55,12 +55,12 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
 
       const declarationExcerpt: IDeclarationExcerpt = {
         excerptTokens: jsonObject.excerptTokens.map(x => new ExcerptToken(x.kind, x.text)),
-        embeddedExcerptsByName: { }
+        embeddedExcerpts: { }
       };
 
-      for (const key of Object.getOwnPropertyNames(jsonObject.embeddedExcerptsByName)) {
-        const range: IExcerptTokenRange = jsonObject.embeddedExcerptsByName[key];
-        declarationExcerpt.embeddedExcerptsByName[key] = range;
+      for (const key of Object.getOwnPropertyNames(jsonObject.embeddedExcerpts)) {
+        const range: IExcerptTokenRange = jsonObject.embeddedExcerpts[key];
+        declarationExcerpt.embeddedExcerpts[key] = range;
       }
 
       options.declarationExcerpt = declarationExcerpt;
@@ -75,8 +75,8 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
 
       this[_embeddedExcerptsByName] = new Map<ExcerptName, Excerpt>();
 
-      for (const key of Object.getOwnPropertyNames(options.declarationExcerpt.embeddedExcerptsByName)) {
-        const excerptRange: IExcerptTokenRange = options.declarationExcerpt.embeddedExcerptsByName[key];
+      for (const key of Object.getOwnPropertyNames(options.declarationExcerpt.embeddedExcerpts)) {
+        const excerptRange: IExcerptTokenRange = options.declarationExcerpt.embeddedExcerpts[key];
         this[_embeddedExcerptsByName].set(key as ExcerptName, new Excerpt(this[_excerptTokens], excerptRange));
       }
 
@@ -138,9 +138,9 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
 
       jsonObject.excerptTokens = this.excerptTokens.map(x => ({ kind: x.kind, text: x.text }));
 
-      jsonObject.embeddedExcerptsByName = { };
+      jsonObject.embeddedExcerpts = { };
       for (const [key, value] of this.embeddedExcerptsByName) {
-        jsonObject.embeddedExcerptsByName[key] = value.tokenRange;
+        jsonObject.embeddedExcerpts[key] = value.tokenRange;
       }
     }
   }

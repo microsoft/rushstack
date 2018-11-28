@@ -193,7 +193,7 @@ export class ApiModelGenerator {
 
       const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        embeddedExcerpts: [{ embeddedExcerptName: 'Initializer', node: enumMember.initializer }]
+        embeddedExcerpts: [{ embeddedExcerptName: 'initializer', node: enumMember.initializer }]
       });
 
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
@@ -245,7 +245,7 @@ export class ApiModelGenerator {
     if (apiMethod === undefined) {
       const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        embeddedExcerpts: [{ embeddedExcerptName: 'ReturnType', node: methodDeclaration.type }]
+        embeddedExcerpts: [{ embeddedExcerptName: 'returnType', node: methodDeclaration.type }]
       });
 
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
@@ -277,7 +277,7 @@ export class ApiModelGenerator {
     if (apiMethodSignature === undefined) {
       const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        embeddedExcerpts: [{ embeddedExcerptName: 'ReturnType', node: methodSignature.type }]
+        embeddedExcerpts: [{ embeddedExcerptName: 'returnType', node: methodSignature.type }]
       });
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
@@ -298,7 +298,7 @@ export class ApiModelGenerator {
 
     const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
       startingNode: parameterDeclaration,
-      embeddedExcerpts: [{ embeddedExcerptName: 'ParameterType', node: parameterDeclaration.type }]
+      embeddedExcerpts: [{ embeddedExcerptName: 'parameterType', node: parameterDeclaration.type }]
     });
 
     functionLikeItem.addParameter(new ApiParameter({
@@ -348,7 +348,7 @@ export class ApiModelGenerator {
     if (apiProperty === undefined) {
       const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        embeddedExcerpts: [{ embeddedExcerptName: 'PropertyType', node: propertyDeclaration.type }]
+        embeddedExcerpts: [{ embeddedExcerptName: 'propertyType', node: propertyDeclaration.type }]
       });
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
@@ -375,7 +375,7 @@ export class ApiModelGenerator {
     if (apiPropertySignature === undefined) {
       const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        embeddedExcerpts: [{ embeddedExcerptName: 'PropertyType', node: propertySignature.type }]
+        embeddedExcerpts: [{ embeddedExcerptName: 'propertyType', node: propertySignature.type }]
       });
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
