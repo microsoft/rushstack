@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Nov 2018 02:17:11 GMT and should not be manually modified.
+
+## 3.7.0
+Wed, 28 Nov 2018 02:17:11 GMT
+
+### Minor changes
+
+- Add new API PackageJsonLookup.loadOwnPackageJson()
 
 ## 3.6.0
 Fri, 16 Nov 2018 21:37:10 GMT
