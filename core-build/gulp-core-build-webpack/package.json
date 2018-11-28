@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-webpack",
-  "version": "3.4.54",
+  "version": "3.4.55",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.8.48",
+    "@microsoft/gulp-core-build": "3.8.49",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
     "colors": "~1.2.1",
@@ -21,8 +21,8 @@
     "webpack": "~3.11.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.5.5",
-    "@microsoft/node-library-build": "6.0.13",
+    "@microsoft/rush-stack-compiler": "0.5.6",
+    "@microsoft/node-library-build": "6.0.14",
     "@types/orchestrator": "0.0.30",
     "@types/q": "0.0.32",
     "@types/source-map": "0.5.0",
