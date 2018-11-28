@@ -2,9 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
+import { Excerpt } from '../mixins/Excerpt';
+import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 
 /** @public */
-export interface IApiPropertyItemOptions extends IApiDocumentedItemOptions {
+export interface IApiPropertyItemOptions extends
+  IApiDocumentedItemOptions,
+  IApiDeclarationMixinOptions {
 }
 
 /**
@@ -12,9 +16,13 @@ export interface IApiPropertyItemOptions extends IApiDocumentedItemOptions {
  *
  * @public
  */
-export class ApiPropertyItem extends ApiDocumentedItem {
+export class ApiPropertyItem extends ApiDeclarationMixin(ApiDocumentedItem) {
+  public readonly propertyTypeExcerpt: Excerpt;
+
   public constructor(options: IApiPropertyItemOptions) {
     super(options);
+
+    this.propertyTypeExcerpt = this.getEmbeddedExcerpt('PropertyType');
   }
 
   /**

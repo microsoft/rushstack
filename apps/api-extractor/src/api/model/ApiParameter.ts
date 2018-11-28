@@ -6,19 +6,22 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { ApiItemKind, ApiItem, IApiItemOptions } from './ApiItem';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem } from './ApiDocumentedItem';
-import { ApiResultTypeMixin, IApiResultTypeMixinOptions } from '../mixins/ApiResultTypeMixin';
+import { Excerpt } from '../mixins/Excerpt';
 
 /** @public */
 export interface IApiParameterOptions extends
   IApiDeclarationMixinOptions,
-  IApiResultTypeMixinOptions,
   IApiItemOptions {
 }
 
 /** @public */
-export class ApiParameter extends ApiDeclarationMixin(ApiResultTypeMixin(ApiItem)) {
+export class ApiParameter extends ApiDeclarationMixin(ApiItem) {
+  public readonly parameterTypeExcerpt: Excerpt;
+
   public constructor(options: IApiParameterOptions) {
     super(options);
+
+    this.parameterTypeExcerpt = this.getEmbeddedExcerpt('ParameterType');
   }
 
   /** @override */

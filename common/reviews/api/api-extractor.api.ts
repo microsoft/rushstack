@@ -57,6 +57,8 @@ class ApiEnumMember extends ApiEnumMember_base {
   readonly canonicalReference: string;
   // (undocumented)
   static getCanonicalReference(name: string): string;
+  // (undocumented)
+  readonly initializerExcerpt: Excerpt;
   // @override (undocumented)
   readonly kind: ApiItemKind;
 }
@@ -152,6 +154,8 @@ class ApiMethod extends ApiMethod_base {
   static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
+  // (undocumented)
+  readonly returnTypeExcerpt: Excerpt;
 }
 
 // @public (undocumented)
@@ -163,6 +167,8 @@ class ApiMethodSignature extends ApiMethodSignature_base {
   static getCanonicalReference(name: string, overloadIndex: number): string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
+  // (undocumented)
+  readonly returnTypeExcerpt: Excerpt;
 }
 
 // @public (undocumented)
@@ -220,6 +226,8 @@ class ApiParameter extends ApiParameter_base {
   readonly canonicalReference: string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
+  // (undocumented)
+  readonly parameterTypeExcerpt: Excerpt;
   readonly tsdocParamBlock: tsdoc.DocParamBlock | undefined;
 }
 
@@ -235,9 +243,11 @@ class ApiProperty extends ApiProperty_base {
 }
 
 // @public
-class ApiPropertyItem extends ApiDocumentedItem {
+class ApiPropertyItem extends ApiPropertyItem_base {
   constructor(options: IApiPropertyItemOptions);
   readonly isEventProperty: boolean;
+  // (undocumented)
+  readonly propertyTypeExcerpt: Excerpt;
 }
 
 // @public (undocumented)
@@ -256,11 +266,35 @@ interface ApiReleaseTagMixin {
 }
 
 // @public (undocumented)
-interface ApiResultTypeMixin {
+interface ApiStaticMixin {
 }
 
 // @public (undocumented)
-interface ApiStaticMixin {
+class Excerpt {
+  constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange);
+  // (undocumented)
+  readonly text: string;
+  // (undocumented)
+  readonly tokenRange: IExcerptTokenRange;
+  // (undocumented)
+  readonly tokens: ReadonlyArray<ExcerptToken>;
+}
+
+// @public (undocumented)
+class ExcerptToken {
+  constructor(kind: ExcerptTokenKind, text: string);
+  // (undocumented)
+  readonly kind: ExcerptTokenKind;
+  // (undocumented)
+  readonly text: string;
+}
+
+// @public (undocumented)
+enum ExcerptTokenKind {
+  // (undocumented)
+  Content = "Content",
+  // (undocumented)
+  Reference = "Reference"
 }
 
 // @public
@@ -295,7 +329,7 @@ interface IApiClassOptions extends IApiDeclarationMixinOptions, IApiItemContaine
 // @public (undocumented)
 interface IApiDeclarationMixinOptions extends IApiItemOptions {
   // (undocumented)
-  signature: string;
+  declarationExcerpt: IDeclarationExcerpt;
 }
 
 // @public (undocumented)
@@ -341,11 +375,11 @@ interface IApiItemOptions {
 }
 
 // @public (undocumented)
-interface IApiMethodOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiResultTypeMixinOptions, IApiStaticMixinOptions, IApiDocumentedItemOptions {
+interface IApiMethodOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiStaticMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public (undocumented)
-interface IApiMethodSignatureOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiResultTypeMixinOptions, IApiDocumentedItemOptions {
+interface IApiMethodSignatureOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public (undocumented)
@@ -357,19 +391,19 @@ interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiDocument
 }
 
 // @public (undocumented)
-interface IApiParameterOptions extends IApiDeclarationMixinOptions, IApiResultTypeMixinOptions, IApiItemOptions {
+interface IApiParameterOptions extends IApiDeclarationMixinOptions, IApiItemOptions {
 }
 
 // @public (undocumented)
-interface IApiPropertyItemOptions extends IApiDocumentedItemOptions {
+interface IApiPropertyItemOptions extends IApiDocumentedItemOptions, IApiDeclarationMixinOptions {
 }
 
 // @public (undocumented)
-interface IApiPropertyOptions extends IApiDeclarationMixinOptions, IApiReleaseTagMixinOptions, IApiResultTypeMixinOptions, IApiStaticMixinOptions, IApiPropertyItemOptions {
+interface IApiPropertyOptions extends IApiReleaseTagMixinOptions, IApiStaticMixinOptions, IApiPropertyItemOptions {
 }
 
 // @public (undocumented)
-interface IApiPropertySignatureOptions extends IApiDeclarationMixinOptions, IApiReleaseTagMixinOptions, IApiResultTypeMixinOptions, IApiPropertyItemOptions {
+interface IApiPropertySignatureOptions extends IApiReleaseTagMixinOptions, IApiPropertyItemOptions {
 }
 
 // @public (undocumented)
@@ -379,15 +413,35 @@ interface IApiReleaseTagMixinOptions extends IApiItemOptions {
 }
 
 // @public (undocumented)
-interface IApiResultTypeMixinOptions extends IApiItemOptions {
-  // (undocumented)
-  resultTypeSignature: string;
-}
-
-// @public (undocumented)
 interface IApiStaticMixinOptions extends IApiItemOptions {
   // (undocumented)
   isStatic: boolean;
+}
+
+// @public (undocumented)
+interface IDeclarationExcerpt {
+  // (undocumented)
+  embeddedExcerptsByName: {
+    [name: string]: IExcerptTokenRange;
+  }
+  // (undocumented)
+  excerptTokens: IExcerptToken[];
+}
+
+// @public (undocumented)
+interface IExcerptToken {
+  // (undocumented)
+  readonly kind: ExcerptTokenKind;
+  // (undocumented)
+  text: string;
+}
+
+// @public (undocumented)
+interface IExcerptTokenRange {
+  // (undocumented)
+  readonly endIndex: number;
+  // (undocumented)
+  readonly startIndex: number;
 }
 
 // @public
@@ -507,5 +561,6 @@ enum ReleaseTag {
   Public = 4
 }
 
+// WARNING: Unsupported export: ExcerptName
 // WARNING: Unsupported export: Constructor
 // WARNING: Unsupported export: PropertiesOf

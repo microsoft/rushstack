@@ -16,7 +16,6 @@ import { ApiMethod } from '../api/model/ApiMethod';
 import { ApiNamespace } from '../api/model/ApiNamespace';
 import { ApiInterface } from '../api/model/ApiInterface';
 import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
-import { Span } from '../analyzer/Span';
 import { ApiParameter } from '../api/model/ApiParameter';
 import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
@@ -25,6 +24,8 @@ import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
 import { ApiFunctionLikeMixin } from '../api/mixins/ApiFunctionLikeMixin';
 import { ApiEnum } from '../api/model/ApiEnum';
 import { ApiEnumMember } from '../api/model/ApiEnumMember';
+import { IDeclarationExcerpt } from '../api/mixins/Excerpt';
+import { ExcerptBuilder } from './ExcerptBuilder';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -135,13 +136,15 @@ export class ApiModelGenerator {
     let apiClass: ApiClass | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiClass;
 
     if (apiClass === undefined) {
-      const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
-        ts.SyntaxKind.FirstPunctuation);  // FirstPunctuation = "{"
-
+      const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
+        startingNode: astDeclaration.declaration,
+        nodeToStopAt: ts.SyntaxKind.FirstPunctuation  // FirstPunctuation = "{"
+      });
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiClass = new ApiClass({ name, signature, docComment, releaseTag });
+      apiClass = new ApiClass({ name, declarationExcerpt, docComment, releaseTag });
+
       parentApiItem.addMember(apiClass);
     }
 
@@ -157,13 +160,15 @@ export class ApiModelGenerator {
     let apiEnum: ApiEnum | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiEnum;
 
     if (apiEnum === undefined) {
-      const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
-        ts.SyntaxKind.FirstPunctuation);  // FirstPunctuation = "{"
+      const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
+        startingNode: astDeclaration.declaration,
+        nodeToStopAt: ts.SyntaxKind.FirstPunctuation  // FirstPunctuation = "{"
+      });
 
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiEnum = new ApiEnum({ name, signature, docComment, releaseTag });
+      apiEnum = new ApiEnum({ name, declarationExcerpt, docComment, releaseTag });
       parentApiItem.addMember(apiEnum);
     }
 
@@ -176,14 +181,20 @@ export class ApiModelGenerator {
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
     const canonicalReference: string = ApiEnumMember.getCanonicalReference(name);
 
-    let apiEnumMember: ApiEnumMember | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiMethod;
+    let apiEnumMember: ApiEnumMember | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiEnumMember;
 
     if (apiEnumMember === undefined) {
-      const signature: string = astDeclaration.declaration.getText();
+      const enumMember: ts.EnumMember = astDeclaration.declaration as ts.EnumMember;
+
+      const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
+        startingNode: astDeclaration.declaration,
+        embeddedExcerpts: [{ embeddedExcerptName: 'Initializer', node: enumMember.initializer }]
+      });
+
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiEnumMember = new ApiEnumMember({ name, signature, docComment, releaseTag });
+      apiEnumMember = new ApiEnumMember({ name, declarationExcerpt, docComment, releaseTag });
 
       parentApiItem.addMember(apiEnumMember);
     }
@@ -198,12 +209,15 @@ export class ApiModelGenerator {
     let apiInterface: ApiClass | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiInterface;
 
     if (apiInterface === undefined) {
-      const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
-        ts.SyntaxKind.FirstPunctuation); // FirstPunctuation = "{"
+      const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
+        startingNode: astDeclaration.declaration,
+        nodeToStopAt: ts.SyntaxKind.FirstPunctuation  // FirstPunctuation = "{"
+      });
+
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiInterface = new ApiInterface({ name, signature, docComment, releaseTag });
+      apiInterface = new ApiInterface({ name, declarationExcerpt, docComment, releaseTag });
       parentApiItem.addMember(apiInterface);
     }
 
@@ -224,13 +238,15 @@ export class ApiModelGenerator {
     let apiMethod: ApiMethod | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiMethod;
 
     if (apiMethod === undefined) {
-      const signature: string = astDeclaration.declaration.getText();
+      const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
+        startingNode: astDeclaration.declaration,
+        embeddedExcerpts: [{ embeddedExcerptName: 'ReturnType', node: methodDeclaration.type }]
+      });
+
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
-      const resultTypeSignature: string = this._getSignatureForTypeNode(methodDeclaration.type);
 
-      apiMethod = new ApiMethod({ name, signature, docComment, releaseTag, resultTypeSignature, isStatic,
-        overloadIndex });
+      apiMethod = new ApiMethod({ name, declarationExcerpt, docComment, releaseTag, isStatic, overloadIndex });
 
       for (const parameter of methodDeclaration.parameters) {
         this._processApiParameter(parameter, apiMethod);
@@ -254,17 +270,18 @@ export class ApiModelGenerator {
       ApiMethodSignature;
 
     if (apiMethodSignature === undefined) {
-      const signature: string = astDeclaration.declaration.getText();
+      const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
+        startingNode: astDeclaration.declaration,
+        embeddedExcerpts: [{ embeddedExcerptName: 'ReturnType', node: methodSignature.type }]
+      });
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
-      const resultTypeSignature: string = this._getSignatureForTypeNode(methodSignature.type);
 
-      apiMethodSignature = new ApiMethodSignature({ name, signature, docComment, releaseTag, resultTypeSignature,
+      apiMethodSignature = new ApiMethodSignature({ name, declarationExcerpt, docComment, releaseTag,
         overloadIndex });
 
       for (const parameter of methodSignature.parameters) {
         this._processApiParameter(parameter, apiMethodSignature);
-
       }
 
       parentApiItem.addMember(apiMethodSignature);
@@ -274,13 +291,14 @@ export class ApiModelGenerator {
   private _processApiParameter(parameterDeclaration: ts.ParameterDeclaration,
     functionLikeItem: ApiFunctionLikeMixin): void {
 
-    const signature: string = parameterDeclaration.getText().trim();
-    const resultTypeSignature: string = this._getSignatureForTypeNode(parameterDeclaration.type);
+    const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
+      startingNode: parameterDeclaration,
+      embeddedExcerpts: [{ embeddedExcerptName: 'ParameterType', node: parameterDeclaration.type }]
+    });
 
     functionLikeItem.addParameter(new ApiParameter({
       name: parameterDeclaration.name.getText() || '',
-      signature,
-      resultTypeSignature
+      declarationExcerpt
     }));
   }
 
@@ -293,12 +311,15 @@ export class ApiModelGenerator {
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiNamespace;
 
     if (apiNamespace === undefined) {
-      const signature: string = this._getSignatureBeforeNodeKind(astDeclaration.declaration,
-        ts.SyntaxKind.ModuleBlock); // ModuleBlock = the "{ ... }" block
+      const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
+        startingNode: astDeclaration.declaration,
+        nodeToStopAt: ts.SyntaxKind.ModuleBlock  // ModuleBlock = the "{ ... }" block
+      });
+
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiNamespace = new ApiNamespace({ name, signature, docComment, releaseTag });
+      apiNamespace = new ApiNamespace({ name, declarationExcerpt, docComment, releaseTag });
       parentApiItem.addMember(apiNamespace);
     }
 
@@ -320,12 +341,14 @@ export class ApiModelGenerator {
       = parentApiItem.tryGetMember(canonicalReference) as ApiProperty;
 
     if (apiProperty === undefined) {
-      const signature: string = astDeclaration.declaration.getText();
+      const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
+        startingNode: astDeclaration.declaration,
+        embeddedExcerpts: [{ embeddedExcerptName: 'PropertyType', node: propertyDeclaration.type }]
+      });
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
-      const resultTypeSignature: string = this._getSignatureForTypeNode(propertyDeclaration.type);
 
-      apiProperty = new ApiProperty({ name, signature, docComment, releaseTag, resultTypeSignature, isStatic });
+      apiProperty = new ApiProperty({ name, declarationExcerpt, docComment, releaseTag, isStatic });
       parentApiItem.addMember(apiProperty);
     } else {
       // If the property was already declared before (via a merged interface declaration),
@@ -345,12 +368,14 @@ export class ApiModelGenerator {
       = parentApiItem.tryGetMember(canonicalReference) as ApiPropertySignature;
 
     if (apiPropertySignature === undefined) {
-      const signature: string = astDeclaration.declaration.getText();
+      const declarationExcerpt: IDeclarationExcerpt = ExcerptBuilder.build({
+        startingNode: astDeclaration.declaration,
+        embeddedExcerpts: [{ embeddedExcerptName: 'PropertyType', node: propertySignature.type }]
+      });
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
-      const resultTypeSignature: string = this._getSignatureForTypeNode(propertySignature.type);
 
-      apiPropertySignature = new ApiPropertySignature({ name, signature, docComment, releaseTag, resultTypeSignature });
+      apiPropertySignature = new ApiPropertySignature({ name, declarationExcerpt, docComment, releaseTag });
       parentApiItem.addMember(apiPropertySignature);
     } else {
       // If the property was already declared before (via a merged interface declaration),
@@ -385,34 +410,5 @@ export class ApiModelGenerator {
     }
 
     return overloadIndex;
-  }
-
-  // Used for classes and interfaces, this returns the declaration text stopping before a token such as "{"
-  private _getSignatureBeforeNodeKind(declaration: ts.Declaration, nodeKind: ts.SyntaxKind): string {
-    const span: Span = new Span(declaration);
-
-    let done: boolean = false;
-    for (const childSpan of span.children) {
-      if (childSpan.kind === nodeKind) {
-        // We reached the token (e.g. "{")
-        done = true;
-      }
-      if (done) {
-        childSpan.modification.skipAll();
-      }
-
-      // Also discard any comments
-      if (childSpan.kind === ts.SyntaxKind.JSDocComment) {
-        childSpan.modification.skipAll();
-      }
-    }
-    return span.getModifiedText().trim();
-  }
-
-  private _getSignatureForTypeNode(type: ts.TypeNode | undefined): string {
-    if (type) {
-      return type.getText();
-    }
-    return '';
   }
 }

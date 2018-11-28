@@ -7,7 +7,7 @@ This is an example class.
 <b>Signature:</b>
 
 ```typescript
-export declare class DocClass1
+export declare class DocClass1 
 ```
 
 ## Events

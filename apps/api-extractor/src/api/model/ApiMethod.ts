@@ -7,21 +7,22 @@ import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin
 import { ApiFunctionLikeMixin, IApiFunctionLikeMixinOptions } from '../mixins/ApiFunctionLikeMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { ApiResultTypeMixin, IApiResultTypeMixinOptions } from '../mixins/ApiResultTypeMixin';
+import { Excerpt } from '../mixins/Excerpt';
 
 /** @public */
 export interface IApiMethodOptions extends
   IApiDeclarationMixinOptions,
   IApiFunctionLikeMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiResultTypeMixinOptions,
   IApiStaticMixinOptions,
   IApiDocumentedItemOptions {
 }
 
 /** @public */
-export class ApiMethod extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(ApiResultTypeMixin(
-  ApiStaticMixin(ApiDocumentedItem))))) {
+export class ApiMethod extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
+  ApiStaticMixin(ApiDocumentedItem)))) {
+
+  public readonly returnTypeExcerpt: Excerpt;
 
   public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
@@ -33,6 +34,8 @@ export class ApiMethod extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiRelea
 
   public constructor(options: IApiMethodOptions) {
     super(options);
+
+    this.returnTypeExcerpt = this.getEmbeddedExcerpt('ReturnType');
   }
 
   /** @override */

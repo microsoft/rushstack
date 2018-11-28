@@ -3,31 +3,39 @@
 
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
 import { ApiDocumentedItem } from '../model/ApiDocumentedItem';
+import { Excerpt, ExcerptToken, IExcerptTokenRange, IDeclarationExcerpt, ExcerptName } from './Excerpt';
 
 /** @public */
 export interface IApiDeclarationMixinOptions extends IApiItemOptions {
-  signature: string;
+  declarationExcerpt: IDeclarationExcerpt;
 }
 
-export interface IApiDeclarationMixinJson extends IApiItemJson {
-  signature: string;
+export interface IApiDeclarationMixinJson extends IApiItemJson, IDeclarationExcerpt {
 }
 
-const _signature: unique symbol = Symbol('ApiDeclarationMixin._signature');
+const _excerpt: unique symbol = Symbol('ApiDeclarationMixin._excerpt');
+const _excerptTokens: unique symbol = Symbol('ApiDeclarationMixin._excerptTokens');
+const _embeddedExcerptsByName: unique symbol = Symbol('ApiDeclarationMixin._embeddedExcerptsByName');
 
 /** @public */
 // tslint:disable-next-line:interface-name
 export interface ApiDeclarationMixin extends ApiItem {
-  readonly signature: string;
+  readonly excerpt: Excerpt;
+
+  readonly excerptTokens: ReadonlyArray<ExcerptToken>;
+
+  readonly embeddedExcerptsByName: ReadonlyMap<ExcerptName, Excerpt>;
 
   /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 
+  getEmbeddedExcerpt(name: ExcerptName): Excerpt;
+
   /**
    * If the API item has certain important modifier tags such as `@sealed`, `@virtual`, or `@override`,
-   * this prepends them as a doc comment above the signature.
+   * this prepends them as a doc comment above the excerpt.
    */
-  getSignatureWithModifiers(): string;
+  getExcerptWithModifiers(): string;
 }
 
 /** @public */
@@ -35,7 +43,9 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
   TBaseClass & (new (...args: any[]) => ApiDeclarationMixin) { // tslint:disable-line:no-any
 
   abstract class MixedClass extends baseClass implements ApiDeclarationMixin {
-    public [_signature]: string;
+    public [_excerptTokens]: ExcerptToken[];
+    public [_embeddedExcerptsByName]: Map<ExcerptName, Excerpt>;
+    public [_excerpt]: Excerpt;
 
     /** @override */
     public static onDeserializeInto(options: Partial<IApiDeclarationMixinOptions>,
@@ -43,7 +53,17 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
 
       baseClass.onDeserializeInto(options, jsonObject);
 
-      options.signature = jsonObject.signature;
+      const declarationExcerpt: IDeclarationExcerpt = {
+        excerptTokens: jsonObject.excerptTokens.map(x => new ExcerptToken(x.kind, x.text)),
+        embeddedExcerptsByName: { }
+      };
+
+      for (const key of Object.getOwnPropertyNames(jsonObject.embeddedExcerptsByName)) {
+        const range: IExcerptTokenRange = jsonObject.embeddedExcerptsByName[key];
+        declarationExcerpt.embeddedExcerptsByName[key] = range;
+      }
+
+      options.declarationExcerpt = declarationExcerpt;
     }
 
     // tslint:disable-next-line:no-any
@@ -51,18 +71,45 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
       super(...args);
 
       const options: IApiDeclarationMixinOptions = args[0];
-      this[_signature] = options.signature;
+      this[_excerptTokens] = [...options.declarationExcerpt.excerptTokens];
+
+      this[_embeddedExcerptsByName] = new Map<ExcerptName, Excerpt>();
+
+      for (const key of Object.getOwnPropertyNames(options.declarationExcerpt.embeddedExcerptsByName)) {
+        const excerptRange: IExcerptTokenRange = options.declarationExcerpt.embeddedExcerptsByName[key];
+        this[_embeddedExcerptsByName].set(key as ExcerptName, new Excerpt(this[_excerptTokens], excerptRange));
+      }
+
+      // this.excerpt is a Excerpt that spans the entire list of tokens
+      this[_excerpt] = new Excerpt(this[_excerptTokens],
+        { startIndex: 0, endIndex: this[_excerptTokens].length });
     }
 
-    public get signature(): string {
-      return this[_signature];
+    public get excerpt(): Excerpt {
+      return this[_excerpt];
     }
 
-    public getSignatureWithModifiers(): string {
-      const signature: string = this.signature;
+    public get excerptTokens(): ReadonlyArray<ExcerptToken> {
+      return this[_excerptTokens];
+    }
+
+    public get embeddedExcerptsByName(): ReadonlyMap<ExcerptName, Excerpt> {
+      return this[_embeddedExcerptsByName];
+    }
+
+    public getEmbeddedExcerpt(name: ExcerptName): Excerpt {
+      const excerpt: Excerpt | undefined = this.embeddedExcerptsByName.get(name);
+      if (excerpt === undefined) {
+        throw new Error(`The embedded excerpt "${name}" must be defined for ${this.kind} objects`);
+      }
+      return excerpt;
+    }
+
+    public getExcerptWithModifiers(): string {
+      const excerpt: string = this.excerpt.text;
       const modifierTags: string[] = [];
 
-      if (signature.length > 0) {
+      if (excerpt.length > 0) {
         if (this instanceof ApiDocumentedItem) {
           if (this.tsdocComment) {
             if (this.tsdocComment.modifierTagSet.isSealed()) {
@@ -77,19 +124,24 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
           }
           if (modifierTags.length > 0) {
             return '/** ' + modifierTags.join(' ') + ' */\n'
-              + signature;
+              + excerpt;
           }
         }
       }
 
-      return this.signature;
+      return excerpt;
     }
 
     /** @override */
     public serializeInto(jsonObject: Partial<IApiDeclarationMixinJson>): void {
       super.serializeInto(jsonObject);
 
-      jsonObject.signature = this[_signature];
+      jsonObject.excerptTokens = this.excerptTokens.map(x => ({ kind: x.kind, text: x.text }));
+
+      jsonObject.embeddedExcerptsByName = { };
+      for (const [key, value] of this.embeddedExcerptsByName) {
+        jsonObject.embeddedExcerptsByName[key] = value.tokenRange;
+      }
     }
   }
 
@@ -99,6 +151,6 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
 /** @public */
 export namespace ApiDeclarationMixin {
   export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiDeclarationMixin {
-    return apiItem.hasOwnProperty(_signature);
+    return apiItem.hasOwnProperty(_excerpt);
   }
 }

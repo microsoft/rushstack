@@ -337,7 +337,7 @@ class LockFile {
 
 // @public
 class MapExtensions {
-  static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: Map<K, V>): void;
+  static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: ReadonlyMap<K, V>): void;
 }
 
 // @public

@@ -30,10 +30,6 @@ export { ILogger } from './api/ILogger';
 export { IndentedWriter } from './api/IndentedWriter';
 
 export {
-  Constructor,
-  PropertiesOf
-} from './api/mixins/Mixin';
-export {
   IApiDeclarationMixinOptions,
   ApiDeclarationMixin
 } from './api/mixins/ApiDeclarationMixin';
@@ -50,13 +46,22 @@ export {
   ApiReleaseTagMixin
 } from './api/mixins/ApiReleaseTagMixin';
 export {
-  IApiResultTypeMixinOptions,
-  ApiResultTypeMixin
-} from './api/mixins/ApiResultTypeMixin';
-export {
   IApiStaticMixinOptions,
   ApiStaticMixin
 } from './api/mixins/ApiStaticMixin';
+export {
+  ExcerptTokenKind,
+  ExcerptName,
+  IExcerptTokenRange,
+  IExcerptToken,
+  IDeclarationExcerpt,
+  ExcerptToken,
+  Excerpt
+} from './api/mixins/Excerpt';
+export {
+  Constructor,
+  PropertiesOf
+} from './api/mixins/Mixin';
 
 export {
   IApiClassOptions,

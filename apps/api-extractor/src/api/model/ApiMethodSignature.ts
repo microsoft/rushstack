@@ -6,20 +6,21 @@ import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiD
 import { ApiFunctionLikeMixin, IApiFunctionLikeMixinOptions } from '../mixins/ApiFunctionLikeMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { ApiResultTypeMixin, IApiResultTypeMixinOptions } from '../mixins/ApiResultTypeMixin';
+import { Excerpt } from '../mixins/Excerpt';
 
 /** @public */
 export interface IApiMethodSignatureOptions extends
   IApiDeclarationMixinOptions,
   IApiFunctionLikeMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiResultTypeMixinOptions,
   IApiDocumentedItemOptions {
 }
 
 /** @public */
 export class ApiMethodSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
-  ApiResultTypeMixin(ApiDocumentedItem)))) {
+  ApiDocumentedItem))) {
+
+  public readonly returnTypeExcerpt: Excerpt;
 
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;
@@ -27,6 +28,8 @@ export class ApiMethodSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin
 
   public constructor(options: IApiMethodSignatureOptions) {
     super(options);
+
+    this.returnTypeExcerpt = this.getEmbeddedExcerpt('ReturnType');
   }
 
   /** @override */

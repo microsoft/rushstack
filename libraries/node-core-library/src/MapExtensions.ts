@@ -14,7 +14,7 @@ export class MapExtensions {
    * @param targetMap - The map that entries will be added to
    * @param sourceMap - The map containing the entries to be added
    */
-  public static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: Map<K, V>): void {
+  public static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: ReadonlyMap<K, V>): void {
     for (const pair of sourceMap.entries()) {
       targetMap.set(pair[0], pair[1]);
     }

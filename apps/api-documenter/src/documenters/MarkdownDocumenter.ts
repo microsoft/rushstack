@@ -35,10 +35,10 @@ import {
   ReleaseTag,
   ApiDeclarationMixin,
   ApiStaticMixin,
-  ApiResultTypeMixin,
   ApiPropertyItem,
   ApiFunctionLikeMixin,
-  ApiInterface
+  ApiInterface,
+  Excerpt
 } from '@microsoft/api-extractor';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -148,7 +148,7 @@ export class MarkdownDocumenter {
     }
 
     if (ApiDeclarationMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.signature.length > 0) {
+      if (apiItem.excerpt.text.length > 0) {
         output.appendNode(
           new DocParagraph({ configuration }, [
             new DocEmphasisSpan({ configuration, bold: true}, [
@@ -157,7 +157,7 @@ export class MarkdownDocumenter {
           ])
         );
         output.appendNode(
-          new DocFencedCode({ configuration, code: apiItem.getSignatureWithModifiers(), language: 'typescript' })
+          new DocFencedCode({ configuration, code: apiItem.getExcerptWithModifiers(), language: 'typescript' })
         );
       }
     }
@@ -361,7 +361,7 @@ export class MarkdownDocumenter {
               new DocTableRow({ configuration }, [
                 this._createTitleCell(apiMember),
                 this._createModifiersCell(apiMember),
-                this._createResultTypeCell(apiMember),
+                this._createPropertyTypeCell(apiMember),
                 this._createDescriptionCell(apiMember)
               ])
             );
@@ -370,7 +370,7 @@ export class MarkdownDocumenter {
               new DocTableRow({ configuration }, [
                 this._createTitleCell(apiMember),
                 this._createModifiersCell(apiMember),
-                this._createResultTypeCell(apiMember),
+                this._createPropertyTypeCell(apiMember),
                 this._createDescriptionCell(apiMember)
               ])
             );
@@ -421,7 +421,7 @@ export class MarkdownDocumenter {
 
           new DocTableCell({ configuration }, [
             new DocParagraph({ configuration }, [
-              new DocCodeSpan({ configuration, code: apiEnumMember.signature })
+              new DocCodeSpan({ configuration, code: apiEnumMember.initializerExcerpt.text })
             ])
           ]),
 
@@ -474,7 +474,7 @@ export class MarkdownDocumenter {
             eventsTable.addRow(
               new DocTableRow({ configuration }, [
                 this._createTitleCell(apiMember),
-                this._createResultTypeCell(apiMember),
+                this._createPropertyTypeCell(apiMember),
                 this._createDescriptionCell(apiMember)
               ])
             );
@@ -482,7 +482,7 @@ export class MarkdownDocumenter {
             propertiesTable.addRow(
               new DocTableRow({ configuration }, [
                 this._createTitleCell(apiMember),
-                this._createResultTypeCell(apiMember),
+                this._createPropertyTypeCell(apiMember),
                 this._createDescriptionCell(apiMember)
               ])
             );
@@ -536,7 +536,7 @@ export class MarkdownDocumenter {
           ]),
           new DocTableCell({configuration}, [
             new DocParagraph({ configuration }, [
-              new DocCodeSpan({ configuration, code: apiParameter.resultTypeSignature })
+              new DocCodeSpan({ configuration, code: apiParameter.parameterTypeExcerpt.text })
             ])
           ]),
           new DocTableCell({configuration}, parameterDescription.nodes)
@@ -549,28 +549,33 @@ export class MarkdownDocumenter {
       output.appendNode(parametersTable);
     }
 
-    if (ApiResultTypeMixin.isBaseClassOf(apiFunctionLike)) {
+    if (ApiDeclarationMixin.isBaseClassOf(apiFunctionLike)) {
 
-      output.appendNode(
-        new DocParagraph({ configuration }, [
-          new DocEmphasisSpan({ configuration, bold: true}, [
-            new DocPlainText({ configuration, text: 'Returns:' })
+      const returnTypeExcerpt: Excerpt | undefined = apiFunctionLike.embeddedExcerptsByName.get('ReturnType');
+      if (returnTypeExcerpt !== undefined) {
+
+        output.appendNode(
+          new DocParagraph({ configuration }, [
+            new DocEmphasisSpan({ configuration, bold: true}, [
+              new DocPlainText({ configuration, text: 'Returns:' })
+            ])
           ])
-        ])
-      );
+        );
 
-      output.appendNode(
-        new DocParagraph({ configuration }, [
-          new DocCodeSpan({ configuration, code: apiFunctionLike.resultTypeSignature })
-        ])
-      );
+        output.appendNode(
+          new DocParagraph({ configuration }, [
+            new DocCodeSpan({ configuration, code: returnTypeExcerpt.text })
+          ])
+        );
 
-      if (apiFunctionLike instanceof ApiDocumentedItem) {
-        if (apiFunctionLike.tsdocComment) {
-          if (apiFunctionLike.tsdocComment.returnsBlock) {
-            this._appendSection(output, apiFunctionLike.tsdocComment.returnsBlock.content);
+        if (apiFunctionLike instanceof ApiDocumentedItem) {
+          if (apiFunctionLike.tsdocComment) {
+            if (apiFunctionLike.tsdocComment.returnsBlock) {
+              this._appendSection(output, apiFunctionLike.tsdocComment.returnsBlock.content);
+            }
           }
         }
+
       }
 
     }
@@ -630,13 +635,13 @@ export class MarkdownDocumenter {
     return new DocTableCell({ configuration }, section.nodes);
   }
 
-  private _createResultTypeCell(apiItem: ApiItem): DocTableCell {
+  private _createPropertyTypeCell(apiItem: ApiItem): DocTableCell {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const section: DocSection = new DocSection({ configuration });
 
-    if (ApiResultTypeMixin.isBaseClassOf(apiItem)) {
-      section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: apiItem.resultTypeSignature }));
+    if (apiItem instanceof ApiPropertyItem) {
+      section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: apiItem.propertyTypeExcerpt.text }));
     }
 
     return new DocTableCell({ configuration }, section.nodes);

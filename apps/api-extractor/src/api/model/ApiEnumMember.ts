@@ -5,6 +5,7 @@ import { ApiItemKind } from './ApiItem';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
+import { Excerpt } from '../mixins/Excerpt';
 
 /** @public */
 export interface IApiEnumMemberOptions extends
@@ -15,6 +16,7 @@ export interface IApiEnumMemberOptions extends
 
 /** @public */
 export class ApiEnumMember extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
+  public readonly initializerExcerpt: Excerpt;
 
   public static getCanonicalReference(name: string): string {
     return name;
@@ -22,6 +24,8 @@ export class ApiEnumMember extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDoc
 
   public constructor(options: IApiEnumMemberOptions) {
     super(options);
+
+    this.initializerExcerpt = this.getEmbeddedExcerpt('Initializer');
   }
 
   /** @override */

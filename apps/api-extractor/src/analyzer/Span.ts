@@ -374,7 +374,7 @@ export class Span {
         const sortedSubset: Span[] = this.children.filter(x => x.modification.sortKey !== undefined);
         const sortedSubsetCount: number = sortedSubset.length;
 
-        // Is there at least one fo them?
+        // Is there at least one of them?
         if (sortedSubsetCount > 1) {
 
           // Remember the separator for the first and last ones

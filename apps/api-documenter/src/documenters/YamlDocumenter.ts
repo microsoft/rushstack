@@ -21,7 +21,6 @@ import {
   ReleaseTag,
   ApiProperty,
   ApiPropertyItem,
-  ApiResultTypeMixin,
   ApiMethod,
   ApiMethodSignature,
   ApiPropertySignature,
@@ -389,17 +388,11 @@ export class YamlDocumenter {
 
   private _populateYamlFunctionLike(yamlItem: Partial<IYamlItem>, apiItem: ApiMethod | ApiMethodSignature): void {
     const syntax: IYamlSyntax = {
-      content: apiItem.getSignatureWithModifiers()
+      content: apiItem.getExcerptWithModifiers()
     };
     yamlItem.syntax = syntax;
 
-    let returnType: string = '';
-
-    if (ApiResultTypeMixin.isBaseClassOf(apiItem)) {
-      if (apiItem.resultTypeSignature) {
-        returnType = this._linkToUidIfPossible(apiItem.resultTypeSignature);
-      }
-    }
+    const returnType: string = this._linkToUidIfPossible(apiItem.returnTypeExcerpt.text);
 
     let returnDescription: string = '';
 
@@ -427,7 +420,7 @@ export class YamlDocumenter {
         {
            id: apiParameter.name,
            description:  parameterDescription,
-           type: [ this._linkToUidIfPossible(apiParameter.resultTypeSignature) ]
+           type: [ this._linkToUidIfPossible(apiParameter.parameterTypeExcerpt.text) ]
         } as IYamlParameter
       );
     }
@@ -439,13 +432,13 @@ export class YamlDocumenter {
 
   private _populateYamlProperty(yamlItem: Partial<IYamlItem>, apiItem: ApiProperty | ApiPropertySignature): void {
     const syntax: IYamlSyntax = {
-      content: apiItem.getSignatureWithModifiers()
+      content: apiItem.getExcerptWithModifiers()
     };
     yamlItem.syntax = syntax;
 
-    if (apiItem.resultTypeSignature) {
+    if (apiItem.propertyTypeExcerpt.text) {
       syntax.return = {
-        type: [ this._linkToUidIfPossible(apiItem.resultTypeSignature) ]
+        type: [ this._linkToUidIfPossible(apiItem.propertyTypeExcerpt.text) ]
       };
     }
   }
