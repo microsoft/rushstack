@@ -65,7 +65,7 @@ items:
       content: 'malformedEvent: SystemEvent;'
       return:
         type:
-          - SystemEvent
+          - api-extractor-test-05.SystemEvent
   - uid: api-extractor-test-05.DocClass1.modifiedEvent
     summary: This event is fired whenever the object is modified.
     name: modifiedEvent
@@ -77,7 +77,7 @@ items:
       content: 'readonly modifiedEvent: SystemEvent;'
       return:
         type:
-          - SystemEvent
+          - api-extractor-test-05.SystemEvent
   - uid: api-extractor-test-05.DocClass1.regularProperty
     summary: This is a regular property that happens to use the SystemEvent type.
     name: regularProperty
@@ -89,7 +89,7 @@ items:
       content: 'regularProperty: SystemEvent;'
       return:
         type:
-          - SystemEvent
+          - api-extractor-test-05.SystemEvent
   - uid: api-extractor-test-05.DocClass1.tableExample
     summary: 'An example with tables:'
     remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
