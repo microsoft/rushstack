@@ -121,7 +121,7 @@ export class Extractor {
   }
 
   private static _getPackageJson(): IPackageJson {
-    return PackageJsonLookup.loadOwnPackageJson(__dirname, '../..');
+    return PackageJsonLookup.loadOwnPackageJson(__dirname);
   }
 
   private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
