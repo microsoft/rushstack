@@ -22,11 +22,17 @@ export interface ISignatureBuilderOptions {
   embeddedExcerpts?: IExcerptBuilderEmbeddedExcerpt[];
 }
 
-interface IBuildSpanOptions {
+interface IBuildSpanState {
   nodeToStopAt?: ts.SyntaxKind;
   nameByNode: Map<ts.Node, ExcerptName>;
   remainingExcerptNames: Set<ExcerptName>;
-  lastReferencedIndex: number;
+
+  /**
+   * Normally adjacent tokens of the same kind get merged, to avoid creating lots of unnecessary extra tokens.
+   * However when an embedded excerpt needs to start/end at a specific character, we temporarily disable merging by
+   * setting this flag.  After the new token is added, this flag is cleared.
+   */
+  disableMergingForNextToken: boolean;
 }
 
 export class ExcerptBuilder {
@@ -55,7 +61,7 @@ export class ExcerptBuilder {
       nodeToStopAt: options.nodeToStopAt,
       nameByNode,
       remainingExcerptNames,
-      lastReferencedIndex: 0
+      disableMergingForNextToken: false
     });
 
     // For any excerpts that we didn't find, add empty entries
@@ -67,9 +73,9 @@ export class ExcerptBuilder {
   }
 
   private static _buildSpan(declarationExcerpt: IDeclarationExcerpt, span: Span,
-    options: IBuildSpanOptions): boolean {
+    state: IBuildSpanState): boolean {
 
-    if (options.nodeToStopAt && span.kind === options.nodeToStopAt) {
+    if (state.nodeToStopAt && span.kind === state.nodeToStopAt) {
       return false;
     }
 
@@ -79,41 +85,41 @@ export class ExcerptBuilder {
     }
 
     // Can this node start a excerpt?
-    const embeddedExcerptName: ExcerptName | undefined = options.nameByNode.get(span.node);
+    const embeddedExcerptName: ExcerptName | undefined = state.nameByNode.get(span.node);
     let excerptStartIndex: number | undefined = undefined;
     if (embeddedExcerptName) {
       // Did we not already build this excerpt?
-      if (options.remainingExcerptNames.has(embeddedExcerptName)) {
-        options.remainingExcerptNames.delete(embeddedExcerptName);
+      if (state.remainingExcerptNames.has(embeddedExcerptName)) {
+        state.remainingExcerptNames.delete(embeddedExcerptName);
 
         excerptStartIndex = declarationExcerpt.excerptTokens.length;
-        options.lastReferencedIndex = excerptStartIndex;
+        state.disableMergingForNextToken = true;
       }
     }
 
     if (span.prefix) {
       if (span.kind === ts.SyntaxKind.Identifier) {
         ExcerptBuilder._appendToken(declarationExcerpt.excerptTokens, ExcerptTokenKind.Reference,
-          span.prefix, options);
+          span.prefix, state);
       } else {
         ExcerptBuilder._appendToken(declarationExcerpt.excerptTokens, ExcerptTokenKind.Content,
-          span.prefix, options);
+          span.prefix, state);
       }
     }
 
     for (const child of span.children) {
-      if (!this._buildSpan(declarationExcerpt, child, options)) {
+      if (!this._buildSpan(declarationExcerpt, child, state)) {
         return false;
       }
     }
 
     if (span.suffix) {
       ExcerptBuilder._appendToken(declarationExcerpt.excerptTokens, ExcerptTokenKind.Content,
-        span.suffix, options);
+        span.suffix, state);
     }
     if (span.separator) {
       ExcerptBuilder._appendToken(declarationExcerpt.excerptTokens, ExcerptTokenKind.Content,
-        span.separator, options);
+        span.separator, state);
     }
 
     // Are we building a excerpt?  If so, add it.
@@ -123,14 +129,14 @@ export class ExcerptBuilder {
         endIndex: declarationExcerpt.excerptTokens.length
       };
 
-      options.lastReferencedIndex = declarationExcerpt.excerptTokens.length;
+      state.disableMergingForNextToken = true;
     }
 
     return true;
   }
 
   private static _appendToken(excerptTokens: IExcerptToken[], excerptTokenKind: ExcerptTokenKind,
-    text: string, options: IBuildSpanOptions): void {
+    text: string, state: IBuildSpanState): void {
 
     if (text.length === 0) {
       return;
@@ -138,9 +144,11 @@ export class ExcerptBuilder {
 
     if (excerptTokenKind !== ExcerptTokenKind.Content) {
       excerptTokens.push(new ExcerptToken(excerptTokenKind, text));
+      state.disableMergingForNextToken = false;
+
     } else {
       // If someone referenced this index, then we need to start a new token
-      if (excerptTokens.length > options.lastReferencedIndex) {
+      if (excerptTokens.length > 0 && !state.disableMergingForNextToken) {
         // Otherwise, can we merge with the previous token?
         const previousToken: IExcerptToken = excerptTokens[excerptTokens.length - 1];
         if (previousToken.kind === excerptTokenKind) {
@@ -150,6 +158,7 @@ export class ExcerptBuilder {
       }
 
       excerptTokens.push(new ExcerptToken(excerptTokenKind, text));
+      state.disableMergingForNextToken = false;
     }
   }
 
