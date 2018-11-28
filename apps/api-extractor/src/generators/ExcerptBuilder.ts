@@ -37,8 +37,11 @@ export class ExcerptBuilder {
 
     const nameByNode: Map<ts.Node, ExcerptName> = new Map<ts.Node, ExcerptName>();
     for (const excerpt of options.embeddedExcerpts || []) {
+      // Collect all names
+      remainingExcerptNames.add(excerpt.embeddedExcerptName);
+
+      // If nodes were specify, add them to our map so we will look for them
       if (excerpt.node) {
-        remainingExcerptNames.add(excerpt.embeddedExcerptName);
         nameByNode.set(excerpt.node, excerpt.embeddedExcerptName);
       }
     }
