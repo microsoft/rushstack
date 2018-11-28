@@ -558,6 +558,11 @@
         "@microsoft/rush-stack-compiler"
       ]
     },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-shared",
+      "projectFolder": "stack/rush-stack-compiler-shared",
+      "reviewCategory": "libraries"
+    },
 
     // "webpack" folder (alphabetical order)
     {

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * This package is an NPM peer dependency that is used with
+ * This package is used with
  * [\@microsoft/rush-stack](https://www.npmjs.com/package/\@microsoft/rush-stack)
  * to select a TypeScript compiler version.
  *
@@ -14,8 +14,8 @@
  * @packagedocumentation
  */
 
-export * from './RushStackCompilerBase';
-export * from './ApiExtractorRunner';
-export * from './TypescriptCompiler';
-export * from './TslintRunner';
-export * from './ToolPaths';
+export * from './shared/RushStackCompilerBase';
+export * from './shared/ApiExtractorRunner';
+export * from './shared/TypescriptCompiler';
+export * from './shared/TslintRunner';
+export * from './shared/ToolPaths';
