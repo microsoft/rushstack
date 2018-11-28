@@ -3,18 +3,13 @@
 
 import * as os from 'os';
 import * as colors from 'colors';
-import * as path from 'path';
-
-import { FileConstants } from '@microsoft/node-core-library';
 
 import { ApiExtractorCommandLine } from './cli/ApiExtractorCommandLine';
+import { Extractor } from './extractor/Extractor';
 
-const myPackageJsonFilename: string = path.resolve(path.join(
-  __dirname, '..', FileConstants.PackageJson)
-);
-const myPackageJson: { version: string } = require(myPackageJsonFilename);
+const myPackageVersion: string = Extractor.version;
 
-console.log(os.EOL + colors.bold(`api-extractor ${myPackageJson.version} `
+console.log(os.EOL + colors.bold(`api-extractor ${myPackageVersion} `
   + colors.cyan(' - http://aka.ms/extractor') + os.EOL));
 
 const parser: ApiExtractorCommandLine = new ApiExtractorCommandLine();
