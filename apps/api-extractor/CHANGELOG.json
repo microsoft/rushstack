@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "6.3.0",
+      "tag": "@microsoft/api-extractor_v6.3.0",
+      "date": "Wed, 28 Nov 2018 19:29:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support \"extends\" field in api-extractor.json config files for easier management of monorepos with many projects"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.2.0",
       "tag": "@microsoft/api-extractor_v6.2.0",
       "date": "Wed, 28 Nov 2018 02:17:11 GMT",
