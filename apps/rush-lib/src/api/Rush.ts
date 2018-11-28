@@ -60,7 +60,7 @@ export class Rush {
    * This is the same as the Rush tool version for that release.
    */
   public static get version(): string {
-    return PackageJsonLookup.loadOwnPackageJson(__dirname, '../..').version;
+    return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
   }
 
   private static _printStartupBanner(isManaged: boolean): void {

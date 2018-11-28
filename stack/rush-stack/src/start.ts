@@ -9,7 +9,7 @@ import {
 
 import { RushStackCommandLine } from './cli/RushStackCommandLine';
 
-const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname, '..').version;
+const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
 console.log(os.EOL + colors.bold(`rush-stack ${currentPackageVersion} `
   + colors.cyan(' - http://rushstack.io') + os.EOL));
