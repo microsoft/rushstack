@@ -15,8 +15,8 @@
   "scripts": {
     "build": "gulp --clean"
   },
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "lib/shared/index.js",
+  "types": "lib/shared/index.d.ts",
   "dependencies": {
     "@microsoft/api-extractor": "6.1.6",
     "@microsoft/node-core-library": "3.6.0",

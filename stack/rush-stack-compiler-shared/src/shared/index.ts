@@ -14,8 +14,8 @@
  * @packagedocumentation
  */
 
-export * from './shared/RushStackCompilerBase';
-export * from './shared/ApiExtractorRunner';
-export * from './shared/TypescriptCompiler';
-export * from './shared/TslintRunner';
-export * from './shared/ToolPaths';
+export * from './RushStackCompilerBase';
+export * from './ApiExtractorRunner';
+export * from './TypescriptCompiler';
+export * from './TslintRunner';
+export * from './ToolPaths';

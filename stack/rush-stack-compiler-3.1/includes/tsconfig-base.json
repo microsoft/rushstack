@@ -3,6 +3,7 @@
 
   "compilerOptions": {
     "outDir": "../../../../lib",
+    "rootDirs": ["../../../../src/"],
 
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
