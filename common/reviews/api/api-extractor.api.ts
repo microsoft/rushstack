@@ -21,6 +21,7 @@ class Extractor {
   static loadConfigObject(jsonConfigFile: string): IExtractorConfig;
   processProject(options?: IAnalyzeProjectOptions): boolean;
   static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractorOptions): void;
+  static readonly version: string;
 }
 
 // @public

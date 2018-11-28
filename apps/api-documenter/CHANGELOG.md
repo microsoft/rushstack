@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Nov 2018 02:17:11 GMT and should not be manually modified.
+
+## 1.5.57
+Wed, 28 Nov 2018 02:17:11 GMT
+
+### Patches
+
+- add uid to implements and extends blocks, fix uid references
 
 ## 1.5.56
 Fri, 16 Nov 2018 21:37:10 GMT

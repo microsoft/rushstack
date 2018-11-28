@@ -35,12 +35,9 @@ else if (!semver.satisfies(nodeVersion, '^6.9.0')
     + ` Please consider installing a stable release.`));
 }
 
-import * as path from 'path';
 import {
-  JsonFile,
-  IPackageJson,
   Text,
-  FileConstants
+  PackageJsonLookup
 } from '@microsoft/node-core-library';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
@@ -51,7 +48,8 @@ import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 // Load the configuration
 const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
-const currentPackageJson: IPackageJson = JsonFile.load(path.join(__dirname, '..', FileConstants.PackageJson));
+
+const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
 let rushVersionToLoad: string | undefined = undefined;
 
@@ -102,8 +100,8 @@ if (rushVersionToLoad && semver.lt(rushVersionToLoad, '5.0.0-dev.18')) {
 
 // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
 // install it
-if (rushVersionToLoad && rushVersionToLoad !== currentPackageJson.version) {
-  const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageJson.version);
+if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion) {
+  const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageVersion);
   versionSelector.ensureRushVersionInstalled(rushVersionToLoad, configuration)
     .catch((error: Error) => {
       console.log(colors.red('Error: ' + error.message));
@@ -114,5 +112,5 @@ if (rushVersionToLoad && rushVersionToLoad !== currentPackageJson.version) {
   // Rush is "managed" if its version and configuration are dictated by a repo's rush.json
   const isManaged: boolean = !!configuration;
 
-  RushCommandSelector.execute(currentPackageJson.version, isManaged, rushLib);
+  RushCommandSelector.execute(currentPackageVersion, isManaged, rushLib);
 }

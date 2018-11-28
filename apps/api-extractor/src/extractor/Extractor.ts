@@ -11,7 +11,8 @@ import {
   JsonFile,
   JsonSchema,
   Path,
-  FileSystem
+  FileSystem,
+  PackageJsonLookup
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
@@ -26,6 +27,7 @@ import { ApiFileGenerator } from '../generators/ApiFileGenerator';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/dtsRollup/DtsRollupGenerator';
 import { MonitoredLogger } from './MonitoredLogger';
 import { TypeScriptMessageFormatter } from '../utils/TypeScriptMessageFormatter';
+import { PackageMetadataManager } from '../generators/dtsRollup/PackageMetadataManager';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -119,6 +121,13 @@ export class Extractor {
   private readonly _localBuild: boolean;
   private readonly _monitoredLogger: MonitoredLogger;
   private readonly _absoluteRootFolder: string;
+
+  /**
+   * The NPM package version for the currently executing instance of the "\@microsoft/api-extractor" library.
+   */
+  public static get version(): string {
+    return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+  }
 
   /**
    * Given a list of absolute file paths, return a list containing only the declaration
@@ -450,6 +459,9 @@ export class Extractor {
 
     this._generateRollupDtsFiles(context);
 
+    // Write the tsdoc-metadata.json file for this project
+    PackageMetadataManager.writeTsdocMetadataFile(context.packageFolder);
+
     if (this._localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
       return this._monitoredLogger.errorCount === 0;
@@ -537,7 +549,7 @@ export class Extractor {
     this._monitoredLogger.logVerbose(`Writing package typings: ${mainDtsRollupFullPath}`);
 
     dtsRollupGenerator.writeTypingsFile(mainDtsRollupFullPath, dtsKind);
-}
+  }
 
   private _getShortFilePath(absolutePath: string): string {
     if (!path.isAbsolute(absolutePath)) {

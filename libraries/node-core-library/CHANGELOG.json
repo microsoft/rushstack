@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.7.0",
+      "tag": "@microsoft/node-core-library_v3.7.0",
+      "date": "Wed, 28 Nov 2018 02:17:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new API PackageJsonLookup.loadOwnPackageJson()"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.6.0",
       "tag": "@microsoft/node-core-library_v3.6.0",
       "date": "Fri, 16 Nov 2018 21:37:10 GMT",

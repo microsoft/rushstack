@@ -2,12 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import * as path from 'path';
 import * as colors from 'colors';
-import {
-  IPackageJson,
-  FileConstants
-} from '@microsoft/node-core-library';
+import { PackageJsonLookup } from '@microsoft/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from '../logic/RushConstants';
@@ -20,8 +16,6 @@ import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor'
  * @public
  */
 export class Rush {
-  private static _version: string;
-
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
    * Third-party tools should not use this API.  Instead, they should execute the "rush" binary
@@ -66,13 +60,7 @@ export class Rush {
    * This is the same as the Rush tool version for that release.
    */
   public static get version(): string {
-    if (!Rush._version) {
-      const myPackageJsonFilename: string = path.resolve(path.join(__dirname, '..', '..', FileConstants.PackageJson));
-      const myPackageJson: IPackageJson = require(myPackageJsonFilename);
-      Rush._version = myPackageJson.version;
-    }
-
-    return Rush._version;
+    return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
   }
 
   private static _printStartupBanner(isManaged: boolean): void {
