@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as ts from 'typescript';
+import * as resolve from 'resolve';
 import lodash = require('lodash');
 import colors = require('colors');
 
@@ -184,9 +185,19 @@ export class Extractor {
     let extractorConfig: IExtractorConfig = JsonFile.load(jsonConfigFile);
 
     while (extractorConfig.extends) {
-      // Populate the api extractor config path defined in extends relative to current config path.
-      currentConfigFilePath = path.resolve(path.dirname(currentConfigFilePath), extractorConfig.extends);
-
+      if (extractorConfig.extends.match(/^\./)) {
+        // If extends has relative path.
+        // Populate the api extractor config path defined in extends relative to current config path.
+        currentConfigFilePath = path.resolve(path.dirname(currentConfigFilePath), extractorConfig.extends);
+      } else {
+        // If extends has package path.
+        currentConfigFilePath = resolve.sync(
+          extractorConfig.extends,
+          {
+            basedir: path.dirname(currentConfigFilePath)
+          }
+        );
+      }
       // Check if this file was already processed.
       if (pathSet.has(currentConfigFilePath)) {
         throw new Error('The api extractor config files contains a cycle. '
