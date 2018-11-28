@@ -125,7 +125,7 @@ export class Extractor {
    * The NPM package version for the currently executing instance of the "\@microsoft/api-extractor" library.
    */
   public static get version(): string {
-    return PackageJsonLookup.loadOwnPackageJson(__dirname, '../..').version;
+    return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
   }
 
   /**

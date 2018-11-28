@@ -8,7 +8,7 @@ import { PackageJsonLookup } from '@microsoft/node-core-library';
 
 import { ApiExtractorCommandLine } from './cli/ApiExtractorCommandLine';
 
-const myPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname, '..').version;
+const myPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
 console.log(os.EOL + colors.bold(`api-extractor ${myPackageVersion} `
   + colors.cyan(' - http://aka.ms/extractor') + os.EOL));

@@ -49,7 +49,7 @@ import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 // Load the configuration
 const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
 
-const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname, '..').version;
+const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
 let rushVersionToLoad: string | undefined = undefined;
 
