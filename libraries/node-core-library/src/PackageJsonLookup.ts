@@ -31,6 +31,8 @@ export interface IPackageJsonLookupParameters {
  * @public
  */
 export class PackageJsonLookup {
+  private static _loadOwnPackageJsonLookup: PackageJsonLookup = new PackageJsonLookup({ loadExtraFields: true });
+
   private _loadExtraFields: boolean = false;
 
   // Cached the return values for tryGetPackageFolder():
@@ -40,6 +42,41 @@ export class PackageJsonLookup {
   // Cached the return values for getPackageName():
   // packageJsonPath --> packageName
   private _packageJsonCache: Map<string, IPackageJson>;
+
+  /**
+   * A helper for loading the caller's own package.json file.
+   *
+   * @remarks
+   *
+   * This function provides a concise and efficient way for an NPM package to report metadata about itself.
+   * For example, a tool might want to report its version.
+   *
+   * The `loadOwnPackageJson()` probes upwards from the caller's folder, expecting to find a package.json file,
+   * which is assumed to be the caller's package.  The result is cached, under the assumption that a tool's
+   * own package.json (and intermediary folders) will never change during the lifetime of the process.
+   *
+   * @example
+   * ```ts
+   * // Report the version of our NPM package
+   * const myPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+   * console.log(`Cool Tool - Version ${myPackageVersion}`);
+   * ```
+   *
+   * @param dirnameOfCaller - The NodeJS `__dirname` macro for the caller.
+   * @returns This function always returns a valid `IPackageJson` object.  If any problems are encountered during
+   * loading, an exception will be thrown instead.
+   */
+  public static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson {
+    const packageJson: IPackageJson | undefined = PackageJsonLookup._loadOwnPackageJsonLookup
+      .tryLoadPackageJsonFor(dirnameOfCaller);
+
+    if (packageJson === undefined) {
+      throw new Error(`PackageJsonLookup.loadOwnPackageJson() failed to find the caller's package.json.`
+        + `  The __dirname was: ${dirnameOfCaller}`);
+    }
+
+    return packageJson;
+  }
 
   constructor(parameters?: IPackageJsonLookupParameters) {
     if (parameters) {

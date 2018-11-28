@@ -3,18 +3,14 @@
 
 import * as os from 'os';
 import * as colors from 'colors';
-import * as path from 'path';
 
-import { FileConstants } from '@microsoft/node-core-library';
+import { PackageJsonLookup } from '@microsoft/node-core-library';
 
 import { ApiDocumenterCommandLine } from './cli/ApiDocumenterCommandLine';
 
-const myPackageJsonFilename: string = path.resolve(path.join(
-  __dirname, '..', FileConstants.PackageJson)
-);
-const myPackageJson: { version: string } = require(myPackageJsonFilename);
+const myPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
-console.log(os.EOL + colors.bold(`api-documenter ${myPackageJson.version} `
+console.log(os.EOL + colors.bold(`api-documenter ${myPackageVersion} `
   + colors.cyan(' - http://aka.ms/extractor') + os.EOL));
 
 const parser: ApiDocumenterCommandLine = new ApiDocumenterCommandLine();
