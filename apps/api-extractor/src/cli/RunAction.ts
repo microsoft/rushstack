@@ -5,7 +5,6 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import {
-  JsonFile,
   PackageJsonLookup,
   FileSystem,
   IPackageJson
@@ -134,7 +133,7 @@ export class RunAction extends CommandLineAction {
       console.log(`Using configuration from ${configFilename}` + os.EOL + os.EOL);
     }
 
-    const config: IExtractorConfig = JsonFile.loadAndValidate(configFilename, Extractor.jsonSchema);
+    const config: IExtractorConfig = Extractor.loadConfigObject(configFilename);
     const extractor: Extractor = new Extractor(
       config,
       {

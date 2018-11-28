@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as ts from 'typescript';
+import * as resolve from 'resolve';
 import lodash = require('lodash');
 import colors = require('colors');
 
@@ -187,9 +188,60 @@ export class Extractor {
    * @param options - IExtractor options.
    */
   public static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractorOptions): void {
-    const configObject: IExtractorConfig = JsonFile.loadAndValidate(jsonConfigFile, Extractor.jsonSchema);
+    const configObject: IExtractorConfig = this.loadConfigObject(jsonConfigFile);
     const extractor: Extractor = new Extractor(configObject, options);
     extractor.processProject();
+  }
+
+  /**
+   * Loads the api extractor config file in Extractor Config object.
+   * The jsonConfigFile path specified is relative to project directory path.
+   * @param jsonConfigFile - Path to api extractor json config file.
+   */
+  public static loadConfigObject(jsonConfigFile: string): IExtractorConfig {
+    // Set to keep track of config files which have been processed.
+    const pathSet: Set<string> = new Set<string>();
+    // Get absolute path of config file.
+    let currentConfigFilePath: string = path.resolve(process.cwd(), jsonConfigFile);
+    pathSet.add(currentConfigFilePath);
+
+    const originalConfigFileFolder: string = path.dirname(currentConfigFilePath);
+
+    let extractorConfig: IExtractorConfig = JsonFile.load(jsonConfigFile);
+
+    while (extractorConfig.extends) {
+      if (extractorConfig.extends.match(/^\./)) {
+        // If extends has relative path.
+        // Populate the api extractor config path defined in extends relative to current config path.
+        currentConfigFilePath = path.resolve(originalConfigFileFolder, extractorConfig.extends);
+      } else {
+        // If extends has package path.
+        currentConfigFilePath = resolve.sync(
+          extractorConfig.extends,
+          {
+            basedir: originalConfigFileFolder
+          }
+        );
+      }
+      // Check if this file was already processed.
+      if (pathSet.has(currentConfigFilePath)) {
+        throw new Error(`The API Extractor config files contain a cycle. "${currentConfigFilePath}"`
+          + ` is included twice.  Please check the "extends" values in config files.`);
+      }
+      pathSet.add(currentConfigFilePath);
+
+      // Remove extends property from config for current config.
+      delete extractorConfig.extends;
+
+      // Load the extractor config defined in extends property.
+      const baseConfig: IExtractorConfig = JsonFile.load(currentConfigFilePath);
+      lodash.merge(baseConfig, extractorConfig);
+      extractorConfig = baseConfig;
+    }
+
+    // Validate if the extractor config generated adheres to schema.
+    Extractor.jsonSchema.validateObject(extractorConfig, jsonConfigFile);
+    return extractorConfig;
   }
 
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {

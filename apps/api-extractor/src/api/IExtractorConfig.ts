@@ -255,6 +255,12 @@ export interface IExtractorDtsRollupConfig {
  */
 export interface IExtractorConfig {
   /**
+   * Path to json config file from which config should extend.
+   * The path specified in this field is relative to current config file path.
+   */
+  extends?: string;
+
+  /**
    * Determines how the TypeScript compiler will be invoked.
    * The compiler.configType selects the type of configuration;
    * Different options are available according to the configuration type.
