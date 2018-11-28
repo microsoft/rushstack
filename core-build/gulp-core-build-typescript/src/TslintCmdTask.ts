@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { JsonFile } from '@microsoft/node-core-library';
-import { TslintRunner as TTslintRunner } from '@microsoft/rush-stack-compiler';
+import { TslintRunner as TTslintRunner } from '@microsoft/rush-stack-compiler-2.7';
 
 import {
   RSCTask,

@@ -54,7 +54,7 @@
     "jsdom": "~11.11.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.5.4",
+    "@microsoft/rush-stack-compiler-3.0": "0.0.0",
     "@types/z-schema": "3.16.31",
     "@microsoft/node-library-build": "6.0.12",
     "chai": "~3.5.0"

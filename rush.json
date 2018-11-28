@@ -387,8 +387,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/node-library-build"
       ]
     },
     {
@@ -403,8 +402,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/node-library-build"
       ]
     },
     {
@@ -426,8 +424,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler",
-        "@microsoft/api-extractor"
+        "@microsoft/rush-stack-compiler"
       ]
     },
     {
