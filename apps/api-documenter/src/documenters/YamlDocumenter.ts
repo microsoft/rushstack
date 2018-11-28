@@ -360,11 +360,11 @@ export class YamlDocumenter {
   private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, apiItem: ApiDocumentedItem): void {
     /*
     if (apiStructure.extends) {
-      yamlItem.extends = [ apiStructure.extends ];
+      yamlItem.extends = [ this._linkToUidIfPossible(apiStructure.extends) ];
     }
 
     if (apiStructure.implements) {
-      yamlItem.implements = [ apiStructure.implements ];
+      yamlItem.implements = [ this._linkToUidIfPossible(apiStructure.implements) ];
     }
     */
 
