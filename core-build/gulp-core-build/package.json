@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "3.8.49",
+  "version": "3.8.50",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -54,7 +54,7 @@
     "jsdom": "~11.11.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.0": "0.0.0",
+    "@microsoft/rush-stack-compiler-3.0": "0.1.0",
     "@types/z-schema": "3.16.31",
     "@microsoft/node-library-build": "6.0.14",
     "chai": "~3.5.0"
