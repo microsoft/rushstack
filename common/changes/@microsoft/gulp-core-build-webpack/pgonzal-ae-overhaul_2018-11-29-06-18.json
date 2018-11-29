@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-webpack",
+  "email": "pgonzal@users.noreply.github.com"
+}

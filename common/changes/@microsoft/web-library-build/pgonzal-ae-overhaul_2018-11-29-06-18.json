@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/web-library-build",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/web-library-build",
+  "email": "pgonzal@users.noreply.github.com"
+}
