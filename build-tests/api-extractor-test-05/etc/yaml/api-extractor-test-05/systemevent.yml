@@ -13,7 +13,7 @@ items:
   - uid: api-extractor-test-05.SystemEvent.addHandler
     summary: Adds an handler for the event.
     name: addHandler(handler)
-    fullName: addHandler
+    fullName: addHandler(handler)
     langs:
       - typeScript
     type: method

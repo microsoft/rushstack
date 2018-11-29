@@ -1,0 +1,171 @@
+{
+  "title": "API Extractor Configuration",
+  "description": "Describes how the API Extractor tool will process a project.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optional field. Path to json config file from which config should extend",
+      "type": "string"
+    },
+
+    "compiler": {
+      "description": "Determines how the TypeScript compiler will be invoked. The compiler.configType selects the type of configuration. Different options are available according to the configuration type.",
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "configType": {
+              "description": "configType=tsconfig indicates that the compiler settings will be taken from a tsconfig.json file",
+              "type": "string",
+              "enum": [ "tsconfig" ]
+            },
+            "rootFolder": {
+              "description": "The root folder for the project. This folder typically contains the tsconfig.json and package.json config files.",
+              "type": "string"
+            },
+            "overrideTsconfig": {
+              "description": "Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema: http://json.schemastore.org/tsconfig If omitted, then the tsconfig.json file will be read.",
+              "type": "object"
+            }
+          },
+          "required": [ "configType", "rootFolder" ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "configType": {
+              "description": "configType=runtime indicates that the compiler settings will be provided by a tool chain via a runtime API",
+              "type": "string",
+              "enum": [ "runtime" ]
+            }
+          },
+          "required": [ "configType" ],
+          "additionalProperties": false
+        }
+      ]
+    },
+
+    "project": {
+      "description": "Describes a specific project that will be analyzed.",
+      "type": "object",
+      "properties": {
+        "entryPointSourceFile": {
+          "description": "Specifies the TypeScript source file that will be treated as the entry point for compilation.",
+          "type": "string"
+        }
+      },
+      "required": [ "entryPointSourceFile" ],
+      "additionalProperties": false
+    },
+
+    "policies": {
+      "description": "These policies determine how API Extractor validates various best practices for API design.",
+      "type": "object",
+      "properties": {
+        "namespaceSupport": {
+          "description": "Controls how API Extractor treats the TypeScript namespace keyword:\n\nconservative - (the default) namespaces may only be used to represent tables of constants\n\npermissive - arbitrary nesting of namespaces is allowed",
+          "type": "string",
+          "enum": [ "conservative", "permissive" ]
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "validationRules": {
+      "description": "Configuration for various validation checks that ensure good API design",
+      "type": "object",
+      "properties": {
+        "missingReleaseTags": {
+          "description": "This rule checks for top-level API items that are missing a release tag such as \"@beta\" or \"@internal\". If \"allow\" is chosen, then missing release tags will be assumed to be \"@public\". The default policy is \"error\".",
+          "type": "string",
+          "enum": [ "error", "allow" ]
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "apiReviewFile": {
+      "description": "Configures how the API review files (*.api.ts) will be generated.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether to generate review files at all.  The default is true.",
+          "type": "boolean"
+        },
+        "apiReviewFolder": {
+          "description": "The file path of the folder containing API review file, relative to the project folder. The default value is \"./etc\".",
+          "type": "string"
+        },
+        "tempFolder": {
+          "description": "The *.api.ts report is saved into this folder.  During a production build, the temporary file will be compared with the file in apiReviewFolder; if there are differences, and error will be reported. The default value is \"./temp\".",
+          "type": "string"
+        }
+      },
+      "required": [ "enabled" ],
+      "additionalProperties": false
+    },
+
+    "apiJsonFile": {
+      "description": "Configures how the API JSON files (*.api.json) will be generated.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether to generate API JSON files at all.  The default is true.",
+          "type": "boolean"
+        },
+        "outputFolder": {
+          "description": "Specifies where the *.api.json file should be written. The default value is \"./dist\"",
+          "type": "string"
+        }
+      },
+      "required": [ "enabled" ],
+      "additionalProperties": false
+    },
+
+    "dtsRollup": {
+      "description": "Configures how the *.d.ts rollup files will be generated.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether to generate rollup *.d.ts files.  The default is false.",
+          "type": "boolean"
+        },
+        "trimming": {
+          "description": "If \"trimming\" is false (the default), then a single *.d.ts rollup file will be generated in the \"publishFolder\".  If \"trimming\" is true, then three separate *.d.ts rollups will be generated in \"publishFolderForInternal\", \"publishFolderForBeta\", and \"publishFolderForPublic\".",
+          "type": "boolean"
+        },
+        "publishFolder": {
+          "description": "This setting is only used if \"trimming\" is false. It indicates the folder where \"npm publish\" will be run.  The default value is \"./dist\".",
+          "type": "string"
+        },
+        "publishFolderForInternal": {
+          "description": "This setting is only used if \"trimming\" is true. It indicates the folder where \"npm publish\" will be run for an internal release. The default value is \"./dist/internal\". An internal release will contain all definitions that are reachable from the entry point.",
+          "type": "string"
+        },
+        "publishFolderForBeta": {
+          "description": "This setting is only used if \"trimming\" is true. It indicates the folder where \"npm publish\" will be run for a beta release. The default value is \"./dist/beta\". A beta release will contain all definitions that are reachable from the entry point, except definitions marked as @alpha or @internal.",
+          "type": "string"
+        },
+        "publishFolderForPublic": {
+          "description": "This setting is only used if \"trimming\" is true. It indicates the folder where \"npm publish\" will be run for a public release. The default value is \"./dist/public\". A public release will contain all definitions that are reachable from the entry point, except definitions marked as @beta, @alpha, or @internal.",
+          "type": "string"
+        },
+        "mainDtsRollupPath": {
+          "description": "Specifies the relative path for the *.d.ts rollup file to be generated for the package's main entry point. The default value is an empty string, which causes the path to be automatically inferred from the \"typings\" field of the project's package.json file. If specified, the value must be a relative path that can be combined with one of the publish folder settings.",
+          "type": "string"
+        }
+      },
+      "required": [ "enabled" ],
+      "additionalProperties": false
+    }
+  },
+  "required": [ "compiler", "project" ],
+  "additionalProperties": false
+}

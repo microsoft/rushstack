@@ -7,10 +7,8 @@ import {
   CommandLineAction,
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
-
 import { FileSystem } from '@microsoft/node-core-library';
-
-import { DocItemSet } from '../utils/DocItemSet';
+import { ApiModel } from '@microsoft/api-extractor';
 
 export abstract class BaseAction extends CommandLineAction {
   protected inputFolder: string;
@@ -38,8 +36,8 @@ export abstract class BaseAction extends CommandLineAction {
     });
   }
 
-  protected buildDocItemSet(): DocItemSet {
-    const docItemSet: DocItemSet = new DocItemSet();
+  protected buildApiModel(): ApiModel {
+    const apiModel: ApiModel = new ApiModel();
 
     this.inputFolder = this._inputFolderParameter.value || './input';
     if (!FileSystem.exists(this.inputFolder)) {
@@ -53,10 +51,10 @@ export abstract class BaseAction extends CommandLineAction {
       if (filename.match(/\.api\.json$/i)) {
         console.log(`Reading ${filename}`);
         const filenamePath: string = path.join(this.inputFolder, filename);
-        docItemSet.loadApiJsonFile(filenamePath);
+        apiModel.loadPackage(filenamePath);
       }
     }
 
-    return docItemSet;
+    return apiModel;
   }
 }

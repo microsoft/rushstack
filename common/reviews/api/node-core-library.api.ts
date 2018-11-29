@@ -284,6 +284,12 @@ interface IProtectableMapParameters<K, V> {
   onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
+// @public
+interface IStringBuilder {
+  append(text: string): void;
+  toString(): string;
+}
+
 // @beta
 interface ITerminalProvider {
   eolCharacter: string;
@@ -331,7 +337,7 @@ class LockFile {
 
 // @public
 class MapExtensions {
-  static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: Map<K, V>): void;
+  static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: ReadonlyMap<K, V>): void;
 }
 
 // @public
@@ -409,8 +415,8 @@ class Sort {
   static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any, keyComparer?: (x: T, y: T) => number): void;
 }
 
-// @beta
-class StringBuilder {
+// @public
+class StringBuilder implements IStringBuilder {
   constructor();
   append(text: string): void;
   toString(): string;

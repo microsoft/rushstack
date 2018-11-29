@@ -23,12 +23,17 @@ export class DocClass1 {
 
   /**
    * This is an overloaded function.
-   * @param x - the number
    * @param a - the first string
    * @param b - the second string
    */
   exampleFunction(a: string, b: string): string;
+
+  /**
+   * This is also an overloaded function.
+   * @param x - the number
+   */
   exampleFunction(x: number): number;
+
   public exampleFunction(x: number | string, y?: string): string | number {
     return x;
   }
@@ -69,5 +74,38 @@ export class DocClass1 {
    * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\-_]+$/
    */
   interestingEdgeCases(): void {
+  }
+
+  /**
+   * @deprecated Use `otherThing()` instead.
+   */
+  public deprecatedExample(): void {
+  }
+
+  /**
+   * Returns the sum of two numbers.
+   *
+   * @remarks
+   * This illustrates usage of the `@example` block tag.
+   *
+   * @param x - the first number to add
+   * @param y - the second number to add
+   * @returns the sum of the two numbers
+   *
+   * @example
+   * Here's a simple example:
+   * ```
+   * // Prints "2":
+   * console.log(DocClass1.sumWithExample(1,1));
+   * ```
+   * @example
+   * Here's an example with negative numbers:
+   * ```
+   * // Prints "0":
+   * console.log(DocClass1.sumWithExample(1,-1));
+   * ```
+   */
+  public static sumWithExample(x: number, y: number): number {
+    return x + y;
   }
 }

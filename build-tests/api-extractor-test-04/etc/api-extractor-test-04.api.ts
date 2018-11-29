@@ -1,85 +1,98 @@
 // @alpha
-class AlphaClass {
-  // @internal
-  _internalMember(): void;
-  undecoratedMember(): void;
+declare class AlphaClass {
+    // @internal
+    _internalMember(): void;
+    undecoratedMember(): void;
 }
 
 // @beta
-class BetaClass implements BetaInterface {
-  // @internal
-  _internalMember(): void;
-  // @alpha
-  alphaMember(): void;
-  undecoratedMember(): void;
+declare class BetaClass implements BetaInterface {
+    // @alpha
+    alphaMember(): void;
+    // @internal
+    _internalMember(): void;
+    undecoratedMember(): void;
 }
 
 // @beta
 interface BetaInterface {
-  // @internal
-  _internalMember(): void;
-  // @alpha
-  alphaMember(): void;
-  undecoratedMember(): void;
+    // @alpha
+    alphaMember(): void;
+    // @internal
+    _internalMember(): void;
+    undecoratedMember(): void;
 }
 
 // @beta
-enum ConstEnum {
-  // @internal
-  _InternalMember = "_InternalMember",
-  // @alpha
-  AlphaMember = "AlphaMember",
-  BetaMember2 = "BetaMember2"
+declare const enum ConstEnum {
+    // @alpha
+    AlphaMember = "AlphaMember",
+    BetaMember2 = "BetaMember2",
+    // @internal
+    _InternalMember = "_InternalMember"
 }
 
-// WARNING: Unsupported export "N2" Currently the "namespace" block only supports constant variables.
-// WARNING: Unsupported export "N3" Currently the "namespace" block only supports constant variables.
 // @beta
-module EntangledNamespace {
+declare namespace EntangledNamespace {
+    namespace N2 {
+        // @alpha
+        class ClassX {
+            static a: string;
+        }
+    }
+    namespace N3 {
+        // @internal
+        class _ClassY {
+            b: EntangledNamespace.N2.ClassX;
+            c(): typeof N2.ClassX.a;
+        }
+    }
 }
 
-// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
+// @alpha
+declare type ExportedAlias = AlphaClass;
+
 // @internal
-class InternalClass {
-  undecoratedMember(): void;
+declare class InternalClass {
+    undecoratedMember(): void;
 }
 
-// WARNING: Because this definition is explicitly marked as @internal, an underscore prefix ("_") should be added to its name
 // @internal
 interface IPublicClassInternalParameters {
 }
 
 // @public
 interface IPublicComplexInterface {
-  // @internal
-  [key: string]: IPublicClassInternalParameters;
-  // @internal
-  new (): any;
+    // @internal
+    [key: string]: IPublicClassInternalParameters;
+    // @internal
+    new (): any;
 }
 
 // @public
-class PublicClass {
-  // @internal
-  constructor(parameters: IPublicClassInternalParameters);
-  // @internal
-  _internalMember(): void;
-  // @alpha
-  alphaMember(): void;
-  // @beta
-  betaField: string;
-  // @beta
-  betaMember(): void;
-  undecoratedMember(): void;
+declare class PublicClass {
+    // @internal (undocumented)
+    constructor(parameters: IPublicClassInternalParameters);
+    // @alpha
+    alphaMember(): void;
+    // @beta
+    betaField: string;
+    // @beta
+    betaMember(): void;
+    // @internal
+    _internalMember(): void;
+    undecoratedMember(): void;
 }
 
 // @beta
-enum RegularEnum {
-  // @internal
-  _InternalMember = 102,
-  // @alpha
-  AlphaMember = 101,
-  BetaMember = 100
+declare enum RegularEnum {
+    // @alpha
+    AlphaMember = 101,
+    BetaMember = 100,
+    // @internal
+    _InternalMember = 102
 }
 
-// WARNING: Unsupported export: variableDeclaration
-// WARNING: Unsupported export: ExportedAlias
+// @beta
+declare const variableDeclaration: string;
+

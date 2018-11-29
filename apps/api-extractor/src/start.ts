@@ -5,11 +5,9 @@ import * as os from 'os';
 import * as colors from 'colors';
 
 import { ApiExtractorCommandLine } from './cli/ApiExtractorCommandLine';
-import { Extractor } from './extractor/Extractor';
+import { Extractor } from './api/Extractor';
 
-const myPackageVersion: string = Extractor.version;
-
-console.log(os.EOL + colors.bold(`api-extractor ${myPackageVersion} `
+console.log(os.EOL + colors.bold(`api-extractor ${Extractor.version} `
   + colors.cyan(' - http://aka.ms/extractor') + os.EOL));
 
 const parser: ApiExtractorCommandLine = new ApiExtractorCommandLine();

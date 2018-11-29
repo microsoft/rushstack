@@ -24,8 +24,8 @@ export class AedocDefinitions {
     syntaxKind: TSDocTagSyntaxKind.ModifierTag
   });
 
-  public static get parserConfiguration(): TSDocConfiguration {
-    if (!AedocDefinitions._parserConfiguration) {
+  public static get tsdocConfiguration(): TSDocConfiguration {
+    if (!AedocDefinitions._tsdocConfiguration) {
       const configuration: TSDocConfiguration = new TSDocConfiguration();
       configuration.addTagDefinitions([
         AedocDefinitions.betaDocumentation,
@@ -58,10 +58,10 @@ export class AedocDefinitions {
         true
       );
 
-      AedocDefinitions._parserConfiguration = configuration;
+      AedocDefinitions._tsdocConfiguration = configuration;
     }
-    return AedocDefinitions._parserConfiguration;
+    return AedocDefinitions._tsdocConfiguration;
   }
 
-  private static _parserConfiguration: TSDocConfiguration | undefined;
+  private static _tsdocConfiguration: TSDocConfiguration | undefined;
 }

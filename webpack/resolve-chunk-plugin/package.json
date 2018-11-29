@@ -4,6 +4,9 @@
   "description": "This is a webpack plugin that looks for calls to \"resolveChunk\" with a chunk name, and returns the chunk ID.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",

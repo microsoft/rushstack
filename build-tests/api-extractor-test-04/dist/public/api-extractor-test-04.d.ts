@@ -1,8 +1,8 @@
 /**
  * api-extractor-test-04
- * 
+ *
  * Test scenarios for trimming alpha/beta/internal definitions from the generated *.d.ts files.
- * 
+ *
  * @packagedocumentation
  */
 
@@ -19,6 +19,8 @@
 
 /* Excluded from this release type: ExportedAlias */
 
+/* Excluded from this release type: InternalClass */
+
 /* Excluded from this release type: IPublicClassInternalParameters */
 
 /**
@@ -29,8 +31,6 @@ export declare interface IPublicComplexInterface {
     /* Excluded from this release type: __index */
     /* Excluded from this release type: __new */
 }
-
-/* Excluded from this release type: InternalClass */
 
 /**
  * This is a public class

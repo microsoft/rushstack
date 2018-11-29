@@ -33,7 +33,7 @@
   "dependencies": {
     "@microsoft/node-core-library": "3.7.0",
     "@microsoft/ts-command-line": "4.2.2",
-    "@microsoft/tsdoc": "0.12.2",
+    "@microsoft/tsdoc": "0.12.4",
     "@types/node": "8.5.8",
     "@types/z-schema": "3.16.31",
     "colors": "~1.2.1",

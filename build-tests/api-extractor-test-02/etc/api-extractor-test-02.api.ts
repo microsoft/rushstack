@@ -1,28 +1,28 @@
 // @public
 interface GenericInterface<T> {
-  // (undocumented)
-  member: T;
+    // (undocumented)
+    member: T;
 }
 
 // @public (undocumented)
-export function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface2): void;
+declare function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
 
 // @public (undocumented)
-export function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface2): void;
+declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
 
 // @public
-class ImportedModuleAsBaseClass extends semver3.SemVer {
+declare class ImportedModuleAsBaseClass extends semver1.SemVer {
 }
 
 // @public
-export function importedModuleAsGenericParameter(): GenericInterface<semver2.SemVer> | undefined;
+declare function importedModuleAsGenericParameter(): GenericInterface<semver1.SemVer> | undefined;
 
 // @public
-export function importedModuleAsReturnType(): semver1.SemVer | undefined;
+declare function importedModuleAsReturnType(): semver1.SemVer | undefined;
 
 // @public
-class SubclassWithImport extends RenamedReexportedClass, implements ISimpleInterface {
-  // (undocumented)
-  test(): void;
+declare class SubclassWithImport extends ReexportedClass implements ISimpleInterface {
+    // (undocumented)
+    test(): void;
 }
 

@@ -74,7 +74,7 @@ export {
   LegacyAdapters,
   callback
 } from './LegacyAdapters';
-export { StringBuilder } from './StringBuilder';
+export { StringBuilder, IStringBuilder } from './StringBuilder';
 export { Terminal } from './Terminal/Terminal';
 export {
   Colors,

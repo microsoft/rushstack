@@ -16,8 +16,8 @@ import {
   CommandLineFlagParameter
 } from '@microsoft/ts-command-line';
 
-import { Extractor } from '../extractor/Extractor';
-import { IExtractorConfig } from '../extractor/IExtractorConfig';
+import { Extractor } from '../api/Extractor';
+import { IExtractorConfig } from '../api/IExtractorConfig';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 

@@ -10,4 +10,5 @@
  * @packagedocumentation
  */
 
- export * from './DocClass1';
+export * from './DocClass1';
+export * from './DocEnums';

@@ -8,6 +8,9 @@ import {
   ISetWebpackPublicPathOptions
 } from './SetPublicPathPlugin';
 
+/**
+ * @public
+ */
 export const registryVariableName: string = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
 
 export interface IInternalOptions extends ISetWebpackPublicPathOptions {

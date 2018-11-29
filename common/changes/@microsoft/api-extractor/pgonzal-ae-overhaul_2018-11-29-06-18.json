@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "THIS IS A BETA RELEASE - We are bumping the version to \"7.0.0\" to simplify dogfooding. This release is not yet ready for general usage.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "pgonzal@users.noreply.github.com"
+}

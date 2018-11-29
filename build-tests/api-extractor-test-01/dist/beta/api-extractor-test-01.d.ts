@@ -1,11 +1,11 @@
 /**
  * api-extractor-test-01
- * 
+ *
  * @remarks
  * This library is consumed by api-extractor-test-02 and api-extractor-test-03.
  * It tests the basic types of definitions, and all the weird cases for following
  * chains of type aliases.
- * 
+ *
  * @packagedocumentation
  */
 
@@ -73,6 +73,35 @@ export declare class ClassExportedAsDefault {
 }
 
 /**
+ * This class gets aliased twice before being exported from the package.
+ * @public
+ */
+export declare class ClassWithAccessModifiers {
+    /** Doc comment */
+    private _privateField;
+    /** Doc comment */
+    private privateMethod;
+    /** Doc comment */
+    private readonly privateGetter;
+    /** Doc comment */
+    private privateSetter;
+    /** Doc comment */
+    private constructor();
+    /** Doc comment */
+    private static privateStaticMethod;
+    /** Doc comment */
+    protected protectedField: number;
+    /** Doc comment */
+    protected readonly protectedGetter: string;
+    /** Doc comment */
+    protected protectedSetter(x: string): void;
+    /** Doc comment */
+    static publicStaticField: number;
+    /** Doc comment */
+    defaultPublicMethod(): void;
+}
+
+/**
  * @public
  */
 export declare class ClassWithSymbols {
@@ -96,6 +125,15 @@ export declare class ClassWithTypeLiterals {
         classValue: ClassWithTypeLiterals;
         callback: () => number;
     } | undefined;
+}
+
+/**
+ * @public
+ */
+export declare const enum ConstEnum {
+    Zero = 0,
+    One = 1,
+    Two = 2
 }
 
 /**
@@ -138,6 +176,9 @@ export declare class ForgottenExportConsumer2 {
 export declare class ForgottenExportConsumer3 {
     test2(): IForgottenDirectDependency | undefined;
 }
+
+/** @public */
+export declare const fullyExportedCustomSymbol: unique symbol;
 
 /**
  * This class is directly consumed by ForgottenExportConsumer3.
@@ -193,6 +234,8 @@ export declare interface IInterfaceAsDefaultExport {
 export declare interface ISimpleInterface {
 }
 
+declare const locallyExportedCustomSymbol: unique symbol;
+
 /**
  * This class gets aliased twice before being exported from the package.
  * @public
@@ -204,6 +247,24 @@ export declare class ReexportedClass {
 
 /** @public */
 export declare class ReferenceLibDirective extends Intl.PluralRules {
+}
+
+/**
+ * @public
+ */
+export declare enum RegularEnum {
+    /**
+     * These are some docs for Zero
+     */
+    Zero = 0,
+    /**
+     * These are some docs for One
+     */
+    One = 1,
+    /**
+     * These are some docs for Two
+     */
+    Two = 2
 }
 
 /**
@@ -225,13 +286,9 @@ export declare class TypeReferencesInAedoc {
     getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
 }
 
-/* Excluded from this release type: VARIABLE */
-
-export declare const fullyExportedCustomSymbol: unique symbol;
-
-declare const locallyExportedCustomSymbol: unique symbol;
-
 declare const unexportedCustomSymbol: unique symbol;
+
+/* Excluded from this release type: VARIABLE */
 
 /**
  * Example decorator

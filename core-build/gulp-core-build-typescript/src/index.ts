@@ -18,6 +18,11 @@ export {
   ITslintCmdTaskConfig
 };
 
+/** @public */
 export const tscCmd: TscCmdTask = new TscCmdTask();
+
+/** @public */
 export const tslintCmd: TslintCmdTask = new TslintCmdTask();
+
+/** @public */
 export const apiExtractor: ApiExtractorTask = new ApiExtractorTask();
