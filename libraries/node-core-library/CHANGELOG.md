@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Wed, 28 Nov 2018 02:17:11 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Nov 2018 07:02:09 GMT and should not be manually modified.
+
+## 3.7.1
+Thu, 29 Nov 2018 07:02:09 GMT
+
+### Patches
+
+- Improve Sort.compareByValue() to consistently order "null" and "undefined" values
 
 ## 3.7.0
 Wed, 28 Nov 2018 02:17:11 GMT

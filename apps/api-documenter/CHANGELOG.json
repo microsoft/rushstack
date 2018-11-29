@@ -2,6 +2,32 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.0",
+      "tag": "@microsoft/api-documenter_v7.0.0",
+      "date": "Thu, 29 Nov 2018 07:02:09 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "THIS IS A BETA RELEASE - We are bumping the version to \"7.0.0\" to simplify dogfooding. This release is not yet ready for general usage."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.3.0` to `7.0.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.7.0` to `3.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.1.0` to `0.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.15` to `6.0.16`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.59",
       "tag": "@microsoft/api-documenter_v1.5.59",
       "date": "Thu, 29 Nov 2018 00:35:38 GMT",
