@@ -1,0 +1,17 @@
+{
+  "name": "@microsoft/rush-stack-compiler-2.7",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.1.0",
+      "date": "Thu, 29 Nov 2018 00:35:39 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial package creation."
+          }
+        ]
+      }
+    }
+  ]
+}

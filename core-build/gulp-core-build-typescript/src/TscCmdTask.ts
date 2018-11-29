@@ -11,7 +11,7 @@ import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import * as Typescript from 'typescript';
 import * as decomment from 'decomment';
-import { TypescriptCompiler } from '@microsoft/rush-stack-compiler';
+import { TypescriptCompiler as TTypescriptCompiler } from '@microsoft/rush-stack-compiler-2.7';
 
 import {
   RSCTask,
@@ -91,7 +91,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
       )
     );
 
-    const typescriptCompiler: TypescriptCompiler = new this._rushStackCompiler.TypescriptCompiler(
+    const typescriptCompiler: TTypescriptCompiler = new this._rushStackCompiler.TypescriptCompiler(
       this.buildFolder,
       this._terminalProvider
     );

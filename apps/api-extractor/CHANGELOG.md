@@ -1,6 +1,20 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Nov 2018 19:29:53 GMT and should not be manually modified.
+
+## 6.3.0
+Wed, 28 Nov 2018 19:29:53 GMT
+
+### Minor changes
+
+- Support "extends" field in api-extractor.json config files for easier management of monorepos with many projects
+
+## 6.2.0
+Wed, 28 Nov 2018 02:17:11 GMT
+
+### Minor changes
+
+- Introduce a new build output "dist/tsdoc-metdata.json", which completely replaces the old "tsdocFlavor" field in package.json
 
 ## 6.1.6
 Fri, 16 Nov 2018 21:37:10 GMT

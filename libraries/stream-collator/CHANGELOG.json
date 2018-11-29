@@ -2,6 +2,51 @@
   "name": "@microsoft/stream-collator",
   "entries": [
     {
+      "version": "3.0.21",
+      "tag": "@microsoft/stream-collator_v3.0.21",
+      "date": "Thu, 29 Nov 2018 00:35:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.0.0` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.14` to `6.0.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.20",
+      "tag": "@microsoft/stream-collator_v3.0.20",
+      "date": "Wed, 28 Nov 2018 19:29:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.5` to `0.5.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.13` to `6.0.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.19",
+      "tag": "@microsoft/stream-collator_v3.0.19",
+      "date": "Wed, 28 Nov 2018 02:17:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.4` to `0.5.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.12` to `6.0.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.18",
       "tag": "@microsoft/stream-collator_v3.0.18",
       "date": "Fri, 16 Nov 2018 21:37:10 GMT",

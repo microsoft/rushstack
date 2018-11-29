@@ -1,3 +1,6 @@
 {
-  "extends": "@microsoft/rush-stack-compiler/includes/tslint.json"
+  "extends": "@microsoft/rush-stack-compiler-2.7/includes/tslint.json",
+  "rules": {
+    "no-unused-variable": false
+  }
 }

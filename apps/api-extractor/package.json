@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "6.1.6",
+  "version": "6.3.0",
   "description": "Validate, document, and review the exported API for a TypeScript library",
   "keywords": [
     "typescript",
@@ -31,7 +31,7 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.6.0",
+    "@microsoft/node-core-library": "3.7.0",
     "@microsoft/ts-command-line": "4.2.2",
     "@microsoft/tsdoc": "0.12.4",
     "@types/node": "8.5.8",
@@ -44,11 +44,11 @@
     "resolve": "1.8.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.4.3",
+    "@microsoft/rush-stack-compiler-3.0": "0.1.0",
     "tslint-microsoft-contrib": "~5.2.1",
     "@types/lodash": "4.14.116",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "6.0.6",
+    "@microsoft/node-library-build": "6.0.15",
     "@types/jest": "21.1.10"
   }
 }

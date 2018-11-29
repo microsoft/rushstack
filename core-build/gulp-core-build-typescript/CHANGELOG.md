@@ -1,6 +1,23 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Fri, 16 Nov 2018 21:37:10 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Nov 2018 00:35:38 GMT and should not be manually modified.
+
+## 7.3.0
+Thu, 29 Nov 2018 00:35:38 GMT
+
+### Minor changes
+
+- Update rush-stack-compiler resolution to find a package following the "rush-stack-compiler-<version>" naming convention.
+
+## 7.2.7
+Wed, 28 Nov 2018 19:29:54 GMT
+
+*Version update only*
+
+## 7.2.6
+Wed, 28 Nov 2018 02:17:11 GMT
+
+*Version update only*
 
 ## 7.2.5
 Fri, 16 Nov 2018 21:37:10 GMT

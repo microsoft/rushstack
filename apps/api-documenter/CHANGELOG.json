@@ -2,6 +2,65 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "1.5.59",
+      "tag": "@microsoft/api-documenter_v1.5.59",
+      "date": "Thu, 29 Nov 2018 00:35:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.0.0` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.14` to `6.0.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.58",
+      "tag": "@microsoft/api-documenter_v1.5.58",
+      "date": "Wed, 28 Nov 2018 19:29:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.2.0` to `6.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.5` to `0.5.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.13` to `6.0.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.5.57",
+      "tag": "@microsoft/api-documenter_v1.5.57",
+      "date": "Wed, 28 Nov 2018 02:17:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "add uid to implements and extends blocks, fix uid references"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `6.1.6` to `6.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.6.0` to `3.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.4` to `0.5.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.12` to `6.0.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.56",
       "tag": "@microsoft/api-documenter_v1.5.56",
       "date": "Fri, 16 Nov 2018 21:37:10 GMT",

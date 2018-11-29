@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-karma",
-  "version": "4.6.45",
+  "version": "4.6.48",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -16,8 +16,8 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.8.47",
-    "@microsoft/node-core-library": "3.6.0",
+    "@microsoft/gulp-core-build": "3.8.50",
+    "@microsoft/node-core-library": "3.7.0",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "gulp-karma": "~0.0.5",
@@ -38,8 +38,8 @@
     "webpack": "~3.11.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.5.4",
-    "@microsoft/node-library-build": "6.0.12",
+    "@microsoft/rush-stack-compiler-3.0": "0.1.0",
+    "@microsoft/node-library-build": "6.0.15",
     "@types/gulp": "3.8.32",
     "@types/karma": "0.13.33",
     "@types/log4js": "0.0.33",

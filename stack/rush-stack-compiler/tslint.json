@@ -1,3 +1,0 @@
-{
-  "extends": "./node_modules/@microsoft/rush-stack-compiler/includes/tslint.json"
-}

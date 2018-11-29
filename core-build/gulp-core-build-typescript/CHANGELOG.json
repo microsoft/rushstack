@@ -2,6 +2,53 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "7.3.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.3.0",
+      "date": "Thu, 29 Nov 2018 00:35:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update rush-stack-compiler resolution to find a package following the \"rush-stack-compiler-<version>\" naming convention."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-2.7\" from `0.0.0` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.49` to `3.8.50`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.7",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.2.7",
+      "date": "Wed, 28 Nov 2018 19:29:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.48` to `3.8.49`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.6",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.2.6",
+      "date": "Wed, 28 Nov 2018 02:17:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.47` to `3.8.48`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.6.0` to `3.7.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.2.5",
       "tag": "@microsoft/gulp-core-build-typescript_v7.2.5",
       "date": "Fri, 16 Nov 2018 21:37:10 GMT",
