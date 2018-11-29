@@ -14,7 +14,6 @@ import { AstFunction } from '../ast/AstFunction';
 import { AstItem, AstItemKind } from '../ast/AstItem';
 import { AstItemVisitor } from './AstItemVisitor';
 import { AstPackage } from '../ast/AstPackage';
-import { AstParameter } from '../ast/AstParameter';
 import { AstProperty } from '../ast/AstProperty';
 import { AstMember, ApiAccessModifier } from '../ast/AstMember';
 import { AstNamespace } from '../ast/AstNamespace';
@@ -38,7 +37,6 @@ import { ApiJsonFile } from '../api/ApiJsonFile';
  * @public
  */
 export class ApiJsonGenerator extends AstItemVisitor {
-  private static _methodCounter: number = 0;
   private static _MEMBERS_KEY: string = 'members';
   private static _EXPORTS_KEY: string = 'exports';
 
@@ -108,8 +106,6 @@ export class ApiJsonGenerator extends AstItemVisitor {
     }
 
     refObject![astStructuredType.name] = structureNode;
-
-    ApiJsonGenerator._methodCounter = 0;
 
     const members: AstItem[] = astStructuredType.getSortedMemberItems();
 

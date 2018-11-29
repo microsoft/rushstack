@@ -2,6 +2,18 @@
 
 const build = require('@microsoft/node-library-build');
 
-build.mocha.enabled = false;
+// Remove these when node-library-build is published and bumped
+build.tscCmd.mergeConfig({
+  allowBuiltinCompiler: true
+});
 
+build.tslintCmd.mergeConfig({
+  allowBuiltinCompiler: true
+});
+
+build.apiExtractor.mergeConfig({
+  allowBuiltinCompiler: true
+});
+
+build.mocha.enabled = false;
 build.initialize(require('gulp'));

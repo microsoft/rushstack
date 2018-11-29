@@ -133,13 +133,6 @@ export class DtsRollupGenerator {
     });
   }
 
-  private get astEntryPoint(): AstEntryPoint {
-    if (!this._astEntryPoint) {
-      throw new Error('DtsRollupGenerator.analyze() was not called');
-    }
-    return this._astEntryPoint;
-  }
-
   private _createDtsEntryForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
     let dtsEntry: DtsEntry | undefined = this._dtsEntriesByAstSymbol.get(astSymbol);
 

@@ -35,7 +35,7 @@
     "webpack": "~3.11.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.5.6",
+    "@microsoft/rush-stack-compiler-3.0": "0.0.0",
     "@microsoft/node-library-build": "6.0.14",
     "@types/gulp": "3.8.32",
     "@types/karma": "0.13.33",

@@ -22,7 +22,7 @@
     "js-yaml": "~3.9.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler": "0.5.6",
+    "@microsoft/rush-stack-compiler-3.0": "0.0.0",
     "@microsoft/node-library-build": "6.0.14",
     "@types/js-yaml": "3.9.1",
     "@types/node": "8.5.8",

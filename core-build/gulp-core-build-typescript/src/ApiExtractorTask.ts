@@ -6,7 +6,7 @@ import {
   JsonFile,
   FileSystem
 } from '@microsoft/node-core-library';
-import { ApiExtractorRunner } from '@microsoft/rush-stack-compiler';
+import { ApiExtractorRunner as TApiExtractorRunner } from '@microsoft/rush-stack-compiler-2.7';
 import { IExtractorConfig, IExtractorOptions } from '@microsoft/api-extractor';
 
 import { RSCTask, IRSCTaskConfig } from './RSCTask';
@@ -196,7 +196,7 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
       skipLibCheck: this.taskConfig.skipLibCheck
     };
 
-    const apiExtractorRunner: ApiExtractorRunner = new this._rushStackCompiler.ApiExtractorRunner(
+    const apiExtractorRunner: TApiExtractorRunner = new this._rushStackCompiler.ApiExtractorRunner(
       extractorConfig,
       extractorOptions,
       this.buildFolder,

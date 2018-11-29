@@ -25,7 +25,7 @@
     "tslint-microsoft-contrib": "~5.2.1",
     "@types/jest": "21.1.10",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "6.0.6",
-    "@microsoft/rush-stack-compiler": "0.4.3"
+    "@microsoft/node-library-build": "6.0.14",
+    "@microsoft/rush-stack-compiler": "0.5.6"
   }
 }
