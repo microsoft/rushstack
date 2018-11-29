@@ -1,11 +1,10 @@
 // @public (undocumented)
-declare function add(num1: number, num2: number): number;
+export function add(num1: number, num2: number): number;
 
 // @public (undocumented)
-declare function log(message: string): void;
+export function log(message: string): void;
 
 // @public (undocumented)
-declare function logClass(): void;
+export function logClass(): void;
 
-
-// (No @packageDocumentation comment for this package)
+// (No @packagedocumentation comment for this package)
