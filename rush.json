@@ -423,6 +423,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
+        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.0"
       ]
@@ -511,6 +512,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
+        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.0"
       ]
@@ -521,6 +523,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
+        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.0"
       ]
@@ -531,6 +534,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
+        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.0"
       ]
@@ -541,6 +545,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
+        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.0"
       ]
@@ -551,6 +556,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
+        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.0"
       ]
