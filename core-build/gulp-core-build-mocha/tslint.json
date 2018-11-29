@@ -1,8 +1,3 @@
 {
-  "extends": "@microsoft/rush-stack-compiler-3.0/includes/tslint.json",
-
-  // Remove this override when node-core-library is published and updated
-  "rules": {
-    "no-string-literal": false
-  }
+  "extends": "@microsoft/rush-stack-compiler-3.0/includes/tslint.json"
 }

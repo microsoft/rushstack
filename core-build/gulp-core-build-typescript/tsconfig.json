@@ -1,35 +1,3 @@
 {
-  // Put this back and remove the rest when node-library-build is published and bumped
-  // "extends": "./node_modules/@microsoft/rush-stack-compiler-3.0/includes/tsconfig-node.json"
-
-  "compilerOptions": {
-    "outDir": "./lib",
-
-    "forceConsistentCasingInFileNames": true,
-    "jsx": "react",
-    "declaration": true,
-    "sourceMap": true,
-    "inlineSources": true,
-    "experimentalDecorators": true,
-    "strictNullChecks": true,
-    "noUnusedLocals": true,
-    "types": [],
-
-    "module": "commonjs",
-    "target": "es6",
-    "lib": [
-      "es5",
-      "es2015.collection",
-      "es2015.iterable",
-      "es2015.promise"
-    ]
-  },
-  "include": [
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
-  ],
-  "exclude": [
-    "./node_modules",
-    "./lib"
-  ]
+  "extends": "./node_modules/@microsoft/rush-stack-compiler-2.7/includes/tsconfig-node.json"
 }
