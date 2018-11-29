@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-stack-compiler",
-  "version": "0.5.4",
+  "version": "0.5.6",
   "description": "@microsoft/rush-stack-compiler is deprecated in favor of variants with the TypeScript compiler version appended to the package name.",
   "license": "MIT",
   "scripts": {

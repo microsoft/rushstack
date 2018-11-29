@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-mocha",
-  "version": "3.5.39",
+  "version": "3.5.41",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -13,7 +13,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.8.47",
+    "@microsoft/gulp-core-build": "3.8.49",
     "@types/node": "8.5.8",
     "glob": "~7.0.5",
     "gulp": "~3.9.1",
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.0": "0.0.0",
-    "@microsoft/node-library-build": "6.0.12",
+    "@microsoft/node-library-build": "6.0.14",
     "@types/glob": "5.0.30",
     "@types/gulp": "3.8.32",
     "@types/gulp-istanbul": "0.9.30",

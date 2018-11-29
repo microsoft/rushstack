@@ -8,6 +8,11 @@
       "type": "string"
     },
 
+    "extends": {
+      "description": "Optional field. Path to json config file from which config should extend",
+      "type": "string"
+    },
+
     "compiler": {
       "description": "Determines how the TypeScript compiler will be invoked. The compiler.configType selects the type of configuration. Different options are available according to the configuration type.",
       "type": "object",
