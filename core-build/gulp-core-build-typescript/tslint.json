@@ -1,8 +1,6 @@
 {
   "extends": "@microsoft/rush-stack-compiler-2.7/includes/tslint.json",
   "rules": {
-    "no-unused-variable": false,
-    // Remove this override when node-core-library is published and updated
-    "no-string-literal": false
+    "no-unused-variable": false
   }
 }

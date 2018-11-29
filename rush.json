@@ -278,7 +278,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/rush-stack-compiler-3.0"
       ]
     },
     {
@@ -424,7 +424,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/rush-stack-compiler-3.0"
       ]
     },
     {
@@ -460,7 +460,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/rush-stack-compiler-3.0"
       ]
     },
     {
@@ -488,7 +488,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/rush-stack-compiler-3.0"
       ]
     },
 
@@ -512,7 +512,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/rush-stack-compiler-3.0"
       ]
     },
     {
@@ -522,7 +522,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/rush-stack-compiler-3.0"
       ]
     },
     {
@@ -532,7 +532,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/rush-stack-compiler-3.0"
       ]
     },
     {
@@ -542,7 +542,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/rush-stack-compiler-3.0"
       ]
     },
     {
@@ -552,7 +552,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler"
+        "@microsoft/rush-stack-compiler-3.0"
       ]
     },
     {
