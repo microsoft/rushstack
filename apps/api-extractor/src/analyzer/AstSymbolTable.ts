@@ -25,7 +25,6 @@ import { ILogger } from '../api/ILogger';
 export class AstSymbolTable {
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
-  private readonly _packageJsonLookup: PackageJsonLookup;
   private readonly _packageMetadataManager: PackageMetadataManager;
 
   /**
@@ -61,7 +60,6 @@ export class AstSymbolTable {
 
     this._program = program;
     this._typeChecker = typeChecker;
-    this._packageJsonLookup = packageJsonLookup;
     this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup, logger);
   }
 
