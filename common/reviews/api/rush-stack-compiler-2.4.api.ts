@@ -15,6 +15,11 @@ interface ITslintRunnerConfig {
 }
 
 // @beta (undocumented)
+interface ITypescriptCompilerOptions {
+  customArgs?: string[];
+}
+
+// @beta (undocumented)
 class RushStackCompilerBase<TOptions = {}> {
   constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider);
   // WARNING: The type "StandardBuildFolders" needs to be exported by the package (e.g. added to index.ts)
@@ -46,7 +51,7 @@ class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
 }
 
 // @beta (undocumented)
-class TypescriptCompiler extends RushStackCompilerBase {
+class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
   constructor(rootPath: string, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-2.9",
+      "comment": "Allow custom arguments to be passed to the tsc command.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-2.9",
+  "email": "iclanton@users.noreply.github.com"
+}
