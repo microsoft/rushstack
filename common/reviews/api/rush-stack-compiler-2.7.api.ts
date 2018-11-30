@@ -26,6 +26,16 @@ class RushStackCompilerBase<TOptions = {}> {
   protected _terminal: Terminal;
 }
 
+// @alpha
+class ToolPackages {
+  // (undocumented)
+  static apiExtractor: typeof apiExtractor;
+  // (undocumented)
+  static tslint: typeof tslint;
+  // (undocumented)
+  static typescript: typeof typescript;
+}
+
 // @beta (undocumented)
 class ToolPaths {
   // (undocumented)
@@ -50,8 +60,6 @@ class TypescriptCompiler extends RushStackCompilerBase {
   constructor(rootPath: string, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;
-  // (undocumented)
-  typescript: typeof typescript;
 }
 
 // WARNING: Unsupported export: WriteFileIssueFunction

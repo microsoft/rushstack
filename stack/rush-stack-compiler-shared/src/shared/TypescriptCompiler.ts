@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as typescript from 'typescript';
 import { ITerminalProvider } from '@microsoft/node-core-library';
 
 import { CmdRunner } from './CmdRunner';
@@ -13,7 +12,6 @@ import { RushStackCompilerBase } from './RushStackCompilerBase';
  * @beta
  */
 export class TypescriptCompiler extends RushStackCompilerBase {
-  public typescript: typeof typescript = typescript;
   private _cmdRunner: CmdRunner;
 
   constructor(rootPath: string, terminalProvider: ITerminalProvider) {
