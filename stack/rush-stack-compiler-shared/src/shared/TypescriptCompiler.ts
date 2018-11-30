@@ -12,12 +12,28 @@ import { RushStackCompilerBase } from './RushStackCompilerBase';
 /**
  * @beta
  */
-export class TypescriptCompiler extends RushStackCompilerBase {
+export interface ITypescriptCompilerOptions {
+  /**
+   * Option to pass custom arguments to the tsc command.
+   */
+  customArgs?: string[];
+}
+
+/**
+ * @beta
+ */
+export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
   public typescript: typeof typescript = typescript;
   private _cmdRunner: CmdRunner;
 
-  constructor(rootPath: string, terminalProvider: ITerminalProvider) {
-    super({}, rootPath, terminalProvider);
+  constructor(rootPath: string, terminalProvider: ITerminalProvider);
+  constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider);
+  constructor(arg1: ITypescriptCompilerOptions | string, arg2: string | ITerminalProvider, arg3?: ITerminalProvider) {
+    super(
+      typeof arg1 === 'string' ? {} : arg1,
+      typeof arg2 === 'string' ? arg2 : arg1 as string,
+      arg3 ? arg3 : arg2 as ITerminalProvider
+    );
     this._cmdRunner = new CmdRunner(
       this._standardBuildFolders,
       this._terminal,
@@ -31,7 +47,7 @@ export class TypescriptCompiler extends RushStackCompilerBase {
 
   public invoke(): Promise<void> {
     return this._cmdRunner.runCmd({
-      args: [],
+      args: this._taskOptions.customArgs || [],
       onData: (data: Buffer) => {
         // Log lines separately
         const dataLines: (string | undefined)[] = data.toString().split('\n');

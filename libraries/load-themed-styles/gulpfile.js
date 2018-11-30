@@ -1,11 +1,13 @@
 'use strict';
 
 const build = require('@microsoft/node-library-build');
+const path = require('path');
 
 build.tscCmd = 'tsc-commonjs';
 
 const tscAmdTask = new build.TscCmdTask();
 tscAmdTask.name = 'tsc-amd';
+tscAmdTask.cleanMatch = [path.join(__dirname, 'lib-amd')];
 tscAmdTask.setConfig({
   customArgs: [
     '--outDir', './lib-amd',
@@ -15,6 +17,7 @@ tscAmdTask.setConfig({
 
 const tscEsnextTask = new build.TscCmdTask();
 tscEsnextTask.name = 'tsc-es6';
+tscEsnextTask.cleanMatch = [path.join(__dirname, 'lib-es6')];
 tscEsnextTask.setConfig({
   customArgs: [
     '--outDir', './lib-es6',
