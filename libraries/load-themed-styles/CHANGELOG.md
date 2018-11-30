@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Thu, 29 Nov 2018 07:02:09 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Nov 2018 23:34:57 GMT and should not be manually modified.
+
+## 1.8.44
+Fri, 30 Nov 2018 23:34:57 GMT
+
+### Patches
+
+- Fix an issue where lib-amd and lib-es6 directories weren't built.
 
 ## 1.8.43
 Thu, 29 Nov 2018 07:02:09 GMT

@@ -2,6 +2,27 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.5.28",
+      "tag": "@microsoft/gulp-core-build-sass_v4.5.28",
+      "date": "Fri, 30 Nov 2018 23:34:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.51` to `3.8.52`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" from `1.8.43` to `1.8.44`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.1.1` to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.16` to `6.0.17`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.5.27",
       "tag": "@microsoft/gulp-core-build-sass_v4.5.27",
       "date": "Thu, 29 Nov 2018 07:02:09 GMT",

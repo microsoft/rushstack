@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-2.9",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.3.0",
+      "date": "Fri, 30 Nov 2018 23:34:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow custom arguments to be passed to the tsc command."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@microsoft/rush-stack-compiler-2.9_v0.2.1",
       "date": "Thu, 29 Nov 2018 07:02:09 GMT",

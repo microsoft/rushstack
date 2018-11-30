@@ -2,6 +2,26 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.8.44",
+      "tag": "@microsoft/load-themed-styles_v1.8.44",
+      "date": "Fri, 30 Nov 2018 23:34:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where lib-amd and lib-es6 directories weren't built."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.1.1` to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.16` to `6.0.17`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.43",
       "tag": "@microsoft/load-themed-styles_v1.8.43",
       "date": "Thu, 29 Nov 2018 07:02:09 GMT",

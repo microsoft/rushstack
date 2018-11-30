@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "7.4.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v7.4.0",
+      "date": "Fri, 30 Nov 2018 23:34:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow custom arguments to be passed to the tsc command."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-2.7\" from `0.1.1` to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.51` to `3.8.52`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.1",
       "tag": "@microsoft/gulp-core-build-typescript_v7.3.1",
       "date": "Thu, 29 Nov 2018 07:02:09 GMT",
