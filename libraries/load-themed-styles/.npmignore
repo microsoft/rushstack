@@ -12,6 +12,8 @@
 # Ignore certain files in the above folder
 /dist/*.stats.*
 /lib/**/test/*
+/lib-amd/**/test/*
+/lib-es6/**/test/*
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
