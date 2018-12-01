@@ -94,6 +94,14 @@ export class DtsRollupGenerator {
             indentedWriter.write(`import { ${astImport.exportName} }`);
           }
           indentedWriter.writeLine(` from '${astImport.modulePath}';`);
+
+          if (entity.exported) {
+            // We write re-export as two lines: `import { Mod } from 'package'; export { Mod };`,
+            // instead of a single line `export { Mod } from 'package';`.
+            // Because this variable may be used by others, and we cannot know it.
+            // so we always keep the `import ...` declaration, for now.
+            indentedWriter.writeLine(`export { ${entity.nameForEmit} }`);
+          }
         }
       }
     }
