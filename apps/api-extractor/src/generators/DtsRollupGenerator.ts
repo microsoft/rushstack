@@ -100,7 +100,7 @@ export class DtsRollupGenerator {
             // instead of a single line `export { Mod } from 'package';`.
             // Because this variable may be used by others, and we cannot know it.
             // so we always keep the `import ...` declaration, for now.
-            indentedWriter.writeLine(`export { ${entity.nameForEmit} }`);
+            indentedWriter.writeLine(`export { ${entity.nameForEmit} };`);
           }
         }
       }

@@ -9,7 +9,7 @@
 
 import { ISimpleInterface } from 'api-extractor-test-01';
 import { ReexportedClass as RenamedReexportedClass3 } from 'api-extractor-test-01';
-export { RenamedReexportedClass3 }
+export { RenamedReexportedClass3 };
 import * as semver1 from 'semver';
 
 /**
