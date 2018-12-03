@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.8.45",
+      "tag": "@microsoft/load-themed-styles_v1.8.45",
+      "date": "Mon, 03 Dec 2018 17:04:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Don't publish tests."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.44",
       "tag": "@microsoft/load-themed-styles_v1.8.44",
       "date": "Fri, 30 Nov 2018 23:34:57 GMT",
