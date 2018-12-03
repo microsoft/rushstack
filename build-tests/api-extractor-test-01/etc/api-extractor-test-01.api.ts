@@ -133,6 +133,12 @@ interface IMergedInterfaceReferencee {
 interface ISimpleInterface {
 }
 
+// @public (undocumented)
+declare namespace NamespaceContainingVariable {
+    let // @internal (undocumented)
+ variable: object[];
+}
+
 // @public
 declare class ReexportedClass {
     // (undocumented)
