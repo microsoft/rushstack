@@ -286,7 +286,8 @@ export class InstallManager {
               sourcePath: path.join(hookSource, filename),
               destinationPath: path.join(hookDestination, filename)
             });
-            FileSystem.changePosixModeBits(path.join(hookDestination, filename), PosixModeBits.UserExecute);
+            FileSystem.changePosixModeBits(path.join(hookDestination, filename),
+              PosixModeBits.UserRead | PosixModeBits.UserExecute);
           }
 
           console.log('Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL);
