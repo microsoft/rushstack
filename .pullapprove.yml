@@ -18,7 +18,6 @@ groups:
       - iclanton
       - nickpape-msft
       - pgonzal
-      - qz2017
       - patmill
       - aditima
 
@@ -31,7 +30,6 @@ groups:
       - iclanton
       - nickpape-msft
       - pgonzal
-      - qz2017
       - mpasarin
       - aditima
 
@@ -52,7 +50,6 @@ groups:
       - iclanton
       - nickpape-msft
       - pgonzal
-      - qz2017
       - aditima
 
   load-themed-styles-approvers:
@@ -64,6 +61,5 @@ groups:
       - iclanton
       - nickpape-msft
       - pgonzal
-      - qz2017
       - dzearing
       - aditima
