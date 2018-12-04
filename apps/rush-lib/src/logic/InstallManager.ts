@@ -44,6 +44,9 @@ import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../api
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
 
+// The PosixModeBits are intended to be used with bitwise operations.
+// tslint:disable:no-bitwise
+
 const MAX_INSTALL_ATTEMPTS: number = 2;
 
 /**
