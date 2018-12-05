@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.5.3",
+      "tag": "@microsoft/rush_v5.5.3",
+      "date": "Wed, 05 Dec 2018 20:14:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add user read permission to copied Git hooks"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.5.2",
       "tag": "@microsoft/rush_v5.5.2",
       "date": "Fri, 09 Nov 2018 02:14:11 GMT",

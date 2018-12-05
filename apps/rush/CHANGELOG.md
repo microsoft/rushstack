@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 09 Nov 2018 02:14:11 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Dec 2018 20:14:08 GMT and should not be manually modified.
+
+## 5.5.3
+Wed, 05 Dec 2018 20:14:08 GMT
+
+### Updates
+
+- Add user read permission to copied Git hooks
 
 ## 5.5.2
 Fri, 09 Nov 2018 02:14:11 GMT
