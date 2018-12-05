@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/loader-load-themed-styles",
-  "version": "1.7.112",
+  "version": "1.7.113",
   "description": "This simple loader wraps the loading of CSS in script equivalent to `require('load-themed-styles').loadStyles( /* css text */ )`. It is designed to be a replacement for style-loader.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "loader-utils": "~1.1.0",
-    "@microsoft/load-themed-styles": "1.8.44"
+    "@microsoft/load-themed-styles": "1.8.45"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.0": "0.2.0",

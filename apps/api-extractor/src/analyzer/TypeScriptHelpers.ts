@@ -136,8 +136,6 @@ export class TypeScriptHelpers {
 
   /**
    * Returns the first parent node with the specified  SyntaxKind, or undefined if there is no match.
-   * @remarks
-   * This search will NOT match the starting node.
    */
   public static findFirstParent<T extends ts.Node>(node: ts.Node, kindToMatch: ts.SyntaxKind): T | undefined {
     let current: ts.Node | undefined = node.parent;

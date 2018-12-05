@@ -188,6 +188,9 @@ export class DtsRollupGenerator {
         break;
 
       case ts.SyntaxKind.VariableDeclaration:
+        // Is this a top-level variable declaration?
+        // (The logic below does not apply to variable declarations that are part of an explicit "namespace" block,
+        // since the compiler prefers not to emit "declare" or "export" keywords for those declarations.)
         if (!span.parent) {
           // The VariableDeclaration node is part of a VariableDeclarationList, however
           // the Entry.followedSymbol points to the VariableDeclaration part because
@@ -266,7 +269,19 @@ export class DtsRollupGenerator {
 
           const releaseTag: ReleaseTag = collector.fetchMetadata(childAstDeclaration.astSymbol).releaseTag;
           if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-            const modification: SpanModification = child.modification;
+            let nodeToTrim: Span = child;
+
+            // If we are trimming a variable statement, then we need to trim the outer VariableDeclarationList
+            // as well.
+            if (child.kind === ts.SyntaxKind.VariableDeclaration) {
+              const variableStatement: Span | undefined
+                = child.findFirstParent(ts.SyntaxKind.VariableStatement);
+              if (variableStatement !== undefined) {
+                nodeToTrim = variableStatement;
+              }
+            }
+
+            const modification: SpanModification = nodeToTrim.modification;
 
             // Yes, trim it and stop here
             const name: string = childAstDeclaration.astSymbol.localName;
@@ -275,19 +290,19 @@ export class DtsRollupGenerator {
             modification.prefix = `/* Excluded from this release type: ${name} */`;
             modification.suffix = '';
 
-            if (child.children.length > 0) {
+            if (nodeToTrim.children.length > 0) {
               // If there are grandchildren, then keep the last grandchild's separator,
               // since it often has useful whitespace
-              modification.suffix = child.children[child.children.length - 1].separator;
+              modification.suffix = nodeToTrim.children[nodeToTrim.children.length - 1].separator;
             }
 
-            if (child.nextSibling) {
+            if (nodeToTrim.nextSibling) {
               // If the thing we are trimming is followed by a comma, then trim the comma also.
               // An example would be an enum member.
-              if (child.nextSibling.kind === ts.SyntaxKind.CommaToken) {
+              if (nodeToTrim.nextSibling.kind === ts.SyntaxKind.CommaToken) {
                 // Keep its separator since it often has useful whitespace
-                modification.suffix += child.nextSibling.separator;
-                child.nextSibling.modification.skipAll();
+                modification.suffix += nodeToTrim.nextSibling.separator;
+                nodeToTrim.nextSibling.modification.skipAll();
               }
             }
 
