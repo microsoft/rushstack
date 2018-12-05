@@ -35,21 +35,25 @@ export class CheckBuildReceiptTask extends GulpTask<IBuildReceiptTask> {
     gulp: typeof Gulp,
     completeCallback: (error?: string | Error) => void
   ): Promise<Object> | NodeJS.ReadWriteStream | void {
-    _getLocalHashes().then(localHashes => {
-      _lastLocalHashes = localHashes;
-      _readPackageHashes(path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json')).then(packageHashes => {
-        if (packageHashes) {
-          if (_areObjectsEqual(localHashes, packageHashes)) {
-            this.buildConfig.isRedundantBuild = true;
-            this.log('Build is redundant. Skipping steps.');
-          } else {
-            _areObjectsEqual(localHashes, packageHashes);
-            this.log('Build has new content, continuing execution.');
-          }
-        }
-        completeCallback();
-      });
-    });
+    _getLocalHashes()
+      .then(localHashes => {
+        _lastLocalHashes = localHashes;
+        _readPackageHashes(path.join(process.cwd(), this.buildConfig.packageFolder, 'build.json'))
+          .then(packageHashes => {
+            if (packageHashes) {
+              if (_areObjectsEqual(localHashes, packageHashes)) {
+                this.buildConfig.isRedundantBuild = true;
+                this.log('Build is redundant. Skipping steps.');
+              } else {
+                _areObjectsEqual(localHashes, packageHashes);
+                this.log('Build has new content, continuing execution.');
+              }
+            }
+            completeCallback();
+          })
+          .catch(console.error);
+      })
+      .catch(console.error);
   }
 }
 

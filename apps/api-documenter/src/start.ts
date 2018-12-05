@@ -15,4 +15,4 @@ console.log(os.EOL + colors.bold(`api-documenter ${myPackageVersion} `
 
 const parser: ApiDocumenterCommandLine = new ApiDocumenterCommandLine();
 
-parser.execute();
+parser.execute().catch(console.error);

@@ -36,7 +36,7 @@ export class Rush {
     }
 
     const parser: RushCommandLineParser = new RushCommandLineParser();
-    parser.execute();
+    parser.execute().catch(console.error);
   }
 
   /**

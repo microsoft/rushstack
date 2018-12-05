@@ -16,4 +16,4 @@ console.log(os.EOL + colors.bold(`rush-stack ${currentPackageVersion} `
 
 const parser: RushStackCommandLine = new RushStackCommandLine();
 
-parser.execute();
+parser.execute().catch(console.error);
