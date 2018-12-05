@@ -44,6 +44,9 @@ import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../api
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
 
+// The PosixModeBits are intended to be used with bitwise operations.
+// tslint:disable:no-bitwise
+
 const MAX_INSTALL_ATTEMPTS: number = 2;
 
 /**
@@ -286,7 +289,8 @@ export class InstallManager {
               sourcePath: path.join(hookSource, filename),
               destinationPath: path.join(hookDestination, filename)
             });
-            FileSystem.changePosixModeBits(path.join(hookDestination, filename), PosixModeBits.UserExecute);
+            FileSystem.changePosixModeBits(path.join(hookDestination, filename),
+              PosixModeBits.UserRead | PosixModeBits.UserExecute);
           }
 
           console.log('Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL);
