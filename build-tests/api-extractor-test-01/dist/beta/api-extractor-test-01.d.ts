@@ -238,8 +238,7 @@ declare const locallyExportedCustomSymbol: unique symbol;
 
 /** @public */
 export declare namespace NamespaceContainingVariable {
-    /** @internal */
-    let /* Excluded from this release type: variable */;
+    /* Excluded from this release type: variable */
 }
 
 /**
