@@ -236,6 +236,11 @@ export declare interface ISimpleInterface {
 
 declare const locallyExportedCustomSymbol: unique symbol;
 
+/** @public */
+export declare namespace NamespaceContainingVariable {
+    /* Excluded from this release type: variable */
+}
+
 /**
  * This class gets aliased twice before being exported from the package.
  * @public

@@ -256,6 +256,12 @@ export declare interface ISimpleInterface {
 
 declare const locallyExportedCustomSymbol: unique symbol;
 
+/** @public */
+export declare namespace NamespaceContainingVariable {
+    /** @internal */
+    let variable: object[];
+}
+
 /**
  * This class gets aliased twice before being exported from the package.
  * @public
