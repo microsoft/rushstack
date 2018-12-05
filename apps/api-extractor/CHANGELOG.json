@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.2",
+      "tag": "@microsoft/api-extractor_v7.0.2",
+      "date": "Wed, 05 Dec 2018 19:57:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix reexported types from an external package for dts rollup"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.1",
       "tag": "@microsoft/api-extractor_v7.0.1",
       "date": "Wed, 05 Dec 2018 17:04:18 GMT",

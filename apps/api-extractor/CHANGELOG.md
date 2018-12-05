@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 05 Dec 2018 17:04:18 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Dec 2018 19:57:03 GMT and should not be manually modified.
+
+## 7.0.2
+Wed, 05 Dec 2018 19:57:03 GMT
+
+### Patches
+
+- fix reexported types from an external package for dts rollup
 
 ## 7.0.1
 Wed, 05 Dec 2018 17:04:18 GMT
