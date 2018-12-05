@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/api-documenter",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "lijunle@users.noreply.github.com"
+}
