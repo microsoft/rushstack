@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 29 Nov 2018 07:02:09 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Dec 2018 17:04:18 GMT and should not be manually modified.
+
+## 7.0.1
+Wed, 05 Dec 2018 17:04:18 GMT
+
+### Patches
+
+- Fix an issue where .d.ts trimming did not properly handle variable declarations (GitHub #976)
 
 ## 7.0.0
 Thu, 29 Nov 2018 07:02:09 GMT
