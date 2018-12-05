@@ -21,7 +21,15 @@ declare function importedModuleAsGenericParameter(): GenericInterface<semver1.Se
 declare function importedModuleAsReturnType(): semver1.SemVer | undefined;
 
 // @public
-declare class SubclassWithImport extends ReexportedClass implements ISimpleInterface {
+declare class RenamedReexportedClass3 {
+    // (undocumented)
+    getSelfReference(): RenamedReexportedClass3;
+    // (undocumented)
+    getValue(): string;
+}
+
+// @public
+declare class SubclassWithImport extends RenamedReexportedClass3 implements ISimpleInterface {
     // (undocumented)
     test(): void;
 }

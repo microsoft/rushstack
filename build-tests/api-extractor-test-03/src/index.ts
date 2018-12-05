@@ -10,7 +10,7 @@
  * an indirect dependency (api-extractor-test-01).
  */
 
-import { SubclassWithImport } from 'api-extractor-test-02';
+import { SubclassWithImport, RenamedReexportedClass3 } from 'api-extractor-test-02';
 
 const subclassWithImport: SubclassWithImport = new SubclassWithImport();
 

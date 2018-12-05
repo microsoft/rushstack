@@ -17,6 +17,7 @@ export * from './TypeFromImportedModule';
 
 export { importDeduping1 } from './ImportDeduping1';
 export { importDeduping2 } from './ImportDeduping2';
+export { ReexportedClass as RenamedReexportedClass3 } from 'api-extractor-test-01';
 
 import { AmbientConsumer } from 'api-extractor-test-01';
 
