@@ -5,7 +5,12 @@ import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiFunctionLikeMixin } from '../mixins/ApiFunctionLikeMixin';
 import { ApiPackage } from './ApiPackage';
 
-/** @public */
+/**
+ * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
+ * {@link ApiItem}.
+ *
+ * @public
+ */
 export const enum ApiItemKind {
   Class = 'Class',
   EntryPoint = 'EntryPoint',
@@ -23,7 +28,10 @@ export const enum ApiItemKind {
   None = 'None'
 }
 
-/** @public */
+/**
+ * Constructor options for {@link ApiItem}.
+ * @public
+ */
 export interface IApiItemOptions {
   name: string;
 }
@@ -41,7 +49,14 @@ export interface IApiItemJson {
 // tslint:disable-next-line:variable-name
 export const ApiItem_parent: unique symbol = Symbol('ApiItem._parent');
 
-/** @public */
+/**
+ * The abstract base class for all members of an `ApiModel` object.
+ *
+ * @remarks
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ * @public
+ */
 export class ApiItem {
   public [ApiItem_parent]: ApiItem | undefined;
 

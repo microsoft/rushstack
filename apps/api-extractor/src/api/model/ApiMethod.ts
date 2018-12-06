@@ -9,7 +9,10 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedIte
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { Excerpt } from '../mixins/Excerpt';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiMethod}.
+ * @public
+ */
 export interface IApiMethodOptions extends
   IApiDeclarationMixinOptions,
   IApiFunctionLikeMixinOptions,
@@ -18,7 +21,27 @@ export interface IApiMethodOptions extends
   IApiDocumentedItemOptions {
 }
 
-/** @public */
+/**
+ * Represents a TypeScript member function declaration that belongs to an `ApiClass`.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * `ApiMethod` represents a TypeScript declaration such as the `render` member function in this example:
+ *
+ * ```ts
+ * export class Widget {
+ *   public draw(): void { }
+ * }
+ * ```
+ *
+ * Compare with {@link ApiMethodSignature}, which represents a method belonging to an interface.
+ * For example, a class method can be `static` but an interface method cannot.
+ *
+ * @public
+ */
 export class ApiMethod extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
   ApiStaticMixin(ApiDocumentedItem)))) {
 

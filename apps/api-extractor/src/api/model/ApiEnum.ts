@@ -8,7 +8,10 @@ import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiRel
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { ApiEnumMember } from './ApiEnumMember';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiEnum}.
+ * @public
+ */
 export interface IApiEnumOptions extends
   IApiDeclarationMixinOptions,
   IApiItemContainerMixinOptions,
@@ -16,7 +19,26 @@ export interface IApiEnumOptions extends
   IApiDocumentedItemOptions {
 }
 
-/** @public */
+/**
+ * Represents a TypeScript enum declaration.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * `ApiEnum` represents an enum declaration such as `FontSizes` in the example below:
+ *
+ * ```ts
+ * export enum FontSizes {
+ *   Small = 100,
+ *   Medium = 200,
+ *   Large = 300
+ * }
+ * ```
+ *
+ * @public
+ */
 export class ApiEnum extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
 
   public static getCanonicalReference(name: string): string {

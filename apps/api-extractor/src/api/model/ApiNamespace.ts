@@ -7,7 +7,10 @@ import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiD
 import { IApiDocumentedItemOptions, ApiDocumentedItem } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiClass}.
+ * @public
+ */
 export interface IApiNamespaceOptions extends
   IApiDeclarationMixinOptions,
   IApiItemContainerMixinOptions,
@@ -15,7 +18,22 @@ export interface IApiNamespaceOptions extends
   IApiDocumentedItemOptions {
 }
 
-/** @public */
+/**
+ * Represents a TypeScript namespace declaration.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * `ApiNamespace` represents a TypeScript declaration such as this:
+ *
+ * ```ts
+ * export namespace X { }
+ * ```
+ *
+ * @public
+ */
 export class ApiNamespace extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
   public static getCanonicalReference(name: string): string {
     return `(${name}:namespace)`;

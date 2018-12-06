@@ -7,14 +7,36 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedIte
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { Excerpt } from '../mixins/Excerpt';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiEnumMember}.
+ * @public
+ */
 export interface IApiEnumMemberOptions extends
   IApiDeclarationMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
 }
 
-/** @public */
+/**
+ * Represents a member of a TypeScript enum declaration.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * `ApiEnumMember` represents an enum member such as `Small` in the example below:
+ *
+ * ```ts
+ * export enum FontSizes {
+ *   Small = 100,
+ *   Medium = 200,
+ *   Large = 300
+ * }
+ * ```
+ *
+ * @public
+ */
 export class ApiEnumMember extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
   public readonly initializerExcerpt: Excerpt;
 
