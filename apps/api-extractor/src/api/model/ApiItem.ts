@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
+import { ApiFunctionLikeMixin } from '../mixins/ApiFunctionLikeMixin';
+import { ApiPackage } from './ApiPackage';
 
 /** @public */
 export const enum ApiItemKind {
@@ -163,5 +165,3 @@ export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<
 
 // Circular import
 import { Deserializer } from './Deserializer';
-import { ApiPackage } from './ApiPackage';
-import { ApiFunctionLikeMixin } from '../mixins/ApiFunctionLikeMixin';
