@@ -3,7 +3,10 @@
 
 import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../model/ApiItem';
 
-/** @public */
+/**
+ * Constructor options for {@link (ApiItemContainerMixin:interface)}.
+ * @public
+ */
 export interface IApiItemContainerMixinOptions extends IApiItemOptions {
   members?: ApiItem[];
 }
@@ -17,7 +20,25 @@ const _membersSorted: unique symbol = Symbol('ApiItemContainerMixin._membersSort
 const _membersByCanonicalReference: unique symbol = Symbol('ApiItemContainerMixin._membersByCanonicalReference');
 const _membersByName: unique symbol = Symbol('ApiItemContainerMixin._membersByName');
 
-/** @public */
+/**
+ * The mixin base class for API items that act as containers for other child items.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.  The non-abstract classes (e.g. `ApiClass`, `ApiEnum`, `ApiInterface`, etc.) use
+ * TypeScript "mixin" functions (e.g. `ApiDeclarationMixin`, `ApiItemContainerMixin`, etc.) to add various
+ * features that cannot be represented as a normal inheritance chain (since TypeScript does not allow a child class
+ * to extend more than one base class).  The "mixin" is a TypeScript merged declaration with three components:
+ * the function that generates a subclass, an interface that describes the members of the subclass, and
+ * a namespace containing static members of the class.
+ *
+ * Examples of `ApiItemContainerMixin` child classes include `ApiModel`, `ApiPackage`, `ApiEntryPoint`,
+ * and `ApiEnum`.  But note that `ApiParameter` is not considered a "member" of an `ApiMethod`; this relationship
+ * is modeled using {@link ApiFunctionLikeMixin.parameters} instead of {@link ApiItemContainerMixin.members}.
+ *
+ * @public
+ */
 // tslint:disable-next-line:interface-name
 export interface ApiItemContainerMixin extends ApiItem {
   /**
@@ -33,6 +54,9 @@ export interface ApiItemContainerMixin extends ApiItem {
    */
   addMember(member: ApiItem): void;
 
+  /**
+   * Attempts to retrieve a member using its canonicalReference, or returns undefined if no matching member was found.
+   */
   tryGetMember(canonicalReference: string): ApiItem | undefined;
 
   /**
@@ -44,7 +68,14 @@ export interface ApiItemContainerMixin extends ApiItem {
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
-/** @public */
+/**
+ * Mixin function for {@link (ApiDeclarationMixin:interface)}.
+ *
+ * @param baseClass - The base class to be extended
+ * @returns A child class that extends baseClass, adding the {@link (ApiItemContainerMixin:interface)} functionality.
+ *
+ * @public
+ */
 export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
   TBaseClass & (new (...args: any[]) => ApiItemContainerMixin) { // tslint:disable-line:no-any
 
@@ -151,8 +182,20 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
   return MixedClass;
 }
 
-/** @public */
+/**
+ * Static members for {@link (ApiItemContainerMixin:interface)}.
+ * @public
+ */
 export namespace ApiItemContainerMixin {
+  /**
+   * A type guard that tests whether the specified `ApiItem` subclass extends the `ApiItemContainerMixin` mixin.
+   *
+   * @remarks
+   *
+   * The JavaScript `instanceof` operator cannot be used to test for mixin inheritance, because each invocation of
+   * the mixin function produces a different subclass.  (This could be mitigated by `Symbol.hasInstance`, however
+   * the TypeScript type system cannot invoke a runtime test.)
+   */
   export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiItemContainerMixin {
     return apiItem.hasOwnProperty(_members);
   }

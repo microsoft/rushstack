@@ -9,7 +9,7 @@ class ApiClass extends ApiClass_base {
   readonly kind: ApiItemKind;
 }
 
-// @public (undocumented)
+// @public
 interface ApiDeclarationMixin {
 }
 
@@ -63,7 +63,7 @@ class ApiEnumMember extends ApiEnumMember_base {
   readonly kind: ApiItemKind;
 }
 
-// @public (undocumented)
+// @public
 interface ApiFunctionLikeMixin {
 }
 
@@ -109,7 +109,7 @@ class ApiItem {
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
-// @public (undocumented)
+// @public
 interface ApiItemContainerMixin {
 }
 
@@ -262,15 +262,15 @@ class ApiPropertySignature extends ApiPropertySignature_base {
   readonly kind: ApiItemKind;
 }
 
-// @public (undocumented)
+// @public
 interface ApiReleaseTagMixin {
 }
 
-// @public (undocumented)
+// @public
 interface ApiStaticMixin {
 }
 
-// @public (undocumented)
+// @public
 class Excerpt {
   constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange);
   // (undocumented)
@@ -328,7 +328,7 @@ interface IAnalyzeProjectOptions {
 interface IApiClassOptions extends IApiDeclarationMixinOptions, IApiItemContainerMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
 }
 
-// @public (undocumented)
+// @public
 interface IApiDeclarationMixinOptions extends IApiItemOptions {
   // (undocumented)
   declarationExcerpt: IDeclarationExcerpt;
@@ -352,7 +352,7 @@ interface IApiEnumMemberOptions extends IApiDeclarationMixinOptions, IApiRelease
 interface IApiEnumOptions extends IApiDeclarationMixinOptions, IApiItemContainerMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
 }
 
-// @public (undocumented)
+// @public
 interface IApiFunctionLikeMixinOptions extends IApiItemOptions {
   // (undocumented)
   overloadIndex: number;
@@ -364,7 +364,7 @@ interface IApiFunctionLikeMixinOptions extends IApiItemOptions {
 interface IApiInterfaceOptions extends IApiDeclarationMixinOptions, IApiItemContainerMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
 }
 
-// @public (undocumented)
+// @public
 interface IApiItemContainerMixinOptions extends IApiItemOptions {
   // (undocumented)
   members?: ApiItem[];
@@ -408,13 +408,13 @@ interface IApiPropertyOptions extends IApiReleaseTagMixinOptions, IApiStaticMixi
 interface IApiPropertySignatureOptions extends IApiReleaseTagMixinOptions, IApiPropertyItemOptions {
 }
 
-// @public (undocumented)
+// @public
 interface IApiReleaseTagMixinOptions extends IApiItemOptions {
   // (undocumented)
   releaseTag: ReleaseTag;
 }
 
-// @public (undocumented)
+// @public
 interface IApiStaticMixinOptions extends IApiItemOptions {
   // (undocumented)
   isStatic: boolean;
