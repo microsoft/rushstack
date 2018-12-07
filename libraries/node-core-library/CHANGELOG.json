@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.8.0",
+      "tag": "@microsoft/node-core-library_v3.8.0",
+      "date": "Fri, 07 Dec 2018 17:04:56 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added a new \"InternalError\" API for reporting software defects"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.7.1",
       "tag": "@microsoft/node-core-library_v3.7.1",
       "date": "Thu, 29 Nov 2018 07:02:09 GMT",
