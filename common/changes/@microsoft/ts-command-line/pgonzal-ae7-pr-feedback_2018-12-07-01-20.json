@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/ts-command-line",
+      "comment": "Updated to use the new InternalError class for reporting software defects",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "pgonzal@users.noreply.github.com"
+}
