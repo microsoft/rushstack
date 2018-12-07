@@ -259,7 +259,8 @@ export class InitAction extends BaseConfiglessRushAction {
 
         if (activeBlockIndent !== match[1]) {
           // If this happens, please report a Rush bug
-          throw new InternalError(`The template contains an inconsistently indented section "${activeBlockSectionName}"`);
+          throw new InternalError(`The template contains an inconsistently indented section`
+            + ` "${activeBlockSectionName}"`);
         }
 
         activeBlockSectionName = undefined;
