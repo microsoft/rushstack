@@ -9,7 +9,7 @@ import * as path from 'path';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { FileSystem, NewlineKind } from '@microsoft/node-core-library';
+import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
 import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
 import { Rush } from '../../api/Rush';
 
@@ -161,7 +161,7 @@ export class InitAction extends BaseConfiglessRushAction {
 
       if (!FileSystem.exists(sourcePath)) {
         // If this happens, please report a Rush bug
-        throw new Error('Unable to find template input file: ' + sourcePath);
+        throw new InternalError('Unable to find template input file: ' + sourcePath);
       }
 
       const destinationPath: string = path.join(initFolder, templateFilePath)
@@ -234,7 +234,7 @@ export class InitAction extends BaseConfiglessRushAction {
       if (match) {
         if (activeBlockSectionName) {
           // If this happens, please report a Rush bug
-          throw new Error(`The template contains an unmatched BEGIN macro for "${activeBlockSectionName}"`);
+          throw new InternalError(`The template contains an unmatched BEGIN macro for "${activeBlockSectionName}"`);
         }
 
         activeBlockSectionName = match[2];
@@ -249,17 +249,17 @@ export class InitAction extends BaseConfiglessRushAction {
       if (match) {
         if (activeBlockSectionName === undefined) {
           // If this happens, please report a Rush bug
-          throw new Error(`The template contains an unmatched END macro for "${activeBlockSectionName}"`);
+          throw new InternalError(`The template contains an unmatched END macro for "${activeBlockSectionName}"`);
         }
 
         if (activeBlockSectionName !== match[2]) {
           // If this happens, please report a Rush bug
-          throw new Error(`The template contains an mismatched END macro for "${activeBlockSectionName}"`);
+          throw new InternalError(`The template contains an mismatched END macro for "${activeBlockSectionName}"`);
         }
 
         if (activeBlockIndent !== match[1]) {
           // If this happens, please report a Rush bug
-          throw new Error(`The template contains an inconsistently indented section "${activeBlockSectionName}"`);
+          throw new InternalError(`The template contains an inconsistently indented section "${activeBlockSectionName}"`);
         }
 
         activeBlockSectionName = undefined;
@@ -291,7 +291,7 @@ export class InitAction extends BaseConfiglessRushAction {
       match = transformedLine.match(InitAction._anyMacroRegExp);
       if (match) {
         // If this happens, please report a Rush bug
-        throw new Error('The template contains a malformed macro expression: ' + JSON.stringify(match[0]));
+        throw new InternalError('The template contains a malformed macro expression: ' + JSON.stringify(match[0]));
       }
 
       // If we are inside a block section that is commented out, then insert the "//" after indentation
@@ -300,7 +300,7 @@ export class InitAction extends BaseConfiglessRushAction {
           // Is the line indented properly?
           if (transformedLine.substr(0, activeBlockIndent.length).trim().length > 0) {
             // If this happens, please report a Rush bug
-            throw new Error(`The template contains inconsistently indented lines inside`
+            throw new InternalError(`The template contains inconsistently indented lines inside`
               + ` the "${activeBlockSectionName}" section`);
           }
 
@@ -323,7 +323,7 @@ export class InitAction extends BaseConfiglessRushAction {
     const value: boolean | undefined = this._commentedBySectionName.get(sectionName);
     if (value === undefined) {
       // If this happens, please report a Rush bug
-      throw new Error(`The template references an undefined section name ${sectionName}`);
+      throw new InternalError(`The template references an undefined section name ${sectionName}`);
     }
 
     return value!;
@@ -334,7 +334,7 @@ export class InitAction extends BaseConfiglessRushAction {
       case '%RUSH_VERSION%':
         return Rush.version;
       default:
-        throw new Error(`The template references an undefined variable "${variableName}"`);
+        throw new InternalError(`The template references an undefined variable "${variableName}"`);
     }
   }
 }

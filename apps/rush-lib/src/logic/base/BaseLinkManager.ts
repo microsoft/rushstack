@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { FileSystem, IFileSystemCreateLinkOptions } from '@microsoft/node-core-library';
+import { FileSystem, IFileSystemCreateLinkOptions, InternalError } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
@@ -111,8 +111,7 @@ export abstract class BaseLinkManager {
     const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
 
     if (!localPackage.symlinkTargetFolderPath) {
-      // Program bug
-      throw Error('localPackage.symlinkTargetFolderPath was not assigned');
+      throw new InternalError('localPackage.symlinkTargetFolderPath was not assigned');
     }
 
     // This is special case for when localPackage.name has the form '@scope/name',
