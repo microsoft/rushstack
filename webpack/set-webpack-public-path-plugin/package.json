@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/set-webpack-public-path-plugin",
-  "version": "2.1.65",
+  "version": "2.1.66",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -23,13 +23,13 @@
     "@types/tapable": "1.0.2"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.0": "0.2.0",
+    "@microsoft/rush-stack-compiler-3.0": "0.2.1",
     "@types/lodash": "4.14.116",
     "@types/mocha": "5.2.5",
     "@types/uglify-js": "2.6.29",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "^5.2.0",
-    "@microsoft/node-library-build": "6.0.17"
+    "@microsoft/node-library-build": "6.0.18"
   }
 }

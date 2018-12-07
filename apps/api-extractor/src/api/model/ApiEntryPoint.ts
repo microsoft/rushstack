@@ -4,11 +4,37 @@
 import { ApiItem, ApiItemKind } from './ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiEntryPoint}.
+ * @public
+ */
 export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions {
 }
 
-/** @public */
+/**
+ * Represents the entry point for an NPM package.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * `ApiEntryPoint` represents the entry point to an NPM package.  For example, suppose the package.json file
+ * looks like this:
+ *
+ * ```json
+ * {
+ *   "name": "example-library",
+ *   "version": "1.0.0",
+ *   "main": "./lib/index.js",
+ *   "typings": "./lib/index.d.ts"
+ * }
+ * ```
+ *
+ * In this example, the `ApiEntryPoint` would represent the TypeScript module for `./lib/index.js`.
+ *
+ * @public
+ */
 export class ApiEntryPoint extends ApiItemContainerMixin(ApiItem) {
   public constructor(options: IApiEntryPointOptions) {
     super(options);

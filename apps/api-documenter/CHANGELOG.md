@@ -1,6 +1,23 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 30 Nov 2018 23:34:57 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Dec 2018 17:04:56 GMT and should not be manually modified.
+
+## 7.0.4
+Fri, 07 Dec 2018 17:04:56 GMT
+
+### Patches
+
+- Updated to use the new InternalError class for reporting software defects
+
+## 7.0.3
+Wed, 05 Dec 2018 19:57:03 GMT
+
+*Version update only*
+
+## 7.0.2
+Wed, 05 Dec 2018 17:04:18 GMT
+
+*Version update only*
 
 ## 7.0.1
 Fri, 30 Nov 2018 23:34:57 GMT

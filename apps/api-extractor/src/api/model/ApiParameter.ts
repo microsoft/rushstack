@@ -8,13 +8,39 @@ import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiD
 import { ApiDocumentedItem } from './ApiDocumentedItem';
 import { Excerpt } from '../mixins/Excerpt';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiParameter}.
+ * @public
+ */
 export interface IApiParameterOptions extends
   IApiDeclarationMixinOptions,
   IApiItemOptions {
 }
 
-/** @public */
+/**
+ * Represents a function parameter for a function-like declaration.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * `ApiParameter` represents a TypeScript declaration such as `x: number` in this example:
+ *
+ * ```ts
+ * export function add(x: number, y: number): number {
+ *   return x + y;
+ * }
+ * ```
+ *
+ * `ApiParameter` objects belong to the {@link ApiFunctionLikeMixin.parameters} collection.
+ *
+ * Even though it has associated documentation content, `ApiParameter` does not extend from `ApiDocumentedItem`
+ * because it does not technically own its documentation; instead, the documentation is extracted from a `@param`
+ * TSDoc tag belonging to a containing declaration such as `ApiMethod` or `ApiFunction`.
+ *
+ * @public
+ */
 export class ApiParameter extends ApiDeclarationMixin(ApiItem) {
   public readonly parameterTypeExcerpt: Excerpt;
 

@@ -7,7 +7,10 @@ import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiClass}.
+ * @public
+ */
 export interface IApiClassOptions extends
   IApiDeclarationMixinOptions,
   IApiItemContainerMixinOptions,
@@ -15,7 +18,22 @@ export interface IApiClassOptions extends
   IApiDocumentedItemOptions {
 }
 
-/** @public */
+/**
+ * Represents a TypeScript class declaration.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * `ApiClass` represents a TypeScript declaration such as this:
+ *
+ * ```ts
+ * export class X { }
+ * ```
+ *
+ * @public
+ */
 export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
   public static getCanonicalReference(name: string): string {
     return `(${name}:class)`;

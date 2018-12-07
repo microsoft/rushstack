@@ -4,6 +4,7 @@
 import * as ts from 'typescript';
 import { AstImport } from './AstImport';
 import { AstDeclaration } from './AstDeclaration';
+import { InternalError } from '@microsoft/node-core-library';
 
 /**
  * Constructor options for AstSymbol
@@ -130,7 +131,7 @@ export class AstSymbol {
    */
   public _notifyDeclarationAttach(astDeclaration: AstDeclaration): void {
     if (this.analyzed) {
-      throw new Error('Program Bug: _notifyDeclarationAttach() called after analysis is already complete');
+      throw new InternalError('_notifyDeclarationAttach() called after analysis is already complete');
     }
     this._astDeclarations.push(astDeclaration);
   }
@@ -142,7 +143,7 @@ export class AstSymbol {
    */
   public _notifyAnalyzed(): void {
     if (this.parentAstSymbol) {
-      throw new Error('Program Bug: _notifyAnalyzed() called for an AstSymbol which is not the root');
+      throw new InternalError('_notifyAnalyzed() called for an AstSymbol which is not the root');
     }
     this._analyzed = true;
   }

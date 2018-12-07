@@ -94,6 +94,14 @@ export class DtsRollupGenerator {
             indentedWriter.write(`import { ${astImport.exportName} }`);
           }
           indentedWriter.writeLine(` from '${astImport.modulePath}';`);
+
+          if (entity.exported) {
+            // We write re-export as two lines: `import { Mod } from 'package'; export { Mod };`,
+            // instead of a single line `export { Mod } from 'package';`.
+            // Because this variable may be used by others, and we cannot know it.
+            // so we always keep the `import ...` declaration, for now.
+            indentedWriter.writeLine(`export { ${entity.nameForEmit} };`);
+          }
         }
       }
     }
@@ -194,6 +202,7 @@ export class DtsRollupGenerator {
           const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node,
             [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
           if (!list) {
+            // This should not happen unless the compiler API changes somehow
             throw new Error('Unsupported variable declaration');
           }
           const listPrefix: string = list.getSourceFile().text

@@ -5,7 +5,10 @@ import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../
 import { ApiDocumentedItem } from '../model/ApiDocumentedItem';
 import { Excerpt, ExcerptToken, IExcerptTokenRange, IDeclarationExcerpt, ExcerptName } from './Excerpt';
 
-/** @public */
+/**
+ * Constructor options for {@link (ApiDeclarationMixin:interface)}.
+ * @public
+ */
 export interface IApiDeclarationMixinOptions extends IApiItemOptions {
   declarationExcerpt: IDeclarationExcerpt;
 }
@@ -17,18 +20,51 @@ const _excerpt: unique symbol = Symbol('ApiDeclarationMixin._excerpt');
 const _excerptTokens: unique symbol = Symbol('ApiDeclarationMixin._excerptTokens');
 const _embeddedExcerptsByName: unique symbol = Symbol('ApiDeclarationMixin._embeddedExcerptsByName');
 
-/** @public */
+/**
+ * The mixin base class for API items that have an associated source code excerpt containing a
+ * TypeScript declaration.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.  The non-abstract classes (e.g. `ApiClass`, `ApiEnum`, `ApiInterface`, etc.) use
+ * TypeScript "mixin" functions (e.g. `ApiDeclarationMixin`, `ApiItemContainerMixin`, etc.) to add various
+ * features that cannot be represented as a normal inheritance chain (since TypeScript does not allow a child class
+ * to extend more than one base class).  The "mixin" is a TypeScript merged declaration with three components:
+ * the function that generates a subclass, an interface that describes the members of the subclass, and
+ * a namespace containing static members of the class.
+ *
+ * Most `ApiItem` subclasses have declarations and thus extend `ApiDeclarationMixin`.  Counterexamples include
+ * `ApiModel` and `ApiPackage`, which do not have any corresponding TypeScript source code.
+ *
+ * @public
+ */
 // tslint:disable-next-line:interface-name
 export interface ApiDeclarationMixin extends ApiItem {
+  /**
+   * The source code excerpt where the API item is declared.
+   */
   readonly excerpt: Excerpt;
 
+  /**
+   * The individual source code tokens that comprise the main excerpt.
+   */
   readonly excerptTokens: ReadonlyArray<ExcerptToken>;
 
+  /**
+   * A collection of named embedded excerpts.  For example, if `ApiDeclarationMixin.excerpt` is a property
+   * declaration, then `embeddedExcerptsByName` might contain an embedded excerpt corresponding to the
+   * type of the property.
+   */
   readonly embeddedExcerptsByName: ReadonlyMap<ExcerptName, Excerpt>;
 
   /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 
+  /**
+   * Returns a member of the {@link (ApiDeclarationMixin:interface).embeddedExcerptsByName} map,
+   * or throws an exception if was not found.
+   */
   getEmbeddedExcerpt(name: ExcerptName): Excerpt;
 
   /**
@@ -38,7 +74,14 @@ export interface ApiDeclarationMixin extends ApiItem {
   getExcerptWithModifiers(): string;
 }
 
-/** @public */
+/**
+ * Mixin function for {@link (ApiDeclarationMixin:interface)}.
+ *
+ * @param baseClass - The base class to be extended
+ * @returns A child class that extends baseClass, adding the {@link (ApiDeclarationMixin:interface)} functionality.
+ *
+ * @public
+ */
 export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
   TBaseClass & (new (...args: any[]) => ApiDeclarationMixin) { // tslint:disable-line:no-any
 
@@ -148,8 +191,20 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
   return MixedClass;
 }
 
-/** @public */
+/**
+ * Static members for {@link (ApiDeclarationMixin:interface)}.
+ * @public
+ */
 export namespace ApiDeclarationMixin {
+  /**
+   * A type guard that tests whether the specified `ApiItem` subclass extends the `ApiDeclarationMixin` mixin.
+   *
+   * @remarks
+   *
+   * The JavaScript `instanceof` operator cannot be used to test for mixin inheritance, because each invocation of
+   * the mixin function produces a different subclass.  (This could be mitigated by `Symbol.hasInstance`, however
+   * the TypeScript type system cannot invoke a runtime test.)
+   */
   export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiDeclarationMixin {
     return apiItem.hasOwnProperty(_excerpt);
   }

@@ -6,14 +6,50 @@ import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { ApiPropertyItem, IApiPropertyItemOptions } from './ApiPropertyItem';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiProperty}.
+ * @public
+ */
 export interface IApiPropertyOptions extends
   IApiReleaseTagMixinOptions,
   IApiStaticMixinOptions,
   IApiPropertyItemOptions {
 }
 
-/** @public */
+/**
+ * Represents a TypeScript property declaration that belongs to an `ApiClass`.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * `ApiProperty` represents a TypeScript declaration such as the `width` and `height` members in this example:
+ *
+ * ```ts
+ * export class Widget {
+ *   public width: number = 100;
+ *
+ *   public get height(): number {
+ *     if (this.isSquashed()) {
+ *       return 0;
+ *     } else {
+ *       return this.clientArea.height;
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * Note that member variables are also considered to be properties.
+ *
+ * If the property has both a getter function and setter function, they will be represented by a single `ApiProperty`
+ * and must have a single documentation comment.
+ *
+ * Compare with {@link ApiPropertySignature}, which represents a property belonging to an interface.
+ * For example, a class property can be `static` but an interface property cannot.
+ *
+ * @public
+ */
 export class ApiProperty extends ApiReleaseTagMixin(ApiStaticMixin(ApiPropertyItem)) {
 
   public static getCanonicalReference(name: string, isStatic: boolean): string {

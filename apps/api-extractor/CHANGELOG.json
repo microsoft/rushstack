@@ -2,6 +2,50 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.3",
+      "tag": "@microsoft/api-extractor_v7.0.3",
+      "date": "Fri, 07 Dec 2018 17:04:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added more API documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.7.1` to `3.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.2` to `4.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.2",
+      "tag": "@microsoft/api-extractor_v7.0.2",
+      "date": "Wed, 05 Dec 2018 19:57:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix reexported types from an external package for dts rollup"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.1",
+      "tag": "@microsoft/api-extractor_v7.0.1",
+      "date": "Wed, 05 Dec 2018 17:04:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where .d.ts trimming did not properly handle variable declarations (GitHub #976)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.0",
       "tag": "@microsoft/api-extractor_v7.0.0",
       "date": "Thu, 29 Nov 2018 07:02:09 GMT",

@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "",
+      "comment": "Updated to use the new InternalError class for reporting software defects",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

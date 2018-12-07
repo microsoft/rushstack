@@ -273,7 +273,7 @@ export class NpmLinkManager extends BaseLinkManager {
             const commonPackageFromLookup: NpmPackage | undefined =
               commonPackageLookup.getPackage(newLocalPackage.nameAndVersion) as NpmPackage;
             if (!commonPackageFromLookup) {
-              throw Error(`The ${localPackage.name}@${localPackage.version} package was not found`
+              throw new Error(`The ${localPackage.name}@${localPackage.version} package was not found`
                 + ` in the common folder`);
             }
             newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
@@ -295,7 +295,7 @@ export class NpmLinkManager extends BaseLinkManager {
           }
         } else {
           if (dependency.kind !== PackageDependencyKind.Optional) {
-            throw Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
+            throw new Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
               + ` was not found in the common folder -- do you need to run "rush install"?`);
           } else {
             console.log('Skipping optional dependency: ' + dependency.name);

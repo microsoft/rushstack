@@ -5,14 +5,17 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedIte
 import { Excerpt } from '../mixins/Excerpt';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiPropertyItem}.
+ * @public
+ */
 export interface IApiPropertyItemOptions extends
   IApiDocumentedItemOptions,
   IApiDeclarationMixinOptions {
 }
 
 /**
- * Common base class for ApiProperty and ApiPropertySignature.
+ * The abstract base class for {@link ApiProperty} and {@link ApiPropertySignature}.
  *
  * @public
  */

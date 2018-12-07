@@ -18,6 +18,7 @@ import {
   DocErrorText
 } from '@microsoft/tsdoc';
 import { IndentedWriter } from '@microsoft/api-extractor';
+import { InternalError } from '@microsoft/node-core-library';
 
 export interface IMarkdownEmitterOptions {
 }
@@ -172,7 +173,7 @@ export class MarkdownEmitter {
   protected writeLinkTagWithCodeDestination(docLinkTag: DocLinkTag, context: IMarkdownEmitterContext): void {
 
     // The subclass needs to implement this to support code destinations
-    throw new Error('writeLinkTagWithCodeDestination()');
+    throw new InternalError('writeLinkTagWithCodeDestination()');
   }
 
   /** @virtual */
