@@ -62,8 +62,8 @@ export interface IApiPackageJson extends IApiItemJson {
  */
 export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
-    const jsonObject: { } = JsonFile.load(apiJsonFilename);
-    return ApiItem.deserialize(jsonObject as IApiItemJson) as ApiPackage;
+    const jsonObject: IApiItemJson = JsonFile.load(apiJsonFilename);
+    return ApiItem.deserialize(jsonObject) as ApiPackage;
   }
 
   public constructor(options: IApiPackageOptions) {

@@ -95,6 +95,8 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
    * @remarks
    *
    * If the NPM scope is omitted in the package name, it will still be found provided that it is an unambiguous match.
+   * For example, it's often convenient to write `{@link node-core-library#JsonFile}` instead of
+   * `{@link @microsoft/node-core-library#JsonFile}`.
    */
   public tryGetPackageByName(packageName: string): ApiPackage | undefined {
     // Build the lookup on demand

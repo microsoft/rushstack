@@ -16,7 +16,7 @@ export interface IDocHeadingParameters extends IDocNodeParameters {
 }
 
 /**
- * Represents table, similar to an HTML `<h1>` or `<h2>` element.
+ * Represents a section header similar to an HTML `<h1>` or `<h2>` element.
  */
 export class DocHeading extends DocNode {
   public readonly title: string;
