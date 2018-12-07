@@ -8,7 +8,10 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedIte
 import { Extractor } from '../Extractor';
 import { ApiEntryPoint } from './ApiEntryPoint';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiPackage}.
+ * @public
+ */
 export interface IApiPackageOptions extends
   IApiItemContainerMixinOptions,
   IApiDocumentedItemOptions {
@@ -47,11 +50,20 @@ export interface IApiPackageJson extends IApiItemJson {
   metadata: IApiPackageMetadataJson;
 }
 
-/** @public */
+/**
+ * Represents an NPM package containing API declarations.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * @public
+ */
 export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
-    const jsonObject: { } = JsonFile.load(apiJsonFilename);
-    return ApiItem.deserialize(jsonObject as IApiItemJson) as ApiPackage;
+    const jsonObject: IApiItemJson = JsonFile.load(apiJsonFilename);
+    return ApiItem.deserialize(jsonObject) as ApiPackage;
   }
 
   public constructor(options: IApiPackageOptions) {

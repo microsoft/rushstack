@@ -4,7 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import { PackageJsonLookup } from '@microsoft/node-core-library';
+import { PackageJsonLookup, InternalError } from '@microsoft/node-core-library';
 
 import { AstDeclaration } from './AstDeclaration';
 import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
@@ -170,7 +170,7 @@ export class AstSymbolTable {
       throw new Error('Child declaration not found for the specified node');
     }
     if (childAstDeclaration.parent !== parentAstDeclaration) {
-      throw new Error('Program Bug: The found child is not attached to the parent AstDeclaration');
+      throw new InternalError('The found child is not attached to the parent AstDeclaration');
     }
 
     return childAstDeclaration;
@@ -230,7 +230,7 @@ export class AstSymbolTable {
     const astDeclaration: AstDeclaration | undefined
       = this._astDeclarationsByDeclaration.get(node);
     if (!astDeclaration) {
-      throw new Error('Program Bug: Unable to find constructed AstDeclaration');
+      throw new InternalError('Unable to find constructed AstDeclaration');
     }
 
     return astDeclaration;
@@ -243,7 +243,7 @@ export class AstSymbolTable {
 
     const symbol: ts.Symbol | undefined = TypeScriptHelpers.getSymbolForDeclaration(node as ts.Declaration);
     if (!symbol) {
-      throw new Error('Program Bug: Unable to find symbol for node');
+      throw new InternalError('Unable to find symbol for node');
     }
 
     return this._fetchAstSymbol(symbol, true);
@@ -267,7 +267,7 @@ export class AstSymbolTable {
 
     if (!astSymbol) {
       if (!followedSymbol.declarations || followedSymbol.declarations.length < 1) {
-        throw new Error('Program Bug: Followed a symbol with no declarations');
+        throw new InternalError('Followed a symbol with no declarations');
       }
 
       const astImport: AstImport | undefined = followAliasesResult.astImport;
@@ -316,7 +316,7 @@ export class AstSymbolTable {
         if (!nominal) {
           for (const declaration of followedSymbol.declarations || []) {
             if (!SymbolAnalyzer.isAstDeclaration(declaration.kind)) {
-              throw new Error(`Program Bug: The "${followedSymbol.name}" symbol uses the construct`
+              throw new InternalError(`The "${followedSymbol.name}" symbol uses the construct`
                 + ` "${ts.SyntaxKind[declaration.kind]}" which may be an unimplemented language feature`);
             }
           }
@@ -342,7 +342,7 @@ export class AstSymbolTable {
 
             parentAstSymbol = this._fetchAstSymbol(parentSymbol, addIfMissing);
             if (!parentAstSymbol) {
-              throw new Error('Program bug: Unable to construct a parent AstSymbol for '
+              throw new InternalError('Unable to construct a parent AstSymbol for '
                 + followedSymbol.name);
             }
           }
@@ -373,12 +373,12 @@ export class AstSymbolTable {
             const parentDeclaration: ts.Node | undefined = this._tryFindFirstAstDeclarationParent(declaration);
 
             if (!parentDeclaration) {
-              throw new Error('Program bug: Missing parent declaration');
+              throw new InternalError('Missing parent declaration');
             }
 
             parentAstDeclaration = this._astDeclarationsByDeclaration.get(parentDeclaration);
             if (!parentAstDeclaration) {
-              throw new Error('Program bug: Missing parent AstDeclaration');
+              throw new InternalError('Missing parent AstDeclaration');
             }
           }
 
@@ -398,7 +398,7 @@ export class AstSymbolTable {
       //
       // This assumption might be violated if the caller did something unusual like feeding random
       // symbols to AstSymbolTable.analyze() in the middle of the analysis.
-      throw new Error('Program Bug: The symbol ' + astSymbol.localName + ' is being imported'
+      throw new InternalError('The symbol ' + astSymbol.localName + ' is being imported'
         + ' after it was already registered as non-imported');
     }
 

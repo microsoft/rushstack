@@ -569,10 +569,8 @@ export class MarkdownDocumenter {
         );
 
         if (apiFunctionLike instanceof ApiDocumentedItem) {
-          if (apiFunctionLike.tsdocComment) {
-            if (apiFunctionLike.tsdocComment.returnsBlock) {
-              this._appendSection(output, apiFunctionLike.tsdocComment.returnsBlock.content);
-            }
+          if (apiFunctionLike.tsdocComment && apiFunctionLike.tsdocComment.returnsBlock) {
+            this._appendSection(output, apiFunctionLike.tsdocComment.returnsBlock.content);
           }
         }
 
@@ -596,6 +594,13 @@ export class MarkdownDocumenter {
     ]);
   }
 
+  /**
+   * This generates a DocTableCell for an ApiItem including the summary section and "(BETA)" annotation.
+   *
+   * @remarks
+   * We mostly assume that the input is an ApiDocumentedItem, but it's easier to perform this as a runtime
+   * check than to have each caller perform a type cast.
+   */
   private _createDescriptionCell(apiItem: ApiItem): DocTableCell {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
@@ -659,6 +664,9 @@ export class MarkdownDocumenter {
       switch (hierarchyItem.kind) {
         case ApiItemKind.Model:
         case ApiItemKind.EntryPoint:
+          // We don't show the model as part of the breadcrumb because it is the root-level container.
+          // We don't show the entry point because today API Extractor doesn't support multiple entry points;
+          // this may change in the future.
           break;
         default:
           output.appendNodesInParagraph([

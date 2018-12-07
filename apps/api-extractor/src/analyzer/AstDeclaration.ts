@@ -4,6 +4,7 @@
 import * as ts from 'typescript';
 import { AstSymbol } from './AstSymbol';
 import { Span } from './Span';
+import { InternalError } from '@microsoft/node-core-library';
 
 /**
  * Constructor options for AstDeclaration
@@ -103,11 +104,11 @@ export class AstDeclaration {
    */
   public _notifyChildAttach(child: AstDeclaration): void {
     if (child.parent !== this) {
-      throw new Error('Program Bug: Invalid call to notifyChildAttach()');
+      throw new InternalError('Invalid call to notifyChildAttach()');
     }
 
     if (this.astSymbol.analyzed) {
-      throw new Error('Program Bug: _notifyChildAttach() called after analysis is already complete');
+      throw new InternalError('_notifyChildAttach() called after analysis is already complete');
     }
 
     this._analyzedChildren.push(child);
@@ -152,7 +153,7 @@ export class AstDeclaration {
    */
   public _notifyReferencedAstSymbol(referencedAstSymbol: AstSymbol): void {
     if (this.astSymbol.analyzed) {
-      throw new Error('Program Bug: notifyReferencedAstSymbol() called after analysis is already complete');
+      throw new InternalError('notifyReferencedAstSymbol() called after analysis is already complete');
     }
 
     for (let current: AstDeclaration | undefined = this; current; current = current.parent) {

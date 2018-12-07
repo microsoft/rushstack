@@ -219,7 +219,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         }
       }
       if (!this.selectedAction) {
-        throw Error('Unrecognized action');
+        throw new Error('Unrecognized action');
       }
 
       return this.onExecute();

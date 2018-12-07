@@ -1,6 +1,5 @@
 // @public
 class Interleaver {
-  constructor();
   static registerTask(taskName: string, quietMode?: boolean): ITaskWriter;
   static reset(): void;
   static setStdOut(stdout: {

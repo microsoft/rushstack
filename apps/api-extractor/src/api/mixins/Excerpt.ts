@@ -53,7 +53,19 @@ export class ExcerptToken {
   }
 }
 
-/** @public */
+/**
+ * This class is used by {@link (ApiDeclarationMixin:interface)} to represent a source code excerpt containing
+ * a TypeScript declaration.
+ *
+ * @remarks
+ *
+ * The main excerpt is parsed into an array of tokens, and the main excerpt's token range will span all of these
+ * tokens.  The declaration may also have have "embedded excerpts", which are other subranges of tokens.
+ * For example, if the main excerpt is a function declaration, it may have an embedded excerpt corresponding
+ * to the return type of the function.
+ *
+ * @public
+ */
 export class Excerpt {
   public readonly tokenRange: IExcerptTokenRange;
 

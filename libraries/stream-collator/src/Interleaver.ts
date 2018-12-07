@@ -172,10 +172,5 @@ export class Interleaver {
     this._stdout.write(colors.red(taskInfo.stderr.join('')));
   }
 
-  /**
-   * A constructor which throws an exception if used
-   */
-  constructor() {
-    throw Error('do not use constructor directly, only static functions');
-  }
+  private constructor() { }
 }

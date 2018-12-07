@@ -9,7 +9,8 @@ import {
   JsonSchema,
   PackageName,
   FileSystem,
-  NewlineKind
+  NewlineKind,
+  InternalError
 } from '@microsoft/node-core-library';
 import { StringBuilder, DocSection, DocComment } from '@microsoft/tsdoc';
 import {
@@ -108,7 +109,7 @@ export class YamlDocumenter {
 
     if (this._shouldEmbed(apiItem.kind)) {
       if (!parentYamlFile) {
-        throw new Error('Missing file context'); // program bug
+        throw new InternalError('Missing file context');
       }
       parentYamlFile.items.push(yamlItem);
     } else {

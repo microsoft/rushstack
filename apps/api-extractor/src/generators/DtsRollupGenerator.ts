@@ -202,6 +202,7 @@ export class DtsRollupGenerator {
           const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node,
             [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
           if (!list) {
+            // This should not happen unless the compiler API changes somehow
             throw new Error('Unsupported variable declaration');
           }
           const listPrefix: string = list.getSourceFile().text

@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as os from 'os';
-import { JsonFile, JsonSchema, FileSystem, NewlineKind } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
@@ -196,7 +196,7 @@ export class ApprovedPackagesConfiguration {
    */
   private _addItem(item: ApprovedPackagesItem): void {
     if (this._itemsByName.has(item.packageName)) {
-      throw new Error('Duplicate key'); // this is a program bug
+      throw new InternalError('Duplicate key');
     }
     this.items.push(item);
     this._itemsByName.set(item.packageName, item);

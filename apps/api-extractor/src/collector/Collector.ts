@@ -7,7 +7,8 @@ import * as tsdoc from '@microsoft/tsdoc';
 import {
   PackageJsonLookup,
   IPackageJson,
-  Sort
+  Sort,
+  InternalError
 } from '@microsoft/node-core-library';
 
 import { ILogger } from '../api/ILogger';
@@ -261,10 +262,10 @@ export class Collector {
     } else {
       if (exportedName) {
         if (!entity.exported) {
-          throw new Error('Program Bug: CollectorEntity should have been marked as exported');
+          throw new InternalError('CollectorEntity should have been marked as exported');
         }
         if (entity.originalName !== exportedName) {
-          throw new Error(`The symbol ${exportedName} was also exported as ${entity.originalName};`
+          throw new InternalError(`The symbol ${exportedName} was also exported as ${entity.originalName};`
             + ` this is not supported yet`);
         }
       }
@@ -297,7 +298,7 @@ export class Collector {
 
         if (usedNames.has(entity.originalName)) {
           // This should be impossible
-          throw new Error(`Program bug: a package cannot have two exports with the name ${entity.originalName}`);
+          throw new InternalError(`A package cannot have two exports with the name ${entity.originalName}`);
         }
 
         entity.nameForEmit = entity.originalName;

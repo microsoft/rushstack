@@ -25,6 +25,7 @@ export {
   IPackageJsonScriptTable,
   IPackageJsonTsdocConfiguration
 } from './IPackageJson';
+export { InternalError } from './InternalError';
 export {
   JsonFile,
   IJsonFileSaveOptions,
