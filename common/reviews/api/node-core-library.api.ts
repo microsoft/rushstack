@@ -226,6 +226,11 @@ interface IJsonSchemaValidateOptions {
 }
 
 // @public
+class InternalError extends Error {
+  constructor(message: string);
+}
+
+// @public
 interface IPackageJson {
   bin?: string;
   dependencies?: IPackageJsonDependencyTable;
