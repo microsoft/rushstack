@@ -3,10 +3,10 @@
 
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { ApiItemKind, ApiItem, IApiItemOptions } from './ApiItem';
+import { ApiItemKind, ApiItem, IApiItemOptions, IApiItemJson } from './ApiItem';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem } from './ApiDocumentedItem';
-import { Excerpt } from '../mixins/Excerpt';
+import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 
 /**
  * Constructor options for {@link ApiParameter}.
@@ -15,6 +15,12 @@ import { Excerpt } from '../mixins/Excerpt';
 export interface IApiParameterOptions extends
   IApiDeclarationMixinOptions,
   IApiItemOptions {
+
+  parameterTypeTokenRange: IExcerptTokenRange;
+}
+
+export interface IApiParameterJson extends IApiItemJson {
+  parameterTypeTokenRange: IExcerptTokenRange;
 }
 
 /**
@@ -44,10 +50,17 @@ export interface IApiParameterOptions extends
 export class ApiParameter extends ApiDeclarationMixin(ApiItem) {
   public readonly parameterTypeExcerpt: Excerpt;
 
+  /** @override */
+  public static onDeserializeInto(options: Partial<IApiParameterOptions>, jsonObject: IApiParameterJson): void {
+    super.onDeserializeInto(options, jsonObject);
+
+    options.parameterTypeTokenRange = jsonObject.parameterTypeTokenRange;
+  }
+
   public constructor(options: IApiParameterOptions) {
     super(options);
 
-    this.parameterTypeExcerpt = this.getEmbeddedExcerpt('parameterType');
+    this.parameterTypeExcerpt = this.buildExcerpt(options.parameterTypeTokenRange);
   }
 
   /** @override */
@@ -72,5 +85,12 @@ export class ApiParameter extends ApiDeclarationMixin(ApiItem) {
         }
       }
     }
+  }
+
+  /** @override */
+  public serializeInto(jsonObject: Partial<IApiParameterJson>): void {
+    super.serializeInto(jsonObject);
+
+    jsonObject.parameterTypeTokenRange = this.parameterTypeExcerpt.tokenRange;
   }
 }

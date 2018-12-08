@@ -3,17 +3,14 @@
 
 import { ApiItemKind } from './ApiItem';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { ApiPropertyItem, IApiPropertyItemOptions } from './ApiPropertyItem';
 
 /**
  * Constructor options for {@link ApiProperty}.
  * @public
  */
-export interface IApiPropertyOptions extends
-  IApiReleaseTagMixinOptions,
-  IApiStaticMixinOptions,
-  IApiPropertyItemOptions {
+export interface IApiPropertyOptions extends IApiPropertyItemOptions,
+  IApiStaticMixinOptions {
 }
 
 /**
@@ -50,7 +47,7 @@ export interface IApiPropertyOptions extends
  *
  * @public
  */
-export class ApiProperty extends ApiReleaseTagMixin(ApiStaticMixin(ApiPropertyItem)) {
+export class ApiProperty extends ApiStaticMixin(ApiPropertyItem) {
 
   public static getCanonicalReference(name: string, isStatic: boolean): string {
     if (isStatic) {

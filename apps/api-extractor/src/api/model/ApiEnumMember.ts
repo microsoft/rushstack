@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind } from './ApiItem';
+import { ApiItemKind, IApiItemJson } from './ApiItem';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { Excerpt } from '../mixins/Excerpt';
+import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 
 /**
  * Constructor options for {@link ApiEnumMember}.
@@ -15,6 +15,12 @@ export interface IApiEnumMemberOptions extends
   IApiDeclarationMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
+
+  initializerTokenRange: IExcerptTokenRange;
+}
+
+export interface IApiEnumMemberJson extends IApiItemJson {
+  initializerTokenRange: IExcerptTokenRange;
 }
 
 /**
@@ -44,10 +50,17 @@ export class ApiEnumMember extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDoc
     return name;
   }
 
+  /** @override */
+  public static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, jsonObject: IApiEnumMemberJson): void {
+    super.onDeserializeInto(options, jsonObject);
+
+    options.initializerTokenRange = jsonObject.initializerTokenRange;
+  }
+
   public constructor(options: IApiEnumMemberOptions) {
     super(options);
 
-    this.initializerExcerpt = this.getEmbeddedExcerpt('initializer');
+    this.initializerExcerpt = this.buildExcerpt(options.initializerTokenRange);
   }
 
   /** @override */
@@ -58,5 +71,12 @@ export class ApiEnumMember extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDoc
   /** @override */
   public get canonicalReference(): string {
     return ApiEnumMember.getCanonicalReference(this.name);
+  }
+
+  /** @override */
+  public serializeInto(jsonObject: Partial<IApiEnumMemberJson>): void {
+    super.serializeInto(jsonObject);
+
+    jsonObject.initializerTokenRange = this.initializerExcerpt.tokenRange;
   }
 }

@@ -2,16 +2,25 @@
 // See LICENSE in the project root for license information.
 
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
-import { Excerpt } from '../mixins/Excerpt';
+import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
+import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
+import { IApiItemJson } from './ApiItem';
 
 /**
  * Constructor options for {@link ApiPropertyItem}.
  * @public
  */
 export interface IApiPropertyItemOptions extends
-  IApiDocumentedItemOptions,
-  IApiDeclarationMixinOptions {
+  IApiDeclarationMixinOptions,
+  IApiReleaseTagMixinOptions,
+  IApiDocumentedItemOptions {
+
+  propertyTypeTokenRange: IExcerptTokenRange;
+}
+
+export interface IApiPropertyItemJson extends IApiItemJson {
+  propertyTypeTokenRange: IExcerptTokenRange;
 }
 
 /**
@@ -19,13 +28,20 @@ export interface IApiPropertyItemOptions extends
  *
  * @public
  */
-export class ApiPropertyItem extends ApiDeclarationMixin(ApiDocumentedItem) {
+export class ApiPropertyItem extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
   public readonly propertyTypeExcerpt: Excerpt;
+
+  /** @override */
+  public static onDeserializeInto(options: Partial<IApiPropertyItemOptions>, jsonObject: IApiPropertyItemJson): void {
+    super.onDeserializeInto(options, jsonObject);
+
+    options.propertyTypeTokenRange = jsonObject.propertyTypeTokenRange;
+  }
 
   public constructor(options: IApiPropertyItemOptions) {
     super(options);
 
-    this.propertyTypeExcerpt = this.getEmbeddedExcerpt('propertyType');
+    this.propertyTypeExcerpt = this.buildExcerpt(options.propertyTypeTokenRange);
   }
 
   /**
@@ -43,5 +59,12 @@ export class ApiPropertyItem extends ApiDeclarationMixin(ApiDocumentedItem) {
       return this.tsdocComment.modifierTagSet.isEventProperty();
     }
     return false;
+  }
+
+  /** @override */
+  public serializeInto(jsonObject: Partial<IApiPropertyItemJson>): void {
+    super.serializeInto(jsonObject);
+
+    jsonObject.propertyTypeTokenRange = this.propertyTypeExcerpt.tokenRange;
   }
 }

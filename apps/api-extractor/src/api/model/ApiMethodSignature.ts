@@ -2,18 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from './ApiItem';
-import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
-import { ApiFunctionLikeMixin, IApiFunctionLikeMixinOptions } from '../mixins/ApiFunctionLikeMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
-import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { Excerpt } from '../mixins/Excerpt';
+import { IApiMethodItemOptions, ApiMethodItem } from './ApiMethodItem';
 
 /** @public */
-export interface IApiMethodSignatureOptions extends
-  IApiDeclarationMixinOptions,
-  IApiFunctionLikeMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDocumentedItemOptions {
+export interface IApiMethodSignatureOptions extends IApiMethodItemOptions {
 }
 
 /**
@@ -37,19 +29,13 @@ export interface IApiMethodSignatureOptions extends
  *
  * @public
  */
-export class ApiMethodSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
-  ApiDocumentedItem))) {
-
-  public readonly returnTypeExcerpt: Excerpt;
-
+export class ApiMethodSignature extends ApiMethodItem {
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;
   }
 
   public constructor(options: IApiMethodSignatureOptions) {
     super(options);
-
-    this.returnTypeExcerpt = this.getEmbeddedExcerpt('returnType');
   }
 
   /** @override */

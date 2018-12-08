@@ -34,7 +34,7 @@ export class ApiDocumentedItem extends ApiItem {
   public static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>,
     jsonObject: IApiItemJson): void {
 
-    ApiItem.onDeserializeInto(options, jsonObject);
+    super.onDeserializeInto(options, jsonObject);
 
     const documentedJson: IApiDocumentedItemJson = jsonObject as IApiDocumentedItemJson;
 

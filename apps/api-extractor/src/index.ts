@@ -51,10 +51,8 @@ export {
 } from './api/mixins/ApiStaticMixin';
 export {
   ExcerptTokenKind,
-  ExcerptName,
   IExcerptTokenRange,
   IExcerptToken,
-  IDeclarationExcerpt,
   ExcerptToken,
   Excerpt
 } from './api/mixins/Excerpt';
@@ -96,6 +94,10 @@ export {
   IApiMethodOptions,
   ApiMethod
 } from './api/model/ApiMethod';
+export {
+  IApiMethodItemOptions,
+  ApiMethodItem
+} from './api/model/ApiMethodItem';
 export {
   IApiMethodSignatureOptions,
   ApiMethodSignature

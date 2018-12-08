@@ -4,9 +4,19 @@ class ApiClass extends ApiClass_base {
   // @override (undocumented)
   readonly canonicalReference: string;
   // (undocumented)
+  readonly extendsExcerpt: Excerpt | undefined;
+  // (undocumented)
   static getCanonicalReference(name: string): string;
+  // (undocumented)
+  readonly implementsExcerpts: ReadonlyArray<Excerpt>;
   // @override (undocumented)
   readonly kind: ApiItemKind;
+  // WARNING: The type "IApiClassJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  static onDeserializeInto(options: Partial<IApiClassOptions>, jsonObject: IApiClassJson): void;
+  // WARNING: The type "IApiClassJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  serializeInto(jsonObject: Partial<IApiClassJson>): void;
 }
 
 // @public
@@ -61,6 +71,12 @@ class ApiEnumMember extends ApiEnumMember_base {
   readonly initializerExcerpt: Excerpt;
   // @override (undocumented)
   readonly kind: ApiItemKind;
+  // WARNING: The type "IApiEnumMemberJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, jsonObject: IApiEnumMemberJson): void;
+  // WARNING: The type "IApiEnumMemberJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  serializeInto(jsonObject: Partial<IApiEnumMemberJson>): void;
 }
 
 // @public
@@ -154,12 +170,23 @@ class ApiMethod extends ApiMethod_base {
   static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
-  // (undocumented)
-  readonly returnTypeExcerpt: Excerpt;
 }
 
 // @public
-class ApiMethodSignature extends ApiMethodSignature_base {
+class ApiMethodItem extends ApiMethodItem_base {
+  constructor(options: IApiMethodItemOptions);
+  // WARNING: The type "IApiMethodItemJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  static onDeserializeInto(options: Partial<IApiMethodItemOptions>, jsonObject: IApiMethodItemJson): void;
+  // (undocumented)
+  readonly returnTypeExcerpt: Excerpt;
+  // WARNING: The type "IApiMethodItemJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  serializeInto(jsonObject: Partial<IApiMethodItemJson>): void;
+}
+
+// @public
+class ApiMethodSignature extends ApiMethodItem {
   constructor(options: IApiMethodSignatureOptions);
   // @override (undocumented)
   readonly canonicalReference: string;
@@ -167,8 +194,6 @@ class ApiMethodSignature extends ApiMethodSignature_base {
   static getCanonicalReference(name: string, overloadIndex: number): string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
-  // (undocumented)
-  readonly returnTypeExcerpt: Excerpt;
 }
 
 // @public
@@ -227,8 +252,14 @@ class ApiParameter extends ApiParameter_base {
   readonly canonicalReference: string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
+  // WARNING: The type "IApiParameterJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  static onDeserializeInto(options: Partial<IApiParameterOptions>, jsonObject: IApiParameterJson): void;
   // (undocumented)
   readonly parameterTypeExcerpt: Excerpt;
+  // WARNING: The type "IApiParameterJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  serializeInto(jsonObject: Partial<IApiParameterJson>): void;
   readonly tsdocParamBlock: tsdoc.DocParamBlock | undefined;
 }
 
@@ -247,12 +278,18 @@ class ApiProperty extends ApiProperty_base {
 class ApiPropertyItem extends ApiPropertyItem_base {
   constructor(options: IApiPropertyItemOptions);
   readonly isEventProperty: boolean;
+  // WARNING: The type "IApiPropertyItemJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  static onDeserializeInto(options: Partial<IApiPropertyItemOptions>, jsonObject: IApiPropertyItemJson): void;
   // (undocumented)
   readonly propertyTypeExcerpt: Excerpt;
+  // WARNING: The type "IApiPropertyItemJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  serializeInto(jsonObject: Partial<IApiPropertyItemJson>): void;
 }
 
 // @public
-class ApiPropertySignature extends ApiPropertySignature_base {
+class ApiPropertySignature extends ApiPropertyItem {
   constructor(options: IApiPropertySignatureOptions);
   // @override (undocumented)
   readonly canonicalReference: string;
@@ -276,7 +313,7 @@ class Excerpt {
   // (undocumented)
   readonly text: string;
   // (undocumented)
-  readonly tokenRange: IExcerptTokenRange;
+  readonly tokenRange: Readonly<IExcerptTokenRange>;
   // (undocumented)
   readonly tokens: ReadonlyArray<ExcerptToken>;
 }
@@ -326,12 +363,16 @@ interface IAnalyzeProjectOptions {
 
 // @public
 interface IApiClassOptions extends IApiDeclarationMixinOptions, IApiItemContainerMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
+  // (undocumented)
+  extendsTokenRange: IExcerptTokenRange | undefined;
+  // (undocumented)
+  implementsTokenRanges: IExcerptTokenRange[];
 }
 
 // @public
 interface IApiDeclarationMixinOptions extends IApiItemOptions {
   // (undocumented)
-  declarationExcerpt: IDeclarationExcerpt;
+  excerptTokens: IExcerptToken[];
 }
 
 // @public
@@ -346,6 +387,8 @@ interface IApiEntryPointOptions extends IApiItemContainerMixinOptions {
 
 // @public
 interface IApiEnumMemberOptions extends IApiDeclarationMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
+  // (undocumented)
+  initializerTokenRange: IExcerptTokenRange;
 }
 
 // @public
@@ -377,11 +420,17 @@ interface IApiItemOptions {
 }
 
 // @public
-interface IApiMethodOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiStaticMixinOptions, IApiDocumentedItemOptions {
+interface IApiMethodItemOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
+  // (undocumented)
+  returnTypeTokenRange: IExcerptTokenRange;
+}
+
+// @public
+interface IApiMethodOptions extends IApiMethodItemOptions, IApiStaticMixinOptions {
 }
 
 // @public (undocumented)
-interface IApiMethodSignatureOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
+interface IApiMethodSignatureOptions extends IApiMethodItemOptions {
 }
 
 // @public
@@ -394,18 +443,22 @@ interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiDocument
 
 // @public
 interface IApiParameterOptions extends IApiDeclarationMixinOptions, IApiItemOptions {
+  // (undocumented)
+  parameterTypeTokenRange: IExcerptTokenRange;
 }
 
 // @public
-interface IApiPropertyItemOptions extends IApiDocumentedItemOptions, IApiDeclarationMixinOptions {
+interface IApiPropertyItemOptions extends IApiDeclarationMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
+  // (undocumented)
+  propertyTypeTokenRange: IExcerptTokenRange;
 }
 
 // @public
-interface IApiPropertyOptions extends IApiReleaseTagMixinOptions, IApiStaticMixinOptions, IApiPropertyItemOptions {
+interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiStaticMixinOptions {
 }
 
 // @public
-interface IApiPropertySignatureOptions extends IApiReleaseTagMixinOptions, IApiPropertyItemOptions {
+interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
 }
 
 // @public
@@ -421,16 +474,6 @@ interface IApiStaticMixinOptions extends IApiItemOptions {
 }
 
 // @public (undocumented)
-interface IDeclarationExcerpt {
-  // (undocumented)
-  embeddedExcerpts: {
-          [name in ExcerptName]?: IExcerptTokenRange;
-      };
-  // (undocumented)
-  excerptTokens: IExcerptToken[];
-}
-
-// @public (undocumented)
 interface IExcerptToken {
   // (undocumented)
   readonly kind: ExcerptTokenKind;
@@ -441,9 +484,9 @@ interface IExcerptToken {
 // @public (undocumented)
 interface IExcerptTokenRange {
   // (undocumented)
-  readonly endIndex: number;
+  endIndex: number;
   // (undocumented)
-  readonly startIndex: number;
+  startIndex: number;
 }
 
 // @public
@@ -564,6 +607,5 @@ enum ReleaseTag {
   Public = 4
 }
 
-// WARNING: Unsupported export: ExcerptName
 // WARNING: Unsupported export: Constructor
 // WARNING: Unsupported export: PropertiesOf

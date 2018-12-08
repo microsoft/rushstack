@@ -9,37 +9,16 @@ export const enum ExcerptTokenKind {
   Reference = 'Reference'
 }
 
-/**
- * Names used in {@link ApiDeclarationMixin.embeddedExcerptsByName}.
- *
- * @remarks
- * These strings use camelCase because they are property names for IDeclarationExcerpt.embeddedExcerpts.
- *
- * @public
- */
-export type ExcerptName = 'returnType' | 'parameterType' | 'propertyType' | 'initializer';
-
 /** @public */
 export interface IExcerptTokenRange {
-  readonly startIndex: number;
-  readonly endIndex: number;
+  startIndex: number;
+  endIndex: number;
 }
 
 /** @public */
 export interface IExcerptToken {
   readonly kind: ExcerptTokenKind;
   text: string;
-}
-
-/**
- * @remarks
- * This object must be completely JSON serializable, since it is included in IApiDeclarationMixinJson
- * @public
- */
-export interface IDeclarationExcerpt {
-  excerptTokens: IExcerptToken[];
-
-  embeddedExcerpts: { [name in ExcerptName]?: IExcerptTokenRange };
 }
 
 /** @public */
@@ -67,7 +46,7 @@ export class ExcerptToken {
  * @public
  */
 export class Excerpt {
-  public readonly tokenRange: IExcerptTokenRange;
+  public readonly tokenRange: Readonly<IExcerptTokenRange>;
 
   public readonly tokens: ReadonlyArray<ExcerptToken>;
 
@@ -76,6 +55,11 @@ export class Excerpt {
   public constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange) {
     this.tokens = tokens;
     this.tokenRange = tokenRange;
+
+    if (this.tokenRange.startIndex < 0 || this.tokenRange.endIndex > this.tokens.length
+      || this.tokenRange.startIndex > this.tokenRange.endIndex) {
+      throw new Error('Invalid token range');
+    }
   }
 
   public get text(): string {

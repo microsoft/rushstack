@@ -2,16 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from './ApiItem';
-import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { ApiPropertyItem, IApiPropertyItemOptions } from './ApiPropertyItem';
 
 /**
  * Constructor options for {@link ApiPropertySignature}.
  * @public
  */
-export interface IApiPropertySignatureOptions extends
-  IApiReleaseTagMixinOptions,
-  IApiPropertyItemOptions {
+export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
 }
 
 /**
@@ -36,7 +33,7 @@ export interface IApiPropertySignatureOptions extends
  *
  * @public
  */
-export class ApiPropertySignature extends ApiReleaseTagMixin(ApiPropertyItem) {
+export class ApiPropertySignature extends ApiPropertyItem {
 
   public static getCanonicalReference(name: string): string {
     return name;
