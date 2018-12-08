@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-2.7",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.3.0",
+      "date": "Sat, 08 Dec 2018 06:35:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable no-floating-promises TSLint rule."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@microsoft/rush-stack-compiler-2.7_v0.2.1",
       "date": "Fri, 07 Dec 2018 17:04:56 GMT",
