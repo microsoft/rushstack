@@ -451,7 +451,9 @@ export class ChangeAction extends BaseRushAction {
           console.log(`Not overwriting ${filePath}...`);
           return Promise.resolve();
         }
-      }).catch(console.error);
+      }).catch((error) => {
+        console.error(colors.red(error.message));
+      });
     }
 
     this._writeFile(filePath, output);

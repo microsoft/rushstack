@@ -16,4 +16,4 @@ console.log(os.EOL + colors.bold(`rush-stack ${currentPackageVersion} `
 
 const parser: RushStackCommandLine = new RushStackCommandLine();
 
-parser.execute().catch(console.error);
+parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise

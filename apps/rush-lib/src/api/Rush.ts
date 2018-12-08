@@ -36,7 +36,7 @@ export class Rush {
     }
 
     const parser: RushCommandLineParser = new RushCommandLineParser();
-    parser.execute().catch(console.error);
+    parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
   /**
