@@ -59,6 +59,7 @@
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
+    "no-floating-promises": true,
     "no-function-expression": true,
     "no-inferrable-types": false,
     "no-internal-module": true,

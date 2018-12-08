@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.0",
+      "comment": "Enable no-floating-promises TSLint rule.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.0",
+  "email": "lijunle@users.noreply.github.com"
+}

@@ -1,7 +1,7 @@
 {
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
-    "toolVersion": "7.0.2",
+    "toolVersion": "7.0.3",
     "schemaVersion": 1000
   },
   "kind": "Package",
