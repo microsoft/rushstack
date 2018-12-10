@@ -3,9 +3,9 @@
 
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { ApiItemKind, ApiItem, IApiItemOptions, IApiItemJson } from './ApiItem';
+import { ApiItemKind, ApiItem, IApiItemOptions, IApiItemJson } from '../items/ApiItem';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
-import { ApiDocumentedItem } from './ApiDocumentedItem';
+import { ApiDocumentedItem } from '../items/ApiDocumentedItem';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 
 /**

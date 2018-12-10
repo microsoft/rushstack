@@ -68,7 +68,7 @@ export {
 export {
   IApiDocumentedItemOptions,
   ApiDocumentedItem
-} from './api/model/ApiDocumentedItem';
+} from './api/items/ApiDocumentedItem';
 export {
   IApiEntryPointOptions,
   ApiEntryPoint
@@ -89,7 +89,7 @@ export {
   ApiItemKind,
   IApiItemOptions,
   ApiItem
-} from './api/model/ApiItem';
+} from './api/items/ApiItem';
 export {
   IApiMethodOptions,
   ApiMethod
@@ -97,7 +97,7 @@ export {
 export {
   IApiMethodItemOptions,
   ApiMethodItem
-} from './api/model/ApiMethodItem';
+} from './api/items/ApiMethodItem';
 export {
   IApiMethodSignatureOptions,
   ApiMethodSignature
@@ -124,7 +124,7 @@ export {
 export {
   IApiPropertyItemOptions,
   ApiPropertyItem
-} from './api/model/ApiPropertyItem';
+} from './api/items/ApiPropertyItem';
 export {
   IApiPropertySignatureOptions,
   ApiPropertySignature

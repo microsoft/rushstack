@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind } from './ApiItem';
-import { ApiPropertyItem, IApiPropertyItemOptions } from './ApiPropertyItem';
+import { ApiItemKind } from '../items/ApiItem';
+import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
 
 /**
  * Constructor options for {@link ApiPropertySignature}.

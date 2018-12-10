@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind, IApiItemJson } from './ApiItem';
+import { ApiItemKind, IApiItemJson } from '../items/ApiItem';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
+import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 

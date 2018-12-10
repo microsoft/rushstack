@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IApiItemJson, IApiItemOptions, ApiItem, ApiItemKind } from './ApiItem';
+import { IApiItemJson, IApiItemOptions, ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiClass, IApiClassOptions, IApiClassJson } from './ApiClass';
 import { ApiEntryPoint, IApiEntryPointOptions } from './ApiEntryPoint';
 import { ApiMethod, IApiMethodOptions } from './ApiMethod';
@@ -15,8 +15,8 @@ import { ApiMethodSignature, IApiMethodSignatureOptions } from './ApiMethodSigna
 import { ApiProperty, IApiPropertyOptions } from './ApiProperty';
 import { ApiEnumMember, IApiEnumMemberOptions, IApiEnumMemberJson } from './ApiEnumMember';
 import { ApiEnum, IApiEnumOptions } from './ApiEnum';
-import { IApiMethodItemJson } from './ApiMethodItem';
-import { IApiPropertyItemJson } from './ApiPropertyItem';
+import { IApiMethodItemJson } from '../items/ApiMethodItem';
+import { IApiPropertyItemJson } from '../items/ApiPropertyItem';
 
 export class Deserializer {
   public static deserialize(jsonObject: IApiItemJson): ApiItem {

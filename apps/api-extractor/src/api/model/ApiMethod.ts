@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind } from './ApiItem';
+import { ApiItemKind } from '../items/ApiItem';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { IApiMethodItemOptions, ApiMethodItem } from './ApiMethodItem';
+import { IApiMethodItemOptions, ApiMethodItem } from '../items/ApiMethodItem';
 
 /**
  * Constructor options for {@link ApiMethod}.

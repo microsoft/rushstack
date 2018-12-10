@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItem, ApiItemKind, IApiItemJson } from './ApiItem';
+import { ApiItem, ApiItemKind, IApiItemJson } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { JsonFile, IJsonFileSaveOptions } from '@microsoft/node-core-library';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
+import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { Extractor } from '../Extractor';
 import { ApiEntryPoint } from './ApiEntryPoint';
 
