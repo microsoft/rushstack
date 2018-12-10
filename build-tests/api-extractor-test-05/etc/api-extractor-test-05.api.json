@@ -16,6 +16,29 @@
       "members": [
         {
           "kind": "Class",
+          "name": "DocBaseClass",
+          "canonicalReference": "(DocBaseClass:class)",
+          "docComment": "/**\n * Example base class\n *\n * @public\n */\n",
+          "releaseTag": "Public",
+          "members": [],
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare class "
+            },
+            {
+              "kind": "Reference",
+              "text": "DocBaseClass"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "implementsTokenRanges": []
+        },
+        {
+          "kind": "Class",
           "name": "DocClass1",
           "canonicalReference": "(DocClass1:class)",
           "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * @defaultvalue\n *\n * a default value for this function\n *\n * @public\n */\n",
@@ -26,7 +49,6 @@
               "name": "deprecatedExample",
               "canonicalReference": "(deprecatedExample:instance,0)",
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
-              "isStatic": false,
               "releaseTag": "Public",
               "overloadIndex": 0,
               "parameters": [],
@@ -48,19 +70,17 @@
                   "text": ";"
                 }
               ],
-              "embeddedExcerpts": {
-                "returnType": {
-                  "startIndex": 2,
-                  "endIndex": 3
-                }
-              }
+              "returnTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              },
+              "isStatic": false
             },
             {
               "kind": "Method",
               "name": "exampleFunction",
               "canonicalReference": "(exampleFunction:instance,0)",
               "docComment": "/**\n * This is an overloaded function.\n *\n * @param a - the first string\n *\n * @param b - the second string\n */\n",
-              "isStatic": false,
               "releaseTag": "Public",
               "overloadIndex": 0,
               "parameters": [
@@ -82,11 +102,9 @@
                       "text": "string"
                     }
                   ],
-                  "embeddedExcerpts": {
-                    "parameterType": {
-                      "startIndex": 2,
-                      "endIndex": 3
-                    }
+                  "parameterTypeTokenRange": {
+                    "startIndex": 2,
+                    "endIndex": 3
                   }
                 },
                 {
@@ -107,11 +125,9 @@
                       "text": "string"
                     }
                   ],
-                  "embeddedExcerpts": {
-                    "parameterType": {
-                      "startIndex": 2,
-                      "endIndex": 3
-                    }
+                  "parameterTypeTokenRange": {
+                    "startIndex": 2,
+                    "endIndex": 3
                   }
                 }
               ],
@@ -149,19 +165,17 @@
                   "text": ";"
                 }
               ],
-              "embeddedExcerpts": {
-                "returnType": {
-                  "startIndex": 6,
-                  "endIndex": 7
-                }
-              }
+              "returnTypeTokenRange": {
+                "startIndex": 6,
+                "endIndex": 7
+              },
+              "isStatic": false
             },
             {
               "kind": "Method",
               "name": "exampleFunction",
               "canonicalReference": "(exampleFunction:instance,1)",
               "docComment": "/**\n * This is also an overloaded function.\n *\n * @param x - the number\n */\n",
-              "isStatic": false,
               "releaseTag": "Public",
               "overloadIndex": 1,
               "parameters": [
@@ -183,11 +197,9 @@
                       "text": "number"
                     }
                   ],
-                  "embeddedExcerpts": {
-                    "parameterType": {
-                      "startIndex": 2,
-                      "endIndex": 3
-                    }
+                  "parameterTypeTokenRange": {
+                    "startIndex": 2,
+                    "endIndex": 3
                   }
                 }
               ],
@@ -217,19 +229,17 @@
                   "text": ";"
                 }
               ],
-              "embeddedExcerpts": {
-                "returnType": {
-                  "startIndex": 4,
-                  "endIndex": 5
-                }
-              }
+              "returnTypeTokenRange": {
+                "startIndex": 4,
+                "endIndex": 5
+              },
+              "isStatic": false
             },
             {
               "kind": "Method",
               "name": "interestingEdgeCases",
               "canonicalReference": "(interestingEdgeCases:instance,0)",
               "docComment": "/**\n * Example: \"\\{ \\\\\"maxItemsToShow\\\\\": 123 \\}\"\n *\n * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\\\-_]+$/\n */\n",
-              "isStatic": false,
               "releaseTag": "Public",
               "overloadIndex": 0,
               "parameters": [],
@@ -251,18 +261,18 @@
                   "text": ";"
                 }
               ],
-              "embeddedExcerpts": {
-                "returnType": {
-                  "startIndex": 2,
-                  "endIndex": 3
-                }
-              }
+              "returnTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              },
+              "isStatic": false
             },
             {
               "kind": "Property",
               "name": "malformedEvent",
               "canonicalReference": "(malformedEvent:instance)",
               "docComment": "/**\n * This event should have been marked as readonly.\n *\n * @eventproperty\n */\n",
+              "releaseTag": "Public",
               "excerptTokens": [
                 {
                   "kind": "Reference",
@@ -281,20 +291,18 @@
                   "text": ";"
                 }
               ],
-              "embeddedExcerpts": {
-                "propertyType": {
-                  "startIndex": 2,
-                  "endIndex": 3
-                }
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
               },
-              "isStatic": false,
-              "releaseTag": "Public"
+              "isStatic": false
             },
             {
               "kind": "Property",
               "name": "modifiedEvent",
               "canonicalReference": "(modifiedEvent:instance)",
               "docComment": "/**\n * This event is fired whenever the object is modified.\n *\n * @eventproperty\n */\n",
+              "releaseTag": "Public",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -317,20 +325,18 @@
                   "text": ";"
                 }
               ],
-              "embeddedExcerpts": {
-                "propertyType": {
-                  "startIndex": 3,
-                  "endIndex": 4
-                }
+              "propertyTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
               },
-              "isStatic": false,
-              "releaseTag": "Public"
+              "isStatic": false
             },
             {
               "kind": "Property",
               "name": "regularProperty",
               "canonicalReference": "(regularProperty:instance)",
               "docComment": "/**\n * This is a regular property that happens to use the SystemEvent type.\n */\n",
+              "releaseTag": "Public",
               "excerptTokens": [
                 {
                   "kind": "Reference",
@@ -349,21 +355,17 @@
                   "text": ";"
                 }
               ],
-              "embeddedExcerpts": {
-                "propertyType": {
-                  "startIndex": 2,
-                  "endIndex": 3
-                }
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
               },
-              "isStatic": false,
-              "releaseTag": "Public"
+              "isStatic": false
             },
             {
               "kind": "Method",
               "name": "sumWithExample",
               "canonicalReference": "(sumWithExample:static,0)",
               "docComment": "/**\n * Returns the sum of two numbers.\n *\n * @remarks\n *\n * This illustrates usage of the `@example` block tag.\n *\n * @param x - the first number to add\n *\n * @param y - the second number to add\n *\n * @returns the sum of the two numbers\n *\n * @example\n *\n * Here's a simple example:\n * ```\n * // Prints \"2\":\n * console.log(DocClass1.sumWithExample(1,1));\n * ```\n *\n * @example\n *\n * Here's an example with negative numbers:\n * ```\n * // Prints \"0\":\n * console.log(DocClass1.sumWithExample(1,-1));\n * ```\n *\n */\n",
-              "isStatic": true,
               "releaseTag": "Public",
               "overloadIndex": 0,
               "parameters": [
@@ -385,11 +387,9 @@
                       "text": "number"
                     }
                   ],
-                  "embeddedExcerpts": {
-                    "parameterType": {
-                      "startIndex": 2,
-                      "endIndex": 3
-                    }
+                  "parameterTypeTokenRange": {
+                    "startIndex": 2,
+                    "endIndex": 3
                   }
                 },
                 {
@@ -410,11 +410,9 @@
                       "text": "number"
                     }
                   ],
-                  "embeddedExcerpts": {
-                    "parameterType": {
-                      "startIndex": 2,
-                      "endIndex": 3
-                    }
+                  "parameterTypeTokenRange": {
+                    "startIndex": 2,
+                    "endIndex": 3
                   }
                 }
               ],
@@ -456,19 +454,17 @@
                   "text": ";"
                 }
               ],
-              "embeddedExcerpts": {
-                "returnType": {
-                  "startIndex": 7,
-                  "endIndex": 8
-                }
-              }
+              "returnTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 8
+              },
+              "isStatic": true
             },
             {
               "kind": "Method",
               "name": "tableExample",
               "canonicalReference": "(tableExample:instance,0)",
               "docComment": "/**\n * An example with tables:\n *\n * @remarks\n *\n * <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>\n */\n",
-              "isStatic": false,
               "releaseTag": "Public",
               "overloadIndex": 0,
               "parameters": [],
@@ -490,12 +486,11 @@
                   "text": ";"
                 }
               ],
-              "embeddedExcerpts": {
-                "returnType": {
-                  "startIndex": 2,
-                  "endIndex": 3
-                }
-              }
+              "returnTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              },
+              "isStatic": false
             }
           ],
           "excerptTokens": [
@@ -510,9 +505,50 @@
             {
               "kind": "Content",
               "text": " "
+            },
+            {
+              "kind": "Content",
+              "text": "extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "DocBaseClass"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            },
+            {
+              "kind": "Content",
+              "text": "implements "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface1"
+            },
+            {
+              "kind": "Content",
+              "text": ", "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface2"
+            },
+            {
+              "kind": "Content",
+              "text": " "
             }
           ],
-          "embeddedExcerpts": {}
+          "extendsTokenRange": {
+            "startIndex": 3,
+            "endIndex": 6
+          },
+          "implementsTokenRanges": [
+            {
+              "startIndex": 6,
+              "endIndex": 11
+            }
+          ]
         },
         {
           "kind": "Enum",
@@ -541,11 +577,9 @@
                   "text": "1"
                 }
               ],
-              "embeddedExcerpts": {
-                "initializer": {
-                  "startIndex": 2,
-                  "endIndex": 3
-                }
+              "initializerTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
               }
             },
             {
@@ -568,11 +602,9 @@
                   "text": "2"
                 }
               ],
-              "embeddedExcerpts": {
-                "initializer": {
-                  "startIndex": 2,
-                  "endIndex": 3
-                }
+              "initializerTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
               }
             },
             {
@@ -595,11 +627,9 @@
                   "text": "0"
                 }
               ],
-              "embeddedExcerpts": {
-                "initializer": {
-                  "startIndex": 2,
-                  "endIndex": 3
-                }
+              "initializerTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
               }
             }
           ],
@@ -616,8 +646,121 @@
               "kind": "Content",
               "text": " "
             }
+          ]
+        },
+        {
+          "kind": "Interface",
+          "name": "IDocInterface1",
+          "canonicalReference": "(IDocInterface1:interface)",
+          "docComment": "/**\n * @public\n */\n",
+          "releaseTag": "Public",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "name": "regularProperty",
+              "canonicalReference": "regularProperty",
+              "docComment": "/**\n * Does something\n */\n",
+              "releaseTag": "Public",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "regularProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "SystemEvent"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              }
+            }
           ],
-          "embeddedExcerpts": {}
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface1"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ]
+        },
+        {
+          "kind": "Interface",
+          "name": "IDocInterface2",
+          "canonicalReference": "(IDocInterface2:interface)",
+          "docComment": "/**\n * @public\n */\n",
+          "releaseTag": "Public",
+          "members": [
+            {
+              "kind": "MethodSignature",
+              "name": "deprecatedExample",
+              "canonicalReference": "(deprecatedExample:0)",
+              "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
+              "releaseTag": "Public",
+              "overloadIndex": 0,
+              "parameters": [],
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "deprecatedExample"
+                },
+                {
+                  "kind": "Content",
+                  "text": "(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              }
+            }
+          ],
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface2"
+            },
+            {
+              "kind": "Content",
+              "text": " extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface1"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ]
         },
         {
           "kind": "Class",
@@ -631,7 +774,6 @@
               "name": "addHandler",
               "canonicalReference": "(addHandler:instance,0)",
               "docComment": "/**\n * Adds an handler for the event.\n */\n",
-              "isStatic": false,
               "releaseTag": "Public",
               "overloadIndex": 0,
               "parameters": [
@@ -653,11 +795,9 @@
                       "text": "() => void"
                     }
                   ],
-                  "embeddedExcerpts": {
-                    "parameterType": {
-                      "startIndex": 2,
-                      "endIndex": 3
-                    }
+                  "parameterTypeTokenRange": {
+                    "startIndex": 2,
+                    "endIndex": 3
                   }
                 }
               ],
@@ -687,12 +827,11 @@
                   "text": ";"
                 }
               ],
-              "embeddedExcerpts": {
-                "returnType": {
-                  "startIndex": 4,
-                  "endIndex": 5
-                }
-              }
+              "returnTypeTokenRange": {
+                "startIndex": 4,
+                "endIndex": 5
+              },
+              "isStatic": false
             }
           ],
           "excerptTokens": [
@@ -709,7 +848,7 @@
               "text": " "
             }
           ],
-          "embeddedExcerpts": {}
+          "implementsTokenRanges": []
         }
       ]
     }

@@ -11,13 +11,22 @@ items:
       - typeScript
     type: package
     children:
+      - api-extractor-test-05.DocBaseClass
       - api-extractor-test-05.DocClass1
       - api-extractor-test-05.DocEnum
+      - api-extractor-test-05.IDocInterface1
+      - api-extractor-test-05.IDocInterface2
       - api-extractor-test-05.SystemEvent
 references:
+  - uid: api-extractor-test-05.DocBaseClass
+    name: DocBaseClass
   - uid: api-extractor-test-05.DocClass1
     name: DocClass1
   - uid: api-extractor-test-05.DocEnum
     name: DocEnum
+  - uid: api-extractor-test-05.IDocInterface1
+    name: IDocInterface1
+  - uid: api-extractor-test-05.IDocInterface2
+    name: IDocInterface2
   - uid: api-extractor-test-05.SystemEvent
     name: SystemEvent
