@@ -132,3 +132,6 @@ export {
 export {
   IResolveDeclarationReferenceResult
 } from './api/model/DeclarationReferenceResolver';
+export {
+  HeritageType
+} from './api/model/HeritageType';

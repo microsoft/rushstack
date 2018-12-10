@@ -148,14 +148,17 @@ export class ApiModelGenerator {
       const implementsTokenRanges: IExcerptTokenRange[] = [];
 
       for (const heritageClause of classDeclaration.heritageClauses || []) {
-
         if (heritageClause.token === ts.SyntaxKind.ExtendsKeyword) {
           extendsTokenRange = ExcerptBuilder.createEmptyTokenRange();
-          nodesToCapture.push({ node: heritageClause, tokenRange: extendsTokenRange});
+          if (heritageClause.types.length > 0) {
+            nodesToCapture.push({ node: heritageClause.types[0], tokenRange: extendsTokenRange});
+          }
         } else if (heritageClause.token === ts.SyntaxKind.ImplementsKeyword) {
-          const implementsTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-          implementsTokenRanges.push(implementsTokenRange);
-          nodesToCapture.push({ node: heritageClause, tokenRange: implementsTokenRange});
+          for (const heritageType of heritageClause.types) {
+            const implementsTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+            implementsTokenRanges.push(implementsTokenRange);
+            nodesToCapture.push({ node: heritageType, tokenRange: implementsTokenRange});
+          }
         }
       }
 
@@ -240,15 +243,31 @@ export class ApiModelGenerator {
     let apiInterface: ApiInterface | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiInterface;
 
     if (apiInterface === undefined) {
+      const interfaceDeclaration: ts.InterfaceDeclaration = astDeclaration.declaration as ts.InterfaceDeclaration;
+
+      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+      const extendsTokenRanges: IExcerptTokenRange[] = [];
+
+      for (const heritageClause of interfaceDeclaration.heritageClauses || []) {
+        if (heritageClause.token === ts.SyntaxKind.ExtendsKeyword) {
+          for (const heritageType of heritageClause.types) {
+            const extendsTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+            extendsTokenRanges.push(extendsTokenRange);
+            nodesToCapture.push({ node: heritageType, tokenRange: extendsTokenRange});
+          }
+        }
+      }
+
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        nodeToStopAt: ts.SyntaxKind.FirstPunctuation  // FirstPunctuation = "{"
+        nodeToStopAt: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
+        nodesToCapture
       });
 
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiInterface = new ApiInterface({ name, docComment, releaseTag, excerptTokens });
+      apiInterface = new ApiInterface({ name, docComment, releaseTag, excerptTokens, extendsTokenRanges });
       parentApiItem.addMember(apiInterface);
     }
 

@@ -6,7 +6,8 @@ import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiD
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt';
+import { IExcerptTokenRange } from '../mixins/Excerpt';
+import { HeritageType } from './HeritageType';
 
 /**
  * Constructor options for {@link ApiClass}.
@@ -44,8 +45,8 @@ export interface IApiClassJson extends IApiItemJson {
  * @public
  */
 export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
-  public readonly extendsExcerpt: Excerpt | undefined;
-  private readonly _implementsExcerpts: Excerpt[] = [];
+  public readonly extendsType: HeritageType | undefined;
+  private readonly _implementsTypes: HeritageType[] = [];
 
   public static getCanonicalReference(name: string): string {
     return `(${name}:class)`;
@@ -63,13 +64,13 @@ export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiRelea
     super(options);
 
     if (options.extendsTokenRange) {
-      this.extendsExcerpt = this.buildExcerpt(options.extendsTokenRange);
+      this.extendsType = new HeritageType(this.buildExcerpt(options.extendsTokenRange));
     } else {
-      this.extendsExcerpt = undefined;
+      this.extendsType = undefined;
     }
 
     for (const implementsTokenRange of options.implementsTokenRanges) {
-      this._implementsExcerpts.push(this.buildExcerpt(implementsTokenRange));
+      this._implementsTypes.push(new HeritageType(this.buildExcerpt(implementsTokenRange)));
     }
   }
 
@@ -83,8 +84,8 @@ export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiRelea
     return ApiClass.getCanonicalReference(this.name);
   }
 
-  public get implementsExcerpts(): ReadonlyArray<Excerpt> {
-    return this._implementsExcerpts;
+  public get implementsTypes(): ReadonlyArray<HeritageType> {
+    return this._implementsTypes;
   }
 
   /** @override */
@@ -92,10 +93,10 @@ export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiRelea
     super.serializeInto(jsonObject);
 
     // Note that JSON does not support the "undefined" value, so we simply omit the field entirely if it is undefined
-    if (this.extendsExcerpt) {
-      jsonObject.extendsTokenRange = this.extendsExcerpt.tokenRange;
+    if (this.extendsType) {
+      jsonObject.extendsTokenRange = this.extendsType.excerpt.tokenRange;
     }
 
-    jsonObject.implementsTokenRanges = this.implementsExcerpts.map(x => x.tokenRange);
+    jsonObject.implementsTokenRanges = this.implementsTypes.map(x => x.excerpt.tokenRange);
   }
 }

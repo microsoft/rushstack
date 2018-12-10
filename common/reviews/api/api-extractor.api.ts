@@ -4,11 +4,11 @@ class ApiClass extends ApiClass_base {
   // @override (undocumented)
   readonly canonicalReference: string;
   // (undocumented)
-  readonly extendsExcerpt: Excerpt | undefined;
+  readonly extendsType: HeritageType | undefined;
   // (undocumented)
   static getCanonicalReference(name: string): string;
   // (undocumented)
-  readonly implementsExcerpts: ReadonlyArray<Excerpt>;
+  readonly implementsTypes: ReadonlyArray<HeritageType>;
   // @override (undocumented)
   readonly kind: ApiItemKind;
   // WARNING: The type "IApiClassJson" needs to be exported by the package (e.g. added to index.ts)
@@ -89,9 +89,17 @@ class ApiInterface extends ApiInterface_base {
   // @override (undocumented)
   readonly canonicalReference: string;
   // (undocumented)
+  readonly extendsTypes: ReadonlyArray<HeritageType>;
+  // (undocumented)
   static getCanonicalReference(name: string): string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
+  // WARNING: The type "IApiInterfaceJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  static onDeserializeInto(options: Partial<IApiInterfaceOptions>, jsonObject: IApiInterfaceJson): void;
+  // WARNING: The type "IApiInterfaceJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  serializeInto(jsonObject: Partial<IApiInterfaceJson>): void;
 }
 
 // @public
@@ -357,6 +365,12 @@ enum ExtractorValidationRulePolicy {
 }
 
 // @public
+class HeritageType {
+  constructor(excerpt: Excerpt);
+  readonly excerpt: Excerpt;
+}
+
+// @public
 interface IAnalyzeProjectOptions {
   projectConfig?: IExtractorProjectConfig;
 }
@@ -405,6 +419,8 @@ interface IApiFunctionLikeMixinOptions extends IApiItemOptions {
 
 // @public
 interface IApiInterfaceOptions extends IApiDeclarationMixinOptions, IApiItemContainerMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
+  // (undocumented)
+  extendsTokenRanges: IExcerptTokenRange[];
 }
 
 // @public

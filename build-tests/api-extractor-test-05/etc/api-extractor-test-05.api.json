@@ -504,11 +504,7 @@
             },
             {
               "kind": "Content",
-              "text": " "
-            },
-            {
-              "kind": "Content",
-              "text": "extends "
+              "text": " extends "
             },
             {
               "kind": "Reference",
@@ -541,12 +537,16 @@
           ],
           "extendsTokenRange": {
             "startIndex": 3,
-            "endIndex": 6
+            "endIndex": 5
           },
           "implementsTokenRanges": [
             {
               "startIndex": 6,
-              "endIndex": 11
+              "endIndex": 7
+            },
+            {
+              "startIndex": 8,
+              "endIndex": 10
             }
           ]
         },
@@ -698,7 +698,8 @@
               "kind": "Content",
               "text": " "
             }
-          ]
+          ],
+          "extendsTokenRanges": []
         },
         {
           "kind": "Interface",
@@ -759,6 +760,12 @@
             {
               "kind": "Content",
               "text": " "
+            }
+          ],
+          "extendsTokenRanges": [
+            {
+              "startIndex": 3,
+              "endIndex": 5
             }
           ]
         },

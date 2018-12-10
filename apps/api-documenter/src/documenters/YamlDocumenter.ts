@@ -20,14 +20,14 @@ import {
   ApiDocumentedItem,
   ApiReleaseTagMixin,
   ReleaseTag,
-  ApiProperty,
   ApiPropertyItem,
-  ApiPropertySignature,
   ApiItemContainerMixin,
   ApiPackage,
   ApiFunctionLikeMixin,
   ApiEnumMember,
-  ApiMethodItem
+  ApiMethodItem,
+  ApiClass,
+  ApiInterface
 } from '@microsoft/api-extractor';
 
 import {
@@ -358,15 +358,24 @@ export class YamlDocumenter {
   }
 
   private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, apiItem: ApiDocumentedItem): void {
-    /*
-    if (apiStructure.extends) {
-      yamlItem.extends = [ this._linkToUidIfPossible(apiStructure.extends) ];
+    if (apiItem instanceof ApiClass) {
+      if (apiItem.extendsType) {
+        yamlItem.extends = [ this._linkToUidIfPossible(apiItem.extendsType.excerpt.text) ];
+      }
+      if (apiItem.implementsTypes.length > 0) {
+        yamlItem.implements = [];
+        for (const implementsType of apiItem.implementsTypes) {
+          yamlItem.implements.push(this._linkToUidIfPossible(implementsType.excerpt.text));
+        }
+      }
+    } else if (apiItem instanceof ApiInterface) {
+      if (apiItem.extendsTypes.length > 0) {
+        yamlItem.extends = [];
+        for (const extendsType of apiItem.extendsTypes) {
+          yamlItem.extends.push(this._linkToUidIfPossible(extendsType.excerpt.text));
+        }
+      }
     }
-
-    if (apiStructure.implements) {
-      yamlItem.implements = [ this._linkToUidIfPossible(apiStructure.implements) ];
-    }
-    */
 
     if (apiItem.tsdocComment) {
       if (apiItem.tsdocComment.modifierTagSet.isSealed()) {

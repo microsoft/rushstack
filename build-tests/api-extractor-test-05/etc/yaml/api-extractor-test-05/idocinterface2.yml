@@ -6,6 +6,8 @@ items:
     langs:
       - typeScript
     type: interface
+    extends:
+      - api-extractor-test-05.IDocInterface1
     package: api-extractor-test-05
     children:
       - api-extractor-test-05.IDocInterface2.deprecatedExample

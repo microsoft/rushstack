@@ -8,7 +8,7 @@ import { ApiMethod, IApiMethodOptions } from './ApiMethod';
 import { ApiModel } from './ApiModel';
 import { ApiNamespace, IApiNamespaceOptions } from './ApiNamespace';
 import { ApiPackage, IApiPackageOptions } from './ApiPackage';
-import { ApiInterface, IApiInterfaceOptions } from './ApiInterface';
+import { ApiInterface, IApiInterfaceOptions, IApiInterfaceJson } from './ApiInterface';
 import { ApiPropertySignature, IApiPropertySignatureOptions } from './ApiPropertySignature';
 import { ApiParameter, IApiParameterOptions, IApiParameterJson } from './ApiParameter';
 import { ApiMethodSignature, IApiMethodSignatureOptions } from './ApiMethodSignature';
@@ -36,7 +36,7 @@ export class Deserializer {
         ApiEnumMember.onDeserializeInto(options, jsonObject as IApiEnumMemberJson);
         return new ApiEnumMember(options as IApiEnumMemberOptions);
       case ApiItemKind.Interface:
-        ApiInterface.onDeserializeInto(options, jsonObject);
+        ApiInterface.onDeserializeInto(options, jsonObject as IApiInterfaceJson);
         return new ApiInterface(options as IApiInterfaceOptions);
       case ApiItemKind.Method:
         ApiMethod.onDeserializeInto(options, jsonObject as IApiMethodItemJson);
