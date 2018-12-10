@@ -23,7 +23,7 @@ export interface IApiClassOptions extends
 }
 
 export interface IApiClassJson extends IApiItemJson {
-  extendsTokenRange: IExcerptTokenRange | undefined;
+  extendsTokenRange?: IExcerptTokenRange;
   implementsTokenRanges: IExcerptTokenRange[];
 }
 
@@ -91,10 +91,9 @@ export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiRelea
   public serializeInto(jsonObject: Partial<IApiClassJson>): void {
     super.serializeInto(jsonObject);
 
+    // Note that JSON does not support the "undefined" value, so we simply omit the field entirely if it is undefined
     if (this.extendsExcerpt) {
       jsonObject.extendsTokenRange = this.extendsExcerpt.tokenRange;
-    } else {
-      jsonObject.extendsTokenRange = undefined;
     }
 
     jsonObject.implementsTokenRanges = this.implementsExcerpts.map(x => x.tokenRange);

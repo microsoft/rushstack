@@ -38,7 +38,8 @@ import {
   ApiPropertyItem,
   ApiFunctionLikeMixin,
   ApiInterface,
-  Excerpt
+  Excerpt,
+  ApiMethodItem
 } from '@microsoft/api-extractor';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -439,7 +440,7 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: INTERFACE
    */
-  private _writeInterfaceTables(output: DocSection, apiClass: ApiClass): void {
+  private _writeInterfaceTables(output: DocSection, apiClass: ApiInterface): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const eventsTable: DocTable = new DocTable({ configuration,
@@ -549,33 +550,27 @@ export class MarkdownDocumenter {
       output.appendNode(parametersTable);
     }
 
-    if (ApiDeclarationMixin.isBaseClassOf(apiFunctionLike)) {
-
-      const returnTypeExcerpt: Excerpt | undefined = apiFunctionLike.embeddedExcerptsByName.get('returnType');
-      if (returnTypeExcerpt !== undefined) {
-
-        output.appendNode(
-          new DocParagraph({ configuration }, [
-            new DocEmphasisSpan({ configuration, bold: true}, [
-              new DocPlainText({ configuration, text: 'Returns:' })
-            ])
+    if (apiFunctionLike instanceof ApiMethodItem) {
+      const returnTypeExcerpt: Excerpt = apiFunctionLike.returnTypeExcerpt;
+      output.appendNode(
+        new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true}, [
+            new DocPlainText({ configuration, text: 'Returns:' })
           ])
-        );
+        ])
+      );
 
-        output.appendNode(
-          new DocParagraph({ configuration }, [
-            new DocCodeSpan({ configuration, code: returnTypeExcerpt.text })
-          ])
-        );
+      output.appendNode(
+        new DocParagraph({ configuration }, [
+          new DocCodeSpan({ configuration, code: returnTypeExcerpt.text.trim() || '(not declared)' })
+        ])
+      );
 
-        if (apiFunctionLike instanceof ApiDocumentedItem) {
-          if (apiFunctionLike.tsdocComment && apiFunctionLike.tsdocComment.returnsBlock) {
-            this._appendSection(output, apiFunctionLike.tsdocComment.returnsBlock.content);
-          }
+      if (apiFunctionLike instanceof ApiDocumentedItem) {
+        if (apiFunctionLike.tsdocComment && apiFunctionLike.tsdocComment.returnsBlock) {
+          this._appendSection(output, apiFunctionLike.tsdocComment.returnsBlock.content);
         }
-
       }
-
     }
   }
 

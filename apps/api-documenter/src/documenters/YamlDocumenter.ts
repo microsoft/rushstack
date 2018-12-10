@@ -22,13 +22,12 @@ import {
   ReleaseTag,
   ApiProperty,
   ApiPropertyItem,
-  ApiMethod,
-  ApiMethodSignature,
   ApiPropertySignature,
   ApiItemContainerMixin,
   ApiPackage,
   ApiFunctionLikeMixin,
-  ApiEnumMember
+  ApiEnumMember,
+  ApiMethodItem
 } from '@microsoft/api-extractor';
 
 import {
@@ -316,7 +315,7 @@ export class YamlDocumenter {
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
         yamlItem.type = 'method';
-        this._populateYamlFunctionLike(yamlItem, apiItem as ApiMethod);
+        this._populateYamlFunctionLike(yamlItem, apiItem as ApiMethodItem);
         break;
       /*
       case ApiItemKind.Constructor:
@@ -335,7 +334,7 @@ export class YamlDocumenter {
         } else {
           yamlItem.type = 'property';
         }
-        this._populateYamlProperty(yamlItem, apiItem as ApiProperty);
+        this._populateYamlProperty(yamlItem, apiProperty);
         break;
       /*
       case ApiItemKind.Function:
@@ -386,7 +385,7 @@ export class YamlDocumenter {
     }
   }
 
-  private _populateYamlFunctionLike(yamlItem: Partial<IYamlItem>, apiItem: ApiMethod | ApiMethodSignature): void {
+  private _populateYamlFunctionLike(yamlItem: Partial<IYamlItem>, apiItem: ApiMethodItem): void {
     const syntax: IYamlSyntax = {
       content: apiItem.getExcerptWithModifiers()
     };
@@ -430,7 +429,7 @@ export class YamlDocumenter {
     }
   }
 
-  private _populateYamlProperty(yamlItem: Partial<IYamlItem>, apiItem: ApiProperty | ApiPropertySignature): void {
+  private _populateYamlProperty(yamlItem: Partial<IYamlItem>, apiItem: ApiPropertyItem): void {
     const syntax: IYamlSyntax = {
       content: apiItem.getExcerptWithModifiers()
     };
