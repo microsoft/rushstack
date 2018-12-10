@@ -28,7 +28,7 @@
         "run",
         "-l"
       ],
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -41,7 +41,7 @@
         "run",
         "-l"
       ],
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -54,7 +54,7 @@
         "run",
         "-l"
       ],
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -67,7 +67,7 @@
         "run",
         "-l"
       ],
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -80,7 +80,7 @@
         "run",
         "-l"
       ],
-      "sourceMaps": false
+      "sourceMaps": true
     }
   ]
 }
