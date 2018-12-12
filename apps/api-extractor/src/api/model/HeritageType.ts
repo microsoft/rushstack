@@ -15,7 +15,7 @@ import { Excerpt } from '../mixins/Excerpt';
  * }
  * ```
  *
- * The heritage types are .
+ * The heritage types are `Controls.WidgetBase`, `Controls.IWidget`, and `IDisposable`.
  * @public
  */
 export class HeritageType {
