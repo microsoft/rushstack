@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.8.1",
+      "tag": "@microsoft/node-core-library_v3.8.1",
+      "date": "Wed, 12 Dec 2018 17:04:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Clarify error message reported by JsonFile._validateNoUndefinedMembers()"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.0",
       "tag": "@microsoft/node-core-library_v3.8.0",
       "date": "Fri, 07 Dec 2018 17:04:56 GMT",
