@@ -164,6 +164,9 @@ function initializeThemeState(): IThemeState {
  * @param {boolean} loadAsync When true, always load styles in async mode, irrespective of current sync mode.
  */
 export function loadStyles(styles: string | ThemableArray, loadAsync: boolean = false): void {
+  if (typeof document === 'undefined') {
+    return;
+  }
   measure(() => {
     const styleParts: ThemableArray = Array.isArray(styles) ? styles : splitStyles(styles);
     if (_injectStylesWithCssText === undefined) {
