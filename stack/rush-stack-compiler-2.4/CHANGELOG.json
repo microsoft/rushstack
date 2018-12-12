@@ -2,6 +2,30 @@
   "name": "@microsoft/rush-stack-compiler-2.4",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@microsoft/rush-stack-compiler-2.4_v0.3.0",
+      "date": "Sat, 08 Dec 2018 06:35:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable no-floating-promises TSLint rule."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@microsoft/rush-stack-compiler-2.4_v0.2.1",
+      "date": "Fri, 07 Dec 2018 17:04:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.7.1` to `3.8.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@microsoft/rush-stack-compiler-2.4_v0.2.0",
       "date": "Fri, 30 Nov 2018 23:34:57 GMT",

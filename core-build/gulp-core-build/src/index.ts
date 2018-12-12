@@ -268,7 +268,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
         setWatchMode();
         buildConfig.gulp.watch(watchMatch, _runWatch);
 
-        _runWatch();
+        _runWatch().catch(console.error);
       });
     }
   };

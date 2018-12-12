@@ -1,6 +1,13 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Thu, 06 Sep 2018 01:25:26 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Dec 2018 17:04:56 GMT and should not be manually modified.
+
+## 4.2.3
+Fri, 07 Dec 2018 17:04:56 GMT
+
+### Patches
+
+- Updated to use the new InternalError class for reporting software defects
 
 ## 4.2.2
 Thu, 06 Sep 2018 01:25:26 GMT

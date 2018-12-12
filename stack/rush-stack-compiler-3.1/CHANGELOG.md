@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush-stack-compiler-3.1
 
-This log was last generated on Fri, 30 Nov 2018 23:34:57 GMT and should not be manually modified.
+This log was last generated on Sat, 08 Dec 2018 06:35:36 GMT and should not be manually modified.
+
+## 0.3.0
+Sat, 08 Dec 2018 06:35:36 GMT
+
+### Minor changes
+
+- Enable no-floating-promises TSLint rule.
+
+## 0.2.1
+Fri, 07 Dec 2018 17:04:56 GMT
+
+*Version update only*
 
 ## 0.2.0
 Fri, 30 Nov 2018 23:34:57 GMT

@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.3",
+      "tag": "@microsoft/api-extractor_v7.0.3",
+      "date": "Fri, 07 Dec 2018 17:04:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added more API documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.7.1` to `3.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.2` to `4.2.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.2",
       "tag": "@microsoft/api-extractor_v7.0.2",
       "date": "Wed, 05 Dec 2018 19:57:03 GMT",

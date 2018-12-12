@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 29 Nov 2018 07:02:09 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Dec 2018 17:04:56 GMT and should not be manually modified.
+
+## 3.8.0
+Fri, 07 Dec 2018 17:04:56 GMT
+
+### Minor changes
+
+- Added a new "InternalError" API for reporting software defects
 
 ## 3.7.1
 Thu, 29 Nov 2018 07:02:09 GMT
