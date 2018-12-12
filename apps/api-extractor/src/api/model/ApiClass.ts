@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind } from './ApiItem';
+import { ApiItemKind, IApiItemJson } from '../items/ApiItem';
 import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
+import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
+import { IExcerptTokenRange } from '../mixins/Excerpt';
+import { HeritageType } from './HeritageType';
 
 /**
  * Constructor options for {@link ApiClass}.
@@ -16,6 +18,14 @@ export interface IApiClassOptions extends
   IApiItemContainerMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
+
+  extendsTokenRange: IExcerptTokenRange | undefined;
+  implementsTokenRanges: IExcerptTokenRange[];
+}
+
+export interface IApiClassJson extends IApiItemJson {
+  extendsTokenRange?: IExcerptTokenRange;
+  implementsTokenRanges: IExcerptTokenRange[];
 }
 
 /**
@@ -35,12 +45,33 @@ export interface IApiClassOptions extends
  * @public
  */
 export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
+  public readonly extendsType: HeritageType | undefined;
+  private readonly _implementsTypes: HeritageType[] = [];
+
   public static getCanonicalReference(name: string): string {
     return `(${name}:class)`;
   }
 
+  /** @override */
+  public static onDeserializeInto(options: Partial<IApiClassOptions>, jsonObject: IApiClassJson): void {
+    super.onDeserializeInto(options, jsonObject);
+
+    options.extendsTokenRange = jsonObject.extendsTokenRange;
+    options.implementsTokenRanges = jsonObject.implementsTokenRanges;
+  }
+
   public constructor(options: IApiClassOptions) {
     super(options);
+
+    if (options.extendsTokenRange) {
+      this.extendsType = new HeritageType(this.buildExcerpt(options.extendsTokenRange));
+    } else {
+      this.extendsType = undefined;
+    }
+
+    for (const implementsTokenRange of options.implementsTokenRanges) {
+      this._implementsTypes.push(new HeritageType(this.buildExcerpt(implementsTokenRange)));
+    }
   }
 
   /** @override */
@@ -51,5 +82,21 @@ export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiRelea
   /** @override */
   public get canonicalReference(): string {
     return ApiClass.getCanonicalReference(this.name);
+  }
+
+  public get implementsTypes(): ReadonlyArray<HeritageType> {
+    return this._implementsTypes;
+  }
+
+  /** @override */
+  public serializeInto(jsonObject: Partial<IApiClassJson>): void {
+    super.serializeInto(jsonObject);
+
+    // Note that JSON does not support the "undefined" value, so we simply omit the field entirely if it is undefined
+    if (this.extendsType) {
+      jsonObject.extendsTokenRange = this.extendsType.excerpt.tokenRange;
+    }
+
+    jsonObject.implementsTokenRanges = this.implementsTypes.map(x => x.excerpt.tokenRange);
   }
 }

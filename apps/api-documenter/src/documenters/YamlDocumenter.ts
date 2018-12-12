@@ -20,15 +20,14 @@ import {
   ApiDocumentedItem,
   ApiReleaseTagMixin,
   ReleaseTag,
-  ApiProperty,
   ApiPropertyItem,
-  ApiMethod,
-  ApiMethodSignature,
-  ApiPropertySignature,
   ApiItemContainerMixin,
   ApiPackage,
   ApiFunctionLikeMixin,
-  ApiEnumMember
+  ApiEnumMember,
+  ApiMethodItem,
+  ApiClass,
+  ApiInterface
 } from '@microsoft/api-extractor';
 
 import {
@@ -316,7 +315,7 @@ export class YamlDocumenter {
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
         yamlItem.type = 'method';
-        this._populateYamlFunctionLike(yamlItem, apiItem as ApiMethod);
+        this._populateYamlFunctionLike(yamlItem, apiItem as ApiMethodItem);
         break;
       /*
       case ApiItemKind.Constructor:
@@ -335,7 +334,7 @@ export class YamlDocumenter {
         } else {
           yamlItem.type = 'property';
         }
-        this._populateYamlProperty(yamlItem, apiItem as ApiProperty);
+        this._populateYamlProperty(yamlItem, apiProperty);
         break;
       /*
       case ApiItemKind.Function:
@@ -359,15 +358,24 @@ export class YamlDocumenter {
   }
 
   private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, apiItem: ApiDocumentedItem): void {
-    /*
-    if (apiStructure.extends) {
-      yamlItem.extends = [ this._linkToUidIfPossible(apiStructure.extends) ];
+    if (apiItem instanceof ApiClass) {
+      if (apiItem.extendsType) {
+        yamlItem.extends = [ this._linkToUidIfPossible(apiItem.extendsType.excerpt.text) ];
+      }
+      if (apiItem.implementsTypes.length > 0) {
+        yamlItem.implements = [];
+        for (const implementsType of apiItem.implementsTypes) {
+          yamlItem.implements.push(this._linkToUidIfPossible(implementsType.excerpt.text));
+        }
+      }
+    } else if (apiItem instanceof ApiInterface) {
+      if (apiItem.extendsTypes.length > 0) {
+        yamlItem.extends = [];
+        for (const extendsType of apiItem.extendsTypes) {
+          yamlItem.extends.push(this._linkToUidIfPossible(extendsType.excerpt.text));
+        }
+      }
     }
-
-    if (apiStructure.implements) {
-      yamlItem.implements = [ this._linkToUidIfPossible(apiStructure.implements) ];
-    }
-    */
 
     if (apiItem.tsdocComment) {
       if (apiItem.tsdocComment.modifierTagSet.isSealed()) {
@@ -386,7 +394,7 @@ export class YamlDocumenter {
     }
   }
 
-  private _populateYamlFunctionLike(yamlItem: Partial<IYamlItem>, apiItem: ApiMethod | ApiMethodSignature): void {
+  private _populateYamlFunctionLike(yamlItem: Partial<IYamlItem>, apiItem: ApiMethodItem): void {
     const syntax: IYamlSyntax = {
       content: apiItem.getExcerptWithModifiers()
     };
@@ -430,7 +438,7 @@ export class YamlDocumenter {
     }
   }
 
-  private _populateYamlProperty(yamlItem: Partial<IYamlItem>, apiItem: ApiProperty | ApiPropertySignature): void {
+  private _populateYamlProperty(yamlItem: Partial<IYamlItem>, apiItem: ApiPropertyItem): void {
     const syntax: IYamlSyntax = {
       content: apiItem.getExcerptWithModifiers()
     };

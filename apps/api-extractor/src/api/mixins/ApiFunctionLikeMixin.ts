@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
+import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import { ApiParameter } from '../model/ApiParameter';
 
 /**

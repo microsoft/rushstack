@@ -3,7 +3,7 @@
 
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiFunctionLikeMixin } from '../mixins/ApiFunctionLikeMixin';
-import { ApiPackage } from './ApiPackage';
+import { ApiPackage } from '../model/ApiPackage';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -179,4 +179,4 @@ export class ApiItem {
 export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<typeof ApiItem> { }
 
 // Circular import
-import { Deserializer } from './Deserializer';
+import { Deserializer } from '../model/Deserializer';

@@ -12,6 +12,33 @@ export class SystemEvent {
 }
 
 /**
+ * Example base class
+ * @public
+ */
+export class DocBaseClass {
+}
+
+/**
+ * @public
+ */
+export interface IDocInterface1 {
+  /**
+   * Does something
+   */
+  regularProperty: SystemEvent;
+}
+
+/**
+ * @public
+ */
+export interface IDocInterface2 extends IDocInterface1 {
+  /**
+   * @deprecated Use `otherThing()` instead.
+   */
+  deprecatedExample(): void;
+}
+
+/**
  * This is an example class.
  *
  * @remarks
@@ -19,7 +46,7 @@ export class SystemEvent {
  * @defaultvalue a default value for this function
  * @public
  */
-export class DocClass1 {
+export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
 
   /**
    * This is an overloaded function.

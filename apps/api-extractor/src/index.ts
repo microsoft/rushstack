@@ -51,10 +51,8 @@ export {
 } from './api/mixins/ApiStaticMixin';
 export {
   ExcerptTokenKind,
-  ExcerptName,
   IExcerptTokenRange,
   IExcerptToken,
-  IDeclarationExcerpt,
   ExcerptToken,
   Excerpt
 } from './api/mixins/Excerpt';
@@ -70,7 +68,7 @@ export {
 export {
   IApiDocumentedItemOptions,
   ApiDocumentedItem
-} from './api/model/ApiDocumentedItem';
+} from './api/items/ApiDocumentedItem';
 export {
   IApiEntryPointOptions,
   ApiEntryPoint
@@ -91,11 +89,15 @@ export {
   ApiItemKind,
   IApiItemOptions,
   ApiItem
-} from './api/model/ApiItem';
+} from './api/items/ApiItem';
 export {
   IApiMethodOptions,
   ApiMethod
 } from './api/model/ApiMethod';
+export {
+  IApiMethodItemOptions,
+  ApiMethodItem
+} from './api/items/ApiMethodItem';
 export {
   IApiMethodSignatureOptions,
   ApiMethodSignature
@@ -122,7 +124,7 @@ export {
 export {
   IApiPropertyItemOptions,
   ApiPropertyItem
-} from './api/model/ApiPropertyItem';
+} from './api/items/ApiPropertyItem';
 export {
   IApiPropertySignatureOptions,
   ApiPropertySignature
@@ -130,3 +132,6 @@ export {
 export {
   IResolveDeclarationReferenceResult
 } from './api/model/DeclarationReferenceResolver';
+export {
+  HeritageType
+} from './api/model/HeritageType';

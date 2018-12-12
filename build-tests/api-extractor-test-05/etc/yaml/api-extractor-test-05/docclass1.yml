@@ -8,6 +8,11 @@ items:
     langs:
       - typeScript
     type: class
+    extends:
+      - api-extractor-test-05.DocBaseClass
+    implements:
+      - api-extractor-test-05.IDocInterface1
+      - api-extractor-test-05.IDocInterface2
     package: api-extractor-test-05
     children:
       - api-extractor-test-05.DocClass1.deprecatedExample

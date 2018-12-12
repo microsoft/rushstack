@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { DocDeclarationReference } from '@microsoft/tsdoc';
-import { ApiItem } from './ApiItem';
+import { ApiItem } from '../items/ApiItem';
 import { ApiModel } from './ApiModel';
 import { ApiPackage } from './ApiPackage';
 import { ApiEntryPoint } from './ApiEntryPoint';

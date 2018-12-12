@@ -1,24 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../model/ApiItem';
-import { ApiDocumentedItem } from '../model/ApiDocumentedItem';
-import { Excerpt, ExcerptToken, IExcerptTokenRange, IDeclarationExcerpt, ExcerptName } from './Excerpt';
+import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
+import { ApiDocumentedItem } from '../items/ApiDocumentedItem';
+import { Excerpt, ExcerptToken, IExcerptTokenRange, IExcerptToken } from './Excerpt';
 
 /**
  * Constructor options for {@link (ApiDeclarationMixin:interface)}.
  * @public
  */
 export interface IApiDeclarationMixinOptions extends IApiItemOptions {
-  declarationExcerpt: IDeclarationExcerpt;
+  excerptTokens: IExcerptToken[];
 }
 
-export interface IApiDeclarationMixinJson extends IApiItemJson, IDeclarationExcerpt {
+export interface IApiDeclarationMixinJson extends IApiItemJson {
+  excerptTokens: IExcerptToken[];
 }
 
 const _excerpt: unique symbol = Symbol('ApiDeclarationMixin._excerpt');
 const _excerptTokens: unique symbol = Symbol('ApiDeclarationMixin._excerptTokens');
-const _embeddedExcerptsByName: unique symbol = Symbol('ApiDeclarationMixin._embeddedExcerptsByName');
 
 /**
  * The mixin base class for API items that have an associated source code excerpt containing a
@@ -51,21 +51,13 @@ export interface ApiDeclarationMixin extends ApiItem {
    */
   readonly excerptTokens: ReadonlyArray<ExcerptToken>;
 
-  /**
-   * A collection of named embedded excerpts.  For example, if `ApiDeclarationMixin.excerpt` is a property
-   * declaration, then `embeddedExcerptsByName` might contain an embedded excerpt corresponding to the
-   * type of the property.
-   */
-  readonly embeddedExcerptsByName: ReadonlyMap<ExcerptName, Excerpt>;
-
   /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 
   /**
-   * Returns a member of the {@link (ApiDeclarationMixin:interface).embeddedExcerptsByName} map,
-   * or throws an exception if was not found.
+   * Constructs a new {@link Excerpt} corresponding to the provided token range.
    */
-  getEmbeddedExcerpt(name: ExcerptName): Excerpt;
+  buildExcerpt(tokenRange: IExcerptTokenRange): Excerpt;
 
   /**
    * If the API item has certain important modifier tags such as `@sealed`, `@virtual`, or `@override`,
@@ -87,7 +79,6 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
 
   abstract class MixedClass extends baseClass implements ApiDeclarationMixin {
     public [_excerptTokens]: ExcerptToken[];
-    public [_embeddedExcerptsByName]: Map<ExcerptName, Excerpt>;
     public [_excerpt]: Excerpt;
 
     /** @override */
@@ -96,17 +87,7 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
 
       baseClass.onDeserializeInto(options, jsonObject);
 
-      const declarationExcerpt: IDeclarationExcerpt = {
-        excerptTokens: jsonObject.excerptTokens.map(x => new ExcerptToken(x.kind, x.text)),
-        embeddedExcerpts: { }
-      };
-
-      for (const key of Object.getOwnPropertyNames(jsonObject.embeddedExcerpts)) {
-        const range: IExcerptTokenRange = jsonObject.embeddedExcerpts[key];
-        declarationExcerpt.embeddedExcerpts[key] = range;
-      }
-
-      options.declarationExcerpt = declarationExcerpt;
+      options.excerptTokens = jsonObject.excerptTokens;
     }
 
     // tslint:disable-next-line:no-any
@@ -114,18 +95,8 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
       super(...args);
 
       const options: IApiDeclarationMixinOptions = args[0];
-      this[_excerptTokens] = [...options.declarationExcerpt.excerptTokens];
-
-      this[_embeddedExcerptsByName] = new Map<ExcerptName, Excerpt>();
-
-      for (const key of Object.getOwnPropertyNames(options.declarationExcerpt.embeddedExcerpts)) {
-        const excerptRange: IExcerptTokenRange = options.declarationExcerpt.embeddedExcerpts[key];
-        this[_embeddedExcerptsByName].set(key as ExcerptName, new Excerpt(this[_excerptTokens], excerptRange));
-      }
-
-      // this.excerpt is a Excerpt that spans the entire list of tokens
-      this[_excerpt] = new Excerpt(this[_excerptTokens],
-        { startIndex: 0, endIndex: this[_excerptTokens].length });
+      this[_excerptTokens] = [...options.excerptTokens];
+      this[_excerpt] = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
     }
 
     public get excerpt(): Excerpt {
@@ -134,18 +105,6 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
 
     public get excerptTokens(): ReadonlyArray<ExcerptToken> {
       return this[_excerptTokens];
-    }
-
-    public get embeddedExcerptsByName(): ReadonlyMap<ExcerptName, Excerpt> {
-      return this[_embeddedExcerptsByName];
-    }
-
-    public getEmbeddedExcerpt(name: ExcerptName): Excerpt {
-      const excerpt: Excerpt | undefined = this.embeddedExcerptsByName.get(name);
-      if (excerpt === undefined) {
-        throw new Error(`The embedded excerpt "${name}" must be defined for ${this.kind} objects`);
-      }
-      return excerpt;
     }
 
     public getExcerptWithModifiers(): string {
@@ -180,12 +139,12 @@ export function ApiDeclarationMixin<TBaseClass extends IApiItemConstructor>(base
       super.serializeInto(jsonObject);
 
       jsonObject.excerptTokens = this.excerptTokens.map(x => ({ kind: x.kind, text: x.text }));
-
-      jsonObject.embeddedExcerpts = { };
-      for (const [key, value] of this.embeddedExcerptsByName) {
-        jsonObject.embeddedExcerpts[key] = value.tokenRange;
-      }
     }
+
+    public buildExcerpt(tokenRange: IExcerptTokenRange): Excerpt {
+      return new Excerpt(this.excerptTokens, tokenRange);
+    }
+
   }
 
   return MixedClass;

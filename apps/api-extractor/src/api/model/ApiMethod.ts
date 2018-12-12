@@ -1,24 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind } from './ApiItem';
-import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
+import { ApiItemKind } from '../items/ApiItem';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { ApiFunctionLikeMixin, IApiFunctionLikeMixinOptions } from '../mixins/ApiFunctionLikeMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
-import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { Excerpt } from '../mixins/Excerpt';
+import { IApiMethodItemOptions, ApiMethodItem } from '../items/ApiMethodItem';
 
 /**
  * Constructor options for {@link ApiMethod}.
  * @public
  */
-export interface IApiMethodOptions extends
-  IApiDeclarationMixinOptions,
-  IApiFunctionLikeMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiStaticMixinOptions,
-  IApiDocumentedItemOptions {
+export interface IApiMethodOptions extends IApiMethodItemOptions,
+  IApiStaticMixinOptions {
 }
 
 /**
@@ -42,10 +34,7 @@ export interface IApiMethodOptions extends
  *
  * @public
  */
-export class ApiMethod extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
-  ApiStaticMixin(ApiDocumentedItem)))) {
-
-  public readonly returnTypeExcerpt: Excerpt;
+export class ApiMethod extends ApiStaticMixin(ApiMethodItem) {
 
   public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
@@ -57,8 +46,6 @@ export class ApiMethod extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiRelea
 
   public constructor(options: IApiMethodOptions) {
     super(options);
-
-    this.returnTypeExcerpt = this.getEmbeddedExcerpt('returnType');
   }
 
   /** @override */
