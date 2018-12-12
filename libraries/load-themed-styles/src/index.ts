@@ -390,6 +390,9 @@ export function splitStyles(styles: string): ThemableArray {
  * @param {IStyleRecord} styleRecord May specify a style Element to update.
  */
 function registerStyles(styleArray: ThemableArray): void {
+  if (typeof document === 'undefined') {
+    return;
+  }
   const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
   const styleElement: HTMLStyleElement = document.createElement('style');
   const {
