@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.8.2",
+      "tag": "@microsoft/node-core-library_v3.8.2",
+      "date": "Thu, 13 Dec 2018 02:58:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Use @types/jju not custom typings"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.1",
       "tag": "@microsoft/node-core-library_v3.8.1",
       "date": "Wed, 12 Dec 2018 17:04:19 GMT",

@@ -20,7 +20,6 @@ import {
   FileSystem,
   FileConstants,
   Sort,
-  FolderConstants,
   PosixModeBits
 } from '@microsoft/node-core-library';
 
@@ -30,6 +29,7 @@ import { BaseLinkManager } from '../logic/base/BaseLinkManager';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { PolicyValidator } from '../logic/policy/PolicyValidator';
 import { IRushTempPackageJson } from '../logic/base/BasePackage';
+import { Git } from '../logic/Git';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { PurgeManager } from './PurgeManager';
@@ -272,9 +272,9 @@ export class InstallManager {
 
       // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
       const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
-      const hookDestination: string = path.join(this._rushConfiguration.rushJsonFolder, FolderConstants.Git, 'hooks');
+      const hookDestination: string | undefined = Git.getHooksFolder();
 
-      if (FileSystem.exists(hookSource)) {
+      if (FileSystem.exists(hookSource) && hookDestination) {
         const hookFilenames: Array<string> = FileSystem.readFolder(hookSource);
         if (hookFilenames.length > 0) {
           console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));

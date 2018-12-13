@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.5",
+      "tag": "@microsoft/api-extractor_v7.0.5",
+      "date": "Thu, 13 Dec 2018 02:58:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove unused jju dependency"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.1` to `3.8.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.4",
       "tag": "@microsoft/api-extractor_v7.0.4",
       "date": "Wed, 12 Dec 2018 17:04:19 GMT",

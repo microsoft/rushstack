@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 12 Dec 2018 17:04:19 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Dec 2018 02:58:10 GMT and should not be manually modified.
+
+## 7.0.5
+Thu, 13 Dec 2018 02:58:10 GMT
+
+### Patches
+
+- Remove unused jju dependency
 
 ## 7.0.4
 Wed, 12 Dec 2018 17:04:19 GMT

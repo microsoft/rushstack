@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+
 import gitInfo = require('git-repo-info');
 
 import { JsonFile } from '@microsoft/node-core-library';
@@ -11,6 +12,7 @@ import {
   IChangeFile,
   IChangeInfo
 } from './ChangeManagement';
+import { Git } from '../logic/Git';
 
 /**
  * This class represents a single change file.
@@ -80,9 +82,9 @@ export class ChangeFile {
    */
   public generatePath(): string {
     let branch: string | undefined = undefined;
-    try {
-      branch = gitInfo().branch;
-    } catch (error) {
+    const repoInfo: gitInfo.GitRepoInfo | undefined = Git.getGitInfo();
+    branch = repoInfo && repoInfo.branch;
+    if (!branch) {
       console.log('Could not automatically detect git branch name, using timestamp instead.');
     }
 
