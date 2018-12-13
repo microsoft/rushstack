@@ -3,6 +3,8 @@
 
 import * as path from 'path';
 
+import gitInfo = require('git-repo-info');
+
 import { JsonFile } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from './RushConfiguration';
@@ -80,9 +82,9 @@ export class ChangeFile {
    */
   public generatePath(): string {
     let branch: string | undefined = undefined;
-    try {
-      branch = Git.getGitInfo()!.branch;
-    } catch (error) {
+    const repoInfo: gitInfo.GitRepoInfo | undefined = Git.getGitInfo();
+    branch = repoInfo && repoInfo.branch;
+    if (!branch) {
       console.log('Could not automatically detect git branch name, using timestamp instead.');
     }
 

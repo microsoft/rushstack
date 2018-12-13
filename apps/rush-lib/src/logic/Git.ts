@@ -50,14 +50,10 @@ export class Git {
    */
   public static isPathUnderGitWorkingTree(repoInfo?: gitInfo.GitRepoInfo): boolean {
     if (Git.isGitPresent()) { // Do we even have a Git binary?
-      try {
-        if (!repoInfo) {
-          repoInfo = Git.getGitInfo();
-        }
-        return !!repoInfo!.sha;
-      } catch (e) {
-        return false; // Unexpected, but possible if the .git directory is corrupted.
+      if (!repoInfo) {
+        repoInfo = Git.getGitInfo();
       }
+      return !!(repoInfo && repoInfo.sha);
     } else {
       return false;
     }
@@ -130,13 +126,16 @@ export class Git {
    */
   public static getGitInfo(): Readonly<gitInfo.GitRepoInfo> | undefined {
     if (!Git._checkedGitInfo) {
+      let repoInfo: gitInfo.GitRepoInfo | undefined;
       try {
-        const repoInfo: gitInfo.GitRepoInfo = gitInfo();
-        if (Git.isPathUnderGitWorkingTree(repoInfo)) {
-          Git._gitInfo = repoInfo;
-        }
+        // gitInfo() shouldn't usually throw, but wrapping in a try/catch just in case
+        repoInfo = gitInfo();
       } catch (ex) {
-        // ignore
+        // if there's an error, assume we're not in a Git working tree
+      }
+
+      if (repoInfo && Git.isPathUnderGitWorkingTree(repoInfo)) {
+        Git._gitInfo = repoInfo;
       }
       Git._checkedGitInfo = true;
     }
