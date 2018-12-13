@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 05 Dec 2018 20:14:08 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Dec 2018 02:58:10 GMT and should not be manually modified.
+
+## 5.5.4
+Thu, 13 Dec 2018 02:58:10 GMT
+
+### Patches
+
+- Remove unused jju dependency
+
+### Updates
+
+- Properly handle Git worktrees
+- Updated to use the new InternalError class for reporting software defects
 
 ## 5.5.3
 Wed, 05 Dec 2018 20:14:08 GMT
