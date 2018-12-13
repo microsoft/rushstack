@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Fri, 07 Dec 2018 17:04:56 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Dec 2018 17:04:19 GMT and should not be manually modified.
+
+## 3.8.1
+Wed, 12 Dec 2018 17:04:19 GMT
+
+### Patches
+
+- Clarify error message reported by JsonFile._validateNoUndefinedMembers()
 
 ## 3.8.0
 Fri, 07 Dec 2018 17:04:56 GMT

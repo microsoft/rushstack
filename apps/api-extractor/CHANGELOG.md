@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 07 Dec 2018 17:04:56 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Dec 2018 17:04:19 GMT and should not be manually modified.
+
+## 7.0.4
+Wed, 12 Dec 2018 17:04:19 GMT
+
+### Patches
+
+- Reintroduce support for "extends" and "implements" heritage clauses
+- Redesign the Excerpt API to support multiple subranges (e.g. for a list of "implements" clauses)
 
 ## 7.0.3
 Fri, 07 Dec 2018 17:04:56 GMT
