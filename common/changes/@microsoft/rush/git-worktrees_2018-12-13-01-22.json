@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Properly handle Git worktrees",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "ecraig12345@users.noreply.github.com"
+}
