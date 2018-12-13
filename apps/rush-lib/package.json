@@ -30,7 +30,7 @@
     "@yarnpkg/lockfile": "~1.0.2",
     "builtins": "~1.0.3",
     "colors": "~1.2.1",
-    "git-repo-info": "~1.1.4",
+    "git-repo-info": "~2.1.0",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
     "https-proxy-agent": "~2.2.1",
