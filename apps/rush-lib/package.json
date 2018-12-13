@@ -37,7 +37,6 @@
     "@types/inquirer": "0.0.43",
     "inquirer": "~6.2.0",
     "js-yaml": "~3.9.1",
-    "jju": "~1.3.0",
     "lodash": "~4.17.5",
     "minimatch": "~3.0.2",
     "node-fetch": "~2.1.2",
