@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Fix an issue where registerStyles() failed in environments where `document` is undefined (GitHub #992)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "pgonzal@users.noreply.github.com"
+}
