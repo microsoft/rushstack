@@ -11,7 +11,7 @@ import { ApiDocumenterCommandLine } from './cli/ApiDocumenterCommandLine';
 const myPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
 console.log(os.EOL + colors.bold(`api-documenter ${myPackageVersion} `
-  + colors.cyan(' - http://aka.ms/extractor') + os.EOL));
+  + colors.cyan(' - https://api-extractor.com/') + os.EOL));
 
 const parser: ApiDocumenterCommandLine = new ApiDocumenterCommandLine();
 
