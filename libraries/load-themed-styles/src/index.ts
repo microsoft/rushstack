@@ -164,9 +164,6 @@ function initializeThemeState(): IThemeState {
  * @param {boolean} loadAsync When true, always load styles in async mode, irrespective of current sync mode.
  */
 export function loadStyles(styles: string | ThemableArray, loadAsync: boolean = false): void {
-  if (typeof document === 'undefined') {
-    return;
-  }
   measure(() => {
     const styleParts: ThemableArray = Array.isArray(styles) ? styles : splitStyles(styles);
     if (_injectStylesWithCssText === undefined) {
@@ -424,6 +421,9 @@ function registerStyles(styleArray: ThemableArray): void {
  * @param {IStyleRecord} styleRecord May specify a style Element to update.
  */
 function registerStylesIE(styleArray: ThemableArray, styleRecord?: IStyleRecord): void {
+  if (typeof document === 'undefined') {
+    return;
+  }
   const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
   const registeredStyles: IStyleRecord[] = _themeState.registeredStyles;
   let lastStyleElement: IExtendedHtmlStyleElement = _themeState.lastStyleElement;
