@@ -13,7 +13,9 @@
 
 - **A single NPM install:** In one step, Rush installs all the dependencies for all your projects into a common folder.  This is not just a "package.json" file at the root of your repo (which might set you up to accidentally `require()` a sibling's dependencies).  Instead, Rush uses symlinks to reconstruct an accurate "node_modules" folder for each project, without any of the limitations or glitches that seem to plague other approaches.
 
-- **Automatic local linking:** Inside a Rush repo, all your projects are automatically symlinked to each other. When you make a change, you can see the downstream effects without publishing anything, and without any `npm link` headaches.
+  ⏵ **This algorithm supports the [PNPM, NPM, and Yarn]({% link pages/maintainer/package_managers.md %}) package managers.**
+
+- **Automatic local linking:** Inside a Rush repo, all your projects are automatically symlinked to each other. When you make a change, you can see the downstream effects without publishing anything, and without any `npm link` headaches.  If you don't want certain projects to get linked, that's supported, too.
 
 - **Fast builds:** Rush detects your dependency graph and builds your projects in the right order.  If two packages don't directly depend on each other, Rush parallelizes their build as separate NodeJS processes (and shows live console output in a [readable order](https://www.npmjs.com/package/@microsoft/stream-collator)).  In practice this multi-process approach can yield more significant speedups than all those async functions in your single-threaded Gulpfile.
 
@@ -23,11 +25,12 @@
 
 - **Bulk publishing:** When it's time to do a release, Rush can detect which packages have changes, automatically bump all the appropriate version numbers, and run `npm publish` in each folder.  If you like, configure your server to automatically run `rush publish` every hour.
 
-- **Changelog tracking:** Whenever a PR is created, you can require developers to provide a major/minor/patch log entry for the affected projects.  During publishing, these changes will be automatically aggregated into a nicely formatted [CHANGELOG.md](https://github.com/Microsoft/web-build-tools/blob/master/core-build/web-library-build/CHANGELOG.md) file.
+- **Changelog tracking:** Whenever a PR is created, you can require developers to provide a major/minor/patch log entry for the affected projects.  During publishing, these changes will be automatically aggregated into a nicely formatted [CHANGELOG.md](https://github.com/Microsoft/web-build-tools/blob/master/libraries/node-core-library/CHANGELOG.md) file.
 
-- **Enterprise policies:** Want to review new libraries before developers add them to package.json, but avoid hassling people about already approved cases?  Want to enforce that all your projects depend on the same library version numbers?  Are dorky personal e-mail addresses showing up in your company's Git history?  Rush can help maintain a consistent ecosystem when you've got many developers and many projects in the mix.
+- **Enterprise policies:** Want to review new libraries before developers add them to package.json, but avoid hassling people about already approved cases?  Want to enforce that all your projects depend on the same library version numbers?  Are unprofessional personal e-mail addresses accidentally showing up in your company's Git history?  Rush can help maintain a consistent ecosystem when you've got many developers and many projects in the mix.
 
 - **Lots more!** Rush was created by the platform team for [Microsoft SharePoint](http://aka.ms/spfx).  We build hundreds of production NPM packages every day, from internal and public Git repositories, for third party SDKs and live services with millions of users.  If there's an important package management problem that needs solvin', it's likely to end up as a feature for Rush.
+
 
 # 3 Minute Demo
 
