@@ -1,12 +1,12 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.0.7",
+  "version": "7.0.8",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/api-documenter"
   },
-  "homepage": "http://aka.ms/extractor",
+  "homepage": "https://api-extractor.com/",
   "license": "MIT",
   "scripts": {
     "build": "gulp test --clean"
@@ -15,7 +15,7 @@
     "api-documenter": "./bin/api-documenter"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.0.5",
+    "@microsoft/api-extractor": "7.0.6",
     "@microsoft/node-core-library": "3.8.2",
     "@microsoft/ts-command-line": "4.2.3",
     "@microsoft/tsdoc": "0.12.4",

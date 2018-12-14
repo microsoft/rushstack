@@ -1,7 +1,7 @@
 # @microsoft/api-documenter
 
 This tool can be used to generate an online API reference manual for your TypeScript library.
-It reads the *.api.json data files produced by [API Extractor](http://aka.ms/extractor),
+It reads the *.api.json data files produced by [API Extractor](https://api-extractor.com/),
 and then generates web pages using the [Markdown](https://en.wikipedia.org/wiki/Markdown)
 file format.
 
@@ -14,5 +14,4 @@ to understand.  This is possible because most of processing is already performed
 by API Extractor.
 
 For more information, see the
-[Rendering API docs](https://github.com/Microsoft/web-build-tools/wiki/API-Extractor-~-Rendering-API-docs)
-wiki article.
+[Generating Docs](https://api-extractor.com/pages/setup/generating_docs/) article from the API Extractor documentation.

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "7.0.5",
+  "version": "7.0.6",
   "description": "Validate, document, and review the exported API for a TypeScript library",
   "keywords": [
     "typescript",
@@ -17,7 +17,7 @@
     "type": "git",
     "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/api-extractor"
   },
-  "homepage": "http://aka.ms/extractor",
+  "homepage": "https://api-extractor.com",
   "main": "lib/index.js",
   "typings": "dist/index-internal.d.ts",
   "tsdoc": {
