@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.8.50",
+      "tag": "@microsoft/load-themed-styles_v1.8.50",
+      "date": "Fri, 14 Dec 2018 20:51:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where registerStyles() failed in environments where `document` is undefined (GitHub #992)"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.49",
       "tag": "@microsoft/load-themed-styles_v1.8.49",
       "date": "Thu, 13 Dec 2018 02:58:11 GMT",

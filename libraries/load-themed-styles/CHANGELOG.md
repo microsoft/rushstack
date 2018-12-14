@@ -1,6 +1,13 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Thu, 13 Dec 2018 02:58:11 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Dec 2018 20:51:51 GMT and should not be manually modified.
+
+## 1.8.50
+Fri, 14 Dec 2018 20:51:51 GMT
+
+### Patches
+
+- Fix an issue where registerStyles() failed in environments where `document` is undefined (GitHub #992)
 
 ## 1.8.49
 Thu, 13 Dec 2018 02:58:11 GMT
