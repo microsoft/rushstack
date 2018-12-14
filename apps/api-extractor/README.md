@@ -21,7 +21,7 @@
 
 - **\*.d.ts rollup:** You webpacked your library into a nice **\*.js** bundle file -- so why ship your typings as a messy tree of **lib/\*.d.ts** files full of private definitions?  Can't we consolidate them into a tidy **\*.d.ts** rollup file?  And if you publish internal/beta/public releases, each release type should get its own **\*.d.ts** file with appropriate trimming.  Developers building a production project don't want to see a bunch of **internal** and **beta** members in their VS Code IntelliSense!
 
-- **Online documentation:**  You have faithfully annotated each TypeScript member with nice [JSDoc](http://usejsdoc.org/) descriptions.  Now that your library has shipped, it's time to set up [a nicely formatted](https://docs.microsoft.com/en-us/javascript/api/sp-http) API reference.  What tool to use?
+- **Online documentation:**  You have faithfully annotated each TypeScript member with nice [TSDoc](https://github.com/Microsoft/tsdoc) descriptions.  Now that your library has shipped, it's time to set up [a nicely formatted](https://docs.microsoft.com/en-us/javascript/api/sp-http) API reference.  What tool to use?
 
 **API Extractor** provides an integrated, professional-quality solution for all these problems.  It is invoked at build time by your toolchain and leverages the TypeScript compiler engine to:
 
