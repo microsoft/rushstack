@@ -14,5 +14,4 @@ to understand.  This is possible because most of processing is already performed
 by API Extractor.
 
 For more information, see the
-[Rendering API docs](https://github.com/Microsoft/web-build-tools/wiki/API-Extractor-~-Rendering-API-docs)
-wiki article.
+[Generating Docs](https://api-extractor.com/pages/setup/generating_docs/) article from the API Extractor documentation.

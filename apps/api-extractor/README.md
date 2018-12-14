@@ -5,9 +5,9 @@
 <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://api-extractor.com/
 
-<!-- ----------------------------------------------------------------------------------- -->
-<!-- Text below this line should stay in sync with API-Extractor.md from the GitHub wiki -->
-<!-- ----------------------------------------------------------------------------------- -->
+<!-- ------------------------------------------------------------------ -->
+<!-- Text below this line should stay in sync with the web site content -->
+<!-- ------------------------------------------------------------------ -->
 
 **API Extractor** helps you build better [TypeScript](https://www.typescriptlang.org/) library packages.  Suppose for example that your company has published an NPM package called "**awesome-widgets**" that exports many classes and interfaces.  As developers start to depend on your library, you may encounter issues such as...
 
@@ -33,9 +33,9 @@
 
 Best of all, **API Extractor** is free and open source.  Join the community and create a pull request!
 
-<!-- ----------------------------------------------------------------------------------- -->
-<!-- Text above this line should stay in sync with API-Extractor.md from the GitHub wiki -->
-<!-- ----------------------------------------------------------------------------------- -->
+<!-- ------------------------------------------------------------------ -->
+<!-- Text above this line should stay in sync with the web site content -->
+<!-- ------------------------------------------------------------------ -->
 
 # Getting Started
 

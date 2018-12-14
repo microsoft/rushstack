@@ -5,9 +5,9 @@
 <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://rushjs.io
 
-<!-- -------------------------------------------------------------------------- -->
-<!-- Text below this line should stay in sync with Rush.md from the GitHub wiki -->
-<!-- -------------------------------------------------------------------------- -->
+<!-- ------------------------------------------------------------------ -->
+<!-- Text below this line should stay in sync with the web site content -->
+<!-- ------------------------------------------------------------------ -->
 
 **Rush** makes life easier for JavaScript developers who build and publish many NPM packages at once.  If you're looking to consolidate all your projects into a single repo, you came to the right place!  Rush is a fast, professional solution for managing this scenario.  It gives you:
 
@@ -53,9 +53,9 @@ $ rush build    # <-- instantaneous!
 _(If you don't have a GitHub account set up, you can use `rush install --bypass-policy`.)_
 
 
-<!-- -------------------------------------------------------------------------- -->
-<!-- Text above this line should stay in sync with Rush.md from the GitHub wiki -->
-<!-- -------------------------------------------------------------------------- -->
+<!-- ------------------------------------------------------------------ -->
+<!-- Text above this line should stay in sync with the web site content -->
+<!-- ------------------------------------------------------------------ -->
 
 # Getting Started
 
