@@ -3,7 +3,7 @@
 
 ![API Extractor](https://github.com/Microsoft/web-build-tools/raw/master/common/wiki-images/api-extractor-title.png?raw=true)
 <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://aka.ms/extractor
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://api-extractor.com/
 
 <!-- ----------------------------------------------------------------------------------- -->
 <!-- Text below this line should stay in sync with API-Extractor.md from the GitHub wiki -->
@@ -39,4 +39,4 @@ Best of all, **API Extractor** is free and open source.  Join the community and 
 
 # Getting Started
 
-The GitHub wiki has complete, up-to-date documentation: https://aka.ms/extractor
+For more details and support resources, please visit: https://api-extractor.com/

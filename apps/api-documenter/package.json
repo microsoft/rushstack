@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/api-documenter"
   },
-  "homepage": "http://aka.ms/extractor",
+  "homepage": "https://api-extractor.com/",
   "license": "MIT",
   "scripts": {
     "build": "gulp test --clean"

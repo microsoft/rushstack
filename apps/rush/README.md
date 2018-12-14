@@ -59,4 +59,4 @@ _(If you don't have a GitHub account set up, you can use `rush install --bypass-
 
 # Getting Started
 
-The GitHub wiki has complete, up-to-date documentation: https://rushjs.io
+For more details and support resources, please visit: https://rushjs.io

@@ -17,7 +17,7 @@
     "type": "git",
     "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/api-extractor"
   },
-  "homepage": "http://aka.ms/extractor",
+  "homepage": "https://api-extractor.com",
   "main": "lib/index.js",
   "typings": "dist/index-internal.d.ts",
   "tsdoc": {
