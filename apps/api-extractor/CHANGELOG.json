@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.6",
+      "tag": "@microsoft/api-extractor_v7.0.6",
+      "date": "Fri, 14 Dec 2018 19:43:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update web site URLs"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.5",
       "tag": "@microsoft/api-extractor_v7.0.5",
       "date": "Thu, 13 Dec 2018 02:58:10 GMT",

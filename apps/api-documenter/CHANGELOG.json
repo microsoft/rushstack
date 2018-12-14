@@ -2,6 +2,23 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.8",
+      "tag": "@microsoft/api-documenter_v7.0.8",
+      "date": "Fri, 14 Dec 2018 19:43:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update web site URLs"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.5` to `7.0.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.7",
       "tag": "@microsoft/api-documenter_v7.0.7",
       "date": "Thu, 13 Dec 2018 02:58:10 GMT",

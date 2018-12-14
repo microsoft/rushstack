@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 13 Dec 2018 02:58:10 GMT and should not be manually modified.
+This log was last generated on Fri, 14 Dec 2018 19:43:46 GMT and should not be manually modified.
+
+## 7.0.8
+Fri, 14 Dec 2018 19:43:46 GMT
+
+### Patches
+
+- Update web site URLs
 
 ## 7.0.7
 Thu, 13 Dec 2018 02:58:10 GMT
