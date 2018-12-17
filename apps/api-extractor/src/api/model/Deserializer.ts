@@ -15,8 +15,10 @@ import { ApiMethodSignature, IApiMethodSignatureOptions } from './ApiMethodSigna
 import { ApiProperty, IApiPropertyOptions } from './ApiProperty';
 import { ApiEnumMember, IApiEnumMemberOptions, IApiEnumMemberJson } from './ApiEnumMember';
 import { ApiEnum, IApiEnumOptions } from './ApiEnum';
-import { IApiMethodItemJson } from '../items/ApiMethodItem';
 import { IApiPropertyItemJson } from '../items/ApiPropertyItem';
+import { ApiConstructor, IApiConstructorOptions } from './ApiConstructor';
+import { ApiConstructSignature, IApiConstructSignatureOptions } from './ApiConstructSignature';
+import { ApiFunction, IApiFunctionOptions } from './ApiFunction';
 
 export class Deserializer {
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
@@ -26,6 +28,12 @@ export class Deserializer {
       case ApiItemKind.Class:
         ApiClass.onDeserializeInto(options, jsonObject as IApiClassJson);
         return new ApiClass(options as IApiClassOptions);
+      case ApiItemKind.Constructor:
+        ApiConstructor.onDeserializeInto(options, jsonObject);
+        return new ApiConstructor(options as IApiConstructorOptions);
+      case ApiItemKind.ConstructSignature:
+        ApiConstructSignature.onDeserializeInto(options, jsonObject);
+        return new ApiConstructSignature(options as IApiConstructSignatureOptions);
       case ApiItemKind.EntryPoint:
         ApiEntryPoint.onDeserializeInto(options, jsonObject);
         return new ApiEntryPoint(options as IApiEntryPointOptions);
@@ -35,14 +43,17 @@ export class Deserializer {
       case ApiItemKind.EnumMember:
         ApiEnumMember.onDeserializeInto(options, jsonObject as IApiEnumMemberJson);
         return new ApiEnumMember(options as IApiEnumMemberOptions);
+      case ApiItemKind.Function:
+        ApiFunction.onDeserializeInto(options, jsonObject);
+        return new ApiFunction(options as IApiFunctionOptions);
       case ApiItemKind.Interface:
         ApiInterface.onDeserializeInto(options, jsonObject as IApiInterfaceJson);
         return new ApiInterface(options as IApiInterfaceOptions);
       case ApiItemKind.Method:
-        ApiMethod.onDeserializeInto(options, jsonObject as IApiMethodItemJson);
+        ApiMethod.onDeserializeInto(options, jsonObject);
         return new ApiMethod(options as IApiMethodOptions);
       case ApiItemKind.MethodSignature:
-        ApiMethodSignature.onDeserializeInto(options, jsonObject as IApiMethodItemJson);
+        ApiMethodSignature.onDeserializeInto(options, jsonObject);
         return new ApiMethodSignature(options as IApiMethodSignatureOptions);
       case ApiItemKind.Model:
         return new ApiModel();

@@ -46,6 +46,10 @@ export {
   ApiReleaseTagMixin
 } from './api/mixins/ApiReleaseTagMixin';
 export {
+  IApiReturnTypeMixinOptions,
+  ApiReturnTypeMixin
+} from './api/mixins/ApiReturnTypeMixin';
+export {
   IApiStaticMixinOptions,
   ApiStaticMixin
 } from './api/mixins/ApiStaticMixin';
@@ -66,6 +70,14 @@ export {
   ApiClass
 } from './api/model/ApiClass';
 export {
+  IApiConstructorOptions,
+  ApiConstructor
+} from './api/model/ApiConstructor';
+export {
+  IApiConstructSignatureOptions,
+  ApiConstructSignature
+} from './api/model/ApiConstructSignature';
+export {
   IApiDocumentedItemOptions,
   ApiDocumentedItem
 } from './api/items/ApiDocumentedItem';
@@ -82,6 +94,10 @@ export {
   ApiEnumMember
 } from './api/model/ApiEnumMember';
 export {
+  IApiFunctionOptions,
+  ApiFunction
+} from './api/model/ApiFunction';
+export {
   IApiInterfaceOptions,
   ApiInterface
 } from './api/model/ApiInterface';
@@ -94,10 +110,6 @@ export {
   IApiMethodOptions,
   ApiMethod
 } from './api/model/ApiMethod';
-export {
-  IApiMethodItemOptions,
-  ApiMethodItem
-} from './api/items/ApiMethodItem';
 export {
   IApiMethodSignatureOptions,
   ApiMethodSignature

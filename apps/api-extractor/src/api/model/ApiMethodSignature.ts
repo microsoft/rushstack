@@ -2,10 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from '../items/ApiItem';
-import { IApiMethodItemOptions, ApiMethodItem } from '../items/ApiMethodItem';
+import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
+import { ApiFunctionLikeMixin, IApiFunctionLikeMixinOptions } from '../mixins/ApiFunctionLikeMixin';
+import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
+import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
+import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
 
 /** @public */
-export interface IApiMethodSignatureOptions extends IApiMethodItemOptions {
+export interface IApiMethodSignatureOptions extends
+  IApiDeclarationMixinOptions,
+  IApiFunctionLikeMixinOptions,
+  IApiReleaseTagMixinOptions,
+  IApiReturnTypeMixinOptions,
+  IApiDocumentedItemOptions {
 }
 
 /**
@@ -29,7 +38,9 @@ export interface IApiMethodSignatureOptions extends IApiMethodItemOptions {
  *
  * @public
  */
-export class ApiMethodSignature extends ApiMethodItem {
+export class ApiMethodSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
+  ApiReturnTypeMixin(ApiDocumentedItem)))) {
+
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;
   }

@@ -29,6 +29,9 @@ export interface IApiPropertyItemJson extends IApiItemJson {
  * @public
  */
 export class ApiPropertyItem extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
+  /**
+   * An {@link Excerpt} that describes the type of the property.
+   */
   public readonly propertyTypeExcerpt: Excerpt;
 
   /** @override */

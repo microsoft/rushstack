@@ -13,10 +13,10 @@ import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiRel
  * @public
  */
 export interface IApiConstructorOptions extends
-  IApiStaticMixinOptions,
   IApiDeclarationMixinOptions,
   IApiFunctionLikeMixinOptions,
   IApiReleaseTagMixinOptions,
+  IApiStaticMixinOptions,
   IApiDocumentedItemOptions {
 }
 
@@ -47,8 +47,8 @@ export interface IApiConstructorOptions extends
  *
  * @public
  */
-export class ApiConstructor extends ApiStaticMixin(ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
-  ApiDocumentedItem)))) {
+export class ApiConstructor extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
+  ApiStaticMixin(ApiDocumentedItem)))) {
 
   public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {

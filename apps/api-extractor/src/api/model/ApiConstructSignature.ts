@@ -2,21 +2,21 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from '../items/ApiItem';
-import { IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 import { IApiFunctionLikeMixinOptions, ApiFunctionLikeMixin } from '../mixins/ApiFunctionLikeMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
+import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
 
 /**
  * Constructor options for {@link ApiConstructor}.
  * @public
  */
-export interface IApiConstructorOptions extends
-  IApiStaticMixinOptions,
+export interface IApiConstructSignatureOptions extends
   IApiDeclarationMixinOptions,
   IApiFunctionLikeMixinOptions,
   IApiReleaseTagMixinOptions,
+  IApiReturnTypeMixinOptions,
   IApiDocumentedItemOptions {
 }
 
@@ -63,13 +63,13 @@ export interface IApiConstructorOptions extends
  * @public
  */
 export class ApiConstructSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
-  ApiDocumentedItem))) {
+  ApiReturnTypeMixin(ApiDocumentedItem)))) {
 
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;
   }
 
-  public constructor(options: IApiConstructorOptions) {
+  public constructor(options: IApiConstructSignatureOptions) {
     super(options);
   }
 
