@@ -4,47 +4,51 @@
 import { ApiItemKind } from '../items/ApiItem';
 import { IApiMethodItemOptions, ApiMethodItem } from '../items/ApiMethodItem';
 
-/** @public */
-export interface IApiMethodSignatureOptions extends IApiMethodItemOptions {
+/**
+ * Constructor options for {@link ApiFunction}.
+ * @public
+ */
+export interface IApiMethodOptions extends IApiMethodItemOptions {
 }
 
 /**
- * Represents a TypeScript member function declaration that belongs to an `ApiInterface`.
+ * Represents a TypeScript function declaration.
  *
  * @remarks
  *
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.
  *
- * `ApiMethodSignature` represents a TypeScript declaration such as the `render` member function in this example:
+ * `ApiFunction` represents a TypeScript declaration such as this example:
  *
  * ```ts
- * export interface IWidget {
- *   render(): void;
+ * export static getAverage(x: number, y: number): number {
+ *   return (x + y) / 2.0;
  * }
  * ```
  *
- * Compare with {@link ApiMethod}, which represents a method belonging to a class.
- * For example, a class method can be `static` but an interface method cannot.
+ * Functions are exported by an entry point module or by a namespace.  Compare with {@link ApiMethod}, which
+ * represents a function that is a member of a class.
  *
  * @public
  */
-export class ApiMethodSignature extends ApiMethodItem {
+export class ApiFunction extends ApiMethodItem {
+
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;
   }
 
-  public constructor(options: IApiMethodSignatureOptions) {
+  public constructor(options: IApiMethodOptions) {
     super(options);
   }
 
   /** @override */
   public get kind(): ApiItemKind {
-    return ApiItemKind.MethodSignature;
+    return ApiItemKind.Function;
   }
 
   /** @override */
   public get canonicalReference(): string {
-    return ApiMethodSignature.getCanonicalReference(this.name, this.overloadIndex);
+    return ApiFunction.getCanonicalReference(this.name, this.overloadIndex);
   }
 }

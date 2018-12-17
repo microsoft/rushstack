@@ -142,6 +142,10 @@ enum ApiItemKind {
   // (undocumented)
   Class = "Class",
   // (undocumented)
+  Constructor = "Constructor",
+  // (undocumented)
+  ConstructSignature = "ConstructSignature",
+  // (undocumented)
   EntryPoint = "EntryPoint",
   // (undocumented)
   Enum = "Enum",

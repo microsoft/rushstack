@@ -13,9 +13,12 @@ import { ApiPackage } from '../model/ApiPackage';
  */
 export const enum ApiItemKind {
   Class = 'Class',
+  Constructor = 'Constructor',
+  ConstructSignature = 'ConstructSignature',
   EntryPoint = 'EntryPoint',
   Enum = 'Enum',
   EnumMember = 'EnumMember',
+  Function = 'Function',
   Interface = 'Interface',
   Method = 'Method',
   MethodSignature = 'MethodSignature',

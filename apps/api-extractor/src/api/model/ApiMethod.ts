@@ -25,7 +25,7 @@ export interface IApiMethodOptions extends IApiMethodItemOptions,
  *
  * ```ts
  * export class Widget {
- *   public draw(): void { }
+ *   public render(): void { }
  * }
  * ```
  *
