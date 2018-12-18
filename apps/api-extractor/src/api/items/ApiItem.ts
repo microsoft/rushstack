@@ -20,6 +20,7 @@ export const enum ApiItemKind {
   Enum = 'Enum',
   EnumMember = 'EnumMember',
   Function = 'Function',
+  IndexSignature = 'IndexSignature',
   Interface = 'Interface',
   Method = 'Method',
   MethodSignature = 'MethodSignature',

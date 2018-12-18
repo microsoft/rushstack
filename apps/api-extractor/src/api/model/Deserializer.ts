@@ -19,6 +19,8 @@ import { IApiPropertyItemJson } from '../items/ApiPropertyItem';
 import { ApiConstructor, IApiConstructorOptions } from './ApiConstructor';
 import { ApiConstructSignature, IApiConstructSignatureOptions } from './ApiConstructSignature';
 import { ApiFunction, IApiFunctionOptions } from './ApiFunction';
+import { ApiCallSignature, IApiCallSignatureOptions } from './ApiCallSignature';
+import { ApiIndexSignature, IApiIndexSignatureOptions } from './ApiIndexSignature';
 
 export class Deserializer {
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
@@ -28,6 +30,9 @@ export class Deserializer {
       case ApiItemKind.Class:
         ApiClass.onDeserializeInto(options, jsonObject as IApiClassJson);
         return new ApiClass(options as IApiClassOptions);
+      case ApiItemKind.CallSignature:
+        ApiCallSignature.onDeserializeInto(options, jsonObject);
+        return new ApiCallSignature(options as IApiCallSignatureOptions);
       case ApiItemKind.Constructor:
         ApiConstructor.onDeserializeInto(options, jsonObject);
         return new ApiConstructor(options as IApiConstructorOptions);
@@ -46,6 +51,9 @@ export class Deserializer {
       case ApiItemKind.Function:
         ApiFunction.onDeserializeInto(options, jsonObject);
         return new ApiFunction(options as IApiFunctionOptions);
+      case ApiItemKind.IndexSignature:
+        ApiIndexSignature.onDeserializeInto(options, jsonObject);
+        return new ApiIndexSignature(options as IApiIndexSignatureOptions);
       case ApiItemKind.Interface:
         ApiInterface.onDeserializeInto(options, jsonObject as IApiInterfaceJson);
         return new ApiInterface(options as IApiInterfaceOptions);

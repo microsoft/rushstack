@@ -9,10 +9,10 @@ import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiRel
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
 
 /**
- * Constructor options for {@link ApiCallSignature}.
+ * Constructor options for {@link ApiIndexSignature}.
  * @public
  */
-export interface IApiCallSignatureOptions extends
+export interface IApiIndexSignatureOptions extends
   IApiDeclarationMixinOptions,
   IApiFunctionLikeMixinOptions,
   IApiReleaseTagMixinOptions,
@@ -21,52 +21,45 @@ export interface IApiCallSignatureOptions extends
 }
 
 /**
- * Represents a TypeScript function call signature.
+ * Represents a TypeScript index signature.
  *
  * @remarks
  *
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.
  *
- * `ApiCallSignature` represents a TypeScript declaration such as `(x: number, y: number): number`
- * in this example:
+ * `ApiIndexSignature` represents a TypeScript declaration such as `[x: number]: number` in this example:
  *
  * ```ts
- * interface IChooser {
- *   // A call signature:
- *   (x: number, y: number): number;
+ * interface INumberTable {
+ *   // An index signature
+ *   [value: number]: number;
  *
- *   // Another overload for this call signature:
- *   (x: string, y: string): string;
+ *   // An overloaded index signature
+ *   [name: string]: number;
  * }
- *
- * function chooseFirst<T>(x: T, y: T): T {
- *   return x;
- * }
- *
- * let chooser: IChooser = chooseFirst;
  * ```
  *
  * @public
  */
-export class ApiCallSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
+export class ApiIndexSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
   ApiReturnTypeMixin(ApiDocumentedItem)))) {
 
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;
   }
 
-  public constructor(options: IApiCallSignatureOptions) {
+  public constructor(options: IApiIndexSignatureOptions) {
     super(options);
   }
 
   /** @override */
   public get kind(): ApiItemKind {
-    return ApiItemKind.CallSignature;
+    return ApiItemKind.IndexSignature;
   }
 
   /** @override */
   public get canonicalReference(): string {
-    return ApiCallSignature.getCanonicalReference(this.name, this.overloadIndex);
+    return ApiIndexSignature.getCanonicalReference(this.name, this.overloadIndex);
   }
 }

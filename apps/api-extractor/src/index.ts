@@ -102,6 +102,10 @@ export {
   ApiFunction
 } from './api/model/ApiFunction';
 export {
+  IApiIndexSignatureOptions,
+  ApiIndexSignature
+} from './api/model/ApiIndexSignature';
+export {
   IApiInterfaceOptions,
   ApiInterface
 } from './api/model/ApiInterface';

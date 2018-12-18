@@ -128,6 +128,17 @@ interface ApiFunctionLikeMixin {
 }
 
 // @public
+class ApiIndexSignature extends ApiIndexSignature_base {
+  constructor(options: IApiIndexSignatureOptions);
+  // @override (undocumented)
+  readonly canonicalReference: string;
+  // (undocumented)
+  static getCanonicalReference(name: string, overloadIndex: number): string;
+  // @override (undocumented)
+  readonly kind: ApiItemKind;
+}
+
+// @public
 class ApiInterface extends ApiInterface_base {
   constructor(options: IApiInterfaceOptions);
   // @override (undocumented)
@@ -199,6 +210,8 @@ enum ApiItemKind {
   EnumMember = "EnumMember",
   // (undocumented)
   Function = "Function",
+  // (undocumented)
+  IndexSignature = "IndexSignature",
   // (undocumented)
   Interface = "Interface",
   // (undocumented)
@@ -473,6 +486,10 @@ interface IApiFunctionLikeMixinOptions extends IApiItemOptions {
 
 // @public
 interface IApiFunctionOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
+}
+
+// @public
+interface IApiIndexSignatureOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public
