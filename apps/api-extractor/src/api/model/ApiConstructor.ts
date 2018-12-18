@@ -50,11 +50,11 @@ export interface IApiConstructorOptions extends
 export class ApiConstructor extends ApiDeclarationMixin(ApiParameterListMixin(ApiReleaseTagMixin(
   ApiStaticMixin(ApiDocumentedItem)))) {
 
-  public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
+  public static getCanonicalReference(isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
-      return `(${name}:static,${overloadIndex})`;
+      return `(:static,${overloadIndex})`;
     } else {
-      return `(${name}:instance,${overloadIndex})`;
+      return `(:instance,${overloadIndex})`;
     }
   }
 
@@ -69,6 +69,6 @@ export class ApiConstructor extends ApiDeclarationMixin(ApiParameterListMixin(Ap
 
   /** @override */
   public get canonicalReference(): string {
-    return ApiConstructor.getCanonicalReference(this.name, this.isStatic, this.overloadIndex);
+    return ApiConstructor.getCanonicalReference(this.isStatic, this.overloadIndex);
   }
 }

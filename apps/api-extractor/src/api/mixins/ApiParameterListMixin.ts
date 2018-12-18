@@ -131,7 +131,8 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
     public addParameter(parameter: ApiParameter): void {
       const existingParent: ApiItem | undefined = parameter[ApiItem_parent];
       if (existingParent !== undefined) {
-        throw new Error(`This ApiParameter has already been added to another function: "${existingParent.name}"`);
+        throw new Error(`This ApiParameter has already been added to another function:`
+          + ` "${existingParent.displayName}"`);
       }
 
       this[_parameters].push(parameter);

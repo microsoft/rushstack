@@ -54,7 +54,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
   private _packagesByName: Map<string, ApiPackage> | undefined = undefined;
 
   public constructor() {
-    super({ name: 'MODEL' });
+    super({ });
 
     this._resolver = new DeclarationReferenceResolver(this);
   }
@@ -72,7 +72,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
 
   /** @override */
   public get canonicalReference(): string {
-    return this.name;
+    return '';
   }
 
   public get packages(): ReadonlyArray<ApiPackage> {

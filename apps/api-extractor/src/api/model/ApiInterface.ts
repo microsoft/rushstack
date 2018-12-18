@@ -8,6 +8,7 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocume
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IExcerptTokenRange } from '../../index';
 import { HeritageType } from './HeritageType';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiInterface}.
@@ -16,6 +17,7 @@ import { HeritageType } from './HeritageType';
 export interface IApiInterfaceOptions extends
   IApiDeclarationMixinOptions,
   IApiItemContainerMixinOptions,
+  IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
 
@@ -43,7 +45,9 @@ export interface IApiInterfaceJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiInterface extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
+export class ApiInterface extends ApiDeclarationMixin(ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(
+  ApiDocumentedItem)))) {
+
   private readonly _extendsTypes: HeritageType[] = [];
 
   public static getCanonicalReference(name: string): string {

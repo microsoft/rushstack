@@ -6,6 +6,7 @@ import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiD
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiEnumMember}.
@@ -13,6 +14,7 @@ import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
  */
 export interface IApiEnumMemberOptions extends
   IApiDeclarationMixinOptions,
+  IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
 
@@ -43,7 +45,7 @@ export interface IApiEnumMemberJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiEnumMember extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
+export class ApiEnumMember extends ApiDeclarationMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
   /**
    * An {@link Excerpt} that describes the value of the enum member.
    */

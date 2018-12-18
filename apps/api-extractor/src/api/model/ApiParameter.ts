@@ -7,6 +7,7 @@ import { ApiItemKind, ApiItem, IApiItemOptions, IApiItemJson } from '../items/Ap
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem } from '../items/ApiDocumentedItem';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiParameter}.
@@ -14,6 +15,7 @@ import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
  */
 export interface IApiParameterOptions extends
   IApiDeclarationMixinOptions,
+  IApiNameMixinOptions,
   IApiItemOptions {
 
   parameterTypeTokenRange: IExcerptTokenRange;
@@ -47,7 +49,7 @@ export interface IApiParameterJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiParameter extends ApiDeclarationMixin(ApiItem) {
+export class ApiParameter extends ApiDeclarationMixin(ApiNameMixin(ApiItem)) {
   /**
    * An {@link Excerpt} that describes the type of the parameter.
    */

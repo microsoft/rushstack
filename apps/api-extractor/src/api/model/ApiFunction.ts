@@ -7,6 +7,7 @@ import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/
 import { IApiDocumentedItemOptions, ApiDocumentedItem } from '../items/ApiDocumentedItem';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiFunction}.
@@ -14,6 +15,7 @@ import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiRet
  */
 export interface IApiFunctionOptions extends
   IApiDeclarationMixinOptions,
+  IApiNameMixinOptions,
   IApiParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiReturnTypeMixinOptions,
@@ -41,8 +43,8 @@ export interface IApiFunctionOptions extends
  *
  * @public
  */
-export class ApiFunction extends ApiDeclarationMixin(ApiParameterListMixin(ApiReleaseTagMixin(
-  ApiReturnTypeMixin(ApiDocumentedItem)))) {
+export class ApiFunction extends ApiDeclarationMixin(ApiNameMixin(ApiParameterListMixin(ApiReleaseTagMixin(
+  ApiReturnTypeMixin(ApiDocumentedItem))))) {
 
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;

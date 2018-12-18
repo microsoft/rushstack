@@ -40,11 +40,9 @@ export const enum ApiItemKind {
  * @public
  */
 export interface IApiItemOptions {
-  name: string;
 }
 
 export interface IApiItemJson {
-  name: string;
   kind: ApiItemKind;
   canonicalReference: string;
 }
@@ -67,8 +65,6 @@ export const ApiItem_parent: unique symbol = Symbol('ApiItem._parent');
 export class ApiItem {
   public [ApiItem_parent]: ApiItem | undefined;
 
-  private readonly _name: string;
-
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
     // tslint:disable-next-line:no-use-before-declare
     return Deserializer.deserialize(jsonObject);
@@ -76,17 +72,16 @@ export class ApiItem {
 
   /** @virtual */
   public static onDeserializeInto(options: Partial<IApiItemOptions>, jsonObject: IApiItemJson): void {
-    options.name = jsonObject.name;
+    // (implemented by subclasses)
   }
 
   public constructor(options: IApiItemOptions) {
-    this._name = options.name;
+    // ("options" is not used here, but part of the inheritance pattern)
   }
 
   /** @virtual */
   public serializeInto(jsonObject: Partial<IApiItemJson>): void {
     jsonObject.kind = this.kind;
-    jsonObject.name = this.name;
     jsonObject.canonicalReference = this.canonicalReference;
   }
 
@@ -95,13 +90,29 @@ export class ApiItem {
     throw new Error('ApiItem.kind was not implemented by the child class');
   }
 
-  public get name(): string {
-    return this._name;
-  }
-
   /** @virtual */
   public get canonicalReference(): string {
     throw new Error('ApiItem.canonicalReference was not implemented by the child class');
+  }
+
+  /**
+   * Returns a name for this object that can be used in diagnostic messages, for example.
+   *
+   * @remarks
+   * For an object that inherits ApiNameMixin, this will return the declared name (e.g. the name of a TypeScript
+   * function).  Otherwise, it will return a string such as "(call signature)" or "(model)".
+   *
+   * @virtual
+   */
+  public get displayName(): string {
+    switch (this.kind) {
+      case ApiItemKind.CallSignature: return '(call signature)';
+      case ApiItemKind.Constructor: return '(constructor)';
+      case ApiItemKind.ConstructSignature: return '(construct signature)';
+      case ApiItemKind.IndexSignature: return '(indexer)';
+      case ApiItemKind.Model: return '(model)';
+    }
+    return '(???)';  // All other types should inherit ApiNameMixin which will override this property
   }
 
   /**
@@ -157,7 +168,7 @@ export class ApiItem {
       } else if (ApiParameterListMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
         reversedParts.push('()');
       }
-      reversedParts.push(current.name);
+      reversedParts.push(current.displayName);
     }
 
     return reversedParts.reverse().join('');

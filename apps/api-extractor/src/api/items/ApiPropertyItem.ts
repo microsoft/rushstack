@@ -6,6 +6,7 @@ import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiItemJson } from './ApiItem';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiPropertyItem}.
@@ -13,6 +14,7 @@ import { IApiItemJson } from './ApiItem';
  */
 export interface IApiPropertyItemOptions extends
   IApiDeclarationMixinOptions,
+  IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
 
@@ -28,7 +30,7 @@ export interface IApiPropertyItemJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiPropertyItem extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
+export class ApiPropertyItem extends ApiDeclarationMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
   /**
    * An {@link Excerpt} that describes the type of the property.
    */

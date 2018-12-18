@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../items/ApiItem';
+import { ApiNameMixin } from './ApiNameMixin';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.
@@ -128,7 +129,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
       const existingParent: ApiItem | undefined = member[ApiItem_parent];
       if (existingParent !== undefined) {
-        throw new Error(`This item has already been added to another container: "${existingParent.name}"`);
+        throw new Error(`This item has already been added to another container: "${existingParent.displayName}"`);
       }
 
       this[_members].push(member);
@@ -149,12 +150,14 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
         const map: Map<string, ApiItem[]> = new Map<string, ApiItem[]>();
 
         for (const member of this[_members]) {
-          let list: ApiItem[] | undefined = map.get(member.name);
-          if (list === undefined) {
-            list = [];
-            map.set(member.name, list);
+          if (ApiNameMixin.isBaseClassOf(member)) {
+            let list: ApiItem[] | undefined = map.get(member.name);
+            if (list === undefined) {
+              list = [];
+              map.set(member.name, list);
+            }
+            list.push(member);
           }
-          list.push(member);
         }
 
         this[_membersByName] = map;

@@ -65,8 +65,8 @@ export interface IApiConstructSignatureOptions extends
 export class ApiConstructSignature extends ApiDeclarationMixin(ApiParameterListMixin(ApiReleaseTagMixin(
   ApiReturnTypeMixin(ApiDocumentedItem)))) {
 
-  public static getCanonicalReference(name: string, overloadIndex: number): string {
-    return `(${name}:${overloadIndex})`;
+  public static getCanonicalReference(overloadIndex: number): string {
+    return `(:${overloadIndex})`;
   }
 
   public constructor(options: IApiConstructSignatureOptions) {
@@ -80,6 +80,6 @@ export class ApiConstructSignature extends ApiDeclarationMixin(ApiParameterListM
 
   /** @override */
   public get canonicalReference(): string {
-    return ApiConstructSignature.getCanonicalReference(this.name, this.overloadIndex);
+    return ApiConstructSignature.getCanonicalReference(this.overloadIndex);
   }
 }

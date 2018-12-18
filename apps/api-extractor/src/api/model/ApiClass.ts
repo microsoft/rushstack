@@ -8,6 +8,7 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocume
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiClass}.
@@ -16,6 +17,7 @@ import { HeritageType } from './HeritageType';
 export interface IApiClassOptions extends
   IApiDeclarationMixinOptions,
   IApiItemContainerMixinOptions,
+  IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
 
@@ -44,7 +46,9 @@ export interface IApiClassJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
+export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(
+  ApiDocumentedItem)))) {
+
   /**
    * The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.
    */

@@ -7,6 +7,7 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocume
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { ApiEnumMember } from './ApiEnumMember';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiEnum}.
@@ -15,6 +16,7 @@ import { ApiEnumMember } from './ApiEnumMember';
 export interface IApiEnumOptions extends
   IApiDeclarationMixinOptions,
   IApiItemContainerMixinOptions,
+  IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
 }
@@ -39,7 +41,8 @@ export interface IApiEnumOptions extends
  *
  * @public
  */
-export class ApiEnum extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
+export class ApiEnum extends ApiDeclarationMixin(ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(
+  ApiDocumentedItem)))) {
 
   public static getCanonicalReference(name: string): string {
     return `(${name}:enum)`;
