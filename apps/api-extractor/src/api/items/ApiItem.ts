@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
-import { ApiFunctionLikeMixin } from '../mixins/ApiFunctionLikeMixin';
+import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { ApiPackage } from '../model/ApiPackage';
 
 /**
@@ -154,7 +154,7 @@ export class ApiItem {
       }
       if (reversedParts.length !== 0) {
         reversedParts.push('.');
-      } else if (ApiFunctionLikeMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
+      } else if (ApiParameterListMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
         reversedParts.push('()');
       }
       reversedParts.push(current.name);

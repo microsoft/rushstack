@@ -21,7 +21,7 @@ import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { ApiProperty } from '../api/model/ApiProperty';
 import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
-import { ApiFunctionLikeMixin } from '../api/mixins/ApiFunctionLikeMixin';
+import { ApiParameterListMixin } from '../api/mixins/ApiParameterListMixin';
 import { ApiEnum } from '../api/model/ApiEnum';
 import { ApiEnumMember } from '../api/model/ApiEnumMember';
 import { IExcerptTokenRange, IExcerptToken } from '../api/mixins/Excerpt';
@@ -350,7 +350,7 @@ export class ApiModelGenerator {
   }
 
   private _processApiParameter(parameterDeclaration: ts.ParameterDeclaration,
-    functionLikeItem: ApiFunctionLikeMixin): void {
+    apiParameterListMixin: ApiParameterListMixin): void {
 
     const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
@@ -362,7 +362,7 @@ export class ApiModelGenerator {
       nodesToCapture
     });
 
-    functionLikeItem.addParameter(new ApiParameter({
+    apiParameterListMixin.addParameter(new ApiParameter({
       name: parameterDeclaration.name.getText() || '',
       excerptTokens, parameterTypeTokenRange
     }));

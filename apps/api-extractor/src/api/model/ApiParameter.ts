@@ -39,7 +39,7 @@ export interface IApiParameterJson extends IApiItemJson {
  * }
  * ```
  *
- * `ApiParameter` objects belong to the {@link ApiFunctionLikeMixin.parameters} collection.
+ * `ApiParameter` objects belong to the {@link ApiParameterListMixin.parameters} collection.
  *
  * Even though it has associated documentation content, `ApiParameter` does not extend from `ApiDocumentedItem`
  * because it does not technically own its documentation; instead, the documentation is extracted from a `@param`

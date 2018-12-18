@@ -5,21 +5,21 @@ import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemConstructor, IApiItemOpt
 import { ApiParameter } from '../model/ApiParameter';
 
 /**
- * Constructor options for {@link (ApiFunctionLikeMixin:interface)}.
+ * Constructor options for {@link (ApiParameterListMixin:interface)}.
  * @public
  */
-export interface IApiFunctionLikeMixinOptions extends IApiItemOptions {
+export interface IApiParameterListMixinOptions extends IApiItemOptions {
   overloadIndex: number;
   parameters?: ApiParameter[];
 }
 
-export interface IApiFunctionLikeJson extends IApiItemJson {
+export interface IApiParameterListJson extends IApiItemJson {
   overloadIndex: number;
   parameters: IApiItemJson[];
 }
 
-const _overloadIndex: unique symbol = Symbol('ApiFunctionLikeMixin._overloadIndex');
-const _parameters: unique symbol = Symbol('ApiFunctionLikeMixin._parameters');
+const _overloadIndex: unique symbol = Symbol('ApiParameterListMixin._overloadIndex');
+const _parameters: unique symbol = Symbol('ApiParameterListMixin._parameters');
 
 /**
  * The mixin base class for API items that can have function parameters (but not necessarily a return value).
@@ -37,7 +37,7 @@ const _parameters: unique symbol = Symbol('ApiFunctionLikeMixin._parameters');
  * @public
  */
 // tslint:disable-next-line:interface-name
-export interface ApiFunctionLikeMixin extends ApiItem {
+export interface ApiParameterListMixin extends ApiItem {
   /**
    * When a function has multiple overloaded declarations, this zero-based integer index can be used to unqiuely
    * identify them.
@@ -68,7 +68,7 @@ export interface ApiFunctionLikeMixin extends ApiItem {
   readonly parameters: ReadonlyArray<ApiParameter>;
 
   /**
-   * Appends a parameter to the `ApiFunctionLikeMixin.parameters` collection.
+   * Appends a parameter to the `ApiParameterListMixin.parameters` collection.
    */
   addParameter(parameter: ApiParameter): void;
 
@@ -76,23 +76,23 @@ export interface ApiFunctionLikeMixin extends ApiItem {
 }
 
 /**
- * Mixin function for {@link (ApiFunctionLikeMixin:interface)}.
+ * Mixin function for {@link (ApiParameterListMixin:interface)}.
  *
  * @param baseClass - The base class to be extended
- * @returns A child class that extends baseClass, adding the {@link (ApiFunctionLikeMixin:interface)} functionality.
+ * @returns A child class that extends baseClass, adding the {@link (ApiParameterListMixin:interface)} functionality.
  *
  * @public
  */
-export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiFunctionLikeMixin) { // tslint:disable-line:no-any
+export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
+  TBaseClass & (new (...args: any[]) => ApiParameterListMixin) { // tslint:disable-line:no-any
 
-  abstract class MixedClass extends baseClass implements ApiFunctionLikeMixin {
+  abstract class MixedClass extends baseClass implements ApiParameterListMixin {
     public readonly [_overloadIndex]: number;
     public readonly [_parameters]: ApiParameter[];
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiFunctionLikeMixinOptions>,
-      jsonObject: IApiFunctionLikeJson): void {
+    public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>,
+      jsonObject: IApiParameterListJson): void {
 
       baseClass.onDeserializeInto(options, jsonObject);
 
@@ -108,7 +108,7 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
     constructor(...args: any[]) {
       super(...args);
 
-      const options: IApiFunctionLikeMixinOptions = args[0];
+      const options: IApiParameterListMixinOptions = args[0];
       this[_overloadIndex] = options.overloadIndex;
 
       this[_parameters] = [];
@@ -140,7 +140,7 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
     }
 
     /** @override */
-    public serializeInto(jsonObject: Partial<IApiFunctionLikeJson>): void {
+    public serializeInto(jsonObject: Partial<IApiParameterListJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.overloadIndex = this.overloadIndex;
@@ -160,12 +160,12 @@ export function ApiFunctionLikeMixin<TBaseClass extends IApiItemConstructor>(bas
 }
 
 /**
- * Static members for {@link (ApiFunctionLikeMixin:interface)}.
+ * Static members for {@link (ApiParameterListMixin:interface)}.
  * @public
  */
-export namespace ApiFunctionLikeMixin {
+export namespace ApiParameterListMixin {
   /**
-   * A type guard that tests whether the specified `ApiItem` subclass extends the `ApiFunctionLikeMixin` mixin.
+   * A type guard that tests whether the specified `ApiItem` subclass extends the `ApiParameterListMixin` mixin.
    *
    * @remarks
    *
@@ -173,7 +173,7 @@ export namespace ApiFunctionLikeMixin {
    * the mixin function produces a different subclass.  (This could be mitigated by `Symbol.hasInstance`, however
    * the TypeScript type system cannot invoke a runtime test.)
    */
-  export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiFunctionLikeMixin {
+  export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiParameterListMixin {
     return apiItem.hasOwnProperty(_parameters);
   }
 }

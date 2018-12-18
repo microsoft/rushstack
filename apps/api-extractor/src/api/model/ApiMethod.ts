@@ -4,7 +4,7 @@
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
-import { IApiFunctionLikeMixinOptions, ApiFunctionLikeMixin } from '../mixins/ApiFunctionLikeMixin';
+import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IApiDocumentedItemOptions, ApiDocumentedItem } from '../items/ApiDocumentedItem';
 import { ApiReturnTypeMixin, IApiReturnTypeMixinOptions } from '../mixins/ApiReturnTypeMixin';
@@ -15,7 +15,7 @@ import { ApiReturnTypeMixin, IApiReturnTypeMixinOptions } from '../mixins/ApiRet
  */
 export interface IApiMethodOptions extends
   IApiDeclarationMixinOptions,
-  IApiFunctionLikeMixinOptions,
+  IApiParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiReturnTypeMixinOptions,
   IApiStaticMixinOptions,
@@ -43,7 +43,7 @@ export interface IApiMethodOptions extends
  *
  * @public
  */
-export class ApiMethod extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
+export class ApiMethod extends ApiDeclarationMixin(ApiParameterListMixin(ApiReleaseTagMixin(
   ApiReturnTypeMixin(ApiStaticMixin(ApiDocumentedItem))))) {
 
   public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {

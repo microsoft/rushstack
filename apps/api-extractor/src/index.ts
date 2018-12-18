@@ -34,9 +34,9 @@ export {
   ApiDeclarationMixin
 } from './api/mixins/ApiDeclarationMixin';
 export {
-  IApiFunctionLikeMixinOptions,
-  ApiFunctionLikeMixin
-} from './api/mixins/ApiFunctionLikeMixin';
+  IApiParameterListMixinOptions,
+  ApiParameterListMixin
+} from './api/mixins/ApiParameterListMixin';
 export {
   IApiItemContainerMixinOptions,
   ApiItemContainerMixin

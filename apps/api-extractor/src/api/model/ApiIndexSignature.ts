@@ -3,7 +3,7 @@
 
 import { ApiItemKind } from '../items/ApiItem';
 import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
-import { IApiFunctionLikeMixinOptions, ApiFunctionLikeMixin } from '../mixins/ApiFunctionLikeMixin';
+import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { IApiDocumentedItemOptions, ApiDocumentedItem } from '../items/ApiDocumentedItem';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
@@ -14,7 +14,7 @@ import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiRet
  */
 export interface IApiIndexSignatureOptions extends
   IApiDeclarationMixinOptions,
-  IApiFunctionLikeMixinOptions,
+  IApiParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiReturnTypeMixinOptions,
   IApiDocumentedItemOptions {
@@ -42,7 +42,7 @@ export interface IApiIndexSignatureOptions extends
  *
  * @public
  */
-export class ApiIndexSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
+export class ApiIndexSignature extends ApiDeclarationMixin(ApiParameterListMixin(ApiReleaseTagMixin(
   ApiReturnTypeMixin(ApiDocumentedItem)))) {
 
   public static getCanonicalReference(name: string, overloadIndex: number): string {

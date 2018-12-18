@@ -121,10 +121,6 @@ class ApiFunction extends ApiFunction_base {
 }
 
 // @public
-interface ApiFunctionLikeMixin {
-}
-
-// @public
 class ApiIndexSignature extends ApiIndexSignature_base {
   constructor(options: IApiIndexSignatureOptions);
   // @override (undocumented)
@@ -304,7 +300,7 @@ class ApiPackage extends ApiPackage_base {
   saveToJsonFile(apiJsonFilename: string, options?: IJsonFileSaveOptions): void;
 }
 
-// WARNING: Unable to find referenced member "@microsoft/api-extractor#ApiFunctionLikeMixin.parameters"
+// WARNING: Unable to find referenced member "@microsoft/api-extractor#ApiParameterListMixin.parameters"
 // @public
 class ApiParameter extends ApiParameter_base {
   constructor(options: IApiParameterOptions);
@@ -320,6 +316,10 @@ class ApiParameter extends ApiParameter_base {
   // @override (undocumented)
   serializeInto(jsonObject: Partial<IApiParameterJson>): void;
   readonly tsdocParamBlock: tsdoc.DocParamBlock | undefined;
+}
+
+// @public
+interface ApiParameterListMixin {
 }
 
 // @public
@@ -452,7 +452,7 @@ interface IAnalyzeProjectOptions {
 }
 
 // @public
-interface IApiCallSignatureOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
+interface IApiCallSignatureOptions extends IApiDeclarationMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public
@@ -464,11 +464,11 @@ interface IApiClassOptions extends IApiDeclarationMixinOptions, IApiItemContaine
 }
 
 // @public
-interface IApiConstructorOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiStaticMixinOptions, IApiDocumentedItemOptions {
+interface IApiConstructorOptions extends IApiDeclarationMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiStaticMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public
-interface IApiConstructSignatureOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
+interface IApiConstructSignatureOptions extends IApiDeclarationMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public
@@ -498,19 +498,11 @@ interface IApiEnumOptions extends IApiDeclarationMixinOptions, IApiItemContainer
 }
 
 // @public
-interface IApiFunctionLikeMixinOptions extends IApiItemOptions {
-  // (undocumented)
-  overloadIndex: number;
-  // (undocumented)
-  parameters?: ApiParameter[];
+interface IApiFunctionOptions extends IApiDeclarationMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public
-interface IApiFunctionOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
-}
-
-// @public
-interface IApiIndexSignatureOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
+interface IApiIndexSignatureOptions extends IApiDeclarationMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public
@@ -532,11 +524,11 @@ interface IApiItemOptions {
 }
 
 // @public
-interface IApiMethodOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiDocumentedItemOptions {
+interface IApiMethodOptions extends IApiDeclarationMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public (undocumented)
-interface IApiMethodSignatureOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
+interface IApiMethodSignatureOptions extends IApiDeclarationMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public
@@ -545,6 +537,14 @@ interface IApiNamespaceOptions extends IApiDeclarationMixinOptions, IApiItemCont
 
 // @public
 interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiDocumentedItemOptions {
+}
+
+// @public
+interface IApiParameterListMixinOptions extends IApiItemOptions {
+  // (undocumented)
+  overloadIndex: number;
+  // (undocumented)
+  parameters?: ApiParameter[];
 }
 
 // @public
