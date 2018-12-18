@@ -41,12 +41,12 @@ export interface IApiConstructSignatureOptions extends
  *   new(x: number, y: number): IVector;
  * }
  *
- * function createVector(vectorConstructor: IVectorConstructor,
+ * export function createVector(vectorConstructor: IVectorConstructor,
  *   x: number, y: number): IVector {
  *   return new vectorConstructor(x, y);
  * }
  *
- * export class Vector implements IVector {
+ * class Vector implements IVector {
  *   public x: number;
  *   public y: number;
  *   public constructor(x: number, y: number) {

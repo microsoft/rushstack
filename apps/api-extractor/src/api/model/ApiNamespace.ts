@@ -26,10 +26,16 @@ export interface IApiNamespaceOptions extends
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.
  *
- * `ApiNamespace` represents a TypeScript declaration such as this:
+ * `ApiNamespace` represents a TypeScript declaration such `X` or `Y` in this example:
  *
  * ```ts
- * export namespace X { }
+ * export namespace X {
+ *   export namespace Y {
+ *     export interface IWidget {
+ *       render(): void;
+ *     }
+ *   }
+ * }
  * ```
  *
  * @public

@@ -154,6 +154,10 @@ export {
   ApiTypeAlias
 } from './api/model/ApiTypeAlias';
 export {
+  IApiVariableDeclarationOptions,
+  ApiVariableDeclaration
+} from './api/model/ApiVariableDeclaration';
+export {
   IResolveDeclarationReferenceResult
 } from './api/model/DeclarationReferenceResolver';
 export {

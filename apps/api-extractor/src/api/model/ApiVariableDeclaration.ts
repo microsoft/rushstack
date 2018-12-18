@@ -7,57 +7,51 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocume
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 
 /**
- * Constructor options for {@link ApiTypeAlias}.
+ * Constructor options for {@link ApiVariableDeclaration}.
  * @public
  */
-export interface IApiTypeAliasOptions extends
+export interface IApiVariableDeclarationOptions extends
   IApiDeclarationMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDocumentedItemOptions {
 }
 
 /**
- * Represents a TypeScript type alias declaration.
+ * Represents a TypeScript variable declaration.
  *
  * @remarks
  *
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.
  *
- * `ApiTypeAlias` represents a definition such as one of these examples:
+ * `ApiVariableDeclaration` represents an exported `const` or `let` object such as these examples:
  *
  * ```ts
- * // A union type:
- * export type Shape = Square | Triangle | Circle;
+ * // A variable declaration
+ * export let verboseLogging: boolean;
  *
- * // A generic type alias:
- * export type BoxedValue<T> = { value: T };
- *
- * export type BoxedArray<T> = { array: T[] };
- *
- * // A conditional type alias:
- * export type Boxed<T> = T extends any[] ? BoxedArray<T[number]> : BoxedValue<T>;
- *
+ * // A constant variable declaration with an initializer
+ * export const canvas: IWidget = createCanvas();
  * ```
  *
  * @public
  */
-export class ApiTypeAlias extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
+export class ApiVariableDeclaration extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
   public static getCanonicalReference(name: string): string {
     return name;
   }
 
-  public constructor(options: IApiTypeAliasOptions) {
+  public constructor(options: IApiVariableDeclarationOptions) {
     super(options);
   }
 
   /** @override */
   public get kind(): ApiItemKind {
-    return ApiItemKind.TypeAlias;
+    return ApiItemKind.VariableDeclaration;
   }
 
   /** @override */
   public get canonicalReference(): string {
-    return ApiTypeAlias.getCanonicalReference(this.name);
+    return ApiVariableDeclaration.getCanonicalReference(this.name);
   }
 }

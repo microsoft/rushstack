@@ -31,7 +31,7 @@ export interface IApiFunctionOptions extends
  * `ApiFunction` represents a TypeScript declaration such as this example:
  *
  * ```ts
- * export static getAverage(x: number, y: number): number {
+ * export function getAverage(x: number, y: number): number {
  *   return (x + y) / 2.0;
  * }
  * ```

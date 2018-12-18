@@ -31,7 +31,7 @@ export interface IApiEnumMemberJson extends IApiItemJson {
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.
  *
- * `ApiEnumMember` represents an enum member such as `Small` in the example below:
+ * `ApiEnumMember` represents an enum member such as `Small = 100` in the example below:
  *
  * ```ts
  * export enum FontSizes {
@@ -44,6 +44,9 @@ export interface IApiEnumMemberJson extends IApiItemJson {
  * @public
  */
 export class ApiEnumMember extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
+  /**
+   * An {@link Excerpt} that describes the value of the enum member.
+   */
   public readonly initializerExcerpt: Excerpt;
 
   public static getCanonicalReference(name: string): string {

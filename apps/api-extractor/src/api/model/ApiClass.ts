@@ -45,7 +45,11 @@ export interface IApiClassJson extends IApiItemJson {
  * @public
  */
 export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
+  /**
+   * The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.
+   */
   public readonly extendsType: HeritageType | undefined;
+
   private readonly _implementsTypes: HeritageType[] = [];
 
   public static getCanonicalReference(name: string): string {
@@ -84,6 +88,9 @@ export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiRelea
     return ApiClass.getCanonicalReference(this.name);
   }
 
+  /**
+   * The list of interfaces that this class implements using the `implements` keyword.
+   */
   public get implementsTypes(): ReadonlyArray<HeritageType> {
     return this._implementsTypes;
   }

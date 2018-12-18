@@ -48,6 +48,9 @@ export interface IApiParameterJson extends IApiItemJson {
  * @public
  */
 export class ApiParameter extends ApiDeclarationMixin(ApiItem) {
+  /**
+   * An {@link Excerpt} that describes the type of the parameter.
+   */
   public readonly parameterTypeExcerpt: Excerpt;
 
   /** @override */

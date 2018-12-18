@@ -14,11 +14,9 @@ class ApiClass extends ApiClass_base {
   constructor(options: IApiClassOptions);
   // @override (undocumented)
   readonly canonicalReference: string;
-  // (undocumented)
   readonly extendsType: HeritageType | undefined;
   // (undocumented)
   static getCanonicalReference(name: string): string;
-  // (undocumented)
   readonly implementsTypes: ReadonlyArray<HeritageType>;
   // @override (undocumented)
   readonly kind: ApiItemKind;
@@ -100,7 +98,6 @@ class ApiEnumMember extends ApiEnumMember_base {
   readonly canonicalReference: string;
   // (undocumented)
   static getCanonicalReference(name: string): string;
-  // (undocumented)
   readonly initializerExcerpt: Excerpt;
   // @override (undocumented)
   readonly kind: ApiItemKind;
@@ -143,7 +140,6 @@ class ApiInterface extends ApiInterface_base {
   constructor(options: IApiInterfaceOptions);
   // @override (undocumented)
   readonly canonicalReference: string;
-  // (undocumented)
   readonly extendsTypes: ReadonlyArray<HeritageType>;
   // (undocumented)
   static getCanonicalReference(name: string): string;
@@ -233,7 +229,9 @@ enum ApiItemKind {
   // (undocumented)
   PropertySignature = "PropertySignature",
   // (undocumented)
-  TypeAlias = "TypeAlias"
+  TypeAlias = "TypeAlias",
+  // (undocumented)
+  VariableDeclaration = "VariableDeclaration"
 }
 
 // @public
@@ -317,7 +315,6 @@ class ApiParameter extends ApiParameter_base {
   // WARNING: The type "IApiParameterJson" needs to be exported by the package (e.g. added to index.ts)
   // @override (undocumented)
   static onDeserializeInto(options: Partial<IApiParameterOptions>, jsonObject: IApiParameterJson): void;
-  // (undocumented)
   readonly parameterTypeExcerpt: Excerpt;
   // WARNING: The type "IApiParameterJson" needs to be exported by the package (e.g. added to index.ts)
   // @override (undocumented)
@@ -379,8 +376,17 @@ class ApiTypeAlias extends ApiTypeAlias_base {
   readonly canonicalReference: string;
   // (undocumented)
   static getCanonicalReference(name: string): string;
+  // @override (undocumented)
+  readonly kind: ApiItemKind;
+}
+
+// @public
+class ApiVariableDeclaration extends ApiVariableDeclaration_base {
+  constructor(options: IApiVariableDeclarationOptions);
+  // @override (undocumented)
+  readonly canonicalReference: string;
   // (undocumented)
-  readonly initializerExcerpt: Excerpt;
+  static getCanonicalReference(name: string): string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
 }
@@ -581,6 +587,10 @@ interface IApiStaticMixinOptions extends IApiItemOptions {
 
 // @public
 interface IApiTypeAliasOptions extends IApiDeclarationMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
+}
+
+// @public
+interface IApiVariableDeclarationOptions extends IApiDeclarationMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public (undocumented)

@@ -75,6 +75,9 @@ export class ApiInterface extends ApiDeclarationMixin(ApiItemContainerMixin(ApiR
     return ApiInterface.getCanonicalReference(this.name);
   }
 
+  /**
+   * The list of base interfaces that this interface inherits from using the `extends` keyword.
+   */
   public get extendsTypes(): ReadonlyArray<HeritageType> {
     return this._extendsTypes;
   }

@@ -32,7 +32,7 @@ export interface IApiCallSignatureOptions extends
  * in this example:
  *
  * ```ts
- * interface IChooser {
+ * export interface IChooser {
  *   // A call signature:
  *   (x: number, y: number): number;
  *

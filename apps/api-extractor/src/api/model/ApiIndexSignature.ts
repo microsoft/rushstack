@@ -31,7 +31,7 @@ export interface IApiIndexSignatureOptions extends
  * `ApiIndexSignature` represents a TypeScript declaration such as `[x: number]: number` in this example:
  *
  * ```ts
- * interface INumberTable {
+ * export interface INumberTable {
  *   // An index signature
  *   [value: number]: number;
  *
