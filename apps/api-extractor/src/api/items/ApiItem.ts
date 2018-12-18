@@ -30,6 +30,7 @@ export const enum ApiItemKind {
   Parameter = 'Parameter',
   Property = 'Property',
   PropertySignature = 'PropertySignature',
+  TypeAlias = 'TypeAlias',
   None = 'None'
 }
 

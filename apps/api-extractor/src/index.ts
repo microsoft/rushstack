@@ -150,6 +150,10 @@ export {
   ApiPropertySignature
 } from './api/model/ApiPropertySignature';
 export {
+  IApiTypeAliasOptions,
+  ApiTypeAlias
+} from './api/model/ApiTypeAlias';
+export {
   IResolveDeclarationReferenceResult
 } from './api/model/DeclarationReferenceResolver';
 export {

@@ -21,6 +21,7 @@ import { ApiConstructSignature, IApiConstructSignatureOptions } from './ApiConst
 import { ApiFunction, IApiFunctionOptions } from './ApiFunction';
 import { ApiCallSignature, IApiCallSignatureOptions } from './ApiCallSignature';
 import { ApiIndexSignature, IApiIndexSignatureOptions } from './ApiIndexSignature';
+import { ApiTypeAlias, IApiTypeAliasOptions } from './ApiTypeAlias';
 
 export class Deserializer {
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
@@ -80,6 +81,9 @@ export class Deserializer {
       case ApiItemKind.PropertySignature:
         ApiPropertySignature.onDeserializeInto(options, jsonObject as IApiPropertyItemJson);
         return new ApiPropertySignature(options as IApiPropertySignatureOptions);
+      case ApiItemKind.TypeAlias:
+        ApiTypeAlias.onDeserializeInto(options, jsonObject);
+        return new ApiTypeAlias(options as IApiTypeAliasOptions);
       default:
         throw new Error(`Failed to deserialize unsupported API item type ${JSON.stringify(jsonObject.kind)}`);
     }

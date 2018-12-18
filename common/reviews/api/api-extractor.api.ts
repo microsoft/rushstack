@@ -231,7 +231,9 @@ enum ApiItemKind {
   // (undocumented)
   Property = "Property",
   // (undocumented)
-  PropertySignature = "PropertySignature"
+  PropertySignature = "PropertySignature",
+  // (undocumented)
+  TypeAlias = "TypeAlias"
 }
 
 // @public
@@ -368,6 +370,19 @@ interface ApiReturnTypeMixin {
 
 // @public
 interface ApiStaticMixin {
+}
+
+// @public
+class ApiTypeAlias extends ApiTypeAlias_base {
+  constructor(options: IApiTypeAliasOptions);
+  // @override (undocumented)
+  readonly canonicalReference: string;
+  // (undocumented)
+  static getCanonicalReference(name: string): string;
+  // (undocumented)
+  readonly initializerExcerpt: Excerpt;
+  // @override (undocumented)
+  readonly kind: ApiItemKind;
 }
 
 // @public
@@ -562,6 +577,10 @@ interface IApiReturnTypeMixinOptions extends IApiItemOptions {
 interface IApiStaticMixinOptions extends IApiItemOptions {
   // (undocumented)
   isStatic: boolean;
+}
+
+// @public
+interface IApiTypeAliasOptions extends IApiDeclarationMixinOptions, IApiReleaseTagMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public (undocumented)
