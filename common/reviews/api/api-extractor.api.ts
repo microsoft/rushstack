@@ -300,24 +300,6 @@ class ApiPackage extends ApiPackage_base {
   saveToJsonFile(apiJsonFilename: string, options?: IJsonFileSaveOptions): void;
 }
 
-// WARNING: Unable to find referenced member "@microsoft/api-extractor#ApiParameterListMixin.parameters"
-// @public
-class ApiParameter extends ApiParameter_base {
-  constructor(options: IApiParameterOptions);
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
-  // WARNING: The type "IApiParameterJson" needs to be exported by the package (e.g. added to index.ts)
-  // @override (undocumented)
-  static onDeserializeInto(options: Partial<IApiParameterOptions>, jsonObject: IApiParameterJson): void;
-  readonly parameterTypeExcerpt: Excerpt;
-  // WARNING: The type "IApiParameterJson" needs to be exported by the package (e.g. added to index.ts)
-  // @override (undocumented)
-  serializeInto(jsonObject: Partial<IApiParameterJson>): void;
-  readonly tsdocParamBlock: tsdoc.DocParamBlock | undefined;
-}
-
 // @public
 interface ApiParameterListMixin {
 }
@@ -542,7 +524,7 @@ interface IApiParameterListMixinOptions extends IApiItemOptions {
   // (undocumented)
   overloadIndex: number;
   // (undocumented)
-  parameters?: ApiParameter[];
+  parameters?: Parameter[];
 }
 
 // @public
@@ -714,6 +696,24 @@ class IndentedWriter {
 interface IResolveDeclarationReferenceResult {
   errorMessage: string | undefined;
   resolvedApiItem: ApiItem | undefined;
+}
+
+// WARNING: Unable to find referenced member "@microsoft/api-extractor#ApiParameterListMixin.parameters"
+// @public
+class Parameter extends Parameter_base {
+  constructor(options: IApiParameterOptions);
+  // @override (undocumented)
+  readonly canonicalReference: string;
+  // @override (undocumented)
+  readonly kind: ApiItemKind;
+  // WARNING: The type "IApiParameterJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  static onDeserializeInto(options: Partial<IApiParameterOptions>, jsonObject: IApiParameterJson): void;
+  readonly parameterTypeExcerpt: Excerpt;
+  // WARNING: The type "IApiParameterJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  serializeInto(jsonObject: Partial<IApiParameterJson>): void;
+  readonly tsdocParamBlock: tsdoc.DocParamBlock | undefined;
 }
 
 // @public

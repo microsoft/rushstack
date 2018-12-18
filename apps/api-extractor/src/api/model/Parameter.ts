@@ -10,7 +10,7 @@ import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
- * Constructor options for {@link ApiParameter}.
+ * Constructor options for {@link Parameter}.
  * @public
  */
 export interface IApiParameterOptions extends
@@ -26,14 +26,11 @@ export interface IApiParameterJson extends IApiItemJson {
 }
 
 /**
- * Represents a function parameter for a function-like declaration.
+ * Represents a named parameter for a function-like declaration.
  *
  * @remarks
  *
- * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
- * API declarations.
- *
- * `ApiParameter` represents a TypeScript declaration such as `x: number` in this example:
+ * `Parameter` represents a TypeScript declaration such as `x: number` in this example:
  *
  * ```ts
  * export function add(x: number, y: number): number {
@@ -41,15 +38,15 @@ export interface IApiParameterJson extends IApiItemJson {
  * }
  * ```
  *
- * `ApiParameter` objects belong to the {@link ApiParameterListMixin.parameters} collection.
+ * `Parameter` objects belong to the {@link ApiParameterListMixin.parameters} collection.
  *
- * Even though it has associated documentation content, `ApiParameter` does not extend from `ApiDocumentedItem`
+ * Even though it has associated documentation content, `Parameter` does not extend from `ApiDocumentedItem`
  * because it does not technically own its documentation; instead, the documentation is extracted from a `@param`
  * TSDoc tag belonging to a containing declaration such as `ApiMethod` or `ApiFunction`.
  *
  * @public
  */
-export class ApiParameter extends ApiDeclarationMixin(ApiNameMixin(ApiItem)) {
+export class Parameter extends ApiDeclarationMixin(ApiNameMixin(ApiItem)) {
   /**
    * An {@link Excerpt} that describes the type of the parameter.
    */

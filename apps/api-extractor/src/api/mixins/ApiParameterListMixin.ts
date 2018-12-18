@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
-import { ApiParameter } from '../model/ApiParameter';
+import { Parameter } from '../model/Parameter';
 
 /**
  * Constructor options for {@link (ApiParameterListMixin:interface)}.
@@ -10,7 +10,7 @@ import { ApiParameter } from '../model/ApiParameter';
  */
 export interface IApiParameterListMixinOptions extends IApiItemOptions {
   overloadIndex: number;
-  parameters?: ApiParameter[];
+  parameters?: Parameter[];
 }
 
 export interface IApiParameterListJson extends IApiItemJson {
@@ -65,12 +65,12 @@ export interface ApiParameterListMixin extends ApiItem {
   /**
    * The function parameters.
    */
-  readonly parameters: ReadonlyArray<ApiParameter>;
+  readonly parameters: ReadonlyArray<Parameter>;
 
   /**
    * Appends a parameter to the `ApiParameterListMixin.parameters` collection.
    */
-  addParameter(parameter: ApiParameter): void;
+  addParameter(parameter: Parameter): void;
 
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
@@ -88,7 +88,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
 
   abstract class MixedClass extends baseClass implements ApiParameterListMixin {
     public readonly [_overloadIndex]: number;
-    public readonly [_parameters]: ApiParameter[];
+    public readonly [_parameters]: Parameter[];
 
     /** @override */
     public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>,
@@ -100,7 +100,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
       options.parameters = [];
 
       for (const parameterObject of jsonObject.parameters) {
-        options.parameters.push(ApiItem.deserialize(parameterObject) as ApiParameter);
+        options.parameters.push(ApiItem.deserialize(parameterObject) as Parameter);
       }
     }
 
@@ -124,14 +124,14 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
       return this[_overloadIndex];
     }
 
-    public get parameters(): ReadonlyArray<ApiParameter> {
+    public get parameters(): ReadonlyArray<Parameter> {
       return this[_parameters];
     }
 
-    public addParameter(parameter: ApiParameter): void {
+    public addParameter(parameter: Parameter): void {
       const existingParent: ApiItem | undefined = parameter[ApiItem_parent];
       if (existingParent !== undefined) {
-        throw new Error(`This ApiParameter has already been added to another function:`
+        throw new Error(`This Parameter has already been added to another function:`
           + ` "${existingParent.displayName}"`);
       }
 

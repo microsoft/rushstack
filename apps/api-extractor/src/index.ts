@@ -135,8 +135,8 @@ export {
 } from './api/model/ApiPackage';
 export {
   IApiParameterOptions,
-  ApiParameter
-} from './api/model/ApiParameter';
+  Parameter
+} from './api/model/Parameter';
 export {
   IApiPropertyOptions,
   ApiProperty

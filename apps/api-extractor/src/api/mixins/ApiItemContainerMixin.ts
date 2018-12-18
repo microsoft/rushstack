@@ -35,7 +35,7 @@ const _membersByName: unique symbol = Symbol('ApiItemContainerMixin._membersByNa
  * a namespace containing static members of the class.
  *
  * Examples of `ApiItemContainerMixin` child classes include `ApiModel`, `ApiPackage`, `ApiEntryPoint`,
- * and `ApiEnum`.  But note that `ApiParameter` is not considered a "member" of an `ApiMethod`; this relationship
+ * and `ApiEnum`.  But note that `Parameter` is not considered a "member" of an `ApiMethod`; this relationship
  * is modeled using {@link ApiParameterListMixin.parameters} instead of {@link ApiItemContainerMixin.members}.
  *
  * @public

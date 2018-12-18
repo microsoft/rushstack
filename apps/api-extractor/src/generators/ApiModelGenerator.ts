@@ -16,7 +16,7 @@ import { ApiMethod } from '../api/model/ApiMethod';
 import { ApiNamespace } from '../api/model/ApiNamespace';
 import { ApiInterface } from '../api/model/ApiInterface';
 import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
-import { ApiParameter } from '../api/model/ApiParameter';
+import { Parameter } from '../api/model/Parameter';
 import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { ApiProperty } from '../api/model/ApiProperty';
@@ -362,7 +362,7 @@ export class ApiModelGenerator {
       nodesToCapture
     });
 
-    apiParameterListMixin.addParameter(new ApiParameter({
+    apiParameterListMixin.addParameter(new Parameter({
       name: parameterDeclaration.name.getText() || '',
       excerptTokens, parameterTypeTokenRange
     }));
