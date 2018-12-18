@@ -66,6 +66,10 @@ export {
 } from './api/mixins/Mixin';
 
 export {
+  IApiCallSignatureOptions,
+  ApiCallSignature
+} from './api/model/ApiCallSignature';
+export {
   IApiClassOptions,
   ApiClass
 } from './api/model/ApiClass';

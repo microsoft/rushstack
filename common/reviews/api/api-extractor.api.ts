@@ -1,4 +1,15 @@
 // @public
+class ApiCallSignature extends ApiCallSignature_base {
+  constructor(options: IApiCallSignatureOptions);
+  // @override (undocumented)
+  readonly canonicalReference: string;
+  // (undocumented)
+  static getCanonicalReference(name: string, overloadIndex: number): string;
+  // @override (undocumented)
+  readonly kind: ApiItemKind;
+}
+
+// @public
 class ApiClass extends ApiClass_base {
   constructor(options: IApiClassOptions);
   // @override (undocumented)
@@ -172,6 +183,8 @@ interface ApiItemContainerMixin {
 
 // @public
 enum ApiItemKind {
+  // (undocumented)
+  CallSignature = "CallSignature",
   // (undocumented)
   Class = "Class",
   // (undocumented)
@@ -402,6 +415,10 @@ class HeritageType {
 // @public
 interface IAnalyzeProjectOptions {
   projectConfig?: IExtractorProjectConfig;
+}
+
+// @public
+interface IApiCallSignatureOptions extends IApiDeclarationMixinOptions, IApiFunctionLikeMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDocumentedItemOptions {
 }
 
 // @public

@@ -12,6 +12,7 @@ import { ApiPackage } from '../model/ApiPackage';
  * @public
  */
 export const enum ApiItemKind {
+  CallSignature = 'CallSignature',
   Class = 'Class',
   Constructor = 'Constructor',
   ConstructSignature = 'ConstructSignature',
