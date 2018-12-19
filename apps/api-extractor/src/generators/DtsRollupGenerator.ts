@@ -128,6 +128,11 @@ export class DtsRollupGenerator {
         }
       }
     }
+
+    // Emit "export { }" which is a special directive that prevents consumers from importing declarations
+    // that don't have an explicit "export" modifier.
+    indentedWriter.writeLine();
+    indentedWriter.writeLine('export { }');
   }
 
   /**
