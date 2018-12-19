@@ -33,13 +33,13 @@ import {
   ApiDocumentedItem,
   ApiClass,
   ReleaseTag,
-  ApiDeclarationMixin,
   ApiStaticMixin,
   ApiPropertyItem,
   ApiInterface,
   Excerpt,
   ApiParameterListMixin,
-  ApiReturnTypeMixin
+  ApiReturnTypeMixin,
+  ApiDeclaredItem
 } from '@microsoft/api-extractor';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -148,7 +148,7 @@ export class MarkdownDocumenter {
       }
     }
 
-    if (ApiDeclarationMixin.isBaseClassOf(apiItem)) {
+    if (apiItem instanceof ApiDeclaredItem) {
       if (apiItem.excerpt.text.length > 0) {
         output.appendNode(
           new DocParagraph({ configuration }, [

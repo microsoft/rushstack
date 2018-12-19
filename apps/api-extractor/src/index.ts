@@ -29,10 +29,26 @@ export { ILogger } from './api/ILogger';
 
 export { IndentedWriter } from './api/IndentedWriter';
 
+// items
 export {
-  IApiDeclarationMixinOptions,
-  ApiDeclarationMixin
-} from './api/mixins/ApiDeclarationMixin';
+  IApiDeclaredItemOptions,
+  ApiDeclaredItem
+} from './api/items/ApiDeclaredItem';
+export {
+  IApiDocumentedItemOptions,
+  ApiDocumentedItem
+} from './api/items/ApiDocumentedItem';
+export {
+  ApiItemKind,
+  IApiItemOptions,
+  ApiItem
+} from './api/items/ApiItem';
+export {
+  IApiPropertyItemOptions,
+  ApiPropertyItem
+} from './api/items/ApiPropertyItem';
+
+// mixins
 export {
   IApiParameterListMixinOptions,
   ApiParameterListMixin
@@ -65,6 +81,7 @@ export {
   PropertiesOf
 } from './api/mixins/Mixin';
 
+// model
 export {
   IApiCallSignatureOptions,
   ApiCallSignature
@@ -81,10 +98,6 @@ export {
   IApiConstructSignatureOptions,
   ApiConstructSignature
 } from './api/model/ApiConstructSignature';
-export {
-  IApiDocumentedItemOptions,
-  ApiDocumentedItem
-} from './api/items/ApiDocumentedItem';
 export {
   IApiEntryPointOptions,
   ApiEntryPoint
@@ -109,11 +122,6 @@ export {
   IApiInterfaceOptions,
   ApiInterface
 } from './api/model/ApiInterface';
-export {
-  ApiItemKind,
-  IApiItemOptions,
-  ApiItem
-} from './api/items/ApiItem';
 export {
   IApiMethodOptions,
   ApiMethod
@@ -141,10 +149,6 @@ export {
   IApiPropertyOptions,
   ApiProperty
 } from './api/model/ApiProperty';
-export {
-  IApiPropertyItemOptions,
-  ApiPropertyItem
-} from './api/items/ApiPropertyItem';
 export {
   IApiPropertySignatureOptions,
   ApiPropertySignature

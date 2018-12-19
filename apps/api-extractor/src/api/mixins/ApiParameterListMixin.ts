@@ -3,7 +3,7 @@
 
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import { Parameter } from '../model/Parameter';
-import { ApiDeclarationMixin } from './ApiDeclarationMixin';
+import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IExcerptTokenRange } from './Excerpt';
 import { InternalError } from '@microsoft/node-core-library';
 
@@ -40,7 +40,7 @@ const _parameters: unique symbol = Symbol('ApiParameterListMixin._parameters');
  *
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.  The non-abstract classes (e.g. `ApiClass`, `ApiEnum`, `ApiInterface`, etc.) use
- * TypeScript "mixin" functions (e.g. `ApiDeclarationMixin`, `ApiItemContainerMixin`, etc.) to add various
+ * TypeScript "mixin" functions (e.g. `ApiDeclaredItem`, `ApiItemContainerMixin`, etc.) to add various
  * features that cannot be represented as a normal inheritance chain (since TypeScript does not allow a child class
  * to extend more than one base class).  The "mixin" is a TypeScript merged declaration with three components:
  * the function that generates a subclass, an interface that describes the members of the subclass, and
@@ -116,7 +116,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
 
       this[_parameters] = [];
 
-      if (ApiDeclarationMixin.isBaseClassOf(this)) {
+      if (this instanceof ApiDeclaredItem) {
         if (options.parameters) {
           for (const parameterOptions of options.parameters) {
 
@@ -130,7 +130,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
           }
         }
       } else {
-        throw new InternalError('ApiParameterListMixin must always extend ApiDeclarationMixin');
+        throw new InternalError('ApiReturnTypeMixin expects a base class that inherits from ApiDeclaredItem');
       }
     }
 

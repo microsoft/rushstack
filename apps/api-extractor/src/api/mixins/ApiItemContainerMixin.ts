@@ -28,7 +28,7 @@ const _membersByName: unique symbol = Symbol('ApiItemContainerMixin._membersByNa
  *
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.  The non-abstract classes (e.g. `ApiClass`, `ApiEnum`, `ApiInterface`, etc.) use
- * TypeScript "mixin" functions (e.g. `ApiDeclarationMixin`, `ApiItemContainerMixin`, etc.) to add various
+ * TypeScript "mixin" functions (e.g. `ApiDeclaredItem`, `ApiItemContainerMixin`, etc.) to add various
  * features that cannot be represented as a normal inheritance chain (since TypeScript does not allow a child class
  * to extend more than one base class).  The "mixin" is a TypeScript merged declaration with three components:
  * the function that generates a subclass, an interface that describes the members of the subclass, and
@@ -70,7 +70,7 @@ export interface ApiItemContainerMixin extends ApiItem {
 }
 
 /**
- * Mixin function for {@link (ApiDeclarationMixin:interface)}.
+ * Mixin function for {@link (ApiDeclaredItem:interface)}.
  *
  * @param baseClass - The base class to be extended
  * @returns A child class that extends baseClass, adding the {@link (ApiItemContainerMixin:interface)} functionality.

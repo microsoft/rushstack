@@ -22,6 +22,7 @@ import { ApiCallSignature, IApiCallSignatureOptions } from './ApiCallSignature';
 import { ApiIndexSignature, IApiIndexSignatureOptions } from './ApiIndexSignature';
 import { ApiTypeAlias, IApiTypeAliasOptions } from './ApiTypeAlias';
 import { ApiVariableDeclaration, IApiVariableDeclarationOptions } from './ApiVariableDeclaration';
+import { IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 
 export class Deserializer {
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
@@ -32,42 +33,42 @@ export class Deserializer {
         ApiClass.onDeserializeInto(options, jsonObject as IApiClassJson);
         return new ApiClass(options as IApiClassOptions);
       case ApiItemKind.CallSignature:
-        ApiCallSignature.onDeserializeInto(options, jsonObject);
+        ApiCallSignature.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiCallSignature(options as IApiCallSignatureOptions);
       case ApiItemKind.Constructor:
-        ApiConstructor.onDeserializeInto(options, jsonObject);
+        ApiConstructor.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiConstructor(options as IApiConstructorOptions);
       case ApiItemKind.ConstructSignature:
-        ApiConstructSignature.onDeserializeInto(options, jsonObject);
+        ApiConstructSignature.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiConstructSignature(options as IApiConstructSignatureOptions);
       case ApiItemKind.EntryPoint:
         ApiEntryPoint.onDeserializeInto(options, jsonObject);
         return new ApiEntryPoint(options as IApiEntryPointOptions);
       case ApiItemKind.Enum:
-        ApiEnum.onDeserializeInto(options, jsonObject);
+        ApiEnum.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiEnum(options as IApiEnumOptions);
       case ApiItemKind.EnumMember:
         ApiEnumMember.onDeserializeInto(options, jsonObject as IApiEnumMemberJson);
         return new ApiEnumMember(options as IApiEnumMemberOptions);
       case ApiItemKind.Function:
-        ApiFunction.onDeserializeInto(options, jsonObject);
+        ApiFunction.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiFunction(options as IApiFunctionOptions);
       case ApiItemKind.IndexSignature:
-        ApiIndexSignature.onDeserializeInto(options, jsonObject);
+        ApiIndexSignature.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiIndexSignature(options as IApiIndexSignatureOptions);
       case ApiItemKind.Interface:
         ApiInterface.onDeserializeInto(options, jsonObject as IApiInterfaceJson);
         return new ApiInterface(options as IApiInterfaceOptions);
       case ApiItemKind.Method:
-        ApiMethod.onDeserializeInto(options, jsonObject);
+        ApiMethod.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiMethod(options as IApiMethodOptions);
       case ApiItemKind.MethodSignature:
-        ApiMethodSignature.onDeserializeInto(options, jsonObject);
+        ApiMethodSignature.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiMethodSignature(options as IApiMethodSignatureOptions);
       case ApiItemKind.Model:
         return new ApiModel();
       case ApiItemKind.Namespace:
-        ApiNamespace.onDeserializeInto(options, jsonObject);
+        ApiNamespace.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiNamespace(options as IApiNamespaceOptions);
       case ApiItemKind.Package:
         ApiPackage.onDeserializeInto(options, jsonObject);
@@ -79,10 +80,10 @@ export class Deserializer {
         ApiPropertySignature.onDeserializeInto(options, jsonObject as IApiPropertyItemJson);
         return new ApiPropertySignature(options as IApiPropertySignatureOptions);
         case ApiItemKind.TypeAlias:
-        ApiTypeAlias.onDeserializeInto(options, jsonObject);
+        ApiTypeAlias.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiTypeAlias(options as IApiTypeAliasOptions);
       case ApiItemKind.VariableDeclaration:
-        ApiVariableDeclaration.onDeserializeInto(options, jsonObject);
+        ApiVariableDeclaration.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiVariableDeclaration(options as IApiVariableDeclarationOptions);
       default:
         throw new Error(`Failed to deserialize unsupported API item type ${JSON.stringify(jsonObject.kind)}`);

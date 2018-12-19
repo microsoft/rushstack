@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
-import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { ApiPackage } from '../model/ApiPackage';
 
 /**
@@ -197,3 +196,4 @@ export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<
 
 // Circular import
 import { Deserializer } from '../model/Deserializer';
+import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';

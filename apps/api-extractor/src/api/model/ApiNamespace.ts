@@ -3,8 +3,7 @@
 
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
-import { IApiDocumentedItemOptions, ApiDocumentedItem } from '../items/ApiDocumentedItem';
+import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
@@ -13,11 +12,10 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
  * @public
  */
 export interface IApiNamespaceOptions extends
-  IApiDeclarationMixinOptions,
   IApiItemContainerMixinOptions,
   IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiDeclaredItemOptions {
 }
 
 /**
@@ -42,8 +40,7 @@ export interface IApiNamespaceOptions extends
  *
  * @public
  */
-export class ApiNamespace extends ApiDeclarationMixin(ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(
-  ApiDocumentedItem)))) {
+export class ApiNamespace extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
 
     public static getCanonicalReference(name: string): string {
     return `(${name}:namespace)`;

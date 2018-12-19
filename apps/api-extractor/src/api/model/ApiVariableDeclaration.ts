@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
@@ -12,10 +11,9 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
  * @public
  */
 export interface IApiVariableDeclarationOptions extends
-  IApiDeclarationMixinOptions,
   IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiDeclaredItemOptions {
 }
 
 /**
@@ -38,7 +36,7 @@ export interface IApiVariableDeclarationOptions extends
  *
  * @public
  */
-export class ApiVariableDeclaration extends ApiDeclarationMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
+export class ApiVariableDeclaration extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
   public static getCanonicalReference(name: string): string {
     return name;
   }

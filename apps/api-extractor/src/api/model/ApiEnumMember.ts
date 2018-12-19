@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind, IApiItemJson } from '../items/ApiItem';
-import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
+import { ApiItemKind } from '../items/ApiItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
@@ -13,15 +12,14 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
  * @public
  */
 export interface IApiEnumMemberOptions extends
-  IApiDeclarationMixinOptions,
   IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiDeclaredItemOptions {
 
   initializerTokenRange: IExcerptTokenRange;
 }
 
-export interface IApiEnumMemberJson extends IApiItemJson {
+export interface IApiEnumMemberJson extends IApiDeclaredItemJson {
   initializerTokenRange: IExcerptTokenRange;
 }
 
@@ -45,7 +43,7 @@ export interface IApiEnumMemberJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiEnumMember extends ApiDeclarationMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
+export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
   /**
    * An {@link Excerpt} that describes the value of the enum member.
    */

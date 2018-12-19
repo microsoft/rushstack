@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
-import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
+import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
@@ -13,11 +12,10 @@ import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiRet
  * @public
  */
 export interface IApiConstructSignatureOptions extends
-  IApiDeclarationMixinOptions,
   IApiParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiReturnTypeMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiDeclaredItemOptions {
 }
 
 /**
@@ -62,8 +60,8 @@ export interface IApiConstructSignatureOptions extends
  *
  * @public
  */
-export class ApiConstructSignature extends ApiDeclarationMixin(ApiParameterListMixin(ApiReleaseTagMixin(
-  ApiReturnTypeMixin(ApiDocumentedItem)))) {
+export class ApiConstructSignature extends ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(
+  ApiDeclaredItem))) {
 
   public static getCanonicalReference(overloadIndex: number): string {
     return `(:${overloadIndex})`;
