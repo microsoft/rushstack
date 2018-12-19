@@ -29,7 +29,7 @@ import { ApiConstructor } from '../api/model/ApiConstructor';
 import { ApiConstructSignature } from '../api/model/ApiConstructSignature';
 import { ApiFunction } from '../api/model/ApiFunction';
 import { ApiIndexSignature } from '../api/model/ApiIndexSignature';
-import { ApiVariableDeclaration } from '../api/model/ApiVariableDeclaration';
+import { ApiVariable } from '../api/model/ApiVariable';
 import { ApiTypeAlias } from '../api/model/ApiTypeAlias';
 
 export class ApiModelGenerator {
@@ -627,10 +627,10 @@ export class ApiModelGenerator {
 
     const name: string = !!exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
-    const canonicalReference: string = ApiVariableDeclaration.getCanonicalReference(name);
+    const canonicalReference: string = ApiVariable.getCanonicalReference(name);
 
-    let apiVariable: ApiVariableDeclaration | undefined = parentApiItem.tryGetMember(canonicalReference) as
-      ApiVariableDeclaration;
+    let apiVariable: ApiVariable | undefined = parentApiItem.tryGetMember(canonicalReference) as
+      ApiVariable;
 
     if (apiVariable === undefined) {
       const variableDeclaration: ts.VariableDeclaration = astDeclaration.declaration as ts.VariableDeclaration;
@@ -647,7 +647,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiVariable = new ApiVariableDeclaration({ name, docComment, releaseTag, excerptTokens, variableTypeTokenRange });
+      apiVariable = new ApiVariable({ name, docComment, releaseTag, excerptTokens, variableTypeTokenRange });
 
       parentApiItem.addMember(apiVariable);
     }

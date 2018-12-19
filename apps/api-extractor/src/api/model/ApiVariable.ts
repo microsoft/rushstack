@@ -8,10 +8,10 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt';
 
 /**
- * Constructor options for {@link ApiVariableDeclaration}.
+ * Constructor options for {@link ApiVariable}.
  * @public
  */
-export interface IApiVariableDeclarationOptions extends
+export interface IApiVariableOptions extends
   IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDeclaredItemOptions {
@@ -19,7 +19,7 @@ export interface IApiVariableDeclarationOptions extends
   variableTypeTokenRange: IExcerptTokenRange;
 }
 
-export interface IApiVariableDeclarationJson extends IApiDeclaredItemJson {
+export interface IApiVariableJson extends IApiDeclaredItemJson {
   variableTypeTokenRange: IExcerptTokenRange;
 }
 
@@ -31,7 +31,7 @@ export interface IApiVariableDeclarationJson extends IApiDeclaredItemJson {
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.
  *
- * `ApiVariableDeclaration` represents an exported `const` or `let` object such as these examples:
+ * `ApiVariable` represents an exported `const` or `let` object such as these examples:
  *
  * ```ts
  * // A variable declaration
@@ -43,15 +43,15 @@ export interface IApiVariableDeclarationJson extends IApiDeclaredItemJson {
  *
  * @public
  */
-export class ApiVariableDeclaration extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
+export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
   /**
    * An {@link Excerpt} that describes the type of the variable.
    */
   public readonly variableTypeExcerpt: Excerpt;
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiVariableDeclarationOptions>,
-    jsonObject: IApiVariableDeclarationJson): void {
+  public static onDeserializeInto(options: Partial<IApiVariableOptions>,
+    jsonObject: IApiVariableJson): void {
 
     super.onDeserializeInto(options, jsonObject);
 
@@ -62,22 +62,22 @@ export class ApiVariableDeclaration extends ApiNameMixin(ApiReleaseTagMixin(ApiD
     return name;
   }
 
-  public constructor(options: IApiVariableDeclarationOptions) {
+  public constructor(options: IApiVariableOptions) {
     super(options);
   }
 
   /** @override */
   public get kind(): ApiItemKind {
-    return ApiItemKind.VariableDeclaration;
+    return ApiItemKind.Variable;
   }
 
   /** @override */
   public get canonicalReference(): string {
-    return ApiVariableDeclaration.getCanonicalReference(this.name);
+    return ApiVariable.getCanonicalReference(this.name);
   }
 
   /** @override */
-  public serializeInto(jsonObject: Partial<IApiVariableDeclarationJson>): void {
+  public serializeInto(jsonObject: Partial<IApiVariableJson>): void {
     super.serializeInto(jsonObject);
 
     jsonObject.variableTypeTokenRange = this.variableTypeExcerpt.tokenRange;

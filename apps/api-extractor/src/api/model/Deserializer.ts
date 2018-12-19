@@ -21,7 +21,7 @@ import { ApiFunction, IApiFunctionOptions } from './ApiFunction';
 import { ApiCallSignature, IApiCallSignatureOptions } from './ApiCallSignature';
 import { ApiIndexSignature, IApiIndexSignatureOptions } from './ApiIndexSignature';
 import { ApiTypeAlias, IApiTypeAliasOptions } from './ApiTypeAlias';
-import { ApiVariableDeclaration, IApiVariableDeclarationOptions, IApiVariableDeclarationJson } from './ApiVariableDeclaration';
+import { ApiVariable, IApiVariableOptions, IApiVariableJson } from './ApiVariable';
 import { IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 
 export class Deserializer {
@@ -82,9 +82,9 @@ export class Deserializer {
         case ApiItemKind.TypeAlias:
         ApiTypeAlias.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
         return new ApiTypeAlias(options as IApiTypeAliasOptions);
-      case ApiItemKind.VariableDeclaration:
-        ApiVariableDeclaration.onDeserializeInto(options, jsonObject as IApiVariableDeclarationJson);
-        return new ApiVariableDeclaration(options as IApiVariableDeclarationOptions);
+      case ApiItemKind.Variable:
+        ApiVariable.onDeserializeInto(options, jsonObject as IApiVariableJson);
+        return new ApiVariable(options as IApiVariableOptions);
       default:
         throw new Error(`Failed to deserialize unsupported API item type ${JSON.stringify(jsonObject.kind)}`);
     }

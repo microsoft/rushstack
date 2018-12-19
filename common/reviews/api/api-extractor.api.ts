@@ -236,7 +236,7 @@ enum ApiItemKind {
   // (undocumented)
   TypeAlias = "TypeAlias",
   // (undocumented)
-  VariableDeclaration = "VariableDeclaration"
+  Variable = "Variable"
 }
 
 // @public
@@ -372,20 +372,20 @@ class ApiTypeAlias extends ApiTypeAlias_base {
 }
 
 // @public
-class ApiVariableDeclaration extends ApiVariableDeclaration_base {
-  constructor(options: IApiVariableDeclarationOptions);
+class ApiVariable extends ApiVariable_base {
+  constructor(options: IApiVariableOptions);
   // @override (undocumented)
   readonly canonicalReference: string;
   // (undocumented)
   static getCanonicalReference(name: string): string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
-  // WARNING: The type "IApiVariableDeclarationJson" needs to be exported by the package (e.g. added to index.ts)
+  // WARNING: The type "IApiVariableJson" needs to be exported by the package (e.g. added to index.ts)
   // @override (undocumented)
-  static onDeserializeInto(options: Partial<IApiVariableDeclarationOptions>, jsonObject: IApiVariableDeclarationJson): void;
-  // WARNING: The type "IApiVariableDeclarationJson" needs to be exported by the package (e.g. added to index.ts)
+  static onDeserializeInto(options: Partial<IApiVariableOptions>, jsonObject: IApiVariableJson): void;
+  // WARNING: The type "IApiVariableJson" needs to be exported by the package (e.g. added to index.ts)
   // @override (undocumented)
-  serializeInto(jsonObject: Partial<IApiVariableDeclarationJson>): void;
+  serializeInto(jsonObject: Partial<IApiVariableJson>): void;
   readonly variableTypeExcerpt: Excerpt;
 }
 
@@ -580,7 +580,7 @@ interface IApiTypeAliasOptions extends IApiNameMixinOptions, IApiReleaseTagMixin
 }
 
 // @public
-interface IApiVariableDeclarationOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
   // (undocumented)
   variableTypeTokenRange: IExcerptTokenRange;
 }
