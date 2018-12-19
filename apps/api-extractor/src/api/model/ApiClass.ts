@@ -1,29 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind, IApiItemJson } from '../items/ApiItem';
-import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
+import { ApiItemKind } from '../items/ApiItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiClass}.
  * @public
  */
 export interface IApiClassOptions extends
-  IApiDeclarationMixinOptions,
   IApiItemContainerMixinOptions,
+  IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiDeclaredItemOptions {
 
   extendsTokenRange: IExcerptTokenRange | undefined;
   implementsTokenRanges: IExcerptTokenRange[];
 }
 
-export interface IApiClassJson extends IApiItemJson {
+export interface IApiClassJson extends IApiDeclaredItemJson {
   extendsTokenRange?: IExcerptTokenRange;
   implementsTokenRanges: IExcerptTokenRange[];
 }
@@ -44,8 +44,13 @@ export interface IApiClassJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
+export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+
+  /**
+   * The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.
+   */
   public readonly extendsType: HeritageType | undefined;
+
   private readonly _implementsTypes: HeritageType[] = [];
 
   public static getCanonicalReference(name: string): string {
@@ -84,6 +89,9 @@ export class ApiClass extends ApiDeclarationMixin(ApiItemContainerMixin(ApiRelea
     return ApiClass.getCanonicalReference(this.name);
   }
 
+  /**
+   * The list of interfaces that this class implements using the `implements` keyword.
+   */
   public get implementsTypes(): ReadonlyArray<HeritageType> {
     return this._implementsTypes;
   }

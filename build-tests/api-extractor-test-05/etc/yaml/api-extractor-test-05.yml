@@ -14,9 +14,48 @@ items:
       - api-extractor-test-05.DocBaseClass
       - api-extractor-test-05.DocClass1
       - api-extractor-test-05.DocEnum
+      - api-extractor-test-05.globalFunction
       - api-extractor-test-05.IDocInterface1
       - api-extractor-test-05.IDocInterface2
+      - api-extractor-test-05.IDocInterface3
+      - api-extractor-test-05.OuterNamespace.InnerNamespace.nestedFunction
       - api-extractor-test-05.SystemEvent
+  - uid: api-extractor-test-05.globalFunction
+    summary: An exported function
+    name: globalFunction(x)
+    fullName: globalFunction(x)
+    langs:
+      - typeScript
+    type: function
+    syntax:
+      content: 'export declare function globalFunction(x: number): number;'
+      return:
+        type:
+          - number
+        description: ''
+      parameters:
+        - id: x
+          description: ''
+          type:
+            - number
+  - uid: api-extractor-test-05.OuterNamespace.InnerNamespace.nestedFunction
+    summary: A function inside a namespace
+    name: OuterNamespace.InnerNamespace.nestedFunction
+    fullName: OuterNamespace.InnerNamespace.nestedFunction
+    langs:
+      - typeScript
+    type: function
+    syntax:
+      content: 'function nestedFunction(x: number): number;'
+      return:
+        type:
+          - number
+        description: ''
+      parameters:
+        - id: x
+          description: ''
+          type:
+            - number
 references:
   - uid: api-extractor-test-05.DocBaseClass
     name: DocBaseClass
@@ -28,5 +67,7 @@ references:
     name: IDocInterface1
   - uid: api-extractor-test-05.IDocInterface2
     name: IDocInterface2
+  - uid: api-extractor-test-05.IDocInterface3
+    name: IDocInterface3
   - uid: api-extractor-test-05.SystemEvent
     name: SystemEvent

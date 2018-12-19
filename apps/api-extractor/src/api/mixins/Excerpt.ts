@@ -33,7 +33,7 @@ export class ExcerptToken {
 }
 
 /**
- * This class is used by {@link (ApiDeclarationMixin:interface)} to represent a source code excerpt containing
+ * This class is used by {@link (ApiDeclaredItem:interface)} to represent a source code excerpt containing
  * a TypeScript declaration.
  *
  * @remarks

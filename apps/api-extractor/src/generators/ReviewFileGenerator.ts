@@ -13,7 +13,7 @@ import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { Text } from '@microsoft/node-core-library';
+import { Text, InternalError } from '@microsoft/node-core-library';
 
 export class ReviewFileGenerator {
   /**
@@ -109,7 +109,7 @@ export class ReviewFileGenerator {
             [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
           if (!list) {
             // This should not happen unless the compiler API changes somehow
-            throw new Error('Unsupported variable declaration');
+            throw new InternalError('Unsupported variable declaration');
           }
           const listPrefix: string = list.getSourceFile().text
             .substring(list.getStart(), list.declarations[0].getStart());

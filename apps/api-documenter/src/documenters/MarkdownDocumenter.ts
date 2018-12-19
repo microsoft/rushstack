@@ -33,13 +33,13 @@ import {
   ApiDocumentedItem,
   ApiClass,
   ReleaseTag,
-  ApiDeclarationMixin,
   ApiStaticMixin,
   ApiPropertyItem,
-  ApiFunctionLikeMixin,
   ApiInterface,
   Excerpt,
-  ApiMethodItem
+  ApiParameterListMixin,
+  ApiReturnTypeMixin,
+  ApiDeclaredItem
 } from '@microsoft/api-extractor';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -106,7 +106,7 @@ export class MarkdownDocumenter {
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} namespace` }));
         break;
       case ApiItemKind.Package:
-        const unscopedPackageName: string = PackageName.getUnscopedName(apiItem.name);
+        const unscopedPackageName: string = PackageName.getUnscopedName(apiItem.displayName);
         output.appendNode(new DocHeading({ configuration, title: `${unscopedPackageName} package` }));
         break;
       case ApiItemKind.Property:
@@ -148,7 +148,7 @@ export class MarkdownDocumenter {
       }
     }
 
-    if (ApiDeclarationMixin.isBaseClassOf(apiItem)) {
+    if (apiItem instanceof ApiDeclaredItem) {
       if (apiItem.excerpt.text.length > 0) {
         output.appendNode(
           new DocParagraph({ configuration }, [
@@ -175,7 +175,7 @@ export class MarkdownDocumenter {
         break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
-        this._writeFunctionLikeTables(output, apiItem as ApiFunctionLikeMixin);
+        this._writeParameterTables(output, apiItem as ApiParameterListMixin);
         break;
       case ApiItemKind.Namespace:
         break;
@@ -515,14 +515,14 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: FUNCTION-LIKE
    */
-  private _writeFunctionLikeTables(output: DocSection, apiFunctionLike: ApiFunctionLikeMixin): void {
+  private _writeParameterTables(output: DocSection, apiParameterListMixin: ApiParameterListMixin): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const parametersTable: DocTable = new DocTable({ configuration,
       headerTitles: [ 'Parameter', 'Type', 'Description' ]
     });
 
-    for (const apiParameter of apiFunctionLike.parameters) {
+    for (const apiParameter of apiParameterListMixin.parameters) {
       const parameterDescription: DocSection = new DocSection({ configuration } );
       if (apiParameter.tsdocParamBlock) {
         this._appendSection(parameterDescription, apiParameter.tsdocParamBlock.content);
@@ -550,8 +550,8 @@ export class MarkdownDocumenter {
       output.appendNode(parametersTable);
     }
 
-    if (apiFunctionLike instanceof ApiMethodItem) {
-      const returnTypeExcerpt: Excerpt = apiFunctionLike.returnTypeExcerpt;
+    if (ApiReturnTypeMixin.isBaseClassOf(apiParameterListMixin)) {
+      const returnTypeExcerpt: Excerpt = apiParameterListMixin.returnTypeExcerpt;
       output.appendNode(
         new DocParagraph({ configuration }, [
           new DocEmphasisSpan({ configuration, bold: true}, [
@@ -566,9 +566,9 @@ export class MarkdownDocumenter {
         ])
       );
 
-      if (apiFunctionLike instanceof ApiDocumentedItem) {
-        if (apiFunctionLike.tsdocComment && apiFunctionLike.tsdocComment.returnsBlock) {
-          this._appendSection(output, apiFunctionLike.tsdocComment.returnsBlock.content);
+      if (apiParameterListMixin instanceof ApiDocumentedItem) {
+        if (apiParameterListMixin.tsdocComment && apiParameterListMixin.tsdocComment.returnsBlock) {
+          this._appendSection(output, apiParameterListMixin.tsdocComment.returnsBlock.content);
         }
       }
     }
@@ -672,7 +672,7 @@ export class MarkdownDocumenter {
             new DocLinkTag({
               configuration: this._tsdocConfiguration,
               tagName: '@link',
-              linkText: hierarchyItem.name,
+              linkText: hierarchyItem.displayName,
               urlDestination: this._getLinkFilenameForApiItem(hierarchyItem)
             })
           ]);
@@ -719,8 +719,8 @@ export class MarkdownDocumenter {
     let baseName: string = '';
     for (const hierarchyItem of apiItem.getHierarchy()) {
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
-      let qualifiedName: string = hierarchyItem.name;
-      if (ApiFunctionLikeMixin.isBaseClassOf(hierarchyItem)) {
+      let qualifiedName: string = hierarchyItem.displayName;
+      if (ApiParameterListMixin.isBaseClassOf(hierarchyItem)) {
         if (hierarchyItem.overloadIndex > 0) {
           qualifiedName += `_${hierarchyItem.overloadIndex}`;
         }
@@ -731,7 +731,7 @@ export class MarkdownDocumenter {
         case ApiItemKind.EntryPoint:
           break;
         case ApiItemKind.Package:
-          baseName = PackageName.getUnscopedName(hierarchyItem.name);
+          baseName = PackageName.getUnscopedName(hierarchyItem.displayName);
           break;
         default:
           baseName += '.' + qualifiedName;

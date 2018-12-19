@@ -1,25 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
-import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
+import { IApiDeclaredItemOptions, ApiDeclaredItem, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { IApiItemJson } from './ApiItem';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiPropertyItem}.
  * @public
  */
 export interface IApiPropertyItemOptions extends
-  IApiDeclarationMixinOptions,
+  IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiDeclaredItemOptions {
 
   propertyTypeTokenRange: IExcerptTokenRange;
 }
 
-export interface IApiPropertyItemJson extends IApiItemJson {
+export interface IApiPropertyItemJson extends IApiDeclaredItemJson {
   propertyTypeTokenRange: IExcerptTokenRange;
 }
 
@@ -28,7 +27,10 @@ export interface IApiPropertyItemJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiPropertyItem extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
+export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
+  /**
+   * An {@link Excerpt} that describes the type of the property.
+   */
   public readonly propertyTypeExcerpt: Excerpt;
 
   /** @override */

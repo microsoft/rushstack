@@ -7,6 +7,7 @@ import { JsonFile, IJsonFileSaveOptions } from '@microsoft/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { Extractor } from '../Extractor';
 import { ApiEntryPoint } from './ApiEntryPoint';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiPackage}.
@@ -14,6 +15,7 @@ import { ApiEntryPoint } from './ApiEntryPoint';
  */
 export interface IApiPackageOptions extends
   IApiItemContainerMixinOptions,
+  IApiNameMixinOptions,
   IApiDocumentedItemOptions {
 }
 
@@ -60,7 +62,7 @@ export interface IApiPackageJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
+export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
     const jsonObject: IApiItemJson = JsonFile.load(apiJsonFilename);
     return ApiItem.deserialize(jsonObject) as ApiPackage;

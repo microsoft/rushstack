@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
-import { ApiFunctionLikeMixin } from '../mixins/ApiFunctionLikeMixin';
 import { ApiPackage } from '../model/ApiPackage';
 
 /**
@@ -12,19 +11,25 @@ import { ApiPackage } from '../model/ApiPackage';
  * @public
  */
 export const enum ApiItemKind {
+  CallSignature = 'CallSignature',
   Class = 'Class',
+  Constructor = 'Constructor',
+  ConstructSignature = 'ConstructSignature',
   EntryPoint = 'EntryPoint',
   Enum = 'Enum',
   EnumMember = 'EnumMember',
+  Function = 'Function',
+  IndexSignature = 'IndexSignature',
   Interface = 'Interface',
   Method = 'Method',
   MethodSignature = 'MethodSignature',
   Model = 'Model',
   Namespace = 'Namespace',
   Package = 'Package',
-  Parameter = 'Parameter',
   Property = 'Property',
   PropertySignature = 'PropertySignature',
+  TypeAlias = 'TypeAlias',
+  Variable = 'Variable',
   None = 'None'
 }
 
@@ -33,11 +38,9 @@ export const enum ApiItemKind {
  * @public
  */
 export interface IApiItemOptions {
-  name: string;
 }
 
 export interface IApiItemJson {
-  name: string;
   kind: ApiItemKind;
   canonicalReference: string;
 }
@@ -60,8 +63,6 @@ export const ApiItem_parent: unique symbol = Symbol('ApiItem._parent');
 export class ApiItem {
   public [ApiItem_parent]: ApiItem | undefined;
 
-  private readonly _name: string;
-
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
     // tslint:disable-next-line:no-use-before-declare
     return Deserializer.deserialize(jsonObject);
@@ -69,17 +70,16 @@ export class ApiItem {
 
   /** @virtual */
   public static onDeserializeInto(options: Partial<IApiItemOptions>, jsonObject: IApiItemJson): void {
-    options.name = jsonObject.name;
+    // (implemented by subclasses)
   }
 
   public constructor(options: IApiItemOptions) {
-    this._name = options.name;
+    // ("options" is not used here, but part of the inheritance pattern)
   }
 
   /** @virtual */
   public serializeInto(jsonObject: Partial<IApiItemJson>): void {
     jsonObject.kind = this.kind;
-    jsonObject.name = this.name;
     jsonObject.canonicalReference = this.canonicalReference;
   }
 
@@ -88,18 +88,34 @@ export class ApiItem {
     throw new Error('ApiItem.kind was not implemented by the child class');
   }
 
-  public get name(): string {
-    return this._name;
-  }
-
   /** @virtual */
   public get canonicalReference(): string {
     throw new Error('ApiItem.canonicalReference was not implemented by the child class');
   }
 
   /**
+   * Returns a name for this object that can be used in diagnostic messages, for example.
+   *
+   * @remarks
+   * For an object that inherits ApiNameMixin, this will return the declared name (e.g. the name of a TypeScript
+   * function).  Otherwise, it will return a string such as "(call signature)" or "(model)".
+   *
+   * @virtual
+   */
+  public get displayName(): string {
+    switch (this.kind) {
+      case ApiItemKind.CallSignature: return '(call signature)';
+      case ApiItemKind.Constructor: return '(constructor)';
+      case ApiItemKind.ConstructSignature: return '(construct signature)';
+      case ApiItemKind.IndexSignature: return '(indexer)';
+      case ApiItemKind.Model: return '(model)';
+    }
+    return '(???)';  // All other types should inherit ApiNameMixin which will override this property
+  }
+
+  /**
    * If this item was added to a ApiItemContainerMixin item, then this returns the container item.
-   * If this is an ApiParameter that was added to a method or function, then this returns the function item.
+   * If this is an Parameter that was added to a method or function, then this returns the function item.
    * Otherwise, it returns undefined.
    * @virtual
    */
@@ -147,10 +163,10 @@ export class ApiItem {
       }
       if (reversedParts.length !== 0) {
         reversedParts.push('.');
-      } else if (ApiFunctionLikeMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
+      } else if (ApiParameterListMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
         reversedParts.push('()');
       }
-      reversedParts.push(current.name);
+      reversedParts.push(current.displayName);
     }
 
     return reversedParts.reverse().join('');
@@ -180,3 +196,4 @@ export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<
 
 // Circular import
 import { Deserializer } from '../model/Deserializer';
+import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';

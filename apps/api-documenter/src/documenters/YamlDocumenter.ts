@@ -23,11 +23,15 @@ import {
   ApiPropertyItem,
   ApiItemContainerMixin,
   ApiPackage,
-  ApiFunctionLikeMixin,
   ApiEnumMember,
-  ApiMethodItem,
   ApiClass,
-  ApiInterface
+  ApiInterface,
+  ApiParameterListMixin,
+  ApiMethod,
+  ApiMethodSignature,
+  ApiConstructor,
+  ApiFunction,
+  ApiReturnTypeMixin
 } from '@microsoft/api-extractor';
 
 import {
@@ -202,7 +206,7 @@ export class YamlDocumenter {
       if (apiItem.kind === ApiItemKind.Namespace) {
         // Namespaces don't have nodes yet
         tocItem = {
-          name: apiItem.name
+          name: apiItem.displayName
         };
       } else {
         if (this._shouldEmbed(apiItem.kind)) {
@@ -212,12 +216,12 @@ export class YamlDocumenter {
 
         if (apiItem.kind === ApiItemKind.Package) {
           tocItem = {
-            name: PackageName.getUnscopedName(apiItem.name),
+            name: PackageName.getUnscopedName(apiItem.displayName),
             uid: this._getUid(apiItem)
           };
         } else {
           tocItem = {
-            name: apiItem.name,
+            name: apiItem.displayName,
             uid: this._getUid(apiItem)
           };
         }
@@ -253,6 +257,16 @@ export class YamlDocumenter {
   }
 
   private _generateYamlItem(apiItem: ApiDocumentedItem): IYamlItem | undefined {
+    // Filter out known items that are not yet supported
+    switch (apiItem.kind) {
+      case ApiItemKind.CallSignature:
+      case ApiItemKind.ConstructSignature:
+      case ApiItemKind.IndexSignature:
+      case ApiItemKind.TypeAlias:
+      case ApiItemKind.Variable:
+        return undefined;
+    }
+
     const yamlItem: Partial<IYamlItem> = { };
     yamlItem.uid = this._getUid(apiItem);
 
@@ -315,14 +329,14 @@ export class YamlDocumenter {
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
         yamlItem.type = 'method';
-        this._populateYamlFunctionLike(yamlItem, apiItem as ApiMethodItem);
+        this._populateYamlFunctionLike(yamlItem, apiItem as ApiMethod | ApiMethodSignature);
         break;
-      /*
+
       case ApiItemKind.Constructor:
         yamlItem.type = 'constructor';
-        this._populateYamlFunctionLike(yamlItem, apiItem);
+        this._populateYamlFunctionLike(yamlItem, apiItem as ApiConstructor);
         break;
-      */
+
       case ApiItemKind.Package:
         yamlItem.type = 'package';
         break;
@@ -336,20 +350,20 @@ export class YamlDocumenter {
         }
         this._populateYamlProperty(yamlItem, apiProperty);
         break;
-      /*
+
       case ApiItemKind.Function:
         yamlItem.type = 'function';
-        this._populateYamlFunctionLike(yamlItem, apiItem);
+        this._populateYamlFunctionLike(yamlItem, apiItem as ApiFunction);
         break;
+
       default:
         throw new Error('Unimplemented item kind: ' + apiItem.kind);
-      */
     }
 
     if (apiItem.kind !== ApiItemKind.Package && !this._shouldEmbed(apiItem.kind)) {
       const associatedPackage: ApiPackage | undefined = apiItem.getAssociatedPackage();
       if (!associatedPackage) {
-        throw new Error('Unable to determine associated package for ' + apiItem.name);
+        throw new Error('Unable to determine associated package for ' + apiItem.displayName);
       }
       yamlItem.package = this._getUid(associatedPackage);
     }
@@ -394,27 +408,31 @@ export class YamlDocumenter {
     }
   }
 
-  private _populateYamlFunctionLike(yamlItem: Partial<IYamlItem>, apiItem: ApiMethodItem): void {
+  private _populateYamlFunctionLike(yamlItem: Partial<IYamlItem>, apiItem: ApiMethod | ApiMethodSignature
+    | ApiConstructor | ApiFunction): void {
+
     const syntax: IYamlSyntax = {
       content: apiItem.getExcerptWithModifiers()
     };
     yamlItem.syntax = syntax;
 
-    const returnType: string = this._linkToUidIfPossible(apiItem.returnTypeExcerpt.text);
+    if (ApiReturnTypeMixin.isBaseClassOf(apiItem)) {
+      const returnType: string = this._linkToUidIfPossible(apiItem.returnTypeExcerpt.text);
 
-    let returnDescription: string = '';
+      let returnDescription: string = '';
 
-    if (apiItem.tsdocComment && apiItem.tsdocComment.returnsBlock) {
-      returnDescription = this._renderMarkdown(apiItem.tsdocComment.returnsBlock.content, apiItem);
-      // temporary workaround for people who mistakenly add a hyphen, e.g. "@returns - blah"
-      returnDescription = returnDescription.replace(/^\s*-\s+/, '');
-    }
+      if (apiItem.tsdocComment && apiItem.tsdocComment.returnsBlock) {
+        returnDescription = this._renderMarkdown(apiItem.tsdocComment.returnsBlock.content, apiItem);
+        // temporary workaround for people who mistakenly add a hyphen, e.g. "@returns - blah"
+        returnDescription = returnDescription.replace(/^\s*-\s+/, '');
+      }
 
-    if (returnType || returnDescription) {
-      syntax.return = {
-        type: [ returnType ],
-        description: returnDescription
-      };
+      if (returnType || returnDescription) {
+        syntax.return = {
+          type: [ returnType ],
+          description: returnDescription
+        };
+      }
     }
 
     const parameters: IYamlParameter[] = [];
@@ -498,8 +516,8 @@ export class YamlDocumenter {
     for (const hierarchyItem of apiItem.getHierarchy()) {
 
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
-      let qualifiedName: string = hierarchyItem.name;
-      if (ApiFunctionLikeMixin.isBaseClassOf(hierarchyItem)) {
+      let qualifiedName: string = hierarchyItem.displayName;
+      if (ApiParameterListMixin.isBaseClassOf(hierarchyItem)) {
         if (hierarchyItem.overloadIndex > 0) {
           qualifiedName += `_${hierarchyItem.overloadIndex}`;
         }
@@ -510,7 +528,7 @@ export class YamlDocumenter {
         case ApiItemKind.EntryPoint:
           break;
         case ApiItemKind.Package:
-          result += PackageName.getUnscopedName(hierarchyItem.name);
+          result += PackageName.getUnscopedName(hierarchyItem.displayName);
           break;
         default:
           result += '.';
@@ -545,7 +563,7 @@ export class YamlDocumenter {
       case ApiItemKind.Enum:
       case ApiItemKind.Interface:
         // Attempt to register both the fully qualified name and the short name
-        const namesForType: string[] = [apiItem.name];
+        const namesForType: string[] = [apiItem.displayName];
 
         // Note that nameWithDot cannot conflict with apiItem.name (because apiItem.name
         // cannot contain a dot)
@@ -631,7 +649,7 @@ export class YamlDocumenter {
         case ApiItemKind.EntryPoint:
           break;
         case ApiItemKind.Package:
-          result += PackageName.getUnscopedName(current.name);
+          result += PackageName.getUnscopedName(current.displayName);
           break;
         default:
           if (current.parent && current.parent.kind === ApiItemKind.EntryPoint) {
@@ -639,7 +657,7 @@ export class YamlDocumenter {
           } else {
             result += '.';
           }
-          result += current.name;
+          result += current.displayName;
           break;
       }
     }

@@ -1,28 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind, IApiItemJson } from '../items/ApiItem';
+import { ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { IExcerptTokenRange } from '../../index';
 import { HeritageType } from './HeritageType';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiInterface}.
  * @public
  */
 export interface IApiInterfaceOptions extends
-  IApiDeclarationMixinOptions,
   IApiItemContainerMixinOptions,
+  IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiDeclaredItemOptions {
 
   extendsTokenRanges: IExcerptTokenRange[];
 }
 
-export interface IApiInterfaceJson extends IApiItemJson {
+export interface IApiInterfaceJson extends IApiDeclaredItemJson {
   extendsTokenRanges: IExcerptTokenRange[];
 }
 
@@ -43,7 +43,8 @@ export interface IApiInterfaceJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiInterface extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
+export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+
   private readonly _extendsTypes: HeritageType[] = [];
 
   public static getCanonicalReference(name: string): string {
@@ -75,6 +76,9 @@ export class ApiInterface extends ApiDeclarationMixin(ApiItemContainerMixin(ApiR
     return ApiInterface.getCanonicalReference(this.name);
   }
 
+  /**
+   * The list of base interfaces that this interface inherits from using the `extends` keyword.
+   */
   public get extendsTypes(): ReadonlyArray<HeritageType> {
     return this._extendsTypes;
   }

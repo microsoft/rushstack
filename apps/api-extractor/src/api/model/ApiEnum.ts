@@ -2,21 +2,21 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { ApiEnumMember } from './ApiEnumMember';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiEnum}.
  * @public
  */
 export interface IApiEnumOptions extends
-  IApiDeclarationMixinOptions,
   IApiItemContainerMixinOptions,
+  IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiDeclaredItemOptions {
 }
 
 /**
@@ -39,7 +39,7 @@ export interface IApiEnumOptions extends
  *
  * @public
  */
-export class ApiEnum extends ApiDeclarationMixin(ApiItemContainerMixin(ApiReleaseTagMixin(ApiDocumentedItem))) {
+export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
 
   public static getCanonicalReference(name: string): string {
     return `(${name}:enum)`;
