@@ -19,40 +19,43 @@ items:
       - api-extractor-test-05.IDocInterface2
       - api-extractor-test-05.IDocInterface3
       - api-extractor-test-05.OuterNamespace.InnerNamespace.nestedFunction
-      - api-extractor-test-05.OuterNamespace.nestedVariable
       - api-extractor-test-05.SystemEvent
-      - api-extractor-test-05.constVariable
-      - api-extractor-test-05.ExampleTypeAlias
   - uid: api-extractor-test-05.globalFunction
     summary: An exported function
     name: globalFunction(x)
     fullName: globalFunction(x)
     langs:
       - typeScript
+    type: function
+    syntax:
+      content: 'export declare function globalFunction(x: number): number;'
+      return:
+        type:
+          - number
+        description: ''
+      parameters:
+        - id: x
+          description: ''
+          type:
+            - number
   - uid: api-extractor-test-05.OuterNamespace.InnerNamespace.nestedFunction
     summary: A function inside a namespace
     name: OuterNamespace.InnerNamespace.nestedFunction
     fullName: OuterNamespace.InnerNamespace.nestedFunction
     langs:
       - typeScript
-  - uid: api-extractor-test-05.OuterNamespace.nestedVariable
-    summary: A variable exported from within a namespace.
-    name: OuterNamespace.nestedVariable
-    fullName: OuterNamespace.nestedVariable
-    langs:
-      - typeScript
-  - uid: api-extractor-test-05.constVariable
-    summary: An exported variable declaration.
-    name: constVariable
-    fullName: constVariable
-    langs:
-      - typeScript
-  - uid: api-extractor-test-05.ExampleTypeAlias
-    summary: A type alias
-    name: ExampleTypeAlias
-    fullName: ExampleTypeAlias
-    langs:
-      - typeScript
+    type: function
+    syntax:
+      content: 'function nestedFunction(x: number): number;'
+      return:
+        type:
+          - number
+        description: ''
+      parameters:
+        - id: x
+          description: ''
+          type:
+            - number
 references:
   - uid: api-extractor-test-05.DocBaseClass
     name: DocBaseClass

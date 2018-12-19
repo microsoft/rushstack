@@ -8,25 +8,3 @@ items:
       - typeScript
     type: interface
     package: api-extractor-test-05
-    children:
-      - api-extractor-test-05.IDocInterface3.(call signature)
-      - api-extractor-test-05.IDocInterface3.(indexer)
-      - api-extractor-test-05.IDocInterface3.(construct signature)
-  - uid: api-extractor-test-05.IDocInterface3.(call signature)
-    summary: Call signature
-    name: (call signature)(x)
-    fullName: (call signature)(x)
-    langs:
-      - typeScript
-  - uid: api-extractor-test-05.IDocInterface3.(indexer)
-    summary: Indexer
-    name: (indexer)(x)
-    fullName: (indexer)(x)
-    langs:
-      - typeScript
-  - uid: api-extractor-test-05.IDocInterface3.(construct signature)
-    summary: Construct signature
-    name: (construct signature)()
-    fullName: (construct signature)()
-    langs:
-      - typeScript

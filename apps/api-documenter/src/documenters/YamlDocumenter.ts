@@ -28,7 +28,10 @@ import {
   ApiInterface,
   ApiParameterListMixin,
   ApiMethod,
-  ApiMethodSignature
+  ApiMethodSignature,
+  ApiConstructor,
+  ApiFunction,
+  ApiReturnTypeMixin
 } from '@microsoft/api-extractor';
 
 import {
@@ -254,6 +257,16 @@ export class YamlDocumenter {
   }
 
   private _generateYamlItem(apiItem: ApiDocumentedItem): IYamlItem | undefined {
+    // Filter out known items that are not yet supported
+    switch (apiItem.kind) {
+      case ApiItemKind.CallSignature:
+      case ApiItemKind.ConstructSignature:
+      case ApiItemKind.IndexSignature:
+      case ApiItemKind.TypeAlias:
+      case ApiItemKind.Variable:
+        return undefined;
+    }
+
     const yamlItem: Partial<IYamlItem> = { };
     yamlItem.uid = this._getUid(apiItem);
 
@@ -318,12 +331,12 @@ export class YamlDocumenter {
         yamlItem.type = 'method';
         this._populateYamlFunctionLike(yamlItem, apiItem as ApiMethod | ApiMethodSignature);
         break;
-      /*
+
       case ApiItemKind.Constructor:
         yamlItem.type = 'constructor';
-        this._populateYamlFunctionLike(yamlItem, apiItem);
+        this._populateYamlFunctionLike(yamlItem, apiItem as ApiConstructor);
         break;
-      */
+
       case ApiItemKind.Package:
         yamlItem.type = 'package';
         break;
@@ -337,14 +350,14 @@ export class YamlDocumenter {
         }
         this._populateYamlProperty(yamlItem, apiProperty);
         break;
-      /*
+
       case ApiItemKind.Function:
         yamlItem.type = 'function';
-        this._populateYamlFunctionLike(yamlItem, apiItem);
+        this._populateYamlFunctionLike(yamlItem, apiItem as ApiFunction);
         break;
+
       default:
         throw new Error('Unimplemented item kind: ' + apiItem.kind);
-      */
     }
 
     if (apiItem.kind !== ApiItemKind.Package && !this._shouldEmbed(apiItem.kind)) {
@@ -395,27 +408,31 @@ export class YamlDocumenter {
     }
   }
 
-  private _populateYamlFunctionLike(yamlItem: Partial<IYamlItem>, apiItem: ApiMethod | ApiMethodSignature): void {
+  private _populateYamlFunctionLike(yamlItem: Partial<IYamlItem>, apiItem: ApiMethod | ApiMethodSignature
+    | ApiConstructor | ApiFunction): void {
+
     const syntax: IYamlSyntax = {
       content: apiItem.getExcerptWithModifiers()
     };
     yamlItem.syntax = syntax;
 
-    const returnType: string = this._linkToUidIfPossible(apiItem.returnTypeExcerpt.text);
+    if (ApiReturnTypeMixin.isBaseClassOf(apiItem)) {
+      const returnType: string = this._linkToUidIfPossible(apiItem.returnTypeExcerpt.text);
 
-    let returnDescription: string = '';
+      let returnDescription: string = '';
 
-    if (apiItem.tsdocComment && apiItem.tsdocComment.returnsBlock) {
-      returnDescription = this._renderMarkdown(apiItem.tsdocComment.returnsBlock.content, apiItem);
-      // temporary workaround for people who mistakenly add a hyphen, e.g. "@returns - blah"
-      returnDescription = returnDescription.replace(/^\s*-\s+/, '');
-    }
+      if (apiItem.tsdocComment && apiItem.tsdocComment.returnsBlock) {
+        returnDescription = this._renderMarkdown(apiItem.tsdocComment.returnsBlock.content, apiItem);
+        // temporary workaround for people who mistakenly add a hyphen, e.g. "@returns - blah"
+        returnDescription = returnDescription.replace(/^\s*-\s+/, '');
+      }
 
-    if (returnType || returnDescription) {
-      syntax.return = {
-        type: [ returnType ],
-        description: returnDescription
-      };
+      if (returnType || returnDescription) {
+        syntax.return = {
+          type: [ returnType ],
+          description: returnDescription
+        };
+      }
     }
 
     const parameters: IYamlParameter[] = [];

@@ -31,6 +31,14 @@ items:
     fullName: (constructor)(name)
     langs:
       - typeScript
+    type: constructor
+    syntax:
+      content: 'constructor(name: string);'
+      parameters:
+        - id: name
+          description: ''
+          type:
+            - string
   - uid: api-extractor-test-05.DocClass1.deprecatedExample
     deprecated:
       content: Use `otherThing()` instead.
