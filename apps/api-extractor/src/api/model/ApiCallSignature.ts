@@ -50,7 +50,7 @@ export interface IApiCallSignatureOptions extends
 export class ApiCallSignature extends ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))) {
 
   public static getCanonicalReference(overloadIndex: number): string {
-    return `(:${overloadIndex})`;
+    return `(:call,${overloadIndex})`;
   }
 
   public constructor(options: IApiCallSignatureOptions) {

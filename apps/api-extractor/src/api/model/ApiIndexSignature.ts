@@ -43,7 +43,7 @@ export interface IApiIndexSignatureOptions extends
 export class ApiIndexSignature extends ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))) {
 
   public static getCanonicalReference(overloadIndex: number): string {
-    return `(:${overloadIndex})`;
+    return `(:index,${overloadIndex})`;
   }
 
   public constructor(options: IApiIndexSignatureOptions) {

@@ -31,6 +31,7 @@ import { ApiFunction } from '../api/model/ApiFunction';
 import { ApiIndexSignature } from '../api/model/ApiIndexSignature';
 import { ApiVariable } from '../api/model/ApiVariable';
 import { ApiTypeAlias } from '../api/model/ApiTypeAlias';
+import { ApiCallSignature } from '../api/model/ApiCallSignature';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -84,6 +85,10 @@ export class ApiModelGenerator {
     }
 
     switch (astDeclaration.declaration.kind) {
+      case ts.SyntaxKind.CallSignature:
+        this._processApiCallSignature(astDeclaration, exportedName, parentApiItem);
+        break;
+
       case ts.SyntaxKind.Constructor:
         this._processApiConstructor(astDeclaration, exportedName, parentApiItem);
         break;
@@ -153,6 +158,39 @@ export class ApiModelGenerator {
     parentApiItem: ApiItemContainerMixin): void {
     for (const childDeclaration of astDeclaration.children) {
       this._processDeclaration(childDeclaration, undefined, parentApiItem);
+    }
+  }
+
+  private _processApiCallSignature(astDeclaration: AstDeclaration, exportedName: string | undefined,
+    parentApiItem: ApiItemContainerMixin): void {
+
+    const overloadIndex: number = this._getOverloadIndex(astDeclaration);
+    const canonicalReference: string = ApiCallSignature.getCanonicalReference(overloadIndex);
+
+    let apiCallSignature: ApiCallSignature | undefined = parentApiItem.tryGetMember(canonicalReference) as
+    ApiCallSignature;
+
+    if (apiCallSignature === undefined) {
+      const callSignature: ts.CallSignatureDeclaration = astDeclaration.declaration as ts.CallSignatureDeclaration;
+
+      const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
+
+      const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+      nodesToCapture.push({ node: callSignature.type, tokenRange: returnTypeTokenRange });
+
+      const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, callSignature.parameters);
+
+      const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
+        startingNode: astDeclaration.declaration,
+        nodesToCapture
+      });
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
+
+      apiCallSignature = new ApiCallSignature({ docComment, releaseTag, parameters, overloadIndex,
+        excerptTokens, returnTypeTokenRange });
+
+      parentApiItem.addMember(apiCallSignature);
     }
   }
 

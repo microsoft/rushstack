@@ -39,6 +39,29 @@ export interface IDocInterface2 extends IDocInterface1 {
 }
 
 /**
+ * Some less common TypeScript declaration kinds.
+ * @public
+ */
+export interface IDocInterface3 {
+  /**
+   * Call signature
+   * @param x - the parameter
+   */
+  (x: number): number;
+
+  /**
+   * Construct signature
+   */
+  new(): IDocInterface1;
+
+  /**
+   * Indexer
+   * @param x - the parameter
+   */
+  [x: string]: string;
+}
+
+/**
  * This is an example class.
  *
  * @remarks
@@ -47,6 +70,12 @@ export interface IDocInterface2 extends IDocInterface1 {
  * @public
  */
 export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
+  /**
+   * The class constructor
+   */
+  public constructor(name: string) {
+    super();
+  }
 
   /**
    * This is an overloaded function.

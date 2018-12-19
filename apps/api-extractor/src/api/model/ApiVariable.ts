@@ -64,6 +64,8 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
 
   public constructor(options: IApiVariableOptions) {
     super(options);
+
+    this.variableTypeExcerpt = this.buildExcerpt(options.variableTypeTokenRange);
   }
 
   /** @override */

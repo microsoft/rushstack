@@ -26,4 +26,5 @@ This project tests various documentation generation scenarios and doc comment sy
 |  --- | --- |
 |  <p>[IDocInterface1](./api-extractor-test-05.idocinterface1.md)</p> | <p></p> |
 |  <p>[IDocInterface2](./api-extractor-test-05.idocinterface2.md)</p> | <p></p> |
+|  <p>[IDocInterface3](./api-extractor-test-05.idocinterface3.md)</p> | <p>Some less common TypeScript declaration kinds.</p> |
 

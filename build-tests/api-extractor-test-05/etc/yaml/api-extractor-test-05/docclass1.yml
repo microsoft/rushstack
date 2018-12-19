@@ -15,6 +15,7 @@ items:
       - api-extractor-test-05.IDocInterface2
     package: api-extractor-test-05
     children:
+      - api-extractor-test-05.DocClass1.(constructor)
       - api-extractor-test-05.DocClass1.deprecatedExample
       - api-extractor-test-05.DocClass1.exampleFunction
       - api-extractor-test-05.DocClass1.exampleFunction_1
@@ -24,6 +25,12 @@ items:
       - api-extractor-test-05.DocClass1.regularProperty
       - api-extractor-test-05.DocClass1.sumWithExample
       - api-extractor-test-05.DocClass1.tableExample
+  - uid: api-extractor-test-05.DocClass1.(constructor)
+    summary: The class constructor
+    name: (constructor)(name)
+    fullName: (constructor)(name)
+    langs:
+      - typeScript
   - uid: api-extractor-test-05.DocClass1.deprecatedExample
     deprecated:
       content: Use `otherThing()` instead.

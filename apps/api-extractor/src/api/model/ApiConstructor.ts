@@ -49,9 +49,9 @@ export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(Api
 
   public static getCanonicalReference(isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
-      return `(:static,${overloadIndex})`;
+      return `(:constructor,static,${overloadIndex})`;
     } else {
-      return `(:instance,${overloadIndex})`;
+      return `(:constructor,instance,${overloadIndex})`;
     }
   }
 

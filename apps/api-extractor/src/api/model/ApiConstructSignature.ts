@@ -64,7 +64,7 @@ export class ApiConstructSignature extends ApiParameterListMixin(ApiReleaseTagMi
   ApiDeclaredItem))) {
 
   public static getCanonicalReference(overloadIndex: number): string {
-    return `(:${overloadIndex})`;
+    return `(:new,${overloadIndex})`;
   }
 
   public constructor(options: IApiConstructSignatureOptions) {

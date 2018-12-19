@@ -87,6 +87,45 @@
           "name": "DocClass1",
           "members": [
             {
+              "kind": "Constructor",
+              "canonicalReference": "(:constructor,instance,0)",
+              "docComment": "/**\n * The class constructor\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "constructor("
+                },
+                {
+                  "kind": "Reference",
+                  "text": "name"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ");"
+                }
+              ],
+              "isStatic": false,
+              "releaseTag": "Public",
+              "overloadIndex": 0,
+              "parameters": [
+                {
+                  "parameterName": "name",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                }
+              ]
+            },
+            {
               "kind": "Method",
               "canonicalReference": "(deprecatedExample:instance,0)",
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
@@ -609,6 +648,65 @@
           ]
         },
         {
+          "kind": "Function",
+          "canonicalReference": "(globalFunction:0)",
+          "docComment": "/**\n * An exported function\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function "
+            },
+            {
+              "kind": "Reference",
+              "text": "globalFunction"
+            },
+            {
+              "kind": "Content",
+              "text": "("
+            },
+            {
+              "kind": "Reference",
+              "text": "x"
+            },
+            {
+              "kind": "Content",
+              "text": ": "
+            },
+            {
+              "kind": "Content",
+              "text": "number"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "number"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 7,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 0,
+          "parameters": [
+            {
+              "parameterName": "x",
+              "parameterTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "name": "globalFunction"
+        },
+        {
           "kind": "Interface",
           "canonicalReference": "(IDocInterface1:interface)",
           "docComment": "/**\n * @public\n */\n",
@@ -730,6 +828,286 @@
           ]
         },
         {
+          "kind": "Interface",
+          "canonicalReference": "(IDocInterface3:interface)",
+          "docComment": "/**\n * Some less common TypeScript declaration kinds.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface3"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "IDocInterface3",
+          "members": [
+            {
+              "kind": "CallSignature",
+              "canonicalReference": "(:call,0)",
+              "docComment": "/**\n * Call signature\n *\n * @param x - the parameter\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "("
+                },
+                {
+                  "kind": "Reference",
+                  "text": "x"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 0,
+              "parameters": [
+                {
+                  "parameterName": "x",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "IndexSignature",
+              "canonicalReference": "(:index,0)",
+              "docComment": "/**\n * Indexer\n *\n * @param x - the parameter\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "["
+                },
+                {
+                  "kind": "Reference",
+                  "text": "x"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": "]: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 0,
+              "parameters": [
+                {
+                  "parameterName": "x",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "ConstructSignature",
+              "canonicalReference": "(:new,0)",
+              "docComment": "/**\n * Construct signature\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "new (): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 0,
+              "parameters": []
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Namespace",
+          "canonicalReference": "(OuterNamespace:namespace)",
+          "docComment": "/**\n * A top-level namespace\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare namespace "
+            },
+            {
+              "kind": "Reference",
+              "text": "OuterNamespace"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "OuterNamespace",
+          "members": [
+            {
+              "kind": "Namespace",
+              "canonicalReference": "(InnerNamespace:namespace)",
+              "docComment": "/**\n * A nested namespace\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "namespace "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "InnerNamespace"
+                },
+                {
+                  "kind": "Content",
+                  "text": " "
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "InnerNamespace",
+              "members": [
+                {
+                  "kind": "Function",
+                  "canonicalReference": "(nestedFunction:0)",
+                  "docComment": "/**\n * A function inside a namespace\n */\n",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "function "
+                    },
+                    {
+                      "kind": "Reference",
+                      "text": "nestedFunction"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "("
+                    },
+                    {
+                      "kind": "Reference",
+                      "text": "x"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ": "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "number"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "): "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "number"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "returnTypeTokenRange": {
+                    "startIndex": 7,
+                    "endIndex": 8
+                  },
+                  "releaseTag": "Public",
+                  "overloadIndex": 0,
+                  "parameters": [
+                    {
+                      "parameterName": "x",
+                      "parameterTypeTokenRange": {
+                        "startIndex": 5,
+                        "endIndex": 6
+                      }
+                    }
+                  ],
+                  "name": "nestedFunction"
+                }
+              ]
+            },
+            {
+              "kind": "Variable",
+              "canonicalReference": "nestedVariable",
+              "docComment": "/**\n * A variable exported from within a namespace.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "nestedVariable"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "nestedVariable",
+              "variableTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              }
+            }
+          ]
+        },
+        {
           "kind": "Class",
           "canonicalReference": "(SystemEvent:class)",
           "docComment": "/**\n * A class used to exposed events.\n *\n * @public\n */\n",
@@ -808,6 +1186,60 @@
             }
           ],
           "implementsTokenRanges": []
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "constVariable",
+          "docComment": "/**\n * An exported variable declaration.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Reference",
+              "text": "constVariable"
+            },
+            {
+              "kind": "Content",
+              "text": ": "
+            },
+            {
+              "kind": "Content",
+              "text": "number"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "constVariable",
+          "variableTypeTokenRange": {
+            "startIndex": 2,
+            "endIndex": 3
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "ExampleTypeAlias",
+          "docComment": "/**\n * A type alias\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type "
+            },
+            {
+              "kind": "Reference",
+              "text": "ExampleTypeAlias"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Promise"
+            },
+            {
+              "kind": "Content",
+              "text": "<boolean>;"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "ExampleTypeAlias"
         }
       ]
     }
