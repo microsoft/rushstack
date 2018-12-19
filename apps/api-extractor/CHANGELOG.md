@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 14 Dec 2018 19:43:46 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Dec 2018 05:57:33 GMT and should not be manually modified.
+
+## 7.0.7
+Wed, 19 Dec 2018 05:57:33 GMT
+
+### Patches
+
+- Extend ApiModel to support new item kinds: ApiCallSignature, ApiConstructor, ApiConstructSignature, ApiFunction, ApiIndexSignature, ApiTypeAlias, and ApiVariable
 
 ## 7.0.6
 Fri, 14 Dec 2018 19:43:46 GMT

@@ -2,6 +2,39 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "6.0.43",
+      "tag": "@microsoft/web-library-build_v6.0.43",
+      "date": "Wed, 19 Dec 2018 05:57:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.56` to `3.8.57`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-karma\" from `4.6.54` to `4.6.55`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.5.34` to `4.5.35`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.2.89` to `3.2.90`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `7.4.4` to `7.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.62` to `3.4.63`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.21` to `6.0.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.2` to `0.3.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.0.42",
       "tag": "@microsoft/web-library-build_v6.0.42",
       "date": "Fri, 14 Dec 2018 20:51:51 GMT",

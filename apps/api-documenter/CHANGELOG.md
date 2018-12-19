@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 14 Dec 2018 19:43:46 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Dec 2018 05:57:33 GMT and should not be manually modified.
+
+## 7.0.9
+Wed, 19 Dec 2018 05:57:33 GMT
+
+### Patches
+
+- Update to work with refactored ApiModel classes
 
 ## 7.0.8
 Fri, 14 Dec 2018 19:43:46 GMT
