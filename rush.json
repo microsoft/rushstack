@@ -64,7 +64,7 @@
    * uncomment this line. Note this is effectively like running "rush check" before the following:
    *   rush install, rush update, rush link, rush version, rush publish
    * In some cases you may want this turned on, but need to allow some packages to use a different
-   * version. In those cases, you will need to add an entry to the "allowedAlternateVersions"
+   * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
    * section of the common-versions.json.
    */
    "ensureConsistentVersions": true,
