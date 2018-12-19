@@ -1,8 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
+import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import { Parameter } from '../model/Parameter';
+import { ApiDeclarationMixin } from './ApiDeclarationMixin';
+import { IExcerptTokenRange } from './Excerpt';
+import { InternalError } from '@microsoft/node-core-library';
+
+/**
+ * Represents parameter information that is part of {@link IApiParameterListMixinOptions}
+ * @public
+ */
+export interface IApiParameterOptions {
+  parameterName: string;
+  parameterTypeTokenRange: IExcerptTokenRange;
+}
 
 /**
  * Constructor options for {@link (ApiParameterListMixin:interface)}.
@@ -10,12 +22,12 @@ import { Parameter } from '../model/Parameter';
  */
 export interface IApiParameterListMixinOptions extends IApiItemOptions {
   overloadIndex: number;
-  parameters?: Parameter[];
+  parameters: IApiParameterOptions[];
 }
 
 export interface IApiParameterListJson extends IApiItemJson {
   overloadIndex: number;
-  parameters: IApiItemJson[];
+  parameters: IApiParameterOptions[];
 }
 
 const _overloadIndex: unique symbol = Symbol('ApiParameterListMixin._overloadIndex');
@@ -67,11 +79,6 @@ export interface ApiParameterListMixin extends ApiItem {
    */
   readonly parameters: ReadonlyArray<Parameter>;
 
-  /**
-   * Appends a parameter to the `ApiParameterListMixin.parameters` collection.
-   */
-  addParameter(parameter: Parameter): void;
-
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
@@ -97,11 +104,7 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
       baseClass.onDeserializeInto(options, jsonObject);
 
       options.overloadIndex = jsonObject.overloadIndex;
-      options.parameters = [];
-
-      for (const parameterObject of jsonObject.parameters) {
-        options.parameters.push(ApiItem.deserialize(parameterObject) as Parameter);
-      }
+      options.parameters = jsonObject.parameters || [];
     }
 
     // tslint:disable-next-line:no-any
@@ -113,10 +116,21 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
 
       this[_parameters] = [];
 
-      if (options.parameters) {
-        for (const parameter of options.parameters) {
-          this.addParameter(parameter);
+      if (ApiDeclarationMixin.isBaseClassOf(this)) {
+        if (options.parameters) {
+          for (const parameterOptions of options.parameters) {
+
+            const parameter: Parameter = new Parameter({
+              name: parameterOptions.parameterName,
+              parameterTypeExcerpt: this.buildExcerpt(parameterOptions.parameterTypeTokenRange),
+              parent: this
+            });
+
+            this[_parameters].push(parameter);
+          }
         }
+      } else {
+        throw new InternalError('ApiParameterListMixin must always extend ApiDeclarationMixin');
       }
     }
 
@@ -128,29 +142,18 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
       return this[_parameters];
     }
 
-    public addParameter(parameter: Parameter): void {
-      const existingParent: ApiItem | undefined = parameter[ApiItem_parent];
-      if (existingParent !== undefined) {
-        throw new Error(`This Parameter has already been added to another function:`
-          + ` "${existingParent.displayName}"`);
-      }
-
-      this[_parameters].push(parameter);
-
-      parameter[ApiItem_parent] = this;
-    }
-
     /** @override */
     public serializeInto(jsonObject: Partial<IApiParameterListJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.overloadIndex = this.overloadIndex;
 
-      const parameterObjects: IApiItemJson[] = [];
+      const parameterObjects: IApiParameterOptions[] = [];
       for (const parameter of this.parameters) {
-        const parameterJsonObject: Partial<IApiItemJson> = {};
-        parameter.serializeInto(parameterJsonObject);
-        parameterObjects.push(parameterJsonObject as IApiItemJson);
+        parameterObjects.push({
+          parameterName: parameter.name,
+          parameterTypeTokenRange: parameter.parameterTypeExcerpt.tokenRange
+        });
       }
 
       jsonObject.parameters = parameterObjects;

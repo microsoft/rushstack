@@ -219,8 +219,6 @@ enum ApiItemKind {
   // (undocumented)
   Package = "Package",
   // (undocumented)
-  Parameter = "Parameter",
-  // (undocumented)
   Property = "Property",
   // (undocumented)
   PropertySignature = "PropertySignature",
@@ -524,13 +522,7 @@ interface IApiParameterListMixinOptions extends IApiItemOptions {
   // (undocumented)
   overloadIndex: number;
   // (undocumented)
-  parameters?: Parameter[];
-}
-
-// @public
-interface IApiParameterOptions extends IApiDeclarationMixinOptions, IApiNameMixinOptions, IApiItemOptions {
-  // (undocumented)
-  parameterTypeTokenRange: IExcerptTokenRange;
+  parameters: IApiParameterOptions[];
 }
 
 // @public
@@ -693,6 +685,16 @@ class IndentedWriter {
 }
 
 // @public
+interface IParameterOptions {
+  // (undocumented)
+  name: string;
+  // (undocumented)
+  parameterTypeExcerpt: Excerpt;
+  // (undocumented)
+  parent: ApiParameterListMixin;
+}
+
+// @public
 interface IResolveDeclarationReferenceResult {
   errorMessage: string | undefined;
   resolvedApiItem: ApiItem | undefined;
@@ -700,19 +702,10 @@ interface IResolveDeclarationReferenceResult {
 
 // WARNING: Unable to find referenced member "@microsoft/api-extractor#ApiParameterListMixin.parameters"
 // @public
-class Parameter extends Parameter_base {
-  constructor(options: IApiParameterOptions);
-  // @override (undocumented)
-  readonly canonicalReference: string;
-  // @override (undocumented)
-  readonly kind: ApiItemKind;
-  // WARNING: The type "IApiParameterJson" needs to be exported by the package (e.g. added to index.ts)
-  // @override (undocumented)
-  static onDeserializeInto(options: Partial<IApiParameterOptions>, jsonObject: IApiParameterJson): void;
+class Parameter {
+  constructor(options: IParameterOptions);
+  name: string;
   readonly parameterTypeExcerpt: Excerpt;
-  // WARNING: The type "IApiParameterJson" needs to be exported by the package (e.g. added to index.ts)
-  // @override (undocumented)
-  serializeInto(jsonObject: Partial<IApiParameterJson>): void;
   readonly tsdocParamBlock: tsdoc.DocParamBlock | undefined;
 }
 

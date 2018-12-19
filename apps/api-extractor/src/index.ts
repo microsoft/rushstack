@@ -134,7 +134,7 @@ export {
   ApiPackage
 } from './api/model/ApiPackage';
 export {
-  IApiParameterOptions,
+  IParameterOptions,
   Parameter
 } from './api/model/Parameter';
 export {

@@ -3,27 +3,26 @@
 
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { ApiItemKind, ApiItem, IApiItemOptions, IApiItemJson } from '../items/ApiItem';
-import { IApiDeclarationMixinOptions, ApiDeclarationMixin } from '../mixins/ApiDeclarationMixin';
 import { ApiDocumentedItem } from '../items/ApiDocumentedItem';
-import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
-import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { Excerpt } from '../mixins/Excerpt';
+import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 
 /**
  * Constructor options for {@link Parameter}.
  * @public
  */
-export interface IApiParameterOptions extends
-  IApiDeclarationMixinOptions,
-  IApiNameMixinOptions,
-  IApiItemOptions {
-
-  parameterTypeTokenRange: IExcerptTokenRange;
+export interface IParameterOptions {
+  name: string;
+  parameterTypeExcerpt: Excerpt;
+  parent: ApiParameterListMixin;
 }
 
-export interface IApiParameterJson extends IApiItemJson {
-  parameterTypeTokenRange: IExcerptTokenRange;
-}
+/**
+ * PRIVATE
+ * Allows ApiParameterListMixin to assign the parent.
+ */
+// tslint:disable-next-line:variable-name
+export const Parameter_parent: unique symbol = Symbol('Parameter._parent');
 
 /**
  * Represents a named parameter for a function-like declaration.
@@ -40,59 +39,36 @@ export interface IApiParameterJson extends IApiItemJson {
  *
  * `Parameter` objects belong to the {@link ApiParameterListMixin.parameters} collection.
  *
- * Even though it has associated documentation content, `Parameter` does not extend from `ApiDocumentedItem`
- * because it does not technically own its documentation; instead, the documentation is extracted from a `@param`
- * TSDoc tag belonging to a containing declaration such as `ApiMethod` or `ApiFunction`.
- *
  * @public
  */
-export class Parameter extends ApiDeclarationMixin(ApiNameMixin(ApiItem)) {
+export class Parameter {
   /**
    * An {@link Excerpt} that describes the type of the parameter.
    */
   public readonly parameterTypeExcerpt: Excerpt;
 
-  /** @override */
-  public static onDeserializeInto(options: Partial<IApiParameterOptions>, jsonObject: IApiParameterJson): void {
-    super.onDeserializeInto(options, jsonObject);
+  /**
+   * The parameter name.
+   */
+  public name: string;
 
-    options.parameterTypeTokenRange = jsonObject.parameterTypeTokenRange;
-  }
+  private _parent: ApiParameterListMixin;
 
-  public constructor(options: IApiParameterOptions) {
-    super(options);
-
-    this.parameterTypeExcerpt = this.buildExcerpt(options.parameterTypeTokenRange);
-  }
-
-  /** @override */
-  public get kind(): ApiItemKind {
-    return ApiItemKind.Parameter;
-  }
-
-  /** @override */
-  public get canonicalReference(): string {
-    return this.name;
+  public constructor(options: IParameterOptions) {
+    this.name = options.name;
+    this.parameterTypeExcerpt = options.parameterTypeExcerpt;
+    this._parent = options.parent;
   }
 
   /**
    * Returns the `@param` documentation for this parameter, if present.
    */
   public get tsdocParamBlock(): tsdoc.DocParamBlock | undefined {
-    const parent: ApiItem | undefined = this.parent;
-    if (parent) {
-      if (parent instanceof ApiDocumentedItem) {
-        if (parent.tsdocComment) {
-          return parent.tsdocComment.params.tryGetBlockByName(this.name);
-        }
+    if (this._parent instanceof ApiDocumentedItem) {
+      if (this._parent.tsdocComment) {
+        return this._parent.tsdocComment.params.tryGetBlockByName(this.name);
       }
     }
   }
 
-  /** @override */
-  public serializeInto(jsonObject: Partial<IApiParameterJson>): void {
-    super.serializeInto(jsonObject);
-
-    jsonObject.parameterTypeTokenRange = this.parameterTypeExcerpt.tokenRange;
-  }
 }

@@ -16,12 +16,11 @@ import { ApiMethod } from '../api/model/ApiMethod';
 import { ApiNamespace } from '../api/model/ApiNamespace';
 import { ApiInterface } from '../api/model/ApiInterface';
 import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
-import { Parameter } from '../api/model/Parameter';
 import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { ApiProperty } from '../api/model/ApiProperty';
 import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
-import { ApiParameterListMixin } from '../api/mixins/ApiParameterListMixin';
+import { IApiParameterOptions } from '../api/mixins/ApiParameterListMixin';
 import { ApiEnum } from '../api/model/ApiEnum';
 import { ApiEnumMember } from '../api/model/ApiEnumMember';
 import { IExcerptTokenRange, IExcerptToken } from '../api/mixins/Excerpt';
@@ -293,6 +292,8 @@ export class ApiModelGenerator {
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: methodDeclaration.type, tokenRange: returnTypeTokenRange });
 
+      const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, methodDeclaration.parameters);
+
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
@@ -301,12 +302,8 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiMethod = new ApiMethod({ name, docComment, releaseTag, isStatic, overloadIndex,
+      apiMethod = new ApiMethod({ name, docComment, releaseTag, isStatic, parameters, overloadIndex,
         excerptTokens, returnTypeTokenRange });
-
-      for (const parameter of methodDeclaration.parameters) {
-        this._processApiParameter(parameter, apiMethod);
-      }
 
       parentApiItem.addMember(apiMethod);
     }
@@ -331,6 +328,8 @@ export class ApiModelGenerator {
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: methodSignature.type, tokenRange: returnTypeTokenRange });
 
+      const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, methodSignature.parameters);
+
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
@@ -338,34 +337,11 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiMethodSignature = new ApiMethodSignature({ name, docComment, releaseTag, overloadIndex,
+      apiMethodSignature = new ApiMethodSignature({ name, docComment, releaseTag, parameters, overloadIndex,
         excerptTokens, returnTypeTokenRange });
-
-      for (const parameter of methodSignature.parameters) {
-        this._processApiParameter(parameter, apiMethodSignature);
-      }
 
       parentApiItem.addMember(apiMethodSignature);
     }
-  }
-
-  private _processApiParameter(parameterDeclaration: ts.ParameterDeclaration,
-    apiParameterListMixin: ApiParameterListMixin): void {
-
-    const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
-
-    const parameterTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-    nodesToCapture.push({ node: parameterDeclaration.type, tokenRange: parameterTypeTokenRange });
-
-    const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
-      startingNode: parameterDeclaration,
-      nodesToCapture
-    });
-
-    apiParameterListMixin.addParameter(new Parameter({
-      name: parameterDeclaration.name.getText() || '',
-      excerptTokens, parameterTypeTokenRange
-    }));
   }
 
   private _processApiNamespace(astDeclaration: AstDeclaration, exportedName: string | undefined,
@@ -458,6 +434,21 @@ export class ApiModelGenerator {
       // If the property was already declared before (via a merged interface declaration),
       // we assume its signature is identical, because the language requires that.
     }
+  }
+
+  private _captureParameters(nodesToCapture: IExcerptBuilderNodeToCapture[],
+    parameterNodes: ts.NodeArray<ts.ParameterDeclaration>): IApiParameterOptions[] {
+
+    const parameters: IApiParameterOptions[] = [];
+    for (const parameter of parameterNodes) {
+      const parameterTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+      nodesToCapture.push({ node: parameter.type, tokenRange: parameterTypeTokenRange });
+      parameters.push({
+        parameterName: parameter.name.getText().trim(),
+        parameterTypeTokenRange
+      });
+    }
+    return parameters;
   }
 
   private _getOverloadIndex(astDeclaration: AstDeclaration): number {

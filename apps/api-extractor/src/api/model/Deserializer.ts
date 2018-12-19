@@ -10,7 +10,6 @@ import { ApiNamespace, IApiNamespaceOptions } from './ApiNamespace';
 import { ApiPackage, IApiPackageOptions } from './ApiPackage';
 import { ApiInterface, IApiInterfaceOptions, IApiInterfaceJson } from './ApiInterface';
 import { ApiPropertySignature, IApiPropertySignatureOptions } from './ApiPropertySignature';
-import { Parameter, IApiParameterOptions, IApiParameterJson } from './Parameter';
 import { ApiMethodSignature, IApiMethodSignatureOptions } from './ApiMethodSignature';
 import { ApiProperty, IApiPropertyOptions } from './ApiProperty';
 import { ApiEnumMember, IApiEnumMemberOptions, IApiEnumMemberJson } from './ApiEnumMember';
@@ -73,9 +72,6 @@ export class Deserializer {
       case ApiItemKind.Package:
         ApiPackage.onDeserializeInto(options, jsonObject);
         return new ApiPackage(options as IApiPackageOptions);
-      case ApiItemKind.Parameter:
-        Parameter.onDeserializeInto(options, jsonObject as IApiParameterJson);
-        return new Parameter(options as IApiParameterOptions);
       case ApiItemKind.Property:
         ApiProperty.onDeserializeInto(options, jsonObject as IApiPropertyItemJson);
         return new ApiProperty(options as IApiPropertyOptions);
