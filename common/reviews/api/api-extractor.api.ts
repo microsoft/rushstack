@@ -380,6 +380,13 @@ class ApiVariableDeclaration extends ApiVariableDeclaration_base {
   static getCanonicalReference(name: string): string;
   // @override (undocumented)
   readonly kind: ApiItemKind;
+  // WARNING: The type "IApiVariableDeclarationJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  static onDeserializeInto(options: Partial<IApiVariableDeclarationOptions>, jsonObject: IApiVariableDeclarationJson): void;
+  // WARNING: The type "IApiVariableDeclarationJson" needs to be exported by the package (e.g. added to index.ts)
+  // @override (undocumented)
+  serializeInto(jsonObject: Partial<IApiVariableDeclarationJson>): void;
+  readonly variableTypeExcerpt: Excerpt;
 }
 
 // @public
@@ -574,6 +581,8 @@ interface IApiTypeAliasOptions extends IApiNameMixinOptions, IApiReleaseTagMixin
 
 // @public
 interface IApiVariableDeclarationOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+  // (undocumented)
+  variableTypeTokenRange: IExcerptTokenRange;
 }
 
 // @public (undocumented)

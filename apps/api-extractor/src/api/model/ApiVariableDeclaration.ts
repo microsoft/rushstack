@@ -2,9 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt';
 
 /**
  * Constructor options for {@link ApiVariableDeclaration}.
@@ -14,6 +15,12 @@ export interface IApiVariableDeclarationOptions extends
   IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDeclaredItemOptions {
+
+  variableTypeTokenRange: IExcerptTokenRange;
+}
+
+export interface IApiVariableDeclarationJson extends IApiDeclaredItemJson {
+  variableTypeTokenRange: IExcerptTokenRange;
 }
 
 /**
@@ -37,6 +44,20 @@ export interface IApiVariableDeclarationOptions extends
  * @public
  */
 export class ApiVariableDeclaration extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
+  /**
+   * An {@link Excerpt} that describes the type of the variable.
+   */
+  public readonly variableTypeExcerpt: Excerpt;
+
+  /** @override */
+  public static onDeserializeInto(options: Partial<IApiVariableDeclarationOptions>,
+    jsonObject: IApiVariableDeclarationJson): void {
+
+    super.onDeserializeInto(options, jsonObject);
+
+    options.variableTypeTokenRange = jsonObject.variableTypeTokenRange;
+  }
+
   public static getCanonicalReference(name: string): string {
     return name;
   }
@@ -53,5 +74,12 @@ export class ApiVariableDeclaration extends ApiNameMixin(ApiReleaseTagMixin(ApiD
   /** @override */
   public get canonicalReference(): string {
     return ApiVariableDeclaration.getCanonicalReference(this.name);
+  }
+
+  /** @override */
+  public serializeInto(jsonObject: Partial<IApiVariableDeclarationJson>): void {
+    super.serializeInto(jsonObject);
+
+    jsonObject.variableTypeTokenRange = this.variableTypeExcerpt.tokenRange;
   }
 }
