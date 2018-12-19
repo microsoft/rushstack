@@ -18,13 +18,6 @@ export interface IParameterOptions {
 }
 
 /**
- * PRIVATE
- * Allows ApiParameterListMixin to assign the parent.
- */
-// tslint:disable-next-line:variable-name
-export const Parameter_parent: unique symbol = Symbol('Parameter._parent');
-
-/**
  * Represents a named parameter for a function-like declaration.
  *
  * @remarks
