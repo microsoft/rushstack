@@ -192,8 +192,7 @@ export class SymbolAnalyzer {
         // Examples:
         //    " '@microsoft/sp-lodash-subset'"
         //    " "lodash/has""
-        const modulePath: string | undefined = SymbolAnalyzer._getPackagePathFromModuleSpecifier(
-          exportDeclaration.moduleSpecifier);
+        const modulePath: string | undefined = TypeScriptHelpers.getModuleSpecifier(exportDeclaration);
 
         if (modulePath) {
           return {
@@ -284,17 +283,15 @@ export class SymbolAnalyzer {
       }
 
       if (importDeclaration.moduleSpecifier) {
-        // Examples:
-        //    " '@microsoft/sp-lodash-subset'"
-        //    " "lodash/has""
-        const modulePath: string | undefined = SymbolAnalyzer._getPackagePathFromModuleSpecifier(
-          importDeclaration.moduleSpecifier);
+        const moduleSpecifier: string | undefined = TypeScriptHelpers.getModuleSpecifier(importDeclaration);
 
-        if (modulePath) {
+        // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
+        // but ignore:  "../folder/LocalFile"
+        if (moduleSpecifier && !ts.isExternalModuleNameRelative(moduleSpecifier)) {
           return {
             followedSymbol: TypeScriptHelpers.followAliases(symbol, typeChecker),
             localName: symbol.name,
-            astImport: new AstImport({ modulePath, exportName }),
+            astImport: new AstImport({ modulePath: moduleSpecifier, exportName }),
             isAmbient: false
           };
         }
@@ -303,28 +300,5 @@ export class SymbolAnalyzer {
     }
 
     return undefined;
-  }
-
-  private static _getPackagePathFromModuleSpecifier(moduleSpecifier: ts.Expression): string | undefined {
-    // Examples:
-    //    " '@microsoft/sp-lodash-subset'"
-    //    " "lodash/has""
-    //    " './MyClass'"
-    const moduleSpecifierText: string = moduleSpecifier.getFullText();
-
-    // Remove quotes/whitespace
-    const path: string = moduleSpecifierText
-      .replace(/^\s*['"]/, '')
-      .replace(/['"]\s*$/, '');
-
-    // Does it start with something like "./" or "../"?
-    // Or is it a fixed string like "." or ".."?
-    if (/^\.\.?(\/|$)/.test(path)) {
-      // Yes, so there is no module specifier
-      return undefined;
-    } else {
-      // No, so we can assume it's an import from an external package
-      return path;
-    }
   }
 }

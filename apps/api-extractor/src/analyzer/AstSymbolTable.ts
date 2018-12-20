@@ -76,10 +76,14 @@ export class AstSymbolTable {
         throw new Error('Unable to find a root declaration for ' + sourceFile.fileName);
       }
 
-      const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(rootFileSymbol) || [];
-
       const exportedMembers: IExportedMember[] = [];
 
+      const visitedModules: Set<ts.Symbol> = new Set<ts.Symbol>();
+      this._collectExportsFromModule(exportedMembers, rootFileSymbol, visitedModules, undefined);
+
+      /*
+      const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(rootFileSymbol) || [];
+-
       for (const exportSymbol of exportSymbols) {
         const astSymbol: AstSymbol | undefined = this._fetchAstSymbol(exportSymbol, true);
 
@@ -91,11 +95,99 @@ export class AstSymbolTable {
 
         exportedMembers.push({ name: exportSymbol.name, astSymbol: astSymbol });
       }
+      */
 
       astEntryPoint = new AstEntryPoint({ exportedMembers });
       this._astEntryPointsBySourceFile.set(sourceFile, astEntryPoint);
     }
     return astEntryPoint;
+  }
+
+  private _collectExportsFromModule(exportedMembers: IExportedMember[], moduleSymbol: ts.Symbol,
+    visitedModules: Set<ts.Symbol>, followedModulePath: string | undefined): void {
+
+    // Don't traverse into a module that we already  processed before:
+    // The compiler allows m1 to have "export * from 'm2'" and "export * from 'm3'",
+    // even if m2 and m3 both have "export * from 'm4'".
+    if (visitedModules.has(moduleSymbol)) {
+      return;
+    }
+    visitedModules.add(moduleSymbol);
+
+    if (moduleSymbol.exports) {
+
+      for (const exportedSymbol of moduleSymbol.exports.values() as IterableIterator<ts.Symbol>) {
+        if (exportedSymbol.escapedName !== ts.InternalSymbolName.ExportStar) {
+          const astSymbol: AstSymbol | undefined = this._fetchAstSymbol(exportedSymbol, true, followedModulePath);
+
+          if (!astSymbol) {
+            throw new Error('Unsupported export: ' + exportedSymbol.name);
+          }
+
+          this.analyze(astSymbol);
+
+          exportedMembers.push({ name: exportedSymbol.name, astSymbol: astSymbol });
+        } else {
+
+          // Special handling for "export * from 'module-name';" declarations, which are all attached to a single
+          // symbol whose name is InternalSymbolName.ExportStar
+          for (const exportStarDeclaration of exportedSymbol.getDeclarations() || []) {
+            if (ts.isExportDeclaration(exportStarDeclaration)) {
+              this._collectExportsFromExportStar(exportedMembers, exportStarDeclaration,
+                visitedModules, followedModulePath);
+            } else {
+              // Ignore ExportDeclaration nodes that don't match the expected pattern
+              // TODO: Should we report a warning?
+            }
+          }
+
+        }
+      }
+
+    }
+  }
+
+  private _collectExportsFromExportStar(exportedMembers: IExportedMember[], exportStarDeclaration: ts.ExportDeclaration,
+    visitedModules: Set<ts.Symbol>, followedModulePath: string | undefined): void {
+
+    // The name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
+    const moduleSpecifier: string | undefined = TypeScriptHelpers.getModuleSpecifier(exportStarDeclaration);
+    if (!moduleSpecifier) {
+      // TODO: Should we report a warning?
+      return;
+    }
+
+    // Are we leaving the main project for the first time?
+    if (followedModulePath === undefined) {
+      // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
+      // but ignore:  "../folder/LocalFile"
+      if (!ts.isExternalModuleNameRelative(moduleSpecifier)) {
+        // Yes, we are traversing into an external package.  That becomes the followedModulePath for everything
+        // we encounter as we continue recursing
+        followedModulePath = moduleSpecifier;
+      }
+    }
+
+    const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptHelpers.getResolvedModule(
+      exportStarDeclaration.getSourceFile(), moduleSpecifier);
+
+    if (resolvedModule === undefined) {
+      // This should not happen, since getResolvedModule() specifically looks up names that the compiler
+      // found in export declarations for this source file
+      throw new InternalError('getResolvedModule() could not resolve module name ' + JSON.stringify(moduleSpecifier));
+    }
+
+    // Map the filename back to the corresponding SourceFile. This circuitous approach is needed because
+    // we have no way to access the compiler's internal resolveExternalModuleName() function
+    const moduleSourceFile: ts.SourceFile | undefined = this._program.getSourceFile(resolvedModule.resolvedFileName);
+    if (!moduleSourceFile) {
+      // This should not happen, since getResolvedModule() specifically looks up names that the compiler
+      // found in export declarations for this source file
+      throw new InternalError('getSourceFile() failed to locate ' + JSON.stringify(resolvedModule.resolvedFileName));
+    }
+
+    const moduleSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(moduleSourceFile);
+    this._collectExportsFromModule(exportedMembers, moduleSymbol, visitedModules, followedModulePath);
   }
 
   /**
@@ -249,8 +341,19 @@ export class AstSymbolTable {
     return this._fetchAstSymbol(symbol, true);
   }
 
-  private _fetchAstSymbol(symbol: ts.Symbol, addIfMissing: boolean): AstSymbol | undefined {
+  private _fetchAstSymbol(symbol: ts.Symbol, addIfMissing: boolean,
+    followedModulePath?: string): AstSymbol | undefined {
+
     const followAliasesResult: IFollowAliasesResult = SymbolAnalyzer.followAliases(symbol, this._typeChecker);
+
+    if (followedModulePath !== undefined) {
+      // FIX THIS
+      const exportName: string = followAliasesResult.astImport ? followAliasesResult.astImport.exportName
+        : followAliasesResult.localName;
+
+      (followAliasesResult as any).astImport = new AstImport({ exportName,
+        modulePath: followedModulePath});
+    }
 
     const followedSymbol: ts.Symbol = followAliasesResult.followedSymbol;
 
@@ -305,7 +408,7 @@ export class AstSymbolTable {
         // If the file is from a package that does not support AEDoc, then we process the
         // symbol itself, but we don't attempt to process any parent/children of it.
         const followedSymbolSourceFile: ts.SourceFile = followedSymbol.declarations[0].getSourceFile();
-        if (this._program.isSourceFileFromExternalLibrary(followedSymbolSourceFile)) {
+        if (astImport !== undefined) {
           if (!this._packageMetadataManager.isAedocSupportedFor(followedSymbolSourceFile.fileName)) {
             nominal = true;
           }

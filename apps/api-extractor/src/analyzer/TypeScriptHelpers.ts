@@ -66,6 +66,18 @@ export class TypeScriptHelpers {
     return symbol;
   }
 
+  // Return name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
+  public static getModuleSpecifier(declarationWithModuleSpecifier: ts.ImportDeclaration
+    | ts.ExportDeclaration): string | undefined {
+
+    if (declarationWithModuleSpecifier.moduleSpecifier
+      && ts.isStringLiteralLike(declarationWithModuleSpecifier.moduleSpecifier)) {
+      return TypeScriptHelpers.getTextOfIdentifierOrLiteral(declarationWithModuleSpecifier.moduleSpecifier);
+    }
+
+    return undefined;
+  }
+
   /**
    * Retrieves the comment ranges associated with the specified node.
    */
@@ -75,6 +87,31 @@ export class TypeScriptHelpers {
 
     // tslint:disable-next-line:no-any
     return (ts as any).getJSDocCommentRanges.apply(this, arguments);
+  }
+
+  /**
+   * Retrieves the (unescaped) value of an string literal, numeric literal, or identifier.
+   */
+  public static getTextOfIdentifierOrLiteral(node: ts.Identifier | ts.StringLiteralLike | ts.NumericLiteral): string {
+    // Compiler internal:
+    // https://github.com/Microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L2721
+
+    // tslint:disable-next-line:no-any
+    return (ts as any).getTextOfIdentifierOrLiteral(node);
+  }
+
+  /**
+   * Retrieves the (cached) module resolution information for a module name that was exported from a SourceFile.
+   * The compiler populates this cache as part of analyzing the source file.
+   */
+  public static getResolvedModule(sourceFile: ts.SourceFile, moduleNameText: string): ts.ResolvedModuleFull
+    | undefined {
+
+    // Compiler internal:
+    // https://github.com/Microsoft/TypeScript/blob/v3.2.2/src/compiler/utilities.ts#L218
+
+    // tslint:disable-next-line:no-any
+    return (ts as any).getResolvedModule(sourceFile, moduleNameText);
   }
 
   /**
