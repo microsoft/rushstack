@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix install-run-rush handling of spaces in paths",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "ecraig12345@users.noreply.github.com"
+}

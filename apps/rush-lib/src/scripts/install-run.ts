@@ -352,11 +352,18 @@ function installPackage(packageInstallFolder: string, name: string, version: str
 
 /**
  * Get the ".bin" path for the package.
+ * If on Windows and the path contains spaces, the returned path will be quoted.
+ * (Paths with spaces don't seem to cause trouble for child_process.spawn() on Mac.)
  */
 function getBinPath(packageInstallFolder: string, binName: string): string {
+  const isWindows: boolean = os.platform() === 'win32';
   const binFolderPath: string = path.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-  const resolvedBinName: string = (os.platform() === 'win32') ? `${binName}.cmd` : binName;
-  return path.resolve(binFolderPath, resolvedBinName);
+  const resolvedBinName: string = isWindows ? `${binName}.cmd` : binName;
+  const resolvedPath: string = path.resolve(binFolderPath, resolvedBinName);
+  if (isWindows && resolvedPath.indexOf(' ') !== -1) {
+    return `"${resolvedPath}"`;
+  }
+  return resolvedPath;
 }
 
 /**
@@ -409,7 +416,10 @@ export function installAndRun(
     {
       stdio: 'inherit',
       cwd: process.cwd(),
-      env: process.env
+      env: process.env,
+      // If binPath contains spaces, it must be quoted, and quoted paths will only be processed
+      // correctly if we use a shell (otherwise don't use a shell since it's a bit less efficient).
+      shell: binPath[0] === '"'
     }
   );
 
