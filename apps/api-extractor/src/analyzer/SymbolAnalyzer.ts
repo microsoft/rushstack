@@ -189,16 +189,13 @@ export class SymbolAnalyzer {
       }
 
       if (exportDeclaration.moduleSpecifier) {
-        // Examples:
-        //    " '@microsoft/sp-lodash-subset'"
-        //    " "lodash/has""
-        const modulePath: string | undefined = TypeScriptHelpers.getModuleSpecifier(exportDeclaration);
+        const externalModulePath: string | undefined = SymbolAnalyzer._tryGetExternalModulePath(exportDeclaration);
 
-        if (modulePath) {
+        if (externalModulePath) {
           return {
             followedSymbol: TypeScriptHelpers.followAliases(symbol, typeChecker),
             localName: exportName,
-            astImport: new AstImport({ modulePath, exportName }),
+            astImport: new AstImport({ modulePath: externalModulePath, exportName }),
             isAmbient: false
           };
         }
@@ -283,20 +280,31 @@ export class SymbolAnalyzer {
       }
 
       if (importDeclaration.moduleSpecifier) {
-        const moduleSpecifier: string | undefined = TypeScriptHelpers.getModuleSpecifier(importDeclaration);
-
-        // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
-        // but ignore:  "../folder/LocalFile"
-        if (moduleSpecifier && !ts.isExternalModuleNameRelative(moduleSpecifier)) {
+        const externalModulePath: string | undefined = SymbolAnalyzer._tryGetExternalModulePath(importDeclaration);
+        if (externalModulePath) {
           return {
             followedSymbol: TypeScriptHelpers.followAliases(symbol, typeChecker),
             localName: symbol.name,
-            astImport: new AstImport({ modulePath: moduleSpecifier, exportName }),
+            astImport: new AstImport({ modulePath: externalModulePath, exportName }),
             isAmbient: false
           };
         }
       }
 
+    }
+
+    return undefined;
+  }
+
+  private static _tryGetExternalModulePath(declarationWithModuleSpecifier: ts.ImportDeclaration
+    | ts.ExportDeclaration): string | undefined {
+
+    const moduleSpecifier: string | undefined = TypeScriptHelpers.getModuleSpecifier(declarationWithModuleSpecifier);
+
+    // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
+    // but ignore:  "../folder/LocalFile"
+    if (moduleSpecifier && !ts.isExternalModuleNameRelative(moduleSpecifier)) {
+      return moduleSpecifier;
     }
 
     return undefined;
