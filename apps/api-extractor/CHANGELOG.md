@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 19 Dec 2018 05:57:33 GMT and should not be manually modified.
+This log was last generated on Thu, 20 Dec 2018 17:04:08 GMT and should not be manually modified.
+
+## 7.0.8
+Thu, 20 Dec 2018 17:04:08 GMT
+
+### Patches
+
+- Fix an issue where it was possible to import forgotten declarations from a .d.ts rollup, even though they did not have an explicit "export" modifier
 
 ## 7.0.7
 Wed, 19 Dec 2018 05:57:33 GMT
