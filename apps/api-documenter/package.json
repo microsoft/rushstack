@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.0.9",
+  "version": "7.0.10",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
     "api-documenter": "./bin/api-documenter"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.0.7",
+    "@microsoft/api-extractor": "7.0.8",
     "@microsoft/node-core-library": "3.8.3",
     "@microsoft/ts-command-line": "4.2.3",
     "@microsoft/tsdoc": "0.12.4",
