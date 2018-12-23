@@ -14,6 +14,7 @@ import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { Text, InternalError } from '@microsoft/node-core-library';
+import { AstImport } from '../analyzer/AstImport';
 
 export class ReviewFileGenerator {
   /**
@@ -35,15 +36,31 @@ export class ReviewFileGenerator {
 
     for (const entity of collector.entities) {
       if (entity.exported) {
-        // Emit all the declarations for this entry
-        for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
+        if (!entity.astSymbol.astImport) {
+          // Emit all the declarations for this entry
+          for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
 
-          output.append(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
+            output.append(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
 
-          const span: Span = new Span(astDeclaration.declaration);
-          ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration);
-          span.writeModifiedText(output);
-          output.append('\n\n');
+            const span: Span = new Span(astDeclaration.declaration);
+            ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration);
+            span.writeModifiedText(output);
+            output.append('\n\n');
+          }
+        } else {
+          // This definition is reexported from another package, so write it as an "export" line
+          // In general, we don't report on external packages; if that's important we assume API Extractor
+          // would be enabled for the upstream project.  But see GitHub issue #896 for a possible exception.
+          const astImport: AstImport = entity.astSymbol.astImport;
+
+          if (astImport.exportName === '*') {
+            output.append(`export * as ${entity.nameForEmit}`);
+          } else if (entity.nameForEmit !== astImport.exportName) {
+            output.append(`export { ${astImport.exportName} as ${entity.nameForEmit} }`);
+          } else {
+            output.append(`export { ${astImport.exportName} }`);
+          }
+          output.append(` from '${astImport.modulePath}';\n`);
         }
       }
     }
