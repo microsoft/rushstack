@@ -28,7 +28,6 @@ import {
   ApiEnum,
   ApiPackage,
   ApiItemKind,
-  ApiEntryPoint,
   ApiReleaseTagMixin,
   ApiDocumentedItem,
   ApiClass,
@@ -39,7 +38,8 @@ import {
   Excerpt,
   ApiParameterListMixin,
   ApiReturnTypeMixin,
-  ApiDeclaredItem
+  ApiDeclaredItem,
+  ApiNamespace
 } from '@microsoft/api-extractor';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -102,6 +102,9 @@ export class MarkdownDocumenter {
       case ApiItemKind.MethodSignature:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} method` }));
         break;
+      case ApiItemKind.Function:
+        output.appendNode(new DocHeading({ configuration, title: `${scopedName} function` }));
+        break;
       case ApiItemKind.Namespace:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} namespace` }));
         break;
@@ -112,6 +115,9 @@ export class MarkdownDocumenter {
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} property` }));
+        break;
+      case ApiItemKind.TypeAlias:
+        output.appendNode(new DocHeading({ configuration, title: `${scopedName} type` }));
         break;
       default:
         throw new Error('Unsupported API item kind: ' + apiItem.kind);
@@ -177,13 +183,18 @@ export class MarkdownDocumenter {
       case ApiItemKind.MethodSignature:
         this._writeParameterTables(output, apiItem as ApiParameterListMixin);
         break;
+      case ApiItemKind.Function:
+        break;
       case ApiItemKind.Namespace:
+        this._writePackageOrNamespaceTables(output, apiItem as ApiNamespace);
         break;
       case ApiItemKind.Package:
-        this._writePackageTables(output, apiItem as ApiPackage);
+        this._writePackageOrNamespaceTables(output, apiItem as ApiPackage);
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
+        break;
+      case ApiItemKind.TypeAlias:
         break;
       default:
         throw new Error('Unsupported API item kind: ' + apiItem.kind);
@@ -232,9 +243,9 @@ export class MarkdownDocumenter {
   }
 
   /**
-   * GENERATE PAGE: PACKAGE
+   * GENERATE PAGE: PACKAGE or NAMESPACE
    */
-  private _writePackageTables(output: DocSection, apiPackage: ApiPackage): void {
+  private _writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const classesTable: DocTable = new DocTable({ configuration,
@@ -257,9 +268,15 @@ export class MarkdownDocumenter {
       headerTitles: [ 'Namespace', 'Description' ]
     });
 
-    const apiEntryPoint: ApiEntryPoint = apiPackage.entryPoints[0];
+    const typeAliasesTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Type Alias', 'Description' ]
+    });
 
-    for (const apiMember of apiEntryPoint.members) {
+    const apiMembers: ReadonlyArray<ApiItem> = apiContainer.kind === ApiItemKind.Package ?
+      (apiContainer as ApiPackage).entryPoints[0].members
+      : (apiContainer as ApiNamespace).members;
+
+    for (const apiMember of apiMembers) {
 
       const row: DocTableRow = new DocTableRow({ configuration }, [
         this._createTitleCell(apiMember),
@@ -282,6 +299,20 @@ export class MarkdownDocumenter {
           this._writeApiItemPage(apiMember);
           break;
 
+        case ApiItemKind.Namespace:
+          namespacesTable.addRow(row);
+          this._writeApiItemPage(apiMember);
+          break;
+
+        case ApiItemKind.Function:
+          functionsTable.addRow(row);
+          this._writeApiItemPage(apiMember);
+          break;
+
+        case ApiItemKind.TypeAlias:
+          typeAliasesTable.addRow(row);
+          this._writeApiItemPage(apiMember);
+          break;
 /*
         case 'function':
           this._writeFunctionPage(docChild);
@@ -319,6 +350,11 @@ export class MarkdownDocumenter {
     if (namespacesTable.rows.length > 0) {
       output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Namespaces' }));
       output.appendNode(namespacesTable);
+    }
+
+    if (typeAliasesTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Type Aliases' }));
+      output.appendNode(typeAliasesTable);
     }
   }
 
