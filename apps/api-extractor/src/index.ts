@@ -22,6 +22,7 @@ export {
   IExtractorApiReviewFileConfig,
   IExtractorApiJsonFileConfig,
   IExtractorDtsRollupConfig,
+  IExtractorTsdocMetadataConfig,
   IExtractorConfig
 } from './api/IExtractorConfig';
 

@@ -164,6 +164,23 @@
       },
       "required": [ "enabled" ],
       "additionalProperties": false
+    },
+
+    "tsdocMetadata": {
+      "description": "Configures how the TSDoc metadata file will be generated",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether to generate the TSDoc metadata file. The default is true.",
+          "type": "boolean"
+        },
+        "tsdocMetadataPath": {
+          "description": "Specifies where the TSDoc metadata file should be written. The default value is an empty string, which causes the path to be automatically inferred from the \"tsdocMetadata\", \"typings\" or \"main\" fields of the project's package.json. If none of these fields are set, it defaults to \"tsdoc-metadata.json\".",
+          "type": "string"
+        },
+      },
+      "required": [ "enabled" ],
+      "additionalProperties": false
     }
   },
   "required": [ "compiler", "project" ],

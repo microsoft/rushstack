@@ -226,6 +226,7 @@ export class PackageJsonLookup {
         packageJson.scripts = loadedPackageJson.scripts;
         packageJson.typings = loadedPackageJson.typings;
         packageJson.tsdoc = loadedPackageJson.tsdoc;
+        packageJson.tsdocMetadata = loadedPackageJson.tsdocMetadata;
         packageJson.version = loadedPackageJson.version;
       }
 

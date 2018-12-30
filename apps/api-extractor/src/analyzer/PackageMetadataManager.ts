@@ -61,26 +61,70 @@ export class PackageMetadataManager {
   private readonly _packageMetadataByPackageJsonPath: Map<string, PackageMetadata>
     = new Map<string, PackageMetadata>();
 
-  public static writeTsdocMetadataFile(packageJsonFolder: string): void {
-    // This feature is still being standardized: https://github.com/Microsoft/tsdoc/issues/7
-    // In the future we will use the @microsoft/tsdoc library to read this file.
-    const tsdocMetadataPath: string = path.join(packageJsonFolder,
-      'dist', PackageMetadataManager.tsdocMetadataFilename);
+  // This feature is still being standardized: https://github.com/Microsoft/tsdoc/issues/7
+  // In the future we will use the @microsoft/tsdoc library to read this file.
+  private static _resolveTsdocMetadataPathFromPackageJson(packageFolder: string, packageJson: IPackageJson): string {
+    const { tsdocMetadataFilename } = PackageMetadataManager;
+    let tsdocMetadataRelativePath: string;
+    if (packageJson.tsdocMetadata) {
+      tsdocMetadataRelativePath = packageJson.tsdocMetadata;
+    } else if (packageJson.typings) {
+      tsdocMetadataRelativePath = path.join(
+        path.dirname(packageJson.typings),
+        tsdocMetadataFilename
+      );
+    } else if (packageJson.main) {
+      tsdocMetadataRelativePath = path.join(
+        path.dirname(packageJson.main),
+        tsdocMetadataFilename
+      );
+    } else {
+      tsdocMetadataRelativePath = tsdocMetadataFilename;
+    }
+    const tsdocMetadataPath: string = path.resolve(
+      packageFolder,
+      tsdocMetadataRelativePath
+    );
+    return tsdocMetadataPath;
+  }
 
+  /**
+   * @param tsdocMetadataPath - An explicit path that can be configured in api-extractor.json.
+   * If this parameter is not an empty string, it overrides the normal path calculation.
+   * @returns the absolute path to the TSDoc metadata file
+   */
+  public static resolveTsdocMetadataPath(
+    packageFolder: string,
+    packageJson: IPackageJson,
+    tsdocMetadataPath?: string
+  ): string {
+    if (tsdocMetadataPath) {
+      return path.resolve(packageFolder, tsdocMetadataPath);
+    }
+    return PackageMetadataManager._resolveTsdocMetadataPathFromPackageJson(
+      packageFolder,
+      packageJson
+    );
+  }
+
+  /**
+   * Writes the TSDoc metadata file to the specified output file.
+   */
+  public static writeTsdocMetadataFile(tsdocMetadataPath: string): void {
     const fileObject: Object = {
       tsdocVersion: '0.12',
       toolPackages: [
         {
-           packageName: '@microsoft/api-extractor',
-           packageVersion: Extractor.version
+          packageName: '@microsoft/api-extractor',
+          packageVersion: Extractor.version
         }
       ]
     };
 
     const fileContent: string =
-      '// This file is read by tools that parse documentation comments conforming to the TSDoc standard.\n'
-      + '// It should be published with your NPM package.  It should not be tracked by Git.\n'
-      + JsonFile.stringify(fileObject);
+      '// This file is read by tools that parse documentation comments conforming to the TSDoc standard.\n' +
+      '// It should be published with your NPM package.  It should not be tracked by Git.\n' +
+      JsonFile.stringify(fileObject);
 
     FileSystem.writeFile(tsdocMetadataPath, fileContent, {
       convertLineEndings: NewlineKind.CrLf,
@@ -112,12 +156,12 @@ export class PackageMetadataManager {
 
       const packageJsonFolder: string = path.dirname(packageJsonFilePath);
 
-      // This feature is still being standardized: https://github.com/Microsoft/tsdoc/issues/7
-      // In the future we will use the @microsoft/tsdoc library to read this file.
       let aedocSupported: boolean = false;
 
-      const tsdocMetadataPath: string = path.join(packageJsonFolder,
-        'dist', PackageMetadataManager.tsdocMetadataFilename);
+      const tsdocMetadataPath: string = PackageMetadataManager._resolveTsdocMetadataPathFromPackageJson(
+        packageJsonFolder,
+        packageJson
+      );
 
       if (FileSystem.exists(tsdocMetadataPath)) {
         this._logger.logVerbose('Found metadata in ' + tsdocMetadataPath);

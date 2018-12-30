@@ -35,5 +35,10 @@
     "publishFolderForPublic": "./dist/public",
 
     "mainDtsRollupPath": ""
+  },
+
+  "tsdocMetadata": {
+    "enabled": true,
+    "tsdocMetadataPath": ""
   }
 }

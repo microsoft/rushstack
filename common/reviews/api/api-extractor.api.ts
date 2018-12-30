@@ -624,6 +624,8 @@ interface IExtractorConfig {
   extends?: string;
   policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
+  // @beta
+  tsdocMetadata?: IExtractorTsdocMetadataConfig;
   validationRules?: IExtractorValidationRulesConfig;
 }
 
@@ -671,6 +673,12 @@ interface IExtractorTsconfigCompilerConfig {
   overrideTsconfig?: {
   }
   rootFolder: string;
+}
+
+// @beta
+interface IExtractorTsdocMetadataConfig {
+  enabled: boolean;
+  tsdocMetadataPath?: string;
 }
 
 // @public

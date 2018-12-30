@@ -246,7 +246,7 @@ export class Extractor {
 
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     // Use the provided config to override the defaults
-    const normalized: IExtractorConfig  = lodash.merge(
+    const normalized: IExtractorConfig = lodash.merge(
       lodash.cloneDeep(Extractor._defaultConfig), config);
 
     return normalized;
@@ -385,7 +385,8 @@ export class Extractor {
     // This helps strict-null-checks to understand that _applyConfigDefaults() eliminated
     // any undefined members
     if (!(this.actualConfig.policies && this.actualConfig.validationRules
-      && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile && this.actualConfig.dtsRollup)) {
+      && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile
+      && this.actualConfig.dtsRollup && this.actualConfig.tsdocMetadata)) {
       throw new Error('The configuration object wasn\'t normalized properly');
     }
 
@@ -475,8 +476,16 @@ export class Extractor {
 
     this._generateRollupDtsFiles(collector);
 
-    // Write the tsdoc-metadata.json file for this project
-    PackageMetadataManager.writeTsdocMetadataFile(collector.package.packageFolder);
+    if (this.actualConfig.tsdocMetadata.enabled) {
+      // Write the tsdoc-metadata.json file for this project
+      PackageMetadataManager.writeTsdocMetadataFile(
+        PackageMetadataManager.resolveTsdocMetadataPath(
+          collector.package.packageFolder,
+          collector.package.packageJson,
+          this.actualConfig.tsdocMetadata.tsdocMetadataPath
+        )
+      );
+    }
 
     if (this._localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
@@ -590,7 +599,7 @@ export class Extractor {
       const compilerLibFolder: string = path.join(options.typescriptCompilerFolder, 'lib');
 
       let foundBaseLib: boolean = false;
-      const filesToAdd: string[]  = [];
+      const filesToAdd: string[] = [];
       for (const libFilename of commandLine.options.lib || []) {
         if (libFilename === DEFAULT_BUILTIN_LIBRARY) {
           // Ignore the default lib - it'll get added later
