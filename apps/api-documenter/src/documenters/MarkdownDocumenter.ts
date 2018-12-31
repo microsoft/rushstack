@@ -119,6 +119,9 @@ export class MarkdownDocumenter {
       case ApiItemKind.TypeAlias:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} type` }));
         break;
+      case ApiItemKind.Variable:
+        output.appendNode(new DocHeading({ configuration, title: `${scopedName} variable` }));
+        break;
       default:
         throw new Error('Unsupported API item kind: ' + apiItem.kind);
     }
@@ -196,6 +199,8 @@ export class MarkdownDocumenter {
         break;
       case ApiItemKind.TypeAlias:
         break;
+      case ApiItemKind.Variable:
+        break;
       default:
         throw new Error('Unsupported API item kind: ' + apiItem.kind);
     }
@@ -268,6 +273,10 @@ export class MarkdownDocumenter {
       headerTitles: [ 'Namespace', 'Description' ]
     });
 
+    const variablesTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Variable', 'Description' ]
+    });
+
     const typeAliasesTable: DocTable = new DocTable({ configuration,
       headerTitles: [ 'Type Alias', 'Description' ]
     });
@@ -313,6 +322,11 @@ export class MarkdownDocumenter {
           typeAliasesTable.addRow(row);
           this._writeApiItemPage(apiMember);
           break;
+
+        case ApiItemKind.Variable:
+          variablesTable.addRow(row);
+          this._writeApiItemPage(apiMember);
+          break;
 /*
         case 'function':
           this._writeFunctionPage(docChild);
@@ -350,6 +364,11 @@ export class MarkdownDocumenter {
     if (namespacesTable.rows.length > 0) {
       output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Namespaces' }));
       output.appendNode(namespacesTable);
+    }
+
+    if (variablesTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Variables' }));
+      output.appendNode(variablesTable);
     }
 
     if (typeAliasesTable.rows.length > 0) {
