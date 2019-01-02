@@ -1,0 +1,4 @@
+/**
+ * @public
+ */
+export default "literal";

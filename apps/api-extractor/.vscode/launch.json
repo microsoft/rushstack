@@ -72,6 +72,19 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "test-06",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-06",
+      "args": [
+        "-d",
+        "run",
+        "-l"
+      ],
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "scratch",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "(your project path)",

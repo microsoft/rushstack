@@ -1,0 +1,16 @@
+{
+  "name": "api-extractor-test-06",
+  "description": "Building this project is a regression test for api-extractor",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "@microsoft/api-extractor": "7.0.8",
+    "@types/jest": "21.1.10",
+    "@types/node": "8.5.8",
+    "fs-extra": "~7.0.1",
+    "typescript": "~3.0.3"
+  }
+}
