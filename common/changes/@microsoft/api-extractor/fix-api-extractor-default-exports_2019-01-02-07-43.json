@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fix an issue with rolling up default exports (https://github.com/Microsoft/web-build-tools/issues/1007)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "yacinehmito@users.noreply.github.com"
+}
