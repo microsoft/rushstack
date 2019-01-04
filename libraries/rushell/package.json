@@ -17,11 +17,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.8.2"
+    "@microsoft/node-core-library": "3.8.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.0": "0.3.2",
-    "@microsoft/node-library-build": "6.0.21",
+    "@microsoft/rush-stack-compiler-3.0": "0.3.3",
+    "@microsoft/node-library-build": "6.0.22",
     "@types/jest": "~23.3.11",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",

@@ -3,14 +3,23 @@
 
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
-import { IApiMethodItemOptions, ApiMethodItem } from '../items/ApiMethodItem';
+import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
+import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
+import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
+import { ApiReturnTypeMixin, IApiReturnTypeMixinOptions } from '../mixins/ApiReturnTypeMixin';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiMethod}.
  * @public
  */
-export interface IApiMethodOptions extends IApiMethodItemOptions,
-  IApiStaticMixinOptions {
+export interface IApiMethodOptions extends
+  IApiNameMixinOptions,
+  IApiParameterListMixinOptions,
+  IApiReleaseTagMixinOptions,
+  IApiReturnTypeMixinOptions,
+  IApiStaticMixinOptions,
+  IApiDeclaredItemOptions {
 }
 
 /**
@@ -25,7 +34,7 @@ export interface IApiMethodOptions extends IApiMethodItemOptions,
  *
  * ```ts
  * export class Widget {
- *   public draw(): void { }
+ *   public render(): void { }
  * }
  * ```
  *
@@ -34,7 +43,8 @@ export interface IApiMethodOptions extends IApiMethodItemOptions,
  *
  * @public
  */
-export class ApiMethod extends ApiStaticMixin(ApiMethodItem) {
+export class ApiMethod extends ApiNameMixin(ApiParameterListMixin(ApiReleaseTagMixin(
+  ApiReturnTypeMixin(ApiStaticMixin(ApiDeclaredItem))))) {
 
   public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {

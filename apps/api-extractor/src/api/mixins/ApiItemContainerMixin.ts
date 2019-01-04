@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../items/ApiItem';
+import { ApiNameMixin } from './ApiNameMixin';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.
@@ -27,15 +28,15 @@ const _membersByName: unique symbol = Symbol('ApiItemContainerMixin._membersByNa
  *
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.  The non-abstract classes (e.g. `ApiClass`, `ApiEnum`, `ApiInterface`, etc.) use
- * TypeScript "mixin" functions (e.g. `ApiDeclarationMixin`, `ApiItemContainerMixin`, etc.) to add various
+ * TypeScript "mixin" functions (e.g. `ApiDeclaredItem`, `ApiItemContainerMixin`, etc.) to add various
  * features that cannot be represented as a normal inheritance chain (since TypeScript does not allow a child class
  * to extend more than one base class).  The "mixin" is a TypeScript merged declaration with three components:
  * the function that generates a subclass, an interface that describes the members of the subclass, and
  * a namespace containing static members of the class.
  *
  * Examples of `ApiItemContainerMixin` child classes include `ApiModel`, `ApiPackage`, `ApiEntryPoint`,
- * and `ApiEnum`.  But note that `ApiParameter` is not considered a "member" of an `ApiMethod`; this relationship
- * is modeled using {@link ApiFunctionLikeMixin.parameters} instead of {@link ApiItemContainerMixin.members}.
+ * and `ApiEnum`.  But note that `Parameter` is not considered a "member" of an `ApiMethod`; this relationship
+ * is modeled using {@link ApiParameterListMixin.parameters} instead of {@link ApiItemContainerMixin.members}.
  *
  * @public
  */
@@ -69,7 +70,7 @@ export interface ApiItemContainerMixin extends ApiItem {
 }
 
 /**
- * Mixin function for {@link (ApiDeclarationMixin:interface)}.
+ * Mixin function for {@link (ApiDeclaredItem:interface)}.
  *
  * @param baseClass - The base class to be extended
  * @returns A child class that extends baseClass, adding the {@link (ApiItemContainerMixin:interface)} functionality.
@@ -128,7 +129,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
       const existingParent: ApiItem | undefined = member[ApiItem_parent];
       if (existingParent !== undefined) {
-        throw new Error(`This item has already been added to another container: "${existingParent.name}"`);
+        throw new Error(`This item has already been added to another container: "${existingParent.displayName}"`);
       }
 
       this[_members].push(member);
@@ -149,12 +150,14 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
         const map: Map<string, ApiItem[]> = new Map<string, ApiItem[]>();
 
         for (const member of this[_members]) {
-          let list: ApiItem[] | undefined = map.get(member.name);
-          if (list === undefined) {
-            list = [];
-            map.set(member.name, list);
+          if (ApiNameMixin.isBaseClassOf(member)) {
+            let list: ApiItem[] | undefined = map.get(member.name);
+            if (list === undefined) {
+              list = [];
+              map.set(member.name, list);
+            }
+            list.push(member);
           }
-          list.push(member);
         }
 
         this[_membersByName] = map;

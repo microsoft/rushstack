@@ -15,5 +15,10 @@ items:
             uid: api-extractor-test-05.IDocInterface1
           - name: IDocInterface2
             uid: api-extractor-test-05.IDocInterface2
+          - name: IDocInterface3
+            uid: api-extractor-test-05.IDocInterface3
+          - name: OuterNamespace
+            items:
+              - name: InnerNamespace
           - name: SystemEvent
             uid: api-extractor-test-05.SystemEvent

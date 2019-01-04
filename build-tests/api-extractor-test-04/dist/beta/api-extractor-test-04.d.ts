@@ -126,3 +126,5 @@ export declare enum RegularEnum {
  * @beta
  */
 export declare const variableDeclaration: string;
+
+export { }

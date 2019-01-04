@@ -2,10 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from '../items/ApiItem';
-import { IApiMethodItemOptions, ApiMethodItem } from '../items/ApiMethodItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
+import { ApiParameterListMixin, IApiParameterListMixinOptions } from '../mixins/ApiParameterListMixin';
+import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
+import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /** @public */
-export interface IApiMethodSignatureOptions extends IApiMethodItemOptions {
+export interface IApiMethodSignatureOptions extends
+  IApiNameMixinOptions,
+  IApiParameterListMixinOptions,
+  IApiReleaseTagMixinOptions,
+  IApiReturnTypeMixinOptions,
+  IApiDeclaredItemOptions {
 }
 
 /**
@@ -20,7 +29,7 @@ export interface IApiMethodSignatureOptions extends IApiMethodItemOptions {
  *
  * ```ts
  * export interface IWidget {
- *   draw(): void;
+ *   render(): void;
  * }
  * ```
  *
@@ -29,7 +38,9 @@ export interface IApiMethodSignatureOptions extends IApiMethodItemOptions {
  *
  * @public
  */
-export class ApiMethodSignature extends ApiMethodItem {
+export class ApiMethodSignature extends ApiNameMixin(ApiParameterListMixin(ApiReleaseTagMixin(
+  ApiReturnTypeMixin(ApiDeclaredItem)))) {
+
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;
   }

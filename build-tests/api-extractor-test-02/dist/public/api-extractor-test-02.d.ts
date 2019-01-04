@@ -52,3 +52,5 @@ export declare function importedModuleAsReturnType(): semver1.SemVer | undefined
 export declare class SubclassWithImport extends RenamedReexportedClass3 implements ISimpleInterface {
     test(): void;
 }
+
+export { }

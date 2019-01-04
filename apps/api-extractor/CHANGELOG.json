@@ -2,6 +2,35 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.8",
+      "tag": "@microsoft/api-extractor_v7.0.8",
+      "date": "Thu, 20 Dec 2018 17:04:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where it was possible to import forgotten declarations from a .d.ts rollup, even though they did not have an explicit \"export\" modifier"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.7",
+      "tag": "@microsoft/api-extractor_v7.0.7",
+      "date": "Wed, 19 Dec 2018 05:57:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Extend ApiModel to support new item kinds: ApiCallSignature, ApiConstructor, ApiConstructSignature, ApiFunction, ApiIndexSignature, ApiTypeAlias, and ApiVariable"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.2` to `3.8.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.6",
       "tag": "@microsoft/api-extractor_v7.0.6",
       "date": "Fri, 14 Dec 2018 19:43:46 GMT",

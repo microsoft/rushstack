@@ -4,7 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import { FileSystem, NewlineKind } from '@microsoft/node-core-library';
+import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
 
 import { Collector } from '../collector/Collector';
 import { IndentedWriter } from '../api/IndentedWriter';
@@ -128,6 +128,11 @@ export class DtsRollupGenerator {
         }
       }
     }
+
+    // Emit "export { }" which is a special directive that prevents consumers from importing declarations
+    // that don't have an explicit "export" modifier.
+    indentedWriter.writeLine();
+    indentedWriter.writeLine('export { }');
   }
 
   /**
@@ -203,7 +208,7 @@ export class DtsRollupGenerator {
             [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
           if (!list) {
             // This should not happen unless the compiler API changes somehow
-            throw new Error('Unsupported variable declaration');
+            throw new InternalError('Unsupported variable declaration');
           }
           const listPrefix: string = list.getSourceFile().text
             .substring(list.getStart(), list.declarations[0].getStart());

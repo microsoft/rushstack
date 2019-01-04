@@ -1,25 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind, IApiItemJson } from '../items/ApiItem';
-import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
+import { ApiItemKind } from '../items/ApiItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiEnumMember}.
  * @public
  */
 export interface IApiEnumMemberOptions extends
-  IApiDeclarationMixinOptions,
+  IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiDeclaredItemOptions {
 
   initializerTokenRange: IExcerptTokenRange;
 }
 
-export interface IApiEnumMemberJson extends IApiItemJson {
+export interface IApiEnumMemberJson extends IApiDeclaredItemJson {
   initializerTokenRange: IExcerptTokenRange;
 }
 
@@ -31,7 +31,7 @@ export interface IApiEnumMemberJson extends IApiItemJson {
  * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
  * API declarations.
  *
- * `ApiEnumMember` represents an enum member such as `Small` in the example below:
+ * `ApiEnumMember` represents an enum member such as `Small = 100` in the example below:
  *
  * ```ts
  * export enum FontSizes {
@@ -43,7 +43,10 @@ export interface IApiEnumMemberJson extends IApiItemJson {
  *
  * @public
  */
-export class ApiEnumMember extends ApiDeclarationMixin(ApiReleaseTagMixin(ApiDocumentedItem)) {
+export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
+  /**
+   * An {@link Excerpt} that describes the value of the enum member.
+   */
   public readonly initializerExcerpt: Excerpt;
 
   public static getCanonicalReference(name: string): string {

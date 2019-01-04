@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.8.3",
+      "tag": "@microsoft/node-core-library_v3.8.3",
+      "date": "Wed, 19 Dec 2018 05:57:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing space in error message"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.2",
       "tag": "@microsoft/node-core-library_v3.8.2",
       "date": "Thu, 13 Dec 2018 02:58:10 GMT",

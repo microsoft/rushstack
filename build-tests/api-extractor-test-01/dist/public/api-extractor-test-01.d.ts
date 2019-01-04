@@ -293,3 +293,5 @@ declare const unexportedCustomSymbol: unique symbol;
  * @public
  */
 export declare function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
+
+export { }

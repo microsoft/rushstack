@@ -3,12 +3,13 @@
 
 import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /**
  * Constructor options for {@link ApiEntryPoint}.
  * @public
  */
-export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions {
+export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions {
 }
 
 /**
@@ -35,7 +36,7 @@ export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions {
  *
  * @public
  */
-export class ApiEntryPoint extends ApiItemContainerMixin(ApiItem) {
+export class ApiEntryPoint extends ApiItemContainerMixin(ApiNameMixin(ApiItem)) {
   public constructor(options: IApiEntryPointOptions) {
     super(options);
   }

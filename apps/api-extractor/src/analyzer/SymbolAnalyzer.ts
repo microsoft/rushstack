@@ -47,23 +47,21 @@ export class SymbolAnalyzer {
   public static isAstDeclaration(kind: ts.SyntaxKind): boolean {
     // (alphabetical order)
     switch (kind) {
+      case ts.SyntaxKind.CallSignature:
       case ts.SyntaxKind.ClassDeclaration:
-      case ts.SyntaxKind.Constructor: // Example: new(x: number);
-      case ts.SyntaxKind.ConstructSignature: // Example: new(x: number);
+      case ts.SyntaxKind.ConstructSignature:    // Example: "new(x: number): IMyClass"
+      case ts.SyntaxKind.Constructor:           // Example: "constructor(x: number)"
       case ts.SyntaxKind.EnumDeclaration:
       case ts.SyntaxKind.EnumMember:
-      case ts.SyntaxKind.FunctionDeclaration:
-      case ts.SyntaxKind.IndexSignature:  // Example: [key: string]: string
+      case ts.SyntaxKind.FunctionDeclaration:   // Example: "(x: number): number"
+      case ts.SyntaxKind.IndexSignature:        // Example: "[key: string]: string"
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.MethodDeclaration:
       case ts.SyntaxKind.MethodSignature:
-
-      // ModuleDeclaration is used for both "module" and "namespace" declarations
-      case ts.SyntaxKind.ModuleDeclaration:
+      case ts.SyntaxKind.ModuleDeclaration:     // Used for both "module" and "namespace" declarations
       case ts.SyntaxKind.PropertyDeclaration:
       case ts.SyntaxKind.PropertySignature:
-
-      case ts.SyntaxKind.TypeAliasDeclaration:
+      case ts.SyntaxKind.TypeAliasDeclaration:  // Example: "type Shape = Circle | Square"
       case ts.SyntaxKind.VariableDeclaration:
         return true;
 

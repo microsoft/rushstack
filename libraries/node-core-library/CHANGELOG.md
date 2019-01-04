@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 13 Dec 2018 02:58:10 GMT and should not be manually modified.
+This log was last generated on Wed, 19 Dec 2018 05:57:33 GMT and should not be manually modified.
+
+## 3.8.3
+Wed, 19 Dec 2018 05:57:33 GMT
+
+### Patches
+
+- Add missing space in error message
 
 ## 3.8.2
 Thu, 13 Dec 2018 02:58:10 GMT
