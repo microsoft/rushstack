@@ -57,7 +57,7 @@
     "@types/z-schema": "3.16.31",
     "gulp": "~3.9.1",
     "@types/glob": "5.0.30",
-    "@types/jest": "21.1.10",
+    "@types/jest": "~23.3.11",
     "@types/js-yaml": "3.9.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "2.0.29",

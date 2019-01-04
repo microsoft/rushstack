@@ -48,6 +48,6 @@
     "@types/lodash": "4.14.116",
     "gulp": "~3.9.1",
     "@microsoft/node-library-build": "6.0.15",
-    "@types/jest": "21.1.10"
+    "@types/jest": "~23.3.11"
   }
 }
