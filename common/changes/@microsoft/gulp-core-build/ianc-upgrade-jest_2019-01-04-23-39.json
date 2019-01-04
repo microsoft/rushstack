@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Upgrade Jest to version 23.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "iclanton@users.noreply.github.com"
+}
