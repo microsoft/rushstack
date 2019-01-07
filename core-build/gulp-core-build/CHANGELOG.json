@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.9.0",
+      "tag": "@microsoft/gulp-core-build_v3.9.0",
+      "date": "Mon, 07 Jan 2019 17:04:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade Jest to version 23."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.57",
       "tag": "@microsoft/gulp-core-build_v3.8.57",
       "date": "Wed, 19 Dec 2018 05:57:33 GMT",
