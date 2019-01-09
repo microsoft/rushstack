@@ -7,8 +7,3 @@
 |  [`rush-lib`](./rush-lib.md) | A library for writing scripts that interact with the Rush tool. |
 |  [`ts-command-line`](./ts-command-line.md) | An object-oriented command-line parser for TypeScript projects. |
 
-## External Packages
-
-|  Package | Description |
-|  --- | --- |
-|  [`web-apis`](./web-apis.md) | Documentation for system libraries used by these packages. |
