@@ -20,6 +20,12 @@ This project tests various documentation generation scenarios and doc comment sy
 |  --- | --- |
 |  <p>[DocEnum](./api-extractor-test-05.docenum.md)</p> | <p>Docs for DocEnum</p> |
 
+## Functions
+
+|  <p>Function</p> | <p>Description</p> |
+|  --- | --- |
+|  <p>[globalFunction(x)](./api-extractor-test-05.globalfunction.md)</p> | <p>An exported function</p> |
+
 ## Interfaces
 
 |  <p>Interface</p> | <p>Description</p> |
@@ -27,4 +33,22 @@ This project tests various documentation generation scenarios and doc comment sy
 |  <p>[IDocInterface1](./api-extractor-test-05.idocinterface1.md)</p> | <p></p> |
 |  <p>[IDocInterface2](./api-extractor-test-05.idocinterface2.md)</p> | <p></p> |
 |  <p>[IDocInterface3](./api-extractor-test-05.idocinterface3.md)</p> | <p>Some less common TypeScript declaration kinds.</p> |
+
+## Namespaces
+
+|  <p>Namespace</p> | <p>Description</p> |
+|  --- | --- |
+|  <p>[OuterNamespace](./api-extractor-test-05.outernamespace.md)</p> | <p>A top-level namespace</p> |
+
+## Variables
+
+|  <p>Variable</p> | <p>Description</p> |
+|  --- | --- |
+|  <p>[constVariable](./api-extractor-test-05.constvariable.md)</p> | <p>An exported variable declaration.</p> |
+
+## Type Aliases
+
+|  <p>Type Alias</p> | <p>Description</p> |
+|  --- | --- |
+|  <p>[ExampleTypeAlias](./api-extractor-test-05.exampletypealias.md)</p> | <p>A type alias</p> |
 
