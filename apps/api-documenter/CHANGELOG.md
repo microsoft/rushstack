@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 07 Jan 2019 17:04:07 GMT and should not be manually modified.
+This log was last generated on Wed, 09 Jan 2019 22:04:17 GMT and should not be manually modified.
+
+## 7.0.12
+Wed, 09 Jan 2019 22:04:17 GMT
+
+### Patches
+
+- Support more API types for the markdown generator: namespace, function, type alias, variable
 
 ## 7.0.11
 Mon, 07 Jan 2019 17:04:07 GMT
