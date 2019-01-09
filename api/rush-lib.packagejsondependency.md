@@ -1,21 +1,28 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [PackageJsonDependency](./rush-lib.packagejsondependency.md)
 
-# PackageJsonDependency class
+## PackageJsonDependency class
 
 > This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+
+<b>Signature:</b>
+
+```typescript
+export declare class PackageJsonDependency 
+```
 
 ## Properties
 
-|  Property | Access Modifier | Type | Description |
+|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- | --- |
-|  [`dependencyType`](./rush-lib.packagejsondependency.dependencytype.md) |  | `DependencyType` |  |
-|  [`name`](./rush-lib.packagejsondependency.name.md) |  | `string` |  |
-|  [`version`](./rush-lib.packagejsondependency.version.md) |  | `string` |  |
+|  <p>[dependencyType](./rush-lib.packagejsondependency.dependencytype.md)</p> |  | <p>`DependencyType`</p> | <p><b><i>(BETA)</i></b></p> |
+|  <p>[name](./rush-lib.packagejsondependency.name.md)</p> |  | <p>`string`</p> | <p><b><i>(BETA)</i></b></p> |
+|  <p>[version](./rush-lib.packagejsondependency.version.md)</p> |  | <p>`string`</p> | <p><b><i>(BETA)</i></b></p> |
 
 ## Methods
 
-|  Method | Access Modifier | Returns | Description |
-|  --- | --- | --- | --- |
-|  [`constructor(name, version, type, onChange)`](./rush-lib.packagejsondependency.constructor.md) |  |  | Constructs a new instance of the [PackageJsonDependency](./rush-lib.packagejsondependency.md) class |
-|  [`setVersion(newVersion)`](./rush-lib.packagejsondependency.setversion.md) |  | `void` |  |
+|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  --- | --- | --- |
+|  <p>[setVersion(newVersion)](./rush-lib.packagejsondependency.setversion.md)</p> |  | <p><b><i>(BETA)</i></b></p> |
 

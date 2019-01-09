@@ -1,12 +1,18 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [ICommandLineIntegerDefinition](./ts-command-line.icommandlineintegerdefinition.md)
 
-# ICommandLineIntegerDefinition interface
+## ICommandLineIntegerDefinition interface
 
 For use with CommandLineParser, this interface represents a command line parameter whose argument is an integer value.
 
+<b>Signature:</b>
+
+```typescript
+export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument 
+```
+
 ## Properties
 
-|  Property | Type | Description |
+|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  [`defaultValue`](./ts-command-line.icommandlineintegerdefinition.defaultvalue.md) | `number` | The default value which will be used if the parameter is omitted from the command line. |
+|  <p>[defaultValue](./ts-command-line.icommandlineintegerdefinition.defaultvalue.md)</p> | <p>`number`</p> | <p></p> |
 

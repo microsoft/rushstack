@@ -1,13 +1,19 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [ICommandLineChoiceDefinition](./ts-command-line.icommandlinechoicedefinition.md)
 
-# ICommandLineChoiceDefinition interface
+## ICommandLineChoiceDefinition interface
 
 For use with CommandLineParser, this interface represents a parameter which is constrained to a list of possible options
 
+<b>Signature:</b>
+
+```typescript
+export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition 
+```
+
 ## Properties
 
-|  Property | Type | Description |
+|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  [`alternatives`](./ts-command-line.icommandlinechoicedefinition.alternatives.md) | `string[]` | A list of strings (which contain no spaces), of possible options which can be selected |
-|  [`defaultValue`](./ts-command-line.icommandlinechoicedefinition.defaultvalue.md) | `string` | The default value which will be used if the parameter is omitted from the command line. |
+|  <p>[alternatives](./ts-command-line.icommandlinechoicedefinition.alternatives.md)</p> | <p>`string[]`</p> | <p>A list of strings (which contain no spaces), of possible options which can be selected</p> |
+|  <p>[defaultValue](./ts-command-line.icommandlinechoicedefinition.defaultvalue.md)</p> | <p>`string`</p> | <p></p> |
 

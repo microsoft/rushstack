@@ -1,18 +1,22 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [PackageName](./node-core-library.packagename.md) &gt; [validate](./node-core-library.packagename.validate.md)
 
-# PackageName.validate method
+## PackageName.validate() method
 
 Throws an exception if the specified name is not a valid package name. The packageName must not be an empty string.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 static validate(packageName: string): void;
 ```
-**Returns:** `void`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `packageName` | `string` |  |
+|  <p>packageName</p> | <p>`string`</p> |  |
+
+<b>Returns:</b>
+
+`void`
 

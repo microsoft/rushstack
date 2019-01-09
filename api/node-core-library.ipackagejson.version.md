@@ -1,10 +1,11 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IPackageJson](./node-core-library.ipackagejson.md) &gt; [version](./node-core-library.ipackagejson.version.md)
 
-# IPackageJson.version property
+## IPackageJson.version property
 
 A version number conforming to the Semantic Versioning (SemVer) standard.
 
-**Signature:**
-```javascript
-version: string
+<b>Signature:</b>
+
+```typescript
+version: string;
 ```

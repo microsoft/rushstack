@@ -1,12 +1,18 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IJsonSchemaValidateOptions](./node-core-library.ijsonschemavalidateoptions.md)
 
-# IJsonSchemaValidateOptions interface
+## IJsonSchemaValidateOptions interface
 
 Options for JsonSchema.validateObject()
 
+<b>Signature:</b>
+
+```typescript
+export interface IJsonSchemaValidateOptions 
+```
+
 ## Properties
 
-|  Property | Type | Description |
+|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  [`customErrorHeader`](./node-core-library.ijsonschemavalidateoptions.customerrorheader.md) | `string` | A custom header that will be used to report schema errors. |
+|  <p>[customErrorHeader](./node-core-library.ijsonschemavalidateoptions.customerrorheader.md)</p> | <p>`string`</p> | <p>A custom header that will be used to report schema errors.</p> |
 

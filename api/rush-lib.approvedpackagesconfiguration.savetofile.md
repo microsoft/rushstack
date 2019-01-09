@@ -1,12 +1,15 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesConfiguration](./rush-lib.approvedpackagesconfiguration.md) &gt; [saveToFile](./rush-lib.approvedpackagesconfiguration.savetofile.md)
 
-# ApprovedPackagesConfiguration.saveToFile method
+## ApprovedPackagesConfiguration.saveToFile() method
 
 Loads the configuration data to the filename that was passed to the constructor.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 saveToFile(): void;
 ```
-**Returns:** `void`
+<b>Returns:</b>
+
+`void`
 

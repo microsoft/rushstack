@@ -1,14 +1,16 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineStringParameter](./ts-command-line.commandlinestringparameter.md) &gt; [value](./ts-command-line.commandlinestringparameter.value.md)
 
-# CommandLineStringParameter.value property
+## CommandLineStringParameter.value property
 
 Returns the argument value for a string parameter that was parsed from the command line.
 
-**Signature:**
-```javascript
-value: string | undefined
+<b>Signature:</b>
+
+```typescript
+readonly value: string | undefined;
 ```
 
 ## Remarks
 
 The return value will be undefined if the command-line has not been parsed yet, or if the parameter was omitted and has no default value.
+

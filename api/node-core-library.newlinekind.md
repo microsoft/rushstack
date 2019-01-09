@@ -1,11 +1,19 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [NewlineKind](./node-core-library.newlinekind.md)
 
-# NewlineKind enumeration
+## NewlineKind enum
 
 Enumeration controlling conversion of newline characters.
 
-|  Member | Value | Description |
+<b>Signature:</b>
+
+```typescript
+export declare const enum NewlineKind 
+```
+
+## Enumeration Members
+
+|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  CrLf | `= "\r\n"` | Windows-style newlines |
-|  Lf | `= "\n"` | POSIX-style newlines |
+|  <p>CrLf</p> | <p>`"\r\n"`</p> | <p>Windows-style newlines</p> |
+|  <p>Lf</p> | <p>`"\n"`</p> | <p>POSIX-style newlines</p> |
 

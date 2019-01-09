@@ -1,10 +1,11 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IJsonFileSaveOptions](./node-core-library.ijsonfilesaveoptions.md) &gt; [updateExistingFile](./node-core-library.ijsonfilesaveoptions.updateexistingfile.md)
 
-# IJsonFileSaveOptions.updateExistingFile property
+## IJsonFileSaveOptions.updateExistingFile property
 
 If true, use the "jju" library to preserve the existing JSON formatting: The file will be loaded from the target filename, the new content will be merged in (preserving whitespace and comments), and then the file will be overwritten with the merged contents. If the target file does not exist, then the file is saved normally.
 
-**Signature:**
-```javascript
-updateExistingFile: boolean
+<b>Signature:</b>
+
+```typescript
+updateExistingFile?: boolean;
 ```

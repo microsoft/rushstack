@@ -1,24 +1,26 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineStringParameter](./ts-command-line.commandlinestringparameter.md)
 
-# CommandLineStringParameter class
+## CommandLineStringParameter class
 
-The data type returned by [CommandLineParameterProvider.defineStringParameter](./ts-command-line.commandlineparameterprovider.definestringparameter.md)<!-- -->.
+The data type returned by [CommandLineParameterProvider.defineStringParameter()](./ts-command-line.commandlineparameterprovider.definestringparameter.md)<!-- -->.
+
+<b>Signature:</b>
+
+```typescript
+export declare class CommandLineStringParameter extends CommandLineParameterWithArgument 
+```
 
 ## Properties
 
-|  Property | Access Modifier | Type | Description |
+|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- | --- |
-|  [`defaultValue`](./ts-command-line.commandlinestringparameter.defaultvalue.md) |  | `string | undefined` | The default value which will be used if the parameter is omitted from the command line. |
-|  [`kind`](./ts-command-line.commandlinestringparameter.kind.md) |  | `CommandLineParameterKind` | Indicates the type of parameter. |
-|  [`value`](./ts-command-line.commandlinestringparameter.value.md) |  | `string | undefined` | Returns the argument value for a string parameter that was parsed from the command line. |
+|  <p>[defaultValue](./ts-command-line.commandlinestringparameter.defaultvalue.md)</p> |  | <p>`string | undefined`</p> | <p></p> |
+|  <p>[kind](./ts-command-line.commandlinestringparameter.kind.md)</p> |  | <p>`CommandLineParameterKind`</p> | <p></p> |
+|  <p>[value](./ts-command-line.commandlinestringparameter.value.md)</p> |  | <p>`string | undefined`</p> | <p>Returns the argument value for a string parameter that was parsed from the command line.</p> |
 
 ## Methods
 
-|  Method | Access Modifier | Returns | Description |
-|  --- | --- | --- | --- |
-|  [`appendToArgList(argList)`](./ts-command-line.commandlinestringparameter.appendtoarglist.md) |  | `void` | Append the parsed values to the provided string array. |
-
-## Remarks
-
-The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the CommandLineStringParameter class.
+|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  --- | --- | --- |
+|  <p>[appendToArgList(argList)](./ts-command-line.commandlinestringparameter.appendtoarglist.md)</p> |  | <p></p> |
 

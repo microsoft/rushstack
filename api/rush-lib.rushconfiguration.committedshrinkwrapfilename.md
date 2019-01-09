@@ -1,14 +1,21 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [committedShrinkwrapFilename](./rush-lib.rushconfiguration.committedshrinkwrapfilename.md)
 
-# RushConfiguration.committedShrinkwrapFilename property
+## RushConfiguration.committedShrinkwrapFilename property
+
+> Warning: This API is now obsolete.
+> 
+> Use `getCommittedShrinkwrapFilename` instead, which gets the correct common shrinkwrap file name for a given active variant.
+> 
 
 The full path of the shrinkwrap file that is tracked by Git. (The "rush install" command uses a temporary copy, whose path is tempShrinkwrapFilename.)
 
-**Signature:**
-```javascript
-committedShrinkwrapFilename: string
+<b>Signature:</b>
+
+```typescript
+readonly committedShrinkwrapFilename: string;
 ```
 
 ## Remarks
 
 This property merely reports the filename; the file itself may not actually exist. Example: `C:\MyRepo\common\npm-shrinkwrap.json` or `C:\MyRepo\common\shrinkwrap.yaml`
+

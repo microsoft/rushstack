@@ -1,24 +1,28 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [PackageJsonLookup](./node-core-library.packagejsonlookup.md) &gt; [tryGetPackageFolderFor](./node-core-library.packagejsonlookup.trygetpackagefolderfor.md)
 
-# PackageJsonLookup.tryGetPackageFolderFor method
+## PackageJsonLookup.tryGetPackageFolderFor() method
 
 Returns the absolute path of a folder containing a package.json file, by looking upwards from the specified fileOrFolderPath. If no package.json can be found, undefined is returned.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 tryGetPackageFolderFor(fileOrFolderPath: string): string | undefined;
 ```
-**Returns:** `string | undefined`
+
+## Parameters
+
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  --- | --- | --- |
+|  <p>fileOrFolderPath</p> | <p>`string`</p> | <p>a relative or absolute path to a source file or folder that may be part of a package</p> |
+
+<b>Returns:</b>
+
+`string | undefined`
 
 an absolute path to a folder containing a package.json file
 
 ## Remarks
 
 The fileOrFolderPath is not required to actually exist on disk. The fileOrFolderPath itself can be the return value, if it is a folder containing a package.json file. Both positive and negative lookup results are cached.
-
-## Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  `fileOrFolderPath` | `string` | a relative or absolute path to a source file or folder that may be part of a package |
 

@@ -1,18 +1,21 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesConfiguration](./rush-lib.approvedpackagesconfiguration.md) &gt; [addOrUpdatePackage](./rush-lib.approvedpackagesconfiguration.addorupdatepackage.md)
 
-# ApprovedPackagesConfiguration.addOrUpdatePackage method
+## ApprovedPackagesConfiguration.addOrUpdatePackage() method
 
+<b>Signature:</b>
 
-**Signature:**
-```javascript
+```typescript
 addOrUpdatePackage(packageName: string, reviewCategory: string): void;
 ```
-**Returns:** `void`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `packageName` | `string` |  |
-|  `reviewCategory` | `string` |  |
+|  <p>packageName</p> | <p>`string`</p> |  |
+|  <p>reviewCategory</p> | <p>`string`</p> |  |
+
+<b>Returns:</b>
+
+`void`
 

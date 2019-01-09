@@ -1,0 +1,19 @@
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IStringBuilder](./node-core-library.istringbuilder.md) &gt; [toString](./node-core-library.istringbuilder.tostring.md)
+
+## IStringBuilder.toString() method
+
+Returns a single string containing all the text that was appended to the buffer so far.
+
+<b>Signature:</b>
+
+```typescript
+toString(): string;
+```
+<b>Returns:</b>
+
+`string`
+
+## Remarks
+
+This is a potentially expensive operation.
+

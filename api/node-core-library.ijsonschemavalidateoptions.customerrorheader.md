@@ -1,14 +1,16 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IJsonSchemaValidateOptions](./node-core-library.ijsonschemavalidateoptions.md) &gt; [customErrorHeader](./node-core-library.ijsonschemavalidateoptions.customerrorheader.md)
 
-# IJsonSchemaValidateOptions.customErrorHeader property
+## IJsonSchemaValidateOptions.customErrorHeader property
 
 A custom header that will be used to report schema errors.
 
-**Signature:**
-```javascript
-customErrorHeader: string
+<b>Signature:</b>
+
+```typescript
+customErrorHeader?: string;
 ```
 
 ## Remarks
 
 If omitted, the default header is "JSON validation failed:". The error message starts with the header, followed by the full input filename, followed by the z-schema error tree. If you wish to customize all aspects of the error message, use JsonFile.loadAndValidateWithCallback() or JsonSchema.validateObjectWithCallback().
+

@@ -1,12 +1,13 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [CommonVersionsConfiguration](./rush-lib.commonversionsconfiguration.md) &gt; [preferredVersions](./rush-lib.commonversionsconfiguration.preferredversions.md)
 
-# CommonVersionsConfiguration.preferredVersions property
+## CommonVersionsConfiguration.preferredVersions property
 
 A table that specifies a "preferred version" for a dependency package.
 
-**Signature:**
-```javascript
-preferredVersions: Map<string, string>
+<b>Signature:</b>
+
+```typescript
+readonly preferredVersions: Map<string, string>;
 ```
 
 ## Remarks
@@ -16,3 +17,4 @@ The "preferred version" is typically used to hold an indirect dependency back to
 For example, suppose local project `A` depends on an external package `B`<!-- -->, and `B` asks for `C@^1.0.0`<!-- -->, which normally would select `C@1.5.0`<!-- -->. If we specify `C@~1.2.3` as our preferred version, and it selects `C@1.2.9`<!-- -->, then that will be installed for B instead of `C@1.5.0`<!-- -->. Whereas if the preferred version was `C@~2.0.0` then it would have no effect, because this is incompatible with `C@^1.0.0`<!-- -->. A compatible parent dependency will take precedence over the preferred version; for example if `A` had a direct dependency on `C@1.2.2`<!-- -->, then `B` would get `C@1.2.2` regardless of the preferred version.
 
 Rush's implementation relies on the package manager's heuristic for avoiding duplicates by trying to reuse dependencies requested by a parent in the graph: The preferred versions are simply injected into the fake common/temp/package.json file that acts as the root for all local projects in the Rush repo.
+

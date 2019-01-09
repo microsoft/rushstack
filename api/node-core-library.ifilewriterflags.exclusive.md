@@ -1,12 +1,13 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IFileWriterFlags](./node-core-library.ifilewriterflags.md) &gt; [exclusive](./node-core-library.ifilewriterflags.exclusive.md)
 
-# IFileWriterFlags.exclusive property
+## IFileWriterFlags.exclusive property
 
 Fails if path exists. The exclusive flag ensures that path is newly created.
 
-**Signature:**
-```javascript
-exclusive: boolean
+<b>Signature:</b>
+
+```typescript
+exclusive?: boolean;
 ```
 
 ## Remarks
@@ -14,3 +15,4 @@ exclusive: boolean
 On POSIX-like operating systems, path is considered to exist even if it is a symlink to a non-existent file. The exclusive flag may or may not work with network file systems.
 
 POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
+

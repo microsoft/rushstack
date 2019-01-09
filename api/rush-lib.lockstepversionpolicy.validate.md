@@ -1,21 +1,26 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [LockStepVersionPolicy](./rush-lib.lockstepversionpolicy.md) &gt; [validate](./rush-lib.lockstepversionpolicy.validate.md)
 
-# LockStepVersionPolicy.validate method
+## LockStepVersionPolicy.validate() method
 
 > This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
 
 Validates the specified version and throws if the version does not satisfy lockstep version.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 validate(versionString: string, packageName: string): void;
 ```
-**Returns:** `void`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `versionString` | `string` | version string |
-|  `packageName` | `string` | package name |
+|  <p>versionString</p> | <p>`string`</p> | <p>version string</p> |
+|  <p>packageName</p> | <p>`string`</p> | <p>package name</p> |
+
+<b>Returns:</b>
+
+`void`
 

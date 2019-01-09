@@ -1,0 +1,25 @@
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [LegacyAdapters](./node-core-library.legacyadapters.md) &gt; [convertCallbackToPromise](./node-core-library.legacyadapters.convertcallbacktopromise.md)
+
+## LegacyAdapters.convertCallbackToPromise() method
+
+> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
+> 
+
+This function wraps a function with a callback in a promise.
+
+<b>Signature:</b>
+
+```typescript
+static convertCallbackToPromise<TResult, TError>(fn: (cb: callback<TResult, TError>) => void): Promise<TResult>;
+```
+
+## Parameters
+
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  --- | --- | --- |
+|  <p>fn</p> | <p>`(cb: callback<TResult, TError>) => void`</p> |  |
+
+<b>Returns:</b>
+
+`Promise<TResult>`
+

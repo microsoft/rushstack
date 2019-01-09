@@ -1,10 +1,11 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IFileSystemWriteFileOptions](./node-core-library.ifilesystemwritefileoptions.md) &gt; [ensureFolderExists](./node-core-library.ifilesystemwritefileoptions.ensurefolderexists.md)
 
-# IFileSystemWriteFileOptions.ensureFolderExists property
+## IFileSystemWriteFileOptions.ensureFolderExists property
 
 If true, will ensure the folder is created before writing the file. Defaults to `false`<!-- -->.
 
-**Signature:**
-```javascript
-ensureFolderExists: boolean
+<b>Signature:</b>
+
+```typescript
+ensureFolderExists?: boolean;
 ```

@@ -1,17 +1,20 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesConfiguration](./rush-lib.approvedpackagesconfiguration.md) &gt; [getItemByName](./rush-lib.approvedpackagesconfiguration.getitembyname.md)
 
-# ApprovedPackagesConfiguration.getItemByName method
+## ApprovedPackagesConfiguration.getItemByName() method
 
+<b>Signature:</b>
 
-**Signature:**
-```javascript
+```typescript
 getItemByName(packageName: string): ApprovedPackagesItem | undefined;
 ```
-**Returns:** `ApprovedPackagesItem | undefined`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `packageName` | `string` |  |
+|  <p>packageName</p> | <p>`string`</p> |  |
+
+<b>Returns:</b>
+
+`ApprovedPackagesItem | undefined`
 

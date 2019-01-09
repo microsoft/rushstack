@@ -1,19 +1,23 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [ProtectableMap](./node-core-library.protectablemap.md) &gt; [forEach](./node-core-library.protectablemap.foreach.md)
 
-# ProtectableMap.forEach method
+## ProtectableMap.forEach() method
 
 Performs an operation for each (key, value) entries in the map.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void;
 ```
-**Returns:** `void`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `callbackfn` | `(value: V, key: K, map: Map<K, V>) => void` |  |
-|  `thisArg` | `any` |  |
+|  <p>callbackfn</p> | <p>`(value: V, key: K, map: Map<K, V>) => void`</p> |  |
+|  <p>thisArg</p> | <p>`any`</p> |  |
+
+<b>Returns:</b>
+
+`void`
 

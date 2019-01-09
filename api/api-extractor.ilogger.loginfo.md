@@ -1,18 +1,22 @@
 [Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [ILogger](./api-extractor.ilogger.md) &gt; [logInfo](./api-extractor.ilogger.loginfo.md)
 
-# ILogger.logInfo method
+## ILogger.logInfo() method
 
 Log a normal message.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 logInfo(message: string): void;
 ```
-**Returns:** `void`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `message` | `string` |  |
+|  <p>message</p> | <p>`string`</p> |  |
+
+<b>Returns:</b>
+
+`void`
 

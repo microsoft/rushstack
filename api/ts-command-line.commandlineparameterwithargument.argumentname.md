@@ -1,14 +1,10 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParameterWithArgument](./ts-command-line.commandlineparameterwithargument.md) &gt; [argumentName](./ts-command-line.commandlineparameterwithargument.argumentname.md)
 
-# CommandLineParameterWithArgument.argumentName property
+## CommandLineParameterWithArgument.argumentName property
 
-The name of the argument, which will be shown in the command-line help.
 
-**Signature:**
-```javascript
-argumentName: string
+<b>Signature:</b>
+
+```typescript
+readonly argumentName: string;
 ```
-
-## Remarks
-
-For example, if the parameter name is '--count" and the argument name is "NUMBER", then the command-line help would display "--count NUMBER". The argument name must be comprised of upper-case letters, numbers, and underscores. It should be kept short.

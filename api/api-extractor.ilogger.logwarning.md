@@ -1,18 +1,22 @@
 [Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [ILogger](./api-extractor.ilogger.md) &gt; [logWarning](./api-extractor.ilogger.logwarning.md)
 
-# ILogger.logWarning method
+## ILogger.logWarning() method
 
 Log a warning message. Typically it is shown in yellow and will break a production build.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 logWarning(message: string): void;
 ```
-**Returns:** `void`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `message` | `string` |  |
+|  <p>message</p> | <p>`string`</p> |  |
+
+<b>Returns:</b>
+
+`void`
 

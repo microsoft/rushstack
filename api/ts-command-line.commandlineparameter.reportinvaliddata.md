@@ -1,18 +1,22 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParameter](./ts-command-line.commandlineparameter.md) &gt; [reportInvalidData](./ts-command-line.commandlineparameter.reportinvaliddata.md)
 
-# CommandLineParameter.reportInvalidData method
+## CommandLineParameter.reportInvalidData() method
 
 Internal usage only. Used to report unexpected output from the argparse library.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 protected reportInvalidData(data: any): never;
 ```
-**Returns:** `never`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `data` | `any` |  |
+|  <p>data</p> | <p>`any`</p> |  |
+
+<b>Returns:</b>
+
+`never`
 

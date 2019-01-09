@@ -1,18 +1,22 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [ProtectableMap](./node-core-library.protectablemap.md) &gt; [delete](./node-core-library.protectablemap.delete.md)
 
-# ProtectableMap.delete method
+## ProtectableMap.delete() method
 
 Removes the specified key from the map. This operation does NOT invoke the ProtectableMap onDelete() hook.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 delete(key: K): boolean;
 ```
-**Returns:** `boolean`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `key` | `K` |  |
+|  <p>key</p> | <p>`K`</p> |  |
+
+<b>Returns:</b>
+
+`boolean`
 

@@ -1,0 +1,15 @@
+[Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [InternalError](./node-core-library.internalerror.md) &gt; [toString](./node-core-library.internalerror.tostring.md)
+
+## InternalError.toString() method
+
+
+<b>Signature:</b>
+
+```typescript
+/** @override */
+toString(): string;
+```
+<b>Returns:</b>
+
+`string`
+

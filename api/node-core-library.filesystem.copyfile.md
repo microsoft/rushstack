@@ -1,18 +1,22 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [FileSystem](./node-core-library.filesystem.md) &gt; [copyFile](./node-core-library.filesystem.copyfile.md)
 
-# FileSystem.copyFile method
+## FileSystem.copyFile() method
 
 Copies a file from one location to another. By default, destinationPath is overwritten if it already exists. Behind the scenes it uses `fs.copyFileSync()`<!-- -->.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 static copyFile(options: IFileSystemCopyFileOptions): void;
 ```
-**Returns:** `void`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `options` | `IFileSystemCopyFileOptions` |  |
+|  <p>options</p> | <p>`IFileSystemCopyFileOptions`</p> |  |
+
+<b>Returns:</b>
+
+`void`
 

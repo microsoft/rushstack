@@ -1,23 +1,25 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineStringListParameter](./ts-command-line.commandlinestringlistparameter.md)
 
-# CommandLineStringListParameter class
+## CommandLineStringListParameter class
 
-The data type returned by [CommandLineParameterProvider.defineStringListParameter](./ts-command-line.commandlineparameterprovider.definestringlistparameter.md)<!-- -->.
+The data type returned by [CommandLineParameterProvider.defineStringListParameter()](./ts-command-line.commandlineparameterprovider.definestringlistparameter.md)<!-- -->.
+
+<b>Signature:</b>
+
+```typescript
+export declare class CommandLineStringListParameter extends CommandLineParameterWithArgument 
+```
 
 ## Properties
 
-|  Property | Access Modifier | Type | Description |
+|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- | --- |
-|  [`kind`](./ts-command-line.commandlinestringlistparameter.kind.md) |  | `CommandLineParameterKind` | Indicates the type of parameter. |
-|  [`values`](./ts-command-line.commandlinestringlistparameter.values.md) |  | `ReadonlyArray<string>` | Returns the string arguments for a string list parameter that was parsed from the command line. |
+|  <p>[kind](./ts-command-line.commandlinestringlistparameter.kind.md)</p> |  | <p>`CommandLineParameterKind`</p> | <p></p> |
+|  <p>[values](./ts-command-line.commandlinestringlistparameter.values.md)</p> |  | <p>`ReadonlyArray<string>`</p> | <p>Returns the string arguments for a string list parameter that was parsed from the command line.</p> |
 
 ## Methods
 
-|  Method | Access Modifier | Returns | Description |
-|  --- | --- | --- | --- |
-|  [`appendToArgList(argList)`](./ts-command-line.commandlinestringlistparameter.appendtoarglist.md) |  | `void` | Append the parsed values to the provided string array. |
-
-## Remarks
-
-The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the CommandLineStringListParameter class.
+|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  --- | --- | --- |
+|  <p>[appendToArgList(argList)](./ts-command-line.commandlinestringlistparameter.appendtoarglist.md)</p> |  | <p></p> |
 

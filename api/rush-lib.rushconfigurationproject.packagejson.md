@@ -1,10 +1,16 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfigurationProject](./rush-lib.rushconfigurationproject.md) &gt; [packageJson](./rush-lib.rushconfigurationproject.packagejson.md)
 
-# RushConfigurationProject.packageJson property
+## RushConfigurationProject.packageJson property
+
+> Warning: This API is now obsolete.
+> 
+> Use packageJsonEditor instead
+> 
 
 The parsed NPM "package.json" file from projectFolder.
 
-**Signature:**
-```javascript
-packageJson: IPackageJson
+<b>Signature:</b>
+
+```typescript
+readonly packageJson: IPackageJson;
 ```

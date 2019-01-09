@@ -1,18 +1,22 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [ProtectableMap](./node-core-library.protectablemap.md) &gt; [has](./node-core-library.protectablemap.has.md)
 
-# ProtectableMap.has method
+## ProtectableMap.has() method
 
 Returns true if the specified key belongs to the map.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 has(key: K): boolean;
 ```
-**Returns:** `boolean`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `key` | `K` |  |
+|  <p>key</p> | <p>`K`</p> |  |
+
+<b>Returns:</b>
+
+`boolean`
 

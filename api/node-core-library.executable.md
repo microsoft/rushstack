@@ -1,15 +1,21 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [Executable](./node-core-library.executable.md)
 
-# Executable class
+## Executable class
 
 The Executable class provides a safe, portable, recommended solution for tools that need to launch child processes.
 
+<b>Signature:</b>
+
+```typescript
+export declare class Executable 
+```
+
 ## Methods
 
-|  Method | Access Modifier | Returns | Description |
-|  --- | --- | --- | --- |
-|  [`spawnSync(filename, args, options)`](./node-core-library.executable.spawnsync.md) |  | `child_process.SpawnSyncReturns<string>` | Synchronously create a child process and optionally capture its output. |
-|  [`tryResolve(filename, options)`](./node-core-library.executable.tryresolve.md) |  | `string | undefined` | Given a filename, this determines the absolute path of the executable file that would be executed by a shell:<p/>- If the filename is missing a path, then the shell's default PATH will be searched. - If the filename is missing a file extension, then Windows default file extensions will be searched. |
+|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  --- | --- | --- |
+|  <p>[spawnSync(filename, args, options)](./node-core-library.executable.spawnsync.md)</p> | <p>`static`</p> | <p>Synchronously create a child process and optionally capture its output.</p> |
+|  <p>[tryResolve(filename, options)](./node-core-library.executable.tryresolve.md)</p> | <p>`static`</p> | <p>Given a filename, this determines the absolute path of the executable file that would be executed by a shell:</p><p>- If the filename is missing a path, then the shell's default PATH will be searched. - If the filename is missing a file extension, then Windows default file extensions will be searched.</p> |
 
 ## Remarks
 
@@ -24,3 +30,4 @@ The NodeJS child\_process API provides a solution for launching child processes,
 The Executable API provides a pure JavaScript implementation of primitive shell-like functionality for searching the default PATH, appending default file extensions on Windows, and executing a file that may contain a POSIX shebang. This primitive functionality is sufficient (and recommended) for most tooling scenarios.
 
 If you need additional shell features such as wildcard globbing, environment variable expansion, piping, or built-in commands, then we recommend to use the `@microsoft/rushell` library instead. Rushell is a pure JavaScript shell with a standard syntax that is guaranteed to work consistently across all platforms.
+

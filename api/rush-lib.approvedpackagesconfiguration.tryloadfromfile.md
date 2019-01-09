@@ -1,18 +1,22 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesConfiguration](./rush-lib.approvedpackagesconfiguration.md) &gt; [tryLoadFromFile](./rush-lib.approvedpackagesconfiguration.tryloadfromfile.md)
 
-# ApprovedPackagesConfiguration.tryLoadFromFile method
+## ApprovedPackagesConfiguration.tryLoadFromFile() method
 
 If the file exists, calls loadFromFile().
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean;
 ```
-**Returns:** `boolean`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `approvedPackagesPolicyEnabled` | `boolean` |  |
+|  <p>approvedPackagesPolicyEnabled</p> | <p>`boolean`</p> |  |
+
+<b>Returns:</b>
+
+`boolean`
 

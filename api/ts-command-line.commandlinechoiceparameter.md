@@ -1,25 +1,27 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineChoiceParameter](./ts-command-line.commandlinechoiceparameter.md)
 
-# CommandLineChoiceParameter class
+## CommandLineChoiceParameter class
 
-The data type returned by [CommandLineParameterProvider.defineChoiceParameter](./ts-command-line.commandlineparameterprovider.definechoiceparameter.md)<!-- -->.
+The data type returned by [CommandLineParameterProvider.defineChoiceParameter()](./ts-command-line.commandlineparameterprovider.definechoiceparameter.md)<!-- -->.
+
+<b>Signature:</b>
+
+```typescript
+export declare class CommandLineChoiceParameter extends CommandLineParameter 
+```
 
 ## Properties
 
-|  Property | Access Modifier | Type | Description |
+|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- | --- |
-|  [`alternatives`](./ts-command-line.commandlinechoiceparameter.alternatives.md) |  | `ReadonlyArray<string>` | A list of strings (which contain no spaces), of possible options which can be selected |
-|  [`defaultValue`](./ts-command-line.commandlinechoiceparameter.defaultvalue.md) |  | `string | undefined` | The default value which will be used if the parameter is omitted from the command line. |
-|  [`kind`](./ts-command-line.commandlinechoiceparameter.kind.md) |  | `CommandLineParameterKind` | Indicates the type of parameter. |
-|  [`value`](./ts-command-line.commandlinechoiceparameter.value.md) |  | `string | undefined` | Returns the argument value for a choice parameter that was parsed from the command line. |
+|  <p>[alternatives](./ts-command-line.commandlinechoiceparameter.alternatives.md)</p> |  | <p>`ReadonlyArray<string>`</p> | <p></p> |
+|  <p>[defaultValue](./ts-command-line.commandlinechoiceparameter.defaultvalue.md)</p> |  | <p>`string | undefined`</p> | <p></p> |
+|  <p>[kind](./ts-command-line.commandlinechoiceparameter.kind.md)</p> |  | <p>`CommandLineParameterKind`</p> | <p></p> |
+|  <p>[value](./ts-command-line.commandlinechoiceparameter.value.md)</p> |  | <p>`string | undefined`</p> | <p>Returns the argument value for a choice parameter that was parsed from the command line.</p> |
 
 ## Methods
 
-|  Method | Access Modifier | Returns | Description |
-|  --- | --- | --- | --- |
-|  [`appendToArgList(argList)`](./ts-command-line.commandlinechoiceparameter.appendtoarglist.md) |  | `void` | Append the parsed values to the provided string array. |
-
-## Remarks
-
-The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the CommandLineChoiceParameter class.
+|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  --- | --- | --- |
+|  <p>[appendToArgList(argList)](./ts-command-line.commandlinechoiceparameter.appendtoarglist.md)</p> |  | <p></p> |
 

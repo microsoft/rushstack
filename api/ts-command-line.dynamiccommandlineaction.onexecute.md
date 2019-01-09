@@ -1,11 +1,13 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [DynamicCommandLineAction](./ts-command-line.dynamiccommandlineaction.md) &gt; [onExecute](./ts-command-line.dynamiccommandlineaction.onexecute.md)
 
-# DynamicCommandLineAction.onExecute method
+## DynamicCommandLineAction.onExecute() method
 
+<b>Signature:</b>
 
-**Signature:**
-```javascript
+```typescript
 protected onExecute(): Promise<void>;
 ```
-**Returns:** `Promise<void>`
+<b>Returns:</b>
+
+`Promise<void>`
 

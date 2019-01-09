@@ -1,22 +1,21 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [PackageName](./node-core-library.packagename.md) &gt; [getUnscopedName](./node-core-library.packagename.getunscopedname.md)
 
-# PackageName.getUnscopedName method
+## PackageName.getUnscopedName() method
 
-The parsed NPM package name without the scope.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 static getUnscopedName(packageName: string): string;
 ```
-**Returns:** `string`
-
-## Remarks
-
-For example, if the parsed input was "@scope/example", then the name would be "example".
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `packageName` | `string` |  |
+|  <p>packageName</p> | <p>`string`</p> |  |
+
+<b>Returns:</b>
+
+`string`
 

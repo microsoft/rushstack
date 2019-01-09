@@ -1,11 +1,13 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [DynamicCommandLineAction](./ts-command-line.dynamiccommandlineaction.md) &gt; [onDefineParameters](./ts-command-line.dynamiccommandlineaction.ondefineparameters.md)
 
-# DynamicCommandLineAction.onDefineParameters method
+## DynamicCommandLineAction.onDefineParameters() method
 
+<b>Signature:</b>
 
-**Signature:**
-```javascript
+```typescript
 protected onDefineParameters(): void;
 ```
-**Returns:** `void`
+<b>Returns:</b>
+
+`void`
 

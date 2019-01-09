@@ -1,12 +1,13 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesPolicy](./rush-lib.approvedpackagespolicy.md) &gt; [nonbrowserApprovedPackages](./rush-lib.approvedpackagespolicy.nonbrowserapprovedpackages.md)
 
-# ApprovedPackagesPolicy.nonbrowserApprovedPackages property
+## ApprovedPackagesPolicy.nonbrowserApprovedPackages property
 
 Packages approved for usage everywhere \*except\* in a web browser.
 
-**Signature:**
-```javascript
-nonbrowserApprovedPackages: ApprovedPackagesConfiguration
+<b>Signature:</b>
+
+```typescript
+readonly nonbrowserApprovedPackages: ApprovedPackagesConfiguration;
 ```
 
 ## Remarks
@@ -14,3 +15,4 @@ nonbrowserApprovedPackages: ApprovedPackagesConfiguration
 This is part of an optional approval workflow, whose purpose is to review any new dependencies that are introduced (e.g. maybe a legal review is required, or maybe we are trying to minimize bloat). The intent is that the file will be stored in Git and tracked by a branch policy that notifies reviewers when a PR attempts to modify the file.
 
 Example filename: `C:\MyRepo\common\config\rush\browser-approved-packages.json`
+

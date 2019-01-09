@@ -1,18 +1,27 @@
 [Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [Extractor](./api-extractor.extractor.md) &gt; [analyzeProject](./api-extractor.extractor.analyzeproject.md)
 
-# Extractor.analyzeProject method
+## Extractor.analyzeProject() method
+
+> Warning: This API is now obsolete.
+> 
+> Use [Extractor.processProject()](./api-extractor.extractor.processproject.md) instead.
+> 
 
 Invokes the API Extractor engine, using the configuration that was passed to the constructor.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 analyzeProject(options?: IAnalyzeProjectOptions): void;
 ```
-**Returns:** `void`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `options` | `IAnalyzeProjectOptions` |  |
+|  <p>options</p> | <p>`IAnalyzeProjectOptions`</p> |  |
+
+<b>Returns:</b>
+
+`void`
 

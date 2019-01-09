@@ -1,10 +1,11 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [gitSampleEmail](./rush-lib.rushconfiguration.gitsampleemail.md)
 
-# RushConfiguration.gitSampleEmail property
+## RushConfiguration.gitSampleEmail property
 
 \[Part of the "gitPolicy" feature.\] An example valid email address that conforms to one of the allowedEmailRegExps. Example: `"foxtrot@example\.com"` This will never be undefined, and will always be nonempty if gitAllowedEmailRegExps is used.
 
-**Signature:**
-```javascript
-gitSampleEmail: string
+<b>Signature:</b>
+
+```typescript
+readonly gitSampleEmail: string;
 ```

@@ -1,21 +1,25 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [FileDiffTest](./node-core-library.filedifftest.md) &gt; [prepareFolder](./node-core-library.filedifftest.preparefolder.md)
 
-# FileDiffTest.prepareFolder method
+## FileDiffTest.prepareFolder() method
 
 Sets up a folder in the temp directory where the unit test should write its output files to be diffed. Any previous contents of the folder will be deleted.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 static prepareFolder(unitTestDirName: string, testModule: string): string;
 ```
-**Returns:** `string`
-
-A fully qualified path of the folder where the unit test should write its output
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `unitTestDirName` | `string` | the "\_\_dirname" variable, evaluated in the context of the unit test |
-|  `testModule` | `string` | the name of the class being unit tested; must contain only letters, numbers, and underscores. |
+|  <p>unitTestDirName</p> | <p>`string`</p> | <p>the "\_\_dirname" variable, evaluated in the context of the unit test</p> |
+|  <p>testModule</p> | <p>`string`</p> | <p>the name of the class being unit tested; must contain only letters, numbers, and underscores.</p> |
+
+<b>Returns:</b>
+
+`string`
+
+A fully qualified path of the folder where the unit test should write its output
 

@@ -1,9 +1,9 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [projects](./rush-lib.rushconfiguration.projects.md)
 
-# RushConfiguration.projects property
+## RushConfiguration.projects property
 
+<b>Signature:</b>
 
-**Signature:**
-```javascript
-projects: RushConfigurationProject[]
+```typescript
+readonly projects: RushConfigurationProject[];
 ```

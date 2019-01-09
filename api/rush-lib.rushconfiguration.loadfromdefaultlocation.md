@@ -1,11 +1,13 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [loadFromDefaultLocation](./rush-lib.rushconfiguration.loadfromdefaultlocation.md)
 
-# RushConfiguration.loadFromDefaultLocation method
+## RushConfiguration.loadFromDefaultLocation() method
 
+<b>Signature:</b>
 
-**Signature:**
-```javascript
+```typescript
 static loadFromDefaultLocation(): RushConfiguration;
 ```
-**Returns:** `RushConfiguration`
+<b>Returns:</b>
+
+`RushConfiguration`
 

@@ -1,9 +1,9 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [projectsByName](./rush-lib.rushconfiguration.projectsbyname.md)
 
-# RushConfiguration.projectsByName property
+## RushConfiguration.projectsByName property
 
+<b>Signature:</b>
 
-**Signature:**
-```javascript
-projectsByName: Map<string, RushConfigurationProject>
+```typescript
+readonly projectsByName: Map<string, RushConfigurationProject>;
 ```

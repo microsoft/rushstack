@@ -1,24 +1,29 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesConfiguration](./rush-lib.approvedpackagesconfiguration.md)
 
-# ApprovedPackagesConfiguration class
+## ApprovedPackagesConfiguration class
 
 This represents the JSON file specified via the "approvedPackagesFile" option in rush.json.
 
+<b>Signature:</b>
+
+```typescript
+export declare class ApprovedPackagesConfiguration 
+```
+
 ## Properties
 
-|  Property | Access Modifier | Type | Description |
+|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- | --- |
-|  [`items`](./rush-lib.approvedpackagesconfiguration.items.md) |  | `ApprovedPackagesItem[]` |  |
+|  <p>[items](./rush-lib.approvedpackagesconfiguration.items.md)</p> |  | <p>`ApprovedPackagesItem[]`</p> |  |
 
 ## Methods
 
-|  Method | Access Modifier | Returns | Description |
-|  --- | --- | --- | --- |
-|  [`constructor(jsonFilename)`](./rush-lib.approvedpackagesconfiguration.constructor.md) |  |  | Constructs a new instance of the [ApprovedPackagesConfiguration](./rush-lib.approvedpackagesconfiguration.md) class |
-|  [`addOrUpdatePackage(packageName, reviewCategory)`](./rush-lib.approvedpackagesconfiguration.addorupdatepackage.md) |  | `void` |  |
-|  [`clear()`](./rush-lib.approvedpackagesconfiguration.clear.md) |  | `void` | Clears all the settings, returning to an empty state. |
-|  [`getItemByName(packageName)`](./rush-lib.approvedpackagesconfiguration.getitembyname.md) |  | `ApprovedPackagesItem | undefined` |  |
-|  [`loadFromFile()`](./rush-lib.approvedpackagesconfiguration.loadfromfile.md) |  | `void` | Loads the configuration data from the filename that was passed to the constructor. |
-|  [`saveToFile()`](./rush-lib.approvedpackagesconfiguration.savetofile.md) |  | `void` | Loads the configuration data to the filename that was passed to the constructor. |
-|  [`tryLoadFromFile(approvedPackagesPolicyEnabled)`](./rush-lib.approvedpackagesconfiguration.tryloadfromfile.md) |  | `boolean` | If the file exists, calls loadFromFile(). |
+|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  --- | --- | --- |
+|  <p>[addOrUpdatePackage(packageName, reviewCategory)](./rush-lib.approvedpackagesconfiguration.addorupdatepackage.md)</p> |  |  |
+|  <p>[clear()](./rush-lib.approvedpackagesconfiguration.clear.md)</p> |  | <p>Clears all the settings, returning to an empty state.</p> |
+|  <p>[getItemByName(packageName)](./rush-lib.approvedpackagesconfiguration.getitembyname.md)</p> |  |  |
+|  <p>[loadFromFile()](./rush-lib.approvedpackagesconfiguration.loadfromfile.md)</p> |  | <p>Loads the configuration data from the filename that was passed to the constructor.</p> |
+|  <p>[saveToFile()](./rush-lib.approvedpackagesconfiguration.savetofile.md)</p> |  | <p>Loads the configuration data to the filename that was passed to the constructor.</p> |
+|  <p>[tryLoadFromFile(approvedPackagesPolicyEnabled)](./rush-lib.approvedpackagesconfiguration.tryloadfromfile.md)</p> |  | <p>If the file exists, calls loadFromFile().</p> |
 

@@ -1,12 +1,13 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfigurationProject](./rush-lib.rushconfigurationproject.md) &gt; [projectFolder](./rush-lib.rushconfigurationproject.projectfolder.md)
 
-# RushConfigurationProject.projectFolder property
+## RushConfigurationProject.projectFolder property
 
 The full path of the folder that contains the project to be built by Rush.
 
 Example: `C:\MyRepo\libraries\my-project`
 
-**Signature:**
-```javascript
-projectFolder: string
+<b>Signature:</b>
+
+```typescript
+readonly projectFolder: string;
 ```

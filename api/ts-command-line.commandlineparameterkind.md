@@ -1,14 +1,22 @@
 [Home](./index) &gt; [@microsoft/ts-command-line](./ts-command-line.md) &gt; [CommandLineParameterKind](./ts-command-line.commandlineparameterkind.md)
 
-# CommandLineParameterKind enumeration
+## CommandLineParameterKind enum
 
 Identifies the kind of a CommandLineParameter.
 
-|  Member | Value | Description |
+<b>Signature:</b>
+
+```typescript
+export declare enum CommandLineParameterKind 
+```
+
+## Enumeration Members
+
+|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  Choice | `= 0` | Indicates a CommandLineChoiceParameter |
-|  Flag | `= 1` | Indicates a CommandLineFlagParameter |
-|  Integer | `= 2` | Indicates a CommandLineIntegerParameter |
-|  String | `= 3` | Indicates a CommandLineStringParameter |
-|  StringList | `= 4` | Indicates a CommandLineStringListParameter |
+|  <p>Choice</p> | <p>`0`</p> | <p>Indicates a CommandLineChoiceParameter</p> |
+|  <p>Flag</p> | <p>`1`</p> | <p>Indicates a CommandLineFlagParameter</p> |
+|  <p>Integer</p> | <p>`2`</p> | <p>Indicates a CommandLineIntegerParameter</p> |
+|  <p>String</p> | <p>`3`</p> | <p>Indicates a CommandLineStringParameter</p> |
+|  <p>StringList</p> | <p>`4`</p> | <p>Indicates a CommandLineStringListParameter</p> |
 

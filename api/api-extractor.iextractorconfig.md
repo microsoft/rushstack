@@ -1,18 +1,25 @@
 [Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [IExtractorConfig](./api-extractor.iextractorconfig.md)
 
-# IExtractorConfig interface
+## IExtractorConfig interface
 
 Configuration options for the API Extractor tool. These options can be loaded from a JSON config file.
 
+<b>Signature:</b>
+
+```typescript
+export interface IExtractorConfig 
+```
+
 ## Properties
 
-|  Property | Type | Description |
+|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  [`apiJsonFile`](./api-extractor.iextractorconfig.apijsonfile.md) | `IExtractorApiJsonFileConfig` | Configures how the API JSON files (\*.api.json) will be generated. |
-|  [`apiReviewFile`](./api-extractor.iextractorconfig.apireviewfile.md) | `IExtractorApiReviewFileConfig` | Configures how the API review files (\*.api.ts) will be generated. |
-|  [`compiler`](./api-extractor.iextractorconfig.compiler.md) | `IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig` | Determines how the TypeScript compiler will be invoked. The compiler.configType selects the type of configuration; Different options are available according to the configuration type. |
-|  [`dtsRollup`](./api-extractor.iextractorconfig.dtsrollup.md) | `IExtractorDtsRollupConfig` | Configures how the \*.d.ts rollup files will be generated. |
-|  [`policies`](./api-extractor.iextractorconfig.policies.md) | `IExtractorPoliciesConfig` | These policies determine how API Extractor validates various best practices for API design. |
-|  [`project`](./api-extractor.iextractorconfig.project.md) | `IExtractorProjectConfig` | Describes a specific project that will be analyzed. In principle, multiple individual projects can be processed while reusing a common compiler state. |
-|  [`validationRules`](./api-extractor.iextractorconfig.validationrules.md) | `IExtractorValidationRulesConfig` | Configuration for various validation checks that ensure good API design |
+|  <p>[apiJsonFile](./api-extractor.iextractorconfig.apijsonfile.md)</p> | <p>`IExtractorApiJsonFileConfig`</p> | <p></p> |
+|  <p>[apiReviewFile](./api-extractor.iextractorconfig.apireviewfile.md)</p> | <p>`IExtractorApiReviewFileConfig`</p> | <p></p> |
+|  <p>[compiler](./api-extractor.iextractorconfig.compiler.md)</p> | <p>`IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig`</p> | <p>Determines how the TypeScript compiler will be invoked. The compiler.configType selects the type of configuration; Different options are available according to the configuration type.</p> |
+|  <p>[dtsRollup](./api-extractor.iextractorconfig.dtsrollup.md)</p> | <p>`IExtractorDtsRollupConfig`</p> | <p><b><i>(BETA)</i></b></p> |
+|  <p>[extends](./api-extractor.iextractorconfig.extends.md)</p> | <p>`string`</p> | <p>Path to json config file from which config should extend. The path specified in this field is relative to current config file path.</p> |
+|  <p>[policies](./api-extractor.iextractorconfig.policies.md)</p> | <p>`IExtractorPoliciesConfig`</p> | <p></p> |
+|  <p>[project](./api-extractor.iextractorconfig.project.md)</p> | <p>`IExtractorProjectConfig`</p> | <p></p> |
+|  <p>[validationRules](./api-extractor.iextractorconfig.validationrules.md)</p> | <p>`IExtractorValidationRulesConfig`</p> | <p></p> |
 

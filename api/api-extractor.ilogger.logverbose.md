@@ -1,18 +1,22 @@
 [Home](./index) &gt; [@microsoft/api-extractor](./api-extractor.md) &gt; [ILogger](./api-extractor.ilogger.md) &gt; [logVerbose](./api-extractor.ilogger.logverbose.md)
 
-# ILogger.logVerbose method
+## ILogger.logVerbose() method
 
 Log a message that will only be shown in a "verbose" logging mode.
 
-**Signature:**
-```javascript
+<b>Signature:</b>
+
+```typescript
 logVerbose(message: string): void;
 ```
-**Returns:** `void`
 
 ## Parameters
 
-|  Parameter | Type | Description |
+|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
 |  --- | --- | --- |
-|  `message` | `string` |  |
+|  <p>message</p> | <p>`string`</p> |  |
+
+<b>Returns:</b>
+
+`void`
 

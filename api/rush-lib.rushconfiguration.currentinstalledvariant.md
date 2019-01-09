@@ -1,0 +1,11 @@
+[Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [RushConfiguration](./rush-lib.rushconfiguration.md) &gt; [currentInstalledVariant](./rush-lib.rushconfiguration.currentinstalledvariant.md)
+
+## RushConfiguration.currentInstalledVariant property
+
+Gets the currently-installed variant, if an installation has occurred. For Rush operations which do not take a --variant parameter, this method determines which variant, if any, was last specified when performing "rush install" or "rush update".
+
+<b>Signature:</b>
+
+```typescript
+readonly currentInstalledVariant: string | undefined;
+```

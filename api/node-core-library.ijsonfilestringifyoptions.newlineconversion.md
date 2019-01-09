@@ -1,10 +1,11 @@
 [Home](./index) &gt; [@microsoft/node-core-library](./node-core-library.md) &gt; [IJsonFileStringifyOptions](./node-core-library.ijsonfilestringifyoptions.md) &gt; [newlineConversion](./node-core-library.ijsonfilestringifyoptions.newlineconversion.md)
 
-# IJsonFileStringifyOptions.newlineConversion property
+## IJsonFileStringifyOptions.newlineConversion property
 
 If true, then `\n` will be used for newlines instead of the default `\r\n`<!-- -->.
 
-**Signature:**
-```javascript
-newlineConversion: NewlineKind
+<b>Signature:</b>
+
+```typescript
+newlineConversion?: NewlineKind;
 ```

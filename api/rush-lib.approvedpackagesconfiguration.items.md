@@ -1,9 +1,9 @@
 [Home](./index) &gt; [@microsoft/rush-lib](./rush-lib.md) &gt; [ApprovedPackagesConfiguration](./rush-lib.approvedpackagesconfiguration.md) &gt; [items](./rush-lib.approvedpackagesconfiguration.items.md)
 
-# ApprovedPackagesConfiguration.items property
+## ApprovedPackagesConfiguration.items property
 
+<b>Signature:</b>
 
-**Signature:**
-```javascript
-items: ApprovedPackagesItem[]
+```typescript
+items: ApprovedPackagesItem[];
 ```
