@@ -12,9 +12,9 @@ addMember(member: ApiEnumMember): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>member</p> | <p>`ApiEnumMember`</p> |  |
+|  member | `ApiEnumMember` |  |
 
 <b>Returns:</b>
 

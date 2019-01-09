@@ -12,20 +12,20 @@ export declare class ApiPackage extends ApiPackage_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apipackage.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[entryPoints](./api-extractor.apipackage.entrypoints.md)</p> |  | <p>`ReadonlyArray<ApiEntryPoint>`</p> |  |
-|  <p>[kind](./api-extractor.apipackage.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apipackage.canonicalreference.md) |  | `string` |  |
+|  [entryPoints](./api-extractor.apipackage.entrypoints.md) |  | `ReadonlyArray<ApiEntryPoint>` |  |
+|  [kind](./api-extractor.apipackage.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[addMember(member)](./api-extractor.apipackage.addmember.md)</p> |  | <p></p> |
-|  <p>[findEntryPointsByPath(importPath)](./api-extractor.apipackage.findentrypointsbypath.md)</p> |  |  |
-|  <p>[loadFromJsonFile(apiJsonFilename)](./api-extractor.apipackage.loadfromjsonfile.md)</p> | <p>`static`</p> |  |
-|  <p>[saveToJsonFile(apiJsonFilename, options)](./api-extractor.apipackage.savetojsonfile.md)</p> |  |  |
+|  [addMember(member)](./api-extractor.apipackage.addmember.md) |  |  |
+|  [findEntryPointsByPath(importPath)](./api-extractor.apipackage.findentrypointsbypath.md) |  |  |
+|  [loadFromJsonFile(apiJsonFilename)](./api-extractor.apipackage.loadfromjsonfile.md) | `static` |  |
+|  [saveToJsonFile(apiJsonFilename, options)](./api-extractor.apipackage.savetojsonfile.md) |  |  |
 
 ## Remarks
 

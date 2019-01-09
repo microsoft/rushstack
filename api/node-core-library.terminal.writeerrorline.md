@@ -15,9 +15,9 @@ writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>messageParts</p> | <p>`(string | IColorableSequence)[]`</p> |  |
+|  messageParts | `(string | IColorableSequence)[]` |  |
 
 <b>Returns:</b>
 

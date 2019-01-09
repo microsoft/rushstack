@@ -12,16 +12,16 @@ export declare class ApiConstructSignature extends ApiConstructSignature_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apiconstructsignature.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apiconstructsignature.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apiconstructsignature.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apiconstructsignature.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(overloadIndex)](./api-extractor.apiconstructsignature.getcanonicalreference.md)</p> | <p>`static`</p> |  |
+|  [getCanonicalReference(overloadIndex)](./api-extractor.apiconstructsignature.getcanonicalreference.md) | `static` |  |
 
 ## Remarks
 

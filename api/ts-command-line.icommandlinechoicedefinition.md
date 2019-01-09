@@ -12,8 +12,8 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[alternatives](./ts-command-line.icommandlinechoicedefinition.alternatives.md)</p> | <p>`string[]`</p> | <p>A list of strings (which contain no spaces), of possible options which can be selected</p> |
-|  <p>[defaultValue](./ts-command-line.icommandlinechoicedefinition.defaultvalue.md)</p> | <p>`string`</p> | <p></p> |
+|  [alternatives](./ts-command-line.icommandlinechoicedefinition.alternatives.md) | `string[]` | A list of strings (which contain no spaces), of possible options which can be selected |
+|  [defaultValue](./ts-command-line.icommandlinechoicedefinition.defaultvalue.md) | `string` |  |
 

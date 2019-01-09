@@ -11,8 +11,8 @@ export interface IExcerptTokenRange
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[endIndex](./api-extractor.iexcerpttokenrange.endindex.md)</p> | <p>`number`</p> |  |
-|  <p>[startIndex](./api-extractor.iexcerpttokenrange.startindex.md)</p> | <p>`number`</p> |  |
+|  [endIndex](./api-extractor.iexcerpttokenrange.endindex.md) | `number` |  |
+|  [startIndex](./api-extractor.iexcerpttokenrange.startindex.md) | `number` |  |
 

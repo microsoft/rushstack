@@ -12,9 +12,9 @@ tryGetMember(canonicalReference: string): ApiItem | undefined;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>canonicalReference</p> | <p>`string`</p> |  |
+|  canonicalReference | `string` |  |
 
 <b>Returns:</b>
 

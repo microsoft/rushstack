@@ -12,7 +12,7 @@ export declare const enum FileConstants
 
 ## Enumeration Members
 
-|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
+|  Member | Value | Description |
 |  --- | --- | --- |
-|  <p>PackageJson</p> | <p>`"package.json"`</p> | <p>"package.json" - the configuration file that defines an NPM package</p> |
+|  PackageJson | `"package.json"` | "package.json" - the configuration file that defines an NPM package |
 

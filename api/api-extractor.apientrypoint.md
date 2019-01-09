@@ -12,10 +12,10 @@ export declare class ApiEntryPoint extends ApiEntryPoint_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apientrypoint.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apientrypoint.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apientrypoint.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apientrypoint.kind.md) |  | `ApiItemKind` |  |
 
 ## Remarks
 

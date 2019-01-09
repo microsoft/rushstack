@@ -12,9 +12,9 @@ tryGetAction(actionName: string): CommandLineAction | undefined;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>actionName</p> | <p>`string`</p> |  |
+|  actionName | `string` |  |
 
 <b>Returns:</b>
 

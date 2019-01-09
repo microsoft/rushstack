@@ -12,9 +12,9 @@ addMember(member: ApiItem): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>member</p> | <p>`ApiItem`</p> |  |
+|  member | `ApiItem` |  |
 
 <b>Returns:</b>
 

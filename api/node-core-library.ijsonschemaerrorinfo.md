@@ -12,7 +12,7 @@ export interface IJsonSchemaErrorInfo
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[details](./node-core-library.ijsonschemaerrorinfo.details.md)</p> | <p>`string`</p> | <p>The z-schema error tree, formatted as an indented text string.</p> |
+|  [details](./node-core-library.ijsonschemaerrorinfo.details.md) | `string` | The z-schema error tree, formatted as an indented text string. |
 

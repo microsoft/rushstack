@@ -12,9 +12,9 @@ export declare class HeritageType
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[excerpt](./api-extractor.heritagetype.excerpt.md)</p> |  | <p>`Excerpt`</p> | <p>An excerpt corresponding to the referenced type.</p> |
+|  [excerpt](./api-extractor.heritagetype.excerpt.md) |  | `Excerpt` | An excerpt corresponding to the referenced type. |
 
 ## Remarks
 

@@ -12,7 +12,7 @@ export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IAp
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[extendsTokenRanges](./api-extractor.iapiinterfaceoptions.extendstokenranges.md)</p> | <p>`IExcerptTokenRange[]`</p> |  |
+|  [extendsTokenRanges](./api-extractor.iapiinterfaceoptions.extendstokenranges.md) | `IExcerptTokenRange[]` |  |
 

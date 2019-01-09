@@ -12,19 +12,19 @@ export declare class JsonSchema
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[shortName](./node-core-library.jsonschema.shortname.md)</p> |  | <p>`string`</p> | <p>Returns a short name for this schema, for use in error messages.</p> |
+|  [shortName](./node-core-library.jsonschema.shortname.md) |  | `string` | Returns a short name for this schema, for use in error messages. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[ensureCompiled()](./node-core-library.jsonschema.ensurecompiled.md)</p> |  | <p>If not already done, this loads the schema from disk and compiles it.</p> |
-|  <p>[fromFile(filename, options)](./node-core-library.jsonschema.fromfile.md)</p> | <p>`static`</p> | <p>Registers a JsonSchema that will be loaded from a file on disk.</p> |
-|  <p>[fromLoadedObject(schemaObject)](./node-core-library.jsonschema.fromloadedobject.md)</p> | <p>`static`</p> | <p>Registers a JsonSchema that will be loaded from a file on disk.</p> |
-|  <p>[validateObject(jsonObject, filenameForErrors, options)](./node-core-library.jsonschema.validateobject.md)</p> |  | <p>Validates the specified JSON object against this JSON schema. If the validation fails, an exception will be thrown.</p> |
-|  <p>[validateObjectWithCallback(jsonObject, errorCallback)](./node-core-library.jsonschema.validateobjectwithcallback.md)</p> |  | <p>Validates the specified JSON object against this JSON schema. If the validation fails, a callback is called for each validation error.</p> |
+|  [ensureCompiled()](./node-core-library.jsonschema.ensurecompiled.md) |  | If not already done, this loads the schema from disk and compiles it. |
+|  [fromFile(filename, options)](./node-core-library.jsonschema.fromfile.md) | `static` | Registers a JsonSchema that will be loaded from a file on disk. |
+|  [fromLoadedObject(schemaObject)](./node-core-library.jsonschema.fromloadedobject.md) | `static` | Registers a JsonSchema that will be loaded from a file on disk. |
+|  [validateObject(jsonObject, filenameForErrors, options)](./node-core-library.jsonschema.validateobject.md) |  | Validates the specified JSON object against this JSON schema. If the validation fails, an exception will be thrown. |
+|  [validateObjectWithCallback(jsonObject, errorCallback)](./node-core-library.jsonschema.validateobjectwithcallback.md) |  | Validates the specified JSON object against this JSON schema. If the validation fails, a callback is called for each validation error. |
 
 ## Remarks
 

@@ -12,15 +12,15 @@ export declare class CommandLineIntegerParameter extends CommandLineParameterWit
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[defaultValue](./ts-command-line.commandlineintegerparameter.defaultvalue.md)</p> |  | <p>`number | undefined`</p> | <p></p> |
-|  <p>[kind](./ts-command-line.commandlineintegerparameter.kind.md)</p> |  | <p>`CommandLineParameterKind`</p> | <p></p> |
-|  <p>[value](./ts-command-line.commandlineintegerparameter.value.md)</p> |  | <p>`number | undefined`</p> | <p>Returns the argument value for an integer parameter that was parsed from the command line.</p> |
+|  [defaultValue](./ts-command-line.commandlineintegerparameter.defaultvalue.md) |  | `number | undefined` |  |
+|  [kind](./ts-command-line.commandlineintegerparameter.kind.md) |  | `CommandLineParameterKind` |  |
+|  [value](./ts-command-line.commandlineintegerparameter.value.md) |  | `number | undefined` | Returns the argument value for an integer parameter that was parsed from the command line. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[appendToArgList(argList)](./ts-command-line.commandlineintegerparameter.appendtoarglist.md)</p> |  | <p></p> |
+|  [appendToArgList(argList)](./ts-command-line.commandlineintegerparameter.appendtoarglist.md) |  |  |
 

@@ -17,9 +17,9 @@ analyzeProject(options?: IAnalyzeProjectOptions): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>options</p> | <p>`IAnalyzeProjectOptions`</p> |  |
+|  options | `IAnalyzeProjectOptions` |  |
 
 <b>Returns:</b>
 

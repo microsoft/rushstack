@@ -12,16 +12,16 @@ export declare class ApiNamespace extends ApiNamespace_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apinamespace.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apinamespace.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apinamespace.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apinamespace.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(name)](./api-extractor.apinamespace.getcanonicalreference.md)</p> | <p>`static`</p> |  |
+|  [getCanonicalReference(name)](./api-extractor.apinamespace.getcanonicalreference.md) | `static` |  |
 
 ## Remarks
 

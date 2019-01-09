@@ -12,9 +12,9 @@ getProjectByName(projectName: string): RushConfigurationProject | undefined;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>projectName</p> | <p>`string`</p> |  |
+|  projectName | `string` |  |
 
 <b>Returns:</b>
 

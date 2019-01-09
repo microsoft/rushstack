@@ -13,9 +13,9 @@ static magentaBackground(text: string | IColorableSequence): IColorableSequence;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>text</p> | <p>`string | IColorableSequence`</p> |  |
+|  text | `string | IColorableSequence` |  |
 
 <b>Returns:</b>
 

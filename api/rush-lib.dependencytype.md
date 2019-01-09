@@ -14,10 +14,10 @@ export declare const enum DependencyType
 
 ## Enumeration Members
 
-|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
+|  Member | Value | Description |
 |  --- | --- | --- |
-|  <p>Dev</p> | <p>`"devDependencies"`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>Optional</p> | <p>`"optionalDependencies"`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>Peer</p> | <p>`"peerDependencies"`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>Regular</p> | <p>`"dependencies"`</p> | <p><b><i>(BETA)</i></b></p> |
+|  Dev | `"devDependencies"` | <b><i>(BETA)</i></b> |
+|  Optional | `"optionalDependencies"` | <b><i>(BETA)</i></b> |
+|  Peer | `"peerDependencies"` | <b><i>(BETA)</i></b> |
+|  Regular | `"dependencies"` | <b><i>(BETA)</i></b> |
 

@@ -14,10 +14,10 @@ export declare enum TerminalProviderSeverity
 
 ## Enumeration Members
 
-|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
+|  Member | Value | Description |
 |  --- | --- | --- |
-|  <p>error</p> | <p>`2`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>log</p> | <p>`0`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>verbose</p> | <p>`3`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>warning</p> | <p>`1`</p> | <p><b><i>(BETA)</i></b></p> |
+|  error | `2` | <b><i>(BETA)</i></b> |
+|  log | `0` | <b><i>(BETA)</i></b> |
+|  verbose | `3` | <b><i>(BETA)</i></b> |
+|  warning | `1` | <b><i>(BETA)</i></b> |
 

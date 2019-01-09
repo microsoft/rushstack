@@ -12,9 +12,9 @@ processProject(options?: IAnalyzeProjectOptions): boolean;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>options</p> | <p>`IAnalyzeProjectOptions`</p> | <p>provides additional runtime state that is NOT part of the API Extractor config file.</p> |
+|  options | `IAnalyzeProjectOptions` | provides additional runtime state that is NOT part of the API Extractor config file. |
 
 <b>Returns:</b>
 

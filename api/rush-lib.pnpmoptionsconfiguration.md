@@ -12,9 +12,9 @@ export declare class PnpmOptionsConfiguration
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[strictPeerDependencies](./rush-lib.pnpmoptionsconfiguration.strictpeerdependencies.md)</p> |  | <p>`boolean`</p> | <p>If true, then Rush will add the "--strict-peer-dependencies" option when invoking PNPM. This causes "rush install" to fail if there are unsatisfied peer dependencies, which is an invalid state that can cause build failures or incompatible dependency versions. (For historical reasons, JavaScript package managers generally do not treat this invalid state as an error.)</p><p>The default value is false. (For now.)</p> |
+|  [strictPeerDependencies](./rush-lib.pnpmoptionsconfiguration.strictpeerdependencies.md) |  | `boolean` | If true, then Rush will add the "--strict-peer-dependencies" option when invoking PNPM. This causes "rush install" to fail if there are unsatisfied peer dependencies, which is an invalid state that can cause build failures or incompatible dependency versions. (For historical reasons, JavaScript package managers generally do not treat this invalid state as an error.)<!-- -->The default value is false. (For now.) |
 
 ## Remarks
 

@@ -12,19 +12,19 @@ export declare class ApiVariable extends ApiVariable_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apivariable.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apivariable.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
-|  <p>[variableTypeExcerpt](./api-extractor.apivariable.variabletypeexcerpt.md)</p> |  | <p>`Excerpt`</p> | <p>An [Excerpt](./api-extractor.excerpt.md) that describes the type of the variable.</p> |
+|  [canonicalReference](./api-extractor.apivariable.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apivariable.kind.md) |  | `ApiItemKind` |  |
+|  [variableTypeExcerpt](./api-extractor.apivariable.variabletypeexcerpt.md) |  | `Excerpt` | An [Excerpt](./api-extractor.excerpt.md) that describes the type of the variable. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(name)](./api-extractor.apivariable.getcanonicalreference.md)</p> | <p>`static`</p> |  |
-|  <p>[onDeserializeInto(options, jsonObject)](./api-extractor.apivariable.ondeserializeinto.md)</p> | <p>`static`</p> | <p></p> |
-|  <p>[serializeInto(jsonObject)](./api-extractor.apivariable.serializeinto.md)</p> |  | <p></p> |
+|  [getCanonicalReference(name)](./api-extractor.apivariable.getcanonicalreference.md) | `static` |  |
+|  [onDeserializeInto(options, jsonObject)](./api-extractor.apivariable.ondeserializeinto.md) | `static` |  |
+|  [serializeInto(jsonObject)](./api-extractor.apivariable.serializeinto.md) |  |  |
 
 ## Remarks
 

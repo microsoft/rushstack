@@ -12,10 +12,10 @@ static deleteFile(filePath: string, options?: IFileSystemDeleteFileOptions): voi
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>filePath</p> | <p>`string`</p> | <p>The absolute or relative path to the file that should be deleted.</p> |
-|  <p>options</p> | <p>`IFileSystemDeleteFileOptions`</p> | <p>Optional settings that can change the behavior. Type: `IDeleteFileOptions`</p> |
+|  filePath | `string` | The absolute or relative path to the file that should be deleted. |
+|  options | `IFileSystemDeleteFileOptions` | Optional settings that can change the behavior. Type: `IDeleteFileOptions` |
 
 <b>Returns:</b>
 

@@ -12,10 +12,10 @@ static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): A
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>folderPath</p> | <p>`string`</p> | <p>The absolute or relative path to the folder which should be read.</p> |
-|  <p>options</p> | <p>`IFileSystemReadFolderOptions`</p> | <p>Optional settings that can change the behavior. Type: `IReadFolderOptions`</p> |
+|  folderPath | `string` | The absolute or relative path to the folder which should be read. |
+|  options | `IFileSystemReadFolderOptions` | Optional settings that can change the behavior. Type: `IReadFolderOptions` |
 
 <b>Returns:</b>
 

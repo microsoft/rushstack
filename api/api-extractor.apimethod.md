@@ -12,16 +12,16 @@ export declare class ApiMethod extends ApiMethod_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apimethod.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apimethod.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apimethod.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apimethod.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(name, isStatic, overloadIndex)](./api-extractor.apimethod.getcanonicalreference.md)</p> | <p>`static`</p> |  |
+|  [getCanonicalReference(name, isStatic, overloadIndex)](./api-extractor.apimethod.getcanonicalreference.md) | `static` |  |
 
 ## Remarks
 

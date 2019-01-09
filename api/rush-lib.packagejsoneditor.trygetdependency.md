@@ -13,9 +13,9 @@ tryGetDependency(packageName: string): PackageJsonDependency | undefined;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>packageName</p> | <p>`string`</p> |  |
+|  packageName | `string` |  |
 
 <b>Returns:</b>
 

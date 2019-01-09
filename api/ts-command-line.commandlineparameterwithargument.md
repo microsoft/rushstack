@@ -12,9 +12,9 @@ export declare abstract class CommandLineParameterWithArgument extends CommandLi
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[argumentName](./ts-command-line.commandlineparameterwithargument.argumentname.md)</p> |  | <p>`string`</p> | <p></p> |
+|  [argumentName](./ts-command-line.commandlineparameterwithargument.argumentname.md) |  | `string` |  |
 
 ## Remarks
 

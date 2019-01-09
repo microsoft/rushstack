@@ -12,9 +12,9 @@ tryLoadPackageJsonFor(fileOrFolderPath: string): IPackageJson | undefined;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>fileOrFolderPath</p> | <p>`string`</p> | <p>a relative or absolute path to a source file or folder that may be part of a package</p> |
+|  fileOrFolderPath | `string` | a relative or absolute path to a source file or folder that may be part of a package |
 
 <b>Returns:</b>
 

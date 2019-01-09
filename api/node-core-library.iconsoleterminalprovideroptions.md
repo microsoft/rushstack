@@ -15,7 +15,7 @@ export interface IConsoleTerminalProviderOptions
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[verboseEnabled](./node-core-library.iconsoleterminalprovideroptions.verboseenabled.md)</p> | <p>`boolean`</p> | <p><b><i>(BETA)</i></b> If true, print verbose logging messages</p> |
+|  [verboseEnabled](./node-core-library.iconsoleterminalprovideroptions.verboseenabled.md) | `boolean` | <b><i>(BETA)</i></b> If true, print verbose logging messages |
 

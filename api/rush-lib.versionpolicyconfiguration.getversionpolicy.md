@@ -15,9 +15,9 @@ getVersionPolicy(policyName: string): VersionPolicy;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>policyName</p> | <p>`string`</p> | <p>Name of the version policy</p> |
+|  policyName | `string` | Name of the version policy |
 
 <b>Returns:</b>
 

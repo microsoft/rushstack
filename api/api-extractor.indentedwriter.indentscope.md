@@ -15,10 +15,10 @@ indentScope(scope: () => void, indentPrefix?: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>scope</p> | <p>`() => void`</p> |  |
-|  <p>indentPrefix</p> | <p>`string`</p> |  |
+|  scope | `() => void` |  |
+|  indentPrefix | `string` |  |
 
 <b>Returns:</b>
 

@@ -12,11 +12,11 @@ export declare class Excerpt
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[text](./api-extractor.excerpt.text.md)</p> |  | <p>`string`</p> |  |
-|  <p>[tokenRange](./api-extractor.excerpt.tokenrange.md)</p> |  | <p>`Readonly<IExcerptTokenRange>`</p> |  |
-|  <p>[tokens](./api-extractor.excerpt.tokens.md)</p> |  | <p>`ReadonlyArray<ExcerptToken>`</p> |  |
+|  [text](./api-extractor.excerpt.text.md) |  | `string` |  |
+|  [tokenRange](./api-extractor.excerpt.tokenrange.md) |  | `Readonly<IExcerptTokenRange>` |  |
+|  [tokens](./api-extractor.excerpt.tokens.md) |  | `ReadonlyArray<ExcerptToken>` |  |
 
 ## Remarks
 

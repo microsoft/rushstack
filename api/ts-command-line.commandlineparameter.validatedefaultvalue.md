@@ -10,9 +10,9 @@ protected validateDefaultValue(hasDefaultValue: boolean): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>hasDefaultValue</p> | <p>`boolean`</p> |  |
+|  hasDefaultValue | `boolean` |  |
 
 <b>Returns:</b>
 

@@ -12,10 +12,10 @@ forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): 
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>callbackfn</p> | <p>`(value: V, key: K, map: Map<K, V>) => void`</p> |  |
-|  <p>thisArg</p> | <p>`any`</p> |  |
+|  callbackfn | `(value: V, key: K, map: Map<K, V>) => void` |  |
+|  thisArg | `any` |  |
 
 <b>Returns:</b>
 

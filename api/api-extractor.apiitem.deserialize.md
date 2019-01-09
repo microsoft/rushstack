@@ -10,9 +10,9 @@ static deserialize(jsonObject: IApiItemJson): ApiItem;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonObject</p> | <p>`IApiItemJson`</p> |  |
+|  jsonObject | `IApiItemJson` |  |
 
 <b>Returns:</b>
 

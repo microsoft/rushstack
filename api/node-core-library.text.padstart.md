@@ -12,11 +12,11 @@ static padStart(s: string, minimumLength: number, paddingCharacter?: string): st
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>s</p> | <p>`string`</p> |  |
-|  <p>minimumLength</p> | <p>`number`</p> |  |
-|  <p>paddingCharacter</p> | <p>`string`</p> |  |
+|  s | `string` |  |
+|  minimumLength | `number` |  |
+|  paddingCharacter | `string` |  |
 
 <b>Returns:</b>
 

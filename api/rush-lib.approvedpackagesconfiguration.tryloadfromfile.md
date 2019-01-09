@@ -12,9 +12,9 @@ tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>approvedPackagesPolicyEnabled</p> | <p>`boolean`</p> |  |
+|  approvedPackagesPolicyEnabled | `boolean` |  |
 
 <b>Returns:</b>
 

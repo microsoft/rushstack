@@ -12,11 +12,11 @@ static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any, keyComparer?:
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>set</p> | <p>`Set<T>`</p> |  |
-|  <p>keySelector</p> | <p>`(element: T) => any`</p> |  |
-|  <p>keyComparer</p> | <p>`(x: T, y: T) => number`</p> |  |
+|  set | `Set<T>` |  |
+|  keySelector | `(element: T) => any` |  |
+|  keyComparer | `(x: T, y: T) => number` |  |
 
 <b>Returns:</b>
 

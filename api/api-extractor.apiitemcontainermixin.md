@@ -12,7 +12,7 @@ export declare namespace ApiItemContainerMixin
 
 ## Functions
 
-|  <p>Function</p> | <p>Description</p> |
+|  Function | Description |
 |  --- | --- |
-|  <p>[isBaseClassOf(apiItem)](./api-extractor.apiitemcontainermixin.isbaseclassof.md)</p> | <p>A type guard that tests whether the specified `ApiItem` subclass extends the `ApiItemContainerMixin` mixin.</p> |
+|  [isBaseClassOf(apiItem)](./api-extractor.apiitemcontainermixin.isbaseclassof.md) | A type guard that tests whether the specified `ApiItem` subclass extends the `ApiItemContainerMixin` mixin. |
 

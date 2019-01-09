@@ -15,10 +15,10 @@ bump(bumpType?: BumpType, identifier?: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>bumpType</p> | <p>`BumpType`</p> | <p>bump type</p> |
-|  <p>identifier</p> | <p>`string`</p> | <p>prerelease id</p> |
+|  bumpType | `BumpType` | bump type |
+|  identifier | `string` | prerelease id |
 
 <b>Returns:</b>
 

@@ -11,8 +11,8 @@ export declare const enum ExcerptTokenKind
 
 ## Enumeration Members
 
-|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
+|  Member | Value | Description |
 |  --- | --- | --- |
-|  <p>Content</p> | <p>`"Content"`</p> |  |
-|  <p>Reference</p> | <p>`"Reference"`</p> |  |
+|  Content | `"Content"` |  |
+|  Reference | `"Reference"` |  |
 

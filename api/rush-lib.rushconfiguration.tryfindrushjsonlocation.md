@@ -12,9 +12,9 @@ static tryFindRushJsonLocation(verbose?: boolean): string | undefined;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>verbose</p> | <p>`boolean`</p> |  |
+|  verbose | `boolean` |  |
 
 <b>Returns:</b>
 

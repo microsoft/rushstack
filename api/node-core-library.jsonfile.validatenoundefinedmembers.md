@@ -12,9 +12,9 @@ static validateNoUndefinedMembers(jsonObject: Object): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonObject</p> | <p>`Object`</p> |  |
+|  jsonObject | `Object` |  |
 
 <b>Returns:</b>
 

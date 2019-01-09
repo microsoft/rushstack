@@ -15,10 +15,10 @@ write(data: string, severity: TerminalProviderSeverity): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>data</p> | <p>`string`</p> | <p>The terminal message.</p> |
-|  <p>severity</p> | <p>`TerminalProviderSeverity`</p> | <p>The message severity. Terminal providers can route different kinds of messages to different streams and may choose to ignore verbose messages.</p> |
+|  data | `string` | The terminal message. |
+|  severity | `TerminalProviderSeverity` | The message severity. Terminal providers can route different kinds of messages to different streams and may choose to ignore verbose messages. |
 
 <b>Returns:</b>
 

@@ -12,9 +12,9 @@ static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>options</p> | <p>`IFileSystemCreateLinkOptions`</p> |  |
+|  options | `IFileSystemCreateLinkOptions` |  |
 
 <b>Returns:</b>
 

@@ -12,11 +12,11 @@ export declare enum CommandLineParameterKind
 
 ## Enumeration Members
 
-|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
+|  Member | Value | Description |
 |  --- | --- | --- |
-|  <p>Choice</p> | <p>`0`</p> | <p>Indicates a CommandLineChoiceParameter</p> |
-|  <p>Flag</p> | <p>`1`</p> | <p>Indicates a CommandLineFlagParameter</p> |
-|  <p>Integer</p> | <p>`2`</p> | <p>Indicates a CommandLineIntegerParameter</p> |
-|  <p>String</p> | <p>`3`</p> | <p>Indicates a CommandLineStringParameter</p> |
-|  <p>StringList</p> | <p>`4`</p> | <p>Indicates a CommandLineStringListParameter</p> |
+|  Choice | `0` | Indicates a CommandLineChoiceParameter |
+|  Flag | `1` | Indicates a CommandLineFlagParameter |
+|  Integer | `2` | Indicates a CommandLineIntegerParameter |
+|  String | `3` | Indicates a CommandLineStringParameter |
+|  StringList | `4` | Indicates a CommandLineStringListParameter |
 

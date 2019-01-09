@@ -13,10 +13,10 @@ write(data: string, severity: TerminalProviderSeverity): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>data</p> | <p>`string`</p> |  |
-|  <p>severity</p> | <p>`TerminalProviderSeverity`</p> |  |
+|  data | `string` |  |
+|  severity | `TerminalProviderSeverity` |  |
 
 <b>Returns:</b>
 

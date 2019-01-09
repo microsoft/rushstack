@@ -12,10 +12,10 @@ static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>filePath</p> | <p>`string`</p> | <p>The relative or absolute path to the file whose contents should be read.</p> |
-|  <p>options</p> | <p>`IFileSystemReadFileOptions`</p> | <p>Optional settings that can change the behavior. Type: `IReadFileOptions`</p> |
+|  filePath | `string` | The relative or absolute path to the file whose contents should be read. |
+|  options | `IFileSystemReadFileOptions` | Optional settings that can change the behavior. Type: `IReadFileOptions` |
 
 <b>Returns:</b>
 

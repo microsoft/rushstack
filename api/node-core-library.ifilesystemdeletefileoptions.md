@@ -12,7 +12,7 @@ export interface IFileSystemDeleteFileOptions
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[throwIfNotExists](./node-core-library.ifilesystemdeletefileoptions.throwifnotexists.md)</p> | <p>`boolean`</p> | <p>If true, will throw an exception if the file did not exist before `deleteFile()` was called. Defaults to `false`<!-- -->.</p> |
+|  [throwIfNotExists](./node-core-library.ifilesystemdeletefileoptions.throwifnotexists.md) | `boolean` | If true, will throw an exception if the file did not exist before `deleteFile()` was called. Defaults to `false`<!-- -->. |
 

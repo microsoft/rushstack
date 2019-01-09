@@ -11,7 +11,7 @@ export declare class DynamicCommandLineParser extends CommandLineParser
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[onDefineParameters()](./ts-command-line.dynamiccommandlineparser.ondefineparameters.md)</p> |  |  |
+|  [onDefineParameters()](./ts-command-line.dynamiccommandlineparser.ondefineparameters.md) |  |  |
 

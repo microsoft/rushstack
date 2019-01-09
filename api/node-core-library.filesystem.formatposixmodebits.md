@@ -12,9 +12,9 @@ static formatPosixModeBits(modeBits: PosixModeBits): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>modeBits</p> | <p>`PosixModeBits`</p> | <p>POSIX-style file mode bits specified using the [PosixModeBits](./node-core-library.posixmodebits.md) enum</p> |
+|  modeBits | `PosixModeBits` | POSIX-style file mode bits specified using the [PosixModeBits](./node-core-library.posixmodebits.md) enum |
 
 <b>Returns:</b>
 

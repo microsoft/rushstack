@@ -12,9 +12,9 @@ write(text: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>text</p> | <p>`string`</p> | <p>The text to write to the file.</p> |
+|  text | `string` | The text to write to the file. |
 
 <b>Returns:</b>
 

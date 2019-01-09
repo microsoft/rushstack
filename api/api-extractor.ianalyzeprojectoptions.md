@@ -12,7 +12,7 @@ export interface IAnalyzeProjectOptions
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[projectConfig](./api-extractor.ianalyzeprojectoptions.projectconfig.md)</p> | <p>`IExtractorProjectConfig`</p> | <p>If omitted, then the [IExtractorConfig.project](./api-extractor.iextractorconfig.project.md) config will be used by default.</p> |
+|  [projectConfig](./api-extractor.ianalyzeprojectoptions.projectconfig.md) | `IExtractorProjectConfig` | If omitted, then the [IExtractorConfig.project](./api-extractor.iextractorconfig.project.md) config will be used by default. |
 

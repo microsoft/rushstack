@@ -12,7 +12,7 @@ export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitio
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[defaultValue](./ts-command-line.icommandlineintegerdefinition.defaultvalue.md)</p> | <p>`number`</p> | <p></p> |
+|  [defaultValue](./ts-command-line.icommandlineintegerdefinition.defaultvalue.md) | `number` |  |
 

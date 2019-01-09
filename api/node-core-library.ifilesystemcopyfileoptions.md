@@ -12,8 +12,8 @@ export interface IFileSystemCopyFileOptions
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[destinationPath](./node-core-library.ifilesystemcopyfileoptions.destinationpath.md)</p> | <p>`string`</p> | <p>The path that the object will be copied to. The path may be absolute or relative.</p> |
-|  <p>[sourcePath](./node-core-library.ifilesystemcopyfileoptions.sourcepath.md)</p> | <p>`string`</p> | <p>The path of the existing object to be copied. The path may be absolute or relative.</p> |
+|  [destinationPath](./node-core-library.ifilesystemcopyfileoptions.destinationpath.md) | `string` | The path that the object will be copied to. The path may be absolute or relative. |
+|  [sourcePath](./node-core-library.ifilesystemcopyfileoptions.sourcepath.md) | `string` | The path of the existing object to be copied. The path may be absolute or relative. |
 

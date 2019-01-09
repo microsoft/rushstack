@@ -15,8 +15,8 @@ export declare enum VersionPolicyDefinitionName
 
 ## Enumeration Members
 
-|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
+|  Member | Value | Description |
 |  --- | --- | --- |
-|  <p>individualVersion</p> | <p>`1`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>lockStepVersion</p> | <p>`0`</p> | <p><b><i>(BETA)</i></b></p> |
+|  individualVersion | `1` | <b><i>(BETA)</i></b> |
+|  lockStepVersion | `0` | <b><i>(BETA)</i></b> |
 

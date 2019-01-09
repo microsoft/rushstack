@@ -12,10 +12,10 @@ export interface IStringBuilder
 
 ## Methods
 
-|  <p>Method</p> | <p>Description</p> |
+|  Method | Description |
 |  --- | --- |
-|  <p>[append(text)](./node-core-library.istringbuilder.append.md)</p> | <p>Append the specified text to the buffer.</p> |
-|  <p>[toString()](./node-core-library.istringbuilder.tostring.md)</p> | <p>Returns a single string containing all the text that was appended to the buffer so far.</p> |
+|  [append(text)](./node-core-library.istringbuilder.append.md) | Append the specified text to the buffer. |
+|  [toString()](./node-core-library.istringbuilder.tostring.md) | Returns a single string containing all the text that was appended to the buffer so far. |
 
 ## Remarks
 

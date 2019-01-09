@@ -12,9 +12,9 @@ get(key: K): V | undefined;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>key</p> | <p>`K`</p> |  |
+|  key | `K` |  |
 
 <b>Returns:</b>
 

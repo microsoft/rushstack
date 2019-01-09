@@ -10,9 +10,9 @@ findEntryPointsByPath(importPath: string): ReadonlyArray<ApiEntryPoint>;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>importPath</p> | <p>`string`</p> |  |
+|  importPath | `string` |  |
 
 <b>Returns:</b>
 

@@ -12,9 +12,9 @@ static copyFile(options: IFileSystemCopyFileOptions): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>options</p> | <p>`IFileSystemCopyFileOptions`</p> |  |
+|  options | `IFileSystemCopyFileOptions` |  |
 
 <b>Returns:</b>
 

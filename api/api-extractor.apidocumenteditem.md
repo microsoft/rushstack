@@ -12,16 +12,16 @@ export declare class ApiDocumentedItem extends ApiItem
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[tsdocComment](./api-extractor.apidocumenteditem.tsdoccomment.md)</p> |  | <p>`tsdoc.DocComment | undefined`</p> |  |
+|  [tsdocComment](./api-extractor.apidocumenteditem.tsdoccomment.md) |  | `tsdoc.DocComment | undefined` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[onDeserializeInto(options, jsonObject)](./api-extractor.apidocumenteditem.ondeserializeinto.md)</p> | <p>`static`</p> | <p></p> |
-|  <p>[serializeInto(jsonObject)](./api-extractor.apidocumenteditem.serializeinto.md)</p> |  | <p></p> |
+|  [onDeserializeInto(options, jsonObject)](./api-extractor.apidocumenteditem.ondeserializeinto.md) | `static` |  |
+|  [serializeInto(jsonObject)](./api-extractor.apidocumenteditem.serializeinto.md) |  |  |
 
 ## Remarks
 

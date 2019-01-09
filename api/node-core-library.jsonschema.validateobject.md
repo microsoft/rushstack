@@ -12,11 +12,11 @@ validateObject(jsonObject: Object, filenameForErrors: string, options?: IJsonSch
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonObject</p> | <p>`Object`</p> | <p>The JSON data to be validated</p> |
-|  <p>filenameForErrors</p> | <p>`string`</p> | <p>The filename that the JSON data was available, or an empty string if not applicable</p> |
-|  <p>options</p> | <p>`IJsonSchemaValidateOptions`</p> | <p>Other options that control the validation</p> |
+|  jsonObject | `Object` | The JSON data to be validated |
+|  filenameForErrors | `string` | The filename that the JSON data was available, or an empty string if not applicable |
+|  options | `IJsonSchemaValidateOptions` | Other options that control the validation |
 
 <b>Returns:</b>
 

@@ -12,9 +12,9 @@ export interface IParameterOptions
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[name](./api-extractor.iparameteroptions.name.md)</p> | <p>`string`</p> |  |
-|  <p>[parameterTypeExcerpt](./api-extractor.iparameteroptions.parametertypeexcerpt.md)</p> | <p>`Excerpt`</p> |  |
-|  <p>[parent](./api-extractor.iparameteroptions.parent.md)</p> | <p>`ApiParameterListMixin`</p> |  |
+|  [name](./api-extractor.iparameteroptions.name.md) | `string` |  |
+|  [parameterTypeExcerpt](./api-extractor.iparameteroptions.parametertypeexcerpt.md) | `Excerpt` |  |
+|  [parent](./api-extractor.iparameteroptions.parent.md) | `ApiParameterListMixin` |  |
 

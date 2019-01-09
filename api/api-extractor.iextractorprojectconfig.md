@@ -12,7 +12,7 @@ export interface IExtractorProjectConfig
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[entryPointSourceFile](./api-extractor.iextractorprojectconfig.entrypointsourcefile.md)</p> | <p>`string`</p> | <p>Specifies the TypeScript \*.d.ts file that will be treated as the entry point for compilation. Typically this corresponds to the "typings" or "types" field from package.json, but secondary entry points are also possible.</p> |
+|  [entryPointSourceFile](./api-extractor.iextractorprojectconfig.entrypointsourcefile.md) | `string` | Specifies the TypeScript \*.d.ts file that will be treated as the entry point for compilation. Typically this corresponds to the "typings" or "types" field from package.json, but secondary entry points are also possible. |
 

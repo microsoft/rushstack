@@ -12,20 +12,20 @@ export declare abstract class CommandLineParameter
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[description](./ts-command-line.commandlineparameter.description.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[environmentVariable](./ts-command-line.commandlineparameter.environmentvariable.md)</p> |  | <p>`string | undefined`</p> | <p></p> |
-|  <p>[kind](./ts-command-line.commandlineparameter.kind.md)</p> |  | <p>`CommandLineParameterKind`</p> | <p>Indicates the type of parameter.</p> |
-|  <p>[longName](./ts-command-line.commandlineparameter.longname.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[required](./ts-command-line.commandlineparameter.required.md)</p> |  | <p>`boolean`</p> | <p></p> |
-|  <p>[shortName](./ts-command-line.commandlineparameter.shortname.md)</p> |  | <p>`string | undefined`</p> | <p></p> |
+|  [description](./ts-command-line.commandlineparameter.description.md) |  | `string` |  |
+|  [environmentVariable](./ts-command-line.commandlineparameter.environmentvariable.md) |  | `string | undefined` |  |
+|  [kind](./ts-command-line.commandlineparameter.kind.md) |  | `CommandLineParameterKind` | Indicates the type of parameter. |
+|  [longName](./ts-command-line.commandlineparameter.longname.md) |  | `string` |  |
+|  [required](./ts-command-line.commandlineparameter.required.md) |  | `boolean` |  |
+|  [shortName](./ts-command-line.commandlineparameter.shortname.md) |  | `string | undefined` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[appendToArgList(argList)](./ts-command-line.commandlineparameter.appendtoarglist.md)</p> |  | <p>Append the parsed values to the provided string array.</p> |
-|  <p>[reportInvalidData(data)](./ts-command-line.commandlineparameter.reportinvaliddata.md)</p> |  | <p>Internal usage only. Used to report unexpected output from the argparse library.</p> |
-|  <p>[validateDefaultValue(hasDefaultValue)](./ts-command-line.commandlineparameter.validatedefaultvalue.md)</p> |  |  |
+|  [appendToArgList(argList)](./ts-command-line.commandlineparameter.appendtoarglist.md) |  | Append the parsed values to the provided string array. |
+|  [reportInvalidData(data)](./ts-command-line.commandlineparameter.reportinvaliddata.md) |  | Internal usage only. Used to report unexpected output from the argparse library. |
+|  [validateDefaultValue(hasDefaultValue)](./ts-command-line.commandlineparameter.validatedefaultvalue.md) |  |  |
 

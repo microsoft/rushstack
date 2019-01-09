@@ -12,16 +12,16 @@ export declare class ApiMethodSignature extends ApiMethodSignature_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apimethodsignature.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apimethodsignature.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apimethodsignature.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apimethodsignature.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(name, overloadIndex)](./api-extractor.apimethodsignature.getcanonicalreference.md)</p> | <p>`static`</p> |  |
+|  [getCanonicalReference(name, overloadIndex)](./api-extractor.apimethodsignature.getcanonicalreference.md) | `static` |  |
 
 ## Remarks
 

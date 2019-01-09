@@ -12,7 +12,7 @@ export declare namespace ApiReleaseTagMixin
 
 ## Functions
 
-|  <p>Function</p> | <p>Description</p> |
+|  Function | Description |
 |  --- | --- |
-|  <p>[isBaseClassOf(apiItem)](./api-extractor.apireleasetagmixin.isbaseclassof.md)</p> | <p>A type guard that tests whether the specified `ApiItem` subclass extends the `ApiReleaseTagMixin` mixin.</p> |
+|  [isBaseClassOf(apiItem)](./api-extractor.apireleasetagmixin.isbaseclassof.md) | A type guard that tests whether the specified `ApiItem` subclass extends the `ApiReleaseTagMixin` mixin. |
 

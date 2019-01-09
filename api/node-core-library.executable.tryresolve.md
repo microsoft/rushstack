@@ -14,10 +14,10 @@ static tryResolve(filename: string, options?: IExecutableResolveOptions): string
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>filename</p> | <p>`string`</p> | <p>The name of the executable file. This string must not contain any command-line arguments. If the name contains any path delimiters, then the shell's default PATH will not be searched.</p> |
-|  <p>options</p> | <p>`IExecutableResolveOptions`</p> | <p>optional other parameters</p> |
+|  filename | `string` | The name of the executable file. This string must not contain any command-line arguments. If the name contains any path delimiters, then the shell's default PATH will not be searched. |
+|  options | `IExecutableResolveOptions` | optional other parameters |
 
 <b>Returns:</b>
 

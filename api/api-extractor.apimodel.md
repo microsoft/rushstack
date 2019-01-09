@@ -12,20 +12,20 @@ export declare class ApiModel extends ApiModel_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apimodel.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apimodel.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
-|  <p>[packages](./api-extractor.apimodel.packages.md)</p> |  | <p>`ReadonlyArray<ApiPackage>`</p> |  |
+|  [canonicalReference](./api-extractor.apimodel.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apimodel.kind.md) |  | `ApiItemKind` |  |
+|  [packages](./api-extractor.apimodel.packages.md) |  | `ReadonlyArray<ApiPackage>` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[addMember(member)](./api-extractor.apimodel.addmember.md)</p> |  | <p></p> |
-|  <p>[loadPackage(apiJsonFilename)](./api-extractor.apimodel.loadpackage.md)</p> |  |  |
-|  <p>[resolveDeclarationReference(declarationReference, contextApiItem)](./api-extractor.apimodel.resolvedeclarationreference.md)</p> |  |  |
-|  <p>[tryGetPackageByName(packageName)](./api-extractor.apimodel.trygetpackagebyname.md)</p> |  | <p>Efficiently finds a package by the NPM package name.</p> |
+|  [addMember(member)](./api-extractor.apimodel.addmember.md) |  |  |
+|  [loadPackage(apiJsonFilename)](./api-extractor.apimodel.loadpackage.md) |  |  |
+|  [resolveDeclarationReference(declarationReference, contextApiItem)](./api-extractor.apimodel.resolvedeclarationreference.md) |  |  |
+|  [tryGetPackageByName(packageName)](./api-extractor.apimodel.trygetpackagebyname.md) |  | Efficiently finds a package by the NPM package name. |
 
 ## Remarks
 

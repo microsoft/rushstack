@@ -15,10 +15,10 @@ ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>project</p> | <p>`IPackageJson`</p> | <p>input package json</p> |
-|  <p>force</p> | <p>`boolean`</p> | <p>force update even when the project version is higher than the policy version.</p> |
+|  project | `IPackageJson` | input package json |
+|  force | `boolean` | force update even when the project version is higher than the policy version. |
 
 <b>Returns:</b>
 

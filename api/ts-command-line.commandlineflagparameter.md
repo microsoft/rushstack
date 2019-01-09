@@ -12,14 +12,14 @@ export declare class CommandLineFlagParameter extends CommandLineParameter
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[kind](./ts-command-line.commandlineflagparameter.kind.md)</p> |  | <p>`CommandLineParameterKind`</p> | <p></p> |
-|  <p>[value](./ts-command-line.commandlineflagparameter.value.md)</p> |  | <p>`boolean`</p> | <p>Returns a boolean indicating whether the parameter was included in the command line.</p> |
+|  [kind](./ts-command-line.commandlineflagparameter.kind.md) |  | `CommandLineParameterKind` |  |
+|  [value](./ts-command-line.commandlineflagparameter.value.md) |  | `boolean` | Returns a boolean indicating whether the parameter was included in the command line. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[appendToArgList(argList)](./ts-command-line.commandlineflagparameter.appendtoarglist.md)</p> |  | <p></p> |
+|  [appendToArgList(argList)](./ts-command-line.commandlineflagparameter.appendtoarglist.md) |  |  |
 

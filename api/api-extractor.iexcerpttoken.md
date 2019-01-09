@@ -11,8 +11,8 @@ export interface IExcerptToken
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[kind](./api-extractor.iexcerpttoken.kind.md)</p> | <p>`ExcerptTokenKind`</p> |  |
-|  <p>[text](./api-extractor.iexcerpttoken.text.md)</p> | <p>`string`</p> |  |
+|  [kind](./api-extractor.iexcerpttoken.kind.md) | `ExcerptTokenKind` |  |
+|  [text](./api-extractor.iexcerpttoken.text.md) | `string` |  |
 

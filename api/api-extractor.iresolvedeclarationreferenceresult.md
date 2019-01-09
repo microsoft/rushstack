@@ -12,8 +12,8 @@ export interface IResolveDeclarationReferenceResult
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[errorMessage](./api-extractor.iresolvedeclarationreferenceresult.errormessage.md)</p> | <p>`string | undefined`</p> | <p>If resolvedApiItem is undefined, then this will always contain an error message explaining why the resolution failed.</p> |
-|  <p>[resolvedApiItem](./api-extractor.iresolvedeclarationreferenceresult.resolvedapiitem.md)</p> | <p>`ApiItem | undefined`</p> | <p>The referenced ApiItem, if the declaration reference could be resolved.</p> |
+|  [errorMessage](./api-extractor.iresolvedeclarationreferenceresult.errormessage.md) | `string | undefined` | If resolvedApiItem is undefined, then this will always contain an error message explaining why the resolution failed. |
+|  [resolvedApiItem](./api-extractor.iresolvedeclarationreferenceresult.resolvedapiitem.md) | `ApiItem | undefined` | The referenced ApiItem, if the declaration reference could be resolved. |
 

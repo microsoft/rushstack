@@ -12,10 +12,10 @@ static truncateWithEllipsis(s: string, maximumLength: number): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>s</p> | <p>`string`</p> |  |
-|  <p>maximumLength</p> | <p>`number`</p> |  |
+|  s | `string` |  |
+|  maximumLength | `number` |  |
 
 <b>Returns:</b>
 

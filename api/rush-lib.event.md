@@ -15,10 +15,10 @@ export declare enum Event
 
 ## Enumeration Members
 
-|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
+|  Member | Value | Description |
 |  --- | --- | --- |
-|  <p>postRushBuild</p> | <p>`4`</p> | <p><b><i>(BETA)</i></b> Post Rush build event</p> |
-|  <p>postRushInstall</p> | <p>`2`</p> | <p><b><i>(BETA)</i></b> Post Rush install event</p> |
-|  <p>preRushBuild</p> | <p>`3`</p> | <p><b><i>(BETA)</i></b> Pre Rush build event</p> |
-|  <p>preRushInstall</p> | <p>`1`</p> | <p><b><i>(BETA)</i></b> Pre Rush install event</p> |
+|  postRushBuild | `4` | <b><i>(BETA)</i></b> Post Rush build event |
+|  postRushInstall | `2` | <b><i>(BETA)</i></b> Post Rush install event |
+|  preRushBuild | `3` | <b><i>(BETA)</i></b> Pre Rush build event |
+|  preRushInstall | `1` | <b><i>(BETA)</i></b> Pre Rush install event |
 

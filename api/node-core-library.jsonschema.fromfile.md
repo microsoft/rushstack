@@ -12,10 +12,10 @@ static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSch
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>filename</p> | <p>`string`</p> |  |
-|  <p>options</p> | <p>`IJsonSchemaFromFileOptions`</p> |  |
+|  filename | `string` |  |
+|  options | `IJsonSchemaFromFileOptions` |  |
 
 <b>Returns:</b>
 

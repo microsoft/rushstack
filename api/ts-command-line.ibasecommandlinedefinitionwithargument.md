@@ -12,9 +12,9 @@ export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLine
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[argumentName](./ts-command-line.ibasecommandlinedefinitionwithargument.argumentname.md)</p> | <p>`string`</p> | <p>The name of the argument, which will be shown in the command-line help.</p> |
+|  [argumentName](./ts-command-line.ibasecommandlinedefinitionwithargument.argumentname.md) | `string` | The name of the argument, which will be shown in the command-line help. |
 
 ## Remarks
 

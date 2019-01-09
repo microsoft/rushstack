@@ -12,16 +12,16 @@ export declare class ApiProperty extends ApiProperty_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apiproperty.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apiproperty.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apiproperty.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apiproperty.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(name, isStatic)](./api-extractor.apiproperty.getcanonicalreference.md)</p> | <p>`static`</p> |  |
+|  [getCanonicalReference(name, isStatic)](./api-extractor.apiproperty.getcanonicalreference.md) | `static` |  |
 
 ## Remarks
 

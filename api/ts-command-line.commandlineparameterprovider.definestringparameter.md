@@ -12,9 +12,9 @@ defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStri
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>definition</p> | <p>`ICommandLineStringDefinition`</p> |  |
+|  definition | `ICommandLineStringDefinition` |  |
 
 <b>Returns:</b>
 

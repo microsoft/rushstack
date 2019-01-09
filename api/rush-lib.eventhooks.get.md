@@ -15,9 +15,9 @@ get(event: Event): string[];
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>event</p> | <p>`Event`</p> | <p>Rush event</p> |
+|  event | `Event` | Rush event |
 
 <b>Returns:</b>
 

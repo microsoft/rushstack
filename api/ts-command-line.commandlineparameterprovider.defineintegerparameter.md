@@ -12,9 +12,9 @@ defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIn
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>definition</p> | <p>`ICommandLineIntegerDefinition`</p> |  |
+|  definition | `ICommandLineIntegerDefinition` |  |
 
 <b>Returns:</b>
 

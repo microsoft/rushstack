@@ -12,8 +12,8 @@ export declare class ApprovedPackagesItem
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[allowedCategories](./rush-lib.approvedpackagesitem.allowedcategories.md)</p> |  | <p>`Set<string>`</p> | <p>The project categories that are allowed to use this package.</p> |
-|  <p>[packageName](./rush-lib.approvedpackagesitem.packagename.md)</p> |  | <p>`string`</p> | <p>The NPM package name</p> |
+|  [allowedCategories](./rush-lib.approvedpackagesitem.allowedcategories.md) |  | `Set<string>` | The project categories that are allowed to use this package. |
+|  [packageName](./rush-lib.approvedpackagesitem.packagename.md) |  | `string` | The NPM package name |
 

@@ -12,9 +12,9 @@ tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | unde
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>currentFolderPath</p> | <p>`string`</p> |  |
+|  currentFolderPath | `string` |  |
 
 <b>Returns:</b>
 

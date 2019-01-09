@@ -15,10 +15,10 @@ abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefine
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>project</p> | <p>`IPackageJson`</p> | <p>package json</p> |
-|  <p>force</p> | <p>`boolean`</p> | <p>force update even when the project version is higher than the policy version.</p> |
+|  project | `IPackageJson` | package json |
+|  force | `boolean` | force update even when the project version is higher than the policy version. |
 
 <b>Returns:</b>
 

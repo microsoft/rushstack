@@ -12,10 +12,10 @@ static compareByValue(x: any, y: any): number;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>x</p> | <p>`any`</p> |  |
-|  <p>y</p> | <p>`any`</p> |  |
+|  x | `any` |  |
+|  y | `any` |  |
 
 <b>Returns:</b>
 

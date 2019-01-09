@@ -10,9 +10,9 @@ static getCanonicalReference(name: string): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>name</p> | <p>`string`</p> |  |
+|  name | `string` |  |
 
 <b>Returns:</b>
 

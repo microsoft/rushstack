@@ -11,8 +11,8 @@ export declare class ExcerptToken
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[kind](./api-extractor.excerpttoken.kind.md)</p> |  | <p>`ExcerptTokenKind`</p> |  |
-|  <p>[text](./api-extractor.excerpttoken.text.md)</p> |  | <p>`string`</p> |  |
+|  [kind](./api-extractor.excerpttoken.kind.md) |  | `ExcerptTokenKind` |  |
+|  [text](./api-extractor.excerpttoken.text.md) |  | `string` |  |
 

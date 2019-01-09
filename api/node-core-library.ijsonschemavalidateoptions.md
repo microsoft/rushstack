@@ -12,7 +12,7 @@ export interface IJsonSchemaValidateOptions
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[customErrorHeader](./node-core-library.ijsonschemavalidateoptions.customerrorheader.md)</p> | <p>`string`</p> | <p>A custom header that will be used to report schema errors.</p> |
+|  [customErrorHeader](./node-core-library.ijsonschemavalidateoptions.customerrorheader.md) | `string` | A custom header that will be used to report schema errors. |
 

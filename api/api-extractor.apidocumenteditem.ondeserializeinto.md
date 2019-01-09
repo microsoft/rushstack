@@ -12,10 +12,10 @@ static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>, jsonObject
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>options</p> | <p>`Partial<IApiDocumentedItemOptions>`</p> |  |
-|  <p>jsonObject</p> | <p>`IApiItemJson`</p> |  |
+|  options | `Partial<IApiDocumentedItemOptions>` |  |
+|  jsonObject | `IApiItemJson` |  |
 
 <b>Returns:</b>
 

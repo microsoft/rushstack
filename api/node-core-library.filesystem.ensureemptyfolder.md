@@ -12,9 +12,9 @@ static ensureEmptyFolder(folderPath: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>folderPath</p> | <p>`string`</p> | <p>The absolute or relative path to the folder which should have its contents deleted.</p> |
+|  folderPath | `string` | The absolute or relative path to the folder which should have its contents deleted. |
 
 <b>Returns:</b>
 

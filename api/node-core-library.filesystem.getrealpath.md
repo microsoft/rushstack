@@ -12,9 +12,9 @@ static getRealPath(linkPath: string): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>linkPath</p> | <p>`string`</p> | <p>The path to the link.</p> |
+|  linkPath | `string` | The path to the link. |
 
 <b>Returns:</b>
 

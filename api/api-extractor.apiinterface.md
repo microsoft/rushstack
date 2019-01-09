@@ -12,19 +12,19 @@ export declare class ApiInterface extends ApiInterface_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apiinterface.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[extendsTypes](./api-extractor.apiinterface.extendstypes.md)</p> |  | <p>`ReadonlyArray<HeritageType>`</p> | <p>The list of base interfaces that this interface inherits from using the `extends` keyword.</p> |
-|  <p>[kind](./api-extractor.apiinterface.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apiinterface.canonicalreference.md) |  | `string` |  |
+|  [extendsTypes](./api-extractor.apiinterface.extendstypes.md) |  | `ReadonlyArray<HeritageType>` | The list of base interfaces that this interface inherits from using the `extends` keyword. |
+|  [kind](./api-extractor.apiinterface.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(name)](./api-extractor.apiinterface.getcanonicalreference.md)</p> | <p>`static`</p> |  |
-|  <p>[onDeserializeInto(options, jsonObject)](./api-extractor.apiinterface.ondeserializeinto.md)</p> | <p>`static`</p> | <p></p> |
-|  <p>[serializeInto(jsonObject)](./api-extractor.apiinterface.serializeinto.md)</p> |  | <p></p> |
+|  [getCanonicalReference(name)](./api-extractor.apiinterface.getcanonicalreference.md) | `static` |  |
+|  [onDeserializeInto(options, jsonObject)](./api-extractor.apiinterface.ondeserializeinto.md) | `static` |  |
+|  [serializeInto(jsonObject)](./api-extractor.apiinterface.serializeinto.md) |  |  |
 
 ## Remarks
 

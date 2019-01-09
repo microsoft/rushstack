@@ -12,16 +12,16 @@ export declare class ApiTypeAlias extends ApiTypeAlias_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apitypealias.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apitypealias.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apitypealias.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apitypealias.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(name)](./api-extractor.apitypealias.getcanonicalreference.md)</p> | <p>`static`</p> |  |
+|  [getCanonicalReference(name)](./api-extractor.apitypealias.getcanonicalreference.md) | `static` |  |
 
 ## Remarks
 

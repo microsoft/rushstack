@@ -12,18 +12,18 @@ export declare class ApiEnum extends ApiEnum_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apienum.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apienum.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
-|  <p>[members](./api-extractor.apienum.members.md)</p> |  | <p>`ReadonlyArray<ApiEnumMember>`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apienum.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apienum.kind.md) |  | `ApiItemKind` |  |
+|  [members](./api-extractor.apienum.members.md) |  | `ReadonlyArray<ApiEnumMember>` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[addMember(member)](./api-extractor.apienum.addmember.md)</p> |  | <p></p> |
-|  <p>[getCanonicalReference(name)](./api-extractor.apienum.getcanonicalreference.md)</p> | <p>`static`</p> |  |
+|  [addMember(member)](./api-extractor.apienum.addmember.md) |  |  |
+|  [getCanonicalReference(name)](./api-extractor.apienum.getcanonicalreference.md) | `static` |  |
 
 ## Remarks
 

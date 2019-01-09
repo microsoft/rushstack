@@ -12,7 +12,7 @@ export interface IApiEnumMemberOptions extends IApiNameMixinOptions, IApiRelease
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[initializerTokenRange](./api-extractor.iapienummemberoptions.initializertokenrange.md)</p> | <p>`IExcerptTokenRange`</p> |  |
+|  [initializerTokenRange](./api-extractor.iapienummemberoptions.initializertokenrange.md) | `IExcerptTokenRange` |  |
 

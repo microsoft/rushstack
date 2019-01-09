@@ -12,11 +12,11 @@ static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: I
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonFilename</p> | <p>`string`</p> |  |
-|  <p>jsonSchema</p> | <p>`JsonSchema`</p> |  |
-|  <p>options</p> | <p>`IJsonSchemaValidateOptions`</p> |  |
+|  jsonFilename | `string` |  |
+|  jsonSchema | `JsonSchema` |  |
+|  options | `IJsonSchemaValidateOptions` |  |
 
 <b>Returns:</b>
 

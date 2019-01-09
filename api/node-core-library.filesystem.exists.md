@@ -12,9 +12,9 @@ static exists(path: string): boolean;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>path</p> | <p>`string`</p> | <p>The absolute or relative path to the filesystem object.</p> |
+|  path | `string` | The absolute or relative path to the filesystem object. |
 
 <b>Returns:</b>
 

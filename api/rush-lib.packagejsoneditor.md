@@ -14,22 +14,22 @@ export declare class PackageJsonEditor
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[dependencyList](./rush-lib.packagejsoneditor.dependencylist.md)</p> |  | <p>`ReadonlyArray<PackageJsonDependency>`</p> | <p><b><i>(BETA)</i></b> The list of dependencies of type DependencyType.Regular, DependencyType.Optional, or DependencyType.Peer.</p> |
-|  <p>[devDependencyList](./rush-lib.packagejsoneditor.devdependencylist.md)</p> |  | <p>`ReadonlyArray<PackageJsonDependency>`</p> | <p><b><i>(BETA)</i></b> The list of dependencies of type DependencyType.Dev.</p> |
-|  <p>[filePath](./rush-lib.packagejsoneditor.filepath.md)</p> |  | <p>`string`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[name](./rush-lib.packagejsoneditor.name.md)</p> |  | <p>`string`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[version](./rush-lib.packagejsoneditor.version.md)</p> |  | <p>`string`</p> | <p><b><i>(BETA)</i></b></p> |
+|  [dependencyList](./rush-lib.packagejsoneditor.dependencylist.md) |  | `ReadonlyArray<PackageJsonDependency>` | <b><i>(BETA)</i></b> The list of dependencies of type DependencyType.Regular, DependencyType.Optional, or DependencyType.Peer. |
+|  [devDependencyList](./rush-lib.packagejsoneditor.devdependencylist.md) |  | `ReadonlyArray<PackageJsonDependency>` | <b><i>(BETA)</i></b> The list of dependencies of type DependencyType.Dev. |
+|  [filePath](./rush-lib.packagejsoneditor.filepath.md) |  | `string` | <b><i>(BETA)</i></b> |
+|  [name](./rush-lib.packagejsoneditor.name.md) |  | `string` | <b><i>(BETA)</i></b> |
+|  [version](./rush-lib.packagejsoneditor.version.md) |  | `string` | <b><i>(BETA)</i></b> |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[addOrUpdateDependency(packageName, newVersion, dependencyType)](./rush-lib.packagejsoneditor.addorupdatedependency.md)</p> |  | <p><b><i>(BETA)</i></b></p> |
-|  <p>[fromObject(object, filename)](./rush-lib.packagejsoneditor.fromobject.md)</p> | <p>`static`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[load(filePath)](./rush-lib.packagejsoneditor.load.md)</p> | <p>`static`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[saveIfModified()](./rush-lib.packagejsoneditor.saveifmodified.md)</p> |  | <p><b><i>(BETA)</i></b></p> |
-|  <p>[tryGetDependency(packageName)](./rush-lib.packagejsoneditor.trygetdependency.md)</p> |  | <p><b><i>(BETA)</i></b></p> |
-|  <p>[tryGetDevDependency(packageName)](./rush-lib.packagejsoneditor.trygetdevdependency.md)</p> |  | <p><b><i>(BETA)</i></b></p> |
+|  [addOrUpdateDependency(packageName, newVersion, dependencyType)](./rush-lib.packagejsoneditor.addorupdatedependency.md) |  | <b><i>(BETA)</i></b> |
+|  [fromObject(object, filename)](./rush-lib.packagejsoneditor.fromobject.md) | `static` | <b><i>(BETA)</i></b> |
+|  [load(filePath)](./rush-lib.packagejsoneditor.load.md) | `static` | <b><i>(BETA)</i></b> |
+|  [saveIfModified()](./rush-lib.packagejsoneditor.saveifmodified.md) |  | <b><i>(BETA)</i></b> |
+|  [tryGetDependency(packageName)](./rush-lib.packagejsoneditor.trygetdependency.md) |  | <b><i>(BETA)</i></b> |
+|  [tryGetDevDependency(packageName)](./rush-lib.packagejsoneditor.trygetdevdependency.md) |  | <b><i>(BETA)</i></b> |
 

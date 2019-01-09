@@ -15,10 +15,10 @@ update(versionPolicyName: string, newVersion: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>versionPolicyName</p> | <p>`string`</p> | <p>version policy name</p> |
-|  <p>newVersion</p> | <p>`string`</p> | <p>new version</p> |
+|  versionPolicyName | `string` | version policy name |
+|  newVersion | `string` | new version |
 
 <b>Returns:</b>
 

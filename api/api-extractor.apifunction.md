@@ -12,16 +12,16 @@ export declare class ApiFunction extends ApiFunction_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apifunction.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apifunction.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apifunction.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apifunction.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(name, overloadIndex)](./api-extractor.apifunction.getcanonicalreference.md)</p> | <p>`static`</p> |  |
+|  [getCanonicalReference(name, overloadIndex)](./api-extractor.apifunction.getcanonicalreference.md) | `static` |  |
 
 ## Remarks
 

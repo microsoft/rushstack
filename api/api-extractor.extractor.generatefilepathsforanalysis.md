@@ -12,9 +12,9 @@ static generateFilePathsForAnalysis(inputFilePaths: string[]): string[];
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>inputFilePaths</p> | <p>`string[]`</p> |  |
+|  inputFilePaths | `string[]` |  |
 
 <b>Returns:</b>
 

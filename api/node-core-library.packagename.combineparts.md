@@ -12,10 +12,10 @@ static combineParts(scope: string, unscopedName: string): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>scope</p> | <p>`string`</p> | <p>Must be either an empty string, or a scope name such as "<!-- -->@<!-- -->example"</p> |
-|  <p>unscopedName</p> | <p>`string`</p> | <p>Must be a nonempty package name that does not contain a scope</p> |
+|  scope | `string` | Must be either an empty string, or a scope name such as "<!-- -->@<!-- -->example" |
+|  unscopedName | `string` | Must be a nonempty package name that does not contain a scope |
 
 <b>Returns:</b>
 

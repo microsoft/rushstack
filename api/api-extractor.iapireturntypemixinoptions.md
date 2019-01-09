@@ -12,7 +12,7 @@ export interface IApiReturnTypeMixinOptions extends IApiItemOptions
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[returnTypeTokenRange](./api-extractor.iapireturntypemixinoptions.returntypetokenrange.md)</p> | <p>`IExcerptTokenRange`</p> |  |
+|  [returnTypeTokenRange](./api-extractor.iapireturntypemixinoptions.returntypetokenrange.md) | `IExcerptTokenRange` |  |
 

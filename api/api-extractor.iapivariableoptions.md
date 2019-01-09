@@ -12,7 +12,7 @@ export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTa
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[variableTypeTokenRange](./api-extractor.iapivariableoptions.variabletypetokenrange.md)</p> | <p>`IExcerptTokenRange`</p> |  |
+|  [variableTypeTokenRange](./api-extractor.iapivariableoptions.variabletypetokenrange.md) | `IExcerptTokenRange` |  |
 

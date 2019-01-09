@@ -15,7 +15,7 @@ export declare class EventHooks
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[get(event)](./rush-lib.eventhooks.get.md)</p> |  | <p><b><i>(BETA)</i></b> Return all the scripts associated with the specified event.</p> |
+|  [get(event)](./rush-lib.eventhooks.get.md) |  | <b><i>(BETA)</i></b> Return all the scripts associated with the specified event. |
 

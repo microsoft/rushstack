@@ -12,9 +12,9 @@ static load(jsonFilename: string): any;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonFilename</p> | <p>`string`</p> |  |
+|  jsonFilename | `string` |  |
 
 <b>Returns:</b>
 

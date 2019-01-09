@@ -15,9 +15,9 @@ update(newVersionString: string): boolean;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>newVersionString</p> | <p>`string`</p> | <p>New version</p> |
+|  newVersionString | `string` | New version |
 
 <b>Returns:</b>
 

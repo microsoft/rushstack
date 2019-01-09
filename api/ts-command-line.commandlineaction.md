@@ -12,16 +12,16 @@ export declare abstract class CommandLineAction extends CommandLineParameterProv
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[actionName](./ts-command-line.commandlineaction.actionname.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[documentation](./ts-command-line.commandlineaction.documentation.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[summary](./ts-command-line.commandlineaction.summary.md)</p> |  | <p>`string`</p> | <p></p> |
+|  [actionName](./ts-command-line.commandlineaction.actionname.md) |  | `string` |  |
+|  [documentation](./ts-command-line.commandlineaction.documentation.md) |  | `string` |  |
+|  [summary](./ts-command-line.commandlineaction.summary.md) |  | `string` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[onDefineParameters()](./ts-command-line.commandlineaction.ondefineparameters.md)</p> |  | <p></p> |
-|  <p>[onExecute()](./ts-command-line.commandlineaction.onexecute.md)</p> |  | <p>Your subclass should implement this hook to perform the operation.</p> |
+|  [onDefineParameters()](./ts-command-line.commandlineaction.ondefineparameters.md) |  |  |
+|  [onExecute()](./ts-command-line.commandlineaction.onexecute.md) |  | Your subclass should implement this hook to perform the operation. |
 

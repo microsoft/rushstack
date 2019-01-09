@@ -12,11 +12,11 @@ static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema,
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonFilename</p> | <p>`string`</p> |  |
-|  <p>jsonSchema</p> | <p>`JsonSchema`</p> |  |
-|  <p>errorCallback</p> | <p>`(errorInfo: IJsonSchemaErrorInfo) => void`</p> |  |
+|  jsonFilename | `string` |  |
+|  jsonSchema | `JsonSchema` |  |
+|  errorCallback | `(errorInfo: IJsonSchemaErrorInfo) => void` |  |
 
 <b>Returns:</b>
 

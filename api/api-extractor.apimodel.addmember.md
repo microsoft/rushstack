@@ -12,9 +12,9 @@ addMember(member: ApiPackage): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>member</p> | <p>`ApiPackage`</p> |  |
+|  member | `ApiPackage` |  |
 
 <b>Returns:</b>
 

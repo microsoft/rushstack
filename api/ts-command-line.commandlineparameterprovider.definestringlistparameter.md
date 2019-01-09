@@ -12,9 +12,9 @@ defineStringListParameter(definition: ICommandLineStringListDefinition): Command
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>definition</p> | <p>`ICommandLineStringListDefinition`</p> |  |
+|  definition | `ICommandLineStringListDefinition` |  |
 
 <b>Returns:</b>
 

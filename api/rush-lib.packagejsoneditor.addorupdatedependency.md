@@ -13,11 +13,11 @@ addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: D
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>packageName</p> | <p>`string`</p> |  |
-|  <p>newVersion</p> | <p>`string`</p> |  |
-|  <p>dependencyType</p> | <p>`DependencyType`</p> |  |
+|  packageName | `string` |  |
+|  newVersion | `string` |  |
+|  dependencyType | `DependencyType` |  |
 
 <b>Returns:</b>
 

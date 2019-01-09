@@ -14,9 +14,9 @@ static convertToLf(input: string): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>input</p> | <p>`string`</p> |  |
+|  input | `string` |  |
 
 <b>Returns:</b>
 

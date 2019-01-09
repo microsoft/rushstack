@@ -12,7 +12,7 @@ export declare namespace ApiStaticMixin
 
 ## Functions
 
-|  <p>Function</p> | <p>Description</p> |
+|  Function | Description |
 |  --- | --- |
-|  <p>[isBaseClassOf(apiItem)](./api-extractor.apistaticmixin.isbaseclassof.md)</p> | <p>A type guard that tests whether the specified `ApiItem` subclass extends the `ApiStaticMixin` mixin.</p> |
+|  [isBaseClassOf(apiItem)](./api-extractor.apistaticmixin.isbaseclassof.md) | A type guard that tests whether the specified `ApiItem` subclass extends the `ApiStaticMixin` mixin. |
 

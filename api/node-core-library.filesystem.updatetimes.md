@@ -12,10 +12,10 @@ static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>path</p> | <p>`string`</p> | <p>The path of the file that should be modified.</p> |
-|  <p>times</p> | <p>`IFileSystemUpdateTimeParameters`</p> | <p>The times that the object should be updated to reflect.</p> |
+|  path | `string` | The path of the file that should be modified. |
+|  times | `IFileSystemUpdateTimeParameters` | The times that the object should be updated to reflect. |
 
 <b>Returns:</b>
 

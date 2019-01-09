@@ -15,9 +15,9 @@ validate(projectsByName: Map<string, RushConfigurationProject>): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>projectsByName</p> | <p>`Map<string, RushConfigurationProject>`</p> |  |
+|  projectsByName | `Map<string, RushConfigurationProject>` |  |
 
 <b>Returns:</b>
 

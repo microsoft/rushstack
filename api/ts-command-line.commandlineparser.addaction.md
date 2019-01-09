@@ -12,9 +12,9 @@ addAction(action: CommandLineAction): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>action</p> | <p>`CommandLineAction`</p> |  |
+|  action | `CommandLineAction` |  |
 
 <b>Returns:</b>
 

@@ -12,9 +12,9 @@ static ensureFolder(folderPath: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>folderPath</p> | <p>`string`</p> | <p>The absolute or relative path of the folder which should be created.</p> |
+|  folderPath | `string` | The absolute or relative path of the folder which should be created. |
 
 <b>Returns:</b>
 

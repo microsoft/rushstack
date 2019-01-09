@@ -15,9 +15,9 @@ static convertCallbackToPromise<TResult, TError>(fn: (cb: callback<TResult, TErr
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>fn</p> | <p>`(cb: callback<TResult, TError>) => void`</p> |  |
+|  fn | `(cb: callback<TResult, TError>) => void` |  |
 
 <b>Returns:</b>
 

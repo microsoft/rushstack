@@ -12,10 +12,10 @@ static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>childPath</p> | <p>`string`</p> |  |
-|  <p>parentFolderPath</p> | <p>`string`</p> |  |
+|  childPath | `string` |  |
+|  parentFolderPath | `string` |  |
 
 <b>Returns:</b>
 

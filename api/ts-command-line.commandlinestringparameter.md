@@ -12,15 +12,15 @@ export declare class CommandLineStringParameter extends CommandLineParameterWith
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[defaultValue](./ts-command-line.commandlinestringparameter.defaultvalue.md)</p> |  | <p>`string | undefined`</p> | <p></p> |
-|  <p>[kind](./ts-command-line.commandlinestringparameter.kind.md)</p> |  | <p>`CommandLineParameterKind`</p> | <p></p> |
-|  <p>[value](./ts-command-line.commandlinestringparameter.value.md)</p> |  | <p>`string | undefined`</p> | <p>Returns the argument value for a string parameter that was parsed from the command line.</p> |
+|  [defaultValue](./ts-command-line.commandlinestringparameter.defaultvalue.md) |  | `string | undefined` |  |
+|  [kind](./ts-command-line.commandlinestringparameter.kind.md) |  | `CommandLineParameterKind` |  |
+|  [value](./ts-command-line.commandlinestringparameter.value.md) |  | `string | undefined` | Returns the argument value for a string parameter that was parsed from the command line. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[appendToArgList(argList)](./ts-command-line.commandlinestringparameter.appendtoarglist.md)</p> |  | <p></p> |
+|  [appendToArgList(argList)](./ts-command-line.commandlinestringparameter.appendtoarglist.md) |  |  |
 

@@ -15,12 +15,12 @@ export declare enum BumpType
 
 ## Enumeration Members
 
-|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
+|  Member | Value | Description |
 |  --- | --- | --- |
-|  <p>major</p> | <p>`5`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>minor</p> | <p>`4`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>none</p> | <p>`0`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>patch</p> | <p>`2`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>preminor</p> | <p>`3`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>prerelease</p> | <p>`1`</p> | <p><b><i>(BETA)</i></b></p> |
+|  major | `5` | <b><i>(BETA)</i></b> |
+|  minor | `4` | <b><i>(BETA)</i></b> |
+|  none | `0` | <b><i>(BETA)</i></b> |
+|  patch | `2` | <b><i>(BETA)</i></b> |
+|  preminor | `3` | <b><i>(BETA)</i></b> |
+|  prerelease | `1` | <b><i>(BETA)</i></b> |
 

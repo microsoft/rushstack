@@ -12,21 +12,21 @@ export declare class ProtectableMap<K, V>
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[protectedView](./node-core-library.protectablemap.protectedview.md)</p> |  | <p>`Map<K, V>`</p> | <p>The owner of the protectable map should return this object via its public API.</p> |
-|  <p>[size](./node-core-library.protectablemap.size.md)</p> |  | <p>`number`</p> | <p>Returns the number of (key, value) entries in the map.</p> |
+|  [protectedView](./node-core-library.protectablemap.protectedview.md) |  | `Map<K, V>` | The owner of the protectable map should return this object via its public API. |
+|  [size](./node-core-library.protectablemap.size.md) |  | `number` | Returns the number of (key, value) entries in the map. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[clear()](./node-core-library.protectablemap.clear.md)</p> |  | <p>Removes all entries from the map. This operation does NOT invoke the ProtectableMap onClear() hook.</p> |
-|  <p>[delete(key)](./node-core-library.protectablemap.delete.md)</p> |  | <p>Removes the specified key from the map. This operation does NOT invoke the ProtectableMap onDelete() hook.</p> |
-|  <p>[forEach(callbackfn, thisArg)](./node-core-library.protectablemap.foreach.md)</p> |  | <p>Performs an operation for each (key, value) entries in the map.</p> |
-|  <p>[get(key)](./node-core-library.protectablemap.get.md)</p> |  | <p>Retrieves the value for the specified key.</p> |
-|  <p>[has(key)](./node-core-library.protectablemap.has.md)</p> |  | <p>Returns true if the specified key belongs to the map.</p> |
-|  <p>[set(key, value)](./node-core-library.protectablemap.set.md)</p> |  | <p>Sets a value for the specified key. This operation does NOT invoke the ProtectableMap onSet() hook.</p> |
+|  [clear()](./node-core-library.protectablemap.clear.md) |  | Removes all entries from the map. This operation does NOT invoke the ProtectableMap onClear() hook. |
+|  [delete(key)](./node-core-library.protectablemap.delete.md) |  | Removes the specified key from the map. This operation does NOT invoke the ProtectableMap onDelete() hook. |
+|  [forEach(callbackfn, thisArg)](./node-core-library.protectablemap.foreach.md) |  | Performs an operation for each (key, value) entries in the map. |
+|  [get(key)](./node-core-library.protectablemap.get.md) |  | Retrieves the value for the specified key. |
+|  [has(key)](./node-core-library.protectablemap.has.md) |  | Returns true if the specified key belongs to the map. |
+|  [set(key, value)](./node-core-library.protectablemap.set.md) |  | Sets a value for the specified key. This operation does NOT invoke the ProtectableMap onSet() hook. |
 
 ## Remarks
 

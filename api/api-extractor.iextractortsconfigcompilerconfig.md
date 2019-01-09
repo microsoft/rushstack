@@ -12,9 +12,9 @@ export interface IExtractorTsconfigCompilerConfig
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[configType](./api-extractor.iextractortsconfigcompilerconfig.configtype.md)</p> | <p>`'tsconfig'`</p> |  |
-|  <p>[overrideTsconfig](./api-extractor.iextractortsconfigcompilerconfig.overridetsconfig.md)</p> | <p>`{}`</p> | <p>Override the tsconfig.json file contents.</p> |
-|  <p>[rootFolder](./api-extractor.iextractortsconfigcompilerconfig.rootfolder.md)</p> | <p>`string`</p> | <p>The root folder for the project.</p> |
+|  [configType](./api-extractor.iextractortsconfigcompilerconfig.configtype.md) | `'tsconfig'` |  |
+|  [overrideTsconfig](./api-extractor.iextractortsconfigcompilerconfig.overridetsconfig.md) | `{}` | Override the tsconfig.json file contents. |
+|  [rootFolder](./api-extractor.iextractortsconfigcompilerconfig.rootfolder.md) | `string` | The root folder for the project. |
 

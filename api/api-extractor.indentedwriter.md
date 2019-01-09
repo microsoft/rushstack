@@ -15,25 +15,25 @@ export declare class IndentedWriter
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[defaultIndentPrefix](./api-extractor.indentedwriter.defaultindentprefix.md)</p> |  | <p>`string`</p> | <p><b><i>(BETA)</i></b> The text characters used to create one level of indentation. Two spaces by default.</p> |
+|  [defaultIndentPrefix](./api-extractor.indentedwriter.defaultindentprefix.md) |  | `string` | <b><i>(BETA)</i></b> The text characters used to create one level of indentation. Two spaces by default. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[decreaseIndent()](./api-extractor.indentedwriter.decreaseindent.md)</p> |  | <p><b><i>(BETA)</i></b> Decreases the indentation, reverting the effect of the corresponding call to IndentedWriter.increaseIndent().</p> |
-|  <p>[ensureNewLine()](./api-extractor.indentedwriter.ensurenewline.md)</p> |  | <p><b><i>(BETA)</i></b> Adds a newline if the file pointer is not already at the start of the line (or start of the stream).</p> |
-|  <p>[ensureSkippedLine()](./api-extractor.indentedwriter.ensureskippedline.md)</p> |  | <p><b><i>(BETA)</i></b> Adds up to two newlines to ensure that there is a blank line above the current line.</p> |
-|  <p>[getText()](./api-extractor.indentedwriter.gettext.md)</p> |  | <p><b><i>(BETA)</i></b> Retrieves the output that was built so far.</p> |
-|  <p>[increaseIndent(indentPrefix)](./api-extractor.indentedwriter.increaseindent.md)</p> |  | <p><b><i>(BETA)</i></b> Increases the indentation. Normally the indentation is two spaces, however an arbitrary prefix can optional be specified. (For example, the prefix could be "// " to indent and comment simultaneously.) Each call to IndentedWriter.increaseIndent() must be followed by a corresponding call to IndentedWriter.decreaseIndent().</p> |
-|  <p>[indentScope(scope, indentPrefix)](./api-extractor.indentedwriter.indentscope.md)</p> |  | <p><b><i>(BETA)</i></b> A shorthand for ensuring that increaseIndent()/decreaseIndent() occur in pairs.</p> |
-|  <p>[peekLastCharacter()](./api-extractor.indentedwriter.peeklastcharacter.md)</p> |  | <p><b><i>(BETA)</i></b> Returns the last character that was written, or an empty string if no characters have been written yet.</p> |
-|  <p>[peekSecondLastCharacter()](./api-extractor.indentedwriter.peeksecondlastcharacter.md)</p> |  | <p><b><i>(BETA)</i></b> Returns the second to last character that was written, or an empty string if less than one characters have been written yet.</p> |
-|  <p>[toString()](./api-extractor.indentedwriter.tostring.md)</p> |  | <p><b><i>(BETA)</i></b></p> |
-|  <p>[write(message)](./api-extractor.indentedwriter.write.md)</p> |  | <p><b><i>(BETA)</i></b> Writes some text to the internal string buffer, applying indentation according to the current indentation level. If the string contains multiple newlines, each line will be indented separately.</p> |
-|  <p>[writeLine(message)](./api-extractor.indentedwriter.writeline.md)</p> |  | <p><b><i>(BETA)</i></b> A shorthand for writing an optional message, followed by a newline. Indentation is applied following the semantics of IndentedWriter.write().</p> |
+|  [decreaseIndent()](./api-extractor.indentedwriter.decreaseindent.md) |  | <b><i>(BETA)</i></b> Decreases the indentation, reverting the effect of the corresponding call to IndentedWriter.increaseIndent(). |
+|  [ensureNewLine()](./api-extractor.indentedwriter.ensurenewline.md) |  | <b><i>(BETA)</i></b> Adds a newline if the file pointer is not already at the start of the line (or start of the stream). |
+|  [ensureSkippedLine()](./api-extractor.indentedwriter.ensureskippedline.md) |  | <b><i>(BETA)</i></b> Adds up to two newlines to ensure that there is a blank line above the current line. |
+|  [getText()](./api-extractor.indentedwriter.gettext.md) |  | <b><i>(BETA)</i></b> Retrieves the output that was built so far. |
+|  [increaseIndent(indentPrefix)](./api-extractor.indentedwriter.increaseindent.md) |  | <b><i>(BETA)</i></b> Increases the indentation. Normally the indentation is two spaces, however an arbitrary prefix can optional be specified. (For example, the prefix could be "// " to indent and comment simultaneously.) Each call to IndentedWriter.increaseIndent() must be followed by a corresponding call to IndentedWriter.decreaseIndent(). |
+|  [indentScope(scope, indentPrefix)](./api-extractor.indentedwriter.indentscope.md) |  | <b><i>(BETA)</i></b> A shorthand for ensuring that increaseIndent()/decreaseIndent() occur in pairs. |
+|  [peekLastCharacter()](./api-extractor.indentedwriter.peeklastcharacter.md) |  | <b><i>(BETA)</i></b> Returns the last character that was written, or an empty string if no characters have been written yet. |
+|  [peekSecondLastCharacter()](./api-extractor.indentedwriter.peeksecondlastcharacter.md) |  | <b><i>(BETA)</i></b> Returns the second to last character that was written, or an empty string if less than one characters have been written yet. |
+|  [toString()](./api-extractor.indentedwriter.tostring.md) |  | <b><i>(BETA)</i></b> |
+|  [write(message)](./api-extractor.indentedwriter.write.md) |  | <b><i>(BETA)</i></b> Writes some text to the internal string buffer, applying indentation according to the current indentation level. If the string contains multiple newlines, each line will be indented separately. |
+|  [writeLine(message)](./api-extractor.indentedwriter.writeline.md) |  | <b><i>(BETA)</i></b> A shorthand for writing an optional message, followed by a newline. Indentation is applied following the semantics of IndentedWriter.write(). |
 
 ## Remarks
 

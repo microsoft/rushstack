@@ -12,10 +12,10 @@ export declare class Executable
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[spawnSync(filename, args, options)](./node-core-library.executable.spawnsync.md)</p> | <p>`static`</p> | <p>Synchronously create a child process and optionally capture its output.</p> |
-|  <p>[tryResolve(filename, options)](./node-core-library.executable.tryresolve.md)</p> | <p>`static`</p> | <p>Given a filename, this determines the absolute path of the executable file that would be executed by a shell:</p><p>- If the filename is missing a path, then the shell's default PATH will be searched. - If the filename is missing a file extension, then Windows default file extensions will be searched.</p> |
+|  [spawnSync(filename, args, options)](./node-core-library.executable.spawnsync.md) | `static` | Synchronously create a child process and optionally capture its output. |
+|  [tryResolve(filename, options)](./node-core-library.executable.tryresolve.md) | `static` | Given a filename, this determines the absolute path of the executable file that would be executed by a shell:<!-- -->- If the filename is missing a path, then the shell's default PATH will be searched. - If the filename is missing a file extension, then Windows default file extensions will be searched. |
 
 ## Remarks
 

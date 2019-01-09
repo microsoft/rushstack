@@ -11,9 +11,9 @@ append(text: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>text</p> | <p>`string`</p> |  |
+|  text | `string` |  |
 
 <b>Returns:</b>
 

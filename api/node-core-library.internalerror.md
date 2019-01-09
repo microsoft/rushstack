@@ -12,15 +12,15 @@ export declare class InternalError extends Error
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[unformattedMessage](./node-core-library.internalerror.unformattedmessage.md)</p> |  | <p>`string`</p> | <p>The underlying error message, without the additional boilerplate for an `InternalError`<!-- -->.</p> |
+|  [unformattedMessage](./node-core-library.internalerror.unformattedmessage.md) |  | `string` | The underlying error message, without the additional boilerplate for an `InternalError`<!-- -->. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[toString()](./node-core-library.internalerror.tostring.md)</p> |  | <p></p> |
+|  [toString()](./node-core-library.internalerror.tostring.md) |  |  |
 
 ## Remarks
 

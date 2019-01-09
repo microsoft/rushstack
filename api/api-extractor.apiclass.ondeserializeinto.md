@@ -12,10 +12,10 @@ static onDeserializeInto(options: Partial<IApiClassOptions>, jsonObject: IApiCla
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>options</p> | <p>`Partial<IApiClassOptions>`</p> |  |
-|  <p>jsonObject</p> | <p>`IApiClassJson`</p> |  |
+|  options | `Partial<IApiClassOptions>` |  |
+|  jsonObject | `IApiClassJson` |  |
 
 <b>Returns:</b>
 

@@ -12,11 +12,11 @@ static save(jsonObject: Object, jsonFilename: string, options?: IJsonFileSaveOpt
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonObject</p> | <p>`Object`</p> | <p>the object to be saved</p> |
-|  <p>jsonFilename</p> | <p>`string`</p> | <p>the file path to write</p> |
-|  <p>options</p> | <p>`IJsonFileSaveOptions`</p> | <p>other settings that control how the file is saved</p> |
+|  jsonObject | `Object` | the object to be saved |
+|  jsonFilename | `string` | the file path to write |
+|  options | `IJsonFileSaveOptions` | other settings that control how the file is saved |
 
 <b>Returns:</b>
 

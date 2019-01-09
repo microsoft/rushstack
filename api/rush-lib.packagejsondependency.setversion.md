@@ -13,9 +13,9 @@ setVersion(newVersion: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>newVersion</p> | <p>`string`</p> |  |
+|  newVersion | `string` |  |
 
 <b>Returns:</b>
 

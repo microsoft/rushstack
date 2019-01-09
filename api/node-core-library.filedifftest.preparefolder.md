@@ -12,10 +12,10 @@ static prepareFolder(unitTestDirName: string, testModule: string): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>unitTestDirName</p> | <p>`string`</p> | <p>the "\_\_dirname" variable, evaluated in the context of the unit test</p> |
-|  <p>testModule</p> | <p>`string`</p> | <p>the name of the class being unit tested; must contain only letters, numbers, and underscores.</p> |
+|  unitTestDirName | `string` | the "\_\_dirname" variable, evaluated in the context of the unit test |
+|  testModule | `string` | the name of the class being unit tested; must contain only letters, numbers, and underscores. |
 
 <b>Returns:</b>
 

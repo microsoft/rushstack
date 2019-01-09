@@ -12,10 +12,10 @@ static open(path: string, flags?: IFileWriterFlags): FileWriter;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>path</p> | <p>`string`</p> | <p>The absolute or relative path to the file handle that should be opened.</p> |
-|  <p>flags</p> | <p>`IFileWriterFlags`</p> | <p>The flags for opening the handle</p> |
+|  path | `string` | The absolute or relative path to the file handle that should be opened. |
+|  flags | `IFileWriterFlags` | The flags for opening the handle |
 
 <b>Returns:</b>
 

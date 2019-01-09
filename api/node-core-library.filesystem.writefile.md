@@ -12,11 +12,11 @@ static writeFile(filePath: string, contents: string | Buffer, options?: IFileSys
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>filePath</p> | <p>`string`</p> | <p>The absolute or relative path of the file.</p> |
-|  <p>contents</p> | <p>`string | Buffer`</p> | <p>The text that should be written to the file.</p> |
-|  <p>options</p> | <p>`IFileSystemWriteFileOptions`</p> | <p>Optional settings that can change the behavior. Type: `IWriteFileOptions`</p> |
+|  filePath | `string` | The absolute or relative path of the file. |
+|  contents | `string | Buffer` | The text that should be written to the file. |
+|  options | `IFileSystemWriteFileOptions` | Optional settings that can change the behavior. Type: `IWriteFileOptions` |
 
 <b>Returns:</b>
 

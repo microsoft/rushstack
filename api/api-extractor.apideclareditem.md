@@ -12,19 +12,19 @@ export declare class ApiDeclaredItem extends ApiDocumentedItem
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[excerpt](./api-extractor.apideclareditem.excerpt.md)</p> |  | <p>`Excerpt`</p> | <p>The source code excerpt where the API item is declared.</p> |
-|  <p>[excerptTokens](./api-extractor.apideclareditem.excerpttokens.md)</p> |  | <p>`ReadonlyArray<ExcerptToken>`</p> | <p>The individual source code tokens that comprise the main excerpt.</p> |
+|  [excerpt](./api-extractor.apideclareditem.excerpt.md) |  | `Excerpt` | The source code excerpt where the API item is declared. |
+|  [excerptTokens](./api-extractor.apideclareditem.excerpttokens.md) |  | `ReadonlyArray<ExcerptToken>` | The individual source code tokens that comprise the main excerpt. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[buildExcerpt(tokenRange)](./api-extractor.apideclareditem.buildexcerpt.md)</p> |  | <p>Constructs a new [Excerpt](./api-extractor.excerpt.md) corresponding to the provided token range.</p> |
-|  <p>[getExcerptWithModifiers()](./api-extractor.apideclareditem.getexcerptwithmodifiers.md)</p> |  | <p>If the API item has certain important modifier tags such as `@sealed`<!-- -->, `@virtual`<!-- -->, or `@override`<!-- -->, this prepends them as a doc comment above the excerpt.</p> |
-|  <p>[onDeserializeInto(options, jsonObject)](./api-extractor.apideclareditem.ondeserializeinto.md)</p> | <p>`static`</p> | <p></p> |
-|  <p>[serializeInto(jsonObject)](./api-extractor.apideclareditem.serializeinto.md)</p> |  | <p></p> |
+|  [buildExcerpt(tokenRange)](./api-extractor.apideclareditem.buildexcerpt.md) |  | Constructs a new [Excerpt](./api-extractor.excerpt.md) corresponding to the provided token range. |
+|  [getExcerptWithModifiers()](./api-extractor.apideclareditem.getexcerptwithmodifiers.md) |  | If the API item has certain important modifier tags such as `@sealed`<!-- -->, `@virtual`<!-- -->, or `@override`<!-- -->, this prepends them as a doc comment above the excerpt. |
+|  [onDeserializeInto(options, jsonObject)](./api-extractor.apideclareditem.ondeserializeinto.md) | `static` |  |
+|  [serializeInto(jsonObject)](./api-extractor.apideclareditem.serializeinto.md) |  |  |
 
 ## Remarks
 

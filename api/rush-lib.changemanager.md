@@ -12,7 +12,7 @@ export declare class ChangeManager
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[createEmptyChangeFiles(rushConfiguration, projectName, emailAddress)](./rush-lib.changemanager.createemptychangefiles.md)</p> | <p>`static`</p> | <p>Creates a change file that has a 'none' type.</p> |
+|  [createEmptyChangeFiles(rushConfiguration, projectName, emailAddress)](./rush-lib.changemanager.createemptychangefiles.md) | `static` | Creates a change file that has a 'none' type. |
 

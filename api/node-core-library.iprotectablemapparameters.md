@@ -12,9 +12,9 @@ export interface IProtectableMapParameters<K, V>
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[onClear](./node-core-library.iprotectablemapparameters.onclear.md)</p> | <p>`(source: ProtectableMap<K, V>) => void`</p> | <p>An optional hook that will be invoked before Map.clear() is performed.</p> |
-|  <p>[onDelete](./node-core-library.iprotectablemapparameters.ondelete.md)</p> | <p>`(source: ProtectableMap<K, V>, key: K) => void`</p> | <p>An optional hook that will be invoked before Map.delete() is performed.</p> |
-|  <p>[onSet](./node-core-library.iprotectablemapparameters.onset.md)</p> | <p>`(source: ProtectableMap<K, V>, key: K, value: V) => V`</p> | <p>An optional hook that will be invoked before Map.set() is performed.</p> |
+|  [onClear](./node-core-library.iprotectablemapparameters.onclear.md) | `(source: ProtectableMap<K, V>) => void` | An optional hook that will be invoked before Map.clear() is performed. |
+|  [onDelete](./node-core-library.iprotectablemapparameters.ondelete.md) | `(source: ProtectableMap<K, V>, key: K) => void` | An optional hook that will be invoked before Map.delete() is performed. |
+|  [onSet](./node-core-library.iprotectablemapparameters.onset.md) | `(source: ProtectableMap<K, V>, key: K, value: V) => V` | An optional hook that will be invoked before Map.set() is performed. |
 

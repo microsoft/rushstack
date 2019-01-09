@@ -12,8 +12,8 @@ export declare const enum NewlineKind
 
 ## Enumeration Members
 
-|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
+|  Member | Value | Description |
 |  --- | --- | --- |
-|  <p>CrLf</p> | <p>`"\r\n"`</p> | <p>Windows-style newlines</p> |
-|  <p>Lf</p> | <p>`"\n"`</p> | <p>POSIX-style newlines</p> |
+|  CrLf | `"\r\n"` | Windows-style newlines |
+|  Lf | `"\n"` | POSIX-style newlines |
 

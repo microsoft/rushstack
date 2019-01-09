@@ -12,9 +12,9 @@ buildExcerpt(tokenRange: IExcerptTokenRange): Excerpt;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>tokenRange</p> | <p>`IExcerptTokenRange`</p> |  |
+|  tokenRange | `IExcerptTokenRange` |  |
 
 <b>Returns:</b>
 

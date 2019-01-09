@@ -12,10 +12,10 @@ static changePosixModeBits(path: string, mode: PosixModeBits): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>path</p> | <p>`string`</p> | <p>The absolute or relative path to the object that should be updated.</p> |
-|  <p>mode</p> | <p>`PosixModeBits`</p> |  |
+|  path | `string` | The absolute or relative path to the object that should be updated. |
+|  mode | `PosixModeBits` |  |
 
 <b>Returns:</b>
 

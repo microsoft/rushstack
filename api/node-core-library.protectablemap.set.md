@@ -12,10 +12,10 @@ set(key: K, value: V): this;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>key</p> | <p>`K`</p> |  |
-|  <p>value</p> | <p>`V`</p> |  |
+|  key | `K` |  |
+|  value | `V` |  |
 
 <b>Returns:</b>
 

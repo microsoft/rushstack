@@ -10,10 +10,10 @@ resolveDeclarationReference(declarationReference: DocDeclarationReference, conte
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>declarationReference</p> | <p>`DocDeclarationReference`</p> |  |
-|  <p>contextApiItem</p> | <p>`ApiItem | undefined`</p> |  |
+|  declarationReference | `DocDeclarationReference` |  |
+|  contextApiItem | `ApiItem | undefined` |  |
 
 <b>Returns:</b>
 

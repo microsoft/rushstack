@@ -15,14 +15,14 @@ export interface ITerminalProvider
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[eolCharacter](./node-core-library.iterminalprovider.eolcharacter.md)</p> | <p>`string`</p> | <p><b><i>(BETA)</i></b> This property should return the newline character the terminal provider expects.</p> |
-|  <p>[supportsColor](./node-core-library.iterminalprovider.supportscolor.md)</p> | <p>`boolean`</p> | <p><b><i>(BETA)</i></b> This property should return true only if the terminal provider supports rendering console colors.</p> |
+|  [eolCharacter](./node-core-library.iterminalprovider.eolcharacter.md) | `string` | <b><i>(BETA)</i></b> This property should return the newline character the terminal provider expects. |
+|  [supportsColor](./node-core-library.iterminalprovider.supportscolor.md) | `boolean` | <b><i>(BETA)</i></b> This property should return true only if the terminal provider supports rendering console colors. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Description</p> |
+|  Method | Description |
 |  --- | --- |
-|  <p>[write(data, severity)](./node-core-library.iterminalprovider.write.md)</p> | <p><b><i>(BETA)</i></b> This function gets called on every terminal provider upon every message function call on the terminal instance.</p> |
+|  [write(data, severity)](./node-core-library.iterminalprovider.write.md) | <b><i>(BETA)</i></b> This function gets called on every terminal provider upon every message function call on the terminal instance. |
 

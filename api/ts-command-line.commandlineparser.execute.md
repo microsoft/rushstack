@@ -12,9 +12,9 @@ execute(args?: string[]): Promise<boolean>;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>args</p> | <p>`string[]`</p> | <p>the command-line arguments to be parsed; if omitted, then the process.argv will be used</p> |
+|  args | `string[]` | the command-line arguments to be parsed; if omitted, then the process.argv will be used |
 
 <b>Returns:</b>
 

@@ -12,8 +12,8 @@ export interface IFileSystemCreateLinkOptions
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[linkTargetPath](./node-core-library.ifilesystemcreatelinkoptions.linktargetpath.md)</p> | <p>`string`</p> | <p>The existing path that the symbolic link will point to.</p> |
-|  <p>[newLinkPath](./node-core-library.ifilesystemcreatelinkoptions.newlinkpath.md)</p> | <p>`string`</p> | <p>The new path for the new symlink link to be created.</p> |
+|  [linkTargetPath](./node-core-library.ifilesystemcreatelinkoptions.linktargetpath.md) | `string` | The existing path that the symbolic link will point to. |
+|  [newLinkPath](./node-core-library.ifilesystemcreatelinkoptions.newlinkpath.md) | `string` | The new path for the new symlink link to be created. |
 

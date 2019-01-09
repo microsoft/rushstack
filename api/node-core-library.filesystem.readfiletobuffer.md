@@ -12,9 +12,9 @@ static readFileToBuffer(filePath: string): Buffer;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>filePath</p> | <p>`string`</p> | <p>The relative or absolute path to the file whose contents should be read.</p> |
+|  filePath | `string` | The relative or absolute path to the file whose contents should be read. |
 
 <b>Returns:</b>
 

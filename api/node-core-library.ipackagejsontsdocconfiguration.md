@@ -15,7 +15,7 @@ export interface IPackageJsonTsdocConfiguration
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[tsdocFlavor](./node-core-library.ipackagejsontsdocconfiguration.tsdocflavor.md)</p> | <p>`string`</p> | <p><b><i>(BETA)</i></b> A token indicating the dialect of TSDoc syntax used by \*.d.ts files in this package.</p> |
+|  [tsdocFlavor](./node-core-library.ipackagejsontsdocconfiguration.tsdocflavor.md) | `string` | <b><i>(BETA)</i></b> A token indicating the dialect of TSDoc syntax used by \*.d.ts files in this package. |
 

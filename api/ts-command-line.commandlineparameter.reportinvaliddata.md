@@ -12,9 +12,9 @@ protected reportInvalidData(data: any): never;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>data</p> | <p>`any`</p> |  |
+|  data | `any` |  |
 
 <b>Returns:</b>
 

@@ -12,9 +12,9 @@ abstract appendToArgList(argList: string[]): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>argList</p> | <p>`string[]`</p> | <p>the parsed strings will be appended to this string array</p> |
+|  argList | `string[]` | the parsed strings will be appended to this string array |
 
 <b>Returns:</b>
 

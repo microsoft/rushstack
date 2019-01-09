@@ -15,9 +15,9 @@ increaseIndent(indentPrefix?: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>indentPrefix</p> | <p>`string`</p> |  |
+|  indentPrefix | `string` |  |
 
 <b>Returns:</b>
 

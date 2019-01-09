@@ -12,9 +12,9 @@ static fromLoadedObject(schemaObject: Object): JsonSchema;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>schemaObject</p> | <p>`Object`</p> |  |
+|  schemaObject | `Object` |  |
 
 <b>Returns:</b>
 

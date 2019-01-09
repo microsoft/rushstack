@@ -12,9 +12,9 @@ getPnpmfilePath(variant?: string | undefined): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>variant</p> | <p>`string | undefined`</p> | <p>The name of the current variant in use by the active command.</p> |
+|  variant | `string | undefined` | The name of the current variant in use by the active command. |
 
 <b>Returns:</b>
 

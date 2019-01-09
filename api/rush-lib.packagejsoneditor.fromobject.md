@@ -13,10 +13,10 @@ static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>object</p> | <p>`IPackageJson`</p> |  |
-|  <p>filename</p> | <p>`string`</p> |  |
+|  object | `IPackageJson` |  |
+|  filename | `string` |  |
 
 <b>Returns:</b>
 

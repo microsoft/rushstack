@@ -12,10 +12,10 @@ export declare class StringBuilder implements IStringBuilder
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[append(text)](./node-core-library.stringbuilder.append.md)</p> |  | <p></p> |
-|  <p>[toString()](./node-core-library.stringbuilder.tostring.md)</p> |  | <p></p> |
+|  [append(text)](./node-core-library.stringbuilder.append.md) |  |  |
+|  [toString()](./node-core-library.stringbuilder.tostring.md) |  |  |
 
 ## Remarks
 

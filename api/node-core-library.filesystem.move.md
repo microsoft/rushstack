@@ -12,9 +12,9 @@ static move(options: IFileSystemMoveOptions): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>options</p> | <p>`IFileSystemMoveOptions`</p> |  |
+|  options | `IFileSystemMoveOptions` |  |
 
 <b>Returns:</b>
 

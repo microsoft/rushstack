@@ -12,9 +12,9 @@ addMember(member: ApiEntryPoint): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>member</p> | <p>`ApiEntryPoint`</p> |  |
+|  member | `ApiEntryPoint` |  |
 
 <b>Returns:</b>
 

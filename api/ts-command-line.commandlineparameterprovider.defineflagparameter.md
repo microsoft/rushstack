@@ -12,9 +12,9 @@ defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagPara
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>definition</p> | <p>`ICommandLineFlagDefinition`</p> |  |
+|  definition | `ICommandLineFlagDefinition` |  |
 
 <b>Returns:</b>
 

@@ -12,9 +12,9 @@ serializeInto(jsonObject: Partial<IApiDeclaredItemJson>): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonObject</p> | <p>`Partial<IApiDeclaredItemJson>`</p> |  |
+|  jsonObject | `Partial<IApiDeclaredItemJson>` |  |
 
 <b>Returns:</b>
 

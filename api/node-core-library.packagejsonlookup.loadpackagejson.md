@@ -12,9 +12,9 @@ loadPackageJson(jsonFilename: string): IPackageJson;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonFilename</p> | <p>`string`</p> | <p>a relative or absolute path to a package.json file</p> |
+|  jsonFilename | `string` | a relative or absolute path to a package.json file |
 
 <b>Returns:</b>
 

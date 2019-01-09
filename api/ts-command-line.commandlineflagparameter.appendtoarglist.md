@@ -12,9 +12,9 @@ appendToArgList(argList: string[]): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>argList</p> | <p>`string[]`</p> |  |
+|  argList | `string[]` |  |
 
 <b>Returns:</b>
 

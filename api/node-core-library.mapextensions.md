@@ -12,7 +12,7 @@ export declare class MapExtensions
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[mergeFromMap(targetMap, sourceMap)](./node-core-library.mapextensions.mergefrommap.md)</p> | <p>`static`</p> | <p>Adds all the (key, value) pairs from the source map into the target map.</p> |
+|  [mergeFromMap(targetMap, sourceMap)](./node-core-library.mapextensions.mergefrommap.md) | `static` | Adds all the (key, value) pairs from the source map into the target map. |
 

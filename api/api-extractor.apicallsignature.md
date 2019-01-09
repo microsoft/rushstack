@@ -12,16 +12,16 @@ export declare class ApiCallSignature extends ApiCallSignature_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apicallsignature.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apicallsignature.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apicallsignature.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apicallsignature.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(overloadIndex)](./api-extractor.apicallsignature.getcanonicalreference.md)</p> | <p>`static`</p> |  |
+|  [getCanonicalReference(overloadIndex)](./api-extractor.apicallsignature.getcanonicalreference.md) | `static` |  |
 
 ## Remarks
 

@@ -12,10 +12,10 @@ export interface ILogger
 
 ## Methods
 
-|  <p>Method</p> | <p>Description</p> |
+|  Method | Description |
 |  --- | --- |
-|  <p>[logError(message)](./api-extractor.ilogger.logerror.md)</p> | <p>Log an error message. Typically it is shown in red and will break a production build.</p> |
-|  <p>[logInfo(message)](./api-extractor.ilogger.loginfo.md)</p> | <p>Log a normal message.</p> |
-|  <p>[logVerbose(message)](./api-extractor.ilogger.logverbose.md)</p> | <p>Log a message that will only be shown in a "verbose" logging mode.</p> |
-|  <p>[logWarning(message)](./api-extractor.ilogger.logwarning.md)</p> | <p>Log a warning message. Typically it is shown in yellow and will break a production build.</p> |
+|  [logError(message)](./api-extractor.ilogger.logerror.md) | Log an error message. Typically it is shown in red and will break a production build. |
+|  [logInfo(message)](./api-extractor.ilogger.loginfo.md) | Log a normal message. |
+|  [logVerbose(message)](./api-extractor.ilogger.logverbose.md) | Log a message that will only be shown in a "verbose" logging mode. |
+|  [logWarning(message)](./api-extractor.ilogger.logwarning.md) | Log a warning message. Typically it is shown in yellow and will break a production build. |
 

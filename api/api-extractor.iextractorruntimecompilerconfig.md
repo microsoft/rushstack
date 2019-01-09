@@ -14,7 +14,7 @@ export interface IExtractorRuntimeCompilerConfig
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[configType](./api-extractor.iextractorruntimecompilerconfig.configtype.md)</p> | <p>`'runtime'`</p> |  |
+|  [configType](./api-extractor.iextractorruntimecompilerconfig.configtype.md) | `'runtime'` |  |
 

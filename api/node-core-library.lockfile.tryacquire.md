@@ -12,10 +12,10 @@ static tryAcquire(resourceDir: string, resourceName: string): LockFile | undefin
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>resourceDir</p> | <p>`string`</p> |  |
-|  <p>resourceName</p> | <p>`string`</p> | <p>the name of the resource we are locking on. Should be an alphabetic string.</p> |
+|  resourceDir | `string` |  |
+|  resourceName | `string` | the name of the resource we are locking on. Should be an alphabetic string. |
 
 <b>Returns:</b>
 

@@ -12,16 +12,16 @@ export declare class ApiConstructor extends ApiConstructor_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apiconstructor.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[kind](./api-extractor.apiconstructor.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apiconstructor.canonicalreference.md) |  | `string` |  |
+|  [kind](./api-extractor.apiconstructor.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(isStatic, overloadIndex)](./api-extractor.apiconstructor.getcanonicalreference.md)</p> | <p>`static`</p> |  |
+|  [getCanonicalReference(isStatic, overloadIndex)](./api-extractor.apiconstructor.getcanonicalreference.md) | `static` |  |
 
 ## Remarks
 

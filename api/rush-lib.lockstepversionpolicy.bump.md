@@ -15,10 +15,10 @@ bump(bumpType?: BumpType, identifier?: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>bumpType</p> | <p>`BumpType`</p> | <p>Overwrite bump type in version-policy.json with the provided value.</p> |
-|  <p>identifier</p> | <p>`string`</p> | <p>Prerelease identifier if bump type is prerelease.</p> |
+|  bumpType | `BumpType` | Overwrite bump type in version-policy.json with the provided value. |
+|  identifier | `string` | Prerelease identifier if bump type is prerelease. |
 
 <b>Returns:</b>
 

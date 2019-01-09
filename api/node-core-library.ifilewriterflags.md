@@ -12,8 +12,8 @@ export interface IFileWriterFlags
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[append](./node-core-library.ifilewriterflags.append.md)</p> | <p>`boolean`</p> | <p>Open file for appending.</p> |
-|  <p>[exclusive](./node-core-library.ifilewriterflags.exclusive.md)</p> | <p>`boolean`</p> | <p>Fails if path exists. The exclusive flag ensures that path is newly created.</p> |
+|  [append](./node-core-library.ifilewriterflags.append.md) | `boolean` | Open file for appending. |
+|  [exclusive](./node-core-library.ifilewriterflags.exclusive.md) | `boolean` | Fails if path exists. The exclusive flag ensures that path is newly created. |
 

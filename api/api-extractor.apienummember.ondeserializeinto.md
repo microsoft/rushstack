@@ -12,10 +12,10 @@ static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, jsonObject: IA
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>options</p> | <p>`Partial<IApiEnumMemberOptions>`</p> |  |
-|  <p>jsonObject</p> | <p>`IApiEnumMemberJson`</p> |  |
+|  options | `Partial<IApiEnumMemberOptions>` |  |
+|  jsonObject | `IApiEnumMemberJson` |  |
 
 <b>Returns:</b>
 

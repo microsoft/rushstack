@@ -13,11 +13,11 @@ static convertCallbackToPromise<TResult, TError, TArg1, TArg2>(fn: (arg1: TArg1,
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>fn</p> | <p>`(arg1: TArg1, arg2: TArg2, cb: callback<TResult, TError>) => void`</p> |  |
-|  <p>arg1</p> | <p>`TArg1`</p> |  |
-|  <p>arg2</p> | <p>`TArg2`</p> |  |
+|  fn | `(arg1: TArg1, arg2: TArg2, cb: callback<TResult, TError>) => void` |  |
+|  arg1 | `TArg1` |  |
+|  arg2 | `TArg2` |  |
 
 <b>Returns:</b>
 

@@ -12,11 +12,11 @@ static updateString(previousJson: string, newJsonObject: Object, options?: IJson
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>previousJson</p> | <p>`string`</p> |  |
-|  <p>newJsonObject</p> | <p>`Object`</p> |  |
-|  <p>options</p> | <p>`IJsonFileStringifyOptions`</p> | <p>other settings that control serialization</p> |
+|  previousJson | `string` |  |
+|  newJsonObject | `Object` |  |
+|  options | `IJsonFileStringifyOptions` | other settings that control serialization |
 
 <b>Returns:</b>
 

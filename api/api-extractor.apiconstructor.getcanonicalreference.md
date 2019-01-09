@@ -10,10 +10,10 @@ static getCanonicalReference(isStatic: boolean, overloadIndex: number): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>isStatic</p> | <p>`boolean`</p> |  |
-|  <p>overloadIndex</p> | <p>`number`</p> |  |
+|  isStatic | `boolean` |  |
+|  overloadIndex | `number` |  |
 
 <b>Returns:</b>
 

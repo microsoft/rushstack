@@ -15,9 +15,9 @@ write(message: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>message</p> | <p>`string`</p> |  |
+|  message | `string` |  |
 
 <b>Returns:</b>
 

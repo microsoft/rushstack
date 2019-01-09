@@ -15,12 +15,12 @@ bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shoul
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>versionPolicyName</p> | <p>`string`</p> | <p>version policy name</p> |
-|  <p>bumpType</p> | <p>`BumpType`</p> | <p>bump type to override what policy has defined.</p> |
-|  <p>identifier</p> | <p>`string`</p> | <p>prerelease identifier to override what policy has defined.</p> |
-|  <p>shouldCommit</p> | <p>`boolean`</p> | <p>should save to disk</p> |
+|  versionPolicyName | `string` | version policy name |
+|  bumpType | `BumpType` | bump type to override what policy has defined. |
+|  identifier | `string` | prerelease identifier to override what policy has defined. |
+|  shouldCommit | `boolean` | should save to disk |
 
 <b>Returns:</b>
 

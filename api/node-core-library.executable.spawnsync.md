@@ -12,11 +12,11 @@ static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyn
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>filename</p> | <p>`string`</p> | <p>The name of the executable file. This string must not contain any command-line arguments. If the name contains any path delimiters, then the shell's default PATH will not be searched.</p> |
-|  <p>args</p> | <p>`string[]`</p> | <p>The command-line arguments to be passed to the process.</p> |
-|  <p>options</p> | <p>`IExecutableSpawnSyncOptions`</p> | <p>Additional options</p> |
+|  filename | `string` | The name of the executable file. This string must not contain any command-line arguments. If the name contains any path delimiters, then the shell's default PATH will not be searched. |
+|  args | `string[]` | The command-line arguments to be passed to the process. |
+|  options | `IExecutableSpawnSyncOptions` | Additional options |
 
 <b>Returns:</b>
 

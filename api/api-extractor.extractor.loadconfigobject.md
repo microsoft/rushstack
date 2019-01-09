@@ -12,9 +12,9 @@ static loadConfigObject(jsonConfigFile: string): IExtractorConfig;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonConfigFile</p> | <p>`string`</p> | <p>Path to api extractor json config file.</p> |
+|  jsonConfigFile | `string` | Path to api extractor json config file. |
 
 <b>Returns:</b>
 

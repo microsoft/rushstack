@@ -12,10 +12,10 @@ validateObjectWithCallback(jsonObject: Object, errorCallback: (errorInfo: IJsonS
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonObject</p> | <p>`Object`</p> |  |
-|  <p>errorCallback</p> | <p>`(errorInfo: IJsonSchemaErrorInfo) => void`</p> |  |
+|  jsonObject | `Object` |  |
+|  errorCallback | `(errorInfo: IJsonSchemaErrorInfo) => void` |  |
 
 <b>Returns:</b>
 

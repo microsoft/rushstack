@@ -15,10 +15,10 @@ abstract bump(bumpType?: BumpType, identifier?: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>bumpType</p> | <p>`BumpType`</p> | <p>(optional) override bump type</p> |
-|  <p>identifier</p> | <p>`string`</p> | <p>(optional) override prerelease Id</p> |
+|  bumpType | `BumpType` | (optional) override bump type |
+|  identifier | `string` | (optional) override prerelease Id |
 
 <b>Returns:</b>
 

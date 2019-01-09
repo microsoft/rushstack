@@ -15,9 +15,9 @@ static scrubError(error: Error | string | any): Error;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>error</p> | <p>`Error | string | any`</p> |  |
+|  error | `Error | string | any` |  |
 
 <b>Returns:</b>
 

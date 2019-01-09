@@ -10,10 +10,10 @@ saveToJsonFile(apiJsonFilename: string, options?: IJsonFileSaveOptions): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>apiJsonFilename</p> | <p>`string`</p> |  |
-|  <p>options</p> | <p>`IJsonFileSaveOptions`</p> |  |
+|  apiJsonFilename | `string` |  |
+|  options | `IJsonFileSaveOptions` |  |
 
 <b>Returns:</b>
 

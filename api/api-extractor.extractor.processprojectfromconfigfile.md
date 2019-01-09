@@ -12,10 +12,10 @@ static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractor
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonConfigFile</p> | <p>`string`</p> | <p>Path to api extractor json config file.</p> |
-|  <p>options</p> | <p>`IExtractorOptions`</p> | <p>IExtractor options.</p> |
+|  jsonConfigFile | `string` | Path to api extractor json config file. |
+|  options | `IExtractorOptions` | IExtractor options. |
 
 <b>Returns:</b>
 

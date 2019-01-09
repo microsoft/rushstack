@@ -12,9 +12,9 @@ export declare class FileDiffTest
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[assertEqual(actualFilePath, expectedFilePath)](./node-core-library.filedifftest.assertequal.md)</p> | <p>`static`</p> | <p>Compares the contents of two files, and returns true if they are equivalent. Note that these files are not normally edited by a human; the "equivalence" comparison here is intended to ignore spurious changes that might be introduced by a tool, e.g. Git newline normalization or an editor that strips whitespace when saving.</p> |
-|  <p>[clearCache()](./node-core-library.filedifftest.clearcache.md)</p> | <p>`static`</p> | <p>Clears the internal file cache.</p> |
-|  <p>[prepareFolder(unitTestDirName, testModule)](./node-core-library.filedifftest.preparefolder.md)</p> | <p>`static`</p> | <p>Sets up a folder in the temp directory where the unit test should write its output files to be diffed. Any previous contents of the folder will be deleted.</p> |
+|  [assertEqual(actualFilePath, expectedFilePath)](./node-core-library.filedifftest.assertequal.md) | `static` | Compares the contents of two files, and returns true if they are equivalent. Note that these files are not normally edited by a human; the "equivalence" comparison here is intended to ignore spurious changes that might be introduced by a tool, e.g. Git newline normalization or an editor that strips whitespace when saving. |
+|  [clearCache()](./node-core-library.filedifftest.clearcache.md) | `static` | Clears the internal file cache. |
+|  [prepareFolder(unitTestDirName, testModule)](./node-core-library.filedifftest.preparefolder.md) | `static` | Sets up a folder in the temp directory where the unit test should write its output files to be diffed. Any previous contents of the folder will be deleted. |
 

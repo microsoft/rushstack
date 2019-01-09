@@ -12,20 +12,20 @@ export declare class ApiClass extends ApiClass_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apiclass.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[extendsType](./api-extractor.apiclass.extendstype.md)</p> |  | <p>`HeritageType | undefined`</p> | <p>The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.</p> |
-|  <p>[implementsTypes](./api-extractor.apiclass.implementstypes.md)</p> |  | <p>`ReadonlyArray<HeritageType>`</p> | <p>The list of interfaces that this class implements using the `implements` keyword.</p> |
-|  <p>[kind](./api-extractor.apiclass.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apiclass.canonicalreference.md) |  | `string` |  |
+|  [extendsType](./api-extractor.apiclass.extendstype.md) |  | `HeritageType | undefined` | The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class. |
+|  [implementsTypes](./api-extractor.apiclass.implementstypes.md) |  | `ReadonlyArray<HeritageType>` | The list of interfaces that this class implements using the `implements` keyword. |
+|  [kind](./api-extractor.apiclass.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(name)](./api-extractor.apiclass.getcanonicalreference.md)</p> | <p>`static`</p> |  |
-|  <p>[onDeserializeInto(options, jsonObject)](./api-extractor.apiclass.ondeserializeinto.md)</p> | <p>`static`</p> | <p></p> |
-|  <p>[serializeInto(jsonObject)](./api-extractor.apiclass.serializeinto.md)</p> |  | <p></p> |
+|  [getCanonicalReference(name)](./api-extractor.apiclass.getcanonicalreference.md) | `static` |  |
+|  [onDeserializeInto(options, jsonObject)](./api-extractor.apiclass.ondeserializeinto.md) | `static` |  |
+|  [serializeInto(jsonObject)](./api-extractor.apiclass.serializeinto.md) |  |  |
 
 ## Remarks
 

@@ -12,9 +12,9 @@ defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoi
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>definition</p> | <p>`ICommandLineChoiceDefinition`</p> |  |
+|  definition | `ICommandLineChoiceDefinition` |  |
 
 <b>Returns:</b>
 

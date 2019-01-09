@@ -10,10 +10,10 @@ addOrUpdatePackage(packageName: string, reviewCategory: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>packageName</p> | <p>`string`</p> |  |
-|  <p>reviewCategory</p> | <p>`string`</p> |  |
+|  packageName | `string` |  |
+|  reviewCategory | `string` |  |
 
 <b>Returns:</b>
 

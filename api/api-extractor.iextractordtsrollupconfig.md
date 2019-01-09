@@ -15,15 +15,15 @@ export interface IExtractorDtsRollupConfig
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[enabled](./api-extractor.iextractordtsrollupconfig.enabled.md)</p> | <p>`boolean`</p> | <p><b><i>(BETA)</i></b> Whether to generate rollup \*.d.ts files. The default is false.</p> |
-|  <p>[mainDtsRollupPath](./api-extractor.iextractordtsrollupconfig.maindtsrolluppath.md)</p> | <p>`string`</p> | <p><b><i>(BETA)</i></b> Specifies the relative path for the \*.d.ts rollup file to be generated for the package's main entry point. The default value is an empty string, which causes the path to be automatically inferred from the "typings" field of the project's package.json file.</p> |
-|  <p>[publishFolder](./api-extractor.iextractordtsrollupconfig.publishfolder.md)</p> | <p>`string`</p> | <p><b><i>(BETA)</i></b> This setting is only used if "trimming" is false. It indicates the folder where "npm publish" will be run. The default value is "./dist".</p> |
-|  <p>[publishFolderForBeta](./api-extractor.iextractordtsrollupconfig.publishfolderforbeta.md)</p> | <p>`string`</p> | <p><b><i>(BETA)</i></b> This setting is only used if "trimming" is true. It indicates the folder where "npm publish" will be run for a beta release. The default value is "./dist/beta".</p> |
-|  <p>[publishFolderForInternal](./api-extractor.iextractordtsrollupconfig.publishfolderforinternal.md)</p> | <p>`string`</p> | <p><b><i>(BETA)</i></b> This setting is only used if "trimming" is true. It indicates the folder where "npm publish" will be run for an internal release. The default value is "./dist/internal".</p> |
-|  <p>[publishFolderForPublic](./api-extractor.iextractordtsrollupconfig.publishfolderforpublic.md)</p> | <p>`string`</p> | <p><b><i>(BETA)</i></b> This setting is only used if "trimming" is true. It indicates the folder where "npm publish" will be run for a public release. The default value is "./dist/public".</p> |
-|  <p>[trimming](./api-extractor.iextractordtsrollupconfig.trimming.md)</p> | <p>`boolean`</p> | <p><b><i>(BETA)</i></b> If "trimming" is false (the default), then a single \*.d.ts rollup file will be generated in the "publishFolder". If "trimming" is true, then three separate \*.d.ts rollups will be generated in "publishFolderForInternal", "publishFolderForBeta", and "publishFolderForPublic".</p> |
+|  [enabled](./api-extractor.iextractordtsrollupconfig.enabled.md) | `boolean` | <b><i>(BETA)</i></b> Whether to generate rollup \*.d.ts files. The default is false. |
+|  [mainDtsRollupPath](./api-extractor.iextractordtsrollupconfig.maindtsrolluppath.md) | `string` | <b><i>(BETA)</i></b> Specifies the relative path for the \*.d.ts rollup file to be generated for the package's main entry point. The default value is an empty string, which causes the path to be automatically inferred from the "typings" field of the project's package.json file. |
+|  [publishFolder](./api-extractor.iextractordtsrollupconfig.publishfolder.md) | `string` | <b><i>(BETA)</i></b> This setting is only used if "trimming" is false. It indicates the folder where "npm publish" will be run. The default value is "./dist". |
+|  [publishFolderForBeta](./api-extractor.iextractordtsrollupconfig.publishfolderforbeta.md) | `string` | <b><i>(BETA)</i></b> This setting is only used if "trimming" is true. It indicates the folder where "npm publish" will be run for a beta release. The default value is "./dist/beta". |
+|  [publishFolderForInternal](./api-extractor.iextractordtsrollupconfig.publishfolderforinternal.md) | `string` | <b><i>(BETA)</i></b> This setting is only used if "trimming" is true. It indicates the folder where "npm publish" will be run for an internal release. The default value is "./dist/internal". |
+|  [publishFolderForPublic](./api-extractor.iextractordtsrollupconfig.publishfolderforpublic.md) | `string` | <b><i>(BETA)</i></b> This setting is only used if "trimming" is true. It indicates the folder where "npm publish" will be run for a public release. The default value is "./dist/public". |
+|  [trimming](./api-extractor.iextractordtsrollupconfig.trimming.md) | `boolean` | <b><i>(BETA)</i></b> If "trimming" is false (the default), then a single \*.d.ts rollup file will be generated in the "publishFolder". If "trimming" is true, then three separate \*.d.ts rollups will be generated in "publishFolderForInternal", "publishFolderForBeta", and "publishFolderForPublic". |
 
 ## Remarks
 

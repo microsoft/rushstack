@@ -12,11 +12,11 @@ static replaceAll(input: string, searchValue: string, replaceValue: string): str
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>input</p> | <p>`string`</p> | <p>The string to be modified</p> |
-|  <p>searchValue</p> | <p>`string`</p> | <p>The value to search for</p> |
-|  <p>replaceValue</p> | <p>`string`</p> | <p>The replacement text</p> |
+|  input | `string` | The string to be modified |
+|  searchValue | `string` | The value to search for |
+|  replaceValue | `string` | The replacement text |
 
 <b>Returns:</b>
 

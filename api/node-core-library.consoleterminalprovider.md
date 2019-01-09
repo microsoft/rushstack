@@ -14,15 +14,15 @@ export declare class ConsoleTerminalProvider implements ITerminalProvider
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[eolCharacter](./node-core-library.consoleterminalprovider.eolcharacter.md)</p> |  | <p>`string`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[supportsColor](./node-core-library.consoleterminalprovider.supportscolor.md)</p> |  | <p>`boolean`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[verboseEnabled](./node-core-library.consoleterminalprovider.verboseenabled.md)</p> |  | <p>`boolean`</p> | <p><b><i>(BETA)</i></b></p> |
+|  [eolCharacter](./node-core-library.consoleterminalprovider.eolcharacter.md) |  | `string` | <b><i>(BETA)</i></b> |
+|  [supportsColor](./node-core-library.consoleterminalprovider.supportscolor.md) |  | `boolean` | <b><i>(BETA)</i></b> |
+|  [verboseEnabled](./node-core-library.consoleterminalprovider.verboseenabled.md) |  | `boolean` | <b><i>(BETA)</i></b> |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[write(data, severity)](./node-core-library.consoleterminalprovider.write.md)</p> |  | <p><b><i>(BETA)</i></b></p> |
+|  [write(data, severity)](./node-core-library.consoleterminalprovider.write.md) |  | <b><i>(BETA)</i></b> |
 

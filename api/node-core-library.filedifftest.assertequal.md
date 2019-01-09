@@ -12,10 +12,10 @@ static assertEqual(actualFilePath: string, expectedFilePath: string): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>actualFilePath</p> | <p>`string`</p> |  |
-|  <p>expectedFilePath</p> | <p>`string`</p> |  |
+|  actualFilePath | `string` |  |
+|  expectedFilePath | `string` |  |
 
 <b>Returns:</b>
 

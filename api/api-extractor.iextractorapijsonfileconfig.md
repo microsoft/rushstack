@@ -12,8 +12,8 @@ export interface IExtractorApiJsonFileConfig
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[enabled](./api-extractor.iextractorapijsonfileconfig.enabled.md)</p> | <p>`boolean`</p> | <p>Whether to generate API JSON files at all. The default is true.</p> |
-|  <p>[outputFolder](./api-extractor.iextractorapijsonfileconfig.outputfolder.md)</p> | <p>`string`</p> | <p>Specifies where the \*.api.json file should be written.</p><p>The default value is "./dist"</p> |
+|  [enabled](./api-extractor.iextractorapijsonfileconfig.enabled.md) | `boolean` | Whether to generate API JSON files at all. The default is true. |
+|  [outputFolder](./api-extractor.iextractorapijsonfileconfig.outputfolder.md) | `string` | Specifies where the \*.api.json file should be written.<!-- -->The default value is "./dist" |
 

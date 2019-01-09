@@ -15,10 +15,10 @@ export declare class LegacyAdapters
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[convertCallbackToPromise(fn)](./node-core-library.legacyadapters.convertcallbacktopromise.md)</p> | <p>`static`</p> | <p><b><i>(BETA)</i></b> This function wraps a function with a callback in a promise.</p> |
-|  <p>[convertCallbackToPromise(fn, arg1)](./node-core-library.legacyadapters.convertcallbacktopromise_1.md)</p> | <p>`static`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[convertCallbackToPromise(fn, arg1, arg2)](./node-core-library.legacyadapters.convertcallbacktopromise_2.md)</p> | <p>`static`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[scrubError(error)](./node-core-library.legacyadapters.scruberror.md)</p> | <p>`static`</p> | <p><b><i>(BETA)</i></b> Normalizes an object into an `Error` object.</p> |
+|  [convertCallbackToPromise(fn)](./node-core-library.legacyadapters.convertcallbacktopromise.md) | `static` | <b><i>(BETA)</i></b> This function wraps a function with a callback in a promise. |
+|  [convertCallbackToPromise(fn, arg1)](./node-core-library.legacyadapters.convertcallbacktopromise_1.md) | `static` | <b><i>(BETA)</i></b> |
+|  [convertCallbackToPromise(fn, arg1, arg2)](./node-core-library.legacyadapters.convertcallbacktopromise_2.md) | `static` | <b><i>(BETA)</i></b> |
+|  [scrubError(error)](./node-core-library.legacyadapters.scruberror.md) | `static` | <b><i>(BETA)</i></b> Normalizes an object into an `Error` object. |
 

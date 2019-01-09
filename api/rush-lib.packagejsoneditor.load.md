@@ -13,9 +13,9 @@ static load(filePath: string): PackageJsonEditor;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>filePath</p> | <p>`string`</p> |  |
+|  filePath | `string` |  |
 
 <b>Returns:</b>
 

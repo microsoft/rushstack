@@ -14,10 +14,10 @@ export interface IColorableSequence
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[backgroundColor](./node-core-library.icolorablesequence.backgroundcolor.md)</p> | <p>`ColorValue`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[foregroundColor](./node-core-library.icolorablesequence.foregroundcolor.md)</p> | <p>`ColorValue`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[isEol](./node-core-library.icolorablesequence.iseol.md)</p> | <p>`boolean`</p> | <p><b><i>(BETA)</i></b></p> |
-|  <p>[text](./node-core-library.icolorablesequence.text.md)</p> | <p>`string`</p> | <p><b><i>(BETA)</i></b></p> |
+|  [backgroundColor](./node-core-library.icolorablesequence.backgroundcolor.md) | `ColorValue` | <b><i>(BETA)</i></b> |
+|  [foregroundColor](./node-core-library.icolorablesequence.foregroundcolor.md) | `ColorValue` | <b><i>(BETA)</i></b> |
+|  [isEol](./node-core-library.icolorablesequence.iseol.md) | `boolean` | <b><i>(BETA)</i></b> |
+|  [text](./node-core-library.icolorablesequence.text.md) | `string` | <b><i>(BETA)</i></b> |
 

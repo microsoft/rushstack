@@ -12,10 +12,10 @@ static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>s</p> | <p>`string`</p> |  |
-|  <p>newlineKind</p> | <p>`NewlineKind`</p> |  |
+|  s | `string` |  |
+|  newlineKind | `NewlineKind` |  |
 
 <b>Returns:</b>
 

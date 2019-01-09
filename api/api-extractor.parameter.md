@@ -12,11 +12,11 @@ export declare class Parameter
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[name](./api-extractor.parameter.name.md)</p> |  | <p>`string`</p> | <p>The parameter name.</p> |
-|  <p>[parameterTypeExcerpt](./api-extractor.parameter.parametertypeexcerpt.md)</p> |  | <p>`Excerpt`</p> | <p>An [Excerpt](./api-extractor.excerpt.md) that describes the type of the parameter.</p> |
-|  <p>[tsdocParamBlock](./api-extractor.parameter.tsdocparamblock.md)</p> |  | <p>`tsdoc.DocParamBlock | undefined`</p> | <p>Returns the `@param` documentation for this parameter, if present.</p> |
+|  [name](./api-extractor.parameter.name.md) |  | `string` | The parameter name. |
+|  [parameterTypeExcerpt](./api-extractor.parameter.parametertypeexcerpt.md) |  | `Excerpt` | An [Excerpt](./api-extractor.excerpt.md) that describes the type of the parameter. |
+|  [tsdocParamBlock](./api-extractor.parameter.tsdocparamblock.md) |  | `tsdoc.DocParamBlock | undefined` | Returns the `@param` documentation for this parameter, if present. |
 
 ## Remarks
 

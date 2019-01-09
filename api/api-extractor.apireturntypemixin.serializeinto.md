@@ -12,9 +12,9 @@ serializeInto(jsonObject: Partial<IApiReturnTypeMixinJson>): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonObject</p> | <p>`Partial<IApiReturnTypeMixinJson>`</p> |  |
+|  jsonObject | `Partial<IApiReturnTypeMixinJson>` |  |
 
 <b>Returns:</b>
 

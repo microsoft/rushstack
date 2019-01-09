@@ -12,9 +12,9 @@ findProjectByTempName(tempProjectName: string): RushConfigurationProject | undef
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>tempProjectName</p> | <p>`string`</p> |  |
+|  tempProjectName | `string` |  |
 
 <b>Returns:</b>
 

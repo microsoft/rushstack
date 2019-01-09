@@ -12,14 +12,14 @@ export declare class CommandLineStringListParameter extends CommandLineParameter
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[kind](./ts-command-line.commandlinestringlistparameter.kind.md)</p> |  | <p>`CommandLineParameterKind`</p> | <p></p> |
-|  <p>[values](./ts-command-line.commandlinestringlistparameter.values.md)</p> |  | <p>`ReadonlyArray<string>`</p> | <p>Returns the string arguments for a string list parameter that was parsed from the command line.</p> |
+|  [kind](./ts-command-line.commandlinestringlistparameter.kind.md) |  | `CommandLineParameterKind` |  |
+|  [values](./ts-command-line.commandlinestringlistparameter.values.md) |  | `ReadonlyArray<string>` | Returns the string arguments for a string list parameter that was parsed from the command line. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[appendToArgList(argList)](./ts-command-line.commandlinestringlistparameter.appendtoarglist.md)</p> |  | <p></p> |
+|  [appendToArgList(argList)](./ts-command-line.commandlinestringlistparameter.appendtoarglist.md) |  |  |
 

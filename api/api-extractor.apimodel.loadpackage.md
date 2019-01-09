@@ -10,9 +10,9 @@ loadPackage(apiJsonFilename: string): ApiPackage;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>apiJsonFilename</p> | <p>`string`</p> |  |
+|  apiJsonFilename | `string` |  |
 
 <b>Returns:</b>
 

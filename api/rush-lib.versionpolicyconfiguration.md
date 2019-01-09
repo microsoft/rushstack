@@ -15,16 +15,16 @@ export declare class VersionPolicyConfiguration
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[versionPolicies](./rush-lib.versionpolicyconfiguration.versionpolicies.md)</p> |  | <p>`Map<string, VersionPolicy>`</p> | <p><b><i>(BETA)</i></b> Gets all the version policies</p> |
+|  [versionPolicies](./rush-lib.versionpolicyconfiguration.versionpolicies.md) |  | `Map<string, VersionPolicy>` | <b><i>(BETA)</i></b> Gets all the version policies |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[bump(versionPolicyName, bumpType, identifier, shouldCommit)](./rush-lib.versionpolicyconfiguration.bump.md)</p> |  | <p><b><i>(BETA)</i></b> Bumps up versions for the specified version policy or all version policies</p> |
-|  <p>[getVersionPolicy(policyName)](./rush-lib.versionpolicyconfiguration.getversionpolicy.md)</p> |  | <p><b><i>(BETA)</i></b> Gets the version policy by its name. Throws error if the version policy is not found.</p> |
-|  <p>[update(versionPolicyName, newVersion)](./rush-lib.versionpolicyconfiguration.update.md)</p> |  | <p><b><i>(BETA)</i></b> Updates the version directly for the specified version policy</p> |
-|  <p>[validate(projectsByName)](./rush-lib.versionpolicyconfiguration.validate.md)</p> |  | <p><b><i>(BETA)</i></b> Validate the version policy configuration against the rush config</p> |
+|  [bump(versionPolicyName, bumpType, identifier, shouldCommit)](./rush-lib.versionpolicyconfiguration.bump.md) |  | <b><i>(BETA)</i></b> Bumps up versions for the specified version policy or all version policies |
+|  [getVersionPolicy(policyName)](./rush-lib.versionpolicyconfiguration.getversionpolicy.md) |  | <b><i>(BETA)</i></b> Gets the version policy by its name. Throws error if the version policy is not found. |
+|  [update(versionPolicyName, newVersion)](./rush-lib.versionpolicyconfiguration.update.md) |  | <b><i>(BETA)</i></b> Updates the version directly for the specified version policy |
+|  [validate(projectsByName)](./rush-lib.versionpolicyconfiguration.validate.md) |  | <b><i>(BETA)</i></b> Validate the version policy configuration against the rush config |
 

@@ -12,10 +12,10 @@ static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): strin
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>jsonObject</p> | <p>`Object`</p> | <p>the object to be serialized</p> |
-|  <p>options</p> | <p>`IJsonFileStringifyOptions`</p> | <p>other settings that control serialization</p> |
+|  jsonObject | `Object` | the object to be serialized |
+|  options | `IJsonFileStringifyOptions` | other settings that control serialization |
 
 <b>Returns:</b>
 

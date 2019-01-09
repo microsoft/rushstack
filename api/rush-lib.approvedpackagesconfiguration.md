@@ -12,18 +12,18 @@ export declare class ApprovedPackagesConfiguration
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[items](./rush-lib.approvedpackagesconfiguration.items.md)</p> |  | <p>`ApprovedPackagesItem[]`</p> |  |
+|  [items](./rush-lib.approvedpackagesconfiguration.items.md) |  | `ApprovedPackagesItem[]` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[addOrUpdatePackage(packageName, reviewCategory)](./rush-lib.approvedpackagesconfiguration.addorupdatepackage.md)</p> |  |  |
-|  <p>[clear()](./rush-lib.approvedpackagesconfiguration.clear.md)</p> |  | <p>Clears all the settings, returning to an empty state.</p> |
-|  <p>[getItemByName(packageName)](./rush-lib.approvedpackagesconfiguration.getitembyname.md)</p> |  |  |
-|  <p>[loadFromFile()](./rush-lib.approvedpackagesconfiguration.loadfromfile.md)</p> |  | <p>Loads the configuration data from the filename that was passed to the constructor.</p> |
-|  <p>[saveToFile()](./rush-lib.approvedpackagesconfiguration.savetofile.md)</p> |  | <p>Loads the configuration data to the filename that was passed to the constructor.</p> |
-|  <p>[tryLoadFromFile(approvedPackagesPolicyEnabled)](./rush-lib.approvedpackagesconfiguration.tryloadfromfile.md)</p> |  | <p>If the file exists, calls loadFromFile().</p> |
+|  [addOrUpdatePackage(packageName, reviewCategory)](./rush-lib.approvedpackagesconfiguration.addorupdatepackage.md) |  |  |
+|  [clear()](./rush-lib.approvedpackagesconfiguration.clear.md) |  | Clears all the settings, returning to an empty state. |
+|  [getItemByName(packageName)](./rush-lib.approvedpackagesconfiguration.getitembyname.md) |  |  |
+|  [loadFromFile()](./rush-lib.approvedpackagesconfiguration.loadfromfile.md) |  | Loads the configuration data from the filename that was passed to the constructor. |
+|  [saveToFile()](./rush-lib.approvedpackagesconfiguration.savetofile.md) |  | Loads the configuration data to the filename that was passed to the constructor. |
+|  [tryLoadFromFile(approvedPackagesPolicyEnabled)](./rush-lib.approvedpackagesconfiguration.tryloadfromfile.md) |  | If the file exists, calls loadFromFile(). |
 

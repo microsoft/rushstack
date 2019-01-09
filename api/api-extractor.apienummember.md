@@ -12,19 +12,19 @@ export declare class ApiEnumMember extends ApiEnumMember_base
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[canonicalReference](./api-extractor.apienummember.canonicalreference.md)</p> |  | <p>`string`</p> | <p></p> |
-|  <p>[initializerExcerpt](./api-extractor.apienummember.initializerexcerpt.md)</p> |  | <p>`Excerpt`</p> | <p>An [Excerpt](./api-extractor.excerpt.md) that describes the value of the enum member.</p> |
-|  <p>[kind](./api-extractor.apienummember.kind.md)</p> |  | <p>`ApiItemKind`</p> | <p></p> |
+|  [canonicalReference](./api-extractor.apienummember.canonicalreference.md) |  | `string` |  |
+|  [initializerExcerpt](./api-extractor.apienummember.initializerexcerpt.md) |  | `Excerpt` | An [Excerpt](./api-extractor.excerpt.md) that describes the value of the enum member. |
+|  [kind](./api-extractor.apienummember.kind.md) |  | `ApiItemKind` |  |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[getCanonicalReference(name)](./api-extractor.apienummember.getcanonicalreference.md)</p> | <p>`static`</p> |  |
-|  <p>[onDeserializeInto(options, jsonObject)](./api-extractor.apienummember.ondeserializeinto.md)</p> | <p>`static`</p> | <p></p> |
-|  <p>[serializeInto(jsonObject)](./api-extractor.apienummember.serializeinto.md)</p> |  | <p></p> |
+|  [getCanonicalReference(name)](./api-extractor.apienummember.getcanonicalreference.md) | `static` |  |
+|  [onDeserializeInto(options, jsonObject)](./api-extractor.apienummember.ondeserializeinto.md) | `static` |  |
+|  [serializeInto(jsonObject)](./api-extractor.apienummember.serializeinto.md) |  |  |
 
 ## Remarks
 

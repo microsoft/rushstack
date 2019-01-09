@@ -12,9 +12,9 @@ getFlagParameter(parameterLongName: string): CommandLineFlagParameter;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>parameterLongName</p> | <p>`string`</p> |  |
+|  parameterLongName | `string` |  |
 
 <b>Returns:</b>
 
