@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "tslint-microsoft-contrib": "~5.2.1",
-    "@types/jest": "21.1.10",
+    "@types/jest": "23.3.11",
     "gulp": "~3.9.1",
     "@microsoft/node-library-build": "6.0.15",
     "@microsoft/rush-stack-compiler-3.0": "0.1.0"
