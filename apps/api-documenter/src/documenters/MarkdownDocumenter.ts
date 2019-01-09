@@ -327,18 +327,6 @@ export class MarkdownDocumenter {
           variablesTable.addRow(row);
           this._writeApiItemPage(apiMember);
           break;
-/*
-        case 'function':
-          this._writeFunctionPage(docChild);
-          break;
-        case 'enum':
-          this._writeEnumPage(docChild);
-          break;
-        case ApiItemKind.Namespace:
-          this._writeNamespacePage(docChild);
-          break;
-*/
-
       }
     }
 

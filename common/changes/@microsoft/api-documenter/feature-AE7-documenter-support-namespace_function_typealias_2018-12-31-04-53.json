@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-documenter",
-      "comment": "support more types for markdown - namespace, function, type alias, variable",
+      "comment": "Support more API types for the markdown generator: namespace, function, type alias, variable",
       "type": "patch"
     }
   ],
