@@ -1,4 +1,6 @@
-import * as path from 'path';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as process from 'process';
 import { FileSystem, JsonFile, Executable } from '@microsoft/node-core-library';
 
