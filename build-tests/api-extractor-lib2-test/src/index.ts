@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * api-extractor-lib1-test
+ * api-extractor-lib2-test
  *
  * @remarks
  * This library is consumed by api-extractor-scenarios.
@@ -11,7 +11,7 @@
  */
 
 /** @public */
-export class Lib1Class {
+export class Lib2Class {
 }
 
 /** @public */

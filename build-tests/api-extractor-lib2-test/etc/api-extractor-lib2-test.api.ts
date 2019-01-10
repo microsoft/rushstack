@@ -1,5 +1,5 @@
 // @public (undocumented)
-declare class Lib1Class {
+declare class Lib2Class {
 }
 
 // @public (undocumented)

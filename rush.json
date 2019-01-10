@@ -314,6 +314,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "api-extractor-lib2-test",
+      "projectFolder": "build-tests/api-extractor-lib2-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "api-extractor-scenarios",
       "projectFolder": "build-tests/api-extractor-scenarios",
       "reviewCategory": "tests",
