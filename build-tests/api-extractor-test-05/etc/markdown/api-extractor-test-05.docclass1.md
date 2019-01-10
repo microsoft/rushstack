@@ -12,27 +12,27 @@ export declare class DocClass1 extends DocBaseClass implements IDocInterface1, I
 
 ## Events
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[malformedEvent](./api-extractor-test-05.docclass1.malformedevent.md)</p> |  | <p>`SystemEvent`</p> | <p>This event should have been marked as readonly.</p> |
-|  <p>[modifiedEvent](./api-extractor-test-05.docclass1.modifiedevent.md)</p> |  | <p>`SystemEvent`</p> | <p>This event is fired whenever the object is modified.</p> |
+|  [malformedEvent](./api-extractor-test-05.docclass1.malformedevent.md) |  | `SystemEvent` | This event should have been marked as readonly. |
+|  [modifiedEvent](./api-extractor-test-05.docclass1.modifiedevent.md) |  | `SystemEvent` | This event is fired whenever the object is modified. |
 
 ## Properties
 
-|  <p>Property</p> | <p>Modifiers</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  <p>[regularProperty](./api-extractor-test-05.docclass1.regularproperty.md)</p> |  | <p>`SystemEvent`</p> | <p>This is a regular property that happens to use the SystemEvent type.</p> |
+|  [regularProperty](./api-extractor-test-05.docclass1.regularproperty.md) |  | `SystemEvent` | This is a regular property that happens to use the SystemEvent type. |
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[deprecatedExample()](./api-extractor-test-05.docclass1.deprecatedexample.md)</p> |  |  |
-|  <p>[exampleFunction(a, b)](./api-extractor-test-05.docclass1.examplefunction.md)</p> |  | <p>This is an overloaded function.</p> |
-|  <p>[exampleFunction(x)](./api-extractor-test-05.docclass1.examplefunction_1.md)</p> |  | <p>This is also an overloaded function.</p> |
-|  <p>[interestingEdgeCases()](./api-extractor-test-05.docclass1.interestingedgecases.md)</p> |  | <p>Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"</p><p>The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/</p> |
-|  <p>[sumWithExample(x, y)](./api-extractor-test-05.docclass1.sumwithexample.md)</p> | <p>`static`</p> | <p>Returns the sum of two numbers.</p> |
-|  <p>[tableExample()](./api-extractor-test-05.docclass1.tableexample.md)</p> |  | <p>An example with tables:</p> |
+|  [deprecatedExample()](./api-extractor-test-05.docclass1.deprecatedexample.md) |  |  |
+|  [exampleFunction(a, b)](./api-extractor-test-05.docclass1.examplefunction.md) |  | This is an overloaded function. |
+|  [exampleFunction(x)](./api-extractor-test-05.docclass1.examplefunction_1.md) |  | This is also an overloaded function. |
+|  [interestingEdgeCases()](./api-extractor-test-05.docclass1.interestingedgecases.md) |  | Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"<!-- -->The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/ |
+|  [sumWithExample(x, y)](./api-extractor-test-05.docclass1.sumwithexample.md) | `static` | Returns the sum of two numbers. |
+|  [tableExample()](./api-extractor-test-05.docclass1.tableexample.md) |  | An example with tables: |
 
 ## Remarks
 

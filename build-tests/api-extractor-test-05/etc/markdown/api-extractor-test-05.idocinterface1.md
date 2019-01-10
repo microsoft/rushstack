@@ -11,7 +11,7 @@ export interface IDocInterface1
 
 ## Properties
 
-|  <p>Property</p> | <p>Type</p> | <p>Description</p> |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  <p>[regularProperty](./api-extractor-test-05.idocinterface1.regularproperty.md)</p> | <p>`SystemEvent`</p> | <p>Does something</p> |
+|  [regularProperty](./api-extractor-test-05.idocinterface1.regularproperty.md) | `SystemEvent` | Does something |
 

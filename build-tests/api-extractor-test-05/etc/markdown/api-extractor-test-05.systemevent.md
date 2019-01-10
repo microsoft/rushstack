@@ -12,7 +12,7 @@ export declare class SystemEvent
 
 ## Methods
 
-|  <p>Method</p> | <p>Modifiers</p> | <p>Description</p> |
+|  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  <p>[addHandler(handler)](./api-extractor-test-05.systemevent.addhandler.md)</p> |  | <p>Adds an handler for the event.</p> |
+|  [addHandler(handler)](./api-extractor-test-05.systemevent.addhandler.md) |  | Adds an handler for the event. |
 

@@ -12,10 +12,10 @@ exampleFunction(a: string, b: string): string;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>a</p> | <p>`string`</p> | <p>the first string</p> |
-|  <p>b</p> | <p>`string`</p> | <p>the second string</p> |
+|  a | `string` | the first string |
+|  b | `string` | the second string |
 
 <b>Returns:</b>
 

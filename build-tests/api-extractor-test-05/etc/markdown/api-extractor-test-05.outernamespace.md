@@ -12,13 +12,13 @@ export declare namespace OuterNamespace
 
 ## Namespaces
 
-|  <p>Namespace</p> | <p>Description</p> |
+|  Namespace | Description |
 |  --- | --- |
-|  <p>[InnerNamespace](./api-extractor-test-05.outernamespace.innernamespace.md)</p> | <p>A nested namespace</p> |
+|  [InnerNamespace](./api-extractor-test-05.outernamespace.innernamespace.md) | A nested namespace |
 
 ## Variables
 
-|  <p>Variable</p> | <p>Description</p> |
+|  Variable | Description |
 |  --- | --- |
-|  <p>[nestedVariable](./api-extractor-test-05.outernamespace.nestedvariable.md)</p> | <p>A variable exported from within a namespace.</p> |
+|  [nestedVariable](./api-extractor-test-05.outernamespace.nestedvariable.md) | A variable exported from within a namespace. |
 

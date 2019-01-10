@@ -8,47 +8,47 @@ This project tests various documentation generation scenarios and doc comment sy
 
 ## Classes
 
-|  <p>Class</p> | <p>Description</p> |
+|  Class | Description |
 |  --- | --- |
-|  <p>[DocBaseClass](./api-extractor-test-05.docbaseclass.md)</p> | <p>Example base class</p> |
-|  <p>[DocClass1](./api-extractor-test-05.docclass1.md)</p> | <p>This is an example class.</p> |
-|  <p>[SystemEvent](./api-extractor-test-05.systemevent.md)</p> | <p>A class used to exposed events.</p> |
+|  [DocBaseClass](./api-extractor-test-05.docbaseclass.md) | Example base class |
+|  [DocClass1](./api-extractor-test-05.docclass1.md) | This is an example class. |
+|  [SystemEvent](./api-extractor-test-05.systemevent.md) | A class used to exposed events. |
 
 ## Enumerations
 
-|  <p>Enumeration</p> | <p>Description</p> |
+|  Enumeration | Description |
 |  --- | --- |
-|  <p>[DocEnum](./api-extractor-test-05.docenum.md)</p> | <p>Docs for DocEnum</p> |
+|  [DocEnum](./api-extractor-test-05.docenum.md) | Docs for DocEnum |
 
 ## Functions
 
-|  <p>Function</p> | <p>Description</p> |
+|  Function | Description |
 |  --- | --- |
-|  <p>[globalFunction(x)](./api-extractor-test-05.globalfunction.md)</p> | <p>An exported function</p> |
+|  [globalFunction(x)](./api-extractor-test-05.globalfunction.md) | An exported function |
 
 ## Interfaces
 
-|  <p>Interface</p> | <p>Description</p> |
+|  Interface | Description |
 |  --- | --- |
-|  <p>[IDocInterface1](./api-extractor-test-05.idocinterface1.md)</p> | <p></p> |
-|  <p>[IDocInterface2](./api-extractor-test-05.idocinterface2.md)</p> | <p></p> |
-|  <p>[IDocInterface3](./api-extractor-test-05.idocinterface3.md)</p> | <p>Some less common TypeScript declaration kinds.</p> |
+|  [IDocInterface1](./api-extractor-test-05.idocinterface1.md) |  |
+|  [IDocInterface2](./api-extractor-test-05.idocinterface2.md) |  |
+|  [IDocInterface3](./api-extractor-test-05.idocinterface3.md) | Some less common TypeScript declaration kinds. |
 
 ## Namespaces
 
-|  <p>Namespace</p> | <p>Description</p> |
+|  Namespace | Description |
 |  --- | --- |
-|  <p>[OuterNamespace](./api-extractor-test-05.outernamespace.md)</p> | <p>A top-level namespace</p> |
+|  [OuterNamespace](./api-extractor-test-05.outernamespace.md) | A top-level namespace |
 
 ## Variables
 
-|  <p>Variable</p> | <p>Description</p> |
+|  Variable | Description |
 |  --- | --- |
-|  <p>[constVariable](./api-extractor-test-05.constvariable.md)</p> | <p>An exported variable declaration.</p> |
+|  [constVariable](./api-extractor-test-05.constvariable.md) | An exported variable declaration. |
 
 ## Type Aliases
 
-|  <p>Type Alias</p> | <p>Description</p> |
+|  Type Alias | Description |
 |  --- | --- |
-|  <p>[ExampleTypeAlias](./api-extractor-test-05.exampletypealias.md)</p> | <p>A type alias</p> |
+|  [ExampleTypeAlias](./api-extractor-test-05.exampletypealias.md) | A type alias |
 
