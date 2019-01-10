@@ -1,0 +1,10 @@
+### YamlMime:UniversalReference
+items:
+  - uid: api-documenter-test.IDocInterface3
+    summary: Some less common TypeScript declaration kinds.
+    name: IDocInterface3
+    fullName: IDocInterface3
+    langs:
+      - typeScript
+    type: interface
+    package: api-documenter-test

@@ -1,0 +1,184 @@
+### YamlMime:UniversalReference
+items:
+  - uid: api-documenter-test.DocClass1
+    summary: This is an example class.
+    remarks: These are some remarks.
+    name: DocClass1
+    fullName: DocClass1
+    langs:
+      - typeScript
+    type: class
+    extends:
+      - api-documenter-test.DocBaseClass
+    implements:
+      - api-documenter-test.IDocInterface1
+      - api-documenter-test.IDocInterface2
+    package: api-documenter-test
+    children:
+      - api-documenter-test.DocClass1.(constructor)
+      - api-documenter-test.DocClass1.deprecatedExample
+      - api-documenter-test.DocClass1.exampleFunction
+      - api-documenter-test.DocClass1.exampleFunction_1
+      - api-documenter-test.DocClass1.interestingEdgeCases
+      - api-documenter-test.DocClass1.malformedEvent
+      - api-documenter-test.DocClass1.modifiedEvent
+      - api-documenter-test.DocClass1.regularProperty
+      - api-documenter-test.DocClass1.sumWithExample
+      - api-documenter-test.DocClass1.tableExample
+  - uid: api-documenter-test.DocClass1.(constructor)
+    summary: The class constructor
+    name: (constructor)(name)
+    fullName: (constructor)(name)
+    langs:
+      - typeScript
+    type: constructor
+    syntax:
+      content: 'constructor(name: string);'
+      parameters:
+        - id: name
+          description: ''
+          type:
+            - string
+  - uid: api-documenter-test.DocClass1.deprecatedExample
+    deprecated:
+      content: Use `otherThing()` instead.
+    name: deprecatedExample()
+    fullName: deprecatedExample()
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'deprecatedExample(): void;'
+      return:
+        type:
+          - void
+        description: ''
+  - uid: api-documenter-test.DocClass1.exampleFunction
+    summary: This is an overloaded function.
+    name: 'exampleFunction(a, b)'
+    fullName: 'exampleFunction(a, b)'
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'exampleFunction(a: string, b: string): string;'
+      return:
+        type:
+          - string
+        description: ''
+      parameters:
+        - id: a
+          description: the first string
+          type:
+            - string
+        - id: b
+          description: the second string
+          type:
+            - string
+  - uid: api-documenter-test.DocClass1.exampleFunction_1
+    summary: This is also an overloaded function.
+    name: exampleFunction(x)
+    fullName: exampleFunction(x)
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'exampleFunction(x: number): number;'
+      return:
+        type:
+          - number
+        description: ''
+      parameters:
+        - id: x
+          description: the number
+          type:
+            - number
+  - uid: api-documenter-test.DocClass1.interestingEdgeCases
+    summary: |-
+      Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"
+
+      The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/
+    name: interestingEdgeCases()
+    fullName: interestingEdgeCases()
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'interestingEdgeCases(): void;'
+      return:
+        type:
+          - void
+        description: ''
+  - uid: api-documenter-test.DocClass1.malformedEvent
+    summary: This event should have been marked as readonly.
+    name: malformedEvent
+    fullName: malformedEvent
+    langs:
+      - typeScript
+    type: event
+    syntax:
+      content: 'malformedEvent: SystemEvent;'
+      return:
+        type:
+          - api-documenter-test.SystemEvent
+  - uid: api-documenter-test.DocClass1.modifiedEvent
+    summary: This event is fired whenever the object is modified.
+    name: modifiedEvent
+    fullName: modifiedEvent
+    langs:
+      - typeScript
+    type: event
+    syntax:
+      content: 'readonly modifiedEvent: SystemEvent;'
+      return:
+        type:
+          - api-documenter-test.SystemEvent
+  - uid: api-documenter-test.DocClass1.regularProperty
+    summary: This is a regular property that happens to use the SystemEvent type.
+    name: regularProperty
+    fullName: regularProperty
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'regularProperty: SystemEvent;'
+      return:
+        type:
+          - api-documenter-test.SystemEvent
+  - uid: api-documenter-test.DocClass1.sumWithExample
+    summary: Returns the sum of two numbers.
+    remarks: This illustrates usage of the `@example` block tag.
+    name: 'sumWithExample(x, y)'
+    fullName: 'sumWithExample(x, y)'
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'static sumWithExample(x: number, y: number): number;'
+      return:
+        type:
+          - number
+        description: the sum of the two numbers
+      parameters:
+        - id: x
+          description: the first number to add
+          type:
+            - number
+        - id: 'y'
+          description: the second number to add
+          type:
+            - number
+  - uid: api-documenter-test.DocClass1.tableExample
+    summary: 'An example with tables:'
+    remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
+    name: tableExample()
+    fullName: tableExample()
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'tableExample(): void;'
+      return:
+        type:
+          - void
+        description: ''

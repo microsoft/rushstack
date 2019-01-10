@@ -1,0 +1,18 @@
+[Home](./index) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface2](./api-documenter-test.idocinterface2.md) &gt; [deprecatedExample](./api-documenter-test.idocinterface2.deprecatedexample.md)
+
+## IDocInterface2.deprecatedExample() method
+
+> Warning: This API is now obsolete.
+> 
+> Use `otherThing()` instead.
+> 
+
+<b>Signature:</b>
+
+```typescript
+deprecatedExample(): void;
+```
+<b>Returns:</b>
+
+`void`
+
