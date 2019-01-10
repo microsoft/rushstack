@@ -7,7 +7,11 @@ import { FileSystem, JsonFile, Executable } from '@microsoft/node-core-library';
 function executeCommand(command: string, args: string[]): void {
   console.log(`---> ${command} ${args.join(' ')}`);
 
-  const result = Executable.spawnSync(command, args, { stdio: 'inherit' });
+  // Redirect STDERR --> STDOUT since we don't want this warning to break the Rush build:
+  // "You have changed the public API signature for this project"
+  //
+  // TODO: Remove this after the "Create an empty file" workaround below is removed
+  const result = Executable.spawnSync(command, args, { stdio: [ 0, 1, 1 ] });
 
   if (result.error) {
     throw result.error.toString();
@@ -66,7 +70,8 @@ export function runScenarios(buildConfigPath: string): void {
     if (process.argv.indexOf('--production') >= 0) {
       executeCommand(apiExtractorBinary, ['run', '--config', apiExtractorJsonPath]);
     } else {
-      // Create an empty file to force API Extractor to copy the output file
+      // Create an empty file to force API Extractor to create a missing output file
+      // TODO: Add an api-extractor option to force creation of a missing .api.ts file
       JsonFile.save('', `etc/test-outputs/${scenarioFolderName}/api-extractor-scenarios.api.ts`,
         { ensureFolderExists: true });
 
