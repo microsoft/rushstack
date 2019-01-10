@@ -179,7 +179,7 @@ export class DtsRollupGenerator {
         }
 
         if (entity.exported) {
-          if (entity.originalName === 'default') {
+          if (entity.originalName === ts.InternalSymbolName.Default) {
             (span.parent || span).modification.suffix = `\nexport default ${entity.nameForEmit};`;
           } else {
             replacedModifiers = 'export ' + replacedModifiers;
@@ -220,7 +220,7 @@ export class DtsRollupGenerator {
           span.modification.suffix = ';';
 
           if (entity.exported) {
-            if (entity.originalName === 'default') {
+            if (entity.originalName === ts.InternalSymbolName.Default) {
               span.modification.suffix += `\nexport default ${entity.nameForEmit};`;
             } else {
               span.modification.prefix = 'export ' + span.modification.prefix;

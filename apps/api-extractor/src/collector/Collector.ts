@@ -294,7 +294,7 @@ export class Collector {
 
     // First collect the explicit package exports (named)
     for (const entity of this._entities) {
-      if (entity.exported && entity.originalName !== 'default') {
+      if (entity.exported && entity.originalName !== ts.InternalSymbolName.Default) {
 
         if (usedNames.has(entity.originalName)) {
           // This should be impossible
@@ -309,7 +309,7 @@ export class Collector {
 
     // Next generate unique names for the non-exports that will be emitted (and the default export)
     for (const entity of this._entities) {
-      if (!entity.exported || entity.originalName === 'default') {
+      if (!entity.exported || entity.originalName === ts.InternalSymbolName.Default) {
         let suffix: number = 1;
         entity.nameForEmit = entity.astSymbol.localName;
 
