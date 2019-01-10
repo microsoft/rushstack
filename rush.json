@@ -302,6 +302,18 @@
 
     // "build-tests" folder (alphabetical order)
     {
+      "packageName": "api-documenter-test",
+      "projectFolder": "build-tests/api-documenter-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-scenarios",
+      "projectFolder": "build-tests/api-extractor-scenarios",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "api-extractor-test-01",
       "projectFolder": "build-tests/api-extractor-test-01",
       "reviewCategory": "tests",
@@ -322,18 +334,6 @@
     {
       "packageName": "api-extractor-test-04",
       "projectFolder": "build-tests/api-extractor-test-04",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "api-extractor-test-05",
-      "projectFolder": "build-tests/api-extractor-test-05",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "api-extractor-test-06",
-      "projectFolder": "build-tests/api-extractor-test-06",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

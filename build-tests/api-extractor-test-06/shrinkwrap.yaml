@@ -1,8 +1,0 @@
-registry: 'https://registry.npmjs.org/'
-shrinkwrapMinorVersion: 9
-shrinkwrapVersion: 3
-specifiers:
-  '@types/jest': 21.1.10
-  '@types/node': 8.5.8
-  fs-extra: ~7.0.1
-  typescript: ~3.0.3
