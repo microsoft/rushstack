@@ -12,9 +12,9 @@ addHandler(handler: () => void): void;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>handler</p> | <p>`() => void`</p> |  |
+|  handler | `() => void` |  |
 
 <b>Returns:</b>
 

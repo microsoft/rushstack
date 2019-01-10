@@ -12,7 +12,7 @@ namespace InnerNamespace
 
 ## Functions
 
-|  <p>Function</p> | <p>Description</p> |
+|  Function | Description |
 |  --- | --- |
-|  <p>[nestedFunction(x)](./api-extractor-test-05.outernamespace.innernamespace.nestedfunction.md)</p> | <p>A function inside a namespace</p> |
+|  [nestedFunction(x)](./api-extractor-test-05.outernamespace.innernamespace.nestedfunction.md) | A function inside a namespace |
 
