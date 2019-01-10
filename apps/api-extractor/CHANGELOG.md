@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 20 Dec 2018 17:04:08 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Jan 2019 01:57:52 GMT and should not be manually modified.
+
+## 7.0.9
+Thu, 10 Jan 2019 01:57:52 GMT
+
+### Patches
+
+- Fix an issue with rolling up default exports (https://github.com/Microsoft/web-build-tools/issues/1007)
 
 ## 7.0.8
 Thu, 20 Dec 2018 17:04:08 GMT

@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.9",
+      "tag": "@microsoft/api-extractor_v7.0.9",
+      "date": "Thu, 10 Jan 2019 01:57:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with rolling up default exports (https://github.com/Microsoft/web-build-tools/issues/1007)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.3` to `3.9.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.8",
       "tag": "@microsoft/api-extractor_v7.0.8",
       "date": "Thu, 20 Dec 2018 17:04:08 GMT",

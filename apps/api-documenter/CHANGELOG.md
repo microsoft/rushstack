@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 09 Jan 2019 22:04:17 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Jan 2019 01:57:52 GMT and should not be manually modified.
+
+## 7.0.13
+Thu, 10 Jan 2019 01:57:52 GMT
+
+### Patches
+
+- Work around an issue where GitHub Pages cannot render `<p></p>` inside a pipes-and-dashes table (even though GHFM supports this)
 
 ## 7.0.12
 Wed, 09 Jan 2019 22:04:17 GMT

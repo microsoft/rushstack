@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-2.7",
   "entries": [
     {
+      "version": "0.3.4",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.3.4",
+      "date": "Thu, 10 Jan 2019 01:57:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.3` to `3.9.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.3",
       "tag": "@microsoft/rush-stack-compiler-2.7_v0.3.3",
       "date": "Wed, 19 Dec 2018 05:57:33 GMT",

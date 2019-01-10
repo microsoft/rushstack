@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.9.0",
+      "tag": "@microsoft/node-core-library_v3.9.0",
+      "date": "Thu, 10 Jan 2019 01:57:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove deprecated FileDiffTest API for unit tests; please use Jest snapshots instead"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.3",
       "tag": "@microsoft/node-core-library_v3.8.3",
       "date": "Wed, 19 Dec 2018 05:57:33 GMT",
