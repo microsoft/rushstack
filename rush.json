@@ -338,12 +338,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "api-extractor-test-06",
-      "projectFolder": "build-tests/api-extractor-test-06",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "node-library-build-test",
       "projectFolder": "build-tests/node-library-build-test",
       "reviewCategory": "tests",
