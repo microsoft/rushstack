@@ -48,7 +48,7 @@
     },
     {
       "name": "@microsoft/node-core-library",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/node-library-build",

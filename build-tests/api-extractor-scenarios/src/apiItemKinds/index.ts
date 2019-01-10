@@ -1,0 +1,2 @@
+/** @public */
+export class X { }
