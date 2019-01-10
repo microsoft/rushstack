@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "7.4.6",
+  "version": "7.4.7",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -16,9 +16,9 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/rush-stack-compiler-2.7": "0.3.3",
-    "@microsoft/gulp-core-build": "3.9.0",
-    "@microsoft/node-core-library": "3.8.3",
+    "@microsoft/rush-stack-compiler-2.7": "0.3.4",
+    "@microsoft/gulp-core-build": "3.9.1",
+    "@microsoft/node-core-library": "3.9.0",
     "@types/node": "8.5.8",
     "decomment": "~0.9.1",
     "glob": "~7.0.5",
