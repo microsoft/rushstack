@@ -12,10 +12,10 @@ static sumWithExample(x: number, y: number): number;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>x</p> | <p>`number`</p> | <p>the first number to add</p> |
-|  <p>y</p> | <p>`number`</p> | <p>the second number to add</p> |
+|  x | `number` | the first number to add |
+|  y | `number` | the second number to add |
 
 <b>Returns:</b>
 

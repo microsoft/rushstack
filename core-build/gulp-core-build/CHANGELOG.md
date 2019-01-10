@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 19 Dec 2018 05:57:33 GMT and should not be manually modified.
+This log was last generated on Mon, 07 Jan 2019 17:04:07 GMT and should not be manually modified.
+
+## 3.9.0
+Mon, 07 Jan 2019 17:04:07 GMT
+
+### Minor changes
+
+- Upgrade Jest to version 23.
 
 ## 3.8.57
 Wed, 19 Dec 2018 05:57:33 GMT

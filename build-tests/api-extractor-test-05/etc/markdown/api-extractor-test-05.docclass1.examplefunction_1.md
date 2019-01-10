@@ -12,9 +12,9 @@ exampleFunction(x: number): number;
 
 ## Parameters
 
-|  <p>Parameter</p> | <p>Type</p> | <p>Description</p> |
+|  Parameter | Type | Description |
 |  --- | --- | --- |
-|  <p>x</p> | <p>`number`</p> | <p>the number</p> |
+|  x | `number` | the number |
 
 <b>Returns:</b>
 

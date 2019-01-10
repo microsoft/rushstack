@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "Remove deprecated FileDiffTest API for unit tests; please use Jest snapshots instead",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "pgonzal@users.noreply.github.com"
+}

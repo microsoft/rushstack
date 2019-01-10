@@ -2,6 +2,30 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.12",
+      "tag": "@microsoft/api-documenter_v7.0.12",
+      "date": "Wed, 09 Jan 2019 22:04:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Support more API types for the markdown generator: namespace, function, type alias, variable"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.11",
+      "tag": "@microsoft/api-documenter_v7.0.11",
+      "date": "Mon, 07 Jan 2019 17:04:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.22` to `6.0.23`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.10",
       "tag": "@microsoft/api-documenter_v7.0.10",
       "date": "Thu, 20 Dec 2018 17:04:08 GMT",

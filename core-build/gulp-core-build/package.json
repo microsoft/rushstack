@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "3.8.57",
+  "version": "3.9.0",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -52,7 +52,7 @@
     "jest-cli": "~22.4.3",
     "jest-environment-jsdom": "~22.4.3",
     "jest-resolve": "~22.4.3",
-    "jest": "~22.4.3",
+    "jest": "~23.6.0",
     "jsdom": "~11.11.0"
   },
   "devDependencies": {

@@ -11,7 +11,7 @@ export interface IDocInterface2 extends IDocInterface1
 
 ## Methods
 
-|  <p>Method</p> | <p>Description</p> |
+|  Method | Description |
 |  --- | --- |
-|  <p>[deprecatedExample()](./api-extractor-test-05.idocinterface2.deprecatedexample.md)</p> |  |
+|  [deprecatedExample()](./api-extractor-test-05.idocinterface2.deprecatedexample.md) |  |
 

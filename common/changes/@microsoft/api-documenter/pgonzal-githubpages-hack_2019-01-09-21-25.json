@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Work around an issue where GitHub Pages cannot render `<p></p>` inside a pipes-and-dashes table (even though GHFM supports this)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "pgonzal@users.noreply.github.com"
+}

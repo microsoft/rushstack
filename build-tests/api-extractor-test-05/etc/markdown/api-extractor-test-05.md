@@ -8,23 +8,47 @@ This project tests various documentation generation scenarios and doc comment sy
 
 ## Classes
 
-|  <p>Class</p> | <p>Description</p> |
+|  Class | Description |
 |  --- | --- |
-|  <p>[DocBaseClass](./api-extractor-test-05.docbaseclass.md)</p> | <p>Example base class</p> |
-|  <p>[DocClass1](./api-extractor-test-05.docclass1.md)</p> | <p>This is an example class.</p> |
-|  <p>[SystemEvent](./api-extractor-test-05.systemevent.md)</p> | <p>A class used to exposed events.</p> |
+|  [DocBaseClass](./api-extractor-test-05.docbaseclass.md) | Example base class |
+|  [DocClass1](./api-extractor-test-05.docclass1.md) | This is an example class. |
+|  [SystemEvent](./api-extractor-test-05.systemevent.md) | A class used to exposed events. |
 
 ## Enumerations
 
-|  <p>Enumeration</p> | <p>Description</p> |
+|  Enumeration | Description |
 |  --- | --- |
-|  <p>[DocEnum](./api-extractor-test-05.docenum.md)</p> | <p>Docs for DocEnum</p> |
+|  [DocEnum](./api-extractor-test-05.docenum.md) | Docs for DocEnum |
+
+## Functions
+
+|  Function | Description |
+|  --- | --- |
+|  [globalFunction(x)](./api-extractor-test-05.globalfunction.md) | An exported function |
 
 ## Interfaces
 
-|  <p>Interface</p> | <p>Description</p> |
+|  Interface | Description |
 |  --- | --- |
-|  <p>[IDocInterface1](./api-extractor-test-05.idocinterface1.md)</p> | <p></p> |
-|  <p>[IDocInterface2](./api-extractor-test-05.idocinterface2.md)</p> | <p></p> |
-|  <p>[IDocInterface3](./api-extractor-test-05.idocinterface3.md)</p> | <p>Some less common TypeScript declaration kinds.</p> |
+|  [IDocInterface1](./api-extractor-test-05.idocinterface1.md) |  |
+|  [IDocInterface2](./api-extractor-test-05.idocinterface2.md) |  |
+|  [IDocInterface3](./api-extractor-test-05.idocinterface3.md) | Some less common TypeScript declaration kinds. |
+
+## Namespaces
+
+|  Namespace | Description |
+|  --- | --- |
+|  [OuterNamespace](./api-extractor-test-05.outernamespace.md) | A top-level namespace |
+
+## Variables
+
+|  Variable | Description |
+|  --- | --- |
+|  [constVariable](./api-extractor-test-05.constvariable.md) | An exported variable declaration. |
+
+## Type Aliases
+
+|  Type Alias | Description |
+|  --- | --- |
+|  [ExampleTypeAlias](./api-extractor-test-05.exampletypealias.md) | A type alias |
 

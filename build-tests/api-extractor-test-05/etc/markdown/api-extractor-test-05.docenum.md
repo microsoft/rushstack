@@ -12,9 +12,9 @@ export declare enum DocEnum
 
 ## Enumeration Members
 
-|  <p>Member</p> | <p>Value</p> | <p>Description</p> |
+|  Member | Value | Description |
 |  --- | --- | --- |
-|  <p>One</p> | <p>`1`</p> | <p>These are some docs for One</p> |
-|  <p>Two</p> | <p>`2`</p> | <p>These are some docs for Two</p> |
-|  <p>Zero</p> | <p>`0`</p> | <p>These are some docs for Zero</p> |
+|  One | `1` | These are some docs for One |
+|  Two | `2` | These are some docs for Two |
+|  Zero | `0` | These are some docs for Zero |
 
