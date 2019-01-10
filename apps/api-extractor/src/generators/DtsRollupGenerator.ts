@@ -179,7 +179,11 @@ export class DtsRollupGenerator {
         }
 
         if (entity.exported) {
-          replacedModifiers = 'export ' + replacedModifiers;
+          if (entity.originalName === ts.InternalSymbolName.Default) {
+            (span.parent || span).modification.suffix = `\nexport default ${entity.nameForEmit};`;
+          } else {
+            replacedModifiers = 'export ' + replacedModifiers;
+          }
         }
 
         if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
@@ -213,9 +217,14 @@ export class DtsRollupGenerator {
           const listPrefix: string = list.getSourceFile().text
             .substring(list.getStart(), list.declarations[0].getStart());
           span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
+          span.modification.suffix = ';';
 
           if (entity.exported) {
-            span.modification.prefix = 'export ' + span.modification.prefix;
+            if (entity.originalName === ts.InternalSymbolName.Default) {
+              span.modification.suffix += `\nexport default ${entity.nameForEmit};`;
+            } else {
+              span.modification.prefix = 'export ' + span.modification.prefix;
+            }
           }
 
           const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
@@ -229,8 +238,6 @@ export class DtsRollupGenerator {
             }
             span.modification.prefix = originalComment + span.modification.prefix;
           }
-
-          span.modification.suffix = ';';
         }
         break;
 

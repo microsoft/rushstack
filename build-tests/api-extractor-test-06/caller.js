@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const assert = require("assert");
+const scenario_class_1 = require("./dist/scenario-class");
+const scenario_functiondeclaration_1 = require("./dist/scenario-functiondeclaration");
+const scenario_functionstatement_1 = require("./dist/scenario-functionstatement");
+const scenario_literal_1 = require("./dist/scenario-literal");
+assert(typeof scenario_class_1.default === 'function');
+assert(typeof scenario_functiondeclaration_1.default === 'function');
+assert(typeof scenario_functionstatement_1.default === 'function');
+assert(typeof scenario_literal_1.default === 'string');
+assert(scenario_class_1.default.name === 'DefaultClass');
+assert(scenario_functiondeclaration_1.default.name === 'defaultFunctionDeclaration');
+assert(scenario_functionstatement_1.default.name === 'defaultFunctionStatement');
+assert(scenario_literal_1.default === 'literal');

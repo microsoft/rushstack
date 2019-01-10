@@ -278,7 +278,7 @@ export class SymbolAnalyzer {
         //   FromKeyword:  pre=[from] sep=[ ]
         //   StringLiteral:  pre=['./A']
         //   SemicolonToken:  pre=[;]
-        exportName = 'default';
+        exportName = ts.InternalSymbolName.Default;
       } else {
         throw new Error('Unimplemented import declaration kind: ' + declaration.getText());
       }

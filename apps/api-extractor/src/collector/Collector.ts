@@ -292,9 +292,9 @@ export class Collector {
   private _makeUniqueNames(): void {
     const usedNames: Set<string> = new Set<string>();
 
-    // First collect the explicit package exports
+    // First collect the explicit package exports (named)
     for (const entity of this._entities) {
-      if (entity.exported) {
+      if (entity.exported && entity.originalName !== ts.InternalSymbolName.Default) {
 
         if (usedNames.has(entity.originalName)) {
           // This should be impossible
@@ -307,14 +307,14 @@ export class Collector {
       }
     }
 
-    // Next generate unique names for the non-exports that will be emitted
+    // Next generate unique names for the non-exports that will be emitted (and the default export)
     for (const entity of this._entities) {
-      if (!entity.exported) {
+      if (!entity.exported || entity.originalName === ts.InternalSymbolName.Default) {
         let suffix: number = 1;
-        entity.nameForEmit = entity.originalName;
+        entity.nameForEmit = entity.astSymbol.localName;
 
         while (usedNames.has(entity.nameForEmit)) {
-          entity.nameForEmit = `${entity.originalName}_${++suffix}`;
+          entity.nameForEmit = `${entity.astSymbol.localName}_${++suffix}`;
         }
 
         usedNames.add(entity.nameForEmit);
