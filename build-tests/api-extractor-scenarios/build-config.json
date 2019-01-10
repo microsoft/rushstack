@@ -1,6 +1,8 @@
 {
   "scenarioFolderNames": [
     "apiItemKinds",
+    "exportStar1",
+    "exportStar2",
     "defaultExportOfEntryPoint1",
     "defaultExportOfEntryPoint2",
     "defaultExportOfEntryPoint3",

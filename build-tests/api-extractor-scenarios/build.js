@@ -15,6 +15,7 @@ console.log();
 fsx.emptyDirSync('dist');
 fsx.emptyDirSync('lib');
 fsx.emptyDirSync('temp');
+fsx.emptyDirSync('etc/test-outputs');
 
 // Run the TypeScript compiler
 executeCommand('node node_modules/typescript/lib/tsc');

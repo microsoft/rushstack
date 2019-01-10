@@ -3,6 +3,6 @@ declare class Lib1Class {
 }
 
 // @public (undocumented)
-interface Lib2Interface {
+interface Lib1Interface {
 }
 

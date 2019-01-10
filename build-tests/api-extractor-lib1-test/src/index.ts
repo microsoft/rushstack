@@ -15,5 +15,5 @@ export class Lib1Class {
 }
 
 /** @public */
-export interface Lib2Interface {
+export interface Lib1Interface {
 }
