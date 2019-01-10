@@ -18,7 +18,6 @@ export {
   IExecutableSpawnSyncOptions,
   Executable
 } from './Executable';
-export { FileDiffTest } from './FileDiffTest';
 export {
   IPackageJson,
   IPackageJsonDependencyTable,
