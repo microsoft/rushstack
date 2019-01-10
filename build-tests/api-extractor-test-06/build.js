@@ -33,11 +33,12 @@ function prepareScenario(scenario) {
   apiExtractorConfig.project.entryPointSourceFile = `lib/${scenario}.d.ts`;
   apiExtractorConfig.dtsRollup.mainDtsRollupPath = `${name}/index.d.ts`;
   const configPath = path.join('temp', `api-extractor-${scenario.toLowerCase()}.json`);
+
   fsx.writeJSONSync(configPath, apiExtractorConfig, { spaces: 2 });
   if (process.argv.indexOf('--production') >= 0) {
-    executeCommand(`node node_modules/@microsoft/api-extractor/lib/start run --config '${configPath}'`);
+    executeCommand(`node node_modules/@microsoft/api-extractor/lib/start run --config ${configPath}`);
   } else {
-    executeCommand(`node node_modules/@microsoft/api-extractor/lib/start run --local --config '${configPath}'`);
+    executeCommand(`node node_modules/@microsoft/api-extractor/lib/start run --local --config ${configPath}`);
   }
 }
 
