@@ -16,6 +16,10 @@ function executeCommand(command: string, args: string[]): void {
   if (result.error) {
     throw result.error.toString();
   }
+
+  if (result.status !== 0) {
+    throw new Error('The process returned a nonzero exit code');
+  }
 }
 
 export function runScenarios(buildConfigPath: string): void {

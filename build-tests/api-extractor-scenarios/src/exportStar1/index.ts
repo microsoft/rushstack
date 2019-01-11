@@ -3,6 +3,5 @@
 
 export * from './reexportStar';
 
-// TODO
-// "Internal Error: The symbol A was also exported as B; this is not supported yet"
+// TODO: "Internal Error: The symbol A was also exported as B; this is not supported yet"
 // export { A as B } from './localFile';

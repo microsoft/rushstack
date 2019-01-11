@@ -1,6 +1,7 @@
 {
   "scenarioFolderNames": [
     "apiItemKinds",
+    "exportDuplicate1",
     "exportImportedExternal",
     "exportStar1",
     "exportStar2",
