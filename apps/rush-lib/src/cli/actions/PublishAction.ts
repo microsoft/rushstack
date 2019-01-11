@@ -122,9 +122,9 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--set-access-level',
       parameterShortName: undefined,
       description:
-      `The access option to pass to npm publish. By default NPM will publish scoped packages with an access` +
-      `level of 'restricted'. Scoped packages can be published with an access level of 'public' by specifying` +
-      `that value for this flag with the initial publication. NPM always publishes unscoped packages with an` +
+      `The access option to pass to npm publish. By default NPM will publish scoped packages with an access ` +
+      `level of 'restricted'. Scoped packages can be published with an access level of 'public' by specifying ` +
+      `that value for this flag with the initial publication. NPM always publishes unscoped packages with an ` +
       `access level of 'public'.`
     });
 
