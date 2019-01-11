@@ -8,6 +8,8 @@ dependencies:
   '@rush-temp/api-documenter': 'file:projects/api-documenter.tgz'
   '@rush-temp/api-documenter-test': 'file:projects/api-documenter-test.tgz'
   '@rush-temp/api-extractor': 'file:projects/api-extractor.tgz'
+  '@rush-temp/api-extractor-lib1-test': 'file:projects/api-extractor-lib1-test.tgz'
+  '@rush-temp/api-extractor-lib2-test': 'file:projects/api-extractor-lib2-test.tgz'
   '@rush-temp/api-extractor-scenarios': 'file:projects/api-extractor-scenarios.tgz'
   '@rush-temp/api-extractor-test-01': 'file:projects/api-extractor-test-01.tgz'
   '@rush-temp/api-extractor-test-02': 'file:projects/api-extractor-test-02.tgz'
@@ -10082,6 +10084,30 @@ packages:
       integrity: sha512-UrWQq7mRjurECP9jG1raSNTsPVxg7gfnguuxro7njKXTtxqXc4GSvvwEWKAfYxeiGIqDqUFqNa0S2ii4nDkLew==
       tarball: 'file:projects/api-documenter.tgz'
     version: 0.0.0
+  'file:projects/api-extractor-lib1-test.tgz':
+    dependencies:
+      '@types/jest': 23.3.11
+      '@types/node': 8.5.8
+      fs-extra: 7.0.1
+      typescript: 3.1.6
+    dev: false
+    name: '@rush-temp/api-extractor-lib1-test'
+    resolution:
+      integrity: sha512-2JNRSRsQAKPgR3aHokv6u7Gr0ZdrR87wqXaE112xjwYuYOdnKDKItZvHpp25GaM8hY51C+hLjfTuF0EORacp1g==
+      tarball: 'file:projects/api-extractor-lib1-test.tgz'
+    version: 0.0.0
+  'file:projects/api-extractor-lib2-test.tgz':
+    dependencies:
+      '@types/jest': 23.3.11
+      '@types/node': 8.5.8
+      fs-extra: 7.0.1
+      typescript: 3.1.6
+    dev: false
+    name: '@rush-temp/api-extractor-lib2-test'
+    resolution:
+      integrity: sha512-jRXDzpzsPYoD9DGGDpLz7JcKqaQn3BeTUskj+OVQTrdX7fUmhkfqVvGmVZoneB6BlAbsWt+0DQEbfCYacNE6ew==
+      tarball: 'file:projects/api-extractor-lib2-test.tgz'
+    version: 0.0.0
   'file:projects/api-extractor-scenarios.tgz':
     dependencies:
       '@types/jest': 23.3.11
@@ -10091,7 +10117,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-scenarios'
     resolution:
-      integrity: sha512-QqHVhNYBiu+wK043dd4stKy8iE9OCR43h9FyLytlItPYDz5xRorKCCwHiTtKrB1w0RR2PLk4B6kamENKxHfFWA==
+      integrity: sha512-94rg9S9GDja2/UWNItlrcgq3C/ksE2bajlPMTuRK3r/Uf6mJHy1LDqGb20ABahbPMc+01Ys0XLA00314F7QQEw==
       tarball: 'file:projects/api-extractor-scenarios.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-01.tgz':
@@ -10798,6 +10824,8 @@ specifiers:
   '@rush-temp/api-documenter': 'file:./projects/api-documenter.tgz'
   '@rush-temp/api-documenter-test': 'file:./projects/api-documenter-test.tgz'
   '@rush-temp/api-extractor': 'file:./projects/api-extractor.tgz'
+  '@rush-temp/api-extractor-lib1-test': 'file:./projects/api-extractor-lib1-test.tgz'
+  '@rush-temp/api-extractor-lib2-test': 'file:./projects/api-extractor-lib2-test.tgz'
   '@rush-temp/api-extractor-scenarios': 'file:./projects/api-extractor-scenarios.tgz'
   '@rush-temp/api-extractor-test-01': 'file:./projects/api-extractor-test-01.tgz'
   '@rush-temp/api-extractor-test-02': 'file:./projects/api-extractor-test-02.tgz'
