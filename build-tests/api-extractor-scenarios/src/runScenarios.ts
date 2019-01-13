@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as process from 'process';
-import { JsonFile, Executable } from '@microsoft/node-core-library';
+import { JsonFile, Executable, FileSystem } from '@microsoft/node-core-library';
 
 function executeCommand(command: string, args: string[]): void {
   console.log(`---> ${command} ${args.join(' ')}`);
@@ -71,16 +71,16 @@ export function runScenarios(buildConfigPath: string): void {
 
     JsonFile.save(apiExtractorJson, apiExtractorJsonPath, { ensureFolderExists: true });
 
+    // Create an empty file to force API Extractor to create a missing output file
+    // TODO: Add an api-extractor option to force creation of a missing .api.ts file
+    // See GitHub issue https://github.com/Microsoft/web-build-tools/issues/1018
+    FileSystem.writeFile(`./etc/test-outputs/${scenarioFolderName}/api-extractor-scenarios.api.ts`, '',
+      { ensureFolderExists: true });
+
     // Run the API Extractor command-line
     if (process.argv.indexOf('--production') >= 0) {
       executeCommand(apiExtractorBinary, ['run', '--config', apiExtractorJsonPath]);
     } else {
-      // Create an empty file to force API Extractor to create a missing output file
-      // TODO: Add an api-extractor option to force creation of a missing .api.ts file
-      // See GitHub issue https://github.com/Microsoft/web-build-tools/issues/1018
-      JsonFile.save('', `etc/test-outputs/${scenarioFolderName}/api-extractor-scenarios.api.ts`,
-        { ensureFolderExists: true });
-
       executeCommand(apiExtractorBinary, ['run', '--local', '--config', apiExtractorJsonPath]);
     }
 
