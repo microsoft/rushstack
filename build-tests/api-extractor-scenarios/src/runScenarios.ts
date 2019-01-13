@@ -78,11 +78,6 @@ export function runScenarios(buildConfigPath: string): void {
       { ensureFolderExists: true });
 
     // Run the API Extractor command-line
-    if (process.argv.indexOf('--production') >= 0) {
-      executeCommand(apiExtractorBinary, ['run', '--config', apiExtractorJsonPath]);
-    } else {
-      executeCommand(apiExtractorBinary, ['run', '--local', '--config', apiExtractorJsonPath]);
-    }
-
+    executeCommand(apiExtractorBinary, ['run', '--local', '--config', apiExtractorJsonPath]);
   }
 }
