@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix typo of timestamp in rush change manual page",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "kevintcoughlin@users.noreply.github.com"
+}
