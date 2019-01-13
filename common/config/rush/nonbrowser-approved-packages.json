@@ -131,6 +131,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "api-extractor-lib1-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "api-extractor-lib2-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "api-extractor-test-01",
       "allowedCategories": [ "tests" ]
     },

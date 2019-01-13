@@ -8,20 +8,20 @@ function executeCommand(command) {
   child_process.execSync(command, { stdio: 'inherit' });
 }
 
-console.log(`==> Starting build.js for ${path.basename(process.cwd())}`);
-console.log();
-
 // Clean the old build outputs
+console.log(`==> Starting build.js for ${path.basename(process.cwd())}`);
 fsx.emptyDirSync('dist');
 fsx.emptyDirSync('lib');
 fsx.emptyDirSync('temp');
-fsx.emptyDirSync('etc/test-outputs');
 
 // Run the TypeScript compiler
 executeCommand('node node_modules/typescript/lib/tsc');
 
-// Run the scenario runner
-require('./lib/runScenarios').runScenarios('./build-config.json');
+// Run the API Extractor command-line
+if (process.argv.indexOf('--production') >= 0) {
+  executeCommand('node node_modules/@microsoft/api-extractor/lib/start run');
+} else {
+  executeCommand('node node_modules/@microsoft/api-extractor/lib/start run --local');
+}
 
-console.log();
 console.log(`==> Finished build.js for ${path.basename(process.cwd())}`);
