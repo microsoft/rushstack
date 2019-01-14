@@ -1,4 +1,8 @@
 // @public (undocumented)
+declare class A {
+}
+
+// @public (undocumented)
 declare class X {
 }
 

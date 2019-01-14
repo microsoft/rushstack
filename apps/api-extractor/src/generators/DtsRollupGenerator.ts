@@ -95,13 +95,6 @@ export class DtsRollupGenerator {
           }
           indentedWriter.writeLine(` from '${astImport.modulePath}';`);
 
-          if (entity.exported) {
-            // We write re-export as two lines: `import { Mod } from 'package'; export { Mod };`,
-            // instead of a single line `export { Mod } from 'package';`.
-            // Because this variable may be used by others, and we cannot know it.
-            // so we always keep the `import ...` declaration, for now.
-            indentedWriter.writeLine(`export { ${entity.nameForEmit} };`);
-          }
         }
       }
     }
@@ -109,22 +102,33 @@ export class DtsRollupGenerator {
     // Emit the regular declarations
     for (const entity of collector.entities) {
       if (!entity.astSymbol.astImport) {
-
         const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astSymbol).releaseTag;
-        if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-
-          // Emit all the declarations for this entry
-          for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
-
-            indentedWriter.writeLine();
-
-            const span: Span = new Span(astDeclaration.declaration);
-            DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
-            indentedWriter.writeLine(span.getModifiedText());
-          }
-        } else {
+        if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
           indentedWriter.writeLine();
           indentedWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+          continue;
+        }
+
+        // Emit all the declarations for this entry
+        for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
+
+          indentedWriter.writeLine();
+
+          const span: Span = new Span(astDeclaration.declaration);
+          DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
+          indentedWriter.writeLine(span.getModifiedText());
+        }
+      }
+
+      if (!entity.emitWithExportKeyword) {
+        for (const exportName of entity.exportNames) {
+          if (exportName === ts.InternalSymbolName.Default) {
+            indentedWriter.writeLine(`export default ${entity.nameForEmit};`);
+          } else if (entity.nameForEmit !== exportName) {
+            indentedWriter.writeLine(`export { ${entity.nameForEmit} as ${exportName} }`);
+          } else {
+            indentedWriter.writeLine(`export { ${exportName} }`);
+          }
         }
       }
     }
@@ -178,12 +182,8 @@ export class DtsRollupGenerator {
           replacedModifiers += 'declare ';
         }
 
-        if (entity.exported) {
-          if (entity.originalName === ts.InternalSymbolName.Default) {
-            (span.parent || span).modification.suffix = `\nexport default ${entity.nameForEmit};`;
-          } else {
-            replacedModifiers = 'export ' + replacedModifiers;
-          }
+        if (entity.emitWithExportKeyword) {
+          replacedModifiers = 'export ' + replacedModifiers;
         }
 
         if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
@@ -219,12 +219,8 @@ export class DtsRollupGenerator {
           span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
           span.modification.suffix = ';';
 
-          if (entity.exported) {
-            if (entity.originalName === ts.InternalSymbolName.Default) {
-              span.modification.suffix += `\nexport default ${entity.nameForEmit};`;
-            } else {
-              span.modification.prefix = 'export ' + span.modification.prefix;
-            }
+          if (entity.emitWithExportKeyword) {
+            span.modification.prefix = 'export ' + span.modification.prefix;
           }
 
           const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);

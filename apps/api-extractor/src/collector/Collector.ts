@@ -248,27 +248,17 @@ export class Collector {
     let entity: CollectorEntity | undefined = this._entitiesByAstSymbol.get(astSymbol);
 
     if (!entity) {
-      entity = new CollectorEntity({
-        astSymbol: astSymbol,
-        originalName: exportedName || astSymbol.localName,
-        exported: !!exportedName
-      });
+      entity = new CollectorEntity(astSymbol);
 
       this._entitiesByAstSymbol.set(astSymbol, entity);
       this._entitiesBySymbol.set(astSymbol.followedSymbol, entity);
       this._entities.push(entity);
 
       this._collectReferenceDirectives(astSymbol);
-    } else {
-      if (exportedName) {
-        if (!entity.exported) {
-          throw new InternalError('CollectorEntity should have been marked as exported');
-        }
-        if (entity.originalName !== exportedName) {
-          throw new InternalError(`The symbol ${exportedName} was also exported as ${entity.originalName};`
-            + ` this is not supported yet`);
-        }
-      }
+    }
+
+    if (exportedName) {
+      entity.addExportName(exportedName);
     }
   }
 
@@ -294,31 +284,39 @@ export class Collector {
 
     // First collect the explicit package exports (named)
     for (const entity of this._entities) {
-      if (entity.exported && entity.originalName !== ts.InternalSymbolName.Default) {
-
-        if (usedNames.has(entity.originalName)) {
+      for (const exportName of entity.exportNames) {
+        if (usedNames.has(exportName)) {
           // This should be impossible
-          throw new InternalError(`A package cannot have two exports with the name ${entity.originalName}`);
+          throw new InternalError(`A package cannot have two exports with the name "${exportName}"`);
         }
 
-        entity.nameForEmit = entity.originalName;
-
-        usedNames.add(entity.nameForEmit);
+        usedNames.add(exportName);
       }
     }
 
     // Next generate unique names for the non-exports that will be emitted (and the default export)
     for (const entity of this._entities) {
-      if (!entity.exported || entity.originalName === ts.InternalSymbolName.Default) {
-        let suffix: number = 1;
-        entity.nameForEmit = entity.astSymbol.localName;
 
-        while (usedNames.has(entity.nameForEmit)) {
-          entity.nameForEmit = `${entity.astSymbol.localName}_${++suffix}`;
-        }
-
-        usedNames.add(entity.nameForEmit);
+      // If this entity is exported exactly once, then emit the exported name
+      if (entity.singleExportName !== undefined && entity.singleExportName !== ts.InternalSymbolName.Default) {
+        entity.nameForEmit = entity.singleExportName;
+        continue;
       }
+
+      // If the localName happens to be the same as one of the exports, then emit that name
+      if (entity.exportNames.has(entity.astSymbol.localName)) {
+        entity.nameForEmit = entity.astSymbol.localName;
+        continue;
+      }
+
+      // In all other cases, generate a unique name based on the localName
+      let suffix: number = 1;
+      let nameForEmit: string = entity.astSymbol.localName;
+      while (usedNames.has(nameForEmit)) {
+        nameForEmit = `${entity.astSymbol.localName}_${++suffix}`;
+      }
+      entity.nameForEmit = nameForEmit;
+      usedNames.add(nameForEmit);
     }
   }
 

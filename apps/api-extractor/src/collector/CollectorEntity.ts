@@ -1,21 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as ts from 'typescript';
+
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { Collector } from './Collector';
+import { Sort } from '@microsoft/node-core-library';
 
 /**
- * Constructor options for CollectorEntity
- */
-export interface ICollectorEntityOptions {
-  readonly astSymbol: AstSymbol;
-  readonly originalName: string;
-  readonly exported: boolean;
-}
-
-/**
- * This is a data structure used by DtsRollupGenerator to track an AstSymbol that may be
- * emitted in the *.d.ts file.
+ * This is a data structure used by the Collector to track an AstSymbol that may be emitted in the *.d.ts file.
+ *
  * @remarks
  * The additional contextual state beyond AstSymbol is:
  * - Whether it's an export of this entry point or not
@@ -27,28 +21,22 @@ export class CollectorEntity {
    */
   public readonly astSymbol: AstSymbol;
 
-  /**
-   * The original name, prior to any renaming by DtsRollupGenerator._makeUniqueNames()
-   */
-  public readonly originalName: string;
-
-  /**
-   * Whether this API item is exported by the *.t.s file
-   */
-  public readonly exported: boolean;
+  private _exportNames: Set<string> = new Set<string>();
+  private _exportNamesSorted: boolean = false;
+  private _singleExportName: string | undefined = undefined;
 
   private _nameForEmit: string | undefined = undefined;
 
   private _sortKey: string | undefined = undefined;
 
-  public constructor(options: ICollectorEntityOptions) {
-    this.astSymbol = options.astSymbol;
-    this.originalName = options.originalName;
-    this.exported = options.exported;
+  public constructor(astSymbol: AstSymbol) {
+    this.astSymbol = astSymbol;
   }
 
   /**
-   * The originalName, possibly renamed to ensure that all the top-level exports have unique names.
+   * The declaration name that will be emitted in a .d.ts rollup.  For non-exported declarations,
+   * Collector._makeUniqueNames() may need to rename the declaration to avoid conflicts with other declarations
+   * in that module.
    */
   public get nameForEmit(): string | undefined {
     return this._nameForEmit;
@@ -60,12 +48,71 @@ export class CollectorEntity {
   }
 
   /**
+   * If this symbol is exported from the entry point, the list of export names.
+   *
+   * @remarks
+   * Note that a given symbol may be exported more than once:
+   * ```
+   * class X { }
+   * export { X }
+   * export { X as Y }
+   * ```
+   */
+  public get exportNames(): ReadonlySet<string> {
+    if (!this._exportNamesSorted) {
+      Sort.sortSet(this._exportNames);
+      this._exportNamesSorted = true;
+    }
+    return this._exportNames;
+  }
+
+  /**
+   * If exportNames contains only one string, then singleExportName is that string.
+   * In all other cases, it is undefined.
+   */
+  public get singleExportName(): string | undefined {
+   return this._singleExportName;
+  }
+
+  /**
+   * This is true if exportNames contains only one string, and the declaration can be exported using the inline syntax
+   * such as "export class X { }" instead of "export { X }".
+   */
+  public get emitWithExportKeyword(): boolean {
+    return this._singleExportName !== undefined
+      && this._singleExportName !== ts.InternalSymbolName.Default
+      && this.astSymbol.astImport === undefined;
+  }
+
+  /**
+   * Returns true if this symbol is an export for the entry point being analyzed.
+   */
+  public get exported(): boolean {
+    return this.exportNames.size > 0;
+  }
+
+  /**
+   * Adds a new exportName to the exportNames set.
+   */
+  public addExportName(exportName: string): void {
+    if (!this._exportNames.has(exportName)) {
+      this._exportNamesSorted = false;
+      this._exportNames.add(exportName);
+
+      if (this._exportNames.size === 1) {
+        this._singleExportName = exportName;
+      } else {
+        this._singleExportName = undefined;
+      }
+    }
+  }
+
+  /**
    * A sorting key used by DtsRollupGenerator._makeUniqueNames()
    */
   public getSortKey(): string {
     if (!this._sortKey) {
-      const name: string = this.nameForEmit || this.originalName;
-      this._sortKey = Collector.getSortKeyIgnoringUnderscore(name);
+      this._sortKey = Collector.getSortKeyIgnoringUnderscore(this.nameForEmit || this.astSymbol.localName);
     }
     return this._sortKey;
   }
