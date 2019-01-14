@@ -6,5 +6,9 @@ declare class A {
 declare class Lib1Class {
 }
 
+// @public (undocumented)
+declare interface RenamedLib2Interface {
+}
+
 
 // (No @packageDocumentation comment for this package)

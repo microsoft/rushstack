@@ -7,4 +7,8 @@ export declare class A {
 export declare class Lib1Class {
 }
 
+/** @public */
+export declare interface RenamedLib2Interface {
+}
+
 export { }
