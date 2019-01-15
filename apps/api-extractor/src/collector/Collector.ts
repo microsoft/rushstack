@@ -167,8 +167,8 @@ export class Collector {
     }
 
     // Build the entry point
-    const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleBySourceFile(
-      this.package.entryPointSourceFile, undefined);
+    const astEntryPoint: AstModule = this.astSymbolTable.fetchEntryPointModule(
+      this.package.entryPointSourceFile);
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
       this.package.entryPointSourceFile, this);

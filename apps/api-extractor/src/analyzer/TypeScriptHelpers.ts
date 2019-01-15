@@ -39,6 +39,37 @@ export class TypeScriptHelpers {
   }
 
   /**
+   * Returns true if the specified symbol is an ambient declaration.
+   */
+  public static isAmbient(symbol: ts.Symbol, typeChecker: ts.TypeChecker): boolean {
+    const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(symbol, typeChecker);
+
+    if (followedSymbol.declarations && followedSymbol.declarations.length > 0) {
+      const firstDeclaration: ts.Declaration = followedSymbol.declarations[0];
+
+      // Test 1: Are we inside the sinister "declare global {" construct?
+      const highestModuleDeclaration: ts.ModuleDeclaration | undefined
+        = TypeScriptHelpers.findHighestParent(firstDeclaration, ts.SyntaxKind.ModuleDeclaration);
+      if (highestModuleDeclaration) {
+        if (highestModuleDeclaration.name.getText().trim() === 'global') {
+          return true;
+        }
+      }
+
+      // Test 2: Otherwise, the main heuristic for ambient declarations is by looking at the
+      // ts.SyntaxKind.SourceFile node to see whether it has a symbol or not (i.e. whether it
+      // is acting as a module or not).
+      const sourceFileNode: ts.Node | undefined = TypeScriptHelpers.findFirstParent(
+        firstDeclaration, ts.SyntaxKind.SourceFile);
+      if (sourceFileNode && !!typeChecker.getSymbolAtLocation(sourceFileNode)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
    * Returns the Symbol for the provided Declaration.  This is a workaround for a missing
    * feature of the TypeScript Compiler API.   It is the only apparent way to reach
    * certain data structures, and seems to always work, but is not officially documented.
