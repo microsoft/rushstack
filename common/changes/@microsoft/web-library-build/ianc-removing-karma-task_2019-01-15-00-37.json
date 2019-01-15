@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Remove karma task.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@microsoft/web-library-build",
+  "email": "iclanton@users.noreply.github.com"
+}

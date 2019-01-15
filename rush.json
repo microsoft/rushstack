@@ -409,12 +409,6 @@
       ]
     },
     {
-      "packageName": "@microsoft/gulp-core-build-karma",
-      "projectFolder": "core-build/gulp-core-build-karma",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@microsoft/gulp-core-build-mocha",
       "projectFolder": "core-build/gulp-core-build-mocha",
       "reviewCategory": "libraries",

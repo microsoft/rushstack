@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Remove karma task.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "iclanton@users.noreply.github.com"
+}
