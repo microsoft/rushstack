@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/api-documenter",
       "comment": "MarkdownEmitter: break for inline tags",
-      "type": "minor"
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/api-documenter",
