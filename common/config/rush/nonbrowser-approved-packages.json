@@ -63,10 +63,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@microsoft/rush-stack-compiler",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
       "name": "@microsoft/rush-stack-compiler-2.4",
       "allowedCategories": [ "tests" ]
     },
