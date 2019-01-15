@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.0": "0.3.4",
-    "@microsoft/node-library-build": "6.0.24",
+    "@microsoft/node-library-build": "6.0.25",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/node": "8.5.8",
