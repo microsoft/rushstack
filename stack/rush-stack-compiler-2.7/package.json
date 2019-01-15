@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/stack/rush-stack-compiler"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/stack/rush-stack-compiler-2.7"
   },
   "bin": {
     "rush-api-extractor": "./bin/rush-api-extractor",
