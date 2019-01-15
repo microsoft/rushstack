@@ -8,7 +8,7 @@ import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
 
 export class TypeScriptHelpers {
   /**
-   * This traverses any type aliases to find the original place where an item was defined.
+   * This traverses any symbol aliases to find the original place where an item was defined.
    * For example, suppose a class is defined as "export default class MyClass { }"
    * but exported from the package's index.ts like this:
    *

@@ -2,13 +2,7 @@
 declare class A {
 }
 
-// @public (undocumented)
-declare class Lib1Class {
-}
-
-// @public (undocumented)
-declare interface RenamedLib2Interface {
-}
-
+export { Lib1Class } from 'api-extractor-lib1-test';
+export { Lib2Interface as RenamedLib2Interface } from 'api-extractor-lib2-test';
 
 // (No @packageDocumentation comment for this package)

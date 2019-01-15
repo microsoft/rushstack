@@ -44,7 +44,9 @@ export class AstSymbol {
 
   /**
    * If this symbol was imported from another package, that information is tracked here.
-   * Otherwise, the value is undefined.
+   * Otherwise, the value is undefined.  For example, if this symbol was defined in the referencing source file,
+   * or if it was imported from a local file in the current project, or if it is an ambient definition,
+   * then astImport will be undefined.
    */
   public readonly astImport: AstImport | undefined;
 

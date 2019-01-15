@@ -1,14 +1,10 @@
+import { Lib1Class } from 'api-extractor-lib1-test';
+import { Lib2Interface as RenamedLib2Interface } from 'api-extractor-lib2-test';
 
 /** @public */
 export declare class A {
 }
-
-/** @public */
-export declare class Lib1Class {
-}
-
-/** @public */
-export declare interface RenamedLib2Interface {
-}
+export { Lib1Class }
+export { RenamedLib2Interface }
 
 export { }

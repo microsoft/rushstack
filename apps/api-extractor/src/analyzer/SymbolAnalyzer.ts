@@ -6,32 +6,6 @@
 import * as ts from 'typescript';
 
 import { TypeScriptHelpers } from './TypeScriptHelpers';
-import { AstImport } from './AstImport';
-
-/**
- * Return value for DtsRollupGenerator._followAliases()
- */
-export interface IFollowAliasesResult {
-  /**
-   * The original symbol that defined this entry, after following any aliases.
-   */
-  readonly followedSymbol: ts.Symbol;
-
-  /**
-   * The original name used where it was defined.
-   */
-  readonly localName: string;
-
-  /**
-   * True if this is an ambient definition, e.g. from a "typings" folder.
-   */
-  readonly isAmbient: boolean;
-
-  /**
-   * If this followedSymbol was reached by traversing
-   */
-  readonly astImport: AstImport | undefined;
-}
 
 /**
  * This is a helper class for DtsRollupGenerator and AstSymbolTable.
@@ -75,87 +49,35 @@ export class SymbolAnalyzer {
     return false;
   }
 
-  /**
-   * For the given symbol, follow imports and type alias to find the symbol that represents
-   * the original definition.
-   */
-  public static followAliases(symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult {
-    let current: ts.Symbol = symbol;
+  public static isAmbient(symbol: ts.Symbol, typeChecker: ts.TypeChecker): boolean {
+    const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(symbol, typeChecker);
 
-    // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name
-    let declarationName: string | undefined = undefined;
-
-    while (true) { // tslint:disable-line:no-constant-condition
-      for (const declaration of current.declarations || []) {
-        const declarationNameIdentifier: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
-        if (declarationNameIdentifier && ts.isIdentifier(declarationNameIdentifier)) {
-          declarationName = declarationNameIdentifier.getText().trim();
-        }
-
-        // 2. Check for any signs that this was imported from an external package
-        let result: IFollowAliasesResult | undefined;
-
-        result = SymbolAnalyzer._followAliasesForExportDeclaration(declaration, current, typeChecker);
-        if (result) {
-          return result;
-        }
-
-        result = SymbolAnalyzer._followAliasesForImportDeclaration(declaration, current, typeChecker);
-        if (result) {
-          return result;
-        }
-      }
-
-      if (!(current.flags & ts.SymbolFlags.Alias)) {
-        break;
-      }
-
-      const currentAlias: ts.Symbol = TypeScriptHelpers.getImmediateAliasedSymbol(current, typeChecker);
-      // Stop if we reach the end of the chain
-      if (!currentAlias || currentAlias === current) {
-        break;
-      }
-
-      current = currentAlias;
-    }
-
-    // Is this an ambient declaration?
-    let isAmbient: boolean = true;
-    if (current.declarations) {
+    if (followedSymbol.declarations && followedSymbol.declarations.length > 0) {
+      const firstDeclaration: ts.Declaration = followedSymbol.declarations[0];
 
       // Test 1: Are we inside the sinister "declare global {" construct?
-      let insideDeclareGlobal: boolean = false;
       const highestModuleDeclaration: ts.ModuleDeclaration | undefined
-        = TypeScriptHelpers.findHighestParent(current.declarations[0], ts.SyntaxKind.ModuleDeclaration);
+        = TypeScriptHelpers.findHighestParent(firstDeclaration, ts.SyntaxKind.ModuleDeclaration);
       if (highestModuleDeclaration) {
         if (highestModuleDeclaration.name.getText().trim() === 'global') {
-          insideDeclareGlobal = true;
+          return true;
         }
       }
 
       // Test 2: Otherwise, the main heuristic for ambient declarations is by looking at the
       // ts.SyntaxKind.SourceFile node to see whether it has a symbol or not (i.e. whether it
       // is acting as a module or not).
-      if (!insideDeclareGlobal) {
-        const sourceFileNode: ts.Node | undefined = TypeScriptHelpers.findFirstParent(
-          current.declarations[0], ts.SyntaxKind.SourceFile);
-        if (sourceFileNode && !!typeChecker.getSymbolAtLocation(sourceFileNode)) {
-          isAmbient = false;
-        }
+      const sourceFileNode: ts.Node | undefined = TypeScriptHelpers.findFirstParent(
+        firstDeclaration, ts.SyntaxKind.SourceFile);
+      if (sourceFileNode && !!typeChecker.getSymbolAtLocation(sourceFileNode)) {
+        return false;
       }
     }
 
-    return {
-      followedSymbol: current,
-      localName: declarationName || current.name,
-      astImport: undefined,
-      isAmbient: isAmbient
-    };
+    return true;
   }
 
-  /**
-   * Helper function for _followAliases(), for handling ts.ExportDeclaration patterns
-   */
+  /*
   private static _followAliasesForExportDeclaration(declaration: ts.Declaration,
     symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult | undefined {
 
@@ -206,9 +128,6 @@ export class SymbolAnalyzer {
     return undefined;
   }
 
-  /**
-   * Helper function for _followAliases(), for handling ts.ImportDeclaration patterns
-   */
   private static _followAliasesForImportDeclaration(declaration: ts.Declaration,
     symbol: ts.Symbol, typeChecker: ts.TypeChecker): IFollowAliasesResult | undefined {
 
@@ -295,18 +214,6 @@ export class SymbolAnalyzer {
 
     return undefined;
   }
+*/
 
-  private static _tryGetExternalModulePath(declarationWithModuleSpecifier: ts.ImportDeclaration
-    | ts.ExportDeclaration): string | undefined {
-
-    const moduleSpecifier: string | undefined = TypeScriptHelpers.getModuleSpecifier(declarationWithModuleSpecifier);
-
-    // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
-    // but ignore:  "../folder/LocalFile"
-    if (moduleSpecifier && !ts.isExternalModuleNameRelative(moduleSpecifier)) {
-      return moduleSpecifier;
-    }
-
-    return undefined;
-  }
 }

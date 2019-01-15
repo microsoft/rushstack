@@ -20,7 +20,7 @@ import {
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable } from '../analyzer/AstSymbolTable';
-import { AstEntryPoint } from '../analyzer/AstEntryPoint';
+import { AstModule } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -81,7 +81,7 @@ export class Collector {
 
   private readonly _tsdocParser: tsdoc.TSDocParser;
 
-  private _astEntryPoint: AstEntryPoint | undefined;
+  private _astEntryPoint: AstModule | undefined;
 
   private readonly _entities: CollectorEntity[] = [];
   private readonly _entitiesByAstSymbol: Map<AstSymbol, CollectorEntity> = new Map<AstSymbol, CollectorEntity>();
@@ -167,7 +167,8 @@ export class Collector {
     }
 
     // Build the entry point
-    const astEntryPoint: AstEntryPoint = this.astSymbolTable.fetchEntryPoint(this.package.entryPointSourceFile);
+    const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleBySourceFile(
+      this.package.entryPointSourceFile, undefined);
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
       this.package.entryPointSourceFile, this);
@@ -183,10 +184,8 @@ export class Collector {
     const exportedAstSymbols: AstSymbol[] = [];
 
     // Create a CollectorEntity for each top-level export
-    for (const exportedMember of astEntryPoint.exportedMembers) {
-      const astSymbol: AstSymbol = exportedMember.astSymbol;
-
-      this._createEntityForSymbol(exportedMember.astSymbol, exportedMember.name);
+    for (const [exportName, astSymbol] of astEntryPoint.exportedSymbols) {
+      this._createEntityForSymbol(astSymbol, exportName);
 
       exportedAstSymbols.push(astSymbol);
     }
