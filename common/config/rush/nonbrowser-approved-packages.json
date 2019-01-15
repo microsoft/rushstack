@@ -19,10 +19,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/gulp-core-build-karma",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@microsoft/gulp-core-build-mocha",
       "allowedCategories": [ "libraries" ]
     },
@@ -263,10 +259,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "gulp-karma",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "gulp-mocha",
       "allowedCategories": [ "libraries" ]
     },
@@ -343,34 +335,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "karma",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-coverage",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-mocha",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-mocha-clean-reporter",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-phantomjs-launcher",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-sinon-chai",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-webpack",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "loader-utils",
       "allowedCategories": [ "libraries" ]
     },
@@ -428,14 +392,6 @@
     },
     {
       "name": "orchestrator",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "phantomjs-polyfill",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "phantomjs-prebuilt",
       "allowedCategories": [ "libraries" ]
     },
     {

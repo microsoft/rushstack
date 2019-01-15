@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.9.1",
-    "@microsoft/gulp-core-build-karma": "4.6.57",
     "@microsoft/gulp-core-build-sass": "4.5.37",
     "@microsoft/gulp-core-build-serve": "3.2.92",
     "@microsoft/gulp-core-build-typescript": "7.4.7",
