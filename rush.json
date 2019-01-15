@@ -513,12 +513,6 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@microsoft/rush-stack-compiler",
-      "projectFolder": "stack/rush-stack-compiler",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
       "packageName": "@microsoft/rush-stack-compiler-2.4",
       "projectFolder": "stack/rush-stack-compiler-2.4",
       "reviewCategory": "libraries",
