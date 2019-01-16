@@ -11,7 +11,7 @@ export class AstModule {
   public readonly sourceFile: ts.SourceFile;
 
   public readonly exportedSymbols: Map<string, AstSymbol>;
-  public readonly starExportedModules: Set<AstModule>;
+  public readonly starExportedExternalModules: Set<AstModule>;
 
   /**
    * Example:  "@microsoft/node-core-library/lib/FileSystem"
@@ -22,7 +22,7 @@ export class AstModule {
   public constructor(sourceFile: ts.SourceFile) {
     this.sourceFile = sourceFile;
     this.exportedSymbols = new Map<string, AstSymbol>();
-    this.starExportedModules = new Set<AstModule>();
+    this.starExportedExternalModules = new Set<AstModule>();
     this.externalModulePath = undefined;
   }
 

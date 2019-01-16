@@ -56,8 +56,14 @@ export class AstSymbolTable {
     this._typeChecker = typeChecker;
     this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup, logger);
 
-    this._exportAnalyzer = new ExportAnalyzer(this._program, this._typeChecker);
-    this._exportAnalyzer.fetchAstSymbol = this._fetchAstSymbol;
+    this._exportAnalyzer = new ExportAnalyzer(
+      this._program,
+      this._typeChecker,
+      {
+        analyze: this.analyze.bind(this),
+        fetchAstSymbol: this._fetchAstSymbol.bind(this)
+      }
+    );
   }
 
   /**
