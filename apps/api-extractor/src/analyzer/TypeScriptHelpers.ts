@@ -59,9 +59,9 @@ export class TypeScriptHelpers {
       // Test 2: Otherwise, the main heuristic for ambient declarations is by looking at the
       // ts.SyntaxKind.SourceFile node to see whether it has a symbol or not (i.e. whether it
       // is acting as a module or not).
-      const sourceFileNode: ts.Node | undefined = TypeScriptHelpers.findFirstParent(
-        firstDeclaration, ts.SyntaxKind.SourceFile);
-      if (sourceFileNode && !!typeChecker.getSymbolAtLocation(sourceFileNode)) {
+      const sourceFile: ts.SourceFile = firstDeclaration.getSourceFile();
+
+      if (!!typeChecker.getSymbolAtLocation(sourceFile)) {
         return false;
       }
     }

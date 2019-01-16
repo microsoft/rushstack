@@ -11,7 +11,7 @@ import { AstModule } from './AstModule';
 
 export interface IAstSymbolTable {
   fetchAstSymbol(followedSymbol: ts.Symbol, addIfMissing: boolean,
-    astImportOptions: IAstImportOptions | undefined): AstSymbol | undefined;
+    astImportOptions: IAstImportOptions | undefined, localName?: string): AstSymbol | undefined;
 
   analyze(astSymbol: AstSymbol): void;
 }
@@ -114,11 +114,14 @@ export class ExportAnalyzer {
 
       // Is this symbol an import/export that we need to follow to find the real declaration?
       for (const declaration of current.declarations || []) {
-        if (this._matchExportDeclaration(astModule, symbol, declaration)) {
-          return;
+        let matchedAstSymbol: AstSymbol | undefined;
+        matchedAstSymbol = this._matchExportDeclaration(astModule, symbol, declaration);
+        if (matchedAstSymbol !== undefined) {
+          return matchedAstSymbol;
         }
-        if (this._matchImportDeclaration(astModule, symbol, declaration)) {
-          return;
+        matchedAstSymbol = this._matchImportDeclaration(astModule, symbol, declaration);
+        if (matchedAstSymbol !== undefined) {
+          return matchedAstSymbol;
         }
       }
 
@@ -140,7 +143,7 @@ export class ExportAnalyzer {
   }
 
   private _matchExportDeclaration(astModule: AstModule, exportedSymbol: ts.Symbol,
-    declaration: ts.Declaration): boolean {
+    declaration: ts.Declaration): AstSymbol | undefined {
 
     const exportDeclaration: ts.ExportDeclaration | undefined
       = TypeScriptHelpers.findFirstParent<ts.ExportDeclaration>(declaration, ts.SyntaxKind.ExportDeclaration);
@@ -174,25 +177,22 @@ export class ExportAnalyzer {
       // Ignore "export { A }" without a module specifier
       if (exportDeclaration.moduleSpecifier) {
         const specifierAstModule: AstModule = this._fetchSpecifierAstModule(exportDeclaration);
-        const exportedAstSymbol: AstSymbol = this._getExportOfAstModule(exportName, specifierAstModule);
-
-        astModule.exportedSymbols.set(exportedSymbol.name, exportedAstSymbol);
-
-        return true;
+        const astSymbol: AstSymbol = this._getExportOfAstModule(exportName, specifierAstModule);
+        return astSymbol;
       }
     }
 
-    return false;
+    return undefined;
   }
 
   private _matchImportDeclaration(astModule: AstModule, exportedSymbol: ts.Symbol,
-    declaration: ts.Declaration): boolean {
+    declaration: ts.Declaration): AstSymbol | undefined {
 
     const importDeclaration: ts.ImportDeclaration | undefined
       = TypeScriptHelpers.findFirstParent<ts.ImportDeclaration>(declaration, ts.SyntaxKind.ImportDeclaration);
 
     if (importDeclaration) {
-      let exportName: string;
+      const specifierAstModule: AstModule = this._fetchSpecifierAstModule(importDeclaration);
 
       if (declaration.kind === ts.SyntaxKind.NamespaceImport) {
         // EXAMPLE:
@@ -209,7 +209,23 @@ export class ExportAnalyzer {
         //   StringLiteral:  pre=['the-lib']
         //   SemicolonToken:  pre=[;]
 
-        throw new InternalError('"import * as x" is not supported yet');
+        if (specifierAstModule.externalModulePath === undefined) {
+          // The implementation here only works when importing from an external module.
+          // The full solution is tracked by: https://github.com/Microsoft/web-build-tools/issues/1029
+          throw new Error('"import * as ___ from ___;" is not supported yet for local files.'
+            + '\nFailure in: ' + importDeclaration.getSourceFile().fileName);
+        }
+
+        const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(exportedSymbol, this._typeChecker);
+
+        const astImportOptions: IAstImportOptions = {
+          exportName: '*',
+          modulePath: specifierAstModule.externalModulePath
+        };
+
+        const astSymbol: AstSymbol | undefined = this._astSymbolTable.fetchAstSymbol(followedSymbol, true,
+          astImportOptions, exportedSymbol.name);
+        return astSymbol;
       }
 
       if (declaration.kind === ts.SyntaxKind.ImportSpecifier) {
@@ -234,7 +250,9 @@ export class ExportAnalyzer {
 
         // Example: " ExportName as RenamedName"
         const importSpecifier: ts.ImportSpecifier = declaration as ts.ImportSpecifier;
-        exportName = (importSpecifier.propertyName || importSpecifier.name).getText().trim();
+        const exportName: string = (importSpecifier.propertyName || importSpecifier.name).getText().trim();
+        const astSymbol: AstSymbol = this._getExportOfAstModule(exportName, specifierAstModule);
+        return astSymbol;
       } else if (declaration.kind === ts.SyntaxKind.ImportClause) {
         // EXAMPLE:
         // "import A, { B } from './A';"
@@ -253,19 +271,14 @@ export class ExportAnalyzer {
         //   FromKeyword:  pre=[from] sep=[ ]
         //   StringLiteral:  pre=['./A']
         //   SemicolonToken:  pre=[;]
-        exportName = ts.InternalSymbolName.Default;
+        const astSymbol: AstSymbol = this._getExportOfAstModule(ts.InternalSymbolName.Default, specifierAstModule);
+        return astSymbol;
       } else {
         throw new InternalError('Unimplemented import declaration kind: ' + declaration.getText());
       }
-
-      const specifierAstModule: AstModule = this._fetchSpecifierAstModule(importDeclaration);
-      const exportedAstSymbol: AstSymbol = this._getExportOfAstModule(exportName, specifierAstModule);
-
-      astModule.exportedSymbols.set(exportedSymbol.name, exportedAstSymbol);
-      return true;
     }
 
-    return false;
+    return undefined;
   }
 
   private _getExportOfAstModule(exportName: string, astModule: AstModule): AstSymbol {
