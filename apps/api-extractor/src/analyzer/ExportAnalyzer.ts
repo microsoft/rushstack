@@ -48,15 +48,22 @@ export class ExportAnalyzer {
 
       // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
       // but ignore:  "../folder/LocalFile"
+      //
+      // (For the entry point of the local project being analyzed, moduleSpecifier === undefined)
       if (moduleSpecifier !== undefined && !ts.isExternalModuleNameRelative(moduleSpecifier)) {
-        // Yes, this is the entry point for an external package.
+        // This makes astModule.isExternal=true
+        astModule.externalModulePath = moduleSpecifier;
+      }
+
+      if (astModule.isExternal) {
+        // It's an external package, so do the special simplified analysis that doesn't crawl into referenced modules
         astModule.externalModulePath = moduleSpecifier;
 
         for (const exportedSymbol of this._typeChecker.getExportsOfModule(moduleSymbol)) {
 
           const astImportOptions: IAstImportOptions = {
             exportName: exportedSymbol.name,
-            modulePath: astModule.externalModulePath
+            modulePath: moduleSpecifier!
           };
 
           const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(exportedSymbol, this._typeChecker);
@@ -70,6 +77,7 @@ export class ExportAnalyzer {
           astModule.exportedSymbols.set(exportedSymbol.name, astSymbol);
         }
       } else {
+        // The module is part of the local project, so do the full analysis
 
         if (moduleSymbol.exports) {
           for (const exportedSymbol of moduleSymbol.exports.values() as IterableIterator<ts.Symbol>) {
@@ -84,7 +92,6 @@ export class ExportAnalyzer {
             } else {
               const fetchedAstSymbol: AstSymbol | undefined = this._fetchAstSymbolFromModule(astModule, exportedSymbol);
               if (fetchedAstSymbol !== undefined) {
-                this._astSymbolTable.analyze(fetchedAstSymbol);
                 astModule.exportedSymbols.set(exportedSymbol.name, fetchedAstSymbol);
               }
             }
@@ -92,6 +99,12 @@ export class ExportAnalyzer {
 
         }
 
+      }
+
+      if (astModule.isExternal) {
+        for (const exportedAstSymbol of astModule.exportedSymbols.values()) {
+          this._astSymbolTable.analyze(exportedAstSymbol);
+        }
       }
     }
 
