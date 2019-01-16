@@ -323,8 +323,20 @@ export class AstSymbolTable {
           }
         }
 
+        // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name
+        // This handles cases such as "export default class X { }" where the symbol name is "default"
+        // but the declaration name is "X".
+        let localName: string | undefined = followedSymbol.name;
+        for (const declaration of followedSymbol.declarations || []) {
+          const declarationNameIdentifier: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
+          if (declarationNameIdentifier && ts.isIdentifier(declarationNameIdentifier)) {
+            localName = declarationNameIdentifier.getText().trim();
+            break;
+          }
+        }
+
         astSymbol = new AstSymbol({
-          localName: followedSymbol.name,
+          localName: localName,
           followedSymbol: followedSymbol,
           astImport: astImport,
           parentAstSymbol: parentAstSymbol,
