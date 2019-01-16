@@ -82,7 +82,11 @@ export class ExportAnalyzer {
               }
 
             } else {
-              this._collectExportForAstModule(astModule, exportedSymbol);
+              const fetchedAstSymbol: AstSymbol | undefined = this._fetchAstSymbolFromModule(astModule, exportedSymbol);
+              if (fetchedAstSymbol !== undefined) {
+                this._astSymbolTable.analyze(fetchedAstSymbol);
+                astModule.exportedSymbols.set(exportedSymbol.name, fetchedAstSymbol);
+              }
             }
           }
 
@@ -94,17 +98,26 @@ export class ExportAnalyzer {
     return astModule;
   }
 
-  private _collectExportForAstModule(astModule: AstModule, exportedSymbol: ts.Symbol): void {
-    let current: ts.Symbol = exportedSymbol;
+  public fetchReferencedAstSymbol(symbol: ts.Symbol, sourceFile: ts.SourceFile): AstSymbol | undefined {
+    const astModule: AstModule | undefined = this._astModulesBySourceFile.get(sourceFile);
+    if (astModule === undefined) {
+      throw new InternalError('fetchReferencedAstSymbol() called for a source file that was not analyzed');
+    }
+
+    return this._fetchAstSymbolFromModule(astModule, symbol);
+  }
+
+  private _fetchAstSymbolFromModule(astModule: AstModule, symbol: ts.Symbol): AstSymbol | undefined {
+    let current: ts.Symbol = symbol;
 
     while (true) { // tslint:disable-line:no-constant-condition
 
       // Is this symbol an import/export that we need to follow to find the real declaration?
       for (const declaration of current.declarations || []) {
-        if (this._matchExportDeclaration(astModule, exportedSymbol, declaration)) {
+        if (this._matchExportDeclaration(astModule, symbol, declaration)) {
           return;
         }
-        if (this._matchImportDeclaration(astModule, exportedSymbol, declaration)) {
+        if (this._matchImportDeclaration(astModule, symbol, declaration)) {
           return;
         }
       }
@@ -123,11 +136,7 @@ export class ExportAnalyzer {
     }
 
     // Otherwise, assume it is a normal declaration
-    const fetchedAstSymbol: AstSymbol | undefined = this._astSymbolTable.fetchAstSymbol(current, true, undefined);
-    if (fetchedAstSymbol !== undefined) {
-      this._astSymbolTable.analyze(fetchedAstSymbol);
-      astModule.exportedSymbols.set(exportedSymbol.name, fetchedAstSymbol);
-    }
+    return this._astSymbolTable.fetchAstSymbol(current, true, undefined);
   }
 
   private _matchExportDeclaration(astModule: AstModule, exportedSymbol: ts.Symbol,
@@ -253,6 +262,7 @@ export class ExportAnalyzer {
       const exportedAstSymbol: AstSymbol = this._getExportOfAstModule(exportName, specifierAstModule);
 
       astModule.exportedSymbols.set(exportedSymbol.name, exportedAstSymbol);
+      return true;
     }
 
     return false;

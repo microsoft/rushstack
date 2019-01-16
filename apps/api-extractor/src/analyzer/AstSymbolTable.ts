@@ -73,6 +73,10 @@ export class AstSymbolTable {
     return this._exportAnalyzer.fetchAstModuleBySourceFile(sourceFile, undefined);
   }
 
+  public fetchReferencedAstSymbol(symbol: ts.Symbol, sourceFile: ts.SourceFile): AstSymbol | undefined {
+    return this._exportAnalyzer.fetchReferencedAstSymbol(symbol, sourceFile);
+  }
+
   /**
    * Ensures that AstSymbol.analyzed is true for the provided symbol.  The operation
    * starts from the root symbol and then fills out all children of all declarations, and
@@ -179,7 +183,8 @@ export class AstSymbolTable {
             throw new Error('Symbol not found for identifier: ' + symbolNode.getText());
           }
 
-          const referencedAstSymbol: AstSymbol | undefined = this._fetchAstSymbol(symbol, true, undefined);
+          const referencedAstSymbol: AstSymbol | undefined
+            = this.fetchReferencedAstSymbol(symbol, symbolNode.getSourceFile());
           if (referencedAstSymbol) {
             governingAstDeclaration._notifyReferencedAstSymbol(referencedAstSymbol);
           }
