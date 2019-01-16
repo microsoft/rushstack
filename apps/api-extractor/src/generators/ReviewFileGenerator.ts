@@ -9,7 +9,6 @@ import { Span } from '../analyzer/Span';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { StringBuilder } from '@microsoft/tsdoc';
-import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
@@ -102,7 +101,7 @@ export class ReviewFileGenerator {
 
       case ts.SyntaxKind.SyntaxList:
         if (span.parent) {
-          if (SymbolAnalyzer.isAstDeclaration(span.parent.kind)) {
+          if (AstDeclaration.isSupportedSyntaxKind(span.parent.kind)) {
             // If the immediate parent is an API declaration, and the immediate children are API declarations,
             // then sort the children alphabetically
             sortChildren = true;
@@ -170,7 +169,7 @@ export class ReviewFileGenerator {
       for (const child of span.children) {
         let childAstDeclaration: AstDeclaration = astDeclaration;
 
-        if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
+        if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
           childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
 
           if (sortChildren) {

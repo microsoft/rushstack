@@ -5,7 +5,6 @@ import * as ts from 'typescript';
 import { PackageJsonLookup, InternalError } from '@microsoft/node-core-library';
 
 import { AstDeclaration } from './AstDeclaration';
-import { SymbolAnalyzer } from './SymbolAnalyzer';
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstImport, IAstImportOptions } from './AstImport';
@@ -213,7 +212,7 @@ export class AstSymbolTable {
   }
 
   private _fetchAstSymbolForNode(node: ts.Node): AstSymbol | undefined {
-    if (!SymbolAnalyzer.isAstDeclaration(node.kind)) {
+    if (!AstDeclaration.isSupportedSyntaxKind(node.kind)) {
       return undefined;
     }
 
@@ -291,7 +290,7 @@ export class AstSymbolTable {
 
         if (!nominal) {
           for (const declaration of followedSymbol.declarations || []) {
-            if (!SymbolAnalyzer.isAstDeclaration(declaration.kind)) {
+            if (!AstDeclaration.isSupportedSyntaxKind(declaration.kind)) {
               throw new InternalError(`The "${followedSymbol.name}" symbol uses the construct`
                 + ` "${ts.SyntaxKind[declaration.kind]}" which may be an unimplemented language feature`);
             }
@@ -387,7 +386,7 @@ export class AstSymbolTable {
   private _tryFindFirstAstDeclarationParent(node: ts.Node): ts.Node | undefined {
     let currentNode: ts.Node | undefined = node.parent;
     while (currentNode) {
-      if (SymbolAnalyzer.isAstDeclaration(currentNode.kind)) {
+      if (AstDeclaration.isSupportedSyntaxKind(currentNode.kind)) {
         return currentNode;
       }
       currentNode = currentNode.parent;
