@@ -132,6 +132,13 @@ export class DtsRollupGenerator {
       }
     }
 
+    if (collector.starExportedExternalModulePaths.length > 0) {
+      indentedWriter.writeLine();
+      for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
+        indentedWriter.writeLine(`export * from "${starExportedExternalModulePath}";`);
+      }
+    }
+
     // Emit "export { }" which is a special directive that prevents consumers from importing declarations
     // that don't have an explicit "export" modifier.
     indentedWriter.writeLine();

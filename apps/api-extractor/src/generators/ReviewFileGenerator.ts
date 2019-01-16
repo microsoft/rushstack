@@ -64,6 +64,13 @@ export class ReviewFileGenerator {
       }
     }
 
+    if (collector.starExportedExternalModulePaths.length > 0) {
+      output.append('\n');
+      for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
+        output.append(`export * from "${starExportedExternalModulePath}";\n`);
+      }
+    }
+
     if (collector.package.tsdocComment === undefined) {
       output.append('\n');
       ReviewFileGenerator._writeLineAsComment(output, '(No @packageDocumentation comment for this package)');

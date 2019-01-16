@@ -87,6 +87,8 @@ export class Collector {
   private readonly _entitiesByAstSymbol: Map<AstSymbol, CollectorEntity> = new Map<AstSymbol, CollectorEntity>();
   private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
 
+  private readonly _starExportedExternalModulePaths: string[] = [];
+
   private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
   private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
 
@@ -151,6 +153,14 @@ export class Collector {
   }
 
   /**
+   * A list of module specifiers (e.g. `"@microsoft/node-core-library/lib/FileSystem"`) that should be emitted
+   * as star exports (e.g. `export * from "@microsoft/node-core-library/lib/FileSystem"`).
+   */
+  public get starExportedExternalModulePaths(): ReadonlyArray<string> {
+    return this._starExportedExternalModulePaths;
+  }
+
+  /**
    * Perform the analysis.
    */
   public analyze(): void {
@@ -169,6 +179,7 @@ export class Collector {
     // Build the entry point
     const astEntryPoint: AstModule = this.astSymbolTable.fetchEntryPointModule(
       this.package.entryPointSourceFile);
+    this._astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
       this.package.entryPointSourceFile, this);
@@ -202,9 +213,16 @@ export class Collector {
 
     this._makeUniqueNames();
 
+    for (const starExportedExternalModule of astEntryPoint.starExportedExternalModules) {
+      if (starExportedExternalModule.externalModulePath !== undefined) {
+        this._starExportedExternalModulePaths.push(starExportedExternalModule.externalModulePath);
+      }
+    }
+
     Sort.sortBy(this._entities, x => x.getSortKey());
     Sort.sortSet(this._dtsTypeReferenceDirectives);
     Sort.sortSet(this._dtsLibReferenceDirectives);
+    this._starExportedExternalModulePaths.sort();
   }
 
   public tryGetEntityBySymbol(symbol: ts.Symbol): CollectorEntity | undefined {
