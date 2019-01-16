@@ -119,7 +119,7 @@ export class DtsRollupGenerator {
         }
       }
 
-      if (!entity.emitWithExportKeyword) {
+      if (!entity.shouldInlineExport) {
         for (const exportName of entity.exportNames) {
           if (exportName === ts.InternalSymbolName.Default) {
             indentedWriter.writeLine(`export default ${entity.nameForEmit};`);
@@ -188,7 +188,7 @@ export class DtsRollupGenerator {
           replacedModifiers += 'declare ';
         }
 
-        if (entity.emitWithExportKeyword) {
+        if (entity.shouldInlineExport) {
           replacedModifiers = 'export ' + replacedModifiers;
         }
 
@@ -225,7 +225,7 @@ export class DtsRollupGenerator {
           span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
           span.modification.suffix = ';';
 
-          if (entity.emitWithExportKeyword) {
+          if (entity.shouldInlineExport) {
             span.modification.prefix = 'export ' + span.modification.prefix;
           }
 

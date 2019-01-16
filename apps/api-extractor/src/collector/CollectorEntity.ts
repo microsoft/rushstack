@@ -78,7 +78,7 @@ export class CollectorEntity {
    * This is true if exportNames contains only one string, and the declaration can be exported using the inline syntax
    * such as "export class X { }" instead of "export { X }".
    */
-  public get emitWithExportKeyword(): boolean {
+  public get shouldInlineExport(): boolean {
     return this._singleExportName !== undefined
       && this._singleExportName !== ts.InternalSymbolName.Default
       && this.astSymbol.astImport === undefined;
