@@ -100,6 +100,10 @@
         "sampleEmail": {
           "description": "An example valid e-mail address for \"Mr. Example\" that conforms to one of the allowedEmailRegExps.  Example: \"mr-example@contoso\\.com\"",
           "type": "string"
+        },
+        "defaultCommitMessage": {
+          "description": "The default commit message Rush uses when commiting changes during the Rush lifecycle.",
+          "type": "string"
         }
       },
       "additionalProperties": false
@@ -119,10 +123,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "variantName",
-           "description"
-        ]
+        "required": ["variantName", "description"]
       }
     },
     "repository": {
@@ -179,10 +180,7 @@
           }
         },
         "additionalProperties": false,
-        "required": [
-          "packageName",
-          "projectFolder"
-        ]
+        "required": ["packageName", "projectFolder"]
       }
     },
     "eventHooks": {
@@ -222,8 +220,5 @@
     }
   },
   "additionalProperties": false,
-  "required": [
-    "rushVersion",
-    "projects"
-  ]
+  "required": ["rushVersion", "projects"]
 }

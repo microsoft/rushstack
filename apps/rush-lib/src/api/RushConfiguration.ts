@@ -52,6 +52,7 @@ export interface IApprovedPackagesPolicyJson {
 export interface IRushGitPolicyJson {
   allowedEmailRegExps?: string[];
   sampleEmail?: string;
+  defaultCommitMessage?: string;
 }
 
 /**
@@ -203,6 +204,7 @@ export class RushConfiguration {
   // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
+  private _gitDefaultCommitMessage: string;
 
   // "hotfixChangeEnabled" feature
   private _hotfixChangeEnabled: boolean;
@@ -650,6 +652,14 @@ export class RushConfiguration {
   }
 
   /**
+   * [Part of the "gitPolicy" feature.]
+   * A default commit message to use when committing chnages during the Rush lifecycle.
+   */
+  public get gitDefaultCommitMessage(): string {
+    return this._gitDefaultCommitMessage;
+  }
+
+  /**
    * [Part of the "hotfixChange" feature.]
    * Enables creating hotfix changes
    */
@@ -987,6 +997,10 @@ export class RushConfiguration {
           throw new Error('The rush.json file is missing the "sampleEmail" option, ' +
             'which is required when using "allowedEmailRegExps"');
         }
+      }
+
+      if (rushConfigurationJson.gitPolicy.defaultCommitMessage) {
+        this._gitDefaultCommitMessage = rushConfigurationJson.gitPolicy.defaultCommitMessage;
       }
     }
 

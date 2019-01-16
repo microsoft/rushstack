@@ -236,7 +236,7 @@ export class PublishAction extends BaseRushAction {
       if (VersionControl.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
         git.addChanges();
-        git.commit();
+        git.commit(this.rushConfiguration.gitDefaultCommitMessage);
         git.push(tempBranch);
 
         // Override tag parameter if there is a hotfix change.

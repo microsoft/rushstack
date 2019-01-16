@@ -227,7 +227,7 @@ export class VersionAction extends BaseRushAction {
 
     if (packageJsonUpdated) {
       git.addChanges();
-      git.commit();
+      git.commit(this.rushConfiguration.gitDefaultCommitMessage);
     }
 
     if (changeLogUpdated || packageJsonUpdated) {

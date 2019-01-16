@@ -222,6 +222,7 @@ class RushConfiguration {
   getPnpmfilePath(variant?: string | undefined): string;
   getProjectByName(projectName: string): RushConfigurationProject | undefined;
   readonly gitAllowedEmailRegExps: string[];
+  readonly gitDefaultCommitMessage: string;
   readonly gitSampleEmail: string;
   readonly hotfixChangeEnabled: boolean;
   static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
