@@ -94,7 +94,7 @@ export class AstSymbolTable {
       return;
     }
 
-    if (astSymbol.nominal) {
+    if (astSymbol.nominalAnalysis) {
       // We don't analyze nominal symbols
       astSymbol._notifyAnalyzed();
       return;
@@ -265,7 +265,7 @@ export class AstSymbolTable {
 
       if (!astSymbol) {
         // None of the above lookups worked, so create a new entry...
-        let nominal: boolean = false;
+        let nominalAnalysis: boolean = false;
 
         // NOTE: In certain circumstances we need an AstSymbol for a source file that is acting
         // as a TypeScript module.  For example, one of the unit tests has this line:
@@ -279,7 +279,7 @@ export class AstSymbolTable {
         // false, we do create an AstDeclaration for a ts.SyntaxKind.SourceFile in this special edge case.
         if (followedSymbol.declarations.length === 1
           && followedSymbol.declarations[0].kind === ts.SyntaxKind.SourceFile) {
-          nominal = true;
+          nominalAnalysis = true;
         }
 
         // If the file is from a package that does not support AEDoc, then we process the
@@ -287,13 +287,13 @@ export class AstSymbolTable {
         const followedSymbolSourceFile: ts.SourceFile = followedSymbol.declarations[0].getSourceFile();
         if (astImport !== undefined) {
           if (!this._packageMetadataManager.isAedocSupportedFor(followedSymbolSourceFile.fileName)) {
-            nominal = true;
+            nominalAnalysis = true;
           }
         }
 
         let parentAstSymbol: AstSymbol | undefined = undefined;
 
-        if (!nominal) {
+        if (!nominalAnalysis) {
           for (const declaration of followedSymbol.declarations || []) {
             if (!AstDeclaration.isSupportedSyntaxKind(declaration.kind)) {
               throw new InternalError(`The "${followedSymbol.name}" symbol uses the construct`
@@ -348,7 +348,7 @@ export class AstSymbolTable {
           astImport: astImport,
           parentAstSymbol: parentAstSymbol,
           rootAstSymbol: parentAstSymbol ? parentAstSymbol.rootAstSymbol : undefined,
-          nominal: nominal
+          nominalAnalysis: nominalAnalysis
         });
 
         this._astSymbolsBySymbol.set(followedSymbol, astSymbol);

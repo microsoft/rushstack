@@ -13,7 +13,7 @@ export interface IAstSymbolOptions {
   readonly followedSymbol: ts.Symbol;
   readonly localName: string;
   readonly astImport: AstImport | undefined;
-  readonly nominal: boolean;
+  readonly nominalAnalysis: boolean;
   readonly parentAstSymbol: AstSymbol | undefined;
   readonly rootAstSymbol: AstSymbol | undefined;
 }
@@ -57,7 +57,7 @@ export class AstSymbol {
    *
    * Nominal symbols are tracked because we still need to emit exports for them.
    */
-  public readonly nominal: boolean;
+  public readonly nominalAnalysis: boolean;
 
   /**
    * Returns the symbol of the parent of this AstSymbol, or undefined if there is no parent.
@@ -92,7 +92,7 @@ export class AstSymbol {
     this.followedSymbol = options.followedSymbol;
     this.localName = options.localName;
     this.astImport = options.astImport;
-    this.nominal = options.nominal;
+    this.nominalAnalysis = options.nominalAnalysis;
     this.parentAstSymbol = options.parentAstSymbol;
     this.rootAstSymbol = options.rootAstSymbol || this;
     this._astDeclarations = [];

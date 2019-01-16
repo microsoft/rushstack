@@ -121,7 +121,7 @@ export class AstDeclaration {
   public getDump(indent: string = ''): string {
     const declarationKind: string = ts.SyntaxKind[this.declaration.kind];
     let result: string = indent + `+ ${this.astSymbol.localName} (${declarationKind})`;
-    if (this.astSymbol.nominal) {
+    if (this.astSymbol.nominalAnalysis) {
       result += ' (nominal)';
     }
     result += '\n';
@@ -206,7 +206,7 @@ export class AstDeclaration {
       case ts.SyntaxKind.VariableDeclaration:
         return true;
 
-      // NOTE: In contexts where a source file is treated as a module, we do create "nominal"
+      // NOTE: In contexts where a source file is treated as a module, we do create "nominal analysis"
       // AstSymbol objects corresponding to a ts.SyntaxKind.SourceFile node.  However, a source file
       // is NOT considered a nesting structure, and it does NOT act as a root for the declarations
       // appearing in the file.  This is because the *.d.ts generator is in the business of rolling up
