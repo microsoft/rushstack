@@ -8,6 +8,7 @@ import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { IAstImportOptions } from './AstImport';
 import { AstModule } from './AstModule';
+import { TypeScriptInternals } from './TypeScriptInternals';
 
 export interface IAstSymbolTable {
   fetchAstSymbol(followedSymbol: ts.Symbol, addIfMissing: boolean,
@@ -142,7 +143,7 @@ export class ExportAnalyzer {
         break;
       }
 
-      const currentAlias: ts.Symbol = TypeScriptHelpers.getImmediateAliasedSymbol(current, this._typeChecker);
+      const currentAlias: ts.Symbol = TypeScriptInternals.getImmediateAliasedSymbol(current, this._typeChecker);
       // Stop if we reach the end of the chain
       if (!currentAlias || currentAlias === current) {
         break;
@@ -360,7 +361,7 @@ export class ExportAnalyzer {
       throw new InternalError('Unable to parse module specifier');
     }
 
-    const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptHelpers.getResolvedModule(
+    const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
       exportStarDeclaration.getSourceFile(), moduleSpecifier);
 
     if (resolvedModule === undefined) {

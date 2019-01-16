@@ -29,6 +29,7 @@ import { CollectorPackage } from './CollectorPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { DeclarationMetadata } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
+import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 
 /**
  * Options for Collector constructor.
@@ -522,7 +523,7 @@ export class Collector {
     }
 
     const sourceFileText: string = declaration.getSourceFile().text;
-    const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(nodeForComment, sourceFileText) || [];
+    const ranges: ts.CommentRange[] = TypeScriptInternals.getJSDocCommentRanges(nodeForComment, sourceFileText) || [];
 
     if (ranges.length === 0) {
       return undefined;
