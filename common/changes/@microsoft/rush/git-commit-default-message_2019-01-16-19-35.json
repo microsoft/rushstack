@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add ability to configure git commit message",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "raygesualdo@users.noreply.github.com"
+}
