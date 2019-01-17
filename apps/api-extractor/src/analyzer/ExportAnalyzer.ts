@@ -10,6 +10,12 @@ import { IAstImportOptions } from './AstImport';
 import { AstModule } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
 
+/**
+ * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.
+ *
+ * In particular, we want ExportAnalyzer to be able to call AstSymbolTable._fetchAstSymbol() even though it
+ * is a very private API that should not be exposed to any other components.
+ */
 export interface IAstSymbolTable {
   fetchAstSymbol(followedSymbol: ts.Symbol, addIfMissing: boolean,
     astImportOptions: IAstImportOptions | undefined, localName?: string): AstSymbol | undefined;
@@ -17,6 +23,16 @@ export interface IAstSymbolTable {
   analyze(astSymbol: AstSymbol): void;
 }
 
+/**
+ * The ExportAnalyzer is an internal part of AstSymbolTable that has been moved out into its own source file
+ * because it is a complex and mostly self-contained algorithm.
+ *
+ * Its job is to build up AstModule objects by crawling import statements to discover where declarations come from.
+ * This is conceptually the same as the compiler's own TypeChecker.getExportsOfModule(), except that when
+ * ExportAnalyzer encounters a declaration that was imported from an external package, it remembers how it was imported
+ * (i.e. the AstImport object).  Today the compiler API does not expose this information, which is crucial for
+ * generating .d.ts rollups.
+ */
 export class ExportAnalyzer {
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
@@ -32,8 +48,7 @@ export class ExportAnalyzer {
   }
 
   /**
-   * For a given source file, this analyzes all of its exports and produces an AstModule
-   * object.
+   * For a given source file, this analyzes all of its exports and produces an AstModule object.
    */
   public fetchAstModuleBySourceFile(sourceFile: ts.SourceFile, moduleSpecifier: string | undefined): AstModule {
     // Don't traverse into a module that we already processed before:
@@ -112,6 +127,11 @@ export class ExportAnalyzer {
     return astModule;
   }
 
+  /**
+   * For a given symbol (which was encountered in the specified sourceFile), this fetches the AstSymbol that it
+   * refers to.  For example, if a particular interface describes the return value of a function, this API can help
+   * us determine a TSDoc declaration reference for that symbol (if the symbol is exported).
+   */
   public fetchReferencedAstSymbol(symbol: ts.Symbol, sourceFile: ts.SourceFile): AstSymbol | undefined {
     const astModule: AstModule | undefined = this._astModulesBySourceFile.get(sourceFile);
     if (astModule === undefined) {
@@ -129,11 +149,11 @@ export class ExportAnalyzer {
       // Is this symbol an import/export that we need to follow to find the real declaration?
       for (const declaration of current.declarations || []) {
         let matchedAstSymbol: AstSymbol | undefined;
-        matchedAstSymbol = this._matchExportDeclaration(astModule, symbol, declaration);
+        matchedAstSymbol = this._tryMatchExportDeclaration(astModule, symbol, declaration);
         if (matchedAstSymbol !== undefined) {
           return matchedAstSymbol;
         }
-        matchedAstSymbol = this._matchImportDeclaration(astModule, symbol, declaration);
+        matchedAstSymbol = this._tryMatchImportDeclaration(astModule, symbol, declaration);
         if (matchedAstSymbol !== undefined) {
           return matchedAstSymbol;
         }
@@ -156,7 +176,7 @@ export class ExportAnalyzer {
     return this._astSymbolTable.fetchAstSymbol(current, true, undefined);
   }
 
-  private _matchExportDeclaration(astModule: AstModule, exportedSymbol: ts.Symbol,
+  private _tryMatchExportDeclaration(astModule: AstModule, exportedSymbol: ts.Symbol,
     declaration: ts.Declaration): AstSymbol | undefined {
 
     const exportDeclaration: ts.ExportDeclaration | undefined
@@ -199,7 +219,7 @@ export class ExportAnalyzer {
     return undefined;
   }
 
-  private _matchImportDeclaration(astModule: AstModule, exportedSymbol: ts.Symbol,
+  private _tryMatchImportDeclaration(astModule: AstModule, exportedSymbol: ts.Symbol,
     declaration: ts.Declaration): AstSymbol | undefined {
 
     const importDeclaration: ts.ImportDeclaration | undefined
@@ -328,21 +348,29 @@ export class ExportAnalyzer {
     return undefined;
   }
 
-  private _collectExportsFromExportStar(astModule: AstModule, exportStarDeclaration: ts.Declaration): void {
+  /**
+   * Given an ImportDeclaration of the form `export * from "___";`, this copies all the exported declarations
+   * from the source module into the target AstModule.  If the source module is an external package,
+   * it is simply added to targetModule.starExportedExternalModules.  If the source module is a local file,
+   * then all of its contents are copied over.
+   */
+  private _collectExportsFromExportStar(targetAstModule: AstModule, exportStarDeclaration: ts.Declaration): void {
     if (ts.isExportDeclaration(exportStarDeclaration)) {
 
       const starExportedModule: AstModule | undefined = this._fetchSpecifierAstModule(exportStarDeclaration);
       if (starExportedModule !== undefined) {
         if (starExportedModule.isExternal) {
-          astModule.starExportedExternalModules.add(starExportedModule);
+          targetAstModule.starExportedExternalModules.add(starExportedModule);
         } else {
+          // Copy exportedSymbols from the other module
           for (const [exportName, exportedSymbol] of starExportedModule.exportedSymbols) {
-            if (!astModule.exportedSymbols.has(exportName)) {
-              astModule.exportedSymbols.set(exportName, exportedSymbol);
+            if (!targetAstModule.exportedSymbols.has(exportName)) {
+              targetAstModule.exportedSymbols.set(exportName, exportedSymbol);
             }
           }
+          // Copy starExportedExternalModules from the other module
           for (const starExportedExternalModule of starExportedModule.starExportedExternalModules) {
-            astModule.starExportedExternalModules.add(starExportedExternalModule);
+            targetAstModule.starExportedExternalModules.add(starExportedExternalModule);
           }
         }
       }
@@ -353,6 +381,10 @@ export class ExportAnalyzer {
     }
   }
 
+  /**
+   * Given an ImportDeclaration of the form `export * from "___";`, this interprets the module specifier (`"___"`)
+   * and fetches the corresponding AstModule object.
+   */
   private _fetchSpecifierAstModule(exportStarDeclaration: ts.ImportDeclaration | ts.ExportDeclaration): AstModule {
 
     // The name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'

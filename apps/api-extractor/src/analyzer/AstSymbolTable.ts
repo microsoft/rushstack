@@ -19,6 +19,9 @@ import { ExportAnalyzer } from './ExportAnalyzer';
  * AstModule objects, but otherwise the state that it maintains  is agnostic of
  * any particular entry point.  (For example, it does not track whether a given AstSymbol
  * is "exported" or not.)
+ *
+ * Internally, AstSymbolTable relies on ExportAnalyzer to crawl import statements and determine where symbols
+ * are declared (i.e. the AstImport information needed to import them).
  */
 export class AstSymbolTable {
   private readonly _program: ts.Program;
@@ -82,6 +85,7 @@ export class AstSymbolTable {
    * starts from the root symbol and then fills out all children of all declarations, and
    * also calculates AstDeclaration.referencedAstSymbols for all declarations.
    * If the symbol is not imported, any non-imported references are also analyzed.
+   *
    * @remarks
    * This is an expensive operation, so we only perform it for top-level exports of an
    * the AstModule.  For example, if some code references a nested class inside
