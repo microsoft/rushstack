@@ -437,7 +437,8 @@ export class Extractor {
 
       // Write the actual file
       FileSystem.writeFile(actualApiReviewPath, actualApiReviewContent, {
-        ensureFolderExists: true
+        ensureFolderExists: true,
+        convertLineEndings: NewlineKind.CrLf
       });
 
       // Compare it against the expected file
