@@ -2,6 +2,24 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.10",
+      "tag": "@microsoft/api-extractor_v7.0.10",
+      "date": "Thu, 17 Jan 2019 00:37:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for exports of the form `export * from \"____\";`"
+          },
+          {
+            "comment": "Improve the analyzer to allow a declaration to be exported more than once"
+          },
+          {
+            "comment": "Fix inconsistent newlines in .api.ts files"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.9",
       "tag": "@microsoft/api-extractor_v7.0.9",
       "date": "Thu, 10 Jan 2019 01:57:52 GMT",

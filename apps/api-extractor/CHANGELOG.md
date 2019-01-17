@@ -1,6 +1,15 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 10 Jan 2019 01:57:52 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Jan 2019 00:37:54 GMT and should not be manually modified.
+
+## 7.0.10
+Thu, 17 Jan 2019 00:37:54 GMT
+
+### Patches
+
+- Add support for exports of the form `export * from "____";`
+- Improve the analyzer to allow a declaration to be exported more than once
+- Fix inconsistent newlines in .api.ts files
 
 ## 7.0.9
 Thu, 10 Jan 2019 01:57:52 GMT
