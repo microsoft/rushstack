@@ -99,6 +99,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/teams-js",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/ts-command-line",
       "allowedCategories": [ "libraries" ]
     },
