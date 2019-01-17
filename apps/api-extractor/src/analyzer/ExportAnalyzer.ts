@@ -117,7 +117,7 @@ export class ExportAnalyzer {
 
       }
 
-      if (astModule.isExternal) {
+      if (!astModule.isExternal) {
         for (const exportedAstSymbol of astModule.exportedSymbols.values()) {
           this._astSymbolTable.analyze(exportedAstSymbol);
         }
