@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Thu, 10 Jan 2019 01:57:52 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Jan 2019 17:04:09 GMT and should not be manually modified.
+
+## 3.9.2
+Tue, 15 Jan 2019 17:04:09 GMT
+
+### Patches
+
+- Remove karma task.
 
 ## 3.9.1
 Thu, 10 Jan 2019 01:57:52 GMT

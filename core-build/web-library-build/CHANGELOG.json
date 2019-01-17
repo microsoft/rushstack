@@ -2,6 +2,38 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "7.0.0",
+      "tag": "@microsoft/web-library-build_v7.0.0",
+      "date": "Tue, 15 Jan 2019 17:04:09 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Remove karma task."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.1` to `3.9.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.5.37` to `4.5.38`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.2.92` to `3.2.93`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `7.4.7` to `7.4.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.65` to `3.4.66`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.24` to `6.0.25`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.0.45",
       "tag": "@microsoft/web-library-build_v6.0.45",
       "date": "Thu, 10 Jan 2019 01:57:53 GMT",

@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.9.2",
+      "tag": "@microsoft/gulp-core-build_v3.9.2",
+      "date": "Tue, 15 Jan 2019 17:04:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove karma task."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.9.1",
       "tag": "@microsoft/gulp-core-build_v3.9.1",
       "date": "Thu, 10 Jan 2019 01:57:52 GMT",

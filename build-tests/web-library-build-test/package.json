@@ -15,8 +15,8 @@
     "ts-jest": "~22.4.6",
     "@types/jest": "23.3.11",
     "@microsoft/rush-stack-compiler-3.0": "0.3.4",
-    "@microsoft/load-themed-styles": "1.8.53",
-    "@microsoft/web-library-build": "6.0.45",
+    "@microsoft/load-themed-styles": "1.8.54",
+    "@microsoft/web-library-build": "7.0.0",
     "gulp": "~3.9.1"
   }
 }
