@@ -8,7 +8,7 @@ import { AstDeclaration } from './AstDeclaration';
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstImport, IAstImportOptions } from './AstImport';
-import { AstModule } from './AstModule';
+import { AstModule, AstModuleExportInfo } from './AstModule';
 import { PackageMetadataManager } from './PackageMetadataManager';
 import { ILogger } from '../api/ILogger';
 import { ExportAnalyzer } from './ExportAnalyzer';
@@ -74,6 +74,10 @@ export class AstSymbolTable {
    */
   public fetchEntryPointModule(sourceFile: ts.SourceFile): AstModule {
     return this._exportAnalyzer.fetchAstModuleBySourceFile(sourceFile, undefined);
+  }
+
+  public fetchAstModuleExportInfo(astModule: AstModule): AstModuleExportInfo {
+    return this._exportAnalyzer.fetchAstModuleExportInfo(astModule);
   }
 
   public fetchReferencedAstSymbol(symbol: ts.Symbol, sourceFile: ts.SourceFile): AstSymbol | undefined {
