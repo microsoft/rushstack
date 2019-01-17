@@ -437,7 +437,8 @@ export class Extractor {
 
       // Write the actual file
       FileSystem.writeFile(actualApiReviewPath, actualApiReviewContent, {
-        ensureFolderExists: true
+        ensureFolderExists: true,
+        convertLineEndings: NewlineKind.CrLf
       });
 
       // Compare it against the expected file
@@ -458,7 +459,10 @@ export class Extractor {
             this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
               + ` Updating ${expectedApiReviewShortPath}`);
 
-            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent);
+            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent, {
+              ensureFolderExists: true,
+              convertLineEndings: NewlineKind.CrLf
+            });
           }
         } else {
           this._monitoredLogger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);

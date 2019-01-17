@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 /** @public */
-class X {
-}
+export class X { }
+export { X as Y }
 
-export { X }
-
-// TODO: "Internal Error: The symbol Y was also exported as X; this is not supported yet"
-// export { X as Y}
+/** @public */
+class A { }
+export { A as B }
+export { A as C }

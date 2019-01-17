@@ -76,8 +76,13 @@ export function runScenarios(buildConfigPath: string): void {
     // See GitHub issue https://github.com/Microsoft/web-build-tools/issues/1018
     FileSystem.writeFile(`./etc/test-outputs/${scenarioFolderName}/api-extractor-scenarios.api.ts`, '',
       { ensureFolderExists: true });
+  }
+
+  for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
+    const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
 
     // Run the API Extractor command-line
     executeCommand(apiExtractorBinary, ['run', '--local', '--config', apiExtractorJsonPath]);
   }
+
 }

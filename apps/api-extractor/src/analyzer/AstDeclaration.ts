@@ -29,7 +29,7 @@ export interface IAstDeclarationOptions {
  * of analyzing AEDoc and emitting *.d.ts files.
  *
  * The AstDeclarations correspond to items from the compiler's ts.Node hierarchy, but
- * omitting/skipping any nodes that don't match the SymbolAnalyzer.isAstDeclaration()
+ * omitting/skipping any nodes that don't match the AstDeclaration.isSupportedSyntaxKind()
  * criteria.  This simplification makes the other API Extractor stages easier to implement.
  */
 export class AstDeclaration {
@@ -121,7 +121,7 @@ export class AstDeclaration {
   public getDump(indent: string = ''): string {
     const declarationKind: string = ts.SyntaxKind[this.declaration.kind];
     let result: string = indent + `+ ${this.astSymbol.localName} (${declarationKind})`;
-    if (this.astSymbol.nominal) {
+    if (this.astSymbol.nominalAnalysis) {
       result += ' (nominal)';
     }
     result += '\n';
@@ -180,4 +180,40 @@ export class AstDeclaration {
       child.forEachDeclarationRecursive(action);
     }
   }
+
+  /**
+   * This function determines which ts.Node kinds will generate an AstDeclaration.
+   * These correspond to the definitions that we can add AEDoc to.
+   */
+  public static isSupportedSyntaxKind(kind: ts.SyntaxKind): boolean {
+    // (alphabetical order)
+    switch (kind) {
+      case ts.SyntaxKind.CallSignature:
+      case ts.SyntaxKind.ClassDeclaration:
+      case ts.SyntaxKind.ConstructSignature:    // Example: "new(x: number): IMyClass"
+      case ts.SyntaxKind.Constructor:           // Example: "constructor(x: number)"
+      case ts.SyntaxKind.EnumDeclaration:
+      case ts.SyntaxKind.EnumMember:
+      case ts.SyntaxKind.FunctionDeclaration:   // Example: "(x: number): number"
+      case ts.SyntaxKind.IndexSignature:        // Example: "[key: string]: string"
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.MethodDeclaration:
+      case ts.SyntaxKind.MethodSignature:
+      case ts.SyntaxKind.ModuleDeclaration:     // Used for both "module" and "namespace" declarations
+      case ts.SyntaxKind.PropertyDeclaration:
+      case ts.SyntaxKind.PropertySignature:
+      case ts.SyntaxKind.TypeAliasDeclaration:  // Example: "type Shape = Circle | Square"
+      case ts.SyntaxKind.VariableDeclaration:
+        return true;
+
+      // NOTE: In contexts where a source file is treated as a module, we do create "nominal analysis"
+      // AstSymbol objects corresponding to a ts.SyntaxKind.SourceFile node.  However, a source file
+      // is NOT considered a nesting structure, and it does NOT act as a root for the declarations
+      // appearing in the file.  This is because the *.d.ts generator is in the business of rolling up
+      // source files, and thus wants to ignore them in general.
+    }
+
+    return false;
+  }
+
 }
