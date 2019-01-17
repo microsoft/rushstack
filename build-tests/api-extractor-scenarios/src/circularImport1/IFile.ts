@@ -3,6 +3,7 @@
 
 import { IFolder } from "./IFolder";
 
-export interface IFile {
+/** @public */
+export class IFile {
   containingFolder: IFolder;
 }
