@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 17 Jan 2019 00:37:54 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Jan 2019 00:52:21 GMT and should not be manually modified.
+
+## 7.0.11
+Fri, 18 Jan 2019 00:52:21 GMT
+
+### Patches
+
+- Add support for circular references between files that use `export * from "____";`
 
 ## 7.0.10
 Thu, 17 Jan 2019 00:37:54 GMT

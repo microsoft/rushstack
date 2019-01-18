@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.11",
+      "tag": "@microsoft/api-extractor_v7.0.11",
+      "date": "Fri, 18 Jan 2019 00:52:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for circular references between files that use `export * from \"____\";`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.10",
       "tag": "@microsoft/api-extractor_v7.0.10",
       "date": "Thu, 17 Jan 2019 00:37:54 GMT",
