@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 18 Jan 2019 00:52:21 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Jan 2019 22:04:59 GMT and should not be manually modified.
+
+## 7.0.17
+Fri, 18 Jan 2019 22:04:59 GMT
+
+### Patches
+
+- MarkdownEmitter: break for inline tags
 
 ## 7.0.16
 Fri, 18 Jan 2019 00:52:21 GMT
