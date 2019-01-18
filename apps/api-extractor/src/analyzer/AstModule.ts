@@ -5,29 +5,43 @@ import * as ts from 'typescript';
 
 import { AstSymbol } from './AstSymbol';
 
+export class AstModuleExportInfo {
+  public readonly exportedLocalSymbols: Map<string, AstSymbol> = new Map<string, AstSymbol>();
+  public readonly starExportedExternalModules: Set<AstModule> = new Set<AstModule>();
+}
+
 /**
+ * An internal data structure that represents a source file that is analyzed by AstSymbolTable.
  */
 export class AstModule {
   public readonly sourceFile: ts.SourceFile;
-
-  public readonly exportedSymbols: Map<string, AstSymbol>;
-  public readonly starExportedExternalModules: Set<AstModule>;
+  public readonly moduleSymbol: ts.Symbol;
 
   /**
    * Example:  "@microsoft/node-core-library/lib/FileSystem"
    * but never: "./FileSystem"
    */
-  public externalModulePath: string | undefined;
+  public readonly externalModulePath: string | undefined;
 
-  public constructor(sourceFile: ts.SourceFile) {
+  public readonly starExportedModules: Set<AstModule>;
+
+  public readonly cachedExportedSymbols: Map<string, AstSymbol>;
+
+  public astModuleExportInfo: AstModuleExportInfo | undefined;
+
+  public constructor(sourceFile: ts.SourceFile, moduleSymbol: ts.Symbol, externalModulePath: string | undefined) {
     this.sourceFile = sourceFile;
-    this.exportedSymbols = new Map<string, AstSymbol>();
-    this.starExportedExternalModules = new Set<AstModule>();
-    this.externalModulePath = undefined;
+    this.moduleSymbol = moduleSymbol;
+    this.externalModulePath = externalModulePath;
+
+    this.starExportedModules = new Set<AstModule>();
+
+    this.cachedExportedSymbols = new Map<string, AstSymbol>();
+
+    this.astModuleExportInfo = undefined;
   }
 
   public get isExternal(): boolean {
     return this.externalModulePath !== undefined;
   }
-
 }

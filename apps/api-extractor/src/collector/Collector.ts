@@ -20,7 +20,7 @@ import {
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable } from '../analyzer/AstSymbolTable';
-import { AstModule } from '../analyzer/AstModule';
+import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -196,7 +196,9 @@ export class Collector {
     const exportedAstSymbols: AstSymbol[] = [];
 
     // Create a CollectorEntity for each top-level export
-    for (const [exportName, astSymbol] of astEntryPoint.exportedSymbols) {
+
+    const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
+    for (const [exportName, astSymbol] of astModuleExportInfo.exportedLocalSymbols) {
       this._createEntityForSymbol(astSymbol, exportName);
 
       exportedAstSymbols.push(astSymbol);
@@ -214,7 +216,7 @@ export class Collector {
 
     this._makeUniqueNames();
 
-    for (const starExportedExternalModule of astEntryPoint.starExportedExternalModules) {
+    for (const starExportedExternalModule of astModuleExportInfo.starExportedExternalModules) {
       if (starExportedExternalModule.externalModulePath !== undefined) {
         this._starExportedExternalModulePaths.push(starExportedExternalModule.externalModulePath);
       }
