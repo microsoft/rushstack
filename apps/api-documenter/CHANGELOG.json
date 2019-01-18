@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.17",
+      "tag": "@microsoft/api-documenter_v7.0.17",
+      "date": "Fri, 18 Jan 2019 22:04:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "MarkdownEmitter: break for inline tags"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.16",
       "tag": "@microsoft/api-documenter_v7.0.16",
       "date": "Fri, 18 Jan 2019 00:52:21 GMT",
