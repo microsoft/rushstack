@@ -169,6 +169,9 @@ export class MarkdownEmitter {
         this.writePlainText(docErrorText.text, context);
         break;
       }
+      case DocNodeKind.InlineTag: {
+        break;
+      }
       default:
         throw new Error('Unsupported element kind: ' + docNode.kind);
     }
