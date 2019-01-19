@@ -624,6 +624,7 @@ interface IExtractorConfig {
   extends?: string;
   policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
+  skipLibCheck?: boolean;
   validationRules?: IExtractorValidationRulesConfig;
 }
 
@@ -643,7 +644,6 @@ interface IExtractorOptions {
   compilerProgram?: ts.Program;
   customLogger?: Partial<ILogger>;
   localBuild?: boolean;
-  skipLibCheck?: boolean;
   // @beta
   typescriptCompilerFolder?: string;
 }

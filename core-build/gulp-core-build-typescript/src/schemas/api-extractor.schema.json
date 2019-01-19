@@ -9,47 +9,6 @@
     "$schema": {
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
       "type": "string"
-    },
-
-    "enabled": {
-      "description": "Indicates whether the task should be run",
-      "type": "boolean"
-    },
-    "entry": {
-      "description": "The file path of the exported entry point, relative to the project folder",
-      "type": "string"
-    },
-    "apiReviewFolder": {
-      "description": "The file path of the folder containing already approved API files, relative to the project folder.",
-      "type": "string"
-    },
-    "apiJsonFolder": {
-      "description": "The file path of the folder containing the *.api.json output file containing API information, relative to the project folder.",
-      "type": "string"
-    },
-    "generateDtsRollup": {
-      "description": "If true, then API Extractor will generate *.d.ts rollup files for this project.",
-      "type": "boolean"
-    },
-    "dtsRollupTrimming": {
-      "description": "Only used if generateDtsRollup=true.  If dtsRollupTrimming=true, then API Extractor will generate separate *.d.ts rollup files for internal, beta, and public release types; otherwise a single *.d.ts file will be generated with no trimming.",
-      "type": "boolean"
-    },
-    "publishFolderForInternal": {
-      "description": "This setting is only used if \"dtsRollupTrimming\" is true. It indicates the folder where \"npm publish\" will be run for an internal release. The default value is \"./dist/internal\". An internal release will contain all definitions that are reachable from the entry point.",
-      "type": "string"
-    },
-    "publishFolderForBeta": {
-      "description": "This setting is only used if \"dtsRollupTrimming\" is true. It indicates the folder where \"npm publish\" will be run for a beta release. The default value is \"./dist/beta\". A beta release will contain all definitions that are reachable from the entry point, except definitions marked as @alpha or @internal.",
-      "type": "string"
-    },
-    "publishFolderForPublic": {
-      "description": "This setting is only used if \"dtsRollupTrimming\" is true. It indicates the folder where \"npm publish\" will be run for a public release. The default value is \"./dist/public\". A public release will contain all definitions that are reachable from the entry point, except definitions marked as @beta, @alpha, or @internal.",
-      "type": "string"
-    },
-    "skipLibCheck": {
-      "description": "This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it may be required when dependencies contain declarations that are incompatible with the TypeScript engine that API Extractor uses for its analysis. If this option is used, it is strongly recommended that broken dependencies be fixed or upgraded.",
-      "type": "boolean"
     }
   },
   "required": [ "enabled" ],
