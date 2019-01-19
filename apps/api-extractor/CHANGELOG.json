@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.12",
+      "tag": "@microsoft/api-extractor_v7.0.12",
+      "date": "Sat, 19 Jan 2019 01:17:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where files using \"export=\" were incorrectly interpreted as having ambient declarations"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.11",
       "tag": "@microsoft/api-extractor_v7.0.11",
       "date": "Fri, 18 Jan 2019 00:52:21 GMT",
