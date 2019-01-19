@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.0",
+      "comment": "Expose api extractor API.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.0",
+  "email": "iclanton@users.noreply.github.com"
+}
