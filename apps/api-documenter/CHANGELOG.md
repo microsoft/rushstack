@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 18 Jan 2019 22:04:59 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Jan 2019 01:17:51 GMT and should not be manually modified.
+
+## 7.0.18
+Sat, 19 Jan 2019 01:17:51 GMT
+
+### Patches
+
+- [api-documenter] Enable Office snippets to match multiple versions
 
 ## 7.0.17
 Fri, 18 Jan 2019 22:04:59 GMT

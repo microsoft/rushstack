@@ -2,6 +2,23 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.18",
+      "tag": "@microsoft/api-documenter_v7.0.18",
+      "date": "Sat, 19 Jan 2019 01:17:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "[api-documenter] Enable Office snippets to match multiple versions"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.11` to `7.0.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.17",
       "tag": "@microsoft/api-documenter_v7.0.17",
       "date": "Fri, 18 Jan 2019 22:04:59 GMT",

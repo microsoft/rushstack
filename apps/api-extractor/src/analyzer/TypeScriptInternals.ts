@@ -58,4 +58,11 @@ export class TypeScriptInternals {
 
     return (ts as any).getResolvedModule(sourceFile, moduleNameText);
   }
+
+  /**
+   * Returns ts.Symbol.parent if it exists.
+   */
+  public static getSymbolParent(symbol: ts.Symbol): ts.Symbol | undefined {
+    return (symbol as any).parent;
+  }
 }
