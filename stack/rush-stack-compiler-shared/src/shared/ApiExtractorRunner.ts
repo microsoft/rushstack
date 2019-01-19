@@ -7,6 +7,7 @@ import {
   IExtractorOptions,
   IExtractorConfig
 } from '@microsoft/api-extractor';
+import * as ApiExtractor from '@microsoft/api-extractor';
 
 import { RushStackCompilerBase } from './RushStackCompilerBase';
 import { ToolPaths } from './ToolPaths';
@@ -18,6 +19,7 @@ import { ToolPaths } from './ToolPaths';
  * @beta
  */
 export class ApiExtractorRunner extends RushStackCompilerBase {
+  public static apiExtractor: typeof ApiExtractor = ApiExtractor;
   private _extractorConfig: IExtractorConfig;
   private _extractorOptions: IExtractorOptions;
 
