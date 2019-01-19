@@ -2,6 +2,31 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "8.0.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.0",
+      "date": "Sat, 19 Jan 2019 03:47:47 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Update api extractor task to use api extractor's config file."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Upgrade to use API Extractor 7 beta"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-2.7\" from `0.3.4` to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.2` to `3.9.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.4.8",
       "tag": "@microsoft/gulp-core-build-typescript_v7.4.8",
       "date": "Tue, 15 Jan 2019 17:04:09 GMT",

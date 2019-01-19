@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 19 Jan 2019 01:17:51 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Jan 2019 03:47:47 GMT and should not be manually modified.
+
+## 7.0.13
+Sat, 19 Jan 2019 03:47:47 GMT
+
+### Patches
+
+- Move the skipLibCheck into the config file.
 
 ## 7.0.12
 Sat, 19 Jan 2019 01:17:51 GMT
