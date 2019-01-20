@@ -36,6 +36,15 @@ export class TypeScriptHelpers {
   }
 
   /**
+   * Certain virtual symbols do not have any declarations.  For example, `ts.TypeChecker.getExportsOfModule()` can
+   * sometimes return a "prototype" symbol for an object, even though there is no corresponding declaration in the
+   * source code.  API Extractor generally ignores such symbols.
+   */
+  public static hasAnyDeclarations(symbol: ts.Symbol): boolean {
+    return symbol.declarations && symbol.declarations.length > 0;
+  }
+
+  /**
    * Returns true if the specified symbol is an ambient declaration.
    */
   public static isAmbient(symbol: ts.Symbol, typeChecker: ts.TypeChecker): boolean {

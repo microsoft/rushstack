@@ -2,6 +2,41 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.19",
+      "tag": "@microsoft/api-documenter_v7.0.19",
+      "date": "Sat, 19 Jan 2019 03:47:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.12` to `7.0.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.4` to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.25` to `6.0.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.18",
+      "tag": "@microsoft/api-documenter_v7.0.18",
+      "date": "Sat, 19 Jan 2019 01:17:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "[api-documenter] Enable Office snippets to match multiple versions"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.11` to `7.0.12`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.17",
       "tag": "@microsoft/api-documenter_v7.0.17",
       "date": "Fri, 18 Jan 2019 22:04:59 GMT",

@@ -2,6 +2,21 @@
   "name": "@microsoft/rush-stack-compiler-3.0",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@microsoft/rush-stack-compiler-3.0_v0.4.0",
+      "date": "Sat, 19 Jan 2019 03:47:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose api extractor API."
+          },
+          {
+            "comment": "Upgrade to use API Extractor 7 beta"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.4",
       "tag": "@microsoft/rush-stack-compiler-3.0_v0.3.4",
       "date": "Thu, 10 Jan 2019 01:57:53 GMT",

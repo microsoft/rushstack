@@ -1,6 +1,17 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 15 Jan 2019 17:04:09 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Jan 2019 03:47:47 GMT and should not be manually modified.
+
+## 8.0.0
+Sat, 19 Jan 2019 03:47:47 GMT
+
+### Breaking changes
+
+- Update api extractor task to use api extractor's config file.
+
+### Minor changes
+
+- Upgrade to use API Extractor 7 beta
 
 ## 7.4.8
 Tue, 15 Jan 2019 17:04:09 GMT

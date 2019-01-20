@@ -4,6 +4,7 @@
     "circularImport1",
     "circularImport2",
     "exportDuplicate1",
+    "exportEquals",
     "exportImportedExternal",
     "exportStar1",
     "exportStar2",
