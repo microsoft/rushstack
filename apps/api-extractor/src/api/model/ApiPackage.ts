@@ -53,6 +53,15 @@ export interface IApiPackageJson extends IApiItemJson {
 }
 
 /**
+ * Options for {@link ApiPackage.saveToJsonFile}.
+ * @public
+ */
+export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
+  /** {@inheritDoc IExtractorConfig.testMode} */
+  testMode?: boolean;
+}
+
+/**
  * Represents an NPM package containing API declarations.
  *
  * @remarks
@@ -98,11 +107,15 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     return this.findMembersByName(importPath) as ReadonlyArray<ApiEntryPoint>;
   }
 
-  public saveToJsonFile(apiJsonFilename: string, options?: IJsonFileSaveOptions): void {
+  public saveToJsonFile(apiJsonFilename: string, options?: IApiPackageSaveOptions): void {
+    if (!options) {
+      options = {};
+    }
+
     const jsonObject: IApiPackageJson = {
       metadata: {
         toolPackage: Extractor.packageName,
-        toolVersion: Extractor.version,
+        toolVersion: options.testMode ? '' : Extractor.version,
         schemaVersion: ApiJsonSchemaVersion.V_1000
       }
     } as IApiPackageJson;

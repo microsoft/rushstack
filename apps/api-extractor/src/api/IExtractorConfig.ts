@@ -309,4 +309,11 @@ export interface IExtractorConfig {
    * This option only applies when compiler.config.configType is set to "tsconfig"
    */
   skipLibCheck?: boolean;
+
+  /**
+   * Set to true invoking API Extractor's test harness.
+   * @remarks
+   * Blanks out the "toolVersion" field in .api.json files to prevent spurious diffs.
+   */
+  testMode?: boolean;
 }
