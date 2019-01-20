@@ -311,9 +311,10 @@ export interface IExtractorConfig {
   skipLibCheck?: boolean;
 
   /**
-   * Set to true invoking API Extractor's test harness.
+   * Set to true when invoking API Extractor's test harness.
    * @remarks
-   * Blanks out the "toolVersion" field in .api.json files to prevent spurious diffs.
+   * When `testMode` is true, the `toolVersion` field in the .api.json file is assigned an empty string
+   * to prevent spurious diffs in output files tracked for tests.
    */
   testMode?: boolean;
 }
