@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.3.0",
+      "tag": "@microsoft/gulp-core-build-serve_v3.3.0",
+      "date": "Mon, 21 Jan 2019 17:04:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added rootFolder option to adjust base folder for gulp serve"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.94",
       "tag": "@microsoft/gulp-core-build-serve_v3.2.94",
       "date": "Sat, 19 Jan 2019 03:47:47 GMT",
