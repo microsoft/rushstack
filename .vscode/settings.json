@@ -15,6 +15,7 @@
     "lib": true,
     "lib-amd": true,
     "temp": true,
+    "**/test/**/temp": false,
     "coverage": true
   }
 }
