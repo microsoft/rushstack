@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Test package a",
   "scripts": {
-    "build": "fake_build_task_but_works_with_mock"
+    "build": "fake_build_task_but_works_with_mock",
+    "rebuild": "fake_REbuild_task_but_works_with_mock"
   }
 }

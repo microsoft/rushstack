@@ -178,6 +178,8 @@ export class RushCommandLineParser extends CommandLineParser {
     if (!this.tryGetAction('rebuild')) {
       this.addAction(new BulkScriptAction({
         actionName: 'rebuild',
+        // To remain compatible with existing repos, `rebuild` defaults to calling the `build` command in each repo.
+        commandToRun: 'build',
         summary: 'Clean and rebuild the entire set of projects',
         documentation: 'This command assumes that the package.json file for each project contains'
           + ' a "scripts" entry for "npm run build" that performs a full clean build.'
