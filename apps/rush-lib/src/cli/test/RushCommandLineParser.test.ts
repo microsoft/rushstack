@@ -27,7 +27,7 @@ function getParserTestContext(repoName: string, taskName: string): IParserTestCo
   chdir(resolve(__dirname, repoName));
 
   // The `build` task is hard-coded to be incremental. So delete the `package-deps.json` files in
-  // the test repo to override so the test actually runs.
+  // the test repo to guarantee the test actually runs.
   FileSystem.deleteFile(resolve(__dirname, `${repoName}/a/package-deps.json`));
   FileSystem.deleteFile(resolve(__dirname, `${repoName}/b/package-deps.json`));
 
@@ -80,7 +80,7 @@ describe('RushCommandLineParser', () => {
     describe('in basic repo', () => {
       describe(`'build' action`, () => {
         it(`executes the package's 'build' script`, () => {
-          const repoName: string = 'basicBuildActionRepo';
+          const repoName: string = 'basicAndRunBuildActionRepo';
           const context: IParserTestContext = getParserTestContext(repoName, 'build');
 
           expect.assertions(8);
@@ -114,7 +114,7 @@ describe('RushCommandLineParser', () => {
 
       describe(`'rebuild' action`, () => {
         it(`executes the package's 'build' script`, () => {
-          const repoName: string = 'basicRebuildActionRepo';
+          const repoName: string = 'basicAndRunRebuildActionRepo';
           const context: IParserTestContext = getParserTestContext(repoName, 'rebuild');
 
           expect.assertions(8);
@@ -150,7 +150,7 @@ describe('RushCommandLineParser', () => {
     describe(`in repo with 'rebuild' command overridden`, () => {
       describe(`'build' action`, () => {
         it(`executes the package's 'build' script`, () => {
-          const repoName: string = 'overriddenBuildActionRepo';
+          const repoName: string = 'overrideRebuildAndRunBuildActionRepo';
           const context: IParserTestContext = getParserTestContext(repoName, 'build');
 
           expect.assertions(8);
@@ -184,7 +184,7 @@ describe('RushCommandLineParser', () => {
 
       describe(`'rebuild' action`, () => {
         it(`executes the package's 'rebuild' (not 'build') script`, () => {
-          const repoName: string = 'overriddenRebuildActionRepo';
+          const repoName: string = 'overrideRebuildAndRunRebuildActionRepo';
           const context: IParserTestContext = getParserTestContext(repoName, 'rebuild');
 
           expect.assertions(8);
