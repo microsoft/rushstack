@@ -26,7 +26,7 @@
     "resolve": "1.8.1"
   },
   "devDependencies": {
-    "tslint-microsoft-contrib": "~5.2.1",
+    "tslint-microsoft-contrib": "~6.0.0",
     "@microsoft/api-extractor": "7.0.12",
     "@microsoft/node-library-build": "6.0.15",
     "@types/glob": "5.0.30",
