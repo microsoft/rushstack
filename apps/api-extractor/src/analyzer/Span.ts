@@ -270,6 +270,22 @@ export class Span {
   }
 
   /**
+   * Returns the first parent node with the specified  SyntaxKind, or undefined if there is no match.
+   */
+  public findFirstParent(kindToMatch: ts.SyntaxKind): Span | undefined {
+    let current: Span | undefined = this;
+
+    while (current) {
+      if (current.kind === kindToMatch) {
+        return current;
+      }
+      current = current.parent;
+    }
+
+    return undefined;
+  }
+
+  /**
    * Starting from the first character of this span, walk backwards until we find the start of the line,
    * and return that whitespace.
    */

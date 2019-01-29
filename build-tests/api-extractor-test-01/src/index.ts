@@ -113,4 +113,4 @@ export { ReexportedClass3 as ReexportedClass } from './ReexportedClass3/Reexport
 export { TypeReferencesInAedoc } from './TypeReferencesInAedoc';
 export { ReferenceLibDirective } from './ReferenceLibDirective';
 
-export { VARIABLE } from './variableDeclarations';
+export { VARIABLE, NamespaceContainingVariable } from './variableDeclarations';

@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.5.2",
+  "rushVersion": "5.5.4",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "2.17.3",
+  "pnpmVersion": "2.25.1",
 
   // "npmVersion": "4.5.0",
   // "yarnVersion": "1.9.4",
@@ -64,7 +64,7 @@
    * uncomment this line. Note this is effectively like running "rush check" before the following:
    *   rush install, rush update, rush link, rush version, rush publish
    * In some cases you may want this turned on, but need to allow some packages to use a different
-   * version. In those cases, you will need to add an entry to the "allowedAlternateVersions"
+   * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
    * section of the common-versions.json.
    */
    "ensureConsistentVersions": true,
@@ -302,6 +302,30 @@
 
     // "build-tests" folder (alphabetical order)
     {
+      "packageName": "api-documenter-test",
+      "projectFolder": "build-tests/api-documenter-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-lib1-test",
+      "projectFolder": "build-tests/api-extractor-lib1-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-lib2-test",
+      "projectFolder": "build-tests/api-extractor-lib2-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-scenarios",
+      "projectFolder": "build-tests/api-extractor-scenarios",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "api-extractor-test-01",
       "projectFolder": "build-tests/api-extractor-test-01",
       "reviewCategory": "tests",
@@ -322,12 +346,6 @@
     {
       "packageName": "api-extractor-test-04",
       "projectFolder": "build-tests/api-extractor-test-04",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "api-extractor-test-05",
-      "projectFolder": "build-tests/api-extractor-test-05",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -395,12 +413,6 @@
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-karma",
-      "projectFolder": "core-build/gulp-core-build-karma",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/gulp-core-build-mocha",
@@ -503,12 +515,6 @@
     {
       "packageName": "@microsoft/rush-stack",
       "projectFolder": "stack/rush-stack",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler",
-      "projectFolder": "stack/rush-stack-compiler",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

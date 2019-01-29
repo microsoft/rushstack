@@ -2,6 +2,199 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.13",
+      "tag": "@microsoft/api-extractor_v7.0.13",
+      "date": "Sat, 19 Jan 2019 03:47:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Move the skipLibCheck into the config file."
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.12",
+      "tag": "@microsoft/api-extractor_v7.0.12",
+      "date": "Sat, 19 Jan 2019 01:17:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where files using \"export=\" were incorrectly interpreted as having ambient declarations"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.11",
+      "tag": "@microsoft/api-extractor_v7.0.11",
+      "date": "Fri, 18 Jan 2019 00:52:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for circular references between files that use `export * from \"____\";`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.10",
+      "tag": "@microsoft/api-extractor_v7.0.10",
+      "date": "Thu, 17 Jan 2019 00:37:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for exports of the form `export * from \"____\";`"
+          },
+          {
+            "comment": "Improve the analyzer to allow a declaration to be exported more than once"
+          },
+          {
+            "comment": "Fix inconsistent newlines in .api.ts files"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.9",
+      "tag": "@microsoft/api-extractor_v7.0.9",
+      "date": "Thu, 10 Jan 2019 01:57:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with rolling up default exports (https://github.com/Microsoft/web-build-tools/issues/1007)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.3` to `3.9.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.8",
+      "tag": "@microsoft/api-extractor_v7.0.8",
+      "date": "Thu, 20 Dec 2018 17:04:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where it was possible to import forgotten declarations from a .d.ts rollup, even though they did not have an explicit \"export\" modifier"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.7",
+      "tag": "@microsoft/api-extractor_v7.0.7",
+      "date": "Wed, 19 Dec 2018 05:57:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Extend ApiModel to support new item kinds: ApiCallSignature, ApiConstructor, ApiConstructSignature, ApiFunction, ApiIndexSignature, ApiTypeAlias, and ApiVariable"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.2` to `3.8.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.6",
+      "tag": "@microsoft/api-extractor_v7.0.6",
+      "date": "Fri, 14 Dec 2018 19:43:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update web site URLs"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.5",
+      "tag": "@microsoft/api-extractor_v7.0.5",
+      "date": "Thu, 13 Dec 2018 02:58:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove unused jju dependency"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.1` to `3.8.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.4",
+      "tag": "@microsoft/api-extractor_v7.0.4",
+      "date": "Wed, 12 Dec 2018 17:04:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reintroduce support for \"extends\" and \"implements\" heritage clauses"
+          },
+          {
+            "comment": "Redesign the Excerpt API to support multiple subranges (e.g. for a list of \"implements\" clauses)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.0` to `3.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.3",
+      "tag": "@microsoft/api-extractor_v7.0.3",
+      "date": "Fri, 07 Dec 2018 17:04:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Added more API documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.7.1` to `3.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.2` to `4.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.2",
+      "tag": "@microsoft/api-extractor_v7.0.2",
+      "date": "Wed, 05 Dec 2018 19:57:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix reexported types from an external package for dts rollup"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.1",
+      "tag": "@microsoft/api-extractor_v7.0.1",
+      "date": "Wed, 05 Dec 2018 17:04:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where .d.ts trimming did not properly handle variable declarations (GitHub #976)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.0",
       "tag": "@microsoft/api-extractor_v7.0.0",
       "date": "Thu, 29 Nov 2018 07:02:09 GMT",

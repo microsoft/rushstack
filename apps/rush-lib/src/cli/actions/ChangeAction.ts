@@ -44,7 +44,7 @@ export class ChangeAction extends BaseRushAction {
 
   constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
-      'Asks a series of questions and then generates a <branchname>-<timstamp>.json file ' +
+      'Asks a series of questions and then generates a <branchname>-<timestamp>.json file ' +
       'in the common folder. The `publish` command will consume these files and perform the proper ' +
       'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
       '',
@@ -451,6 +451,8 @@ export class ChangeAction extends BaseRushAction {
           console.log(`Not overwriting ${filePath}...`);
           return Promise.resolve();
         }
+      }).catch((error) => {
+        console.error(colors.red(error.message));
       });
     }
 

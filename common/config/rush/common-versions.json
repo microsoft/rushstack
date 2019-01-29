@@ -36,9 +36,6 @@
      * For example, allow some projects to use an older TypeScript compiler
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
-     "@microsoft/api-extractor": [
-       "6.0.9"
-     ],
      "typescript": [
        "~2.4.2",
        "~2.7.2",

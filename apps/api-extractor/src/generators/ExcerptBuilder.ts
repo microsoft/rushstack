@@ -5,75 +5,89 @@ import * as ts from 'typescript';
 import {
   ExcerptToken,
   ExcerptTokenKind,
-  IDeclarationExcerpt,
-  ExcerptName,
-  IExcerptToken
+  IExcerptToken,
+  IExcerptTokenRange
 } from '../api/mixins/Excerpt';
 import { Span } from '../analyzer/Span';
 
-export interface IExcerptBuilderEmbeddedExcerpt {
-  embeddedExcerptName: ExcerptName;
+/**
+ * Used to provide ExcerptBuilder with a list of nodes whose token range we want to capture.
+ */
+export interface IExcerptBuilderNodeToCapture {
+  /**
+   * The node to capture
+   */
   node: ts.Node | undefined;
+  /**
+   * The token range whose startIndex/endIndex will be overwritten with the indexes for the
+   * tokens corresponding to IExcerptBuilderNodeToCapture.node
+   */
+  tokenRange: IExcerptTokenRange;
 }
 
+/**
+ * Options for ExcerptBuilder
+ */
 export interface ISignatureBuilderOptions {
+  /**
+   * The AST node that we will traverse to extract tokens
+   */
+
   startingNode: ts.Node;
+  /**
+   * An AST node to stop at (e.g. the "{" after a class declaration).
+   * If omitted, then all child nodes for `startingNode` will be processed
+   */
   nodeToStopAt?: ts.SyntaxKind;
-  embeddedExcerpts?: IExcerptBuilderEmbeddedExcerpt[];
+
+  /**
+   * A list of child nodes whose token ranges we want to capture
+   */
+  nodesToCapture?: IExcerptBuilderNodeToCapture[];
 }
 
+/**
+ * Internal state for ExcerptBuilder
+ */
 interface IBuildSpanState {
   nodeToStopAt?: ts.SyntaxKind;
-  nameByNode: Map<ts.Node, ExcerptName>;
-  remainingExcerptNames: Set<ExcerptName>;
+  tokenRangesByNode: Map<ts.Node, IExcerptTokenRange>;
 
   /**
    * Normally adjacent tokens of the same kind get merged, to avoid creating lots of unnecessary extra tokens.
-   * However when an embedded excerpt needs to start/end at a specific character, we temporarily disable merging by
+   * However when an captured excerpt needs to start/end at a specific character, we temporarily disable merging by
    * setting this flag.  After the new token is added, this flag is cleared.
    */
   disableMergingForNextToken: boolean;
 }
 
 export class ExcerptBuilder {
-  public static build(options: ISignatureBuilderOptions): IDeclarationExcerpt {
+  public static build(options: ISignatureBuilderOptions): IExcerptToken[] {
     const span: Span = new Span(options.startingNode);
 
-    const remainingExcerptNames: Set<ExcerptName> = new Set<ExcerptName>();
-
-    const nameByNode: Map<ts.Node, ExcerptName> = new Map<ts.Node, ExcerptName>();
-    for (const excerpt of options.embeddedExcerpts || []) {
-      // Collect all names
-      remainingExcerptNames.add(excerpt.embeddedExcerptName);
-
-      // If nodes were specify, add them to our map so we will look for them
+    const tokenRangesByNode: Map<ts.Node, IExcerptTokenRange> = new Map<ts.Node, IExcerptTokenRange>();
+    for (const excerpt of options.nodesToCapture || []) {
       if (excerpt.node) {
-        nameByNode.set(excerpt.node, excerpt.embeddedExcerptName);
+        tokenRangesByNode.set(excerpt.node, excerpt.tokenRange);
       }
     }
 
-    const declarationExcerpt: IDeclarationExcerpt = {
-      excerptTokens: [ ],
-      embeddedExcerpts: { }
-    };
+    const excerptTokens: IExcerptToken[] = [];
 
-    ExcerptBuilder._buildSpan(declarationExcerpt, span, {
+    ExcerptBuilder._buildSpan(excerptTokens, span, {
       nodeToStopAt: options.nodeToStopAt,
-      nameByNode,
-      remainingExcerptNames,
+      tokenRangesByNode,
       disableMergingForNextToken: false
     });
 
-    // For any excerpts that we didn't find, add empty entries
-    for (const embeddedExcerptName of remainingExcerptNames) {
-      declarationExcerpt.embeddedExcerpts[embeddedExcerptName] = { startIndex: 0, endIndex: 0 };
-    }
-
-    return declarationExcerpt;
+    return excerptTokens;
   }
 
-  private static _buildSpan(declarationExcerpt: IDeclarationExcerpt, span: Span,
-    state: IBuildSpanState): boolean {
+  public static createEmptyTokenRange(): IExcerptTokenRange {
+    return { startIndex: 0, endIndex: 0 };
+  }
+
+  private static _buildSpan(excerptTokens: IExcerptToken[], span: Span, state: IBuildSpanState): boolean {
 
     if (state.nodeToStopAt && span.kind === state.nodeToStopAt) {
       return false;
@@ -85,49 +99,44 @@ export class ExcerptBuilder {
     }
 
     // Can this node start a excerpt?
-    const embeddedExcerptName: ExcerptName | undefined = state.nameByNode.get(span.node);
-    let excerptStartIndex: number | undefined = undefined;
-    if (embeddedExcerptName) {
-      // Did we not already build this excerpt?
-      if (state.remainingExcerptNames.has(embeddedExcerptName)) {
-        state.remainingExcerptNames.delete(embeddedExcerptName);
+    const capturedTokenRange: IExcerptTokenRange | undefined = state.tokenRangesByNode.get(span.node);
+    let excerptStartIndex: number = 0;
 
-        excerptStartIndex = declarationExcerpt.excerptTokens.length;
-        state.disableMergingForNextToken = true;
-      }
+    if (capturedTokenRange) {
+      // We will assign capturedTokenRange.startIndex to be the index of the next token to be appended
+      excerptStartIndex = excerptTokens.length;
+      state.disableMergingForNextToken = true;
     }
 
     if (span.prefix) {
       if (span.kind === ts.SyntaxKind.Identifier) {
-        ExcerptBuilder._appendToken(declarationExcerpt.excerptTokens, ExcerptTokenKind.Reference,
+        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Reference,
           span.prefix, state);
       } else {
-        ExcerptBuilder._appendToken(declarationExcerpt.excerptTokens, ExcerptTokenKind.Content,
+        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content,
           span.prefix, state);
       }
     }
 
     for (const child of span.children) {
-      if (!this._buildSpan(declarationExcerpt, child, state)) {
+      if (!this._buildSpan(excerptTokens, child, state)) {
         return false;
       }
     }
 
     if (span.suffix) {
-      ExcerptBuilder._appendToken(declarationExcerpt.excerptTokens, ExcerptTokenKind.Content,
-        span.suffix, state);
+      ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content, span.suffix, state);
     }
     if (span.separator) {
-      ExcerptBuilder._appendToken(declarationExcerpt.excerptTokens, ExcerptTokenKind.Content,
-        span.separator, state);
+      ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content, span.separator, state);
     }
 
-    // Are we building a excerpt?  If so, add it.
-    if (excerptStartIndex !== undefined) {
-      declarationExcerpt.embeddedExcerpts[embeddedExcerptName!] = {
-        startIndex: excerptStartIndex,
-        endIndex: declarationExcerpt.excerptTokens.length
-      };
+    // Are we building a excerpt?  If so, set its range
+    if (capturedTokenRange) {
+      capturedTokenRange.startIndex = excerptStartIndex;
+
+      // We will assign capturedTokenRange.startIndex to be the index after the last token that was appended so far
+      capturedTokenRange.endIndex = excerptTokens.length;
 
       state.disableMergingForNextToken = true;
     }

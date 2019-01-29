@@ -1,26 +1,45 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItemKind } from './ApiItem';
-import { ApiDeclarationMixin, IApiDeclarationMixinOptions } from '../mixins/ApiDeclarationMixin';
-import { ApiFunctionLikeMixin, IApiFunctionLikeMixinOptions } from '../mixins/ApiFunctionLikeMixin';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
+import { ApiItemKind } from '../items/ApiItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
+import { ApiParameterListMixin, IApiParameterListMixinOptions } from '../mixins/ApiParameterListMixin';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
-import { Excerpt } from '../mixins/Excerpt';
+import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
 /** @public */
 export interface IApiMethodSignatureOptions extends
-  IApiDeclarationMixinOptions,
-  IApiFunctionLikeMixinOptions,
+  IApiNameMixinOptions,
+  IApiParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDocumentedItemOptions {
+  IApiReturnTypeMixinOptions,
+  IApiDeclaredItemOptions {
 }
 
-/** @public */
-export class ApiMethodSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin(ApiReleaseTagMixin(
-  ApiDocumentedItem))) {
-
-  public readonly returnTypeExcerpt: Excerpt;
+/**
+ * Represents a TypeScript member function declaration that belongs to an `ApiInterface`.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * `ApiMethodSignature` represents a TypeScript declaration such as the `render` member function in this example:
+ *
+ * ```ts
+ * export interface IWidget {
+ *   render(): void;
+ * }
+ * ```
+ *
+ * Compare with {@link ApiMethod}, which represents a method belonging to a class.
+ * For example, a class method can be `static` but an interface method cannot.
+ *
+ * @public
+ */
+export class ApiMethodSignature extends ApiNameMixin(ApiParameterListMixin(ApiReleaseTagMixin(
+  ApiReturnTypeMixin(ApiDeclaredItem)))) {
 
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;
@@ -28,8 +47,6 @@ export class ApiMethodSignature extends ApiDeclarationMixin(ApiFunctionLikeMixin
 
   public constructor(options: IApiMethodSignatureOptions) {
     super(options);
-
-    this.returnTypeExcerpt = this.getEmbeddedExcerpt('returnType');
   }
 
   /** @override */

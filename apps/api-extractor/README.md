@@ -3,11 +3,11 @@
 
 ![API Extractor](https://github.com/Microsoft/web-build-tools/raw/master/common/wiki-images/api-extractor-title.png?raw=true)
 <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://aka.ms/extractor
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://api-extractor.com/
 
-<!-- ----------------------------------------------------------------------------------- -->
-<!-- Text below this line should stay in sync with API-Extractor.md from the GitHub wiki -->
-<!-- ----------------------------------------------------------------------------------- -->
+<!-- ------------------------------------------------------------------ -->
+<!-- Text below this line should stay in sync with the web site content -->
+<!-- ------------------------------------------------------------------ -->
 
 **API Extractor** helps you build better [TypeScript](https://www.typescriptlang.org/) library packages.  Suppose for example that your company has published an NPM package called "**awesome-widgets**" that exports many classes and interfaces.  As developers start to depend on your library, you may encounter issues such as...
 
@@ -21,7 +21,7 @@
 
 - **\*.d.ts rollup:** You webpacked your library into a nice **\*.js** bundle file -- so why ship your typings as a messy tree of **lib/\*.d.ts** files full of private definitions?  Can't we consolidate them into a tidy **\*.d.ts** rollup file?  And if you publish internal/beta/public releases, each release type should get its own **\*.d.ts** file with appropriate trimming.  Developers building a production project don't want to see a bunch of **internal** and **beta** members in their VS Code IntelliSense!
 
-- **Online documentation:**  You have faithfully annotated each TypeScript member with nice [JSDoc](http://usejsdoc.org/) descriptions.  Now that your library has shipped, it's time to set up [a nicely formatted](https://docs.microsoft.com/en-us/javascript/api/sp-http) API reference.  What tool to use?
+- **Online documentation:**  You have faithfully annotated each TypeScript member with nice [TSDoc](https://github.com/Microsoft/tsdoc) descriptions.  Now that your library has shipped, it's time to set up [a nicely formatted](https://docs.microsoft.com/en-us/javascript/api/sp-http) API reference.  What tool to use?
 
 **API Extractor** provides an integrated, professional-quality solution for all these problems.  It is invoked at build time by your toolchain and leverages the TypeScript compiler engine to:
 
@@ -33,10 +33,10 @@
 
 Best of all, **API Extractor** is free and open source.  Join the community and create a pull request!
 
-<!-- ----------------------------------------------------------------------------------- -->
-<!-- Text above this line should stay in sync with API-Extractor.md from the GitHub wiki -->
-<!-- ----------------------------------------------------------------------------------- -->
+<!-- ------------------------------------------------------------------ -->
+<!-- Text above this line should stay in sync with the web site content -->
+<!-- ------------------------------------------------------------------ -->
 
 # Getting Started
 
-The GitHub wiki has complete, up-to-date documentation: https://aka.ms/extractor
+For more details and support resources, please visit: https://api-extractor.com/

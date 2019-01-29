@@ -237,7 +237,7 @@ export class JsonFile {
         const value: any = jsonObject[key];
         if (value === undefined) {
           const fullPath: string = JsonFile._formatKeyPath(keyPath);
-          throw new Error(`The value for ${fullPath} is undefined`);
+          throw new Error(`The value for ${fullPath} is "undefined" and cannot be serialized as JSON`);
         }
 
         JsonFile._validateNoUndefinedMembers(value, keyPath);

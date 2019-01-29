@@ -3,7 +3,7 @@ import * as lockfile from '@yarnpkg/lockfile';
 import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
-import { FileSystem, PackageName, IParsedPackageNameOrError } from '@microsoft/node-core-library';
+import { FileSystem, PackageName, IParsedPackageNameOrError, InternalError } from '@microsoft/node-core-library';
 import { RushConstants } from '../RushConstants';
 
 /**
@@ -167,7 +167,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
   /** @override */
   protected getTopLevelDependencyVersion(dependencyName: string): string | undefined { // abstract
-    throw new Error('Not implemented');
+    throw new InternalError('Not implemented');
   }
 
   /** @override */
@@ -175,7 +175,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     tempProjectName: string,
     versionRange: string): string | undefined { // abstract
 
-    throw new Error('Not implemented');
+    throw new InternalError('Not implemented');
   }
 
   private constructor(shrinkwrapJson: IYarnShrinkwrapJson) {

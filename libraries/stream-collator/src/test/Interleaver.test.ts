@@ -35,14 +35,6 @@ describe('Interleaver tests', () => {
   });
 
   describe('Testing register and close', () => {
-    it('cannot be directly instantiated', (done: MochaDone) => {
-      assert.throws(() => {
-        const a: Interleaver = new Interleaver();
-        assert.isNotNull(a);
-      });
-      done();
-    });
-
     it('can register a task', (done: MochaDone) => {
       const helloWorldWriter: ITaskWriter = Interleaver.registerTask('Hello World');
       assert.isObject(helloWorldWriter);

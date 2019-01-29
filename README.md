@@ -10,11 +10,11 @@ _**This repo hosts a collection of tools and libraries used to build web project
 
 Highlighted projects:
 
-- **[API Extractor](https://github.com/Microsoft/web-build-tools/wiki/API-Extractor)** helps you build better TypeScript libraries.  It standardizes your exported API surface, generates your online API reference, and makes it easy to detect and review changes that will impact your API contract.
+- **[API Extractor](https://api-extractor.com/)** helps you build better TypeScript libraries.  It standardizes your exported API surface, generates your online API reference, and makes it easy to detect and review changes that will impact your API contract.
 
 - **[Gulp Core Build](https://github.com/Microsoft/web-build-tools/wiki/Gulp-Core-Build)**: If you maintain lots of projects, **gulp-core-build** gets you out of the business of maintaining lots of Gulpfiles.  It defines reusable "rigs" that you customize using simple config files with well-defined JSON schemas.
 
-- **[Rush](https://github.com/Microsoft/web-build-tools/wiki/Rush)**: Want to consolidate all your web projects in one big repo?  Rush is a fast and reliable solution for installing, linking, building, publishing, checking, change log authoring, and anything else that involves a "package.json" file.
+- **[Rush](https://rushjs.io/)**: Want to consolidate all your web projects in one big repo?  Rush is a fast and reliable solution for installing, linking, building, publishing, checking, change log authoring, and anything else that involves a "package.json" file.
 
 
 # Contributing
@@ -74,13 +74,6 @@ Defines the build task model, config file parser, and rig framework for the **Gu
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build)
 [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build.svg)](https://david-dm.org/Microsoft/gulp-core-build)
 
-### [@microsoft/gulp-core-build-karma](./core-build/gulp-core-build-karma/README.md)
-
-A build task for running unit tests using `karma` + `phantomjs` + `mocha` + `chai`. This setup allows you to run browser-based testing.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-karma.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-karma)
-[![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-karma.svg)](https://david-dm.org/Microsoft/gulp-core-build-karma)
-
 ### [@microsoft/gulp-core-build-mocha](./core-build/gulp-core-build-mocha/README.md)
 
 A build task for running unit tests using `mocha` + `chai`. This setup is useful for unit testing build tools, as it runs in the NodeJS process rather than in a browser.
@@ -127,7 +120,7 @@ A **Gulp Core Build** rig which provides basic functionality for building and un
 
 ### [@microsoft/web-library-build](./core-build/web-library-build/README.md)
 
-A **Gulp Core Build** rig for building web libraries. It includes build tasks for processing css, typescript, serving, and running browser tests using karma.
+A **Gulp Core Build** rig for building web libraries. It includes build tasks for processing css, typescript, serving, and running browser tests using jest.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fweb-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fweb-library-build)
 [![Dependencies](https://david-dm.org/Microsoft/web-library-build.svg)](https://david-dm.org/Microsoft/web-library-build)

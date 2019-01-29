@@ -18,13 +18,13 @@ export {
   IExecutableSpawnSyncOptions,
   Executable
 } from './Executable';
-export { FileDiffTest } from './FileDiffTest';
 export {
   IPackageJson,
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable,
   IPackageJsonTsdocConfiguration
 } from './IPackageJson';
+export { InternalError } from './InternalError';
 export {
   JsonFile,
   IJsonFileSaveOptions,

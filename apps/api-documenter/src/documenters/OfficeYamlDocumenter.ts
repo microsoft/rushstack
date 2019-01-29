@@ -25,6 +25,7 @@ interface ISnippetsFile {
  */
 export class OfficeYamlDocumenter extends YamlDocumenter {
   private _snippets: ISnippetsFile;
+  private _snippetsAll: ISnippetsFile;
 
   // Default API Set URL when no product match is found.
   private _apiSetUrlDefault: string = '/office/dev/add-ins/reference/javascript-api-for-office';
@@ -47,6 +48,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
 
     const snippetsContent: string = FileSystem.readFile(snippetsFilePath);
     this._snippets = yaml.load(snippetsContent, { filename: snippetsFilePath });
+    this._snippetsAll = yaml.load(snippetsContent, { filename: snippetsFilePath });
   }
 
   /** @override */
@@ -88,7 +90,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
       });
     }
 
-    const snippets: string[] | undefined = this._snippets[nameWithoutPackage];
+    const snippets: string[] | undefined = this._snippetsAll[nameWithoutPackage];
     if (snippets) {
       delete this._snippets[nameWithoutPackage];
       const snippetText: string = this._generateExampleSnippetText(snippets);

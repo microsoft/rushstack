@@ -29,14 +29,30 @@ export { ILogger } from './api/ILogger';
 
 export { IndentedWriter } from './api/IndentedWriter';
 
+// items
 export {
-  IApiDeclarationMixinOptions,
-  ApiDeclarationMixin
-} from './api/mixins/ApiDeclarationMixin';
+  IApiDeclaredItemOptions,
+  ApiDeclaredItem
+} from './api/items/ApiDeclaredItem';
 export {
-  IApiFunctionLikeMixinOptions,
-  ApiFunctionLikeMixin
-} from './api/mixins/ApiFunctionLikeMixin';
+  IApiDocumentedItemOptions,
+  ApiDocumentedItem
+} from './api/items/ApiDocumentedItem';
+export {
+  ApiItemKind,
+  IApiItemOptions,
+  ApiItem
+} from './api/items/ApiItem';
+export {
+  IApiPropertyItemOptions,
+  ApiPropertyItem
+} from './api/items/ApiPropertyItem';
+
+// mixins
+export {
+  IApiParameterListMixinOptions,
+  ApiParameterListMixin
+} from './api/mixins/ApiParameterListMixin';
 export {
   IApiItemContainerMixinOptions,
   ApiItemContainerMixin
@@ -46,15 +62,17 @@ export {
   ApiReleaseTagMixin
 } from './api/mixins/ApiReleaseTagMixin';
 export {
+  IApiReturnTypeMixinOptions,
+  ApiReturnTypeMixin
+} from './api/mixins/ApiReturnTypeMixin';
+export {
   IApiStaticMixinOptions,
   ApiStaticMixin
 } from './api/mixins/ApiStaticMixin';
 export {
   ExcerptTokenKind,
-  ExcerptName,
   IExcerptTokenRange,
   IExcerptToken,
-  IDeclarationExcerpt,
   ExcerptToken,
   Excerpt
 } from './api/mixins/Excerpt';
@@ -63,14 +81,23 @@ export {
   PropertiesOf
 } from './api/mixins/Mixin';
 
+// model
+export {
+  IApiCallSignatureOptions,
+  ApiCallSignature
+} from './api/model/ApiCallSignature';
 export {
   IApiClassOptions,
   ApiClass
 } from './api/model/ApiClass';
 export {
-  IApiDocumentedItemOptions,
-  ApiDocumentedItem
-} from './api/model/ApiDocumentedItem';
+  IApiConstructorOptions,
+  ApiConstructor
+} from './api/model/ApiConstructor';
+export {
+  IApiConstructSignatureOptions,
+  ApiConstructSignature
+} from './api/model/ApiConstructSignature';
 export {
   IApiEntryPointOptions,
   ApiEntryPoint
@@ -84,14 +111,17 @@ export {
   ApiEnumMember
 } from './api/model/ApiEnumMember';
 export {
+  IApiFunctionOptions,
+  ApiFunction
+} from './api/model/ApiFunction';
+export {
+  IApiIndexSignatureOptions,
+  ApiIndexSignature
+} from './api/model/ApiIndexSignature';
+export {
   IApiInterfaceOptions,
   ApiInterface
 } from './api/model/ApiInterface';
-export {
-  ApiItemKind,
-  IApiItemOptions,
-  ApiItem
-} from './api/model/ApiItem';
 export {
   IApiMethodOptions,
   ApiMethod
@@ -112,21 +142,28 @@ export {
   ApiPackage
 } from './api/model/ApiPackage';
 export {
-  IApiParameterOptions,
-  ApiParameter
-} from './api/model/ApiParameter';
+  IParameterOptions,
+  Parameter
+} from './api/model/Parameter';
 export {
   IApiPropertyOptions,
   ApiProperty
 } from './api/model/ApiProperty';
 export {
-  IApiPropertyItemOptions,
-  ApiPropertyItem
-} from './api/model/ApiPropertyItem';
-export {
   IApiPropertySignatureOptions,
   ApiPropertySignature
 } from './api/model/ApiPropertySignature';
 export {
+  IApiTypeAliasOptions,
+  ApiTypeAlias
+} from './api/model/ApiTypeAlias';
+export {
+  IApiVariableOptions,
+  ApiVariable
+} from './api/model/ApiVariable';
+export {
   IResolveDeclarationReferenceResult
 } from './api/model/DeclarationReferenceResolver';
+export {
+  HeritageType
+} from './api/model/HeritageType';

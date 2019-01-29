@@ -1,6 +1,63 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Thu, 29 Nov 2018 07:02:09 GMT and should not be manually modified.
+This log was last generated on Mon, 21 Jan 2019 17:04:11 GMT and should not be manually modified.
+
+## 3.3.0
+Mon, 21 Jan 2019 17:04:11 GMT
+
+### Minor changes
+
+- Added rootFolder option to adjust base folder for gulp serve
+
+## 3.2.94
+Sat, 19 Jan 2019 03:47:47 GMT
+
+*Version update only*
+
+## 3.2.93
+Tue, 15 Jan 2019 17:04:09 GMT
+
+*Version update only*
+
+## 3.2.92
+Thu, 10 Jan 2019 01:57:53 GMT
+
+*Version update only*
+
+## 3.2.91
+Mon, 07 Jan 2019 17:04:07 GMT
+
+*Version update only*
+
+## 3.2.90
+Wed, 19 Dec 2018 05:57:33 GMT
+
+*Version update only*
+
+## 3.2.89
+Thu, 13 Dec 2018 02:58:11 GMT
+
+*Version update only*
+
+## 3.2.88
+Wed, 12 Dec 2018 17:04:19 GMT
+
+*Version update only*
+
+## 3.2.87
+Sat, 08 Dec 2018 06:35:36 GMT
+
+*Version update only*
+
+## 3.2.86
+Fri, 07 Dec 2018 17:04:56 GMT
+
+*Version update only*
+
+## 3.2.85
+Fri, 30 Nov 2018 23:34:58 GMT
+
+*Version update only*
 
 ## 3.2.84
 Thu, 29 Nov 2018 07:02:09 GMT

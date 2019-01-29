@@ -9,37 +9,16 @@ export const enum ExcerptTokenKind {
   Reference = 'Reference'
 }
 
-/**
- * Names used in {@link ApiDeclarationMixin.embeddedExcerptsByName}.
- *
- * @remarks
- * These strings use camelCase because they are property names for IDeclarationExcerpt.embeddedExcerpts.
- *
- * @public
- */
-export type ExcerptName = 'returnType' | 'parameterType' | 'propertyType' | 'initializer';
-
 /** @public */
 export interface IExcerptTokenRange {
-  readonly startIndex: number;
-  readonly endIndex: number;
+  startIndex: number;
+  endIndex: number;
 }
 
 /** @public */
 export interface IExcerptToken {
   readonly kind: ExcerptTokenKind;
   text: string;
-}
-
-/**
- * @remarks
- * This object must be completely JSON serializable, since it is included in IApiDeclarationMixinJson
- * @public
- */
-export interface IDeclarationExcerpt {
-  excerptTokens: IExcerptToken[];
-
-  embeddedExcerpts: { [name in ExcerptName]?: IExcerptTokenRange };
 }
 
 /** @public */
@@ -53,9 +32,25 @@ export class ExcerptToken {
   }
 }
 
-/** @public */
+/**
+ * This class is used by {@link (ApiDeclaredItem:interface)} to represent a source code excerpt containing
+ * a TypeScript declaration.
+ *
+ * @remarks
+ *
+ * The main excerpt is parsed into an array of tokens, and the main excerpt's token range will span all of these
+ * tokens.  The declaration may also have have "captured" excerpts, which are other subranges of tokens.
+ * For example, if the main excerpt is a function declaration, it will also have a captured excerpt corresponding
+ * to the return type of the function.
+ *
+ * An excerpt may be empty (i.e. a token range containing zero tokens).  For example, if a function's return value
+ * is not explicitly declared, then the returnTypeExcerpt will be empty.  By contrast, a class constructor cannot
+ * have a return value, so ApiConstructor has no returnTypeExcerpt property at all.
+ *
+ * @public
+ */
 export class Excerpt {
-  public readonly tokenRange: IExcerptTokenRange;
+  public readonly tokenRange: Readonly<IExcerptTokenRange>;
 
   public readonly tokens: ReadonlyArray<ExcerptToken>;
 
@@ -64,6 +59,11 @@ export class Excerpt {
   public constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange) {
     this.tokens = tokens;
     this.tokenRange = tokenRange;
+
+    if (this.tokenRange.startIndex < 0 || this.tokenRange.endIndex > this.tokens.length
+      || this.tokenRange.startIndex > this.tokenRange.endIndex) {
+      throw new Error('Invalid token range');
+    }
   }
 
   public get text(): string {

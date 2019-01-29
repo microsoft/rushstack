@@ -1,12 +1,12 @@
 {
   "name": "@microsoft/api-documenter",
-  "version": "7.0.0",
+  "version": "7.0.19",
   "description": "Read JSON files from api-extractor, generate documentation pages",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/web-build-tools/tree/master/apps/api-documenter"
   },
-  "homepage": "http://aka.ms/extractor",
+  "homepage": "https://api-extractor.com/",
   "license": "MIT",
   "scripts": {
     "build": "gulp test --clean"
@@ -15,20 +15,20 @@
     "api-documenter": "./bin/api-documenter"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.0.0",
-    "@microsoft/node-core-library": "3.7.1",
-    "@microsoft/ts-command-line": "4.2.2",
+    "@microsoft/api-extractor": "7.0.13",
+    "@microsoft/node-core-library": "3.9.0",
+    "@microsoft/ts-command-line": "4.2.3",
     "@microsoft/tsdoc": "0.12.4",
     "colors": "~1.2.1",
     "js-yaml": "~3.9.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.0": "0.1.1",
-    "@microsoft/node-library-build": "6.0.16",
+    "@microsoft/rush-stack-compiler-3.0": "0.4.0",
+    "@microsoft/node-library-build": "6.0.26",
     "@types/js-yaml": "3.9.1",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",
-    "@types/jest": "21.1.10",
-    "jest": "~22.4.3"
+    "@types/jest": "23.3.11",
+    "jest": "~23.6.0"
   }
 }

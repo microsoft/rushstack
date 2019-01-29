@@ -1,6 +1,73 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Thu, 29 Nov 2018 07:02:09 GMT and should not be manually modified.
+This log was last generated on Mon, 21 Jan 2019 17:04:11 GMT and should not be manually modified.
+
+## 7.0.2
+Mon, 21 Jan 2019 17:04:11 GMT
+
+*Version update only*
+
+## 7.0.1
+Sat, 19 Jan 2019 03:47:47 GMT
+
+*Version update only*
+
+## 7.0.0
+Tue, 15 Jan 2019 17:04:09 GMT
+
+### Breaking changes
+
+- Remove karma task.
+
+## 6.0.45
+Thu, 10 Jan 2019 01:57:53 GMT
+
+*Version update only*
+
+## 6.0.44
+Mon, 07 Jan 2019 17:04:07 GMT
+
+*Version update only*
+
+## 6.0.43
+Wed, 19 Dec 2018 05:57:33 GMT
+
+*Version update only*
+
+## 6.0.42
+Fri, 14 Dec 2018 20:51:51 GMT
+
+*Version update only*
+
+## 6.0.41
+Thu, 13 Dec 2018 02:58:10 GMT
+
+*Version update only*
+
+## 6.0.40
+Wed, 12 Dec 2018 17:04:19 GMT
+
+*Version update only*
+
+## 6.0.39
+Sat, 08 Dec 2018 06:35:36 GMT
+
+*Version update only*
+
+## 6.0.38
+Fri, 07 Dec 2018 17:04:56 GMT
+
+*Version update only*
+
+## 6.0.37
+Mon, 03 Dec 2018 17:04:06 GMT
+
+*Version update only*
+
+## 6.0.36
+Fri, 30 Nov 2018 23:34:57 GMT
+
+*Version update only*
 
 ## 6.0.35
 Thu, 29 Nov 2018 07:02:09 GMT

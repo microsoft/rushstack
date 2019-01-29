@@ -1,6 +1,58 @@
 # Change Log - @microsoft/stream-collator
 
-This log was last generated on Thu, 29 Nov 2018 07:02:09 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Jan 2019 03:47:47 GMT and should not be manually modified.
+
+## 3.0.32
+Sat, 19 Jan 2019 03:47:47 GMT
+
+*Version update only*
+
+## 3.0.31
+Tue, 15 Jan 2019 17:04:09 GMT
+
+*Version update only*
+
+## 3.0.30
+Thu, 10 Jan 2019 01:57:53 GMT
+
+*Version update only*
+
+## 3.0.29
+Mon, 07 Jan 2019 17:04:07 GMT
+
+*Version update only*
+
+## 3.0.28
+Wed, 19 Dec 2018 05:57:33 GMT
+
+*Version update only*
+
+## 3.0.27
+Thu, 13 Dec 2018 02:58:11 GMT
+
+*Version update only*
+
+## 3.0.26
+Wed, 12 Dec 2018 17:04:19 GMT
+
+*Version update only*
+
+## 3.0.25
+Sat, 08 Dec 2018 06:35:36 GMT
+
+*Version update only*
+
+## 3.0.24
+Fri, 07 Dec 2018 17:04:56 GMT
+
+### Patches
+
+- Updated to use the new InternalError class for reporting software defects
+
+## 3.0.23
+Fri, 30 Nov 2018 23:34:58 GMT
+
+*Version update only*
 
 ## 3.0.22
 Thu, 29 Nov 2018 07:02:09 GMT

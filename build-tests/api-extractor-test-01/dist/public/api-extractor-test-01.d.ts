@@ -229,6 +229,11 @@ export declare interface ISimpleInterface {
 
 declare const locallyExportedCustomSymbol: unique symbol;
 
+/** @public */
+export declare namespace NamespaceContainingVariable {
+    /* Excluded from this release type: variable */
+}
+
 /**
  * This class gets aliased twice before being exported from the package.
  * @public
@@ -288,3 +293,5 @@ declare const unexportedCustomSymbol: unique symbol;
  * @public
  */
 export declare function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
+
+export { }

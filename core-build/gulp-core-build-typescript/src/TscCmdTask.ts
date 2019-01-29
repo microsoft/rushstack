@@ -24,6 +24,11 @@ import { TsParseConfigHost } from './TsParseConfigHost';
  */
 export interface ITscCmdTaskConfig extends IRSCTaskConfig {
   /**
+   * Option to pass custom arguments to the tsc command.
+   */
+  customArgs?: string[];
+
+  /**
    * Glob matches for files to be passed through the build.
    */
   staticMatch?: string[];
@@ -92,6 +97,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     );
 
     const typescriptCompiler: TTypescriptCompiler = new this._rushStackCompiler.TypescriptCompiler(
+      { customArgs: this.taskConfig.customArgs },
       this.buildFolder,
       this._terminalProvider
     );

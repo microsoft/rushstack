@@ -256,6 +256,12 @@ export declare interface ISimpleInterface {
 
 declare const locallyExportedCustomSymbol: unique symbol;
 
+/** @public */
+export declare namespace NamespaceContainingVariable {
+    /** @internal */
+    let variable: object[];
+}
+
 /**
  * This class gets aliased twice before being exported from the package.
  * @public
@@ -316,3 +322,5 @@ export declare const VARIABLE: string;
  * @public
  */
 export declare function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
+
+export { }

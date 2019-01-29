@@ -1,6 +1,64 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 29 Nov 2018 07:02:09 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Jan 2019 03:47:47 GMT and should not be manually modified.
+
+## 8.0.0
+Sat, 19 Jan 2019 03:47:47 GMT
+
+### Breaking changes
+
+- Update api extractor task to use api extractor's config file.
+
+### Minor changes
+
+- Upgrade to use API Extractor 7 beta
+
+## 7.4.8
+Tue, 15 Jan 2019 17:04:09 GMT
+
+*Version update only*
+
+## 7.4.7
+Thu, 10 Jan 2019 01:57:53 GMT
+
+*Version update only*
+
+## 7.4.6
+Mon, 07 Jan 2019 17:04:07 GMT
+
+*Version update only*
+
+## 7.4.5
+Wed, 19 Dec 2018 05:57:33 GMT
+
+*Version update only*
+
+## 7.4.4
+Thu, 13 Dec 2018 02:58:11 GMT
+
+*Version update only*
+
+## 7.4.3
+Wed, 12 Dec 2018 17:04:19 GMT
+
+*Version update only*
+
+## 7.4.2
+Sat, 08 Dec 2018 06:35:36 GMT
+
+*Version update only*
+
+## 7.4.1
+Fri, 07 Dec 2018 17:04:56 GMT
+
+*Version update only*
+
+## 7.4.0
+Fri, 30 Nov 2018 23:34:57 GMT
+
+### Minor changes
+
+- Allow custom arguments to be passed to the tsc command.
 
 ## 7.3.1
 Thu, 29 Nov 2018 07:02:09 GMT

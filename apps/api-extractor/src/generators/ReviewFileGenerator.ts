@@ -9,11 +9,11 @@ import { Span } from '../analyzer/Span';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { StringBuilder } from '@microsoft/tsdoc';
-import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { Text } from '@microsoft/node-core-library';
+import { Text, InternalError } from '@microsoft/node-core-library';
+import { AstImport } from '../analyzer/AstImport';
 
 export class ReviewFileGenerator {
   /**
@@ -35,16 +35,39 @@ export class ReviewFileGenerator {
 
     for (const entity of collector.entities) {
       if (entity.exported) {
-        // Emit all the declarations for this entry
-        for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
+        if (!entity.astSymbol.astImport) {
+          // Emit all the declarations for this entry
+          for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
 
-          output.append(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
+            output.append(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
 
-          const span: Span = new Span(astDeclaration.declaration);
-          ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration);
-          span.writeModifiedText(output);
-          output.append('\n\n');
+            const span: Span = new Span(astDeclaration.declaration);
+            ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration);
+            span.writeModifiedText(output);
+            output.append('\n\n');
+          }
+        } else {
+          // This definition is reexported from another package, so write it as an "export" line
+          // In general, we don't report on external packages; if that's important we assume API Extractor
+          // would be enabled for the upstream project.  But see GitHub issue #896 for a possible exception.
+          const astImport: AstImport = entity.astSymbol.astImport;
+
+          if (astImport.exportName === '*') {
+            output.append(`export * as ${entity.nameForEmit}`);
+          } else if (entity.nameForEmit !== astImport.exportName) {
+            output.append(`export { ${astImport.exportName} as ${entity.nameForEmit} }`);
+          } else {
+            output.append(`export { ${astImport.exportName} }`);
+          }
+          output.append(` from '${astImport.modulePath}';\n`);
         }
+      }
+    }
+
+    if (collector.starExportedExternalModulePaths.length > 0) {
+      output.append('\n');
+      for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
+        output.append(`export * from "${starExportedExternalModulePath}";\n`);
       }
     }
 
@@ -85,7 +108,7 @@ export class ReviewFileGenerator {
 
       case ts.SyntaxKind.SyntaxList:
         if (span.parent) {
-          if (SymbolAnalyzer.isAstDeclaration(span.parent.kind)) {
+          if (AstDeclaration.isSupportedSyntaxKind(span.parent.kind)) {
             // If the immediate parent is an API declaration, and the immediate children are API declarations,
             // then sort the children alphabetically
             sortChildren = true;
@@ -108,7 +131,8 @@ export class ReviewFileGenerator {
           const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node,
             [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
           if (!list) {
-            throw new Error('Unsupported variable declaration');
+            // This should not happen unless the compiler API changes somehow
+            throw new InternalError('Unsupported variable declaration');
           }
           const listPrefix: string = list.getSourceFile().text
             .substring(list.getStart(), list.declarations[0].getStart());
@@ -152,7 +176,7 @@ export class ReviewFileGenerator {
       for (const child of span.children) {
         let childAstDeclaration: AstDeclaration = astDeclaration;
 
-        if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
+        if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
           childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
 
           if (sortChildren) {

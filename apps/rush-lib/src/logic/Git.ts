@@ -3,6 +3,7 @@
 
 import gitInfo = require('git-repo-info');
 import * as os from 'os';
+import * as path from 'path';
 import { Executable } from '@microsoft/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
@@ -18,6 +19,8 @@ interface IResultOrError<TResult> {
 export class Git {
   private static _checkedGitPath: boolean = false;
   private static _gitPath: string | undefined;
+  private static _checkedGitInfo: boolean = false;
+  private static _gitInfo: gitInfo.GitRepoInfo | undefined;
 
   private static _gitEmailResult: IResultOrError<string> | undefined = undefined;
 
@@ -42,14 +45,15 @@ export class Git {
 
   /**
    * Returns true if the Git binary was found and the current path is under a Git working tree.
+   * @param repoInfo - If provided, do the check based on this Git repo info. If not provided,
+   * the result of `Git.getGitInfo()` is used.
    */
-  public static isPathUnderGitWorkingTree(): boolean {
+  public static isPathUnderGitWorkingTree(repoInfo?: gitInfo.GitRepoInfo): boolean {
     if (Git.isGitPresent()) { // Do we even have a Git binary?
-      try {
-        return !!gitInfo().sha;
-      } catch (e) {
-        return false; // Unexpected, but possible if the .git directory is corrupted.
+      if (!repoInfo) {
+        repoInfo = Git.getGitInfo();
       }
+      return !!(repoInfo && repoInfo.sha);
     } else {
       return false;
     }
@@ -102,6 +106,40 @@ export class Git {
     }
 
     return emailResult.result;
+  }
+
+  /**
+   * Get the folder where Git hooks should go for the current working tree.
+   * Returns undefined if the current path is not under a Git working tree.
+   */
+  public static getHooksFolder(): string | undefined {
+    const repoInfo: gitInfo.GitRepoInfo | undefined = Git.getGitInfo();
+    if (repoInfo && repoInfo.worktreeGitDir) {
+      return path.join(repoInfo.worktreeGitDir, 'hooks');
+    }
+    return undefined;
+  }
+
+  /**
+   * Get information about the current Git working tree.
+   * Returns undefined if the current path is not under a Git working tree.
+   */
+  public static getGitInfo(): Readonly<gitInfo.GitRepoInfo> | undefined {
+    if (!Git._checkedGitInfo) {
+      let repoInfo: gitInfo.GitRepoInfo | undefined;
+      try {
+        // gitInfo() shouldn't usually throw, but wrapping in a try/catch just in case
+        repoInfo = gitInfo();
+      } catch (ex) {
+        // if there's an error, assume we're not in a Git working tree
+      }
+
+      if (repoInfo && Git.isPathUnderGitWorkingTree(repoInfo)) {
+        Git._gitInfo = repoInfo;
+      }
+      Git._checkedGitInfo = true;
+    }
+    return Git._gitInfo;
   }
 
   private static _tryGetGitEmail(): IResultOrError<string> {

@@ -2,6 +2,105 @@
   "name": "@microsoft/rush-stack-compiler-3.0",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@microsoft/rush-stack-compiler-3.0_v0.4.0",
+      "date": "Sat, 19 Jan 2019 03:47:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose api extractor API."
+          },
+          {
+            "comment": "Upgrade to use API Extractor 7 beta"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.4",
+      "tag": "@microsoft/rush-stack-compiler-3.0_v0.3.4",
+      "date": "Thu, 10 Jan 2019 01:57:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.3` to `3.9.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.3",
+      "tag": "@microsoft/rush-stack-compiler-3.0_v0.3.3",
+      "date": "Wed, 19 Dec 2018 05:57:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.2` to `3.8.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.2",
+      "tag": "@microsoft/rush-stack-compiler-3.0_v0.3.2",
+      "date": "Thu, 13 Dec 2018 02:58:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.1` to `3.8.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "@microsoft/rush-stack-compiler-3.0_v0.3.1",
+      "date": "Wed, 12 Dec 2018 17:04:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.0` to `3.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@microsoft/rush-stack-compiler-3.0_v0.3.0",
+      "date": "Sat, 08 Dec 2018 06:35:36 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable no-floating-promises TSLint rule."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@microsoft/rush-stack-compiler-3.0_v0.2.1",
+      "date": "Fri, 07 Dec 2018 17:04:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.7.1` to `3.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@microsoft/rush-stack-compiler-3.0_v0.2.0",
+      "date": "Fri, 30 Nov 2018 23:34:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow custom arguments to be passed to the tsc command."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@microsoft/rush-stack-compiler-3.0_v0.1.1",
       "date": "Thu, 29 Nov 2018 07:02:09 GMT",

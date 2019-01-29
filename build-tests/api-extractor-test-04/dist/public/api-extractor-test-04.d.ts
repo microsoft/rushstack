@@ -51,3 +51,5 @@ export declare class PublicClass {
 /* Excluded from this release type: RegularEnum */
 
 /* Excluded from this release type: variableDeclaration */
+
+export { }

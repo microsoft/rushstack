@@ -20,8 +20,9 @@ declare function importedModuleAsGenericParameter(): GenericInterface<semver1.Se
 // @public
 declare function importedModuleAsReturnType(): semver1.SemVer | undefined;
 
+export { ReexportedClass as RenamedReexportedClass3 } from 'api-extractor-test-01';
 // @public
-declare class SubclassWithImport extends ReexportedClass implements ISimpleInterface {
+declare class SubclassWithImport extends RenamedReexportedClass3 implements ISimpleInterface {
     // (undocumented)
     test(): void;
 }

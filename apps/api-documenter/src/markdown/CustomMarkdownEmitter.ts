@@ -44,7 +44,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
   }
 
   /** @override */
-  protected writeNode(docNode: DocNode, context: IMarkdownEmitterContext): void {
+  protected writeNode(docNode: DocNode, context: IMarkdownEmitterContext, docNodeSiblings: boolean): void {
     const writer: IndentedWriter = context.writer;
 
     switch (docNode.kind) {
@@ -71,7 +71,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
 
         writer.increaseIndent('> ');
 
-        this.writeNode(docNoteBox.content, context);
+        this.writeNode(docNoteBox.content, context, false);
         writer.ensureNewLine();
 
         writer.decreaseIndent();
@@ -105,7 +105,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
           if (docTable.header) {
             const cell: DocTableCell | undefined = docTable.header.cells[i];
             if (cell) {
-              this.writeNode(cell.content, context);
+              this.writeNode(cell.content, context, false);
             }
           }
           writer.write(' |');
@@ -123,7 +123,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
           writer.write('| ');
           for (const cell of row.cells) {
             writer.write(' ');
-            this.writeNode(cell.content, context);
+            this.writeNode(cell.content, context, false);
             writer.write(' |');
           }
           writer.writeLine();
@@ -146,7 +146,7 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
         break;
       }
       default:
-        super.writeNode(docNode, context);
+        super.writeNode(docNode, context, false);
     }
   }
 

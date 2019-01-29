@@ -1,16 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItem, ApiItemKind, IApiItemJson } from './ApiItem';
+import { ApiItem, ApiItemKind, IApiItemJson } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { JsonFile, IJsonFileSaveOptions } from '@microsoft/node-core-library';
-import { ApiDocumentedItem, IApiDocumentedItemOptions } from './ApiDocumentedItem';
+import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { Extractor } from '../Extractor';
 import { ApiEntryPoint } from './ApiEntryPoint';
+import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
-/** @public */
+/**
+ * Constructor options for {@link ApiPackage}.
+ * @public
+ */
 export interface IApiPackageOptions extends
   IApiItemContainerMixinOptions,
+  IApiNameMixinOptions,
   IApiDocumentedItemOptions {
 }
 
@@ -47,11 +52,20 @@ export interface IApiPackageJson extends IApiItemJson {
   metadata: IApiPackageMetadataJson;
 }
 
-/** @public */
-export class ApiPackage extends ApiItemContainerMixin(ApiDocumentedItem) {
+/**
+ * Represents an NPM package containing API declarations.
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.
+ *
+ * @public
+ */
+export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
-    const jsonObject: { } = JsonFile.load(apiJsonFilename);
-    return ApiItem.deserialize(jsonObject as IApiItemJson) as ApiPackage;
+    const jsonObject: IApiItemJson = JsonFile.load(apiJsonFilename);
+    return ApiItem.deserialize(jsonObject) as ApiPackage;
   }
 
   public constructor(options: IApiPackageOptions) {

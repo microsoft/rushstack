@@ -1,6 +1,117 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 29 Nov 2018 07:02:09 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Jan 2019 03:47:47 GMT and should not be manually modified.
+
+## 7.0.19
+Sat, 19 Jan 2019 03:47:47 GMT
+
+*Version update only*
+
+## 7.0.18
+Sat, 19 Jan 2019 01:17:51 GMT
+
+### Patches
+
+- [api-documenter] Enable Office snippets to match multiple versions
+
+## 7.0.17
+Fri, 18 Jan 2019 22:04:59 GMT
+
+### Patches
+
+- MarkdownEmitter: break for inline tags
+
+## 7.0.16
+Fri, 18 Jan 2019 00:52:21 GMT
+
+*Version update only*
+
+## 7.0.15
+Thu, 17 Jan 2019 00:37:54 GMT
+
+*Version update only*
+
+## 7.0.14
+Tue, 15 Jan 2019 17:04:09 GMT
+
+*Version update only*
+
+## 7.0.13
+Thu, 10 Jan 2019 01:57:52 GMT
+
+### Patches
+
+- Work around an issue where GitHub Pages cannot render `<p></p>` inside a pipes-and-dashes table (even though GHFM supports this)
+
+## 7.0.12
+Wed, 09 Jan 2019 22:04:17 GMT
+
+### Patches
+
+- Support more API types for the markdown generator: namespace, function, type alias, variable
+
+## 7.0.11
+Mon, 07 Jan 2019 17:04:07 GMT
+
+*Version update only*
+
+## 7.0.10
+Thu, 20 Dec 2018 17:04:08 GMT
+
+*Version update only*
+
+## 7.0.9
+Wed, 19 Dec 2018 05:57:33 GMT
+
+### Patches
+
+- Update to work with refactored ApiModel classes
+
+## 7.0.8
+Fri, 14 Dec 2018 19:43:46 GMT
+
+### Patches
+
+- Update web site URLs
+
+## 7.0.7
+Thu, 13 Dec 2018 02:58:10 GMT
+
+*Version update only*
+
+## 7.0.6
+Wed, 12 Dec 2018 17:04:19 GMT
+
+### Patches
+
+- The YAML exporter now documents "extends" and "implements" heritage
+
+## 7.0.5
+Sat, 08 Dec 2018 06:35:35 GMT
+
+*Version update only*
+
+## 7.0.4
+Fri, 07 Dec 2018 17:04:56 GMT
+
+### Patches
+
+- Updated to use the new InternalError class for reporting software defects
+
+## 7.0.3
+Wed, 05 Dec 2018 19:57:03 GMT
+
+*Version update only*
+
+## 7.0.2
+Wed, 05 Dec 2018 17:04:18 GMT
+
+*Version update only*
+
+## 7.0.1
+Fri, 30 Nov 2018 23:34:57 GMT
+
+*Version update only*
 
 ## 7.0.0
 Thu, 29 Nov 2018 07:02:09 GMT

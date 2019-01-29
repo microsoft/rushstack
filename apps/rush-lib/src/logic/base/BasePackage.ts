@@ -136,10 +136,10 @@ export class BasePackage {
 
   public addChild<T extends BasePackage>(child: T): void {
     if (child.parent) {
-      throw Error('Child already has a parent');
+      throw new Error('Child already has a parent');
     }
     if (this._childrenByName.has(child.name)) {
-      throw Error('Child already exists');
+      throw new Error('Child already exists');
     }
     child.parent = this;
     this.children.push(child);

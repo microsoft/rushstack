@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import {
-  ApiFunctionLikeMixin, ApiItem
+  ApiParameterListMixin,
+  ApiItem
 } from '@microsoft/api-extractor';
 
 export class Utilities {
@@ -10,9 +11,9 @@ export class Utilities {
    * Generates a concise signature for a function.  Example: "getArea(width, height)"
    */
   public static getConciseSignature(apiItem: ApiItem): string {
-    if (ApiFunctionLikeMixin.isBaseClassOf(apiItem)) {
-      return apiItem.name + '(' + apiItem.parameters.map(x => x.name).join(', ') + ')';
+    if (ApiParameterListMixin.isBaseClassOf(apiItem)) {
+      return apiItem.displayName + '(' + apiItem.parameters.map(x => x.name).join(', ') + ')';
     }
-    return apiItem.name;
+    return apiItem.displayName;
   }
 }

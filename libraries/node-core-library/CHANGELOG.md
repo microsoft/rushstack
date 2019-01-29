@@ -1,6 +1,41 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 29 Nov 2018 07:02:09 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Jan 2019 01:57:52 GMT and should not be manually modified.
+
+## 3.9.0
+Thu, 10 Jan 2019 01:57:52 GMT
+
+### Minor changes
+
+- Remove deprecated FileDiffTest API for unit tests; please use Jest snapshots instead
+
+## 3.8.3
+Wed, 19 Dec 2018 05:57:33 GMT
+
+### Patches
+
+- Add missing space in error message
+
+## 3.8.2
+Thu, 13 Dec 2018 02:58:10 GMT
+
+### Patches
+
+- Use @types/jju not custom typings
+
+## 3.8.1
+Wed, 12 Dec 2018 17:04:19 GMT
+
+### Patches
+
+- Clarify error message reported by JsonFile._validateNoUndefinedMembers()
+
+## 3.8.0
+Fri, 07 Dec 2018 17:04:56 GMT
+
+### Minor changes
+
+- Added a new "InternalError" API for reporting software defects
 
 ## 3.7.1
 Thu, 29 Nov 2018 07:02:09 GMT

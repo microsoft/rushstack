@@ -1,0 +1,17 @@
+[Home](./index) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [DocClass1](./api-documenter-test.docclass1.md) &gt; [interestingEdgeCases](./api-documenter-test.docclass1.interestingedgecases.md)
+
+## DocClass1.interestingEdgeCases() method
+
+Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"
+
+The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/
+
+<b>Signature:</b>
+
+```typescript
+interestingEdgeCases(): void;
+```
+<b>Returns:</b>
+
+`void`
+

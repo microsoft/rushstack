@@ -65,13 +65,6 @@ enum FileConstants {
 }
 
 // @public
-class FileDiffTest {
-  static assertEqual(actualFilePath: string, expectedFilePath: string): void;
-  static clearCache(): void;
-  static prepareFolder(unitTestDirName: string, testModule: string): string;
-}
-
-// @public
 class FileSystem {
   static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
   static changePosixModeBits(path: string, mode: PosixModeBits): void;
@@ -223,6 +216,14 @@ interface IJsonSchemaFromFileOptions {
 // @public
 interface IJsonSchemaValidateOptions {
   customErrorHeader?: string;
+}
+
+// @public
+class InternalError extends Error {
+  constructor(message: string);
+  // @override (undocumented)
+  toString(): string;
+  readonly unformattedMessage: string;
 }
 
 // @public

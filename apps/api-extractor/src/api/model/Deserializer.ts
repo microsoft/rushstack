@@ -1,20 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IApiItemJson, IApiItemOptions, ApiItem, ApiItemKind } from './ApiItem';
-import { ApiClass } from './ApiClass';
-import { ApiEntryPoint } from './ApiEntryPoint';
-import { ApiMethod } from './ApiMethod';
+import { IApiItemJson, IApiItemOptions, ApiItem, ApiItemKind } from '../items/ApiItem';
+import { ApiClass, IApiClassOptions, IApiClassJson } from './ApiClass';
+import { ApiEntryPoint, IApiEntryPointOptions } from './ApiEntryPoint';
+import { ApiMethod, IApiMethodOptions } from './ApiMethod';
 import { ApiModel } from './ApiModel';
-import { ApiNamespace } from './ApiNamespace';
-import { ApiPackage } from './ApiPackage';
-import { ApiInterface } from './ApiInterface';
-import { ApiPropertySignature } from './ApiPropertySignature';
-import { ApiParameter } from './ApiParameter';
-import { ApiMethodSignature } from './ApiMethodSignature';
-import { ApiProperty } from './ApiProperty';
-import { ApiEnumMember } from './ApiEnumMember';
-import { ApiEnum } from './ApiEnum';
+import { ApiNamespace, IApiNamespaceOptions } from './ApiNamespace';
+import { ApiPackage, IApiPackageOptions } from './ApiPackage';
+import { ApiInterface, IApiInterfaceOptions, IApiInterfaceJson } from './ApiInterface';
+import { ApiPropertySignature, IApiPropertySignatureOptions } from './ApiPropertySignature';
+import { ApiMethodSignature, IApiMethodSignatureOptions } from './ApiMethodSignature';
+import { ApiProperty, IApiPropertyOptions } from './ApiProperty';
+import { ApiEnumMember, IApiEnumMemberOptions, IApiEnumMemberJson } from './ApiEnumMember';
+import { ApiEnum, IApiEnumOptions } from './ApiEnum';
+import { IApiPropertyItemJson } from '../items/ApiPropertyItem';
+import { ApiConstructor, IApiConstructorOptions } from './ApiConstructor';
+import { ApiConstructSignature, IApiConstructSignatureOptions } from './ApiConstructSignature';
+import { ApiFunction, IApiFunctionOptions } from './ApiFunction';
+import { ApiCallSignature, IApiCallSignatureOptions } from './ApiCallSignature';
+import { ApiIndexSignature, IApiIndexSignatureOptions } from './ApiIndexSignature';
+import { ApiTypeAlias, IApiTypeAliasOptions } from './ApiTypeAlias';
+import { ApiVariable, IApiVariableOptions, IApiVariableJson } from './ApiVariable';
+import { IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 
 export class Deserializer {
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
@@ -22,43 +30,61 @@ export class Deserializer {
 
     switch (jsonObject.kind) {
       case ApiItemKind.Class:
-        ApiClass.onDeserializeInto(options, jsonObject);
-        return new ApiClass(options as any); // tslint:disable-line:no-any
+        ApiClass.onDeserializeInto(options, jsonObject as IApiClassJson);
+        return new ApiClass(options as IApiClassOptions);
+      case ApiItemKind.CallSignature:
+        ApiCallSignature.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+        return new ApiCallSignature(options as IApiCallSignatureOptions);
+      case ApiItemKind.Constructor:
+        ApiConstructor.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+        return new ApiConstructor(options as IApiConstructorOptions);
+      case ApiItemKind.ConstructSignature:
+        ApiConstructSignature.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+        return new ApiConstructSignature(options as IApiConstructSignatureOptions);
       case ApiItemKind.EntryPoint:
         ApiEntryPoint.onDeserializeInto(options, jsonObject);
-        return new ApiEntryPoint(options as any); // tslint:disable-line:no-any
+        return new ApiEntryPoint(options as IApiEntryPointOptions);
       case ApiItemKind.Enum:
-        ApiEnum.onDeserializeInto(options, jsonObject);
-        return new ApiEnum(options as any); // tslint:disable-line:no-any
+        ApiEnum.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+        return new ApiEnum(options as IApiEnumOptions);
       case ApiItemKind.EnumMember:
-        ApiEnumMember.onDeserializeInto(options, jsonObject);
-        return new ApiEnumMember(options as any); // tslint:disable-line:no-any
+        ApiEnumMember.onDeserializeInto(options, jsonObject as IApiEnumMemberJson);
+        return new ApiEnumMember(options as IApiEnumMemberOptions);
+      case ApiItemKind.Function:
+        ApiFunction.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+        return new ApiFunction(options as IApiFunctionOptions);
+      case ApiItemKind.IndexSignature:
+        ApiIndexSignature.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+        return new ApiIndexSignature(options as IApiIndexSignatureOptions);
       case ApiItemKind.Interface:
-        ApiInterface.onDeserializeInto(options, jsonObject);
-        return new ApiInterface(options as any); // tslint:disable-line:no-any
+        ApiInterface.onDeserializeInto(options, jsonObject as IApiInterfaceJson);
+        return new ApiInterface(options as IApiInterfaceOptions);
       case ApiItemKind.Method:
-        ApiMethod.onDeserializeInto(options, jsonObject);
-        return new ApiMethod(options as any); // tslint:disable-line:no-any
+        ApiMethod.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+        return new ApiMethod(options as IApiMethodOptions);
       case ApiItemKind.MethodSignature:
-        ApiMethodSignature.onDeserializeInto(options, jsonObject);
-        return new ApiMethodSignature(options as any); // tslint:disable-line:no-any
+        ApiMethodSignature.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+        return new ApiMethodSignature(options as IApiMethodSignatureOptions);
       case ApiItemKind.Model:
         return new ApiModel();
       case ApiItemKind.Namespace:
-        ApiNamespace.onDeserializeInto(options, jsonObject);
-        return new ApiNamespace(options as any); // tslint:disable-line:no-any
+        ApiNamespace.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+        return new ApiNamespace(options as IApiNamespaceOptions);
       case ApiItemKind.Package:
         ApiPackage.onDeserializeInto(options, jsonObject);
-        return new ApiPackage(options as any); // tslint:disable-line:no-any
-      case ApiItemKind.Parameter:
-        ApiParameter.onDeserializeInto(options, jsonObject);
-        return new ApiParameter(options as any); // tslint:disable-line:no-any
+        return new ApiPackage(options as IApiPackageOptions);
       case ApiItemKind.Property:
-        ApiProperty.onDeserializeInto(options, jsonObject);
-        return new ApiProperty(options as any); // tslint:disable-line:no-any
+        ApiProperty.onDeserializeInto(options, jsonObject as IApiPropertyItemJson);
+        return new ApiProperty(options as IApiPropertyOptions);
       case ApiItemKind.PropertySignature:
-        ApiPropertySignature.onDeserializeInto(options, jsonObject);
-        return new ApiPropertySignature(options as any); // tslint:disable-line:no-any
+        ApiPropertySignature.onDeserializeInto(options, jsonObject as IApiPropertyItemJson);
+        return new ApiPropertySignature(options as IApiPropertySignatureOptions);
+        case ApiItemKind.TypeAlias:
+        ApiTypeAlias.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+        return new ApiTypeAlias(options as IApiTypeAliasOptions);
+      case ApiItemKind.Variable:
+        ApiVariable.onDeserializeInto(options, jsonObject as IApiVariableJson);
+        return new ApiVariable(options as IApiVariableOptions);
       default:
         throw new Error(`Failed to deserialize unsupported API item type ${JSON.stringify(jsonObject.kind)}`);
     }

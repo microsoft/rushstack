@@ -20,7 +20,6 @@ import {
   FileSystem,
   FileConstants,
   Sort,
-  FolderConstants,
   PosixModeBits
 } from '@microsoft/node-core-library';
 
@@ -30,6 +29,7 @@ import { BaseLinkManager } from '../logic/base/BaseLinkManager';
 import { BaseShrinkwrapFile } from '../logic/base/BaseShrinkwrapFile';
 import { PolicyValidator } from '../logic/policy/PolicyValidator';
 import { IRushTempPackageJson } from '../logic/base/BasePackage';
+import { Git } from '../logic/Git';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { PurgeManager } from './PurgeManager';
@@ -43,6 +43,9 @@ import { Rush } from '../api/Rush';
 import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { CommonVersionsConfiguration } from '../api/CommonVersionsConfiguration';
+
+// The PosixModeBits are intended to be used with bitwise operations.
+// tslint:disable:no-bitwise
 
 const MAX_INSTALL_ATTEMPTS: number = 2;
 
@@ -269,9 +272,9 @@ export class InstallManager {
 
       // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
       const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
-      const hookDestination: string = path.join(this._rushConfiguration.rushJsonFolder, FolderConstants.Git, 'hooks');
+      const hookDestination: string | undefined = Git.getHooksFolder();
 
-      if (FileSystem.exists(hookSource)) {
+      if (FileSystem.exists(hookSource) && hookDestination) {
         const hookFilenames: Array<string> = FileSystem.readFolder(hookSource);
         if (hookFilenames.length > 0) {
           console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
@@ -286,7 +289,8 @@ export class InstallManager {
               sourcePath: path.join(hookSource, filename),
               destinationPath: path.join(hookDestination, filename)
             });
-            FileSystem.changePosixModeBits(path.join(hookDestination, filename), PosixModeBits.UserExecute);
+            FileSystem.changePosixModeBits(path.join(hookDestination, filename),
+              PosixModeBits.UserRead | PosixModeBits.UserExecute);
           }
 
           console.log('Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL);

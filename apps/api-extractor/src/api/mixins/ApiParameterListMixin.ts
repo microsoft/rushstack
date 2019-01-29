@@ -1,0 +1,183 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.s
+
+import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
+import { Parameter } from '../model/Parameter';
+import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
+import { IExcerptTokenRange } from './Excerpt';
+import { InternalError } from '@microsoft/node-core-library';
+
+/**
+ * Represents parameter information that is part of {@link IApiParameterListMixinOptions}
+ * @public
+ */
+export interface IApiParameterOptions {
+  parameterName: string;
+  parameterTypeTokenRange: IExcerptTokenRange;
+}
+
+/**
+ * Constructor options for {@link (ApiParameterListMixin:interface)}.
+ * @public
+ */
+export interface IApiParameterListMixinOptions extends IApiItemOptions {
+  overloadIndex: number;
+  parameters: IApiParameterOptions[];
+}
+
+export interface IApiParameterListJson extends IApiItemJson {
+  overloadIndex: number;
+  parameters: IApiParameterOptions[];
+}
+
+const _overloadIndex: unique symbol = Symbol('ApiParameterListMixin._overloadIndex');
+const _parameters: unique symbol = Symbol('ApiParameterListMixin._parameters');
+
+/**
+ * The mixin base class for API items that can have function parameters (but not necessarily a return value).
+ *
+ * @remarks
+ *
+ * This is part of the {@link ApiModel} hierarchy of classes, which are serializable representations of
+ * API declarations.  The non-abstract classes (e.g. `ApiClass`, `ApiEnum`, `ApiInterface`, etc.) use
+ * TypeScript "mixin" functions (e.g. `ApiDeclaredItem`, `ApiItemContainerMixin`, etc.) to add various
+ * features that cannot be represented as a normal inheritance chain (since TypeScript does not allow a child class
+ * to extend more than one base class).  The "mixin" is a TypeScript merged declaration with three components:
+ * the function that generates a subclass, an interface that describes the members of the subclass, and
+ * a namespace containing static members of the class.
+ *
+ * @public
+ */
+// tslint:disable-next-line:interface-name
+export interface ApiParameterListMixin extends ApiItem {
+  /**
+   * When a function has multiple overloaded declarations, this zero-based integer index can be used to unqiuely
+   * identify them.
+   *
+   * @remarks
+   *
+   * Consider this overloaded declaration:
+   *
+   * ```ts
+   * export namespace Versioning {
+   *   export function addVersions(x: number, y: number): number;
+   *   export function addVersions(x: string, y: string): string;
+   *   export function addVersions(x: number|string, y: number|string): number|string {
+   *     // . . .
+   *   }
+   * }
+   * ```
+   *
+   * In the above example, there are two overloaded declarations.  The overload using numbers will have
+   * `overloadIndex = 0`.  The overload using strings will have `overloadIndex = 1`.  The third declaration that
+   * accepts all possible inputs is considered part of the implementation, and is not processed by API Extractor.
+   */
+  readonly overloadIndex: number;
+
+  /**
+   * The function parameters.
+   */
+  readonly parameters: ReadonlyArray<Parameter>;
+
+  serializeInto(jsonObject: Partial<IApiItemJson>): void;
+}
+
+/**
+ * Mixin function for {@link (ApiParameterListMixin:interface)}.
+ *
+ * @param baseClass - The base class to be extended
+ * @returns A child class that extends baseClass, adding the {@link (ApiParameterListMixin:interface)} functionality.
+ *
+ * @public
+ */
+export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
+  TBaseClass & (new (...args: any[]) => ApiParameterListMixin) { // tslint:disable-line:no-any
+
+  abstract class MixedClass extends baseClass implements ApiParameterListMixin {
+    public readonly [_overloadIndex]: number;
+    public readonly [_parameters]: Parameter[];
+
+    /** @override */
+    public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>,
+      jsonObject: IApiParameterListJson): void {
+
+      baseClass.onDeserializeInto(options, jsonObject);
+
+      options.overloadIndex = jsonObject.overloadIndex;
+      options.parameters = jsonObject.parameters || [];
+    }
+
+    // tslint:disable-next-line:no-any
+    constructor(...args: any[]) {
+      super(...args);
+
+      const options: IApiParameterListMixinOptions = args[0];
+      this[_overloadIndex] = options.overloadIndex;
+
+      this[_parameters] = [];
+
+      if (this instanceof ApiDeclaredItem) {
+        if (options.parameters) {
+          for (const parameterOptions of options.parameters) {
+
+            const parameter: Parameter = new Parameter({
+              name: parameterOptions.parameterName,
+              parameterTypeExcerpt: this.buildExcerpt(parameterOptions.parameterTypeTokenRange),
+              parent: this
+            });
+
+            this[_parameters].push(parameter);
+          }
+        }
+      } else {
+        throw new InternalError('ApiReturnTypeMixin expects a base class that inherits from ApiDeclaredItem');
+      }
+    }
+
+    public get overloadIndex(): number {
+      return this[_overloadIndex];
+    }
+
+    public get parameters(): ReadonlyArray<Parameter> {
+      return this[_parameters];
+    }
+
+    /** @override */
+    public serializeInto(jsonObject: Partial<IApiParameterListJson>): void {
+      super.serializeInto(jsonObject);
+
+      jsonObject.overloadIndex = this.overloadIndex;
+
+      const parameterObjects: IApiParameterOptions[] = [];
+      for (const parameter of this.parameters) {
+        parameterObjects.push({
+          parameterName: parameter.name,
+          parameterTypeTokenRange: parameter.parameterTypeExcerpt.tokenRange
+        });
+      }
+
+      jsonObject.parameters = parameterObjects;
+    }
+  }
+
+  return MixedClass;
+}
+
+/**
+ * Static members for {@link (ApiParameterListMixin:interface)}.
+ * @public
+ */
+export namespace ApiParameterListMixin {
+  /**
+   * A type guard that tests whether the specified `ApiItem` subclass extends the `ApiParameterListMixin` mixin.
+   *
+   * @remarks
+   *
+   * The JavaScript `instanceof` operator cannot be used to test for mixin inheritance, because each invocation of
+   * the mixin function produces a different subclass.  (This could be mitigated by `Symbol.hasInstance`, however
+   * the TypeScript type system cannot invoke a runtime test.)
+   */
+  export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiParameterListMixin {
+    return apiItem.hasOwnProperty(_parameters);
+  }
+}

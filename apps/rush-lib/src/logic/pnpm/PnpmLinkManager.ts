@@ -12,7 +12,8 @@ import {
   IPackageJson,
   PackageName,
   FileSystem,
-  FileConstants
+  FileConstants,
+  InternalError
 } from '@microsoft/node-core-library';
 
 import {
@@ -117,8 +118,8 @@ export class PnpmLinkManager extends BaseLinkManager {
         newLocalPackage.symlinkTargetFolderPath = matchedRushPackage.projectFolder;
         localPackage.children.push(newLocalPackage);
       } else {
-        // weird state or program bug
-        throw Error(`Cannot find dependency "${dependencyName}" for "${project.packageName}" in rush configuration`);
+        throw new InternalError(`Cannot find dependency "${dependencyName}" for "${project.packageName}" in `
+          + ` the Rush configuration`);
       }
     }
 
@@ -169,12 +170,12 @@ export class PnpmLinkManager extends BaseLinkManager {
 
       if (!FileSystem.exists(dependencyLocalInstallationSymlink)) {
         // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
-        throw Error(`Cannot find installed dependency "${dependencyName}" in "${pathToLocalInstallation}"`);
+        throw new InternalError(`Cannot find installed dependency "${dependencyName}" in "${pathToLocalInstallation}"`);
       }
 
       if (!FileSystem.getLinkStatistics(dependencyLocalInstallationSymlink).isSymbolicLink()) {
         // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
-        throw Error(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
+        throw new InternalError(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
       }
 
       // The dependencyLocalInstallationSymlink is just a symlink to another folder.

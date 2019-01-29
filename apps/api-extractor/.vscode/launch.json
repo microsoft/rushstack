@@ -11,9 +11,9 @@
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-01",
       "args": [
-        "-d",
+        "--debug",
         "run",
-        "-l"
+        "--local"
       ],
       "sourceMaps": true
     },
@@ -24,11 +24,11 @@
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-02",
       "args": [
-        "-d",
+        "--debug",
         "run",
-        "-l"
+        "--local"
       ],
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -37,11 +37,11 @@
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-03",
       "args": [
-        "-d",
+        "--debug",
         "run",
-        "-l"
+        "--local"
       ],
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -50,11 +50,11 @@
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-04",
       "args": [
-        "-d",
+        "--debug",
         "run",
-        "-l"
+        "--local"
       ],
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -63,24 +63,39 @@
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-05",
       "args": [
-        "-d",
+        "--debug",
         "run",
-        "-l"
+        "--local"
       ],
-      "sourceMaps": false
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "scenario",
+      "program": "${workspaceFolder}/lib/start.js",
+      "cwd": "${workspaceFolder}/../../build-tests/api-extractor-scenarios",
+      "args": [
+        "--debug",
+        "run",
+        "--local",
+        "--config",
+        "./temp/configs/api-extractor-defaultExportOfEntryPoint1.json"
+      ],
+      "sourceMaps": true
     },
     {
       "type": "node",
       "request": "launch",
       "name": "scratch",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "(your project path)",
+      "cwd": "D:\\GitRepos\\wbt\\core-build\\gulp-core-build",
       "args": [
-        "-d",
+        "--debug",
         "run",
-        "-l"
+        "--local"
       ],
-      "sourceMaps": false
+      "sourceMaps": true
     }
   ]
 }

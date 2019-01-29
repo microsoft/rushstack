@@ -1,21 +1,60 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ApiItem, ApiItemKind } from './ApiItem';
+import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { ApiPackage } from './ApiPackage';
 import { PackageName } from '@microsoft/node-core-library';
 import { DeclarationReferenceResolver, IResolveDeclarationReferenceResult } from './DeclarationReferenceResolver';
 import { DocDeclarationReference } from '@microsoft/tsdoc';
 
-/** @public */
+/**
+ * A serializable representation of a collection of API declarations.
+ *
+ * @remarks
+ *
+ * An `ApiModel` represents a collection of API declarations that can be serialized to disk.  It captures all the
+ * important information needed to generate documentation, without any reliance on the TypeScript compiler engine.
+ *
+ * An `ApiModel` acts as the root of a tree of objects that all inherit from the `ApiItem` base class.
+ * The tree children are determined by the {@link ApiItemContainerMixin} mixin base class.  The model contains
+ * packages.  Packages have an entry point (today, only one).  And the entry point can contain various types
+ * of API declarations.  The container relationships might look like this:
+ *
+ * ```
+ * Things that can contain other things:
+ *
+ * - ApiModel
+ *   - ApiPackage
+ *     - ApiEntryPoint
+ *       - ApiClass
+ *         - ApiMethod
+ *         - ApiProperty
+ *       - ApiEnum
+ *         - ApiEnumMember
+ *       - ApiInterface
+ *         - ApiMethodSignature
+ *         - ApiPropertySignature
+ *       - ApiNamespace
+ *         - (ApiClass, ApiEnum, ApiInterace, ...)
+ *
+ * ```
+ *
+ * Normally, API Extractor writes an .api.json file to disk for each project that it builds.  Then, a tool like
+ * API Documenter can load the various `ApiPackage` objects into a single `ApiModel` and process them as a group.
+ * This is useful because compilation generally occurs separately (e.g. because projects may reside in different
+ * Git repos, or because they build with different TypeScript compiler configurations that may be incompatible),
+ * whereas API Documenter cannot detect broken hyperlinks without seeing the entire documentation set.
+ *
+ * @public
+ */
 export class ApiModel extends ApiItemContainerMixin(ApiItem) {
   private readonly _resolver: DeclarationReferenceResolver;
 
   private _packagesByName: Map<string, ApiPackage> | undefined = undefined;
 
   public constructor() {
-    super({ name: 'MODEL' });
+    super({ });
 
     this._resolver = new DeclarationReferenceResolver(this);
   }
@@ -33,7 +72,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
 
   /** @override */
   public get canonicalReference(): string {
-    return this.name;
+    return '';
   }
 
   public get packages(): ReadonlyArray<ApiPackage> {
@@ -56,6 +95,8 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
    * @remarks
    *
    * If the NPM scope is omitted in the package name, it will still be found provided that it is an unambiguous match.
+   * For example, it's often convenient to write `{@link node-core-library#JsonFile}` instead of
+   * `{@link @microsoft/node-core-library#JsonFile}`.
    */
   public tryGetPackageByName(packageName: string): ApiPackage | undefined {
     // Build the lookup on demand

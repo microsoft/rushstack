@@ -2,6 +2,8 @@
 class ApiExtractorRunner extends RushStackCompilerBase {
   constructor(extractorConfig: IExtractorConfig, extractorOptions: IExtractorOptions, rootPath: string, terminalProvider: ITerminalProvider);
   // (undocumented)
+  static apiExtractor: typeof ApiExtractor;
+  // (undocumented)
   invoke(): Promise<void>;
 }
 
@@ -12,6 +14,11 @@ interface ITslintRunnerConfig {
   fileError: WriteFileIssueFunction;
   // (undocumented)
   fileWarning: WriteFileIssueFunction;
+}
+
+// @beta (undocumented)
+interface ITypescriptCompilerOptions {
+  customArgs?: string[];
 }
 
 // @beta (undocumented)
@@ -56,7 +63,7 @@ class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
 }
 
 // @beta (undocumented)
-class TypescriptCompiler extends RushStackCompilerBase {
+class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
   constructor(rootPath: string, terminalProvider: ITerminalProvider);
   // (undocumented)
   invoke(): Promise<void>;
