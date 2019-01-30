@@ -49,7 +49,7 @@ groups:
     users:
       - iclanton
       - nickpape-msft
-      - pgonzal
+      - octogonz
       - aditima
 
   load-themed-styles-approvers:
@@ -60,6 +60,6 @@ groups:
     users:
       - iclanton
       - nickpape-msft
-      - pgonzal
+      - octogonz
       - dzearing
       - aditima
