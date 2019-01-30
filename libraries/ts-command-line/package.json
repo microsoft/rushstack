@@ -22,7 +22,7 @@
     "@types/node": "8.5.8"
   },
   "devDependencies": {
-    "tslint-microsoft-contrib": "~6.0.0",
+    "tslint-microsoft-contrib": "~5.2.1",
     "@types/jest": "23.3.11",
     "gulp": "~3.9.1",
     "@microsoft/node-library-build": "6.0.15",

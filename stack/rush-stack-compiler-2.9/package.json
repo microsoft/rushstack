@@ -21,7 +21,7 @@
     "@microsoft/api-extractor": "7.0.12",
     "@microsoft/node-core-library": "3.9.0",
     "@types/node": "8.5.8",
-    "tslint-microsoft-contrib": "~6.0.0",
+    "tslint-microsoft-contrib": "~5.2.1",
     "tslint": "~5.12.1",
     "typescript": "~2.9.2"
   },
