@@ -1,11 +1,11 @@
 {
-  "name": "@microsoft/rush-stack-compiler-2.4",
-  "version": "0.4.0",
-  "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain. This version selects TypeScript 2.4.",
+  "name": "@microsoft/rush-stack-compiler-3.2",
+  "version": "0.0.0",
+  "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain. This version selects TypeScript 3.2.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/web-build-tools/tree/master/stack/rush-stack-compiler-2.4"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/stack/rush-stack-compiler-3.2"
   },
   "bin": {
     "rush-api-extractor": "./bin/rush-api-extractor",
@@ -23,7 +23,7 @@
     "@types/node": "8.5.8",
     "tslint-microsoft-contrib": "~5.2.1",
     "tslint": "~5.12.1",
-    "typescript": "~2.4.2"
+    "typescript": "~3.2.4"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.0.15",

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.1",
+      "comment": "Add ToolPackages API for raw access to tools packages.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.1",
+  "email": "iclanton@users.noreply.github.com"
+}
