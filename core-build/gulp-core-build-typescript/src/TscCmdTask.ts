@@ -111,7 +111,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
 
     if (this.taskConfig.removeCommentsFromJavaScript === true) {
       buildPromise = buildPromise.then(
-        () => this._removeComments(typescriptCompiler.typescript)
+        () => this._removeComments(this._rushStackCompiler.ToolPackages.typescript)
       );
     }
 
