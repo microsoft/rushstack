@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-3.1",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@microsoft/rush-stack-compiler-3.1_v0.5.0",
+      "date": "Wed, 30 Jan 2019 20:49:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add ToolPackages API for raw access to tools packages."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@microsoft/rush-stack-compiler-3.1_v0.4.0",
       "date": "Sat, 19 Jan 2019 03:47:47 GMT",

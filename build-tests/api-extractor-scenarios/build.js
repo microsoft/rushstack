@@ -21,7 +21,7 @@ fsx.emptyDirSync('etc/test-outputs');
 executeCommand('node node_modules/typescript/lib/tsc');
 
 // Run the scenario runner
-require('./lib/runScenarios').runScenarios('./build-config.json');
+require('./lib/runScenarios').runScenarios('./config/build-config.json');
 
 console.log();
 console.log(`==> Finished build.js for ${path.basename(process.cwd())}`);

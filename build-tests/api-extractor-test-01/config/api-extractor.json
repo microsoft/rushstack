@@ -12,5 +12,7 @@
 
   "project": {
     "entryPointSourceFile": "lib/index.d.ts"
-  }
+  },
+
+  "testMode": true
 }

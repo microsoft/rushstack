@@ -9,3 +9,14 @@ An exported function
 ```typescript
 export declare function globalFunction(x: number): number;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  x | `number` |  |
+
+<b>Returns:</b>
+
+`number`
+
