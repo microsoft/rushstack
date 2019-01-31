@@ -35,5 +35,9 @@
     "publishFolderForPublic": "./dist/public",
 
     "mainDtsRollupPath": ""
-  }
+  },
+
+  "skipLibCheck": false,
+  
+  "testMode": false
 }

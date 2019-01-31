@@ -139,7 +139,8 @@ export {
 } from './api/model/ApiNamespace';
 export {
   IApiPackageOptions,
-  ApiPackage
+  ApiPackage,
+  IApiPackageSaveOptions
 } from './api/model/ApiPackage';
 export {
   IParameterOptions,
