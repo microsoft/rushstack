@@ -2,6 +2,26 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.21",
+      "tag": "@microsoft/api-documenter_v7.0.21",
+      "date": "Thu, 31 Jan 2019 17:03:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix issue where docs were not generated for function parameters and return types (GitHub #1055)"
+          },
+          {
+            "comment": "Upgrade to TSDoc 0.12.5"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.13` to `7.0.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.20",
       "tag": "@microsoft/api-documenter_v7.0.20",
       "date": "Wed, 30 Jan 2019 20:49:11 GMT",

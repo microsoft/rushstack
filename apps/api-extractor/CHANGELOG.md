@@ -1,6 +1,15 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 19 Jan 2019 03:47:47 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Jan 2019 17:03:49 GMT and should not be manually modified.
+
+## 7.0.14
+Thu, 31 Jan 2019 17:03:49 GMT
+
+### Patches
+
+- Upgrade to TSDoc 0.12.5, which allows `$` in `@param` names
+- Add "testMode" option in api-extractor.json to eliminate spurious diffs in test files when the version number gets bumped
+- Normalize newlines for excerpt strings in the .api.json file
 
 ## 7.0.13
 Sat, 19 Jan 2019 03:47:47 GMT
