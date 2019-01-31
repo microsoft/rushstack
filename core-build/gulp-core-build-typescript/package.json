@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "tslint-microsoft-contrib": "~5.2.1",
-    "@microsoft/api-extractor": "7.0.13",
+    "@microsoft/api-extractor": "7.0.14",
     "@microsoft/node-library-build": "6.0.27",
     "@types/glob": "5.0.30",
     "gulp": "~3.9.1",

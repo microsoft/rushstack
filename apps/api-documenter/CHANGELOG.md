@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 30 Jan 2019 20:49:11 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Jan 2019 17:03:49 GMT and should not be manually modified.
+
+## 7.0.21
+Thu, 31 Jan 2019 17:03:49 GMT
+
+### Patches
+
+- Fix issue where docs were not generated for function parameters and return types (GitHub #1055)
+- Upgrade to TSDoc 0.12.5
 
 ## 7.0.20
 Wed, 30 Jan 2019 20:49:11 GMT
