@@ -4,8 +4,8 @@
     {
       "commandKind": "global",
       "name": "rebuild",
-      "summary": "Rebuild the repo as a global command",
-      "description": "This should fail unit tests",
+      "summary": "Rebuild",
+      "description": "This combo is not supported",
       "shellCommand": "node fake-rebuild"
     }
   ]

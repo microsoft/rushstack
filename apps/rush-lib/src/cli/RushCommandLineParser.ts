@@ -279,6 +279,10 @@ export class RushCommandLineParser extends CommandLineParser {
       throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
         `the command kind "global". This command can only be designated as a command kind "bulk".`);
     }
+    if (command.safeForSimultaneousRushProcesses) {
+      throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+        `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`);
+    }
   }
 
   private _reportErrorAndSetExitCode(error: Error): void {

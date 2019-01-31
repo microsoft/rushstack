@@ -262,5 +262,27 @@ describe('RushCommandLineParser', () => {
         }).toThrowError('This command can only be designated as a command kind "bulk"');
       });
     });
+
+    describe(`in repo with 'build' command overridden with 'safeForSimultaneousRushProcesses=true'`, () => {
+      it(`throws an error when starting Rush`, () => {
+        const repoName: string = 'overrideBuildWithSimultaneousProcessesRepo';
+
+        expect.assertions(1);
+        return expect(() => {
+          newCommandLineParserInstance(repoName, 'doesnt-matter');
+        }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
+      });
+    });
+
+    describe(`in repo with 'rebuild' command overridden with 'safeForSimultaneousRushProcesses=true'`, () => {
+      it(`throws an error when starting Rush`, () => {
+        const repoName: string = 'overrideRebuildWithSimultaneousProcessesRepo';
+
+        expect.assertions(1);
+        return expect(() => {
+          newCommandLineParserInstance(repoName, 'doesnt-matter');
+        }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
+      });
+    });
   });
 });
