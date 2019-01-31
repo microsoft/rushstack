@@ -115,7 +115,9 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     const jsonObject: IApiPackageJson = {
       metadata: {
         toolPackage: Extractor.packageName,
-        toolVersion: options.testMode ? '' : Extractor.version,
+        // In test mode, we don't write the real version, since that would cause spurious diffs whenever
+        // the verison is bumped.  Instead we write a placeholder string.
+        toolVersion: options.testMode ? '[test mode]' : Extractor.version,
         schemaVersion: ApiJsonSchemaVersion.V_1000
       }
     } as IApiPackageJson;
