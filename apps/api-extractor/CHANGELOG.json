@@ -2,6 +2,24 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.14",
+      "tag": "@microsoft/api-extractor_v7.0.14",
+      "date": "Thu, 31 Jan 2019 17:03:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to TSDoc 0.12.5, which allows `$` in `@param` names"
+          },
+          {
+            "comment": "Add \"testMode\" option in api-extractor.json to eliminate spurious diffs in test files when the version number gets bumped"
+          },
+          {
+            "comment": "Normalize newlines for excerpt strings in the .api.json file"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.13",
       "tag": "@microsoft/api-extractor_v7.0.13",
       "date": "Sat, 19 Jan 2019 03:47:47 GMT",
