@@ -14,7 +14,7 @@
   "keywords": [],
   "dependencies": {},
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.0": "0.5.0",
+    "@microsoft/rush-stack-compiler-3.1": "0.5.0",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/webpack-env": "1.13.0",

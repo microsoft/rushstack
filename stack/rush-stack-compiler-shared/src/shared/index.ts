@@ -26,4 +26,4 @@ export {
   TslintRunner
 } from './TslintRunner';
 export { ToolPaths } from './ToolPaths';
-export { ToolPackages } from './ToolPackages';
+export { ToolPackages } from  './ToolPackages';

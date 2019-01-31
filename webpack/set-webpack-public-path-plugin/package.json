@@ -23,7 +23,7 @@
     "@types/tapable": "1.0.2"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.0": "0.5.0",
+    "@microsoft/rush-stack-compiler-3.1": "0.5.0",
     "@types/lodash": "4.14.116",
     "@types/mocha": "5.2.5",
     "@types/uglify-js": "2.6.29",

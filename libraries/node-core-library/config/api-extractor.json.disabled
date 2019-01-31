@@ -13,5 +13,8 @@
   "apiJsonFile": {
     "enabled": true,
     "outputFolder": "./temp"
+  },
+  "dtsRollup": {
+    "enabled": true
   }
 }
