@@ -270,8 +270,12 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _validateCommandLineConfigCommand(command: CommandJson): void {
-    // There are some restrictions on the 'rebuild' command.
-    if (command.name === 'rebuild' && command.commandKind === 'global') {
+    // There are some restrictions on the 'build' and 'rebuild' commands.
+    if (command.name !== 'build' && command.name !== 'rebuild') {
+      return;
+    }
+
+    if (command.commandKind === 'global') {
       throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
         `the command kind "global". This command can only be designated as a command kind "bulk".`);
     }

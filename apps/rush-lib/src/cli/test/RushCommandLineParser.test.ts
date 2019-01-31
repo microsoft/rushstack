@@ -241,16 +241,26 @@ describe('RushCommandLineParser', () => {
       });
     });
 
+    describe(`in repo with 'build' command overridden as a global command`, () => {
+      it(`throws an error when starting Rush`, () => {
+        const repoName: string = 'overrideBuildAsGlobalCommandRepo';
+
+        expect.assertions(1);
+        return expect(() => {
+          newCommandLineParserInstance(repoName, 'doesnt-matter');
+        }).toThrowError('This command can only be designated as a command kind "bulk"');
+      });
+    });
+
     describe(`in repo with 'rebuild' command overridden as a global command`, () => {
       it(`throws an error when starting Rush`, () => {
         const repoName: string = 'overrideRebuildAsGlobalCommandRepo';
 
         expect.assertions(1);
         return expect(() => {
-          newCommandLineParserInstance(repoName, 'build');
+          newCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('This command can only be designated as a command kind "bulk"');
       });
     });
-
   });
 });

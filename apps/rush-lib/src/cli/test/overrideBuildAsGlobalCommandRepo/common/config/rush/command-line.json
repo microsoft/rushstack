@@ -3,10 +3,10 @@
   "commands": [
     {
       "commandKind": "global",
-      "name": "rebuild",
-      "summary": "Rebuild the repo as a global command",
+      "name": "build",
+      "summary": "Build the repo as a global command",
       "description": "This should fail unit tests",
-      "shellCommand": "node fake-rebuild"
+      "shellCommand": "node fake-build"
     }
   ]
 }
