@@ -185,6 +185,7 @@ export function initialize(gulp: typeof Gulp): void;
 
 // @public (undocumented)
 interface ITscCmdTaskConfig extends IRSCTaskConfig {
+  customArgs?: string[];
   removeCommentsFromJavaScript?: boolean;
   staticMatch?: string[];
 }
@@ -326,7 +327,6 @@ class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TE
 // WARNING: Unsupported export: tslintCmd
 // WARNING: Unsupported export: apiExtractor
 // WARNING: Unsupported export: sass
-// WARNING: Unsupported export: karma
 // WARNING: Unsupported export: webpack
 // WARNING: Unsupported export: serve
 // WARNING: Unsupported export: reload

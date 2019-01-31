@@ -246,9 +246,16 @@ export class AstSymbolTable {
       return undefined;
     }
 
+    // API Extractor doesn't analyze ambient declarations at all
     if (TypeScriptHelpers.isAmbient(followedSymbol, this._typeChecker)) {
-      // API Extractor doesn't analyze ambient declarations at all
-      return undefined;
+      if (TypeScriptHelpers.hasAnyDeclarations(followedSymbol)
+        && this._exportAnalyzer.isImportableAmbientSourceFile(followedSymbol.declarations[0].getSourceFile())) {
+        // We make a special exemption for ambient declarations that appear in a source file containing
+        // an "export=" declaration that allows them to be imported as non-ambient.
+      } else {
+        // Ignore ambient declarations
+        return undefined;
+      }
     }
 
     let astSymbol: AstSymbol | undefined = this._astSymbolsBySymbol.get(followedSymbol);

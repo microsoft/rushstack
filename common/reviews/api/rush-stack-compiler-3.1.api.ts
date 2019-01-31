@@ -2,6 +2,8 @@
 class ApiExtractorRunner extends RushStackCompilerBase {
   constructor(extractorConfig: IExtractorConfig, extractorOptions: IExtractorOptions, rootPath: string, terminalProvider: ITerminalProvider);
   // (undocumented)
+  static apiExtractor: typeof ApiExtractor;
+  // (undocumented)
   invoke(): Promise<void>;
 }
 

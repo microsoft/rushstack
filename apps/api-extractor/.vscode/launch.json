@@ -89,7 +89,7 @@
       "request": "launch",
       "name": "scratch",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "(your project path)",
+      "cwd": "D:\\GitRepos\\wbt\\core-build\\gulp-core-build",
       "args": [
         "--debug",
         "run",

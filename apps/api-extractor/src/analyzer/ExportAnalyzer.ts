@@ -9,6 +9,7 @@ import { AstSymbol } from './AstSymbol';
 import { IAstImportOptions } from './AstImport';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
+import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.
@@ -21,6 +22,24 @@ export interface IAstSymbolTable {
     astImportOptions: IAstImportOptions | undefined, localName?: string): AstSymbol | undefined;
 
   analyze(astSymbol: AstSymbol): void;
+}
+
+/**
+ * Used with ExportAnalyzer.fetchAstModuleBySourceFile() to provide contextual information about how the source file
+ * was imported.
+ */
+interface IAstModuleReference {
+  /**
+   * For example, if we are following a statement like `import { X } from 'some-package'`, this will be the
+   * string `"some-package"`.
+   */
+  moduleSpecifier: string;
+
+  /**
+   * For example, if we are following a statement like `import { X } from 'some-package'`, this will be the
+   * symbol for `X`.
+   */
+  moduleSpecifierSymbol: ts.Symbol;
 }
 
 /**
@@ -41,6 +60,9 @@ export class ExportAnalyzer {
   private readonly _astModulesBySourceFile: Map<ts.SourceFile, AstModule>
     = new Map<ts.SourceFile, AstModule>();
 
+  // Used with isImportableAmbientSourceFile()
+  private readonly _importableAmbientSourceFiles: Set<ts.SourceFile> = new Set<ts.SourceFile>();
+
   public constructor(program: ts.Program, typeChecker: ts.TypeChecker, astSymbolTable: IAstSymbolTable) {
     this._program = program;
     this._typeChecker = typeChecker;
@@ -49,24 +71,30 @@ export class ExportAnalyzer {
 
   /**
    * For a given source file, this analyzes all of its exports and produces an AstModule object.
+   *
+   * @param moduleReference - contextual information about the import statement that took us to this source file,
+   * or `undefined` if this source file is the initial entry point
    */
-  public fetchAstModuleBySourceFile(sourceFile: ts.SourceFile, moduleSpecifier: string | undefined): AstModule {
+  public fetchAstModuleBySourceFile(sourceFile: ts.SourceFile,
+    moduleReference: IAstModuleReference | undefined): AstModule {
+
     // Don't traverse into a module that we already processed before:
     // The compiler allows m1 to have "export * from 'm2'" and "export * from 'm3'",
     // even if m2 and m3 both have "export * from 'm4'".
     let astModule: AstModule | undefined = this._astModulesBySourceFile.get(sourceFile);
 
     if (!astModule) {
-      const moduleSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(sourceFile);
+      const moduleSymbol: ts.Symbol = this._getSymbolForSourceFile(sourceFile, moduleReference);
 
-      // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
-      // but ignore:  "../folder/LocalFile"
-      //
-      // (If moduleSpecifier === undefined, then this is the entry point of the local project being analyzed.)
+      // (If moduleReference === undefined, then this is the entry point of the local project being analyzed.)
       let externalModulePath: string | undefined = undefined;
-      if (moduleSpecifier !== undefined && !ts.isExternalModuleNameRelative(moduleSpecifier)) {
-        // This makes astModule.isExternal=true
-        externalModulePath = moduleSpecifier;
+      if (moduleReference !== undefined) {
+        // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
+        // but ignore:  "../folder/LocalFile"
+        if (!ts.isExternalModuleNameRelative(moduleReference.moduleSpecifier)) {
+          // This makes astModule.isExternal=true
+          externalModulePath = moduleReference.moduleSpecifier;
+        }
       }
 
       astModule = new AstModule(sourceFile, moduleSymbol, externalModulePath);
@@ -76,33 +104,44 @@ export class ExportAnalyzer {
         // It's an external package, so do the special simplified analysis that doesn't crawl into referenced modules
         for (const exportedSymbol of this._typeChecker.getExportsOfModule(moduleSymbol)) {
 
+          if (externalModulePath === undefined) {
+            throw new InternalError('Failed assertion: externalModulePath=undefined but astModule.isExternal=true');
+          }
+
           const astImportOptions: IAstImportOptions = {
             exportName: exportedSymbol.name,
-            modulePath: moduleSpecifier!
+            modulePath: externalModulePath
           };
 
           const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(exportedSymbol, this._typeChecker);
-          const astSymbol: AstSymbol | undefined = this._astSymbolTable.fetchAstSymbol(
-            followedSymbol, true, astImportOptions);
 
-          if (!astSymbol) {
-            throw new Error('Unsupported export: ' + exportedSymbol.name);
+          // Ignore virtual symbols that don't have any declarations
+          if (TypeScriptHelpers.hasAnyDeclarations(followedSymbol)) {
+            const astSymbol: AstSymbol | undefined = this._astSymbolTable.fetchAstSymbol(
+              followedSymbol, true, astImportOptions);
+
+            if (!astSymbol) {
+              throw new Error(`Unsupported export ${JSON.stringify(exportedSymbol.name)} in `
+                + TypeScriptMessageFormatter.formatFileAndLineNumber(followedSymbol.declarations[0]));
+            }
+
+            astModule.cachedExportedSymbols.set(exportedSymbol.name, astSymbol);
           }
-
-          astModule.cachedExportedSymbols.set(exportedSymbol.name, astSymbol);
         }
       } else {
         // The module is part of the local project, so do the full analysis
 
         if (moduleSymbol.exports) {
-          // The "export * from 'module-name';" declarationsare all attached to a single virtual symbol
+          // The "export * from 'module-name';" declarations are all attached to a single virtual symbol
           // whose name is InternalSymbolName.ExportStar
           const exportStarSymbol: ts.Symbol | undefined = moduleSymbol.exports.get(ts.InternalSymbolName.ExportStar);
           if (exportStarSymbol) {
             for (const exportStarDeclaration of exportStarSymbol.getDeclarations() || []) {
               if (ts.isExportDeclaration(exportStarDeclaration)) {
 
-                const starExportedModule: AstModule | undefined = this._fetchSpecifierAstModule(exportStarDeclaration);
+                const starExportedModule: AstModule | undefined = this._fetchSpecifierAstModule(exportStarDeclaration,
+                  exportStarSymbol);
+
                 if (starExportedModule !== undefined) {
                   astModule.starExportedModules.add(starExportedModule);
                 }
@@ -120,6 +159,55 @@ export class ExportAnalyzer {
     return astModule;
   }
 
+  /**
+   * Retrieves the symbol for the module corresponding to the ts.SourceFile that is being imported/exported.
+   */
+  private _getSymbolForSourceFile(sourceFile: ts.SourceFile,
+    moduleReference: IAstModuleReference | undefined): ts.Symbol {
+
+    const moduleSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(sourceFile);
+    if (moduleSymbol !== undefined) {
+      // This is the normal case.  The SourceFile acts is a module and has a symbol.
+      return moduleSymbol;
+    }
+
+    if (moduleReference !== undefined) {
+      // But there is also an elaborate case where the source file contains one or more "module" declarations,
+      // and our moduleReference took us to one of those.
+
+      // tslint:disable-next-line:no-bitwise
+      if ((moduleReference.moduleSpecifierSymbol.flags & ts.SymbolFlags.Alias) !== 0) {
+        // Follow the import/export declaration to one hop the exported item inside the target module
+        let followedSymbol: ts.Symbol | undefined = TypeScriptInternals.getImmediateAliasedSymbol(
+          moduleReference.moduleSpecifierSymbol, this._typeChecker);
+
+        if (followedSymbol === undefined) {
+          // This is a workaround for a compiler bug where getImmediateAliasedSymbol() sometimes returns undefined
+          followedSymbol = this._typeChecker.getAliasedSymbol(moduleReference.moduleSpecifierSymbol);
+        }
+
+        if (followedSymbol !== undefined && followedSymbol !== moduleReference.moduleSpecifierSymbol) {
+          // The parent of the exported symbol will be the module that we're importing from
+          const parent: ts.Symbol | undefined = TypeScriptInternals.getSymbolParent(followedSymbol);
+          if (parent !== undefined) {
+            // Make sure the thing we found is a module
+            // tslint:disable-next-line:no-bitwise
+            if ((parent.flags & ts.SymbolFlags.ValueModule) !== 0) {
+              // Record that that this is an ambient module that can also be imported from
+              this._importableAmbientSourceFiles.add(sourceFile);
+              return parent;
+            }
+          }
+        }
+      }
+    }
+
+    throw new InternalError('Unable to determine module for: ' + sourceFile.fileName);
+  }
+
+  /**
+   * This crawls the specified entry point and collects the full set of exported AstSymbols.
+   */
   public fetchAstModuleExportInfo(astModule: AstModule): AstModuleExportInfo {
     if (astModule.astModuleExportInfo === undefined) {
       const astModuleExportInfo: AstModuleExportInfo = new AstModuleExportInfo();
@@ -129,6 +217,16 @@ export class ExportAnalyzer {
       astModule.astModuleExportInfo = astModuleExportInfo;
     }
     return astModule.astModuleExportInfo;
+  }
+
+  /**
+   * Returns true if when we analyzed sourceFile, we found that it contains an "export=" statement that allows
+   * it to behave /either/ as an ambient module /or/ as a regular importable module.  In this case,
+   * `AstSymbolTable._fetchAstSymbol()` will analyze its symbols even though `TypeScriptHelpers.isAmbient()`
+   * returns true.
+   */
+  public isImportableAmbientSourceFile(sourceFile: ts.SourceFile): boolean {
+    return this._importableAmbientSourceFiles.has(sourceFile);
   }
 
   private _collectAllExportsRecursive(astModuleExportInfo: AstModuleExportInfo, astModule: AstModule,
@@ -191,11 +289,11 @@ export class ExportAnalyzer {
       // Is this symbol an import/export that we need to follow to find the real declaration?
       for (const declaration of current.declarations || []) {
         let matchedAstSymbol: AstSymbol | undefined;
-        matchedAstSymbol = this._tryMatchExportDeclaration(symbol, declaration);
+        matchedAstSymbol = this._tryMatchExportDeclaration(declaration, current);
         if (matchedAstSymbol !== undefined) {
           return matchedAstSymbol;
         }
-        matchedAstSymbol = this._tryMatchImportDeclaration(symbol, declaration);
+        matchedAstSymbol = this._tryMatchImportDeclaration(declaration, current);
         if (matchedAstSymbol !== undefined) {
           return matchedAstSymbol;
         }
@@ -219,7 +317,7 @@ export class ExportAnalyzer {
     return astSymbol;
   }
 
-  private _tryMatchExportDeclaration(exportedSymbol: ts.Symbol, declaration: ts.Declaration): AstSymbol | undefined {
+  private _tryMatchExportDeclaration(declaration: ts.Declaration, declarationSymbol: ts.Symbol): AstSymbol | undefined {
 
     const exportDeclaration: ts.ExportDeclaration | undefined
       = TypeScriptHelpers.findFirstParent<ts.ExportDeclaration>(declaration, ts.SyntaxKind.ExportDeclaration);
@@ -252,7 +350,7 @@ export class ExportAnalyzer {
 
       // Ignore "export { A }" without a module specifier
       if (exportDeclaration.moduleSpecifier) {
-        const specifierAstModule: AstModule = this._fetchSpecifierAstModule(exportDeclaration);
+        const specifierAstModule: AstModule = this._fetchSpecifierAstModule(exportDeclaration, declarationSymbol);
         const astSymbol: AstSymbol = this._getExportOfAstModule(exportName, specifierAstModule);
         return astSymbol;
       }
@@ -261,13 +359,13 @@ export class ExportAnalyzer {
     return undefined;
   }
 
-  private _tryMatchImportDeclaration(exportedSymbol: ts.Symbol, declaration: ts.Declaration): AstSymbol | undefined {
+  private _tryMatchImportDeclaration(declaration: ts.Declaration, declarationSymbol: ts.Symbol): AstSymbol | undefined {
 
     const importDeclaration: ts.ImportDeclaration | undefined
       = TypeScriptHelpers.findFirstParent<ts.ImportDeclaration>(declaration, ts.SyntaxKind.ImportDeclaration);
 
     if (importDeclaration) {
-      const specifierAstModule: AstModule = this._fetchSpecifierAstModule(importDeclaration);
+      const specifierAstModule: AstModule = this._fetchSpecifierAstModule(importDeclaration, declarationSymbol);
 
       if (declaration.kind === ts.SyntaxKind.NamespaceImport) {
         // EXAMPLE:
@@ -291,7 +389,7 @@ export class ExportAnalyzer {
             + '\nFailure in: ' + importDeclaration.getSourceFile().fileName);
         }
 
-        const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(exportedSymbol, this._typeChecker);
+        const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(declarationSymbol, this._typeChecker);
 
         const astImportOptions: IAstImportOptions = {
           exportName: '*',
@@ -299,7 +397,7 @@ export class ExportAnalyzer {
         };
 
         const astSymbol: AstSymbol | undefined = this._astSymbolTable.fetchAstSymbol(followedSymbol, true,
-          astImportOptions, exportedSymbol.name);
+          astImportOptions, declarationSymbol.name);
         return astSymbol;
       }
 
@@ -407,16 +505,17 @@ export class ExportAnalyzer {
    * Given an ImportDeclaration of the form `export * from "___";`, this interprets the module specifier (`"___"`)
    * and fetches the corresponding AstModule object.
    */
-  private _fetchSpecifierAstModule(exportStarDeclaration: ts.ImportDeclaration | ts.ExportDeclaration): AstModule {
+  private _fetchSpecifierAstModule(importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration,
+    exportStarSymbol: ts.Symbol): AstModule {
 
     // The name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
-    const moduleSpecifier: string | undefined = TypeScriptHelpers.getModuleSpecifier(exportStarDeclaration);
+    const moduleSpecifier: string | undefined = TypeScriptHelpers.getModuleSpecifier(importOrExportDeclaration);
     if (!moduleSpecifier) {
       throw new InternalError('Unable to parse module specifier');
     }
 
     const resolvedModule: ts.ResolvedModuleFull | undefined = TypeScriptInternals.getResolvedModule(
-      exportStarDeclaration.getSourceFile(), moduleSpecifier);
+      importOrExportDeclaration.getSourceFile(), moduleSpecifier);
 
     if (resolvedModule === undefined) {
       // This should not happen, since getResolvedModule() specifically looks up names that the compiler
@@ -433,7 +532,11 @@ export class ExportAnalyzer {
       throw new InternalError('getSourceFile() failed to locate ' + JSON.stringify(resolvedModule.resolvedFileName));
     }
 
-    const specifierAstModule: AstModule = this.fetchAstModuleBySourceFile(moduleSourceFile, moduleSpecifier);
+    const specifierAstModule: AstModule = this.fetchAstModuleBySourceFile(moduleSourceFile, {
+      moduleSpecifier: moduleSpecifier,
+      moduleSpecifierSymbol: exportStarSymbol
+    });
+
     return specifierAstModule;
   }
 }
