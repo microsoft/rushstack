@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Added support for custom clean-css properties, updated to use @types/clean-css 4.2.1",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-sass",
+  "email": "golawaya@users.noreply.github.com"
+}
