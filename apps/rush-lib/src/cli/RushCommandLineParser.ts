@@ -10,6 +10,7 @@ import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
+import { CommandJson } from '../api/CommandLineJson';
 import { Utilities } from '../utilities/Utilities';
 import { BaseScriptAction } from '../cli/scriptActions/BaseScriptAction';
 
@@ -209,6 +210,8 @@ export class RushCommandLineParser extends CommandLineParser {
           + ` using a name that already exists`);
       }
 
+      this._validateCommandLineConfigCommand(command);
+
       switch (command.commandKind) {
         case 'bulk':
           this.addAction(new BulkScriptAction({
@@ -263,6 +266,14 @@ export class RushCommandLineParser extends CommandLineParser {
             + ` support custom parameters`);
         }
       }
+    }
+  }
+
+  private _validateCommandLineConfigCommand(command: CommandJson): void {
+    // There are some restrictions on the 'rebuild' command.
+    if (command.name === 'rebuild' && command.commandKind === 'global') {
+      throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+        `the command kind "global". This command can only be designated as a command kind "bulk".`);
     }
   }
 

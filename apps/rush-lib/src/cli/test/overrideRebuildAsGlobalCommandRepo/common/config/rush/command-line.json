@@ -1,0 +1,20 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "global",
+      "name": "rebuild",
+      "summary": "Rebuild the repo",
+      "description": "Rebuild the repo using the 'rebuild' script command",
+      "shellCommand": "node fake-rebuild"
+    }
+  ],
+  "parameters": [
+    {
+      "longName": "--flag-for-build-and-rebuild",
+      "description": "This flag should be usable for build and rebuild commands.",
+      "parameterKind": "flag",
+      "associatedCommands": [ "build", "rebuild" ]
+    }
+  ]
+}
