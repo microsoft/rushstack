@@ -64,7 +64,9 @@ export function runScenarios(buildConfigPath: string): void {
 
       "project": {
         "entryPointSourceFile": `./lib/${scenarioFolderName}/index.d.ts`
-      }
+      },
+
+      "testMode": true
     };
 
     const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;

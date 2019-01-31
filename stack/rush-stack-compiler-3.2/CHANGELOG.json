@@ -1,6 +1,18 @@
 {
-  "name": "@microsoft/rush-stack-compiler-3.1",
+  "name": "@microsoft/rush-stack-compiler-3.2",
   "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@microsoft/rush-stack-compiler-3.2_v0.2.0",
+      "date": "Wed, 30 Jan 2019 22:07:03 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial package creation"
+          }
+        ]
+      }
+    },
     {
       "version": "0.1.1",
       "tag": "@microsoft/rush-stack-compiler-3.1_v0.1.1",

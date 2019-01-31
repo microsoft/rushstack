@@ -325,7 +325,7 @@ declare class ApiPackage extends ApiPackage_base {
     // (undocumented)
     static loadFromJsonFile(apiJsonFilename: string): ApiPackage;
     // (undocumented)
-    saveToJsonFile(apiJsonFilename: string, options?: IJsonFileSaveOptions): void;
+    saveToJsonFile(apiJsonFilename: string, options?: IApiPackageSaveOptions): void;
 }
 
 // @public
@@ -477,7 +477,7 @@ declare class ExcerptToken {
     readonly kind: ExcerptTokenKind;
     // (undocumented)
     readonly text: string;
-}
+    }
 
 // @public (undocumented)
 declare const enum ExcerptTokenKind {
@@ -608,6 +608,12 @@ interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiNameMixi
 }
 
 // @public
+interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
+    // (undocumented)
+    testMode?: boolean;
+}
+
+// @public
 interface IApiParameterListMixinOptions extends IApiItemOptions {
     // (undocumented)
     overloadIndex: number;
@@ -701,6 +707,7 @@ interface IExtractorConfig {
     // (undocumented)
     project: IExtractorProjectConfig;
     skipLibCheck?: boolean;
+    testMode?: boolean;
     // (undocumented)
     validationRules?: IExtractorValidationRulesConfig;
 }
