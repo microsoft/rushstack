@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Updated support for clean-css 4.2.1 and typings.  Added override task configuration for clean-css options.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-sass",
+  "email": "golawaya@users.noreply.github.com"
+}
