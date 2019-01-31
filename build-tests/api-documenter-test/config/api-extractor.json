@@ -12,5 +12,7 @@
   "apiJsonFile": {
     "enabled": true,
     "outputFolder": "etc"
-  }
+  },
+
+  "testMode": true
 }

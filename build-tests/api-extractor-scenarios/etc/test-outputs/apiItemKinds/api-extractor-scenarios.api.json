@@ -1,7 +1,7 @@
 {
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
-    "toolVersion": "7.0.13",
+    "toolVersion": "[test mode]",
     "schemaVersion": 1000
   },
   "kind": "Package",
@@ -118,7 +118,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "{\r\n        "
+                  "text": "{\n        "
                 },
                 {
                   "kind": "Reference",
@@ -126,7 +126,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ": number;\r\n        "
+                  "text": ": number;\n        "
                 },
                 {
                   "kind": "Reference",
@@ -134,7 +134,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ": number;\r\n    }"
+                  "text": ": number;\n    }"
                 },
                 {
                   "kind": "Content",
@@ -182,7 +182,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "{\r\n        "
+                  "text": "{\n        "
                 },
                 {
                   "kind": "Reference",
@@ -198,7 +198,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ";\r\n        "
+                  "text": ";\n        "
                 },
                 {
                   "kind": "Reference",
@@ -206,7 +206,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ": () => number;\r\n    } | undefined"
+                  "text": ": () => number;\n    } | undefined"
                 },
                 {
                   "kind": "Content",
