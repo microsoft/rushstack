@@ -1,0 +1,17 @@
+.github/CODEOWNERS @iclanton @nickpape-msft @octogonz @patmill @aditima
+.pullapprove.yml @iclanton @nickpape-msft @octogonz @patmill @aditima
+.travis.yml @iclanton @nickpape-msft @octogonz @patmill @aditima
+
+common/reviews/* @iclanton @nickpape-msft @octogonz @mpasarin @aditima
+
+apps/* @iclanton @nickpape-msft @octogonz @aditima
+build-tests/* @iclanton @nickpape-msft @octogonz @aditima
+core-build/* @iclanton @nickpape-msft @octogonz @aditima
+libraries/* @iclanton @nickpape-msft @octogonz @aditima
+webpack/* @iclanton @nickpape-msft @octogonz @aditima
+rush.json @iclanton @nickpape-msft @octogonz @aditima
+.gitattributes @iclanton @nickpape-msft @octogonz @aditima
+.gitignore @iclanton @nickpape-msft @octogonz @aditima
+README.md
+
+libraries/load-themed-styles/* @iclanton @nickpape-msft @octogonz @dzearing @aditima
