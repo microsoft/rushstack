@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TaskRunner Constructor throwsErrorOnInvalidParallelism 1`] = `"Invalid parallelism value of 'tequila', expected a number or 'max'"`;
+
+exports[`TaskRunner Dependencies detectsDependencyCycle 1`] = `
+"A cyclic dependency was encountered:
+  foo
+  -> bar
+  -> foo
+Consider using the cyclicDependencyProjects option for rush.json."
+`;
+
+exports[`TaskRunner Dependencies throwsErrorOnNonExistentDependency 1`] = `"The project 'bar' has not been registered."`;
+
+exports[`TaskRunner Dependencies throwsErrorOnNonExistentTask 1`] = `"The task 'foo' has not been registered"`;
+
+exports[`TaskRunner Error logging printedStderrAfterError 1`] = `"Project(s) failed to build"`;
