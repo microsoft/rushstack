@@ -4,8 +4,6 @@ jobs:
 - job: PR Build
   displayName: NodeJS
   condition: succeeded()
-  pool:
-    vmImage: Hosted
   strategy:
     maxParallel: 2
     matrix:
