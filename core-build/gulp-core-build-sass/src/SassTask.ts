@@ -68,6 +68,12 @@ export interface ISassTaskConfig {
    * named export. By default we use the 'default' export name.
    */
   moduleExportName?: string;
+
+  /**
+   * Allows the override of the options passed to clean-css.  Options such a returnPromise and
+   * sourceMap will be ignored.
+   */
+  cleanCssOptions?: CleanCss.Options;
 }
 
 const _classMaps: { [file: string]: Object } = {};
@@ -185,15 +191,14 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       ];
       return postcss(plugins).process(result.css.toString(), options) as PromiseLike<postcss.Result>;
     }).then((result: postcss.Result) => {
-      const cleanCssOptions: CleanCss.Options = {
-        advanced: false
-      };
-      if (result.map) {
-        cleanCssOptions.sourceMap = result.map.toString(); // Pass the source map through to cleancss
+      let cleanCssOptions: CleanCss.Options = { level: 1, returnPromise: true };
+      if (!!this.taskConfig.cleanCssOptions) {
+        cleanCssOptions = { ...this.taskConfig.cleanCssOptions, returnPromise: true };
       }
+      cleanCssOptions.sourceMap = !!result.map;
 
-      const cleanCss: CleanCss =  new CleanCss(cleanCssOptions);
-      return cleanCss.minify(result.css.toString());
+      const cleanCss: CleanCss.MinifierPromise = new CleanCss(cleanCssOptions);
+      return cleanCss.minify(result.css.toString(), result.map ? result.map.toString() : undefined);
     }).then((result: CleanCss.Output) => {
       if (cssOutputPathAbsolute) {
         const generatedFileLines: string[] = [
