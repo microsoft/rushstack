@@ -10,6 +10,10 @@ import { ITask, ITaskDefinition } from './ITask';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 
+type ConsoleLike = {
+  log: (message: string) => void;
+};
+
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
  * Any class of task definition may be registered, and dependencies between tasks are
@@ -29,15 +33,20 @@ export class TaskRunner {
   private _currentActiveTasks: number;
   private _totalTasks: number;
   private _completedTasks: number;
+  private _console: ConsoleLike;
 
-  constructor(quietMode: boolean,
-    parallelism: string |undefined,
-    changedProjectsOnly: boolean) {
+  constructor(
+    quietMode: boolean,
+    parallelism: string | undefined,
+    changedProjectsOnly: boolean,
+    customConsole?: ConsoleLike
+  ) {
     this._tasks = new Map<string, ITask>();
     this._buildQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._changedProjectsOnly = changedProjectsOnly;
+    this._console = customConsole || console;
 
     const numberOfCores: number = os.cpus().length;
 
@@ -53,8 +62,7 @@ export class TaskRunner {
 
         this._parallelism = parallelismInt;
       }
-
-    }  else {
+    } else {
       // If an explicit parallelism number wasn't provided, then choose a sensible
       // default.
       if (os.platform() === 'win32') {
@@ -86,7 +94,7 @@ export class TaskRunner {
     this._tasks.set(task.name, task);
 
     if (!this._quietMode) {
-      console.log(`Registered ${task.name}`);
+      this._print(`Registered ${task.name}`);
     }
   }
 
@@ -131,7 +139,7 @@ export class TaskRunner {
     this._currentActiveTasks = 0;
     this._completedTasks = 0;
     this._totalTasks = this._tasks.size;
-    console.log(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
+    this._print(`Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`);
 
     this._checkForCyclicDependencies(this._tasks.values(), []);
 
@@ -194,7 +202,7 @@ export class TaskRunner {
       this._currentActiveTasks++;
       const task: ITask = ctask;
       task.status = TaskStatus.Executing;
-      console.log(colors.white(`[${task.name}] started`));
+      this._print(colors.white(`[${task.name}] started`));
 
       task.stopwatch = Stopwatch.start();
       task.writer = Interleaver.registerTask(task.name, this._quietMode);
@@ -230,7 +238,7 @@ export class TaskRunner {
           task.error = error;
           this._markTaskAsFailed(task);
         }
-      ).then(() => this._startAvailableTasks()));
+        ).then(() => this._startAvailableTasks()));
     }
 
     return Promise.all(taskPromises).then(() => { /* collapse void[] to void */ });
@@ -240,7 +248,7 @@ export class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: ITask): void {
-    console.log(colors.red(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed to build!`));
+    this._print(colors.red(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed to build!`));
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: ITask) => {
       this._markTaskAsBlocked(dependent, task);
@@ -253,7 +261,7 @@ export class TaskRunner {
   private _markTaskAsBlocked(task: ITask, failedTask: ITask): void {
     if (task.status === TaskStatus.Ready) {
       this._completedTasks++;
-      console.log(colors.red(`${this._getCurrentCompletedTaskString()}`
+      this._print(colors.red(`${this._getCurrentCompletedTaskString()}`
         + `[${task.name}] blocked by [${failedTask.name}]!`));
       task.status = TaskStatus.Blocked;
       task.dependents.forEach((dependent: ITask) => {
@@ -266,7 +274,7 @@ export class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    console.log(colors.green(`${this._getCurrentCompletedTaskString()}`
+    this._print(colors.green(`${this._getCurrentCompletedTaskString()}`
       + `[${task.name}] completed successfully in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.Success;
 
@@ -283,7 +291,7 @@ export class TaskRunner {
    * list of all its dependents
    */
   private _markTaskAsSuccessWithWarning(task: ITask): void {
-    console.log(colors.yellow(`${this._getCurrentCompletedTaskString()}`
+    this._print(colors.yellow(`${this._getCurrentCompletedTaskString()}`
       + `[${task.name}] completed with warnings in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.SuccessWithWarning;
     task.dependents.forEach((dependent: ITask) => {
@@ -298,7 +306,7 @@ export class TaskRunner {
    * Marks a task as skipped.
    */
   private _markTaskAsSkipped(task: ITask): void {
-    console.log(colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`));
+    this._print(colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`));
     task.status = TaskStatus.Skipped;
     task.dependents.forEach((dependent: ITask) => {
       dependent.dependencies.delete(task);
@@ -330,7 +338,6 @@ export class TaskRunner {
    * the furthest away "root" node
    */
   private _calculateCriticalPaths(task: ITask): number {
-
     // Return the memoized value
     if (task.criticalPathLength !== undefined) {
       return task.criticalPathLength;
@@ -360,7 +367,7 @@ export class TaskRunner {
       }
     });
 
-    console.log('');
+    this._print('');
 
     this._printStatus(TaskStatus.Executing, tasksByStatus, colors.yellow);
     this._printStatus(TaskStatus.Ready, tasksByStatus, colors.white);
@@ -374,12 +381,12 @@ export class TaskRunner {
     if (tasksWithErrors) {
       tasksWithErrors.forEach((task: ITask) => {
         if (task.error) {
-          console.log(colors.red(`[${task.name}] ${task.error.message}`));
+          this._print(colors.red(`[${task.name}] ${task.error.message}`));
         }
       });
     }
 
-    console.log('');
+    this._print('');
   }
 
   private _printStatus(
@@ -390,8 +397,8 @@ export class TaskRunner {
     const tasks: ITask[] = tasksByStatus[status];
 
     if (tasks && tasks.length) {
-      console.log(color(`${status} (${tasks.length})`));
-      console.log(color('================================'));
+      this._print(color(`${status} (${tasks.length})`));
+      this._print(color('================================'));
       for (let i: number = 0; i < tasks.length; i++) {
         const task: ITask = tasks[i];
 
@@ -399,7 +406,7 @@ export class TaskRunner {
           case TaskStatus.Executing:
           case TaskStatus.Ready:
           case TaskStatus.Skipped:
-            console.log(color(task.name));
+            this._print(color(task.name));
             break;
 
           case TaskStatus.Success:
@@ -408,9 +415,9 @@ export class TaskRunner {
           case TaskStatus.Failure:
             if (task.stopwatch) {
               const time: string = task.stopwatch.toString();
-              console.log(color(`${task.name} (${time})`));
+              this._print(color(`${task.name} (${time})`));
             } else {
-              console.log(color(`${task.name}`));
+              this._print(color(`${task.name}`));
             }
             break;
         }
@@ -422,13 +429,16 @@ export class TaskRunner {
               .map(text => text.trim())
               .filter(text => text)
               .join(os.EOL);
-
-            console.log(stderr + (i !== tasks.length - 1 ? os.EOL : ''));
+            this._print(stderr + (i !== tasks.length - 1 ? os.EOL : ''));
           }
         }
       }
 
-      console.log(color('================================' + os.EOL));
+      this._print(color('================================' + os.EOL));
     }
+  }
+
+  private _print(message: string): void {
+    this._console.log(message);
   }
 }
