@@ -92,7 +92,7 @@ describe('TaskRunner', () => {
       taskRunner = new TaskRunner(false, '1', false, logger);
     });
 
-    const EXPECTED_FAIL = 'Promise returned by execute() resolved but was expected to fail';
+    const EXPECTED_FAIL: string = 'Promise returned by execute() resolved but was expected to fail';
 
     it('printedStderrAfterError', () => {
       taskRunner.addTask({
