@@ -53,13 +53,7 @@ describe('TaskRunner', () => {
     });
 
     it('throwsErrorOnNonExistentDependency', () => {
-      taskRunner.addTask({
-        name: 'foo',
-        isIncrementalBuildAllowed: false,
-        execute: (writer: ITaskWriter) => {
-          return Promise.resolve(TaskStatus.Success);
-        }
-      });
+      taskRunner.addTask(createDummyTask('foo'));
       expect(() => taskRunner.addDependencies('foo', ['bar']))
         .toThrowErrorMatchingSnapshot();
     });
