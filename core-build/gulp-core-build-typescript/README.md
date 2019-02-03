@@ -1,6 +1,6 @@
 # @microsoft/gulp-core-build-typescript
 
-`gulp-core-build-typescript contains `gulp-core-build` subtasks for compiling and linting TypeScript code.
+`gulp-core-build-typescript` contains `gulp-core-build` subtasks for compiling and linting TypeScript code.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-typescript.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-typescript)
 [![Build Status](https://travis-ci.org/Microsoft/gulp-core-build-typescript.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build-typescript)
