@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Improve TaskRunner testability, add basic unit tests",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "hogmoru@users.noreply.github.com"
+}
