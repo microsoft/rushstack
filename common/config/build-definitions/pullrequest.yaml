@@ -1,7 +1,7 @@
 resources:
 - repo: self
 jobs:
-- job: PR Build
+- job: PRBuild
   displayName: NodeJS
   condition: succeeded()
   strategy:
