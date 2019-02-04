@@ -4,6 +4,9 @@ import { Lib1Interface } from 'api-extractor-lib1-test';
 import { Lib2Class as RenamedLib2Class } from 'api-extractor-lib2-test';
 export { DoubleRenamedLib2Class }
 export { Lib1Class }
+
+declare class Lib1ForgottenExport {
+}
 export { Lib1Interface }
 export { RenamedLib2Class }
 
