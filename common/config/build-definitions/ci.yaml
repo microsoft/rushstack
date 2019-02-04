@@ -2,14 +2,13 @@ resources:
 - repo: self
 jobs:
 - job: PRBuild
-  displayName: NodeJS
   condition: succeeded()
   strategy:
     maxParallel: 2
     matrix:
-      NodeJs8:
+      'NodeJs 8':
         NodeVersion: 8
-      NodeJs10:
+      'NodeJs 10':
         NodeVersion: 10
   steps:
   - task: NodeTool@0
