@@ -58,7 +58,7 @@ export class MarkdownEmitter {
       options
     };
 
-    this.writeNode(docNode, context);
+    this.writeNode(docNode, context, false);
 
     writer.ensureNewLine(); // finish the last line
 
@@ -79,7 +79,7 @@ export class MarkdownEmitter {
   /**
    * @virtual
    */
-  protected writeNode(docNode: DocNode, context: IMarkdownEmitterContext): void {
+  protected writeNode(docNode: DocNode, context: IMarkdownEmitterContext, docNodeSiblings: boolean): void {
     const writer: IndentedWriter = context.writer;
 
     switch (docNode.kind) {
@@ -122,9 +122,14 @@ export class MarkdownEmitter {
         const docParagraph: DocParagraph = docNode as DocParagraph;
         const trimmedParagraph: DocParagraph = DocNodeTransforms.trimSpacesInParagraph(docParagraph);
         if (context.insideTable) {
-          writer.write('<p>');
-          this.writeNodes(trimmedParagraph.nodes, context);
-          writer.write('</p>');
+          if (docNodeSiblings) {
+            writer.write('<p>');
+            this.writeNodes(trimmedParagraph.nodes, context);
+            writer.write('</p>');
+          } else {
+            // Special case:  If we are the only element inside this table cell, then we can omit the <p></p> container.
+            this.writeNodes(trimmedParagraph.nodes, context);
+          }
         } else {
           this.writeNodes(trimmedParagraph.nodes, context);
           writer.ensureNewLine();
@@ -162,6 +167,9 @@ export class MarkdownEmitter {
       case DocNodeKind.ErrorText: {
         const docErrorText: DocErrorText = docNode as DocErrorText;
         this.writePlainText(docErrorText.text, context);
+        break;
+      }
+      case DocNodeKind.InlineTag: {
         break;
       }
       default:
@@ -237,7 +245,7 @@ export class MarkdownEmitter {
 
   protected writeNodes(docNodes: ReadonlyArray<DocNode>, context: IMarkdownEmitterContext): void {
     for (const docNode of docNodes) {
-      this.writeNode(docNode, context);
+      this.writeNode(docNode, context, docNodes.length > 1);
     }
   }
 }

@@ -16,26 +16,24 @@ export interface IAstImportOptions {
 export class AstImport {
   /**
    * The name of the external package (and possibly module path) that this definition
-   * was imported from.  If it was defined in the referencing source file, or if it was
-   * imported from a local file, or if it is an ambient definition, then externalPackageName
-   * will be undefined.
+   * was imported from.
    *
-   * Example: "@microsoft/gulp-core-build/lib/IBuildConfig"
+   * Example: "@microsoft/node-core-library/lib/FileSystem"
    */
   public readonly modulePath: string;
 
   /**
-   * If importPackagePath is defined, then this specifies the export name for the definition.
+   * If modulePath is defined, then this specifies the export name for the definition.
    *
    * Example: "IBuildConfig"
    */
   public readonly exportName: string;
 
   /**
-   * If importPackagePath and importPackageExportName are defined, then this is a dictionary key
+   * If modulePath and exportName are defined, then this is a dictionary key
    * that combines them with a colon (":").
    *
-   * Example: "@microsoft/gulp-core-build/lib/IBuildConfig:IBuildConfig"
+   * Example: "@microsoft/node-core-library/lib/FileSystem:FileSystem"
    */
   public readonly key: string;
 

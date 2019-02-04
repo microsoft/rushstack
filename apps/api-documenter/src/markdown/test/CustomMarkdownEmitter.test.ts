@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { FileDiffTest, FileSystem } from '@microsoft/node-core-library';
 import {
   DocSection,
   TSDocConfiguration,
@@ -24,8 +22,7 @@ import { DocTableCell } from '../../nodes/DocTableCell';
 import { CustomMarkdownEmitter } from '../CustomMarkdownEmitter';
 import { ApiModel, ApiItem } from '@microsoft/api-extractor';
 
-test('render Markdown from TSDoc', done => {
-  const outputFolder: string = FileDiffTest.prepareFolder(__dirname, 'MarkdownPageRenderer');
+test('render Markdown from TSDoc', () => {
   const configuration: TSDocConfiguration = CustomDocNodes.configuration;
 
   const output: DocSection = new DocSection({ configuration });
@@ -196,7 +193,6 @@ test('render Markdown from TSDoc', done => {
     ])
   ]);
 
-  const outputFilename: string = path.join(outputFolder, 'ActualOutput.md');
   const stringBuilder: StringBuilder = new StringBuilder();
   const apiModel: ApiModel = new ApiModel();
   const markdownEmitter: CustomMarkdownEmitter = new CustomMarkdownEmitter(apiModel);
@@ -206,9 +202,6 @@ test('render Markdown from TSDoc', done => {
       return '#';
     }
   });
-  FileSystem.writeFile(outputFilename, stringBuilder.toString());
 
-  FileDiffTest.assertEqual(outputFilename, path.join(__dirname, 'ExpectedOutput.md'));
-
-  done();
+  expect(stringBuilder).toMatchSnapshot();
 });

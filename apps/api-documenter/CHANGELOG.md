@@ -1,6 +1,72 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 20 Dec 2018 17:04:08 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Jan 2019 17:03:49 GMT and should not be manually modified.
+
+## 7.0.21
+Thu, 31 Jan 2019 17:03:49 GMT
+
+### Patches
+
+- Fix issue where docs were not generated for function parameters and return types (GitHub #1055)
+- Upgrade to TSDoc 0.12.5
+
+## 7.0.20
+Wed, 30 Jan 2019 20:49:11 GMT
+
+*Version update only*
+
+## 7.0.19
+Sat, 19 Jan 2019 03:47:47 GMT
+
+*Version update only*
+
+## 7.0.18
+Sat, 19 Jan 2019 01:17:51 GMT
+
+### Patches
+
+- [api-documenter] Enable Office snippets to match multiple versions
+
+## 7.0.17
+Fri, 18 Jan 2019 22:04:59 GMT
+
+### Patches
+
+- MarkdownEmitter: break for inline tags
+
+## 7.0.16
+Fri, 18 Jan 2019 00:52:21 GMT
+
+*Version update only*
+
+## 7.0.15
+Thu, 17 Jan 2019 00:37:54 GMT
+
+*Version update only*
+
+## 7.0.14
+Tue, 15 Jan 2019 17:04:09 GMT
+
+*Version update only*
+
+## 7.0.13
+Thu, 10 Jan 2019 01:57:52 GMT
+
+### Patches
+
+- Work around an issue where GitHub Pages cannot render `<p></p>` inside a pipes-and-dashes table (even though GHFM supports this)
+
+## 7.0.12
+Wed, 09 Jan 2019 22:04:17 GMT
+
+### Patches
+
+- Support more API types for the markdown generator: namespace, function, type alias, variable
+
+## 7.0.11
+Mon, 07 Jan 2019 17:04:07 GMT
+
+*Version update only*
 
 ## 7.0.10
 Thu, 20 Dec 2018 17:04:08 GMT

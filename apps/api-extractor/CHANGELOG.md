@@ -1,6 +1,52 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 20 Dec 2018 17:04:08 GMT and should not be manually modified.
+This log was last generated on Thu, 31 Jan 2019 17:03:49 GMT and should not be manually modified.
+
+## 7.0.14
+Thu, 31 Jan 2019 17:03:49 GMT
+
+### Patches
+
+- Upgrade to TSDoc 0.12.5, which allows `$` in `@param` names
+- Add "testMode" option in api-extractor.json to eliminate spurious diffs in test files when the version number gets bumped
+- Normalize newlines for excerpt strings in the .api.json file
+
+## 7.0.13
+Sat, 19 Jan 2019 03:47:47 GMT
+
+### Patches
+
+- Move the skipLibCheck into the config file.
+
+## 7.0.12
+Sat, 19 Jan 2019 01:17:51 GMT
+
+### Patches
+
+- Fix an issue where files using "export=" were incorrectly interpreted as having ambient declarations
+
+## 7.0.11
+Fri, 18 Jan 2019 00:52:21 GMT
+
+### Patches
+
+- Add support for circular references between files that use `export * from "____";`
+
+## 7.0.10
+Thu, 17 Jan 2019 00:37:54 GMT
+
+### Patches
+
+- Add support for exports of the form `export * from "____";`
+- Improve the analyzer to allow a declaration to be exported more than once
+- Fix inconsistent newlines in .api.ts files
+
+## 7.0.9
+Thu, 10 Jan 2019 01:57:52 GMT
+
+### Patches
+
+- Fix an issue with rolling up default exports (https://github.com/Microsoft/web-build-tools/issues/1007)
 
 ## 7.0.8
 Thu, 20 Dec 2018 17:04:08 GMT

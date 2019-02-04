@@ -1,0 +1,38 @@
+### YamlMime:UniversalReference
+items:
+  - uid: api-documenter-test.DocEnum
+    summary: Docs for DocEnum
+    name: DocEnum
+    fullName: DocEnum
+    langs:
+      - typeScript
+    type: enum
+    package: api-documenter-test
+    children:
+      - api-documenter-test.DocEnum.One
+      - api-documenter-test.DocEnum.Two
+      - api-documenter-test.DocEnum.Zero
+  - uid: api-documenter-test.DocEnum.One
+    summary: These are some docs for One
+    name: One
+    fullName: One
+    langs:
+      - typeScript
+    type: field
+    numericValue: '1'
+  - uid: api-documenter-test.DocEnum.Two
+    summary: These are some docs for Two
+    name: Two
+    fullName: Two
+    langs:
+      - typeScript
+    type: field
+    numericValue: '2'
+  - uid: api-documenter-test.DocEnum.Zero
+    summary: These are some docs for Zero
+    name: Zero
+    fullName: Zero
+    langs:
+      - typeScript
+    type: field
+    numericValue: '0'

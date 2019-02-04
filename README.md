@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/web-build-tools/Lobby](https://badges.gitter.im/web-build-tools/Lobby.svg)](https://gitter.im/web-build-tools/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/Microsoft/web-build-tools.svg?branch=master)](https://travis-ci.org/Microsoft/web-build-tools)
+[![Build status](https://dev.azure.com/RushStack/web-build-tools%20(GitHub)/_apis/build/status/CI%20Build)](https://dev.azure.com/RushStack/web-build-tools%20(GitHub)/_build/latest?definitionId=3)
 
 _**This repo hosts a collection of tools and libraries used to build web projects at Microsoft.**_
 
@@ -74,13 +74,6 @@ Defines the build task model, config file parser, and rig framework for the **Gu
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build)
 [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build.svg)](https://david-dm.org/Microsoft/gulp-core-build)
 
-### [@microsoft/gulp-core-build-karma](./core-build/gulp-core-build-karma/README.md)
-
-A build task for running unit tests using `karma` + `phantomjs` + `mocha` + `chai`. This setup allows you to run browser-based testing.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-karma.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-karma)
-[![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-karma.svg)](https://david-dm.org/Microsoft/gulp-core-build-karma)
-
 ### [@microsoft/gulp-core-build-mocha](./core-build/gulp-core-build-mocha/README.md)
 
 A build task for running unit tests using `mocha` + `chai`. This setup is useful for unit testing build tools, as it runs in the NodeJS process rather than in a browser.
@@ -127,7 +120,7 @@ A **Gulp Core Build** rig which provides basic functionality for building and un
 
 ### [@microsoft/web-library-build](./core-build/web-library-build/README.md)
 
-A **Gulp Core Build** rig for building web libraries. It includes build tasks for processing css, typescript, serving, and running browser tests using karma.
+A **Gulp Core Build** rig for building web libraries. It includes build tasks for processing css, typescript, serving, and running browser tests using jest.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fweb-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fweb-library-build)
 [![Dependencies](https://david-dm.org/Microsoft/web-library-build.svg)](https://david-dm.org/Microsoft/web-library-build)

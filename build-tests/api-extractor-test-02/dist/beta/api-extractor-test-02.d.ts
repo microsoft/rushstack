@@ -9,7 +9,6 @@
 
 import { ISimpleInterface } from 'api-extractor-test-01';
 import { ReexportedClass as RenamedReexportedClass3 } from 'api-extractor-test-01';
-export { RenamedReexportedClass3 };
 import * as semver1 from 'semver';
 
 /**
@@ -44,6 +43,7 @@ export declare function importedModuleAsGenericParameter(): GenericInterface<sem
  * @public
  */
 export declare function importedModuleAsReturnType(): semver1.SemVer | undefined;
+export { RenamedReexportedClass3 }
 
 /**
  * Example of a class that inherits from an externally imported class.

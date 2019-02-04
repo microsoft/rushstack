@@ -13,7 +13,7 @@ export interface IAstSymbolOptions {
   readonly followedSymbol: ts.Symbol;
   readonly localName: string;
   readonly astImport: AstImport | undefined;
-  readonly nominal: boolean;
+  readonly nominalAnalysis: boolean;
   readonly parentAstSymbol: AstSymbol | undefined;
   readonly rootAstSymbol: AstSymbol | undefined;
 }
@@ -44,7 +44,9 @@ export class AstSymbol {
 
   /**
    * If this symbol was imported from another package, that information is tracked here.
-   * Otherwise, the value is undefined.
+   * Otherwise, the value is undefined.  For example, if this symbol was defined in the referencing source file,
+   * or if it was imported from a local file in the current project, or if it is an ambient definition,
+   * then astImport will be undefined.
    */
   public readonly astImport: AstImport | undefined;
 
@@ -55,7 +57,7 @@ export class AstSymbol {
    *
    * Nominal symbols are tracked because we still need to emit exports for them.
    */
-  public readonly nominal: boolean;
+  public readonly nominalAnalysis: boolean;
 
   /**
    * Returns the symbol of the parent of this AstSymbol, or undefined if there is no parent.
@@ -90,7 +92,7 @@ export class AstSymbol {
     this.followedSymbol = options.followedSymbol;
     this.localName = options.localName;
     this.astImport = options.astImport;
-    this.nominal = options.nominal;
+    this.nominalAnalysis = options.nominalAnalysis;
     this.parentAstSymbol = options.parentAstSymbol;
     this.rootAstSymbol = options.rootAstSymbol || this;
     this._astDeclarations = [];

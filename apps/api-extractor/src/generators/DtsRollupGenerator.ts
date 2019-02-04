@@ -14,7 +14,6 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 
 /**
@@ -95,13 +94,6 @@ export class DtsRollupGenerator {
           }
           indentedWriter.writeLine(` from '${astImport.modulePath}';`);
 
-          if (entity.exported) {
-            // We write re-export as two lines: `import { Mod } from 'package'; export { Mod };`,
-            // instead of a single line `export { Mod } from 'package';`.
-            // Because this variable may be used by others, and we cannot know it.
-            // so we always keep the `import ...` declaration, for now.
-            indentedWriter.writeLine(`export { ${entity.nameForEmit} };`);
-          }
         }
       }
     }
@@ -109,23 +101,41 @@ export class DtsRollupGenerator {
     // Emit the regular declarations
     for (const entity of collector.entities) {
       if (!entity.astSymbol.astImport) {
-
         const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astSymbol).releaseTag;
-        if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-
-          // Emit all the declarations for this entry
-          for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
-
-            indentedWriter.writeLine();
-
-            const span: Span = new Span(astDeclaration.declaration);
-            DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
-            indentedWriter.writeLine(span.getModifiedText());
-          }
-        } else {
+        if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
           indentedWriter.writeLine();
           indentedWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+          continue;
         }
+
+        // Emit all the declarations for this entry
+        for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
+
+          indentedWriter.writeLine();
+
+          const span: Span = new Span(astDeclaration.declaration);
+          DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
+          indentedWriter.writeLine(span.getModifiedText());
+        }
+      }
+
+      if (!entity.shouldInlineExport) {
+        for (const exportName of entity.exportNames) {
+          if (exportName === ts.InternalSymbolName.Default) {
+            indentedWriter.writeLine(`export default ${entity.nameForEmit};`);
+          } else if (entity.nameForEmit !== exportName) {
+            indentedWriter.writeLine(`export { ${entity.nameForEmit} as ${exportName} }`);
+          } else {
+            indentedWriter.writeLine(`export { ${exportName} }`);
+          }
+        }
+      }
+    }
+
+    if (collector.starExportedExternalModulePaths.length > 0) {
+      indentedWriter.writeLine();
+      for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
+        indentedWriter.writeLine(`export * from "${starExportedExternalModulePath}";`);
       }
     }
 
@@ -178,7 +188,7 @@ export class DtsRollupGenerator {
           replacedModifiers += 'declare ';
         }
 
-        if (entity.exported) {
+        if (entity.shouldInlineExport) {
           replacedModifiers = 'export ' + replacedModifiers;
         }
 
@@ -213,8 +223,9 @@ export class DtsRollupGenerator {
           const listPrefix: string = list.getSourceFile().text
             .substring(list.getStart(), list.declarations[0].getStart());
           span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
+          span.modification.suffix = ';';
 
-          if (entity.exported) {
+          if (entity.shouldInlineExport) {
             span.modification.prefix = 'export ' + span.modification.prefix;
           }
 
@@ -229,8 +240,6 @@ export class DtsRollupGenerator {
             }
             span.modification.prefix = originalComment + span.modification.prefix;
           }
-
-          span.modification.suffix = ';';
         }
         break;
 
@@ -270,7 +279,7 @@ export class DtsRollupGenerator {
 
         // Should we trim this node?
         let trimmed: boolean = false;
-        if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
+        if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
           childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
 
           const releaseTag: ReleaseTag = collector.fetchMetadata(childAstDeclaration.astSymbol).releaseTag;

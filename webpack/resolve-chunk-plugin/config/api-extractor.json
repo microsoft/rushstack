@@ -1,6 +1,17 @@
 {
-  "enabled": true,
-  "apiReviewFolder": "../../common/reviews/api",
-  "apiJsonFolder": "./temp",
-  "entry": "lib/index.d.ts"
+  "project": {
+    "entryPointSourceFile": "lib/index.d.ts"
+  },
+  "compiler": {
+    "rootFolder": ".",
+    "configType": "tsconfig"
+  },
+  "apiReviewFile": {
+    "enabled": true,
+    "apiReviewFolder": "../../common/reviews/api"
+  },
+  "apiJsonFile": {
+    "enabled": true,
+    "outputFolder": "./temp"
+  }
 }

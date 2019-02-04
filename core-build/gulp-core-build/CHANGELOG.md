@@ -1,6 +1,35 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Wed, 19 Dec 2018 05:57:33 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Jan 2019 20:49:12 GMT and should not be manually modified.
+
+## 3.9.4
+Wed, 30 Jan 2019 20:49:12 GMT
+
+*Version update only*
+
+## 3.9.3
+Sat, 19 Jan 2019 03:47:47 GMT
+
+*Version update only*
+
+## 3.9.2
+Tue, 15 Jan 2019 17:04:09 GMT
+
+### Patches
+
+- Remove karma task.
+
+## 3.9.1
+Thu, 10 Jan 2019 01:57:52 GMT
+
+*Version update only*
+
+## 3.9.0
+Mon, 07 Jan 2019 17:04:07 GMT
+
+### Minor changes
+
+- Upgrade Jest to version 23.
 
 ## 3.8.57
 Wed, 19 Dec 2018 05:57:33 GMT

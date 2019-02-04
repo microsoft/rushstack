@@ -1,4 +1,11 @@
-// WARNING: Unsupported export: instrument
-// WARNING: Unsupported export: mocha
-// WARNING: Unsupported export: default
-// (No @packagedocumentation comment for this package)
+// @public (undocumented)
+declare const _default: IExecutable;
+
+// @public (undocumented)
+declare const instrument: InstrumentTask;
+
+// @public (undocumented)
+declare const mocha: MochaTask;
+
+
+// (No @packageDocumentation comment for this package)

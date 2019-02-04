@@ -64,7 +64,13 @@ export class ApiModelGenerator {
     for (const entity of this._collector.entities) {
       for (const astDeclaration of entity.astSymbol.astDeclarations) {
         if (entity.exported) {
-          this._processDeclaration(astDeclaration, entity.nameForEmit, apiEntryPoint);
+          if (!entity.astSymbol.imported) {
+            this._processDeclaration(astDeclaration, entity.nameForEmit, apiEntryPoint);
+          } else {
+            // TODO: Figure out how to represent reexported definitions.  Basically we need to introduce a new
+            // ApiItem subclass for "export alias", similar to a type alias, but representing declarations of the
+            // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
+          }
         }
       }
     }

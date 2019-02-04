@@ -2,6 +2,75 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.8.56",
+      "tag": "@microsoft/load-themed-styles_v1.8.56",
+      "date": "Wed, 30 Jan 2019 20:49:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.4.0` to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.26` to `6.0.27`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.8.55",
+      "tag": "@microsoft/load-themed-styles_v1.8.55",
+      "date": "Sat, 19 Jan 2019 03:47:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.4` to `0.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.25` to `6.0.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.8.54",
+      "tag": "@microsoft/load-themed-styles_v1.8.54",
+      "date": "Tue, 15 Jan 2019 17:04:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.24` to `6.0.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.8.53",
+      "tag": "@microsoft/load-themed-styles_v1.8.53",
+      "date": "Thu, 10 Jan 2019 01:57:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.3` to `0.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.23` to `6.0.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.8.52",
+      "tag": "@microsoft/load-themed-styles_v1.8.52",
+      "date": "Mon, 07 Jan 2019 17:04:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.22` to `6.0.23`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.51",
       "tag": "@microsoft/load-themed-styles_v1.8.51",
       "date": "Wed, 19 Dec 2018 05:57:33 GMT",

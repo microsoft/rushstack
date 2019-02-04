@@ -19,10 +19,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/gulp-core-build-karma",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@microsoft/gulp-core-build-mocha",
       "allowedCategories": [ "libraries" ]
     },
@@ -48,7 +44,7 @@
     },
     {
       "name": "@microsoft/node-core-library",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/node-library-build",
@@ -64,10 +60,6 @@
     },
     {
       "name": "@microsoft/rush-stack",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
@@ -91,6 +83,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@microsoft/rush-stack-compiler-3.2",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/rush-stack-compiler-shared",
       "allowedCategories": [ "libraries" ]
     },
@@ -105,6 +101,10 @@
     {
       "name": "@microsoft/stream-collator",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/teams-js",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/ts-command-line",
@@ -129,6 +129,14 @@
     {
       "name": "@yarnpkg/lockfile",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "api-extractor-lib1-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "api-extractor-lib2-test",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "api-extractor-test-01",
@@ -255,10 +263,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "gulp-karma",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "gulp-mocha",
       "allowedCategories": [ "libraries" ]
     },
@@ -335,34 +339,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "karma",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-coverage",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-mocha",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-mocha-clean-reporter",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-phantomjs-launcher",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-sinon-chai",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-webpack",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "loader-utils",
       "allowedCategories": [ "libraries" ]
     },
@@ -420,14 +396,6 @@
     },
     {
       "name": "orchestrator",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "phantomjs-polyfill",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "phantomjs-prebuilt",
       "allowedCategories": [ "libraries" ]
     },
     {

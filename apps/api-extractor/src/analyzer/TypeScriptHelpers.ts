@@ -5,10 +5,11 @@
 
 import * as ts from 'typescript';
 import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
+import { TypeScriptInternals } from './TypeScriptInternals';
 
 export class TypeScriptHelpers {
   /**
-   * This traverses any type aliases to find the original place where an item was defined.
+   * This traverses any symbol aliases to find the original place where an item was defined.
    * For example, suppose a class is defined as "export default class MyClass { }"
    * but exported from the package's index.ts like this:
    *
@@ -34,23 +35,44 @@ export class TypeScriptHelpers {
     return current;
   }
 
-  public static getImmediateAliasedSymbol(symbol: ts.Symbol, typeChecker: ts.TypeChecker): ts.Symbol {
-    return (typeChecker as any).getImmediateAliasedSymbol(symbol); // tslint:disable-line:no-any
+  /**
+   * Certain virtual symbols do not have any declarations.  For example, `ts.TypeChecker.getExportsOfModule()` can
+   * sometimes return a "prototype" symbol for an object, even though there is no corresponding declaration in the
+   * source code.  API Extractor generally ignores such symbols.
+   */
+  public static hasAnyDeclarations(symbol: ts.Symbol): boolean {
+    return symbol.declarations && symbol.declarations.length > 0;
   }
 
   /**
-   * Returns the Symbol for the provided Declaration.  This is a workaround for a missing
-   * feature of the TypeScript Compiler API.   It is the only apparent way to reach
-   * certain data structures, and seems to always work, but is not officially documented.
-   *
-   * @returns The associated Symbol.  If there is no semantic information (e.g. if the
-   * declaration is an extra semicolon somewhere), then "undefined" is returned.
+   * Returns true if the specified symbol is an ambient declaration.
    */
-  public static tryGetSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol | undefined {
-    /* tslint:disable:no-any */
-    const symbol: ts.Symbol = (declaration as any).symbol;
-    /* tslint:enable:no-any */
-    return symbol;
+  public static isAmbient(symbol: ts.Symbol, typeChecker: ts.TypeChecker): boolean {
+    const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(symbol, typeChecker);
+
+    if (followedSymbol.declarations && followedSymbol.declarations.length > 0) {
+      const firstDeclaration: ts.Declaration = followedSymbol.declarations[0];
+
+      // Test 1: Are we inside the sinister "declare global {" construct?
+      const highestModuleDeclaration: ts.ModuleDeclaration | undefined
+        = TypeScriptHelpers.findHighestParent(firstDeclaration, ts.SyntaxKind.ModuleDeclaration);
+      if (highestModuleDeclaration) {
+        if (highestModuleDeclaration.name.getText().trim() === 'global') {
+          return true;
+        }
+      }
+
+      // Test 2: Otherwise, the main heuristic for ambient declarations is by looking at the
+      // ts.SyntaxKind.SourceFile node to see whether it has a symbol or not (i.e. whether it
+      // is acting as a module or not).
+      const sourceFile: ts.SourceFile = firstDeclaration.getSourceFile();
+
+      if (!!typeChecker.getSymbolAtLocation(sourceFile)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -58,7 +80,7 @@ export class TypeScriptHelpers {
    * cannot be found.
    */
   public static getSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol {
-    const symbol: ts.Symbol | undefined = TypeScriptHelpers.tryGetSymbolForDeclaration(declaration);
+    const symbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(declaration);
     if (!symbol) {
       throw new Error(TypeScriptMessageFormatter.formatFileAndLineNumber(declaration) + ': '
         + 'Unable to determine semantic information for this declaration');
@@ -66,15 +88,16 @@ export class TypeScriptHelpers {
     return symbol;
   }
 
-  /**
-   * Retrieves the comment ranges associated with the specified node.
-   */
-  public static getJSDocCommentRanges(node: ts.Node, text: string): ts.CommentRange[] | undefined {
-    // Compiler internal:
-    // https://github.com/Microsoft/TypeScript/blob/v2.4.2/src/compiler/utilities.ts#L616
+  // Return name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
+  public static getModuleSpecifier(declarationWithModuleSpecifier: ts.ImportDeclaration
+    | ts.ExportDeclaration): string | undefined {
 
-    // tslint:disable-next-line:no-any
-    return (ts as any).getJSDocCommentRanges.apply(this, arguments);
+    if (declarationWithModuleSpecifier.moduleSpecifier
+      && ts.isStringLiteralLike(declarationWithModuleSpecifier.moduleSpecifier)) {
+      return TypeScriptInternals.getTextOfIdentifierOrLiteral(declarationWithModuleSpecifier.moduleSpecifier);
+    }
+
+    return undefined;
   }
 
   /**

@@ -1,0 +1,24 @@
+items:
+  - name: SharePoint Framework reference
+    href: ~/overview/sharepoint.md
+    items:
+      - name: api-documenter-test
+        uid: api-documenter-test
+        items:
+          - name: DocBaseClass
+            uid: api-documenter-test.DocBaseClass
+          - name: DocClass1
+            uid: api-documenter-test.DocClass1
+          - name: DocEnum
+            uid: api-documenter-test.DocEnum
+          - name: IDocInterface1
+            uid: api-documenter-test.IDocInterface1
+          - name: IDocInterface2
+            uid: api-documenter-test.IDocInterface2
+          - name: IDocInterface3
+            uid: api-documenter-test.IDocInterface3
+          - name: OuterNamespace
+            items:
+              - name: InnerNamespace
+          - name: SystemEvent
+            uid: api-documenter-test.SystemEvent
