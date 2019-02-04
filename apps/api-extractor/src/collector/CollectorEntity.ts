@@ -14,6 +14,7 @@ import { Sort } from '@microsoft/node-core-library';
  * The additional contextual state beyond AstSymbol is:
  * - Whether it's an export of this entry point or not
  * - The nameForEmit, which may get renamed by DtsRollupGenerator._makeUniqueNames()
+ * - The export name (or names, if the same declaration is exported multiple times)
  */
 export class CollectorEntity {
   /**

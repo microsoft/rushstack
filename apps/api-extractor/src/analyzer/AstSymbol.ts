@@ -43,10 +43,12 @@ export class AstSymbol {
   public readonly followedSymbol: ts.Symbol;
 
   /**
-   * If this symbol was imported from another package, that information is tracked here.
-   * Otherwise, the value is undefined.  For example, if this symbol was defined in the referencing source file,
-   * or if it was imported from a local file in the current project, or if it is an ambient definition,
-   * then astImport will be undefined.
+   * If the `Collector.package` imported this symbol from an external package,
+   * then that information is tracked here.  Otherwise, the value is undefined.
+   *
+   * @remarks
+   * The `astImport` property will be undefined if it was declared in the local project,
+   * or if it is an ambient definition.
    */
   public readonly astImport: AstImport | undefined;
 

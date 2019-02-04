@@ -327,12 +327,12 @@ export class AstSymbolTable {
           // - but P1 and P2 may be different (e.g. merged namespaces containing merged interfaces)
 
           // Is there a parent AstSymbol?  First we check to see if there is a parent declaration:
-          const arbitaryParentDeclaration: ts.Node | undefined
+          const arbitraryParentDeclaration: ts.Node | undefined
             = this._tryFindFirstAstDeclarationParent(followedSymbol.declarations[0]);
 
-          if (arbitaryParentDeclaration) {
+          if (arbitraryParentDeclaration) {
             const parentSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(
-              arbitaryParentDeclaration as ts.Declaration);
+              arbitraryParentDeclaration as ts.Declaration);
 
             parentAstSymbol = this._fetchAstSymbol(parentSymbol, addIfMissing, undefined);
             if (!parentAstSymbol) {
