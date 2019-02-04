@@ -25,7 +25,7 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
-import { CollectorPackage } from './CollectorPackage';
+import { WorkingPackage } from './WorkingPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { DeclarationMetadata } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
@@ -76,7 +76,7 @@ export class Collector {
 
   public readonly logger: ILogger;
 
-  public readonly package: CollectorPackage;
+  public readonly package: WorkingPackage;
 
   private readonly _program: ts.Program;
 
@@ -114,7 +114,7 @@ export class Collector {
       throw new Error('Unable to load file: ' + options.entryPointFile);
     }
 
-    this.package = new CollectorPackage({
+    this.package = new WorkingPackage({
       packageFolder,
       packageJson,
       entryPointSourceFile

@@ -9,15 +9,15 @@ import {
 } from '@microsoft/node-core-library';
 
 /**
- * Constructor options for CollectorPackage
+ * Constructor options for WorkingPackage
  */
-export interface ICollectorPackageOptions {
+export interface IWorkingPackageOptions {
   packageFolder: string;
   packageJson: IPackageJson;
   entryPointSourceFile: ts.SourceFile;
 }
 
-export class CollectorPackage {
+export class WorkingPackage {
   /**
    * Returns the folder for the package being analyzed.
    *
@@ -37,7 +37,7 @@ export class CollectorPackage {
   public tsdocComment: tsdoc.DocComment | undefined;
   public tsdocParserContext: tsdoc.ParserContext | undefined;
 
-  public constructor(options: ICollectorPackageOptions) {
+  public constructor(options: IWorkingPackageOptions) {
     this.packageFolder = options.packageFolder;
     this.packageJson = options.packageJson;
     this.entryPointSourceFile = options.entryPointSourceFile;
