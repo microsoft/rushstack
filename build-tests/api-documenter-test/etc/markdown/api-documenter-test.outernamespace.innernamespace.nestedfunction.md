@@ -9,3 +9,14 @@ A function inside a namespace
 ```typescript
 function nestedFunction(x: number): number;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  x | `number` |  |
+
+<b>Returns:</b>
+
+`number`
+

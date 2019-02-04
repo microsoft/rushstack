@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/web-build-tools/Lobby](https://badges.gitter.im/web-build-tools/Lobby.svg)](https://gitter.im/web-build-tools/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/Microsoft/web-build-tools.svg?branch=master)](https://travis-ci.org/Microsoft/web-build-tools)
+[![Build status](https://dev.azure.com/RushStack/web-build-tools%20(GitHub)/_apis/build/status/CI%20Build)](https://dev.azure.com/RushStack/web-build-tools%20(GitHub)/_build/latest?definitionId=3)
 
 _**This repo hosts a collection of tools and libraries used to build web projects at Microsoft.**_
 

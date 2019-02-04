@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Sat, 19 Jan 2019 03:47:47 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Jan 2019 20:49:11 GMT and should not be manually modified.
+
+## 8.0.1
+Wed, 30 Jan 2019 20:49:11 GMT
+
+### Patches
+
+- Update dependency on changed API in RSC
 
 ## 8.0.0
 Sat, 19 Jan 2019 03:47:47 GMT

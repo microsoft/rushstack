@@ -306,7 +306,7 @@ class ApiPackage extends ApiPackage_base {
   // (undocumented)
   static loadFromJsonFile(apiJsonFilename: string): ApiPackage;
   // (undocumented)
-  saveToJsonFile(apiJsonFilename: string, options?: IJsonFileSaveOptions): void;
+  saveToJsonFile(apiJsonFilename: string, options?: IApiPackageSaveOptions): void;
 }
 
 // @public
@@ -536,6 +536,11 @@ interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiNameMixi
 }
 
 // @public
+interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
+  testMode?: boolean;
+}
+
+// @public
 interface IApiParameterListMixinOptions extends IApiItemOptions {
   // (undocumented)
   overloadIndex: number;
@@ -625,6 +630,7 @@ interface IExtractorConfig {
   policies?: IExtractorPoliciesConfig;
   project: IExtractorProjectConfig;
   skipLibCheck?: boolean;
+  testMode?: boolean;
   validationRules?: IExtractorValidationRulesConfig;
 }
 
