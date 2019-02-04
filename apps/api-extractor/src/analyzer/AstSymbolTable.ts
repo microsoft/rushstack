@@ -80,8 +80,8 @@ export class AstSymbolTable {
     return this._exportAnalyzer.fetchAstModuleExportInfo(astModule);
   }
 
-  public fetchReferencedAstSymbol(symbol: ts.Symbol, sourceFile: ts.SourceFile): AstSymbol | undefined {
-    return this._exportAnalyzer.fetchReferencedAstSymbol(symbol, sourceFile);
+  public fetchReferencedAstSymbol(symbol: ts.Symbol): AstSymbol | undefined {
+    return this._exportAnalyzer.fetchReferencedAstSymbol(symbol);
   }
 
   /**
@@ -143,7 +143,7 @@ export class AstSymbolTable {
 
   /**
    * For a given astDeclaration, this efficiently finds the child corresponding to the
-   * specified ts.Node.  It is assumed that isAstDeclaration() would return true for
+   * specified ts.Node.  It is assumed that AstDeclaration.isSupportedSyntaxKind() would return true for
    * that node type, and that the node is an immediate child of the provided AstDeclaration.
    */
   // NOTE: This could be a method of AstSymbol if it had a backpointer to its AstSymbolTable.
@@ -191,8 +191,7 @@ export class AstSymbolTable {
             throw new Error('Symbol not found for identifier: ' + symbolNode.getText());
           }
 
-          const referencedAstSymbol: AstSymbol | undefined
-            = this.fetchReferencedAstSymbol(symbol, symbolNode.getSourceFile());
+          const referencedAstSymbol: AstSymbol | undefined = this.fetchReferencedAstSymbol(symbol);
           if (referencedAstSymbol) {
             governingAstDeclaration._notifyReferencedAstSymbol(referencedAstSymbol);
           }

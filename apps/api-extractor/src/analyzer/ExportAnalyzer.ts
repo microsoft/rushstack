@@ -272,16 +272,11 @@ export class ExportAnalyzer {
    * refers to.  For example, if a particular interface describes the return value of a function, this API can help
    * us determine a TSDoc declaration reference for that symbol (if the symbol is exported).
    */
-  public fetchReferencedAstSymbol(symbol: ts.Symbol, sourceFile: ts.SourceFile): AstSymbol | undefined {
-    const astModule: AstModule | undefined = this._astModulesBySourceFile.get(sourceFile);
-    if (astModule === undefined) {
-      throw new InternalError('fetchReferencedAstSymbol() called for a source file that was not analyzed');
-    }
-
-    return this._fetchAstSymbolFromModule(astModule, symbol);
+  public fetchReferencedAstSymbol(symbol: ts.Symbol): AstSymbol | undefined {
+    return this._fetchAstSymbolFromModule(symbol);
   }
 
-  private _fetchAstSymbolFromModule(astModule: AstModule, symbol: ts.Symbol): AstSymbol | undefined {
+  private _fetchAstSymbolFromModule(symbol: ts.Symbol): AstSymbol | undefined {
     let current: ts.Symbol = symbol;
 
     while (true) { // tslint:disable-line:no-constant-condition
@@ -482,7 +477,7 @@ export class ExportAnalyzer {
     if (astModule.moduleSymbol.exports) {
       const exportSymbol: ts.Symbol | undefined = astModule.moduleSymbol.exports.get(escapedExportName);
       if (exportSymbol) {
-        astSymbol = this._fetchAstSymbolFromModule(astModule, exportSymbol);
+        astSymbol = this._fetchAstSymbolFromModule(exportSymbol);
         if (astSymbol !== undefined) {
           astModule.cachedExportedSymbols.set(exportName, astSymbol); // cache for next time
           return astSymbol;
