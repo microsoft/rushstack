@@ -11,6 +11,7 @@ dependencies:
   '@rush-temp/api-extractor': 'file:projects/api-extractor.tgz'
   '@rush-temp/api-extractor-lib1-test': 'file:projects/api-extractor-lib1-test.tgz'
   '@rush-temp/api-extractor-lib2-test': 'file:projects/api-extractor-lib2-test.tgz'
+  '@rush-temp/api-extractor-lib3-test': 'file:projects/api-extractor-lib3-test.tgz'
   '@rush-temp/api-extractor-scenarios': 'file:projects/api-extractor-scenarios.tgz'
   '@rush-temp/api-extractor-test-01': 'file:projects/api-extractor-test-01.tgz'
   '@rush-temp/api-extractor-test-02': 'file:projects/api-extractor-test-02.tgz'
@@ -378,7 +379,7 @@ packages:
       '@pnpm/package-bins': 1.0.0
       '@pnpm/types': 1.8.0
       '@types/mz': 0.0.32
-      '@types/node': 10.12.20
+      '@types/node': 10.12.21
       '@types/ramda': 0.25.47
       '@zkochan/cmd-shim': 2.2.4
       arr-flatten: 1.1.0
@@ -402,7 +403,7 @@ packages:
       '@pnpm/package-bins': 1.0.0
       '@pnpm/types': 1.8.0
       '@types/mz': 0.0.32
-      '@types/node': 10.12.20
+      '@types/node': 10.12.21
       '@types/ramda': 0.25.47
       '@zkochan/cmd-shim': 2.2.4
       arr-flatten: 1.1.0
@@ -423,7 +424,7 @@ packages:
       integrity: sha512-thVgwrQ5rMcPYI6a0IPOt2pnlF1n5zX7BN4CrFeBp0/JCGsZAht/VOPv9bD3cZ+j0vDemEwE23BfhOWxmxq2yQ==
   /@pnpm/logger/1.0.2:
     dependencies:
-      '@types/node': 10.12.20
+      '@types/node': 10.12.21
       bole: 3.0.2
       ndjson: 1.5.0
     dev: false
@@ -599,10 +600,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-spbM5xRP+rd7hAkMqtTx5Lvqjgk=
-  /@types/node/10.12.20:
+  /@types/node/10.12.21:
     dev: false
     resolution:
-      integrity: sha512-9spv6SklidqxevvZyOUGjZVz4QRXGu2dNaLyXIFzFYZW0AGDykzPRIUFJXTlQXyfzAucddwTcGtJNim8zqSOPA==
+      integrity: sha512-CBgLNk4o3XMnqMc0rhb6lc77IwShMEglz05deDcn2lQxyXEZivfwgYJu7SMha9V5XcrP6qZuevTHV/QrN2vjKQ==
   /@types/node/8.5.8:
     dev: false
     resolution:
@@ -876,9 +877,9 @@ packages:
       node: '>= 4.0.0'
     resolution:
       integrity: sha512-JVwXMr9nHYTUXsBFKUqhJwvlcYU/blreOEUkhNR2eXZIvwd+c+o5V4MgDPKWnMS/56awN3TRzIP+KoPn+roQtg==
-  /ajv-keywords/3.3.0/ajv@6.7.0:
+  /ajv-keywords/3.3.0/ajv@6.8.1:
     dependencies:
-      ajv: 6.7.0
+      ajv: 6.8.1
     dev: false
     id: registry.npmjs.org/ajv-keywords/3.3.0
     peerDependencies:
@@ -894,7 +895,7 @@ packages:
     dev: false
     resolution:
       integrity: sha1-c7Xuyj+rZT49P5Qis0GtQiBdyWU=
-  /ajv/6.7.0:
+  /ajv/6.8.1:
     dependencies:
       fast-deep-equal: 2.0.1
       fast-json-stable-stringify: 2.0.0
@@ -902,7 +903,7 @@ packages:
       uri-js: 4.2.2
     dev: false
     resolution:
-      integrity: sha512-RZXPviBTtfmtka9n9sy1N5M5b82CbxWIR6HIis4s3WQTXDJamc/0gpCWNGz6EWdWp4DOfjzJfhz/AS9zVPjjWg==
+      integrity: sha512-eqxCp82P+JfqL683wwsL73XmFs1eG6qjw+RD3YHx+Jll1r0jNd4dh8QG9NYAeNGA/hnZjeEDgtTskgJULbxpWQ==
   /align-text/0.1.4:
     dependencies:
       kind-of: 3.2.2
@@ -1210,7 +1211,7 @@ packages:
   /autoprefixer/9.1.5:
     dependencies:
       browserslist: 4.4.1
-      caniuse-lite: 1.0.30000933
+      caniuse-lite: 1.0.30000934
       normalize-range: 0.1.2
       num2fraction: 1.2.2
       postcss: 7.0.5
@@ -1459,12 +1460,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-+hN/Zh2D08Mx65pZ/4g5bsmNiZUuChDiQfTUQ7qJr4/kuopCr88xZsAXv6mBoZEsUI4OuGHlX59qE94K2mMW8Q==
-  /binary-extensions/1.12.0:
+  /binary-extensions/1.13.0:
     dev: false
     engines:
       node: '>=0.10.0'
     resolution:
-      integrity: sha512-DYWGk01lDcxeS/K9IHPGWfT8PsJmbXRtRd2Sx72Tnb8pcYZQFF1oSDb8hJtS1vhp212q1Rzi5dUf9+nq0o9UIg==
+      integrity: sha512-EgmjVLMn22z7eGGv3kcnHwSnJXmFHjISTY9E/S5lIcTD3Oxw05QTcBLNkJFzcb3cNueUdF/IN4U+d78V0zO8Hw==
   /binaryextensions/1.0.1:
     dev: false
     resolution:
@@ -1633,9 +1634,9 @@ packages:
       integrity: sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==
   /browserslist/4.4.1:
     dependencies:
-      caniuse-lite: 1.0.30000933
-      electron-to-chromium: 1.3.109
-      node-releases: 1.1.6
+      caniuse-lite: 1.0.30000934
+      electron-to-chromium: 1.3.113
+      node-releases: 1.1.7
     dev: false
     hasBin: true
     resolution:
@@ -1745,10 +1746,10 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-1UVjW+HjPFQmScaRc+Xeas+uNN0=
-  /caniuse-lite/1.0.30000933:
+  /caniuse-lite/1.0.30000934:
     dev: false
     resolution:
-      integrity: sha512-d3QXv7eFTU40DSedSP81dV/ajcGSKpT+GW+uhtWmLvQm9bPk0KK++7i1e2NSW/CXGZhWFt2mFbFtCJ5I5bMuVA==
+      integrity: sha512-o7yfZn0R9N+mWAuksDsdLsb1gu9o//XK0QSU0zSSReKNRsXsFc/n/psxi0YSPNiqlKxImp5h4DHnAPdwYJ8nNA==
   /capture-exit/1.2.0:
     dependencies:
       rsvp: 3.6.2
@@ -2514,10 +2515,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
-  /electron-to-chromium/1.3.109:
+  /electron-to-chromium/1.3.113:
     dev: false
     resolution:
-      integrity: sha512-1qhgVZD9KIULMyeBkbjU/dWmm30zpPUfdWZfVO3nPhbtqMHJqHr4Ua5wBcWtAymVFrUCuAJxjMF1OhG+bR21Ow==
+      integrity: sha512-De+lPAxEcpxvqPTyZAXELNpRZXABRxf+uL/rSykstQhzj/B0l1150G/ExIIxKc16lI89Hgz81J0BHAcbTqK49g==
   /elliptic/6.4.1:
     dependencies:
       bn.js: 4.11.8
@@ -3813,7 +3814,7 @@ packages:
       integrity: sha1-ukAsJmGU8VlW7xXg/PJCmT9qff0=
   /har-validator/5.1.3:
     dependencies:
-      ajv: 6.7.0
+      ajv: 6.8.1
       har-schema: 2.0.0
     dev: false
     engines:
@@ -4186,7 +4187,7 @@ packages:
       integrity: sha1-d8mYQFJ6qOyxqLppe4BkWnqSap0=
   /is-binary-path/1.0.1:
     dependencies:
-      binary-extensions: 1.12.0
+      binary-extensions: 1.13.0
     dev: false
     engines:
       node: '>=0.10.0'
@@ -4593,6 +4594,10 @@ packages:
       supports-color: 3.2.3
       which: 1.3.1
       wordwrap: 1.0.0
+    deprecated: |-
+      This module is no longer maintained, try this instead:
+        npm i nyc
+      Visit https://istanbul.js.org/integrations for other alternatives.
     dev: false
     hasBin: true
     resolution:
@@ -4613,6 +4618,10 @@ packages:
       supports-color: 3.2.3
       which: 1.3.1
       wordwrap: 1.0.0
+    deprecated: |-
+      This module is no longer maintained, try this instead:
+        npm i nyc
+      Visit https://istanbul.js.org/integrations for other alternatives.
     dev: false
     hasBin: true
     resolution:
@@ -4666,7 +4675,7 @@ packages:
       jest-validate: 22.4.4
       jest-worker: 22.4.3
       micromatch: 2.3.11
-      node-notifier: 5.3.0
+      node-notifier: 5.4.0
       realpath-native: 1.0.2
       rimraf: 2.6.3
       slash: 1.0.0
@@ -4709,7 +4718,7 @@ packages:
       jest-watcher: 23.4.0
       jest-worker: 23.2.0
       micromatch: 2.3.11
-      node-notifier: 5.3.0
+      node-notifier: 5.4.0
       prompts: 0.1.14
       realpath-native: 1.0.2
       rimraf: 2.6.3
@@ -5230,7 +5239,7 @@ packages:
       escodegen: 1.11.0
       html-encoding-sniffer: 1.0.2
       left-pad: 1.3.0
-      nwsapi: 2.0.9
+      nwsapi: 2.1.0
       parse5: 4.0.0
       pn: 1.1.0
       request: 2.88.0
@@ -6120,21 +6129,22 @@ packages:
     dev: false
     resolution:
       integrity: sha1-RDhEn+aeMh+UHO+UOYaweXAycBs=
-  /node-notifier/5.3.0:
+  /node-notifier/5.4.0:
     dependencies:
       growly: 1.3.0
+      is-wsl: 1.1.0
       semver: 5.6.0
       shellwords: 0.1.1
       which: 1.3.1
     dev: false
     resolution:
-      integrity: sha512-AhENzCSGZnZJgBARsUjnQ7DnZbzyP+HxlVXuD0xqAnvL8q+OqtSX7lGg9e8nHzwXkMMXNdVeqq4E2M3EUAqX6Q==
-  /node-releases/1.1.6:
+      integrity: sha512-SUDEb+o71XR5lXSTyivXd9J7fCloE3SyP4lSgt3lU2oSANiox+SxlNRGPjDKrwU1YN3ix2KN/VGGCg0t01rttQ==
+  /node-releases/1.1.7:
     dependencies:
       semver: 5.3.0
     dev: false
     resolution:
-      integrity: sha512-lODUVHEIZutZx+TDdOk47qLik8FJMXzJ+WnyUGci1MTvTOyzZrz5eVPIIpc5Hb3NfHZGeGHeuwrRYVI1PEITWg==
+      integrity: sha512-bKdrwaqJUPHqlCzDD7so/R+Nk0jGv9a11ZhLrD9f6i947qGLrGAhU3OxRENa19QQmwzGy/g6zCDEuLGDO8HPvA==
   /node-sass/4.9.3:
     dependencies:
       async-foreach: 0.1.3
@@ -6235,10 +6245,10 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-CXtgK1NCKlIsGvuHkDGDNpQaAR0=
-  /nwsapi/2.0.9:
+  /nwsapi/2.1.0:
     dev: false
     resolution:
-      integrity: sha512-nlWFSCTYQcHk/6A9FFnfhKc14c3aFhfdNBXgo8Qgi9QTBu/qg3Ww+Uiz9wMzXd1T8GFxPc2QIHB6Qtf2XFryFQ==
+      integrity: sha512-ZG3bLAvdHmhIjaQ/Db1qvBxsGvFMLIRpQszyqbg31VJ53UP++uZX1/gf3Ut96pdwN9AuDwlMqIYLm0UPCdUeHg==
   /oauth-sign/0.8.2:
     dev: false
     resolution:
@@ -8835,8 +8845,8 @@ packages:
     dependencies:
       acorn: 5.7.3
       acorn-dynamic-import: 2.0.2
-      ajv: 6.7.0
-      ajv-keywords: /ajv-keywords/3.3.0/ajv@6.7.0
+      ajv: 6.8.1
+      ajv-keywords: /ajv-keywords/3.3.0/ajv@6.8.1
       async: 2.6.1
       enhanced-resolve: 3.4.1
       escope: 3.6.0
@@ -9149,7 +9159,7 @@ packages:
     dev: false
     name: '@rush-temp/api-documenter-test'
     resolution:
-      integrity: sha512-OVJNRaJQ+fa+N7d9Kfz91SygFVeuyJ5QKgRtvOUDumf2o/xL5RLShQZuohLwaHsMhurOlrMFGoOjenXGwRNs1Q==
+      integrity: sha512-TByiX13VcDUqNGUEAlyVQ6Gip+tJWFtedmwc/OHvXWbHANQ3N3ZhF5v5Nc1ka/K+n/DMWxqhSZmu/BPXGmX1Iw==
       tarball: 'file:projects/api-documenter-test.tgz'
     version: 0.0.0
   'file:projects/api-documenter.tgz':
@@ -9165,7 +9175,7 @@ packages:
     dev: false
     name: '@rush-temp/api-documenter'
     resolution:
-      integrity: sha512-z2wgtB0zYODO2uWlQSqjGqUVdfU9Vv7xJTBWRT8FkwF4bEUguex4aQzcrJb421tYUUzj+wFqh9O8xG0diYCVtw==
+      integrity: sha512-1vTE11mnLLD5ht0Npx2XCeJ8qYTIXz2N/qTTdI0y2fXKgSWYjwJk3UALytJssDA6+4yN4GbR3oo/tw0+8liz3g==
       tarball: 'file:projects/api-documenter.tgz'
     version: 0.0.0
   'file:projects/api-extractor-lib1-test.tgz':
@@ -9177,7 +9187,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-lib1-test'
     resolution:
-      integrity: sha512-HojhqOUKBLEK6F0cUW0uW20kBthFonKhBz4k/yz7KZ30dzuVmxrexlPwIzkZTVEpphsHPuO4kqYnX5tm5Aw0MQ==
+      integrity: sha512-j4XNDWRSQ/o13cHpu0bDV4aC/asl3aprfrXVZ5BuSfCK4+jv7zmMGPfqqhtUXOYqHPb3J4dVZUCO9sFc4T/pXQ==
       tarball: 'file:projects/api-extractor-lib1-test.tgz'
     version: 0.0.0
   'file:projects/api-extractor-lib2-test.tgz':
@@ -9189,8 +9199,20 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-lib2-test'
     resolution:
-      integrity: sha512-Li5qXShYcqMi82EPPaSBofWnBHPiPOUbnRJsJf6a4z0QJJAGqt3SJDE7xNr9CLMe/J5GVlZNblJMwvGNH7IiQQ==
+      integrity: sha512-4z/s7lsLzZdXC+fxMRyOByO2YSaGlqIXUIe1g/JHOa+2hA/FCKCWKJZzeTvOAdJPciZhJ7K3b/DEiy8o2TAltg==
       tarball: 'file:projects/api-extractor-lib2-test.tgz'
+    version: 0.0.0
+  'file:projects/api-extractor-lib3-test.tgz':
+    dependencies:
+      '@types/jest': 23.3.11
+      '@types/node': 8.5.8
+      fs-extra: 7.0.1
+      typescript: 3.1.6
+    dev: false
+    name: '@rush-temp/api-extractor-lib3-test'
+    resolution:
+      integrity: sha512-4jIXOUpuPCZtt2wKnxMtGOzjPrAwsyONnIUuodQy6unPhvq1KyaPn7V7vqNb4BA8QmKYQ7xbZmsuRGTImMA8gg==
+      tarball: 'file:projects/api-extractor-lib3-test.tgz'
     version: 0.0.0
   'file:projects/api-extractor-scenarios.tgz':
     dependencies:
@@ -9202,7 +9224,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-scenarios'
     resolution:
-      integrity: sha512-zJXNb/5RMMpl68WTPTbsZpPTRPUsC6CI3QsO6et29bk0BGXmJR8viUlxkSFsN/vM6IRvDMuth1rcJiQjNFudag==
+      integrity: sha512-wHMk8i+HPb7kH9zN8eL9HrOC36DLjGfRIIAw/sx2E2vkim2HHMxr5CJW9huRNMXzgNaz0SpKMJ3/oKCyRXpChg==
       tarball: 'file:projects/api-extractor-scenarios.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-01.tgz':
@@ -9214,7 +9236,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-test-01'
     resolution:
-      integrity: sha512-0EdHzGAirjkaQgAXw9Ynxx4plRAjuxau0GGvngUBftx5GS0TBSCdW2Jpl3gxuOX0aUlmsaT2g897V2YEIo7a3A==
+      integrity: sha512-+hAUlOFp2Y9C3ckPj6aLCsVV1pzWqIZvIQkZbRau+GHm0/FR+7qKlSTKFuOfgdIUvIV4CZ/m4OJvZFl1mGjp8g==
       tarball: 'file:projects/api-extractor-test-01.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-02.tgz':
@@ -9227,7 +9249,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-test-02'
     resolution:
-      integrity: sha512-LAohhyQBNdyMTphToMXUZupdOeBeoMfhEXDhHYuGlu3n5dSexbP6oJ9NO3BEW/pqiZ4S4iDNNvDNGMytSLZRXA==
+      integrity: sha512-ALXQQNGgMjn+2Yi/HTbqkxSrA4/IekxqMbo1kKAuHIvT4ZUa8UL3zHF5btbMp2mQd/75pfdOElmo/ma8YRXUhw==
       tarball: 'file:projects/api-extractor-test-02.tgz'
     version: 0.0.0
   'file:projects/api-extractor-test-03.tgz':
@@ -9249,7 +9271,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-test-04'
     resolution:
-      integrity: sha512-9T1nL4+mBMWTc2W0nltnnpFNEL1XvugjkxoSaD4AF8JLrgTtSJX8Me727jaCKTIlC7FiKcmVzV///HHHpCcYTw==
+      integrity: sha512-ZX/lpvdEjbQ4kjaRzCA2qKKHe8CizLKOq0Bmu8M56I9jeP0HrxDZ4O+Qg8kwAatnGTwG16qN1NnMg0tiloTBLw==
       tarball: 'file:projects/api-extractor-test-04.tgz'
     version: 0.0.0
   'file:projects/api-extractor.tgz':
@@ -9900,6 +9922,7 @@ specifiers:
   '@rush-temp/api-extractor': 'file:./projects/api-extractor.tgz'
   '@rush-temp/api-extractor-lib1-test': 'file:./projects/api-extractor-lib1-test.tgz'
   '@rush-temp/api-extractor-lib2-test': 'file:./projects/api-extractor-lib2-test.tgz'
+  '@rush-temp/api-extractor-lib3-test': 'file:./projects/api-extractor-lib3-test.tgz'
   '@rush-temp/api-extractor-scenarios': 'file:./projects/api-extractor-scenarios.tgz'
   '@rush-temp/api-extractor-test-01': 'file:./projects/api-extractor-test-01.tgz'
   '@rush-temp/api-extractor-test-02': 'file:./projects/api-extractor-test-02.tgz'
