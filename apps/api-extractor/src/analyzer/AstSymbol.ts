@@ -39,11 +39,16 @@ export class AstSymbol {
 
   /**
    * The compiler symbol where this type was defined, after following any aliases.
+   *
+   * @remarks
+   * This is a normal form that can be reached from any symbol alias by calling
+   * `TypeScriptHelpers.followAliases()`.  It can be compared to determine whether two
+   * symbols refer to the same underlying type.
    */
   public readonly followedSymbol: ts.Symbol;
 
   /**
-   * If the `Collector.package` imported this symbol from an external package,
+   * If the working package imported this symbol from an external package,
    * then that information is tracked here.  Otherwise, the value is undefined.
    *
    * @remarks

@@ -46,9 +46,9 @@ export interface ICollectorOptions {
   program: ts.Program;
 
   /**
-   * The entry point for the project.  This should correspond to the "main" field
-   * from NPM's package.json file.  If it is a relative path, it will be relative to
-   * the project folder described by IExtractorAnalyzeOptions.compilerOptions.
+   * The entry point to be processed by API Extractor.  Normally this should correspond to
+   * the "main" field from the package.json file.  If it is a relative path, it will be
+   * relative to the project folder described by IExtractorAnalyzeOptions.compilerOptions.
    */
   entryPointFile: string;
 
@@ -60,9 +60,10 @@ export interface ICollectorOptions {
 }
 
 /**
- * The main entry point for the "api-extractor" utility.  The Analyzer object invokes the
- * TypeScript Compiler API to analyze a project, and constructs the AstItem
- * abstract syntax tree.
+ * The `Collector` manages the overall data set that is used by `ApiModelGenerator`,
+ * `DtsRollupGenerator`, and `ReviewFileGenerator`.  Starting from the working package's entry point,
+ * the `Collector` collects all exported symbols, determines how to import any symbols they reference,
+ * assigns unique names, and sorts everything into a normalized alphabetical ordering.
  */
 export class Collector {
   public readonly program: ts.Program;

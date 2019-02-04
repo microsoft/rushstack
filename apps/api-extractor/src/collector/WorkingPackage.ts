@@ -17,9 +17,23 @@ export interface IWorkingPackageOptions {
   entryPointSourceFile: ts.SourceFile;
 }
 
+/**
+ * Information about the working package for a particular invocation of API Extractor.
+ *
+ * @remarks
+ * API Extractor tries to model the world as a collection of NPM packages, such that each
+ * .d.ts file belongs to at most one package.  When API Extractor is invoked on a project,
+ * we refer to that project as being the "working package".  There is exactly one
+ * "working package" for the duration of this analysis.  Any files that do not belong to
+ * the working package are referred to as "external":  external declarations belonging to
+ * external packages.
+ *
+ * If API Extractor is invoked on a standalone .d.ts file, the "working package" may not
+ * have an actual package.json file on disk, but we still refer to it in concept.
+ */
 export class WorkingPackage {
   /**
-   * Returns the folder for the package being analyzed.
+   * Returns the folder for the package.json file of the working package.
    *
    * @remarks
    * If the entry point is `C:\Folder\project\src\index.ts` and the nearest package.json
@@ -28,13 +42,28 @@ export class WorkingPackage {
   public readonly packageFolder: string;
 
   /**
-   * The parsed package.json file for this package.
+   * The parsed package.json file for the working package.
    */
   public readonly packageJson: IPackageJson;
 
+  /**
+   * The entry point being processed during this invocation of API Extractor.
+   *
+   * @remarks
+   * The working package may have multiple entry points; however, today API Extractor
+   * only processes a single entry point during an invocation.  This will be improved
+   * in the future.
+   */
   public readonly entryPointSourceFile: ts.SourceFile;
 
+  /**
+   * The `@packagedocumentation` comment, if any, for the working package.
+   */
   public tsdocComment: tsdoc.DocComment | undefined;
+
+  /**
+   * Additional parser information for `WorkingPackage.tsdocComment`.
+   */
   public tsdocParserContext: tsdoc.ParserContext | undefined;
 
   public constructor(options: IWorkingPackageOptions) {
@@ -44,7 +73,7 @@ export class WorkingPackage {
   }
 
   /**
-   * Returns the full name of the package being analyzed.
+   * Returns the full name of the working package.
    */
   public get name(): string {
     return this.packageJson.name;
