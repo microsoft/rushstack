@@ -1,13 +1,5 @@
 resources:
 - repo: self
-trigger:
-  branches:
-    include:
-    - master
-pr:
-  branches:
-    include:
-    - master
 jobs:
 - job: PRBuild
   condition: succeeded()
