@@ -61,8 +61,8 @@ export class DtsRollupGenerator {
   private static _generateTypingsFileContent(collector: Collector, indentedWriter: IndentedWriter,
     dtsKind: DtsRollupKind): void {
 
-    if (collector.package.tsdocParserContext) {
-      indentedWriter.writeLine(collector.package.tsdocParserContext.sourceRange.toString());
+    if (collector.workingPackage.tsdocParserContext) {
+      indentedWriter.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
       indentedWriter.writeLine();
     }
 

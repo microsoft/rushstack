@@ -49,10 +49,10 @@ export class ApiModelGenerator {
   }
 
   public buildApiPackage(): ApiPackage {
-    const packageDocComment: tsdoc.DocComment | undefined = this._collector.package.tsdocComment;
+    const packageDocComment: tsdoc.DocComment | undefined = this._collector.workingPackage.tsdocComment;
 
     const apiPackage: ApiPackage = new ApiPackage({
-      name: this._collector.package.name,
+      name: this._collector.workingPackage.name,
       docComment: packageDocComment
     });
     this._apiModel.addMember(apiPackage);

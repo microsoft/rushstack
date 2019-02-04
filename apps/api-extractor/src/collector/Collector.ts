@@ -76,7 +76,7 @@ export class Collector {
 
   public readonly logger: ILogger;
 
-  public readonly package: WorkingPackage;
+  public readonly workingPackage: WorkingPackage;
 
   private readonly _program: ts.Program;
 
@@ -114,7 +114,7 @@ export class Collector {
       throw new Error('Unable to load file: ' + options.entryPointFile);
     }
 
-    this.package = new WorkingPackage({
+    this.workingPackage = new WorkingPackage({
       packageFolder,
       packageJson,
       entryPointSourceFile
@@ -179,18 +179,18 @@ export class Collector {
 
     // Build the entry point
     const astEntryPoint: AstModule = this.astSymbolTable.fetchEntryPointModule(
-      this.package.entryPointSourceFile);
+      this.workingPackage.entryPointSourceFile);
     this._astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
-      this.package.entryPointSourceFile, this);
+      this.workingPackage.entryPointSourceFile, this);
 
     if (packageDocCommentTextRange) {
-      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(this.package.entryPointSourceFile.text,
+      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(this.workingPackage.entryPointSourceFile.text,
         packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
 
-      this.package.tsdocParserContext = this._tsdocParser.parseRange(range);
-      this.package.tsdocComment = this.package.tsdocParserContext!.docComment;
+      this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
+      this.workingPackage.tsdocComment = this.workingPackage.tsdocParserContext!.docComment;
     }
 
     const exportedAstSymbols: AstSymbol[] = [];
@@ -348,7 +348,7 @@ export class Collector {
       const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(start);
 
       // If the file is under the packageFolder, then show a relative path
-      const relativePath: string = path.relative(this.package.packageFolder, sourceFile.fileName);
+      const relativePath: string = path.relative(this.workingPackage.packageFolder, sourceFile.fileName);
       const shownPath: string = relativePath.substr(0, 2) === '..' ? sourceFile.fileName : relativePath;
 
       // Format the error so that VS Code can follow it.  For example:

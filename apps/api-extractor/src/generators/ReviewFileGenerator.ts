@@ -71,7 +71,7 @@ export class ReviewFileGenerator {
       }
     }
 
-    if (collector.package.tsdocComment === undefined) {
+    if (collector.workingPackage.tsdocComment === undefined) {
       output.append('\n');
       ReviewFileGenerator._writeLineAsComment(output, '(No @packageDocumentation comment for this package)');
     }
