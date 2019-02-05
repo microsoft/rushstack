@@ -6,9 +6,10 @@ import * as ts from 'typescript';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { Collector } from './Collector';
 import { Sort } from '@microsoft/node-core-library';
+import { AstEntity } from '../analyzer/AstSymbolTable';
 
 /**
- * This is a data structure used by the Collector to track an AstSymbol that may be emitted in the *.d.ts file.
+ * This is a data structure used by the Collector to track an AstEntity that may be emitted in the *.d.ts file.
  *
  * @remarks
  * The additional contextual state beyond AstSymbol is:
@@ -18,9 +19,9 @@ import { Sort } from '@microsoft/node-core-library';
  */
 export class CollectorEntity {
   /**
-   * The AstSymbol that this entry represents.
+   * The AstEntity that this entry represents.
    */
-  public readonly astSymbol: AstSymbol;
+  public readonly astEntity: AstEntity;
 
   private _exportNames: Set<string> = new Set<string>();
   private _exportNamesSorted: boolean = false;
@@ -30,8 +31,8 @@ export class CollectorEntity {
 
   private _sortKey: string | undefined = undefined;
 
-  public constructor(astSymbol: AstSymbol) {
-    this.astSymbol = astSymbol;
+  public constructor(astEntity: AstEntity) {
+    this.astEntity = astEntity;
   }
 
   /**
@@ -82,7 +83,7 @@ export class CollectorEntity {
   public get shouldInlineExport(): boolean {
     return this._singleExportName !== undefined
       && this._singleExportName !== ts.InternalSymbolName.Default
-      && this.astSymbol.astImport === undefined;
+      && this.astEntity instanceof AstSymbol;
   }
 
   /**
@@ -113,7 +114,7 @@ export class CollectorEntity {
    */
   public getSortKey(): string {
     if (!this._sortKey) {
-      this._sortKey = Collector.getSortKeyIgnoringUnderscore(this.nameForEmit || this.astSymbol.localName);
+      this._sortKey = Collector.getSortKeyIgnoringUnderscore(this.nameForEmit || this.astEntity.localName);
     }
     return this._sortKey;
   }

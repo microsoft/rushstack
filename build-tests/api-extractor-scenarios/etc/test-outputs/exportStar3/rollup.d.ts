@@ -5,9 +5,6 @@ import { Lib2Interface as RenamedLib2Interface } from 'api-extractor-lib2-test';
 export declare class A {
 }
 export { Lib1Class }
-
-declare class Lib1ForgottenExport {
-}
 export { RenamedLib2Interface }
 
 export { }

@@ -14,6 +14,7 @@ import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { Text, InternalError } from '@microsoft/node-core-library';
 import { AstImport } from '../analyzer/AstImport';
+import { AstSymbol } from '../analyzer/AstSymbol';
 
 export class ReviewFileGenerator {
   /**
@@ -35,9 +36,9 @@ export class ReviewFileGenerator {
 
     for (const entity of collector.entities) {
       if (entity.exported) {
-        if (!entity.astSymbol.astImport) {
+        if (entity.astEntity instanceof AstSymbol) {
           // Emit all the declarations for this entry
-          for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
+          for (const astDeclaration of entity.astEntity.astDeclarations || []) {
 
             output.append(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
 
@@ -50,7 +51,7 @@ export class ReviewFileGenerator {
           // This definition is reexported from another package, so write it as an "export" line
           // In general, we don't report on external packages; if that's important we assume API Extractor
           // would be enabled for the upstream project.  But see GitHub issue #896 for a possible exception.
-          const astImport: AstImport = entity.astSymbol.astImport;
+          const astImport: AstImport = entity.astEntity;
 
           if (astImport.exportName === '*') {
             output.append(`export * as ${entity.nameForEmit}`);

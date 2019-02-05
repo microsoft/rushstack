@@ -43,4 +43,12 @@ export class AstImport {
 
     this.key = `${this.modulePath}:${this.exportName}`;
   }
+
+  /**
+   * Allows `AstEntity.localName` to be used as a convenient generalization of `AstSymbol.localName` and
+   * `AstImport.exportName`.
+   */
+  public get localName(): string {
+    return this.exportName;
+  }
 }

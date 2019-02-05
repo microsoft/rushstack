@@ -15,6 +15,7 @@ import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { AstSymbol } from '../analyzer/AstSymbol';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -79,11 +80,12 @@ export class DtsRollupGenerator {
 
     // Emit the imports
     for (const entity of collector.entities) {
-      if (entity.astSymbol.astImport) {
+      if (entity.astEntity instanceof AstImport) {
+        const astImport: AstImport = entity.astEntity;
 
-        const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astSymbol).releaseTag;
-        if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-          const astImport: AstImport = entity.astSymbol.astImport;
+        // TODO: Find the target AstSymbol for an AstImport
+        // const releaseTag: ReleaseTag = collector.fetchMetadata(astImport).releaseTag;
+        // if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
 
           if (astImport.exportName === '*') {
             indentedWriter.write(`import * as ${entity.nameForEmit}`);
@@ -94,14 +96,14 @@ export class DtsRollupGenerator {
           }
           indentedWriter.writeLine(` from '${astImport.modulePath}';`);
 
-        }
+        // }
       }
     }
 
     // Emit the regular declarations
     for (const entity of collector.entities) {
-      if (!entity.astSymbol.astImport) {
-        const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astSymbol).releaseTag;
+      if (entity.astEntity instanceof AstSymbol) {
+        const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astEntity).releaseTag;
         if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
           indentedWriter.writeLine();
           indentedWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
@@ -109,7 +111,7 @@ export class DtsRollupGenerator {
         }
 
         // Emit all the declarations for this entry
-        for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
+        for (const astDeclaration of entity.astEntity.astDeclarations || []) {
 
           indentedWriter.writeLine();
 
