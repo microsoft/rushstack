@@ -3,6 +3,7 @@
 
 import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 import { StringBuilder } from '../StringBuilder';
+import { Text } from '../Text';
 
 /**
  * @beta
@@ -69,6 +70,9 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   }
 
   private _normalizeOutput(s: string): string { // tslint:disable-line:export-name
-    return s.replace(/\u001b/g, '[x]').replace(/\n/g, '[-n-]').replace(/\r/g, '[-r-]');
+    return Text.convertToLf(s)
+      .replace(/\u001b/g, '[x]')
+      .replace(/\n/g, '[-n-]')
+      .replace(/\r/g, '[-r-]');
   }
 }
