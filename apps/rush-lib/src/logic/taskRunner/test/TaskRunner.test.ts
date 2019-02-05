@@ -3,18 +3,7 @@ import { TaskRunner } from '../TaskRunner';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { TaskStatus } from '../TaskStatus';
 import { ITaskDefinition } from '../ITask';
-
-class TestConsole {
-  public messages: Array<String> = [];
-
-  public log(message: string): void {
-    this.messages.push(message);
-  }
-
-  public concatenate(): string {
-    return this.messages.join(EOL);
-  }
-}
+import { StringBufferTerminalProvider } from '@microsoft/node-core-library';
 
 function createDummyTask(name: string, action?: () => void): ITaskDefinition {
   return {
@@ -29,13 +18,20 @@ function createDummyTask(name: string, action?: () => void): ITaskDefinition {
   };
 }
 
+function checkConsoleOutput(logger: StringBufferTerminalProvider): void {
+  expect(logger.getOutput()).toMatchSnapshot();
+  expect(logger.getVerbose()).toMatchSnapshot();
+  expect(logger.getWarningOutput()).toMatchSnapshot();
+  expect(logger.getErrorOutput()).toMatchSnapshot();
+}
+
 describe('TaskRunner', () => {
-  let logger: TestConsole;
+  let logger: StringBufferTerminalProvider;
   let taskRunner: TaskRunner;
 
   describe('Constructor', () => {
     it('throwsErrorOnInvalidParallelism', () => {
-      logger = new TestConsole();
+      logger = new StringBufferTerminalProvider(true);
       expect(() => new TaskRunner(false, 'tequila', false, logger))
         .toThrowErrorMatchingSnapshot();
     });
@@ -43,7 +39,7 @@ describe('TaskRunner', () => {
 
   describe('Dependencies', () => {
     beforeEach(() => {
-      logger = new TestConsole();
+      logger = new StringBufferTerminalProvider(true);
       taskRunner = new TaskRunner(false, '1', false, logger);
     });
 
@@ -75,6 +71,7 @@ describe('TaskRunner', () => {
         .execute()
         .then(() => {
           expect(result.join(',')).toEqual('1,2');
+          checkConsoleOutput(logger);
         })
         .catch(error => fail(error));
     });
@@ -82,7 +79,7 @@ describe('TaskRunner', () => {
 
   describe('Error logging', () => {
     beforeEach(() => {
-      logger = new TestConsole();
+      logger = new StringBufferTerminalProvider(true);
       taskRunner = new TaskRunner(false, '1', false, logger);
     });
 
@@ -103,9 +100,10 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch(err => {
           expect(err.message).toMatchSnapshot();
-          const allMessages: string = logger.concatenate();
+          const allMessages: string = logger.getOutput();
           expect(allMessages).not.toContain('Hold my beer...');
           expect(allMessages).toContain('Woops');
+          checkConsoleOutput(logger);
         });
     });
   });

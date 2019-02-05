@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Terminal } from '../Terminal';
-import { StringBufferTerminalProvider } from './StringBufferTerminalProvider';
+import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
 import { createColorGrid } from './createColorGrid';
 
 describe('Colors', () => {
