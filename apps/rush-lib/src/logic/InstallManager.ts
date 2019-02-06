@@ -72,7 +72,7 @@ export interface IInstallManagerOptions {
   /**
    * Whether the global "--ignore-engines" flag was specified.
    */
-  ignoreEngines: boolean;
+  ignoreEngines?: boolean;
   /**
    * Whether or not Rush will automatically update the shrinkwrap file.
    * True for "rush update", false for "rush install".
