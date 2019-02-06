@@ -186,7 +186,7 @@ export class YarnOptionsConfiguration {
   public readonly ignoreEngines: boolean;
 
   /** @internal */
-  public constructor(json: IPnpmOptionsJson) {
+  public constructor(json: IYarnOptionsJson) {
     this.ignoreEngines = !!json.ignoreEngines;
   }
 }
