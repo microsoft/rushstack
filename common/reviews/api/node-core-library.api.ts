@@ -416,6 +416,25 @@ class Sort {
   static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any, keyComparer?: (x: T, y: T) => number): void;
 }
 
+// @beta (undocumented)
+class StringBufferTerminalProvider implements ITerminalProvider {
+  constructor(supportsColor?: boolean);
+  // (undocumented)
+  readonly eolCharacter: string;
+  // (undocumented)
+  getErrorOutput(): string;
+  // (undocumented)
+  getOutput(): string;
+  // (undocumented)
+  getVerbose(): string;
+  // (undocumented)
+  getWarningOutput(): string;
+  // (undocumented)
+  readonly supportsColor: boolean;
+  // (undocumented)
+  write(data: string, severity: TerminalProviderSeverity): void;
+}
+
 // @public
 class StringBuilder implements IStringBuilder {
   constructor();
