@@ -78,7 +78,7 @@ export class RushCommandLineParser extends CommandLineParser {
     });
     this._ignoreEnginesParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-engines',
-      description: 'Ignores engines section in package.json for yarn and npm package managers',
+      description: 'Ignores engines section in package.json for yarn and npm package managers'
     });
   }
 
