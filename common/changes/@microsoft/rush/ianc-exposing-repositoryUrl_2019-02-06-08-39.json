@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Include repositoryUrl in the rush.json schema.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
