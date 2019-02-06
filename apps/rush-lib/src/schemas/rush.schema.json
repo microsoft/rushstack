@@ -49,6 +49,10 @@
       "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default.",
       "type": "boolean"
     },
+    "repositoryUrl": {
+      "description": "The remote url of the repository. It helps 'Rush change' finds the right remote to compare against.",
+      "type": "string"
+    },
     "pnpmOptions": {
       "description": "Options that are only used when the PNPM pacakge manager is selected.",
       "type": "object",
