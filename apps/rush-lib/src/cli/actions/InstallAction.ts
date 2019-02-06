@@ -27,6 +27,7 @@ export class InstallAction extends BaseInstallAction {
   protected buildInstallOptions(): IInstallManagerOptions {
     return {
       debug: this.parser.isDebug,
+      ignoreEngines: this.parser.isIgnoreEngines,
       allowShrinkwrapUpdates: false,
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,

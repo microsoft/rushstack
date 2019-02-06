@@ -39,6 +39,7 @@ export class RushCommandLineParser extends CommandLineParser {
   public rushGlobalFolder: RushGlobalFolder;
 
   private _debugParameter: CommandLineFlagParameter;
+  private _ignoreEnginesParameter: CommandLineFlagParameter;
 
   constructor() {
     super({
@@ -59,6 +60,10 @@ export class RushCommandLineParser extends CommandLineParser {
     return this._debugParameter.value;
   }
 
+  public get isIgnoreEngines(): boolean {
+    return this._ignoreEnginesParameter.value;
+  }
+
   public flushTelemetry(): void {
     if (this.telemetry) {
       this.telemetry.flush();
@@ -70,6 +75,10 @@ export class RushCommandLineParser extends CommandLineParser {
       parameterLongName: '--debug',
       parameterShortName: '-d',
       description: 'Show the full call stack if an error occurs while executing the tool'
+    });
+    this._ignoreEnginesParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-engines',
+      description: 'Ignores engines section in package.json for yarn and npm package managers',
     });
   }
 

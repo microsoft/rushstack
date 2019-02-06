@@ -70,6 +70,10 @@ export interface IInstallManagerOptions {
    */
   debug: boolean;
   /**
+   * Whether the global "--ignore-engines" flag was specified.
+   */
+  ignoreEngines: boolean;
+  /**
    * Whether or not Rush will automatically update the shrinkwrap file.
    * True for "rush update", false for "rush install".
    */
@@ -1145,6 +1149,10 @@ export class InstallManager {
       if (options.networkConcurrency) {
         args.push('--network-concurrency', options.networkConcurrency.toString());
       }
+    }
+
+    if (options.ignoreEngines) {
+      args.push('--ignore-engines');
     }
   }
 
