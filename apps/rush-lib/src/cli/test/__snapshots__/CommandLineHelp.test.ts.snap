@@ -36,12 +36,12 @@ Positional arguments:
                   and create or update the shrinkwrap file as needed
     unlink        Delete node_modules symlinks for all projects in the repo
     version       (EXPERIMENTAL) Manage package versions in the repo.
-    build         (EXPERIMENTAL) Build all projects that haven't been built, 
-                  or have changed since they were last built.
-    rebuild       Clean and rebuild the entire set of projects
     import-strings
                   Imports translated strings into each project.
     deploy        Deploys the build
+    build         (EXPERIMENTAL) Build all projects that haven't been built, 
+                  or have changed since they were last built.
+    rebuild       Clean and rebuild the entire set of projects
 
 Optional arguments:
   -h, --help      Show this help message and exit.

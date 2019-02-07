@@ -159,6 +159,15 @@ export class PnpmOptionsConfiguration {
 }
 
 /**
+ * Options for `RushConfiguration.tryFindRushJsonLocation`.
+ * @public
+ */
+export interface ITryFindRushJsonLocationOptions {
+  showVerbose?: boolean;    // Defaults to false (inverse of old `verbose` parameter)
+  startingFolder?: string;  // Defaults to cwd
+}
+
+/**
  * This represents the available Package Manager tools as a string
  * @public
  */
@@ -269,8 +278,8 @@ export class RushConfiguration {
     return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
   }
 
-  public static loadFromDefaultLocation(): RushConfiguration {
-    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+  public static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration {
+    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation(options);
 
     if (rushJsonLocation) {
       return RushConfiguration.loadFromConfigurationFile(rushJsonLocation);
@@ -282,8 +291,10 @@ export class RushConfiguration {
   /**
    * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
    */
-  public static tryFindRushJsonLocation(verbose: boolean = true): string | undefined {
-    let currentFolder: string = process.cwd();
+  public static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined {
+    const optionsIn: ITryFindRushJsonLocationOptions = options || {};
+    const verbose: boolean = optionsIn.showVerbose || false;
+    let currentFolder: string = optionsIn.startingFolder || process.cwd();
 
     // Look upwards at parent folders until we find a folder containing rush.json
     for (let i: number = 0; i < 10; ++i) {

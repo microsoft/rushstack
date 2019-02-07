@@ -34,14 +34,22 @@ import { Telemetry } from '../logic/Telemetry';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 
+/**
+ * Options for `RushCommandLineParser`.
+ */
+export interface IRushCommandLineParserOptions {
+  cwd?: string;   // Defaults to `cwd`
+}
+
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushConfiguration: RushConfiguration;
   public rushGlobalFolder: RushGlobalFolder;
 
   private _debugParameter: CommandLineFlagParameter;
+  private _rushOptions: IRushCommandLineParserOptions;
 
-  constructor() {
+  constructor(options?: IRushCommandLineParserOptions) {
     super({
       toolFilename: 'rush',
       toolDescription: 'Rush makes life easier for JavaScript developers who develop, build, and publish'
@@ -53,6 +61,10 @@ export class RushCommandLineParser extends CommandLineParser {
         + ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,'
         + ' Rush is for you.'
     });
+    const optionsIn: IRushCommandLineParserOptions = options || {};
+    this._rushOptions = {
+      cwd: optionsIn.cwd || process.cwd()
+    };
     this._populateActions();
   }
 
@@ -107,7 +119,10 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _populateActions(): void {
     try {
-      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
+        startingFolder: this._rushOptions.cwd,
+        showVerbose: true
+      });
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
       }

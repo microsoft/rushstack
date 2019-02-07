@@ -7,7 +7,6 @@ jest.mock('child_process');
 jest.mock('../RushCommandLineParser', rushCommandLineParserMockFactory);
 
 import { resolve } from 'path';
-import { chdir } from 'process';
 import { ChildProcessModuleMock, ISpawnMockConfig } from 'child_process';
 import { FileSystem } from '@microsoft/node-core-library';
 import { Interleaver } from '@microsoft/stream-collator';
@@ -24,9 +23,9 @@ interface IParserTestInstance {
 /**
  * Helper to set up a test instance for RushCommandLineParser.
  */
-function newCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
+function getCommandLineParserInstance(repoName: string, taskName: string): IParserTestInstance {
   // Point to the test repo folder
-  chdir(resolve(__dirname, repoName));
+  const startPath: string = resolve(__dirname, repoName);
 
   // The `build` task is hard-coded to be incremental. So delete the `package-deps.json` files in
   // the test repo to guarantee the test actually runs.
@@ -37,7 +36,7 @@ function newCommandLineParserInstance(repoName: string, taskName: string): IPars
   // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
   // repo will fail due to contention over the same lock which is kept until the test runner process
   // ends.
-  const parser: RushCommandLineParser = new RushCommandLineParser();
+  const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
 
   // Mock the command
   process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', taskName];
@@ -105,7 +104,7 @@ describe('RushCommandLineParser', () => {
       describe(`'build' action`, () => {
         it(`executes the package's 'build' script`, () => {
           const repoName: string = 'basicAndRunBuildActionRepo';
-          const instance: IParserTestInstance = newCommandLineParserInstance(repoName, 'build');
+          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
 
           expect.assertions(8);
           return expect(instance.parser.execute()).resolves.toEqual(true)
@@ -139,7 +138,7 @@ describe('RushCommandLineParser', () => {
       describe(`'rebuild' action`, () => {
         it(`executes the package's 'build' script`, () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
-          const instance: IParserTestInstance = newCommandLineParserInstance(repoName, 'rebuild');
+          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
 
           expect.assertions(8);
           return expect(instance.parser.execute()).resolves.toEqual(true)
@@ -175,7 +174,7 @@ describe('RushCommandLineParser', () => {
       describe(`'build' action`, () => {
         it(`executes the package's 'build' script`, () => {
           const repoName: string = 'overrideRebuildAndRunBuildActionRepo';
-          const instance: IParserTestInstance = newCommandLineParserInstance(repoName, 'build');
+          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
 
           expect.assertions(8);
           return expect(instance.parser.execute()).resolves.toEqual(true)
@@ -209,7 +208,7 @@ describe('RushCommandLineParser', () => {
       describe(`'rebuild' action`, () => {
         it(`executes the package's 'rebuild' (not 'build') script`, () => {
           const repoName: string = 'overrideRebuildAndRunRebuildActionRepo';
-          const instance: IParserTestInstance = newCommandLineParserInstance(repoName, 'rebuild');
+          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
 
           expect.assertions(8);
           return expect(instance.parser.execute()).resolves.toEqual(true)
@@ -247,7 +246,7 @@ describe('RushCommandLineParser', () => {
 
         expect.assertions(1);
         return expect(() => {
-          newCommandLineParserInstance(repoName, 'doesnt-matter');
+          getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('This command can only be designated as a command kind "bulk"');
       });
     });
@@ -258,7 +257,7 @@ describe('RushCommandLineParser', () => {
 
         expect.assertions(1);
         return expect(() => {
-          newCommandLineParserInstance(repoName, 'doesnt-matter');
+          getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('This command can only be designated as a command kind "bulk"');
       });
     });
@@ -269,7 +268,7 @@ describe('RushCommandLineParser', () => {
 
         expect.assertions(1);
         return expect(() => {
-          newCommandLineParserInstance(repoName, 'doesnt-matter');
+          getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
       });
     });
@@ -280,7 +279,7 @@ describe('RushCommandLineParser', () => {
 
         expect.assertions(1);
         return expect(() => {
-          newCommandLineParserInstance(repoName, 'doesnt-matter');
+          getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
       });
     });
