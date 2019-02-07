@@ -13,7 +13,8 @@ export {
 export {
   RushConfiguration,
   PackageManager,
-  PnpmOptionsConfiguration
+  PnpmOptionsConfiguration,
+  YarnOptionsConfiguration
 } from './api/RushConfiguration';
 
 export {
