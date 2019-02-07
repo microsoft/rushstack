@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "Exposing utility class StringBufferTerminalProvider, useful to clients of Terminal API for their own unit tests",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "hogmoru@users.noreply.github.com"
+}
