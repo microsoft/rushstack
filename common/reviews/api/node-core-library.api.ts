@@ -1,6 +1,6 @@
 // @beta
 class Colors {
-  // @internal (undocumented)
+  // @internal
   static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
   // (undocumented)
   static black(text: string | IColorableSequence): IColorableSequence;
@@ -40,16 +40,12 @@ class Colors {
   static yellowBackground(text: string | IColorableSequence): IColorableSequence;
 }
 
-// @beta (undocumented)
+// @beta
 class ConsoleTerminalProvider implements ITerminalProvider {
   constructor(options?: Partial<IConsoleTerminalProviderOptions>);
-  // (undocumented)
   readonly eolCharacter: string;
-  // (undocumented)
   readonly supportsColor: boolean;
-  // (undocumented)
   verboseEnabled: boolean;
-  // (undocumented)
   write(data: string, severity: TerminalProviderSeverity): void;
 }
 
@@ -416,22 +412,15 @@ class Sort {
   static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any, keyComparer?: (x: T, y: T) => number): void;
 }
 
-// @beta (undocumented)
+// @beta
 class StringBufferTerminalProvider implements ITerminalProvider {
   constructor(supportsColor?: boolean);
-  // (undocumented)
   readonly eolCharacter: string;
-  // (undocumented)
   getErrorOutput(): string;
-  // (undocumented)
   getOutput(): string;
-  // (undocumented)
   getVerbose(): string;
-  // (undocumented)
   getWarningOutput(): string;
-  // (undocumented)
   readonly supportsColor: boolean;
-  // (undocumented)
   write(data: string, severity: TerminalProviderSeverity): void;
 }
 
