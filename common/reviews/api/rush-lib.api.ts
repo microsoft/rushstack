@@ -183,13 +183,6 @@ declare class PnpmOptionsConfiguration {
 }
 
 // @public
-declare class YarnOptionsConfiguration {
-    // @internal (undocumented)
-    constructor(json: IYarnOptionsJson);
-    readonly ignoreEngines: boolean;
-}
-
-// @public
 declare class Rush {
     static launch(launcherVersion: string, isManaged: boolean): void;
     static launchRushX(launcherVersion: string, isManaged: boolean): void;
@@ -232,7 +225,6 @@ declare class RushConfiguration {
     readonly packageManagerToolVersion: string;
     // (undocumented)
     readonly pnpmOptions: PnpmOptionsConfiguration;
-    readonly yarnOptions: YarnOptionsConfiguration;
     readonly pnpmStoreFolder: string;
     readonly projectFolderMaxDepth: number;
     readonly projectFolderMinDepth: number;
@@ -254,6 +246,8 @@ declare class RushConfiguration {
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;
     readonly yarnCacheFolder: string;
+    // (undocumented)
+    readonly yarnOptions: YarnOptionsConfiguration;
     }
 
 // @public
@@ -323,5 +317,12 @@ declare enum VersionPolicyDefinitionName {
     'individualVersion' = 1,
     // (undocumented)
     'lockStepVersion' = 0
+}
+
+// @public
+declare class YarnOptionsConfiguration {
+    // @internal (undocumented)
+    constructor(json: IYarnOptionsJson);
+    readonly ignoreEngines: boolean;
 }
 
