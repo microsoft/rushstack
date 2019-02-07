@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler-2.9
 
-This log was last generated on Sat, 19 Jan 2019 03:47:47 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Jan 2019 20:49:11 GMT and should not be manually modified.
+
+## 0.6.0
+Wed, 30 Jan 2019 20:49:11 GMT
+
+### Minor changes
+
+- Add ToolPackages API for raw access to tools packages.
 
 ## 0.5.0
 Sat, 19 Jan 2019 03:47:47 GMT

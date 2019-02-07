@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+
 import {
-  ExcerptToken,
   ExcerptTokenKind,
   IExcerptToken,
   IExcerptTokenRange
@@ -152,7 +152,7 @@ export class ExcerptBuilder {
     }
 
     if (excerptTokenKind !== ExcerptTokenKind.Content) {
-      excerptTokens.push(new ExcerptToken(excerptTokenKind, text));
+      excerptTokens.push({ kind: excerptTokenKind, text: text});
       state.disableMergingForNextToken = false;
 
     } else {
@@ -166,7 +166,7 @@ export class ExcerptBuilder {
         }
       }
 
-      excerptTokens.push(new ExcerptToken(excerptTokenKind, text));
+      excerptTokens.push({ kind: excerptTokenKind, text: text});
       state.disableMergingForNextToken = false;
     }
   }
