@@ -163,7 +163,14 @@ export class PnpmOptionsConfiguration {
  * @public
  */
 export interface ITryFindRushJsonLocationOptions {
+  /**
+   * Whether to show verbose console messages.  Defaults to false.
+   */
   showVerbose?: boolean;    // Defaults to false (inverse of old `verbose` parameter)
+
+  /**
+   * The folder path where the search will start.  Defaults tot he current working directory.
+   */
   startingFolder?: string;  // Defaults to cwd
 }
 

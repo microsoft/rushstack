@@ -110,6 +110,12 @@ declare class IndividualVersionPolicy extends VersionPolicy {
     validate(versionString: string, packageName: string): void;
 }
 
+// @public
+interface ITryFindRushJsonLocationOptions {
+    showVerbose?: boolean;
+    startingFolder?: string;
+}
+
 // @internal
 declare class _LastInstallFlag {
     constructor(folderPath: string, state?: Object);
