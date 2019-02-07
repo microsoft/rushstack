@@ -8,56 +8,49 @@
  */
 
 import * as * from 'semver';
-import * as *_2 from 'semver';
-import * as *_3 from 'semver';
 import { ISimpleInterface } from 'api-extractor-test-01';
-import { ISimpleInterface as ISimpleInterface_2 } from 'api-extractor-test-01';
-import { ISimpleInterface as ISimpleInterface_3 } from 'api-extractor-test-01';
-import { ISimpleInterface as ISimpleInterface_4 } from 'api-extractor-test-01';
-import { ISimpleInterface as ISimpleInterface_5 } from 'api-extractor-test-01';
-import { ReexportedClass } from 'api-extractor-test-01';
 import { ReexportedClass as RenamedReexportedClass3 } from 'api-extractor-test-01';
 
 /**
  * An interface with a generic parameter.
  * @public
  */
-export declare interface GenericInterface<T> {
-    member: T;
+export declare interface GenericInterface/*R=FIX*/<T/*R=KEEP*/> {
+    member/*R=KEEP*/: T/*R=KEEP*/;
 }
 
 /** @public */
-export declare function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface2): void;
+export declare function importDeduping1/*R=FIX*/(arg1/*R=KEEP*/: ISimpleInterface/*R=KEEP*/, arg2/*R=KEEP*/: ISimpleInterface2/*R=KEEP*/): void;
 
 /** @public */
-export declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface2): void;
+export declare function importDeduping2/*R=FIX*/(arg1/*R=KEEP*/: ISimpleInterface/*R=KEEP*/, arg2/*R=KEEP*/: ISimpleInterface2/*R=KEEP*/): void;
 
 /**
  * A class that inherits from a type defined in the "semver" module imported from \@types/semver.
  * @public
  */
-export declare class ImportedModuleAsBaseClass extends semver3.SemVer {
+export declare class ImportedModuleAsBaseClass/*R=FIX*/ extends semver3/*R=KEEP*/.SemVer/*R=KEEP*/ {
 }
 
 /**
  * A generic parameter that references the "semver" module imported from \@types/semver.
  * @public
  */
-export declare function importedModuleAsGenericParameter(): GenericInterface<semver2.SemVer> | undefined;
+export declare function importedModuleAsGenericParameter/*R=FIX*/(): GenericInterface/*R=FIX*/<semver2/*R=KEEP*/.SemVer/*R=KEEP*/> | undefined;
 
 /**
  * This definition references the "semver" module imported from \@types/semver.
  * @public
  */
-export declare function importedModuleAsReturnType(): semver1.SemVer | undefined;
+export declare function importedModuleAsReturnType/*R=FIX*/(): semver1/*R=KEEP*/.SemVer/*R=KEEP*/ | undefined;
 export { RenamedReexportedClass3 }
 
 /**
  * Example of a class that inherits from an externally imported class.
  * @public
  */
-export declare class SubclassWithImport extends RenamedReexportedClass implements ISimpleInterface {
-    test(): void;
+export declare class SubclassWithImport/*R=FIX*/ extends RenamedReexportedClass/*R=KEEP*/ implements ISimpleInterface/*R=KEEP*/ {
+    test/*R=KEEP*/(): void;
 }
 
 export { }

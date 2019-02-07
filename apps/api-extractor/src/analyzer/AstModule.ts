@@ -14,7 +14,7 @@ export class AstModuleExportInfo {
 /**
  * Constructor parameters for AstModule
  */
-export interface IAstModuleParameters {
+export interface IAstModuleOptions {
   sourceFile: ts.SourceFile;
   moduleSymbol: ts.Symbol;
   externalModulePath: string | undefined;
@@ -22,6 +22,12 @@ export interface IAstModuleParameters {
 
 /**
  * An internal data structure that represents a source file that is analyzed by AstSymbolTable.
+ *
+ * @privateremarks
+ * Our naming convention is to use I____Parameters for constructor options and
+ * I____Options for general function options.  However the word "parameters" is
+ * confusingly similar to the terminology for function parameters modeled by API Extractor,
+ * so we use I____Options for both cases in this code base.
  */
 export class AstModule {
   /**
@@ -57,11 +63,11 @@ export class AstModule {
    */
   public astModuleExportInfo: AstModuleExportInfo | undefined;
 
-  public constructor(parameters: IAstModuleParameters) {
-    this.sourceFile = parameters.sourceFile;
-    this.moduleSymbol = parameters.moduleSymbol;
+  public constructor(options: IAstModuleOptions) {
+    this.sourceFile = options.sourceFile;
+    this.moduleSymbol = options.moduleSymbol;
 
-    this.externalModulePath = parameters.externalModulePath;
+    this.externalModulePath = options.externalModulePath;
 
     this.starExportedModules = new Set<AstModule>();
 

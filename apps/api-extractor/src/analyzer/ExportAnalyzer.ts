@@ -6,7 +6,7 @@ import { InternalError } from '@microsoft/node-core-library';
 
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
-import { AstImport } from './AstImport';
+import { AstImport, IAstImportOptions } from './AstImport';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
 import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
@@ -62,6 +62,8 @@ export class ExportAnalyzer {
 
   // Used with isImportableAmbientSourceFile()
   private readonly _importableAmbientSourceFiles: Set<ts.SourceFile> = new Set<ts.SourceFile>();
+
+  private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
 
   public constructor(program: ts.Program, typeChecker: ts.TypeChecker, astSymbolTable: IAstSymbolTable) {
     this._program = program;
@@ -364,7 +366,7 @@ export class ExportAnalyzer {
         const specifierAstModule: AstModule = this._fetchSpecifierAstModule(exportDeclaration, declarationSymbol);
 
         if (specifierAstModule.externalModulePath !== undefined) {
-          return new AstImport({
+          return this._fetchAstImport({
             modulePath: specifierAstModule.externalModulePath,
             exportName: exportName
           });
@@ -408,7 +410,7 @@ export class ExportAnalyzer {
             + '\nFailure in: ' + importDeclaration.getSourceFile().fileName);
         }
 
-        return new AstImport({
+        return this._fetchAstImport({
           exportName: '*',
           modulePath: specifierAstModule.externalModulePath
         });
@@ -439,7 +441,7 @@ export class ExportAnalyzer {
         const exportName: string = (importSpecifier.propertyName || importSpecifier.name).getText().trim();
 
         if (specifierAstModule.externalModulePath !== undefined) {
-          return new AstImport({
+          return this._fetchAstImport({
             modulePath: specifierAstModule.externalModulePath,
             exportName: exportName
           });
@@ -467,7 +469,7 @@ export class ExportAnalyzer {
         //   SemicolonToken:  pre=[;]
 
         if (specifierAstModule.externalModulePath !== undefined) {
-          return new AstImport({
+          return this._fetchAstImport({
             modulePath: specifierAstModule.externalModulePath,
             exportName: ts.InternalSymbolName.Default
           });
@@ -530,7 +532,7 @@ export class ExportAnalyzer {
 
         if (starExportedModule.externalModulePath !== undefined) {
           // This entity was obtained from an external module, so return an AstImport instead
-          return new AstImport({
+          return this._fetchAstImport({
             modulePath: starExportedModule.externalModulePath,
             exportName: exportName
           });
@@ -581,5 +583,18 @@ export class ExportAnalyzer {
     const specifierAstModule: AstModule = this.fetchAstModuleFromSourceFile(moduleSourceFile, moduleReference);
 
     return specifierAstModule;
+  }
+
+  private _fetchAstImport(options: IAstImportOptions): AstImport {
+    const key: string = AstImport.getKey(options);
+
+    let astImport: AstImport | undefined = this._astImportsByKey.get(key);
+
+    if (!astImport) {
+      astImport = new AstImport(options);
+      this._astImportsByKey.set(key, astImport);
+    }
+
+    return astImport;
   }
 }

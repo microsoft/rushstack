@@ -2,7 +2,13 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Constructor options for AstImport
+ * Constructor parameters for AstImport
+ *
+ * @privateremarks
+ * Our naming convention is to use I____Parameters for constructor options and
+ * I____Options for general function options.  However the word "parameters" is
+ * confusingly similar to the terminology for function parameters modeled by API Extractor,
+ * so we use I____Options for both cases in this code base.
  */
 export interface IAstImportOptions {
   readonly modulePath: string;
@@ -41,7 +47,7 @@ export class AstImport {
     this.modulePath = options.modulePath;
     this.exportName = options.exportName;
 
-    this.key = `${this.modulePath}:${this.exportName}`;
+    this.key = AstImport.getKey(options);
   }
 
   /**
@@ -50,5 +56,12 @@ export class AstImport {
    */
   public get localName(): string {
     return this.exportName;
+  }
+
+  /**
+   * Calculates the lookup key used with `AstImport.key`
+   */
+  public static getKey(options: IAstImportOptions): string {
+    return `${options.modulePath}:${options.exportName}`;
   }
 }

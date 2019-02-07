@@ -262,14 +262,14 @@ export class DtsRollupGenerator {
             span.modification.prefix = referencedEntity.nameForEmit;
             nameFixup = true;
             // For debugging:
-            // span.modification.prefix += '/*R=FIX*/';
+            span.modification.prefix += '/*R=FIX*/';
           }
 
         }
 
         if (!nameFixup) {
           // For debugging:
-          // span.modification.prefix += '/*R=KEEP*/';
+          span.modification.prefix += '/*R=KEEP*/';
         }
 
         break;
