@@ -246,30 +246,22 @@ export class DtsRollupGenerator {
         break;
 
       case ts.SyntaxKind.Identifier:
-        let nameFixup: boolean = false;
-        const identifierSymbol: ts.Symbol | undefined = collector.typeChecker.getSymbolAtLocation(span.node);
-        if (identifierSymbol) {
-          const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(identifierSymbol, collector.typeChecker);
+        const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForIdentifierNode(
+          span.node as ts.Identifier
+        );
 
-          const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityBySymbol(followedSymbol);
-
-          if (referencedEntity) {
-            if (!referencedEntity.nameForEmit) {
-              // This should never happen
-              throw new Error('referencedEntry.uniqueName is undefined');
-            }
-
-            span.modification.prefix = referencedEntity.nameForEmit;
-            nameFixup = true;
-            // For debugging:
-            span.modification.prefix += '/*R=FIX*/';
+        if (referencedEntity) {
+          if (!referencedEntity.nameForEmit) {
+            // This should never happen
+            throw new InternalError('referencedEntry.nameForEmit is undefined');
           }
 
-        }
-
-        if (!nameFixup) {
+          span.modification.prefix = referencedEntity.nameForEmit;
           // For debugging:
-          span.modification.prefix += '/*R=KEEP*/';
+          // span.modification.prefix += '/*R=FIX*/';
+        } else {
+          // For debugging:
+          // span.modification.prefix += '/*R=KEEP*/';
         }
 
         break;

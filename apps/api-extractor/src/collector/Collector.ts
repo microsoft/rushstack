@@ -87,7 +87,6 @@ export class Collector {
 
   private readonly _entities: CollectorEntity[] = [];
   private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<AstEntity, CollectorEntity>();
-  private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
 
   private readonly _starExportedExternalModulePaths: string[] = [];
 
@@ -231,8 +230,18 @@ export class Collector {
     this._starExportedExternalModulePaths.sort();
   }
 
-  public tryGetEntityBySymbol(symbol: ts.Symbol): CollectorEntity | undefined {
-    return this._entitiesBySymbol.get(symbol);
+  /**
+   * For a given ts.Identifier that is part of an AstSymbol that we analyzed, return the CollectorEntity that
+   * it refers to.  Returns undefined if it doesn't refer to anything interesting.
+   * @remarks
+   * Throws an Error if the ts.Identifier is not part of node tree that was analyzed.
+   */
+  public tryGetEntityForIdentifierNode(identifier: ts.Identifier): CollectorEntity | undefined {
+    const astEntity: AstEntity | undefined = this.astSymbolTable.tryGetEntityForIdentifierNode(identifier);
+    if (astEntity) {
+      return this._entitiesByAstEntity.get(astEntity);
+    }
+    return undefined;
   }
 
   public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
@@ -277,7 +286,6 @@ export class Collector {
       this._entities.push(entity);
 
       if (astEntity instanceof AstSymbol) {
-        this._entitiesBySymbol.set(astEntity.followedSymbol, entity);
         this._collectReferenceDirectives(astEntity);
       }
     }

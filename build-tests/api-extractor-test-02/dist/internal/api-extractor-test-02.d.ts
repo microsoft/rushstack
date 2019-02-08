@@ -15,42 +15,42 @@ import { ReexportedClass as RenamedReexportedClass3 } from 'api-extractor-test-0
  * An interface with a generic parameter.
  * @public
  */
-export declare interface GenericInterface/*R=FIX*/<T/*R=KEEP*/> {
-    member/*R=KEEP*/: T/*R=KEEP*/;
+export declare interface GenericInterface<T> {
+    member: T;
 }
 
 /** @public */
-export declare function importDeduping1/*R=FIX*/(arg1/*R=KEEP*/: ISimpleInterface/*R=KEEP*/, arg2/*R=KEEP*/: ISimpleInterface2/*R=KEEP*/): void;
+export declare function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
 
 /** @public */
-export declare function importDeduping2/*R=FIX*/(arg1/*R=KEEP*/: ISimpleInterface/*R=KEEP*/, arg2/*R=KEEP*/: ISimpleInterface2/*R=KEEP*/): void;
+export declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
 
 /**
  * A class that inherits from a type defined in the "semver" module imported from \@types/semver.
  * @public
  */
-export declare class ImportedModuleAsBaseClass/*R=FIX*/ extends semver3/*R=KEEP*/.SemVer/*R=KEEP*/ {
+export declare class ImportedModuleAsBaseClass extends *.SemVer {
 }
 
 /**
  * A generic parameter that references the "semver" module imported from \@types/semver.
  * @public
  */
-export declare function importedModuleAsGenericParameter/*R=FIX*/(): GenericInterface/*R=FIX*/<semver2/*R=KEEP*/.SemVer/*R=KEEP*/> | undefined;
+export declare function importedModuleAsGenericParameter(): GenericInterface<*.SemVer> | undefined;
 
 /**
  * This definition references the "semver" module imported from \@types/semver.
  * @public
  */
-export declare function importedModuleAsReturnType/*R=FIX*/(): semver1/*R=KEEP*/.SemVer/*R=KEEP*/ | undefined;
+export declare function importedModuleAsReturnType(): *.SemVer | undefined;
 export { RenamedReexportedClass3 }
 
 /**
  * Example of a class that inherits from an externally imported class.
  * @public
  */
-export declare class SubclassWithImport/*R=FIX*/ extends RenamedReexportedClass/*R=KEEP*/ implements ISimpleInterface/*R=KEEP*/ {
-    test/*R=KEEP*/(): void;
+export declare class SubclassWithImport extends RenamedReexportedClass3 implements ISimpleInterface {
+    test(): void;
 }
 
 export { }
