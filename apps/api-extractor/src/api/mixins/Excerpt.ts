@@ -2,6 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { Text } from '@microsoft/node-core-library';
+import * as ts from 'typescript';
+import { DocDeclarationReference, DocNode, DocLinkTag, TSDocParser, ParserContext } from '@microsoft/tsdoc';
+
+// tslint:disable-next-line:variable-name
+export const ExcerptToken_referencedSymbol: unique symbol = Symbol('referencedSymbol');
+// tslint:disable-next-line:variable-name
+export const ExcerptToken_setReference: unique symbol = Symbol('setReference');
 
 /** @public */
 export const enum ExcerptTokenKind {
@@ -21,20 +28,46 @@ export interface IExcerptTokenRange {
 export interface IExcerptToken {
   readonly kind: ExcerptTokenKind;
   text: string;
+  /** reference to the api item, as {@link @microsoft/tsdoc#DocDeclarationReference} format. */
+  readonly reference?: string;
+  readonly [ExcerptToken_referencedSymbol]?: ts.Symbol;
 }
 
 /** @public */
 export class ExcerptToken {
+  private static tsdocParser: TSDocParser = new TSDocParser();
+  private static parseReference(reference: string): DocDeclarationReference | undefined {
+    const docLinkComment: string = `/** {@link ${reference}} */`;
+    const parserContext: ParserContext = ExcerptToken.tsdocParser.parseString(docLinkComment);
+    let docDeclarationReference: DocDeclarationReference | undefined;
+
+    function forEachDocNode(docNode: DocNode): void {
+      if (docNode instanceof DocLinkTag) {
+        docDeclarationReference = docNode.codeDestination;
+      } else {
+        docNode.getChildNodes().forEach(forEachDocNode);
+      }
+    }
+
+    forEachDocNode(parserContext.docComment);
+    return docDeclarationReference;
+  }
+
   private readonly _kind: ExcerptTokenKind;
   private readonly _text: string;
+  protected _reference?: DocDeclarationReference;
+  private readonly _referencedSymbol?: ts.Symbol;
 
-  public constructor(kind: ExcerptTokenKind, text: string) {
-    this._kind = kind;
+  public constructor(data: IExcerptToken) {
+    this._kind = data.kind;
 
     // Standardize the newlines across operating systems. Even though this may deviate from the actual
     // input source file that was parsed, it's useful because the newline gets serialized inside
     // a string literal in .api.json, which cannot be automatically normalized by Git.
-    this._text = Text.convertToLf(text);
+    this._text = Text.convertToLf(data.text);
+
+    this._reference = data.reference ? ExcerptToken.parseReference(data.reference) : undefined;
+    this._referencedSymbol = data[ExcerptToken_referencedSymbol];
   }
 
   public get kind(): ExcerptTokenKind {
@@ -43,6 +76,18 @@ export class ExcerptToken {
 
   public get text(): string {
     return this._text;
+  }
+
+  public get reference(): DocDeclarationReference | undefined {
+    return this._reference;
+  }
+
+  public get [ExcerptToken_referencedSymbol](): ts.Symbol | undefined {
+    return this._referencedSymbol;
+  }
+
+  public [ExcerptToken_setReference](reference: DocDeclarationReference): void {
+    this._reference = reference;
   }
 }
 

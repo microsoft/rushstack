@@ -5,8 +5,9 @@ import * as ts from 'typescript';
 
 import {
   ExcerptTokenKind,
+  IExcerptTokenRange,
   IExcerptToken,
-  IExcerptTokenRange
+  ExcerptToken_referencedSymbol
 } from '../api/mixins/Excerpt';
 import { Span } from '../analyzer/Span';
 
@@ -62,7 +63,13 @@ interface IBuildSpanState {
 }
 
 export class ExcerptBuilder {
-  public static build(options: ISignatureBuilderOptions): IExcerptToken[] {
+  private readonly _typeChecker: ts.TypeChecker;
+
+  constructor(typeChecker: ts.TypeChecker) {
+    this._typeChecker = typeChecker;
+  }
+
+  public build(options: ISignatureBuilderOptions): IExcerptToken[] {
     const span: Span = new Span(options.startingNode);
 
     const tokenRangesByNode: Map<ts.Node, IExcerptTokenRange> = new Map<ts.Node, IExcerptTokenRange>();
@@ -74,7 +81,7 @@ export class ExcerptBuilder {
 
     const excerptTokens: IExcerptToken[] = [];
 
-    ExcerptBuilder._buildSpan(excerptTokens, span, {
+    this._buildSpan(excerptTokens, span, {
       nodeToStopAt: options.nodeToStopAt,
       tokenRangesByNode,
       disableMergingForNextToken: false
@@ -83,11 +90,11 @@ export class ExcerptBuilder {
     return excerptTokens;
   }
 
-  public static createEmptyTokenRange(): IExcerptTokenRange {
+  public createEmptyTokenRange(): IExcerptTokenRange {
     return { startIndex: 0, endIndex: 0 };
   }
 
-  private static _buildSpan(excerptTokens: IExcerptToken[], span: Span, state: IBuildSpanState): boolean {
+  private _buildSpan(excerptTokens: IExcerptToken[], span: Span, state: IBuildSpanState): boolean {
 
     if (state.nodeToStopAt && span.kind === state.nodeToStopAt) {
       return false;
@@ -110,10 +117,11 @@ export class ExcerptBuilder {
 
     if (span.prefix) {
       if (span.kind === ts.SyntaxKind.Identifier) {
-        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Reference,
-          span.prefix, state);
+        const referencedSymbol: ts.Symbol|undefined = this._typeChecker.getSymbolAtLocation(span.node);
+        this._appendToken(excerptTokens, ExcerptTokenKind.Reference,
+          span.prefix, state, referencedSymbol);
       } else {
-        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content,
+        this._appendToken(excerptTokens, ExcerptTokenKind.Content,
           span.prefix, state);
       }
     }
@@ -125,10 +133,10 @@ export class ExcerptBuilder {
     }
 
     if (span.suffix) {
-      ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content, span.suffix, state);
+      this._appendToken(excerptTokens, ExcerptTokenKind.Content, span.suffix, state);
     }
     if (span.separator) {
-      ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content, span.separator, state);
+      this._appendToken(excerptTokens, ExcerptTokenKind.Content, span.separator, state);
     }
 
     // Are we building a excerpt?  If so, set its range
@@ -144,15 +152,15 @@ export class ExcerptBuilder {
     return true;
   }
 
-  private static _appendToken(excerptTokens: IExcerptToken[], excerptTokenKind: ExcerptTokenKind,
-    text: string, state: IBuildSpanState): void {
+  private _appendToken(excerptTokens: IExcerptToken[], excerptTokenKind: ExcerptTokenKind,
+    text: string, state: IBuildSpanState, referencedSymbol?: ts.Symbol): void {
 
     if (text.length === 0) {
       return;
     }
 
     if (excerptTokenKind !== ExcerptTokenKind.Content) {
-      excerptTokens.push({ kind: excerptTokenKind, text: text});
+      excerptTokens.push({ kind: excerptTokenKind, text: text, [ExcerptToken_referencedSymbol]: referencedSymbol });
       state.disableMergingForNextToken = false;
 
     } else {
@@ -166,7 +174,7 @@ export class ExcerptBuilder {
         }
       }
 
-      excerptTokens.push({ kind: excerptTokenKind, text: text});
+      excerptTokens.push({ kind: excerptTokenKind, text: text, [ExcerptToken_referencedSymbol]: referencedSymbol });
       state.disableMergingForNextToken = false;
     }
   }

@@ -14,6 +14,7 @@ import {
   DocLinkTag,
   TSDocConfiguration,
   StringBuilder,
+  DocNode,
   DocNodeKind,
   DocParagraph,
   DocCodeSpan,
@@ -169,6 +170,12 @@ export class MarkdownDocumenter {
         output.appendNode(
           new DocFencedCode({ configuration, code: apiItem.getExcerptWithModifiers(), language: 'typescript' })
         );
+
+        // show api references if there're.
+        const excerptContentWithLinks: DocNode[] = this._createExcerptContent(apiItem.excerpt, apiItem);
+        if (excerptContentWithLinks.some(x => x instanceof DocLinkTag)) {
+          output.appendNodesInParagraph(excerptContentWithLinks);
+        }
       }
     }
 
@@ -463,9 +470,10 @@ export class MarkdownDocumenter {
           ]),
 
           new DocTableCell({ configuration }, [
-            new DocParagraph({ configuration }, [
-              new DocCodeSpan({ configuration, code: apiEnumMember.initializerExcerpt.text })
-            ])
+            new DocParagraph(
+              { configuration },
+              this._createExcerptContent(apiEnumMember.initializerExcerpt, apiEnumMember)
+            )
           ]),
 
           this._createDescriptionCell(apiEnumMember)
@@ -578,9 +586,10 @@ export class MarkdownDocumenter {
             ])
           ]),
           new DocTableCell({configuration}, [
-            new DocParagraph({ configuration }, [
-              new DocCodeSpan({ configuration, code: apiParameter.parameterTypeExcerpt.text })
-            ])
+            new DocParagraph(
+              { configuration },
+              this._createExcerptContent(apiParameter.parameterTypeExcerpt, apiParameterListMixin)
+            )
           ]),
           new DocTableCell({configuration}, parameterDescription.nodes)
         ])
@@ -603,9 +612,10 @@ export class MarkdownDocumenter {
       );
 
       output.appendNode(
-        new DocParagraph({ configuration }, [
-          new DocCodeSpan({ configuration, code: returnTypeExcerpt.text.trim() || '(not declared)' })
-        ])
+        new DocParagraph(
+          { configuration },
+          this._createExcerptContent(returnTypeExcerpt, apiParameterListMixin, '(not declared)')
+        )
       );
 
       if (apiParameterListMixin instanceof ApiDocumentedItem) {
@@ -683,10 +693,36 @@ export class MarkdownDocumenter {
     const section: DocSection = new DocSection({ configuration });
 
     if (apiItem instanceof ApiPropertyItem) {
-      section.appendNodeInParagraph(new DocCodeSpan({ configuration, code: apiItem.propertyTypeExcerpt.text }));
+      const excerpt: Excerpt = apiItem.propertyTypeExcerpt;
+      section.appendNodesInParagraph(
+        this._createExcerptContent(excerpt, apiItem)
+      );
     }
 
     return new DocTableCell({ configuration }, section.nodes);
+  }
+
+  private _createExcerptContent(excerpt: Excerpt, contextApiItem: ApiItem, defaultText?: string): DocNode[] {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+    if (!excerpt.text.trim()) {
+      return [new DocPlainText({ configuration, text: defaultText || '' })];
+    }
+    return excerpt.tokens.slice(excerpt.tokenRange.startIndex, excerpt.tokenRange.endIndex)
+      .reduce<DocNode[]>((acc, token) => {
+        const referencedApiItem: ApiItem|undefined = token.reference
+          && this._apiModel.resolveDeclarationReference(token.reference, contextApiItem).resolvedApiItem;
+        if (referencedApiItem) {
+          acc.push(new DocLinkTag({
+            configuration,
+            tagName: '@link',
+            linkText: token.text,
+            urlDestination: this._getLinkFilenameForApiItem(referencedApiItem)
+          }));
+        } else {
+          acc.push(new DocPlainText({ configuration, text: token.text.replace(/\n/g, '') }));
+        }
+        return acc;
+      }, []);
   }
 
   private _writeBreadcrumb(output: DocSection, apiItem: ApiItem): void {

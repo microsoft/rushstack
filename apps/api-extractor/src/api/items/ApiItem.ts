@@ -3,6 +3,9 @@
 
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiPackage } from '../model/ApiPackage';
+import { ApiEntryPoint } from '../model/ApiEntryPoint';
+import { ApiNameMixin } from '../mixins/ApiNameMixin';
+import { DocDeclarationReference, DocMemberReference, DocMemberIdentifier, TSDocConfiguration } from '@microsoft/tsdoc';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -170,6 +173,48 @@ export class ApiItem {
     }
 
     return reversedParts.reverse().join('');
+  }
+
+  /**
+   * Get {@link @microsoft/tsdoc#DocDeclarationReference} node which referring to the api item.
+   * The result should be resolved exactly to the same api item by {@link ApiModel.resolveDeclarationReference}
+   */
+  public getDocDeclarationReference(): DocDeclarationReference {
+    const reversedPath: string[] = [];
+    let packageName: string|undefined;
+    let entryPointPath: string|undefined;
+
+    for (let current: ApiItem | undefined = this; current !== undefined; current = current.parent) {
+      if (current.kind === ApiItemKind.Model) {
+        break;
+      } else if (current.kind === ApiItemKind.Package) {
+        packageName = (current as ApiPackage).name;
+      } else if (current.kind === ApiItemKind.EntryPoint) {
+        entryPointPath = (current as ApiEntryPoint).name;
+      } else {
+        if (ApiNameMixin.isBaseClassOf(current)) {
+          reversedPath.push(current.name);
+        }
+      }
+    }
+
+    const emptyTsdocConfig: TSDocConfiguration = new TSDocConfiguration();
+    return new DocDeclarationReference({
+      configuration: emptyTsdocConfig,
+      packageName,
+      importPath: entryPointPath,
+      memberReferences: reversedPath.reverse().map((name, idx) => {
+        return new DocMemberReference({
+          configuration: emptyTsdocConfig,
+          hasDot: idx !== 0,
+          memberIdentifier: new DocMemberIdentifier({
+            configuration: emptyTsdocConfig,
+            identifier: name
+          })
+          // selector: ??? // TODO: support declaration selector
+        });
+      })
+    });
   }
 
   /**
