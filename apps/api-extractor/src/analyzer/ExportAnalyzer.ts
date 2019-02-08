@@ -363,17 +363,17 @@ export class ExportAnalyzer {
 
       // Ignore "export { A }" without a module specifier
       if (exportDeclaration.moduleSpecifier) {
-        const specifierAstModule: AstModule = this._fetchSpecifierAstModule(exportDeclaration, declarationSymbol);
+        const externalModulePath: string | undefined = this._tryGetExternalModulePath(exportDeclaration,
+          declarationSymbol);
 
-        if (specifierAstModule.externalModulePath !== undefined) {
+        if (externalModulePath !== undefined) {
           return this._fetchAstImport({
-            modulePath: specifierAstModule.externalModulePath,
+            modulePath: externalModulePath,
             exportName: exportName
           });
         }
 
-        const astEntity: AstEntity = this._getExportOfAstModule(exportName, specifierAstModule);
-        return astEntity;
+        return this._getExportOfSpecifierAstModule(exportName, exportDeclaration, declarationSymbol);
       }
     }
 
@@ -386,7 +386,8 @@ export class ExportAnalyzer {
       = TypeScriptHelpers.findFirstParent<ts.ImportDeclaration>(declaration, ts.SyntaxKind.ImportDeclaration);
 
     if (importDeclaration) {
-      const specifierAstModule: AstModule = this._fetchSpecifierAstModule(importDeclaration, declarationSymbol);
+      const externalModulePath: string | undefined = this._tryGetExternalModulePath(importDeclaration,
+        declarationSymbol);
 
       if (declaration.kind === ts.SyntaxKind.NamespaceImport) {
         // EXAMPLE:
@@ -403,7 +404,7 @@ export class ExportAnalyzer {
         //   StringLiteral:  pre=['the-lib']
         //   SemicolonToken:  pre=[;]
 
-        if (specifierAstModule.externalModulePath === undefined) {
+        if (externalModulePath === undefined) {
           // The implementation here only works when importing from an external module.
           // The full solution is tracked by: https://github.com/Microsoft/web-build-tools/issues/1029
           throw new Error('"import * as ___ from ___;" is not supported yet for local files.'
@@ -412,7 +413,7 @@ export class ExportAnalyzer {
 
         return this._fetchAstImport({
           exportName: declarationSymbol.name,
-          modulePath: specifierAstModule.externalModulePath,
+          modulePath: externalModulePath,
           starImport: true
         });
       }
@@ -441,15 +442,14 @@ export class ExportAnalyzer {
         const importSpecifier: ts.ImportSpecifier = declaration as ts.ImportSpecifier;
         const exportName: string = (importSpecifier.propertyName || importSpecifier.name).getText().trim();
 
-        if (specifierAstModule.externalModulePath !== undefined) {
+        if (externalModulePath !== undefined) {
           return this._fetchAstImport({
-            modulePath: specifierAstModule.externalModulePath,
+            modulePath: externalModulePath,
             exportName: exportName
           });
         }
 
-        const astEntity: AstEntity = this._getExportOfAstModule(exportName, specifierAstModule);
-        return astEntity;
+        return this._getExportOfSpecifierAstModule(exportName, importDeclaration, declarationSymbol);
       } else if (declaration.kind === ts.SyntaxKind.ImportClause) {
         // EXAMPLE:
         // "import A, { B } from './A';"
@@ -469,21 +469,29 @@ export class ExportAnalyzer {
         //   StringLiteral:  pre=['./A']
         //   SemicolonToken:  pre=[;]
 
-        if (specifierAstModule.externalModulePath !== undefined) {
+        if (externalModulePath !== undefined) {
           return this._fetchAstImport({
-            modulePath: specifierAstModule.externalModulePath,
+            modulePath: externalModulePath,
             exportName: ts.InternalSymbolName.Default
           });
         }
 
-        const astEntity: AstEntity = this._getExportOfAstModule(ts.InternalSymbolName.Default, specifierAstModule);
-        return astEntity;
+        return this._getExportOfSpecifierAstModule(ts.InternalSymbolName.Default, importDeclaration, declarationSymbol);
       } else {
         throw new InternalError('Unimplemented import declaration kind: ' + declaration.getText());
       }
     }
 
     return undefined;
+  }
+
+  private _getExportOfSpecifierAstModule(exportName: string,
+    importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration,
+    exportSymbol: ts.Symbol): AstEntity {
+
+    const specifierAstModule: AstModule = this._fetchSpecifierAstModule(importOrExportDeclaration, exportSymbol);
+    const astEntity: AstEntity = this._getExportOfAstModule(exportName, specifierAstModule);
+    return astEntity;
   }
 
   private _getExportOfAstModule(exportName: string, astModule: AstModule): AstEntity {
@@ -541,6 +549,24 @@ export class ExportAnalyzer {
 
         return astEntity;
       }
+    }
+
+    return undefined;
+  }
+
+  private _tryGetExternalModulePath(importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration,
+    exportSymbol: ts.Symbol): string | undefined {
+
+      // The name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
+    const moduleSpecifier: string | undefined = TypeScriptHelpers.getModuleSpecifier(importOrExportDeclaration);
+    if (!moduleSpecifier) {
+      throw new InternalError('Unable to parse module specifier');
+    }
+
+    // Match:       "@microsoft/sp-lodash-subset" or "lodash/has"
+    // but ignore:  "../folder/LocalFile"
+    if (!ts.isExternalModuleNameRelative(moduleSpecifier)) {
+      return moduleSpecifier;
     }
 
     return undefined;
