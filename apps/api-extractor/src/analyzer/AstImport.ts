@@ -13,6 +13,7 @@
 export interface IAstImportOptions {
   readonly modulePath: string;
   readonly exportName: string;
+  readonly starImport?: boolean;
 }
 
 /**
@@ -36,6 +37,12 @@ export class AstImport {
   public readonly exportName: string;
 
   /**
+   * For statements of the form `import * as x from "y";`, `starImport` will be true,
+   * and `exportName` will be the namespace identifier (e.g. `x` in this example).
+   */
+  public readonly starImport: boolean;
+
+  /**
    * If modulePath and exportName are defined, then this is a dictionary key
    * that combines them with a colon (":").
    *
@@ -46,6 +53,7 @@ export class AstImport {
   public constructor(options: IAstImportOptions) {
     this.modulePath = options.modulePath;
     this.exportName = options.exportName;
+    this.starImport = options.starImport || false;
 
     this.key = AstImport.getKey(options);
   }
@@ -62,6 +70,10 @@ export class AstImport {
    * Calculates the lookup key used with `AstImport.key`
    */
   public static getKey(options: IAstImportOptions): string {
-    return `${options.modulePath}:${options.exportName}`;
+    if (options.starImport) {
+      return `${options.modulePath}:*`;
+    } else {
+      return `${options.modulePath}:${options.exportName}`;
+    }
   }
 }

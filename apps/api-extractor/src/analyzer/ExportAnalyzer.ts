@@ -411,8 +411,9 @@ export class ExportAnalyzer {
         }
 
         return this._fetchAstImport({
-          exportName: '*',
-          modulePath: specifierAstModule.externalModulePath
+          exportName: declarationSymbol.name,
+          modulePath: specifierAstModule.externalModulePath,
+          starImport: true
         });
       }
 

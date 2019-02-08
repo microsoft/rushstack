@@ -11,14 +11,14 @@ declare function importDeduping1(arg1: ISimpleInterface, arg2: ISimpleInterface)
 declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInterface): void;
 
 // @public
-declare class ImportedModuleAsBaseClass extends *.SemVer {
+declare class ImportedModuleAsBaseClass extends semver1.SemVer {
 }
 
 // @public
-declare function importedModuleAsGenericParameter(): GenericInterface<*.SemVer> | undefined;
+declare function importedModuleAsGenericParameter(): GenericInterface<semver1.SemVer> | undefined;
 
 // @public
-declare function importedModuleAsReturnType(): *.SemVer | undefined;
+declare function importedModuleAsReturnType(): semver1.SemVer | undefined;
 
 export { ReexportedClass as RenamedReexportedClass3 } from 'api-extractor-test-01';
 // @public

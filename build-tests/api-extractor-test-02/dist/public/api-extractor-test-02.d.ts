@@ -7,9 +7,9 @@
  * @packagedocumentation
  */
 
-import * as * from 'semver';
 import { ISimpleInterface } from 'api-extractor-test-01';
 import { ReexportedClass as RenamedReexportedClass3 } from 'api-extractor-test-01';
+import * as semver1 from 'semver';
 
 /**
  * An interface with a generic parameter.
@@ -29,20 +29,20 @@ export declare function importDeduping2(arg1: ISimpleInterface, arg2: ISimpleInt
  * A class that inherits from a type defined in the "semver" module imported from \@types/semver.
  * @public
  */
-export declare class ImportedModuleAsBaseClass extends *.SemVer {
+export declare class ImportedModuleAsBaseClass extends semver1.SemVer {
 }
 
 /**
  * A generic parameter that references the "semver" module imported from \@types/semver.
  * @public
  */
-export declare function importedModuleAsGenericParameter(): GenericInterface<*.SemVer> | undefined;
+export declare function importedModuleAsGenericParameter(): GenericInterface<semver1.SemVer> | undefined;
 
 /**
  * This definition references the "semver" module imported from \@types/semver.
  * @public
  */
-export declare function importedModuleAsReturnType(): *.SemVer | undefined;
+export declare function importedModuleAsReturnType(): semver1.SemVer | undefined;
 export { RenamedReexportedClass3 }
 
 /**

@@ -87,7 +87,7 @@ export class DtsRollupGenerator {
         // const releaseTag: ReleaseTag = collector.fetchMetadata(astImport).releaseTag;
         // if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
 
-          if (astImport.exportName === '*') {
+          if (astImport.starImport) {
             indentedWriter.write(`import * as ${entity.nameForEmit}`);
           } else if (entity.nameForEmit !== astImport.exportName) {
             indentedWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
