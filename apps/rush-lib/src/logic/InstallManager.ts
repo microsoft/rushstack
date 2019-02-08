@@ -1145,6 +1145,10 @@ export class InstallManager {
       if (options.networkConcurrency) {
         args.push('--network-concurrency', options.networkConcurrency.toString());
       }
+
+      if (this._rushConfiguration.yarnOptions.ignoreEngines) {
+        args.push('--ignore-engines');
+      }
     }
   }
 

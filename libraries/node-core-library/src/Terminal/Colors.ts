@@ -167,6 +167,9 @@ export class Colors {
   }
 
   /**
+   * If called with a string, returns the string wrapped in a {@link IColorableSequence}.
+   * If called with a {@link IColorableSequence}, returns the {@link IColorableSequence}.
+   *
    * @internal
    */
   public static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence {

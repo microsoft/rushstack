@@ -19,15 +19,24 @@ export interface IConsoleTerminalProviderOptions {
 }
 
 /**
+ * Terminal provider that prints to STDOUT (for log- and verbose-level messages) and
+ * STDERR (for warning- and error-level messsages).
+ *
  * @beta
  */
 export class ConsoleTerminalProvider implements ITerminalProvider {
+  /**
+   * If true, verbose-level messages should be written to the console.
+   */
   public verboseEnabled: boolean = false;
 
   public constructor(options: Partial<IConsoleTerminalProviderOptions> = {}) {
     this.verboseEnabled = !!options.verboseEnabled;
   }
 
+  /**
+   * {@inheritdoc ITerminalProvider.write}
+   */
   public write(data: string, severity: TerminalProviderSeverity): void {
     switch (severity) {
       case TerminalProviderSeverity.warning:
@@ -51,10 +60,16 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
     }
   }
 
+  /**
+   * {@inheritdoc ITerminalProvider.eolCharacter}
+   */
   public get eolCharacter(): string {
     return EOL;
   }
 
+  /**
+   * {@inheritdoc ITerminalProvider.supportsColor}
+   */
   public get supportsColor(): boolean {
     return supportsColor;
   }
