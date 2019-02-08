@@ -149,6 +149,7 @@ export class ChangeAction extends BaseRushAction {
       this._targetBranchName = this._targetBranchParameter.value ||
         VersionControl.getRemoteMasterBranch(this.rushConfiguration.repositoryUrl);
     }
+
     return this._targetBranchName;
   }
 
@@ -180,7 +181,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangeFiles(): string[] {
-    return VersionControl.getChangedFiles(`common/changes/`, this._targetBranch).map(relativePath => {
+    return VersionControl.getChangedFiles(this._targetBranch, `common/changes/`).map(relativePath => {
       return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
     });
   }

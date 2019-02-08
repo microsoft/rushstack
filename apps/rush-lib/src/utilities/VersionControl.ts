@@ -2,39 +2,57 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
+import * as colors from 'colors';
+import { Executable } from '@microsoft/node-core-library';
+
+const DEFAULT_BRANCH: string = 'master';
+const DEFAULT_REMOTE: string = 'origin';
 
 export class VersionControl {
-  public static getChangedFolders(targetBranch?: string): Array<string | undefined> | undefined {
-    const branchName: string = targetBranch ? targetBranch : 'origin/master';
-    const output: string | undefined = child_process.execSync(`git diff ${branchName}... --dirstat=files,0`)
-      .toString();
-    return output.split('\n').map(s => {
-      if (s) {
-        const delimiterIndex: number = s.indexOf('%');
-        if (delimiterIndex > 0 && delimiterIndex + 1 < s.length) {
-          return s.substring(delimiterIndex + 1).trim();
+  public static getChangedFolders(targetBranch: string): Array<string | undefined> | undefined {
+    const output: string = child_process.execSync(`git diff ${targetBranch}... --dirstat=files,0`).toString();
+    const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(targetBranch);
+    if (!fetchResult) {
+      console.log(colors.yellow(
+        `Error fetching remote branch ${targetBranch}. Detected changed files may be incorrect.`
+      ));
+    }
+
+    return output.split('\n').map((line) => {
+      if (line) {
+        const delimiterIndex: number = line.indexOf('%');
+        if (delimiterIndex > 0 && delimiterIndex + 1 < line.length) {
+          return line.substring(delimiterIndex + 1).trim();
         }
       }
+
       return undefined;
     });
   }
 
-  public static getChangedFiles(prefix?: string, targetBranch?: string): string[] {
-    const branchName: string = targetBranch ? targetBranch : 'origin/master';
-    const output: string = child_process
-      .execSync(`git diff ${branchName}... --name-only --no-renames --diff-filter=A`)
-      .toString();
+  public static getChangedFiles(targetBranch: string, prefix?: string): string[] {
+    const output: string = child_process.execSync(
+      `git diff ${targetBranch}... --name-only --no-renames --diff-filter=A`
+    ).toString();
+    const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(targetBranch);
+    if (!fetchResult) {
+      console.log(colors.yellow(
+        `Error fetching remote branch ${targetBranch}. Detected changed files may be incorrect.`
+      ));
+    }
+
     const regex: RegExp | undefined = prefix ? new RegExp(`^${prefix}`, 'i') : undefined;
-    return output.split('\n').map(s => {
-      if (s) {
-        const trimmedLine: string = s.trim();
+    return output.split('\n').map((line) => {
+      if (line) {
+        const trimmedLine: string = line.trim();
         if (regex && trimmedLine.match(regex)) {
           return trimmedLine;
         }
       }
+
       return undefined;
-    }).filter(s => {
-      return s && s.length > 0;
+    }).filter((line) => {
+      return line && line.length > 0;
     }) as string[];
   }
 
@@ -48,41 +66,42 @@ export class VersionControl {
    * @param repositoryUrl - repository url
    */
   public static getRemoteMasterBranch(repositoryUrl?: string): string {
-    const defaultRemote: string = 'origin';
-    const defaultMaster: string = 'origin/master';
-    let useDefault: boolean = false;
+    const defaultMaster: string = `${DEFAULT_REMOTE}/${DEFAULT_BRANCH}`;
     let matchingRemotes: string[] = [];
 
-    if (!repositoryUrl) {
-      useDefault = true;
-    } else {
+    if (repositoryUrl) {
       const output: string = child_process
-      .execSync(`git remote`)
-      .toString();
+        .execSync(`git remote`)
+        .toString();
       matchingRemotes = output.split('\n').filter(remoteName => {
         if (remoteName) {
           const remoteUrl: string = child_process.execSync(`git remote get-url ${remoteName}`)
             .toString()
             .trim();
-          if (remoteName === defaultRemote && remoteUrl === repositoryUrl) {
-            useDefault = true;
-          }
           return remoteUrl === repositoryUrl;
         }
         return false;
       });
+    } else {
+      console.log(colors.yellow(
+        'A remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
+      ));
+      return defaultMaster;
     }
 
-    if (useDefault) {
-      return defaultMaster;
-    } else if (matchingRemotes.length > 0) {
+    if (matchingRemotes.length > 0) {
       if (matchingRemotes.length > 1) {
-        console.log(`More than one remotes match the repository url. Use the first remote.`);
+        console.log(`More than one remote matches the repository URL. Using the first remote (${matchingRemotes[0]}).`);
       }
-      return `${matchingRemotes[0]}/master`;
+
+      return `${matchingRemotes[0]}/${DEFAULT_BRANCH}`;
+    } else {
+      console.log(colors.yellow(
+        `Unable to find a remote matching the repository URL (${matchingRemotes[0]}). ` +
+        'Detected changes are likely to be incorrect.'
+      ));
+      return defaultMaster;
     }
-    // For backward-compatible
-    return defaultMaster;
   }
 
   public static hasUncommittedChanges(): boolean {
@@ -90,7 +109,7 @@ export class VersionControl {
   }
 
   /**
-   * The list of files changed but not commited
+   * The list of files changed but not committed
    */
   public static getUncommittedChanges(): ReadonlyArray<string> {
     const changes: string[] = [];
@@ -114,5 +133,26 @@ export class VersionControl {
       .execSync(`git diff HEAD --name-only`)
       .toString();
     return output.trim().split('\n');
+  }
+
+  private static _tryFetchRemoteBranch(remoteBranchName: string): boolean {
+    const firstSlashIndex: number = remoteBranchName.indexOf('/');
+    if (firstSlashIndex === -1) {
+      throw new Error(
+        `Unexpected remote branch format: ${remoteBranchName}. ` +
+        'Expected branch to be in the <remote>/<branch name> format.'
+      );
+    }
+
+    const remoteName: string = remoteBranchName.substr(0, firstSlashIndex);
+    const branchName: string = remoteBranchName.substr(firstSlashIndex + 1);
+    const spawnResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+      'git',
+      ['fetch', remoteName, branchName],
+      {
+        stdio: 'ignore'
+      }
+    );
+    return spawnResult.status === 0;
   }
 }
