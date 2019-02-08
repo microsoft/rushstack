@@ -141,7 +141,7 @@
       "type": "object",
       "properties": {
         "url": {
-          "description": "The remote url of the repository. If a value is provided, \"Rush change\" will use it to find the right remote to compare against.",
+          "description": "The remote url of the repository. If a value is provided, \"rush change\" will use it to find the right remote to compare against.",
           "type": "string"
         }
       },
