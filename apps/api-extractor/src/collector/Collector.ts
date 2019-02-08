@@ -255,6 +255,16 @@ export class Collector {
     return symbolOrDeclaration.metadata as SymbolMetadata | DeclarationMetadata;
   }
 
+  public tryFetchMetadataForAstEntity(astEntity: AstEntity): SymbolMetadata | undefined {
+    if (astEntity instanceof AstSymbol) {
+      return this.fetchMetadata(astEntity);
+    }
+    if (astEntity.astSymbol) { // astImport
+      return this.fetchMetadata(astEntity.astSymbol);
+    }
+    return undefined;
+  }
+
   /**
    * Removes the leading underscore, for example: "_Example" --> "example*Example*_"
    *

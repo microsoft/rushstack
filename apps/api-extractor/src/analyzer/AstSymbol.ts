@@ -82,10 +82,10 @@ export class AstSymbol {
 
   /**
    * If true, then this AstSymbol represents a foreign object whose structure will be
-   * ignored.  The AstDeclaration will not have any parent or children, and its references
+   * ignored.  The AstDeclaration objects will not have any parent or children, and its references
    * will not be analyzed.
    *
-   * Nominal symbols are tracked because we still need to emit exports for them.
+   * Nominal symbols are tracked e.g. when they are reexported by the working package.
    */
   public readonly nominalAnalysis: boolean;
 

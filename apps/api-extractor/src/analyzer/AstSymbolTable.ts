@@ -29,6 +29,12 @@ export interface IFetchAstSymbolOptions {
   isExternal: boolean;
 
   /**
+   * If true, symbols with AstSymbol.nominalAnalysis=true will be returned.
+   * Otherwise `undefined` will be returned for such symbols.
+   */
+  includeNominalAnalysis: boolean;
+
+  /**
    * True while populating the `AstSymbolTable`; false if we're doing a passive lookup
    * without adding anything new to the table
    */
@@ -292,6 +298,7 @@ export class AstSymbolTable {
     const astSymbol: AstSymbol | undefined = this._fetchAstSymbol({
       followedSymbol: symbol,
       isExternal: isExternal,
+      includeNominalAnalysis: true,
       addIfMissing: true
     });
 
@@ -312,6 +319,12 @@ export class AstSymbolTable {
     const followedSymbol: ts.Symbol = options.followedSymbol;
 
     // Filter out symbols representing constructs that we don't care about
+    if (!TypeScriptHelpers.hasAnyDeclarations(followedSymbol)) {
+      return undefined;
+    }
+
+    const arbitraryDeclaration: ts.Declaration = followedSymbol.declarations[0];
+
     // tslint:disable-next-line:no-bitwise
     if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient)) {
       return undefined;
@@ -319,12 +332,9 @@ export class AstSymbolTable {
 
     // API Extractor doesn't analyze ambient declarations at all
     if (TypeScriptHelpers.isAmbient(followedSymbol, this._typeChecker)) {
-      if (TypeScriptHelpers.hasAnyDeclarations(followedSymbol)
-        && this._exportAnalyzer.isImportableAmbientSourceFile(followedSymbol.declarations[0].getSourceFile())) {
-        // We make a special exemption for ambient declarations that appear in a source file containing
-        // an "export=" declaration that allows them to be imported as non-ambient.
-      } else {
-        // Ignore ambient declarations
+      // We make a special exemption for ambient declarations that appear in a source file containing
+      // an "export=" declaration that allows them to be imported as non-ambient.
+      if (!this._exportAnalyzer.isImportableAmbientSourceFile(arbitraryDeclaration.getSourceFile())) {
         return undefined;
       }
     }
@@ -338,34 +348,21 @@ export class AstSymbolTable {
     let astSymbol: AstSymbol | undefined = this._astSymbolsBySymbol.get(followedSymbol);
 
     if (!astSymbol) {
-      if (!followedSymbol.declarations || followedSymbol.declarations.length < 1) {
-        throw new InternalError('Followed a symbol with no declarations');
-      }
-
       // None of the above lookups worked, so create a new entry...
       let nominalAnalysis: boolean = false;
 
-      // NOTE: In certain circumstances we need an AstSymbol for a source file that is acting
-      // as a TypeScript module.  For example, one of the unit tests has this line:
-      //
-      //   import * as semver1 from 'semver';
-      //
-      // To handle the expression "semver1.SemVer", we need "semver1" to map to an AstSymbol
-      // that causes us to emit the above import.  However we do NOT want it to act as the root
-      // of a declaration tree, because in general the *.d.ts generator is trying to roll up
-      // definitions and eliminate source files.  So, even though isAstDeclaration() would return
-      // false, we do create an AstDeclaration for a ts.SyntaxKind.SourceFile in this special edge case.
-      if (followedSymbol.declarations.length === 1
-        && followedSymbol.declarations[0].kind === ts.SyntaxKind.SourceFile) {
-        nominalAnalysis = true;
-      }
-
-      // If the file is from a package that does not support AEDoc, then we process the
-      // symbol itself, but we don't attempt to process any parent/children of it.
-      const followedSymbolSourceFile: ts.SourceFile = followedSymbol.declarations[0].getSourceFile();
       if (options.isExternal) {
-        if (!this._packageMetadataManager.isAedocSupportedFor(followedSymbolSourceFile.fileName)) {
+        // If the file is from an external package that does not support AEDoc, normally we ignore it completely.
+        // But in some cases (e.g. checking star exports of an external package) we need an AstSymbol to
+        // represent it, but we don't need to analyze its sibling/children.
+        const followedSymbolSourceFileName: string = arbitraryDeclaration.getSourceFile().fileName;
+
+        if (!this._packageMetadataManager.isAedocSupportedFor(followedSymbolSourceFileName)) {
           nominalAnalysis = true;
+
+          if (!options.includeNominalAnalysis) {
+            return undefined;
+          }
         }
       }
 
@@ -402,6 +399,7 @@ export class AstSymbolTable {
           parentAstSymbol = this._fetchAstSymbol({
             followedSymbol: parentSymbol,
             isExternal: options.isExternal,
+            includeNominalAnalysis: false,
             addIfMissing: true
           });
           if (!parentAstSymbol) {

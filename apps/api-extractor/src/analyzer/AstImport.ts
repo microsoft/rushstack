@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { AstSymbol } from './AstSymbol';
+
 /**
  * Constructor parameters for AstImport
  *
@@ -41,6 +43,13 @@ export class AstImport {
    * and `exportName` will be the namespace identifier (e.g. `x` in this example).
    */
   public readonly starImport: boolean;
+
+  /**
+   * If this import statement refers to an API from an external package that is tracked by API Extractor
+   * (according to `PackageMetadataManager.isAedocSupportedFor()`), then this property will return the
+   * corresponding AstSymbol.  Otherwise, it is undefined.
+   */
+  public astSymbol: AstSymbol | undefined;
 
   /**
    * If modulePath and exportName are defined, then this is a dictionary key

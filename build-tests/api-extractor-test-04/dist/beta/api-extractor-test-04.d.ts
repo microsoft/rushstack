@@ -6,7 +6,6 @@
  * @packagedocumentation
  */
 
-import { Lib1Interface } from 'api-extractor-lib1-test';
 
 /* Excluded from this release type: AlphaClass */
 
@@ -84,7 +83,8 @@ export declare interface IPublicComplexInterface {
     /* Excluded from this release type: __index */
     /* Excluded from this release type: __new */
 }
-export { Lib1Interface }
+
+/* Excluded from this release type: Lib1Interface */
 
 /**
  * This is a public class

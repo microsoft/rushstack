@@ -117,6 +117,7 @@ export class ExportAnalyzer {
             const astSymbol: AstSymbol | undefined = this._astSymbolTable.fetchAstSymbol({
               followedSymbol: followedSymbol,
               isExternal: astModule.isExternal,
+              includeNominalAnalysis: true,
               addIfMissing: true
             });
 
@@ -325,6 +326,7 @@ export class ExportAnalyzer {
     const astSymbol: AstSymbol | undefined = this._astSymbolTable.fetchAstSymbol({
       followedSymbol: current,
       isExternal: referringModuleIsExternal,
+      includeNominalAnalysis: false,
       addIfMissing: true
     });
 
@@ -367,7 +369,7 @@ export class ExportAnalyzer {
           declarationSymbol);
 
         if (externalModulePath !== undefined) {
-          return this._fetchAstImport({
+          return this._fetchAstImport(declarationSymbol, {
             modulePath: externalModulePath,
             exportName: exportName
           });
@@ -411,7 +413,9 @@ export class ExportAnalyzer {
             + '\nFailure in: ' + importDeclaration.getSourceFile().fileName);
         }
 
-        return this._fetchAstImport({
+        // Here importSymbol=undefined because {@inheritDoc} and such are not going to work correctly for
+        // a package or source file.
+        return this._fetchAstImport(undefined, {
           exportName: declarationSymbol.name,
           modulePath: externalModulePath,
           starImport: true
@@ -443,7 +447,7 @@ export class ExportAnalyzer {
         const exportName: string = (importSpecifier.propertyName || importSpecifier.name).getText().trim();
 
         if (externalModulePath !== undefined) {
-          return this._fetchAstImport({
+          return this._fetchAstImport(declarationSymbol, {
             modulePath: externalModulePath,
             exportName: exportName
           });
@@ -470,7 +474,7 @@ export class ExportAnalyzer {
         //   SemicolonToken:  pre=[;]
 
         if (externalModulePath !== undefined) {
-          return this._fetchAstImport({
+          return this._fetchAstImport(declarationSymbol, {
             modulePath: externalModulePath,
             exportName: ts.InternalSymbolName.Default
           });
@@ -541,7 +545,8 @@ export class ExportAnalyzer {
 
         if (starExportedModule.externalModulePath !== undefined) {
           // This entity was obtained from an external module, so return an AstImport instead
-          return this._fetchAstImport({
+          const astSymbol: AstSymbol = astEntity as AstSymbol;
+          return this._fetchAstImport(astSymbol.followedSymbol, {
             modulePath: starExportedModule.externalModulePath,
             exportName: exportName
           });
@@ -612,7 +617,7 @@ export class ExportAnalyzer {
     return specifierAstModule;
   }
 
-  private _fetchAstImport(options: IAstImportOptions): AstImport {
+  private _fetchAstImport(importSymbol: ts.Symbol | undefined, options: IAstImportOptions): AstImport {
     const key: string = AstImport.getKey(options);
 
     let astImport: AstImport | undefined = this._astImportsByKey.get(key);
@@ -620,6 +625,17 @@ export class ExportAnalyzer {
     if (!astImport) {
       astImport = new AstImport(options);
       this._astImportsByKey.set(key, astImport);
+
+      if (importSymbol) {
+        const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(importSymbol, this._typeChecker);
+
+        astImport.astSymbol = this._astSymbolTable.fetchAstSymbol({
+          followedSymbol: followedSymbol,
+          isExternal: true,
+          includeNominalAnalysis: false,
+          addIfMissing: true
+        });
+      }
     }
 
     return astImport;

@@ -16,6 +16,7 @@ import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstSymbol } from '../analyzer/AstSymbol';
+import { SymbolMetadata } from '../collector/SymbolMetadata';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -83,10 +84,12 @@ export class DtsRollupGenerator {
       if (entity.astEntity instanceof AstImport) {
         const astImport: AstImport = entity.astEntity;
 
-        // TODO: Find the target AstSymbol for an AstImport
-        // const releaseTag: ReleaseTag = collector.fetchMetadata(astImport).releaseTag;
-        // if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+        // For example, if the imported API comes from an external package that supports AEDoc,
+        // and it was marked as `@internal`, then don't emit it.
+        const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(astImport);
+        const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
 
+        if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
           if (astImport.starImport) {
             indentedWriter.write(`import * as ${entity.nameForEmit}`);
           } else if (entity.nameForEmit !== astImport.exportName) {
@@ -95,20 +98,22 @@ export class DtsRollupGenerator {
             indentedWriter.write(`import { ${astImport.exportName} }`);
           }
           indentedWriter.writeLine(` from '${astImport.modulePath}';`);
-
-        // }
+        }
       }
     }
 
     // Emit the regular declarations
     for (const entity of collector.entities) {
+      const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(entity.astEntity);
+      const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
+
+      if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+        indentedWriter.writeLine();
+        indentedWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+        continue;
+      }
+
       if (entity.astEntity instanceof AstSymbol) {
-        const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astEntity).releaseTag;
-        if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-          indentedWriter.writeLine();
-          indentedWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
-          continue;
-        }
 
         // Emit all the declarations for this entry
         for (const astDeclaration of entity.astEntity.astDeclarations || []) {
