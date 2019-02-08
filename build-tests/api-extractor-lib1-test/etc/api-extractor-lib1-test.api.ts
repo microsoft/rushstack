@@ -2,7 +2,7 @@
 declare class Lib1Class extends Lib1ForgottenExport {
 }
 
-// @public (undocumented)
+// @alpha (undocumented)
 interface Lib1Interface {
 }
 

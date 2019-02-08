@@ -17,6 +17,6 @@ class Lib1ForgottenExport {
 export class Lib1Class extends Lib1ForgottenExport {
 }
 
-/** @public */
+/** @alpha */
 export interface Lib1Interface {
 }
