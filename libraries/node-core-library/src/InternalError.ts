@@ -12,6 +12,16 @@
  */
 export class InternalError extends Error {
   /**
+   * If true, a JavScript `debugger;` statement will be invoked whenever the `InternalError` constructor is called.
+   *
+   * @remarks
+   * Generally applications should not be catching and ignoring an `InternalError`.  Instead, the error should
+   * be reported and typically the application will terminate.  Thus, if `InternalError` is constructed, it's
+   * almost always something we want to examine in a debugger.
+   */
+  public static breakInDebugger: boolean = true;
+
+  /**
    * The underlying error message, without the additional boilerplate for an `InternalError`.
    */
   public readonly unformattedMessage: string;
@@ -39,6 +49,10 @@ export class InternalError extends Error {
     (this as any).__proto__ = InternalError.prototype; // tslint:disable-line:no-any
 
     this.unformattedMessage = message;
+
+    if (InternalError.breakInDebugger) {
+      debugger; // tslint:disable-line:no-debugger
+    }
   }
 
   /** @override */

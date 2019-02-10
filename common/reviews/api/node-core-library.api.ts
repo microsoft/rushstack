@@ -217,6 +217,7 @@ interface IJsonSchemaValidateOptions {
 // @public
 class InternalError extends Error {
   constructor(message: string);
+  static breakInDebugger: boolean;
   // @override (undocumented)
   toString(): string;
   readonly unformattedMessage: string;

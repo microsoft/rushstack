@@ -5,6 +5,8 @@ import * as colors from 'colors';
 import * as os from 'os';
 
 import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { InternalError } from '@microsoft/node-core-library';
+
 import { RunAction } from './RunAction';
 
 export class ApiExtractorCommandLine extends CommandLineParser {
@@ -27,6 +29,10 @@ export class ApiExtractorCommandLine extends CommandLineParser {
   }
 
   protected onExecute(): Promise<void> { // override
+    if (this._debugParameter.value) {
+      InternalError.breakInDebugger = true;
+    }
+
     return super.onExecute().catch((error) => {
 
       if (this._debugParameter.value) {
