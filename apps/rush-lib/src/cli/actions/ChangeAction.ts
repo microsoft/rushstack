@@ -36,6 +36,7 @@ export class ChangeAction extends BaseRushAction {
   private _changeFileData: Map<string, IChangeFile>;
   private _changeComments: Map<string, string[]>;
   private _verifyParameter: CommandLineFlagParameter;
+  private _noFetchParameter: CommandLineFlagParameter;
   private _targetBranchParameter: CommandLineStringParameter;
   private _targetBranchName: string;
   private _projectHostMap: Map<string, string>;
@@ -85,6 +86,12 @@ export class ChangeAction extends BaseRushAction {
       parameterShortName: '-v',
       description: 'Verify the change file has been generated and that it is a valid JSON file'
     });
+
+    this._noFetchParameter = this.defineFlagParameter({
+      parameterLongName: '--no-fetch',
+      description: 'Skips fetching the baseline branch before running "git diff" to detect changes.'
+    });
+
     this._targetBranchParameter = this.defineStringParameter({
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
@@ -154,7 +161,10 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangedPackageNames(): string[] {
-    const changedFolders: Array<string | undefined> | undefined = VersionControl.getChangedFolders(this._targetBranch);
+    const changedFolders: Array<string | undefined> | undefined = VersionControl.getChangedFolders(
+      this._targetBranch,
+      this._noFetchParameter.value
+    );
     if (!changedFolders) {
       return [];
     }
@@ -181,7 +191,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangeFiles(): string[] {
-    return VersionControl.getChangedFiles(this._targetBranch, `common/changes/`).map(relativePath => {
+    return VersionControl.getChangedFiles(this._targetBranch, true, `common/changes/`).map(relativePath => {
       return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
     });
   }

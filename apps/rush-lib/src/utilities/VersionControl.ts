@@ -10,8 +10,14 @@ const DEFAULT_REMOTE: string = 'origin';
 const DEFAULT_FULLY_QUALIFIED_BRANCH: string = `${DEFAULT_REMOTE}/${DEFAULT_BRANCH}`;
 
 export class VersionControl {
-  public static getChangedFolders(targetBranch: string): Array<string | undefined> | undefined {
-    VersionControl._fetchNonDefaultBranch(targetBranch);
+  public static getChangedFolders(
+    targetBranch: string,
+    skipFetch: boolean = false
+  ): Array<string | undefined> | undefined {
+    if (!skipFetch) {
+      VersionControl._fetchNonDefaultBranch(targetBranch);
+    }
+
     const output: string = child_process.execSync(`git diff ${targetBranch}... --dirstat=files,0`).toString();
     return output.split('\n').map((line) => {
       if (line) {
@@ -25,8 +31,11 @@ export class VersionControl {
     });
   }
 
-  public static getChangedFiles(targetBranch: string, prefix?: string): string[] {
-    VersionControl._fetchNonDefaultBranch(targetBranch);
+  public static getChangedFiles(targetBranch: string, skipFetch: boolean = false, prefix?: string): string[] {
+    if (!skipFetch) {
+      VersionControl._fetchNonDefaultBranch(targetBranch);
+    }
+
     const output: string = child_process.execSync(
       `git diff ${targetBranch}... --name-only --no-renames --diff-filter=A`
     ).toString();
