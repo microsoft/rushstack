@@ -7,17 +7,12 @@ import { Executable } from '@microsoft/node-core-library';
 
 const DEFAULT_BRANCH: string = 'master';
 const DEFAULT_REMOTE: string = 'origin';
+const DEFAULT_FULLY_QUALIFIED_BRANCH: string = `${DEFAULT_REMOTE}/${DEFAULT_BRANCH}`;
 
 export class VersionControl {
   public static getChangedFolders(targetBranch: string): Array<string | undefined> | undefined {
+    VersionControl._fetchNonDefaultBranch(targetBranch);
     const output: string = child_process.execSync(`git diff ${targetBranch}... --dirstat=files,0`).toString();
-    const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(targetBranch);
-    if (!fetchResult) {
-      console.log(colors.yellow(
-        `Error fetching remote branch ${targetBranch}. Detected changed files may be incorrect.`
-      ));
-    }
-
     return output.split('\n').map((line) => {
       if (line) {
         const delimiterIndex: number = line.indexOf('%');
@@ -31,16 +26,10 @@ export class VersionControl {
   }
 
   public static getChangedFiles(targetBranch: string, prefix?: string): string[] {
+    VersionControl._fetchNonDefaultBranch(targetBranch);
     const output: string = child_process.execSync(
       `git diff ${targetBranch}... --name-only --no-renames --diff-filter=A`
     ).toString();
-    const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(targetBranch);
-    if (!fetchResult) {
-      console.log(colors.yellow(
-        `Error fetching remote branch ${targetBranch}. Detected changed files may be incorrect.`
-      ));
-    }
-
     const regex: RegExp | undefined = prefix ? new RegExp(`^${prefix}`, 'i') : undefined;
     return output.split('\n').map((line) => {
       if (line) {
@@ -66,7 +55,6 @@ export class VersionControl {
    * @param repositoryUrl - repository url
    */
   public static getRemoteMasterBranch(repositoryUrl?: string): string {
-    const defaultMaster: string = `${DEFAULT_REMOTE}/${DEFAULT_BRANCH}`;
     let matchingRemotes: string[] = [];
 
     if (repositoryUrl) {
@@ -86,7 +74,7 @@ export class VersionControl {
       console.log(colors.yellow(
         'A remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
       ));
-      return defaultMaster;
+      return DEFAULT_FULLY_QUALIFIED_BRANCH;
     }
 
     if (matchingRemotes.length > 0) {
@@ -100,7 +88,7 @@ export class VersionControl {
         `Unable to find a remote matching the repository URL (${matchingRemotes[0]}). ` +
         'Detected changes are likely to be incorrect.'
       ));
-      return defaultMaster;
+      return DEFAULT_FULLY_QUALIFIED_BRANCH;
     }
   }
 
@@ -154,5 +142,17 @@ export class VersionControl {
       }
     );
     return spawnResult.status === 0;
+  }
+
+  private static _fetchNonDefaultBranch(remoteBranchName: string): void {
+    if (remoteBranchName !== DEFAULT_FULLY_QUALIFIED_BRANCH) {
+      console.log(`Checking for updates to ${remoteBranchName}...`);
+      const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(remoteBranchName);
+      if (!fetchResult) {
+        console.log(colors.yellow(
+          `Error fetching remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
+        ));
+      }
+    }
   }
 }

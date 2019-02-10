@@ -70,7 +70,7 @@ export interface IEventHooksJson {
  */
 export interface IRushRepositoryJson {
   /**
-   * The remote url of the repository. This helps "rush change" finds the right remote to compare against.
+   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
    */
   url: string;
 }
@@ -692,7 +692,7 @@ export class RushConfiguration {
   }
 
   /**
-   * The remote url of the repository. This helps "rush change" finds the right remote to compare against.
+   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
    */
   public get repositoryUrl(): string {
     return this._repositoryUrl;
