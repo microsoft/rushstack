@@ -31,7 +31,14 @@ export class VersionControl {
     });
   }
 
-  public static getChangedFiles(targetBranch: string, skipFetch: boolean = false, prefix?: string): string[] {
+  /**
+   * @param pathPrefix - An optional path prefix "git diff"s should be filtered by.
+   * @returns
+   * An array of paths of repo-root-relative paths of files that are different from
+   * those in the provided {@param targetBranch}. If a {@param pathPrefix} is provided,
+   * this function only returns reuslts under the that path.
+   */
+  public static getChangedFiles(targetBranch: string, skipFetch: boolean = false, pathPrefix?: string): string[] {
     if (!skipFetch) {
       VersionControl._fetchNonDefaultBranch(targetBranch);
     }
@@ -39,7 +46,7 @@ export class VersionControl {
     const output: string = child_process.execSync(
       `git diff ${targetBranch}... --name-only --no-renames --diff-filter=A`
     ).toString();
-    const regex: RegExp | undefined = prefix ? new RegExp(`^${prefix}`, 'i') : undefined;
+    const regex: RegExp | undefined = pathPrefix ? new RegExp(`^${pathPrefix}`, 'i') : undefined;
     return output.split('\n').map((line) => {
       if (line) {
         const trimmedLine: string = line.trim();
