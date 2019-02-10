@@ -81,20 +81,22 @@ export class VersionControl {
       });
     } else {
       console.log(colors.yellow(
-        'A remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
+        'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
       ));
       return DEFAULT_FULLY_QUALIFIED_BRANCH;
     }
 
     if (matchingRemotes.length > 0) {
       if (matchingRemotes.length > 1) {
-        console.log(`More than one remote matches the repository URL. Using the first remote (${matchingRemotes[0]}).`);
+        console.log(
+          `More than one git remote matches the repository URL. Using the first remote (${matchingRemotes[0]}).`
+        );
       }
 
       return `${matchingRemotes[0]}/${DEFAULT_BRANCH}`;
     } else {
       console.log(colors.yellow(
-        `Unable to find a remote matching the repository URL (${matchingRemotes[0]}). ` +
+        `Unable to find a git remote matching the repository URL (${matchingRemotes[0]}). ` +
         'Detected changes are likely to be incorrect.'
       ));
       return DEFAULT_FULLY_QUALIFIED_BRANCH;
@@ -136,7 +138,7 @@ export class VersionControl {
     const firstSlashIndex: number = remoteBranchName.indexOf('/');
     if (firstSlashIndex === -1) {
       throw new Error(
-        `Unexpected remote branch format: ${remoteBranchName}. ` +
+        `Unexpected git remote branch format: ${remoteBranchName}. ` +
         'Expected branch to be in the <remote>/<branch name> format.'
       );
     }
@@ -159,7 +161,7 @@ export class VersionControl {
       const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(remoteBranchName);
       if (!fetchResult) {
         console.log(colors.yellow(
-          `Error fetching remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
+          `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
         ));
       }
     }
