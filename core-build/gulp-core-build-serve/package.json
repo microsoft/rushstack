@@ -29,7 +29,7 @@
     "sudo": "~1.0.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.1": "0.5.2",
+    "@microsoft/rush-stack-compiler-3.2": "0.2.2",
     "@microsoft/node-library-build": "6.0.29",
     "@types/express": "4.11.0",
     "@types/express-serve-static-core": "4.11.0",

@@ -16,7 +16,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/rush-stack-compiler-3.1": "0.5.2",
+    "@microsoft/rush-stack-compiler-3.2": "0.2.2",
     "@microsoft/gulp-core-build": "3.9.6",
     "@microsoft/node-core-library": "3.10.0",
     "@types/node": "8.5.8",

@@ -29,7 +29,7 @@
     "@microsoft/node-core-library": "3.10.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.1": "0.5.2",
+    "@microsoft/rush-stack-compiler-3.2": "0.2.2",
     "@microsoft/node-library-build": "6.0.29",
     "@types/glob": "5.0.30",
     "@types/node-sass": "3.10.32",
