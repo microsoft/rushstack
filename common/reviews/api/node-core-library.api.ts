@@ -8,13 +8,19 @@ declare class Colors {
     // (undocumented)
     static blackBackground(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
+    static blink(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
     static blue(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static blueBackground(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
+    static bold(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
     static cyan(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static cyanBackground(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static dim(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static gray(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
@@ -24,15 +30,21 @@ declare class Colors {
     // (undocumented)
     static greenBackground(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
+    static hidden(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static invertColor(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
     static magenta(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static magentaBackground(text: string | IColorableSequence): IColorableSequence;
-    // @internal (undocumented)
+    // @internal
     static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static red(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static redBackground(text: string | IColorableSequence): IColorableSequence;
+    // (undocumented)
+    static underline(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static white(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
@@ -43,7 +55,7 @@ declare class Colors {
     static yellowBackground(text: string | IColorableSequence): IColorableSequence;
 }
 
-// @beta (undocumented)
+// @beta
 declare class ConsoleTerminalProvider implements ITerminalProvider {
     // (undocumented)
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
@@ -51,7 +63,6 @@ declare class ConsoleTerminalProvider implements ITerminalProvider {
     readonly eolCharacter: string;
     // (undocumented)
     readonly supportsColor: boolean;
-    // (undocumented)
     verboseEnabled: boolean;
     // (undocumented)
     write(data: string, severity: TerminalProviderSeverity): void;
@@ -124,6 +135,8 @@ interface IColorableSequence {
     isEol?: boolean;
     // (undocumented)
     text: string;
+    // (undocumented)
+    textAttributes?: TextAttribute[];
 }
 
 // @beta
@@ -231,6 +244,7 @@ interface IJsonSchemaValidateOptions {
 // @public
 declare class InternalError extends Error {
     constructor(message: string);
+    static breakInDebugger: boolean;
     // @override (undocumented)
     toString(): string;
     readonly unformattedMessage: string;
@@ -432,6 +446,22 @@ declare class Sort {
     static sortMapKeys<K, V>(map: Map<K, V>, keyComparer?: (x: K, y: K) => number): void;
     static sortSet<T>(set: Set<T>, comparer?: (x: T, y: T) => number): void;
     static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any, keyComparer?: (x: T, y: T) => number): void;
+}
+
+// @beta
+declare class StringBufferTerminalProvider implements ITerminalProvider {
+    // (undocumented)
+    constructor(supportsColor?: boolean);
+    // (undocumented)
+    readonly eolCharacter: string;
+    getErrorOutput(): string;
+    getOutput(): string;
+    getVerbose(): string;
+    getWarningOutput(): string;
+    // (undocumented)
+    readonly supportsColor: boolean;
+    // (undocumented)
+    write(data: string, severity: TerminalProviderSeverity): void;
 }
 
 // @public
