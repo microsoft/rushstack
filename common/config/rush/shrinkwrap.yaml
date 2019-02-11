@@ -46,6 +46,8 @@ dependencies:
   '@rush-temp/rush-stack-compiler-3.1-library-test': 'file:projects/rush-stack-compiler-3.1-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.2': 'file:projects/rush-stack-compiler-3.2.tgz'
   '@rush-temp/rush-stack-compiler-3.2-library-test': 'file:projects/rush-stack-compiler-3.2-library-test.tgz'
+  '@rush-temp/rush-stack-compiler-3.3': 'file:projects/rush-stack-compiler-3.3.tgz'
+  '@rush-temp/rush-stack-compiler-3.3-library-test': 'file:projects/rush-stack-compiler-3.3-library-test.tgz'
   '@rush-temp/rush-stack-compiler-shared': 'file:projects/rush-stack-compiler-shared.tgz'
   '@rush-temp/rush-stack-library-test': 'file:projects/rush-stack-library-test.tgz'
   '@rush-temp/rushell': 'file:projects/rushell.tgz'
@@ -8575,6 +8577,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-0RNDbSdEokBeEAkgNbxJ+BLwSManFy9TeXz8uW+48j/xhEXv1ePME60olyzw2XzUqUBNAYFeJadIqAgNqIACwg==
+  /typescript/3.3.3:
+    dev: false
+    engines:
+      node: '>=4.2.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-Y21Xqe54TBVp+VDSNbuDYdGw0BpoR/Q6wo/+35M8PAU0vipahnyduJWirxxdxjsAkS7hue53x2zp8gz7F05u0A==
   /uglify-js/2.8.29:
     dependencies:
       source-map: 0.5.7
@@ -9826,6 +9835,31 @@ packages:
       integrity: sha512-sgA8pda2Hu7W4VOIffuhcbPZFlNN1nrmYeBuhF+DjcV7LGlhWcqdoBiUtDejYsuNlpRk1uwuJQ1Z8dQHEefsrQ==
       tarball: 'file:projects/rush-stack-compiler-3.2.tgz'
     version: 0.0.0
+  'file:projects/rush-stack-compiler-3.3-library-test.tgz':
+    dependencies:
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-3.3-library-test'
+    resolution:
+      integrity: sha512-IARBR3c0gahlxjO7gjdM9qt55bordxn5PBk0Aufpk7KHYQiuUQF1Lz8l/CtXwU2zTcJaGY1mn/Yq+xGP0mudZQ==
+      tarball: 'file:projects/rush-stack-compiler-3.3-library-test.tgz'
+    version: 0.0.0
+  'file:projects/rush-stack-compiler-3.3.tgz':
+    dependencies:
+      '@microsoft/node-library-build': 6.0.29
+      '@microsoft/rush-stack-compiler-3.2': 0.2.2
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+      tslint: 5.12.1
+      tslint-microsoft-contrib: /tslint-microsoft-contrib/5.2.1/tslint@5.12.1
+      typescript: 3.3.3
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-3.3'
+    resolution:
+      integrity: sha512-qdjMzUeTqF/fc8fF9QmAsyXS0VKe2XVcSKKqV3VhM0uI6e62G7GKtwZZLN94ssylZHrL7guF/FTBZeyD+hd6SQ==
+      tarball: 'file:projects/rush-stack-compiler-3.3.tgz'
+    version: 0.0.0
   'file:projects/rush-stack-compiler-shared.tgz':
     dev: false
     name: '@rush-temp/rush-stack-compiler-shared'
@@ -10009,6 +10043,8 @@ specifiers:
   '@rush-temp/rush-stack-compiler-3.1-library-test': 'file:./projects/rush-stack-compiler-3.1-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.2': 'file:./projects/rush-stack-compiler-3.2.tgz'
   '@rush-temp/rush-stack-compiler-3.2-library-test': 'file:./projects/rush-stack-compiler-3.2-library-test.tgz'
+  '@rush-temp/rush-stack-compiler-3.3': 'file:./projects/rush-stack-compiler-3.3.tgz'
+  '@rush-temp/rush-stack-compiler-3.3-library-test': 'file:./projects/rush-stack-compiler-3.3-library-test.tgz'
   '@rush-temp/rush-stack-compiler-shared': 'file:./projects/rush-stack-compiler-shared.tgz'
   '@rush-temp/rush-stack-library-test': 'file:./projects/rush-stack-library-test.tgz'
   '@rush-temp/rushell': 'file:./projects/rushell.tgz'
