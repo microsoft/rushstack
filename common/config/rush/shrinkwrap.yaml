@@ -9413,11 +9413,11 @@ packages:
       gulp: 3.9.1
       resolve: 1.8.1
       tslint-microsoft-contrib: 5.2.1
-      typescript: 3.1.6
+      typescript: 3.2.4
     dev: false
     name: '@rush-temp/gulp-core-build-typescript'
     resolution:
-      integrity: sha512-ap8UB5ALpdfWX1kIw+UDHhxiH4UIoUZ3BZmHjANk7aFszfUJ3sEMITReawX8s9SJyh/A8kNV26XLSTnnJ4fNRQ==
+      integrity: sha512-x8nreVvHJ2KD5Zj4k4aFF3Ym1JZQyzB8K+3fV9aOzKmAbxKas6we1YCsSj0XPQga2te7tQCNdSUp0+LJlY+vIg==
       tarball: 'file:projects/gulp-core-build-typescript.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-webpack.tgz':

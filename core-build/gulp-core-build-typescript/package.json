@@ -31,7 +31,7 @@
     "@microsoft/node-library-build": "6.0.29",
     "@types/glob": "5.0.30",
     "gulp": "~3.9.1",
-    "typescript": "~3.1.6",
+    "typescript": "~3.2.4",
     "@types/resolve": "0.0.8"
   }
 }
