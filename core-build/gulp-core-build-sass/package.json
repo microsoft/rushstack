@@ -26,11 +26,11 @@
     "node-sass": "4.9.3",
     "postcss": "7.0.5",
     "clean-css": "4.2.1",
-    "@microsoft/node-core-library": "3.9.0"
+    "@microsoft/node-core-library": "3.10.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.1": "0.5.0",
-    "@microsoft/node-library-build": "6.0.27",
+    "@microsoft/rush-stack-compiler-3.1": "0.5.1",
+    "@microsoft/node-library-build": "6.0.28",
     "@types/glob": "5.0.30",
     "@types/node-sass": "3.10.32",
     "@types/clean-css": "3.4.30",
