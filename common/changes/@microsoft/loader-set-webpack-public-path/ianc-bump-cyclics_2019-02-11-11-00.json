@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/loader-set-webpack-public-path",
+  "email": "iclanton@users.noreply.github.com"
+}

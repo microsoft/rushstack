@@ -1,72 +1,79 @@
 // @beta
-class ApiExtractorRunner extends RushStackCompilerBase {
-  constructor(extractorConfig: IExtractorConfig, extractorOptions: IExtractorOptions, rootPath: string, terminalProvider: ITerminalProvider);
-  // (undocumented)
-  static apiExtractor: typeof ApiExtractor;
-  // (undocumented)
-  invoke(): Promise<void>;
+declare class ApiExtractorRunner extends RushStackCompilerBase {
+    // (undocumented)
+    constructor(extractorConfig: IExtractorConfig, extractorOptions: IExtractorOptions, rootPath: string, terminalProvider: ITerminalProvider);
+    // (undocumented)
+    static apiExtractor: typeof ApiExtractor;
+    // (undocumented)
+    invoke(): Promise<void>;
 }
 
 // @public (undocumented)
 interface ITslintRunnerConfig {
-  displayAsError?: boolean;
-  // (undocumented)
-  fileError: WriteFileIssueFunction;
-  // (undocumented)
-  fileWarning: WriteFileIssueFunction;
+    displayAsError?: boolean;
+    // (undocumented)
+    fileError: WriteFileIssueFunction;
+    // (undocumented)
+    fileWarning: WriteFileIssueFunction;
 }
 
 // @beta (undocumented)
 interface ITypescriptCompilerOptions {
-  customArgs?: string[];
+    customArgs?: string[];
 }
 
 // @beta (undocumented)
-class RushStackCompilerBase<TOptions = {}> {
-  constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider);
-  // WARNING: The type "StandardBuildFolders" needs to be exported by the package (e.g. added to index.ts)
-  // (undocumented)
-  protected _standardBuildFolders: StandardBuildFolders;
-  // (undocumented)
-  protected _taskOptions: TOptions;
-  // (undocumented)
-  protected _terminal: Terminal;
+declare abstract class RushStackCompilerBase<TOptions = {}> {
+    // (undocumented)
+    constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider);
+    // (undocumented)
+    protected _standardBuildFolders: StandardBuildFolders;
+    // (undocumented)
+    protected _taskOptions: TOptions;
+    // (undocumented)
+    protected _terminal: Terminal;
 }
 
-// @alpha
-class ToolPackages {
-  // (undocumented)
-  static apiExtractor: typeof apiExtractor;
-  // (undocumented)
-  static tslint: typeof tslint;
-  // (undocumented)
-  static typescript: typeof typescript;
-}
-
-// @beta (undocumented)
-class ToolPaths {
-  // (undocumented)
-  static readonly tslintPackageJson: IPackageJson;
-  // (undocumented)
-  static readonly tslintPackagePath: string;
-  // (undocumented)
-  static readonly typescriptPackageJson: IPackageJson;
-  // (undocumented)
-  static readonly typescriptPackagePath: string;
+// @alpha (undocumented)
+declare class ToolPackages {
+    // (undocumented)
+    static apiExtractor: typeof ApiExtractor;
+    // (undocumented)
+    static tslint: typeof Tslint;
+    // (undocumented)
+    static typescript: typeof Typescript;
 }
 
 // @beta (undocumented)
-class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
-  constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider);
-  // (undocumented)
-  invoke(): Promise<void>;
+declare class ToolPaths {
+    // (undocumented)
+    static readonly tslintPackageJson: IPackageJson;
+    // (undocumented)
+    static readonly tslintPackagePath: string;
+    // (undocumented)
+    static readonly typescriptPackageJson: IPackageJson;
+    // (undocumented)
+    static readonly typescriptPackagePath: string;
+    }
+
+// @beta (undocumented)
+declare class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
+    // (undocumented)
+    constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider);
+    // (undocumented)
+    invoke(): Promise<void>;
 }
 
 // @beta (undocumented)
-class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
-  constructor(rootPath: string, terminalProvider: ITerminalProvider);
-  // (undocumented)
-  invoke(): Promise<void>;
+declare class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
+    // (undocumented)
+    constructor(rootPath: string, terminalProvider: ITerminalProvider);
+    // (undocumented)
+    constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider);
+    // (undocumented)
+    invoke(): Promise<void>;
 }
 
-// WARNING: Unsupported export: WriteFileIssueFunction
+// @beta (undocumented)
+declare type WriteFileIssueFunction = (filePath: string, line: number, column: number, errorCode: string, message: string) => void;
+

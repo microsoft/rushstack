@@ -16,7 +16,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/rush-stack-compiler-2.7": "0.5.2",
+    "@microsoft/rush-stack-compiler-3.1": "0.5.2",
     "@microsoft/gulp-core-build": "3.9.6",
     "@microsoft/node-core-library": "3.10.0",
     "@types/node": "8.5.8",
@@ -28,10 +28,10 @@
   "devDependencies": {
     "tslint-microsoft-contrib": "~5.2.1",
     "@microsoft/api-extractor": "7.0.17",
-    "@microsoft/node-library-build": "6.0.15",
+    "@microsoft/node-library-build": "6.0.29",
     "@types/glob": "5.0.30",
     "gulp": "~3.9.1",
-    "typescript": "~2.7.2",
+    "typescript": "~3.1.6",
     "@types/resolve": "0.0.8"
   }
 }

@@ -1,3 +1,5 @@
-// WARNING: Unsupported export: sass
-// WARNING: Unsupported export: default
-// (No @packagedocumentation comment for this package)
+// @public (undocumented)
+declare const sass: SassTask;
+
+
+// (No @packageDocumentation comment for this package)
