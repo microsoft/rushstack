@@ -90,7 +90,7 @@ export interface IExtractorOptions {
  */
 export class Extractor {
   /**
-   * The JSON Schema for API Extractor config file (api-extractor-config.schema.json).
+   * The JSON Schema for API Extractor config file (api-extractor.schema.json).
    */
   public static jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../schemas/api-extractor.schema.json'));
@@ -394,7 +394,7 @@ export class Extractor {
     const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
 
-    const packageBaseName: string = path.basename(collector.package.name);
+    const packageBaseName: string = path.basename(collector.workingPackage.name);
 
     const apiJsonFileConfig: IExtractorApiJsonFileConfig = this.actualConfig.apiJsonFile;
 
@@ -469,7 +469,7 @@ export class Extractor {
     this._generateRollupDtsFiles(collector);
 
     // Write the tsdoc-metadata.json file for this project
-    PackageMetadataManager.writeTsdocMetadataFile(collector.package.packageFolder);
+    PackageMetadataManager.writeTsdocMetadataFile(collector.workingPackage.packageFolder);
 
     if (this._localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
@@ -481,7 +481,7 @@ export class Extractor {
   }
 
   private _generateRollupDtsFiles(collector: Collector): void {
-    const packageFolder: string = collector.package.packageFolder;
+    const packageFolder: string = collector.workingPackage.packageFolder;
 
     const dtsRollup: IExtractorDtsRollupConfig = this.actualConfig.dtsRollup!;
     if (dtsRollup.enabled) {
@@ -489,14 +489,14 @@ export class Extractor {
 
       if (!mainDtsRollupPath) {
         // If the mainDtsRollupPath is not specified, then infer it from the package.json file
-        if (!collector.package.packageJson.typings) {
+        if (!collector.workingPackage.packageJson.typings) {
           this._monitoredLogger.logError('Either the "mainDtsRollupPath" setting must be specified,'
             + ' or else the package.json file must contain a "typings" field.');
           return;
         }
 
         // Resolve the "typings" field relative to package.json itself
-        const resolvedTypings: string = path.resolve(packageFolder, collector.package.packageJson.typings);
+        const resolvedTypings: string = path.resolve(packageFolder, collector.workingPackage.packageJson.typings);
 
         if (dtsRollup.trimming) {
           if (!Path.isUnder(resolvedTypings, dtsRollup.publishFolderForInternal!)) {

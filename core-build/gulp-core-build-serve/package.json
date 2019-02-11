@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-serve",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -16,7 +16,7 @@
     "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.9.4",
+    "@microsoft/gulp-core-build": "3.9.5",
     "@microsoft/node-core-library": "3.10.0",
     "@types/node": "8.5.8",
     "colors": "~1.2.1",

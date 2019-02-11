@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/stream-collator",
-  "version": "3.0.33",
+  "version": "3.0.34",
   "description": "Display intelligible realtime output from your asynchronous streams",
   "repository": {
     "type": "git",

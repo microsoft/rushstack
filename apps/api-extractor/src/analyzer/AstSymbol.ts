@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { AstImport } from './AstImport';
 import { AstDeclaration } from './AstDeclaration';
 import { InternalError } from '@microsoft/node-core-library';
 
@@ -12,7 +11,7 @@ import { InternalError } from '@microsoft/node-core-library';
 export interface IAstSymbolOptions {
   readonly followedSymbol: ts.Symbol;
   readonly localName: string;
-  readonly astImport: AstImport | undefined;
+  readonly isExternal: boolean;
   readonly nominalAnalysis: boolean;
   readonly parentAstSymbol: AstSymbol | undefined;
   readonly rootAstSymbol: AstSymbol | undefined;
@@ -20,7 +19,7 @@ export interface IAstSymbolOptions {
 
 /**
  * The AstDeclaration and AstSymbol classes are API Extractor's equivalent of the compiler's
- * ts.Declaration and ts.Symbol objects.  They are created by the SymbolTable class.
+ * ts.Declaration and ts.Symbol objects.  They are created by the `AstSymbolTable` class.
  *
  * @remarks
  * The AstSymbol represents the ts.Symbol information for an AstDeclaration.  For example,
@@ -28,34 +27,65 @@ export interface IAstSymbolOptions {
  * but they will all share a common AstSymbol.
  *
  * For nested definitions, the AstSymbol has a unique parent (i.e. AstSymbol.rootAstSymbol),
- * but the parent/children for each AstDeclaration may be different.
+ * but the parent/children for each AstDeclaration may be different.  Consider this example:
+ *
+ * ```ts
+ * export namespace N {
+ *   export function f(): void { }
+ * }
+ *
+ * export interface N {
+ *   g(): void;
+ * }
+ * ```
+ *
+ * Note how the parent/child relationships are different for the symbol tree versus
+ * the declaration tree, and the declaration tree has two roots:
+ *
+ * ```
+ * AstSymbol tree:            AstDeclaration tree:
+ * - N                        - N (namespace)
+ *   - f                        - f
+ *   - g                      - N (interface)
+ *                              - g
+ * ```
  */
 export class AstSymbol {
   /**
    * The original name of the symbol, as exported from the module (i.e. source file)
-   * containing the original TypeScript definition.
+   * containing the original TypeScript definition.  Constructs such as
+   * `import { X as Y } from` may introduce other names that differ from the local name.
+   *
+   * @remarks
+   * For the most part, `localName` corresponds to `followedSymbol.name`, but there
+   * are some edge cases.  For example, the symbol name for `export default class X { }`
+   * is actually `"default"`, not `"X"`.
    */
   public readonly localName: string;
 
   /**
+   * If true, then the `followedSymbol` (i.e. original declaration) of this symbol
+   * is not part of the working package.  The working package may still export this symbol,
+   * but if so it should be emitted as an alias such as `export { X } from "package1";`.
+   */
+  public readonly isExternal: boolean;
+
+  /**
    * The compiler symbol where this type was defined, after following any aliases.
+   *
+   * @remarks
+   * This is a normal form that can be reached from any symbol alias by calling
+   * `TypeScriptHelpers.followAliases()`.  It can be compared to determine whether two
+   * symbols refer to the same underlying type.
    */
   public readonly followedSymbol: ts.Symbol;
 
   /**
-   * If this symbol was imported from another package, that information is tracked here.
-   * Otherwise, the value is undefined.  For example, if this symbol was defined in the referencing source file,
-   * or if it was imported from a local file in the current project, or if it is an ambient definition,
-   * then astImport will be undefined.
-   */
-  public readonly astImport: AstImport | undefined;
-
-  /**
    * If true, then this AstSymbol represents a foreign object whose structure will be
-   * ignored.  The AstDeclaration will not have any parent or children, and its references
+   * ignored.  The AstDeclaration objects will not have any parent or children, and its references
    * will not be analyzed.
    *
-   * Nominal symbols are tracked because we still need to emit exports for them.
+   * Nominal symbols are tracked e.g. when they are reexported by the working package.
    */
   public readonly nominalAnalysis: boolean;
 
@@ -91,7 +121,7 @@ export class AstSymbol {
   public constructor(options: IAstSymbolOptions) {
     this.followedSymbol = options.followedSymbol;
     this.localName = options.localName;
-    this.astImport = options.astImport;
+    this.isExternal = options.isExternal;
     this.nominalAnalysis = options.nominalAnalysis;
     this.parentAstSymbol = options.parentAstSymbol;
     this.rootAstSymbol = options.rootAstSymbol || this;
@@ -100,9 +130,11 @@ export class AstSymbol {
 
   /**
    * The one or more declarations for this symbol.
-   * For example, if this symbol is a method, then the declarations could be
+   * @remarks
+   * For example, if this symbol is a method, then the declarations might be
    * various method overloads.  If this symbol is a namespace, then the declarations
-   * might be separate namespace blocks (with the same name).
+   * might be separate namespace blocks with the same name that get combined via
+   * declaration merging.
    */
   public get astDeclarations(): ReadonlyArray<AstDeclaration> {
     return this._astDeclarations;
@@ -120,14 +152,7 @@ export class AstSymbol {
   }
 
   /**
-   * Returns true if this symbol was imported from another package.
-   */
-  public get imported(): boolean {
-    return !!this.rootAstSymbol.astImport;
-  }
-
-  /**
-   * This is an internal callback used when the SymbolTable attaches a new
+   * This is an internal callback used when the AstSymbolTable attaches a new
    * AstDeclaration to this object.
    * @internal
    */
@@ -139,7 +164,7 @@ export class AstSymbol {
   }
 
   /**
-   * This is an internal callback used when the SymbolTable.analyze()
+   * This is an internal callback used when the AstSymbolTable.analyze()
    * has processed this object.
    * @internal
    */
