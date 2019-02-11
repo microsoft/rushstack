@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 31 Jan 2019 17:03:49 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Feb 2019 03:31:55 GMT and should not be manually modified.
+
+## 7.0.15
+Mon, 11 Feb 2019 03:31:55 GMT
+
+### Patches
+
+- The `--debug` parameter now automatically breaks in the debugger when InternalError is thrown
 
 ## 7.0.14
 Thu, 31 Jan 2019 17:03:49 GMT

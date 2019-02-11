@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Wed, 30 Jan 2019 20:49:11 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Feb 2019 03:31:55 GMT and should not be manually modified.
+
+## 4.6.0
+Mon, 11 Feb 2019 03:31:55 GMT
+
+### Minor changes
+
+- Updated support for clean-css 4.2.1 and typings.  Added override task configuration for clean-css options.
 
 ## 4.5.40
 Wed, 30 Jan 2019 20:49:11 GMT
