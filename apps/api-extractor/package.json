@@ -19,7 +19,7 @@
   },
   "homepage": "https://api-extractor.com",
   "main": "lib/index.js",
-  "typings": "dist/index-internal.d.ts",
+  "typings": "dist/rollup.d.ts",
   "tsdoc": {
     "tsdocFlavor": "AEDoc"
   },
