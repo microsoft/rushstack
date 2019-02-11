@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.23",
+      "tag": "@microsoft/api-documenter_v7.0.23",
+      "date": "Mon, 11 Feb 2019 08:55:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.15` to `7.0.16`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.22",
       "tag": "@microsoft/api-documenter_v7.0.22",
       "date": "Mon, 11 Feb 2019 03:31:55 GMT",
