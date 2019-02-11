@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.17",
+      "tag": "@microsoft/api-extractor_v7.0.17",
+      "date": "Mon, 11 Feb 2019 10:32:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where API Extractor neglected to analyze \"typeof\" expressions"
+          },
+          {
+            "comment": "Fix an issue where declarations inside a namespace were sometimes being incorrectly emitted as top-level exports of the .d.ts rollup"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.16",
       "tag": "@microsoft/api-extractor_v7.0.16",
       "date": "Mon, 11 Feb 2019 08:55:57 GMT",

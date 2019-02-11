@@ -3,6 +3,10 @@
     "apiItemKinds",
     "circularImport",
     "circularImport2",
+    "defaultExportOfEntryPoint",
+    "defaultExportOfEntryPoint2",
+    "defaultExportOfEntryPoint3",
+    "defaultExportOfEntryPoint4",
     "exportDuplicate",
     "exportEquals",
     "exportImportedExternal",
@@ -10,9 +14,6 @@
     "exportStar",
     "exportStar2",
     "exportStar3",
-    "defaultExportOfEntryPoint",
-    "defaultExportOfEntryPoint2",
-    "defaultExportOfEntryPoint3",
-    "defaultExportOfEntryPoint4"
+    "typeOf"
   ]
 }

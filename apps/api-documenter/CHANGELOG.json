@@ -2,6 +2,24 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.24",
+      "tag": "@microsoft/api-documenter_v7.0.24",
+      "date": "Mon, 11 Feb 2019 10:32:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.16` to `7.0.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.5.1` to `0.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.28` to `6.0.29`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.23",
       "tag": "@microsoft/api-documenter_v7.0.23",
       "date": "Mon, 11 Feb 2019 08:55:57 GMT",

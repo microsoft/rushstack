@@ -11,11 +11,11 @@
     "@types/node": "8.5.8"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.0.28",
+    "@microsoft/node-library-build": "6.0.29",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "@microsoft/rush-stack-compiler-3.1": "0.5.1"
+    "@microsoft/rush-stack-compiler-3.1": "0.5.2"
   }
 }

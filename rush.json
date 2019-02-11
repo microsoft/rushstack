@@ -490,7 +490,7 @@
       "packageName": "@microsoft/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+     "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.1"
@@ -501,7 +501,7 @@
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
       "shouldPublish": true
-    },
+   },
     {
       "packageName": "@microsoft/rushell",
       "projectFolder": "libraries/rushell",
@@ -512,7 +512,7 @@
       "packageName": "@microsoft/stream-collator",
       "projectFolder": "libraries/stream-collator",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+     "shouldPublish": true
     },
     {
       "packageName": "@microsoft/ts-command-line",
@@ -523,7 +523,7 @@
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.1"
       ]
-    },
+   },
 
     // "stack" folder (alphabetical order)
     {
@@ -534,7 +534,7 @@
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.4",
-      "projectFolder": "stack/rush-stack-compiler-2.4",
+     "projectFolder": "stack/rush-stack-compiler-2.4",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
@@ -544,7 +544,7 @@
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.7",
-      "projectFolder": "stack/rush-stack-compiler-2.7",
+     "projectFolder": "stack/rush-stack-compiler-2.7",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [

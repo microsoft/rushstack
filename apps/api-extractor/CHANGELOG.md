@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 11 Feb 2019 08:55:57 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Feb 2019 10:32:37 GMT and should not be manually modified.
+
+## 7.0.17
+Mon, 11 Feb 2019 10:32:37 GMT
+
+### Patches
+
+- Fix an issue where API Extractor neglected to analyze "typeof" expressions
+- Fix an issue where declarations inside a namespace were sometimes being incorrectly emitted as top-level exports of the .d.ts rollup
 
 ## 7.0.16
 Mon, 11 Feb 2019 08:55:57 GMT
