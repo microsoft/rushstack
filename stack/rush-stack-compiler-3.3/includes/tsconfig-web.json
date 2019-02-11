@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json.schemastore.org/tsconfig",
+
+  "extends": "./tsconfig-base.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es5",
+    "lib": [
+      "es5",
+      "scripthost",
+      "es2015.collection",
+      "es2015.promise",
+      "es2015.iterable",
+      "dom"
+    ]
+  }
+}

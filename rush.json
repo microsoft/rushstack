@@ -408,6 +408,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-stack-compiler-3.3-library-test",
+      "projectFolder": "build-tests/rush-stack-compiler-3.3-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-stack-library-test",
       "projectFolder": "build-tests/rush-stack-library-test",
       "reviewCategory": "tests",
@@ -585,6 +591,16 @@
     {
       "packageName": "@microsoft/rush-stack-compiler-3.2",
       "projectFolder": "stack/rush-stack-compiler-3.2",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler-3.2"
+      ]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.3",
+      "projectFolder": "stack/rush-stack-compiler-3.3",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
