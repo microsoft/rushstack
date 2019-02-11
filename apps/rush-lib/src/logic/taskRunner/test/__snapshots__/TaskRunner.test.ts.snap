@@ -30,4 +30,4 @@ exports[`TaskRunner Error logging printedStderrAfterError 3`] = `""`;
 
 exports[`TaskRunner Error logging printedStderrAfterError 4`] = `""`;
 
-exports[`TaskRunner Error logging printedStderrAfterError 5`] = `"[x][31m[-n-]1 of 1: [stdout+stderr] failed to build![x][39m[n]"`;
+exports[`TaskRunner Error logging printedStderrAfterError 5`] = `"[-n-]1 of 1: [stdout+stderr] failed to build![n]"`;

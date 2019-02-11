@@ -79,7 +79,7 @@ describe('TaskRunner', () => {
 
   describe('Error logging', () => {
     beforeEach(() => {
-      logger = new StringBufferTerminalProvider(true);
+      logger = new StringBufferTerminalProvider(false);
       taskRunner = new TaskRunner(false, '1', false, logger);
     });
 
