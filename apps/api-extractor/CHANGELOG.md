@@ -1,6 +1,17 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 11 Feb 2019 03:31:55 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Feb 2019 08:55:57 GMT and should not be manually modified.
+
+## 7.0.16
+Mon, 11 Feb 2019 08:55:57 GMT
+
+### Patches
+
+- Redesign the analyzer so that when an external symbol is reexported by the working package, the local object (AstImport) and external object (AstSymbol) are kept separate
+- Fix a number of bugs where external symbols were misinterpreted as being part of the local project
+- Eliminate a number of errors involving unusual language constructs, by avoiding analysis of external symbols unless it's really necessary
+- Simplify the AstSymbol.nominalAnalysis concept and associated code
+- Improve .d.ts rollup trimming to handle reexported symbols correctly
 
 ## 7.0.15
 Mon, 11 Feb 2019 03:31:55 GMT
