@@ -19,7 +19,7 @@
   },
   "homepage": "https://api-extractor.com",
   "main": "lib/index.js",
-  "typings": "dist/index-internal.d.ts",
+  "typings": "dist/rollup.d.ts",
   "tsdoc": {
     "tsdocFlavor": "AEDoc"
   },
@@ -31,7 +31,7 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.9.0",
+    "@microsoft/node-core-library": "3.10.0",
     "@microsoft/ts-command-line": "4.2.3",
     "@microsoft/tsdoc": "0.12.5",
     "@types/node": "8.5.8",

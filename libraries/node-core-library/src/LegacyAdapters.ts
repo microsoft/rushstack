@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * Callback used by {@link LegacyAdapters}.
+ * @beta
+ */
 export type callback<TResult, TError> = (error: TError, result: TResult) => void;
 
 /**

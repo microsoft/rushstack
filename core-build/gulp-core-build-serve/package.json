@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.9.4",
-    "@microsoft/node-core-library": "3.9.0",
+    "@microsoft/node-core-library": "3.10.0",
     "@types/node": "8.5.8",
     "colors": "~1.2.1",
     "deasync": "~0.1.7",
