@@ -1,5 +1,6 @@
 {
   "scenarioFolderNames": [
+    "ambientNameConflict",
     "apiItemKinds",
     "circularImport",
     "circularImport2",
