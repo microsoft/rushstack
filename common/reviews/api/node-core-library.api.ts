@@ -7,13 +7,19 @@ class Colors {
   // (undocumented)
   static blackBackground(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
+  static blink(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
   static blue(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
   static blueBackground(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
+  static bold(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
   static cyan(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
   static cyanBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static dim(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
   static gray(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
@@ -23,6 +29,10 @@ class Colors {
   // (undocumented)
   static greenBackground(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
+  static hidden(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static invertColor(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
   static magenta(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
   static magentaBackground(text: string | IColorableSequence): IColorableSequence;
@@ -30,6 +40,8 @@ class Colors {
   static red(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
   static redBackground(text: string | IColorableSequence): IColorableSequence;
+  // (undocumented)
+  static underline(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
   static white(text: string | IColorableSequence): IColorableSequence;
   // (undocumented)
@@ -110,6 +122,8 @@ interface IColorableSequence {
   isEol?: boolean;
   // (undocumented)
   text: string;
+  // (undocumented)
+  textAttributes?: TextAttribute[];
 }
 
 // @beta
@@ -217,6 +231,7 @@ interface IJsonSchemaValidateOptions {
 // @public
 class InternalError extends Error {
   constructor(message: string);
+  static breakInDebugger: boolean;
   // @override (undocumented)
   toString(): string;
   readonly unformattedMessage: string;

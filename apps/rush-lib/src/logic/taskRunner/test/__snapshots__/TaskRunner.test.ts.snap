@@ -10,7 +10,7 @@ exports[`TaskRunner Dependencies detectsDependencyCycle 1`] = `
 Consider using the cyclicDependencyProjects option for rush.json."
 `;
 
-exports[`TaskRunner Dependencies respectsDependencyOrder 1`] = `"Registered two[n]Registered one[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[one] started[x][39m[n][x][32m1 of 2: [one] completed successfully in 0.00 seconds[x][39m[n][x][37m[two] started[x][39m[n][x][32m2 of 2: [two] completed successfully in 0.00 seconds[x][39m[n][n][x][32mSUCCESS (2)[x][39m[n][x][32m================================[x][39m[n][x][32mtwo (0.00 seconds)[x][39m[n][x][32mone (0.00 seconds)[x][39m[n][x][32m================================[x][39m[-n-][x][32m[x][39m[n][n]"`;
+exports[`TaskRunner Dependencies respectsDependencyOrder 1`] = `"Registered two[n]Registered one[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[one] started[x][39m[n][x][32m1 of 2: [one] completed successfully in 0.00 seconds[x][39m[n][x][37m[two] started[x][39m[n][x][32m2 of 2: [two] completed successfully in 0.00 seconds[x][39m[n][n][x][32mSUCCESS (2)[x][39m[n][x][32m================================[x][39m[n][x][32mtwo (0.00 seconds)[x][39m[n][x][32mone (0.00 seconds)[x][39m[n][x][32m================================[-n-][x][39m[n][n]"`;
 
 exports[`TaskRunner Dependencies respectsDependencyOrder 2`] = `""`;
 
@@ -24,7 +24,7 @@ exports[`TaskRunner Dependencies throwsErrorOnNonExistentTask 1`] = `"The task '
 
 exports[`TaskRunner Error logging printedStderrAfterError 1`] = `"Project(s) failed to build"`;
 
-exports[`TaskRunner Error logging printedStderrAfterError 2`] = `"Registered stdout+stderr[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[stdout+stderr] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mstdout+stderr (0.00 seconds)[x][39m[n]Woops[n][x][31m================================[x][39m[-n-][x][31m[x][39m[n][n]"`;
+exports[`TaskRunner Error logging printedStderrAfterError 2`] = `"Registered stdout+stderr[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[stdout+stderr] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mstdout+stderr (0.00 seconds)[x][39m[n]Woops[n][x][31m================================[-n-][x][39m[n][n]"`;
 
 exports[`TaskRunner Error logging printedStderrAfterError 3`] = `""`;
 
