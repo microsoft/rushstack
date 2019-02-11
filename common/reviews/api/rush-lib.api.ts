@@ -246,6 +246,8 @@ declare class RushConfiguration {
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;
     readonly yarnCacheFolder: string;
+    // (undocumented)
+    readonly yarnOptions: YarnOptionsConfiguration;
     }
 
 // @public
@@ -315,5 +317,12 @@ declare enum VersionPolicyDefinitionName {
     'individualVersion' = 1,
     // (undocumented)
     'lockStepVersion' = 0
+}
+
+// @public
+declare class YarnOptionsConfiguration {
+    // @internal (undocumented)
+    constructor(json: IYarnOptionsJson);
+    readonly ignoreEngines: boolean;
 }
 
