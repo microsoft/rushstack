@@ -8,7 +8,7 @@ import {
   FileSystem
 } from '@microsoft/node-core-library';
 import { IExtractorConfig, IExtractorOptions } from '@microsoft/api-extractor';
-import { ApiExtractorRunner as TApiExtractorRunner } from '@microsoft/rush-stack-compiler-3.1';
+import { ApiExtractorRunner as TApiExtractorRunner } from '@microsoft/rush-stack-compiler-3.2';
 
 import { RSCTask, IRSCTaskConfig } from './RSCTask';
 

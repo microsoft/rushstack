@@ -11,6 +11,6 @@
   },
   "dependencies": {
     "@microsoft/rush-stack": "0.1.49",
-    "@microsoft/rush-stack-compiler-3.1": "0.5.2"
+    "@microsoft/rush-stack-compiler-3.2": "0.2.2"
   }
 }

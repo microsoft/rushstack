@@ -11,7 +11,7 @@ import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import * as TTypescript from 'typescript';
 import * as decomment from 'decomment';
-import { TypescriptCompiler as TTypescriptCompiler } from '@microsoft/rush-stack-compiler-3.1';
+import { TypescriptCompiler as TTypescriptCompiler } from '@microsoft/rush-stack-compiler-3.2';
 
 import {
   RSCTask,

@@ -84,7 +84,7 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.2",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-shared",
