@@ -375,6 +375,7 @@ export class TaskRunner {
     this._printStatus(
       TaskStatus.SuccessWithWarning,
       tasksByStatus,
+      (text: string) => Colors.yellow(text),
       (text: string) => Colors.yellow(Colors.underline(text))
     );
     this._printStatus(TaskStatus.Blocked, tasksByStatus, Colors.red);
@@ -395,12 +396,13 @@ export class TaskRunner {
   private _printStatus(
     status: TaskStatus,
     tasksByStatus: { [status: number]: ITask[] },
-    color: (a: string) => IColorableSequence
+    color: (text: string) => IColorableSequence,
+    headingColor: (text: string) => IColorableSequence = color
   ): void {
     const tasks: ITask[] = tasksByStatus[status];
 
     if (tasks && tasks.length) {
-      this._terminal.writeLine(color(`${status} (${tasks.length})`));
+      this._terminal.writeLine(headingColor(`${status} (${tasks.length})`));
       this._terminal.writeLine(color('================================'));
       for (let i: number = 0; i < tasks.length; i++) {
         const task: ITask = tasks[i];
@@ -418,9 +420,9 @@ export class TaskRunner {
           case TaskStatus.Failure:
             if (task.stopwatch) {
               const time: string = task.stopwatch.toString();
-              this._terminal.writeLine(color(`${task.name} (${time})`));
+              this._terminal.writeLine(headingColor(`${task.name} (${time})`));
             } else {
-              this._terminal.writeLine(color(`${task.name}`));
+              this._terminal.writeLine(headingColor(`${task.name}`));
             }
             break;
         }
