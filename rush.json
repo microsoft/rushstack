@@ -330,6 +330,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "api-extractor-lib3-test",
+      "projectFolder": "build-tests/api-extractor-lib3-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "api-extractor-scenarios",
       "projectFolder": "build-tests/api-extractor-scenarios",
       "reviewCategory": "tests",

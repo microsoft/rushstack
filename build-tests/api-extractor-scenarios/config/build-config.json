@@ -1,15 +1,16 @@
 {
   "scenarioFolderNames": [
     "apiItemKinds",
-    "circularImport1",
+    "circularImport",
     "circularImport2",
-    "exportDuplicate1",
+    "exportDuplicate",
     "exportEquals",
     "exportImportedExternal",
-    "exportStar1",
+    "exportImportedExternal2",
+    "exportStar",
     "exportStar2",
     "exportStar3",
-    "defaultExportOfEntryPoint1",
+    "defaultExportOfEntryPoint",
     "defaultExportOfEntryPoint2",
     "defaultExportOfEntryPoint3",
     "defaultExportOfEntryPoint4"

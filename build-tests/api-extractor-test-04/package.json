@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@microsoft/api-extractor": "7.0.15",
+    "api-extractor-lib1-test": "1.0.0",
     "fs-extra": "~7.0.1",
     "typescript": "~3.1.6"
   }
