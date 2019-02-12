@@ -67,6 +67,3 @@ temp
 # Rush files
 common/temp/**
 package-deps.json
-
-# Keep temp folders in mocked 'repos' that are used for unit tests
-!**/test/**/temp
