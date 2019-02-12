@@ -4,6 +4,7 @@
 const EventEmitter = require('events');
 
 const childProcess = jest.genMockFromModule('child_process');
+const childProcessActual = jest.requireActual('child_process');
 childProcess.spawn.mockImplementation(spawn);
 childProcess.__setSpawnMockConfig = setSpawnMockConfig;
 
@@ -58,5 +59,10 @@ function spawn(file, args, options) {
 
   return cp;
 }
+
+/**
+ * Ensure the real spawnSync function is used, otherwise LockFile breaks.
+ */
+childProcess.spawnSync = childProcessActual.spawnSync;
 
 module.exports = childProcess;
