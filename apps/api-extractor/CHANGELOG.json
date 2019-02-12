@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.18",
+      "tag": "@microsoft/api-extractor_v7.0.18",
+      "date": "Tue, 12 Feb 2019 17:13:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add a workaround for the issue where .d.ts rollups sometimes define names that conflict with a global symbol (the full solution is tracked by GitHub #1095)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.17",
       "tag": "@microsoft/api-extractor_v7.0.17",
       "date": "Mon, 11 Feb 2019 10:32:37 GMT",
