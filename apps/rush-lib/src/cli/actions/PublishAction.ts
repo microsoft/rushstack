@@ -25,6 +25,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
+import { PackageJsonEditor, PackageJsonDependency } from '../../api/PackageJsonEditor';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -221,6 +222,8 @@ export class PublishAction extends BaseRushAction {
       this._prereleaseToken,
       this._addCommitDetails.value);
 
+    const storeLooseVersions: boolean = this.rushConfiguration.storeLooseVersions;
+
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.changes;
       const git: PublishGit = new PublishGit(this._targetBranch.value);
@@ -229,15 +232,27 @@ export class PublishAction extends BaseRushAction {
       // Make changes in temp branch.
       git.checkout(tempBranch, true);
 
+      if (storeLooseVersions) {
+        this._manageLooseVersions('lock');
+      }
+
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
       changeManager.updateChangelog(this._apply.value);
+
+      if (storeLooseVersions) {
+        this._manageLooseVersions('unlock');
+      }
 
       if (VersionControl.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
         git.addChanges();
         git.commit();
         git.push(tempBranch);
+
+        if (storeLooseVersions) {
+          this._manageLooseVersions('lock');
+        }
 
         // Override tag parameter if there is a hotfix change.
         for (const change of orderedChanges) {
@@ -261,6 +276,10 @@ export class PublishAction extends BaseRushAction {
               console.log(`Skip ${change.packageName}. Failed to find its project.`);
             }
           }
+        }
+
+        if (storeLooseVersions) {
+          this._manageLooseVersions('unlock');
         }
 
         // Create and push appropriate Git tags.
@@ -452,5 +471,29 @@ export class PublishAction extends BaseRushAction {
       packageName.substr(1).replace(/\//g, '-') : packageName;
 
     return `${name}-${project.packageJson.version}.tgz`;
+  }
+
+  private _manageLooseVersions(action: 'lock' | 'unlock'): void {
+    const projectsByName: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
+
+    for (const [, project] of projectsByName.entries()) {
+      const editor: PackageJsonEditor = project.packageJsonEditor;
+
+      const dependencies: ReadonlyArray<PackageJsonDependency> = editor.dependencyList;
+
+      for (const dependency of dependencies) {
+        const localProject: RushConfigurationProject | undefined = projectsByName.get(dependency.name);
+
+        if (localProject) {
+          if (action === 'lock') {
+            dependency.setVersion(localProject.packageJson.version);
+          } else {
+            dependency.setVersion('*');
+          }
+        }
+      }
+
+      editor.saveIfModified();
+    }
   }
 }

@@ -120,6 +120,7 @@ export interface IRushConfigurationJson {
   pnpmOptions?: IPnpmOptionsJson;
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
+  storeLooseVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
 }
 
@@ -226,6 +227,7 @@ export class RushConfiguration {
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
   private _ensureConsistentVersions: boolean;
+  private _storeLooseVersions: boolean;
   private _variants: {
     [variantName: string]: boolean;
   };
@@ -707,6 +709,14 @@ export class RushConfiguration {
   }
 
   /**
+   * If true, inter-package dependencies will be stored as '*' in package.json
+   * but emitted as exact versions during publishing.
+   */
+  public get storeLooseVersions(): boolean {
+    return this._storeLooseVersions;
+  }
+
+  /**
    * Indicates whether telemetry collection is enabled for Rush runs.
    * @beta
    */
@@ -945,6 +955,7 @@ export class RushConfiguration {
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
+    this._storeLooseVersions = !!rushConfigurationJson.storeLooseVersions;
 
     this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {});
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || { });
