@@ -336,6 +336,7 @@ export class Collector {
    */
   private _makeUniqueNames(): void {
     const usedNames: Set<string> = new Set<string>();
+    this._collectGlobalNames(usedNames);
 
     // First collect the explicit package exports (named)
     for (const entity of this._entities) {
@@ -372,6 +373,73 @@ export class Collector {
       }
       entity.nameForEmit = nameForEmit;
       usedNames.add(nameForEmit);
+    }
+  }
+
+  /**
+   * Adds global names to the usedNames set, to prevent API Extractor from emitting names that conflict with
+   * a global name.
+   */
+  private _collectGlobalNames(usedNames: Set<string>): void {
+    // As a temporary workaround, this a short list of names that appear in typical projects.
+    // The full solution is tracked by this issue:
+    // https://github.com/Microsoft/web-build-tools/issues/1095
+    const globalNames: string[] = [
+      'Array',
+      'ArrayConstructor',
+      'Console',
+      'Date',
+      'DateConstructor',
+      'Error',
+      'ErrorConstructor',
+      'Float32Array',
+      'Float32ArrayConstructor',
+      'Float64Array',
+      'Float64ArrayConstructor',
+      'IArguments',
+      'Int16Array',
+      'Int16ArrayConstructor',
+      'Int32Array',
+      'Int32ArrayConstructor',
+      'Int8Array',
+      'Int8ArrayConstructor',
+      'Iterable',
+      'IterableIterator',
+      'Iterator',
+      'IteratorResult',
+      'Map',
+      'MapConstructor',
+      'Promise',
+      'PromiseConstructor',
+      'ReadonlyArray',
+      'ReadonlyMap',
+      'ReadonlySet',
+      'Set',
+      'SetConstructor',
+      'String',
+      'Symbol',
+      'SymbolConstructor',
+      'Uint16Array',
+      'Uint16ArrayConstructor',
+      'Uint32Array',
+      'Uint32ArrayConstructor',
+      'Uint8Array',
+      'Uint8ArrayConstructor',
+      'Uint8ClampedArray',
+      'Uint8ClampedArrayConstructor',
+      'WeakMap',
+      'WeakMapConstructor',
+      'WeakSet',
+      'WeakSetConstructor',
+      'clearInterval',
+      'clearTimeout',
+      'console',
+      'setInterval',
+      'setTimeout',
+      'undefined'
+    ];
+    for (const globalName of globalNames) {
+      usedNames.add(globalName);
     }
   }
 
