@@ -1,4 +1,5 @@
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/api-extractor.schema.json",
   "project": {
     "entryPointSourceFile": "lib/index.d.ts"
   },

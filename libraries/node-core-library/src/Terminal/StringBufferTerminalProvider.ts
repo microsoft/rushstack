@@ -6,6 +6,10 @@ import { StringBuilder } from '../StringBuilder';
 import { Text } from '../Text';
 
 /**
+ * Terminal provider that stores written data in buffers separated by severity.
+ * This terminal provider is designed to be used when code that prints to a terminal
+ * is being unit tested.
+ *
  * @beta
  */
 export class StringBufferTerminalProvider implements ITerminalProvider {
@@ -20,6 +24,9 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     this._supportsColor = supportsColor;
   }
 
+  /**
+   * {@inheritdoc ITerminalProvider.write}
+   */
   public write(data: string, severity: TerminalProviderSeverity): void {
     switch (severity) {
       case TerminalProviderSeverity.warning: {
@@ -45,26 +52,44 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     }
   }
 
+  /**
+   * {@inheritdoc ITerminalProvider.eolCharacter}
+   */
   public get eolCharacter(): string {
     return '[n]';
   }
 
+  /**
+   * {@inheritdoc ITerminalProvider.supportsColor}
+   */
   public get supportsColor(): boolean {
     return this._supportsColor;
   }
 
+  /**
+   * Get everything that has been written at log-level severity.
+   */
   public getOutput(): string {
     return this._normalizeOutput(this._standardBuffer.toString());
   }
 
+  /**
+   * Get everything that has been written at verbose-level severity.
+   */
   public getVerbose(): string {
     return this._normalizeOutput(this._verboseBuffer.toString());
   }
 
+  /**
+   * Get everything that has been written at error-level severity.
+   */
   public getErrorOutput(): string {
     return this._normalizeOutput(this._errorBuffer.toString());
   }
 
+  /**
+   * Get everything that has been written at warning-level severity.
+   */
   public getWarningOutput(): string {
     return this._normalizeOutput(this._warningBuffer.toString());
   }

@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
 import * as os from 'os';
 import { Interleaver } from '@microsoft/stream-collator';
 import {
-  Terminal, ConsoleTerminalProvider, ITerminalProvider
+  Terminal,
+  ConsoleTerminalProvider,
+  Colors,
+  IColorableSequence
 } from '@microsoft/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -36,14 +38,14 @@ export class TaskRunner {
     quietMode: boolean,
     parallelism: string | undefined,
     changedProjectsOnly: boolean,
-    customTerminal?: ITerminalProvider
+    terminal?: Terminal
   ) {
     this._tasks = new Map<string, ITask>();
     this._buildQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._changedProjectsOnly = changedProjectsOnly;
-    this._terminal = new Terminal(customTerminal || new ConsoleTerminalProvider());
+    this._terminal = terminal || new Terminal(new ConsoleTerminalProvider());
 
     const numberOfCores: number = os.cpus().length;
 
@@ -199,7 +201,7 @@ export class TaskRunner {
       this._currentActiveTasks++;
       const task: ITask = ctask;
       task.status = TaskStatus.Executing;
-      this._terminal.writeLine(colors.white(`[${task.name}] started`));
+      this._terminal.writeLine(Colors.white(`[${task.name}] started`));
 
       task.stopwatch = Stopwatch.start();
       task.writer = Interleaver.registerTask(task.name, this._quietMode);
@@ -271,7 +273,7 @@ export class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    this._terminal.writeLine(colors.green(`${this._getCurrentCompletedTaskString()}`
+    this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
       + `[${task.name}] completed successfully in ${task.stopwatch.toString()}`));
     task.status = TaskStatus.Success;
 
@@ -303,7 +305,7 @@ export class TaskRunner {
    * Marks a task as skipped.
    */
   private _markTaskAsSkipped(task: ITask): void {
-    this._terminal.writeLine(colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`));
+    this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`));
     task.status = TaskStatus.Skipped;
     task.dependents.forEach((dependent: ITask) => {
       dependent.dependencies.delete(task);
@@ -366,13 +368,18 @@ export class TaskRunner {
 
     this._terminal.writeLine('');
 
-    this._printStatus(TaskStatus.Executing, tasksByStatus, colors.yellow);
-    this._printStatus(TaskStatus.Ready, tasksByStatus, colors.white);
-    this._printStatus(TaskStatus.Skipped, tasksByStatus, colors.grey);
-    this._printStatus(TaskStatus.Success, tasksByStatus, colors.green);
-    this._printStatus(TaskStatus.SuccessWithWarning, tasksByStatus, colors.yellow.underline);
-    this._printStatus(TaskStatus.Blocked, tasksByStatus, colors.red);
-    this._printStatus(TaskStatus.Failure, tasksByStatus, colors.red);
+    this._printStatus(TaskStatus.Executing, tasksByStatus, Colors.yellow);
+    this._printStatus(TaskStatus.Ready, tasksByStatus, Colors.white);
+    this._printStatus(TaskStatus.Skipped, tasksByStatus, Colors.gray);
+    this._printStatus(TaskStatus.Success, tasksByStatus, Colors.green);
+    this._printStatus(
+      TaskStatus.SuccessWithWarning,
+      tasksByStatus,
+      (text: string) => Colors.yellow(text),
+      (text: string) => Colors.yellow(Colors.underline(text))
+    );
+    this._printStatus(TaskStatus.Blocked, tasksByStatus, Colors.red);
+    this._printStatus(TaskStatus.Failure, tasksByStatus, Colors.red);
 
     const tasksWithErrors: ITask[] = tasksByStatus[TaskStatus.Failure];
     if (tasksWithErrors) {
@@ -389,12 +396,13 @@ export class TaskRunner {
   private _printStatus(
     status: TaskStatus,
     tasksByStatus: { [status: number]: ITask[] },
-    color: (a: string) => string
+    color: (text: string) => IColorableSequence,
+    headingColor: (text: string) => IColorableSequence = color
   ): void {
     const tasks: ITask[] = tasksByStatus[status];
 
     if (tasks && tasks.length) {
-      this._terminal.writeLine(color(`${status} (${tasks.length})`));
+      this._terminal.writeLine(headingColor(`${status} (${tasks.length})`));
       this._terminal.writeLine(color('================================'));
       for (let i: number = 0; i < tasks.length; i++) {
         const task: ITask = tasks[i];
@@ -412,9 +420,9 @@ export class TaskRunner {
           case TaskStatus.Failure:
             if (task.stopwatch) {
               const time: string = task.stopwatch.toString();
-              this._terminal.writeLine(color(`${task.name} (${time})`));
+              this._terminal.writeLine(headingColor(`${task.name} (${time})`));
             } else {
-              this._terminal.writeLine(color(`${task.name}`));
+              this._terminal.writeLine(headingColor(`${task.name}`));
             }
             break;
         }

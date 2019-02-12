@@ -6,6 +6,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@microsoft/ts-command-line';
+import { InternalError } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -93,6 +94,10 @@ export class RushCommandLineParser extends CommandLineParser {
     // Ideally we should do this for all the Rush actions, but "rush build" is the most critical one
     // -- if it falsely appears to succeed, we could merge bad PRs, publish empty packages, etc.
     process.exitCode = 1;
+
+    if (this._debugParameter.value) {
+      InternalError.breakInDebugger = true;
+    }
 
     return this._wrapOnExecute().catch((error: Error) => {
       this._reportErrorAndSetExitCode(error);

@@ -32,6 +32,7 @@ import { ApiIndexSignature } from '../api/model/ApiIndexSignature';
 import { ApiVariable } from '../api/model/ApiVariable';
 import { ApiTypeAlias } from '../api/model/ApiTypeAlias';
 import { ApiCallSignature } from '../api/model/ApiCallSignature';
+import { AstSymbol } from '../analyzer/AstSymbol';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -49,10 +50,10 @@ export class ApiModelGenerator {
   }
 
   public buildApiPackage(): ApiPackage {
-    const packageDocComment: tsdoc.DocComment | undefined = this._collector.package.tsdocComment;
+    const packageDocComment: tsdoc.DocComment | undefined = this._collector.workingPackage.tsdocComment;
 
     const apiPackage: ApiPackage = new ApiPackage({
-      name: this._collector.package.name,
+      name: this._collector.workingPackage.name,
       docComment: packageDocComment
     });
     this._apiModel.addMember(apiPackage);
@@ -62,15 +63,15 @@ export class ApiModelGenerator {
 
     // Create a CollectorEntity for each top-level export
     for (const entity of this._collector.entities) {
-      for (const astDeclaration of entity.astSymbol.astDeclarations) {
-        if (entity.exported) {
-          if (!entity.astSymbol.imported) {
+      if (entity.exported) {
+        if (entity.astEntity instanceof AstSymbol) {
+          for (const astDeclaration of entity.astEntity.astDeclarations) {
             this._processDeclaration(astDeclaration, entity.nameForEmit, apiEntryPoint);
-          } else {
-            // TODO: Figure out how to represent reexported definitions.  Basically we need to introduce a new
-            // ApiItem subclass for "export alias", similar to a type alias, but representing declarations of the
-            // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
           }
+        } else {
+          // TODO: Figure out how to represent reexported AstImport objects.  Basically we need to introduce a new
+          // ApiItem subclass for "export alias", similar to a type alias, but representing declarations of the
+          // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
         }
       }
     }

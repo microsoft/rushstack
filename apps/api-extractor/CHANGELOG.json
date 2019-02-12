@@ -2,6 +2,62 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.17",
+      "tag": "@microsoft/api-extractor_v7.0.17",
+      "date": "Mon, 11 Feb 2019 10:32:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where API Extractor neglected to analyze \"typeof\" expressions"
+          },
+          {
+            "comment": "Fix an issue where declarations inside a namespace were sometimes being incorrectly emitted as top-level exports of the .d.ts rollup"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.16",
+      "tag": "@microsoft/api-extractor_v7.0.16",
+      "date": "Mon, 11 Feb 2019 08:55:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Redesign the analyzer so that when an external symbol is reexported by the working package, the local object (AstImport) and external object (AstSymbol) are kept separate"
+          },
+          {
+            "comment": "Fix a number of bugs where external symbols were misinterpreted as being part of the local project"
+          },
+          {
+            "comment": "Eliminate a number of errors involving unusual language constructs, by avoiding analysis of external symbols unless it's really necessary"
+          },
+          {
+            "comment": "Simplify the AstSymbol.nominalAnalysis concept and associated code"
+          },
+          {
+            "comment": "Improve .d.ts rollup trimming to handle reexported symbols correctly"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.15",
+      "tag": "@microsoft/api-extractor_v7.0.15",
+      "date": "Mon, 11 Feb 2019 03:31:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "The `--debug` parameter now automatically breaks in the debugger when InternalError is thrown"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.9.0` to `3.10.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.14",
       "tag": "@microsoft/api-extractor_v7.0.14",
       "date": "Thu, 31 Jan 2019 17:03:49 GMT",

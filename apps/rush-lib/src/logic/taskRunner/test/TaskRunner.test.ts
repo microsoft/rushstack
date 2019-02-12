@@ -3,7 +3,7 @@ import { TaskRunner } from '../TaskRunner';
 import { ITaskWriter } from '@microsoft/stream-collator';
 import { TaskStatus } from '../TaskStatus';
 import { ITaskDefinition } from '../ITask';
-import { StringBufferTerminalProvider } from '@microsoft/node-core-library';
+import { StringBufferTerminalProvider, Terminal } from '@microsoft/node-core-library';
 
 function createDummyTask(name: string, action?: () => void): ITaskDefinition {
   return {
@@ -18,29 +18,32 @@ function createDummyTask(name: string, action?: () => void): ITaskDefinition {
   };
 }
 
-function checkConsoleOutput(logger: StringBufferTerminalProvider): void {
-  expect(logger.getOutput()).toMatchSnapshot();
-  expect(logger.getVerbose()).toMatchSnapshot();
-  expect(logger.getWarningOutput()).toMatchSnapshot();
-  expect(logger.getErrorOutput()).toMatchSnapshot();
+function checkConsoleOutput(terminalProvider: StringBufferTerminalProvider): void {
+  expect(terminalProvider.getOutput()).toMatchSnapshot();
+  expect(terminalProvider.getVerbose()).toMatchSnapshot();
+  expect(terminalProvider.getWarningOutput()).toMatchSnapshot();
+  expect(terminalProvider.getErrorOutput()).toMatchSnapshot();
 }
 
 describe('TaskRunner', () => {
-  let logger: StringBufferTerminalProvider;
+  let terminalProvider: StringBufferTerminalProvider;
+  let terminal: Terminal;
   let taskRunner: TaskRunner;
+
+  beforeEach(() => {
+    terminalProvider = new StringBufferTerminalProvider(true);
+    terminal = new Terminal(terminalProvider);
+  });
 
   describe('Constructor', () => {
     it('throwsErrorOnInvalidParallelism', () => {
-      logger = new StringBufferTerminalProvider(true);
-      expect(() => new TaskRunner(false, 'tequila', false, logger))
-        .toThrowErrorMatchingSnapshot();
+      expect(() => new TaskRunner(false, 'tequila', false, terminal)).toThrowErrorMatchingSnapshot();
     });
   });
 
   describe('Dependencies', () => {
     beforeEach(() => {
-      logger = new StringBufferTerminalProvider(true);
-      taskRunner = new TaskRunner(false, '1', false, logger);
+      taskRunner = new TaskRunner(false, '1', false, terminal);
     });
 
     it('throwsErrorOnNonExistentTask', () => {
@@ -71,7 +74,7 @@ describe('TaskRunner', () => {
         .execute()
         .then(() => {
           expect(result.join(',')).toEqual('1,2');
-          checkConsoleOutput(logger);
+          checkConsoleOutput(terminalProvider);
         })
         .catch(error => fail(error));
     });
@@ -79,8 +82,7 @@ describe('TaskRunner', () => {
 
   describe('Error logging', () => {
     beforeEach(() => {
-      logger = new StringBufferTerminalProvider(true);
-      taskRunner = new TaskRunner(false, '1', false, logger);
+      taskRunner = new TaskRunner(false, '1', false, terminal);
     });
 
     const EXPECTED_FAIL: string = 'Promise returned by execute() resolved but was expected to fail';
@@ -100,10 +102,10 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch(err => {
           expect(err.message).toMatchSnapshot();
-          const allMessages: string = logger.getOutput();
+          const allMessages: string = terminalProvider.getOutput();
           expect(allMessages).not.toContain('Hold my beer...');
           expect(allMessages).toContain('Woops');
-          checkConsoleOutput(logger);
+          checkConsoleOutput(terminalProvider);
         });
     });
   });

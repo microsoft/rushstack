@@ -9,7 +9,8 @@ import {
   IColorableSequence,
   ColorValue,
   Colors,
-  eolSequence
+  eolSequence,
+  TextAttribute
 } from './Colors';
 
 /**
@@ -151,7 +152,6 @@ export class Terminal {
     segments: (string | IColorableSequence)[],
     severity: TerminalProviderSeverity
   ): void {
-
     const withColorText: { [eolChar: string]: string } = {};
     const withoutColorText: { [eolChar: string]: string } = {};
     let withColorLines: string[] | undefined;
@@ -310,6 +310,48 @@ export class Terminal {
               startColorCodes.push(100);
               endColorCodes.push(49);
               break;
+            }
+          }
+
+          if (segment.textAttributes) {
+            for (const textAttribute of segment.textAttributes) {
+              switch (textAttribute) {
+                case TextAttribute.Bold: {
+                  startColorCodes.push(1);
+                  endColorCodes.push(21);
+                  break;
+                }
+
+                case TextAttribute.Dim: {
+                  startColorCodes.push(2);
+                  endColorCodes.push(22);
+                  break;
+                }
+
+                case TextAttribute.Underline: {
+                  startColorCodes.push(4);
+                  endColorCodes.push(24);
+                  break;
+                }
+
+                case TextAttribute.Blink: {
+                  startColorCodes.push(5);
+                  endColorCodes.push(25);
+                  break;
+                }
+
+                case TextAttribute.InvertColor: {
+                  startColorCodes.push(7);
+                  endColorCodes.push(27);
+                  break;
+                }
+
+                case TextAttribute.Hidden: {
+                  startColorCodes.push(8);
+                  endColorCodes.push(28);
+                  break;
+                }
+              }
             }
           }
 

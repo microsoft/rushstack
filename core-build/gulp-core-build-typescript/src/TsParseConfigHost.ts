@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as typescript from 'typescript';
+import * as TTypescript from 'typescript';
 import { FileSystem } from '@microsoft/node-core-library';
 
 /**
  * Used as a helper to parse tsconfig.json files.
  */
-export class TsParseConfigHost implements typescript.ParseConfigHost {
+export class TsParseConfigHost implements TTypescript.ParseConfigHost {
   public useCaseSensitiveFileNames: boolean = false;
 
   public readDirectory(rootDir: string, extensions: string[], excludes: string[], includes: string[]): string[] {
