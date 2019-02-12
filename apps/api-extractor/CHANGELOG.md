@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 11 Feb 2019 10:32:37 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Feb 2019 17:13:12 GMT and should not be manually modified.
+
+## 7.0.18
+Tue, 12 Feb 2019 17:13:12 GMT
+
+### Patches
+
+- Add a workaround for the issue where .d.ts rollups sometimes define names that conflict with a global symbol (the full solution is tracked by GitHub #1095)
 
 ## 7.0.17
 Mon, 11 Feb 2019 10:32:37 GMT
