@@ -45,6 +45,10 @@
       "description": "If true, consistent version specifiers for dependencies will be enforced (i.e. \"rush check\" is run before some commands).",
       "type": "boolean"
     },
+    "storeLooseVersions": {
+      "description": "If true, inter-package dependencies will be stored as '*' in package.json but emitted as exact versions during publishing.",
+      "type": "boolean"
+    },
     "hotfixChangeEnabled": {
       "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default.",
       "type": "boolean"
