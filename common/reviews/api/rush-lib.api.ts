@@ -237,6 +237,7 @@ declare class RushConfiguration {
     readonly rushJsonFolder: string;
     readonly rushLinkJsonFilename: string;
     readonly shrinkwrapFilePhrase: string;
+    readonly storeLooseVersions: boolean;
     // @beta
     readonly telemetryEnabled: boolean;
     readonly tempShrinkwrapFilename: string;
