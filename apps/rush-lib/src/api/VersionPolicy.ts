@@ -172,7 +172,7 @@ export abstract class VersionPolicy {
    * Tells the version policy to modify any dependencies in the target package
    * to values used for checked-in source.
    */
-  public setDependeniesBeforeCommit(packageName: string, configuration: RushConfiguration): void {
+  public setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void {
     if (this._versionFormatForCommit === VersionFormatForCommit.wildcard) {
       const project: RushConfigurationProject = configuration.getProjectByName(packageName)!;
 
