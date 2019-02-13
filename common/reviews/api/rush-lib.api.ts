@@ -237,7 +237,6 @@ declare class RushConfiguration {
     readonly rushJsonFolder: string;
     readonly rushLinkJsonFilename: string;
     readonly shrinkwrapFilePhrase: string;
-    readonly storeLooseVersions: boolean;
     // @beta
     readonly telemetryEnabled: boolean;
     readonly tempShrinkwrapFilename: string;
@@ -298,8 +297,10 @@ declare abstract class VersionPolicy {
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
     readonly policyName: string;
+    setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
+    setDependeniesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
     abstract validate(versionString: string, packageName: string): void;
-}
+    }
 
 // @beta
 declare class VersionPolicyConfiguration {
