@@ -70,7 +70,7 @@ export interface IEventHooksJson {
  */
 export interface IRushRepositoryJson {
   /**
-   * The remote url of the repository. It helps 'Rush change' finds the right remote to compare against.
+   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
    */
   url: string;
 }
@@ -80,6 +80,13 @@ export interface IRushRepositoryJson {
  */
 export interface IPnpmOptionsJson {
   strictPeerDependencies?: boolean;
+}
+
+/**
+ * Part of IRushConfigurationJson.
+ */
+export interface IYarnOptionsJson {
+  ignoreEngines?: boolean;
 }
 
 /**
@@ -111,6 +118,7 @@ export interface IRushConfigurationJson {
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
   pnpmOptions?: IPnpmOptionsJson;
+  yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
 }
@@ -155,6 +163,31 @@ export class PnpmOptionsConfiguration {
   /** @internal */
   public constructor(json: IPnpmOptionsJson) {
     this.strictPeerDependencies = !!json.strictPeerDependencies;
+  }
+}
+
+/**
+ * Options that are only used when the yarn package manager is selected.
+ *
+ * @remarks
+ * It is valid to define these options in rush.json even if the yarn package manager
+ * is not being used.
+ *
+ * @public
+ */
+export class YarnOptionsConfiguration {
+  /**
+   * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
+   * This allows "rush install" to succeed if there are dependencies with engines defined in
+   * package.json which do not match the current environment.
+   *
+   * The default value is false.
+   */
+  public readonly ignoreEngines: boolean;
+
+  /** @internal */
+  public constructor(json: IYarnOptionsJson) {
+    this.ignoreEngines = !!json.ignoreEngines;
   }
 }
 
@@ -211,6 +244,7 @@ export class RushConfiguration {
   private _repositoryUrl: string;
 
   private _pnpmOptions: PnpmOptionsConfiguration;
+  private _yarnOptions: YarnOptionsConfiguration;
 
   // Rush hooks
   private _eventHooks: EventHooks;
@@ -658,7 +692,7 @@ export class RushConfiguration {
   }
 
   /**
-   * The remote url of the repository. It helps 'Rush change' finds the right remote to compare against.
+   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
    */
   public get repositoryUrl(): string {
     return this._repositoryUrl;
@@ -693,6 +727,13 @@ export class RushConfiguration {
    */
   public get pnpmOptions(): PnpmOptionsConfiguration {
     return this._pnpmOptions;
+  }
+
+  /**
+   * {@inheritdoc YarnOptionsConfiguration}
+   */
+  public get yarnOptions(): YarnOptionsConfiguration {
+    return this._yarnOptions;
   }
 
   /**
@@ -905,7 +946,8 @@ export class RushConfiguration {
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
-    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || { });
+    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {});
+    this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || { });
 
     // TODO: Add an actual "packageManager" field in rush.json
     const packageManagerFields: string[] = [];

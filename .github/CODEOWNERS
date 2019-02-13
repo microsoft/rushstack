@@ -1,6 +1,5 @@
 .github/CODEOWNERS @iclanton @nickpape-msft @octogonz @patmill @aditima
-.pullapprove.yml @iclanton @nickpape-msft @octogonz @patmill @aditima
-.travis.yml @iclanton @nickpape-msft @octogonz @patmill @aditima
+common/config/**/* @iclanton @nickpape-msft @octogonz @patmill @aditima
 
 common/reviews/**/* @iclanton @nickpape-msft @octogonz @mpasarin @aditima
 

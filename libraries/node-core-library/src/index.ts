@@ -88,3 +88,6 @@ export {
   ConsoleTerminalProvider,
   IConsoleTerminalProviderOptions
 } from './Terminal/ConsoleTerminalProvider';
+export {
+  StringBufferTerminalProvider
+} from './Terminal/StringBufferTerminalProvider';

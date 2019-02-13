@@ -32,6 +32,8 @@ export declare interface IPublicComplexInterface {
     /* Excluded from this release type: __new */
 }
 
+/* Excluded from this release type: Lib1Interface */
+
 /**
  * This is a public class
  * @public

@@ -8,7 +8,7 @@ import {
   FileSystem
 } from '@microsoft/node-core-library';
 import { IExtractorConfig, IExtractorOptions } from '@microsoft/api-extractor';
-import { ApiExtractorRunner as TApiExtractorRunner } from '@microsoft/rush-stack-compiler-2.7';
+import { ApiExtractorRunner as TApiExtractorRunner } from '@microsoft/rush-stack-compiler-3.2';
 
 import { RSCTask, IRSCTaskConfig } from './RSCTask';
 
@@ -47,8 +47,8 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig>  {
 
     const ApiExtractorRunner: typeof TApiExtractorRunner = this._rushStackCompiler.ApiExtractorRunner;
     const extractorConfig: IExtractorConfig = ApiExtractorRunner.apiExtractor.Extractor.loadConfigObject(
-      this._getApiExtractorConfigFilePath(this.buildConfig.rootPath)
-    );
+        this._getApiExtractorConfigFilePath(this.buildConfig.rootPath)
+      );
 
     const apiExtractorRunner: TApiExtractorRunner = new ApiExtractorRunner(
       extractorConfig,

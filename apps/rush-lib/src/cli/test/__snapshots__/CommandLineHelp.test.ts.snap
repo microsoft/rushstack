@@ -140,7 +140,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: change 1`] = `
-"usage: rush change [-h] [-v] [-b BRANCH]
+"usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH]
 
 Asks a series of questions and then generates a <branchname>-<timestamp>.json 
 file in the common folder. The \`publish\` command will consume these files and 
@@ -163,6 +163,8 @@ Optional arguments:
   -h, --help            Show this help message and exit.
   -v, --verify          Verify the change file has been generated and that it 
                         is a valid JSON file
+  --no-fetch            Skips fetching the baseline branch before running 
+                        \\"git diff\\" to detect changes.
   -b BRANCH, --target-branch BRANCH
                         If this parameter is specified, compare current 
                         branch with the target branch to get changes. If this 

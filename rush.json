@@ -164,11 +164,21 @@
 
   "repository": {
     /**
-     * This setting is sometimes needed when using "rush change" with multiple Git remotes.
-     * It specifies the remote url for the official Git repository.  If this URL is provided,
-     * "rush change" will use it to find the right remote to compare against.
+     * The URL of this Git repository, used by "rush change" to determine the base branch for your PR.
+     *
+     * The "rush change" command needs to determine which files are affected by your PR diff.
+     * If you merged or cherry-picked commits from the master branch into your PR branch, those commits
+     * should be excluded from this diff (since they belong to some other PR).  In order to do that,
+     * Rush needs to know where to find the base branch for your PR.  This information cannot be
+     * determined from Git alone, since the "pull request" feature is not a Git concept.  Ideally
+     * Rush would use a vendor-specific protocol to query the information from GitHub, Azure DevOps, etc.
+     * But to keep things simple, "rush change" simply assumes that your PR is against the "master" branch
+     * of the Git remote indicated by the respository.url setting in rush.json.  If you are working in
+     * a GitHub "fork" of the real repo, this setting will be different from the repository URL of your
+     * your PR branch, and in this situation "rush change" will also automatically invoke "git fetch"
+     * to retrieve the latest activity for the remote master branch.
      */
-    // "url": "https://github.com/Microsoft/rush-example"
+    "url": "https://github.com/Microsoft/web-build-tools.git"
   },
 
   /**
@@ -278,7 +288,7 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.0"
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {
@@ -316,6 +326,12 @@
     {
       "packageName": "api-extractor-lib2-test",
       "projectFolder": "build-tests/api-extractor-lib2-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "api-extractor-lib3-test",
+      "projectFolder": "build-tests/api-extractor-lib3-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -392,6 +408,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-stack-compiler-3.3-library-test",
+      "projectFolder": "build-tests/rush-stack-compiler-3.3-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "rush-stack-library-test",
       "projectFolder": "build-tests/rush-stack-library-test",
       "reviewCategory": "tests",
@@ -441,9 +463,7 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/api-extractor",
-        "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.0"
+        "@microsoft/node-library-build"
       ]
     },
     {
@@ -476,10 +496,10 @@
       "packageName": "@microsoft/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+     "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.0"
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {
@@ -487,7 +507,7 @@
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
       "shouldPublish": true
-    },
+   },
     {
       "packageName": "@microsoft/rushell",
       "projectFolder": "libraries/rushell",
@@ -498,7 +518,7 @@
       "packageName": "@microsoft/stream-collator",
       "projectFolder": "libraries/stream-collator",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+     "shouldPublish": true
     },
     {
       "packageName": "@microsoft/ts-command-line",
@@ -507,9 +527,9 @@
       "shouldPublish": true,
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.0"
+        "@microsoft/rush-stack-compiler-3.2"
       ]
-    },
+   },
 
     // "stack" folder (alphabetical order)
     {
@@ -520,24 +540,22 @@
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.4",
-      "projectFolder": "stack/rush-stack-compiler-2.4",
+     "projectFolder": "stack/rush-stack-compiler-2.4",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.0"
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.7",
-      "projectFolder": "stack/rush-stack-compiler-2.7",
+     "projectFolder": "stack/rush-stack-compiler-2.7",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.0"
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {
@@ -546,9 +564,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.0"
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {
@@ -557,9 +574,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.0"
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {
@@ -568,9 +584,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.0"
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {
@@ -579,9 +594,18 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/api-extractor",
         "@microsoft/node-library-build",
-        "@microsoft/rush-stack-compiler-3.0"
+        "@microsoft/rush-stack-compiler-3.2"
+      ]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.3",
+      "projectFolder": "stack/rush-stack-compiler-3.3",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {

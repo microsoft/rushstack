@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support for Yarn options with the --ignore-engines flag",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "kevingrandon@yahoo.com"
+}

@@ -1,6 +1,18 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 10 Jan 2019 01:57:52 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Feb 2019 03:31:55 GMT and should not be manually modified.
+
+## 3.10.0
+Mon, 11 Feb 2019 03:31:55 GMT
+
+### Minor changes
+
+- Include support for text formatting in the Terminal API.
+- Add new API `InternalError.breakInDebugger`
+
+### Patches
+
+- Exposing utility class StringBufferTerminalProvider, useful to clients of Terminal API for their own unit tests
 
 ## 3.9.0
 Thu, 10 Jan 2019 01:57:52 GMT
