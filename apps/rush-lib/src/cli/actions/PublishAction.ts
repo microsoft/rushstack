@@ -25,7 +25,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
-import { PackageJsonEditor, PackageJsonDependency } from '../../api/PackageJsonEditor';
+import { VersionPolicy } from '../../api/VersionPolicy';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -222,8 +222,6 @@ export class PublishAction extends BaseRushAction {
       this._prereleaseToken,
       this._addCommitDetails.value);
 
-    const storeLooseVersions: boolean = this.rushConfiguration.storeLooseVersions;
-
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.changes;
       const git: PublishGit = new PublishGit(this._targetBranch.value);
@@ -232,17 +230,13 @@ export class PublishAction extends BaseRushAction {
       // Make changes in temp branch.
       git.checkout(tempBranch, true);
 
-      if (storeLooseVersions) {
-        this._manageLooseVersions('lock');
-      }
+      this._setDependenciesBeforePublish();
 
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
       changeManager.updateChangelog(this._apply.value);
 
-      if (storeLooseVersions) {
-        this._manageLooseVersions('unlock');
-      }
+      this._setDependenciesBeforeCommit();
 
       if (VersionControl.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
@@ -250,9 +244,7 @@ export class PublishAction extends BaseRushAction {
         git.commit();
         git.push(tempBranch);
 
-        if (storeLooseVersions) {
-          this._manageLooseVersions('lock');
-        }
+        this._setDependenciesBeforePublish();
 
         // Override tag parameter if there is a hotfix change.
         for (const change of orderedChanges) {
@@ -278,9 +270,7 @@ export class PublishAction extends BaseRushAction {
           }
         }
 
-        if (storeLooseVersions) {
-          this._manageLooseVersions('unlock');
-        }
+        this._setDependenciesBeforeCommit();
 
         // Create and push appropriate Git tags.
         this._gitAddTags(git, orderedChanges);
@@ -473,27 +463,27 @@ export class PublishAction extends BaseRushAction {
     return `${name}-${project.packageJson.version}.tgz`;
   }
 
-  private _manageLooseVersions(action: 'lock' | 'unlock'): void {
-    const projectsByName: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
+  private _setDependenciesBeforePublish(): void {
+    for (const project of this.rushConfiguration.projects) {
+      if (!this._versionPolicy.value || this._versionPolicy.value === project.versionPolicyName) {
+        const versionPolicy: VersionPolicy | undefined = project.versionPolicy;
 
-    for (const [, project] of projectsByName.entries()) {
-      const editor: PackageJsonEditor = project.packageJsonEditor;
-
-      const dependencies: ReadonlyArray<PackageJsonDependency> = editor.dependencyList;
-
-      for (const dependency of dependencies) {
-        const localProject: RushConfigurationProject | undefined = projectsByName.get(dependency.name);
-
-        if (localProject) {
-          if (action === 'lock') {
-            dependency.setVersion(localProject.packageJson.version);
-          } else {
-            dependency.setVersion('*');
-          }
+        if (versionPolicy) {
+          versionPolicy.setDependenciesBeforePublish(project.packageName, this.rushConfiguration);
         }
       }
+    }
+  }
 
-      editor.saveIfModified();
+  private _setDependenciesBeforeCommit(): void {
+    for (const project of this.rushConfiguration.projects) {
+      if (!this._versionPolicy.value || this._versionPolicy.value === project.versionPolicyName) {
+        const versionPolicy: VersionPolicy | undefined = project.versionPolicy;
+
+        if (versionPolicy) {
+          versionPolicy.setDependenciesBeforePublish(project.packageName, this.rushConfiguration);
+        }
+      }
     }
   }
 }

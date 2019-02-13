@@ -8,8 +8,13 @@ import { IPackageJson } from '@microsoft/node-core-library';
 import {
   IVersionPolicyJson,
   ILockStepVersionJson,
-  IIndividualVersionJson
+  IIndividualVersionJson,
+  VersionFormatForCommit,
+  VersionFormatForPublish
 } from './VersionPolicyConfiguration';
+import { PackageJsonEditor } from './PackageJsonEditor';
+import { RushConfiguration } from './RushConfiguration';
+import { RushConfigurationProject } from './RushConfigurationProject';
 
 /**
  * Type of version bumps
@@ -46,6 +51,8 @@ export enum VersionPolicyDefinitionName {
 export abstract class VersionPolicy {
   private _policyName: string;
   private _definitionName: VersionPolicyDefinitionName;
+  private _versionFormatForCommit: VersionFormatForCommit;
+  private _versionFormatForPublish: VersionFormatForPublish;
 
   /**
    * Loads from version policy json
@@ -72,6 +79,16 @@ export abstract class VersionPolicy {
   constructor(versionPolicyJson: IVersionPolicyJson) {
     this._policyName = versionPolicyJson.policyName;
     this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+
+    const {
+      dependencies: {
+        versionFormatForCommit = VersionFormatForCommit.original,
+        versionFormatForPublish = VersionFormatForPublish.original
+      } = {}
+    } = versionPolicyJson;
+
+    this._versionFormatForCommit = versionFormatForCommit;
+    this._versionFormatForPublish = versionFormatForPublish;
   }
 
   /**
@@ -125,6 +142,54 @@ export abstract class VersionPolicy {
    * @param packageName - package name
    */
   public abstract validate(versionString: string, packageName: string): void;
+
+  /**
+   * Tells the version policy to modify any dependencies in the target package
+   * to values used for publishing.
+   */
+  public setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void {
+    if (this._versionFormatForPublish === VersionFormatForPublish.exact) {
+      const project: RushConfigurationProject = configuration.getProjectByName(packageName)!;
+
+      const packageJsonEditor: PackageJsonEditor = project.packageJsonEditor;
+
+      for (const dependency of packageJsonEditor.dependencyList) {
+        const rushDependencyProject: RushConfigurationProject | undefined =
+          configuration.getProjectByName(dependency.name);
+
+        if (rushDependencyProject) {
+          const dependencyVersion: string = rushDependencyProject.packageJson.version;
+
+          dependency.setVersion(dependencyVersion);
+        }
+      }
+
+      packageJsonEditor.saveIfModified();
+    }
+  }
+
+  /**
+   * Tells the version policy to modify any dependencies in the target package
+   * to values used for checked-in source.
+   */
+  public setDependeniesBeforeCommit(packageName: string, configuration: RushConfiguration): void {
+    if (this._versionFormatForCommit === VersionFormatForCommit.wildcard) {
+      const project: RushConfigurationProject = configuration.getProjectByName(packageName)!;
+
+      const packageJsonEditor: PackageJsonEditor = project.packageJsonEditor;
+
+      for (const dependency of packageJsonEditor.dependencyList) {
+        const rushDependencyProject: RushConfigurationProject | undefined =
+          configuration.getProjectByName(dependency.name);
+
+        if (rushDependencyProject) {
+          dependency.setVersion('*');
+        }
+      }
+
+      packageJsonEditor.saveIfModified();
+    }
+  }
 }
 
 /**
