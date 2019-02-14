@@ -28,6 +28,11 @@ import { FileSystem } from '@microsoft/node-core-library';
 export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
+
+  /**
+   * Optional command to run. Otherwise, use the `actionName` as the command to run.
+   */
+  commandToRun?: string;
 }
 
 /**
@@ -42,6 +47,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
 export class BulkScriptAction extends BaseScriptAction {
   private _enableParallelism: boolean;
   private _ignoreMissingScript: boolean;
+  private _commandToRun: string;
 
   private _changedProjectsOnly: CommandLineFlagParameter;
   private _fromFlag: CommandLineStringListParameter;
@@ -56,6 +62,7 @@ export class BulkScriptAction extends BaseScriptAction {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
+    this._commandToRun = options.commandToRun || options.actionName;
   }
 
   public run(): Promise<void> {
@@ -71,7 +78,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
-    const parallelism: string | undefined = this._isParallelismEnabled()
+    const parallelism: string | undefined = this._enableParallelism
       ? this._parallelismParameter!.value
       : '1';
 
@@ -89,7 +96,7 @@ export class BulkScriptAction extends BaseScriptAction {
         rushConfiguration: this.rushConfiguration,
         toFlags: this._mergeToProjects(),
         fromFlags: this._fromFlag.values,
-        commandToRun: this.actionName,
+        commandToRun: this._commandToRun,
         customParameterValues,
         isQuietMode,
         parallelism,
@@ -117,7 +124,7 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   protected onDefineParameters(): void {
-    if (this._isParallelismEnabled()) {
+    if (this._enableParallelism) {
       this._parallelismParameter = this.defineStringParameter({
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
@@ -174,12 +181,6 @@ export class BulkScriptAction extends BaseScriptAction {
       });
     }
     return projects;
-  }
-
-  private _isParallelismEnabled(): boolean {
-    return this.actionName === 'build'
-      || this.actionName === 'rebuild'
-      || this._enableParallelism;
   }
 
   private _doBeforeTask(): void {
