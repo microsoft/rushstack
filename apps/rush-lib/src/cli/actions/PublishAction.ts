@@ -6,7 +6,8 @@ import { EOL } from 'os';
 import * as path from 'path';
 import {
   CommandLineFlagParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  CommandLineChoiceParameter
 } from '@microsoft/ts-command-line';
 import { JsonFile, FileSystem } from '@microsoft/node-core-library';
 
@@ -32,6 +33,7 @@ export class PublishAction extends BaseRushAction {
   private _includeAll: CommandLineFlagParameter;
   private _npmAuthToken: CommandLineStringParameter;
   private _npmTag: CommandLineStringParameter;
+  private _npmAccessLevel: CommandLineChoiceParameter;
   private _publish: CommandLineFlagParameter;
   private _regenerateChangelogs: CommandLineFlagParameter;
   private _registryUrl: CommandLineStringParameter;
@@ -114,6 +116,16 @@ export class PublishAction extends BaseRushAction {
       `The tag option to pass to npm publish. By default NPM will publish using the 'latest' tag, even if ` +
       `the package is older than the current latest, so in publishing workflows for older releases, providing ` +
       `a tag is important. When hotfix changes are made, this parameter defaults to 'hotfix'.`
+    });
+    this._npmAccessLevel = this.defineChoiceParameter({
+      alternatives: ['public', 'restricted'],
+      parameterLongName: '--set-access-level',
+      parameterShortName: undefined,
+      description:
+      `The access option to pass to npm publish. By default NPM will publish scoped packages with an access ` +
+      `level of 'restricted'. Scoped packages can be published with an access level of 'public' by specifying ` +
+      `that value for this flag with the initial publication. NPM always publishes unscoped packages with an ` +
+      `access level of 'public'.`
     });
 
     // NPM pack tarball related parameters
@@ -344,6 +356,10 @@ export class PublishAction extends BaseRushAction {
 
       if (this._force.value) {
         args.push(`--force`);
+      }
+
+      if (this._npmAccessLevel.value) {
+        args.push(`--access`, this._npmAccessLevel.value);
       }
 
       // TODO: Yarn's "publish" command line is fairly different from NPM and PNPM.  The right thing to do here
