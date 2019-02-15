@@ -21,7 +21,7 @@ export class MinimalRushConfiguration {
   private _commonRushConfigFolder: string;
 
   public static loadFromDefaultLocation(): MinimalRushConfiguration | undefined {
-    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation({ showVerbose: true });
     if (rushJsonLocation) {
       return MinimalRushConfiguration._loadFromConfigurationFile(rushJsonLocation);
     } else {

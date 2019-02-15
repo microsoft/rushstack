@@ -110,6 +110,12 @@ declare class IndividualVersionPolicy extends VersionPolicy {
     validate(versionString: string, packageName: string): void;
 }
 
+// @public
+interface ITryFindRushJsonLocationOptions {
+    showVerbose?: boolean;
+    startingFolder?: string;
+}
+
 // @internal
 declare class _LastInstallFlag {
     constructor(folderPath: string, state?: Object);
@@ -217,7 +223,7 @@ declare class RushConfiguration {
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
-    static loadFromDefaultLocation(): RushConfiguration;
+    static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
     readonly npmCacheFolder: string;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManager;
@@ -241,7 +247,7 @@ declare class RushConfiguration {
     readonly telemetryEnabled: boolean;
     readonly tempShrinkwrapFilename: string;
     readonly tempShrinkwrapPreinstallFilename: string;
-    static tryFindRushJsonLocation(verbose?: boolean): string | undefined;
+    static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;

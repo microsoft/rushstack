@@ -1,0 +1,13 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "bulk",
+      "name": "rebuild",
+      "summary": "Rebuild",
+      "description": "This combo is not supported",
+      "enableParallelism": true,
+      "safeForSimultaneousRushProcesses": true
+    }
+  ]
+}
