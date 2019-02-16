@@ -12,6 +12,7 @@ export {
 
 export {
   RushConfiguration,
+  ITryFindRushJsonLocationOptions,
   PackageManager,
   PnpmOptionsConfiguration,
   YarnOptionsConfiguration
