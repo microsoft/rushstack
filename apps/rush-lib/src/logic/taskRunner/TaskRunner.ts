@@ -428,13 +428,16 @@ export class TaskRunner {
         }
 
         if (task.writer) {
-          let stderr: string = task.writer.getStdError();
-          if (stderr && (task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning)) {
-            stderr = stderr.split(os.EOL)
+          const stderr: string = task.writer.getStdError();
+          const shouldPrintDetails: boolean =
+            task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning;
+          let details: string = stderr ? stderr : task.writer.getStdOutput();
+          if (details && shouldPrintDetails) {
+            details = details.split(os.EOL)
               .map(text => text.trim())
               .filter(text => text)
               .join(os.EOL);
-            this._terminal.writeLine(stderr + (i !== tasks.length - 1 ? os.EOL : ''));
+            this._terminal.writeLine(details + (i !== tasks.length - 1 ? os.EOL : ''));
           }
         }
       }

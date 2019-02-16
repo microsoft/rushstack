@@ -108,5 +108,24 @@ describe('TaskRunner', () => {
           checkConsoleOutput(terminalProvider);
         });
     });
+
+    it('printedStdoutAfterErrorWithEmptyStderr', () => {
+      taskRunner.addTask({
+        name: 'stdout only',
+        isIncrementalBuildAllowed: false,
+        execute: (writer: ITaskWriter) => {
+          writer.write('Step 1 of important task' + EOL);
+          writer.write('Oh noes' + EOL);
+          return Promise.resolve(TaskStatus.Failure);
+        }
+      });
+      return taskRunner
+        .execute()
+        .then(() => fail(EXPECTED_FAIL))
+        .catch(err => {
+          expect(err.message).toMatchSnapshot();
+          expect(terminalProvider.getOutput()).toMatch(/.*Step 1 of important task.*Oh noes/);
+        });
+    });
   });
 });
