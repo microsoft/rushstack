@@ -9,7 +9,29 @@
       "oneOf": [
         { "$ref": "#/definitions/lockStepVersion" },
         { "$ref": "#/definitions/individualVersion" }
-      ]
+      ],
+      "properties": {
+        "policyName": {
+          "description": "The name of the version policy",
+          "type": "string"
+        },
+        "dependencies": {
+          "type": "object",
+          "description": "Behavior when handling package dependencies during version bumps and publishing",
+          "properties": {
+            "versionFormatForPublish": {
+              "description": "The version to use for dependencies when publishing",
+              "type": "string",
+              "enum": [ "original", "exact" ]
+            },
+            "versionFormatForCommit": {
+              "description": "The version to use for dependencies when committing to source",
+              "type": "string",
+              "enum": [ "original", "wildcard" ]
+            }
+          }
+        }
+      }
   },
   "definitions": {
     "lockStepVersion": {

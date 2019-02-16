@@ -26,6 +26,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
+import { VersionPolicy } from '../../api/VersionPolicy';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -241,15 +242,21 @@ export class PublishAction extends BaseRushAction {
       // Make changes in temp branch.
       git.checkout(tempBranch, true);
 
+      this._setDependenciesBeforePublish();
+
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
       changeManager.updateChangelog(this._apply.value);
+
+      this._setDependenciesBeforeCommit();
 
       if (VersionControl.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
         git.addChanges();
         git.commit();
         git.push(tempBranch);
+
+        this._setDependenciesBeforePublish();
 
         // Override tag parameter if there is a hotfix change.
         for (const change of orderedChanges) {
@@ -274,6 +281,8 @@ export class PublishAction extends BaseRushAction {
             }
           }
         }
+
+        this._setDependenciesBeforeCommit();
 
         // Create and push appropriate Git tags.
         this._gitAddTags(git, orderedChanges);
@@ -468,5 +477,29 @@ export class PublishAction extends BaseRushAction {
       packageName.substr(1).replace(/\//g, '-') : packageName;
 
     return `${name}-${project.packageJson.version}.tgz`;
+  }
+
+  private _setDependenciesBeforePublish(): void {
+    for (const project of this.rushConfiguration.projects) {
+      if (!this._versionPolicy.value || this._versionPolicy.value === project.versionPolicyName) {
+        const versionPolicy: VersionPolicy | undefined = project.versionPolicy;
+
+        if (versionPolicy) {
+          versionPolicy.setDependenciesBeforePublish(project.packageName, this.rushConfiguration);
+        }
+      }
+    }
+  }
+
+  private _setDependenciesBeforeCommit(): void {
+    for (const project of this.rushConfiguration.projects) {
+      if (!this._versionPolicy.value || this._versionPolicy.value === project.versionPolicyName) {
+        const versionPolicy: VersionPolicy | undefined = project.versionPolicy;
+
+        if (versionPolicy) {
+          versionPolicy.setDependenciesBeforePublish(project.packageName, this.rushConfiguration);
+        }
+      }
+    }
   }
 }

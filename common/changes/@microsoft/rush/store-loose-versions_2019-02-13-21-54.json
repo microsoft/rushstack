@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add dependency management to VersionPolicy and consume in PublishAction",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "ThomasMichon@users.noreply.github.com"
+}

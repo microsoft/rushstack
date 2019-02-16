@@ -303,8 +303,10 @@ declare abstract class VersionPolicy {
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
     readonly policyName: string;
+    setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
+    setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
     abstract validate(versionString: string, packageName: string): void;
-}
+    }
 
 // @beta
 declare class VersionPolicyConfiguration {
