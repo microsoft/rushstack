@@ -319,6 +319,12 @@ export interface IExtractorConfig {
   dtsRollup?: IExtractorDtsRollupConfig;
 
   /**
+   * {@inheritdoc IExtractorTsdocMetadataConfig}
+   * @beta
+   */
+  tsdocMetadata?: IExtractorTsdocMetadataConfig;
+
+  /**
    * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
    * recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it
    * may be required when dependencies contain declarations that are incompatible with the TypeScript engine
@@ -337,10 +343,4 @@ export interface IExtractorConfig {
    * to prevent spurious diffs in output files tracked for tests.
    */
   testMode?: boolean;
-
-  /**
-   * {@inheritdoc IExtractorTsdocMetadataConfig}
-   * @beta
-   */
-  tsdocMetadata?: IExtractorTsdocMetadataConfig;
 }

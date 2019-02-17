@@ -37,13 +37,11 @@
     "mainDtsRollupPath": ""
   },
 
-  "skipLibCheck": false,
-  
-  "testMode": false
-  },
-
   "tsdocMetadata": {
     "enabled": true,
     "tsdocMetadataPath": ""
-  }
+  },
+
+  "skipLibCheck": false,
+  "testMode": false
 }
