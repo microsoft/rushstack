@@ -9,6 +9,7 @@ export interface IColorableSequence {
   isEol?: boolean;
   foregroundColor?: ColorValue;
   backgroundColor?: ColorValue;
+  textAttributes?: TextAttribute[];
 }
 
 export const eolSequence: IColorableSequence = {
@@ -28,6 +29,15 @@ export enum ColorValue {
   Cyan,
   White,
   Gray
+}
+
+export enum TextAttribute {
+  Bold,
+  Dim,
+  Underline,
+  Blink,
+  InvertColor,
+  Hidden
 }
 
 /**
@@ -166,7 +176,34 @@ export class Colors {
     };
   }
 
+  public static bold(text: string | IColorableSequence): IColorableSequence {
+    return Colors._applyTextAttribute(text, TextAttribute.Bold);
+  }
+
+  public static dim(text: string | IColorableSequence): IColorableSequence {
+    return Colors._applyTextAttribute(text, TextAttribute.Dim);
+  }
+
+  public static underline(text: string | IColorableSequence): IColorableSequence {
+    return Colors._applyTextAttribute(text, TextAttribute.Underline);
+  }
+
+  public static blink(text: string | IColorableSequence): IColorableSequence {
+    return Colors._applyTextAttribute(text, TextAttribute.Blink);
+  }
+
+  public static invertColor(text: string | IColorableSequence): IColorableSequence {
+    return Colors._applyTextAttribute(text, TextAttribute.InvertColor);
+  }
+
+  public static hidden(text: string | IColorableSequence): IColorableSequence {
+    return Colors._applyTextAttribute(text, TextAttribute.Hidden);
+  }
+
   /**
+   * If called with a string, returns the string wrapped in a {@link IColorableSequence}.
+   * If called with a {@link IColorableSequence}, returns the {@link IColorableSequence}.
+   *
    * @internal
    */
   public static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence {
@@ -177,5 +214,15 @@ export class Colors {
     } else {
       return value;
     }
+  }
+
+  private static _applyTextAttribute(text: string | IColorableSequence, attribute: TextAttribute): IColorableSequence {
+    const sequence: IColorableSequence = Colors._normalizeStringOrColorableSequence(text);
+    if (!sequence.textAttributes) {
+      sequence.textAttributes = [];
+    }
+
+    sequence.textAttributes.push(attribute);
+    return sequence;
   }
 }

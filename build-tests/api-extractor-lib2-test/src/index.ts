@@ -14,6 +14,6 @@
 export class Lib2Class {
 }
 
-/** @public */
+/** @alpha */
 export interface Lib2Interface {
 }

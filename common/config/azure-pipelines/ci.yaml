@@ -1,0 +1,26 @@
+resources:
+- repo: self
+jobs:
+- job: PRBuild
+  condition: succeeded()
+  strategy:
+    maxParallel: 2
+    matrix:
+      'NodeJs 8':
+        NodeVersion: 8
+      'NodeJs 10':
+        NodeVersion: 10
+  steps:
+  - task: NodeTool@0
+    displayName: 'Use Node $(NodeVersion).x'
+    inputs:
+      versionSpec: '$(NodeVersion).x'
+      checkLatest: true
+  - script: 'node common\scripts\install-run-rush.js change --verify'
+    displayName: 'Verify Change Logs'
+  - script: 'node common\scripts\install-run-rush.js check'
+    displayName: 'Rush Check'
+  - script: 'node common\scripts\install-run-rush.js install --bypass-policy'
+    displayName: 'Rush Install'
+  - script: 'node common\scripts\install-run-rush.js rebuild --verbose --production'
+    displayName: 'Rush Rebuild'

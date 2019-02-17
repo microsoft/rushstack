@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Text } from '@microsoft/node-core-library';
+
 /** @public */
 export const enum ExcerptTokenKind {
   Content = 'Content',
@@ -23,12 +25,24 @@ export interface IExcerptToken {
 
 /** @public */
 export class ExcerptToken {
-  public readonly kind: ExcerptTokenKind;
-  public readonly text: string;
+  private readonly _kind: ExcerptTokenKind;
+  private readonly _text: string;
 
   public constructor(kind: ExcerptTokenKind, text: string) {
-    this.kind = kind;
-    this.text = text;
+    this._kind = kind;
+
+    // Standardize the newlines across operating systems. Even though this may deviate from the actual
+    // input source file that was parsed, it's useful because the newline gets serialized inside
+    // a string literal in .api.json, which cannot be automatically normalized by Git.
+    this._text = Text.convertToLf(text);
+  }
+
+  public get kind(): ExcerptTokenKind {
+    return this._kind;
+  }
+
+  public get text(): string {
+    return this._text;
   }
 }
 

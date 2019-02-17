@@ -2,6 +2,69 @@
   "name": "@microsoft/rush-stack-compiler-2.9",
   "entries": [
     {
+      "version": "0.6.3",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.6.3",
+      "date": "Tue, 12 Feb 2019 17:13:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.17` to `7.0.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.2",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.6.2",
+      "date": "Mon, 11 Feb 2019 10:32:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.16` to `7.0.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.1",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.6.1",
+      "date": "Mon, 11 Feb 2019 03:31:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.9.0` to `3.10.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.0",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.6.0",
+      "date": "Wed, 30 Jan 2019 20:49:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add ToolPackages API for raw access to tools packages."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.0",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.5.0",
+      "date": "Sat, 19 Jan 2019 03:47:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose api extractor API."
+          },
+          {
+            "comment": "Upgrade to use API Extractor 7 beta"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.4",
       "tag": "@microsoft/rush-stack-compiler-2.9_v0.4.4",
       "date": "Thu, 10 Jan 2019 01:57:53 GMT",

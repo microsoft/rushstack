@@ -5,6 +5,7 @@ import * as ts from 'typescript';
 import { AstSymbol } from './AstSymbol';
 import { Span } from './Span';
 import { InternalError } from '@microsoft/node-core-library';
+import { AstEntity } from './AstSymbolTable';
 
 /**
  * Constructor options for AstDeclaration
@@ -17,19 +18,19 @@ export interface IAstDeclarationOptions {
 
 /**
  * The AstDeclaration and AstSymbol classes are API Extractor's equivalent of the compiler's
- * ts.Declaration and ts.Symbol objects.  They are created by the SymbolTable class.
+ * ts.Declaration and ts.Symbol objects.  They are created by the `AstSymbolTable` class.
  *
  * @remarks
  * The AstDeclaration represents one or more syntax components of a symbol.  Usually there is
  * only one AstDeclaration per AstSymbol, but certain TypeScript constructs can have multiple
- * declarations (e.g. overloaded functions, declaration merging, etc).
+ * declarations (e.g. overloaded functions, merged declarations, etc.).
  *
- * Because of this the AstDeclaration manages the parent/child nesting hierarchy (e.g. with
+ * Because of this, the `AstDeclaration` manages the parent/child nesting hierarchy (e.g. with
  * declaration merging, each declaration has its own children) and becomes the main focus
  * of analyzing AEDoc and emitting *.d.ts files.
  *
  * The AstDeclarations correspond to items from the compiler's ts.Node hierarchy, but
- * omitting/skipping any nodes that don't match the SymbolAnalyzer.isAstDeclaration()
+ * omitting/skipping any nodes that don't match the AstDeclaration.isSupportedSyntaxKind()
  * criteria.  This simplification makes the other API Extractor stages easier to implement.
  */
 export class AstDeclaration {
@@ -54,7 +55,7 @@ export class AstDeclaration {
 
   private readonly _analyzedChildren: AstDeclaration[] = [];
 
-  private readonly _analyzedReferencedAstSymbolsSet: Set<AstSymbol> = new Set<AstSymbol>();
+  private readonly _analyzedReferencedAstEntitiesSet: Set<AstEntity> = new Set<AstEntity>();
 
   public constructor(options: IAstDeclarationOptions) {
     this.declaration = options.declaration;
@@ -80,7 +81,7 @@ export class AstDeclaration {
   }
 
   /**
-   * Returns the AstSymbols referenced by this node.
+   * Returns the AstEntity objects referenced by this node.
    * @remarks
    * NOTE: The collection will be empty until AstSymbol.analyzed is true.
    *
@@ -93,12 +94,12 @@ export class AstDeclaration {
    * - symbols that are referenced only by nested children of this declaration
    *   (e.g. if a method returns an enum, this doesn't imply that the method's class references that enum)
    */
-  public get referencedAstSymbols(): ReadonlyArray<AstSymbol> {
-    return this.astSymbol.analyzed ? [...this._analyzedReferencedAstSymbolsSet] : [];
+  public get referencedAstEntities(): ReadonlyArray<AstEntity> {
+    return this.astSymbol.analyzed ? [...this._analyzedReferencedAstEntitiesSet] : [];
   }
 
   /**
-   * This is an internal callback used when the SymbolTable attaches a new
+   * This is an internal callback used when the AstSymbolTable attaches a new
    * child AstDeclaration to this object.
    * @internal
    */
@@ -121,13 +122,13 @@ export class AstDeclaration {
   public getDump(indent: string = ''): string {
     const declarationKind: string = ts.SyntaxKind[this.declaration.kind];
     let result: string = indent + `+ ${this.astSymbol.localName} (${declarationKind})`;
-    if (this.astSymbol.nominal) {
+    if (this.astSymbol.nominalAnalysis) {
       result += ' (nominal)';
     }
     result += '\n';
 
-    for (const referencedAstSymbol of this._analyzedReferencedAstSymbolsSet.values()) {
-      result += indent + `  ref: ${referencedAstSymbol.localName}\n`;
+    for (const referencedAstEntity of this._analyzedReferencedAstEntitiesSet.values()) {
+      result += indent + `  ref: ${referencedAstEntity.localName}\n`;
     }
 
     for (const child of this.children) {
@@ -147,27 +148,27 @@ export class AstDeclaration {
   }
 
   /**
-   * This is an internal callback used when SymbolTable.analyze() discovers a new
+   * This is an internal callback used when AstSymbolTable.analyze() discovers a new
    * type reference associated with this declaration.
    * @internal
    */
-  public _notifyReferencedAstSymbol(referencedAstSymbol: AstSymbol): void {
+  public _notifyReferencedAstEntity(referencedAstEntity: AstEntity): void {
     if (this.astSymbol.analyzed) {
-      throw new InternalError('notifyReferencedAstSymbol() called after analysis is already complete');
+      throw new InternalError('_notifyReferencedAstEntity() called after analysis is already complete');
     }
 
     for (let current: AstDeclaration | undefined = this; current; current = current.parent) {
       // Don't add references to symbols that are already referenced by a parent
-      if (current._analyzedReferencedAstSymbolsSet.has(referencedAstSymbol)) {
+      if (current._analyzedReferencedAstEntitiesSet.has(referencedAstEntity)) {
         return;
       }
       // Don't add the symbols of parents either
-      if (referencedAstSymbol === current.astSymbol) {
+      if (referencedAstEntity === current.astSymbol) {
         return;
       }
     }
 
-    this._analyzedReferencedAstSymbolsSet.add(referencedAstSymbol);
+    this._analyzedReferencedAstEntitiesSet.add(referencedAstEntity);
   }
 
   /**
@@ -180,4 +181,40 @@ export class AstDeclaration {
       child.forEachDeclarationRecursive(action);
     }
   }
+
+  /**
+   * This function determines which ts.Node kinds will generate an AstDeclaration.
+   * These correspond to the definitions that we can add AEDoc to.
+   */
+  public static isSupportedSyntaxKind(kind: ts.SyntaxKind): boolean {
+    // (alphabetical order)
+    switch (kind) {
+      case ts.SyntaxKind.CallSignature:
+      case ts.SyntaxKind.ClassDeclaration:
+      case ts.SyntaxKind.ConstructSignature:    // Example: "new(x: number): IMyClass"
+      case ts.SyntaxKind.Constructor:           // Example: "constructor(x: number)"
+      case ts.SyntaxKind.EnumDeclaration:
+      case ts.SyntaxKind.EnumMember:
+      case ts.SyntaxKind.FunctionDeclaration:   // Example: "(x: number): number"
+      case ts.SyntaxKind.IndexSignature:        // Example: "[key: string]: string"
+      case ts.SyntaxKind.InterfaceDeclaration:
+      case ts.SyntaxKind.MethodDeclaration:
+      case ts.SyntaxKind.MethodSignature:
+      case ts.SyntaxKind.ModuleDeclaration:     // Used for both "module" and "namespace" declarations
+      case ts.SyntaxKind.PropertyDeclaration:
+      case ts.SyntaxKind.PropertySignature:
+      case ts.SyntaxKind.TypeAliasDeclaration:  // Example: "type Shape = Circle | Square"
+      case ts.SyntaxKind.VariableDeclaration:
+        return true;
+
+      // NOTE: In contexts where a source file is treated as a module, we do create "nominal analysis"
+      // AstSymbol objects corresponding to a ts.SyntaxKind.SourceFile node.  However, a source file
+      // is NOT considered a nesting structure, and it does NOT act as a root for the declarations
+      // appearing in the file.  This is because the *.d.ts generator is in the business of rolling up
+      // source files, and thus wants to ignore them in general.
+    }
+
+    return false;
+  }
+
 }

@@ -6,10 +6,12 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@microsoft/ts-command-line';
+import { InternalError } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
+import { CommandJson } from '../api/CommandLineJson';
 import { Utilities } from '../utilities/Utilities';
 import { BaseScriptAction } from '../cli/scriptActions/BaseScriptAction';
 
@@ -33,14 +35,22 @@ import { Telemetry } from '../logic/Telemetry';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 
+/**
+ * Options for `RushCommandLineParser`.
+ */
+export interface IRushCommandLineParserOptions {
+  cwd?: string;   // Defaults to `cwd`
+}
+
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushConfiguration: RushConfiguration;
   public rushGlobalFolder: RushGlobalFolder;
 
   private _debugParameter: CommandLineFlagParameter;
+  private _rushOptions: IRushCommandLineParserOptions;
 
-  constructor() {
+  constructor(options?: IRushCommandLineParserOptions) {
     super({
       toolFilename: 'rush',
       toolDescription: 'Rush makes life easier for JavaScript developers who develop, build, and publish'
@@ -52,6 +62,10 @@ export class RushCommandLineParser extends CommandLineParser {
         + ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,'
         + ' Rush is for you.'
     });
+    const optionsIn: IRushCommandLineParserOptions = options || {};
+    this._rushOptions = {
+      cwd: optionsIn.cwd || process.cwd()
+    };
     this._populateActions();
   }
 
@@ -81,6 +95,10 @@ export class RushCommandLineParser extends CommandLineParser {
     // -- if it falsely appears to succeed, we could merge bad PRs, publish empty packages, etc.
     process.exitCode = 1;
 
+    if (this._debugParameter.value) {
+      InternalError.breakInDebugger = true;
+    }
+
     return this._wrapOnExecute().catch((error: Error) => {
       this._reportErrorAndSetExitCode(error);
     }).then(() => {
@@ -106,7 +124,10 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _populateActions(): void {
     try {
-      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
+        startingFolder: this._rushOptions.cwd,
+        showVerbose: true
+      });
       if (rushJsonFilename) {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
       }
@@ -146,45 +167,59 @@ export class RushCommandLineParser extends CommandLineParser {
       commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
     }
 
-    // always create a build and a rebuild command
-    this.addAction(new BulkScriptAction({
-      actionName: 'build',
-      summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last '
-        + 'built.',
-      documentation: 'This command is similar to "rush rebuild", except that "rush build" performs'
-        + ' an incremental build. In other words, it only builds projects whose source files have'
-        + ' changed since the last successful build. The analysis requires a Git working tree, and'
-        + ' only considers source files that are tracked by Git and whose path is under the project folder.'
-        + ' (For more details about this algorithm, see the documentation for the "package-deps-hash"'
-        + ' NPM package.) The incremental build state is tracked in a file "package-deps.json" which should'
-        + ' NOT be added to Git.  The build command is tracked by the "arguments" field in this JSON file;'
-        + ' a full rebuild is forced whenever the command has changed (e.g. "--production" or not).',
-      parser: this,
-      commandLineConfiguration: commandLineConfiguration,
+    // Build actions from the command line configuration supercede default build actions.
+    this._addCommandLineConfigActions(commandLineConfiguration);
+    this._addDefaultBuildActions(commandLineConfiguration);
+    this._validateCommandLineConfigParameterAssociations(commandLineConfiguration);
+  }
 
-      enableParallelism: true,
-      ignoreMissingScript: false
-    }));
+  private _addDefaultBuildActions(commandLineConfiguration?: CommandLineConfiguration): void {
+    if (!this.tryGetAction('build')) {
+      // always create a build and a rebuild command
+      this.addAction(new BulkScriptAction({
+        actionName: 'build',
+        summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last '
+          + 'built.',
+        documentation: 'This command is similar to "rush rebuild", except that "rush build" performs'
+          + ' an incremental build. In other words, it only builds projects whose source files have'
+          + ' changed since the last successful build. The analysis requires a Git working tree, and'
+          + ' only considers source files that are tracked by Git and whose path is under the project folder.'
+          + ' (For more details about this algorithm, see the documentation for the "package-deps-hash"'
+          + ' NPM package.) The incremental build state is tracked in a file "package-deps.json" which should'
+          + ' NOT be added to Git.  The build command is tracked by the "arguments" field in this JSON file;'
+          + ' a full rebuild is forced whenever the command has changed (e.g. "--production" or not).',
+        parser: this,
+        commandLineConfiguration: commandLineConfiguration,
 
-    this.addAction(new BulkScriptAction({
-      actionName: 'rebuild',
-      summary: 'Clean and rebuild the entire set of projects',
-      documentation: 'This command assumes that the package.json file for each project contains'
-        + ' a "scripts" entry for "npm run build" that performs a full clean build.'
-        + ' Rush invokes this script to build each project that is registered in rush.json.'
-        + ' Projects are built in parallel where possible, but always respecting the dependency'
-        + ' graph for locally linked projects.  The number of simultaneous processes will be'
-        + ' based on the number of machine cores unless overridden by the --parallelism flag.'
-        + ' (For an incremental build, see "rush build" instead of "rush rebuild".)',
-      parser: this,
-      commandLineConfiguration: commandLineConfiguration,
+        enableParallelism: true,
+        ignoreMissingScript: false
+      }));
+    }
 
-      enableParallelism: true,
-      ignoreMissingScript: false
-    }));
+    if (!this.tryGetAction('rebuild')) {
+      this.addAction(new BulkScriptAction({
+        actionName: 'rebuild',
+        // To remain compatible with existing repos, `rebuild` defaults to calling the `build` command in each repo.
+        commandToRun: 'build',
+        summary: 'Clean and rebuild the entire set of projects',
+        documentation: 'This command assumes that the package.json file for each project contains'
+          + ' a "scripts" entry for "npm run build" that performs a full clean build.'
+          + ' Rush invokes this script to build each project that is registered in rush.json.'
+          + ' Projects are built in parallel where possible, but always respecting the dependency'
+          + ' graph for locally linked projects.  The number of simultaneous processes will be'
+          + ' based on the number of machine cores unless overridden by the --parallelism flag.'
+          + ' (For an incremental build, see "rush build" instead of "rush rebuild".)',
+        parser: this,
+        commandLineConfiguration: commandLineConfiguration,
 
+        enableParallelism: true,
+        ignoreMissingScript: false
+      }));
+    }
+  }
+
+  private _addCommandLineConfigActions(commandLineConfiguration?: CommandLineConfiguration): void {
     if (!commandLineConfiguration) {
-      // If there is not a rush.json file, so don't attempt to define custom commands/parameters
       return;
     }
 
@@ -194,6 +229,8 @@ export class RushCommandLineParser extends CommandLineParser {
         throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}"`
           + ` using a name that already exists`);
       }
+
+      this._validateCommandLineConfigCommand(command);
 
       switch (command.commandKind) {
         case 'bulk':
@@ -228,6 +265,12 @@ export class RushCommandLineParser extends CommandLineParser {
             + ` using an unsupported command kind "${command!.commandKind}"`);
       }
     }
+  }
+
+  private _validateCommandLineConfigParameterAssociations(commandLineConfiguration?: CommandLineConfiguration): void {
+    if (!commandLineConfiguration) {
+      return;
+    }
 
     // Check for any invalid associations
     for (const parameter of commandLineConfiguration.parameters) {
@@ -243,6 +286,22 @@ export class RushCommandLineParser extends CommandLineParser {
             + ` support custom parameters`);
         }
       }
+    }
+  }
+
+  private _validateCommandLineConfigCommand(command: CommandJson): void {
+    // There are some restrictions on the 'build' and 'rebuild' commands.
+    if (command.name !== 'build' && command.name !== 'rebuild') {
+      return;
+    }
+
+    if (command.commandKind === 'global') {
+      throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+        `the command kind "global". This command can only be designated as a command kind "bulk".`);
+    }
+    if (command.safeForSimultaneousRushProcesses) {
+      throw new Error(`${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+        `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`);
     }
   }
 

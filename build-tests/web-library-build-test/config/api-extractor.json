@@ -1,6 +1,18 @@
 {
-  "enabled": true,
-  "apiReviewFolder": "../../common/reviews/api",
-  "apiJsonFolder": "./temp",
-  "entry": "lib/test.d.ts"
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/api-extractor.schema.json",
+  "project": {
+    "entryPointSourceFile": "lib/test.d.ts"
+  },
+  "compiler": {
+    "rootFolder": ".",
+    "configType": "tsconfig"
+  },
+  "apiReviewFile": {
+    "enabled": true,
+    "apiReviewFolder": "../../common/reviews/api"
+  },
+  "apiJsonFile": {
+    "enabled": true,
+    "outputFolder": "./temp"
+  }
 }

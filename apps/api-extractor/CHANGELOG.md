@@ -1,6 +1,78 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 10 Jan 2019 01:57:52 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Feb 2019 17:13:12 GMT and should not be manually modified.
+
+## 7.0.18
+Tue, 12 Feb 2019 17:13:12 GMT
+
+### Patches
+
+- Add a workaround for the issue where .d.ts rollups sometimes define names that conflict with a global symbol (the full solution is tracked by GitHub #1095)
+
+## 7.0.17
+Mon, 11 Feb 2019 10:32:37 GMT
+
+### Patches
+
+- Fix an issue where API Extractor neglected to analyze "typeof" expressions
+- Fix an issue where declarations inside a namespace were sometimes being incorrectly emitted as top-level exports of the .d.ts rollup
+
+## 7.0.16
+Mon, 11 Feb 2019 08:55:57 GMT
+
+### Patches
+
+- Redesign the analyzer so that when an external symbol is reexported by the working package, the local object (AstImport) and external object (AstSymbol) are kept separate
+- Fix a number of bugs where external symbols were misinterpreted as being part of the local project
+- Eliminate a number of errors involving unusual language constructs, by avoiding analysis of external symbols unless it's really necessary
+- Simplify the AstSymbol.nominalAnalysis concept and associated code
+- Improve .d.ts rollup trimming to handle reexported symbols correctly
+
+## 7.0.15
+Mon, 11 Feb 2019 03:31:55 GMT
+
+### Patches
+
+- The `--debug` parameter now automatically breaks in the debugger when InternalError is thrown
+
+## 7.0.14
+Thu, 31 Jan 2019 17:03:49 GMT
+
+### Patches
+
+- Upgrade to TSDoc 0.12.5, which allows `$` in `@param` names
+- Add "testMode" option in api-extractor.json to eliminate spurious diffs in test files when the version number gets bumped
+- Normalize newlines for excerpt strings in the .api.json file
+
+## 7.0.13
+Sat, 19 Jan 2019 03:47:47 GMT
+
+### Patches
+
+- Move the skipLibCheck into the config file.
+
+## 7.0.12
+Sat, 19 Jan 2019 01:17:51 GMT
+
+### Patches
+
+- Fix an issue where files using "export=" were incorrectly interpreted as having ambient declarations
+
+## 7.0.11
+Fri, 18 Jan 2019 00:52:21 GMT
+
+### Patches
+
+- Add support for circular references between files that use `export * from "____";`
+
+## 7.0.10
+Thu, 17 Jan 2019 00:37:54 GMT
+
+### Patches
+
+- Add support for exports of the form `export * from "____";`
+- Improve the analyzer to allow a declaration to be exported more than once
+- Fix inconsistent newlines in .api.ts files
 
 ## 7.0.9
 Thu, 10 Jan 2019 01:57:52 GMT

@@ -1,31 +1,66 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/* tslint:disable:no-bitwise */
-
 import * as ts from 'typescript';
 import { PackageJsonLookup, InternalError } from '@microsoft/node-core-library';
 
 import { AstDeclaration } from './AstDeclaration';
-import { SymbolAnalyzer, IFollowAliasesResult } from './SymbolAnalyzer';
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
-import { AstImport } from './AstImport';
-import { AstEntryPoint, IExportedMember } from './AstEntryPoint';
+import { AstModule, AstModuleExportInfo } from './AstModule';
 import { PackageMetadataManager } from './PackageMetadataManager';
 import { ILogger } from '../api/ILogger';
+import { ExportAnalyzer } from './ExportAnalyzer';
+import { AstImport } from './AstImport';
+
+export type AstEntity = AstSymbol | AstImport;
+
+/**
+ * Options for `AstSymbolTable._fetchAstSymbol()`
+ */
+export interface IFetchAstSymbolOptions {
+  /**
+   * The symbol after any symbol aliases have been followed using TypeScriptHelpers.followAliases()
+   */
+  followedSymbol: ts.Symbol;
+  /**
+   * True if followedSymbol is not part of the working package
+   */
+  isExternal: boolean;
+
+  /**
+   * If true, symbols with AstSymbol.nominalAnalysis=true will be returned.
+   * Otherwise `undefined` will be returned for such symbols.
+   */
+  includeNominalAnalysis: boolean;
+
+  /**
+   * True while populating the `AstSymbolTable`; false if we're doing a passive lookup
+   * without adding anything new to the table
+   */
+  addIfMissing: boolean;
+
+  /**
+   * A hint to help `_fetchAstSymbol()` determine the `AstSymbol.localName`.
+   */
+  localName?: string;
+}
 
 /**
  * AstSymbolTable is the workhorse that builds AstSymbol and AstDeclaration objects.
  * It maintains a cache of already constructed objects.  AstSymbolTable constructs
- * AstEntryPoint objects, but otherwise the state that it maintains  is agnostic of
+ * AstModule objects, but otherwise the state that it maintains is agnostic of
  * any particular entry point.  (For example, it does not track whether a given AstSymbol
  * is "exported" or not.)
+ *
+ * Internally, AstSymbolTable relies on ExportAnalyzer to crawl import statements and determine where symbols
+ * are declared (i.e. the AstImport information needed to import them).
  */
 export class AstSymbolTable {
   private readonly _program: ts.Program;
   private readonly _typeChecker: ts.TypeChecker;
   private readonly _packageMetadataManager: PackageMetadataManager;
+  private readonly _exportAnalyzer: ExportAnalyzer;
 
   /**
    * A mapping from ts.Symbol --> AstSymbol
@@ -42,18 +77,10 @@ export class AstSymbolTable {
   private readonly _astDeclarationsByDeclaration: Map<ts.Node, AstDeclaration>
     = new Map<ts.Node, AstDeclaration>();
 
-  /**
-   * A mapping from AstImport.key --> AstSymbol.
-   *
-   * If AstSymbol.astImport is undefined, then it is not included in the map.
-   */
-  private readonly _astSymbolsByImportKey: Map<string, AstSymbol> = new Map<string, AstSymbol>();
-
-  /**
-   * Cache of fetchEntryPoint() results.
-   */
-  private readonly _astEntryPointsBySourceFile: Map<ts.SourceFile, AstEntryPoint>
-    = new Map<ts.SourceFile, AstEntryPoint>();
+  // Note that this is a mapping from specific AST nodes that we analyzed, based on the underlying symbol
+  // for that node.
+  private readonly _entitiesByIdentifierNode: Map<ts.Identifier, AstEntity | undefined>
+    = new Map<ts.Identifier, AstEntity | undefined>();
 
   public constructor(program: ts.Program, typeChecker: ts.TypeChecker, packageJsonLookup: PackageJsonLookup,
     logger: ILogger) {
@@ -61,41 +88,26 @@ export class AstSymbolTable {
     this._program = program;
     this._typeChecker = typeChecker;
     this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup, logger);
+
+    this._exportAnalyzer = new ExportAnalyzer(
+      this._program,
+      this._typeChecker,
+      {
+        analyze: this.analyze.bind(this),
+        fetchAstSymbol: this._fetchAstSymbol.bind(this)
+      }
+    );
   }
 
   /**
-   * For a given source file, this analyzes all of its exports and produces an AstEntryPoint
-   * object.
+   * Used to analyze an entry point that belongs to the working package.
    */
-  public fetchEntryPoint(sourceFile: ts.SourceFile): AstEntryPoint {
-    let astEntryPoint: AstEntryPoint | undefined = this._astEntryPointsBySourceFile.get(sourceFile);
-    if (!astEntryPoint) {
-      const rootFileSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(sourceFile);
+  public fetchAstModuleFromWorkingPackage(sourceFile: ts.SourceFile): AstModule {
+    return this._exportAnalyzer.fetchAstModuleFromSourceFile(sourceFile, undefined);
+  }
 
-      if (!rootFileSymbol.declarations || !rootFileSymbol.declarations.length) {
-        throw new Error('Unable to find a root declaration for ' + sourceFile.fileName);
-      }
-
-      const exportSymbols: ts.Symbol[] = this._typeChecker.getExportsOfModule(rootFileSymbol) || [];
-
-      const exportedMembers: IExportedMember[] = [];
-
-      for (const exportSymbol of exportSymbols) {
-        const astSymbol: AstSymbol | undefined = this._fetchAstSymbol(exportSymbol, true);
-
-        if (!astSymbol) {
-          throw new Error('Unsupported export: ' + exportSymbol.name);
-        }
-
-        this.analyze(astSymbol);
-
-        exportedMembers.push({ name: exportSymbol.name, astSymbol: astSymbol });
-      }
-
-      astEntryPoint = new AstEntryPoint({ exportedMembers });
-      this._astEntryPointsBySourceFile.set(sourceFile, astEntryPoint);
-    }
-    return astEntryPoint;
+  public fetchAstModuleExportInfo(astModule: AstModule): AstModuleExportInfo {
+    return this._exportAnalyzer.fetchAstModuleExportInfo(astModule);
   }
 
   /**
@@ -103,9 +115,10 @@ export class AstSymbolTable {
    * starts from the root symbol and then fills out all children of all declarations, and
    * also calculates AstDeclaration.referencedAstSymbols for all declarations.
    * If the symbol is not imported, any non-imported references are also analyzed.
+   *
    * @remarks
    * This is an expensive operation, so we only perform it for top-level exports of an
-   * the AstEntryPoint.  For example, if some code references a nested class inside
+   * the AstModule.  For example, if some code references a nested class inside
    * a namespace from another library, we do not analyze any of that class's siblings
    * or members.  (We do always construct its parents however, since AstDefinition.parent
    * is immutable, and needed e.g. to calculate release tag inheritance.)
@@ -115,7 +128,7 @@ export class AstSymbolTable {
       return;
     }
 
-    if (astSymbol.nominal) {
+    if (astSymbol.nominalAnalysis) {
       // We don't analyze nominal symbols
       astSymbol._notifyAnalyzed();
       return;
@@ -131,32 +144,28 @@ export class AstSymbolTable {
 
     rootAstSymbol._notifyAnalyzed();
 
-    if (!astSymbol.astImport) {
-      // If this symbol is not imported, then we also analyze any referencedAstSymbols
-      // that are not imported.  For example, this ensures that forgotten exports get
-      // analyzed.
+    if (!astSymbol.isExternal) {
+      // If this symbol is non-external (i.e. it belongs to the working package), then we also analyze any
+      // referencedAstSymbols that are non-external.  For example, this ensures that forgotten exports
+      // get analyzed.
       rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-        for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
+        for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
+
           // Walk up to the root of the tree, looking for any imports along the way
-          if (!referencedAstSymbol.imported) {
-            this.analyze(referencedAstSymbol);
+          if (referencedAstEntity instanceof AstSymbol) {
+            if (!referencedAstEntity.isExternal) {
+              this.analyze(referencedAstEntity);
+            }
           }
+
         }
       });
     }
   }
 
   /**
-   * Looks up the AstSymbol corresponding to the given ts.Symbol.
-   * This will not analyze or construct any new AstSymbol objects.
-   */
-  public tryGetAstSymbol(symbol: ts.Symbol): AstSymbol | undefined {
-    return this._fetchAstSymbol(symbol, false);
-  }
-
-  /**
    * For a given astDeclaration, this efficiently finds the child corresponding to the
-   * specified ts.Node.  It is assumed that isAstDeclaration() would return true for
+   * specified ts.Node.  It is assumed that AstDeclaration.isSupportedSyntaxKind() would return true for
    * that node type, and that the node is an immediate child of the provided AstDeclaration.
    */
   // NOTE: This could be a method of AstSymbol if it had a backpointer to its AstSymbolTable.
@@ -177,6 +186,19 @@ export class AstSymbolTable {
   }
 
   /**
+   * For a given ts.Identifier that is part of an AstSymbol that we analyzed, return the AstEntity that
+   * it refers to.  Returns undefined if it doesn't refer to anything interesting.
+   * @remarks
+   * Throws an Error if the ts.Identifier is not part of node tree that was analyzed.
+   */
+  public tryGetEntityForIdentifierNode(identifier: ts.Identifier): AstEntity | undefined {
+    if (!this._entitiesByIdentifierNode.has(identifier)) {
+      throw new InternalError('tryGetEntityForIdentifier() called for an identifier that was not analyzed');
+    }
+    return this._entitiesByIdentifierNode.get(identifier);
+  }
+
+  /**
    * Used by analyze to recursively analyze the entire child tree.
    */
   private _analyzeChildTree(node: ts.Node, governingAstDeclaration: AstDeclaration): void {
@@ -184,60 +206,88 @@ export class AstSymbolTable {
       case ts.SyntaxKind.JSDocComment: // Skip JSDoc comments - TS considers @param tags TypeReference nodes
         return;
 
-      // is this a reference to another AstSymbol?
+      // Is this a reference to another AstSymbol?
       case ts.SyntaxKind.TypeReference: // general type references
       case ts.SyntaxKind.ExpressionWithTypeArguments: // special case for e.g. the "extends" keyword
       case ts.SyntaxKind.ComputedPropertyName:  // used for EcmaScript "symbols", e.g. "[toPrimitive]".
+      case ts.SyntaxKind.TypeQuery: // represents for "typeof X" as a type
         {
           // Sometimes the type reference will involve multiple identifiers, e.g. "a.b.C".
           // In this case, we only need to worry about importing the first identifier,
           // so do a depth-first search for it:
-          const symbolNode: ts.Node | undefined = TypeScriptHelpers.findFirstChildNode(
+          const identifierNode: ts.Identifier | undefined = TypeScriptHelpers.findFirstChildNode(
             node, ts.SyntaxKind.Identifier);
 
-          if (!symbolNode) {
-            break;
-          }
+          if (identifierNode) {
+            let referencedAstEntity: AstEntity | undefined = this._entitiesByIdentifierNode.get(identifierNode);
+            if (!referencedAstEntity) {
+              const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
+              if (!symbol) {
+                throw new Error('Symbol not found for identifier: ' + identifierNode.getText());
+              }
 
-          const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(symbolNode);
-          if (!symbol) {
-            throw new Error('Symbol not found for identifier: ' + symbolNode.getText());
-          }
+              referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(symbol,
+                governingAstDeclaration.astSymbol.isExternal);
 
-          const referencedAstSymbol: AstSymbol | undefined = this._fetchAstSymbol(symbol, true);
-          if (referencedAstSymbol) {
-            governingAstDeclaration._notifyReferencedAstSymbol(referencedAstSymbol);
+              this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+            }
+
+            if (referencedAstEntity) {
+              governingAstDeclaration._notifyReferencedAstEntity(referencedAstEntity);
+            }
+          }
+        }
+        break;
+
+      // Is this the identifier for the governingAstDeclaration?
+      case ts.SyntaxKind.Identifier:
+        {
+          const identifierNode: ts.Identifier = node as ts.Identifier;
+          if (!this._entitiesByIdentifierNode.has(identifierNode)) {
+            const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
+
+            let referencedAstEntity: AstEntity | undefined = undefined;
+
+            if (symbol === governingAstDeclaration.astSymbol.followedSymbol) {
+              referencedAstEntity = this._fetchEntityForIdentifierNode(identifierNode, governingAstDeclaration);
+            }
+
+            this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
           }
         }
         break;
     }
 
     // Is this node declaring a new AstSymbol?
-    const newGoverningAstDeclaration: AstDeclaration | undefined = this._fetchAstDeclaration(node);
+    const newGoverningAstDeclaration: AstDeclaration | undefined = this._fetchAstDeclaration(node,
+      governingAstDeclaration.astSymbol.isExternal);
 
     for (const childNode of node.getChildren()) {
       this._analyzeChildTree(childNode, newGoverningAstDeclaration || governingAstDeclaration);
     }
   }
 
-  // tslint:disable-next-line:no-unused-variable
-  private _fetchAstDeclaration(node: ts.Node): AstDeclaration | undefined {
-    const astSymbol: AstSymbol | undefined = this._fetchAstSymbolForNode(node);
-    if (!astSymbol) {
-      return undefined;
-    }
+  private _fetchEntityForIdentifierNode(identifierNode: ts.Identifier,
+    governingAstDeclaration: AstDeclaration): AstEntity | undefined {
 
-    const astDeclaration: AstDeclaration | undefined
-      = this._astDeclarationsByDeclaration.get(node);
-    if (!astDeclaration) {
-      throw new InternalError('Unable to find constructed AstDeclaration');
-    }
+    let referencedAstEntity: AstEntity | undefined = this._entitiesByIdentifierNode.get(identifierNode);
+    if (!referencedAstEntity) {
+      const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
+      if (!symbol) {
+        throw new Error('Symbol not found for identifier: ' + identifierNode.getText());
+      }
 
-    return astDeclaration;
+      referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(symbol,
+        governingAstDeclaration.astSymbol.isExternal);
+
+      this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+    }
+    return referencedAstEntity;
   }
 
-  private _fetchAstSymbolForNode(node: ts.Node): AstSymbol | undefined {
-    if (!SymbolAnalyzer.isAstDeclaration(node.kind)) {
+  // tslint:disable-next-line:no-unused-variable
+  private _fetchAstDeclaration(node: ts.Node, isExternal: boolean): AstDeclaration | undefined {
+    if (!AstDeclaration.isSupportedSyntaxKind(node.kind)) {
       return undefined;
     }
 
@@ -246,160 +296,176 @@ export class AstSymbolTable {
       throw new InternalError('Unable to find symbol for node');
     }
 
-    return this._fetchAstSymbol(symbol, true);
+    const astSymbol: AstSymbol | undefined = this._fetchAstSymbol({
+      followedSymbol: symbol,
+      isExternal: isExternal,
+      includeNominalAnalysis: true,
+      addIfMissing: true
+    });
+
+    if (!astSymbol) {
+      return undefined;
+    }
+
+    const astDeclaration: AstDeclaration | undefined = this._astDeclarationsByDeclaration.get(node);
+
+    if (!astDeclaration) {
+      throw new InternalError('Unable to find constructed AstDeclaration');
+    }
+
+    return astDeclaration;
   }
 
-  private _fetchAstSymbol(symbol: ts.Symbol, addIfMissing: boolean): AstSymbol | undefined {
-    const followAliasesResult: IFollowAliasesResult = SymbolAnalyzer.followAliases(symbol, this._typeChecker);
-
-    const followedSymbol: ts.Symbol = followAliasesResult.followedSymbol;
+  private _fetchAstSymbol(options: IFetchAstSymbolOptions): AstSymbol | undefined {
+    const followedSymbol: ts.Symbol = options.followedSymbol;
 
     // Filter out symbols representing constructs that we don't care about
+    if (!TypeScriptHelpers.hasAnyDeclarations(followedSymbol)) {
+      return undefined;
+    }
+
+    const arbitraryDeclaration: ts.Declaration = followedSymbol.declarations[0];
+
+    // tslint:disable-next-line:no-bitwise
     if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient)) {
       return undefined;
     }
 
-    if (followAliasesResult.isAmbient) {
-      return undefined;
+    // API Extractor doesn't analyze ambient declarations at all
+    if (TypeScriptHelpers.isAmbient(followedSymbol, this._typeChecker)) {
+      // We make a special exemption for ambient declarations that appear in a source file containing
+      // an "export=" declaration that allows them to be imported as non-ambient.
+      if (!this._exportAnalyzer.isImportableAmbientSourceFile(arbitraryDeclaration.getSourceFile())) {
+        return undefined;
+      }
+    }
+
+    // Make sure followedSymbol isn't an alias for something else
+    if (TypeScriptHelpers.isFollowableAlias(followedSymbol, this._typeChecker)) {
+      // We expect the caller to have already followed any aliases
+      throw new InternalError('AstSymbolTable._fetchAstSymbol() cannot be called with a symbol alias');
     }
 
     let astSymbol: AstSymbol | undefined = this._astSymbolsBySymbol.get(followedSymbol);
 
     if (!astSymbol) {
-      if (!followedSymbol.declarations || followedSymbol.declarations.length < 1) {
-        throw new InternalError('Followed a symbol with no declarations');
-      }
+      // None of the above lookups worked, so create a new entry...
+      let nominalAnalysis: boolean = false;
 
-      const astImport: AstImport | undefined = followAliasesResult.astImport;
+      if (options.isExternal) {
+        // If the file is from an external package that does not support AEDoc, normally we ignore it completely.
+        // But in some cases (e.g. checking star exports of an external package) we need an AstSymbol to
+        // represent it, but we don't need to analyze its sibling/children.
+        const followedSymbolSourceFileName: string = arbitraryDeclaration.getSourceFile().fileName;
 
-      if (astImport) {
-        if (!astSymbol) {
-          astSymbol = this._astSymbolsByImportKey.get(astImport.key);
-          if (astSymbol) {
-            // We didn't find the entry using followedSymbol, but we did using importPackageKey,
-            // so add a mapping for followedSymbol; we'll need it later when renaming identifiers
-            this._astSymbolsBySymbol.set(followedSymbol, astSymbol);
+        if (!this._packageMetadataManager.isAedocSupportedFor(followedSymbolSourceFileName)) {
+          nominalAnalysis = true;
+
+          if (!options.includeNominalAnalysis) {
+            return undefined;
           }
         }
       }
 
-      if (!astSymbol) {
-        // None of the above lookups worked, so create a new entry...
-        let nominal: boolean = false;
+      let parentAstSymbol: AstSymbol | undefined = undefined;
 
-        // NOTE: In certain circumstances we need an AstSymbol for a source file that is acting
-        // as a TypeScript module.  For example, one of the unit tests has this line:
-        //
-        //   import * as semver1 from 'semver';
-        //
-        // To handle the expression "semver1.SemVer", we need "semver1" to map to an AstSymbol
-        // that causes us to emit the above import.  However we do NOT want it to act as the root
-        // of a declaration tree, because in general the *.d.ts generator is trying to roll up
-        // definitions and eliminate source files.  So, even though isAstDeclaration() would return
-        // false, we do create an AstDeclaration for a ts.SyntaxKind.SourceFile in this special edge case.
-        if (followedSymbol.declarations.length === 1
-          && followedSymbol.declarations[0].kind === ts.SyntaxKind.SourceFile) {
-          nominal = true;
-        }
-
-        // If the file is from a package that does not support AEDoc, then we process the
-        // symbol itself, but we don't attempt to process any parent/children of it.
-        const followedSymbolSourceFile: ts.SourceFile = followedSymbol.declarations[0].getSourceFile();
-        if (this._program.isSourceFileFromExternalLibrary(followedSymbolSourceFile)) {
-          if (!this._packageMetadataManager.isAedocSupportedFor(followedSymbolSourceFile.fileName)) {
-            nominal = true;
-          }
-        }
-
-        let parentAstSymbol: AstSymbol | undefined = undefined;
-
-        if (!nominal) {
-          for (const declaration of followedSymbol.declarations || []) {
-            if (!SymbolAnalyzer.isAstDeclaration(declaration.kind)) {
-              throw new InternalError(`The "${followedSymbol.name}" symbol uses the construct`
-                + ` "${ts.SyntaxKind[declaration.kind]}" which may be an unimplemented language feature`);
-            }
-          }
-
-          // We always fetch the entire chain of parents for each declaration.
-          // (Children/siblings are only analyzed on demand.)
-
-          // Key assumptions behind this squirrely logic:
-          //
-          // IF a given symbol has two declarations D1 and D2; AND
-          // If D1 has a parent P1, then
-          // - D2 will also have a parent P2; AND
-          // - P1 and P2's symbol will be the same
-          // - but P1 and P2 may be different (e.g. merged namespaces containing merged interfaces)
-
-          // Is there a parent AstSymbol?  First we check to see if there is a parent declaration:
-          const arbitaryParentDeclaration: ts.Node | undefined
-            = this._tryFindFirstAstDeclarationParent(followedSymbol.declarations[0]);
-
-          if (arbitaryParentDeclaration) {
-            const parentSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(
-              arbitaryParentDeclaration as ts.Declaration);
-
-            parentAstSymbol = this._fetchAstSymbol(parentSymbol, addIfMissing);
-            if (!parentAstSymbol) {
-              throw new InternalError('Unable to construct a parent AstSymbol for '
-                + followedSymbol.name);
-            }
-          }
-        }
-
-        astSymbol = new AstSymbol({
-          localName: followAliasesResult.localName,
-          followedSymbol: followAliasesResult.followedSymbol,
-          astImport: astImport,
-          parentAstSymbol: parentAstSymbol,
-          rootAstSymbol: parentAstSymbol ? parentAstSymbol.rootAstSymbol : undefined,
-          nominal: nominal
-        });
-
-        this._astSymbolsBySymbol.set(followedSymbol, astSymbol);
-
-        if (astImport) {
-          // If it's an import, add it to the lookup
-          this._astSymbolsByImportKey.set(astImport.key, astSymbol);
-        }
-
-        // Okay, now while creating the declarations we will wire them up to the
-        // their corresponding parent declarations
+      if (!nominalAnalysis) {
         for (const declaration of followedSymbol.declarations || []) {
+          if (!AstDeclaration.isSupportedSyntaxKind(declaration.kind)) {
+            throw new InternalError(`The "${followedSymbol.name}" symbol has a`
+              + ` ts.SyntaxKind.${ts.SyntaxKind[declaration.kind]} declaration which is not (yet?)`
+              + ` supported by API Extractor`);
+          }
+        }
 
-          let parentAstDeclaration: AstDeclaration | undefined = undefined;
-          if (parentAstSymbol) {
-            const parentDeclaration: ts.Node | undefined = this._tryFindFirstAstDeclarationParent(declaration);
+        // We always fetch the entire chain of parents for each declaration.
+        // (Children/siblings are only analyzed on demand.)
 
-            if (!parentDeclaration) {
-              throw new InternalError('Missing parent declaration');
-            }
+        // Key assumptions behind this squirrely logic:
+        //
+        // IF a given symbol has two declarations D1 and D2; AND
+        // If D1 has a parent P1, then
+        // - D2 will also have a parent P2; AND
+        // - P1 and P2's symbol will be the same
+        // - but P1 and P2 may be different (e.g. merged namespaces containing merged interfaces)
 
-            parentAstDeclaration = this._astDeclarationsByDeclaration.get(parentDeclaration);
-            if (!parentAstDeclaration) {
-              throw new InternalError('Missing parent AstDeclaration');
-            }
+        // Is there a parent AstSymbol?  First we check to see if there is a parent declaration:
+        const arbitraryParentDeclaration: ts.Node | undefined
+          = this._tryFindFirstAstDeclarationParent(followedSymbol.declarations[0]);
+
+        if (arbitraryParentDeclaration) {
+          const parentSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(
+            arbitraryParentDeclaration as ts.Declaration);
+
+          parentAstSymbol = this._fetchAstSymbol({
+            followedSymbol: parentSymbol,
+            isExternal: options.isExternal,
+            includeNominalAnalysis: false,
+            addIfMissing: true
+          });
+          if (!parentAstSymbol) {
+            throw new InternalError('Unable to construct a parent AstSymbol for '
+              + followedSymbol.name);
+          }
+        }
+      }
+
+      let localName: string | undefined = options.localName;
+
+      if (localName === undefined) {
+        // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name
+        // This handles cases such as "export default class X { }" where the symbol name is "default"
+        // but the declaration name is "X".
+        localName = followedSymbol.name;
+        for (const declaration of followedSymbol.declarations || []) {
+          const declarationNameIdentifier: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
+          if (declarationNameIdentifier && ts.isIdentifier(declarationNameIdentifier)) {
+            localName = declarationNameIdentifier.getText().trim();
+            break;
+          }
+        }
+      }
+
+      astSymbol = new AstSymbol({
+        followedSymbol: followedSymbol,
+        localName: localName,
+        isExternal: options.isExternal,
+        nominalAnalysis: nominalAnalysis,
+        parentAstSymbol: parentAstSymbol,
+        rootAstSymbol: parentAstSymbol ? parentAstSymbol.rootAstSymbol : undefined
+      });
+
+      this._astSymbolsBySymbol.set(followedSymbol, astSymbol);
+
+      // Okay, now while creating the declarations we will wire them up to the
+      // their corresponding parent declarations
+      for (const declaration of followedSymbol.declarations || []) {
+
+        let parentAstDeclaration: AstDeclaration | undefined = undefined;
+        if (parentAstSymbol) {
+          const parentDeclaration: ts.Node | undefined = this._tryFindFirstAstDeclarationParent(declaration);
+
+          if (!parentDeclaration) {
+            throw new InternalError('Missing parent declaration');
           }
 
-          const astDeclaration: AstDeclaration = new AstDeclaration({
-            declaration, astSymbol, parent: parentAstDeclaration});
-
-          this._astDeclarationsByDeclaration.set(declaration, astDeclaration);
+          parentAstDeclaration = this._astDeclarationsByDeclaration.get(parentDeclaration);
+          if (!parentAstDeclaration) {
+            throw new InternalError('Missing parent AstDeclaration');
+          }
         }
+
+        const astDeclaration: AstDeclaration = new AstDeclaration({
+          declaration, astSymbol, parent: parentAstDeclaration});
+
+        this._astDeclarationsByDeclaration.set(declaration, astDeclaration);
       }
     }
 
-    if (followAliasesResult.astImport && !astSymbol.imported) {
-      // Our strategy for recognizing external declarations is to look for an import statement
-      // during SymbolAnalyzer.followAliases().  Although it is sometimes possible to reach a symbol
-      // without traversing an import statement, we assume that that the first reference will always
-      // involve an import statement.
-      //
-      // This assumption might be violated if the caller did something unusual like feeding random
-      // symbols to AstSymbolTable.analyze() in the middle of the analysis.
-      throw new InternalError('The symbol ' + astSymbol.localName + ' is being imported'
-        + ' after it was already registered as non-imported');
+    if (options.isExternal !== astSymbol.isExternal) {
+      throw new InternalError(`Cannot assign isExternal=${options.isExternal} for`
+        + ` the symbol ${astSymbol.localName} because it was previously registered`
+        + ` with isExternal=${astSymbol.isExternal}`);
     }
 
     return astSymbol;
@@ -411,7 +477,7 @@ export class AstSymbolTable {
   private _tryFindFirstAstDeclarationParent(node: ts.Node): ts.Node | undefined {
     let currentNode: ts.Node | undefined = node.parent;
     while (currentNode) {
-      if (SymbolAnalyzer.isAstDeclaration(currentNode.kind)) {
+      if (AstDeclaration.isSupportedSyntaxKind(currentNode.kind)) {
         return currentNode;
       }
       currentNode = currentNode.parent;

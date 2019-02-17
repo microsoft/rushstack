@@ -9,11 +9,12 @@ import { Span } from '../analyzer/Span';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { StringBuilder } from '@microsoft/tsdoc';
-import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { Text, InternalError } from '@microsoft/node-core-library';
+import { AstImport } from '../analyzer/AstImport';
+import { AstSymbol } from '../analyzer/AstSymbol';
 
 export class ReviewFileGenerator {
   /**
@@ -35,20 +36,43 @@ export class ReviewFileGenerator {
 
     for (const entity of collector.entities) {
       if (entity.exported) {
-        // Emit all the declarations for this entry
-        for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
+        if (entity.astEntity instanceof AstSymbol) {
+          // Emit all the declarations for this entry
+          for (const astDeclaration of entity.astEntity.astDeclarations || []) {
 
-          output.append(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
+            output.append(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
 
-          const span: Span = new Span(astDeclaration.declaration);
-          ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration);
-          span.writeModifiedText(output);
-          output.append('\n\n');
+            const span: Span = new Span(astDeclaration.declaration);
+            ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration);
+            span.writeModifiedText(output);
+            output.append('\n\n');
+          }
+        } else {
+          // This definition is reexported from another package, so write it as an "export" line
+          // In general, we don't report on external packages; if that's important we assume API Extractor
+          // would be enabled for the upstream project.  But see GitHub issue #896 for a possible exception.
+          const astImport: AstImport = entity.astEntity;
+
+          if (astImport.exportName === '*') {
+            output.append(`export * as ${entity.nameForEmit}`);
+          } else if (entity.nameForEmit !== astImport.exportName) {
+            output.append(`export { ${astImport.exportName} as ${entity.nameForEmit} }`);
+          } else {
+            output.append(`export { ${astImport.exportName} }`);
+          }
+          output.append(` from '${astImport.modulePath}';\n`);
         }
       }
     }
 
-    if (collector.package.tsdocComment === undefined) {
+    if (collector.starExportedExternalModulePaths.length > 0) {
+      output.append('\n');
+      for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
+        output.append(`export * from "${starExportedExternalModulePath}";\n`);
+      }
+    }
+
+    if (collector.workingPackage.tsdocComment === undefined) {
       output.append('\n');
       ReviewFileGenerator._writeLineAsComment(output, '(No @packageDocumentation comment for this package)');
     }
@@ -85,7 +109,7 @@ export class ReviewFileGenerator {
 
       case ts.SyntaxKind.SyntaxList:
         if (span.parent) {
-          if (SymbolAnalyzer.isAstDeclaration(span.parent.kind)) {
+          if (AstDeclaration.isSupportedSyntaxKind(span.parent.kind)) {
             // If the immediate parent is an API declaration, and the immediate children are API declarations,
             // then sort the children alphabetically
             sortChildren = true;
@@ -120,28 +144,20 @@ export class ReviewFileGenerator {
         break;
 
       case ts.SyntaxKind.Identifier:
-        let nameFixup: boolean = false;
-        const identifierSymbol: ts.Symbol | undefined = collector.typeChecker.getSymbolAtLocation(span.node);
-        if (identifierSymbol) {
-          const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(identifierSymbol, collector.typeChecker);
+        const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForIdentifierNode(
+          span.node as ts.Identifier
+        );
 
-          const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityBySymbol(followedSymbol);
-
-          if (referencedEntity) {
-            if (!referencedEntity.nameForEmit) {
-              // This should never happen
-              throw new Error('referencedEntry.uniqueName is undefined');
-            }
-
-            span.modification.prefix = referencedEntity.nameForEmit;
-            nameFixup = true;
-            // For debugging:
-            // span.modification.prefix += '/*R=FIX*/';
+        if (referencedEntity) {
+          if (!referencedEntity.nameForEmit) {
+            // This should never happen
+            throw new InternalError('referencedEntry.nameForEmit is undefined');
           }
 
-        }
-
-        if (!nameFixup) {
+          span.modification.prefix = referencedEntity.nameForEmit;
+          // For debugging:
+          // span.modification.prefix += '/*R=FIX*/';
+        } else {
           // For debugging:
           // span.modification.prefix += '/*R=KEEP*/';
         }
@@ -153,7 +169,7 @@ export class ReviewFileGenerator {
       for (const child of span.children) {
         let childAstDeclaration: AstDeclaration = astDeclaration;
 
-        if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
+        if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
           childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
 
           if (sortChildren) {

@@ -13,6 +13,7 @@ import { RushConfigurationProject } from './RushConfigurationProject';
 export interface IVersionPolicyJson {
   policyName: string;
   definitionName: string;
+  dependencies?: IVersionPolicyDependencyJson;
 }
 
 /**
@@ -29,6 +30,30 @@ export interface ILockStepVersionJson extends IVersionPolicyJson {
  */
 export interface IIndividualVersionJson extends IVersionPolicyJson {
   lockedMajor?: number;
+}
+
+/**
+ * @beta
+ */
+export enum VersionFormatForPublish {
+  original = 'original',
+  exact = 'exact'
+}
+
+/**
+ * @beta
+ */
+export enum VersionFormatForCommit {
+  wildcard = 'wildcard',
+  original = 'original'
+}
+
+/**
+ * @beta
+ */
+export interface IVersionPolicyDependencyJson {
+  versionFormatForPublish?: VersionFormatForPublish;
+  versionFormatForCommit?: VersionFormatForCommit;
 }
 
 /**

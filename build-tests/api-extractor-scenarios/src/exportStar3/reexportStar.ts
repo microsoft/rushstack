@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 export * from 'api-extractor-lib1-test';
+export * from 'api-extractor-lib2-test';
 
 /** @public */
 export class A { }

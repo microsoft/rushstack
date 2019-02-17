@@ -2,6 +2,26 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.10.0",
+      "tag": "@microsoft/node-core-library_v3.10.0",
+      "date": "Mon, 11 Feb 2019 03:31:55 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Include support for text formatting in the Terminal API."
+          },
+          {
+            "comment": "Add new API `InternalError.breakInDebugger`"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Exposing utility class StringBufferTerminalProvider, useful to clients of Terminal API for their own unit tests"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.9.0",
       "tag": "@microsoft/node-core-library_v3.9.0",
       "date": "Thu, 10 Jan 2019 01:57:52 GMT",

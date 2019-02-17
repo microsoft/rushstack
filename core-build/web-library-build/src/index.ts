@@ -16,7 +16,6 @@ import {
 } from '@microsoft/gulp-core-build';
 import { apiExtractor, tscCmd, tslintCmd } from '@microsoft/gulp-core-build-typescript';
 import { sass } from '@microsoft/gulp-core-build-sass';
-import { karma } from '@microsoft/gulp-core-build-karma';
 import { webpack } from '@microsoft/gulp-core-build-webpack';
 import { serve, reload } from '@microsoft/gulp-core-build-serve';
 import { PostProcessSourceMaps } from './PostProcessSourceMaps';
@@ -24,14 +23,19 @@ import { PostProcessSourceMaps } from './PostProcessSourceMaps';
 export * from '@microsoft/gulp-core-build';
 export * from '@microsoft/gulp-core-build-typescript';
 export * from '@microsoft/gulp-core-build-sass';
-export * from '@microsoft/gulp-core-build-karma';
 export * from '@microsoft/gulp-core-build-webpack';
 export * from '@microsoft/gulp-core-build-serve';
 
-// pre copy and post copy allows you to specify a map of dest: [sources] to copy from one place to another.
+// Pre copy and post copy allows you to specify a map of dest: [sources] to copy from one place to another.
+/**
+ * @public
+ */
 export const preCopy: CopyTask = new CopyTask();
 preCopy.name = 'pre-copy';
 
+/**
+ * @public
+ */
 export const postCopy: CopyTask = new CopyTask();
 postCopy.name = 'post-copy';
 
@@ -48,15 +52,42 @@ setConfig({
 });
 
 // Define default task groups.
+/**
+ * @public
+ */
 export const buildTasks: IExecutable = task(
   'build',
   serial(preCopy, sass, parallel(tslintCmd, tscCmd), apiExtractor, postCopy)
 );
+
+/**
+ * @public
+ */
 export const bundleTasks: IExecutable = task('bundle', serial(buildTasks, webpack));
-export const testTasks: IExecutable = task('test', serial(buildTasks, karma, jest));
-export const defaultTasks: IExecutable = serial(bundleTasks, karma, jest);
+
+/**
+ * @public
+ */
+export const testTasks: IExecutable = task('test', serial(buildTasks, jest));
+
+/**
+ * @public
+ */
+export const defaultTasks: IExecutable = serial(bundleTasks, jest);
+
+/**
+ * @public
+ */
 export const postProcessSourceMapsTask: PostProcessSourceMaps = new PostProcessSourceMaps();
+
+/**
+ * @public
+ */
 export const validateShrinkwrapTask: ValidateShrinkwrapTask = new ValidateShrinkwrapTask();
+
+/**
+ * @public
+ */
 export const generateShrinkwrapTask: GenerateShrinkwrapTask = new GenerateShrinkwrapTask();
 
 task('validate-shrinkwrap', validateShrinkwrapTask);

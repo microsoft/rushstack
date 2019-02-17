@@ -19,16 +19,17 @@ import {
 } from '../api/IExtractorConfig';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { CollectorEntity } from './CollectorEntity';
-import { AstSymbolTable } from '../analyzer/AstSymbolTable';
-import { AstEntryPoint } from '../analyzer/AstEntryPoint';
+import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
+import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
-import { CollectorPackage } from './CollectorPackage';
+import { WorkingPackage } from './WorkingPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { DeclarationMetadata } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
+import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 
 /**
  * Options for Collector constructor.
@@ -45,9 +46,9 @@ export interface ICollectorOptions {
   program: ts.Program;
 
   /**
-   * The entry point for the project.  This should correspond to the "main" field
-   * from NPM's package.json file.  If it is a relative path, it will be relative to
-   * the project folder described by IExtractorAnalyzeOptions.compilerOptions.
+   * The entry point to be processed by API Extractor.  Normally this should correspond to
+   * the "main" field from the package.json file.  If it is a relative path, it will be
+   * relative to the project folder described by IExtractorAnalyzeOptions.compilerOptions.
    */
   entryPointFile: string;
 
@@ -59,9 +60,10 @@ export interface ICollectorOptions {
 }
 
 /**
- * The main entry point for the "api-extractor" utility.  The Analyzer object invokes the
- * TypeScript Compiler API to analyze a project, and constructs the AstItem
- * abstract syntax tree.
+ * The `Collector` manages the overall data set that is used by `ApiModelGenerator`,
+ * `DtsRollupGenerator`, and `ReviewFileGenerator`.  Starting from the working package's entry point,
+ * the `Collector` collects all exported symbols, determines how to import any symbols they reference,
+ * assigns unique names, and sorts everything into a normalized alphabetical ordering.
  */
 export class Collector {
   public readonly program: ts.Program;
@@ -75,17 +77,18 @@ export class Collector {
 
   public readonly logger: ILogger;
 
-  public readonly package: CollectorPackage;
+  public readonly workingPackage: WorkingPackage;
 
   private readonly _program: ts.Program;
 
   private readonly _tsdocParser: tsdoc.TSDocParser;
 
-  private _astEntryPoint: AstEntryPoint | undefined;
+  private _astEntryPoint: AstModule | undefined;
 
   private readonly _entities: CollectorEntity[] = [];
-  private readonly _entitiesByAstSymbol: Map<AstSymbol, CollectorEntity> = new Map<AstSymbol, CollectorEntity>();
-  private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
+  private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<AstEntity, CollectorEntity>();
+
+  private readonly _starExportedExternalModulePaths: string[] = [];
 
   private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
   private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
@@ -111,7 +114,7 @@ export class Collector {
       throw new Error('Unable to load file: ' + options.entryPointFile);
     }
 
-    this.package = new CollectorPackage({
+    this.workingPackage = new WorkingPackage({
       packageFolder,
       packageJson,
       entryPointSourceFile
@@ -151,6 +154,14 @@ export class Collector {
   }
 
   /**
+   * A list of module specifiers (e.g. `"@microsoft/node-core-library/lib/FileSystem"`) that should be emitted
+   * as star exports (e.g. `export * from "@microsoft/node-core-library/lib/FileSystem"`).
+   */
+  public get starExportedExternalModulePaths(): ReadonlyArray<string> {
+    return this._starExportedExternalModulePaths;
+  }
+
+  /**
    * Perform the analysis.
    */
   public analyze(): void {
@@ -167,49 +178,70 @@ export class Collector {
     }
 
     // Build the entry point
-    const astEntryPoint: AstEntryPoint = this.astSymbolTable.fetchEntryPoint(this.package.entryPointSourceFile);
+    const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleFromWorkingPackage(
+      this.workingPackage.entryPointSourceFile);
+    this._astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
-      this.package.entryPointSourceFile, this);
+      this.workingPackage.entryPointSourceFile, this);
 
     if (packageDocCommentTextRange) {
-      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(this.package.entryPointSourceFile.text,
+      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(this.workingPackage.entryPointSourceFile.text,
         packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
 
-      this.package.tsdocParserContext = this._tsdocParser.parseRange(range);
-      this.package.tsdocComment = this.package.tsdocParserContext!.docComment;
+      this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
+      this.workingPackage.tsdocComment = this.workingPackage.tsdocParserContext!.docComment;
     }
 
-    const exportedAstSymbols: AstSymbol[] = [];
+    const exportedAstEntities: AstEntity[] = [];
 
     // Create a CollectorEntity for each top-level export
-    for (const exportedMember of astEntryPoint.exportedMembers) {
-      const astSymbol: AstSymbol = exportedMember.astSymbol;
 
-      this._createEntityForSymbol(exportedMember.astSymbol, exportedMember.name);
+    const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
+    for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
+      this._createCollectorEntity(astEntity, exportName);
 
-      exportedAstSymbols.push(astSymbol);
+      exportedAstEntities.push(astEntity);
     }
 
     // Create a CollectorEntity for each indirectly referenced export.
     // Note that we do this *after* the above loop, so that references to exported AstSymbols
     // are encountered first as exports.
     const alreadySeenAstSymbols: Set<AstSymbol> = new Set<AstSymbol>();
-    for (const exportedAstSymbol of exportedAstSymbols) {
-      this._createEntityForIndirectReferences(exportedAstSymbol, alreadySeenAstSymbols);
+    for (const exportedAstEntity of exportedAstEntities) {
+      this._createEntityForIndirectReferences(exportedAstEntity, alreadySeenAstSymbols);
 
-      this.fetchMetadata(exportedAstSymbol);
+      if (exportedAstEntity instanceof AstSymbol) {
+        this.fetchMetadata(exportedAstEntity);
+      }
     }
 
     this._makeUniqueNames();
 
+    for (const starExportedExternalModule of astModuleExportInfo.starExportedExternalModules) {
+      if (starExportedExternalModule.externalModulePath !== undefined) {
+        this._starExportedExternalModulePaths.push(starExportedExternalModule.externalModulePath);
+      }
+    }
+
     Sort.sortBy(this._entities, x => x.getSortKey());
     Sort.sortSet(this._dtsTypeReferenceDirectives);
     Sort.sortSet(this._dtsLibReferenceDirectives);
+    this._starExportedExternalModulePaths.sort();
   }
 
-  public tryGetEntityBySymbol(symbol: ts.Symbol): CollectorEntity | undefined {
-    return this._entitiesBySymbol.get(symbol);
+  /**
+   * For a given ts.Identifier that is part of an AstSymbol that we analyzed, return the CollectorEntity that
+   * it refers to.  Returns undefined if it doesn't refer to anything interesting.
+   * @remarks
+   * Throws an Error if the ts.Identifier is not part of node tree that was analyzed.
+   */
+  public tryGetEntityForIdentifierNode(identifier: ts.Identifier): CollectorEntity | undefined {
+    const astEntity: AstEntity | undefined = this.astSymbolTable.tryGetEntityForIdentifierNode(identifier);
+    if (astEntity) {
+      return this._entitiesByAstEntity.get(astEntity);
+    }
+    return undefined;
   }
 
   public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
@@ -221,6 +253,16 @@ export class Collector {
       this._fetchSymbolMetadata(astSymbol);
     }
     return symbolOrDeclaration.metadata as SymbolMetadata | DeclarationMetadata;
+  }
+
+  public tryFetchMetadataForAstEntity(astEntity: AstEntity): SymbolMetadata | undefined {
+    if (astEntity instanceof AstSymbol) {
+      return this.fetchMetadata(astEntity);
+    }
+    if (astEntity.astSymbol) { // astImport
+      return this.fetchMetadata(astEntity.astSymbol);
+    }
+    return undefined;
   }
 
   /**
@@ -244,46 +286,49 @@ export class Collector {
     return parts.join('');
   }
 
-  private _createEntityForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
-    let entity: CollectorEntity | undefined = this._entitiesByAstSymbol.get(astSymbol);
+  private _createCollectorEntity(astEntity: AstEntity, exportedName: string | undefined): void {
+    let entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
 
     if (!entity) {
-      entity = new CollectorEntity({
-        astSymbol: astSymbol,
-        originalName: exportedName || astSymbol.localName,
-        exported: !!exportedName
-      });
+      entity = new CollectorEntity(astEntity);
 
-      this._entitiesByAstSymbol.set(astSymbol, entity);
-      this._entitiesBySymbol.set(astSymbol.followedSymbol, entity);
+      this._entitiesByAstEntity.set(astEntity, entity);
       this._entities.push(entity);
 
-      this._collectReferenceDirectives(astSymbol);
-    } else {
-      if (exportedName) {
-        if (!entity.exported) {
-          throw new InternalError('CollectorEntity should have been marked as exported');
-        }
-        if (entity.originalName !== exportedName) {
-          throw new InternalError(`The symbol ${exportedName} was also exported as ${entity.originalName};`
-            + ` this is not supported yet`);
-        }
+      if (astEntity instanceof AstSymbol) {
+        this._collectReferenceDirectives(astEntity);
       }
+    }
+
+    if (exportedName) {
+      entity.addExportName(exportedName);
     }
   }
 
-  private _createEntityForIndirectReferences(astSymbol: AstSymbol, alreadySeenAstSymbols: Set<AstSymbol>): void {
-    if (alreadySeenAstSymbols.has(astSymbol)) {
+  private _createEntityForIndirectReferences(astEntity: AstEntity, alreadySeenAstEntities: Set<AstEntity>): void {
+    if (alreadySeenAstEntities.has(astEntity)) {
       return;
     }
-    alreadySeenAstSymbols.add(astSymbol);
+    alreadySeenAstEntities.add(astEntity);
 
-    astSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-      for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
-        this._createEntityForSymbol(referencedAstSymbol, undefined);
-        this._createEntityForIndirectReferences(referencedAstSymbol, alreadySeenAstSymbols);
-      }
-    });
+    if (astEntity instanceof AstSymbol) {
+      astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+        for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
+          if (referencedAstEntity instanceof AstSymbol) {
+            // We only create collector entities for root-level symbols.
+            // For example, if a symbols is nested inside a namespace, only the root-level namespace
+            // get a collector entity
+            if (referencedAstEntity.parentAstSymbol === undefined) {
+              this._createCollectorEntity(referencedAstEntity, undefined);
+            }
+          } else {
+            this._createCollectorEntity(referencedAstEntity, undefined);
+          }
+
+          this._createEntityForIndirectReferences(referencedAstEntity, alreadySeenAstEntities);
+        }
+      });
+    }
   }
 
   /**
@@ -291,34 +336,110 @@ export class Collector {
    */
   private _makeUniqueNames(): void {
     const usedNames: Set<string> = new Set<string>();
+    this._collectGlobalNames(usedNames);
 
     // First collect the explicit package exports (named)
     for (const entity of this._entities) {
-      if (entity.exported && entity.originalName !== ts.InternalSymbolName.Default) {
-
-        if (usedNames.has(entity.originalName)) {
+      for (const exportName of entity.exportNames) {
+        if (usedNames.has(exportName)) {
           // This should be impossible
-          throw new InternalError(`A package cannot have two exports with the name ${entity.originalName}`);
+          throw new InternalError(`A package cannot have two exports with the name "${exportName}"`);
         }
 
-        entity.nameForEmit = entity.originalName;
-
-        usedNames.add(entity.nameForEmit);
+        usedNames.add(exportName);
       }
     }
 
     // Next generate unique names for the non-exports that will be emitted (and the default export)
     for (const entity of this._entities) {
-      if (!entity.exported || entity.originalName === ts.InternalSymbolName.Default) {
-        let suffix: number = 1;
-        entity.nameForEmit = entity.astSymbol.localName;
 
-        while (usedNames.has(entity.nameForEmit)) {
-          entity.nameForEmit = `${entity.astSymbol.localName}_${++suffix}`;
-        }
-
-        usedNames.add(entity.nameForEmit);
+      // If this entity is exported exactly once, then emit the exported name
+      if (entity.singleExportName !== undefined && entity.singleExportName !== ts.InternalSymbolName.Default) {
+        entity.nameForEmit = entity.singleExportName;
+        continue;
       }
+
+      // If the localName happens to be the same as one of the exports, then emit that name
+      if (entity.exportNames.has(entity.astEntity.localName)) {
+        entity.nameForEmit = entity.astEntity.localName;
+        continue;
+      }
+
+      // In all other cases, generate a unique name based on the localName
+      let suffix: number = 1;
+      let nameForEmit: string = entity.astEntity.localName;
+      while (usedNames.has(nameForEmit)) {
+        nameForEmit = `${entity.astEntity.localName}_${++suffix}`;
+      }
+      entity.nameForEmit = nameForEmit;
+      usedNames.add(nameForEmit);
+    }
+  }
+
+  /**
+   * Adds global names to the usedNames set, to prevent API Extractor from emitting names that conflict with
+   * a global name.
+   */
+  private _collectGlobalNames(usedNames: Set<string>): void {
+    // As a temporary workaround, this a short list of names that appear in typical projects.
+    // The full solution is tracked by this issue:
+    // https://github.com/Microsoft/web-build-tools/issues/1095
+    const globalNames: string[] = [
+      'Array',
+      'ArrayConstructor',
+      'Console',
+      'Date',
+      'DateConstructor',
+      'Error',
+      'ErrorConstructor',
+      'Float32Array',
+      'Float32ArrayConstructor',
+      'Float64Array',
+      'Float64ArrayConstructor',
+      'IArguments',
+      'Int16Array',
+      'Int16ArrayConstructor',
+      'Int32Array',
+      'Int32ArrayConstructor',
+      'Int8Array',
+      'Int8ArrayConstructor',
+      'Iterable',
+      'IterableIterator',
+      'Iterator',
+      'IteratorResult',
+      'Map',
+      'MapConstructor',
+      'Promise',
+      'PromiseConstructor',
+      'ReadonlyArray',
+      'ReadonlyMap',
+      'ReadonlySet',
+      'Set',
+      'SetConstructor',
+      'String',
+      'Symbol',
+      'SymbolConstructor',
+      'Uint16Array',
+      'Uint16ArrayConstructor',
+      'Uint32Array',
+      'Uint32ArrayConstructor',
+      'Uint8Array',
+      'Uint8ArrayConstructor',
+      'Uint8ClampedArray',
+      'Uint8ClampedArrayConstructor',
+      'WeakMap',
+      'WeakMapConstructor',
+      'WeakSet',
+      'WeakSetConstructor',
+      'clearInterval',
+      'clearTimeout',
+      'console',
+      'setInterval',
+      'setTimeout',
+      'undefined'
+    ];
+    for (const globalName of globalNames) {
+      usedNames.add(globalName);
     }
   }
 
@@ -330,7 +451,7 @@ export class Collector {
       const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(start);
 
       // If the file is under the packageFolder, then show a relative path
-      const relativePath: string = path.relative(this.package.packageFolder, sourceFile.fileName);
+      const relativePath: string = path.relative(this.workingPackage.packageFolder, sourceFile.fileName);
       const shownPath: string = relativePath.substr(0, 2) === '..' ? sourceFile.fileName : relativePath;
 
       // Format the error so that VS Code can follow it.  For example:
@@ -373,7 +494,7 @@ export class Collector {
 
       if (declaredReleaseTag !== ReleaseTag.None) {
         if (effectiveReleaseTag !== ReleaseTag.None && effectiveReleaseTag !== declaredReleaseTag) {
-          if (!astSymbol.rootAstSymbol.imported) { // for now, don't report errors for external code
+          if (!astSymbol.isExternal) { // for now, don't report errors for external code
             // TODO: Report error message
             this.reportError('Inconsistent release tags between declarations', undefined, undefined);
           }
@@ -392,9 +513,9 @@ export class Collector {
 
     if (effectiveReleaseTag === ReleaseTag.None) {
       if (this.validationRules.missingReleaseTags !== ExtractorValidationRulePolicy.allow) {
-        if (!astSymbol.rootAstSymbol.imported) { // for now, don't report errors for external code
+        if (!astSymbol.isExternal) { // for now, don't report errors for external code
           // For now, don't report errors for forgotten exports
-          const entity: CollectorEntity | undefined = this._entitiesByAstSymbol.get(astSymbol.rootAstSymbol);
+          const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
           if (entity && entity.exported) {
             // We also don't report errors for the default export of an entry point, since its doc comment
             // isn't easy to obtain from the .d.ts file
@@ -458,7 +579,7 @@ export class Collector {
       }
 
       if (inconsistentReleaseTags) {
-        if (!astDeclaration.astSymbol.rootAstSymbol.imported) { // for now, don't report errors for external code
+        if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
           // TODO: Report error message
           this.reportError('Inconsistent release tags in doc comment', undefined, undefined);
         }
@@ -507,7 +628,7 @@ export class Collector {
     }
 
     const sourceFileText: string = declaration.getSourceFile().text;
-    const ranges: ts.CommentRange[] = TypeScriptHelpers.getJSDocCommentRanges(nodeForComment, sourceFileText) || [];
+    const ranges: ts.CommentRange[] = TypeScriptInternals.getJSDocCommentRanges(nodeForComment, sourceFileText) || [];
 
     if (ranges.length === 0) {
       return undefined;
@@ -524,11 +645,6 @@ export class Collector {
   }
 
   private _collectReferenceDirectives(astSymbol: AstSymbol): void {
-    // Are we emitting declarations?
-    if (astSymbol.astImport) {
-      return; // no, it's an import
-    }
-
     const seenFilenames: Set<string> = new Set<string>();
 
     for (const astDeclaration of astSymbol.astDeclarations) {

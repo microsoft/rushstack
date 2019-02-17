@@ -14,8 +14,9 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { SymbolAnalyzer } from '../analyzer/SymbolAnalyzer';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { AstSymbol } from '../analyzer/AstSymbol';
+import { SymbolMetadata } from '../collector/SymbolMetadata';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -62,8 +63,8 @@ export class DtsRollupGenerator {
   private static _generateTypingsFileContent(collector: Collector, indentedWriter: IndentedWriter,
     dtsKind: DtsRollupKind): void {
 
-    if (collector.package.tsdocParserContext) {
-      indentedWriter.writeLine(collector.package.tsdocParserContext.sourceRange.toString());
+    if (collector.workingPackage.tsdocParserContext) {
+      indentedWriter.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
       indentedWriter.writeLine();
     }
 
@@ -80,13 +81,16 @@ export class DtsRollupGenerator {
 
     // Emit the imports
     for (const entity of collector.entities) {
-      if (entity.astSymbol.astImport) {
+      if (entity.astEntity instanceof AstImport) {
+        const astImport: AstImport = entity.astEntity;
 
-        const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astSymbol).releaseTag;
+        // For example, if the imported API comes from an external package that supports AEDoc,
+        // and it was marked as `@internal`, then don't emit it.
+        const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(astImport);
+        const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
+
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-          const astImport: AstImport = entity.astSymbol.astImport;
-
-          if (astImport.exportName === '*') {
+          if (astImport.starImport) {
             indentedWriter.write(`import * as ${entity.nameForEmit}`);
           } else if (entity.nameForEmit !== astImport.exportName) {
             indentedWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
@@ -94,38 +98,51 @@ export class DtsRollupGenerator {
             indentedWriter.write(`import { ${astImport.exportName} }`);
           }
           indentedWriter.writeLine(` from '${astImport.modulePath}';`);
-
-          if (entity.exported) {
-            // We write re-export as two lines: `import { Mod } from 'package'; export { Mod };`,
-            // instead of a single line `export { Mod } from 'package';`.
-            // Because this variable may be used by others, and we cannot know it.
-            // so we always keep the `import ...` declaration, for now.
-            indentedWriter.writeLine(`export { ${entity.nameForEmit} };`);
-          }
         }
       }
     }
 
     // Emit the regular declarations
     for (const entity of collector.entities) {
-      if (!entity.astSymbol.astImport) {
+      const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(entity.astEntity);
+      const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
 
-        const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astSymbol).releaseTag;
-        if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+      if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+        indentedWriter.writeLine();
+        indentedWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+        continue;
+      }
 
-          // Emit all the declarations for this entry
-          for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
+      if (entity.astEntity instanceof AstSymbol) {
 
-            indentedWriter.writeLine();
+        // Emit all the declarations for this entry
+        for (const astDeclaration of entity.astEntity.astDeclarations || []) {
 
-            const span: Span = new Span(astDeclaration.declaration);
-            DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
-            indentedWriter.writeLine(span.getModifiedText());
-          }
-        } else {
           indentedWriter.writeLine();
-          indentedWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+
+          const span: Span = new Span(astDeclaration.declaration);
+          DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
+          indentedWriter.writeLine(span.getModifiedText());
         }
+      }
+
+      if (!entity.shouldInlineExport) {
+        for (const exportName of entity.exportNames) {
+          if (exportName === ts.InternalSymbolName.Default) {
+            indentedWriter.writeLine(`export default ${entity.nameForEmit};`);
+          } else if (entity.nameForEmit !== exportName) {
+            indentedWriter.writeLine(`export { ${entity.nameForEmit} as ${exportName} }`);
+          } else {
+            indentedWriter.writeLine(`export { ${exportName} }`);
+          }
+        }
+      }
+    }
+
+    if (collector.starExportedExternalModulePaths.length > 0) {
+      indentedWriter.writeLine();
+      for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
+        indentedWriter.writeLine(`export * from "${starExportedExternalModulePath}";`);
       }
     }
 
@@ -178,12 +195,8 @@ export class DtsRollupGenerator {
           replacedModifiers += 'declare ';
         }
 
-        if (entity.exported) {
-          if (entity.originalName === ts.InternalSymbolName.Default) {
-            (span.parent || span).modification.suffix = `\nexport default ${entity.nameForEmit};`;
-          } else {
-            replacedModifiers = 'export ' + replacedModifiers;
-          }
+        if (entity.shouldInlineExport) {
+          replacedModifiers = 'export ' + replacedModifiers;
         }
 
         if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
@@ -219,12 +232,8 @@ export class DtsRollupGenerator {
           span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
           span.modification.suffix = ';';
 
-          if (entity.exported) {
-            if (entity.originalName === ts.InternalSymbolName.Default) {
-              span.modification.suffix += `\nexport default ${entity.nameForEmit};`;
-            } else {
-              span.modification.prefix = 'export ' + span.modification.prefix;
-            }
+          if (entity.shouldInlineExport) {
+            span.modification.prefix = 'export ' + span.modification.prefix;
           }
 
           const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
@@ -242,28 +251,20 @@ export class DtsRollupGenerator {
         break;
 
       case ts.SyntaxKind.Identifier:
-        let nameFixup: boolean = false;
-        const identifierSymbol: ts.Symbol | undefined = collector.typeChecker.getSymbolAtLocation(span.node);
-        if (identifierSymbol) {
-          const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(identifierSymbol, collector.typeChecker);
+        const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForIdentifierNode(
+          span.node as ts.Identifier
+        );
 
-          const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityBySymbol(followedSymbol);
-
-          if (referencedEntity) {
-            if (!referencedEntity.nameForEmit) {
-              // This should never happen
-              throw new Error('referencedEntry.uniqueName is undefined');
-            }
-
-            span.modification.prefix = referencedEntity.nameForEmit;
-            nameFixup = true;
-            // For debugging:
-            // span.modification.prefix += '/*R=FIX*/';
+        if (referencedEntity) {
+          if (!referencedEntity.nameForEmit) {
+            // This should never happen
+            throw new InternalError('referencedEntry.nameForEmit is undefined');
           }
 
-        }
-
-        if (!nameFixup) {
+          span.modification.prefix = referencedEntity.nameForEmit;
+          // For debugging:
+          // span.modification.prefix += '/*R=FIX*/';
+        } else {
           // For debugging:
           // span.modification.prefix += '/*R=KEEP*/';
         }
@@ -277,7 +278,7 @@ export class DtsRollupGenerator {
 
         // Should we trim this node?
         let trimmed: boolean = false;
-        if (SymbolAnalyzer.isAstDeclaration(child.kind)) {
+        if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
           childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
 
           const releaseTag: ReleaseTag = collector.fetchMetadata(childAstDeclaration.astSymbol).releaseTag;
