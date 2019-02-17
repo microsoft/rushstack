@@ -708,6 +708,8 @@ interface IExtractorConfig {
     project: IExtractorProjectConfig;
     skipLibCheck?: boolean;
     testMode?: boolean;
+    // @beta (undocumented)
+    tsdocMetadata?: IExtractorTsdocMetadataConfig;
     // (undocumented)
     validationRules?: IExtractorValidationRulesConfig;
 }
@@ -754,6 +756,12 @@ interface IExtractorTsconfigCompilerConfig {
     configType: 'tsconfig';
     overrideTsconfig?: {};
     rootFolder: string;
+}
+
+// @beta
+interface IExtractorTsdocMetadataConfig {
+    enabled: boolean;
+    tsdocMetadataPath?: string;
 }
 
 // @public

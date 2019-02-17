@@ -267,6 +267,8 @@ interface IPackageJson {
     scripts?: IPackageJsonScriptTable;
     // @beta
     tsdoc?: IPackageJsonTsdocConfiguration;
+    // @beta
+    tsdocMetadata?: string;
     typings?: string;
     version: string;
 }
