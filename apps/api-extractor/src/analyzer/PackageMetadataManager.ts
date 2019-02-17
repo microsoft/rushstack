@@ -64,23 +64,36 @@ export class PackageMetadataManager {
   // This feature is still being standardized: https://github.com/Microsoft/tsdoc/issues/7
   // In the future we will use the @microsoft/tsdoc library to read this file.
   private static _resolveTsdocMetadataPathFromPackageJson(packageFolder: string, packageJson: IPackageJson): string {
-    const { tsdocMetadataFilename } = PackageMetadataManager;
+    const tsdocMetadataFilename: string = PackageMetadataManager.tsdocMetadataFilename;
+
     let tsdocMetadataRelativePath: string;
+
     if (packageJson.tsdocMetadata) {
+      // 1. If package.json contains a field such as "tsdocMetadata": "./path1/path2/tsdoc-metadata.json",
+      // then that takes precedence.  This convention will be rarely needed, since the other rules below generally
+      // produce a good result.
       tsdocMetadataRelativePath = packageJson.tsdocMetadata;
     } else if (packageJson.typings) {
+      // 2. If package.json contains a field such as "typings": "./path1/path2/index.d.ts", then we look
+      // for the file under "./path1/path2/tsdoc-metadata.json"
       tsdocMetadataRelativePath = path.join(
         path.dirname(packageJson.typings),
         tsdocMetadataFilename
       );
     } else if (packageJson.main) {
+      // 3. If package.json contains a field such as "main": "./path1/path2/index.js", then we look for
+      // the file under "./path1/path2/tsdoc-metadata.json"
       tsdocMetadataRelativePath = path.join(
         path.dirname(packageJson.main),
         tsdocMetadataFilename
       );
     } else {
+      // 4. If none of the above rules apply, then by default we look for the file under "./tsdoc-metadata.json"
+      // since the default entry point is "./index.js"
       tsdocMetadataRelativePath = tsdocMetadataFilename;
     }
+
+    // Always resolve relative to the package folder.
     const tsdocMetadataPath: string = path.resolve(
       packageFolder,
       tsdocMetadataRelativePath
