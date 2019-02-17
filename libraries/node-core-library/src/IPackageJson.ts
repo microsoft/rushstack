@@ -105,6 +105,13 @@ export interface IPackageJson {
   tsdoc?: IPackageJsonTsdocConfiguration;
 
   /**
+   * The path to the TSDoc metadata file.
+   * This is still being standardized: https://github.com/Microsoft/tsdoc/issues/7#issuecomment-442271815
+   * @beta
+   */
+  tsdocMetadata?: string;
+
+  /**
    * The main entry point for the package.
    */
   bin?: string;

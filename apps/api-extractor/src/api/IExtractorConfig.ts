@@ -248,6 +248,26 @@ export interface IExtractorDtsRollupConfig {
 }
 
 /**
+ * Configures how the tsdoc metadata file will be generated.
+ *
+ * @beta
+ */
+export interface IExtractorTsdocMetadataConfig {
+  /**
+   * Whether to generate the TSDoc metadata file. The default is false.
+   */
+  enabled: boolean;
+
+  /**
+   * Specifies where the TSDoc metadata file should be written. The default value is
+   * an empty string, which causes the path to be automatically inferred from the
+   * "tsdocMetadata", "typings" or "main" fields of the project's package.json.
+   * If none of these fields are set, it defaults to "tsdoc-metadata.json".
+   */
+  tsdocMetadataPath?: string;
+}
+
+/**
  * Configuration options for the API Extractor tool.  These options can be loaded
  * from a JSON config file.
  *
@@ -297,6 +317,12 @@ export interface IExtractorConfig {
    * @beta
    */
   dtsRollup?: IExtractorDtsRollupConfig;
+
+  /**
+   * {@inheritdoc IExtractorTsdocMetadataConfig}
+   * @beta
+   */
+  tsdocMetadata?: IExtractorTsdocMetadataConfig;
 
   /**
    * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
