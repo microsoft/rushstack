@@ -24,7 +24,7 @@ exports[`TaskRunner Dependencies throwsErrorOnNonExistentTask 1`] = `"The task '
 
 exports[`TaskRunner Error logging printedStderrAfterError 1`] = `"Project(s) failed to build"`;
 
-exports[`TaskRunner Error logging printedStderrAfterError 2`] = `"Registered stdout+stderr[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[stdout+stderr] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mstdout+stderr (0.00 seconds)[x][39m[n]Woops[n][x][31m================================[-n-][x][39m[n][n]"`;
+exports[`TaskRunner Error logging printedStderrAfterError 2`] = `"Registered stdout+stderr[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[stdout+stderr] started[x][39m[n][n][x][31mFAILURE (1)[x][39m[n][x][31m================================[x][39m[n][x][31mstdout+stderr (0.00 seconds)[x][39m[n]Error: step 1 failed[n][x][31m================================[-n-][x][39m[n][n]"`;
 
 exports[`TaskRunner Error logging printedStderrAfterError 3`] = `""`;
 

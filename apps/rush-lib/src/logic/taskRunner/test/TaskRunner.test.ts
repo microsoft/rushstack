@@ -92,8 +92,8 @@ describe('TaskRunner', () => {
         name: 'stdout+stderr',
         isIncrementalBuildAllowed: false,
         execute: (writer: ITaskWriter) => {
-          writer.write('Hold my beer...' + EOL);
-          writer.writeError('Woops' + EOL);
+          writer.write('Build step 1' + EOL);
+          writer.writeError('Error: step 1 failed' + EOL);
           return Promise.resolve(TaskStatus.Failure);
         }
       });
@@ -103,8 +103,8 @@ describe('TaskRunner', () => {
         .catch(err => {
           expect(err.message).toMatchSnapshot();
           const allMessages: string = terminalProvider.getOutput();
-          expect(allMessages).not.toContain('Hold my beer...');
-          expect(allMessages).toContain('Woops');
+          expect(allMessages).not.toContain('Build step 1');
+          expect(allMessages).toContain('Error: step 1 failed');
           checkConsoleOutput(terminalProvider);
         });
     });
@@ -114,8 +114,8 @@ describe('TaskRunner', () => {
         name: 'stdout only',
         isIncrementalBuildAllowed: false,
         execute: (writer: ITaskWriter) => {
-          writer.write('Step 1 of important task' + EOL);
-          writer.write('Oh noes' + EOL);
+          writer.write('Build step 1' + EOL);
+          writer.write('Error: step 1 failed' + EOL);
           return Promise.resolve(TaskStatus.Failure);
         }
       });
@@ -124,7 +124,7 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch(err => {
           expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput()).toMatch(/.*Step 1 of important task.*Oh noes/);
+          expect(terminalProvider.getOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
         });
     });
   });
