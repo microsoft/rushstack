@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 12 Feb 2019 17:13:12 GMT and should not be manually modified.
+This log was last generated on Mon, 18 Feb 2019 17:13:23 GMT and should not be manually modified.
+
+## 8.0.0
+Mon, 18 Feb 2019 17:13:23 GMT
+
+### Breaking changes
+
+- New way to resolve & generate TSDoc metadata file
 
 ## 7.0.18
 Tue, 12 Feb 2019 17:13:12 GMT
