@@ -127,5 +127,27 @@ describe('TaskRunner', () => {
           expect(terminalProvider.getOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
         });
     });
+
+    it('printedSummaryOfLargeStdoutAfterErrorWithEmptyStderr', () => {
+      taskRunner.addTask({
+        name: 'large stdout only',
+        isIncrementalBuildAllowed: false,
+        execute: (writer: ITaskWriter) => {
+          writer.write('Building units...');
+          for (let i: number = 1; i <= 50; i++) {
+            writer.write(` - unit #${i};${EOL}`);
+          }
+          return Promise.resolve(TaskStatus.Failure);
+        }
+      });
+      return taskRunner
+        .execute()
+        .then(() => fail(EXPECTED_FAIL))
+        .catch(err => {
+          expect(err.message).toMatchSnapshot();
+          expect(terminalProvider.getOutput())
+            .toMatch(/Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/);
+        });
+    });
   });
 });

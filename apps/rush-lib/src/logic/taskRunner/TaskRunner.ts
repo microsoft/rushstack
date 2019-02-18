@@ -433,10 +433,7 @@ export class TaskRunner {
             task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning;
           let details: string = stderr ? stderr : task.writer.getStdOutput();
           if (details && shouldPrintDetails) {
-            details = details.split(os.EOL)
-              .map(text => text.trim())
-              .filter(text => text)
-              .join(os.EOL);
+            details = this._summarizeTaskReport(details);
             this._terminal.writeLine(details + (i !== tasks.length - 1 ? os.EOL : ''));
           }
         }
@@ -444,6 +441,23 @@ export class TaskRunner {
 
       this._terminal.writeLine(color('================================' + os.EOL));
     }
+  }
+
+  /**
+   * Remove trailing blanks, and all middle lines if text is large
+   */
+  private _summarizeTaskReport(text: string): string {
+    const headSize: number = 10;
+    const tailSize: number = 20;
+    const margin: number = 10;
+    const lines: Array<string> = text.split(/\s*\r?\n/).filter(line => line);
+    if (lines.length < headSize + tailSize + margin) {
+      return lines.join(os.EOL);
+    }
+    const amountRemoved: number = lines.length - headSize - tailSize;
+    const head: string = lines.splice(0, headSize).join(os.EOL);
+    const tail: string = lines.splice(-tailSize).join(os.EOL);
+    return `${head}${os.EOL}[...${amountRemoved} lines omitted...]${os.EOL}${tail}`;
   }
 
 }
