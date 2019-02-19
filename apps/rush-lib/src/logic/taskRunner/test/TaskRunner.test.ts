@@ -128,7 +128,7 @@ describe('TaskRunner', () => {
         });
     });
 
-    it('printedSummaryOfLargeStdoutAfterErrorWithEmptyStderr', () => {
+    it('printedAbridgedStdoutAfterErrorWithEmptyStderr', () => {
       taskRunner.addTask({
         name: 'large stdout only',
         isIncrementalBuildAllowed: false,

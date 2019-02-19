@@ -433,7 +433,7 @@ export class TaskRunner {
             task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning;
           let details: string = stderr ? stderr : task.writer.getStdOutput();
           if (details && shouldPrintDetails) {
-            details = this._summarizeTaskReport(details);
+            details = this._abridgeTaskReport(details);
             this._terminal.writeLine(details + (i !== tasks.length - 1 ? os.EOL : ''));
           }
         }
@@ -446,7 +446,7 @@ export class TaskRunner {
   /**
    * Remove trailing blanks, and all middle lines if text is large
    */
-  private _summarizeTaskReport(text: string): string {
+  private _abridgeTaskReport(text: string): string {
     const headSize: number = 10;
     const tailSize: number = 20;
     const margin: number = 10;
