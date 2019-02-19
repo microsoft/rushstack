@@ -457,7 +457,7 @@ export class TaskRunner {
     const amountRemoved: number = lines.length - headSize - tailSize;
     const head: string = lines.splice(0, headSize).join(os.EOL);
     const tail: string = lines.splice(-tailSize).join(os.EOL);
-    return `${head}${os.EOL}[...${amountRemoved} lines omitted...]${os.EOL}${tail}`;
+    return `${head}${os.EOL}[...${amountRemoved} lines elided...]${os.EOL}${tail}`;
   }
 
 }

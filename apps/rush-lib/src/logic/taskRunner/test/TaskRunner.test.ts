@@ -146,7 +146,7 @@ describe('TaskRunner', () => {
         .catch(err => {
           expect(err.message).toMatchSnapshot();
           expect(terminalProvider.getOutput())
-            .toMatch(/Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/);
+            .toMatch(/Building units.* - unit #1;.* - unit #3;.*lines elided.* - unit #48;.* - unit #50;/);
         });
     });
   });
