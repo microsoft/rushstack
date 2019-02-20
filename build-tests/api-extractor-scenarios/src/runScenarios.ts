@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as process from 'process';
-import { JsonFile, Executable, FileSystem } from '@microsoft/node-core-library';
+import { JsonFile, Executable, FileSystem, Encoding } from '@microsoft/node-core-library';
+
+console.log(Encoding.Utf8);
 
 function executeCommand(command: string, args: string[]): void {
   console.log(`---> ${command} ${args.join(' ')}`);
