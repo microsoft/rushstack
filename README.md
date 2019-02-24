@@ -1,6 +1,6 @@
 # web-build-tools
 
-[![Join the chat at https://gitter.im/web-build-tools/Lobby](https://badges.gitter.im/web-build-tools/Lobby.svg)](https://gitter.im/web-build-tools/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/web-build-tools](https://badges.gitter.im/web-build-tools.svg)](https://gitter.im/web-build-tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build Status](https://dev.azure.com/RushStack/Gearbox%20GitHub%20Projects/_apis/build/status/web-build-tools/web-build-tools%20CI%20Build?branchName=master)](https://dev.azure.com/RushStack/Gearbox%20GitHub%20Projects/_build/latest?definitionId=3&branchName=master)
 
