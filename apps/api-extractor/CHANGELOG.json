@@ -2,11 +2,11 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
-      "version": "8.0.0",
-      "tag": "@microsoft/api-extractor_v8.0.0",
+      "version": "7.0.19",
+      "tag": "@microsoft/api-extractor_v7.0.19",
       "date": "Mon, 18 Feb 2019 17:13:23 GMT",
       "comments": {
-        "major": [
+        "minor": [
           {
             "comment": "New way to resolve & generate TSDoc metadata file"
           }
