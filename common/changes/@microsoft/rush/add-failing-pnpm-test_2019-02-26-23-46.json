@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Enable GitHub dependencies for pnpm installations.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "kevingrandon@yahoo.com"
+}
