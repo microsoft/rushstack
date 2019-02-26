@@ -27,14 +27,14 @@ describe('npm ShrinkwrapFile', () => {
   it('extracts temp projects successfully', () => {
     const tempProjectNames: ReadonlyArray<string> = shrinkwrapFile.getTempProjectNames();
 
-    expect(tempProjectNames).toEqual(['@rush-temp/project1', '@rush-temp/project2' ]);
+    expect(tempProjectNames).toEqual(['@rush-temp/project1', '@rush-temp/project2']);
   });
 });
 
 describe('pnpm ShrinkwrapFile', () => {
-const filename: string = path.resolve(path.join(
-  __dirname, '../../../src/logic/test/shrinkwrapFile/shrinkwrap.yaml'));
-const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
+  const filename: string = path.resolve(path.join(
+    __dirname, '../../../src/logic/test/shrinkwrapFile/shrinkwrap.yaml'));
+  const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
   it('verifies root-level dependency', () => {
     expect(shrinkwrapFile.hasCompatibleTopLevelDependency('q', '~1.5.0')).toEqual(false);
@@ -76,6 +76,11 @@ describe('extractVersionFromPnpmVersionSpecifier', () => {
       .toEqual('1.0.0');
     expect(extractVersionFromPnpmVersionSpecifier('example.pkgs.visualstudio.com/@scope/testDep/1.2.3-beta.3'))
       .toEqual('1.2.3-beta.3');
+  });
+  it('extracts github versions', () => {
+    expect(
+      extractVersionFromPnpmVersionSpecifier('github.com/someorg/somerepo/a14458ef663224a6ddf78cd32a233d52cbb60b32/react@16.8.3')
+    ).toEqual('a14458ef663224a6ddf78cd32a233d52cbb60b32');
   });
   it('handles bad cases', () => {
     expect(extractVersionFromPnpmVersionSpecifier('/foo/gulp-karma/0.0.5/karma@0.13.22')).toEqual(undefined);
