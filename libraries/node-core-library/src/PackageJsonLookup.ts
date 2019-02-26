@@ -224,7 +224,7 @@ export class PackageJsonLookup {
         packageJson.peerDependencies = loadedPackageJson.peerDependencies;
         packageJson.private = loadedPackageJson.private;
         packageJson.scripts = loadedPackageJson.scripts;
-        packageJson.typings = loadedPackageJson.typings;
+        packageJson.typings = loadedPackageJson.typings || loadedPackageJson.types;
         packageJson.tsdoc = loadedPackageJson.tsdoc;
         packageJson.tsdocMetadata = loadedPackageJson.tsdocMetadata;
         packageJson.version = loadedPackageJson.version;

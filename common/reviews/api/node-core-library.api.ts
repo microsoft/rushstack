@@ -269,6 +269,7 @@ interface IPackageJson {
     tsdoc?: IPackageJsonTsdocConfiguration;
     // @beta
     tsdocMetadata?: string;
+    types?: string;
     typings?: string;
     version: string;
 }
