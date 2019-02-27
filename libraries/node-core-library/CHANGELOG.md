@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Wed, 27 Feb 2019 17:13:17 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Feb 2019 22:13:58 GMT and should not be manually modified.
+
+## 3.12.0
+Wed, 27 Feb 2019 22:13:58 GMT
+
+### Minor changes
+
+- Treat `types` as an alias for `typings` in package.json
 
 ## 3.11.1
 Wed, 27 Feb 2019 17:13:17 GMT
