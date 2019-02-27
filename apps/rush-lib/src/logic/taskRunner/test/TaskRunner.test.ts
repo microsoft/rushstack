@@ -125,6 +125,7 @@ describe('TaskRunner', () => {
         .catch(err => {
           expect(err.message).toMatchSnapshot();
           expect(terminalProvider.getOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
+          checkConsoleOutput(terminalProvider);
         });
     });
 
@@ -133,7 +134,7 @@ describe('TaskRunner', () => {
         name: 'large stdout only',
         isIncrementalBuildAllowed: false,
         execute: (writer: ITaskWriter) => {
-          writer.write('Building units...');
+          writer.write(`Building units...${EOL}`);
           for (let i: number = 1; i <= 50; i++) {
             writer.write(` - unit #${i};${EOL}`);
           }
@@ -147,6 +148,30 @@ describe('TaskRunner', () => {
           expect(err.message).toMatchSnapshot();
           expect(terminalProvider.getOutput())
             .toMatch(/Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/);
+          checkConsoleOutput(terminalProvider);
+        });
+    });
+
+    it('preservedLeadingBlanksButTrimmedTrailingBlanks', () => {
+      taskRunner.addTask({
+        name: 'large stderr with leading and trailing blanks',
+        isIncrementalBuildAllowed: false,
+        execute: (writer: ITaskWriter) => {
+          writer.writeError(`List of errors:  ${EOL}`);
+          for (let i: number = 1; i <= 50; i++) {
+            writer.writeError(` - error #${i};  ${EOL}`);
+          }
+          return Promise.resolve(TaskStatus.Failure);
+        }
+      });
+      return taskRunner
+        .execute()
+        .then(() => fail(EXPECTED_FAIL))
+        .catch(err => {
+          expect(err.message).toMatchSnapshot();
+          expect(terminalProvider.getOutput())
+            .toMatch(/List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/);
+          checkConsoleOutput(terminalProvider);
         });
     });
   });
