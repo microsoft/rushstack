@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Mon, 11 Feb 2019 03:31:55 GMT and should not be manually modified.
+This log was last generated on Mon, 18 Feb 2019 17:13:23 GMT and should not be manually modified.
+
+## 3.11.0
+Mon, 18 Feb 2019 17:13:23 GMT
+
+### Minor changes
+
+- Exposing field tsdocMetadata in package.json
 
 ## 3.10.0
 Mon, 11 Feb 2019 03:31:55 GMT
