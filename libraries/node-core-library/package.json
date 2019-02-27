@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/node-core-library",
-  "version": "3.11.0",
+  "version": "3.11.1",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/rollup.d.ts",
