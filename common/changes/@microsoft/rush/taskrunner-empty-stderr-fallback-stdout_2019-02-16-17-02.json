@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Make `rush build` print stdout if stderr is empty. Improves Webpack support.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "hogmoru@users.noreply.github.com"
+}
