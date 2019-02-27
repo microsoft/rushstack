@@ -92,8 +92,8 @@ describe('TaskRunner', () => {
         name: 'stdout+stderr',
         isIncrementalBuildAllowed: false,
         execute: (writer: ITaskWriter) => {
-          writer.write('Hold my beer...' + EOL);
-          writer.writeError('Woops' + EOL);
+          writer.write('Build step 1' + EOL);
+          writer.writeError('Error: step 1 failed' + EOL);
           return Promise.resolve(TaskStatus.Failure);
         }
       });
@@ -103,8 +103,74 @@ describe('TaskRunner', () => {
         .catch(err => {
           expect(err.message).toMatchSnapshot();
           const allMessages: string = terminalProvider.getOutput();
-          expect(allMessages).not.toContain('Hold my beer...');
-          expect(allMessages).toContain('Woops');
+          expect(allMessages).not.toContain('Build step 1');
+          expect(allMessages).toContain('Error: step 1 failed');
+          checkConsoleOutput(terminalProvider);
+        });
+    });
+
+    it('printedStdoutAfterErrorWithEmptyStderr', () => {
+      taskRunner.addTask({
+        name: 'stdout only',
+        isIncrementalBuildAllowed: false,
+        execute: (writer: ITaskWriter) => {
+          writer.write('Build step 1' + EOL);
+          writer.write('Error: step 1 failed' + EOL);
+          return Promise.resolve(TaskStatus.Failure);
+        }
+      });
+      return taskRunner
+        .execute()
+        .then(() => fail(EXPECTED_FAIL))
+        .catch(err => {
+          expect(err.message).toMatchSnapshot();
+          expect(terminalProvider.getOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
+          checkConsoleOutput(terminalProvider);
+        });
+    });
+
+    it('printedAbridgedStdoutAfterErrorWithEmptyStderr', () => {
+      taskRunner.addTask({
+        name: 'large stdout only',
+        isIncrementalBuildAllowed: false,
+        execute: (writer: ITaskWriter) => {
+          writer.write(`Building units...${EOL}`);
+          for (let i: number = 1; i <= 50; i++) {
+            writer.write(` - unit #${i};${EOL}`);
+          }
+          return Promise.resolve(TaskStatus.Failure);
+        }
+      });
+      return taskRunner
+        .execute()
+        .then(() => fail(EXPECTED_FAIL))
+        .catch(err => {
+          expect(err.message).toMatchSnapshot();
+          expect(terminalProvider.getOutput())
+            .toMatch(/Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/);
+          checkConsoleOutput(terminalProvider);
+        });
+    });
+
+    it('preservedLeadingBlanksButTrimmedTrailingBlanks', () => {
+      taskRunner.addTask({
+        name: 'large stderr with leading and trailing blanks',
+        isIncrementalBuildAllowed: false,
+        execute: (writer: ITaskWriter) => {
+          writer.writeError(`List of errors:  ${EOL}`);
+          for (let i: number = 1; i <= 50; i++) {
+            writer.writeError(` - error #${i};  ${EOL}`);
+          }
+          return Promise.resolve(TaskStatus.Failure);
+        }
+      });
+      return taskRunner
+        .execute()
+        .then(() => fail(EXPECTED_FAIL))
+        .catch(err => {
+          expect(err.message).toMatchSnapshot();
+          expect(terminalProvider.getOutput())
+            .toMatch(/List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/);
           checkConsoleOutput(terminalProvider);
         });
     });
