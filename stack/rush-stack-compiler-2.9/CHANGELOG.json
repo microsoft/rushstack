@@ -2,6 +2,21 @@
   "name": "@microsoft/rush-stack-compiler-2.9",
   "entries": [
     {
+      "version": "0.6.5",
+      "tag": "@microsoft/rush-stack-compiler-2.9_v0.6.5",
+      "date": "Wed, 27 Feb 2019 17:13:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.19` to `7.0.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.11.0` to `3.11.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.4",
       "tag": "@microsoft/rush-stack-compiler-2.9_v0.6.4",
       "date": "Mon, 18 Feb 2019 17:13:23 GMT",
