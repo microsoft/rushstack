@@ -179,18 +179,24 @@ export class Collector {
     }
 
     // Build the entry point
+    const entryPointSourceFile: ts.SourceFile = this.workingPackage.entryPointSourceFile;
+
     const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleFromWorkingPackage(
-      this.workingPackage.entryPointSourceFile);
+      entryPointSourceFile);
     this._astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
-      this.workingPackage.entryPointSourceFile, this);
+      entryPointSourceFile, this);
 
     if (packageDocCommentTextRange) {
-      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(this.workingPackage.entryPointSourceFile.text,
+      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(entryPointSourceFile.text,
         packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
 
       this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
+
+      this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext,
+        entryPointSourceFile);
+
       this.workingPackage.tsdocComment = this.workingPackage.tsdocParserContext!.docComment;
     }
 
@@ -629,7 +635,11 @@ export class Collector {
     const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
       range.pos, range.end);
 
-    return this._tsdocParser.parseRange(tsdocTextRange);
+    const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
+
+    this.messageRouter.addTsdocMessages(parserContext, declaration.getSourceFile());
+
+    return parserContext;
   }
 
   private _collectReferenceDirectives(astSymbol: AstSymbol): void {

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import * as tsdoc from '@microsoft/tsdoc';
 
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -24,6 +25,9 @@ export class MessageRouter {
     return this._messages;
   }
 
+  /**
+   * Add a diagnostic message reported by the TypeScript compiler
+   */
   public addCompilerDiagnostic(diagnostic: ts.Diagnostic): void {
     switch (diagnostic.category) {
       case ts.DiagnosticCategory.Suggestion:
@@ -51,6 +55,9 @@ export class MessageRouter {
     this._messages.push(new ExtractorMessage(options));
   }
 
+  /**
+   * Add a message from the API Extractor analysis
+   */
   public addAnalyzerIssue(messageId: ExtractorMessageId, messageText: string,
     astDeclarationOrSymbol: AstDeclaration | AstSymbol): void {
 
@@ -64,6 +71,31 @@ export class MessageRouter {
     this.addAnalyzerIssueForPosition(messageId, messageText, declaration.getSourceFile(), declaration.pos);
   }
 
+  /**
+   * Add all messages produced from an invocation of the TSDoc parser, assuming they refer to
+   * code in the specified source file.
+   */
+  public addTsdocMessages(parserContext: tsdoc.ParserContext, sourceFile: ts.SourceFile): void {
+    for (const message of parserContext.log.messages) {
+      const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(
+        message.textRange.pos);
+
+      this._messages.push(
+        new ExtractorMessage({
+          category: ExtractorMessageCategory.TSDoc,
+          messageId: message.messageId,
+          text: message.text,
+          sourceFilePath: sourceFile.fileName,
+          sourceFileLine: lineAndCharacter.line,
+          sourceFileColumn: lineAndCharacter.character
+        })
+      );
+    }
+  }
+
+  /**
+   * Add a message for a location in an arbitrary source file.
+   */
   public addAnalyzerIssueForPosition(messageId: ExtractorMessageId, messageText: string,
     sourceFile: ts.SourceFile, pos: number): void {
 
@@ -81,5 +113,4 @@ export class MessageRouter {
 
     this._messages.push(new ExtractorMessage(options));
   }
-
 }

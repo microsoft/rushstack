@@ -40,9 +40,12 @@ export class ApiDocumentedItem extends ApiItem {
 
     if (documentedJson.docComment) {
       const tsdocParser: tsdoc.TSDocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
-      const parserContext: tsdoc.ParserContext = tsdocParser.parseString(documentedJson.docComment);
 
-      // TODO: Warn about parser errors
+      // NOTE: For now, we ignore TSDoc errors found in a serialized .api.json file.
+      // Normally these errors would have already been reported by API Extractor during analysis.
+      // However, they could also arise if the JSON file was edited manually, or if the file was saved
+      // using a different release of the software that used an incompatible syntax.
+      const parserContext: tsdoc.ParserContext = tsdocParser.parseString(documentedJson.docComment);
 
       options.docComment = parserContext.docComment;
     }
