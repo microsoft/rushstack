@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import * as path from 'path';
 import * as tsdoc from '@microsoft/tsdoc';
 import {
   PackageJsonLookup,
@@ -17,7 +16,7 @@ import {
   IExtractorValidationRulesConfig,
   ExtractorValidationRulePolicy
 } from '../api/IExtractorConfig';
-import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
+
 import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
 import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
@@ -30,6 +29,8 @@ import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { DeclarationMetadata } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
+import { MessageRouter } from './MessageRouter';
+import { ExtractorMessageId } from './ExtractorMessageId';
 
 /**
  * Options for Collector constructor.
@@ -71,6 +72,7 @@ export class Collector {
   public readonly astSymbolTable: AstSymbolTable;
 
   public readonly packageJsonLookup: PackageJsonLookup;
+  public readonly messageRouter: MessageRouter;
 
   public readonly policies: IExtractorPoliciesConfig;
   public readonly validationRules: IExtractorValidationRulesConfig;
@@ -95,11 +97,11 @@ export class Collector {
 
   constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
+    this.messageRouter = new MessageRouter();
 
     this.policies = options.policies;
     this.validationRules = options.validationRules;
 
-    this.logger = options.logger;
     this._program = options.program;
 
     const packageFolder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
@@ -173,8 +175,7 @@ export class Collector {
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
     // compile errors that would result from a full compilation.
     for (const diagnostic of this._program.getSemanticDiagnostics()) {
-      const errorText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
-      this.reportError(`TypeScript: ${errorText}`, diagnostic.file, diagnostic.start);
+      this.messageRouter.addCompilerDiagnostic(diagnostic);
     }
 
     // Build the entry point
@@ -443,26 +444,6 @@ export class Collector {
     }
   }
 
-  /**
-   * Reports an error message to the registered ApiErrorHandler.
-   */
-  public reportError(message: string, sourceFile: ts.SourceFile | undefined, start: number | undefined): void {
-    if (sourceFile && start) {
-      const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(start);
-
-      // If the file is under the packageFolder, then show a relative path
-      const relativePath: string = path.relative(this.workingPackage.packageFolder, sourceFile.fileName);
-      const shownPath: string = relativePath.substr(0, 2) === '..' ? sourceFile.fileName : relativePath;
-
-      // Format the error so that VS Code can follow it.  For example:
-      // "src\MyClass.ts(15,1): The JSDoc tag "@blah" is not supported by AEDoc"
-      this.logger.logError(`${shownPath}(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1}): `
-        + message);
-    } else {
-      this.logger.logError(message);
-    }
-  }
-
   private _fetchSymbolMetadata(astSymbol: AstSymbol): void {
     if (astSymbol.metadata) {
       return;
@@ -495,8 +476,11 @@ export class Collector {
       if (declaredReleaseTag !== ReleaseTag.None) {
         if (effectiveReleaseTag !== ReleaseTag.None && effectiveReleaseTag !== declaredReleaseTag) {
           if (!astSymbol.isExternal) { // for now, don't report errors for external code
-            // TODO: Report error message
-            this.reportError('Inconsistent release tags between declarations', undefined, undefined);
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.InconsistentReleaseTags,
+              'This symbol has another declaration with a different release tag',
+              astDeclaration
+            );
           }
         } else {
           effectiveReleaseTag = declaredReleaseTag;
@@ -514,16 +498,18 @@ export class Collector {
     if (effectiveReleaseTag === ReleaseTag.None) {
       if (this.validationRules.missingReleaseTags !== ExtractorValidationRulePolicy.allow) {
         if (!astSymbol.isExternal) { // for now, don't report errors for external code
-          // For now, don't report errors for forgotten exports
+          // Don't report missing release tags for forgotten exports
           const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
           if (entity && entity.exported) {
             // We also don't report errors for the default export of an entry point, since its doc comment
             // isn't easy to obtain from the .d.ts file
             if (astSymbol.rootAstSymbol.localName !== '_default') {
-              // TODO: Report error message
-              const loc: string = astSymbol.rootAstSymbol.localName + ' in '
-                + astSymbol.rootAstSymbol.astDeclarations[0].declaration.getSourceFile().fileName;
-              this.reportError('Missing release tag for ' + loc, undefined, undefined);
+
+              this.messageRouter.addAnalyzerIssue(
+                ExtractorMessageId.MissingReleaseTag,
+                'Missing release tag',
+                astSymbol
+              );
             }
           }
         }
@@ -580,8 +566,10 @@ export class Collector {
 
       if (inconsistentReleaseTags) {
         if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
-          // TODO: Report error message
-          this.reportError('Inconsistent release tags in doc comment', undefined, undefined);
+          this.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.ExtraReleaseTag,
+            'The doc comment should not contain more than one release tag',
+            astDeclaration);
         }
       }
 

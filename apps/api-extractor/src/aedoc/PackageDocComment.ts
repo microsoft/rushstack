@@ -3,6 +3,7 @@
 
 import * as ts from 'typescript';
 import { Collector } from '../collector/Collector';
+import { ExtractorMessageId } from '../collector/ExtractorMessageId';
 
 export class PackageDocComment {
   /**
@@ -53,7 +54,8 @@ export class PackageDocComment {
           const commentBody: string = sourceFile.text.substring(commentRange.pos, commentRange.end);
 
           if (/\@packageDocumentation/i.test(commentBody)) {
-            collector.reportError(
+            collector.messageRouter.addAnalyzerIssueForPosition(
+              ExtractorMessageId.MisplacedPackageTag,
               'The @packageDocumentation comment must appear at the top of entry point *.d.ts file',
               sourceFile, commentRange.pos
             );
