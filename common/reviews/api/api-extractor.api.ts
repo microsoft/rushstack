@@ -531,6 +531,13 @@ declare const enum ExtractorMessageId {
 }
 
 // @public
+declare const enum ExtractorMessageLogLevel {
+    Error = "Error",
+    None = "None",
+    Warning = "Warning"
+}
+
+// @public
 declare const enum ExtractorValidationRulePolicy {
     allow = "allow",
     error = "error"
@@ -730,6 +737,8 @@ interface IExtractorConfig {
     dtsRollup?: IExtractorDtsRollupConfig;
     extends?: string;
     // (undocumented)
+    messages?: IExtractorMessagesConfig;
+    // (undocumented)
     policies?: IExtractorPoliciesConfig;
     // (undocumented)
     project: IExtractorProjectConfig;
@@ -750,6 +759,24 @@ interface IExtractorDtsRollupConfig {
     publishFolderForInternal?: string;
     publishFolderForPublic?: string;
     trimming?: boolean;
+}
+
+// @public
+interface IExtractorMessageReportingRuleConfig {
+    addToApiReviewFile: boolean;
+    logLevel: ExtractorMessageLogLevel;
+}
+
+// @public
+interface IExtractorMessageReportingTableConfig {
+    [messageId: string]: IExtractorMessageReportingRuleConfig;
+}
+
+// @public
+interface IExtractorMessagesConfig {
+    compilerMessageReporting: IExtractorMessageReportingTableConfig;
+    extractorMessageReporting: IExtractorMessageReportingTableConfig;
+    tsdocMessageReporting: IExtractorMessageReportingTableConfig;
 }
 
 // @public

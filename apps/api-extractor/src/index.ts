@@ -25,6 +25,10 @@ export {
   IExtractorApiJsonFileConfig,
   IExtractorDtsRollupConfig,
   IExtractorTsdocMetadataConfig,
+  ExtractorMessageLogLevel,
+  IExtractorMessageReportingRuleConfig,
+  IExtractorMessageReportingTableConfig,
+  IExtractorMessagesConfig,
   IExtractorConfig
 } from './api/IExtractorConfig';
 
