@@ -6,13 +6,13 @@ import * as tsdoc from '@microsoft/tsdoc';
 
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
+import { AstSymbol } from '../analyzer/AstSymbol';
 import {
   ExtractorMessage,
   ExtractorMessageCategory,
   IExtractorMessageOptions
-} from './ExtractorMessage';
-import { AstSymbol } from '../analyzer/AstSymbol';
-import { ExtractorMessageId } from './ExtractorMessageId';
+} from '../api/ExtractorMessage';
+import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 export class MessageRouter {
   private _messages: ExtractorMessage[];

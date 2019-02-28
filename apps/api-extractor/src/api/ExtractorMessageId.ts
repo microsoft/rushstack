@@ -1,6 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * Unique identifiers for messages reported by API Extractor during its analysis.
+ *
+ * @remarks
+ *
+ * These strings are possible values for the {@link ExtractorMessage.messageId} property
+ * when the `ExtractorMessage.category` is {@link ExtractorMessageCategory.Extractor}.
+ *
+ * @public
+ */
 export const enum ExtractorMessageId {
   /**
    * The doc comment should not contain more than one release tag.

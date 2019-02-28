@@ -16,6 +16,7 @@ import {
   IExtractorValidationRulesConfig,
   ExtractorValidationRulePolicy
 } from '../api/IExtractorConfig';
+import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
@@ -30,7 +31,6 @@ import { DeclarationMetadata } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
-import { ExtractorMessageId } from './ExtractorMessageId';
 
 /**
  * Options for Collector constructor.

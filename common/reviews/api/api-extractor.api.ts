@@ -504,6 +504,33 @@ declare class Extractor {
 }
 
 // @public
+declare class ExtractorMessage {
+    // @internal (undocumented)
+    constructor(options: IExtractorMessageOptions);
+    readonly category: ExtractorMessageCategory;
+    readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
+    readonly sourceFileColumn: number | undefined;
+    readonly sourceFileLine: number | undefined;
+    readonly sourceFilePath: string | undefined;
+    readonly text: string;
+}
+
+// @public
+declare const enum ExtractorMessageCategory {
+    Compiler = "Compiler",
+    Extractor = "Extractor",
+    TSDoc = "TSDoc"
+}
+
+// @public
+declare const enum ExtractorMessageId {
+    ExtraReleaseTag = "ae-extra-release-tag",
+    InconsistentReleaseTags = "ae-inconsistent-release-tags",
+    MisplacedPackageTag = "ae-misplaced-package-tag",
+    MissingReleaseTag = "ae-missing-release-tag"
+}
+
+// @public
 declare const enum ExtractorValidationRulePolicy {
     allow = "allow",
     error = "error"
