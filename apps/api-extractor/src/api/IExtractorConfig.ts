@@ -296,7 +296,7 @@ export const enum ExtractorMessageLogLevel {
 }
 
 /**
- * Configures how API Extractor messages are reported.
+ * Configures reporting for a given message identifier.
  *
  * @public
  */
@@ -318,14 +318,14 @@ export interface IExtractorMessageReportingRuleConfig {
 }
 
 /**
- * Specifies a table of reporting rules for different message IDs, and also the default rule used for IDs that
- * do not appear in the table.
+ * Specifies a table of reporting rules for different message identifiers, and also the default rule used for
+ * identifiers that do not appear in the table.
  *
  * @public
  */
 export interface IExtractorMessageReportingTableConfig {
   /**
-   * The key is a message ID for the associated type of message, or "default" to specify the default policy.
+   * The key is a message identifier for the associated type of message, or "default" to specify the default policy.
    * For example, the key might be `TS2551` (a compiler message), `tsdoc-link-tag-unescaped-text` (a TSDOc message),
    * or `ae-extra-release-tag` (a message related to the API Extractor analysis).
    */
@@ -333,7 +333,7 @@ export interface IExtractorMessageReportingTableConfig {
 }
 
 /**
- * Configures how API Extractor reports issues that it encounters.
+ * Configures how API Extractor reports error and warning messages produced during analysis.
  *
  * @public
  */
@@ -345,14 +345,14 @@ export interface IExtractorMessagesConfig {
   compilerMessageReporting: IExtractorMessageReportingTableConfig;
 
   /**
-   * Configures handling of messages reported by the TSDoc parser when analyzing code comments.
-   */
-  tsdocMessageReporting: IExtractorMessageReportingTableConfig;
-
-  /**
    * Configures handling of messages reported by API Extractor during its analysis.
    */
   extractorMessageReporting: IExtractorMessageReportingTableConfig;
+
+  /**
+   * Configures handling of messages reported by the TSDoc parser when analyzing code comments.
+   */
+  tsdocMessageReporting: IExtractorMessageReportingTableConfig;
 }
 
 /**

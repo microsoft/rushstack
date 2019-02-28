@@ -42,6 +42,24 @@
     "tsdocMetadataPath": ""
   },
 
+  "messages": {
+    "compilerMessageReporting": {
+      "default": {
+        "logLevel": "Warning"
+      }
+    },
+    "extractorMessageReporting": {
+      "default": {
+        "logLevel": "Warning"
+      }
+    },
+    "tsdocMessageReporting": {
+      "default": {
+        "logLevel": "Warning"
+      }
+    }
+  },
+
   "skipLibCheck": false,
   "testMode": false
 }
