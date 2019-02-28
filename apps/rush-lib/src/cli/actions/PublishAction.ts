@@ -473,10 +473,14 @@ export class PublishAction extends BaseRushAction {
   private _calculateTarballName(project: RushConfigurationProject): string {
     // Same logic as how npm forms the tarball name
     const packageName: string = project.packageName;
-    const name: string = packageName[0] === '@' ?
-      packageName.substr(1).replace(/\//g, '-') : packageName;
+    const name: string = packageName[0] === '@' ? packageName.substr(1).replace(/\//g, '-') : packageName;
 
-    return `${name}-${project.packageJson.version}.tgz`;
+    if (this.rushConfiguration.packageManager === 'yarn') {
+      // yarn tarballs have a "v" before the version number
+      return `${name}-v${project.packageJson.version}.tgz`;
+    } else {
+      return `${name}-${project.packageJson.version}.tgz`;
+    }
   }
 
   private _setDependenciesBeforePublish(): void {
