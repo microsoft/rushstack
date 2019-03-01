@@ -636,7 +636,7 @@ export class Collector {
 
     const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
 
-    this.messageRouter.addTsdocMessages(parserContext, declaration.getSourceFile());
+    this.messageRouter.addTsdocMessages(parserContext, declaration.getSourceFile(), astDeclaration);
 
     return parserContext;
   }

@@ -15,6 +15,7 @@ import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { Text, InternalError } from '@microsoft/node-core-library';
 import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
+import { ExtractorMessage } from '../api/ExtractorMessage';
 
 export class ReviewFileGenerator {
   /**
@@ -43,7 +44,7 @@ export class ReviewFileGenerator {
             output.append(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
 
             const span: Span = new Span(astDeclaration.declaration);
-            ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration);
+            ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration, false);
             span.writeModifiedText(output);
             output.append('\n\n');
           }
@@ -72,9 +73,23 @@ export class ReviewFileGenerator {
       }
     }
 
+    // Write the unassociated warnings at the bottom of the file
+    const unassociatedMessages: ExtractorMessage[] = collector.messageRouter
+      .fetchUnassociatedMessagesForReviewFile();
+    if (unassociatedMessages.length > 0) {
+      output.append('\n');
+      ReviewFileGenerator._writeLineAsComments(output, 'Warnings were encountered during analysis:');
+      ReviewFileGenerator._writeLineAsComments(output, '');
+      for (const unassociatedMessage of unassociatedMessages) {
+        ReviewFileGenerator._writeLineAsComments(output, unassociatedMessage.formatMessageAndLocation(
+          collector.workingPackage.packageFolder
+        ));
+      }
+    }
+
     if (collector.workingPackage.tsdocComment === undefined) {
       output.append('\n');
-      ReviewFileGenerator._writeLineAsComment(output, '(No @packageDocumentation comment for this package)');
+      ReviewFileGenerator._writeLineAsComments(output, '(No @packageDocumentation comment for this package)');
     }
 
     return output.toString();
@@ -84,7 +99,7 @@ export class ReviewFileGenerator {
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
   private static _modifySpan(collector: Collector, span: Span, entity: CollectorEntity,
-    astDeclaration: AstDeclaration): void {
+    astDeclaration: AstDeclaration, insideTypeLiteral: boolean): void {
 
     // Should we process this declaration at all?
     if ((astDeclaration.modifierFlags & ts.ModifierFlags.Private) !== 0) { // tslint:disable-line:no-bitwise
@@ -163,6 +178,10 @@ export class ReviewFileGenerator {
         }
 
         break;
+
+      case ts.SyntaxKind.TypeLiteral:
+        insideTypeLiteral = true;
+        break;
     }
 
     if (recurseChildren) {
@@ -178,14 +197,16 @@ export class ReviewFileGenerator {
               childAstDeclaration.astSymbol.localName);
           }
 
-          const aedocSynopsis: string = ReviewFileGenerator._getAedocSynopsis(collector, childAstDeclaration);
-          const indentedAedocSynopsis: string = ReviewFileGenerator._addIndentAfterNewlines(aedocSynopsis,
-            child.getIndent());
+          if (!insideTypeLiteral) {
+            const aedocSynopsis: string = ReviewFileGenerator._getAedocSynopsis(collector, childAstDeclaration);
+            const indentedAedocSynopsis: string = ReviewFileGenerator._addIndentAfterNewlines(aedocSynopsis,
+              child.getIndent());
 
-          child.modification.prefix = indentedAedocSynopsis + child.modification.prefix;
+            child.modification.prefix = indentedAedocSynopsis + child.modification.prefix;
+          }
         }
 
-        ReviewFileGenerator._modifySpan(collector, child, entity, childAstDeclaration);
+        ReviewFileGenerator._modifySpan(collector, child, entity, childAstDeclaration, insideTypeLiteral);
       }
     }
   }
@@ -197,6 +218,13 @@ export class ReviewFileGenerator {
    */
   private static _getAedocSynopsis(collector: Collector, astDeclaration: AstDeclaration): string {
     const output: StringBuilder = new StringBuilder();
+
+    const messagesToReport: ExtractorMessage[] = collector.messageRouter
+      .fetchAssociatedMessagesForReviewFile(astDeclaration);
+
+    for (const message of messagesToReport) {
+      ReviewFileGenerator._writeLineAsComments(output, 'Warning: ' + message.formatMessageWithoutLocation());
+    }
 
     const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
     const symbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
@@ -247,16 +275,23 @@ export class ReviewFileGenerator {
     }
 
     if (footerParts.length > 0) {
-      ReviewFileGenerator._writeLineAsComment(output, footerParts.join(' '));
+      if (messagesToReport.length > 0) {
+        ReviewFileGenerator._writeLineAsComments(output, ''); // skip a line after the warnings
+      }
+
+      ReviewFileGenerator._writeLineAsComments(output, footerParts.join(' '));
     }
 
     return output.toString();
   }
 
-  private static _writeLineAsComment(output: StringBuilder, line: string): void {
-    output.append('// ');
-    output.append(line);
-    output.append('\n');
+  private static _writeLineAsComments(output: StringBuilder, line: string): void {
+    const lines: string[] = Text.convertToLf(line).split('\n');
+    for (const realLine of lines) {
+      output.append('// ');
+      output.append(realLine);
+      output.append('\n');
+    }
   }
 
   private static _addIndentAfterNewlines(text: string, indent: string): string {

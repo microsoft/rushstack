@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as tsdoc from '@microsoft/tsdoc';
+import * as path from 'path';
 import { ExtractorMessageId } from './ExtractorMessageId';
+import { Path, Text } from '@microsoft/node-core-library';
 
 /**
  * Specifies a category of messages for use with {@link ExtractorMessage}.
@@ -96,5 +98,51 @@ export class ExtractorMessage {
     this.sourceFilePath = options.sourceFilePath;
     this.sourceFileLine = options.sourceFileLine;
     this.sourceFileColumn = options.sourceFileColumn;
+  }
+
+  /**
+   * Returns the message formatted with its identifier and file position.
+   * @remarks
+   * Example:
+   * ```
+   * src/folder/File.ts:123:4 - (ae-extra-release-tag) The doc comment should not contain more than one release tag.
+   * ```
+   */
+  public formatMessageAndLocation(workingPackageFolderPath: string): string {
+    let result: string = '';
+
+    if (this.sourceFilePath) {
+      // Make the path relative to the workingPackageFolderPath
+      let scrubbedPath: string = this.sourceFilePath;
+
+      // If it's under the working folder, make it a relative path
+      if (Path.isUnderOrEqual(this.sourceFilePath, workingPackageFolderPath)) {
+        scrubbedPath = path.relative(workingPackageFolderPath, this.sourceFilePath);
+      }
+
+      // Convert it to a Unix-style path
+      scrubbedPath = Text.replaceAll(scrubbedPath, '\\', '/');
+      result += scrubbedPath;
+
+      if (this.sourceFileLine) {
+        result += `:${this.sourceFileLine}`;
+
+        if (this.sourceFileColumn) {
+          result += `:${this.sourceFileColumn}`;
+        }
+      }
+
+      if (result.length > 0) {
+        result += ' - ';
+      }
+    }
+
+    result += this.formatMessageWithoutLocation();
+
+    return result;
+  }
+
+  public formatMessageWithoutLocation(): string {
+    return `(${this.messageId}) ${this.text}`;
   }
 }

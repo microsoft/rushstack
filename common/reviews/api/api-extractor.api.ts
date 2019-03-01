@@ -508,6 +508,9 @@ declare class ExtractorMessage {
     // @internal (undocumented)
     constructor(options: IExtractorMessageOptions);
     readonly category: ExtractorMessageCategory;
+    formatMessageAndLocation(workingPackageFolderPath: string): string;
+    // (undocumented)
+    formatMessageWithoutLocation(): string;
     readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
     readonly sourceFileColumn: number | undefined;
     readonly sourceFileLine: number | undefined;
@@ -763,7 +766,7 @@ interface IExtractorDtsRollupConfig {
 
 // @public
 interface IExtractorMessageReportingRuleConfig {
-    addToApiReviewFile: boolean;
+    addToApiReviewFile?: boolean;
     logLevel: ExtractorMessageLogLevel;
 }
 
@@ -774,9 +777,9 @@ interface IExtractorMessageReportingTableConfig {
 
 // @public
 interface IExtractorMessagesConfig {
-    compilerMessageReporting: IExtractorMessageReportingTableConfig;
-    extractorMessageReporting: IExtractorMessageReportingTableConfig;
-    tsdocMessageReporting: IExtractorMessageReportingTableConfig;
+    compilerMessageReporting?: IExtractorMessageReportingTableConfig;
+    extractorMessageReporting?: IExtractorMessageReportingTableConfig;
+    tsdocMessageReporting?: IExtractorMessageReportingTableConfig;
 }
 
 // @public
