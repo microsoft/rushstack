@@ -3,6 +3,7 @@
 
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
+import { Sort } from '@microsoft/node-core-library';
 
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -19,7 +20,7 @@ import {
   IExtractorMessageReportingRuleConfig
 } from '../api/IExtractorConfig';
 import { AedocDefinitions } from '../aedoc/AedocDefinitions';
-import { Sort } from '@microsoft/node-core-library';
+import { ILogger } from '../api/ILogger';
 
 interface IReportingRule {
   logLevel: ExtractorMessageLogLevel;
@@ -146,8 +147,8 @@ export class MessageRouter {
         diagnostic.start || 0);
 
       options.sourceFilePath = sourceFile.fileName;
-      options.sourceFileLine = lineAndCharacter.line;
-      options.sourceFileColumn = lineAndCharacter.character;
+      options.sourceFileLine = lineAndCharacter.line + 1;
+      options.sourceFileColumn = lineAndCharacter.character + 1;
     }
 
     this._messages.push(new ExtractorMessage(options));
@@ -189,8 +190,8 @@ export class MessageRouter {
         messageId: message.messageId,
         text: message.unformattedText,
         sourceFilePath: sourceFile.fileName,
-        sourceFileLine: lineAndCharacter.line,
-        sourceFileColumn: lineAndCharacter.character
+        sourceFileLine: lineAndCharacter.line + 1,
+        sourceFileColumn: lineAndCharacter.character + 1
       });
 
       if (astDeclaration) {
@@ -231,8 +232,8 @@ export class MessageRouter {
       messageId,
       text: messageText,
       sourceFilePath: sourceFile.fileName,
-      sourceFileLine: lineAndCharacter.line,
-      sourceFileColumn: lineAndCharacter.character
+      sourceFileLine: lineAndCharacter.line + 1,
+      sourceFileColumn: lineAndCharacter.character + 1
     };
 
     const extractorMessage: ExtractorMessage = new ExtractorMessage(options);
@@ -299,6 +300,40 @@ export class MessageRouter {
   }
 
   /**
+   * This returns the list of remaining messages that were not already processed by
+   * `fetchAssociatedMessagesForReviewFile()` or `fetchUnassociatedMessagesForReviewFile()`.
+   * These messages will be shown on the console.
+   */
+  public reportMessagesToLogger(logger: ILogger, workingPackageFolderPath: string): ExtractorMessage[] {
+    const messagesForLogger: ExtractorMessage[] = [];
+
+    for (const message of this.messages) {
+
+      // Make sure we didn't already report this message
+      if (!this._messagesAddedToApiReviewFile.has(message)) {
+        messagesForLogger.push(message);
+      }
+    }
+
+    this._sortMessagesForOutput(messagesForLogger);
+
+    for (const message of messagesForLogger) {
+      // Is this message type configured to go to the console?
+      const reportingRule: IReportingRule = this._getRuleForMessage(message);
+      switch (reportingRule.logLevel) {
+        case ExtractorMessageLogLevel.Error:
+          logger.logError('Error: ' + message.formatMessageAndLocation(workingPackageFolderPath));
+          break;
+        case ExtractorMessageLogLevel.Warning:
+          logger.logWarning('Warning: ' + message.formatMessageAndLocation(workingPackageFolderPath));
+          break;
+      }
+    }
+
+    return messagesForLogger;
+  }
+
+  /**
    * For a given message, determine the IReportingRule based on the rule tables.
    */
   private _getRuleForMessage(message: ExtractorMessage): IReportingRule {
@@ -320,7 +355,20 @@ export class MessageRouter {
    * Sorts an array of messages according to a reasonable ordering
    */
   private _sortMessagesForOutput(messages: ExtractorMessage[]): void {
-    // Sort by filename, then by line number
-    Sort.sortBy(messages, x => (x.sourceFilePath || '') + '#' + (x.sourceFileLine || ''));
+    messages.sort((a, b) => {
+      let diff: number;
+      // First sort by file name
+      diff = Sort.compareByValue(a.sourceFilePath, b.sourceFilePath);
+      if (diff !== 0) {
+        return diff;
+      }
+      // Then sort by line number
+      diff = Sort.compareByValue(a.sourceFileLine, b.sourceFileLine);
+      if (diff !== 0) {
+        return diff;
+      }
+      // Then sort by messageId
+      return Sort.compareByValue(a.messageId, b.messageId);
+    });
   }
 }

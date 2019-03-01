@@ -80,13 +80,13 @@ export class ExtractorMessage {
 
   /**
    * The line number where the issue occurred in the input source file.  This is not used if `sourceFilePath`
-   * is undefined.
+   * is undefined.  The first line number is 1.
    */
   public readonly sourceFileLine: number | undefined;
 
   /**
    * The column number where the issue occurred in the input source file.  This is not used if `sourceFilePath`
-   * is undefined.
+   * is undefined.  The first column number is 1.
    */
   public readonly sourceFileColumn: number | undefined;
 
