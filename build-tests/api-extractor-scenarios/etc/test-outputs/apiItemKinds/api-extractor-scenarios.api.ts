@@ -7,15 +7,11 @@ declare abstract class AbstractClass {
 // @public (undocumented)
 declare class ClassWithTypeLiterals {
     method1(vector: {
-        // (undocumented)
         x: number;
-        // (undocumented)
         y: number;
     }): void;
     method2(): {
-        // (undocumented)
         classValue: ClassWithTypeLiterals;
-        // (undocumented)
         callback: () => number;
     } | undefined;
 }
@@ -39,9 +35,9 @@ interface IInterface {
 // @public (undocumented)
 declare namespace NamespaceContainingVariable {
     let // (undocumented)
- variable: object[];
+    variable: object[];
     let // (undocumented)
- constVariable: object[];
+    constVariable: object[];
 }
 
 // @public (undocumented)
