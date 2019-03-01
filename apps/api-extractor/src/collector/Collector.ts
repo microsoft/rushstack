@@ -101,6 +101,7 @@ export class Collector {
     this.policies = options.extractorConfig.policies || { };
     this.validationRules = options.extractorConfig.validationRules || { };
 
+    this.logger = options.logger;
     this._program = options.program;
 
     const packageFolder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
