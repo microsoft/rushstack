@@ -14,7 +14,8 @@ import { ILogger } from '../api/ILogger';
 import {
   IExtractorPoliciesConfig,
   IExtractorValidationRulesConfig,
-  ExtractorValidationRulePolicy
+  ExtractorValidationRulePolicy,
+  IExtractorConfig
 } from '../api/IExtractorConfig';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
@@ -55,9 +56,7 @@ export interface ICollectorOptions {
 
   logger: ILogger;
 
-  policies: IExtractorPoliciesConfig;
-
-  validationRules: IExtractorValidationRulesConfig;
+  extractorConfig: IExtractorConfig;
 }
 
 /**
@@ -97,10 +96,10 @@ export class Collector {
 
   constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
-    this.messageRouter = new MessageRouter();
+    this.messageRouter = new MessageRouter(options.extractorConfig.messages || { });
 
-    this.policies = options.policies;
-    this.validationRules = options.validationRules;
+    this.policies = options.extractorConfig.policies || { };
+    this.validationRules = options.extractorConfig.validationRules || { };
 
     this._program = options.program;
 

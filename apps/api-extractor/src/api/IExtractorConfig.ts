@@ -283,6 +283,7 @@ export const enum ExtractorMessageLogLevel {
 
   /**
    * The message will be written to the build output as an warning.
+   *
    * @remarks
    * Warnings cause a production build fail and return a nonzero exit code.  For a non-production build
    * (e.g. using the `--local` option with `api-extractor run`), the warning is displayed but the build will not fail.
@@ -314,7 +315,7 @@ export interface IExtractorMessageReportingRuleConfig {
    * inside that file.  If the API review file is NOT being written, then the message is instead logged according
    * to the `logLevel` option.
    */
-  addToApiReviewFile: boolean;
+  addToApiReviewFile?: boolean;
 }
 
 /**
@@ -342,17 +343,17 @@ export interface IExtractorMessagesConfig {
    * Configures handling of diagnostic messages generating the TypeScript compiler while analyzing the
    * input .d.ts files.
    */
-  compilerMessageReporting: IExtractorMessageReportingTableConfig;
+  compilerMessageReporting?: IExtractorMessageReportingTableConfig;
 
   /**
    * Configures handling of messages reported by API Extractor during its analysis.
    */
-  extractorMessageReporting: IExtractorMessageReportingTableConfig;
+  extractorMessageReporting?: IExtractorMessageReportingTableConfig;
 
   /**
    * Configures handling of messages reported by the TSDoc parser when analyzing code comments.
    */
-  tsdocMessageReporting: IExtractorMessageReportingTableConfig;
+  tsdocMessageReporting?: IExtractorMessageReportingTableConfig;
 }
 
 /**

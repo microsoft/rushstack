@@ -386,8 +386,7 @@ export class Extractor {
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       logger: this._monitoredLogger,
-      policies: this.actualConfig.policies,
-      validationRules: this.actualConfig.validationRules
+      extractorConfig: this.actualConfig
     });
 
     collector.analyze();

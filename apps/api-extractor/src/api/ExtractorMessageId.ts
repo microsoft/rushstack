@@ -32,3 +32,10 @@ export const enum ExtractorMessageId {
    */
   MisplacedPackageTag = 'ae-misplaced-package-tag'
 }
+
+export const allExtractorMessageIds: Set<string> = new Set<string>([
+  'ae-extra-release-tag',
+  'ae-inconsistent-release-tags',
+  'ae-missing-release-tag',
+  'ae-misplaced-package-tag'
+]);

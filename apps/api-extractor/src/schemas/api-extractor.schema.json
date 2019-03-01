@@ -234,7 +234,8 @@
               "description": "If API Extractor is configured to write an API review file (.api.ts), then the message will be written inside that file.  If the API review file is NOT being written, then the message is instead logged according to the \"logLevel\" option."
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "required": [ "logLevel" ]
         }
       },
       "additionalProperties": false

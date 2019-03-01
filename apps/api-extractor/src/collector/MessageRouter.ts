@@ -12,13 +12,96 @@ import {
   ExtractorMessageCategory,
   IExtractorMessageOptions
 } from '../api/ExtractorMessage';
-import { ExtractorMessageId } from '../api/ExtractorMessageId';
+import { ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
+import {
+  IExtractorMessagesConfig,
+  ExtractorMessageLogLevel,
+  IExtractorMessageReportingRuleConfig
+} from '../api/IExtractorConfig';
+
+interface IReportingRule {
+  logLevel: ExtractorMessageLogLevel;
+  addToApiReviewFile: boolean;
+}
 
 export class MessageRouter {
   private _messages: ExtractorMessage[];
 
-  public constructor() {
+  private _reportingRuleByMessageId: Map<string, IReportingRule> = new Map<string, IReportingRule>();
+  private _compilerDefaultRule: IReportingRule = { logLevel: ExtractorMessageLogLevel.None,
+    addToApiReviewFile: false };
+  private _extractorDefaultRule: IReportingRule = { logLevel: ExtractorMessageLogLevel.None,
+    addToApiReviewFile: false };
+  private _tsdocDefaultRule: IReportingRule = { logLevel: ExtractorMessageLogLevel.None,
+    addToApiReviewFile: false };
+
+  public constructor(messagesConfig: IExtractorMessagesConfig) {
     this._messages = [];
+
+    this._applyMessagesConfig(messagesConfig);
+  }
+
+  private _applyMessagesConfig(messagesConfig: IExtractorMessagesConfig): void {
+    if (messagesConfig.compilerMessageReporting) {
+      for (const messageId of Object.getOwnPropertyNames(messagesConfig.compilerMessageReporting)) {
+        const rule: IReportingRule = MessageRouter._getNormalizedRule(
+          messagesConfig.compilerMessageReporting[messageId]);
+
+        if (messageId === 'default') {
+          this._compilerDefaultRule = rule;
+        } else if (!/^TS[0-9]+$/.test(messageId)) {
+          throw new Error(`Error in API Extractor config: The messages.compilerMessageReporting table contains`
+            + ` an invalid entry "${messageId}". The identifier format is "TS" followed by an integer.`);
+        } else {
+          this._reportingRuleByMessageId.set(messageId, rule);
+        }
+      }
+    }
+
+    if (messagesConfig.extractorMessageReporting) {
+      for (const messageId of Object.getOwnPropertyNames(messagesConfig.extractorMessageReporting)) {
+        const rule: IReportingRule = MessageRouter._getNormalizedRule(
+          messagesConfig.extractorMessageReporting[messageId]);
+
+        if (messageId === 'default') {
+          this._extractorDefaultRule = rule;
+        } else if (!/^ae-/.test(messageId)) {
+          throw new Error(`Error in API Extractor config: The messages.extractorMessageReporting table contains`
+            + ` an invalid entry "${messageId}".  The name should begin with the "ae-" prefix.`);
+        } else if (allExtractorMessageIds.has(messageId)) {
+          throw new Error(`Error in API Extractor config: The messages.extractorMessageReporting table contains`
+            + ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`);
+        } else {
+          this._reportingRuleByMessageId.set(messageId, rule);
+        }
+      }
+    }
+
+    if (messagesConfig.tsdocMessageReporting) {
+      for (const messageId of Object.getOwnPropertyNames(messagesConfig.tsdocMessageReporting)) {
+        const rule: IReportingRule = MessageRouter._getNormalizedRule(
+          messagesConfig.tsdocMessageReporting[messageId]);
+
+        if (messageId === 'default') {
+          this._tsdocDefaultRule = rule;
+        } else if (!/^tsdoc-/.test(messageId)) {
+          throw new Error(`Error in API Extractor config: The messages.tsdocMessageReporting table contains`
+            + ` an invalid entry "${messageId}".  The name should begin with the "tsdoc-" prefix.`);
+        } else if (allExtractorMessageIds.has(messageId)) {
+          throw new Error(`Error in API Extractor config: The messages.tsdocMessageReporting table contains`
+            + ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`);
+        } else {
+          this._reportingRuleByMessageId.set(messageId, rule);
+        }
+      }
+    }
+  }
+
+  private static _getNormalizedRule(rule: IExtractorMessageReportingRuleConfig): IReportingRule {
+    return {
+      logLevel: rule.logLevel || 'none',
+      addToApiReviewFile: rule.addToApiReviewFile || false
+    };
   }
 
   public get messages(): ReadonlyArray<ExtractorMessage> {
