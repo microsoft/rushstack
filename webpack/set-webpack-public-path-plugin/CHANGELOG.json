@@ -2,6 +2,36 @@
   "name": "@microsoft/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "2.1.81",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.81",
+      "date": "Wed, 27 Feb 2019 22:13:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.5` to `0.2.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.32` to `6.0.33`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.80",
+      "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.80",
+      "date": "Wed, 27 Feb 2019 17:13:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.4` to `0.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.31` to `6.0.32`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.1.79",
       "tag": "@microsoft/set-webpack-public-path-plugin_v2.1.79",
       "date": "Mon, 18 Feb 2019 17:13:23 GMT",

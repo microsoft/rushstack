@@ -2,6 +2,30 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.21",
+      "tag": "@microsoft/api-extractor_v7.0.21",
+      "date": "Wed, 27 Feb 2019 22:13:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.11.1` to `3.12.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.20",
+      "tag": "@microsoft/api-extractor_v7.0.20",
+      "date": "Wed, 27 Feb 2019 17:13:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.11.0` to `3.11.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.19",
       "tag": "@microsoft/api-extractor_v7.0.19",
       "date": "Mon, 18 Feb 2019 17:13:23 GMT",

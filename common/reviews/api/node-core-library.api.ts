@@ -69,6 +69,12 @@ declare class ConsoleTerminalProvider implements ITerminalProvider {
 }
 
 // @public
+declare const enum Encoding {
+    // (undocumented)
+    Utf8 = "utf8"
+}
+
+// @public
 declare class Executable {
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
@@ -269,6 +275,7 @@ interface IPackageJson {
     tsdoc?: IPackageJsonTsdocConfiguration;
     // @beta
     tsdocMetadata?: string;
+    types?: string;
     typings?: string;
     version: string;
 }

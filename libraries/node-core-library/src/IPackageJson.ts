@@ -95,6 +95,11 @@ export interface IPackageJson {
    * The path to the TypeScript *.d.ts file describing the module file
    * that will act as the main entry point.
    */
+  types?: string;
+
+  /**
+   * Alias for `types`
+   */
   typings?: string;
 
   /**
