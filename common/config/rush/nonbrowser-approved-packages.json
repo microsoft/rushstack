@@ -87,6 +87,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@microsoft/rush-stack-compiler-3.3",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/rush-stack-compiler-shared",
       "allowedCategories": [ "libraries" ]
     },
@@ -432,6 +436,10 @@
     },
     {
       "name": "sinon-chai",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "source-map",
       "allowedCategories": [ "libraries" ]
     },
     {

@@ -38,16 +38,17 @@
     "@types/z-schema": "3.16.31",
     "colors": "~1.2.1",
     "lodash": "~4.17.5",
+    "resolve": "1.8.1",
+    "source-map": "~0.6.1",
     "typescript": "~3.1.6",
-    "z-schema": "~3.18.3",
-    "resolve": "1.8.1"
+    "z-schema": "~3.18.3"
   },
   "devDependencies": {
+    "@microsoft/node-library-build": "6.0.29",
     "@microsoft/rush-stack-compiler-3.2": "0.2.2",
-    "tslint-microsoft-contrib": "~5.2.1",
+    "@types/jest": "23.3.11",
     "@types/lodash": "4.14.116",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "6.0.29",
-    "@types/jest": "23.3.11"
+    "tslint-microsoft-contrib": "~5.2.1"
   }
 }
