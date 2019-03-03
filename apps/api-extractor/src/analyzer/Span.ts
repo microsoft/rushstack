@@ -292,7 +292,7 @@ export class Span {
    * @remarks
    * For example, suppose the character buffer contains this text:
    * ```
-   *              1         2
+   *              1111111111222222
    *  012345 6 7890123456789012345
    * "line 1\r\n  line 2 Example"
    * ```
@@ -314,7 +314,7 @@ export class Span {
         break;
       }
       if (c !== 32 /* space */ && c !== 9 /* tab */) {
-        // We encountered a non-spacing character, so move the contentStartIndex backwards
+        // We encountered a non-spacing character, so move the firstNonSpaceIndex backwards
         firstNonSpaceIndex = i;
       }
       --i;
