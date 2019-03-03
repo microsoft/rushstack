@@ -268,6 +268,95 @@ export interface IExtractorTsdocMetadataConfig {
 }
 
 /**
+ * Used with {@link IExtractorMessageRoutingConfig.logLevel}.
+ *
+ * @public
+ */
+export const enum ExtractorMessageLogLevel {
+  /**
+   * The message will be written to the output log as an error.
+   *
+   * @remarks
+   * Errors cause the build to fail and return a nonzero exit code.
+   */
+  Error = 'error',
+
+  /**
+   * The message will be written to the build output as an warning.
+   *
+   * @remarks
+   * Warnings cause a production build fail and return a nonzero exit code.  For a non-production build
+   * (e.g. using the `--local` option with `api-extractor run`), the warning is displayed but the build will not fail.
+   */
+  Warning = 'warning',
+
+  /**
+   * The message will not be reported to the output log.
+   */
+  None = 'none'
+}
+
+/**
+ * Configures reporting for a given message identifier.
+ *
+ * @public
+ */
+export interface IExtractorMessageReportingRuleConfig {
+  /**
+   * Specifies whether the message should be written to the the tool's output log.
+   *
+   * @remarks
+   * Note that the `addToApiReviewFile` property may supersede this option.
+   */
+  logLevel: ExtractorMessageLogLevel;
+
+  /**
+   * If API Extractor is configured to write an API review file (.api.ts), then the message will be written
+   * inside that file.  If the API review file is NOT being written, then the message is instead logged according
+   * to the `logLevel` option.
+   */
+  addToApiReviewFile?: boolean;
+}
+
+/**
+ * Specifies a table of reporting rules for different message identifiers, and also the default rule used for
+ * identifiers that do not appear in the table.
+ *
+ * @public
+ */
+export interface IExtractorMessageReportingTableConfig {
+  /**
+   * The key is a message identifier for the associated type of message, or "default" to specify the default policy.
+   * For example, the key might be `TS2551` (a compiler message), `tsdoc-link-tag-unescaped-text` (a TSDOc message),
+   * or `ae-extra-release-tag` (a message related to the API Extractor analysis).
+   */
+  [messageId: string]: IExtractorMessageReportingRuleConfig;
+}
+
+/**
+ * Configures how API Extractor reports error and warning messages produced during analysis.
+ *
+ * @public
+ */
+export interface IExtractorMessagesConfig {
+  /**
+   * Configures handling of diagnostic messages generating the TypeScript compiler while analyzing the
+   * input .d.ts files.
+   */
+  compilerMessageReporting?: IExtractorMessageReportingTableConfig;
+
+  /**
+   * Configures handling of messages reported by API Extractor during its analysis.
+   */
+  extractorMessageReporting?: IExtractorMessageReportingTableConfig;
+
+  /**
+   * Configures handling of messages reported by the TSDoc parser when analyzing code comments.
+   */
+  tsdocMessageReporting?: IExtractorMessageReportingTableConfig;
+}
+
+/**
  * Configuration options for the API Extractor tool.  These options can be loaded
  * from a JSON config file.
  *
@@ -323,6 +412,11 @@ export interface IExtractorConfig {
    * @beta
    */
   tsdocMetadata?: IExtractorTsdocMetadataConfig;
+
+  /**
+   * {@inheritdoc IExtractorMessagesConfig}
+   */
+  messages?: IExtractorMessagesConfig;
 
   /**
    * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not

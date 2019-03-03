@@ -504,6 +504,43 @@ declare class Extractor {
 }
 
 // @public
+declare class ExtractorMessage {
+    // @internal (undocumented)
+    constructor(options: IExtractorMessageOptions);
+    readonly category: ExtractorMessageCategory;
+    formatMessageWithLocation(workingPackageFolderPath: string): string;
+    // (undocumented)
+    formatMessageWithoutLocation(): string;
+    readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
+    readonly sourceFileColumn: number | undefined;
+    readonly sourceFileLine: number | undefined;
+    readonly sourceFilePath: string | undefined;
+    readonly text: string;
+}
+
+// @public
+declare const enum ExtractorMessageCategory {
+    Compiler = "Compiler",
+    Extractor = "Extractor",
+    TSDoc = "TSDoc"
+}
+
+// @public
+declare const enum ExtractorMessageId {
+    ExtraReleaseTag = "ae-extra-release-tag",
+    InconsistentReleaseTags = "ae-inconsistent-release-tags",
+    MisplacedPackageTag = "ae-misplaced-package-tag",
+    MissingReleaseTag = "ae-missing-release-tag"
+}
+
+// @public
+declare const enum ExtractorMessageLogLevel {
+    Error = "error",
+    None = "none",
+    Warning = "warning"
+}
+
+// @public
 declare const enum ExtractorValidationRulePolicy {
     allow = "allow",
     error = "error"
@@ -703,6 +740,8 @@ interface IExtractorConfig {
     dtsRollup?: IExtractorDtsRollupConfig;
     extends?: string;
     // (undocumented)
+    messages?: IExtractorMessagesConfig;
+    // (undocumented)
     policies?: IExtractorPoliciesConfig;
     // (undocumented)
     project: IExtractorProjectConfig;
@@ -723,6 +762,24 @@ interface IExtractorDtsRollupConfig {
     publishFolderForInternal?: string;
     publishFolderForPublic?: string;
     trimming?: boolean;
+}
+
+// @public
+interface IExtractorMessageReportingRuleConfig {
+    addToApiReviewFile?: boolean;
+    logLevel: ExtractorMessageLogLevel;
+}
+
+// @public
+interface IExtractorMessageReportingTableConfig {
+    [messageId: string]: IExtractorMessageReportingRuleConfig;
+}
+
+// @public
+interface IExtractorMessagesConfig {
+    compilerMessageReporting?: IExtractorMessageReportingTableConfig;
+    extractorMessageReporting?: IExtractorMessageReportingTableConfig;
+    tsdocMessageReporting?: IExtractorMessageReportingTableConfig;
 }
 
 // @public

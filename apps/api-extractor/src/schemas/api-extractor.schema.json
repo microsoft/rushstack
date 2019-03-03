@@ -183,6 +183,26 @@
       "additionalProperties": false
     },
 
+    "messages": {
+      "description": "Configures how API Extractor reports error and warning messages produced during analysis.",
+      "type": "object",
+      "properties": {
+        "compilerMessageReporting": {
+          "description": "Configures handling of diagnostic messages generating the TypeScript compiler while analyzing the input .d.ts files.",
+          "$ref": "#/definitions/extractorMessageReportingTable"
+        },
+        "extractorMessageReporting": {
+          "description": "Configures handling of messages reported by API Extractor during its analysis.",
+          "$ref": "#/definitions/extractorMessageReportingTable"
+        },
+        "tsdocMessageReporting": {
+          "description": "Configures handling of messages reported by the TSDoc parser when analyzing code comments.",
+          "$ref": "#/definitions/extractorMessageReportingTable"
+        }
+      },
+      "additionalProperties": false
+    },
+
     "skipLibCheck": {
       "description": "This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it may be required when dependencies contain declarations that are incompatible with the TypeScript engine that API Extractor uses for its analysis. If this option is used, it is strongly recommended that broken dependencies be fixed or upgraded.",
       "type": "boolean"
@@ -193,5 +213,32 @@
     }
   },
   "required": [ "compiler", "project" ],
-  "additionalProperties": false
+  "additionalProperties": false,
+
+  "definitions": {
+    "extractorMessageReportingTable": {
+      "type":"object",
+      "description": "Specifies a table of reporting rules for different message identifiers, and also the default rule used for identifiers that do not appear in the table. The key is a message identifier for the associated type of message, or \"default\" to specify the default policy. For example, the key might be \"TS2551\" (a compiler message), \"tsdoc-link-tag-unescaped-text\" (a TSDOc message), or \"ae-extra-release-tag\" (a message related to the API Extractor analysis).",
+      "patternProperties": {
+        ".+": {
+          "type": "object",
+          "description": "Configures reporting for a given message identifier.",
+          "properties": {
+            "logLevel": {
+              "type": "string",
+              "description": "Specifies whether the message should be written to the the tool's output log. Note that the \"addToApiReviewFile\" property may supersede this option.",
+              "enum": [ "error", "warning", "none" ]
+            },
+            "addToApiReviewFile": {
+              "type": "boolean",
+              "description": "If API Extractor is configured to write an API review file (.api.ts), then the message will be written inside that file.  If the API review file is NOT being written, then the message is instead logged according to the \"logLevel\" option."
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "logLevel" ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
 }

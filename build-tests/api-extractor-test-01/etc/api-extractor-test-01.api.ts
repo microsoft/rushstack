@@ -50,15 +50,11 @@ declare class ClassWithSymbols {
 // @public
 declare class ClassWithTypeLiterals {
     method1(vector: {
-        // (undocumented)
         x: number;
-        // (undocumented)
         y: number;
     }): void;
     method2(): {
-        // (undocumented)
         classValue: ClassWithTypeLiterals;
-        // (undocumented)
         callback: () => number;
     } | undefined;
 }
@@ -136,7 +132,7 @@ interface ISimpleInterface {
 // @public (undocumented)
 declare namespace NamespaceContainingVariable {
     let // @internal (undocumented)
- variable: object[];
+    variable: object[];
 }
 
 // @public

@@ -110,7 +110,6 @@ declare abstract class GulpTask<TTaskConfig> implements IExecutable {
 // @public (undocumented)
 interface IBuildConfig {
     args: {
-        // (undocumented)
         [name: string]: string | boolean;
     };
     buildErrorIconPath?: string;
@@ -128,7 +127,6 @@ interface IBuildConfig {
     packageFolder: string;
     production: boolean;
     properties?: {
-        // (undocumented)
         [key: string]: any;
     };
     relogIssues?: boolean;

@@ -386,8 +386,7 @@ export class Extractor {
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       logger: this._monitoredLogger,
-      policies: this.actualConfig.policies,
-      validationRules: this.actualConfig.validationRules
+      extractorConfig: this.actualConfig
     });
 
     collector.analyze();
@@ -479,6 +478,9 @@ export class Extractor {
         )
       );
     }
+
+    // Show out all the messages that we collected during analysis
+    collector.messageRouter.reportMessagesToLogger(this._monitoredLogger, collector.workingPackage.packageFolder);
 
     if (this._localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)

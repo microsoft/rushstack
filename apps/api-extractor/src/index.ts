@@ -12,6 +12,8 @@
 export { ReleaseTag } from './aedoc/ReleaseTag';
 
 export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './api/Extractor';
+export { ExtractorMessage, ExtractorMessageCategory } from './api/ExtractorMessage';
+export { ExtractorMessageId } from './api/ExtractorMessageId';
 export {
   IExtractorTsconfigCompilerConfig,
   IExtractorRuntimeCompilerConfig,
@@ -23,6 +25,10 @@ export {
   IExtractorApiJsonFileConfig,
   IExtractorDtsRollupConfig,
   IExtractorTsdocMetadataConfig,
+  ExtractorMessageLogLevel,
+  IExtractorMessageReportingRuleConfig,
+  IExtractorMessageReportingTableConfig,
+  IExtractorMessagesConfig,
   IExtractorConfig
 } from './api/IExtractorConfig';
 
