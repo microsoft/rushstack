@@ -81,7 +81,7 @@ export class ReviewFileGenerator {
       ReviewFileGenerator._writeLineAsComments(output, 'Warnings were encountered during analysis:');
       ReviewFileGenerator._writeLineAsComments(output, '');
       for (const unassociatedMessage of unassociatedMessages) {
-        ReviewFileGenerator._writeLineAsComments(output, unassociatedMessage.formatMessageAndLocation(
+        ReviewFileGenerator._writeLineAsComments(output, unassociatedMessage.formatMessageWithLocation(
           collector.workingPackage.packageFolder
         ));
       }

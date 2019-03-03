@@ -108,7 +108,7 @@ export class ExtractorMessage {
    * src/folder/File.ts:123:4 - (ae-extra-release-tag) The doc comment should not contain more than one release tag.
    * ```
    */
-  public formatMessageAndLocation(workingPackageFolderPath: string): string {
+  public formatMessageWithLocation(workingPackageFolderPath: string): string {
     let result: string = '';
 
     if (this.sourceFilePath) {

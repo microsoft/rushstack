@@ -322,10 +322,10 @@ export class MessageRouter {
       const reportingRule: IReportingRule = this._getRuleForMessage(message);
       switch (reportingRule.logLevel) {
         case ExtractorMessageLogLevel.Error:
-          logger.logError('Error: ' + message.formatMessageAndLocation(workingPackageFolderPath));
+          logger.logError('Error: ' + message.formatMessageWithLocation(workingPackageFolderPath));
           break;
         case ExtractorMessageLogLevel.Warning:
-          logger.logWarning('Warning: ' + message.formatMessageAndLocation(workingPackageFolderPath));
+          logger.logWarning('Warning: ' + message.formatMessageWithLocation(workingPackageFolderPath));
           break;
       }
     }
