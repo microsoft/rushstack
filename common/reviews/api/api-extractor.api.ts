@@ -508,7 +508,7 @@ declare class ExtractorMessage {
     // @internal (undocumented)
     constructor(options: IExtractorMessageOptions);
     readonly category: ExtractorMessageCategory;
-    formatMessageAndLocation(workingPackageFolderPath: string): string;
+    formatMessageWithLocation(workingPackageFolderPath: string): string;
     // (undocumented)
     formatMessageWithoutLocation(): string;
     readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
@@ -535,9 +535,9 @@ declare const enum ExtractorMessageId {
 
 // @public
 declare const enum ExtractorMessageLogLevel {
-    Error = "Error",
-    None = "None",
-    Warning = "Warning"
+    Error = "error",
+    None = "none",
+    Warning = "warning"
 }
 
 // @public

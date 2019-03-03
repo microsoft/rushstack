@@ -227,7 +227,7 @@
             "logLevel": {
               "type": "string",
               "description": "Specifies whether the message should be written to the the tool's output log. Note that the \"addToApiReviewFile\" property may supersede this option.",
-              "enum": [ "Error", "Warning", "None" ]
+              "enum": [ "error", "warning", "none" ]
             },
             "addToApiReviewFile": {
               "type": "boolean",

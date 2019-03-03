@@ -45,17 +45,17 @@
   "messages": {
     "compilerMessageReporting": {
       "default": {
-        "logLevel": "Warning"
+        "logLevel": "warning"
       }
     },
     "extractorMessageReporting": {
       "default": {
-        "logLevel": "Warning"
+        "logLevel": "warning"
       }
     },
     "tsdocMessageReporting": {
       "default": {
-        "logLevel": "Warning"
+        "logLevel": "warning"
       }
     }
   },

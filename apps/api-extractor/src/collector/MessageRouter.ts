@@ -327,6 +327,10 @@ export class MessageRouter {
         case ExtractorMessageLogLevel.Warning:
           logger.logWarning('Warning: ' + message.formatMessageWithLocation(workingPackageFolderPath));
           break;
+        case ExtractorMessageLogLevel.None:
+          break;
+        default:
+          throw new Error(`Invalid logLevel value: ${JSON.stringify(reportingRule.logLevel)}`);
       }
     }
 

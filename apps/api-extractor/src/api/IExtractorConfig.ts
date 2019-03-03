@@ -279,7 +279,7 @@ export const enum ExtractorMessageLogLevel {
    * @remarks
    * Errors cause the build to fail and return a nonzero exit code.
    */
-  Error = 'Error',
+  Error = 'error',
 
   /**
    * The message will be written to the build output as an warning.
@@ -288,12 +288,12 @@ export const enum ExtractorMessageLogLevel {
    * Warnings cause a production build fail and return a nonzero exit code.  For a non-production build
    * (e.g. using the `--local` option with `api-extractor run`), the warning is displayed but the build will not fail.
    */
-  Warning = 'Warning',
+  Warning = 'warning',
 
   /**
    * The message will not be reported to the output log.
    */
-  None = 'None'
+  None = 'none'
 }
 
 /**
