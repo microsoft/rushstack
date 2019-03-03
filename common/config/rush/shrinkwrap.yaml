@@ -152,6 +152,7 @@ dependencies:
   resolve: 1.8.1
   semver: 5.3.0
   sinon: 1.17.7
+  source-map: 0.6.1
   strict-uri-encode: 2.0.0
   sudo: 1.0.3
   tar: 4.4.8
@@ -436,7 +437,7 @@ packages:
       '@pnpm/package-bins': 1.0.0
       '@pnpm/types': 1.8.0
       '@types/mz': 0.0.32
-      '@types/node': 10.12.27
+      '@types/node': 10.12.29
       '@types/ramda': 0.25.51
       '@zkochan/cmd-shim': 2.2.4
       arr-flatten: 1.1.0
@@ -460,7 +461,7 @@ packages:
       '@pnpm/package-bins': 1.0.0
       '@pnpm/types': 1.8.0
       '@types/mz': 0.0.32
-      '@types/node': 10.12.27
+      '@types/node': 10.12.29
       '@types/ramda': 0.25.51
       '@zkochan/cmd-shim': 2.2.4
       arr-flatten: 1.1.0
@@ -481,7 +482,7 @@ packages:
       integrity: sha512-thVgwrQ5rMcPYI6a0IPOt2pnlF1n5zX7BN4CrFeBp0/JCGsZAht/VOPv9bD3cZ+j0vDemEwE23BfhOWxmxq2yQ==
   /@pnpm/logger/1.0.2:
     dependencies:
-      '@types/node': 10.12.27
+      '@types/node': 10.12.29
       bole: 3.0.2
       ndjson: 1.5.0
     dev: false
@@ -661,10 +662,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-spbM5xRP+rd7hAkMqtTx5Lvqjgk=
-  /@types/node/10.12.27:
+  /@types/node/10.12.29:
     dev: false
     resolution:
-      integrity: sha512-e9wgeY6gaY21on3ve0xAjgBVjGDWq/xUteK0ujsE53bUoxycMkqfnkUgMt6ffZtykZ5X12Mg3T7Pw4TRCObDKg==
+      integrity: sha512-J/tnbnj8HcsBgCe2apZbdUpQ7hs4d7oZNTYA5bekWdP0sr2NGsOpI/HRdDroEi209tEvTcTtxhD0FfED3DhEcw==
   /@types/node/8.5.8:
     dev: false
     resolution:
@@ -938,9 +939,9 @@ packages:
       node: '>= 4.0.0'
     resolution:
       integrity: sha512-JVwXMr9nHYTUXsBFKUqhJwvlcYU/blreOEUkhNR2eXZIvwd+c+o5V4MgDPKWnMS/56awN3TRzIP+KoPn+roQtg==
-  /ajv-keywords/3.4.0/ajv@6.9.2:
+  /ajv-keywords/3.4.0/ajv@6.10.0:
     dependencies:
-      ajv: 6.9.2
+      ajv: 6.10.0
     dev: false
     id: registry.npmjs.org/ajv-keywords/3.4.0
     peerDependencies:
@@ -956,7 +957,7 @@ packages:
     dev: false
     resolution:
       integrity: sha1-c7Xuyj+rZT49P5Qis0GtQiBdyWU=
-  /ajv/6.9.2:
+  /ajv/6.10.0:
     dependencies:
       fast-deep-equal: 2.0.1
       fast-json-stable-stringify: 2.0.0
@@ -964,7 +965,7 @@ packages:
       uri-js: 4.2.2
     dev: false
     resolution:
-      integrity: sha512-4UFy0/LgDo7Oa/+wOAlj44tp9K78u38E5/359eSrqEp1Z5PdVfimCcs7SluXMP755RUQu6d2b4AvF0R1C9RZjg==
+      integrity: sha512-nffhOpkymDECQyR0mnsUtoCE8RlX38G0rYP+wgLWFyZuUyuuojSSvi/+euOiQBIn63whYwYVIIH1TvE3tu4OEg==
   /align-text/0.1.4:
     dependencies:
       kind-of: 3.2.2
@@ -1689,7 +1690,7 @@ packages:
       integrity: sha1-qk62jl17ZYuqa/alfmMMvXqT0pg=
   /browserify-zlib/0.2.0:
     dependencies:
-      pako: 1.0.8
+      pako: 1.0.10
     dev: false
     resolution:
       integrity: sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==
@@ -1697,7 +1698,7 @@ packages:
     dependencies:
       caniuse-lite: 1.0.30000939
       electron-to-chromium: 1.3.113
-      node-releases: 1.1.8
+      node-releases: 1.1.9
     dev: false
     hasBin: true
     resolution:
@@ -3874,7 +3875,7 @@ packages:
       integrity: sha1-ukAsJmGU8VlW7xXg/PJCmT9qff0=
   /har-validator/5.1.3:
     dependencies:
-      ajv: 6.9.2
+      ajv: 6.10.0
       har-schema: 2.0.0
     dev: false
     engines:
@@ -6171,12 +6172,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-SUDEb+o71XR5lXSTyivXd9J7fCloE3SyP4lSgt3lU2oSANiox+SxlNRGPjDKrwU1YN3ix2KN/VGGCg0t01rttQ==
-  /node-releases/1.1.8:
+  /node-releases/1.1.9:
     dependencies:
       semver: 5.3.0
     dev: false
     resolution:
-      integrity: sha512-gQm+K9mGCiT/NXHy+V/ZZS1N/LOaGGqRAAJJs3X9Ah1g+CIbRcBgNyoNYQ+SEtcyAtB9KqDruu+fF7nWjsqRaA==
+      integrity: sha512-oic3GT4OtbWWKfRolz5Syw0Xus0KRFxeorLNj0s93ofX6PWyuzKjsiGxsCtWktBwwmTF6DdRRf2KreGqeOk5KA==
   /node-sass/4.9.3:
     dependencies:
       async-foreach: 0.1.3
@@ -6535,10 +6536,10 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-y8ec26+P1CKOE/Yh8rGiN8GyB7M=
-  /pako/1.0.8:
+  /pako/1.0.10:
     dev: false
     resolution:
-      integrity: sha512-6i0HVbUfcKaTv+EG8ZTr75az7GFXcLYk9UyLEg7Notv/Ma+z/UG3TCoz6GiNeOrn1E/e63I0X/Hpw18jHOTUnA==
+      integrity: sha512-0DTvPVU3ed8+HNXOu5Bs+o//Mbdj9VNQMUOe9oKCwh8l0GNwpTDMKCWbRjgtD291AWnkAgkqA/LOnQS8AmS1tw==
   /parse-asn1/5.1.4:
     dependencies:
       asn1.js: 4.10.1
@@ -8880,8 +8881,8 @@ packages:
     dependencies:
       acorn: 5.7.3
       acorn-dynamic-import: 2.0.2
-      ajv: 6.9.2
-      ajv-keywords: /ajv-keywords/3.4.0/ajv@6.9.2
+      ajv: 6.10.0
+      ajv-keywords: /ajv-keywords/3.4.0/ajv@6.10.0
       async: 2.6.2
       enhanced-resolve: 3.4.1
       escope: 3.6.0
@@ -9324,13 +9325,14 @@ packages:
       gulp: 3.9.1
       lodash: 4.17.11
       resolve: 1.8.1
+      source-map: 0.6.1
       tslint-microsoft-contrib: 5.2.1
       typescript: 3.1.6
       z-schema: 3.18.4
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-cFzMdCm9bWiXuf+NEJCMICwHM9G+MyIEihd5P7GPwQXSLcduw4yJcN4CIkkb7WWRrE77x9oldxw8QBOd0fUk0A==
+      integrity: sha512-CHPWl1Y6vqx9Li30FvlsgYMv4DecfgKGYdMcGEmamQOqUgSbWG9GWFXKmeJTz3mUgl/gD3wtHXcDg8NTvnJjIw==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-mocha.tgz':
@@ -10141,6 +10143,7 @@ specifiers:
   resolve: 1.8.1
   semver: ~5.3.0
   sinon: ~1.17.3
+  source-map: ~0.6.1
   strict-uri-encode: ~2.0.0
   sudo: ~1.0.3
   tar: ~4.4.1
