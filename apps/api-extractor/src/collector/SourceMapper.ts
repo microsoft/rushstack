@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { SourceMapConsumer, RawSourceMap, MappingItem, Position } from 'source-map';
 import { IExtractorMessageOptions } from '../api/ExtractorMessage';
-import { FileSystem, InternalError, JsonFile } from '@microsoft/node-core-library';
+import { FileSystem, InternalError, JsonFile, NewlineKind } from '@microsoft/node-core-library';
 
 interface ISourceMap {
   sourceMapConsumer: SourceMapConsumer;
@@ -15,14 +15,22 @@ interface ISourceMap {
   mappingItems: MappingItem[];
 }
 
+interface IOriginalFileInfo {
+  // Whether the .ts file exists
+  fileExists: boolean;
+
+  // This is used to check whether the guessed position is out of bounds.
+  // Since column/line numbers are 1-based, the 0th item in this array is unusued.
+  maxColumnForLine: number[];
+}
+
 export class SourceMapper {
-  // Map from IExtractorMessageOptions.sourceFilePath --> ISourceMap if a source map was found,
-  // or false if not found
+  // Map from .d.ts file path --> ISourceMap if a source map was found, or false if not found
   private _sourceMapByFilePath: Map<string, ISourceMap | false>
     = new Map<string, ISourceMap | false>();
 
-  // Cache the FileSystem.exists() result for mapped file paths
-  private _existenceByMappedFilePath: Map<string, boolean> = new Map<string, boolean>();
+  // Cache the FileSystem.exists() result for mapped .ts files
+  private _originalFileInfoByPath: Map<string, IOriginalFileInfo> = new Map<string, IOriginalFileInfo>();
 
   /**
    * If the `IExtractorMessageOptions` refers to a `.d.ts` file, look for a `.d.ts.map` and
@@ -46,7 +54,7 @@ export class SourceMapper {
 
       sourceMap = this._sourceMapByFilePath.get(normalizedPath);
       if (sourceMap !== undefined) {
-        // Copy the result to the new key
+        // Copy the result from the normalized to the non-normalized key
         this._sourceMapByFilePath.set(options.sourceFilePath, sourceMap);
       } else {
         // Given "folder/file.d.ts", check for a corresponding "folder/file.d.ts.map"
@@ -54,68 +62,113 @@ export class SourceMapper {
         if (FileSystem.exists(sourceMapPath)) {
           // Load up the source map
           const rawSourceMap: RawSourceMap = JsonFile.load(sourceMapPath) as RawSourceMap;
-          const sourceMapConsumer: SourceMapConsumer = new SourceMapConsumer(rawSourceMap);
 
+          const sourceMapConsumer: SourceMapConsumer = new SourceMapConsumer(rawSourceMap);
           const mappingItems: MappingItem[] = [];
 
           // Extract the list of mapping items
           sourceMapConsumer.eachMapping(
             (mappingItem: MappingItem) => {
-              mappingItems.push(mappingItem);
+              mappingItems.push({
+                ...mappingItem,
+                // The "source-map" package inexplicably uses 1-based line numbers but 0-based column numbers.
+                // Fix that up proactively so we don't have to deal with it later.
+                generatedColumn: mappingItem.generatedColumn + 1,
+                originalColumn: mappingItem.originalColumn + 1
+              });
             },
             this,
             SourceMapConsumer.GENERATED_ORDER
           );
 
-          sourceMap = {
-            sourceMapConsumer,
-            mappingItems
-          };
+          sourceMap = { sourceMapConsumer, mappingItems};
         } else {
+          // No source map for this filename
           sourceMap = false;
         }
 
-        this._sourceMapByFilePath.set(options.sourceFilePath, sourceMap);
         this._sourceMapByFilePath.set(normalizedPath, sourceMap);
+        if (options.sourceFilePath !== normalizedPath) {
+          // Add both keys to the map
+          this._sourceMapByFilePath.set(options.sourceFilePath, sourceMap);
+        }
       }
     }
 
     if (sourceMap === false) {
-      // No source map
+      // No source map for this filename
       return;
+    }
+
+    // Make sure sourceFileLine and sourceFileColumn are defined
+    if (options.sourceFileLine === undefined) {
+      options.sourceFileLine = 1;
+    }
+    if (options.sourceFileColumn === undefined) {
+      options.sourceFileColumn = 1;
     }
 
     const nearestMappingItem: MappingItem | undefined = SourceMapper._findNearestMappingItem(sourceMap.mappingItems,
       {
-        line: options.sourceFileLine || 1,
-        // The source-map package inexplicably uses 1-based line numbers but 0-based column numbers
-        column: (options.sourceFileColumn || 1) - 1
+        line: options.sourceFileLine,
+        column: options.sourceFileColumn
       }
     );
 
     if (nearestMappingItem === undefined) {
-      // The source map provides no mapping for this location
+      // No mapping for this location
       return;
     }
 
     const mappedFilePath: string = path.resolve(path.dirname(options.sourceFilePath), nearestMappingItem.source);
 
-    // Does the mapped file exist?
-    let mappedFileExists: boolean | undefined = this._existenceByMappedFilePath.get(mappedFilePath);
-    if (mappedFileExists === undefined) {
-      mappedFileExists = FileSystem.exists(mappedFilePath);
-      this._existenceByMappedFilePath.set(mappedFilePath, mappedFileExists);
+    // Does the mapped filename exist?  Use a cache to remember the answer.
+    let originalFileInfo: IOriginalFileInfo | undefined = this._originalFileInfoByPath.get(mappedFilePath);
+    if (originalFileInfo === undefined) {
+      originalFileInfo = {
+        fileExists: FileSystem.exists(mappedFilePath),
+        maxColumnForLine: []
+      };
+
+      if (originalFileInfo.fileExists) {
+        // Read the file and measure the length of each line
+        originalFileInfo.maxColumnForLine =
+          FileSystem.readFile(mappedFilePath, { convertLineEndings: NewlineKind.Lf })
+          .split('\n')
+          .map(x => x.length + 1); // +1 since columns are 1-based
+        originalFileInfo.maxColumnForLine.unshift(0);  // Extra item since lines are 1-based
+      }
+
+      this._originalFileInfoByPath.set(mappedFilePath, originalFileInfo);
     }
 
-    if (!mappedFileExists) {
+    if (!originalFileInfo.fileExists) {
       // Don't translate coordinates to a file that doesn't exist
       return;
     }
 
-    // Success -- update the options
-    options.sourceFilePath = mappedFilePath;
-    options.sourceFileLine = nearestMappingItem.originalLine;
-    options.sourceFileColumn = nearestMappingItem.originalColumn + 1;
+    // The nearestMappingItem anchor may be above/left of the real position, due to gaps in the mapping.  Calculate
+    // the delta and apply it to the original position.
+    const guessedPosition: Position = {
+      line: nearestMappingItem.originalLine + options.sourceFileLine - nearestMappingItem.generatedLine,
+      column: nearestMappingItem.originalColumn + options.sourceFileColumn - nearestMappingItem.generatedColumn
+    };
+
+    // Verify that the result is not out of bounds, in cause our heuristic failed
+    if (guessedPosition.line >= 1
+      && guessedPosition.line < originalFileInfo.maxColumnForLine.length
+      && guessedPosition.column >= 1
+      && guessedPosition.column <= originalFileInfo.maxColumnForLine[guessedPosition.line]) {
+
+      options.sourceFilePath = mappedFilePath;
+      options.sourceFileLine = guessedPosition.line;
+      options.sourceFileColumn = guessedPosition.column;
+    } else {
+      // The guessed position was out of bounds, so use the nearestMappingItem position instead.
+      options.sourceFilePath = mappedFilePath;
+      options.sourceFileLine = nearestMappingItem.originalLine;
+      options.sourceFileColumn = nearestMappingItem.originalColumn;
+    }
   }
 
   private static _findNearestMappingItem(mappingItems: MappingItem[], position: Position): MappingItem | undefined {
