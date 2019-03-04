@@ -64,7 +64,7 @@ declare function functionalTestRun(name: string, result: TestResultState, durati
 // @public
 declare class GenerateShrinkwrapTask extends GulpTask<void> {
     constructor();
-    // Warning: (ae-forgotten-export) The symbol gulp needs to be exported from the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "gulp" needs to be exported by the entry point index.d.ts
     executeTask(gulp: gulp.Gulp, completeCallback: (error?: string | Error) => void): NodeJS.ReadWriteStream | void;
 }
 
@@ -85,7 +85,7 @@ declare abstract class GulpTask<TTaskConfig> implements IExecutable {
     copyFile(localSourcePath: string, localDestPath?: string): void;
     enabled: boolean;
     execute(config: IBuildConfig): Promise<void>;
-    // Warning: (ae-forgotten-export) The symbol GulpProxy needs to be exported from the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "GulpProxy" needs to be exported by the entry point index.d.ts
     abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
     fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
     fileExists(localPath: string): boolean;

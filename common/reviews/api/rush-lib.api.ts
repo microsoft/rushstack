@@ -93,7 +93,7 @@ declare enum Event {
 
 // @beta
 declare class EventHooks {
-    // Warning: (ae-forgotten-export) The symbol IEventHooksJson needs to be exported from the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IEventHooksJson" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
     constructor(eventHooksJson: IEventHooksJson);
@@ -102,7 +102,7 @@ declare class EventHooks {
 
 // @beta
 declare class IndividualVersionPolicy extends VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol IIndividualVersionJson needs to be exported from the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
     constructor(versionPolicyJson: IIndividualVersionJson);
@@ -131,7 +131,7 @@ declare class _LastInstallFlag {
 
 // @beta
 declare class LockStepVersionPolicy extends VersionPolicy {
-    // Warning: (ae-forgotten-export) The symbol ILockStepVersionJson needs to be exported from the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
     constructor(versionPolicyJson: ILockStepVersionJson);
@@ -189,7 +189,7 @@ declare type PackageManager = 'pnpm' | 'npm' | 'yarn';
 
 // @public
 declare class PnpmOptionsConfiguration {
-    // Warning: (ae-forgotten-export) The symbol IPnpmOptionsJson needs to be exported from the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IPnpmOptionsJson" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
     constructor(json: IPnpmOptionsJson);
@@ -266,7 +266,7 @@ declare class RushConfiguration {
 
 // @public
 declare class RushConfigurationProject {
-    // Warning: (ae-forgotten-export) The symbol IRushConfigurationProjectJson needs to be exported from the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectJson" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
     constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
@@ -310,7 +310,7 @@ declare abstract class VersionPolicy {
     readonly isLockstepped: boolean;
     // @internal
     abstract readonly _json: IVersionPolicyJson;
-    // Warning: (ae-forgotten-export) The symbol IVersionPolicyJson needs to be exported from the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
     // 
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
@@ -341,7 +341,7 @@ declare enum VersionPolicyDefinitionName {
 
 // @public
 declare class YarnOptionsConfiguration {
-    // Warning: (ae-forgotten-export) The symbol IYarnOptionsJson needs to be exported from the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IYarnOptionsJson" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
     constructor(json: IYarnOptionsJson);

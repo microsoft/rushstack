@@ -13,7 +13,7 @@ declare const generateShrinkwrapTask: GenerateShrinkwrapTask;
 // @public (undocumented)
 declare const postCopy: CopyTask;
 
-// Warning: (ae-forgotten-export) The symbol PostProcessSourceMaps needs to be exported from the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "PostProcessSourceMaps" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
 declare const postProcessSourceMapsTask: PostProcessSourceMaps;

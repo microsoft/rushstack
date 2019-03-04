@@ -33,7 +33,7 @@ export const enum ExtractorMessageId {
   MisplacedPackageTag = 'ae-misplaced-package-tag',
 
   /**
-   * The symbol ___ needs to be exported from the entry point ___.
+   * The symbol ___ needs to be exported by the entry point ___.
    */
   ForgottenExport = 'ae-forgotten-export'
 }

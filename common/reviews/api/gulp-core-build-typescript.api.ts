@@ -1,9 +1,9 @@
-// Warning: (ae-forgotten-export) The symbol ApiExtractorTask needs to be exported from the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ApiExtractorTask" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
 declare const apiExtractor: ApiExtractorTask;
 
-// Warning: (ae-forgotten-export) The symbol IRSCTaskConfig needs to be exported from the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "IRSCTaskConfig" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
 interface ITscCmdTaskConfig extends IRSCTaskConfig {
@@ -20,7 +20,7 @@ interface ITslintCmdTaskConfig extends IRSCTaskConfig {
 // @public (undocumented)
 declare const tscCmd: TscCmdTask;
 
-// Warning: (ae-forgotten-export) The symbol RSCTask needs to be exported from the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "RSCTask" needs to be exported by the entry point index.d.ts
 // 
 // @beta (undocumented)
 declare class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {

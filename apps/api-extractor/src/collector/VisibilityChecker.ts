@@ -54,8 +54,8 @@ export class VisibilityChecker {
               if (!VisibilityChecker._isEcmaScriptSymbol(referencedEntity)) {
 
                 collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.ForgottenExport,
-                  `The symbol ${rootSymbol.localName} needs to be exported`
-                    + ` from the entry point ${entryPointFilename}`,
+                  `The symbol "${rootSymbol.localName}" needs to be exported`
+                    + ` by the entry point ${entryPointFilename}`,
                   astDeclaration);
               }
 
