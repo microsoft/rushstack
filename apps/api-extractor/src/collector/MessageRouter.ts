@@ -174,7 +174,7 @@ export class MessageRouter {
 
     const extractorMessage: ExtractorMessage = this.addAnalyzerIssueForPosition(
       messageId, messageText, astDeclaration.declaration.getSourceFile(),
-      astDeclaration.declaration.pos);
+      astDeclaration.declaration.getStart());
 
     this._associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
   }
