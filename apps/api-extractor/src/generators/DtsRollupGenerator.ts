@@ -91,7 +91,7 @@ export class DtsRollupGenerator {
 
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
           switch (astImport.importKind) {
-            case AstImportKind.Normal:
+            case AstImportKind.NamedImport:
               if (entity.nameForEmit !== astImport.exportName) {
                 indentedWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
               } else {

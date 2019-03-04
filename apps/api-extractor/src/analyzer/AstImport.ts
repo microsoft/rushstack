@@ -11,7 +11,8 @@ export enum AstImportKind {
   /**
    * An import statement such as `import { X } from "y";`.
    */
-  Normal,
+  NamedImport,
+
   /**
    * An import statement such as `import * as x from "y";`.
    */
@@ -54,9 +55,22 @@ export class AstImport {
   public readonly modulePath: string;
 
   /**
-   * For `AstImportKind.Normal`, returns `X` from `import { X } from "y";`.
-   * For `AstImportKind.StarImport`, returns `x` from `import * as x from "y";`.
-   * For `AstImportKind.EqualsImport`, returns `x` from `import x = require("y");`.
+   * The name of the symbol being imported.
+   *
+   * @remarks
+   *
+   * The name depends on the type of import:
+   *
+   * ```ts
+   * // For AstImportKind.NamedImport style, exportName would be "X" in this example:
+   * import { X } from "y";
+   *
+   * // For AstImportKind.StarImport style, exportName would be "x" in this example:
+   * import * as x from "y";
+   *
+   * // For AstImportKind.EqualsImport style, exportName would be "x" in this example:
+   * import x = require("y");
+   * ```
    */
   public readonly exportName: string;
 
@@ -96,7 +110,7 @@ export class AstImport {
    */
   public static getKey(options: IAstImportOptions): string {
     switch (options.importKind) {
-      case AstImportKind.Normal:
+      case AstImportKind.NamedImport:
         return `${options.modulePath}:${options.exportName}`;
       case AstImportKind.StarImport:
         return `${options.modulePath}:*`;

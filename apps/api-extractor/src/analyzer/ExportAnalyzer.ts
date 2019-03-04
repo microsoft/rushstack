@@ -370,7 +370,7 @@ export class ExportAnalyzer {
 
         if (externalModulePath !== undefined) {
           return this._fetchAstImport(declarationSymbol, {
-            importKind: AstImportKind.Normal,
+            importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
             exportName: exportName
           });
@@ -448,7 +448,7 @@ export class ExportAnalyzer {
 
         if (externalModulePath !== undefined) {
           return this._fetchAstImport(declarationSymbol, {
-            importKind: AstImportKind.Normal,
+            importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
             exportName: exportName
           });
@@ -476,7 +476,7 @@ export class ExportAnalyzer {
 
         if (externalModulePath !== undefined) {
           return this._fetchAstImport(declarationSymbol, {
-            importKind: AstImportKind.Normal,
+            importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
             exportName: ts.InternalSymbolName.Default
           });
@@ -579,7 +579,7 @@ export class ExportAnalyzer {
           // This entity was obtained from an external module, so return an AstImport instead
           const astSymbol: AstSymbol = astEntity as AstSymbol;
           return this._fetchAstImport(astSymbol.followedSymbol, {
-            importKind: AstImportKind.Normal,
+            importKind: AstImportKind.NamedImport,
             modulePath: starExportedModule.externalModulePath,
             exportName: exportName
           });
