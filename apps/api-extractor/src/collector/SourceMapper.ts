@@ -11,7 +11,7 @@ interface ISourceMap {
 
   // SourceMapConsumer.originalPositionFor() is useless because the mapping contains numerous gaps,
   // and the API provides no way to find the nearest match.  So instead we extract all the mapping items
-  // and search them ourself.
+  // and search them using SourceMapper._findNearestMappingItem().
   mappingItems: MappingItem[];
 }
 
@@ -20,7 +20,7 @@ interface IOriginalFileInfo {
   fileExists: boolean;
 
   // This is used to check whether the guessed position is out of bounds.
-  // Since column/line numbers are 1-based, the 0th item in this array is unusued.
+  // Since column/line numbers are 1-based, the 0th item in this array is unused.
   maxColumnForLine: number[];
 }
 
@@ -171,6 +171,9 @@ export class SourceMapper {
     }
   }
 
+  // The `mappingItems` array is sorted by generatedLine/generatedColumn (GENERATED_ORDER).
+  // The _findNearestMappingItem() lookup is a simple binary search that returns the previous item
+  // if there is no exact match.
   private static _findNearestMappingItem(mappingItems: MappingItem[], position: Position): MappingItem | undefined {
     if (mappingItems.length === 0) {
       return undefined;
@@ -184,18 +187,17 @@ export class SourceMapper {
 
       const diff: number = SourceMapper._compareMappingItem(mappingItems[middleIndex], position);
 
-      if (diff === 0) {
-        return mappingItems[middleIndex];
-      }
-
       if (diff < 0) {
         startIndex = middleIndex + 1;
-      } else {
+      } if (diff > 0) {
         endIndex = middleIndex - 1;
+      } else {
+        // Exact match
+        return mappingItems[middleIndex];
       }
     }
 
-    // If we didn't find a match, then endIndex < startIndex.
+    // If we didn't find an exact match, then endIndex < startIndex.
     // Take endIndex because it's the smaller value.
     return mappingItems[endIndex];
   }
