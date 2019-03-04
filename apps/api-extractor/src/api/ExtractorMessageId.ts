@@ -28,9 +28,14 @@ export const enum ExtractorMessageId {
   MissingReleaseTag = 'ae-missing-release-tag',
 
   /**
-   * The @packageDocumentation comment must appear at the top of entry point *.d.ts file.
+   * The `@packageDocumentation` comment must appear at the top of entry point *.d.ts file.
    */
-  MisplacedPackageTag = 'ae-misplaced-package-tag'
+  MisplacedPackageTag = 'ae-misplaced-package-tag',
+
+  /**
+   * The symbol ___ needs to be exported from the entry point ___.
+   */
+  ForgottenExport = 'ae-forgotten-export'
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([

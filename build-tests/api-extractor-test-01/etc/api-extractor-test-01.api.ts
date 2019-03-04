@@ -81,18 +81,24 @@ declare class DefaultExportEdgeCase {
 
 // @public (undocumented)
 declare class ForgottenExportConsumer1 {
+    // Warning: (ae-forgotten-export) The symbol IForgottenExport needs to be exported from the entry point index.d.ts
+    // 
     // (undocumented)
     test1(): IForgottenExport | undefined;
 }
 
 // @public (undocumented)
 declare class ForgottenExportConsumer2 {
+    // Warning: (ae-forgotten-export) The symbol IForgottenExport needs to be exported from the entry point index.d.ts
+    // 
     // (undocumented)
     test2(): IForgottenExport_2 | undefined;
 }
 
 // @beta
 declare class ForgottenExportConsumer3 {
+    // Warning: (ae-forgotten-export) The symbol IForgottenDirectDependency needs to be exported from the entry point index.d.ts
+    // 
     // (undocumented)
     test2(): IForgottenDirectDependency | undefined;
 }

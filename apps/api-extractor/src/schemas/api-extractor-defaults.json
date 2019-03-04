@@ -51,6 +51,10 @@
     "extractorMessageReporting": {
       "default": {
         "logLevel": "warning"
+      },
+      "ae-forgotten-export": {
+        "logLevel": "warning",
+        "addToApiReviewFile": true
       }
     },
     "tsdocMessageReporting": {

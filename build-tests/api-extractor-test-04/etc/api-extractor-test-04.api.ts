@@ -44,6 +44,7 @@ declare namespace EntangledNamespace {
         // @internal
         class _ClassY {
             b: EntangledNamespace.N2.ClassX;
+            // Warning: (ae-forgotten-export) The symbol N2 needs to be exported from the entry point index.d.ts
             c(): typeof N2.ClassX.a;
         }
     }
