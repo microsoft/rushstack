@@ -21,6 +21,7 @@ import {
 } from '../api/IExtractorConfig';
 import { AedocDefinitions } from '../aedoc/AedocDefinitions';
 import { ILogger } from '../api/ILogger';
+import { SourceMapper } from './SourceMapper';
 
 interface IReportingRule {
   logLevel: ExtractorMessageLogLevel;
@@ -37,6 +38,8 @@ export class MessageRouter {
   // Messages that got written to the API review file
   private readonly _messagesAddedToApiReviewFile: Set<ExtractorMessage>;
 
+  private readonly _sourceMapper: SourceMapper;
+
   // Normalized representation of the routing rules from api-extractor.json
   private _reportingRuleByMessageId: Map<string, IReportingRule> = new Map<string, IReportingRule>();
   private _compilerDefaultRule: IReportingRule = { logLevel: ExtractorMessageLogLevel.None,
@@ -50,6 +53,7 @@ export class MessageRouter {
     this._messages = [];
     this._associatedMessagesForAstDeclaration = new Map<AstDeclaration, ExtractorMessage[]>();
     this._messagesAddedToApiReviewFile = new Set<ExtractorMessage>();
+    this._sourceMapper = new SourceMapper();
 
     this._applyMessagesConfig(messagesConfig);
   }
@@ -151,6 +155,8 @@ export class MessageRouter {
       options.sourceFileColumn = lineAndCharacter.character + 1;
     }
 
+    // NOTE: Since compiler errors pertain to issues specific to the .d.ts files,
+    // we do not apply source mappings for them.
     this._messages.push(new ExtractorMessage(options));
   }
 
@@ -169,7 +175,7 @@ export class MessageRouter {
 
     const extractorMessage: ExtractorMessage = this.addAnalyzerIssueForPosition(
       messageId, messageText, astDeclaration.declaration.getSourceFile(),
-      astDeclaration.declaration.pos);
+      astDeclaration.declaration.getStart());
 
     this._associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
   }
@@ -185,14 +191,17 @@ export class MessageRouter {
       const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(
         message.textRange.pos);
 
-      const extractorMessage: ExtractorMessage = new ExtractorMessage({
+      const options: IExtractorMessageOptions = {
         category: ExtractorMessageCategory.TSDoc,
         messageId: message.messageId,
         text: message.unformattedText,
         sourceFilePath: sourceFile.fileName,
         sourceFileLine: lineAndCharacter.line + 1,
         sourceFileColumn: lineAndCharacter.character + 1
-      });
+      };
+
+      this._sourceMapper.updateExtractorMessageOptions(options);
+      const extractorMessage: ExtractorMessage = new ExtractorMessage(options);
 
       if (astDeclaration) {
         this._associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
@@ -236,7 +245,9 @@ export class MessageRouter {
       sourceFileColumn: lineAndCharacter.character + 1
     };
 
+    this._sourceMapper.updateExtractorMessageOptions(options);
     const extractorMessage: ExtractorMessage = new ExtractorMessage(options);
+
     this._messages.push(extractorMessage);
     return extractorMessage;
   }
