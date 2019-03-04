@@ -11,7 +11,7 @@ import { IndentedWriter } from '../api/IndentedWriter';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { AstImport } from '../analyzer/AstImport';
+import { AstImport, AstImportKind } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
@@ -90,14 +90,25 @@ export class DtsRollupGenerator {
         const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
 
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-          if (astImport.starImport) {
-            indentedWriter.write(`import * as ${entity.nameForEmit}`);
-          } else if (entity.nameForEmit !== astImport.exportName) {
-            indentedWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
-          } else {
-            indentedWriter.write(`import { ${astImport.exportName} }`);
+          switch (astImport.importKind) {
+            case AstImportKind.Normal:
+              if (entity.nameForEmit !== astImport.exportName) {
+                indentedWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
+              } else {
+                indentedWriter.write(`import { ${astImport.exportName} }`);
+              }
+              indentedWriter.writeLine(` from '${astImport.modulePath}';`);
+              break;
+            case AstImportKind.StarImport:
+              indentedWriter.write(`import * as ${entity.nameForEmit} from '${astImport.modulePath}';`);
+              break;
+            case AstImportKind.EqualsImport:
+              indentedWriter.write(`import ${entity.nameForEmit} = require('${astImport.modulePath}');`);
+              break;
+            default:
+              throw new InternalError('Unimplemented AstImportKind');
           }
-          indentedWriter.writeLine(` from '${astImport.modulePath}';`);
+
         }
       }
     }
