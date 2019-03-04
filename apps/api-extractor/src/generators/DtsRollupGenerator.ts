@@ -100,10 +100,10 @@ export class DtsRollupGenerator {
               indentedWriter.writeLine(` from '${astImport.modulePath}';`);
               break;
             case AstImportKind.StarImport:
-              indentedWriter.write(`import * as ${entity.nameForEmit} from '${astImport.modulePath}';`);
+              indentedWriter.writeLine(`import * as ${entity.nameForEmit} from '${astImport.modulePath}';`);
               break;
             case AstImportKind.EqualsImport:
-              indentedWriter.write(`import ${entity.nameForEmit} = require('${astImport.modulePath}');`);
+              indentedWriter.writeLine(`import ${entity.nameForEmit} = require('${astImport.modulePath}');`);
               break;
             default:
               throw new InternalError('Unimplemented AstImportKind');
