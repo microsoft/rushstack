@@ -25,9 +25,9 @@ interface IOriginalFileInfo {
 }
 
 export class SourceMapper {
-  // Map from .d.ts file path --> ISourceMap if a source map was found, or false if not found
-  private _sourceMapByFilePath: Map<string, ISourceMap | false>
-    = new Map<string, ISourceMap | false>();
+  // Map from .d.ts file path --> ISourceMap if a source map was found, or null if not found
+  private _sourceMapByFilePath: Map<string, ISourceMap | null>
+    = new Map<string, ISourceMap | null>();
 
   // Cache the FileSystem.exists() result for mapped .ts files
   private _originalFileInfoByPath: Map<string, IOriginalFileInfo> = new Map<string, IOriginalFileInfo>();
@@ -46,7 +46,7 @@ export class SourceMapper {
       throw new InternalError('The referenced path was not found: ' + options.sourceFilePath);
     }
 
-    let sourceMap: ISourceMap | false | undefined = this._sourceMapByFilePath.get(options.sourceFilePath);
+    let sourceMap: ISourceMap | null | undefined = this._sourceMapByFilePath.get(options.sourceFilePath);
 
     if (sourceMap === undefined) {
       // Normalize the path and redo the lookup
@@ -84,7 +84,7 @@ export class SourceMapper {
           sourceMap = { sourceMapConsumer, mappingItems};
         } else {
           // No source map for this filename
-          sourceMap = false;
+          sourceMap = null; // tslint:disable-line:no-null-keyword
         }
 
         this._sourceMapByFilePath.set(normalizedPath, sourceMap);
@@ -95,7 +95,7 @@ export class SourceMapper {
       }
     }
 
-    if (sourceMap === false) {
+    if (sourceMap === null) {
       // No source map for this filename
       return;
     }
