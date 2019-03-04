@@ -277,7 +277,7 @@ interface IPackageJson {
     tsdocMetadata?: string;
     types?: string;
     typings?: string;
-    version: string;
+    version?: string;
 }
 
 // @public
