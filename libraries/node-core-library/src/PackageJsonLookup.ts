@@ -201,10 +201,6 @@ export class PackageJsonLookup {
         throw new Error(`Error reading "${jsonFilename}":\n  `
           + 'The required field "name" was not found');
       }
-      if (!loadedPackageJson.version) {
-        throw new Error(`Error reading "${jsonFilename}":\n  `
-          + 'The required field "version" was not found');
-      }
 
       if (this._loadExtraFields) {
         packageJson = loadedPackageJson;

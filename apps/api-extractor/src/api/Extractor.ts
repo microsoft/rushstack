@@ -98,7 +98,7 @@ export class Extractor {
   /**
    * Returns the version number of the API Extractor NPM package.
    */
-  public static get version(): string {
+  public static get version(): string | undefined {
     return Extractor._getPackageJson().version;
   }
 

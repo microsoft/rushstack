@@ -59,7 +59,7 @@ export interface IPackageJson {
   /**
    * A version number conforming to the Semantic Versioning (SemVer) standard.
    */
-  version: string;
+  version?: string;
 
   /**
    * Indicates whether this package is allowed to be published or not.

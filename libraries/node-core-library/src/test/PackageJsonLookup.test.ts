@@ -28,6 +28,20 @@ describe('PackageJsonLookup', () => {
       }
     });
 
+    test('tryLoadPackageJsonFor() test package with no version', () => {
+      const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+      const sourceFilePath: string = path.join(__dirname, './test-data/example-package-no-version');
+      const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(sourceFilePath);
+      expect(packageJson).toBeDefined();
+      if (packageJson) {
+        expect(packageJson.name).toEqual('example-package');
+        expect(packageJson.version).not.toBeDefined();
+
+        // The "nonstandardField" should have been trimmed because loadExtraFields=false
+        expect(packageJson).not.toHaveProperty('nonstandardField');
+      }
+    });
+
     test('tryGetPackageFolderFor() test', () => {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package/src/ExampleFile.txt');
