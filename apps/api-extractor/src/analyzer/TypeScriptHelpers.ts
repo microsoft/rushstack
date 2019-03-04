@@ -36,6 +36,23 @@ export class TypeScriptHelpers {
   }
 
   /**
+   * Returns true if TypeScriptHelpers.followAliases() would return something different
+   * from the input `symbol`.
+   */
+  public static isFollowableAlias(symbol: ts.Symbol, typeChecker: ts.TypeChecker): boolean {
+    if (!(symbol.flags & ts.SymbolFlags.Alias)) {
+      return false;
+    }
+
+    const alias: ts.Symbol = typeChecker.getAliasedSymbol(symbol);
+    if (!alias || alias === symbol) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Certain virtual symbols do not have any declarations.  For example, `ts.TypeChecker.getExportsOfModule()` can
    * sometimes return a "prototype" symbol for an object, even though there is no corresponding declaration in the
    * source code.  API Extractor generally ignores such symbols.

@@ -1,6 +1,14 @@
-// WARNING: Unsupported export: serve
-// WARNING: Unsupported export: reload
-// WARNING: Unsupported export: trustDevCert
-// WARNING: Unsupported export: untrustDevCert
-// WARNING: Unsupported export: default
-// (No @packagedocumentation comment for this package)
+// @public (undocumented)
+declare const reload: ReloadTask;
+
+// @public (undocumented)
+declare const serve: ServeTask;
+
+// @public (undocumented)
+declare const trustDevCert: TrustCertTask;
+
+// @public (undocumented)
+declare const untrustDevCert: UntrustCertTask;
+
+
+// (No @packageDocumentation comment for this package)

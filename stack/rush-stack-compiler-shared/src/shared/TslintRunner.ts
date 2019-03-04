@@ -9,6 +9,9 @@ import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
 import { RushStackCompilerBase } from './RushStackCompilerBase';
 
+/**
+ * @beta
+ */
 export type WriteFileIssueFunction = (
   filePath: string,
   line: number,

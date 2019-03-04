@@ -12,8 +12,8 @@
     "@types/node": "8.5.8"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.0.27",
-    "@microsoft/rush-stack-compiler-3.2": "0.2.0",
+    "@microsoft/node-library-build": "6.0.33",
+    "@microsoft/rush-stack-compiler-3.2": "0.2.6",
     "gulp": "~3.9.1"
   }
 }

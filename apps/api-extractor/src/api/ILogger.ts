@@ -22,7 +22,8 @@ export interface ILogger {
   logWarning(message: string): void;
 
   /**
-   * Log an error message.  Typically it is shown in red and will break a production build.
+   * Log an error message.  Typically it is shown in red and will break the build, even if it
+   * is not a production build.
    */
   logError(message: string): void;
 }

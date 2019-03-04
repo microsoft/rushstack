@@ -21,7 +21,7 @@ export interface ICopyStaticAssetsTaskConfig {
  * Copies files from the /src folder into the /lib folder, if they have certain file extensions
  * or file paths.
  *
- * @internalremarks
+ * @privateRemarks
  *
  * Example:
  * ```

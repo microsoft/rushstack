@@ -2,7 +2,7 @@
 declare class Lib2Class {
 }
 
-// @public (undocumented)
+// @alpha (undocumented)
 interface Lib2Interface {
 }
 

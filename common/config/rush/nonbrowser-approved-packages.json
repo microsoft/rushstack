@@ -80,11 +80,11 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.1",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.2",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-shared",
@@ -136,6 +136,10 @@
     },
     {
       "name": "api-extractor-lib2-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "api-extractor-lib3-test",
       "allowedCategories": [ "tests" ]
     },
     {

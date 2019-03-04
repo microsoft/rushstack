@@ -9,7 +9,8 @@ build.preCopy.setConfig({
     [sharedDir]: [
       path.join(__dirname, 'node_modules', '@microsoft', 'rush-stack-compiler-shared', 'src', 'shared', '**', '*')
     ]
-  }
+  },
+  shouldFlatten: false
 });
 
 build.preCopy.cleanMatch = [sharedDir];

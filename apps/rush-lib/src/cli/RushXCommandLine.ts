@@ -69,8 +69,8 @@ export class RushXCommandLine {
 
       // Are we in a Rush repo?
       let rushConfiguration: RushConfiguration | undefined = undefined;
-      if (RushConfiguration.tryFindRushJsonLocation(false)) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+      if (RushConfiguration.tryFindRushJsonLocation()) {
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
       }
 
       console.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);

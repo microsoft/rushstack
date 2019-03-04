@@ -5,7 +5,6 @@ declare function getPackageDeps(packagePath?: string, excludedPaths?: string[]):
 interface IPackageDeps {
     // (undocumented)
     files: {
-        // (undocumented)
         [key: string]: string;
     };
 }

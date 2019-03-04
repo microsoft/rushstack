@@ -12,7 +12,7 @@ import {
   Terminal
 } from '@microsoft/node-core-library';
 import { GulpTask } from '@microsoft/gulp-core-build';
-import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-2.7';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.2';
 import { GCBTerminalProvider } from './GCBTerminalProvider';
 
 export interface IRSCTaskConfig extends Object {
@@ -63,7 +63,7 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
             'Unable to resolve rush-stack-compiler from tsconfig.json. Using built-in compiler'
           );
           const builtInCompilerPath: string | undefined = RSCTask._packageJsonLookup.tryGetPackageFolderFor(
-            require.resolve('@microsoft/rush-stack-compiler-2.7')
+            require.resolve('@microsoft/rush-stack-compiler-3.2')
           );
           if (!builtInCompilerPath) {
             throw new Error(

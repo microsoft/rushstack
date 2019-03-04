@@ -9,8 +9,8 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.0.14",
-    "@microsoft/api-documenter": "7.0.21",
+    "@microsoft/api-extractor": "7.0.21",
+    "@microsoft/api-documenter": "7.0.28",
     "@types/jest": "23.3.11",
     "@types/node": "8.5.8",
     "fs-extra": "~7.0.1",

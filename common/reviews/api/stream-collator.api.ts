@@ -3,7 +3,6 @@ declare class Interleaver {
     static registerTask(taskName: string, quietMode?: boolean): ITaskWriter;
     static reset(): void;
     static setStdOut(stdout: {
-        // (undocumented)
         write: (text: string) => void;
     }): void;
     }
