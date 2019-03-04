@@ -31,8 +31,14 @@ export class VisibilityChecker {
     for (const referencedEntity of astDeclaration.referencedAstEntities) {
 
       if (referencedEntity instanceof AstSymbol) {
-        if (!referencedEntity.isExternal) {
-          const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(referencedEntity);
+        // If this is e.g. a member of a namespace, then we need to be checking the top-level scope to see
+        // whether it's exported.
+        //
+        // TODO: Technically we should also check each of the nested scopes along the way.
+        const rootSymbol: AstSymbol = referencedEntity.rootAstSymbol;
+
+        if (!rootSymbol.isExternal) {
+          const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(rootSymbol);
 
           if (collectorEntity && collectorEntity.exported) {
             // const metadata: SymbolMetadata = collector.fetchMetadata(referencedEntity);
@@ -48,7 +54,7 @@ export class VisibilityChecker {
               if (!VisibilityChecker._isEcmaScriptSymbol(referencedEntity)) {
 
                 collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.ForgottenExport,
-                  `The symbol ${referencedEntity.localName} needs to be exported`
+                  `The symbol ${rootSymbol.localName} needs to be exported`
                     + ` from the entry point ${entryPointFilename}`,
                   astDeclaration);
               }
