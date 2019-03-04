@@ -155,7 +155,8 @@ export class MessageRouter {
       options.sourceFileColumn = lineAndCharacter.character + 1;
     }
 
-    this._sourceMapper.updateExtractorMessageOptions(options);
+    // NOTE: Since compiler errors pertain to issues specific to the .d.ts files,
+    // we do not apply source mappings for them.
     this._messages.push(new ExtractorMessage(options));
   }
 
