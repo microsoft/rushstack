@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Issue a warning when an exported type refers to another local type that is not exported (ae-forgotten-export)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

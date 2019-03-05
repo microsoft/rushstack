@@ -31,6 +31,7 @@ import { ApiModelGenerator } from '../generators/ApiModelGenerator';
 import { ApiPackage } from './model/ApiPackage';
 import { ReviewFileGenerator } from '../generators/ReviewFileGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
+import { VisibilityChecker } from '../collector/VisibilityChecker';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -390,6 +391,8 @@ export class Extractor {
     });
 
     collector.analyze();
+
+    VisibilityChecker.check(collector);
 
     const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
