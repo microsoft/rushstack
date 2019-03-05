@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Every error/warning message reported by API Extractor now has an associated message identifier",
+      "comment": "The export analyzer now correctly handles symbols imported using \"import x = require('y');\" notation",
       "type": "patch"
     }
   ],
