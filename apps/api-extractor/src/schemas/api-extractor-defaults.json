@@ -35,5 +35,31 @@
     "publishFolderForPublic": "./dist/public",
 
     "mainDtsRollupPath": ""
-  }
+  },
+
+  "tsdocMetadata": {
+    "enabled": true,
+    "tsdocMetadataPath": ""
+  },
+
+  "messages": {
+    "compilerMessageReporting": {
+      "default": {
+        "logLevel": "warning"
+      }
+    },
+    "extractorMessageReporting": {
+      "default": {
+        "logLevel": "warning"
+      }
+    },
+    "tsdocMessageReporting": {
+      "default": {
+        "logLevel": "warning"
+      }
+    }
+  },
+
+  "skipLibCheck": false,
+  "testMode": false
 }

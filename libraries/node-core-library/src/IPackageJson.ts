@@ -95,6 +95,11 @@ export interface IPackageJson {
    * The path to the TypeScript *.d.ts file describing the module file
    * that will act as the main entry point.
    */
+  types?: string;
+
+  /**
+   * Alias for `types`
+   */
   typings?: string;
 
   /**
@@ -103,6 +108,13 @@ export interface IPackageJson {
    * @beta
    */
   tsdoc?: IPackageJsonTsdocConfiguration;
+
+  /**
+   * The path to the TSDoc metadata file.
+   * This is still being standardized: https://github.com/Microsoft/tsdoc/issues/7#issuecomment-442271815
+   * @beta
+   */
+  tsdocMetadata?: string;
 
   /**
    * The main entry point for the package.

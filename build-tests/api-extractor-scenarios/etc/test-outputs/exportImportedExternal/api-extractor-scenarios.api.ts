@@ -1,18 +1,5 @@
-// @public (undocumented)
-declare interface DoubleRenamedLib2Class {
-}
-
-// @public (undocumented)
-declare class Lib1Class {
-}
-
-// @public (undocumented)
-declare interface Lib1Interface {
-}
-
-// @public (undocumented)
-declare class RenamedLib2Class {
-}
-
+export { Lib1Class } from 'api-extractor-lib1-test';
+export { Lib1Interface } from 'api-extractor-lib1-test';
+export { Lib2Class } from 'api-extractor-lib2-test';
 
 // (No @packageDocumentation comment for this package)

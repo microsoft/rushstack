@@ -6,6 +6,7 @@
  * @packagedocumentation
  */
 
+import { Lib1Interface } from 'api-extractor-lib1-test';
 
 /**
  * This is an alpha class.
@@ -169,6 +170,7 @@ export declare interface IPublicComplexInterface {
      */
     new (): any;
 }
+export { Lib1Interface }
 
 /**
  * This is a public class

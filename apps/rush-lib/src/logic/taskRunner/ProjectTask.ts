@@ -180,27 +180,12 @@ export class ProjectTask implements ITaskDefinition {
     }
   }
 
-  private _isBuildCommand(): boolean {
-    return this._commandToRun === 'build' || this._commandToRun === 'rebuild';
-  }
-
   private _getScriptToRun(): string {
-    let script: string | undefined = undefined;
-    if (this._isBuildCommand()) {
-      script = this._getScriptCommand('build');
+    const script: string | undefined = this._getScriptCommand(this._commandToRun);
 
-      if (script === undefined) {
-        // tslint:disable-next-line:max-line-length
-        throw new Error(`The project [${this._rushProject.packageName}] does not define a 'build' command in the 'scripts' section of its package.json`);
-      }
-
-    } else {
-      script = this._getScriptCommand(this._commandToRun);
-
-      if (script === undefined && !this._ignoreMissingScript) {
-        // tslint:disable-next-line:max-line-length
-        throw new Error(`The project [${this._rushProject.packageName}] does not define a '${this._commandToRun}' command in the 'scripts' section of its package.json`);
-      }
+    if (script === undefined && !this._ignoreMissingScript) {
+      // tslint:disable-next-line:max-line-length
+      throw new Error(`The project [${this._rushProject.packageName}] does not define a '${this._commandToRun}' command in the 'scripts' section of its package.json`);
     }
 
     if (!script) {

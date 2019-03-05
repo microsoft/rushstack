@@ -80,6 +80,14 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.1",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.2",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.3",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -97,6 +105,10 @@
     {
       "name": "@microsoft/stream-collator",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/teams-js",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/ts-command-line",
@@ -128,6 +140,10 @@
     },
     {
       "name": "api-extractor-lib2-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "api-extractor-lib3-test",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -164,7 +180,7 @@
     },
     {
       "name": "colors",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "deasync",
@@ -420,6 +436,10 @@
     },
     {
       "name": "sinon-chai",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "source-map",
       "allowedCategories": [ "libraries" ]
     },
     {

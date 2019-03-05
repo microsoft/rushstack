@@ -10,7 +10,9 @@ import {
   IColorableSequence
 } from '../../index';
 
-export function createColorGrid(): IColorableSequence[][] {
+export function createColorGrid(
+  attributeFunction?: (text: string | IColorableSequence) => IColorableSequence
+): IColorableSequence[][] {
   const foregroundFunctions: ((text: string | IColorableSequence) => IColorableSequence)[] = [
     (text) => Colors._normalizeStringOrColorableSequence(text),
     Colors.black,
@@ -40,13 +42,18 @@ export function createColorGrid(): IColorableSequence[][] {
   const lines: IColorableSequence[][] = [];
 
   for (const backgroundFunction of backgroundFunctions) {
-    const sequence: IColorableSequence[] = [];
+    const sequences: IColorableSequence[] = [];
 
     for (const foregroundFunction of foregroundFunctions) {
-      sequence.push(backgroundFunction(foregroundFunction('X')));
+      let sequence: IColorableSequence = backgroundFunction(foregroundFunction('X'));
+      if (attributeFunction) {
+        sequence = attributeFunction(sequence);
+      }
+
+      sequences.push(sequence);
     }
 
-    lines.push(sequence);
+    lines.push(sequences);
   }
 
   return lines;

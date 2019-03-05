@@ -1,12 +1,13 @@
 // @public
-export function getPackageDeps(packagePath?: string, excludedPaths?: string[]): IPackageDeps;
+declare function getPackageDeps(packagePath?: string, excludedPaths?: string[]): IPackageDeps;
 
 // @public (undocumented)
 interface IPackageDeps {
-  // (undocumented)
-  files: {
-    [key: string]: string;
-  }
+    // (undocumented)
+    files: {
+        [key: string]: string;
+    };
 }
 
-// (No @packagedocumentation comment for this package)
+
+// (No @packageDocumentation comment for this package)

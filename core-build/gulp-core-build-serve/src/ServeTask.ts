@@ -74,6 +74,11 @@ export interface IServeTaskConfig {
   pfxPath?: string;
 
   /**
+   * Path relative to the server root to base the server in.
+   */
+  rootFolder?: string;
+
+  /**
    * If true, when gulp-core-build-serve is initialized and a dev certificate doesn't already exist and hasn't been
    *  specified, attempt to generate one and trust it automatically.
    *
@@ -133,7 +138,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
       livereload: true,
       middleware: (): Function[] => [this._logRequestsMiddleware, this._enableCorsMiddleware],
       port: port,
-      root: rootPath,
+      root: path.join(rootPath, this.taskConfig.rootFolder || ''),
       preferHttp1: true,
       host: hostname
     });

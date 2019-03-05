@@ -60,6 +60,17 @@
       },
       "additionalProperties": false
     },
+    "yarnOptions": {
+      "description": "Options that are only used when the Yarn pacakge manager is selected.",
+      "type": "object",
+      "properties": {
+        "ignoreEngines": {
+          "description": "If true, then Rush will add the \"--ignore-engines\" option when invoking Yarn. * This allows \"rush install\" to succeed if there are dependencies with engines defined in package.json which do not match the current environment. The default value is false.",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
     "projectFolderMaxDepth": {
       "description": "The maximum folder depth for the projectFolder field.  The default value is 2, i.e. a single slash in the path name.",
       "type": "number"
@@ -131,7 +142,7 @@
       "type": "object",
       "properties": {
         "url": {
-          "description": "The remote url of the repository. If a value is provided, \"Rush change\" will use it to find the right remote to compare against.",
+          "description": "The remote url of the repository. If a value is provided, \"rush change\" will use it to find the right remote to compare against.",
           "type": "string"
         }
       },

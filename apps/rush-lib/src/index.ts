@@ -12,8 +12,10 @@ export {
 
 export {
   RushConfiguration,
+  ITryFindRushJsonLocationOptions,
   PackageManager,
-  PnpmOptionsConfiguration
+  PnpmOptionsConfiguration,
+  YarnOptionsConfiguration
 } from './api/RushConfiguration';
 
 export {

@@ -14,8 +14,16 @@
  * @packagedocumentation
  */
 
-export * from './RushStackCompilerBase';
-export * from './ApiExtractorRunner';
-export * from './TypescriptCompiler';
-export * from './TslintRunner';
-export * from './ToolPaths';
+export { RushStackCompilerBase }  from './RushStackCompilerBase';
+export { ApiExtractorRunner } from './ApiExtractorRunner';
+export {
+  TypescriptCompiler,
+  ITypescriptCompilerOptions
+} from './TypescriptCompiler';
+export {
+  WriteFileIssueFunction,
+  ITslintRunnerConfig,
+  TslintRunner
+} from './TslintRunner';
+export { ToolPaths } from './ToolPaths';
+export { ToolPackages } from  './ToolPackages';

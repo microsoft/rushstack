@@ -6,7 +6,8 @@ import { EOL } from 'os';
 import * as path from 'path';
 import {
   CommandLineFlagParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  CommandLineChoiceParameter
 } from '@microsoft/ts-command-line';
 import { JsonFile, FileSystem } from '@microsoft/node-core-library';
 
@@ -25,6 +26,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
+import { VersionPolicy } from '../../api/VersionPolicy';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -32,6 +34,7 @@ export class PublishAction extends BaseRushAction {
   private _includeAll: CommandLineFlagParameter;
   private _npmAuthToken: CommandLineStringParameter;
   private _npmTag: CommandLineStringParameter;
+  private _npmAccessLevel: CommandLineChoiceParameter;
   private _publish: CommandLineFlagParameter;
   private _regenerateChangelogs: CommandLineFlagParameter;
   private _registryUrl: CommandLineStringParameter;
@@ -114,6 +117,16 @@ export class PublishAction extends BaseRushAction {
       `The tag option to pass to npm publish. By default NPM will publish using the 'latest' tag, even if ` +
       `the package is older than the current latest, so in publishing workflows for older releases, providing ` +
       `a tag is important. When hotfix changes are made, this parameter defaults to 'hotfix'.`
+    });
+    this._npmAccessLevel = this.defineChoiceParameter({
+      alternatives: ['public', 'restricted'],
+      parameterLongName: '--set-access-level',
+      parameterShortName: undefined,
+      description:
+      `The access option to pass to npm publish. By default NPM will publish scoped packages with an access ` +
+      `level of 'restricted'. Scoped packages can be published with an access level of 'public' by specifying ` +
+      `that value for this flag with the initial publication. NPM always publishes unscoped packages with an ` +
+      `access level of 'public'.`
     });
 
     // NPM pack tarball related parameters
@@ -229,15 +242,21 @@ export class PublishAction extends BaseRushAction {
       // Make changes in temp branch.
       git.checkout(tempBranch, true);
 
+      this._setDependenciesBeforePublish();
+
       // Make changes to package.json and change logs.
       changeManager.apply(this._apply.value);
       changeManager.updateChangelog(this._apply.value);
+
+      this._setDependenciesBeforeCommit();
 
       if (VersionControl.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
         git.addChanges();
         git.commit(this.rushConfiguration.gitDefaultCommitMessage);
         git.push(tempBranch);
+
+        this._setDependenciesBeforePublish();
 
         // Override tag parameter if there is a hotfix change.
         for (const change of orderedChanges) {
@@ -262,6 +281,8 @@ export class PublishAction extends BaseRushAction {
             }
           }
         }
+
+        this._setDependenciesBeforeCommit();
 
         // Create and push appropriate Git tags.
         this._gitAddTags(git, orderedChanges);
@@ -344,6 +365,10 @@ export class PublishAction extends BaseRushAction {
 
       if (this._force.value) {
         args.push(`--force`);
+      }
+
+      if (this._npmAccessLevel.value) {
+        args.push(`--access`, this._npmAccessLevel.value);
       }
 
       // TODO: Yarn's "publish" command line is fairly different from NPM and PNPM.  The right thing to do here
@@ -448,9 +473,37 @@ export class PublishAction extends BaseRushAction {
   private _calculateTarballName(project: RushConfigurationProject): string {
     // Same logic as how npm forms the tarball name
     const packageName: string = project.packageName;
-    const name: string = packageName[0] === '@' ?
-      packageName.substr(1).replace(/\//g, '-') : packageName;
+    const name: string = packageName[0] === '@' ? packageName.substr(1).replace(/\//g, '-') : packageName;
 
-    return `${name}-${project.packageJson.version}.tgz`;
+    if (this.rushConfiguration.packageManager === 'yarn') {
+      // yarn tarballs have a "v" before the version number
+      return `${name}-v${project.packageJson.version}.tgz`;
+    } else {
+      return `${name}-${project.packageJson.version}.tgz`;
+    }
+  }
+
+  private _setDependenciesBeforePublish(): void {
+    for (const project of this.rushConfiguration.projects) {
+      if (!this._versionPolicy.value || this._versionPolicy.value === project.versionPolicyName) {
+        const versionPolicy: VersionPolicy | undefined = project.versionPolicy;
+
+        if (versionPolicy) {
+          versionPolicy.setDependenciesBeforePublish(project.packageName, this.rushConfiguration);
+        }
+      }
+    }
+  }
+
+  private _setDependenciesBeforeCommit(): void {
+    for (const project of this.rushConfiguration.projects) {
+      if (!this._versionPolicy.value || this._versionPolicy.value === project.versionPolicyName) {
+        const versionPolicy: VersionPolicy | undefined = project.versionPolicy;
+
+        if (versionPolicy) {
+          versionPolicy.setDependenciesBeforePublish(project.packageName, this.rushConfiguration);
+        }
+      }
+    }
   }
 }

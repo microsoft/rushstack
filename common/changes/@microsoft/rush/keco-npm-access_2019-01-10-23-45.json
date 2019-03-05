@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support for NPM --access flag for publish action",
+      "packageName": "@microsoft/rush",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "kevintcoughlin@users.noreply.github.com"
+}

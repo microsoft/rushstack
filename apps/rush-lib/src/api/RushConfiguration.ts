@@ -71,7 +71,7 @@ export interface IEventHooksJson {
  */
 export interface IRushRepositoryJson {
   /**
-   * The remote url of the repository. It helps 'Rush change' finds the right remote to compare against.
+   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
    */
   url: string;
 }
@@ -81,6 +81,13 @@ export interface IRushRepositoryJson {
  */
 export interface IPnpmOptionsJson {
   strictPeerDependencies?: boolean;
+}
+
+/**
+ * Part of IRushConfigurationJson.
+ */
+export interface IYarnOptionsJson {
+  ignoreEngines?: boolean;
 }
 
 /**
@@ -112,6 +119,7 @@ export interface IRushConfigurationJson {
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
   pnpmOptions?: IPnpmOptionsJson;
+  yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
 }
@@ -157,6 +165,47 @@ export class PnpmOptionsConfiguration {
   public constructor(json: IPnpmOptionsJson) {
     this.strictPeerDependencies = !!json.strictPeerDependencies;
   }
+}
+
+/**
+ * Options that are only used when the yarn package manager is selected.
+ *
+ * @remarks
+ * It is valid to define these options in rush.json even if the yarn package manager
+ * is not being used.
+ *
+ * @public
+ */
+export class YarnOptionsConfiguration {
+  /**
+   * If true, then Rush will add the "--ignore-engines" option when invoking Yarn.
+   * This allows "rush install" to succeed if there are dependencies with engines defined in
+   * package.json which do not match the current environment.
+   *
+   * The default value is false.
+   */
+  public readonly ignoreEngines: boolean;
+
+  /** @internal */
+  public constructor(json: IYarnOptionsJson) {
+    this.ignoreEngines = !!json.ignoreEngines;
+  }
+}
+
+/**
+ * Options for `RushConfiguration.tryFindRushJsonLocation`.
+ * @public
+ */
+export interface ITryFindRushJsonLocationOptions {
+  /**
+   * Whether to show verbose console messages.  Defaults to false.
+   */
+  showVerbose?: boolean;    // Defaults to false (inverse of old `verbose` parameter)
+
+  /**
+   * The folder path where the search will start.  Defaults tot he current working directory.
+   */
+  startingFolder?: string;  // Defaults to cwd
 }
 
 /**
@@ -213,6 +262,7 @@ export class RushConfiguration {
   private _repositoryUrl: string;
 
   private _pnpmOptions: PnpmOptionsConfiguration;
+  private _yarnOptions: YarnOptionsConfiguration;
 
   // Rush hooks
   private _eventHooks: EventHooks;
@@ -271,8 +321,8 @@ export class RushConfiguration {
     return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
   }
 
-  public static loadFromDefaultLocation(): RushConfiguration {
-    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation();
+  public static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration {
+    const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation(options);
 
     if (rushJsonLocation) {
       return RushConfiguration.loadFromConfigurationFile(rushJsonLocation);
@@ -284,8 +334,10 @@ export class RushConfiguration {
   /**
    * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
    */
-  public static tryFindRushJsonLocation(verbose: boolean = true): string | undefined {
-    let currentFolder: string = process.cwd();
+  public static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined {
+    const optionsIn: ITryFindRushJsonLocationOptions = options || {};
+    const verbose: boolean = optionsIn.showVerbose || false;
+    let currentFolder: string = optionsIn.startingFolder || process.cwd();
 
     // Look upwards at parent folders until we find a folder containing rush.json
     for (let i: number = 0; i < 10; ++i) {
@@ -668,7 +720,7 @@ export class RushConfiguration {
   }
 
   /**
-   * The remote url of the repository. It helps 'Rush change' finds the right remote to compare against.
+   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
    */
   public get repositoryUrl(): string {
     return this._repositoryUrl;
@@ -703,6 +755,13 @@ export class RushConfiguration {
    */
   public get pnpmOptions(): PnpmOptionsConfiguration {
     return this._pnpmOptions;
+  }
+
+  /**
+   * {@inheritdoc YarnOptionsConfiguration}
+   */
+  public get yarnOptions(): YarnOptionsConfiguration {
+    return this._yarnOptions;
   }
 
   /**
@@ -915,7 +974,8 @@ export class RushConfiguration {
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
-    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || { });
+    this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {});
+    this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || { });
 
     // TODO: Add an actual "packageManager" field in rush.json
     const packageManagerFields: string[] = [];

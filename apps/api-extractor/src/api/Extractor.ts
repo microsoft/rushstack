@@ -82,18 +82,6 @@ export interface IExtractorOptions {
    * @beta
    */
   typescriptCompilerFolder?: string;
-
-  /**
-   * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not
-   * recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it
-   * may be required when dependencies contain declarations that are incompatible with the TypeScript engine
-   * that API Extractor uses for its analysis. If this option is used, it is strongly recommended that broken
-   * dependencies be fixed or upgraded.
-   *
-   * @remarks
-   * This option only applies when compiler.config.configType is set to "tsconfig"
-   */
-  skipLibCheck?: boolean;
 }
 
 /**
@@ -102,7 +90,7 @@ export interface IExtractorOptions {
  */
 export class Extractor {
   /**
-   * The JSON Schema for API Extractor config file (api-extractor-config.schema.json).
+   * The JSON Schema for API Extractor config file (api-extractor.schema.json).
    */
   public static jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../schemas/api-extractor.schema.json'));
@@ -246,7 +234,7 @@ export class Extractor {
 
   private static _applyConfigDefaults(config: IExtractorConfig): IExtractorConfig {
     // Use the provided config to override the defaults
-    const normalized: IExtractorConfig  = lodash.merge(
+    const normalized: IExtractorConfig = lodash.merge(
       lodash.cloneDeep(Extractor._defaultConfig), config);
 
     return normalized;
@@ -290,7 +278,7 @@ export class Extractor {
           this._absoluteRootFolder
         );
 
-        if (!commandLine.options.skipLibCheck && options.skipLibCheck) {
+        if (!commandLine.options.skipLibCheck && config.skipLibCheck) {
           commandLine.options.skipLibCheck = true;
           console.log(colors.cyan(
             'API Extractor was invoked with skipLibCheck. This is not recommended and may cause ' +
@@ -385,7 +373,8 @@ export class Extractor {
     // This helps strict-null-checks to understand that _applyConfigDefaults() eliminated
     // any undefined members
     if (!(this.actualConfig.policies && this.actualConfig.validationRules
-      && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile && this.actualConfig.dtsRollup)) {
+      && this.actualConfig.apiJsonFile && this.actualConfig.apiReviewFile
+      && this.actualConfig.dtsRollup && this.actualConfig.tsdocMetadata)) {
       throw new Error('The configuration object wasn\'t normalized properly');
     }
 
@@ -397,8 +386,7 @@ export class Extractor {
       program: this._program,
       entryPointFile: path.resolve(this._absoluteRootFolder, projectConfig.entryPointSourceFile),
       logger: this._monitoredLogger,
-      policies: this.actualConfig.policies,
-      validationRules: this.actualConfig.validationRules
+      extractorConfig: this.actualConfig
     });
 
     collector.analyze();
@@ -406,7 +394,7 @@ export class Extractor {
     const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
 
-    const packageBaseName: string = path.basename(collector.package.name);
+    const packageBaseName: string = path.basename(collector.workingPackage.name);
 
     const apiJsonFileConfig: IExtractorApiJsonFileConfig = this.actualConfig.apiJsonFile;
 
@@ -418,7 +406,8 @@ export class Extractor {
       this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
       apiPackage.saveToJsonFile(apiJsonFilename, {
         newlineConversion: NewlineKind.CrLf,
-        ensureFolderExists: true
+        ensureFolderExists: true,
+        testMode: this.actualConfig.testMode
       });
     }
 
@@ -437,7 +426,8 @@ export class Extractor {
 
       // Write the actual file
       FileSystem.writeFile(actualApiReviewPath, actualApiReviewContent, {
-        ensureFolderExists: true
+        ensureFolderExists: true,
+        convertLineEndings: NewlineKind.CrLf
       });
 
       // Compare it against the expected file
@@ -458,7 +448,10 @@ export class Extractor {
             this._monitoredLogger.logWarning('You have changed the public API signature for this project.'
               + ` Updating ${expectedApiReviewShortPath}`);
 
-            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent);
+            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent, {
+              ensureFolderExists: true,
+              convertLineEndings: NewlineKind.CrLf
+            });
           }
         } else {
           this._monitoredLogger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
@@ -475,8 +468,19 @@ export class Extractor {
 
     this._generateRollupDtsFiles(collector);
 
-    // Write the tsdoc-metadata.json file for this project
-    PackageMetadataManager.writeTsdocMetadataFile(collector.package.packageFolder);
+    if (this.actualConfig.tsdocMetadata.enabled) {
+      // Write the tsdoc-metadata.json file for this project
+      PackageMetadataManager.writeTsdocMetadataFile(
+        PackageMetadataManager.resolveTsdocMetadataPath(
+          collector.workingPackage.packageFolder,
+          collector.workingPackage.packageJson,
+          this.actualConfig.tsdocMetadata.tsdocMetadataPath
+        )
+      );
+    }
+
+    // Show out all the messages that we collected during analysis
+    collector.messageRouter.reportMessagesToLogger(this._monitoredLogger, collector.workingPackage.packageFolder);
 
     if (this._localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
@@ -488,7 +492,7 @@ export class Extractor {
   }
 
   private _generateRollupDtsFiles(collector: Collector): void {
-    const packageFolder: string = collector.package.packageFolder;
+    const packageFolder: string = collector.workingPackage.packageFolder;
 
     const dtsRollup: IExtractorDtsRollupConfig = this.actualConfig.dtsRollup!;
     if (dtsRollup.enabled) {
@@ -496,14 +500,14 @@ export class Extractor {
 
       if (!mainDtsRollupPath) {
         // If the mainDtsRollupPath is not specified, then infer it from the package.json file
-        if (!collector.package.packageJson.typings) {
+        if (!collector.workingPackage.packageJson.typings) {
           this._monitoredLogger.logError('Either the "mainDtsRollupPath" setting must be specified,'
             + ' or else the package.json file must contain a "typings" field.');
           return;
         }
 
         // Resolve the "typings" field relative to package.json itself
-        const resolvedTypings: string = path.resolve(packageFolder, collector.package.packageJson.typings);
+        const resolvedTypings: string = path.resolve(packageFolder, collector.workingPackage.packageJson.typings);
 
         if (dtsRollup.trimming) {
           if (!Path.isUnder(resolvedTypings, dtsRollup.publishFolderForInternal!)) {
@@ -590,7 +594,7 @@ export class Extractor {
       const compilerLibFolder: string = path.join(options.typescriptCompilerFolder, 'lib');
 
       let foundBaseLib: boolean = false;
-      const filesToAdd: string[]  = [];
+      const filesToAdd: string[] = [];
       for (const libFilename of commandLine.options.lib || []) {
         if (libFilename === DEFAULT_BUILTIN_LIBRARY) {
           // Ignore the default lib - it'll get added later

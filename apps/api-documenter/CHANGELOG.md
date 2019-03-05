@@ -1,6 +1,88 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 15 Jan 2019 17:04:09 GMT and should not be manually modified.
+This log was last generated on Mon, 04 Mar 2019 17:13:19 GMT and should not be manually modified.
+
+## 7.0.29
+Mon, 04 Mar 2019 17:13:19 GMT
+
+*Version update only*
+
+## 7.0.28
+Wed, 27 Feb 2019 22:13:58 GMT
+
+*Version update only*
+
+## 7.0.27
+Wed, 27 Feb 2019 17:13:17 GMT
+
+*Version update only*
+
+## 7.0.26
+Mon, 18 Feb 2019 17:13:23 GMT
+
+*Version update only*
+
+## 7.0.25
+Tue, 12 Feb 2019 17:13:12 GMT
+
+*Version update only*
+
+## 7.0.24
+Mon, 11 Feb 2019 10:32:37 GMT
+
+*Version update only*
+
+## 7.0.23
+Mon, 11 Feb 2019 08:55:57 GMT
+
+*Version update only*
+
+## 7.0.22
+Mon, 11 Feb 2019 03:31:55 GMT
+
+*Version update only*
+
+## 7.0.21
+Thu, 31 Jan 2019 17:03:49 GMT
+
+### Patches
+
+- Fix issue where docs were not generated for function parameters and return types (GitHub #1055)
+- Upgrade to TSDoc 0.12.5
+
+## 7.0.20
+Wed, 30 Jan 2019 20:49:11 GMT
+
+*Version update only*
+
+## 7.0.19
+Sat, 19 Jan 2019 03:47:47 GMT
+
+*Version update only*
+
+## 7.0.18
+Sat, 19 Jan 2019 01:17:51 GMT
+
+### Patches
+
+- [api-documenter] Enable Office snippets to match multiple versions
+
+## 7.0.17
+Fri, 18 Jan 2019 22:04:59 GMT
+
+### Patches
+
+- MarkdownEmitter: break for inline tags
+
+## 7.0.16
+Fri, 18 Jan 2019 00:52:21 GMT
+
+*Version update only*
+
+## 7.0.15
+Thu, 17 Jan 2019 00:37:54 GMT
+
+*Version update only*
 
 ## 7.0.14
 Tue, 15 Jan 2019 17:04:09 GMT

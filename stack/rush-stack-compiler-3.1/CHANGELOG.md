@@ -1,6 +1,56 @@
 # Change Log - @microsoft/rush-stack-compiler-3.1
 
-This log was last generated on Thu, 10 Jan 2019 01:57:53 GMT and should not be manually modified.
+This log was last generated on Mon, 04 Mar 2019 17:13:20 GMT and should not be manually modified.
+
+## 0.5.7
+Mon, 04 Mar 2019 17:13:20 GMT
+
+*Version update only*
+
+## 0.5.6
+Wed, 27 Feb 2019 22:13:58 GMT
+
+*Version update only*
+
+## 0.5.5
+Wed, 27 Feb 2019 17:13:17 GMT
+
+*Version update only*
+
+## 0.5.4
+Mon, 18 Feb 2019 17:13:23 GMT
+
+*Version update only*
+
+## 0.5.3
+Tue, 12 Feb 2019 17:13:12 GMT
+
+*Version update only*
+
+## 0.5.2
+Mon, 11 Feb 2019 10:32:37 GMT
+
+*Version update only*
+
+## 0.5.1
+Mon, 11 Feb 2019 03:31:55 GMT
+
+*Version update only*
+
+## 0.5.0
+Wed, 30 Jan 2019 20:49:11 GMT
+
+### Minor changes
+
+- Add ToolPackages API for raw access to tools packages.
+
+## 0.4.0
+Sat, 19 Jan 2019 03:47:47 GMT
+
+### Minor changes
+
+- Expose api extractor API.
+- Upgrade to use API Extractor 7 beta
 
 ## 0.3.4
 Thu, 10 Jan 2019 01:57:53 GMT

@@ -184,9 +184,8 @@ export class MarkdownDocumenter {
         break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
-        this._writeParameterTables(output, apiItem as ApiParameterListMixin);
-        break;
       case ApiItemKind.Function:
+        this._writeParameterTables(output, apiItem as ApiParameterListMixin);
         break;
       case ApiItemKind.Namespace:
         this._writePackageOrNamespaceTables(output, apiItem as ApiNamespace);

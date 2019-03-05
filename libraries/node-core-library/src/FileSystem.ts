@@ -215,7 +215,7 @@ export class FileSystem {
    */
   public static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void {
     // tslint:disable-next-line:no-any
-    fsx.utimes(path, times.accessedTime as any, times.modifiedTime as any);
+    fsx.utimesSync(path, times.accessedTime as any, times.modifiedTime as any);
   }
 
   /**
