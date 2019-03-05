@@ -52,7 +52,7 @@ export interface IApprovedPackagesPolicyJson {
 export interface IRushGitPolicyJson {
   allowedEmailRegExps?: string[];
   sampleEmail?: string;
-  defaultCommitMessage?: string;
+  versionBumpCommitMessage?: string;
 }
 
 /**
@@ -253,7 +253,7 @@ export class RushConfiguration {
   // "gitPolicy" feature
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
-  private _gitDefaultCommitMessage: string;
+  private _gitVersionBumpCommitMessage: string | undefined;
 
   // "hotfixChangeEnabled" feature
   private _hotfixChangeEnabled: boolean;
@@ -705,10 +705,10 @@ export class RushConfiguration {
 
   /**
    * [Part of the "gitPolicy" feature.]
-   * A default commit message to use when committing chnages during the Rush lifecycle.
+   * The commit message to use when committing changes during 'rush publish'
    */
-  public get gitDefaultCommitMessage(): string {
-    return this._gitDefaultCommitMessage;
+  public get gitVersionBumpCommitMessage(): string | undefined {
+    return this._gitVersionBumpCommitMessage;
   }
 
   /**
@@ -1059,8 +1059,8 @@ export class RushConfiguration {
         }
       }
 
-      if (rushConfigurationJson.gitPolicy.defaultCommitMessage) {
-        this._gitDefaultCommitMessage = rushConfigurationJson.gitPolicy.defaultCommitMessage;
+      if (rushConfigurationJson.gitPolicy.versionBumpCommitMessage) {
+        this._gitVersionBumpCommitMessage = rushConfigurationJson.gitPolicy.versionBumpCommitMessage;
       }
     }
 

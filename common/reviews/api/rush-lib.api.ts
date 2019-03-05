@@ -220,6 +220,7 @@ declare class RushConfiguration {
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitSampleEmail: string;
+    readonly gitVersionBumpCommitMessage: string | undefined;
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)

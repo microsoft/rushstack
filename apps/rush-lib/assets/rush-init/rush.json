@@ -167,10 +167,10 @@
     /*[LINE "DEMO"]*/ "sampleEmail": "mrexample@users.noreply.github.com",
 
     /**
-     * Set a default commit message to be used when Rush changes and commits files.
+     * The commit message to use when committing changes during 'rush publish'.
      * This is helpful if you want to skip CI builds for git commits by Rush.
      */
-    /*[LINE "DEMO"]*/ "defaultCommitMessage": "Applying package updates. [skip-ci]"
+    /*[LINE "DEMO"]*/ "versionBumpCommitMessage": "Applying package updates. [skip-ci]"
   },
 
   "repository": {

@@ -47,8 +47,7 @@ export class PublishGit {
       ['tag', '-a', tagName, '-m', `${packageName} v${packageVersion}`]);
   }
 
-  public commit(message?: string): void {
-    const commitMessage: string = message ? message : 'Applying package updates.';
+  public commit(commitMessage: string): void {
     PublishUtilities.execCommand(!!this._targetBranch, 'git', ['commit', '-m', commitMessage]);
   }
 
