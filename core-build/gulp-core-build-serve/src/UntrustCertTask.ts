@@ -19,7 +19,7 @@ export class UntrustCertTask extends GulpTask<void> {
 
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
     /* tslint:disable */
-    const CertificateStore = require('./CertificateStore').default;
+    const CertificateStore = require('./CertificateStore').CertificateStore;
     const { untrustCertificate } = require('./certificates');
     /* tslint:enable */
 
