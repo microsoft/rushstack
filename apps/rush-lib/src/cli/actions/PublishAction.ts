@@ -27,6 +27,7 @@ import { PublishGit } from '../../logic/PublishGit';
 import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { VersionPolicy } from '../../api/VersionPolicy';
+import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -253,7 +254,7 @@ export class PublishAction extends BaseRushAction {
       if (VersionControl.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
         git.addChanges();
-        git.commit();
+        git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
         git.push(tempBranch);
 
         this._setDependenciesBeforePublish();
