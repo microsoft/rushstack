@@ -134,7 +134,10 @@
             "type": "string"
           }
         },
-        "required": ["variantName", "description"]
+        "required": [
+          "variantName",
+          "description"
+        ]
       }
     },
     "repository": {
@@ -191,7 +194,10 @@
           }
         },
         "additionalProperties": false,
-        "required": ["packageName", "projectFolder"]
+        "required": [
+          "packageName",
+          "projectFolder"
+        ]
       }
     },
     "eventHooks": {
@@ -231,5 +237,8 @@
     }
   },
   "additionalProperties": false,
-  "required": ["rushVersion", "projects"]
+  "required": [
+    "rushVersion",
+    "projects"
+  ]
 }
