@@ -251,6 +251,13 @@ export class Collector {
     return undefined;
   }
 
+  /**
+   * Returns the associated `CollectorEntity` for the given `astEntity`, if one was created during analysis.
+   */
+  public tryGetCollectorEntity(astEntity: AstEntity): CollectorEntity | undefined {
+    return this._entitiesByAstEntity.get(astEntity);
+  }
+
   public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
   public fetchMetadata(astDeclaration: AstDeclaration): DeclarationMetadata;
   public fetchMetadata(symbolOrDeclaration: AstSymbol | AstDeclaration): SymbolMetadata | DeclarationMetadata {

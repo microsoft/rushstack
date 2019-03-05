@@ -84,6 +84,7 @@ declare abstract class GulpTask<TTaskConfig> implements IExecutable {
     copyFile(localSourcePath: string, localDestPath?: string): void;
     enabled: boolean;
     execute(config: IBuildConfig): Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "GulpProxy" needs to be exported by the entry point index.d.ts
     abstract executeTask(gulp: gulp.Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void): Promise<Object | void> | NodeJS.ReadWriteStream | void;
     fileError(filePath: string, line: number, column: number, errorCode: string, message: string): void;
     fileExists(localPath: string): boolean;
