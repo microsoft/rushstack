@@ -180,7 +180,7 @@
     },
     {
       "name": "colors",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "deasync",
