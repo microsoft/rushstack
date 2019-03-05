@@ -1,6 +1,11 @@
 # Change Log - @microsoft/package-deps-hash
 
-This log was last generated on Mon, 04 Mar 2019 17:13:20 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Mar 2019 17:13:11 GMT and should not be manually modified.
+
+## 2.2.126
+Tue, 05 Mar 2019 17:13:11 GMT
+
+*Version update only*
 
 ## 2.2.125
 Mon, 04 Mar 2019 17:13:20 GMT

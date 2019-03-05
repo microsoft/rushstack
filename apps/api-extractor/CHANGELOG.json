@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.23",
+      "tag": "@microsoft/api-extractor_v7.0.23",
+      "date": "Tue, 05 Mar 2019 17:13:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Issue a warning when an exported type refers to another local type that is not exported (ae-forgotten-export)"
+          },
+          {
+            "comment": "The export analyzer now correctly handles symbols imported using \"import x = require('y');\" notation"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.22",
       "tag": "@microsoft/api-extractor_v7.0.22",
       "date": "Mon, 04 Mar 2019 17:13:19 GMT",

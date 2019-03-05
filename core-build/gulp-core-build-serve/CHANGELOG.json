@@ -2,6 +2,29 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.3.9",
+      "tag": "@microsoft/gulp-core-build-serve_v3.3.9",
+      "date": "Tue, 05 Mar 2019 17:13:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix UntrustCertTask imports"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.11` to `3.9.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.7` to `0.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.34` to `6.0.35`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.8",
       "tag": "@microsoft/gulp-core-build-serve_v3.3.8",
       "date": "Mon, 04 Mar 2019 17:13:19 GMT",
