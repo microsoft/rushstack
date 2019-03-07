@@ -1,0 +1,16 @@
+steps:
+- task: DeleteFiles@1
+  displayName: 'Delete Old Artifacts'
+  inputs:
+    SourceFolder: $(Build.SourcesDirectory)/common/temp/artifacts
+    Contents: packages
+- script: 'node common\scripts\install-run-rush.js version --bump --target-branch master --version-policy $(VersionPolicy)'
+  displayName: 'Bump Versions'
+- script: 'node common\scripts\install-run-rush.js publish --publish --pack --include-all --version-policy $(VersionPolicy)'
+  displayName: 'Create Tarballs'
+- task: PublishBuildArtifacts@1
+  displayName: Upload Tarballs
+  inputs:
+    artifactName: PackageTarballs
+    pathtoPublish: $(Build.SourcesDirectory)/common/temp/artifacts/packages
+    artifactType: Container
