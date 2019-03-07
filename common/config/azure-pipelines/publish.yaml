@@ -1,0 +1,6 @@
+resources:
+- repo: self
+variables:
+  NodeVersion: 10
+steps:
+- template: templates/build.yaml
