@@ -285,7 +285,7 @@
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.2"
@@ -295,7 +295,7 @@
       "packageName": "@microsoft/api-documenter",
       "projectFolder": "apps/api-documenter",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/rush",
@@ -431,7 +431,7 @@
       "packageName": "@microsoft/gulp-core-build",
       "projectFolder": "core-build/gulp-core-build",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -440,7 +440,7 @@
       "packageName": "@microsoft/gulp-core-build-mocha",
       "projectFolder": "core-build/gulp-core-build-mocha",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -449,19 +449,19 @@
       "packageName": "@microsoft/gulp-core-build-sass",
       "projectFolder": "core-build/gulp-core-build-sass",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/gulp-core-build-serve",
       "projectFolder": "core-build/gulp-core-build-serve",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/gulp-core-build-typescript",
       "projectFolder": "core-build/gulp-core-build-typescript",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build"
       ]
@@ -470,19 +470,19 @@
       "packageName": "@microsoft/gulp-core-build-webpack",
       "projectFolder": "core-build/gulp-core-build-webpack",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/node-library-build",
       "projectFolder": "core-build/node-library-build",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/web-library-build",
       "projectFolder": "core-build/web-library-build",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
 
     // "libraries" folder (alphabetical order)
@@ -490,13 +490,13 @@
       "packageName": "@microsoft/load-themed-styles",
       "projectFolder": "libraries/load-themed-styles",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
-     "shouldPublish": true,
+     "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.2"
@@ -506,7 +506,7 @@
       "packageName": "@microsoft/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
    },
     {
       "packageName": "@microsoft/rushell",
@@ -518,13 +518,13 @@
       "packageName": "@microsoft/stream-collator",
       "projectFolder": "libraries/stream-collator",
       "reviewCategory": "libraries",
-     "shouldPublish": true
+     "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/ts-command-line",
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.2"
@@ -536,13 +536,13 @@
       "packageName": "@microsoft/rush-stack",
       "projectFolder": "stack/rush-stack",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.4",
      "projectFolder": "stack/rush-stack-compiler-2.4",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.2"
@@ -552,7 +552,7 @@
       "packageName": "@microsoft/rush-stack-compiler-2.7",
      "projectFolder": "stack/rush-stack-compiler-2.7",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.2"
@@ -562,7 +562,7 @@
       "packageName": "@microsoft/rush-stack-compiler-2.9",
       "projectFolder": "stack/rush-stack-compiler-2.9",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.2"
@@ -572,7 +572,7 @@
       "packageName": "@microsoft/rush-stack-compiler-3.0",
       "projectFolder": "stack/rush-stack-compiler-3.0",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.2"
@@ -582,7 +582,7 @@
       "packageName": "@microsoft/rush-stack-compiler-3.1",
       "projectFolder": "stack/rush-stack-compiler-3.1",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.2"
@@ -592,7 +592,7 @@
       "packageName": "@microsoft/rush-stack-compiler-3.2",
       "projectFolder": "stack/rush-stack-compiler-3.2",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.2"
@@ -602,7 +602,7 @@
       "packageName": "@microsoft/rush-stack-compiler-3.3",
       "projectFolder": "stack/rush-stack-compiler-3.3",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
+      "versionPolicyName": "mainPackages",
       "cyclicDependencyProjects": [
         "@microsoft/node-library-build",
         "@microsoft/rush-stack-compiler-3.2"
@@ -619,31 +619,31 @@
       "packageName": "@microsoft/loader-load-themed-styles",
       "projectFolder": "webpack/loader-load-themed-styles",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/loader-set-webpack-public-path",
       "projectFolder": "webpack/loader-set-webpack-public-path",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/loader-raw-script",
       "projectFolder": "webpack/loader-raw-script",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/resolve-chunk-plugin",
       "projectFolder": "webpack/resolve-chunk-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     },
     {
       "packageName": "@microsoft/set-webpack-public-path-plugin",
       "projectFolder": "webpack/set-webpack-public-path-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "mainPackages"
     }
   ]
 }

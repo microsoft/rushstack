@@ -79,6 +79,10 @@
   //   "lockedMajor": 3
   // }
   {
+    "policyName": "mainPackages",
+    "definitionName": "individualVersion"
+  },
+  {
     "policyName": "rush",
     "definitionName": "lockStepVersion",
     "version": "5.5.4",
