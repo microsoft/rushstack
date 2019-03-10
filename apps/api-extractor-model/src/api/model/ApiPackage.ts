@@ -56,6 +56,18 @@ export interface IApiPackageJson extends IApiItemJson {
  * @public
  */
 export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
+  /**
+   * Optionally specifies a value for the "toolPackage" field in the output .api.json data file;
+   * otherwise, the value will be "api-extractor-model".
+   */
+  toolPackage?: string,
+
+  /**
+   * Optionally specifies a value for the "toolVersion" field in the output .api.json data file;
+   * otherwise, the value will be the current version of the api-extractor-model package.
+   */
+  toolVersion?: string;
+
   /** {@inheritDoc IExtractorConfig.testMode} */
   testMode?: boolean;
 }
@@ -115,10 +127,10 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
 
     const jsonObject: IApiPackageJson = {
       metadata: {
-        toolPackage: packageJson.name,
+        toolPackage: options.toolPackage || packageJson.name,
         // In test mode, we don't write the real version, since that would cause spurious diffs whenever
         // the verison is bumped.  Instead we write a placeholder string.
-        toolVersion: options.testMode ? '[test mode]' : packageJson.version,
+        toolVersion: options.testMode ? '[test mode]' : options.toolVersion || packageJson.version,
         schemaVersion: ApiJsonSchemaVersion.V_1000
       }
     } as IApiPackageJson;

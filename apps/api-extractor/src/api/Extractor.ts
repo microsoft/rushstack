@@ -408,6 +408,9 @@ export class Extractor {
 
       this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
       apiPackage.saveToJsonFile(apiJsonFilename, {
+        toolPackage: Extractor.packageName,
+        toolVersion: Extractor.version,
+
         newlineConversion: NewlineKind.CrLf,
         ensureFolderExists: true,
         testMode: this.actualConfig.testMode
