@@ -13,9 +13,9 @@ declare class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInte
     exampleFunction(a: string, b: string): string;
     exampleFunction(x: number): number;
     interestingEdgeCases(): void;
-    // @eventproperty
+    // @eventProperty
     malformedEvent: SystemEvent;
-    // @eventproperty
+    // @eventProperty
     readonly modifiedEvent: SystemEvent;
     regularProperty: SystemEvent;
     static sumWithExample(x: number, y: number): number;

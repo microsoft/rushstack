@@ -57,7 +57,7 @@ export class WorkingPackage {
   public readonly entryPointSourceFile: ts.SourceFile;
 
   /**
-   * The `@packagedocumentation` comment, if any, for the working package.
+   * The `@packageDocumentation` comment, if any, for the working package.
    */
   public tsdocComment: tsdoc.DocComment | undefined;
 

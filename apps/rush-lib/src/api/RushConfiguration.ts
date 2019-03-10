@@ -751,14 +751,14 @@ export class RushConfiguration {
   }
 
   /**
-   * {@inheritdoc PnpmOptionsConfiguration}
+   * {@inheritDoc PnpmOptionsConfiguration}
    */
   public get pnpmOptions(): PnpmOptionsConfiguration {
     return this._pnpmOptions;
   }
 
   /**
-   * {@inheritdoc YarnOptionsConfiguration}
+   * {@inheritDoc YarnOptionsConfiguration}
    */
   public get yarnOptions(): YarnOptionsConfiguration {
     return this._yarnOptions;
