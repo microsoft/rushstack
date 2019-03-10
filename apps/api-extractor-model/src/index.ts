@@ -12,145 +12,145 @@
 export { AedocDefinitions } from './aedoc/AedocDefinitions';
 export { ReleaseTag } from './aedoc/ReleaseTag';
 
-export { IndentedWriter } from './api/IndentedWriter';
+export { IndentedWriter } from './IndentedWriter';
 
 // items
 export {
   IApiDeclaredItemOptions,
   ApiDeclaredItem
-} from './api/items/ApiDeclaredItem';
+} from './items/ApiDeclaredItem';
 export {
   IApiDocumentedItemOptions,
   ApiDocumentedItem
-} from './api/items/ApiDocumentedItem';
+} from './items/ApiDocumentedItem';
 export {
   ApiItemKind,
   IApiItemOptions,
   ApiItem
-} from './api/items/ApiItem';
+} from './items/ApiItem';
 export {
   IApiPropertyItemOptions,
   ApiPropertyItem
-} from './api/items/ApiPropertyItem';
+} from './items/ApiPropertyItem';
 
 // mixins
 export {
   IApiParameterListMixinOptions,
   IApiParameterOptions,
   ApiParameterListMixin
-} from './api/mixins/ApiParameterListMixin';
+} from './mixins/ApiParameterListMixin';
 export {
   IApiItemContainerMixinOptions,
   ApiItemContainerMixin
-} from './api/mixins/ApiItemContainerMixin';
+} from './mixins/ApiItemContainerMixin';
 export {
   IApiReleaseTagMixinOptions,
   ApiReleaseTagMixin
-} from './api/mixins/ApiReleaseTagMixin';
+} from './mixins/ApiReleaseTagMixin';
 export {
   IApiReturnTypeMixinOptions,
   ApiReturnTypeMixin
-} from './api/mixins/ApiReturnTypeMixin';
+} from './mixins/ApiReturnTypeMixin';
 export {
   IApiStaticMixinOptions,
   ApiStaticMixin
-} from './api/mixins/ApiStaticMixin';
+} from './mixins/ApiStaticMixin';
 export {
   ExcerptTokenKind,
   IExcerptTokenRange,
   IExcerptToken,
   ExcerptToken,
   Excerpt
-} from './api/mixins/Excerpt';
+} from './mixins/Excerpt';
 export {
   Constructor,
   PropertiesOf
-} from './api/mixins/Mixin';
+} from './mixins/Mixin';
 
 // model
 export {
   IApiCallSignatureOptions,
   ApiCallSignature
-} from './api/model/ApiCallSignature';
+} from './model/ApiCallSignature';
 export {
   IApiClassOptions,
   ApiClass
-} from './api/model/ApiClass';
+} from './model/ApiClass';
 export {
   IApiConstructorOptions,
   ApiConstructor
-} from './api/model/ApiConstructor';
+} from './model/ApiConstructor';
 export {
   IApiConstructSignatureOptions,
   ApiConstructSignature
-} from './api/model/ApiConstructSignature';
+} from './model/ApiConstructSignature';
 export {
   IApiEntryPointOptions,
   ApiEntryPoint
-} from './api/model/ApiEntryPoint';
+} from './model/ApiEntryPoint';
 export {
   IApiEnumOptions,
   ApiEnum
-} from './api/model/ApiEnum';
+} from './model/ApiEnum';
 export {
   IApiEnumMemberOptions,
   ApiEnumMember
-} from './api/model/ApiEnumMember';
+} from './model/ApiEnumMember';
 export {
   IApiFunctionOptions,
   ApiFunction
-} from './api/model/ApiFunction';
+} from './model/ApiFunction';
 export {
   IApiIndexSignatureOptions,
   ApiIndexSignature
-} from './api/model/ApiIndexSignature';
+} from './model/ApiIndexSignature';
 export {
   IApiInterfaceOptions,
   ApiInterface
-} from './api/model/ApiInterface';
+} from './model/ApiInterface';
 export {
   IApiMethodOptions,
   ApiMethod
-} from './api/model/ApiMethod';
+} from './model/ApiMethod';
 export {
   IApiMethodSignatureOptions,
   ApiMethodSignature
-} from './api/model/ApiMethodSignature';
+} from './model/ApiMethodSignature';
 export {
   ApiModel
-} from './api/model/ApiModel';
+} from './model/ApiModel';
 export {
   IApiNamespaceOptions,
   ApiNamespace
-} from './api/model/ApiNamespace';
+} from './model/ApiNamespace';
 export {
   IApiPackageOptions,
   ApiPackage,
   IApiPackageSaveOptions
-} from './api/model/ApiPackage';
+} from './model/ApiPackage';
 export {
   IParameterOptions,
   Parameter
-} from './api/model/Parameter';
+} from './model/Parameter';
 export {
   IApiPropertyOptions,
   ApiProperty
-} from './api/model/ApiProperty';
+} from './model/ApiProperty';
 export {
   IApiPropertySignatureOptions,
   ApiPropertySignature
-} from './api/model/ApiPropertySignature';
+} from './model/ApiPropertySignature';
 export {
   IApiTypeAliasOptions,
   ApiTypeAlias
-} from './api/model/ApiTypeAlias';
+} from './model/ApiTypeAlias';
 export {
   IApiVariableOptions,
   ApiVariable
-} from './api/model/ApiVariable';
+} from './model/ApiVariable';
 export {
   IResolveDeclarationReferenceResult
-} from './api/model/DeclarationReferenceResolver';
+} from './model/DeclarationReferenceResolver';
 export {
   HeritageType
-} from './api/model/HeritageType';
+} from './model/HeritageType';

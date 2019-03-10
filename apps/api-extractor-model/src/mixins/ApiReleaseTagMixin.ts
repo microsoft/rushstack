@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
-import { ReleaseTag } from '../../aedoc/ReleaseTag';
+import { ReleaseTag } from '../aedoc/ReleaseTag';
 
 /**
  * Constructor options for {@link (ApiReleaseTagMixin:interface)}.
