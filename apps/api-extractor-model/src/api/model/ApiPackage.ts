@@ -3,9 +3,8 @@
 
 import { ApiItem, ApiItemKind, IApiItemJson } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { JsonFile, IJsonFileSaveOptions } from '@microsoft/node-core-library';
+import { JsonFile, IJsonFileSaveOptions, PackageJsonLookup, IPackageJson } from '@microsoft/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
-import { Extractor } from '../Extractor';
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 
@@ -112,12 +111,14 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
       options = {};
     }
 
+    const packageJson: IPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
+
     const jsonObject: IApiPackageJson = {
       metadata: {
-        toolPackage: Extractor.packageName,
+        toolPackage: packageJson.name,
         // In test mode, we don't write the real version, since that would cause spurious diffs whenever
         // the verison is bumped.  Instead we write a placeholder string.
-        toolVersion: options.testMode ? '[test mode]' : Extractor.version,
+        toolVersion: options.testMode ? '[test mode]' : packageJson.version,
         schemaVersion: ApiJsonSchemaVersion.V_1000
       }
     } as IApiPackageJson;
