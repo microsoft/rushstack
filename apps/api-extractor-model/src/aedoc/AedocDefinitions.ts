@@ -8,6 +8,9 @@ import {
   StandardTags
 } from '@microsoft/tsdoc';
 
+/**
+ * @internal
+ */
 export class AedocDefinitions {
   public static readonly betaDocumentation: TSDocTagDefinition = new TSDocTagDefinition({
     tagName: '@betaDocumentation',

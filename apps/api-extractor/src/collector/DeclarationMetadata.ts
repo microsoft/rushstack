@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as tsdoc from '@microsoft/tsdoc';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 export class DeclarationMetadata {
   public tsdocComment: tsdoc.DocComment | undefined = undefined;

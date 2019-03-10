@@ -1,0 +1,6 @@
+{
+  "extends": "@microsoft/rush-stack-compiler-3.2/includes/tslint.json",
+  "rules": {
+    "member-ordering": false
+  }
+}

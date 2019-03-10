@@ -40,7 +40,7 @@ import {
   ApiReturnTypeMixin,
   ApiDeclaredItem,
   ApiNamespace
-} from '@microsoft/api-extractor';
+} from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
 import { DocHeading } from '../nodes/DocHeading';

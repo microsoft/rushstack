@@ -3,7 +3,7 @@
 
 import * as tsdoc from '@microsoft/tsdoc';
 import { ApiItem, IApiItemOptions, IApiItemJson } from './ApiItem';
-import { AedocDefinitions } from '../../aedoc/AedocDefinitions';
+import { AedocDefinitions } from '../aedoc/AedocDefinitions';
 
 /**
  * Constructor options for {@link ApiDocumentedItem}.
