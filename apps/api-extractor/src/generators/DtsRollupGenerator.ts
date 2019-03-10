@@ -4,11 +4,8 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
-import {
-  IndentedWriter,
-  ReleaseTag
-} from '@microsoft/api-extractor-model';
+import { FileSystem, NewlineKind, InternalError, StringBuilder } from '@microsoft/node-core-library';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
@@ -45,6 +42,26 @@ export enum DtsRollupKind {
   PublicRelease
 }
 
+// This helper class used by DtsRollupGenerator
+class StringWriter extends StringBuilder {
+  public readonly stringBuilder: StringBuilder = new StringBuilder();
+
+  public write(s: string): void {
+    this.stringBuilder.append(s);
+  }
+
+  public writeLine(s: string = ''): void {
+    if (s.length > 0) {
+      this.stringBuilder.append(s);
+    }
+    this.stringBuilder.append('\n');
+  }
+
+  public toString(): string {
+    return this.stringBuilder.toString();
+  }
+}
+
 export class DtsRollupGenerator {
   /**
    * Generates the typings file and writes it to disk.
@@ -52,33 +69,33 @@ export class DtsRollupGenerator {
    * @param dtsFilename    - The *.d.ts output filename
    */
   public static writeTypingsFile(collector: Collector, dtsFilename: string, dtsKind: DtsRollupKind): void {
-    const indentedWriter: IndentedWriter = new IndentedWriter();
+    const stringWriter: StringWriter = new StringWriter();
 
-    DtsRollupGenerator._generateTypingsFileContent(collector, indentedWriter, dtsKind);
+    DtsRollupGenerator._generateTypingsFileContent(collector, stringWriter, dtsKind);
 
-    FileSystem.writeFile(dtsFilename, indentedWriter.toString(), {
+    FileSystem.writeFile(dtsFilename, stringWriter.toString(), {
       convertLineEndings: NewlineKind.CrLf,
       ensureFolderExists: true
     });
   }
 
-  private static _generateTypingsFileContent(collector: Collector, indentedWriter: IndentedWriter,
+  private static _generateTypingsFileContent(collector: Collector, stringWriter: StringWriter,
     dtsKind: DtsRollupKind): void {
 
     if (collector.workingPackage.tsdocParserContext) {
-      indentedWriter.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
-      indentedWriter.writeLine();
+      stringWriter.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
+      stringWriter.writeLine();
     }
 
     // Emit the triple slash directives
     for (const typeDirectiveReference of collector.dtsTypeReferenceDirectives) {
       // tslint:disable-next-line:max-line-length
       // https://github.com/Microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
-      indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+      stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
     }
 
     for (const libDirectiveReference of collector.dtsLibReferenceDirectives) {
-      indentedWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
+      stringWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
     }
 
     // Emit the imports
@@ -95,17 +112,17 @@ export class DtsRollupGenerator {
           switch (astImport.importKind) {
             case AstImportKind.NamedImport:
               if (entity.nameForEmit !== astImport.exportName) {
-                indentedWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
+                stringWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
               } else {
-                indentedWriter.write(`import { ${astImport.exportName} }`);
+                stringWriter.write(`import { ${astImport.exportName} }`);
               }
-              indentedWriter.writeLine(` from '${astImport.modulePath}';`);
+              stringWriter.writeLine(` from '${astImport.modulePath}';`);
               break;
             case AstImportKind.StarImport:
-              indentedWriter.writeLine(`import * as ${entity.nameForEmit} from '${astImport.modulePath}';`);
+              stringWriter.writeLine(`import * as ${entity.nameForEmit} from '${astImport.modulePath}';`);
               break;
             case AstImportKind.EqualsImport:
-              indentedWriter.writeLine(`import ${entity.nameForEmit} = require('${astImport.modulePath}');`);
+              stringWriter.writeLine(`import ${entity.nameForEmit} = require('${astImport.modulePath}');`);
               break;
             default:
               throw new InternalError('Unimplemented AstImportKind');
@@ -121,8 +138,8 @@ export class DtsRollupGenerator {
       const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
 
       if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-        indentedWriter.writeLine();
-        indentedWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+        stringWriter.writeLine();
+        stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
         continue;
       }
 
@@ -131,38 +148,38 @@ export class DtsRollupGenerator {
         // Emit all the declarations for this entry
         for (const astDeclaration of entity.astEntity.astDeclarations || []) {
 
-          indentedWriter.writeLine();
+          stringWriter.writeLine();
 
           const span: Span = new Span(astDeclaration.declaration);
           DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
-          indentedWriter.writeLine(span.getModifiedText());
+          stringWriter.writeLine(span.getModifiedText());
         }
       }
 
       if (!entity.shouldInlineExport) {
         for (const exportName of entity.exportNames) {
           if (exportName === ts.InternalSymbolName.Default) {
-            indentedWriter.writeLine(`export default ${entity.nameForEmit};`);
+            stringWriter.writeLine(`export default ${entity.nameForEmit};`);
           } else if (entity.nameForEmit !== exportName) {
-            indentedWriter.writeLine(`export { ${entity.nameForEmit} as ${exportName} }`);
+            stringWriter.writeLine(`export { ${entity.nameForEmit} as ${exportName} }`);
           } else {
-            indentedWriter.writeLine(`export { ${exportName} }`);
+            stringWriter.writeLine(`export { ${exportName} }`);
           }
         }
       }
     }
 
     if (collector.starExportedExternalModulePaths.length > 0) {
-      indentedWriter.writeLine();
+      stringWriter.writeLine();
       for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
-        indentedWriter.writeLine(`export * from "${starExportedExternalModulePath}";`);
+        stringWriter.writeLine(`export * from "${starExportedExternalModulePath}";`);
       }
     }
 
     // Emit "export { }" which is a special directive that prevents consumers from importing declarations
     // that don't have an explicit "export" modifier.
-    indentedWriter.writeLine();
-    indentedWriter.writeLine('export { }');
+    stringWriter.writeLine();
+    stringWriter.writeLine('export { }');
   }
 
   /**
