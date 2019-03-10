@@ -42,7 +42,7 @@ export enum DtsRollupKind {
   PublicRelease
 }
 
-// This helper class used by DtsRollupGenerator
+// A small helper used by DtsRollupGenerator
 class StringWriter extends StringBuilder {
   public readonly stringBuilder: StringBuilder = new StringBuilder();
 
