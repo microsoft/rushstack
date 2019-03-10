@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import { Text, InternalError } from '@microsoft/node-core-library';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
@@ -11,8 +13,6 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { StringBuilder } from '@microsoft/tsdoc';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { Text, InternalError } from '@microsoft/node-core-library';
 import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';

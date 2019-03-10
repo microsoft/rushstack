@@ -5,33 +5,36 @@
 
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
+import {
+  ApiModel,
+  ApiClass,
+  ApiPackage,
+  ApiEntryPoint,
+  ApiMethod,
+  ApiNamespace,
+  ApiInterface,
+  ApiPropertySignature,
+  ApiItemContainerMixin,
+  ReleaseTag,
+  ApiProperty,
+  ApiMethodSignature,
+  IApiParameterOptions,
+  ApiEnum,
+  ApiEnumMember,
+  IExcerptTokenRange,
+  IExcerptToken,
+  ApiConstructor,
+  ApiConstructSignature,
+  ApiFunction,
+  ApiIndexSignature,
+  ApiVariable,
+  ApiTypeAlias,
+  ApiCallSignature
+} from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
-import { ApiModel } from '../api/model/ApiModel';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiClass } from '../api/model/ApiClass';
-import { ApiPackage } from '../api/model/ApiPackage';
-import { ApiEntryPoint } from '../api/model/ApiEntryPoint';
-import { ApiMethod } from '../api/model/ApiMethod';
-import { ApiNamespace } from '../api/model/ApiNamespace';
-import { ApiInterface } from '../api/model/ApiInterface';
-import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
-import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { ApiProperty } from '../api/model/ApiProperty';
-import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
-import { IApiParameterOptions } from '../api/mixins/ApiParameterListMixin';
-import { ApiEnum } from '../api/model/ApiEnum';
-import { ApiEnumMember } from '../api/model/ApiEnumMember';
-import { IExcerptTokenRange, IExcerptToken } from '../api/mixins/Excerpt';
 import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
-import { ApiConstructor } from '../api/model/ApiConstructor';
-import { ApiConstructSignature } from '../api/model/ApiConstructSignature';
-import { ApiFunction } from '../api/model/ApiFunction';
-import { ApiIndexSignature } from '../api/model/ApiIndexSignature';
-import { ApiVariable } from '../api/model/ApiVariable';
-import { ApiTypeAlias } from '../api/model/ApiTypeAlias';
-import { ApiCallSignature } from '../api/model/ApiCallSignature';
 import { AstSymbol } from '../analyzer/AstSymbol';
 
 export class ApiModelGenerator {

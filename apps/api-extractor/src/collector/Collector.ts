@@ -9,6 +9,10 @@ import {
   Sort,
   InternalError
 } from '@microsoft/node-core-library';
+import {
+  ReleaseTag,
+  AedocDefinitions
+} from '@microsoft/api-extractor-model';
 
 import { ILogger } from '../api/ILogger';
 import {
@@ -23,7 +27,6 @@ import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
 import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
@@ -32,7 +35,6 @@ import { DeclarationMetadata } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
-import { AedocDefinitions } from '../aedoc/AedocDefinitions';
 
 /**
  * Options for Collector constructor.

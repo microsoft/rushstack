@@ -5,12 +5,14 @@
 
 import * as ts from 'typescript';
 import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
+import {
+  IndentedWriter,
+  ReleaseTag
+} from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
-import { IndentedWriter } from '../api/IndentedWriter';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstImport, AstImportKind } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';

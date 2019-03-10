@@ -28,7 +28,7 @@ import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenera
 import { MonitoredLogger } from './MonitoredLogger';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
-import { ApiPackage } from './model/ApiPackage';
+import { ApiPackage } from '@microsoft/api-extractor-model';
 import { ReviewFileGenerator } from '../generators/ReviewFileGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { VisibilityChecker } from '../collector/VisibilityChecker';
