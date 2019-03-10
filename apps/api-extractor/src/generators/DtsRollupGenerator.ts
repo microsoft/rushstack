@@ -174,9 +174,9 @@ export class DtsRollupGenerator {
     let recurseChildren: boolean = true;
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
-        // If the @packagedocumentation comment seems to be attached to one of the regular API items,
+        // If the @packageDocumentation comment seems to be attached to one of the regular API items,
         // omit it.  It gets explictly emitted at the top of the file.
-        if (span.node.getText().match(/(?:\s|\*)@packagedocumentation(?:\s|\*)/g)) {
+        if (span.node.getText().match(/(?:\s|\*)@packageDocumentation(?:\s|\*)/gi)) {
           span.modification.skipAll();
         }
 

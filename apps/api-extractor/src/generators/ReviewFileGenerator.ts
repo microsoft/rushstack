@@ -261,7 +261,7 @@ export class ReviewFileGenerator {
     }
 
     if (declarationMetadata.isEventProperty) {
-      footerParts.push('@eventproperty');
+      footerParts.push('@eventProperty');
     }
 
     if (declarationMetadata.tsdocComment) {

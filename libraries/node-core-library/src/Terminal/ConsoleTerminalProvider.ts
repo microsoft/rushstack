@@ -35,7 +35,7 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
   }
 
   /**
-   * {@inheritdoc ITerminalProvider.write}
+   * {@inheritDoc ITerminalProvider.write}
    */
   public write(data: string, severity: TerminalProviderSeverity): void {
     switch (severity) {
@@ -61,14 +61,14 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
   }
 
   /**
-   * {@inheritdoc ITerminalProvider.eolCharacter}
+   * {@inheritDoc ITerminalProvider.eolCharacter}
    */
   public get eolCharacter(): string {
     return EOL;
   }
 
   /**
-   * {@inheritdoc ITerminalProvider.supportsColor}
+   * {@inheritDoc ITerminalProvider.supportsColor}
    */
   public get supportsColor(): boolean {
     return supportsColor;

@@ -4,7 +4,7 @@
 /**
  * An object-oriented command-line parser for TypeScript projects.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 export {

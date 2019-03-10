@@ -6,7 +6,7 @@
  * It helps with validation, documentation, and reviewing of the exported API
  * for a TypeScript library.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 export { ReleaseTag } from './aedoc/ReleaseTag';

@@ -3,7 +3,7 @@
 
 /**
  * A library for writing scripts that interact with the Rush tool.
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 export {

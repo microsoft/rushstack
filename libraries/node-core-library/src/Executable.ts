@@ -131,7 +131,7 @@ export class Executable {
    * @param options - Additional options
    * @returns the same data type as returned by the NodeJS child_process.spawnSync() API
    *
-   * @internalremarks
+   * @privateRemarks
    *
    * NOTE: The NodeJS spawnSync() returns SpawnSyncReturns<string> or SpawnSyncReturns<Buffer>
    * polymorphically based on the options.encoding parameter value.  This is a fairly confusing

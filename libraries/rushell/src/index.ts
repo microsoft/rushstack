@@ -4,7 +4,7 @@
 /**
  * Execute shell commands using a consistent syntax on every platform.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 export {
