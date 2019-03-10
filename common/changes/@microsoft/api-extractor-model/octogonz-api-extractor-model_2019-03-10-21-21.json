@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Initial setup of new package @microsoft/api-extractor-model",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "octogonz@users.noreply.github.com"
+}
