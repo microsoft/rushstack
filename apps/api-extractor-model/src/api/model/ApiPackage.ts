@@ -60,7 +60,7 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
    * Optionally specifies a value for the "toolPackage" field in the output .api.json data file;
    * otherwise, the value will be "api-extractor-model".
    */
-  toolPackage?: string,
+  toolPackage?: string;
 
   /**
    * Optionally specifies a value for the "toolVersion" field in the output .api.json data file;
