@@ -4,7 +4,7 @@
  * @remarks
  * This library consumes api-extractor-test-01 and is consumed by api-extractor-test-03.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 import { ISimpleInterface } from 'api-extractor-test-01';

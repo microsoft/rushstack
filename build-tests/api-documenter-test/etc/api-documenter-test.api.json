@@ -6,7 +6,7 @@
   },
   "kind": "Package",
   "canonicalReference": "api-documenter-test",
-  "docComment": "/**\n * api-extractor-test-05\n *\n * This project tests various documentation generation scenarios and doc comment syntaxes.\n *\n * @packagedocumentation\n */\n",
+  "docComment": "/**\n * api-extractor-test-05\n *\n * This project tests various documentation generation scenarios and doc comment syntaxes.\n *\n * @packageDocumentation\n */\n",
   "name": "api-documenter-test",
   "members": [
     {
@@ -40,7 +40,7 @@
         {
           "kind": "Class",
           "canonicalReference": "(DocClass1:class)",
-          "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * @defaultvalue\n *\n * a default value for this function\n *\n * @public\n */\n",
+          "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * @defaultValue\n *\n * a default value for this function\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -327,7 +327,7 @@
             {
               "kind": "Property",
               "canonicalReference": "(malformedEvent:instance)",
-              "docComment": "/**\n * This event should have been marked as readonly.\n *\n * @eventproperty\n */\n",
+              "docComment": "/**\n * This event should have been marked as readonly.\n *\n * @eventProperty\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Reference",
@@ -357,7 +357,7 @@
             {
               "kind": "Property",
               "canonicalReference": "(modifiedEvent:instance)",
-              "docComment": "/**\n * This event is fired whenever the object is modified.\n *\n * @eventproperty\n */\n",
+              "docComment": "/**\n * This event is fired whenever the object is modified.\n *\n * @eventProperty\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
