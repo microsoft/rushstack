@@ -1,0 +1,17 @@
+{
+  "name": "@microsoft/api-extractor-model",
+  "entries": [
+    {
+      "version": "7.0.24",
+      "tag": "@microsoft/api-extractor-model_v7.0.24",
+      "date": "Mon, 11 Mar 2019 16:13:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Initial setup of new package @microsoft/api-extractor-model"
+          }
+        ]
+      }
+    }
+  ]
+}

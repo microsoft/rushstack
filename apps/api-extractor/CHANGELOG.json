@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.24",
+      "tag": "@microsoft/api-extractor_v7.0.24",
+      "date": "Mon, 11 Mar 2019 16:13:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where spurious TSDoc warnings were issued because the TSDoc parser was configured improperly"
+          },
+          {
+            "comment": "Move the .api.json related APIs into a new NPM package @microsoft/api-extractor-model"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.23` to `7.0.24`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.23",
       "tag": "@microsoft/api-extractor_v7.0.23",
       "date": "Tue, 05 Mar 2019 17:13:11 GMT",

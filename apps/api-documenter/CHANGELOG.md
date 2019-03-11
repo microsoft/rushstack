@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 05 Mar 2019 17:13:11 GMT and should not be manually modified.
+This log was last generated on Mon, 11 Mar 2019 16:13:36 GMT and should not be manually modified.
+
+## 7.0.31
+Mon, 11 Mar 2019 16:13:36 GMT
+
+### Patches
+
+- Update api-documenter to use the new NPM package @microsoft/api-extractor-model; eliminate dependencies on @microsoft/api-extractor or the TypeScript compiler
 
 ## 7.0.30
 Tue, 05 Mar 2019 17:13:11 GMT
