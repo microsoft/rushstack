@@ -74,7 +74,7 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
   alternatives: string[];
 
   /**
-   * {@inheritdoc ICommandLineStringDefinition.defaultValue}
+   * {@inheritDoc ICommandLineStringDefinition.defaultValue}
    */
   defaultValue?: string;
 }
@@ -95,7 +95,7 @@ export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
  */
 export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument {
   /**
-   * {@inheritdoc ICommandLineStringDefinition.defaultValue}
+   * {@inheritDoc ICommandLineStringDefinition.defaultValue}
    */
   defaultValue?: number;
 }

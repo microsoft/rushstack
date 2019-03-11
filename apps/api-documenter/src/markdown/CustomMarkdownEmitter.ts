@@ -22,7 +22,7 @@ import {
   IResolveDeclarationReferenceResult,
   ApiItem,
   IndentedWriter
-} from '@microsoft/api-extractor';
+} from '@microsoft/api-extractor-model';
 
 export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
   contextApiItem: ApiItem | undefined;

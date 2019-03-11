@@ -292,6 +292,16 @@
       ]
     },
     {
+      "packageName": "@microsoft/api-extractor-model",
+      "projectFolder": "apps/api-extractor-model",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler-3.2"
+      ]
+    },
+    {
       "packageName": "@microsoft/api-documenter",
       "projectFolder": "apps/api-documenter",
       "reviewCategory": "libraries",

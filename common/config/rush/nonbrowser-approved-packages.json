@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@microsoft/api-extractor-model",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/decorators",
       "allowedCategories": [ "libraries" ]
     },

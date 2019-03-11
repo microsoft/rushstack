@@ -47,12 +47,12 @@ export class StringBuilder implements IStringBuilder {
     this._chunks = [];
   }
 
-  /** {@inheritdoc IStringBuilder.append} */
+  /** {@inheritDoc IStringBuilder.append} */
   public append(text: string): void {
     this._chunks.push(text);
   }
 
-  /** {@inheritdoc IStringBuilder.toString} */
+  /** {@inheritDoc IStringBuilder.toString} */
   public toString(): string {
     if (this._chunks.length === 0) {
       return '';

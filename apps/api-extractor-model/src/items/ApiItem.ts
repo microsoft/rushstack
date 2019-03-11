@@ -3,6 +3,7 @@
 
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiPackage } from '../model/ApiPackage';
+import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -64,8 +65,10 @@ export class ApiItem {
   public [ApiItem_parent]: ApiItem | undefined;
 
   public static deserialize(jsonObject: IApiItemJson): ApiItem {
-    // tslint:disable-next-line:no-use-before-declare
-    return Deserializer.deserialize(jsonObject);
+    // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
+    // to avoid ES5 circular imports.
+    const deserializerModule: typeof import('../model/Deserializer') = require('../model/Deserializer');
+    return deserializerModule.Deserializer.deserialize(jsonObject);
   }
 
   /** @virtual */
@@ -193,7 +196,3 @@ export class ApiItem {
 
 // For mixins
 export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<typeof ApiItem> { }
-
-// Circular import
-import { Deserializer } from '../model/Deserializer';
-import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';

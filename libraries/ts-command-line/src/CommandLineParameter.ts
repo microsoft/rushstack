@@ -51,19 +51,19 @@ export abstract class CommandLineParameter {
    */
   public _parserKey: string;
 
-  /** {@inheritdoc IBaseCommandLineDefinition.parameterLongName} */
+  /** {@inheritDoc IBaseCommandLineDefinition.parameterLongName} */
   public readonly longName: string;
 
-  /** {@inheritdoc IBaseCommandLineDefinition.parameterShortName} */
+  /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
   public readonly shortName: string | undefined;
 
-  /** {@inheritdoc IBaseCommandLineDefinition.description} */
+  /** {@inheritDoc IBaseCommandLineDefinition.description} */
   public readonly description: string;
 
-  /** {@inheritdoc IBaseCommandLineDefinition.required} */
+  /** {@inheritDoc IBaseCommandLineDefinition.required} */
   public readonly required: boolean;
 
-  /** {@inheritdoc IBaseCommandLineDefinition.environmentVariable} */
+  /** {@inheritDoc IBaseCommandLineDefinition.environmentVariable} */
   public readonly environmentVariable: string | undefined;
 
   /** @internal */
@@ -169,7 +169,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
   // Matches the first character that *isn't* part of a valid upper-case argument name such as "URL_2"
   private static _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
 
-  /** {@inheritdoc IBaseCommandLineDefinitionWithArgument.argumentName} */
+  /** {@inheritDoc IBaseCommandLineDefinitionWithArgument.argumentName} */
   public readonly argumentName: string;
 
   /** @internal */
@@ -197,10 +197,10 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
  * @public
  */
 export class CommandLineChoiceParameter extends CommandLineParameter {
-  /** {@inheritdoc ICommandLineChoiceDefinition.alternatives} */
+  /** {@inheritDoc ICommandLineChoiceDefinition.alternatives} */
   public readonly alternatives: ReadonlyArray<string>;
 
-  /** {@inheritdoc ICommandLineStringDefinition.defaultValue} */
+  /** {@inheritDoc ICommandLineStringDefinition.defaultValue} */
   public readonly defaultValue: string | undefined;
 
   private _value: string | undefined = undefined;
@@ -222,13 +222,13 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     this.validateDefaultValue(!!this.defaultValue);
   }
 
-  /** {@inheritdoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameter.kind} */
   public get kind(): CommandLineParameterKind {
     return CommandLineParameterKind.Choice;
   }
 
   /**
-   * {@inheritdoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
   // tslint:disable-next-line:no-any
@@ -264,7 +264,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
   }
 
   /**
-   * {@inheritdoc CommandLineParameter._getSupplementaryNotes}
+   * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
    * @internal
    */
   public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
@@ -285,7 +285,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     return this._value;
   }
 
-  /** {@inheritdoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.value !== undefined) {
       argList.push(this.longName);
@@ -306,13 +306,13 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     super(definition);
   }
 
-  /** {@inheritdoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameter.kind} */
   public get kind(): CommandLineParameterKind {
     return CommandLineParameterKind.Flag;
   }
 
   /**
-   * {@inheritdoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
   // tslint:disable-next-line:no-any
@@ -352,7 +352,7 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     return this._value;
   }
 
-  /** {@inheritdoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.value) {
       argList.push(this.longName);
@@ -365,7 +365,7 @@ export class CommandLineFlagParameter extends CommandLineParameter {
  * @public
  */
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
-  /** {@inheritdoc ICommandLineStringDefinition.defaultValue} */
+  /** {@inheritDoc ICommandLineStringDefinition.defaultValue} */
   public readonly defaultValue: number | undefined;
 
   private _value: number | undefined = undefined;
@@ -377,13 +377,13 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     this.validateDefaultValue(!!this.defaultValue);
   }
 
-  /** {@inheritdoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameter.kind} */
   public get kind(): CommandLineParameterKind {
     return CommandLineParameterKind.Integer;
   }
 
   /**
-   * {@inheritdoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
   // tslint:disable-next-line:no-any
@@ -419,7 +419,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
   }
 
   /**
-   * {@inheritdoc CommandLineParameter._getSupplementaryNotes}
+   * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
    * @internal
    */
   public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
@@ -440,7 +440,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     return this._value;
   }
 
-  /** {@inheritdoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.value !== undefined) {
       argList.push(this.longName);
@@ -454,7 +454,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
  * @public
  */
 export class CommandLineStringParameter extends CommandLineParameterWithArgument {
-  /** {@inheritdoc ICommandLineStringDefinition.defaultValue} */
+  /** {@inheritDoc ICommandLineStringDefinition.defaultValue} */
   public readonly defaultValue: string | undefined;
 
   private _value: string | undefined = undefined;
@@ -467,13 +467,13 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     this.validateDefaultValue(!!this.defaultValue);
   }
 
-  /** {@inheritdoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameter.kind} */
   public get kind(): CommandLineParameterKind {
     return CommandLineParameterKind.String;
   }
 
   /**
-   * {@inheritdoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
   // tslint:disable-next-line:no-any
@@ -506,7 +506,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
   }
 
   /**
-   * {@inheritdoc CommandLineParameter._getSupplementaryNotes}
+   * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
    * @internal
    */
   public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
@@ -529,7 +529,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     return this._value;
   }
 
-  /** {@inheritdoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.value !== undefined) {
       argList.push(this.longName);
@@ -551,13 +551,13 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     super(definition);
   }
 
-  /** {@inheritdoc CommandLineParameter.kind} */
+  /** {@inheritDoc CommandLineParameter.kind} */
   public get kind(): CommandLineParameterKind {
     return CommandLineParameterKind.StringList;
   }
 
   /**
-   * {@inheritdoc CommandLineParameter._setValue}
+   * {@inheritDoc CommandLineParameter._setValue}
    * @internal
    */
   // tslint:disable-next-line:no-any
@@ -608,7 +608,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     return this._values;
   }
 
-  /** {@inheritdoc CommandLineParameter.appendToArgList} @override */
+  /** {@inheritDoc CommandLineParameter.appendToArgList} @override */
   public appendToArgList(argList: string[]): void {
     if (this.values.length > 0) {
       for (const value of this.values) {

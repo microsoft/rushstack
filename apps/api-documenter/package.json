@@ -15,7 +15,7 @@
     "api-documenter": "./bin/api-documenter"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.0.23",
+    "@microsoft/api-extractor-model": "7.0.23",
     "@microsoft/node-core-library": "3.12.0",
     "@microsoft/ts-command-line": "4.2.3",
     "@microsoft/tsdoc": "0.12.7",

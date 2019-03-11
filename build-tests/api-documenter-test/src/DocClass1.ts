@@ -66,7 +66,7 @@ export interface IDocInterface3 {
  *
  * @remarks
  * These are some remarks.
- * @defaultvalue a default value for this function
+ * @defaultValue a default value for this function
  * @public
  */
 export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
@@ -96,13 +96,13 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
 
   /**
    * This event is fired whenever the object is modified.
-   * @eventproperty
+   * @eventProperty
    */
   public readonly modifiedEvent: SystemEvent;
 
   /**
    * This event should have been marked as readonly.
-   * @eventproperty
+   * @eventProperty
    */
   public malformedEvent: SystemEvent;
 

@@ -5,12 +5,14 @@
 
 import * as ts from 'typescript';
 import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
+import {
+  IndentedWriter,
+  ReleaseTag
+} from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
-import { IndentedWriter } from '../api/IndentedWriter';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstImport, AstImportKind } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -174,9 +176,9 @@ export class DtsRollupGenerator {
     let recurseChildren: boolean = true;
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
-        // If the @packagedocumentation comment seems to be attached to one of the regular API items,
+        // If the @packageDocumentation comment seems to be attached to one of the regular API items,
         // omit it.  It gets explictly emitted at the top of the file.
-        if (span.node.getText().match(/(?:\s|\*)@packagedocumentation(?:\s|\*)/g)) {
+        if (span.node.getText().match(/(?:\s|\*)@packageDocumentation(?:\s|\*)/gi)) {
           span.modification.skipAll();
         }
 

@@ -3,7 +3,7 @@
  *
  * Test scenarios for trimming alpha/beta/internal definitions from the generated *.d.ts files.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 

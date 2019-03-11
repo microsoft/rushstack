@@ -4,7 +4,7 @@
 /**
  * Core libraries that every NodeJS toolchain project should use.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 export {

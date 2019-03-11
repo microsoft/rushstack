@@ -9,6 +9,10 @@ import {
   Sort,
   InternalError
 } from '@microsoft/node-core-library';
+import {
+  ReleaseTag,
+  AedocDefinitions
+} from '@microsoft/api-extractor-model';
 
 import { ILogger } from '../api/ILogger';
 import {
@@ -23,7 +27,6 @@ import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
 import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
@@ -125,7 +128,7 @@ export class Collector {
     this.program = options.program;
     this.typeChecker = options.program.getTypeChecker();
 
-    this._tsdocParser = new tsdoc.TSDocParser();
+    this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
     this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup, this.logger);
   }
 

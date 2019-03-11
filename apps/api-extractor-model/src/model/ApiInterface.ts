@@ -5,7 +5,7 @@ import { ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
-import { IExcerptTokenRange } from '../../index';
+import { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Fix some API doc comments to use correct TSDoc syntax",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "octogonz@users.noreply.github.com"
+}
