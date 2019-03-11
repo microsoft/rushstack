@@ -337,6 +337,8 @@ export class Utilities {
     }
 
     const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
+    // load the local node_modules/.bin directory into the PATH
+    environment.PATH =`${path.resolve(options.workingDirectory, "node_modules", ".bin")}:${environment.path}`;
 
     const result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
       shellCommand,
