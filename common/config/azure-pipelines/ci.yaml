@@ -1,5 +1,3 @@
-resources:
-- repo: self
 jobs:
 - job: PRBuild
   condition: succeeded()
@@ -11,4 +9,5 @@ jobs:
       'NodeJs 10':
         NodeVersion: 10
   steps:
+  - checkout: self
   - template: templates/build.yaml

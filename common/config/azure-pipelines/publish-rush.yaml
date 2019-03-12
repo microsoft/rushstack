@@ -1,8 +1,5 @@
-resources:
-- repo: self
 variables:
   NodeVersion: 10
   VersionPolicy: rush
 steps:
-- template: templates/build.yaml
-- template: templates/publish.yaml
+- template: templates/buildAndPublish.yaml

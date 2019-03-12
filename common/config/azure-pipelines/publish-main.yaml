@@ -1,8 +1,0 @@
-resources:
-- repo: self
-variables:
-  NodeVersion: 10
-  VersionPolicy: mainPackages
-steps:
-- template: templates/build.yaml
-- template: templates/publish.yaml
