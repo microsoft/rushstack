@@ -1,6 +1,18 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 05 Mar 2019 17:13:11 GMT and should not be manually modified.
+This log was last generated on Wed, 13 Mar 2019 01:14:05 GMT and should not be manually modified.
+
+## 1.8.66
+Wed, 13 Mar 2019 01:14:05 GMT
+
+*Version update only*
+
+## 1.8.65
+Mon, 11 Mar 2019 16:13:36 GMT
+
+### Patches
+
+- Fix some API doc comments to use correct TSDoc syntax
 
 ## 1.8.64
 Tue, 05 Mar 2019 17:13:11 GMT
