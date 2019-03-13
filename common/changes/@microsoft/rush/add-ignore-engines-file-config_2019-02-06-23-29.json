@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Add support for Yarn options with the --ignore-engines flag",
+      "comment": "Add support for the Yarn --ignore-engines, exposed as yarnOptions.ignoreEngines in rush.json",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "The `--debug` parameter now automatically breaks in the debugger when InternalError is thrown",
+      "comment": "The `--debug` parameter now automatically breaks in the debugger when an InternalError is thrown",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

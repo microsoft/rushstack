@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix typo: 'allowedAlternateVersions' -> 'allowedAlternativeVersions'",
+      "comment": "",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
