@@ -5,13 +5,15 @@
 
 import * as ts from 'typescript';
 import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
+import {
+  IndentedWriter,
+  ReleaseTag
+} from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
-import { IndentedWriter } from '../api/IndentedWriter';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { AstImport } from '../analyzer/AstImport';
+import { AstImport, AstImportKind } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
@@ -90,14 +92,25 @@ export class DtsRollupGenerator {
         const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
 
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-          if (astImport.starImport) {
-            indentedWriter.write(`import * as ${entity.nameForEmit}`);
-          } else if (entity.nameForEmit !== astImport.exportName) {
-            indentedWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
-          } else {
-            indentedWriter.write(`import { ${astImport.exportName} }`);
+          switch (astImport.importKind) {
+            case AstImportKind.NamedImport:
+              if (entity.nameForEmit !== astImport.exportName) {
+                indentedWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
+              } else {
+                indentedWriter.write(`import { ${astImport.exportName} }`);
+              }
+              indentedWriter.writeLine(` from '${astImport.modulePath}';`);
+              break;
+            case AstImportKind.StarImport:
+              indentedWriter.writeLine(`import * as ${entity.nameForEmit} from '${astImport.modulePath}';`);
+              break;
+            case AstImportKind.EqualsImport:
+              indentedWriter.writeLine(`import ${entity.nameForEmit} = require('${astImport.modulePath}');`);
+              break;
+            default:
+              throw new InternalError('Unimplemented AstImportKind');
           }
-          indentedWriter.writeLine(` from '${astImport.modulePath}';`);
+
         }
       }
     }
@@ -163,9 +176,9 @@ export class DtsRollupGenerator {
     let recurseChildren: boolean = true;
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
-        // If the @packagedocumentation comment seems to be attached to one of the regular API items,
+        // If the @packageDocumentation comment seems to be attached to one of the regular API items,
         // omit it.  It gets explictly emitted at the top of the file.
-        if (span.node.getText().match(/(?:\s|\*)@packagedocumentation(?:\s|\*)/g)) {
+        if (span.node.getText().match(/(?:\s|\*)@packageDocumentation(?:\s|\*)/gi)) {
           span.modification.skipAll();
         }
 

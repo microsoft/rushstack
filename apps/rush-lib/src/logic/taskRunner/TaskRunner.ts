@@ -108,7 +108,6 @@ export class TaskRunner {
    * Defines the list of dependencies for an individual task.
    * @param taskName - the string name of the task for which we are defining dependencies. A task with this
    * name must already have been registered.
-   * @taskDependencies
    */
   public addDependencies(taskName: string, taskDependencies: string[]): void {
     const task: ITask | undefined = this._tasks.get(taskName);

@@ -10,7 +10,7 @@ import { BaseAction } from './BaseAction';
 
 import { YamlDocumenter } from '../documenters/YamlDocumenter';
 import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
-import { ApiModel } from '@microsoft/api-extractor';
+import { ApiModel } from '@microsoft/api-extractor-model';
 
 export class YamlAction extends BaseAction {
   private _officeParameter: CommandLineFlagParameter;

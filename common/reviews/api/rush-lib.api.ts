@@ -93,6 +93,8 @@ declare enum Event {
 
 // @beta
 declare class EventHooks {
+    // Warning: (ae-forgotten-export) The symbol "IEventHooksJson" needs to be exported by the entry point index.d.ts
+    // 
     // @internal (undocumented)
     constructor(eventHooksJson: IEventHooksJson);
     get(event: Event): string[];
@@ -100,6 +102,8 @@ declare class EventHooks {
 
 // @beta
 declare class IndividualVersionPolicy extends VersionPolicy {
+    // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
+    // 
     // @internal (undocumented)
     constructor(versionPolicyJson: IIndividualVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
@@ -127,6 +131,8 @@ declare class _LastInstallFlag {
 
 // @beta
 declare class LockStepVersionPolicy extends VersionPolicy {
+    // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
+    // 
     // @internal (undocumented)
     constructor(versionPolicyJson: ILockStepVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
@@ -183,6 +189,8 @@ declare type PackageManager = 'pnpm' | 'npm' | 'yarn';
 
 // @public
 declare class PnpmOptionsConfiguration {
+    // Warning: (ae-forgotten-export) The symbol "IPnpmOptionsJson" needs to be exported by the entry point index.d.ts
+    // 
     // @internal (undocumented)
     constructor(json: IPnpmOptionsJson);
     readonly strictPeerDependencies: boolean;
@@ -220,6 +228,7 @@ declare class RushConfiguration {
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     readonly gitAllowedEmailRegExps: string[];
     readonly gitSampleEmail: string;
+    readonly gitVersionBumpCommitMessage: string | undefined;
     readonly hotfixChangeEnabled: boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
     // (undocumented)
@@ -258,6 +267,8 @@ declare class RushConfiguration {
 
 // @public
 declare class RushConfigurationProject {
+    // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectJson" needs to be exported by the entry point index.d.ts
+    // 
     // @internal (undocumented)
     constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
     readonly cyclicDependencyProjects: Set<string>;
@@ -300,6 +311,8 @@ declare abstract class VersionPolicy {
     readonly isLockstepped: boolean;
     // @internal
     abstract readonly _json: IVersionPolicyJson;
+    // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
     readonly policyName: string;
@@ -329,6 +342,8 @@ declare enum VersionPolicyDefinitionName {
 
 // @public
 declare class YarnOptionsConfiguration {
+    // Warning: (ae-forgotten-export) The symbol "IYarnOptionsJson" needs to be exported by the entry point index.d.ts
+    // 
     // @internal (undocumented)
     constructor(json: IYarnOptionsJson);
     readonly ignoreEngines: boolean;

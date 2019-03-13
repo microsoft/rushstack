@@ -28,9 +28,10 @@ import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenera
 import { MonitoredLogger } from './MonitoredLogger';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
-import { ApiPackage } from './model/ApiPackage';
+import { ApiPackage } from '@microsoft/api-extractor-model';
 import { ReviewFileGenerator } from '../generators/ReviewFileGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
+import { VisibilityChecker } from '../collector/VisibilityChecker';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -391,6 +392,8 @@ export class Extractor {
 
     collector.analyze();
 
+    VisibilityChecker.check(collector);
+
     const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
 
@@ -405,6 +408,9 @@ export class Extractor {
 
       this._monitoredLogger.logVerbose('Writing: ' + apiJsonFilename);
       apiPackage.saveToJsonFile(apiJsonFilename, {
+        toolPackage: Extractor.packageName,
+        toolVersion: Extractor.version,
+
         newlineConversion: NewlineKind.CrLf,
         ensureFolderExists: true,
         testMode: this.actualConfig.testMode

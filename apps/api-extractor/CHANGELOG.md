@@ -1,6 +1,40 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 27 Feb 2019 22:13:58 GMT and should not be manually modified.
+This log was last generated on Wed, 13 Mar 2019 01:14:05 GMT and should not be manually modified.
+
+## 7.0.25
+Wed, 13 Mar 2019 01:14:05 GMT
+
+### Patches
+
+- Upgrade TSDoc
+
+## 7.0.24
+Mon, 11 Mar 2019 16:13:36 GMT
+
+### Patches
+
+- Fix an issue where spurious TSDoc warnings were issued because the TSDoc parser was configured improperly
+- Move the .api.json related APIs into a new NPM package @microsoft/api-extractor-model
+
+## 7.0.23
+Tue, 05 Mar 2019 17:13:11 GMT
+
+### Patches
+
+- Issue a warning when an exported type refers to another local type that is not exported (ae-forgotten-export)
+- The export analyzer now correctly handles symbols imported using "import x = require('y');" notation
+
+## 7.0.22
+Mon, 04 Mar 2019 17:13:19 GMT
+
+### Patches
+
+- Every error/warning message reported by API Extractor now has an associated message identifier
+- Add a new section to api-extractor.json for configuring how errors get reported, with ability to suppress individual errors
+- Reintroduce the ability to report issues by writing warnings into the API review file
+- Fix an issue where members of type literals were incorrectly being flagged as "(undocumented)"
+- Error messages now cite the original .ts source file, if a source map is present. (To enable this, specify `"declarationMap": true` in tsconfig.json.)
 
 ## 7.0.21
 Wed, 27 Feb 2019 22:13:58 GMT

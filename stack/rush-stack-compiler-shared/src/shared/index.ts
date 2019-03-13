@@ -11,7 +11,7 @@
  * - [tslint](https://github.com/palantir/tslint#readme)
  * - [API Extractor](https://api-extractor.com/)
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 export { RushStackCompilerBase }  from './RushStackCompilerBase';

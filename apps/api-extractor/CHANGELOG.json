@@ -2,6 +2,82 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.25",
+      "tag": "@microsoft/api-extractor_v7.0.25",
+      "date": "Wed, 13 Mar 2019 01:14:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade TSDoc"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.24` to `7.0.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.24",
+      "tag": "@microsoft/api-extractor_v7.0.24",
+      "date": "Mon, 11 Mar 2019 16:13:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where spurious TSDoc warnings were issued because the TSDoc parser was configured improperly"
+          },
+          {
+            "comment": "Move the .api.json related APIs into a new NPM package @microsoft/api-extractor-model"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.23` to `7.0.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.23",
+      "tag": "@microsoft/api-extractor_v7.0.23",
+      "date": "Tue, 05 Mar 2019 17:13:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Issue a warning when an exported type refers to another local type that is not exported (ae-forgotten-export)"
+          },
+          {
+            "comment": "The export analyzer now correctly handles symbols imported using \"import x = require('y');\" notation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.22",
+      "tag": "@microsoft/api-extractor_v7.0.22",
+      "date": "Mon, 04 Mar 2019 17:13:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Every error/warning message reported by API Extractor now has an associated message identifier"
+          },
+          {
+            "comment": "Add a new section to api-extractor.json for configuring how errors get reported, with ability to suppress individual errors"
+          },
+          {
+            "comment": "Reintroduce the ability to report issues by writing warnings into the API review file"
+          },
+          {
+            "comment": "Fix an issue where members of type literals were incorrectly being flagged as \"(undocumented)\""
+          },
+          {
+            "comment": "Error messages now cite the original .ts source file, if a source map is present. (To enable this, specify `\"declarationMap\": true` in tsconfig.json.)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.21",
       "tag": "@microsoft/api-extractor_v7.0.21",
       "date": "Wed, 27 Feb 2019 22:13:58 GMT",

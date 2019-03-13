@@ -25,7 +25,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   }
 
   /**
-   * {@inheritdoc ITerminalProvider.write}
+   * {@inheritDoc ITerminalProvider.write}
    */
   public write(data: string, severity: TerminalProviderSeverity): void {
     switch (severity) {
@@ -53,14 +53,14 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   }
 
   /**
-   * {@inheritdoc ITerminalProvider.eolCharacter}
+   * {@inheritDoc ITerminalProvider.eolCharacter}
    */
   public get eolCharacter(): string {
     return '[n]';
   }
 
   /**
-   * {@inheritdoc ITerminalProvider.supportsColor}
+   * {@inheritDoc ITerminalProvider.supportsColor}
    */
   public get supportsColor(): boolean {
     return this._supportsColor;

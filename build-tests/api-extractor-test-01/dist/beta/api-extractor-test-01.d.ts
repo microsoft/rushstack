@@ -6,7 +6,7 @@
  * It tests the basic types of definitions, and all the weird cases for following
  * chains of type aliases.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 /// <reference types="jest" />
@@ -283,7 +283,7 @@ export declare class TypeReferencesInAedoc {
      * @returns An object of type {@link TypeReferencesInAedoc}.
      */
     getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
-    /** {@inheritdoc api-extractor-test-01#TypeReferencesInAedoc.getValue} */
+    /** {@inheritDoc api-extractor-test-01#TypeReferencesInAedoc.getValue} */
     getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
     /**
      * @param arg - Malformed param reference.

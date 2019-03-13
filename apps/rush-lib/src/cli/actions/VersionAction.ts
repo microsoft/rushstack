@@ -24,6 +24,8 @@ import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 
+export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Applying package updates.';
+
 export class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy: CommandLineFlagParameter;
   private _overrideVersion: CommandLineStringParameter;
@@ -227,7 +229,7 @@ export class VersionAction extends BaseRushAction {
 
     if (packageJsonUpdated) {
       git.addChanges();
-      git.commit();
+      git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
     }
 
     if (changeLogUpdated || packageJsonUpdated) {

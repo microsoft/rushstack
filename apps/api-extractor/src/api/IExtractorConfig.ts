@@ -377,44 +377,44 @@ export interface IExtractorConfig {
   compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
 
   /**
-   * {@inheritdoc IExtractorPoliciesConfig}
+   * {@inheritDoc IExtractorPoliciesConfig}
    */
   policies?: IExtractorPoliciesConfig;
 
   /**
-   * {@inheritdoc IExtractorValidationRulesConfig}
+   * {@inheritDoc IExtractorValidationRulesConfig}
    */
   validationRules?: IExtractorValidationRulesConfig;
 
   /**
-   * {@inheritdoc IExtractorProjectConfig}
+   * {@inheritDoc IExtractorProjectConfig}
    */
   project: IExtractorProjectConfig;
 
   /**
-   * {@inheritdoc IExtractorApiReviewFileConfig}
+   * {@inheritDoc IExtractorApiReviewFileConfig}
    */
   apiReviewFile?: IExtractorApiReviewFileConfig;
 
   /**
-   * {@inheritdoc IExtractorApiJsonFileConfig}
+   * {@inheritDoc IExtractorApiJsonFileConfig}
    */
   apiJsonFile?: IExtractorApiJsonFileConfig;
 
   /**
-   * {@inheritdoc IExtractorDtsRollupConfig}
+   * {@inheritDoc IExtractorDtsRollupConfig}
    * @beta
    */
   dtsRollup?: IExtractorDtsRollupConfig;
 
   /**
-   * {@inheritdoc IExtractorTsdocMetadataConfig}
+   * {@inheritDoc IExtractorTsdocMetadataConfig}
    * @beta
    */
   tsdocMetadata?: IExtractorTsdocMetadataConfig;
 
   /**
-   * {@inheritdoc IExtractorMessagesConfig}
+   * {@inheritDoc IExtractorMessagesConfig}
    */
   messages?: IExtractorMessagesConfig;
 

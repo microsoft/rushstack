@@ -8,7 +8,7 @@ import {
   CommandLineStringParameter
 } from '@microsoft/ts-command-line';
 import { FileSystem } from '@microsoft/node-core-library';
-import { ApiModel } from '@microsoft/api-extractor';
+import { ApiModel } from '@microsoft/api-extractor-model';
 
 export abstract class BaseAction extends CommandLineAction {
   protected inputFolder: string;

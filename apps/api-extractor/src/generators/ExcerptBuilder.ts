@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-
 import {
   ExcerptTokenKind,
   IExcerptToken,
   IExcerptTokenRange
-} from '../api/mixins/Excerpt';
+} from '@microsoft/api-extractor-model';
+
 import { Span } from '../analyzer/Span';
 
 /**

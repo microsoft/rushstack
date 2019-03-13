@@ -111,6 +111,10 @@
         "sampleEmail": {
           "description": "An example valid e-mail address for \"Mr. Example\" that conforms to one of the allowedEmailRegExps.  Example: \"mr-example@contoso\\.com\"",
           "type": "string"
+        },
+        "versionBumpCommitMessage": {
+          "description": "The commit message to use when committing changes during \"rush publish\". Defaults to \"Applying package updates.\"",
+          "type": "string"
         }
       },
       "additionalProperties": false
@@ -132,7 +136,7 @@
         },
         "required": [
           "variantName",
-           "description"
+          "description"
         ]
       }
     },

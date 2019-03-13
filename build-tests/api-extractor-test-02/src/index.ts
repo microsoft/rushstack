@@ -9,7 +9,7 @@
  * @remarks
  * This library consumes api-extractor-test-01 and is consumed by api-extractor-test-03.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 export { SubclassWithImport } from './SubclassWithImport';
 

@@ -15,6 +15,7 @@
     "exportStar",
     "exportStar2",
     "exportStar3",
+    "importEquals",
     "typeOf"
   ]
 }

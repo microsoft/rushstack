@@ -1,0 +1,11 @@
+variables:
+  NodeVersion: 10
+  VersionPolicy: noRush
+steps:
+- template: templates/buildAndPublish.yaml
+
+  # The below steps are temporary, until api-extractor 7 is released
+- script: 'npm --//registry.npmjs.org/:_authToken=$(npmToken) dist-tag add @microsoft/api-extractor@6.3.0 latest'
+  displayName: 'api-extractor rollback "latest" dist-tag'
+- script: 'npm --//registry.npmjs.org/:_authToken=$(npmToken) dist-tag add @microsoft/api-documenter@1.5.59 latest'
+  displayName: 'api-documenter rollback "latest" dist-tag'

@@ -4,6 +4,7 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { Sort } from '@microsoft/node-core-library';
+import { AedocDefinitions } from '@microsoft/api-extractor-model';
 
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -19,7 +20,6 @@ import {
   ExtractorMessageLogLevel,
   IExtractorMessageReportingRuleConfig
 } from '../api/IExtractorConfig';
-import { AedocDefinitions } from '../aedoc/AedocDefinitions';
 import { ILogger } from '../api/ILogger';
 import { SourceMapper } from './SourceMapper';
 

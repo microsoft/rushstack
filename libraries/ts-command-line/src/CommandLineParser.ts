@@ -66,10 +66,10 @@ class CustomArgumentParser extends argparse.ArgumentParser {
  * @public
  */
 export abstract class CommandLineParser extends CommandLineParameterProvider {
-  /** {@inheritdoc ICommandLineParserOptions.toolFilename} */
+  /** {@inheritDoc ICommandLineParserOptions.toolFilename} */
   public readonly toolFilename: string;
 
-  /** {@inheritdoc ICommandLineParserOptions.toolDescription} */
+  /** {@inheritDoc ICommandLineParserOptions.toolDescription} */
   public readonly toolDescription: string;
 
   /**
@@ -238,7 +238,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
   }
 
   /**
-   * {@inheritdoc CommandLineParameterProvider._getArgumentParser}
+   * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
    */
   protected _getArgumentParser(): argparse.ArgumentParser { // override
