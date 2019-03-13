@@ -17,8 +17,9 @@ import {
   DocEscapedText,
   DocErrorText
 } from '@microsoft/tsdoc';
-import { IndentedWriter } from '@microsoft/api-extractor-model';
 import { InternalError } from '@microsoft/node-core-library';
+
+import { IndentedWriter } from '../utils/IndentedWriter';
 
 export interface IMarkdownEmitterOptions {
 }

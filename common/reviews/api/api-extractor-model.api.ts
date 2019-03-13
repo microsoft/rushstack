@@ -674,25 +674,6 @@ interface IExcerptTokenRange {
     startIndex: number;
 }
 
-// @beta
-declare class IndentedWriter {
-    // (undocumented)
-    constructor(builder?: IStringBuilder);
-    decreaseIndent(): void;
-    defaultIndentPrefix: string;
-    ensureNewLine(): void;
-    ensureSkippedLine(): void;
-    getText(): string;
-    increaseIndent(indentPrefix?: string): void;
-    indentScope(scope: () => void, indentPrefix?: string): void;
-    peekLastCharacter(): string;
-    peekSecondLastCharacter(): string;
-    // (undocumented)
-    toString(): string;
-    write(message: string): void;
-    writeLine(message?: string): void;
-    }
-
 // @public
 interface IParameterOptions {
     // (undocumented)

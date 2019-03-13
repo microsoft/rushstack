@@ -2,6 +2,36 @@
   "name": "@microsoft/rush-stack",
   "entries": [
     {
+      "version": "0.1.58",
+      "tag": "@microsoft/rush-stack_v0.1.58",
+      "date": "Wed, 13 Mar 2019 19:13:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.10` to `0.2.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.37` to `6.0.38`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.57",
+      "tag": "@microsoft/rush-stack_v0.1.57",
+      "date": "Wed, 13 Mar 2019 01:14:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.9` to `0.2.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.36` to `6.0.37`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.56",
       "tag": "@microsoft/rush-stack_v0.1.56",
       "date": "Mon, 11 Mar 2019 16:13:36 GMT",
