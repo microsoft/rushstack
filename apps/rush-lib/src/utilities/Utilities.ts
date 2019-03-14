@@ -38,6 +38,11 @@ export interface IInstallPackageInDirectoryOptions {
 
 export interface ILifecycleCommandOptions {
   /**
+   * The rush configuration, if the command is running in a rush repo.
+   */
+  rushConfiguration: RushConfiguration | undefined;
+
+  /**
    * Working directory for running the command
    */
   workingDirectory: string;
@@ -55,7 +60,7 @@ export interface ILifecycleCommandOptions {
   /**
    * Options for what should be added to the PATH variable
    */
-  environmentPathOptions: Partial<IEnvironmentPathOptions>;
+  environmentPathOptions: IEnvironmentPathOptions;
 }
 
 export interface IEnvironmentPathOptions {
@@ -63,15 +68,15 @@ export interface IEnvironmentPathOptions {
    * If true, include <project root>/node_modules/.bin in the PATH. If both this and
    * {@link IEnvironmentPathOptions.includeRepoBin} are set, this path will take precedence.
    */
-  includeProjectBin: boolean;
+  includeProjectBin?: boolean;
 
   /**
    * If true, include <repo root>/common/temp/node_modules/.bin in the PATH.
    */
-  includeRepoBin: boolean;
+  includeRepoBin?: boolean;
 }
 
-interface ICreateEnvironmentForRushCommandPathOptions extends Partial<IEnvironmentPathOptions> {
+interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
   projectRoot: string | undefined;
   commonTempFolder: string | undefined;
 }
@@ -390,12 +395,10 @@ export class Utilities {
    */
   public static executeLifecycleCommand(
     command: string,
-    rushConfiguration: RushConfiguration | undefined,
     options: ILifecycleCommandOptions
   ): number {
     const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeLifecycleCommandInternal(
       command,
-      rushConfiguration,
       child_process.spawnSync,
       options
     );
@@ -413,12 +416,10 @@ export class Utilities {
    */
   public static executeLifecycleCommandAsync(
     command: string,
-    rushConfiguration: RushConfiguration,
     options: ILifecycleCommandOptions
   ): child_process.ChildProcess {
     return Utilities._executeLifecycleCommandInternal(
       command,
-      rushConfiguration,
       child_process.spawn,
       options
     );
@@ -557,7 +558,6 @@ export class Utilities {
 
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
-    rushConfiguration: RushConfiguration | undefined,
     spawnFunction: (command: String, args: string[], spawnOptions: child_process.SpawnOptions) => TCommandResult,
     options: ILifecycleCommandOptions
   ): TCommandResult {
@@ -576,7 +576,7 @@ export class Utilities {
         pathOptions: {
           ...options.environmentPathOptions,
           projectRoot: options.workingDirectory,
-          commonTempFolder: rushConfiguration ? rushConfiguration.commonTempFolder : undefined
+          commonTempFolder: options.rushConfiguration ? options.rushConfiguration.commonTempFolder : undefined
         }
       }
     );

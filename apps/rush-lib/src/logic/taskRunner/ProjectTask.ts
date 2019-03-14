@@ -143,8 +143,8 @@ export class ProjectTask implements ITaskDefinition {
         const task: child_process.ChildProcess =
             Utilities.executeLifecycleCommandAsync(
             normalizedTaskCommand,
-            this._rushConfiguration,
             {
+              rushConfiguration: this._rushConfiguration,
               workingDirectory: projectFolder,
               initCwd: this._rushConfiguration.commonTempFolder,
               handleOutput: true,

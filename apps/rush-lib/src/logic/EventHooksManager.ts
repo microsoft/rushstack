@@ -34,8 +34,8 @@ export class EventHooksManager {
         try {
           Utilities.executeLifecycleCommand(
             script,
-            this._rushConfiguration,
             {
+              rushConfiguration: this._rushConfiguration,
               workingDirectory: process.cwd(),
               initCwd: this._commonTempFolder,
               handleOutput: true,

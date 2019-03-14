@@ -51,8 +51,8 @@ export class GlobalScriptAction extends BaseScriptAction {
 
       const exitCode: number = Utilities.executeLifecycleCommand(
         shellCommand,
-        this.rushConfiguration,
         {
+          rushConfiguration: this.rushConfiguration,
           workingDirectory: this.rushConfiguration.rushJsonFolder,
           initCwd: this.rushConfiguration.commonTempFolder,
           handleOutput: false,

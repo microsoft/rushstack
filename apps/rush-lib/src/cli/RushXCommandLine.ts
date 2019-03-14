@@ -79,8 +79,8 @@ export class RushXCommandLine {
 
       const exitCode: number = Utilities.executeLifecycleCommand(
         scriptBody,
-        rushConfiguration,
         {
+          rushConfiguration,
           workingDirectory: packageFolder,
           // If there is a rush.json then use its .npmrc from the temp folder.
           // Otherwise look for npmrc in the project folder.
