@@ -29,8 +29,6 @@ import { StringBuilder, IStringBuilder } from '@microsoft/node-core-library';
   *     two
   *   end
   * ```
-  *
-  * @beta
   */
 export class IndentedWriter {
   /**

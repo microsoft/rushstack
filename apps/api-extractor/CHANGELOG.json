@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.26",
+      "tag": "@microsoft/api-extractor_v7.0.26",
+      "date": "Wed, 13 Mar 2019 19:13:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Refactor code to move the IndentedWriter API from api-extractor-model to api-documenter"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.25` to `7.0.26`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.25",
       "tag": "@microsoft/api-extractor_v7.0.25",
       "date": "Wed, 13 Mar 2019 01:14:05 GMT",
