@@ -35,6 +35,23 @@ export interface IInstallPackageInDirectoryOptions {
   suppressOutput?: boolean;
 }
 
+export interface ILifecycleCommandOptions {
+  /**
+   * Working directory for running the command
+   */
+  workingDirectory: string;
+
+  /**
+   * The folder containing a local .npmrc, which will be used for the INIT_CWD environment variable
+   */
+  initCwd: string;
+
+  /**
+   * If true, suppress the process's output, but if there is a nonzero exit code then print stderr
+   */
+  handleOutput: boolean;
+}
+
 export class Utilities {
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
@@ -77,10 +94,12 @@ export class Utilities {
    * Retries a function until a timeout is reached. The function is expected to throw if it failed and
    *  should be retried.
    */
-  public static retryUntilTimeout<TResult>(fn: () => TResult,
-                                           maxWaitTimeMs: number,
-                                           getTimeoutError: (innerError: Error) => Error,
-                                           fnName: string): TResult {
+  public static retryUntilTimeout<TResult>(
+    fn: () => TResult,
+    maxWaitTimeMs: number,
+    getTimeoutError: (innerError: Error) => Error,
+    fnName: string
+  ): TResult {
     const startTime: number = Utilities.getTimeInMs();
     let looped: boolean = false;
 
@@ -127,12 +146,16 @@ export class Utilities {
     // fail.  To workaround that, retry for up to 7 seconds before giving up.
     const maxWaitTimeMs: number = 7 * 1000;
 
-    return Utilities.retryUntilTimeout(() => FileSystem.ensureFolder(folderName),
-                                       maxWaitTimeMs,
-                                       (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
-                                                        'from a process such as your text editor, command prompt, ' +
-                                                        'or "gulp serve"'),
-                                       'createFolderWithRetry');
+    return Utilities.retryUntilTimeout(
+      () => FileSystem.ensureFolder(folderName),
+      maxWaitTimeMs,
+      (e) => new Error(
+        `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
+        'from a process such as your text editor, command prompt, ' +
+        'or "gulp serve"'
+      ),
+      'createFolderWithRetry'
+    );
   }
 
   /**
@@ -222,6 +245,7 @@ export class Utilities {
     if (stdout && stdout.columns) {
       return stdout.columns;
     }
+
     return 80;
   }
 
@@ -266,9 +290,14 @@ export class Utilities {
     keepEnvironment: boolean = false
   ): string {
 
-    const  result: child_process.SpawnSyncReturns<Buffer>
-      = Utilities._executeCommandInternal(command, args, workingDirectory,
-        ['pipe', 'pipe', 'pipe'], environment, keepEnvironment);
+    const  result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeCommandInternal(
+      command,
+      args,
+      workingDirectory,
+      ['pipe', 'pipe', 'pipe'],
+      environment,
+      keepEnvironment
+    );
 
     return result.stdout.toString();
   }
@@ -301,12 +330,14 @@ export class Utilities {
           if (retryCallback) {
             retryCallback();
           }
+
           continue;
         } else {
           console.error(`Giving up after ${attemptNumber} attempts` + os.EOL);
           throw error;
         }
       }
+
       break;
     }
   }
@@ -314,18 +345,11 @@ export class Utilities {
   /**
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
-   * @param workingDirectory - working directory for running this command
-   * @param initCwd = the folder containing a local .npmrc, which will be used
-   *        for the INIT_CWD environment variable
-   * @param handleOutput - if true, hide the process's output, but if there is a nonzero exit code
-   *   then show the stderr
+   * @param options - options for how the command should be run
    */
   public static executeLifecycleCommand(
-    command: string, options: {
-      workingDirectory: string,
-      initCwd: string,
-      handleOutput: boolean
-    }
+    command: string,
+    options: ILifecycleCommandOptions
   ): number {
     let shellCommand: string = process.env.comspec || 'cmd';
     let commandFlags: string = '/d /s /c';
@@ -359,16 +383,11 @@ export class Utilities {
   /**
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
-   * @param workingDirectory - working directory for running this command
-   * @param initCwd = the folder containing a local .npmrc, which will be used
-   *        for the INIT_CWD environment variable
-   * @param captureOutput - if true, map stdio to 'pipe' instead of the parent process's streams
+   * @param options - options for how the command should be run
    */
   public static executeLifecycleCommandAsync(
     command: string,
-    workingDirectory: string,
-    initCwd: string,
-    captureOutput: boolean = false
+    options: ILifecycleCommandOptions
   ): child_process.ChildProcess {
     let shellCommand: string = process.env.comspec || 'cmd';
     let commandFlags: string = '/d /s /c';
@@ -379,16 +398,16 @@ export class Utilities {
       useShell = false;
     }
 
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(initCwd);
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
 
     return child_process.spawn(
       shellCommand,
       [commandFlags, command],
       {
-        cwd: workingDirectory,
+        cwd: options.workingDirectory,
         shell: useShell,
         env: environment,
-        stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
       });
   }
 
@@ -399,7 +418,7 @@ export class Utilities {
    * Example: 'hello there' --> '"hello there"'
    */
   public static escapeShellParameter(parameter: string): string {
-    return '"' + parameter + '"';
+    return `"${parameter}"`;
   }
 
   /**
@@ -410,6 +429,7 @@ export class Utilities {
     if (FileSystem.exists(directory)) {
       console.log('Deleting old files from ' + directory);
     }
+
     FileSystem.ensureEmptyFolder(directory);
 
     const npmPackageJson: IPackageJson = {
@@ -430,29 +450,32 @@ export class Utilities {
     console.log(os.EOL + 'Running "npm install" in ' + directory);
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
-    Utilities.executeCommandWithRetry(options.maxInstallAttempts, 'npm', ['install'], directory,
+    Utilities.executeCommandWithRetry(
+      options.maxInstallAttempts,
+      'npm',
+      ['install'],
+      directory,
       Utilities._createEnvironmentForRushCommand(''),
-      options.suppressOutput);
+      options.suppressOutput
+    );
   }
 
   public static withFinally<T>(options: { promise: Promise<T>, finally: () => void }): Promise<T> {
-    return options.promise
-      .then<T>((result: T) => {
-        try {
-          options.finally();
-        } catch (error) {
-          return Promise.reject(error);
-        }
-        return result;
-      })
-      .catch<T>((error: Error) => {
-        try {
-          options.finally();
-        } catch (innerError) {
-          return Promise.reject(innerError);
-        }
+    return options.promise.then<T>((result: T) => {
+      try {
+        options.finally();
+      } catch (error) {
         return Promise.reject(error);
-      });
+      }
+      return result;
+    }).catch<T>((error: Error) => {
+      try {
+        options.finally();
+      } catch (innerError) {
+        return Promise.reject(innerError);
+      }
+      return Promise.reject(error);
+    });
   }
 
   /**
@@ -529,10 +552,10 @@ export class Utilities {
     if (initialEnvironment === undefined) {
       initialEnvironment = process.env;
     }
+
     const environment: {} = {};
     for (const key of Object.getOwnPropertyNames(initialEnvironment)) {
-      const normalizedKey: string = os.platform() === 'win32'
-        ? key.toUpperCase() : key;
+      const normalizedKey: string = os.platform() === 'win32' ? key.toUpperCase() : key;
 
       // If Rush itself was invoked inside a lifecycle script, this may be set and would interfere
       // with Rush's installations.  If we actually want it, we will set it explicitly below.
@@ -577,7 +600,6 @@ export class Utilities {
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {
-
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,
@@ -606,13 +628,11 @@ export class Utilities {
     let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(escapedCommand,
       escapedArgs, options);
 
-    /* tslint:disable:no-any */
-    if (result.error && (result.error as any).errno === 'ENOENT') {
+    if (result.error && (result.error as any).errno === 'ENOENT') { // tslint:disable-line:no-any
       // This is a workaround for GitHub issue #25330
       // https://github.com/nodejs/node-v0.x-archive/issues/25330
       result = child_process.spawnSync(command + '.cmd', args, options);
     }
-    /* tslint:enable:no-any */
 
     Utilities._processResult(result);
     return result;
