@@ -13,6 +13,7 @@ import {
   FileSystem,
   FileConstants
 } from '@microsoft/node-core-library';
+import { RushConfiguration } from '../api/RushConfiguration';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -50,6 +51,46 @@ export interface ILifecycleCommandOptions {
    * If true, suppress the process's output, but if there is a nonzero exit code then print stderr
    */
   handleOutput: boolean;
+
+  /**
+   * Options for what should be added to the PATH variable
+   */
+  environmentPathOptions: Partial<IEnvironmentPathOptions>;
+}
+
+export interface IEnvironmentPathOptions {
+  /**
+   * If true, include <project root>/node_modules/.bin in the PATH. If both this and
+   * {@link IEnvironmentPathOptions.includeRepoBin} are set, this path will take precedence.
+   */
+  includeProjectBin: boolean;
+
+  /**
+   * If true, include <repo root>/common/temp/node_modules/.bin in the PATH.
+   */
+  includeRepoBin: boolean;
+}
+
+interface ICreateEnvironmentForRushCommandPathOptions extends Partial<IEnvironmentPathOptions> {
+  projectRoot: string | undefined;
+  commonTempFolder: string | undefined;
+}
+
+interface ICreateEnvironmentForRushCommandOptions {
+  /**
+   * The INIT_CWD environment variable
+   */
+  initCwd?: string;
+
+  /**
+   * an existing environment to copy instead of process.env
+   */
+  initialEnvironment?: IEnvironment;
+
+  /**
+   * Options for what should be added to the PATH variable
+   */
+  pathOptions?: ICreateEnvironmentForRushCommandPathOptions;
 }
 
 export class Utilities {
@@ -349,15 +390,12 @@ export class Utilities {
    */
   public static executeLifecycleCommand(
     command: string,
+    rushConfiguration: RushConfiguration | undefined,
     options: ILifecycleCommandOptions
   ): number {
-    // TODO: move this to a common location
-    // const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
-    // // load the local node_modules/.bin directory into the PATH
-    // environment.PATH = `${path.resolve(options.workingDirectory, 'node_modules', '.bin')}:${environment.PATH}`;
-
     const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeLifecycleCommandInternal(
       command,
+      rushConfiguration,
       child_process.spawnSync,
       options
     );
@@ -375,10 +413,12 @@ export class Utilities {
    */
   public static executeLifecycleCommandAsync(
     command: string,
+    rushConfiguration: RushConfiguration,
     options: ILifecycleCommandOptions
   ): child_process.ChildProcess {
     return Utilities._executeLifecycleCommandInternal(
       command,
+      rushConfiguration,
       child_process.spawn,
       options
     );
@@ -428,7 +468,7 @@ export class Utilities {
       'npm',
       ['install'],
       directory,
-      Utilities._createEnvironmentForRushCommand(''),
+      Utilities._createEnvironmentForRushCommand({}),
       options.suppressOutput
     );
   }
@@ -517,6 +557,7 @@ export class Utilities {
 
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
+    rushConfiguration: RushConfiguration | undefined,
     spawnFunction: (command: String, args: string[], spawnOptions: child_process.SpawnOptions) => TCommandResult,
     options: ILifecycleCommandOptions
   ): TCommandResult {
@@ -529,7 +570,16 @@ export class Utilities {
       useShell = false;
     }
 
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(
+      {
+        initCwd: options.initCwd,
+        pathOptions: {
+          ...options.environmentPathOptions,
+          projectRoot: options.workingDirectory,
+          commonTempFolder: rushConfiguration ? rushConfiguration.commonTempFolder : undefined
+        }
+      }
+    );
 
     return spawnFunction(
       shellCommand,
@@ -545,17 +595,15 @@ export class Utilities {
 
   /**
    * Returns a process.env environment suitable for executing lifecycle scripts.
-   * @param initCwd - The INIT_CWD environment variable
    * @param initialEnvironment - an existing environment to copy instead of process.env
    */
-  private static _createEnvironmentForRushCommand(initCwd: string,
-    initialEnvironment?: IEnvironment): { } {
-    if (initialEnvironment === undefined) {
-      initialEnvironment = process.env;
+  private static _createEnvironmentForRushCommand(options: ICreateEnvironmentForRushCommandOptions): IEnvironment {
+    if (options.initialEnvironment === undefined) {
+      options.initialEnvironment = process.env;
     }
 
-    const environment: {} = {};
-    for (const key of Object.getOwnPropertyNames(initialEnvironment)) {
+    const environment: IEnvironment = {};
+    for (const key of Object.getOwnPropertyNames(options.initialEnvironment)) {
       const normalizedKey: string = os.platform() === 'win32' ? key.toUpperCase() : key;
 
       // If Rush itself was invoked inside a lifecycle script, this may be set and would interfere
@@ -574,21 +622,40 @@ export class Utilities {
         continue;
       }
 
-      environment[key] = initialEnvironment[key];
+      environment[key] = options.initialEnvironment[key];
     }
 
-     // When NPM invokes a lifecycle script, it sets an environment variable INIT_CWD that remembers
-     // the directory that NPM started in.  This allows naive scripts to change their current working directory
-     // and invoke NPM operations, while still be able to find a local .npmrc file.  Although Rush recommends
-     // for toolchain scripts to be professionally written (versus brittle stuff like
-     // "cd ./lib && npm run tsc && cd .."), we support INIT_CWD for compatibility.
-     //
-     // More about this feature: https://github.com/npm/npm/pull/12356
-     if (initCwd) {
-       environment['INIT_CWD'] = initCwd; // tslint:disable-line:no-string-literal
-     }
+    // When NPM invokes a lifecycle script, it sets an environment variable INIT_CWD that remembers
+    // the directory that NPM started in.  This allows naive scripts to change their current working directory
+    // and invoke NPM operations, while still be able to find a local .npmrc file.  Although Rush recommends
+    // for toolchain scripts to be professionally written (versus brittle stuff like
+    // "cd ./lib && npm run tsc && cd .."), we support INIT_CWD for compatibility.
+    //
+    // More about this feature: https://github.com/npm/npm/pull/12356
+    if (options.initCwd) {
+      environment['INIT_CWD'] = options.initCwd; // tslint:disable-line:no-string-literal
+    }
+
+    if (options.pathOptions) {
+      if (options.pathOptions.includeRepoBin && options.pathOptions.commonTempFolder) {
+        environment.PATH = Utilities.addNodeModulesBinToPATH(environment.PATH, options.pathOptions.commonTempFolder);
+      }
+
+      if (options.pathOptions.includeProjectBin && options.pathOptions.projectRoot) {
+        environment.PATH = Utilities.addNodeModulesBinToPATH(environment.PATH, options.pathOptions.projectRoot);
+      }
+    }
 
     return environment;
+  }
+
+  private static addNodeModulesBinToPATH(existingPATH: string | undefined, rootDirectory: string): string {
+    const binPath: string = path.resolve(rootDirectory, 'node_modules', '.bin');
+    if (existingPATH) {
+      return `${binPath}:${existingPATH}`;
+    } else {
+      return binPath;
+    }
   }
 
   /**
@@ -605,7 +672,9 @@ export class Utilities {
       cwd: workingDirectory,
       shell: true,
       stdio: stdio,
-      env: keepEnvironment ? environment : Utilities._createEnvironmentForRushCommand('', environment)
+      env: keepEnvironment
+        ? environment
+        : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment })
     };
 
     // This is needed since we specify shell=true below.
@@ -621,7 +690,8 @@ export class Utilities {
     // into node-core-library, but for now this hack will unblock people:
 
     // Only escape the command if it actually contains spaces:
-    const escapedCommand: string = command.indexOf(' ') < 0 ? command
+    const escapedCommand: string = command.indexOf(' ') < 0
+      ? command
       : Utilities.escapeShellParameter(command);
 
     const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
