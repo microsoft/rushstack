@@ -386,7 +386,7 @@ export class Utilities {
         cwd: workingDirectory,
         shell: useShell,
         env: environment,
-        stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+        stdio: captureOutput ? ['pipe', 'pipe', 'pipe', 'ipc'] : [0, 1, 2, 'ipc']
       });
   }
 

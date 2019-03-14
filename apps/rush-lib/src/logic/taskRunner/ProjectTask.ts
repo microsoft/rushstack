@@ -29,6 +29,7 @@ export interface IProjectTaskOptions {
   commandToRun: string;
   customParameterValues: string[];
   isIncrementalBuildAllowed: boolean;
+  enableIPC: boolean;
   ignoreMissingScript: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
 }
@@ -57,6 +58,7 @@ export class ProjectTask implements ITaskDefinition {
     this._commandToRun = options.commandToRun;
     this._customParameterValues = options.customParameterValues;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
+    this.enableIPC = options.enableIPC;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
   }
@@ -144,17 +146,38 @@ export class ProjectTask implements ITaskDefinition {
           Utilities.executeLifecycleCommandAsync(normalizedTaskCommand, projectFolder,
             this._rushConfiguration.commonTempFolder, true);
 
+        let inBackground: boolean = false;
+
         // Hook into events, in order to get live streaming of build log
         task.stdout.on('data', (data: string) => {
-          writer.write(data);
+          if (!inBackground) {
+            writer.write(data);
+          }
         });
 
         task.stderr.on('data', (data: string) => {
-          writer.writeError(data);
-          this._hasWarningOrError = true;
+          if (!inBackground) {
+            writer.writeError(data);
+            this._hasWarningOrError = true;
+          }
         });
 
         return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
+          const successHandler: Function = () => {
+            // Write deps on success.
+            if (currentPackageDeps) {
+              JsonFile.save(currentPackageDeps, currentDepsPath);
+            }
+            resolve(TaskStatus.Success);
+          };
+
+          task.on('message', (msg) => {
+            if (!inBackground && msg === 'rush-continue') {
+              inBackground = true;
+              successHandler();
+            }
+          });
+
           task.on('close', (code: number) => {
               this._writeLogsToDisk(writer);
 
@@ -163,11 +186,7 @@ export class ProjectTask implements ITaskDefinition {
             } else if (this._hasWarningOrError) {
               resolve(TaskStatus.SuccessWithWarning);
             } else {
-              // Write deps on success.
-              if (currentPackageDeps) {
-                JsonFile.save(currentPackageDeps, currentDepsPath);
-              }
-              resolve(TaskStatus.Success);
+              successHandler();
             }
           });
         });
