@@ -104,8 +104,9 @@ export class Utilities {
    * this looks something like "/usr/username/"
    */
   public static getHomeDirectory(): string {
-    const unresolvedUserFolder: string | undefined
-      = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    const unresolvedUserFolder: string | undefined = process.env[
+      (process.platform === 'win32') ? 'USERPROFILE' : 'HOME'
+    ];
     const homeFolder: string = path.resolve(unresolvedUserFolder);
     if (!FileSystem.exists(homeFolder)) {
       throw new Error('Unable to determine the current user\'s home directory');
@@ -638,21 +639,22 @@ export class Utilities {
 
     if (options.pathOptions) {
       if (options.pathOptions.includeRepoBin && options.pathOptions.commonTempFolder) {
-        environment.PATH = Utilities.addNodeModulesBinToPATH(environment.PATH, options.pathOptions.commonTempFolder);
+        environment.PATH = Utilities.addNodeModulesBinToPath(environment.PATH, options.pathOptions.commonTempFolder);
       }
 
       if (options.pathOptions.includeProjectBin && options.pathOptions.projectRoot) {
-        environment.PATH = Utilities.addNodeModulesBinToPATH(environment.PATH, options.pathOptions.projectRoot);
+        environment.PATH = Utilities.addNodeModulesBinToPath(environment.PATH, options.pathOptions.projectRoot);
       }
     }
 
     return environment;
   }
 
-  private static addNodeModulesBinToPATH(existingPATH: string | undefined, rootDirectory: string): string {
+  private static addNodeModulesBinToPath(existingPath: string | undefined, rootDirectory: string): string {
     const binPath: string = path.resolve(rootDirectory, 'node_modules', '.bin');
-    if (existingPATH) {
-      return `${binPath}:${existingPATH}`;
+    if (existingPath) {
+      const pathSeparator: string = os.platform() === 'win32' ? ';' : ':';
+      return `${binPath}${pathSeparator}${existingPath}`;
     } else {
       return binPath;
     }
