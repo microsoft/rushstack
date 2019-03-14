@@ -113,7 +113,7 @@ export class ChangeAction extends BaseRushAction {
       .sort();
 
     if (this._sortedProjectList.length === 0) {
-      console.log('No change file is needed.');
+      console.log('The change files are up to date. Nothing to do.');
       this._warnUncommittedChanges();
       return Promise.resolve();
     }
@@ -147,7 +147,7 @@ export class ChangeAction extends BaseRushAction {
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
-      console.log('No change is needed.');
+      console.log('The change files are up to date for this branch.');
     }
   }
 
@@ -185,7 +185,7 @@ export class ChangeAction extends BaseRushAction {
   private _validateChangeFile(changedPackages: string[]): void {
     const files: string[] = this._getChangeFiles();
     if (files.length === 0) {
-      throw new Error(`No change file is found. Run "rush change" to generate a change file.`);
+      throw new Error(`Your branch has changes that require a change log entry. Please run "rush change".`);
     }
     ChangeFiles.validate(files, changedPackages);
   }
