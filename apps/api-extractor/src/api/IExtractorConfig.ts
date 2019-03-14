@@ -111,7 +111,7 @@ export interface IExtractorValidationRulesConfig {
 }
 
 /**
- * Configures how the API review files (*.api.ts) will be generated.
+ * Configures how the API review files (*.api.md) will be generated.
  *
  * @public
  */
@@ -124,9 +124,9 @@ export interface IExtractorApiReviewFileConfig {
   /**
    * The file path of the folder containing API review file, relative to
    * the project folder.  This is part of an API review workflow:  During a build,
-   * the API Extractor will output an API file, e.g. "my-project/temp/my-project.api.ts".
+   * the API Extractor will output an API file, e.g. "my-project/temp/my-project.api.md".
    * It will then compare this file against the last reviewed file,
-   * e.g. "../api-review/my-project.api.ts" (assuming that apiReviewFolder is "../api-review").
+   * e.g. "../api-review/my-project.api.md" (assuming that apiReviewFolder is "../api-review").
    * If the files are different, the build will fail with an error message that instructs
    * the developer to update the approved file, and then commit it to Git.  When they
    * create a Pull Request, a branch policy will look for changes under "api-review/*"
@@ -140,7 +140,7 @@ export interface IExtractorApiReviewFileConfig {
   apiReviewFolder?: string;
 
   /**
-   * The *.api.ts report is saved into this folder.  During a production build
+   * The *.api.md report is saved into this folder.  During a production build
    * (i.e. when IExtractorRuntimeOptions.productionBuild=true) the temporary file will
    * be compared with the file in apiReviewFolder; if there are differences, and error
    * will be reported.  During a non-production build, the temporary file will be
@@ -311,7 +311,7 @@ export interface IExtractorMessageReportingRuleConfig {
   logLevel: ExtractorMessageLogLevel;
 
   /**
-   * If API Extractor is configured to write an API review file (.api.ts), then the message will be written
+   * If API Extractor is configured to write an API review file (.api.md), then the message will be written
    * inside that file.  If the API review file is NOT being written, then the message is instead logged according
    * to the `logLevel` option.
    */

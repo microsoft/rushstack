@@ -92,7 +92,7 @@
     },
 
     "apiReviewFile": {
-      "description": "Configures how the API review files (*.api.ts) will be generated.",
+      "description": "Configures how the API review files (*.api.md) will be generated.",
       "type": "object",
       "properties": {
         "enabled": {
@@ -104,7 +104,7 @@
           "type": "string"
         },
         "tempFolder": {
-          "description": "The *.api.ts report is saved into this folder.  During a production build, the temporary file will be compared with the file in apiReviewFolder; if there are differences, and error will be reported. The default value is \"./temp\".",
+          "description": "The *.api.md report is saved into this folder.  During a production build, the temporary file will be compared with the file in apiReviewFolder; if there are differences, and error will be reported. The default value is \"./temp\".",
           "type": "string"
         }
       },
@@ -231,7 +231,7 @@
             },
             "addToApiReviewFile": {
               "type": "boolean",
-              "description": "If API Extractor is configured to write an API review file (.api.ts), then the message will be written inside that file.  If the API review file is NOT being written, then the message is instead logged according to the \"logLevel\" option."
+              "description": "If API Extractor is configured to write an API review file (.api.md), then the message will be written inside that file.  If the API review file is NOT being written, then the message is instead logged according to the \"logLevel\" option."
             }
           },
           "additionalProperties": false,
