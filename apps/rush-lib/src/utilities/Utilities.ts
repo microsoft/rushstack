@@ -351,28 +351,16 @@ export class Utilities {
     command: string,
     options: ILifecycleCommandOptions
   ): number {
-    let shellCommand: string = process.env.comspec || 'cmd';
-    let commandFlags: string = '/d /s /c';
-    let useShell: boolean = true;
-    if (process.platform !== 'win32') {
-      shellCommand = 'sh';
-      commandFlags = '-c';
-      useShell = false;
-    }
+    // TODO: move this to a common location
+    // const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
+    // // load the local node_modules/.bin directory into the PATH
+    // environment.PATH = `${path.resolve(options.workingDirectory, 'node_modules', '.bin')}:${environment.PATH}`;
 
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
-    // load the local node_modules/.bin directory into the PATH
-    environment.PATH = `${path.resolve(options.workingDirectory, 'node_modules', '.bin')}:${environment.PATH}`;
-
-    const result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
-      shellCommand,
-      [commandFlags, command],
-      {
-        cwd: options.workingDirectory,
-        shell: useShell,
-        env: environment,
-        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
-      });
+    const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeLifecycleCommandInternal(
+      command,
+      child_process.spawnSync,
+      options
+    );
 
     if (options.handleOutput) {
       Utilities._processResult(result);
@@ -389,26 +377,11 @@ export class Utilities {
     command: string,
     options: ILifecycleCommandOptions
   ): child_process.ChildProcess {
-    let shellCommand: string = process.env.comspec || 'cmd';
-    let commandFlags: string = '/d /s /c';
-    let useShell: boolean = true;
-    if (process.platform !== 'win32') {
-      shellCommand = 'sh';
-      commandFlags = '-c';
-      useShell = false;
-    }
-
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
-
-    return child_process.spawn(
-      shellCommand,
-      [commandFlags, command],
-      {
-        cwd: options.workingDirectory,
-        shell: useShell,
-        env: environment,
-        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
-      });
+    return Utilities._executeLifecycleCommandInternal(
+      command,
+      child_process.spawn,
+      options
+    );
   }
 
   /**
@@ -540,6 +513,34 @@ export class Utilities {
 
   public static getRushConfigNotFoundError(): Error {
     return new Error('Unable to find rush.json configuration file');
+  }
+
+  private static _executeLifecycleCommandInternal<TCommandResult>(
+    command: string,
+    spawnFunction: (command: String, args: string[], spawnOptions: child_process.SpawnOptions) => TCommandResult,
+    options: ILifecycleCommandOptions
+  ): TCommandResult {
+    let shellCommand: string = process.env.comspec || 'cmd';
+    let commandFlags: string = '/d /s /c';
+    let useShell: boolean = true;
+    if (process.platform !== 'win32') {
+      shellCommand = 'sh';
+      commandFlags = '-c';
+      useShell = false;
+    }
+
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
+
+    return spawnFunction(
+      shellCommand,
+      [commandFlags, command],
+      {
+        cwd: options.workingDirectory,
+        shell: useShell,
+        env: environment,
+        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+      }
+    );
   }
 
   /**
