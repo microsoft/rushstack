@@ -43,6 +43,7 @@ export class PublishAction extends BaseRushAction {
   private _prereleaseName: CommandLineStringParameter;
   private _suffix: CommandLineStringParameter;
   private _force: CommandLineFlagParameter;
+  private _transaction: CommandLineFlagParameter;
   private _prereleaseToken: PrereleaseToken;
   private _versionPolicy: CommandLineStringParameter;
 
@@ -181,6 +182,12 @@ export class PublishAction extends BaseRushAction {
       parameterShortName: undefined,
       description: 'If this flag is specified with --publish, packages will be published with --force on npm'
     });
+    this._transaction = this.defineFlagParameter({
+      parameterLongName: '--transaction',
+      parameterShortName: undefined,
+      description: 'If this flag is specified with --publish, version updates will not be written back to source ' +
+        'unless all packages have published successfully.'
+    });
   }
 
   /**
@@ -272,7 +279,7 @@ export class PublishAction extends BaseRushAction {
           if (change.changeType && change.changeType > ChangeType.dependency) {
             const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
             if (project) {
-              if (!this._packageExists(project)) {
+              if (this._transaction.value || !this._packageExists(project)) {
                 this._npmPublish(change.packageName, project.projectFolder);
               } else {
                 console.log(`Skip ${change.packageName}. Package exists.`);
