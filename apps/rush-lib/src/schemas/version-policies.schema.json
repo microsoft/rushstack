@@ -6,47 +6,71 @@
   "type": "array",
   "items": {
     "type": "object",
-      "oneOf": [
-        { "$ref": "#/definitions/lockStepVersion" },
-        { "$ref": "#/definitions/individualVersion" }
-      ],
-      "properties": {
-        "policyName": {
-          "description": "The name of the version policy",
-          "type": "string"
-        },
-        "dependencies": {
-          "type": "object",
-          "description": "Behavior when handling package dependencies during version bumps and publishing",
-          "properties": {
-            "versionFormatForPublish": {
-              "description": "The version to use for dependencies when publishing",
-              "type": "string",
-              "enum": [ "original", "exact" ]
+    "allOf": [
+      {
+        "oneOf": [
+          { "$ref": "#/definitions/lockStepVersion" },
+          { "$ref": "#/definitions/individualVersion" }
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "policyName": {
+            "description": "The name of the version policy",
+            "type": "string"
+          },
+          "dependencies": {
+            "type": "object",
+            "description": "Behavior when handling package dependencies during version bumps and publishing",
+            "properties": {
+              "versionFormatForPublish": {
+                "description": "The version to use for dependencies when publishing",
+                "type": "string",
+                "enum": ["original", "exact"]
+              },
+              "versionFormatForCommit": {
+                "description": "The version to use for dependencies when committing to source",
+                "type": "string",
+                "enum": ["original", "wildcard"]
+              }
             },
-            "versionFormatForCommit": {
-              "description": "The version to use for dependencies when committing to source",
-              "type": "string",
-              "enum": [ "original", "wildcard" ]
-            }
+            "required": ["versionFormatForPublish", "versionFormatForCommit"],
+            "additionalProperties": false
           }
         }
       }
+    ]
   },
+
   "definitions": {
+    "any-value": {
+      "type": [
+        "array",
+        "boolean",
+        "integer",
+        "number",
+        "object",
+        "string"
+      ],
+      "items": {
+        "$ref": "#/definitions/any-value"
+      }
+    },
+
     "lockStepVersion": {
-      "type":"object",
+      "type": "object",
       "description": "Lockstep version policy",
       "properties": {
-        "policyName": {
-          "description": "The name of the version policy",
-          "type": "string"
-        },
+        "policyName": { "$ref": "#/definitions/any-value" },
+        "dependencies": { "$ref": "#/definitions/any-value" },
+
         "definitionName": {
           "description": "The name of version policy definition",
           "type": "string",
-          "enum": [ "lockStepVersion" ]
+          "enum": ["lockStepVersion"]
         },
+
         "version": {
           "description": "Current version for projects with lockStepVersion policy",
           "type": "string",
@@ -54,35 +78,36 @@
         },
         "nextBump": {
           "description": "Type of next version bump",
-          "enum": [ "prerelease", "release", "minor", "patch", "major" ]
+          "enum": ["prerelease", "release", "minor", "patch", "major"]
         },
         "mainProject": {
           "description": "The main project for this version policy",
           "type": "string"
         }
       },
-      "required": [ "policyName", "definitionName", "version", "nextBump" ],
+      "required": ["policyName", "definitionName", "version", "nextBump"],
       "additionalProperties": false
     },
+
     "individualVersion": {
-      "type":"object",
+      "type": "object",
       "description": "Lockstep version policy",
       "properties": {
-        "policyName": {
-          "description": "The name of the version policy",
-          "type": "string"
-        },
+        "policyName": { "$ref": "#/definitions/any-value" },
+        "dependencies": { "$ref": "#/definitions/any-value" },
+
         "definitionName": {
           "description": "The name of version policy definition",
           "type": "string",
-          "enum": [ "individualVersion" ]
+          "enum": ["individualVersion"]
         },
+
         "lockedMajor": {
           "description": "The locked major version",
           "type": "number"
         }
       },
-      "required": [ "policyName", "definitionName" ],
+      "required": ["policyName", "definitionName"],
       "additionalProperties": false
     }
   }
