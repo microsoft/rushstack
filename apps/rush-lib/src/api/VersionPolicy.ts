@@ -10,7 +10,8 @@ import {
   ILockStepVersionJson,
   IIndividualVersionJson,
   VersionFormatForCommit,
-  VersionFormatForPublish
+  VersionFormatForPublish,
+  IVersionPolicyDependencyJson
 } from './VersionPolicyConfiguration';
 import { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConfiguration } from './RushConfiguration';
@@ -80,15 +81,9 @@ export abstract class VersionPolicy {
     this._policyName = versionPolicyJson.policyName;
     this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
 
-    const {
-      dependencies: {
-        versionFormatForCommit = VersionFormatForCommit.original,
-        versionFormatForPublish = VersionFormatForPublish.original
-      } = {}
-    } = versionPolicyJson;
-
-    this._versionFormatForCommit = versionFormatForCommit;
-    this._versionFormatForPublish = versionFormatForPublish;
+    const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || { };
+    this._versionFormatForCommit = jsonDependencies.versionFormatForCommit || VersionFormatForCommit.original;
+    this._versionFormatForPublish = jsonDependencies.versionFormatForPublish || VersionFormatForPublish.original;
   }
 
   /**

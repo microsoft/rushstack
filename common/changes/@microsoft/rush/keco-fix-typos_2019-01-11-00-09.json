@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix typo of timestamp in rush change manual page",
+      "comment": "",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

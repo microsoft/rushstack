@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Add 'storeLooseVersions' parameter to reduce conflicts during publishing",
+      "comment": "Add a \"dependencies\" configuration property to version-policies.json to customize the way dependency versions are published and stored in source control",
       "packageName": "@microsoft/rush",
       "type": "minor"
     }

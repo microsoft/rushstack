@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Make `rush build` print stdout if stderr is empty. Improves Webpack support.",
+      "comment": "Change \"rush build\" to print stdout if stderr is empty and a task fails. This improves Webpack support",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
