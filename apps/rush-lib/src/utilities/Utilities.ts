@@ -13,6 +13,7 @@ import {
   FileSystem,
   FileConstants
 } from '@microsoft/node-core-library';
+import { RushConfiguration } from '../api/RushConfiguration';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -35,14 +36,77 @@ export interface IInstallPackageInDirectoryOptions {
   suppressOutput?: boolean;
 }
 
+export interface ILifecycleCommandOptions {
+  /**
+   * The rush configuration, if the command is running in a rush repo.
+   */
+  rushConfiguration: RushConfiguration | undefined;
+
+  /**
+   * Working directory for running the command
+   */
+  workingDirectory: string;
+
+  /**
+   * The folder containing a local .npmrc, which will be used for the INIT_CWD environment variable
+   */
+  initCwd: string;
+
+  /**
+   * If true, suppress the process's output, but if there is a nonzero exit code then print stderr
+   */
+  handleOutput: boolean;
+
+  /**
+   * Options for what should be added to the PATH variable
+   */
+  environmentPathOptions: IEnvironmentPathOptions;
+}
+
+export interface IEnvironmentPathOptions {
+  /**
+   * If true, include <project root>/node_modules/.bin in the PATH. If both this and
+   * {@link IEnvironmentPathOptions.includeRepoBin} are set, this path will take precedence.
+   */
+  includeProjectBin?: boolean;
+
+  /**
+   * If true, include <repo root>/common/temp/node_modules/.bin in the PATH.
+   */
+  includeRepoBin?: boolean;
+}
+
+interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
+  projectRoot: string | undefined;
+  commonTempFolder: string | undefined;
+}
+
+interface ICreateEnvironmentForRushCommandOptions {
+  /**
+   * The INIT_CWD environment variable
+   */
+  initCwd?: string;
+
+  /**
+   * an existing environment to copy instead of process.env
+   */
+  initialEnvironment?: IEnvironment;
+
+  /**
+   * Options for what should be added to the PATH variable
+   */
+  pathOptions?: ICreateEnvironmentForRushCommandPathOptions;
+}
+
 export class Utilities {
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
    * this looks something like "/usr/username/"
    */
   public static getHomeDirectory(): string {
-    const unresolvedUserFolder: string | undefined
-      = process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+    const unresolvedUserFolder: string | undefined = process.env[
+      (process.platform === 'win32') ? 'USERPROFILE' : 'HOME'
+    ];
     const homeFolder: string = path.resolve(unresolvedUserFolder);
     if (!FileSystem.exists(homeFolder)) {
       throw new Error('Unable to determine the current user\'s home directory');
@@ -77,10 +141,12 @@ export class Utilities {
    * Retries a function until a timeout is reached. The function is expected to throw if it failed and
    *  should be retried.
    */
-  public static retryUntilTimeout<TResult>(fn: () => TResult,
-                                           maxWaitTimeMs: number,
-                                           getTimeoutError: (innerError: Error) => Error,
-                                           fnName: string): TResult {
+  public static retryUntilTimeout<TResult>(
+    fn: () => TResult,
+    maxWaitTimeMs: number,
+    getTimeoutError: (innerError: Error) => Error,
+    fnName: string
+  ): TResult {
     const startTime: number = Utilities.getTimeInMs();
     let looped: boolean = false;
 
@@ -102,6 +168,8 @@ export class Utilities {
     if (looped) {
       const currentTime: number = Utilities.getTimeInMs();
       const totalSeconds: string = ((currentTime - startTime) / 1000.0).toFixed(2);
+      // This logging statement isn't meaningful to the end-user. `fnName` should be updated
+      // to something like `operationDescription`
       console.log(`${fnName}() stalled for ${totalSeconds} seconds`);
     }
 
@@ -127,12 +195,16 @@ export class Utilities {
     // fail.  To workaround that, retry for up to 7 seconds before giving up.
     const maxWaitTimeMs: number = 7 * 1000;
 
-    return Utilities.retryUntilTimeout(() => FileSystem.ensureFolder(folderName),
-                                       maxWaitTimeMs,
-                                       (e) => new Error(`Error: ${e}${os.EOL}Often this is caused by a file lock ` +
-                                                        'from a process such as your text editor, command prompt, ' +
-                                                        'or "gulp serve"'),
-                                       'createFolderWithRetry');
+    return Utilities.retryUntilTimeout(
+      () => FileSystem.ensureFolder(folderName),
+      maxWaitTimeMs,
+      (e) => new Error(
+        `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
+        'from a process such as your text editor, command prompt, ' +
+        'or "gulp serve"'
+      ),
+      'createFolderWithRetry'
+    );
   }
 
   /**
@@ -222,6 +294,7 @@ export class Utilities {
     if (stdout && stdout.columns) {
       return stdout.columns;
     }
+
     return 80;
   }
 
@@ -266,9 +339,14 @@ export class Utilities {
     keepEnvironment: boolean = false
   ): string {
 
-    const  result: child_process.SpawnSyncReturns<Buffer>
-      = Utilities._executeCommandInternal(command, args, workingDirectory,
-        ['pipe', 'pipe', 'pipe'], environment, keepEnvironment);
+    const  result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeCommandInternal(
+      command,
+      args,
+      workingDirectory,
+      ['pipe', 'pipe', 'pipe'],
+      environment,
+      keepEnvironment
+    );
 
     return result.stdout.toString();
   }
@@ -301,12 +379,14 @@ export class Utilities {
           if (retryCallback) {
             retryCallback();
           }
+
           continue;
         } else {
           console.error(`Giving up after ${attemptNumber} attempts` + os.EOL);
           throw error;
         }
       }
+
       break;
     }
   }
@@ -314,39 +394,17 @@ export class Utilities {
   /**
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
-   * @param workingDirectory - working directory for running this command
-   * @param initCwd = the folder containing a local .npmrc, which will be used
-   *        for the INIT_CWD environment variable
-   * @param handleOutput - if true, hide the process's output, but if there is a nonzero exit code
-   *   then show the stderr
+   * @param options - options for how the command should be run
    */
   public static executeLifecycleCommand(
-    command: string, options: {
-      workingDirectory: string,
-      initCwd: string,
-      handleOutput: boolean
-    }
+    command: string,
+    options: ILifecycleCommandOptions
   ): number {
-    let shellCommand: string = process.env.comspec || 'cmd';
-    let commandFlags: string = '/d /s /c';
-    let useShell: boolean = true;
-    if (process.platform !== 'win32') {
-      shellCommand = 'sh';
-      commandFlags = '-c';
-      useShell = false;
-    }
-
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(options.initCwd);
-
-    const result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
-      shellCommand,
-      [commandFlags, command],
-      {
-        cwd: options.workingDirectory,
-        shell: useShell,
-        env: environment,
-        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
-      });
+    const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeLifecycleCommandInternal(
+      command,
+      child_process.spawnSync,
+      options
+    );
 
     if (options.handleOutput) {
       Utilities._processResult(result);
@@ -357,37 +415,17 @@ export class Utilities {
   /**
    * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
    * @param command - the command to run on shell
-   * @param workingDirectory - working directory for running this command
-   * @param initCwd = the folder containing a local .npmrc, which will be used
-   *        for the INIT_CWD environment variable
-   * @param captureOutput - if true, map stdio to 'pipe' instead of the parent process's streams
+   * @param options - options for how the command should be run
    */
   public static executeLifecycleCommandAsync(
     command: string,
-    workingDirectory: string,
-    initCwd: string,
-    captureOutput: boolean = false
+    options: ILifecycleCommandOptions
   ): child_process.ChildProcess {
-    let shellCommand: string = process.env.comspec || 'cmd';
-    let commandFlags: string = '/d /s /c';
-    let useShell: boolean = true;
-    if (process.platform !== 'win32') {
-      shellCommand = 'sh';
-      commandFlags = '-c';
-      useShell = false;
-    }
-
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(initCwd);
-
-    return child_process.spawn(
-      shellCommand,
-      [commandFlags, command],
-      {
-        cwd: workingDirectory,
-        shell: useShell,
-        env: environment,
-        stdio: captureOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
-      });
+    return Utilities._executeLifecycleCommandInternal(
+      command,
+      child_process.spawn,
+      options
+    );
   }
 
   /**
@@ -397,7 +435,7 @@ export class Utilities {
    * Example: 'hello there' --> '"hello there"'
    */
   public static escapeShellParameter(parameter: string): string {
-    return '"' + parameter + '"';
+    return `"${parameter}"`;
   }
 
   /**
@@ -408,6 +446,7 @@ export class Utilities {
     if (FileSystem.exists(directory)) {
       console.log('Deleting old files from ' + directory);
     }
+
     FileSystem.ensureEmptyFolder(directory);
 
     const npmPackageJson: IPackageJson = {
@@ -428,29 +467,32 @@ export class Utilities {
     console.log(os.EOL + 'Running "npm install" in ' + directory);
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
-    Utilities.executeCommandWithRetry(options.maxInstallAttempts, 'npm', ['install'], directory,
-      Utilities._createEnvironmentForRushCommand(''),
-      options.suppressOutput);
+    Utilities.executeCommandWithRetry(
+      options.maxInstallAttempts,
+      'npm',
+      ['install'],
+      directory,
+      Utilities._createEnvironmentForRushCommand({}),
+      options.suppressOutput
+    );
   }
 
   public static withFinally<T>(options: { promise: Promise<T>, finally: () => void }): Promise<T> {
-    return options.promise
-      .then<T>((result: T) => {
-        try {
-          options.finally();
-        } catch (error) {
-          return Promise.reject(error);
-        }
-        return result;
-      })
-      .catch<T>((error: Error) => {
-        try {
-          options.finally();
-        } catch (innerError) {
-          return Promise.reject(innerError);
-        }
+    return options.promise.then<T>((result: T) => {
+      try {
+        options.finally();
+      } catch (error) {
         return Promise.reject(error);
-      });
+      }
+      return result;
+    }).catch<T>((error: Error) => {
+      try {
+        options.finally();
+      } catch (innerError) {
+        return Promise.reject(innerError);
+      }
+      return Promise.reject(error);
+    });
   }
 
   /**
@@ -517,20 +559,55 @@ export class Utilities {
     return new Error('Unable to find rush.json configuration file');
   }
 
+  private static _executeLifecycleCommandInternal<TCommandResult>(
+    command: string,
+    spawnFunction: (command: String, args: string[], spawnOptions: child_process.SpawnOptions) => TCommandResult,
+    options: ILifecycleCommandOptions
+  ): TCommandResult {
+    let shellCommand: string = process.env.comspec || 'cmd';
+    let commandFlags: string = '/d /s /c';
+    let useShell: boolean = true;
+    if (process.platform !== 'win32') {
+      shellCommand = 'sh';
+      commandFlags = '-c';
+      useShell = false;
+    }
+
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(
+      {
+        initCwd: options.initCwd,
+        pathOptions: {
+          ...options.environmentPathOptions,
+          projectRoot: options.workingDirectory,
+          commonTempFolder: options.rushConfiguration ? options.rushConfiguration.commonTempFolder : undefined
+        }
+      }
+    );
+
+    return spawnFunction(
+      shellCommand,
+      [commandFlags, command],
+      {
+        cwd: options.workingDirectory,
+        shell: useShell,
+        env: environment,
+        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+      }
+    );
+  }
+
   /**
    * Returns a process.env environment suitable for executing lifecycle scripts.
-   * @param initCwd - The INIT_CWD environment variable
    * @param initialEnvironment - an existing environment to copy instead of process.env
    */
-  private static _createEnvironmentForRushCommand(initCwd: string,
-    initialEnvironment?: IEnvironment): { } {
-    if (initialEnvironment === undefined) {
-      initialEnvironment = process.env;
+  private static _createEnvironmentForRushCommand(options: ICreateEnvironmentForRushCommandOptions): IEnvironment {
+    if (options.initialEnvironment === undefined) {
+      options.initialEnvironment = process.env;
     }
-    const environment: {} = {};
-    for (const key of Object.getOwnPropertyNames(initialEnvironment)) {
-      const normalizedKey: string = os.platform() === 'win32'
-        ? key.toUpperCase() : key;
+
+    const environment: IEnvironment = {};
+    for (const key of Object.getOwnPropertyNames(options.initialEnvironment)) {
+      const normalizedKey: string = os.platform() === 'win32' ? key.toUpperCase() : key;
 
       // If Rush itself was invoked inside a lifecycle script, this may be set and would interfere
       // with Rush's installations.  If we actually want it, we will set it explicitly below.
@@ -548,21 +625,53 @@ export class Utilities {
         continue;
       }
 
-      environment[key] = initialEnvironment[key];
+      // Use the uppercased environment variable name on Windows because environment variable names
+      // are case-insensitive on Windows
+      environment[normalizedKey] = options.initialEnvironment[key];
     }
 
-     // When NPM invokes a lifecycle script, it sets an environment variable INIT_CWD that remembers
-     // the directory that NPM started in.  This allows naive scripts to change their current working directory
-     // and invoke NPM operations, while still be able to find a local .npmrc file.  Although Rush recommends
-     // for toolchain scripts to be professionally written (versus brittle stuff like
-     // "cd ./lib && npm run tsc && cd .."), we support INIT_CWD for compatibility.
-     //
-     // More about this feature: https://github.com/npm/npm/pull/12356
-     if (initCwd) {
-       environment['INIT_CWD'] = initCwd; // tslint:disable-line:no-string-literal
-     }
+    // When NPM invokes a lifecycle script, it sets an environment variable INIT_CWD that remembers
+    // the directory that NPM started in.  This allows naive scripts to change their current working directory
+    // and invoke NPM operations, while still be able to find a local .npmrc file.  Although Rush recommends
+    // for toolchain scripts to be professionally written (versus brittle stuff like
+    // "cd ./lib && npm run tsc && cd .."), we support INIT_CWD for compatibility.
+    //
+    // More about this feature: https://github.com/npm/npm/pull/12356
+    if (options.initCwd) {
+      environment['INIT_CWD'] = options.initCwd; // tslint:disable-line:no-string-literal
+    }
+
+    if (options.pathOptions) {
+      if (options.pathOptions.includeRepoBin && options.pathOptions.commonTempFolder) {
+        environment.PATH = Utilities._prependNodeModulesBinToPath(
+          environment.PATH,
+          options.pathOptions.commonTempFolder
+        );
+      }
+
+      if (options.pathOptions.includeProjectBin && options.pathOptions.projectRoot) {
+        environment.PATH = Utilities._prependNodeModulesBinToPath(
+          environment.PATH,
+          options.pathOptions.projectRoot
+        );
+      }
+    }
 
     return environment;
+  }
+
+  /**
+   * Prepend the node_modules/.bin folder under the specified folder to the specified PATH variable. For example,
+   * if `rootDirectory` is "/foobar" and `existingPath` is "/bin", this function will return
+   * "/foobar/node_modules/.bin:/bin"
+   */
+  private static _prependNodeModulesBinToPath(existingPath: string | undefined, rootDirectory: string): string {
+    const binPath: string = path.resolve(rootDirectory, 'node_modules', '.bin');
+    if (existingPath) {
+      return `${binPath}${path.delimiter}${existingPath}`;
+    } else {
+      return binPath;
+    }
   }
 
   /**
@@ -575,12 +684,13 @@ export class Utilities {
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {
-
     const options: child_process.SpawnSyncOptions = {
       cwd: workingDirectory,
       shell: true,
       stdio: stdio,
-      env: keepEnvironment ? environment : Utilities._createEnvironmentForRushCommand('', environment)
+      env: keepEnvironment
+        ? environment
+        : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment })
     };
 
     // This is needed since we specify shell=true below.
@@ -596,7 +706,8 @@ export class Utilities {
     // into node-core-library, but for now this hack will unblock people:
 
     // Only escape the command if it actually contains spaces:
-    const escapedCommand: string = command.indexOf(' ') < 0 ? command
+    const escapedCommand: string = command.indexOf(' ') < 0
+      ? command
       : Utilities.escapeShellParameter(command);
 
     const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
@@ -604,13 +715,11 @@ export class Utilities {
     let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(escapedCommand,
       escapedArgs, options);
 
-    /* tslint:disable:no-any */
-    if (result.error && (result.error as any).errno === 'ENOENT') {
+    if (result.error && (result.error as any).errno === 'ENOENT') { // tslint:disable-line:no-any
       // This is a workaround for GitHub issue #25330
       // https://github.com/nodejs/node-v0.x-archive/issues/25330
       result = child_process.spawnSync(command + '.cmd', args, options);
     }
-    /* tslint:enable:no-any */
 
     Utilities._processResult(result);
     return result;
