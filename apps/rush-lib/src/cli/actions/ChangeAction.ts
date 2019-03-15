@@ -113,7 +113,7 @@ export class ChangeAction extends BaseRushAction {
       .sort();
 
     if (this._sortedProjectList.length === 0) {
-      console.log('The change files are up to date. Nothing to do.');
+      console.log('No changes were detected on this branch. Nothing to do.');
       this._warnUncommittedChanges();
       return Promise.resolve();
     }
@@ -147,7 +147,7 @@ export class ChangeAction extends BaseRushAction {
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
-      console.log('The change files are up to date for this branch.');
+      console.log('No changes were detected on this branch.');
     }
   }
 
