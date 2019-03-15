@@ -623,7 +623,9 @@ export class Utilities {
         continue;
       }
 
-      environment[key] = options.initialEnvironment[key];
+      // Use the uppercased environment variable name on Windows because environment variable names
+      // are case-insensitive on Windows
+      environment[normalizedKey] = options.initialEnvironment[key];
     }
 
     // When NPM invokes a lifecycle script, it sets an environment variable INIT_CWD that remembers
@@ -639,22 +641,32 @@ export class Utilities {
 
     if (options.pathOptions) {
       if (options.pathOptions.includeRepoBin && options.pathOptions.commonTempFolder) {
-        environment.PATH = Utilities.addNodeModulesBinToPath(environment.PATH, options.pathOptions.commonTempFolder);
+        environment.PATH = Utilities._prependNodeModulesBinToPath(
+          environment.PATH,
+          options.pathOptions.commonTempFolder
+        );
       }
 
       if (options.pathOptions.includeProjectBin && options.pathOptions.projectRoot) {
-        environment.PATH = Utilities.addNodeModulesBinToPath(environment.PATH, options.pathOptions.projectRoot);
+        environment.PATH = Utilities._prependNodeModulesBinToPath(
+          environment.PATH,
+          options.pathOptions.projectRoot
+        );
       }
     }
 
     return environment;
   }
 
-  private static addNodeModulesBinToPath(existingPath: string | undefined, rootDirectory: string): string {
+  /**
+   * Prepend the node_modules/.bin folder under the specified folder to the specified PATH variable. For example,
+   * if `rootDirectory` is "C:\foobar" and `existingPath` is "/bin", this function will return
+   * "/foobar/node_modules/.bin:/bin"
+   */
+  private static _prependNodeModulesBinToPath(existingPath: string | undefined, rootDirectory: string): string {
     const binPath: string = path.resolve(rootDirectory, 'node_modules', '.bin');
     if (existingPath) {
-      const pathSeparator: string = os.platform() === 'win32' ? ';' : ':';
-      return `${binPath}${pathSeparator}${existingPath}`;
+      return `${binPath}${path.delimiter}${existingPath}`;
     } else {
       return binPath;
     }
