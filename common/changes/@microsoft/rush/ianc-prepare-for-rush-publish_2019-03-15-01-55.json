@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Remove the \"rush check\" step from the travis.yml template, since this is now handled by \"ensureConsistentVersions\" from rush.json",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "octogonz@users.noreply.github.com"
+}
