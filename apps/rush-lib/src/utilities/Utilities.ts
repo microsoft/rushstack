@@ -662,7 +662,7 @@ export class Utilities {
 
   /**
    * Prepend the node_modules/.bin folder under the specified folder to the specified PATH variable. For example,
-   * if `rootDirectory` is "C:\foobar" and `existingPath` is "/bin", this function will return
+   * if `rootDirectory` is "/foobar" and `existingPath` is "/bin", this function will return
    * "/foobar/node_modules/.bin:/bin"
    */
   private static _prependNodeModulesBinToPath(existingPath: string | undefined, rootDirectory: string): string {
