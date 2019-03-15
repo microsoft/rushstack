@@ -168,6 +168,8 @@ export class Utilities {
     if (looped) {
       const currentTime: number = Utilities.getTimeInMs();
       const totalSeconds: string = ((currentTime - startTime) / 1000.0).toFixed(2);
+      // This logging statement isn't meaningful to the end-user. `fnName` should be updated
+      // to something like `operationDescription`
       console.log(`${fnName}() stalled for ${totalSeconds} seconds`);
     }
 
