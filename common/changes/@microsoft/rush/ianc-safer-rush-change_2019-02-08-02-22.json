@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Improve \"rush change\"'s baseline remote detection.",
+      "comment": "Fix an issue where \"rush change\" sometimes could not detect changes correctly when invoked on a forked GitHub repo",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
