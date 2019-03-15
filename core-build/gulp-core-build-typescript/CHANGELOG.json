@@ -2,6 +2,24 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "8.0.13",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.13",
+      "date": "Fri, 15 Mar 2019 19:13:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.11` to `0.2.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.15` to `3.9.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.26` to `7.0.27`"
+          }
+        ]
+      }
+    },
+    {
       "version": "8.0.12",
       "tag": "@microsoft/gulp-core-build-typescript_v8.0.12",
       "date": "Wed, 13 Mar 2019 19:13:14 GMT",

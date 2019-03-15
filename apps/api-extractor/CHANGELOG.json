@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.27",
+      "tag": "@microsoft/api-extractor_v7.0.27",
+      "date": "Fri, 15 Mar 2019 19:13:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "(Breaking change) The file extension for API review files has changed from \".api.ts\" to \"api.md\".  For details see https://github.com/Microsoft/web-build-tools/issues/1123"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.26",
       "tag": "@microsoft/api-extractor_v7.0.26",
       "date": "Wed, 13 Mar 2019 19:13:14 GMT",
