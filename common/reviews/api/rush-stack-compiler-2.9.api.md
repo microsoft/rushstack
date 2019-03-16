@@ -32,8 +32,6 @@ interface ITypescriptCompilerOptions {
 declare abstract class RushStackCompilerBase<TOptions = {}> {
     // (undocumented)
     constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider);
-    // Warning: (ae-forgotten-export) The symbol "StandardBuildFolders" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     protected _standardBuildFolders: StandardBuildFolders;
     // (undocumented)
@@ -41,6 +39,22 @@ declare abstract class RushStackCompilerBase<TOptions = {}> {
     // (undocumented)
     protected _terminal: Terminal;
 }
+
+// @beta (undocumented)
+declare class StandardBuildFolders {
+    // (undocumented)
+    constructor(projectFolderPath: string);
+    // (undocumented)
+    readonly distFolderPath: string;
+    // (undocumented)
+    readonly libFolderPath: string;
+    // (undocumented)
+    readonly projectFolderPath: string;
+    // (undocumented)
+    readonly srcFolderPath: string;
+    // (undocumented)
+    readonly tempFolderPath: string;
+    }
 
 // @alpha (undocumented)
 declare class ToolPackages {
