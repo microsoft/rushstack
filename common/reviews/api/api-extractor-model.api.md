@@ -241,8 +241,6 @@ declare class ApiItem {
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
-// Warning: (ae-forgotten-export) The symbol "IApiItemConstructor" needs to be exported by the entry point index.d.ts
-// 
 // @public
 declare function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiItemContainerMixin);
 
@@ -530,7 +528,7 @@ declare class ApiVariable extends ApiVariable_base {
     readonly variableTypeExcerpt: Excerpt;
 }
 
-// @public (undocumented)
+// @public
 declare type Constructor<T = {}> = new (...args: any[]) => T;
 
 // @public
@@ -630,6 +628,10 @@ interface IApiIndexSignatureOptions extends IApiParameterListMixinOptions, IApiR
 interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
     // (undocumented)
     extendsTokenRanges: IExcerptTokenRange[];
+}
+
+// @public
+interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<typeof ApiItem> {
 }
 
 // @public
@@ -765,7 +767,7 @@ declare class Parameter {
     readonly tsdocParamBlock: tsdoc.DocParamBlock | undefined;
 }
 
-// @public (undocumented)
+// @public
 declare type PropertiesOf<T> = {
     [K in keyof T]: T[K];
 };

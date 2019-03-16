@@ -194,5 +194,10 @@ export class ApiItem {
   }
 }
 
-// For mixins
+/**
+ * This abstraction is used by the mixin pattern.
+ * It describes a class type that inherits from {@link ApiItem}.
+ *
+ * @public
+ */
 export interface IApiItemConstructor extends Constructor<ApiItem>, PropertiesOf<typeof ApiItem> { }
