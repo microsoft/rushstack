@@ -10,8 +10,6 @@ steps:
   displayName: 'git config name'
 - script: 'node common\scripts\install-run-rush.js change --verify'
   displayName: 'Verify Change Logs'
-- script: 'node common\scripts\install-run-rush.js check'
-  displayName: 'Rush Check'
 - script: 'node common\scripts\install-run-rush.js install --bypass-policy'
   displayName: 'Rush Install'
 - script: 'node common\scripts\install-run-rush.js rebuild --verbose --production'
