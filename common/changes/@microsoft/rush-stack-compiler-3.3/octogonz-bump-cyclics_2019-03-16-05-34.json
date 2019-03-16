@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.3",
+      "comment": "Export StandardBuildFolders to eliminate the ae-forgotten-export warning",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.3",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
