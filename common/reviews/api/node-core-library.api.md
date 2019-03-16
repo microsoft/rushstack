@@ -62,6 +62,28 @@ declare class Colors {
 }
 
 // @beta
+declare enum ColorValue {
+    // (undocumented)
+    Black = 0,
+    // (undocumented)
+    Blue = 4,
+    // (undocumented)
+    Cyan = 6,
+    // (undocumented)
+    Gray = 8,
+    // (undocumented)
+    Green = 2,
+    // (undocumented)
+    Magenta = 5,
+    // (undocumented)
+    Red = 1,
+    // (undocumented)
+    White = 7,
+    // (undocumented)
+    Yellow = 3
+}
+
+// @beta
 declare class ConsoleTerminalProvider implements ITerminalProvider {
     // (undocumented)
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
@@ -141,16 +163,12 @@ declare const enum FolderConstants {
 interface IColorableSequence {
     // (undocumented)
     backgroundColor?: ColorValue;
-    // Warning: (ae-forgotten-export) The symbol "ColorValue" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     foregroundColor?: ColorValue;
     // (undocumented)
     isEol?: boolean;
     // (undocumented)
     text: string;
-    // Warning: (ae-forgotten-export) The symbol "TextAttribute" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     textAttributes?: TextAttribute[];
 }
@@ -530,6 +548,22 @@ declare class Text {
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
     static replaceAll(input: string, searchValue: string, replaceValue: string): string;
     static truncateWithEllipsis(s: string, maximumLength: number): string;
+}
+
+// @beta
+declare enum TextAttribute {
+    // (undocumented)
+    Blink = 3,
+    // (undocumented)
+    Bold = 0,
+    // (undocumented)
+    Dim = 1,
+    // (undocumented)
+    Hidden = 5,
+    // (undocumented)
+    InvertColor = 4,
+    // (undocumented)
+    Underline = 2
 }
 
 
