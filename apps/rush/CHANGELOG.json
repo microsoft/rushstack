@@ -2,6 +2,53 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.6.0",
+      "tag": "@microsoft/rush_v5.6.0",
+      "date": "Fri, 15 Mar 2019 03:21:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for the Yarn --ignore-engines, exposed as yarnOptions.ignoreEngines in rush.json"
+          },
+          {
+            "comment": "Add the ability to configure the version bump and publish git commit message, exposed as gitPolicy.versionBumpCommitMessage in rush.json"
+          },
+          {
+            "comment": "Fix an issue with \"rush publish --pack\" when using yarn."
+          },
+          {
+            "comment": "Remove the \"rush check\" step from the travis.yml template, since this is now handled by \"ensureConsistentVersions\" from rush.json"
+          },
+          {
+            "comment": "Fix an issue where \"rush change\" sometimes could not detect changes correctly when invoked on a forked GitHub repo"
+          },
+          {
+            "comment": "Fix an issue where \"rushx\" and \"rush build\" did not search for commands in the current project's local node_modules/.bin folder (GitHub issue #706)"
+          },
+          {
+            "comment": "The `--debug` parameter now automatically breaks in the debugger when an InternalError is thrown"
+          },
+          {
+            "comment": "Support overriding 'build' and 'rebuild' commands in command-line.json"
+          },
+          {
+            "comment": "Update README.md"
+          },
+          {
+            "comment": "Change \"rush build\" to print stdout if stderr is empty and a task fails. This improves Webpack support"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add \"--set-access-level\" parameter for \"rush publish\" to control whether NPM packages are published as \"public\" or \"restricted\""
+          },
+          {
+            "comment": "Add a \"dependencies\" configuration property to version-policies.json to customize the way dependency versions are published and stored in source control"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.5.4",
       "tag": "@microsoft/rush_v5.5.4",
       "date": "Thu, 13 Dec 2018 02:58:10 GMT",

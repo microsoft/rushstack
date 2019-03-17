@@ -124,10 +124,11 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--set-access-level',
       parameterShortName: undefined,
       description:
-      `The access option to pass to npm publish. By default NPM will publish scoped packages with an access ` +
-      `level of 'restricted'. Scoped packages can be published with an access level of 'public' by specifying ` +
-      `that value for this flag with the initial publication. NPM always publishes unscoped packages with an ` +
-      `access level of 'public'.`
+      `By default, when Rush invokes "npm publish" it will publish scoped packages with an access level ` +
+      `of "restricted". Scoped packages can be published with an access level of "public" by specifying ` +
+      `that value for this flag with the initial publication. NPM always publishes unscoped packages with ` +
+      `an access level of "public". For more information, see the NPM documentation for the "--access" ` +
+      `option of "npm publish".`
     });
 
     // NPM pack tarball related parameters

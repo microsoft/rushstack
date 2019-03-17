@@ -1,6 +1,20 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 13 Mar 2019 01:14:05 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Mar 2019 19:13:25 GMT and should not be manually modified.
+
+## 7.0.27
+Fri, 15 Mar 2019 19:13:25 GMT
+
+### Patches
+
+- (Breaking change) The file extension for API review files has changed from ".api.ts" to "api.md".  For details see https://github.com/Microsoft/web-build-tools/issues/1123
+
+## 7.0.26
+Wed, 13 Mar 2019 19:13:14 GMT
+
+### Patches
+
+- Refactor code to move the IndentedWriter API from api-extractor-model to api-documenter
 
 ## 7.0.25
 Wed, 13 Mar 2019 01:14:05 GMT

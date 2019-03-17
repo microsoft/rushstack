@@ -168,7 +168,10 @@
 
     /**
      * The commit message to use when committing changes during 'rush publish'.
-     * This is helpful if you want to skip CI builds for git commits by Rush.
+     *
+     * For example, if you want to prevent these commits from triggering a CI build,
+     * you might configure your system's trigger to look for a special string such as "[skip-ci]"
+     * in the commit message, and then customize Rush's message to contain that string.
      */
     /*[LINE "DEMO"]*/ "versionBumpCommitMessage": "Applying package updates. [skip-ci]"
   },

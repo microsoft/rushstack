@@ -1,6 +1,27 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 13 Dec 2018 02:58:10 GMT and should not be manually modified.
+This log was last generated on Fri, 15 Mar 2019 03:21:02 GMT and should not be manually modified.
+
+## 5.6.0
+Fri, 15 Mar 2019 03:21:02 GMT
+
+### Minor changes
+
+- Add "--set-access-level" parameter for "rush publish" to control whether NPM packages are published as "public" or "restricted"
+- Add a "dependencies" configuration property to version-policies.json to customize the way dependency versions are published and stored in source control
+
+### Updates
+
+- Add support for the Yarn --ignore-engines, exposed as yarnOptions.ignoreEngines in rush.json
+- Add the ability to configure the version bump and publish git commit message, exposed as gitPolicy.versionBumpCommitMessage in rush.json
+- Fix an issue with "rush publish --pack" when using yarn.
+- Remove the "rush check" step from the travis.yml template, since this is now handled by "ensureConsistentVersions" from rush.json
+- Fix an issue where "rush change" sometimes could not detect changes correctly when invoked on a forked GitHub repo
+- Fix an issue where "rushx" and "rush build" did not search for commands in the current project's local node_modules/.bin folder (GitHub issue #706)
+- The `--debug` parameter now automatically breaks in the debugger when an InternalError is thrown
+- Support overriding 'build' and 'rebuild' commands in command-line.json
+- Update README.md
+- Change "rush build" to print stdout if stderr is empty and a task fails. This improves Webpack support
 
 ## 5.5.4
 Thu, 13 Dec 2018 02:58:10 GMT

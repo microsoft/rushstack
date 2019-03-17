@@ -12,8 +12,6 @@
 export { AedocDefinitions } from './aedoc/AedocDefinitions';
 export { ReleaseTag } from './aedoc/ReleaseTag';
 
-export { IndentedWriter } from './IndentedWriter';
-
 // items
 export {
   IApiDeclaredItemOptions,
@@ -26,7 +24,8 @@ export {
 export {
   ApiItemKind,
   IApiItemOptions,
-  ApiItem
+  ApiItem,
+  IApiItemConstructor
 } from './items/ApiItem';
 export {
   IApiPropertyItemOptions,

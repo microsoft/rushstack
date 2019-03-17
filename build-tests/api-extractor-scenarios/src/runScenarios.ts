@@ -74,9 +74,9 @@ export function runScenarios(buildConfigPath: string): void {
     JsonFile.save(apiExtractorJson, apiExtractorJsonPath, { ensureFolderExists: true });
 
     // Create an empty file to force API Extractor to create a missing output file
-    // TODO: Add an api-extractor option to force creation of a missing .api.ts file
+    // TODO: Add an api-extractor option to force creation of a missing .api.md file
     // See GitHub issue https://github.com/Microsoft/web-build-tools/issues/1018
-    FileSystem.writeFile(`./etc/test-outputs/${scenarioFolderName}/api-extractor-scenarios.api.ts`, '',
+    FileSystem.writeFile(`./etc/test-outputs/${scenarioFolderName}/api-extractor-scenarios.api.md`, '',
       { ensureFolderExists: true });
   }
 
