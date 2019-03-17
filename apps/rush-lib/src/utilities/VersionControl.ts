@@ -82,7 +82,15 @@ export class VersionControl {
           const remoteUrl: string = child_process.execSync(`git remote get-url ${remoteName}`)
             .toString()
             .trim();
-          return remoteUrl === repositoryUrl;
+          if (remoteUrl === repositoryUrl) {
+            return true;
+          }
+          // When you copy a URL from the GitHub web site, they append the ".git" file extension to the URL.
+          // So we allow that to be specified in rush.json, even though the file extension gets dropped
+          // by "git clone".
+          if (remoteUrl + '.git' === repositoryUrl) {
+            return true;
+          }
         }
         return false;
       });
