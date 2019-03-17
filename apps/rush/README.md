@@ -13,7 +13,7 @@
 
 - **A single NPM install:** In one step, Rush installs all the dependencies for all your projects into a common folder.  This is not just a "package.json" file at the root of your repo (which might set you up to accidentally `require()` a sibling's dependencies).  Instead, Rush uses symlinks to reconstruct an accurate "node_modules" folder for each project, without any of the limitations or glitches that seem to plague other approaches.
 
-  ⏵ **This algorithm supports the [PNPM, NPM, and Yarn]({% link pages/maintainer/package_managers.md %}) package managers.**
+  ⏵ **This algorithm supports the [PNPM, NPM, and Yarn](https://rushjs.io/pages/maintainer/package_managers/) package managers.**
 
 - **Automatic local linking:** Inside a Rush repo, all your projects are automatically symlinked to each other. When you make a change, you can see the downstream effects without publishing anything, and without any `npm link` headaches.  If you don't want certain projects to get linked, that's supported, too.
 
