@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Introduce a new warning \"ae-incompatible-release-tags\" that checks for API signatures that reference types with incompatible release tags",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
