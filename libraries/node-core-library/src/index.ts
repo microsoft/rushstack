@@ -82,7 +82,9 @@ export { StringBuilder, IStringBuilder } from './StringBuilder';
 export { Terminal } from './Terminal/Terminal';
 export {
   Colors,
-  IColorableSequence
+  IColorableSequence,
+  ColorValue,
+  TextAttribute
 } from './Terminal/Colors';
 export {
   ITerminalProvider,
