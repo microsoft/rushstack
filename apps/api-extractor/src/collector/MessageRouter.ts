@@ -88,7 +88,7 @@ export class MessageRouter {
         } else if (!/^ae-/.test(messageId)) {
           throw new Error(`Error in API Extractor config: The messages.extractorMessageReporting table contains`
             + ` an invalid entry "${messageId}".  The name should begin with the "ae-" prefix.`);
-        } else if (allExtractorMessageIds.has(messageId)) {
+        } else if (!allExtractorMessageIds.has(messageId)) {
           throw new Error(`Error in API Extractor config: The messages.extractorMessageReporting table contains`
             + ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`);
         } else {
