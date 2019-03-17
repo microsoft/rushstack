@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import { JsonFile } from './JsonFile';
-import { IPackageJson } from './IPackageJson';
+import { IPackageJson, IPackageJsonWithVersion } from './IPackageJson';
 import { FileConstants } from './Constants';
 import { FileSystem } from './FileSystem';
 
@@ -66,7 +66,7 @@ export class PackageJsonLookup {
    * @returns This function always returns a valid `IPackageJson` object.  If any problems are encountered during
    * loading, an exception will be thrown instead.
    */
-  public static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson {
+  public static loadOwnPackageJson(dirnameOfCaller: string): IPackageJsonWithVersion {
     const packageJson: IPackageJson | undefined = PackageJsonLookup._loadOwnPackageJsonLookup
       .tryLoadPackageJsonFor(dirnameOfCaller);
 
@@ -75,7 +75,14 @@ export class PackageJsonLookup {
         + `  The __dirname was: ${dirnameOfCaller}`);
     }
 
-    return packageJson;
+    if (packageJson.version !== undefined) {
+      return packageJson as IPackageJsonWithVersion;
+    }
+
+    const errorPath: string = PackageJsonLookup._loadOwnPackageJsonLookup.tryGetPackageJsonFilePathFor(dirnameOfCaller)
+      || 'package.json';
+    throw new Error(`PackageJsonLookup.loadOwnPackageJson() failed because the "version" field is missing in`
+      + ` ${errorPath}`);
   }
 
   constructor(parameters?: IPackageJsonLookupParameters) {

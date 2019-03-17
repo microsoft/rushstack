@@ -12,9 +12,9 @@ import {
   JsonSchema,
   Path,
   FileSystem,
-  IPackageJson,
   NewlineKind,
-  PackageJsonLookup
+  PackageJsonLookup,
+  IPackageJsonWithVersion
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
@@ -99,7 +99,7 @@ export class Extractor {
   /**
    * Returns the version number of the API Extractor NPM package.
    */
-  public static get version(): string | undefined {
+  public static get version(): string {
     return Extractor._getPackageJson().version;
   }
 
@@ -110,7 +110,7 @@ export class Extractor {
     return Extractor._getPackageJson().name;
   }
 
-  private static _getPackageJson(): IPackageJson {
+  private static _getPackageJson(): IPackageJsonWithVersion {
     return PackageJsonLookup.loadOwnPackageJson(__dirname);
   }
 

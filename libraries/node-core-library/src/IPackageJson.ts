@@ -148,3 +148,22 @@ export interface IPackageJson {
    */
   scripts?: IPackageJsonScriptTable;
 }
+
+/**
+ * Describes a `IPackageJson` object whose `version` field is guaranteed to be defined.
+ *
+ * @remarks
+ * The `IPackageJsonWithVersion` interface can be used with package.json files that were
+ * obtained from an NPM registry, or installed in the `node_modules` folder.
+ * According to the {@link https://docs.npmjs.com/files/package.json | NPM documentation},
+ * the `version` field will always be defined for published NPM packages.
+ *
+ * But this is not true in general.  For example, the
+ * {@link https://nodejs.org/dist/latest-v10.x/docs/api/modules.html#modules_folders_as_modules
+ * | NodeJS documentation} does not require the `version` field when using the `require()` API
+ * to import folders as modules.
+ */
+export interface IPackageJsonWithVersion extends IPackageJson {
+  /** {@inheritDoc IPackageJson.version} */
+  version: string;
+}

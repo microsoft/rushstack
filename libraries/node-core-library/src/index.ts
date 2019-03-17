@@ -20,6 +20,7 @@ export {
 } from './Executable';
 export {
   IPackageJson,
+  IPackageJsonWithVersion,
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable,
   IPackageJsonTsdocConfiguration
