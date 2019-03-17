@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/node-core-library",
-      "comment": "Allow packages to not specify a version field in their package.json",
-      "type": "patch"
+      "comment": "Relax the IPackageJson interface to allow the \"version\" field to be omitted from package.json. Add a IPackageJsonWithVersion interface for when it is guaranteed to be defined.",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/node-core-library",
