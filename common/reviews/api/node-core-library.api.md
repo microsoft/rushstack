@@ -329,6 +329,12 @@ interface IPackageJsonTsdocConfiguration {
 }
 
 // @public
+interface IPackageJsonWithVersion extends IPackageJson {
+    // (undocumented)
+    version: string;
+}
+
+// @public
 interface IParsedPackageName {
     scope: string;
     unscopedName: string;
@@ -417,7 +423,7 @@ declare class PackageJsonLookup {
     // (undocumented)
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
-    static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson;
+    static loadOwnPackageJson(dirnameOfCaller: string): IPackageJsonWithVersion;
     loadPackageJson(jsonFilename: string): IPackageJson;
     tryGetPackageFolderFor(fileOrFolderPath: string): string | undefined;
     tryGetPackageJsonFilePathFor(fileOrFolderPath: string): string | undefined;

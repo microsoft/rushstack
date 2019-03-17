@@ -17,7 +17,7 @@ declare class Extractor {
     static readonly packageName: string;
     processProject(options?: IAnalyzeProjectOptions): boolean;
     static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractorOptions): void;
-    static readonly version: string | undefined;
+    static readonly version: string;
 }
 
 // @public

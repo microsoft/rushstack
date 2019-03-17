@@ -3,7 +3,12 @@
 
 import { ApiItem, ApiItemKind, IApiItemJson } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { JsonFile, IJsonFileSaveOptions, PackageJsonLookup, IPackageJson } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  IJsonFileSaveOptions,
+  PackageJsonLookup,
+  IPackageJsonWithVersion
+} from '@microsoft/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
@@ -123,7 +128,7 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
       options = {};
     }
 
-    const packageJson: IPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
+    const packageJson: IPackageJsonWithVersion = PackageJsonLookup.loadOwnPackageJson(__dirname);
 
     const jsonObject: IApiPackageJson = {
       metadata: {

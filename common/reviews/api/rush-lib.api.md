@@ -113,7 +113,7 @@ declare class IndividualVersionPolicy extends VersionPolicy {
     // @internal (undocumented)
     constructor(versionPolicyJson: IIndividualVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
-    ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
+    ensure(project: IPackageJsonWithVersion, force?: boolean): IPackageJsonWithVersion | undefined;
     // @internal
     readonly _json: IIndividualVersionJson;
     readonly lockedMajor: number | undefined;
@@ -142,7 +142,7 @@ declare class LockStepVersionPolicy extends VersionPolicy {
     // @internal (undocumented)
     constructor(versionPolicyJson: ILockStepVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
-    ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
+    ensure(project: IPackageJsonWithVersion, force?: boolean): IPackageJsonWithVersion | undefined;
     // @internal
     readonly _json: ILockStepVersionJson;
     readonly mainProject: string | undefined;
@@ -175,7 +175,7 @@ declare class PackageJsonEditor {
     // (undocumented)
     readonly filePath: string;
     // (undocumented)
-    static fromObject(object: IPackageJson, filename: string): PackageJsonEditor;
+    static fromObject(object: IPackageJsonWithVersion, filename: string): PackageJsonEditor;
     // (undocumented)
     static load(filePath: string): PackageJsonEditor;
     // (undocumented)
@@ -282,7 +282,7 @@ declare class RushConfigurationProject {
     // @beta
     readonly isMainProject: boolean;
     // @deprecated
-    readonly packageJson: IPackageJson;
+    readonly packageJson: IPackageJsonWithVersion;
     // @beta
     readonly packageJsonEditor: PackageJsonEditor;
     readonly packageName: string;
@@ -313,7 +313,7 @@ declare abstract class VersionPolicy {
     constructor(versionPolicyJson: IVersionPolicyJson);
     abstract bump(bumpType?: BumpType, identifier?: string): void;
     readonly definitionName: VersionPolicyDefinitionName;
-    abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
+    abstract ensure(project: IPackageJsonWithVersion, force?: boolean): IPackageJsonWithVersion | undefined;
     readonly isLockstepped: boolean;
     // @internal
     abstract readonly _json: IVersionPolicyJson;

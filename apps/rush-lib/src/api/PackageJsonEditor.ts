@@ -4,7 +4,7 @@
 import * as semver from 'semver';
 
 import {
-  IPackageJson,
+  IPackageJsonWithVersion,
   JsonFile,
   Sort
 } from '@microsoft/node-core-library';
@@ -64,7 +64,7 @@ export class PackageJsonDependency {
  */
 export class PackageJsonEditor {
   private readonly _filePath: string;
-  private readonly _data: IPackageJson;
+  private readonly _data: IPackageJsonWithVersion;
   private readonly _dependencies: Map<string, PackageJsonDependency>;
 
   // NOTE: The "devDependencies" section is tracked separately because sometimes people
@@ -78,7 +78,7 @@ export class PackageJsonEditor {
     return new PackageJsonEditor(filePath, JsonFile.load(filePath));
   }
 
-  public static fromObject(object: IPackageJson, filename: string): PackageJsonEditor {
+  public static fromObject(object: IPackageJsonWithVersion, filename: string): PackageJsonEditor {
     return new PackageJsonEditor(filename, object);
   }
 
@@ -137,7 +137,7 @@ export class PackageJsonEditor {
     return false;
   }
 
-  private constructor(filepath: string, data: IPackageJson) {
+  private constructor(filepath: string, data: IPackageJsonWithVersion) {
     this._filePath = filepath;
     this._data = data;
     this._modified = false;
@@ -200,7 +200,7 @@ export class PackageJsonEditor {
     this._modified = true;
   }
 
-  private _normalize(): IPackageJson {
+  private _normalize(): IPackageJsonWithVersion {
     delete this._data.dependencies;
     delete this._data.optionalDependencies;
     delete this._data.peerDependencies;

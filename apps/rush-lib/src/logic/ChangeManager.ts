@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJsonWithVersion } from '@microsoft/node-core-library';
 
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
@@ -92,13 +92,13 @@ export class ChangeManager {
    * @param shouldCommit - If the value is true, package.json will be updated.
    * If the value is false, package.json and change logs will not be updated. It will only do a dry-run.
    */
-  public apply(shouldCommit: boolean): Map<string, IPackageJson> | undefined {
+  public apply(shouldCommit: boolean): Map<string, IPackageJsonWithVersion> | undefined {
     if (!this.hasChanges()) {
       return;
     }
 
     // Apply all changes to package.json files.
-    const updatedPackages: Map<string, IPackageJson> = PublishUtilities.updatePackages(
+    const updatedPackages: Map<string, IPackageJsonWithVersion> = PublishUtilities.updatePackages(
       this._allChanges,
       this._allPackages,
       this._rushConfiguration,

@@ -3,7 +3,7 @@
 
 import {
   JsonFile,
-  IPackageJson
+  IPackageJsonWithVersion
 } from '@microsoft/node-core-library';
 
 /**
@@ -42,7 +42,7 @@ export interface IPackageDependency {
  * Represents a "@rush-temp" scoped package, which has our additional custom field
  * for tracking the dependency graph.
  */
-export interface IRushTempPackageJson extends IPackageJson {
+export interface IRushTempPackageJson extends IPackageJsonWithVersion {
   /**
    * An extra setting written into package.json for temp packages, to track
    * references to locally built projects.
