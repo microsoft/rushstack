@@ -69,8 +69,8 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(publicClassReturnsBeta:0)",
-          "docComment": "/**\n * @public\n */\n",
+          "canonicalReference": "(publicFunctionReturnsBeta:0)",
+          "docComment": "/**\n * It's not okay for a \"public\" function to reference a \"beta\" symbol, because \"beta\" is less public than \"public\".\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -78,7 +78,7 @@
             },
             {
               "kind": "Reference",
-              "text": "publicClassReturnsBeta"
+              "text": "publicFunctionReturnsBeta"
             },
             {
               "kind": "Content",
@@ -100,7 +100,7 @@
           "releaseTag": "Public",
           "overloadIndex": 0,
           "parameters": [],
-          "name": "publicClassReturnsBeta"
+          "name": "publicFunctionReturnsBeta"
         }
       ]
     }
