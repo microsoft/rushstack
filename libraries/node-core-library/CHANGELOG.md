@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Wed, 27 Feb 2019 22:13:58 GMT and should not be manually modified.
+This log was last generated on Mon, 18 Mar 2019 04:28:43 GMT and should not be manually modified.
+
+## 3.12.1
+Mon, 18 Mar 2019 04:28:43 GMT
+
+### Patches
+
+- Export ColorValue and TextAttribute to eliminate the ae-forgotten-export warning
 
 ## 3.12.0
 Wed, 27 Feb 2019 22:13:58 GMT

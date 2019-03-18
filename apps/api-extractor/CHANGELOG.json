@@ -2,6 +2,32 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.28",
+      "tag": "@microsoft/api-extractor_v7.0.28",
+      "date": "Mon, 18 Mar 2019 04:28:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"ae-inconsistent-release-tags\" warning to \"ae-different-release-tags\""
+          },
+          {
+            "comment": "Introduce a new warning \"ae-incompatible-release-tags\" that checks for API signatures that reference types with incompatible release tags"
+          },
+          {
+            "comment": "Fix an issue where this error was sometimes reported incorrectly: \"The messages.extractorMessageReporting table contains an unrecognized identifier ___\""
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.26` to `7.0.27`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.0` to `3.12.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.27",
       "tag": "@microsoft/api-extractor_v7.0.27",
       "date": "Fri, 15 Mar 2019 19:13:25 GMT",
