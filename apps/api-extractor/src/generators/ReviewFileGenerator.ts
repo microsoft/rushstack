@@ -245,19 +245,8 @@ export class ReviewFileGenerator {
     const footerParts: string[] = [];
 
     if (!symbolMetadata.releaseTagSameAsParent) {
-      switch (symbolMetadata.releaseTag) {
-        case ReleaseTag.Internal:
-          footerParts.push('@internal');
-          break;
-        case ReleaseTag.Alpha:
-          footerParts.push('@alpha');
-          break;
-        case ReleaseTag.Beta:
-          footerParts.push('@beta');
-          break;
-        case ReleaseTag.Public:
-          footerParts.push('@public');
-          break;
+      if (symbolMetadata.releaseTag !== ReleaseTag.None) {
+        footerParts.push(ReleaseTag.getTagName(symbolMetadata.releaseTag));
       }
     }
 

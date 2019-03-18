@@ -20,7 +20,12 @@ export const enum ExtractorMessageId {
   /**
    * This symbol has another declaration with a different release tag.
    */
-  InconsistentReleaseTags = 'ae-inconsistent-release-tags',
+  DifferentReleaseTags = 'ae-different-release-tags',
+
+  /**
+   * The symbol ___ is marked as ___, but its signature references ___ which is marked as ___.
+   */
+  IncompatibleReleaseTags = 'ae-incompatible-release-tags',
 
   /**
    * The doc comment should not contain more than one release tag.
@@ -40,7 +45,9 @@ export const enum ExtractorMessageId {
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-extra-release-tag',
-  'ae-inconsistent-release-tags',
+  'ae-different-release-tags',
+  'ae-incompatible-release-tags',
   'ae-missing-release-tag',
-  'ae-misplaced-package-tag'
+  'ae-misplaced-package-tag',
+  'ae-forgotten-export'
 ]);

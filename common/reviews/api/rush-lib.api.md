@@ -28,6 +28,8 @@ declare class ApprovedPackagesItem {
 
 // @public
 declare class ApprovedPackagesPolicy {
+    // Warning: (ae-forgotten-export) The symbol "IRushConfigurationJson" needs to be exported by the entry point index.d.ts
+    // 
     // @internal (undocumented)
     constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson);
     readonly browserApprovedPackages: ApprovedPackagesConfiguration;
