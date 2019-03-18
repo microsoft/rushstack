@@ -24,7 +24,8 @@ export {
 export {
   ApiItemKind,
   IApiItemOptions,
-  ApiItem
+  ApiItem,
+  IApiItemConstructor
 } from './items/ApiItem';
 export {
   IApiPropertyItemOptions,

@@ -201,6 +201,8 @@ declare function initialize(gulp: typeof gulp_2): void;
 // @internal
 declare function _isJestEnabled(rootFolder: string): boolean;
 
+// Warning: (ae-incompatible-release-tags) The symbol "jest" is marked as @public, but its signature references "JestTask" which is marked as @alpha
+// 
 // @public (undocumented)
 declare const jest: JestTask;
 
