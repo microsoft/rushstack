@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/node-core-library",
-      "comment": "Relax the IPackageJson interface to allow the \"version\" field to be omitted from package.json. Add a IPackageJsonWithVersion interface for when it is guaranteed to be defined.",
+      "comment": "Introduce an interface INodePackageJson for loading package.json files whose \"version\" field may be missing.",
       "type": "minor"
     }
   ],

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Allow packages to not specify a version field in their package.json",
+      "comment": "API Extractor can now analyze packages whose package.json file is missing the \"version\" field",
       "type": "patch"
     }
   ],
