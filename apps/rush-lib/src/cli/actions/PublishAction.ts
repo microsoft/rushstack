@@ -386,9 +386,9 @@ export class PublishAction extends BaseRushAction {
   private _packageExists(packageConfig: RushConfigurationProject): boolean {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const registry: string = this._getRegistryAndUpdateEnv(env);
-    let args: string = '';
+    const args: string[] = [];
     if (this._npmAuthToken.value) {
-      args = this._getAuthTokenArg(registry);
+      args.push(this._getAuthTokenArg(registry));
     }
 
     const publishedVersions: string[] = Npm.publishedVersions(packageConfig.packageName,
