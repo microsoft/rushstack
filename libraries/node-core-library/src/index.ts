@@ -19,8 +19,8 @@ export {
   Executable
 } from './Executable';
 export {
+  INodePackageJson,
   IPackageJson,
-  IPackageJsonWithVersion,
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable,
   IPackageJsonTsdocConfiguration

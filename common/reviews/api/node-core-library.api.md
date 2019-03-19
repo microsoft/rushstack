@@ -276,16 +276,7 @@ interface IJsonSchemaValidateOptions {
 }
 
 // @public
-declare class InternalError extends Error {
-    constructor(message: string);
-    static breakInDebugger: boolean;
-    // @override (undocumented)
-    toString(): string;
-    readonly unformattedMessage: string;
-}
-
-// @public
-interface IPackageJson {
+interface INodePackageJson {
     bin?: string;
     dependencies?: IPackageJsonDependencyTable;
     description?: string;
@@ -306,6 +297,21 @@ interface IPackageJson {
     types?: string;
     typings?: string;
     version?: string;
+}
+
+// @public
+declare class InternalError extends Error {
+    constructor(message: string);
+    static breakInDebugger: boolean;
+    // @override (undocumented)
+    toString(): string;
+    readonly unformattedMessage: string;
+}
+
+// @public
+interface IPackageJson extends INodePackageJson {
+    // (undocumented)
+    version: string;
 }
 
 // @public

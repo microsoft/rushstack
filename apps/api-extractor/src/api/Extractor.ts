@@ -14,7 +14,7 @@ import {
   FileSystem,
   NewlineKind,
   PackageJsonLookup,
-  IPackageJsonWithVersion
+  IPackageJson
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
@@ -110,7 +110,7 @@ export class Extractor {
     return Extractor._getPackageJson().name;
   }
 
-  private static _getPackageJson(): IPackageJsonWithVersion {
+  private static _getPackageJson(): IPackageJson {
     return PackageJsonLookup.loadOwnPackageJson(__dirname);
   }
 
