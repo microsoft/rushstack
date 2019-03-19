@@ -348,11 +348,7 @@ export class PublishAction extends BaseRushAction {
     const args: string[] = ['publish'];
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
-      const registry: string = this._getRegistryAndUpdateEnv(env);
-
-      if (this._npmAuthToken.value) {
-        args.push(this._getAuthTokenArg(registry));
-      }
+      this._addSharedNpmConfig(env, args);
 
       if (this._npmTag.value) {
         args.push(`--tag`, this._npmTag.value);
@@ -385,11 +381,8 @@ export class PublishAction extends BaseRushAction {
 
   private _packageExists(packageConfig: RushConfigurationProject): boolean {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
-    const registry: string = this._getRegistryAndUpdateEnv(env);
     const args: string[] = [];
-    if (this._npmAuthToken.value) {
-      args.push(this._getAuthTokenArg(registry));
-    }
+    this._addSharedNpmConfig(env, args);
 
     const publishedVersions: string[] = Npm.publishedVersions(packageConfig.packageName,
       packageConfig.projectFolder,
@@ -508,17 +501,16 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _getRegistryAndUpdateEnv(env: { [key: string]: string | undefined }): string {
+  private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
     let registry: string = '//registry.npmjs.org/';
     if (this._registryUrl.value) {
       const registryUrl: string = this._registryUrl.value;
       env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
       registry = registryUrl.substring(registryUrl.indexOf('//'));
     }
-    return registry;
-  }
 
-  private _getAuthTokenArg(registry: string): string {
-    return `--${registry}:_authToken=${this._npmAuthToken.value}`;
+    if (this._npmAuthToken.value) {
+      args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
+    }
   }
 }
