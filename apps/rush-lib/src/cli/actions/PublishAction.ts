@@ -348,15 +348,10 @@ export class PublishAction extends BaseRushAction {
     const args: string[] = ['publish'];
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
-      let registry: string = '//registry.npmjs.org/';
-      if (this._registryUrl.value) {
-        const registryUrl: string = this._registryUrl.value;
-        env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
-        registry = registryUrl.substring(registryUrl.indexOf('//'));
-      }
+      const registry: string = this._getRegistryAndUpdateEnv(env);
 
       if (this._npmAuthToken.value) {
-        args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
+        args.push(this._getAuthTokenArg(registry));
       }
 
       if (this._npmTag.value) {
@@ -390,12 +385,16 @@ export class PublishAction extends BaseRushAction {
 
   private _packageExists(packageConfig: RushConfigurationProject): boolean {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
-    if (this._registryUrl.value) {
-      env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
+    const registry: string = this._getRegistryAndUpdateEnv(env);
+    let args: string = '';
+    if (this._npmAuthToken.value) {
+      args = this._getAuthTokenArg(registry);
     }
+
     const publishedVersions: string[] = Npm.publishedVersions(packageConfig.packageName,
       packageConfig.projectFolder,
-      env);
+      env,
+      args);
     return publishedVersions.indexOf(packageConfig.packageJson.version) >= 0;
   }
 
@@ -507,5 +506,19 @@ export class PublishAction extends BaseRushAction {
         }
       }
     }
+  }
+
+  private _getRegistryAndUpdateEnv(env: { [key: string]: string | undefined }): string {
+    let registry: string = '//registry.npmjs.org/';
+    if (this._registryUrl.value) {
+      const registryUrl: string = this._registryUrl.value;
+      env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
+      registry = registryUrl.substring(registryUrl.indexOf('//'));
+    }
+    return registry;
+  }
+
+  private _getAuthTokenArg(registry: string): string {
+    return `--${registry}:_authToken=${this._npmAuthToken.value}`;
   }
 }
