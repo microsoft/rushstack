@@ -423,10 +423,12 @@ declare class PackageJsonLookup {
     // (undocumented)
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
+    loadNodePackageJson(jsonFilename: string): INodePackageJson;
     static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson;
     loadPackageJson(jsonFilename: string): IPackageJson;
     tryGetPackageFolderFor(fileOrFolderPath: string): string | undefined;
     tryGetPackageJsonFilePathFor(fileOrFolderPath: string): string | undefined;
+    tryLoadNodePackageJsonFor(fileOrFolderPath: string): INodePackageJson | undefined;
     tryLoadPackageJsonFor(fileOrFolderPath: string): IPackageJson | undefined;
 }
 
