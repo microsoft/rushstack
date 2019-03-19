@@ -781,5 +781,11 @@ declare enum ReleaseTag {
     Public = 4
 }
 
+// @public
+declare namespace ReleaseTag {
+    function compare(a: ReleaseTag, b: ReleaseTag): number;
+    function getTagName(releaseTag: ReleaseTag): string;
+}
+
 
 ```

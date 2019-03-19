@@ -493,7 +493,7 @@ export class Collector {
         if (effectiveReleaseTag !== ReleaseTag.None && effectiveReleaseTag !== declaredReleaseTag) {
           if (!astSymbol.isExternal) { // for now, don't report errors for external code
             this.messageRouter.addAnalyzerIssue(
-              ExtractorMessageId.InconsistentReleaseTags,
+              ExtractorMessageId.DifferentReleaseTags,
               'This symbol has another declaration with a different release tag',
               astDeclaration
             );
@@ -553,34 +553,34 @@ export class Collector {
       const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;
 
       let declaredReleaseTag: ReleaseTag = ReleaseTag.None;
-      let inconsistentReleaseTags: boolean = false;
+      let extraReleaseTags: boolean = false;
 
       if (modifierTagSet.isPublic()) {
         declaredReleaseTag = ReleaseTag.Public;
       }
       if (modifierTagSet.isBeta()) {
         if (declaredReleaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
+          extraReleaseTags = true;
         } else {
           declaredReleaseTag = ReleaseTag.Beta;
         }
       }
       if (modifierTagSet.isAlpha()) {
         if (declaredReleaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
+          extraReleaseTags = true;
         } else {
           declaredReleaseTag = ReleaseTag.Alpha;
         }
       }
       if (modifierTagSet.isInternal()) {
         if (declaredReleaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
+          extraReleaseTags = true;
         } else {
           declaredReleaseTag = ReleaseTag.Internal;
         }
       }
 
-      if (inconsistentReleaseTags) {
+      if (extraReleaseTags) {
         if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
           this.messageRouter.addAnalyzerIssue(
             ExtractorMessageId.ExtraReleaseTag,

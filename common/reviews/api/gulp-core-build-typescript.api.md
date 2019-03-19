@@ -23,6 +23,8 @@ interface ITslintCmdTaskConfig extends IRSCTaskConfig {
     displayAsError?: boolean;
 }
 
+// Warning: (ae-incompatible-release-tags) The symbol "tscCmd" is marked as @public, but its signature references "TscCmdTask" which is marked as @beta
+// 
 // @public (undocumented)
 declare const tscCmd: TscCmdTask;
 
@@ -40,6 +42,8 @@ declare class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     protected _onData(data: Buffer): void;
     }
 
+// Warning: (ae-incompatible-release-tags) The symbol "tslintCmd" is marked as @public, but its signature references "TslintCmdTask" which is marked as @beta
+// 
 // @public (undocumented)
 declare const tslintCmd: TslintCmdTask;
 

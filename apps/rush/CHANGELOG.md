@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 15 Mar 2019 03:21:02 GMT and should not be manually modified.
+This log was last generated on Mon, 18 Mar 2019 04:48:37 GMT and should not be manually modified.
+
+## 5.6.1
+Mon, 18 Mar 2019 04:48:37 GMT
+
+### Updates
+
+- Remove the "rush check" step from the travis.yml template, since this is now handled by "ensureConsistentVersions" from rush.json
+- Improve "rush change" to ignore the ".git" file extension when appended to the "repository.url" setting in rush.json
 
 ## 5.6.0
 Fri, 15 Mar 2019 03:21:02 GMT

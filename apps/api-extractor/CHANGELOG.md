@@ -1,6 +1,15 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 15 Mar 2019 19:13:25 GMT and should not be manually modified.
+This log was last generated on Mon, 18 Mar 2019 04:28:43 GMT and should not be manually modified.
+
+## 7.0.28
+Mon, 18 Mar 2019 04:28:43 GMT
+
+### Patches
+
+- Rename the "ae-inconsistent-release-tags" warning to "ae-different-release-tags"
+- Introduce a new warning "ae-incompatible-release-tags" that checks for API signatures that reference types with incompatible release tags
+- Fix an issue where this error was sometimes reported incorrectly: "The messages.extractorMessageReporting table contains an unrecognized identifier ___"
 
 ## 7.0.27
 Fri, 15 Mar 2019 19:13:25 GMT

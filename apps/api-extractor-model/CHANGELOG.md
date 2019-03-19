@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Wed, 13 Mar 2019 19:13:14 GMT and should not be manually modified.
+This log was last generated on Mon, 18 Mar 2019 04:28:43 GMT and should not be manually modified.
+
+## 7.0.27
+Mon, 18 Mar 2019 04:28:43 GMT
+
+### Patches
+
+- Add helper functions for ReleaseTag
+- Export IApiItemConstructor to eliminate the ae-forgotten-export warning
 
 ## 7.0.26
 Wed, 13 Mar 2019 19:13:14 GMT

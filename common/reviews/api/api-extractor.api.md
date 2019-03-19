@@ -46,9 +46,10 @@ declare const enum ExtractorMessageCategory {
 
 // @public
 declare const enum ExtractorMessageId {
+    DifferentReleaseTags = "ae-different-release-tags",
     ExtraReleaseTag = "ae-extra-release-tag",
     ForgottenExport = "ae-forgotten-export",
-    InconsistentReleaseTags = "ae-inconsistent-release-tags",
+    IncompatibleReleaseTags = "ae-incompatible-release-tags",
     MisplacedPackageTag = "ae-misplaced-package-tag",
     MissingReleaseTag = "ae-missing-release-tag"
 }
