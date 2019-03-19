@@ -11,9 +11,9 @@ import * as path from 'path';
 import * as semver from 'semver';
 
 import {
+  IPackageJson,
   JsonFile,
-  FileConstants,
-  IPackageJsonWithVersion
+  FileConstants
 } from '@microsoft/node-core-library';
 
 import {
@@ -90,7 +90,7 @@ export class PublishUtilities {
       if (allChanges.hasOwnProperty(packageName)) {
         const change: IChangeInfo = allChanges[packageName];
         const project: RushConfigurationProject = allPackages.get(packageName)!;
-        const pkg: IPackageJsonWithVersion = project.packageJson;
+        const pkg: IPackageJson = project.packageJson;
         const deps: string[] = project.downstreamDependencyProjects;
 
         // Write the new version expected for the change.
@@ -142,11 +142,11 @@ export class PublishUtilities {
     shouldCommit: boolean,
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
-  ): Map<string, IPackageJsonWithVersion> {
-    const updatedPackages: Map<string, IPackageJsonWithVersion> = new Map<string, IPackageJsonWithVersion>();
+  ): Map<string, IPackageJson> {
+    const updatedPackages: Map<string, IPackageJson> = new Map<string, IPackageJson>();
 
     Object.keys(allChanges).forEach(packageName => {
-      const updatedPackage: IPackageJsonWithVersion = PublishUtilities._writePackageChanges(
+      const updatedPackage: IPackageJson = PublishUtilities._writePackageChanges(
         allChanges[packageName],
         allChanges,
         allPackages,
@@ -288,10 +288,10 @@ export class PublishUtilities {
     shouldCommit: boolean,
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
-  ): IPackageJsonWithVersion {
+  ): IPackageJson {
 
     const project: RushConfigurationProject = allPackages.get(change.packageName)!;
-    const pkg: IPackageJsonWithVersion = project.packageJson;
+    const pkg: IPackageJson = project.packageJson;
 
     const shouldSkipVersionBump: boolean = !project.shouldPublish ||
       !!projectsToExclude && projectsToExclude.has(change.packageName);
@@ -453,7 +453,7 @@ export class PublishUtilities {
       return false;
     }
 
-    const pkg: IPackageJsonWithVersion = project.packageJson;
+    const pkg: IPackageJson = project.packageJson;
     let currentChange: IChangeInfo;
 
     // If the given change does not have a changeType, derive it from the "type" string.
@@ -542,7 +542,7 @@ export class PublishUtilities {
       if ((change.changeType! >= ChangeType.hotfix) ||
         (prereleaseToken && prereleaseToken.hasValue)) {
         for (const depName of downstreamNames) {
-          const pkg: IPackageJsonWithVersion = allPackages.get(depName)!.packageJson;
+          const pkg: IPackageJson = allPackages.get(depName)!.packageJson;
 
           PublishUtilities._updateDownstreamDependency(
             pkg.name,

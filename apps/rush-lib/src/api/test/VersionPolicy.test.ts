@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { IPackageJsonWithVersion } from '@microsoft/node-core-library';
+import { IPackageJson } from '@microsoft/node-core-library';
 
 import { VersionPolicyConfiguration } from '../VersionPolicyConfiguration';
 import {
@@ -39,11 +39,11 @@ describe('VersionPolicy', () => {
 
     it('updates packageJson if version is lower than the locked step version', () => {
       const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
-      const expectedPackageJson: IPackageJsonWithVersion = {
+      const expectedPackageJson: IPackageJson = {
         name: 'a',
         version: '1.1.0'
       };
-      const originalPackageJson: IPackageJsonWithVersion = {
+      const originalPackageJson: IPackageJson = {
         name: 'a',
         version: '1.0.1'
       };
@@ -52,7 +52,7 @@ describe('VersionPolicy', () => {
 
     it('throws exception if version is higher than the locked step version', () => {
       const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
-      const originalPackageJson: IPackageJsonWithVersion = {
+      const originalPackageJson: IPackageJson = {
         name: 'a',
         version: '2.1.0'
       };
@@ -63,11 +63,11 @@ describe('VersionPolicy', () => {
 
     it('update version with force if version is higher than the locked step version', () => {
       const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
-      const originalPackageJson: IPackageJsonWithVersion = {
+      const originalPackageJson: IPackageJson = {
         name: 'a',
         version: '2.1.0'
       };
-      const expectedPackageJson: IPackageJsonWithVersion = {
+      const expectedPackageJson: IPackageJson = {
         name: 'a',
         version: '1.1.0'
       };
@@ -117,11 +117,11 @@ describe('VersionPolicy', () => {
 
     it('updates packageJson if version is lower than the locked major', () => {
       const individualVersionPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
-      const expectedPackageJson: IPackageJsonWithVersion = {
+      const expectedPackageJson: IPackageJson = {
         name: 'a',
         version: '2.0.0'
       };
-      const originalPackageJson: IPackageJsonWithVersion = {
+      const originalPackageJson: IPackageJson = {
         name: 'a',
         version: '1.0.1'
       };
@@ -130,7 +130,7 @@ describe('VersionPolicy', () => {
 
     it('throws exception if version is higher than the locked step version', () => {
       const individualVersionPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
-      const originalPackageJson: IPackageJsonWithVersion = {
+      const originalPackageJson: IPackageJson = {
         name: 'a',
         version: '3.1.0'
       };

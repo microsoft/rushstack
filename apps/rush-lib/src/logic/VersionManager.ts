@@ -5,9 +5,9 @@ import * as path from 'path';
 import * as semver from 'semver';
 import { cloneDeep } from 'lodash';
 import {
+  IPackageJson,
   JsonFile,
-  FileConstants,
-  IPackageJsonWithVersion
+  FileConstants
 } from '@microsoft/node-core-library';
 
 import {
@@ -25,7 +25,7 @@ import { ChangeManager } from './ChangeManager';
 
 export class VersionManager {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
-  private _updatedProjects: Map<string, IPackageJsonWithVersion>;
+  private _updatedProjects: Map<string, IPackageJson>;
   private _changeFiles: Map<string, ChangeFile>;
 
   constructor(
@@ -37,7 +37,7 @@ export class VersionManager {
       ? _versionPolicyConfiguration
       : this._rushConfiguration.versionPolicyConfiguration;
 
-    this._updatedProjects = new Map<string, IPackageJsonWithVersion>();
+    this._updatedProjects = new Map<string, IPackageJson>();
     this._changeFiles = new Map<string, ChangeFile>();
   }
 
@@ -91,7 +91,7 @@ export class VersionManager {
     }
   }
 
-  public get updatedProjects(): Map<string, IPackageJsonWithVersion> {
+  public get updatedProjects(): Map<string, IPackageJson> {
     return this._updatedProjects;
   }
 
@@ -138,8 +138,7 @@ export class VersionManager {
         (!versionPolicyName || projectVersionPolicyName === versionPolicyName)) {
         const versionPolicy: VersionPolicy = this._versionPolicyConfiguration.getVersionPolicy(
           projectVersionPolicyName);
-        const updatedProject: IPackageJsonWithVersion | undefined
-          = versionPolicy.ensure(rushProject.packageJson, force);
+        const updatedProject: IPackageJson | undefined = versionPolicy.ensure(rushProject.packageJson, force);
         if (updatedProject) {
           this._updatedProjects.set(updatedProject.name, updatedProject);
           // No need to create an entry for prerelease version bump.
@@ -178,7 +177,7 @@ export class VersionManager {
 
   private _updateDependencies(): void {
     this._rushConfiguration.projects.forEach(rushProject => {
-      let clonedProject: IPackageJsonWithVersion | undefined = this._updatedProjects.get(rushProject.packageName);
+      let clonedProject: IPackageJson | undefined = this._updatedProjects.get(rushProject.packageName);
       let projectVersionChanged: boolean = true;
       if (!clonedProject) {
         clonedProject = cloneDeep(rushProject.packageJson);
@@ -190,7 +189,7 @@ export class VersionManager {
 
   private _updateProjectAllDependencies(
     rushProject: RushConfigurationProject,
-    clonedProject: IPackageJsonWithVersion,
+    clonedProject: IPackageJson,
     projectVersionChanged: boolean
   ): void {
     if (!clonedProject.dependencies && !clonedProject.devDependencies) {
@@ -223,7 +222,7 @@ export class VersionManager {
 
   private _updateProjectDependencies(dependencies: { [key: string]: string; } | undefined,
     changes: IChangeInfo[],
-    clonedProject: IPackageJsonWithVersion,
+    clonedProject: IPackageJson,
     rushProject: RushConfigurationProject,
     projectVersionChanged: boolean
   ): boolean {
@@ -277,9 +276,9 @@ export class VersionManager {
 
   private _trackDependencyChange(
     changes: IChangeInfo[],
-    clonedProject: IPackageJsonWithVersion,
+    clonedProject: IPackageJson,
     projectVersionChanged: boolean,
-    updatedDependentProject: IPackageJsonWithVersion,
+    updatedDependentProject: IPackageJson,
     oldDependencyVersion: string,
     newDependencyVersion: string
   ): void {
@@ -332,7 +331,7 @@ export class VersionManager {
     });
   }
 
-  private _createChangeInfo(newPackageJson: IPackageJsonWithVersion,
+  private _createChangeInfo(newPackageJson: IPackageJson,
     rushProject: RushConfigurationProject
   ): IChangeInfo {
     return {

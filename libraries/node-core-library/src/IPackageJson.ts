@@ -162,8 +162,6 @@ export interface IPackageJson {
  * {@link https://nodejs.org/dist/latest-v10.x/docs/api/modules.html#modules_folders_as_modules
  * | NodeJS documentation} does not require the `version` field when using the `require()` API
  * to import folders as modules.
- *
- * @public
  */
 export interface IPackageJsonWithVersion extends IPackageJson {
   /** {@inheritDoc IPackageJson.version} */

@@ -4,10 +4,10 @@
 import * as path from 'path';
 import {
   JsonFile,
+  IPackageJson,
   PackageName,
   FileSystem,
-  FileConstants,
-  IPackageJsonWithVersion
+  FileConstants
 } from '@microsoft/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -37,7 +37,7 @@ export class RushConfigurationProject {
   private _projectFolder: string;
   private _projectRelativeFolder: string;
   private _reviewCategory: string;
-  private _packageJson: IPackageJsonWithVersion;
+  private _packageJson: IPackageJson;
   private _packageJsonEditor: PackageJsonEditor;
   private _tempProjectName: string;
   private _unscopedTempProjectName: string;
@@ -178,7 +178,7 @@ export class RushConfigurationProject {
    * The parsed NPM "package.json" file from projectFolder.
    * @deprecated Use packageJsonEditor instead
    */
-  public get packageJson(): IPackageJsonWithVersion {
+  public get packageJson(): IPackageJson {
     return this._packageJson;
   }
 

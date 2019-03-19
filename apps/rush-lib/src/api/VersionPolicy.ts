@@ -3,7 +3,7 @@
 
 import { cloneDeep } from 'lodash';
 import * as semver from 'semver';
-import { IPackageJsonWithVersion } from '@microsoft/node-core-library';
+import { IPackageJson } from '@microsoft/node-core-library';
 
 import {
   IVersionPolicyJson,
@@ -113,7 +113,7 @@ export abstract class VersionPolicy {
    * @param project - package json
    * @param force - force update even when the project version is higher than the policy version.
    */
-  public abstract ensure(project: IPackageJsonWithVersion, force?: boolean): IPackageJsonWithVersion | undefined;
+  public abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
 
   /**
    * Bumps version based on the policy
@@ -256,7 +256,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
    * @param project - input package json
    * @param force - force update even when the project version is higher than the policy version.
    */
-  public ensure(project: IPackageJsonWithVersion, force?: boolean): IPackageJsonWithVersion | undefined {
+  public ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined {
     const packageVersion: semver.SemVer = new semver.SemVer(project.version);
     const compareResult: number = packageVersion.compare(this._version);
     if (compareResult === 0) {
@@ -305,8 +305,8 @@ export class LockStepVersionPolicy extends VersionPolicy {
     }
   }
 
-  private _updatePackageVersion(project: IPackageJsonWithVersion, newVersion: semver.SemVer): IPackageJsonWithVersion {
-    const updatedProject: IPackageJsonWithVersion = cloneDeep(project);
+  private _updatePackageVersion(project: IPackageJson, newVersion: semver.SemVer): IPackageJson {
+    const updatedProject: IPackageJson = cloneDeep(project);
     updatedProject.version = newVersion.format();
     return updatedProject;
   }
@@ -361,11 +361,11 @@ export class IndividualVersionPolicy extends VersionPolicy {
    * @param project - input package json
    * @param force - force update even when the project version is higher than the policy version.
    */
-  public ensure(project: IPackageJsonWithVersion, force?: boolean): IPackageJsonWithVersion | undefined {
+  public ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined {
     if (this.lockedMajor) {
       const version: semver.SemVer = new semver.SemVer(project.version);
       if (version.major < this.lockedMajor) {
-        const updatedProject: IPackageJsonWithVersion = cloneDeep(project);
+        const updatedProject: IPackageJson = cloneDeep(project);
         updatedProject.version = `${this._lockedMajor}.0.0`;
         return updatedProject;
       } else if (version.major > this.lockedMajor) {

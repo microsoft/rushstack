@@ -2,7 +2,7 @@ import * as path from 'path';
 import readPackageTree = require('read-package-tree');
 import {
   JsonFile,
-  IPackageJsonWithVersion
+  IPackageJson
 } from '@microsoft/node-core-library';
 
 import {
@@ -78,7 +78,7 @@ export class NpmPackage extends BasePackage {
    *        Example: `C:\MyRepo\common\temp\node_modules\@rush-temp\project1`
    */
   public static createVirtualTempPackage(packageJsonFilename: string, installFolderName: string): NpmPackage {
-    const packageJson: IPackageJsonWithVersion = JsonFile.load(packageJsonFilename);
+    const packageJson: IPackageJson = JsonFile.load(packageJsonFilename);
     const npmPackage: readPackageTree.PackageNode = {
       children: [],
       error: undefined,
