@@ -137,6 +137,8 @@ export class ReviewFileGenerator {
 
       case ts.SyntaxKind.ExportKeyword:
       case ts.SyntaxKind.DefaultKeyword:
+      case ts.SyntaxKind.DeclareKeyword:
+        // Delete any explicit "export" or "declare" keywords -- we will re-add them below
         span.modification.skipAll();
         break;
 
@@ -194,7 +196,7 @@ export class ReviewFileGenerator {
           }
           const listPrefix: string = list.getSourceFile().text
             .substring(list.getStart(), list.declarations[0].getStart());
-          span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
+          span.modification.prefix = listPrefix + span.modification.prefix;
           span.modification.suffix = ';';
 
           if (entity.shouldInlineExport) {
