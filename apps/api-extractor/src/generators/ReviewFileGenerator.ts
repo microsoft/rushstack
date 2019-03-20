@@ -62,11 +62,46 @@ export class ReviewFileGenerator {
     // Emit the regular declarations
     for (const entity of collector.entities) {
       if (entity.exported) {
+
+        // First, collect the list of export names for this symbol.  When reporting messages with
+        // ExtractorMessage.properties.exportName, this will enable us to emit the warning comments alongside
+        // the associated export statement.
+        interface IExportToEmit {
+          readonly exportName: string;
+          readonly associatedMessages: ExtractorMessage[];
+        }
+        const exportsToEmit: Map<string, IExportToEmit> = new Map<string, IExportToEmit>();
+
+        for (const exportName of entity.exportNames) {
+          if (!entity.shouldInlineExport) {
+            exportsToEmit.set(exportName, { exportName, associatedMessages: [] });
+          }
+        }
+
         if (entity.astEntity instanceof AstSymbol) {
-          // Emit all the declarations for this entry
+          // Emit all the declarations for this entity
           for (const astDeclaration of entity.astEntity.astDeclarations || []) {
 
-            stringWriter.write(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
+            // Get the messages associated with this declaration
+            const fetchedMessages: ExtractorMessage[] = collector.messageRouter
+              .fetchAssociatedMessagesForReviewFile(astDeclaration);
+
+            // Peel off the messages associated with an export statement and store them
+            // in IExportToEmit.associatedMessages (to be processed later).  The remaining messages will
+            // added to messagesToReport, to be emitted next to the declaration instead of the export statement.
+            const messagesToReport: ExtractorMessage[] = [];
+            for (const message of fetchedMessages) {
+              if (message.properties.exportName) {
+                const exportToEmit: IExportToEmit | undefined = exportsToEmit.get(message.properties.exportName);
+                if (exportToEmit) {
+                  exportToEmit.associatedMessages.push(message);
+                  continue;
+                }
+              }
+              messagesToReport.push(message);
+            }
+
+            stringWriter.write(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport));
 
             const span: Span = new Span(astDeclaration.declaration);
             ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration, false);
@@ -75,11 +110,16 @@ export class ReviewFileGenerator {
           }
         }
 
-        for (const exportName of entity.exportNames) {
-          if (!entity.shouldInlineExport) {
-            DtsEmitHelpers.emitNamedExport(stringWriter, exportName, entity);
-            stringWriter.writeLine();
+        // Now emit the export statements for this entity.
+        for (const exportToEmit of exportsToEmit.values()) {
+          // Write any associated messages
+          for (const message of exportToEmit.associatedMessages) {
+            ReviewFileGenerator._writeLineAsComments(stringWriter,
+              'Warning: ' + message.formatMessageWithoutLocation());
           }
+
+          DtsEmitHelpers.emitNamedExport(stringWriter, exportToEmit.exportName, entity);
+          stringWriter.writeLine();
         }
       }
     }
@@ -245,7 +285,10 @@ export class ReviewFileGenerator {
           }
 
           if (!insideTypeLiteral) {
-            const aedocSynopsis: string = ReviewFileGenerator._getAedocSynopsis(collector, childAstDeclaration);
+            const messagesToReport: ExtractorMessage[] = collector.messageRouter
+              .fetchAssociatedMessagesForReviewFile(childAstDeclaration);
+            const aedocSynopsis: string = ReviewFileGenerator._getAedocSynopsis(collector, childAstDeclaration,
+              messagesToReport);
             const indentedAedocSynopsis: string = ReviewFileGenerator._addIndentAfterNewlines(aedocSynopsis,
               child.getIndent());
 
@@ -263,14 +306,12 @@ export class ReviewFileGenerator {
    * whether the item has been documented, and any warnings that were detected
    * by the analysis.
    */
-  private static _getAedocSynopsis(collector: Collector, astDeclaration: AstDeclaration): string {
-    const output: StringWriter = new StringWriter();
-
-    const messagesToReport: ExtractorMessage[] = collector.messageRouter
-      .fetchAssociatedMessagesForReviewFile(astDeclaration);
+  private static _getAedocSynopsis(collector: Collector, astDeclaration: AstDeclaration,
+    messagesToReport: ExtractorMessage[]): string {
+    const stringWriter: StringWriter = new StringWriter();
 
     for (const message of messagesToReport) {
-      ReviewFileGenerator._writeLineAsComments(output, 'Warning: ' + message.formatMessageWithoutLocation());
+      ReviewFileGenerator._writeLineAsComments(stringWriter, 'Warning: ' + message.formatMessageWithoutLocation());
     }
 
     const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
@@ -312,13 +353,13 @@ export class ReviewFileGenerator {
 
     if (footerParts.length > 0) {
       if (messagesToReport.length > 0) {
-        ReviewFileGenerator._writeLineAsComments(output, ''); // skip a line after the warnings
+        ReviewFileGenerator._writeLineAsComments(stringWriter, ''); // skip a line after the warnings
       }
 
-      ReviewFileGenerator._writeLineAsComments(output, footerParts.join(' '));
+      ReviewFileGenerator._writeLineAsComments(stringWriter, footerParts.join(' '));
     }
 
-    return output.toString();
+    return stringWriter.toString();
   }
 
   private static _writeLineAsComments(stringWriter: StringWriter, line: string): void {

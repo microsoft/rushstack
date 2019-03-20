@@ -243,7 +243,8 @@ export class MessageRouter {
       text: messageText,
       sourceFilePath: sourceFile.fileName,
       sourceFileLine: lineAndCharacter.line + 1,
-      sourceFileColumn: lineAndCharacter.character + 1
+      sourceFileColumn: lineAndCharacter.character + 1,
+      properties
     };
 
     this._sourceMapper.updateExtractorMessageOptions(options);
