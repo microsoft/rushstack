@@ -1,6 +1,14 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Mon, 18 Mar 2019 04:28:43 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Mar 2019 19:14:49 GMT and should not be manually modified.
+
+## 3.13.0
+Wed, 20 Mar 2019 19:14:49 GMT
+
+### Minor changes
+
+- Introduce an interface INodePackageJson for loading package.json files whose "version" field may be missing.
+- Add two new APIs PackageJsonLookup.loadNodePackageJson() and tryLoadNodePackageJsonFor() that return INodePackageJson
 
 ## 3.12.1
 Mon, 18 Mar 2019 04:28:43 GMT

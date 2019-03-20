@@ -2,6 +2,21 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.13.0",
+      "tag": "@microsoft/node-core-library_v3.13.0",
+      "date": "Wed, 20 Mar 2019 19:14:49 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce an interface INodePackageJson for loading package.json files whose \"version\" field may be missing."
+          },
+          {
+            "comment": "Add two new APIs PackageJsonLookup.loadNodePackageJson() and tryLoadNodePackageJsonFor() that return INodePackageJson"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.12.1",
       "tag": "@microsoft/node-core-library_v3.12.1",
       "date": "Mon, 18 Mar 2019 04:28:43 GMT",
