@@ -10,13 +10,14 @@ import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
-import { AstImport, AstImportKind } from '../analyzer/AstImport';
+import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { StringWriter } from './StringWriter';
+import { DtsEmitHelpers } from './DtsEmitHelpers';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -90,25 +91,7 @@ export class DtsRollupGenerator {
         const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
 
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-          switch (astImport.importKind) {
-            case AstImportKind.NamedImport:
-              if (entity.nameForEmit !== astImport.exportName) {
-                stringWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
-              } else {
-                stringWriter.write(`import { ${astImport.exportName} }`);
-              }
-              stringWriter.writeLine(` from '${astImport.modulePath}';`);
-              break;
-            case AstImportKind.StarImport:
-              stringWriter.writeLine(`import * as ${entity.nameForEmit} from '${astImport.modulePath}';`);
-              break;
-            case AstImportKind.EqualsImport:
-              stringWriter.writeLine(`import ${entity.nameForEmit} = require('${astImport.modulePath}');`);
-              break;
-            default:
-              throw new InternalError('Unimplemented AstImportKind');
-          }
-
+          DtsEmitHelpers.emitImport(stringWriter, entity, astImport);
         }
       }
     }
@@ -139,23 +122,12 @@ export class DtsRollupGenerator {
 
       if (!entity.shouldInlineExport) {
         for (const exportName of entity.exportNames) {
-          if (exportName === ts.InternalSymbolName.Default) {
-            stringWriter.writeLine(`export default ${entity.nameForEmit};`);
-          } else if (entity.nameForEmit !== exportName) {
-            stringWriter.writeLine(`export { ${entity.nameForEmit} as ${exportName} }`);
-          } else {
-            stringWriter.writeLine(`export { ${exportName} }`);
-          }
+          DtsEmitHelpers.emitNamedExport(stringWriter, exportName, entity);
         }
       }
     }
 
-    if (collector.starExportedExternalModulePaths.length > 0) {
-      stringWriter.writeLine();
-      for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
-        stringWriter.writeLine(`export * from "${starExportedExternalModulePath}";`);
-      }
-    }
+    DtsEmitHelpers.emitStarExports(stringWriter, collector);
 
     // Emit "export { }" which is a special directive that prevents consumers from importing declarations
     // that don't have an explicit "export" modifier.

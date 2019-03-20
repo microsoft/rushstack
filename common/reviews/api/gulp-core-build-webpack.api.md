@@ -4,14 +4,19 @@
 
 ```ts
 
+import * as Gulp from 'gulp';
+import { GulpTask } from '@microsoft/gulp-core-build';
+import { IBuildConfig } from '@microsoft/gulp-core-build';
+import * as Webpack from 'webpack';
+
 // @public (undocumented)
-interface IWebpackResources {
+export interface IWebpackResources {
     // (undocumented)
     webpack: typeof Webpack;
 }
 
 // @public (undocumented)
-interface IWebpackTaskConfig {
+export interface IWebpackTaskConfig {
     config?: Webpack.Configuration;
     configPath: string;
     printStats?: boolean;
@@ -20,10 +25,14 @@ interface IWebpackTaskConfig {
 }
 
 // @public (undocumented)
-declare const webpack: WebpackTask;
+const webpack: WebpackTask;
+
+export default webpack;
+
+export { webpack }
 
 // @public (undocumented)
-declare class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TExtendedConfig> {
+export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TExtendedConfig> {
     // (undocumented)
     constructor(extendedName?: string, extendedConfig?: TExtendedConfig);
     // (undocumented)

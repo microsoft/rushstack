@@ -16,6 +16,7 @@ import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
 import { StringWriter } from './StringWriter';
+import { DtsEmitHelpers } from './DtsEmitHelpers';
 
 export class ReviewFileGenerator {
   /**
@@ -45,6 +46,20 @@ export class ReviewFileGenerator {
     // Write the opening delimiter for the Markdown code fence
     stringWriter.writeLine('```ts\n');
 
+    // Emit the imports
+    let importsEmitted: boolean = false;
+    for (const entity of collector.entities) {
+      if (entity.astEntity instanceof AstImport) {
+        DtsEmitHelpers.emitImport(stringWriter, entity, entity.astEntity);
+        importsEmitted = true;
+      }
+    }
+
+    if (importsEmitted) {
+      stringWriter.writeLine();
+    }
+
+    // Emit the regular declarations
     for (const entity of collector.entities) {
       if (entity.exported) {
         if (entity.astEntity instanceof AstSymbol) {
@@ -58,30 +73,18 @@ export class ReviewFileGenerator {
             span.writeModifiedText(stringWriter.stringBuilder);
             stringWriter.writeLine('\n');
           }
-        } else {
-          // This definition is reexported from another package, so write it as an "export" line
-          // In general, we don't report on external packages; if that's important we assume API Extractor
-          // would be enabled for the upstream project.  But see GitHub issue #896 for a possible exception.
-          const astImport: AstImport = entity.astEntity;
+        }
 
-          if (astImport.exportName === '*') {
-            stringWriter.write(`export * as ${entity.nameForEmit}`);
-          } else if (entity.nameForEmit !== astImport.exportName) {
-            stringWriter.write(`export { ${astImport.exportName} as ${entity.nameForEmit} }`);
-          } else {
-            stringWriter.write(`export { ${astImport.exportName} }`);
+        for (const exportName of entity.exportNames) {
+          if (!entity.shouldInlineExport) {
+            DtsEmitHelpers.emitNamedExport(stringWriter, exportName, entity);
+            stringWriter.writeLine();
           }
-          stringWriter.writeLine(` from '${astImport.modulePath}';`);
         }
       }
     }
 
-    if (collector.starExportedExternalModulePaths.length > 0) {
-      stringWriter.writeLine();
-      for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
-        stringWriter.writeLine(`export * from "${starExportedExternalModulePath}";`);
-      }
-    }
+    DtsEmitHelpers.emitStarExports(stringWriter, collector);
 
     // Write the unassociated warnings at the bottom of the file
     const unassociatedMessages: ExtractorMessage[] = collector.messageRouter
@@ -120,6 +123,8 @@ export class ReviewFileGenerator {
       return;
     }
 
+    const previousSpan: Span | undefined = span.previousSibling;
+
     let recurseChildren: boolean = true;
     let sortChildren: boolean = false;
 
@@ -132,7 +137,33 @@ export class ReviewFileGenerator {
 
       case ts.SyntaxKind.ExportKeyword:
       case ts.SyntaxKind.DefaultKeyword:
+      case ts.SyntaxKind.DeclareKeyword:
+        // Delete any explicit "export" or "declare" keywords -- we will re-add them below
         span.modification.skipAll();
+        break;
+
+      case ts.SyntaxKind.InterfaceKeyword:
+      case ts.SyntaxKind.ClassKeyword:
+      case ts.SyntaxKind.EnumKeyword:
+      case ts.SyntaxKind.NamespaceKeyword:
+      case ts.SyntaxKind.ModuleKeyword:
+      case ts.SyntaxKind.TypeKeyword:
+      case ts.SyntaxKind.FunctionKeyword:
+        // Replace the stuff we possibly deleted above
+        let replacedModifiers: string = '';
+
+        if (entity.shouldInlineExport) {
+          replacedModifiers = 'export ' + replacedModifiers;
+        }
+
+        if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
+          // If there is a previous span of type SyntaxList, then apply it before any other modifiers
+          // (e.g. "abstract") that appear there.
+          previousSpan.modification.prefix = replacedModifiers + previousSpan.modification.prefix;
+        } else {
+          // Otherwise just stick it in front of this span
+          span.modification.prefix = replacedModifiers + span.modification.prefix;
+        }
         break;
 
       case ts.SyntaxKind.SyntaxList:
@@ -165,9 +196,12 @@ export class ReviewFileGenerator {
           }
           const listPrefix: string = list.getSourceFile().text
             .substring(list.getStart(), list.declarations[0].getStart());
-          span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
-
+          span.modification.prefix = listPrefix + span.modification.prefix;
           span.modification.suffix = ';';
+
+          if (entity.shouldInlineExport) {
+            span.modification.prefix = 'export ' + span.modification.prefix;
+          }
         }
         break;
 

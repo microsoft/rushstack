@@ -4,10 +4,18 @@
 
 ```ts
 
+import * as CleanCss from 'clean-css';
+import * as Gulp from 'gulp';
+import { GulpTask } from '@microsoft/gulp-core-build';
+
 // Warning: (ae-forgotten-export) The symbol "SassTask" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-declare const sass: SassTask;
+const sass: SassTask;
+
+export default sass;
+
+export { sass }
 
 
 // (No @packageDocumentation comment for this package)

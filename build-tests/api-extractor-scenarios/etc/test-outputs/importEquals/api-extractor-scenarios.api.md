@@ -4,8 +4,10 @@
 
 ```ts
 
+import colors = require('colors');
+
 // @public (undocumented)
-declare function useColors(): typeof colors.zebra;
+export function useColors(): typeof colors.zebra;
 
 
 // (No @packageDocumentation comment for this package)

@@ -4,8 +4,10 @@
 
 ```ts
 
+import * as Webpack from 'webpack';
+
 // @public
-declare class ResolveChunkPlugin implements Webpack.Plugin {
+export class ResolveChunkPlugin implements Webpack.Plugin {
     apply(compiler: Webpack.Compiler): void;
     }
 

@@ -4,6 +4,9 @@
 
 ```ts
 
-export { Lib1Class } from 'api-extractor-lib1-test';
+import { Lib1Class } from 'api-extractor-lib1-test';
+
+export { Lib1Class }
+
 
 ```

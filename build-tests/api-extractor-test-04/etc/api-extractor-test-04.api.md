@@ -4,15 +4,17 @@
 
 ```ts
 
+import { Lib1Interface } from 'api-extractor-lib1-test';
+
 // @alpha
-declare class AlphaClass {
+export class AlphaClass {
     // @internal
     _internalMember(): void;
     undecoratedMember(): void;
 }
 
 // @beta
-declare class BetaClass implements BetaInterface {
+export class BetaClass implements BetaInterface {
     // @alpha
     alphaMember(): void;
     // @internal
@@ -21,7 +23,7 @@ declare class BetaClass implements BetaInterface {
 }
 
 // @beta
-interface BetaInterface {
+export interface BetaInterface {
     // @alpha
     alphaMember(): void;
     // @internal
@@ -30,7 +32,7 @@ interface BetaInterface {
 }
 
 // @beta
-declare const enum ConstEnum {
+export const enum ConstEnum {
     // @alpha
     AlphaMember = "AlphaMember",
     BetaMember2 = "BetaMember2",
@@ -39,16 +41,16 @@ declare const enum ConstEnum {
 }
 
 // @beta
-declare namespace EntangledNamespace {
-    namespace N2 {
+export namespace EntangledNamespace {
+    export namespace N2 {
         // @alpha
-        class ClassX {
+        export class ClassX {
             static a: string;
         }
     }
-    namespace N3 {
+    export namespace N3 {
         // @internal
-        class _ClassY {
+        export class _ClassY {
             b: EntangledNamespace.N2.ClassX;
             c(): typeof N2.ClassX.a;
         }
@@ -56,28 +58,29 @@ declare namespace EntangledNamespace {
 }
 
 // @alpha
-declare type ExportedAlias = AlphaClass;
+export type ExportedAlias = AlphaClass;
 
 // @internal
-declare class InternalClass {
+export class InternalClass {
     undecoratedMember(): void;
 }
 
 // @internal
-interface IPublicClassInternalParameters {
+export interface IPublicClassInternalParameters {
 }
 
 // @public
-interface IPublicComplexInterface {
+export interface IPublicComplexInterface {
     // @internal
     [key: string]: IPublicClassInternalParameters;
     // @internal
     new (): any;
 }
 
-export { Lib1Interface } from 'api-extractor-lib1-test';
+export { Lib1Interface }
+
 // @public
-declare class PublicClass {
+export class PublicClass {
     // @internal (undocumented)
     constructor(parameters: IPublicClassInternalParameters);
     // @alpha
@@ -92,7 +95,7 @@ declare class PublicClass {
 }
 
 // @beta
-declare enum RegularEnum {
+export enum RegularEnum {
     // @alpha
     AlphaMember = 101,
     BetaMember = 100,
@@ -101,7 +104,7 @@ declare enum RegularEnum {
 }
 
 // @beta
-declare const variableDeclaration: string;
+export const variableDeclaration: string;
 
 
 ```

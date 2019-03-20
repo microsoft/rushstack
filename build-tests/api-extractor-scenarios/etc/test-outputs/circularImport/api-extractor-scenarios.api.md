@@ -5,13 +5,13 @@
 ```ts
 
 // @public (undocumented)
-declare class IFile {
+export class IFile {
     // (undocumented)
     containingFolder: IFolder;
 }
 
 // @public (undocumented)
-declare class IFolder {
+export class IFolder {
     // (undocumented)
     containingFolder: IFolder | undefined;
     // (undocumented)
