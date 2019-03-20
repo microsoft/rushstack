@@ -41,16 +41,26 @@ export interface IPackageJsonTsdocConfiguration {
 }
 
 /**
- * An interface for accessing common fields from a package.json file.
+ * An interface for accessing common fields from a package.json file whose version field may be missing.
  *
  * @remarks
- * More fields may be added to this interface in the future.  Most fields are optional.
- * For documentation about this file format, see the
- * {@link http://wiki.commonjs.org/wiki/Packages/1.0 | CommonJS Packages specification}
- * and the {@link https://docs.npmjs.com/files/package.json | NPM manual page}.
- * @public
- */
-export interface IPackageJson {
+ * This interface is the same as {@link IPackageJson}, except that the `version` field is optional.
+ * According to the {@link https://docs.npmjs.com/files/package.json | NPM documentation}
+ * and {@link http://wiki.commonjs.org/wiki/Packages/1.0 | CommonJS Packages specification}, the `version` field
+ * is normally a required field for package.json files.
+ *
+ * However, NodeJS relaxes this requirement for its `require()` API.  The
+ * {@link https://nodejs.org/dist/latest-v10.x/docs/api/modules.html#modules_folders_as_modules
+  * | "Folders as Modules" section} from the NodeJS documentation gives an example of a package.json file
+  * that has only the `name` and `main` fields.  NodeJS does not consider the `version` field during resolution,
+  * so it can be omitted.  Some libraries do this.
+  *
+  * Use the `INodePackageJson` interface when loading such files.  Use `IPackageJson` for package.json files
+  * that are installed from an NPM registry, or are otherwise known to have a `version` field.
+  *
+  * @public
+  */
+ export interface INodePackageJson {
   /**
    * The name of the package.
    */
@@ -59,7 +69,7 @@ export interface IPackageJson {
   /**
    * A version number conforming to the Semantic Versioning (SemVer) standard.
    */
-  version: string;
+  version?: string;
 
   /**
    * Indicates whether this package is allowed to be published or not.
@@ -147,4 +157,24 @@ export interface IPackageJson {
    * A table of script hooks that a package manager or build tool may invoke.
    */
   scripts?: IPackageJsonScriptTable;
+}
+
+/**
+ * An interface for accessing common fields from a package.json file.
+ *
+ * @remarks
+ * This interface describes a package.json file format whose `name` and `version` field are required.
+ * In some situations, the `version` field is optional; in that case, use the {@link INodePackageJson}
+ * interface instead.
+ *
+ * More fields may be added to this interface in the future.  For documentation about the package.json file format,
+ * see the {@link http://wiki.commonjs.org/wiki/Packages/1.0 | CommonJS Packages specification}
+ * and the {@link https://docs.npmjs.com/files/package.json | NPM manual page}.
+ *
+ * @public
+ */
+export interface IPackageJson extends INodePackageJson {
+  // Make the "version" field non-optional.
+  /** {@inheritDoc IPackageJson.version} */
+  version: string;
 }

@@ -5,10 +5,10 @@ import * as path from 'path';
 
 import {
   PackageJsonLookup,
-  IPackageJson,
   FileSystem,
   JsonFile,
-  NewlineKind
+  NewlineKind,
+  INodePackageJson
 } from '@microsoft/node-core-library';
 import { Extractor } from '../api/Extractor';
 import { ILogger } from '../api/ILogger';
@@ -26,14 +26,14 @@ export class PackageMetadata {
    * The parsed contents of package.json.  Note that PackageJsonLookup
    * only includes essential fields.
    */
-  public readonly packageJson: IPackageJson;
+  public readonly packageJson: INodePackageJson;
   /**
    * If true, then the package's documentation comments can be assumed
    * to contain API Extractor compatible TSDoc tags.
    */
   public readonly aedocSupported: boolean;
 
-  public constructor(packageJsonPath: string, packageJson: IPackageJson, aedocSupported: boolean) {
+  public constructor(packageJsonPath: string, packageJson: INodePackageJson, aedocSupported: boolean) {
     this.packageJsonPath = packageJsonPath;
     this.packageJson = packageJson;
     this.aedocSupported = aedocSupported;
@@ -63,7 +63,9 @@ export class PackageMetadataManager {
 
   // This feature is still being standardized: https://github.com/Microsoft/tsdoc/issues/7
   // In the future we will use the @microsoft/tsdoc library to read this file.
-  private static _resolveTsdocMetadataPathFromPackageJson(packageFolder: string, packageJson: IPackageJson): string {
+  private static _resolveTsdocMetadataPathFromPackageJson(packageFolder: string,
+    packageJson: INodePackageJson): string {
+
     const tsdocMetadataFilename: string = PackageMetadataManager.tsdocMetadataFilename;
 
     let tsdocMetadataRelativePath: string;
@@ -108,7 +110,7 @@ export class PackageMetadataManager {
    */
   public static resolveTsdocMetadataPath(
     packageFolder: string,
-    packageJson: IPackageJson,
+    packageJson: INodePackageJson,
     tsdocMetadataPath?: string
   ): string {
     if (tsdocMetadataPath) {
@@ -165,7 +167,7 @@ export class PackageMetadataManager {
       = this._packageMetadataByPackageJsonPath.get(packageJsonFilePath);
 
     if (!packageMetadata) {
-      const packageJson: IPackageJson = this._packageJsonLookup.loadPackageJson(packageJsonFilePath);
+      const packageJson: INodePackageJson = this._packageJsonLookup.loadNodePackageJson(packageJsonFilePath);
 
       const packageJsonFolder: string = path.dirname(packageJsonFilePath);
 
