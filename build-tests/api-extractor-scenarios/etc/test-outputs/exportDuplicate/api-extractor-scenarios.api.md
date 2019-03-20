@@ -5,12 +5,20 @@
 ```ts
 
 // @public (undocumented)
-declare class A {
+class A {
 }
 
+export { A as B }
+
+export { A as C }
+
 // @public (undocumented)
-declare class X {
+class X {
 }
+
+export { X }
+
+export { X as Y }
 
 
 // (No @packageDocumentation comment for this package)

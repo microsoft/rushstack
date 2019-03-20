@@ -4,20 +4,23 @@
 
 ```ts
 
-// @public (undocumented)
-declare const buildTasks: IExecutable;
+import { CopyTask } from '@microsoft/gulp-core-build';
+import { IExecutable } from '@microsoft/gulp-core-build';
 
 // @public (undocumented)
-declare const defaultTasks: IExecutable;
+export const buildTasks: IExecutable;
 
 // @public (undocumented)
-declare const postCopy: CopyTask;
+export const defaultTasks: IExecutable;
 
 // @public (undocumented)
-declare const preCopy: CopyTask;
+export const postCopy: CopyTask;
 
 // @public (undocumented)
-declare const testTasks: IExecutable;
+export const preCopy: CopyTask;
+
+// @public (undocumented)
+export const testTasks: IExecutable;
 
 
 export * from "@microsoft/gulp-core-build";

@@ -4,34 +4,41 @@
 
 ```ts
 
+import { ConsoleTerminalProvider } from '@microsoft/node-core-library';
+import { GulpTask } from '@microsoft/gulp-core-build';
+import { IBuildConfig } from '@microsoft/gulp-core-build';
+import { Terminal } from '@microsoft/node-core-library';
+import { TerminalProviderSeverity } from '@microsoft/node-core-library';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.2';
+
 // Warning: (ae-forgotten-export) The symbol "ApiExtractorTask" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-declare const apiExtractor: ApiExtractorTask;
+export const apiExtractor: ApiExtractorTask;
 
 // Warning: (ae-forgotten-export) The symbol "IRSCTaskConfig" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-interface ITscCmdTaskConfig extends IRSCTaskConfig {
+export interface ITscCmdTaskConfig extends IRSCTaskConfig {
     customArgs?: string[];
     removeCommentsFromJavaScript?: boolean;
     staticMatch?: string[];
 }
 
 // @public (undocumented)
-interface ITslintCmdTaskConfig extends IRSCTaskConfig {
+export interface ITslintCmdTaskConfig extends IRSCTaskConfig {
     displayAsError?: boolean;
 }
 
 // Warning: (ae-incompatible-release-tags) The symbol "tscCmd" is marked as @public, but its signature references "TscCmdTask" which is marked as @beta
 // 
 // @public (undocumented)
-declare const tscCmd: TscCmdTask;
+export const tscCmd: TscCmdTask;
 
 // Warning: (ae-forgotten-export) The symbol "RSCTask" needs to be exported by the entry point index.d.ts
 // 
 // @beta (undocumented)
-declare class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
+export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     // (undocumented)
     constructor();
     // (undocumented)
@@ -45,10 +52,10 @@ declare class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
 // Warning: (ae-incompatible-release-tags) The symbol "tslintCmd" is marked as @public, but its signature references "TslintCmdTask" which is marked as @beta
 // 
 // @public (undocumented)
-declare const tslintCmd: TslintCmdTask;
+export const tslintCmd: TslintCmdTask;
 
 // @beta (undocumented)
-declare class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
+export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
     // (undocumented)
     constructor();
     // (undocumented)

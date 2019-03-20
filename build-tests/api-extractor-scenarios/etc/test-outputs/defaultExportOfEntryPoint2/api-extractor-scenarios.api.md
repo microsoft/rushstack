@@ -5,7 +5,9 @@
 ```ts
 
 // @public (undocumented)
-declare const defaultFunctionStatement: () => void;
+const defaultFunctionStatement: () => void;
+
+export default defaultFunctionStatement;
 
 
 // (No @packageDocumentation comment for this package)

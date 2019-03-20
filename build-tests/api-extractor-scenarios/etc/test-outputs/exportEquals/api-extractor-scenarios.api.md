@@ -4,8 +4,10 @@
 
 ```ts
 
+import { Context } from '@microsoft/teams-js';
+
 // @public (undocumented)
-interface ITeamsContext {
+export interface ITeamsContext {
     // (undocumented)
     context: Context;
 }

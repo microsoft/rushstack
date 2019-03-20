@@ -4,25 +4,32 @@
 
 ```ts
 
+import * as Gulp from 'gulp';
+import { GulpTask } from '@microsoft/gulp-core-build';
+
 // Warning: (ae-forgotten-export) The symbol "ReloadTask" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-declare const reload: ReloadTask;
+export const reload: ReloadTask;
 
 // Warning: (ae-forgotten-export) The symbol "ServeTask" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-declare const serve: ServeTask;
+const serve: ServeTask;
+
+export default serve;
+
+export { serve }
 
 // Warning: (ae-forgotten-export) The symbol "TrustCertTask" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-declare const trustDevCert: TrustCertTask;
+export const trustDevCert: TrustCertTask;
 
 // Warning: (ae-forgotten-export) The symbol "UntrustCertTask" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-declare const untrustDevCert: UntrustCertTask;
+export const untrustDevCert: UntrustCertTask;
 
 
 // (No @packageDocumentation comment for this package)

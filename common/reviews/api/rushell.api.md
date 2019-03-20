@@ -5,12 +5,12 @@
 ```ts
 
 // @beta
-interface IRushellExecuteResult {
+export interface IRushellExecuteResult {
     value: string;
 }
 
 // @beta
-declare class Rushell {
+export class Rushell {
     // (undocumented)
     execute(script: string): IRushellExecuteResult;
 }

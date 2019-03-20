@@ -5,7 +5,7 @@
 ```ts
 
 // @public
-declare class Interleaver {
+export class Interleaver {
     static registerTask(taskName: string, quietMode?: boolean): ITaskWriter;
     static reset(): void;
     static setStdOut(stdout: {
@@ -14,7 +14,7 @@ declare class Interleaver {
     }
 
 // @public
-interface ITaskWriter {
+export interface ITaskWriter {
     // (undocumented)
     close(): void;
     // (undocumented)
