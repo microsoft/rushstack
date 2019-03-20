@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StringBuilder } from '@microsoft/node-core-library';
+import { StringBuilder } from '@microsoft/tsdoc';
 
 // A small helper used by the generators
 export class StringWriter {
