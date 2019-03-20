@@ -4,7 +4,7 @@
 /* tslint:disable:no-bitwise */
 
 import * as ts from 'typescript';
-import { FileSystem, NewlineKind, InternalError, StringBuilder } from '@microsoft/node-core-library';
+import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
@@ -16,6 +16,7 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
+import { StringWriter } from './StringWriter';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -40,26 +41,6 @@ export enum DtsRollupKind {
    * except definitions marked as \@beta, \@alpha, or \@internal.
    */
   PublicRelease
-}
-
-// A small helper used by DtsRollupGenerator
-class StringWriter extends StringBuilder {
-  public readonly stringBuilder: StringBuilder = new StringBuilder();
-
-  public write(s: string): void {
-    this.stringBuilder.append(s);
-  }
-
-  public writeLine(s: string = ''): void {
-    if (s.length > 0) {
-      this.stringBuilder.append(s);
-    }
-    this.stringBuilder.append('\n');
-  }
-
-  public toString(): string {
-    return this.stringBuilder.toString();
-  }
 }
 
 export class DtsRollupGenerator {
