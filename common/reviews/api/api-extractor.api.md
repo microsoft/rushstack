@@ -31,6 +31,7 @@ declare class ExtractorMessage {
     // (undocumented)
     formatMessageWithoutLocation(): string;
     readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
+    readonly properties: IExtractorMessageProperties;
     readonly sourceFileColumn: number | undefined;
     readonly sourceFileLine: number | undefined;
     readonly sourceFilePath: string | undefined;
@@ -50,6 +51,7 @@ declare const enum ExtractorMessageId {
     ExtraReleaseTag = "ae-extra-release-tag",
     ForgottenExport = "ae-forgotten-export",
     IncompatibleReleaseTags = "ae-incompatible-release-tags",
+    InternalMissingUnderscore = "ae-internal-missing-underscore",
     MisplacedPackageTag = "ae-misplaced-package-tag",
     MissingReleaseTag = "ae-missing-release-tag"
 }
@@ -118,6 +120,11 @@ interface IExtractorDtsRollupConfig {
     publishFolderForInternal?: string;
     publishFolderForPublic?: string;
     trimming?: boolean;
+}
+
+// @public
+interface IExtractorMessageProperties {
+    readonly exportName?: string;
 }
 
 // @public

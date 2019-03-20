@@ -40,7 +40,12 @@ export const enum ExtractorMessageId {
   /**
    * The symbol ___ needs to be exported by the entry point ___.
    */
-  ForgottenExport = 'ae-forgotten-export'
+  ForgottenExport = 'ae-forgotten-export',
+
+  /**
+   * The name ___ should be prefixed with an underscore because the declaration is marked as `@internal`.
+   */
+  InternalMissingUnderscore = 'ae-internal-missing-underscore'
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
@@ -49,5 +54,6 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-incompatible-release-tags',
   'ae-missing-release-tag',
   'ae-misplaced-package-tag',
-  'ae-forgotten-export'
+  'ae-forgotten-export',
+  'ae-internal-missing-underscore'
 ]);
