@@ -12,9 +12,9 @@ import {
   JsonSchema,
   Path,
   FileSystem,
-  IPackageJson,
   NewlineKind,
-  PackageJsonLookup
+  PackageJsonLookup,
+  IPackageJson
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,

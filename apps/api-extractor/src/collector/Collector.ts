@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import {
   PackageJsonLookup,
-  IPackageJson,
+  INodePackageJson,
   Sort,
   InternalError
 } from '@microsoft/node-core-library';
@@ -112,7 +112,7 @@ export class Collector {
       throw new Error('Unable to find a package.json for entry point: ' + options.entryPointFile);
     }
 
-    const packageJson: IPackageJson = this.packageJsonLookup.tryLoadPackageJsonFor(packageFolder)!;
+    const packageJson: INodePackageJson = this.packageJsonLookup.tryLoadNodePackageJsonFor(packageFolder)!;
 
     const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);
     if (!entryPointSourceFile) {

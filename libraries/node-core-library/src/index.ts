@@ -19,6 +19,7 @@ export {
   Executable
 } from './Executable';
 export {
+  INodePackageJson,
   IPackageJson,
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable,

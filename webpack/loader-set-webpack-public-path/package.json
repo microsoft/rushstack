@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/loader-set-webpack-public-path",
-  "version": "3.2.132",
+  "version": "3.2.133",
   "description": "This loader sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -14,17 +14,17 @@
   },
   "dependencies": {
     "@types/node": "8.5.8",
-    "@microsoft/set-webpack-public-path-plugin": "2.1.88",
+    "@microsoft/set-webpack-public-path-plugin": "2.1.89",
     "loader-utils": "~1.1.0",
     "lodash": "~4.17.5"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.2.13",
+    "@microsoft/rush-stack-compiler-3.2": "0.2.14",
     "@types/lodash": "4.14.116",
     "@types/mocha": "5.2.5",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "mocha": "^5.2.0",
-    "@microsoft/node-library-build": "6.0.40"
+    "@microsoft/node-library-build": "6.0.41"
   }
 }

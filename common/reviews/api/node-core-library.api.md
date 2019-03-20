@@ -276,16 +276,7 @@ interface IJsonSchemaValidateOptions {
 }
 
 // @public
-declare class InternalError extends Error {
-    constructor(message: string);
-    static breakInDebugger: boolean;
-    // @override (undocumented)
-    toString(): string;
-    readonly unformattedMessage: string;
-}
-
-// @public
-interface IPackageJson {
+interface INodePackageJson {
     bin?: string;
     dependencies?: IPackageJsonDependencyTable;
     description?: string;
@@ -305,6 +296,21 @@ interface IPackageJson {
     tsdocMetadata?: string;
     types?: string;
     typings?: string;
+    version?: string;
+}
+
+// @public
+declare class InternalError extends Error {
+    constructor(message: string);
+    static breakInDebugger: boolean;
+    // @override (undocumented)
+    toString(): string;
+    readonly unformattedMessage: string;
+}
+
+// @public
+interface IPackageJson extends INodePackageJson {
+    // (undocumented)
     version: string;
 }
 
@@ -417,10 +423,12 @@ declare class PackageJsonLookup {
     // (undocumented)
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
+    loadNodePackageJson(jsonFilename: string): INodePackageJson;
     static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson;
     loadPackageJson(jsonFilename: string): IPackageJson;
     tryGetPackageFolderFor(fileOrFolderPath: string): string | undefined;
     tryGetPackageJsonFilePathFor(fileOrFolderPath: string): string | undefined;
+    tryLoadNodePackageJsonFor(fileOrFolderPath: string): INodePackageJson | undefined;
     tryLoadPackageJsonFor(fileOrFolderPath: string): IPackageJson | undefined;
 }
 

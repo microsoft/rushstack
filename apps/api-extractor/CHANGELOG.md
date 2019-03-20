@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 18 Mar 2019 04:28:43 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Mar 2019 19:14:49 GMT and should not be manually modified.
+
+## 7.0.29
+Wed, 20 Mar 2019 19:14:49 GMT
+
+### Patches
+
+- API Extractor can now analyze packages whose package.json file is missing the "version" field
 
 ## 7.0.28
 Mon, 18 Mar 2019 04:28:43 GMT
