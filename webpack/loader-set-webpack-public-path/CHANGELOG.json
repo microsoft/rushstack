@@ -2,6 +2,24 @@
   "name": "@microsoft/loader-set-webpack-public-path",
   "entries": [
     {
+      "version": "3.2.134",
+      "tag": "@microsoft/loader-set-webpack-public-path_v3.2.134",
+      "date": "Thu, 21 Mar 2019 01:15:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/set-webpack-public-path-plugin\" from `2.1.89` to `2.1.90`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.14` to `0.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.41` to `6.0.42`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.133",
       "tag": "@microsoft/loader-set-webpack-public-path_v3.2.133",
       "date": "Wed, 20 Mar 2019 19:14:49 GMT",
