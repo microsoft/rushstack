@@ -600,9 +600,14 @@ export class Collector {
       declarationMetadata.isSealed = modifierTagSet.isSealed();
       declarationMetadata.isVirtual = modifierTagSet.isVirtual();
 
-      // Require the summary to contain at least 10 non-spacing characters
-      declarationMetadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
-        parserContext.docComment.summarySection, 10);
+      if (astDeclaration.declaration.kind === ts.SyntaxKind.Constructor) {
+        // NOTE: If the constructor summary is missing, then ApiModelGenerator will auto-generate one.
+        declarationMetadata.needsDocumentation = false;
+      } else {
+        // Require the summary to contain at least 10 non-spacing characters
+        declarationMetadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
+          parserContext.docComment.summarySection, 10);
+      }
     }
   }
 
