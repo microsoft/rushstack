@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/web-library-build",
-  "version": "7.0.17",
+  "version": "7.0.18",
   "description": "",
   "engines": {
     "npm": "3.10.8"
@@ -18,18 +18,18 @@
     "tsdocFlavor": "AEDoc"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.9.18",
-    "@microsoft/gulp-core-build-sass": "4.6.13",
-    "@microsoft/gulp-core-build-serve": "3.3.15",
-    "@microsoft/gulp-core-build-typescript": "8.0.15",
-    "@microsoft/gulp-core-build-webpack": "3.4.82",
+    "@microsoft/gulp-core-build": "3.9.19",
+    "@microsoft/gulp-core-build-sass": "4.6.14",
+    "@microsoft/gulp-core-build-serve": "3.3.16",
+    "@microsoft/gulp-core-build-typescript": "8.0.16",
+    "@microsoft/gulp-core-build-webpack": "3.4.83",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",
     "gulp-replace": "^0.5.4"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.0.41",
-    "@microsoft/rush-stack-compiler-3.2": "0.2.14"
+    "@microsoft/node-library-build": "6.0.42",
+    "@microsoft/rush-stack-compiler-3.2": "0.2.15"
   }
 }
