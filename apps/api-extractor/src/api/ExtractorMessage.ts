@@ -7,6 +7,24 @@ import { ExtractorMessageId } from './ExtractorMessageId';
 import { Path, Text } from '@microsoft/node-core-library';
 
 /**
+ * Used by {@link ExtractorMessage.properties}.
+ *
+ * @public
+ */
+export interface IExtractorMessageProperties {
+
+  /**
+   * A declaration can have multiple names if it is exported more than once.
+   * If an `ExtractorMessage` applies to a specific export name, this property can indicate that.
+   *
+   * @remarks
+   *
+   * Used by {@link ExtractorMessageId.InternalMissingUnderscore}.
+   */
+  readonly exportName?: string;
+}
+
+/**
  * Specifies a category of messages for use with {@link ExtractorMessage}.
  * @public
  */
@@ -49,6 +67,7 @@ export interface IExtractorMessageOptions {
   sourceFilePath?: string;
   sourceFileLine?: number;
   sourceFileColumn?: number;
+  properties?: IExtractorMessageProperties;
 }
 
 /**
@@ -90,6 +109,12 @@ export class ExtractorMessage {
    */
   public readonly sourceFileColumn: number | undefined;
 
+  /**
+   * Additional contextual information about the message that may be useful when reporting errors.
+   * All properties are optional.
+   */
+  public readonly properties: IExtractorMessageProperties;
+
   /** @internal */
   public constructor(options: IExtractorMessageOptions) {
     this.category = options.category;
@@ -98,6 +123,7 @@ export class ExtractorMessage {
     this.sourceFilePath = options.sourceFilePath;
     this.sourceFileLine = options.sourceFileLine;
     this.sourceFileColumn = options.sourceFileColumn;
+    this.properties = options.properties || { };
   }
 
   /**
