@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.30",
+      "tag": "@microsoft/api-extractor_v7.0.30",
+      "date": "Thu, 21 Mar 2019 01:15:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the API review file generation to include imports and support multiple exports"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.29",
       "tag": "@microsoft/api-extractor_v7.0.29",
       "date": "Wed, 20 Mar 2019 19:14:49 GMT",
