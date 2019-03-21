@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.6.2",
+      "tag": "@microsoft/rush_v5.6.2",
+      "date": "Thu, 21 Mar 2019 23:09:56 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Publish: pass auth token through to npm view when checking if package exists"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.6.1",
       "tag": "@microsoft/rush_v5.6.1",
       "date": "Mon, 18 Mar 2019 04:48:37 GMT",

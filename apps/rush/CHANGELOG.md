@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 18 Mar 2019 04:48:37 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Mar 2019 23:09:56 GMT and should not be manually modified.
+
+## 5.6.2
+Thu, 21 Mar 2019 23:09:56 GMT
+
+### Updates
+
+- Publish: pass auth token through to npm view when checking if package exists
 
 ## 5.6.1
 Mon, 18 Mar 2019 04:48:37 GMT
