@@ -16,6 +16,7 @@ import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
 import { StringWriter } from './StringWriter';
+import { DtsEmitHelpers } from './DtsEmitHelpers';
 
 export class ReviewFileGenerator {
   /**
@@ -45,43 +46,85 @@ export class ReviewFileGenerator {
     // Write the opening delimiter for the Markdown code fence
     stringWriter.writeLine('```ts\n');
 
+    // Emit the imports
+    let importsEmitted: boolean = false;
+    for (const entity of collector.entities) {
+      if (entity.astEntity instanceof AstImport) {
+        DtsEmitHelpers.emitImport(stringWriter, entity, entity.astEntity);
+        importsEmitted = true;
+      }
+    }
+
+    if (importsEmitted) {
+      stringWriter.writeLine();
+    }
+
+    // Emit the regular declarations
     for (const entity of collector.entities) {
       if (entity.exported) {
+
+        // First, collect the list of export names for this symbol.  When reporting messages with
+        // ExtractorMessage.properties.exportName, this will enable us to emit the warning comments alongside
+        // the associated export statement.
+        interface IExportToEmit {
+          readonly exportName: string;
+          readonly associatedMessages: ExtractorMessage[];
+        }
+        const exportsToEmit: Map<string, IExportToEmit> = new Map<string, IExportToEmit>();
+
+        for (const exportName of entity.exportNames) {
+          if (!entity.shouldInlineExport) {
+            exportsToEmit.set(exportName, { exportName, associatedMessages: [] });
+          }
+        }
+
         if (entity.astEntity instanceof AstSymbol) {
-          // Emit all the declarations for this entry
+          // Emit all the declarations for this entity
           for (const astDeclaration of entity.astEntity.astDeclarations || []) {
 
-            stringWriter.write(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration));
+            // Get the messages associated with this declaration
+            const fetchedMessages: ExtractorMessage[] = collector.messageRouter
+              .fetchAssociatedMessagesForReviewFile(astDeclaration);
+
+            // Peel off the messages associated with an export statement and store them
+            // in IExportToEmit.associatedMessages (to be processed later).  The remaining messages will
+            // added to messagesToReport, to be emitted next to the declaration instead of the export statement.
+            const messagesToReport: ExtractorMessage[] = [];
+            for (const message of fetchedMessages) {
+              if (message.properties.exportName) {
+                const exportToEmit: IExportToEmit | undefined = exportsToEmit.get(message.properties.exportName);
+                if (exportToEmit) {
+                  exportToEmit.associatedMessages.push(message);
+                  continue;
+                }
+              }
+              messagesToReport.push(message);
+            }
+
+            stringWriter.write(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport));
 
             const span: Span = new Span(astDeclaration.declaration);
             ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration, false);
             span.writeModifiedText(stringWriter.stringBuilder);
             stringWriter.writeLine('\n');
           }
-        } else {
-          // This definition is reexported from another package, so write it as an "export" line
-          // In general, we don't report on external packages; if that's important we assume API Extractor
-          // would be enabled for the upstream project.  But see GitHub issue #896 for a possible exception.
-          const astImport: AstImport = entity.astEntity;
+        }
 
-          if (astImport.exportName === '*') {
-            stringWriter.write(`export * as ${entity.nameForEmit}`);
-          } else if (entity.nameForEmit !== astImport.exportName) {
-            stringWriter.write(`export { ${astImport.exportName} as ${entity.nameForEmit} }`);
-          } else {
-            stringWriter.write(`export { ${astImport.exportName} }`);
+        // Now emit the export statements for this entity.
+        for (const exportToEmit of exportsToEmit.values()) {
+          // Write any associated messages
+          for (const message of exportToEmit.associatedMessages) {
+            ReviewFileGenerator._writeLineAsComments(stringWriter,
+              'Warning: ' + message.formatMessageWithoutLocation());
           }
-          stringWriter.writeLine(` from '${astImport.modulePath}';`);
+
+          DtsEmitHelpers.emitNamedExport(stringWriter, exportToEmit.exportName, entity);
+          stringWriter.writeLine();
         }
       }
     }
 
-    if (collector.starExportedExternalModulePaths.length > 0) {
-      stringWriter.writeLine();
-      for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
-        stringWriter.writeLine(`export * from "${starExportedExternalModulePath}";`);
-      }
-    }
+    DtsEmitHelpers.emitStarExports(stringWriter, collector);
 
     // Write the unassociated warnings at the bottom of the file
     const unassociatedMessages: ExtractorMessage[] = collector.messageRouter
@@ -120,6 +163,8 @@ export class ReviewFileGenerator {
       return;
     }
 
+    const previousSpan: Span | undefined = span.previousSibling;
+
     let recurseChildren: boolean = true;
     let sortChildren: boolean = false;
 
@@ -132,7 +177,33 @@ export class ReviewFileGenerator {
 
       case ts.SyntaxKind.ExportKeyword:
       case ts.SyntaxKind.DefaultKeyword:
+      case ts.SyntaxKind.DeclareKeyword:
+        // Delete any explicit "export" or "declare" keywords -- we will re-add them below
         span.modification.skipAll();
+        break;
+
+      case ts.SyntaxKind.InterfaceKeyword:
+      case ts.SyntaxKind.ClassKeyword:
+      case ts.SyntaxKind.EnumKeyword:
+      case ts.SyntaxKind.NamespaceKeyword:
+      case ts.SyntaxKind.ModuleKeyword:
+      case ts.SyntaxKind.TypeKeyword:
+      case ts.SyntaxKind.FunctionKeyword:
+        // Replace the stuff we possibly deleted above
+        let replacedModifiers: string = '';
+
+        if (entity.shouldInlineExport) {
+          replacedModifiers = 'export ' + replacedModifiers;
+        }
+
+        if (previousSpan && previousSpan.kind === ts.SyntaxKind.SyntaxList) {
+          // If there is a previous span of type SyntaxList, then apply it before any other modifiers
+          // (e.g. "abstract") that appear there.
+          previousSpan.modification.prefix = replacedModifiers + previousSpan.modification.prefix;
+        } else {
+          // Otherwise just stick it in front of this span
+          span.modification.prefix = replacedModifiers + span.modification.prefix;
+        }
         break;
 
       case ts.SyntaxKind.SyntaxList:
@@ -165,9 +236,12 @@ export class ReviewFileGenerator {
           }
           const listPrefix: string = list.getSourceFile().text
             .substring(list.getStart(), list.declarations[0].getStart());
-          span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
-
+          span.modification.prefix = listPrefix + span.modification.prefix;
           span.modification.suffix = ';';
+
+          if (entity.shouldInlineExport) {
+            span.modification.prefix = 'export ' + span.modification.prefix;
+          }
         }
         break;
 
@@ -211,7 +285,10 @@ export class ReviewFileGenerator {
           }
 
           if (!insideTypeLiteral) {
-            const aedocSynopsis: string = ReviewFileGenerator._getAedocSynopsis(collector, childAstDeclaration);
+            const messagesToReport: ExtractorMessage[] = collector.messageRouter
+              .fetchAssociatedMessagesForReviewFile(childAstDeclaration);
+            const aedocSynopsis: string = ReviewFileGenerator._getAedocSynopsis(collector, childAstDeclaration,
+              messagesToReport);
             const indentedAedocSynopsis: string = ReviewFileGenerator._addIndentAfterNewlines(aedocSynopsis,
               child.getIndent());
 
@@ -229,14 +306,12 @@ export class ReviewFileGenerator {
    * whether the item has been documented, and any warnings that were detected
    * by the analysis.
    */
-  private static _getAedocSynopsis(collector: Collector, astDeclaration: AstDeclaration): string {
-    const output: StringWriter = new StringWriter();
-
-    const messagesToReport: ExtractorMessage[] = collector.messageRouter
-      .fetchAssociatedMessagesForReviewFile(astDeclaration);
+  private static _getAedocSynopsis(collector: Collector, astDeclaration: AstDeclaration,
+    messagesToReport: ExtractorMessage[]): string {
+    const stringWriter: StringWriter = new StringWriter();
 
     for (const message of messagesToReport) {
-      ReviewFileGenerator._writeLineAsComments(output, 'Warning: ' + message.formatMessageWithoutLocation());
+      ReviewFileGenerator._writeLineAsComments(stringWriter, 'Warning: ' + message.formatMessageWithoutLocation());
     }
 
     const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
@@ -278,13 +353,13 @@ export class ReviewFileGenerator {
 
     if (footerParts.length > 0) {
       if (messagesToReport.length > 0) {
-        ReviewFileGenerator._writeLineAsComments(output, ''); // skip a line after the warnings
+        ReviewFileGenerator._writeLineAsComments(stringWriter, ''); // skip a line after the warnings
       }
 
-      ReviewFileGenerator._writeLineAsComments(output, footerParts.join(' '));
+      ReviewFileGenerator._writeLineAsComments(stringWriter, footerParts.join(' '));
     }
 
-    return output.toString();
+    return stringWriter.toString();
   }
 
   private static _writeLineAsComments(stringWriter: StringWriter, line: string): void {

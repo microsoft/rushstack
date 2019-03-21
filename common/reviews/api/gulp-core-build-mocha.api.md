@@ -4,18 +4,25 @@
 
 ```ts
 
+import * as Gulp from 'gulp';
+import { GulpTask } from '@microsoft/gulp-core-build';
+import { IBuildConfig } from '@microsoft/gulp-core-build';
+import { IExecutable } from '@microsoft/gulp-core-build';
+
 // @public (undocumented)
-declare const _default: IExecutable;
+const _default: IExecutable;
+
+export default _default;
 
 // Warning: (ae-forgotten-export) The symbol "InstrumentTask" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-declare const instrument: InstrumentTask;
+export const instrument: InstrumentTask;
 
 // Warning: (ae-forgotten-export) The symbol "MochaTask" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-declare const mocha: MochaTask;
+export const mocha: MochaTask;
 
 
 // (No @packageDocumentation comment for this package)

@@ -5,11 +5,11 @@
 ```ts
 
 // @public (undocumented)
-declare class Lib2Class {
+export class Lib2Class {
 }
 
 // @alpha (undocumented)
-interface Lib2Interface {
+export interface Lib2Interface {
 }
 
 

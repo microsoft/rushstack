@@ -12,7 +12,8 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import {
   ExtractorMessage,
   ExtractorMessageCategory,
-  IExtractorMessageOptions
+  IExtractorMessageOptions,
+  IExtractorMessageProperties
 } from '../api/ExtractorMessage';
 import { ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
 import {
@@ -164,7 +165,7 @@ export class MessageRouter {
    * Add a message from the API Extractor analysis
    */
   public addAnalyzerIssue(messageId: ExtractorMessageId, messageText: string,
-    astDeclarationOrSymbol: AstDeclaration | AstSymbol): void {
+    astDeclarationOrSymbol: AstDeclaration | AstSymbol, properties?: IExtractorMessageProperties): void {
 
     let astDeclaration: AstDeclaration;
     if (astDeclarationOrSymbol instanceof AstDeclaration) {
@@ -175,7 +176,7 @@ export class MessageRouter {
 
     const extractorMessage: ExtractorMessage = this.addAnalyzerIssueForPosition(
       messageId, messageText, astDeclaration.declaration.getSourceFile(),
-      astDeclaration.declaration.getStart());
+      astDeclaration.declaration.getStart(), properties);
 
     this._associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
   }
@@ -231,7 +232,7 @@ export class MessageRouter {
    * Add a message for a location in an arbitrary source file.
    */
   public addAnalyzerIssueForPosition(messageId: ExtractorMessageId, messageText: string,
-    sourceFile: ts.SourceFile, pos: number): ExtractorMessage {
+    sourceFile: ts.SourceFile, pos: number, properties?: IExtractorMessageProperties): ExtractorMessage {
 
     const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(
       pos);
@@ -242,7 +243,8 @@ export class MessageRouter {
       text: messageText,
       sourceFilePath: sourceFile.fileName,
       sourceFileLine: lineAndCharacter.line + 1,
-      sourceFileColumn: lineAndCharacter.character + 1
+      sourceFileColumn: lineAndCharacter.character + 1,
+      properties
     };
 
     this._sourceMapper.updateExtractorMessageOptions(options);

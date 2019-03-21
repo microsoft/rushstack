@@ -4,13 +4,15 @@
 
 ```ts
 
+import { Lib1Class } from 'api-extractor-lib1-test';
+
 // @public
-declare function f(): typeof Lib1Class | undefined;
+export function f(): typeof Lib1Class | undefined;
 
 // Warning: (ae-forgotten-export) The symbol "ForgottenExport" needs to be exported by the entry point index.d.ts
 // 
 // @public
-declare function g(): typeof ForgottenExport | undefined;
+export function g(): typeof ForgottenExport | undefined;
 
 
 // (No @packageDocumentation comment for this package)

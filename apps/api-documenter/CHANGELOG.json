@@ -2,6 +2,36 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.38",
+      "tag": "@microsoft/api-documenter_v7.0.38",
+      "date": "Thu, 21 Mar 2019 04:59:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.15` to `0.2.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.42` to `6.0.43`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.37",
+      "tag": "@microsoft/api-documenter_v7.0.37",
+      "date": "Thu, 21 Mar 2019 01:15:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.14` to `0.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.41` to `6.0.42`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.36",
       "tag": "@microsoft/api-documenter_v7.0.36",
       "date": "Wed, 20 Mar 2019 19:14:49 GMT",

@@ -5,13 +5,13 @@
 ```ts
 
 // @public (undocumented)
-declare abstract class AbstractClass {
+export abstract class AbstractClass {
     // (undocumented)
     abstract member(): void;
 }
 
 // @public (undocumented)
-declare class ClassWithTypeLiterals {
+export class ClassWithTypeLiterals {
     method1(vector: {
         x: number;
         y: number;
@@ -23,7 +23,7 @@ declare class ClassWithTypeLiterals {
 }
 
 // @public (undocumented)
-declare const enum ConstEnum {
+export const enum ConstEnum {
     // (undocumented)
     One = 1,
     // (undocumented)
@@ -33,13 +33,13 @@ declare const enum ConstEnum {
 }
 
 // @public (undocumented)
-interface IInterface {
+export interface IInterface {
     // (undocumented)
     member: string;
 }
 
 // @public (undocumented)
-declare namespace NamespaceContainingVariable {
+export namespace NamespaceContainingVariable {
     let // (undocumented)
     variable: object[];
     let // (undocumented)
@@ -47,20 +47,20 @@ declare namespace NamespaceContainingVariable {
 }
 
 // @public (undocumented)
-declare enum RegularEnum {
+export enum RegularEnum {
     One = 1,
     Two = 2,
     Zero = 0
 }
 
 // @public (undocumented)
-declare class SimpleClass {
+export class SimpleClass {
     // (undocumented)
     member(): void;
 }
 
 // @public (undocumented)
-declare const VARIABLE: string;
+export const VARIABLE: string;
 
 
 // (No @packageDocumentation comment for this package)

@@ -5,15 +5,15 @@
 ```ts
 
 // @public (undocumented)
-declare class A {
+export class A {
 }
 
 // @public (undocumented)
-declare class B {
+export class B {
 }
 
 // @public (undocumented)
-declare class C {
+export class C {
 }
 
 

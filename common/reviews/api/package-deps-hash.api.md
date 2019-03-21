@@ -5,10 +5,10 @@
 ```ts
 
 // @public
-declare function getPackageDeps(packagePath?: string, excludedPaths?: string[]): IPackageDeps;
+export function getPackageDeps(packagePath?: string, excludedPaths?: string[]): IPackageDeps;
 
 // @public (undocumented)
-interface IPackageDeps {
+export interface IPackageDeps {
     // (undocumented)
     files: {
         [key: string]: string;

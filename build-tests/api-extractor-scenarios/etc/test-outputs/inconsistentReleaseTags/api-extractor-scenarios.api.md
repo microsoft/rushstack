@@ -5,10 +5,10 @@
 ```ts
 
 // @alpha
-declare function alphaFunctionReturnsBeta(): IBeta;
+export function alphaFunctionReturnsBeta(): IBeta;
 
 // @beta (undocumented)
-interface IBeta {
+export interface IBeta {
     // (undocumented)
     x: number;
 }
@@ -16,7 +16,7 @@ interface IBeta {
 // Warning: (ae-incompatible-release-tags) The symbol "publicFunctionReturnsBeta" is marked as @public, but its signature references "IBeta" which is marked as @beta
 // 
 // @public
-declare function publicFunctionReturnsBeta(): IBeta;
+export function publicFunctionReturnsBeta(): IBeta;
 
 
 // (No @packageDocumentation comment for this package)

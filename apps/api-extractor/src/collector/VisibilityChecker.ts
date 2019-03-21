@@ -21,9 +21,31 @@ export class VisibilityChecker {
             VisibilityChecker._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
           });
 
+          VisibilityChecker._checkForInternalUnderscore(collector, entity, entity.astEntity);
         }
       }
     }
+  }
+
+  private static _checkForInternalUnderscore(collector: Collector, collectorEntity: CollectorEntity,
+    astSymbol: AstSymbol): void {
+
+    const astSymbolMetadata: SymbolMetadata = collector.fetchMetadata(astSymbol);
+
+    if (astSymbolMetadata.releaseTag === ReleaseTag.Internal && !astSymbolMetadata.releaseTagSameAsParent) {
+      for (const exportName of collectorEntity.exportNames) {
+        if (exportName[0] !== '_') {
+          collector.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.InternalMissingUnderscore,
+            `The name ${exportName} should be prefixed with an underscore`
+            + ` because the declaration is marked as "@internal"`,
+            astSymbol,
+            { exportName }
+          );
+        }
+      }
+    }
+
   }
 
   private static _checkReferences(collector: Collector, astDeclaration: AstDeclaration,

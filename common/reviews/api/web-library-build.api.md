@@ -4,34 +4,41 @@
 
 ```ts
 
-// @public (undocumented)
-declare const buildTasks: IExecutable;
+import { CopyTask } from '@microsoft/gulp-core-build';
+import { GenerateShrinkwrapTask } from '@microsoft/gulp-core-build';
+import { GulpTask } from '@microsoft/gulp-core-build';
+import gulpType = require('gulp');
+import { IExecutable } from '@microsoft/gulp-core-build';
+import { ValidateShrinkwrapTask } from '@microsoft/gulp-core-build';
 
 // @public (undocumented)
-declare const bundleTasks: IExecutable;
+export const buildTasks: IExecutable;
 
 // @public (undocumented)
-declare const defaultTasks: IExecutable;
+export const bundleTasks: IExecutable;
 
 // @public (undocumented)
-declare const generateShrinkwrapTask: GenerateShrinkwrapTask;
+export const defaultTasks: IExecutable;
 
 // @public (undocumented)
-declare const postCopy: CopyTask;
+export const generateShrinkwrapTask: GenerateShrinkwrapTask;
+
+// @public (undocumented)
+export const postCopy: CopyTask;
 
 // Warning: (ae-forgotten-export) The symbol "PostProcessSourceMaps" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
-declare const postProcessSourceMapsTask: PostProcessSourceMaps;
+export const postProcessSourceMapsTask: PostProcessSourceMaps;
 
 // @public (undocumented)
-declare const preCopy: CopyTask;
+export const preCopy: CopyTask;
 
 // @public (undocumented)
-declare const testTasks: IExecutable;
+export const testTasks: IExecutable;
 
 // @public (undocumented)
-declare const validateShrinkwrapTask: ValidateShrinkwrapTask;
+export const validateShrinkwrapTask: ValidateShrinkwrapTask;
 
 
 export * from "@microsoft/gulp-core-build";

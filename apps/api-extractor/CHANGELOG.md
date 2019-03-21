@@ -1,6 +1,20 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 20 Mar 2019 19:14:49 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Mar 2019 04:59:11 GMT and should not be manually modified.
+
+## 7.0.31
+Thu, 21 Mar 2019 04:59:11 GMT
+
+### Patches
+
+- Reintroduce "ae-internal-missing-underscore" warning for API items marked as `@internal` but whose name does not start with an underscore
+
+## 7.0.30
+Thu, 21 Mar 2019 01:15:32 GMT
+
+### Patches
+
+- Improve the API review file generation to include imports and support multiple exports
 
 ## 7.0.29
 Wed, 20 Mar 2019 19:14:49 GMT
