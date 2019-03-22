@@ -388,6 +388,15 @@ export class PublishUtilities {
           if (!depProject.shouldPublish || projectsToExclude && projectsToExclude.has(depName)) {
             // No version change.
             return;
+          } else if (
+            prereleaseToken &&
+            prereleaseToken.hasValue &&
+            prereleaseToken.isPartialPrerelease &&
+            depChange.changeType! < ChangeType.hotfix
+          ) {
+            // FOr partial prereleases, do not version bump dependecies with the `prereleaseToken`
+            // value unless an actual change (hotfix, patch, minor, major) has occured
+            return;
           } else if (depChange && prereleaseToken && prereleaseToken.hasValue) {
             // TODO: treat prerelease version the same as non-prerelease version.
             // For prelease, the newVersion needs to be appended with prerelease name.
@@ -413,7 +422,8 @@ export class PublishUtilities {
    * Gets the new version from the ChangeInfo.
    * The value of newVersion in ChangeInfo remains unchanged when the change type is dependency,
    * However, for pre-release build, it won't pick up the updated pre-released dependencies. That is why
-   * this function should return a pre-released patch for that case.
+   * this function should return a pre-released patch for that case. The exception to this is when we're
+   * running a partial pre-release build. In this case, only user-changed packages should update.
    */
   private static _getChangeInfoNewVersion(
     change: IChangeInfo,
@@ -421,6 +431,9 @@ export class PublishUtilities {
   ): string {
     let newVersion: string = change.newVersion!;
     if (prereleaseToken && prereleaseToken.hasValue) {
+      if (prereleaseToken.isPartialPrerelease && change.changeType! <= ChangeType.hotfix) {
+        return newVersion;
+      }
       if (prereleaseToken.isPrerelease && change.changeType === ChangeType.dependency) {
         newVersion = semver.inc(newVersion, 'patch');
       }
