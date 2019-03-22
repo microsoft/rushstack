@@ -388,10 +388,15 @@ export class PublishUtilities {
           if (!depProject.shouldPublish || projectsToExclude && projectsToExclude.has(depName)) {
             // No version change.
             return;
-          } else if (prereleaseToken && prereleaseToken.hasValue && prereleaseToken.isPartialPrerelease && depChange.changeType! < ChangeType.hotfix) {
+          } else if (
+            prereleaseToken &&
+            prereleaseToken.hasValue &&
+            prereleaseToken.isPartialPrerelease &&
+            depChange.changeType! < ChangeType.hotfix
+          ) {
             // FOr partial prereleases, do not version bump dependecies with the `prereleaseToken`
             // value unless an actual change (hotfix, patch, minor, major) has occured
-            return
+            return;
           } else if (depChange && prereleaseToken && prereleaseToken.hasValue) {
             // TODO: treat prerelease version the same as non-prerelease version.
             // For prelease, the newVersion needs to be appended with prerelease name.
@@ -427,7 +432,7 @@ export class PublishUtilities {
     let newVersion: string = change.newVersion!;
     if (prereleaseToken && prereleaseToken.hasValue) {
       if (prereleaseToken.isPartialPrerelease && change.changeType! <= ChangeType.hotfix) {
-        return newVersion
+        return newVersion;
       }
       if (prereleaseToken.isPrerelease && change.changeType === ChangeType.dependency) {
         newVersion = semver.inc(newVersion, 'patch');
