@@ -41,6 +41,7 @@ export class PublishAction extends BaseRushAction {
   private _registryUrl: CommandLineStringParameter;
   private _targetBranch: CommandLineStringParameter;
   private _prereleaseName: CommandLineStringParameter;
+  private _partialPrerelease: CommandLineFlagParameter;
   private _suffix: CommandLineStringParameter;
   private _force: CommandLineFlagParameter;
   private _prereleaseToken: PrereleaseToken;
@@ -171,6 +172,11 @@ export class PublishAction extends BaseRushAction {
       argumentName: 'NAME',
       description: 'Bump up to a prerelease version with the provided prerelease name. Cannot be used with --suffix'
     });
+    this._partialPrerelease = this.defineFlagParameter({
+      parameterLongName: '--partial-prerelease',
+      parameterShortName: undefined,
+      description: 'Used with --prerelease-name. Only bump packages to a prerelease version if they have changes.'
+    });
     this._suffix = this.defineStringParameter({
       parameterLongName: '--suffix',
       argumentName: 'SUFFIX',
@@ -203,7 +209,11 @@ export class PublishAction extends BaseRushAction {
       if (this._includeAll.value) {
         this._publishAll(allPackages);
       } else {
-        this._prereleaseToken = new PrereleaseToken(this._prereleaseName.value, this._suffix.value);
+        this._prereleaseToken = new PrereleaseToken(
+          this._prereleaseName.value,
+          this._suffix.value,
+          this._partialPrerelease.value
+        );
         this._publishChanges(allPackages);
       }
 
