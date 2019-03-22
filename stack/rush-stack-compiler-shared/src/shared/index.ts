@@ -14,8 +14,9 @@
  * @packageDocumentation
  */
 
-export { RushStackCompilerBase }  from './RushStackCompilerBase';
 export { ApiExtractorRunner } from './ApiExtractorRunner';
+export { RushStackCompilerBase }  from './RushStackCompilerBase';
+export { StandardBuildFolders } from './StandardBuildFolders';
 export {
   TypescriptCompiler,
   ITypescriptCompilerOptions

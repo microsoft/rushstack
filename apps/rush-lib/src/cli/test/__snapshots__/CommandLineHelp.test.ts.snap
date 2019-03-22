@@ -361,13 +361,15 @@ Optional arguments:
                         tag is important. When hotfix changes are made, this 
                         parameter defaults to 'hotfix'.
   --set-access-level {public,restricted}
-                        The access option to pass to npm publish. By default 
-                        NPM will publish scoped packages with an access level 
-                        of 'restricted'. Scoped packages can be published 
-                        with an access level of 'public' by specifying that 
-                        value for this flag with the initial publication. NPM 
+                        By default, when Rush invokes \\"npm publish\\" it will 
+                        publish scoped packages with an access level of 
+                        \\"restricted\\". Scoped packages can be published with 
+                        an access level of \\"public\\" by specifying that value 
+                        for this flag with the initial publication. NPM 
                         always publishes unscoped packages with an access 
-                        level of 'public'.
+                        level of \\"public\\". For more information, see the NPM 
+                        documentation for the \\"--access\\" option of \\"npm 
+                        publish\\".
   --pack                Packs projects into tarballs instead of publishing to 
                         npm repository. It can only be used when 
                         --include-all is specified. If this flag is specified,

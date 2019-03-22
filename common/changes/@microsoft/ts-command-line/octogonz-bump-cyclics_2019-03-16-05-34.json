@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/ts-command-line",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

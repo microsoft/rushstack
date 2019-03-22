@@ -55,6 +55,14 @@
       "ae-forgotten-export": {
         "logLevel": "warning",
         "addToApiReviewFile": true
+      },
+      "ae-incompatible-release-tags": {
+        "logLevel": "warning",
+        "addToApiReviewFile": true
+      },
+      "ae-internal-missing-underscore": {
+        "logLevel": "warning",
+        "addToApiReviewFile": true
       }
     },
     "tsdocMessageReporting": {

@@ -17,6 +17,7 @@ export const eolSequence: IColorableSequence = {
 } as IColorableSequence;
 
 /**
+ * Colors used with {@link IColorableSequence}.
  * @beta
  */
 export enum ColorValue {
@@ -31,6 +32,10 @@ export enum ColorValue {
   Gray
 }
 
+/**
+ * Text styles used with {@link IColorableSequence}.
+ * @beta
+ */
 export enum TextAttribute {
   Bold,
   Dim,

@@ -12,9 +12,9 @@ import {
   JsonSchema,
   Path,
   FileSystem,
-  IPackageJson,
   NewlineKind,
-  PackageJsonLookup
+  PackageJsonLookup,
+  IPackageJson
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
@@ -65,7 +65,7 @@ export interface IExtractorOptions {
   /**
    * Indicates that API Extractor is running as part of a local build, e.g. on developer's
    * machine. This disables certain validation that would normally be performed
-   * for a ship/production build. For example, the *.api.ts review file is
+   * for a ship/production build. For example, the *.api.md review file is
    * automatically local in a debug build.
    *
    * The default value is false.
@@ -418,7 +418,7 @@ export class Extractor {
     }
 
     if (this.actualConfig.apiReviewFile.enabled) {
-      const apiReviewFilename: string = packageBaseName + '.api.ts';
+      const apiReviewFilename: string = packageBaseName + '.api.md';
 
       const actualApiReviewPath: string = path.resolve(this._absoluteRootFolder,
         this.actualConfig.apiReviewFile.tempFolder, apiReviewFilename);

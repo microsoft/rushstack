@@ -4,9 +4,10 @@ import * as ts from 'typescript';
 import { Collector } from './Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-// import { SymbolMetadata } from './SymbolMetadata';
+import { SymbolMetadata } from './SymbolMetadata';
 import { CollectorEntity } from './CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 export class VisibilityChecker {
 
@@ -20,13 +21,38 @@ export class VisibilityChecker {
             VisibilityChecker._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
           });
 
+          VisibilityChecker._checkForInternalUnderscore(collector, entity, entity.astEntity);
         }
       }
     }
   }
 
+  private static _checkForInternalUnderscore(collector: Collector, collectorEntity: CollectorEntity,
+    astSymbol: AstSymbol): void {
+
+    const astSymbolMetadata: SymbolMetadata = collector.fetchMetadata(astSymbol);
+
+    if (astSymbolMetadata.releaseTag === ReleaseTag.Internal && !astSymbolMetadata.releaseTagSameAsParent) {
+      for (const exportName of collectorEntity.exportNames) {
+        if (exportName[0] !== '_') {
+          collector.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.InternalMissingUnderscore,
+            `The name ${exportName} should be prefixed with an underscore`
+            + ` because the declaration is marked as "@internal"`,
+            astSymbol,
+            { exportName }
+          );
+        }
+      }
+    }
+
+  }
+
   private static _checkReferences(collector: Collector, astDeclaration: AstDeclaration,
     alreadyWarnedSymbols: Set<AstSymbol>): void {
+
+    const astSymbolMetadata: SymbolMetadata = collector.fetchMetadata(astDeclaration.astSymbol);
+    const astSymbolReleaseTag: ReleaseTag = astSymbolMetadata.releaseTag;
 
     for (const referencedEntity of astDeclaration.referencedAstEntities) {
 
@@ -41,8 +67,17 @@ export class VisibilityChecker {
           const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(rootSymbol);
 
           if (collectorEntity && collectorEntity.exported) {
-            // const metadata: SymbolMetadata = collector.fetchMetadata(referencedEntity);
-            return;
+            const referencedMetadata: SymbolMetadata = collector.fetchMetadata(referencedEntity);
+            const referencedReleaseTag: ReleaseTag = referencedMetadata.releaseTag;
+
+            if (ReleaseTag.compare(astSymbolReleaseTag, referencedReleaseTag) > 0) {
+              collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.IncompatibleReleaseTags,
+                `The symbol "${astDeclaration.astSymbol.localName}"`
+                + ` is marked as ${ReleaseTag.getTagName(astSymbolReleaseTag)},`
+                + ` but its signature references "${referencedEntity.localName}"`
+                + ` which is marked as ${ReleaseTag.getTagName(referencedReleaseTag)}`,
+                astDeclaration);
+            }
           } else {
             const entryPointFilename: string = path.basename(collector.workingPackage.entryPointSourceFile.fileName);
 

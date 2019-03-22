@@ -43,3 +43,39 @@ export enum ReleaseTag {
    */
   Public = 4
 }
+
+/**
+ * Helper functions for working with the `ReleaseTag` enum.
+ * @public
+ */
+export namespace ReleaseTag {
+  /**
+   * Returns the TSDoc tag name for a `ReleaseTag` value.
+   *
+   * @remarks
+   * For example, `getTagName(ReleaseTag.Internal)` would return the string `@internal`.
+   */
+  export function getTagName(releaseTag: ReleaseTag): string {
+    switch (releaseTag) {
+      case ReleaseTag.None: return '(none)';
+      case ReleaseTag.Internal: return '@internal';
+      case ReleaseTag.Alpha: return '@alpha';
+      case ReleaseTag.Beta: return '@beta';
+      case ReleaseTag.Public: return '@public';
+    }
+    throw new Error('Unsupported release tag');
+  }
+
+  /**
+   * Compares two `ReleaseTag` values. Their values must not be `ReleaseTag.None`.
+   * @returns 0 if `a` and `b` are equal, a positive number if `a` is more public than `b`,
+   * and a negative number if `a` is less public than `b`.
+   * @remarks
+   * For example, `compareReleaseTag(ReleaseTag.Beta, ReleaseTag.Alpha)` will return a positive
+   * number because beta is more public than alpha.
+   */
+  export function compare(a: ReleaseTag, b: ReleaseTag): number {
+    return a - b;
+  }
+
+}

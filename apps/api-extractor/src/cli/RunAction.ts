@@ -49,7 +49,7 @@ export class RunAction extends CommandLineAction {
       parameterShortName: '-l',
       description: 'Indicates that API Extractor is running as part of a local build,'
         + ' e.g. on a developer\'s machine. This disables certain validation that would'
-        + ' normally be performed for a ship/production build. For example, the *.api.ts'
+        + ' normally be performed for a ship/production build. For example, the *.api.md'
         + ' review file is automatically copied in a local build.'
     });
 

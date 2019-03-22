@@ -9,10 +9,6 @@ script:
   - node common/scripts/install-run-rush.js change -v
   - echo -en 'travis_fold:end:change\\r'
 
-  - echo 'Checking for inconsistent dependency versions' && echo -en 'travis_fold:start:check\\r'
-  - node common/scripts/install-run-rush.js check
-  - echo -en 'travis_fold:end:check\\r'
-
   - echo 'Installing...' && echo -en 'travis_fold:start:install\\r'
   - node common/scripts/install-run-rush.js install
   - echo -en 'travis_fold:end:install\\r'

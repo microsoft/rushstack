@@ -1,6 +1,38 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 13 Mar 2019 01:14:05 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Mar 2019 04:59:11 GMT and should not be manually modified.
+
+## 7.0.38
+Thu, 21 Mar 2019 04:59:11 GMT
+
+*Version update only*
+
+## 7.0.37
+Thu, 21 Mar 2019 01:15:32 GMT
+
+*Version update only*
+
+## 7.0.36
+Wed, 20 Mar 2019 19:14:49 GMT
+
+*Version update only*
+
+## 7.0.35
+Mon, 18 Mar 2019 04:28:43 GMT
+
+*Version update only*
+
+## 7.0.34
+Fri, 15 Mar 2019 19:13:25 GMT
+
+*Version update only*
+
+## 7.0.33
+Wed, 13 Mar 2019 19:13:14 GMT
+
+### Patches
+
+- Refactor code to move the IndentedWriter API from api-extractor-model to api-documenter
 
 ## 7.0.32
 Wed, 13 Mar 2019 01:14:05 GMT

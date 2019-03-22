@@ -1,6 +1,50 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 13 Mar 2019 01:14:05 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Mar 2019 04:59:11 GMT and should not be manually modified.
+
+## 7.0.31
+Thu, 21 Mar 2019 04:59:11 GMT
+
+### Patches
+
+- Reintroduce "ae-internal-missing-underscore" warning for API items marked as `@internal` but whose name does not start with an underscore
+
+## 7.0.30
+Thu, 21 Mar 2019 01:15:32 GMT
+
+### Patches
+
+- Improve the API review file generation to include imports and support multiple exports
+
+## 7.0.29
+Wed, 20 Mar 2019 19:14:49 GMT
+
+### Patches
+
+- API Extractor can now analyze packages whose package.json file is missing the "version" field
+
+## 7.0.28
+Mon, 18 Mar 2019 04:28:43 GMT
+
+### Patches
+
+- Rename the "ae-inconsistent-release-tags" warning to "ae-different-release-tags"
+- Introduce a new warning "ae-incompatible-release-tags" that checks for API signatures that reference types with incompatible release tags
+- Fix an issue where this error was sometimes reported incorrectly: "The messages.extractorMessageReporting table contains an unrecognized identifier ___"
+
+## 7.0.27
+Fri, 15 Mar 2019 19:13:25 GMT
+
+### Patches
+
+- (Breaking change) The file extension for API review files has changed from ".api.ts" to "api.md".  For details see https://github.com/Microsoft/web-build-tools/issues/1123
+
+## 7.0.26
+Wed, 13 Mar 2019 19:13:14 GMT
+
+### Patches
+
+- Refactor code to move the IndentedWriter API from api-extractor-model to api-documenter
 
 ## 7.0.25
 Wed, 13 Mar 2019 01:14:05 GMT

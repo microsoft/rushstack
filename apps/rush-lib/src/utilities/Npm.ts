@@ -8,12 +8,13 @@ export class Npm {
   public static publishedVersions(
     packageName: string,
     cwd: string,
-    env: { [key: string]: string | undefined }
+    env: { [key: string]: string | undefined },
+    extraArgs: string[] = []
   ): string[] {
     const versions: string[] = [];
     try {
       const packageTime: string = Utilities.executeCommandAndCaptureOutput('npm',
-        `view ${packageName} time --json`.split(' '),
+        ['view', packageName, 'time', '--json', ...extraArgs],
         cwd,
         env,
         true
@@ -28,7 +29,7 @@ export class Npm {
         console.log(`Package ${packageName} time value does not exist. Fall back to versions.`);
         // time property does not exist. It happens sometimes. Fall back to versions.
         const packageVersions: string = Utilities.executeCommandAndCaptureOutput('npm',
-          `view ${packageName} versions --json`.split(' '),
+          ['view', packageName, 'versions', '--json', ...extraArgs],
           cwd,
           env,
           true
