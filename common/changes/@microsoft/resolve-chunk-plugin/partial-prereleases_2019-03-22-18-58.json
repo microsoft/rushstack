@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/resolve-chunk-plugin",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/resolve-chunk-plugin",
+  "email": "raygesualdo@users.noreply.github.com"
+}

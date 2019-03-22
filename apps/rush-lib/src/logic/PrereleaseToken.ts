@@ -5,14 +5,16 @@ export class PrereleaseToken {
   private _name: string;
   private _prereleaseName: string | undefined;
   private _suffixName: string | undefined;
+  private _partialPrerelease: boolean;
 
-  constructor(prereleaseName?: string, suffixName?: string) {
+  constructor(prereleaseName?: string, suffixName?: string, partialPrerelease: boolean = false) {
     if (prereleaseName && suffixName) {
       throw new Error('Pre-release name and suffix cannot be provided at the same time.');
     }
     this._name = prereleaseName! || suffixName!;
     this._prereleaseName = prereleaseName;
     this._suffixName = suffixName;
+    this._partialPrerelease = partialPrerelease;
   }
 
   public get hasValue(): boolean {
@@ -25,6 +27,10 @@ export class PrereleaseToken {
 
   public get isSuffix(): boolean {
     return !!this._suffixName;
+  }
+
+  public get isPartialPrerelease(): boolean {
+    return this.isPrerelease && this._partialPrerelease;
   }
 
   public get name(): string {
