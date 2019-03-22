@@ -45,7 +45,17 @@ export const enum ExtractorMessageId {
   /**
    * "The name ___ should be prefixed with an underscore because the declaration is marked as `@internal`."
    */
-  InternalMissingUnderscore = 'ae-internal-missing-underscore'
+  InternalMissingUnderscore = 'ae-internal-missing-underscore',
+
+  /**
+   * "The `@preapproved` tag cannot be applied to ___ because it is not a supported declaration type."
+   */
+  PreapprovedUnsupportedType = 'ae-preapproved-unsupported-type',
+
+  /**
+   * "The `@preapproved` tag cannot be applied to ___ without an `@internal` release tag."
+   */
+  PreapprovedBadReleaseTag = 'ae-preapproved-bad-release-tag'
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([

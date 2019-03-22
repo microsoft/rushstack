@@ -312,7 +312,7 @@ export class ReviewFileGenerator {
    * For declarations marked as `@preapproved`, this is used instead of _modifySpan().
    */
   private static _modifySpanForPreapproved(span: Span): void {
-    // Match this:
+    // Match something like this:
     //
     //   ClassDeclaration:
     //     SyntaxList:

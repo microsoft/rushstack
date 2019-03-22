@@ -53,7 +53,9 @@ declare const enum ExtractorMessageId {
     IncompatibleReleaseTags = "ae-incompatible-release-tags",
     InternalMissingUnderscore = "ae-internal-missing-underscore",
     MisplacedPackageTag = "ae-misplaced-package-tag",
-    MissingReleaseTag = "ae-missing-release-tag"
+    MissingReleaseTag = "ae-missing-release-tag",
+    PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",
+    PreapprovedUnsupportedType = "ae-preapproved-unsupported-type"
 }
 
 // @public

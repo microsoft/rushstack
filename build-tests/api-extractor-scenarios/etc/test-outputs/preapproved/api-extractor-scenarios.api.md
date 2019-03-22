@@ -8,6 +8,12 @@
 class _PreapprovedClass { /* (preapproved) */ }
 
 // @internal (undocumented)
+enum _PreapprovedEnum { /* (preapproved) */ }
+
+// @internal (undocumented)
+interface _PreapprovedInterface { /* (preapproved) */ }
+
+// @internal (undocumented)
 namespace _PreapprovedNamespace { /* (preapproved) */ }
 
 

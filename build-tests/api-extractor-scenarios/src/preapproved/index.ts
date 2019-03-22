@@ -2,6 +2,17 @@
 // See LICENSE in the project root for license information.
 
 /** @internal @preapproved */
+export enum _PreapprovedEnum {
+  ONE = 1,
+  TWO
+}
+
+/** @internal @preapproved */
+export interface _PreapprovedInterface {
+  member(): void;
+}
+
+/** @internal @preapproved */
 export class _PreapprovedClass {
   public member(): void {
   }

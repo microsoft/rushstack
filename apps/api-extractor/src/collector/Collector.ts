@@ -600,7 +600,34 @@ export class Collector {
       declarationMetadata.isSealed = modifierTagSet.isSealed();
       declarationMetadata.isVirtual = modifierTagSet.isVirtual();
 
-      declarationMetadata.isPreapproved = modifierTagSet.hasTag(AedocDefinitions.preapprovedTag);
+      if (modifierTagSet.hasTag(AedocDefinitions.preapprovedTag)) {
+        // This feature only makes sense for potentially big declarations.
+        switch (astDeclaration.declaration.kind) {
+          case ts.SyntaxKind.ClassDeclaration:
+          case ts.SyntaxKind.EnumDeclaration:
+          case ts.SyntaxKind.InterfaceDeclaration:
+          case ts.SyntaxKind.ModuleDeclaration:
+            if (declaredReleaseTag === ReleaseTag.Internal) {
+              declarationMetadata.isPreapproved = true;
+            } else {
+              this.messageRouter.addAnalyzerIssue(
+                ExtractorMessageId.PreapprovedBadReleaseTag,
+                `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
+                  + ` without an @internal release tag`,
+                astDeclaration
+              );
+            }
+            break;
+          default:
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.PreapprovedUnsupportedType,
+              `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
+                + ` because it is not a supported declaration type`,
+              astDeclaration
+            );
+            break;
+        }
+      }
 
       if (astDeclaration.declaration.kind === ts.SyntaxKind.Constructor) {
         // NOTE: If the constructor summary is missing, then ApiModelGenerator will auto-generate one.
