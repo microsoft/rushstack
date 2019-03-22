@@ -104,7 +104,14 @@ export class ReviewFileGenerator {
             stringWriter.write(ReviewFileGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport));
 
             const span: Span = new Span(astDeclaration.declaration);
-            ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration, false);
+
+            const declarationMetadata: DeclarationMetadata = collector.fetchMetadata(astDeclaration);
+            if (declarationMetadata.isPreapproved) {
+              ReviewFileGenerator._modifySpanForPreapproved(span);
+            } else {
+              ReviewFileGenerator._modifySpan(collector, span, entity, astDeclaration, false);
+            }
+
             span.writeModifiedText(stringWriter.stringBuilder);
             stringWriter.writeLine('\n');
           }
@@ -297,6 +304,57 @@ export class ReviewFileGenerator {
         }
 
         ReviewFileGenerator._modifySpan(collector, child, entity, childAstDeclaration, insideTypeLiteral);
+      }
+    }
+  }
+
+  /**
+   * For declarations marked as `@preapproved`, this is used instead of _modifySpan().
+   */
+  private static _modifySpanForPreapproved(span: Span): void {
+    // Match this:
+    //
+    //   ClassDeclaration:
+    //     SyntaxList:
+    //       ExportKeyword:  pre=[export] sep=[ ]
+    //       DeclareKeyword:  pre=[declare] sep=[ ]
+    //     ClassKeyword:  pre=[class] sep=[ ]
+    //     Identifier:  pre=[_PreapprovedClass] sep=[ ]
+    //     FirstPunctuation:  pre=[{] sep=[\n\n    ]
+    //     SyntaxList:
+    //       ...
+    //     CloseBraceToken:  pre=[}]
+    //
+    // or this:
+    //   ModuleDeclaration:
+    //     SyntaxList:
+    //       ExportKeyword:  pre=[export] sep=[ ]
+    //       DeclareKeyword:  pre=[declare] sep=[ ]
+    //     NamespaceKeyword:  pre=[namespace] sep=[ ]
+    //     Identifier:  pre=[_PreapprovedNamespace] sep=[ ]
+    //     ModuleBlock:
+    //       FirstPunctuation:  pre=[{] sep=[\n\n    ]
+    //       SyntaxList:
+    //         ...
+    //       CloseBraceToken:  pre=[}]
+    //
+    // And reduce it to something like this:
+    //
+    //   // @internal (undocumented)
+    //   class _PreapprovedClass { /* (preapproved) */ }
+    //
+
+    let skipRest: boolean = false;
+    for (const child of span.children) {
+      if (skipRest
+        || child.kind === ts.SyntaxKind.SyntaxList
+        || child.kind === ts.SyntaxKind.JSDocComment) {
+        child.modification.skipAll();
+      }
+      if (child.kind === ts.SyntaxKind.Identifier) {
+        skipRest = true;
+        child.modification.omitSeparatorAfter = true;
+        child.modification.suffix = ' { /* (preapproved) */ }';
       }
     }
   }

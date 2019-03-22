@@ -600,6 +600,8 @@ export class Collector {
       declarationMetadata.isSealed = modifierTagSet.isSealed();
       declarationMetadata.isVirtual = modifierTagSet.isVirtual();
 
+      declarationMetadata.isPreapproved = modifierTagSet.hasTag(AedocDefinitions.preapprovedTag);
+
       if (astDeclaration.declaration.kind === ts.SyntaxKind.Constructor) {
         // NOTE: If the constructor summary is missing, then ApiModelGenerator will auto-generate one.
         declarationMetadata.needsDocumentation = false;
