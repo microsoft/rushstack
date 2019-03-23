@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 21 Mar 2019 04:59:11 GMT and should not be manually modified.
+This log was last generated on Sat, 23 Mar 2019 03:48:31 GMT and should not be manually modified.
+
+## 7.0.32
+Sat, 23 Mar 2019 03:48:31 GMT
+
+### Patches
+
+- If the TSDoc summary is missing for a class constructor, then automatically generate it
+- Reintroduce support for the `@preapproved` TSDoc tag
 
 ## 7.0.31
 Thu, 21 Mar 2019 04:59:11 GMT

@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.32",
+      "tag": "@microsoft/api-extractor_v7.0.32",
+      "date": "Sat, 23 Mar 2019 03:48:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "If the TSDoc summary is missing for a class constructor, then automatically generate it"
+          },
+          {
+            "comment": "Reintroduce support for the `@preapproved` TSDoc tag"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.31",
       "tag": "@microsoft/api-extractor_v7.0.31",
       "date": "Thu, 21 Mar 2019 04:59:11 GMT",
