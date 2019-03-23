@@ -12,19 +12,19 @@ import { CollectorEntity } from './CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
-export class VisibilityChecker {
+export class ValidationEnhancer {
 
-  public static check(collector: Collector): void {
+  public static analyze(collector: Collector): void {
     const alreadyWarnedSymbols: Set<AstSymbol> = new Set<AstSymbol>();
 
     for (const entity of collector.entities) {
       if (entity.astEntity instanceof AstSymbol) {
         if (entity.exported) {
           entity.astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-            VisibilityChecker._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
+            ValidationEnhancer._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
           });
 
-          VisibilityChecker._checkForInternalUnderscore(collector, entity, entity.astEntity);
+          ValidationEnhancer._checkForInternalUnderscore(collector, entity, entity.astEntity);
         }
       }
     }
@@ -89,7 +89,7 @@ export class VisibilityChecker {
 
               // The main usage scenario for ECMAScript symbols is to attach private data to a JavaScript object,
               // so as a special case, we do NOT report them as forgotten exports.
-              if (!VisibilityChecker._isEcmaScriptSymbol(referencedEntity)) {
+              if (!ValidationEnhancer._isEcmaScriptSymbol(referencedEntity)) {
 
                 collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.ForgottenExport,
                   `The symbol "${rootSymbol.localName}" needs to be exported`
