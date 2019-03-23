@@ -4,8 +4,12 @@
 
 ```ts
 
+import { JsonSchema } from '@microsoft/node-core-library';
+import * as ts from 'typescript';
+import * as tsdoc from '@microsoft/tsdoc';
+
 // @public
-declare class Extractor {
+export class Extractor {
     // (undocumented)
     constructor(config: IExtractorConfig, options?: IExtractorOptions);
     readonly actualConfig: IExtractorConfig;
@@ -21,10 +25,10 @@ declare class Extractor {
 }
 
 // @public
-declare class ExtractorMessage {
+export class ExtractorMessage {
     // Warning: (ae-forgotten-export) The symbol "IExtractorMessageOptions" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(options: IExtractorMessageOptions);
     readonly category: ExtractorMessageCategory;
     formatMessageWithLocation(workingPackageFolderPath: string): string;
@@ -39,14 +43,14 @@ declare class ExtractorMessage {
 }
 
 // @public
-declare const enum ExtractorMessageCategory {
+export const enum ExtractorMessageCategory {
     Compiler = "Compiler",
     Extractor = "Extractor",
     TSDoc = "TSDoc"
 }
 
 // @public
-declare const enum ExtractorMessageId {
+export const enum ExtractorMessageId {
     DifferentReleaseTags = "ae-different-release-tags",
     ExtraReleaseTag = "ae-extra-release-tag",
     ForgottenExport = "ae-forgotten-export",
@@ -59,38 +63,38 @@ declare const enum ExtractorMessageId {
 }
 
 // @public
-declare const enum ExtractorMessageLogLevel {
+export const enum ExtractorMessageLogLevel {
     Error = "error",
     None = "none",
     Warning = "warning"
 }
 
 // @public
-declare const enum ExtractorValidationRulePolicy {
+export const enum ExtractorValidationRulePolicy {
     allow = "allow",
     error = "error"
 }
 
 // @public
-interface IAnalyzeProjectOptions {
+export interface IAnalyzeProjectOptions {
     projectConfig?: IExtractorProjectConfig;
 }
 
 // @public
-interface IExtractorApiJsonFileConfig {
+export interface IExtractorApiJsonFileConfig {
     enabled: boolean;
     outputFolder?: string;
 }
 
 // @public
-interface IExtractorApiReviewFileConfig {
+export interface IExtractorApiReviewFileConfig {
     apiReviewFolder?: string;
     enabled: boolean;
     tempFolder?: string;
 }
 
 // @public
-interface IExtractorConfig {
+export interface IExtractorConfig {
     // (undocumented)
     apiJsonFile?: IExtractorApiJsonFileConfig;
     // (undocumented)
@@ -114,7 +118,7 @@ interface IExtractorConfig {
 }
 
 // @beta
-interface IExtractorDtsRollupConfig {
+export interface IExtractorDtsRollupConfig {
     enabled: boolean;
     mainDtsRollupPath?: string;
     publishFolder?: string;
@@ -125,30 +129,30 @@ interface IExtractorDtsRollupConfig {
 }
 
 // @public
-interface IExtractorMessageProperties {
+export interface IExtractorMessageProperties {
     readonly exportName?: string;
 }
 
 // @public
-interface IExtractorMessageReportingRuleConfig {
+export interface IExtractorMessageReportingRuleConfig {
     addToApiReviewFile?: boolean;
     logLevel: ExtractorMessageLogLevel;
 }
 
 // @public
-interface IExtractorMessageReportingTableConfig {
+export interface IExtractorMessageReportingTableConfig {
     [messageId: string]: IExtractorMessageReportingRuleConfig;
 }
 
 // @public
-interface IExtractorMessagesConfig {
+export interface IExtractorMessagesConfig {
     compilerMessageReporting?: IExtractorMessageReportingTableConfig;
     extractorMessageReporting?: IExtractorMessageReportingTableConfig;
     tsdocMessageReporting?: IExtractorMessageReportingTableConfig;
 }
 
 // @public
-interface IExtractorOptions {
+export interface IExtractorOptions {
     compilerProgram?: ts.Program;
     customLogger?: Partial<ILogger>;
     localBuild?: boolean;
@@ -157,23 +161,23 @@ interface IExtractorOptions {
 }
 
 // @public
-interface IExtractorPoliciesConfig {
+export interface IExtractorPoliciesConfig {
     namespaceSupport?: 'conservative' | 'permissive';
 }
 
 // @public
-interface IExtractorProjectConfig {
+export interface IExtractorProjectConfig {
     entryPointSourceFile: string;
 }
 
 // @public
-interface IExtractorRuntimeCompilerConfig {
+export interface IExtractorRuntimeCompilerConfig {
     // (undocumented)
     configType: 'runtime';
 }
 
 // @public
-interface IExtractorTsconfigCompilerConfig {
+export interface IExtractorTsconfigCompilerConfig {
     // (undocumented)
     configType: 'tsconfig';
     overrideTsconfig?: {};
@@ -181,18 +185,18 @@ interface IExtractorTsconfigCompilerConfig {
 }
 
 // @beta
-interface IExtractorTsdocMetadataConfig {
+export interface IExtractorTsdocMetadataConfig {
     enabled: boolean;
     tsdocMetadataPath?: string;
 }
 
 // @public
-interface IExtractorValidationRulesConfig {
+export interface IExtractorValidationRulesConfig {
     missingReleaseTags?: ExtractorValidationRulePolicy;
 }
 
 // @public
-interface ILogger {
+export interface ILogger {
     logError(message: string): void;
     logInfo(message: string): void;
     logVerbose(message: string): void;

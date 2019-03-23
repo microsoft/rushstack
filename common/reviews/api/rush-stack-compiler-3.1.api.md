@@ -4,8 +4,17 @@
 
 ```ts
 
+import * as ApiExtractor from '@microsoft/api-extractor';
+import { IExtractorConfig } from '@microsoft/api-extractor';
+import { IExtractorOptions } from '@microsoft/api-extractor';
+import { IPackageJson } from '@microsoft/node-core-library';
+import { ITerminalProvider } from '@microsoft/node-core-library';
+import { Terminal } from '@microsoft/node-core-library';
+import * as Tslint from 'tslint';
+import * as Typescript from 'typescript';
+
 // @beta
-declare class ApiExtractorRunner extends RushStackCompilerBase {
+export class ApiExtractorRunner extends RushStackCompilerBase {
     // (undocumented)
     constructor(extractorConfig: IExtractorConfig, extractorOptions: IExtractorOptions, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
@@ -15,21 +24,25 @@ declare class ApiExtractorRunner extends RushStackCompilerBase {
 }
 
 // @public (undocumented)
-interface ITslintRunnerConfig {
+export interface ITslintRunnerConfig {
     displayAsError?: boolean;
+    // Warning: (ae-incompatible-release-tags) The symbol "fileError" is marked as @public, but its signature references "WriteFileIssueFunction" which is marked as @beta
+    // 
     // (undocumented)
     fileError: WriteFileIssueFunction;
+    // Warning: (ae-incompatible-release-tags) The symbol "fileWarning" is marked as @public, but its signature references "WriteFileIssueFunction" which is marked as @beta
+    // 
     // (undocumented)
     fileWarning: WriteFileIssueFunction;
 }
 
 // @beta (undocumented)
-interface ITypescriptCompilerOptions {
+export interface ITypescriptCompilerOptions {
     customArgs?: string[];
 }
 
 // @beta (undocumented)
-declare abstract class RushStackCompilerBase<TOptions = {}> {
+export abstract class RushStackCompilerBase<TOptions = {}> {
     // (undocumented)
     constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
@@ -41,7 +54,7 @@ declare abstract class RushStackCompilerBase<TOptions = {}> {
 }
 
 // @beta (undocumented)
-declare class StandardBuildFolders {
+export class StandardBuildFolders {
     // (undocumented)
     constructor(projectFolderPath: string);
     // (undocumented)
@@ -57,7 +70,7 @@ declare class StandardBuildFolders {
     }
 
 // @alpha (undocumented)
-declare class ToolPackages {
+export class ToolPackages {
     // (undocumented)
     static apiExtractor: typeof ApiExtractor;
     // (undocumented)
@@ -67,7 +80,7 @@ declare class ToolPackages {
 }
 
 // @beta (undocumented)
-declare class ToolPaths {
+export class ToolPaths {
     // (undocumented)
     static readonly tslintPackageJson: IPackageJson;
     // (undocumented)
@@ -79,7 +92,7 @@ declare class ToolPaths {
     }
 
 // @beta (undocumented)
-declare class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
+export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
     // (undocumented)
     constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
@@ -87,7 +100,7 @@ declare class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
 }
 
 // @beta (undocumented)
-declare class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
+export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
     // (undocumented)
     constructor(rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
@@ -97,7 +110,7 @@ declare class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompil
 }
 
 // @beta (undocumented)
-declare type WriteFileIssueFunction = (filePath: string, line: number, column: number, errorCode: string, message: string) => void;
+export type WriteFileIssueFunction = (filePath: string, line: number, column: number, errorCode: string, message: string) => void;
 
 
 ```

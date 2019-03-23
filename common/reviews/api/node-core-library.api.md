@@ -4,11 +4,14 @@
 
 ```ts
 
-// @beta
-declare type callback<TResult, TError> = (error: TError, result: TResult) => void;
+import * as child_process from 'child_process';
+import * as fs from 'fs';
 
 // @beta
-declare class Colors {
+export type callback<TResult, TError> = (error: TError, result: TResult) => void;
+
+// @beta
+export class Colors {
     // (undocumented)
     static black(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
@@ -62,7 +65,7 @@ declare class Colors {
 }
 
 // @beta
-declare enum ColorValue {
+export enum ColorValue {
     // (undocumented)
     Black = 0,
     // (undocumented)
@@ -84,7 +87,7 @@ declare enum ColorValue {
 }
 
 // @beta
-declare class ConsoleTerminalProvider implements ITerminalProvider {
+export class ConsoleTerminalProvider implements ITerminalProvider {
     // (undocumented)
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
     // (undocumented)
@@ -97,30 +100,32 @@ declare class ConsoleTerminalProvider implements ITerminalProvider {
 }
 
 // @public
-declare const enum Encoding {
+export const enum Encoding {
     // (undocumented)
     Utf8 = "utf8"
 }
 
 // @public
-declare class Executable {
+export class Executable {
+    // Warning: (ae-incompatible-release-tags) The symbol "spawnSync" is marked as @public, but its signature references "IExecutableSpawnSyncOptions" which is marked as @beta
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
+    // Warning: (ae-incompatible-release-tags) The symbol "tryResolve" is marked as @public, but its signature references "IExecutableResolveOptions" which is marked as @beta
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
     }
 
 // @beta
-declare type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableStdioStreamMapping[];
+export type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableStdioStreamMapping[];
 
 // @beta
-declare type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit' | NodeJS.WritableStream | NodeJS.ReadableStream | number | undefined;
+export type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit' | NodeJS.WritableStream | NodeJS.ReadableStream | number | undefined;
 
 // @public
-declare const enum FileConstants {
+export const enum FileConstants {
     PackageJson = "package.json"
 }
 
 // @public
-declare class FileSystem {
+export class FileSystem {
     static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void;
     static changePosixModeBits(path: string, mode: PosixModeBits): void;
     static copyFile(options: IFileSystemCopyFileOptions): void;
@@ -147,20 +152,20 @@ declare class FileSystem {
 }
 
 // @public
-declare class FileWriter {
+export class FileWriter {
     close(): void;
     static open(path: string, flags?: IFileWriterFlags): FileWriter;
     write(text: string): void;
 }
 
 // @public
-declare const enum FolderConstants {
+export const enum FolderConstants {
     Git = ".git",
     NodeModules = "node_modules"
 }
 
 // @beta (undocumented)
-interface IColorableSequence {
+export interface IColorableSequence {
     // (undocumented)
     backgroundColor?: ColorValue;
     // (undocumented)
@@ -174,18 +179,18 @@ interface IColorableSequence {
 }
 
 // @beta
-interface IConsoleTerminalProviderOptions {
+export interface IConsoleTerminalProviderOptions {
     verboseEnabled: boolean;
 }
 
 // @beta
-interface IExecutableResolveOptions {
+export interface IExecutableResolveOptions {
     currentWorkingDirectory?: string;
     environment?: NodeJS.ProcessEnv;
 }
 
 // @beta
-interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
+export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
     input?: string;
     maxBuffer?: number;
     stdio?: ExecutableStdioMapping;
@@ -193,24 +198,24 @@ interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
 }
 
 // @public
-interface IFileSystemCopyFileOptions {
+export interface IFileSystemCopyFileOptions {
     destinationPath: string;
     sourcePath: string;
 }
 
 // @public
-interface IFileSystemCreateLinkOptions {
+export interface IFileSystemCreateLinkOptions {
     linkTargetPath: string;
     newLinkPath: string;
 }
 
 // @public
-interface IFileSystemDeleteFileOptions {
+export interface IFileSystemDeleteFileOptions {
     throwIfNotExists?: boolean;
 }
 
 // @public
-interface IFileSystemMoveOptions {
+export interface IFileSystemMoveOptions {
     destinationPath: string;
     ensureFolderExists?: boolean;
     overwrite?: boolean;
@@ -218,65 +223,65 @@ interface IFileSystemMoveOptions {
 }
 
 // @public
-interface IFileSystemReadFileOptions {
+export interface IFileSystemReadFileOptions {
     convertLineEndings?: NewlineKind;
     encoding?: Encoding;
 }
 
 // @public
-interface IFileSystemReadFolderOptions {
+export interface IFileSystemReadFolderOptions {
     absolutePaths?: boolean;
 }
 
 // @public
-interface IFileSystemUpdateTimeParameters {
+export interface IFileSystemUpdateTimeParameters {
     accessedTime: number | Date;
     modifiedTime: number | Date;
 }
 
 // @public
-interface IFileSystemWriteFileOptions {
+export interface IFileSystemWriteFileOptions {
     convertLineEndings?: NewlineKind;
     encoding?: Encoding;
     ensureFolderExists?: boolean;
 }
 
 // @public
-interface IFileWriterFlags {
+export interface IFileWriterFlags {
     append?: boolean;
     exclusive?: boolean;
 }
 
 // @public
-interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
+export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
     ensureFolderExists?: boolean;
     onlyIfChanged?: boolean;
     updateExistingFile?: boolean;
 }
 
 // @public
-interface IJsonFileStringifyOptions {
+export interface IJsonFileStringifyOptions {
     newlineConversion?: NewlineKind;
     prettyFormatting?: boolean;
 }
 
 // @public
-interface IJsonSchemaErrorInfo {
+export interface IJsonSchemaErrorInfo {
     details: string;
 }
 
 // @public
-interface IJsonSchemaFromFileOptions {
+export interface IJsonSchemaFromFileOptions {
     dependentSchemas?: JsonSchema[];
 }
 
 // @public
-interface IJsonSchemaValidateOptions {
+export interface IJsonSchemaValidateOptions {
     customErrorHeader?: string;
 }
 
 // @public
-interface INodePackageJson {
+export interface INodePackageJson {
     bin?: string;
     dependencies?: IPackageJsonDependencyTable;
     description?: string;
@@ -300,7 +305,7 @@ interface INodePackageJson {
 }
 
 // @public
-declare class InternalError extends Error {
+export class InternalError extends Error {
     constructor(message: string);
     static breakInDebugger: boolean;
     // @override (undocumented)
@@ -309,64 +314,64 @@ declare class InternalError extends Error {
 }
 
 // @public
-interface IPackageJson extends INodePackageJson {
+export interface IPackageJson extends INodePackageJson {
     // (undocumented)
     version: string;
 }
 
 // @public
-interface IPackageJsonDependencyTable {
+export interface IPackageJsonDependencyTable {
     [dependencyName: string]: string;
 }
 
 // @public
-interface IPackageJsonLookupParameters {
+export interface IPackageJsonLookupParameters {
     loadExtraFields?: boolean;
 }
 
 // @public
-interface IPackageJsonScriptTable {
+export interface IPackageJsonScriptTable {
     [scriptName: string]: string;
 }
 
 // @beta
-interface IPackageJsonTsdocConfiguration {
+export interface IPackageJsonTsdocConfiguration {
     tsdocFlavor?: string;
 }
 
 // @public
-interface IParsedPackageName {
+export interface IParsedPackageName {
     scope: string;
     unscopedName: string;
 }
 
 // @public
-interface IParsedPackageNameOrError extends IParsedPackageName {
+export interface IParsedPackageNameOrError extends IParsedPackageName {
     error: string;
 }
 
 // @public
-interface IProtectableMapParameters<K, V> {
+export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
 }
 
 // @public
-interface IStringBuilder {
+export interface IStringBuilder {
     append(text: string): void;
     toString(): string;
 }
 
 // @beta
-interface ITerminalProvider {
+export interface ITerminalProvider {
     eolCharacter: string;
     supportsColor: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }
 
 // @public
-declare class JsonFile {
+export class JsonFile {
     static load(jsonFilename: string): any;
     static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): any;
     static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any;
@@ -377,7 +382,7 @@ declare class JsonFile {
     }
 
 // @public
-declare class JsonSchema {
+export class JsonSchema {
     ensureCompiled(): void;
     static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema;
     static fromLoadedObject(schemaObject: Object): JsonSchema;
@@ -387,7 +392,7 @@ declare class JsonSchema {
     }
 
 // @beta
-declare class LegacyAdapters {
+export class LegacyAdapters {
     static convertCallbackToPromise<TResult, TError>(fn: (cb: callback<TResult, TError>) => void): Promise<TResult>;
     // (undocumented)
     static convertCallbackToPromise<TResult, TError, TArg1>(fn: (arg1: TArg1, cb: callback<TResult, TError>) => void, arg1: TArg1): Promise<TResult>;
@@ -397,7 +402,7 @@ declare class LegacyAdapters {
 }
 
 // @public
-declare class LockFile {
+export class LockFile {
     static acquire(resourceDir: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
     readonly dirtyWhenAcquired: boolean;
     readonly filePath: string;
@@ -408,18 +413,18 @@ declare class LockFile {
     }
 
 // @public
-declare class MapExtensions {
+export class MapExtensions {
     static mergeFromMap<K, V>(targetMap: Map<K, V>, sourceMap: ReadonlyMap<K, V>): void;
 }
 
 // @public
-declare const enum NewlineKind {
+export const enum NewlineKind {
     CrLf = "\r\n",
     Lf = "\n"
 }
 
 // @public
-declare class PackageJsonLookup {
+export class PackageJsonLookup {
     // (undocumented)
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
@@ -433,7 +438,7 @@ declare class PackageJsonLookup {
 }
 
 // @public
-declare class PackageName {
+export class PackageName {
     static combineParts(scope: string, unscopedName: string): string;
     // (undocumented)
     static getScope(packageName: string): string;
@@ -446,13 +451,13 @@ declare class PackageName {
 }
 
 // @public
-declare class Path {
+export class Path {
     static isUnder(childPath: string, parentFolderPath: string): boolean;
     static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;
     }
 
 // @public
-declare const enum PosixModeBits {
+export const enum PosixModeBits {
     AllExecute = 73,
     AllRead = 292,
     AllWrite = 146,
@@ -469,7 +474,7 @@ declare const enum PosixModeBits {
 }
 
 // @public
-declare class ProtectableMap<K, V> {
+export class ProtectableMap<K, V> {
     // (undocumented)
     constructor(parameters: IProtectableMapParameters<K, V>);
     clear(): void;
@@ -483,7 +488,7 @@ declare class ProtectableMap<K, V> {
 }
 
 // @public
-declare class Sort {
+export class Sort {
     static compareByValue(x: any, y: any): number;
     static isSorted<T>(array: T[], comparer?: (x: any, y: any) => number): boolean;
     static isSortedBy<T>(array: T[], keySelector: (element: T) => any, comparer?: (x: any, y: any) => number): boolean;
@@ -494,7 +499,7 @@ declare class Sort {
 }
 
 // @beta
-declare class StringBufferTerminalProvider implements ITerminalProvider {
+export class StringBufferTerminalProvider implements ITerminalProvider {
     // (undocumented)
     constructor(supportsColor?: boolean);
     // (undocumented)
@@ -510,7 +515,7 @@ declare class StringBufferTerminalProvider implements ITerminalProvider {
 }
 
 // @public
-declare class StringBuilder implements IStringBuilder {
+export class StringBuilder implements IStringBuilder {
     // (undocumented)
     constructor();
     // (undocumented)
@@ -520,7 +525,7 @@ declare class StringBuilder implements IStringBuilder {
 }
 
 // @beta
-declare class Terminal {
+export class Terminal {
     // (undocumented)
     constructor(provider: ITerminalProvider);
     registerProvider(provider: ITerminalProvider): void;
@@ -536,7 +541,7 @@ declare class Terminal {
 }
 
 // @beta (undocumented)
-declare enum TerminalProviderSeverity {
+export enum TerminalProviderSeverity {
     // (undocumented)
     error = 2,
     // (undocumented)
@@ -548,7 +553,7 @@ declare enum TerminalProviderSeverity {
 }
 
 // @public
-declare class Text {
+export class Text {
     static convertToCrLf(input: string): string;
     static convertToLf(input: string): string;
     static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
@@ -559,7 +564,7 @@ declare class Text {
 }
 
 // @beta
-declare enum TextAttribute {
+export enum TextAttribute {
     // (undocumented)
     Blink = 3,
     // (undocumented)
