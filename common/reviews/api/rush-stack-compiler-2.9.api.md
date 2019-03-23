@@ -26,12 +26,8 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
 // @public (undocumented)
 export interface ITslintRunnerConfig {
     displayAsError?: boolean;
-    // Warning: (ae-incompatible-release-tags) The symbol "fileError" is marked as @public, but its signature references "WriteFileIssueFunction" which is marked as @beta
-    // 
     // (undocumented)
     fileError: WriteFileIssueFunction;
-    // Warning: (ae-incompatible-release-tags) The symbol "fileWarning" is marked as @public, but its signature references "WriteFileIssueFunction" which is marked as @beta
-    // 
     // (undocumented)
     fileWarning: WriteFileIssueFunction;
 }
@@ -109,7 +105,7 @@ export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompile
     invoke(): Promise<void>;
 }
 
-// @beta (undocumented)
+// @public (undocumented)
 export type WriteFileIssueFunction = (filePath: string, line: number, column: number, errorCode: string, message: string) => void;
 
 

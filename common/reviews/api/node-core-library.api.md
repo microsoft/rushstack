@@ -107,16 +107,14 @@ export const enum Encoding {
 
 // @public
 export class Executable {
-    // Warning: (ae-incompatible-release-tags) The symbol "spawnSync" is marked as @public, but its signature references "IExecutableSpawnSyncOptions" which is marked as @beta
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
-    // Warning: (ae-incompatible-release-tags) The symbol "tryResolve" is marked as @public, but its signature references "IExecutableResolveOptions" which is marked as @beta
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
     }
 
-// @beta
+// @public
 export type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableStdioStreamMapping[];
 
-// @beta
+// @public
 export type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit' | NodeJS.WritableStream | NodeJS.ReadableStream | number | undefined;
 
 // @public
@@ -183,13 +181,13 @@ export interface IConsoleTerminalProviderOptions {
     verboseEnabled: boolean;
 }
 
-// @beta
+// @public
 export interface IExecutableResolveOptions {
     currentWorkingDirectory?: string;
     environment?: NodeJS.ProcessEnv;
 }
 
-// @beta
+// @public
 export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
     input?: string;
     maxBuffer?: number;
