@@ -32,6 +32,7 @@ import { ApiPackage } from '@microsoft/api-extractor-model';
 import { ReviewFileGenerator } from '../generators/ReviewFileGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
+import { DocCommentEnhancer } from '../enhancers/DocCommentEnhancer';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -392,6 +393,7 @@ export class Extractor {
 
     collector.analyze();
 
+    DocCommentEnhancer.analyze(collector);
     ValidationEnhancer.analyze(collector);
 
     const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
