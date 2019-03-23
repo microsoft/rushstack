@@ -39,7 +39,6 @@ export const tscCmd: TscCmdTask;
 // 
 // @beta (undocumented)
 export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
-    // (undocumented)
     constructor();
     // (undocumented)
     executeTask(): Promise<void>;
@@ -56,7 +55,6 @@ export const tslintCmd: TslintCmdTask;
 
 // @beta (undocumented)
 export class TslintCmdTask extends RSCTask<ITslintCmdTaskConfig> {
-    // (undocumented)
     constructor();
     // (undocumented)
     executeTask(): Promise<void>;

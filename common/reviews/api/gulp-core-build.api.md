@@ -19,7 +19,6 @@ export const cleanFlag: IExecutable;
 
 // @public
 export class CleanFlagTask extends CleanTask {
-    // (undocumented)
     constructor();
     // (undocumented)
     executeTask(gulp: typeof gulp_2, completeCallback: (error?: string | Error) => void): void;
@@ -38,7 +37,6 @@ export const copyStaticAssets: CopyStaticAssetsTask;
 
 // @public
 export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {
-    // (undocumented)
     constructor();
     // (undocumented)
     executeTask(gulp: typeof gulp_2, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
@@ -212,7 +210,6 @@ export const jest: JestTask;
 
 // @alpha
 export class JestTask extends GulpTask<IJestConfig> {
-    // (undocumented)
     constructor();
     // (undocumented)
     executeTask(gulp: typeof gulp_2, completeCallback: (error?: string | Error) => void): void;
