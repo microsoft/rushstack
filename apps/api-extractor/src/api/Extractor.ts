@@ -31,7 +31,7 @@ import { ApiModelGenerator } from '../generators/ApiModelGenerator';
 import { ApiPackage } from '@microsoft/api-extractor-model';
 import { ReviewFileGenerator } from '../generators/ReviewFileGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
-import { ValidationEnhancer } from '../collector/VisibilityChecker';
+import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
 
 /**
  * Options for {@link Extractor.processProject}.

@@ -4,11 +4,11 @@
 import * as path from 'path';
 import * as ts from 'typescript';
 
-import { Collector } from './Collector';
+import { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { SymbolMetadata } from './SymbolMetadata';
-import { CollectorEntity } from './CollectorEntity';
+import { SymbolMetadata } from '../collector/SymbolMetadata';
+import { CollectorEntity } from '../collector/CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
