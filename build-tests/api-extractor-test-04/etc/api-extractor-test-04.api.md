@@ -85,7 +85,7 @@ export { Lib1Interface }
 
 // @public
 export class PublicClass {
-    // @internal (undocumented)
+    // @internal
     constructor(parameters: IPublicClassInternalParameters);
     // @alpha
     alphaMember(): void;

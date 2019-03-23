@@ -523,7 +523,8 @@ export class Collector {
 
               this.messageRouter.addAnalyzerIssue(
                 ExtractorMessageId.MissingReleaseTag,
-                'Missing release tag',
+                `"${entity.nameForEmit}" is exported by the package, but it is missing `
+                + `a release tag (@alpha, @beta, @public, or @internal)`,
                 astSymbol
               );
             }
@@ -599,9 +600,43 @@ export class Collector {
       declarationMetadata.isSealed = modifierTagSet.isSealed();
       declarationMetadata.isVirtual = modifierTagSet.isVirtual();
 
-      // Require the summary to contain at least 10 non-spacing characters
-      declarationMetadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
-        parserContext.docComment.summarySection, 10);
+      if (modifierTagSet.hasTag(AedocDefinitions.preapprovedTag)) {
+        // This feature only makes sense for potentially big declarations.
+        switch (astDeclaration.declaration.kind) {
+          case ts.SyntaxKind.ClassDeclaration:
+          case ts.SyntaxKind.EnumDeclaration:
+          case ts.SyntaxKind.InterfaceDeclaration:
+          case ts.SyntaxKind.ModuleDeclaration:
+            if (declaredReleaseTag === ReleaseTag.Internal) {
+              declarationMetadata.isPreapproved = true;
+            } else {
+              this.messageRouter.addAnalyzerIssue(
+                ExtractorMessageId.PreapprovedBadReleaseTag,
+                `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
+                  + ` without an @internal release tag`,
+                astDeclaration
+              );
+            }
+            break;
+          default:
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.PreapprovedUnsupportedType,
+              `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
+                + ` because it is not a supported declaration type`,
+              astDeclaration
+            );
+            break;
+        }
+      }
+
+      if (astDeclaration.declaration.kind === ts.SyntaxKind.Constructor) {
+        // NOTE: If the constructor summary is missing, then ApiModelGenerator will auto-generate one.
+        declarationMetadata.needsDocumentation = false;
+      } else {
+        // Require the summary to contain at least 10 non-spacing characters
+        declarationMetadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
+          parserContext.docComment.summarySection, 10);
+      }
     }
   }
 

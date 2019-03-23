@@ -22,5 +22,7 @@ export class DeclarationMetadata {
   public isSealed: boolean = false;
   public isVirtual: boolean = false;
 
+  public isPreapproved: boolean = false;
+
   public needsDocumentation: boolean = true;
 }

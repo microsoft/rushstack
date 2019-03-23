@@ -32,7 +32,7 @@ export class ApprovedPackagesItem {
 export class ApprovedPackagesPolicy {
     // Warning: (ae-forgotten-export) The symbol "IRushConfigurationJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson);
     readonly browserApprovedPackages: ApprovedPackagesConfiguration;
     readonly enabled: boolean;
@@ -105,7 +105,7 @@ export enum Event {
 export class EventHooks {
     // Warning: (ae-forgotten-export) The symbol "IEventHooksJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(eventHooksJson: IEventHooksJson);
     get(event: Event): string[];
     }
@@ -114,7 +114,7 @@ export class EventHooks {
 export class IndividualVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(versionPolicyJson: IIndividualVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
@@ -143,7 +143,7 @@ export class _LastInstallFlag {
 export class LockStepVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(versionPolicyJson: ILockStepVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
@@ -201,7 +201,7 @@ export type PackageManager = 'pnpm' | 'npm' | 'yarn';
 export class PnpmOptionsConfiguration {
     // Warning: (ae-forgotten-export) The symbol "IPnpmOptionsJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(json: IPnpmOptionsJson);
     readonly strictPeerDependencies: boolean;
 }
@@ -279,7 +279,7 @@ export class RushConfiguration {
 export class RushConfigurationProject {
     // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
     readonly cyclicDependencyProjects: Set<string>;
     readonly downstreamDependencyProjects: string[];
@@ -313,7 +313,7 @@ export class _RushGlobalFolder {
 
 // @beta
 export abstract class VersionPolicy {
-    // @internal (undocumented)
+    // @internal
     constructor(versionPolicyJson: IVersionPolicyJson);
     abstract bump(bumpType?: BumpType, identifier?: string): void;
     readonly definitionName: VersionPolicyDefinitionName;
@@ -333,7 +333,7 @@ export abstract class VersionPolicy {
 
 // @beta
 export class VersionPolicyConfiguration {
-    // @internal (undocumented)
+    // @internal
     constructor(jsonFileName: string);
     bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
     getVersionPolicy(policyName: string): VersionPolicy;
@@ -354,7 +354,7 @@ export enum VersionPolicyDefinitionName {
 export class YarnOptionsConfiguration {
     // Warning: (ae-forgotten-export) The symbol "IYarnOptionsJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(json: IYarnOptionsJson);
     readonly ignoreEngines: boolean;
 }

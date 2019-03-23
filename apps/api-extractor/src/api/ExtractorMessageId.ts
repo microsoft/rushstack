@@ -13,39 +13,49 @@
  */
 export const enum ExtractorMessageId {
   /**
-   * The doc comment should not contain more than one release tag.
+   * "The doc comment should not contain more than one release tag."
    */
   ExtraReleaseTag = 'ae-extra-release-tag',
 
   /**
-   * This symbol has another declaration with a different release tag.
+   * "This symbol has another declaration with a different release tag."
    */
   DifferentReleaseTags = 'ae-different-release-tags',
 
   /**
-   * The symbol ___ is marked as ___, but its signature references ___ which is marked as ___.
+   * "The symbol ___ is marked as ___, but its signature references ___ which is marked as ___."
    */
   IncompatibleReleaseTags = 'ae-incompatible-release-tags',
 
   /**
-   * The doc comment should not contain more than one release tag.
+   * "___ is exported by the package, but it is missing a release tag (`@alpha`, `@beta`, `@public`, or `@internal`)."
    */
   MissingReleaseTag = 'ae-missing-release-tag',
 
   /**
-   * The `@packageDocumentation` comment must appear at the top of entry point *.d.ts file.
+   * "The `@packageDocumentation` comment must appear at the top of entry point *.d.ts file."
    */
   MisplacedPackageTag = 'ae-misplaced-package-tag',
 
   /**
-   * The symbol ___ needs to be exported by the entry point ___.
+   * "The symbol ___ needs to be exported by the entry point ___."
    */
   ForgottenExport = 'ae-forgotten-export',
 
   /**
-   * The name ___ should be prefixed with an underscore because the declaration is marked as `@internal`.
+   * "The name ___ should be prefixed with an underscore because the declaration is marked as `@internal`."
    */
-  InternalMissingUnderscore = 'ae-internal-missing-underscore'
+  InternalMissingUnderscore = 'ae-internal-missing-underscore',
+
+  /**
+   * "The `@preapproved` tag cannot be applied to ___ because it is not a supported declaration type."
+   */
+  PreapprovedUnsupportedType = 'ae-preapproved-unsupported-type',
+
+  /**
+   * "The `@preapproved` tag cannot be applied to ___ without an `@internal` release tag."
+   */
+  PreapprovedBadReleaseTag = 'ae-preapproved-bad-release-tag'
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([

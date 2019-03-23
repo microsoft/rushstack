@@ -17,6 +17,7 @@
     "exportStar3",
     "importEquals",
     "inconsistentReleaseTags",
+    "preapproved",
     "typeOf"
   ]
 }
