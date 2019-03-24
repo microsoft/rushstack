@@ -26,7 +26,7 @@ export interface IResolveDeclarationReferenceResult {
   errorMessage: string | undefined;
 }
 
-export class DeclarationReferenceResolver {
+export class ModelReferenceResolver {
   private readonly _apiModel: ApiModel;
 
   public constructor(apiModel: ApiModel) {
