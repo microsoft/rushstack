@@ -542,6 +542,12 @@ export class ExportAnalyzer {
     return astEntity;
   }
 
+  public tryGetExportOfAstModule(exportName: string, astModule: AstModule): AstEntity | undefined {
+    const visitedAstModules: Set<AstModule> = new Set<AstModule>();
+    return this._tryGetExportOfAstModule(exportName, astModule,
+      visitedAstModules);
+  }
+
   private _tryGetExportOfAstModule(exportName: string, astModule: AstModule,
     visitedAstModules: Set<AstModule>): AstEntity | undefined {
 

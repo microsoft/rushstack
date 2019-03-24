@@ -55,7 +55,22 @@ export const enum ExtractorMessageId {
   /**
    * "The `@preapproved` tag cannot be applied to ___ without an `@internal` release tag."
    */
-  PreapprovedBadReleaseTag = 'ae-preapproved-bad-release-tag'
+  PreapprovedBadReleaseTag = 'ae-preapproved-bad-release-tag',
+
+  /**
+   * "The `@inheritDoc` reference could not be resolved".
+   */
+  UnresolvedInheritDocReference = 'ae-unresolved-inheritdoc-reference',
+
+  /**
+   * "The `@inheritDoc` tag needs a TSDoc declaration reference; signature matching is not supported yet".
+   *
+   * @privateRemarks
+   * In the future, we can implement signature matching so that you can write `{@inheritDoc}` and API Extractor
+   * will find the corresponding member from a base class (or implemented interface).  Until then, the tag needs
+   * an explicit declaration reference such as `{@inhertDoc MyBaseClass.sameMethod}`.
+   */
+  UnresolvedInheritDocBase = 'ae-unresolved-inheritdoc-base'
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
@@ -65,5 +80,9 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-missing-release-tag',
   'ae-misplaced-package-tag',
   'ae-forgotten-export',
-  'ae-internal-missing-underscore'
+  'ae-internal-missing-underscore',
+  'ae-preapproved-unsupported-type',
+  'ae-preapproved-bad-release-tag',
+  'ae-unresolved-inheritdoc-reference',
+  'ae-unresolved-inheritdoc-base'
 ]);

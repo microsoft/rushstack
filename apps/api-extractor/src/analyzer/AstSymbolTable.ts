@@ -110,6 +110,10 @@ export class AstSymbolTable {
     return this._exportAnalyzer.fetchAstModuleExportInfo(astModule);
   }
 
+  public tryGetExportOfAstModule(exportName: string, astModule: AstModule): AstEntity | undefined {
+    return this._exportAnalyzer.tryGetExportOfAstModule(exportName, astModule);
+  }
+
   /**
    * Ensures that AstSymbol.analyzed is true for the provided symbol.  The operation
    * starts from the root symbol and then fills out all children of all declarations, and

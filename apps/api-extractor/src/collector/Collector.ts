@@ -35,6 +35,7 @@ import { DeclarationMetadata } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
+import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 
 /**
  * Options for Collector constructor.
@@ -72,6 +73,7 @@ export class Collector {
   public readonly program: ts.Program;
   public readonly typeChecker: ts.TypeChecker;
   public readonly astSymbolTable: AstSymbolTable;
+  public readonly astReferenceResolver: AstReferenceResolver;
 
   public readonly packageJsonLookup: PackageJsonLookup;
   public readonly messageRouter: MessageRouter;
@@ -130,6 +132,7 @@ export class Collector {
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
     this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup, this.logger);
+    this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
   }
 
   /**

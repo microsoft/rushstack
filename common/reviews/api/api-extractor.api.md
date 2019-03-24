@@ -59,7 +59,9 @@ export const enum ExtractorMessageId {
     MisplacedPackageTag = "ae-misplaced-package-tag",
     MissingReleaseTag = "ae-missing-release-tag",
     PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",
-    PreapprovedUnsupportedType = "ae-preapproved-unsupported-type"
+    PreapprovedUnsupportedType = "ae-preapproved-unsupported-type",
+    UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
+    UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference"
 }
 
 // @public

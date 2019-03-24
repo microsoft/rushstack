@@ -4,6 +4,12 @@
 import * as tsdoc from '@microsoft/tsdoc';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
+export enum VisitorState {
+  Unvisited,
+  Visiting,
+  Visited
+}
+
 export class DeclarationMetadata {
   /**
    * This is the original TSDoc comment parsed from the source code.
@@ -35,4 +41,6 @@ export class DeclarationMetadata {
 
   // Assigned by DocCommentEnhancer
   public needsDocumentation: boolean = true;
+
+  public docCommentEnhancerVisitorStage: VisitorState = VisitorState.Unvisited;
 }
