@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.6.3",
+      "tag": "@microsoft/rush_v5.6.3",
+      "date": "Mon, 25 Mar 2019 03:15:21 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update the \"rush init\" template with a .gitattributes rule to allow comments in JSON files"
+          },
+          {
+            "comment": "Add ability to publish partial prereleases"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.6.2",
       "tag": "@microsoft/rush_v5.6.2",
       "date": "Thu, 21 Mar 2019 23:09:56 GMT",

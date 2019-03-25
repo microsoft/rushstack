@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 21 Mar 2019 23:09:56 GMT and should not be manually modified.
+This log was last generated on Mon, 25 Mar 2019 03:15:21 GMT and should not be manually modified.
+
+## 5.6.3
+Mon, 25 Mar 2019 03:15:21 GMT
+
+### Updates
+
+- Update the "rush init" template with a .gitattributes rule to allow comments in JSON files
+- Add ability to publish partial prereleases
 
 ## 5.6.2
 Thu, 21 Mar 2019 23:09:56 GMT
