@@ -169,7 +169,6 @@ export enum RegularEnum {
 // @public
 export class TypeReferencesInAedoc {
     getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
-    // (undocumented)
     getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
     // (undocumented)
     getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;

@@ -8,7 +8,6 @@ import { IPackageJson } from '@microsoft/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
-    // (undocumented)
     constructor(jsonFilename: string);
     // (undocumented)
     addOrUpdatePackage(packageName: string, reviewCategory: string): void;
@@ -158,7 +157,6 @@ export class LockStepVersionPolicy extends VersionPolicy {
 
 // @beta (undocumented)
 export class PackageJsonDependency {
-    // (undocumented)
     constructor(name: string, version: string, type: DependencyType, onChange: () => void);
     // (undocumented)
     readonly dependencyType: DependencyType;
@@ -248,7 +246,6 @@ export class RushConfiguration {
     readonly packageManager: PackageManager;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
-    // (undocumented)
     readonly pnpmOptions: PnpmOptionsConfiguration;
     readonly pnpmStoreFolder: string;
     readonly projectFolderMaxDepth: number;
@@ -271,7 +268,6 @@ export class RushConfiguration {
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;
     readonly yarnCacheFolder: string;
-    // (undocumented)
     readonly yarnOptions: YarnOptionsConfiguration;
     }
 
@@ -305,7 +301,6 @@ export class RushConfigurationProject {
 
 // @internal
 export class _RushGlobalFolder {
-    // (undocumented)
     constructor();
     readonly nodeSpecificPath: string;
     readonly path: string;
