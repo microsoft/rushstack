@@ -2,6 +2,21 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.5.72",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.72",
+      "date": "Tue, 26 Mar 2019 20:54:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.21` to `3.9.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.17` to `0.2.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.5.71",
       "tag": "@microsoft/gulp-core-build-mocha_v3.5.71",
       "date": "Sat, 23 Mar 2019 03:48:31 GMT",

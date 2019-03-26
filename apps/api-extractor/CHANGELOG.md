@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 23 Mar 2019 03:48:31 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Mar 2019 20:54:18 GMT and should not be manually modified.
+
+## 7.0.33
+Tue, 26 Mar 2019 20:54:18 GMT
+
+### Patches
+
+- Reintroduce support for `@inheritDoc` tags
 
 ## 7.0.32
 Sat, 23 Mar 2019 03:48:31 GMT
