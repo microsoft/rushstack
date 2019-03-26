@@ -51,6 +51,7 @@ export const enum ExtractorMessageCategory {
 
 // @public
 export const enum ExtractorMessageId {
+    CyclicInheritDoc = "ae-cyclic-inherit-doc",
     DifferentReleaseTags = "ae-different-release-tags",
     ExtraReleaseTag = "ae-extra-release-tag",
     ForgottenExport = "ae-forgotten-export",
