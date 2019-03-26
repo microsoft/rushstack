@@ -11,6 +11,25 @@ import { AstModule } from './AstModule';
 import { AstImport } from './AstImport';
 
 /**
+ * Used by `AstReferenceResolver` to report a failed resolution.
+ *
+ * @privateRemarks
+ * This class is similar to an `Error` object, but the intent of `ResolverFailure` is to describe
+ * why a reference could not be resolved.  This information could be used to throw an actual `Error` object,
+ * but normally it is handed off to the `MessageRouter` instead.
+ */
+export class ResolverFailure {
+  /**
+   * Details about why the failure occurred.
+   */
+  public readonly reason: string;
+
+  public constructor(reason: string) {
+    this.reason = reason;
+  }
+}
+
+/**
  * This resolves a TSDoc declaration reference by walking the `AstSymbolTable` compiler state.
  *
  * @remarks
@@ -27,29 +46,29 @@ export class AstReferenceResolver {
     this._workingPackage = workingPackage;
   }
 
-  public resolve(declarationReference: tsdoc.DocDeclarationReference): AstDeclaration | Error {
+  public resolve(declarationReference: tsdoc.DocDeclarationReference): AstDeclaration | ResolverFailure {
     // Is it referring to the working package?
     if (declarationReference.packageName !== undefined
       && declarationReference.packageName !== this._workingPackage.name) {
-      return new Error('External package references are not supported');
+      return new ResolverFailure('External package references are not supported');
     }
 
     // Is it a path-based import?
     if (declarationReference.importPath) {
-      return new Error('Import paths are not supported');
+      return new ResolverFailure('Import paths are not supported');
     }
 
     const astModule: AstModule = this._astSymbolTable.fetchAstModuleFromWorkingPackage(
       this._workingPackage.entryPointSourceFile);
 
     if (declarationReference.memberReferences.length === 0) {
-      return new Error('Package references are not supported');
+      return new ResolverFailure('Package references are not supported');
     }
 
     const rootMemberReference: tsdoc.DocMemberReference = declarationReference.memberReferences[0];
 
-    const exportName: string | Error = this._getMemberReferenceIdentifier(rootMemberReference);
-    if (exportName instanceof Error) {
+    const exportName: string | ResolverFailure = this._getMemberReferenceIdentifier(rootMemberReference);
+    if (exportName instanceof ResolverFailure) {
       return exportName;
     }
 
@@ -57,37 +76,37 @@ export class AstReferenceResolver {
       exportName, astModule);
 
     if (rootAstEntity === undefined) {
-      return new Error(`The package "${this._workingPackage.name}" does not have an export "${exportName}"`);
+      return new ResolverFailure(`The package "${this._workingPackage.name}" does not have an export "${exportName}"`);
     }
 
     if (rootAstEntity instanceof AstImport) {
-      return new Error('Reexported declarations are not supported');
+      return new ResolverFailure('Reexported declarations are not supported');
     }
 
-    let currentDeclaration: AstDeclaration | Error = this._selectDeclaration(rootAstEntity.astDeclarations,
+    let currentDeclaration: AstDeclaration | ResolverFailure = this._selectDeclaration(rootAstEntity.astDeclarations,
       rootMemberReference, rootAstEntity.localName);
 
-    if (currentDeclaration instanceof Error) {
+    if (currentDeclaration instanceof ResolverFailure) {
       return currentDeclaration;
     }
 
     for (let index: number = 1; index < declarationReference.memberReferences.length; ++index) {
       const memberReference: tsdoc.DocMemberReference = declarationReference.memberReferences[index];
 
-      const memberName: string | Error = this._getMemberReferenceIdentifier(memberReference);
-      if (memberName instanceof Error) {
+      const memberName: string | ResolverFailure = this._getMemberReferenceIdentifier(memberReference);
+      if (memberName instanceof ResolverFailure) {
         return memberName;
       }
 
       const matchingChildren: ReadonlyArray<AstDeclaration> = currentDeclaration.findChildrenWithName(memberName);
       if (matchingChildren.length === 0) {
-        return new Error(`No member was found with name "${memberName}"`);
+        return new ResolverFailure(`No member was found with name "${memberName}"`);
       }
 
-      const selectedDeclaration: AstDeclaration | Error = this._selectDeclaration(matchingChildren,
+      const selectedDeclaration: AstDeclaration | ResolverFailure = this._selectDeclaration(matchingChildren,
         memberReference, memberName);
 
-      if (selectedDeclaration instanceof Error) {
+      if (selectedDeclaration instanceof ResolverFailure) {
         return selectedDeclaration;
       }
 
@@ -97,24 +116,24 @@ export class AstReferenceResolver {
     return currentDeclaration;
   }
 
-  private _getMemberReferenceIdentifier(memberReference: tsdoc.DocMemberReference): string | Error {
+  private _getMemberReferenceIdentifier(memberReference: tsdoc.DocMemberReference): string | ResolverFailure {
     if (memberReference.memberSymbol !== undefined) {
-      return new Error('ECMAScript symbol selectors are not supported');
+      return new ResolverFailure('ECMAScript symbol selectors are not supported');
     }
     if (memberReference.memberIdentifier === undefined) {
-      return new Error('The member identifier is missing in the root member reference');
+      return new ResolverFailure('The member identifier is missing in the root member reference');
     }
     return memberReference.memberIdentifier.identifier;
   }
 
   private _selectDeclaration(astDeclarations: ReadonlyArray<AstDeclaration>,
-    memberReference: tsdoc.DocMemberReference, astSymbolName: string): AstDeclaration | Error {
+    memberReference: tsdoc.DocMemberReference, astSymbolName: string): AstDeclaration | ResolverFailure {
 
     if (memberReference.selector === undefined) {
       if (astDeclarations.length === 1) {
         return astDeclarations[0];
       } else {
-        return new Error(`The reference is ambiguous because "${astSymbolName}"`
+        return new ResolverFailure(`The reference is ambiguous because "${astSymbolName}"`
           + ` has more than one declaration; you need to add a TSDoc member reference selector`);
       }
     }
@@ -122,7 +141,7 @@ export class AstReferenceResolver {
     const selectorName: string = memberReference.selector.selector;
 
     if (memberReference.selector.selectorKind !== tsdoc.SelectorKind.System) {
-      return new Error(`The selector "${selectorName}" is not a supported selector type`);
+      return new ResolverFailure(`The selector "${selectorName}" is not a supported selector type`);
     }
 
     let selectorSyntaxKind: ts.SyntaxKind;
@@ -150,16 +169,16 @@ export class AstReferenceResolver {
         selectorSyntaxKind = ts.SyntaxKind.VariableDeclaration;
         break;
       default:
-        return new Error(`Unsupported system selector "${selectorName}"`);
+        return new ResolverFailure(`Unsupported system selector "${selectorName}"`);
     }
 
     const matches: AstDeclaration[] = astDeclarations.filter(x => x.declaration.kind === selectorSyntaxKind);
     if (matches.length === 0) {
-      return new Error(`A declaration for "${astSymbolName}" was not found that matches the`
+      return new ResolverFailure(`A declaration for "${astSymbolName}" was not found that matches the`
         + ` TSDoc selector "${selectorName}"`);
     }
     if (matches.length > 1) {
-      return new Error(`More than one declaration "${astSymbolName}" matches the`
+      return new ResolverFailure(`More than one declaration "${astSymbolName}" matches the`
         + ` TSDoc selector "${selectorName}"`);
     }
     return matches[0];

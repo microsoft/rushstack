@@ -11,6 +11,7 @@ import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
+import { ResolverFailure } from '../analyzer/AstReferenceResolver';
 
 export class DocCommentEnhancer {
   private readonly _collector: Collector;
@@ -108,12 +109,12 @@ export class DocCommentEnhancer {
       return;
     }
 
-    const referencedAstDeclaration: AstDeclaration | Error = this._collector.astReferenceResolver
+    const referencedAstDeclaration: AstDeclaration | ResolverFailure = this._collector.astReferenceResolver
       .resolve(inheritDocTag.declarationReference);
 
-    if (referencedAstDeclaration instanceof Error) {
+    if (referencedAstDeclaration instanceof ResolverFailure) {
       this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedInheritDocReference,
-        'The `@inheritDoc` reference could not be resolved: ' + referencedAstDeclaration.message, astDeclaration);
+        'The `@inheritDoc` reference could not be resolved: ' + referencedAstDeclaration.reason, astDeclaration);
       return;
     }
 
