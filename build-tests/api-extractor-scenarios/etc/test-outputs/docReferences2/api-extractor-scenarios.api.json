@@ -38,7 +38,7 @@
             {
               "kind": "Method",
               "canonicalReference": "(methodA1:instance,0)",
-              "docComment": "",
+              "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Reference",

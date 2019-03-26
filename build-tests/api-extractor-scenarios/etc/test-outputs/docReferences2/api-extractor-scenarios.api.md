@@ -6,7 +6,6 @@
 
 // @public (undocumented)
 export class CyclicA {
-    // (undocumented)
     methodA1(): void;
     methodA3(): void;
 }

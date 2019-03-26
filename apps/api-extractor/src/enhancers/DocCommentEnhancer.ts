@@ -10,7 +10,6 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata, VisitorState } from '../collector/DeclarationMetadata';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
 import { InternalError } from '@microsoft/node-core-library';
-import { ResultOrError } from '../analyzer/AstReferenceResolver';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 export class DocCommentEnhancer {
@@ -41,8 +40,10 @@ export class DocCommentEnhancer {
     const metadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
     if (metadata.docCommentEnhancerVisitorStage === VisitorState.Visited) {
       return;
-    } else if (metadata.docCommentEnhancerVisitorStage === VisitorState.Visiting) {
-      throw new InternalError('Infinite loop');
+    }
+
+    if (metadata.docCommentEnhancerVisitorStage === VisitorState.Visiting) {
+      throw new InternalError('Infinite loop in DocCommentEnhancer._analyzeDeclaration()');
     }
     metadata.docCommentEnhancerVisitorStage = VisitorState.Visiting;
 
@@ -51,6 +52,8 @@ export class DocCommentEnhancer {
     }
 
     this._analyzeNeedsDocumentation(astDeclaration, metadata);
+
+    metadata.docCommentEnhancerVisitorStage = VisitorState.Visited;
   }
 
   private _analyzeNeedsDocumentation(astDeclaration: AstDeclaration, metadata: DeclarationMetadata): void {
@@ -87,6 +90,9 @@ export class DocCommentEnhancer {
     }
   }
 
+  /**
+   * Follow an `{@inheritDoc ___}` reference and copy the content that we find in the referenced comment.
+   */
   private _analyzeInheritDoc(astDeclaration: AstDeclaration, docComment: tsdoc.DocComment,
     inheritDocTag: tsdoc.DocInheritDocTag): void {
 
@@ -97,22 +103,27 @@ export class DocCommentEnhancer {
       return;
     }
 
-    const sourceAstDeclaration: ResultOrError<AstDeclaration> = this._collector.astReferenceResolver
+    const referencedAstDeclaration: AstDeclaration | Error = this._collector.astReferenceResolver
       .resolve(inheritDocTag.declarationReference);
 
-    if (sourceAstDeclaration instanceof Error) {
+    if (referencedAstDeclaration instanceof Error) {
       this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedInheritDocReference,
-        'The `@inheritDoc` reference could not be resolved: ' + sourceAstDeclaration.message, astDeclaration);
+        'The `@inheritDoc` reference could not be resolved: ' + referencedAstDeclaration.message, astDeclaration);
       return;
     }
 
-    const sourceMetadata: DeclarationMetadata = this._collector.fetchMetadata(sourceAstDeclaration);
+    this._analyzeDeclaration(referencedAstDeclaration);
 
-    if (sourceMetadata.tsdocComment) {
-      this._copyInheritedDocs(docComment, sourceMetadata.tsdocComment);
+    const referencedMetadata: DeclarationMetadata = this._collector.fetchMetadata(referencedAstDeclaration);
+
+    if (referencedMetadata.tsdocComment) {
+      this._copyInheritedDocs(docComment, referencedMetadata.tsdocComment);
     }
   }
 
+  /**
+   * Copy the content from `sourceDocComment` to `targetDocComment`.
+   */
   private _copyInheritedDocs(targetDocComment: tsdoc.DocComment, sourceDocComment: tsdoc.DocComment): void {
     targetDocComment.summarySection = sourceDocComment.summarySection;
     targetDocComment.remarksBlock = sourceDocComment.remarksBlock;
