@@ -26,6 +26,14 @@ export interface IResolveDeclarationReferenceResult {
   errorMessage: string | undefined;
 }
 
+/**
+ * This resolves a TSDoc declaration reference by walking the `ApiModel` hierarchy.
+ *
+ * @remarks
+ *
+ * This class is analogous to `AstReferenceResolver` from the `@microsoft/api-extractor` project,
+ * which resolves declaration references by walking the compiler state.
+ */
 export class ModelReferenceResolver {
   private readonly _apiModel: ApiModel;
 

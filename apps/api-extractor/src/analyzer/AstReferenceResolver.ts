@@ -10,8 +10,14 @@ import { WorkingPackage } from '../collector/WorkingPackage';
 import { AstModule } from './AstModule';
 import { AstImport } from './AstImport';
 
-export type ResultOrError<T> = Error | T;
-
+/**
+ * This resolves a TSDoc declaration reference by walking the `AstSymbolTable` compiler state.
+ *
+ * @remarks
+ *
+ * This class is analogous to `ModelReferenceResolver` from the `@microsoft/api-extractor-model` project,
+ * which resolves declaration references by walking the hierarchy loaded from an .api.json file.
+ */
 export class AstReferenceResolver {
   private readonly _astSymbolTable: AstSymbolTable;
   private readonly _workingPackage: WorkingPackage;
@@ -21,7 +27,7 @@ export class AstReferenceResolver {
     this._workingPackage = workingPackage;
   }
 
-  public resolve(declarationReference: tsdoc.DocDeclarationReference): ResultOrError<AstDeclaration> {
+  public resolve(declarationReference: tsdoc.DocDeclarationReference): AstDeclaration | Error {
     // Is it referring to the working package?
     if (declarationReference.packageName !== undefined
       && declarationReference.packageName !== this._workingPackage.name) {
@@ -42,7 +48,7 @@ export class AstReferenceResolver {
 
     const rootMemberReference: tsdoc.DocMemberReference = declarationReference.memberReferences[0];
 
-    const exportName: ResultOrError<string> = this._getMemberReferenceIdentifier(rootMemberReference);
+    const exportName: string | Error = this._getMemberReferenceIdentifier(rootMemberReference);
     if (exportName instanceof Error) {
       return exportName;
     }
@@ -58,7 +64,7 @@ export class AstReferenceResolver {
       return new Error('Reexported declarations are not supported');
     }
 
-    let currentDeclaration: ResultOrError<AstDeclaration> = this._selectDeclaration(rootAstEntity.astDeclarations,
+    let currentDeclaration: AstDeclaration | Error = this._selectDeclaration(rootAstEntity.astDeclarations,
       rootMemberReference, rootAstEntity.localName);
 
     if (currentDeclaration instanceof Error) {
@@ -68,7 +74,7 @@ export class AstReferenceResolver {
     for (let index: number = 1; index < declarationReference.memberReferences.length; ++index) {
       const memberReference: tsdoc.DocMemberReference = declarationReference.memberReferences[index];
 
-      const memberName: ResultOrError<string> = this._getMemberReferenceIdentifier(memberReference);
+      const memberName: string | Error = this._getMemberReferenceIdentifier(memberReference);
       if (memberName instanceof Error) {
         return memberName;
       }
@@ -78,7 +84,7 @@ export class AstReferenceResolver {
         return new Error(`No member was found with name "${memberName}"`);
       }
 
-      const selectedDeclaration: ResultOrError<AstDeclaration> = this._selectDeclaration(matchingChildren,
+      const selectedDeclaration: AstDeclaration | Error = this._selectDeclaration(matchingChildren,
         memberReference, memberName);
 
       if (selectedDeclaration instanceof Error) {
@@ -91,7 +97,7 @@ export class AstReferenceResolver {
     return currentDeclaration;
   }
 
-  private _getMemberReferenceIdentifier(memberReference: tsdoc.DocMemberReference): ResultOrError<string> {
+  private _getMemberReferenceIdentifier(memberReference: tsdoc.DocMemberReference): string | Error {
     if (memberReference.memberSymbol !== undefined) {
       return new Error('ECMAScript symbol selectors are not supported');
     }
@@ -102,7 +108,7 @@ export class AstReferenceResolver {
   }
 
   private _selectDeclaration(astDeclarations: ReadonlyArray<AstDeclaration>,
-    memberReference: tsdoc.DocMemberReference, astSymbolName: string): ResultOrError<AstDeclaration> {
+    memberReference: tsdoc.DocMemberReference, astSymbolName: string): AstDeclaration | Error {
 
     if (memberReference.selector === undefined) {
       if (astDeclarations.length === 1) {
