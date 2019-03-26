@@ -5,7 +5,7 @@ import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { ApiPackage } from './ApiPackage';
 import { PackageName } from '@microsoft/node-core-library';
-import { DeclarationReferenceResolver, IResolveDeclarationReferenceResult } from './DeclarationReferenceResolver';
+import { ModelReferenceResolver, IResolveDeclarationReferenceResult } from './ModelReferenceResolver';
 import { DocDeclarationReference } from '@microsoft/tsdoc';
 
 /**
@@ -49,14 +49,14 @@ import { DocDeclarationReference } from '@microsoft/tsdoc';
  * @public
  */
 export class ApiModel extends ApiItemContainerMixin(ApiItem) {
-  private readonly _resolver: DeclarationReferenceResolver;
+  private readonly _resolver: ModelReferenceResolver;
 
   private _packagesByName: Map<string, ApiPackage> | undefined = undefined;
 
   public constructor() {
     super({ });
 
-    this._resolver = new DeclarationReferenceResolver(this);
+    this._resolver = new ModelReferenceResolver(this);
   }
 
   public loadPackage(apiJsonFilename: string): ApiPackage {

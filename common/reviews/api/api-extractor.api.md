@@ -51,6 +51,7 @@ export const enum ExtractorMessageCategory {
 
 // @public
 export const enum ExtractorMessageId {
+    CyclicInheritDoc = "ae-cyclic-inherit-doc",
     DifferentReleaseTags = "ae-different-release-tags",
     ExtraReleaseTag = "ae-extra-release-tag",
     ForgottenExport = "ae-forgotten-export",
@@ -59,7 +60,9 @@ export const enum ExtractorMessageId {
     MisplacedPackageTag = "ae-misplaced-package-tag",
     MissingReleaseTag = "ae-missing-release-tag",
     PreapprovedBadReleaseTag = "ae-preapproved-bad-release-tag",
-    PreapprovedUnsupportedType = "ae-preapproved-unsupported-type"
+    PreapprovedUnsupportedType = "ae-preapproved-unsupported-type",
+    UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
+    UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference"
 }
 
 // @public

@@ -53,9 +53,13 @@ export class AstDeclaration {
    */
   public metadata: unknown;
 
+  // NOTE: This array becomes immutable after astSymbol.analyze() sets astSymbol.analyzed=true
   private readonly _analyzedChildren: AstDeclaration[] = [];
 
   private readonly _analyzedReferencedAstEntitiesSet: Set<AstEntity> = new Set<AstEntity>();
+
+  // Reverse lookup used by findChildrenWithName()
+  private _childrenByName: Map<string, AstDeclaration[]> | undefined = undefined;
 
   public constructor(options: IAstDeclarationOptions) {
     this.declaration = options.declaration;
@@ -180,6 +184,40 @@ export class AstDeclaration {
     for (const child of this.children) {
       child.forEachDeclarationRecursive(action);
     }
+  }
+
+  /**
+   * Returns the list of child declarations whose `AstSymbol.localName` matches the provided `name`.
+   *
+   * @remarks
+   * This is an efficient O(1) lookup.
+   */
+  public findChildrenWithName(name: string): ReadonlyArray<AstDeclaration> {
+    // The children property returns:
+    //
+    //    return this.astSymbol.analyzed ? this._analyzedChildren : [];
+    //
+    if (!this.astSymbol.analyzed || this._analyzedChildren.length === 0) {
+      return [];
+    }
+
+    if (this._childrenByName === undefined) {
+      // Build the lookup table
+      const childrenByName: Map<string, AstDeclaration[]> = new Map<string, AstDeclaration[]>();
+
+      for (const child of this._analyzedChildren) {
+        const childName: string = child.astSymbol.localName;
+        let array: AstDeclaration[] | undefined = childrenByName.get(childName);
+        if (array === undefined) {
+          array = [];
+          childrenByName.set(childName, array);
+        }
+        array.push(child);
+      }
+      this._childrenByName = childrenByName;
+    }
+
+    return this._childrenByName.get(name) || [];
   }
 
   /**

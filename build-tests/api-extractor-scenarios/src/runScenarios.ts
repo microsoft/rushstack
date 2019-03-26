@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as process from 'process';
 import { JsonFile, Executable, FileSystem } from '@microsoft/node-core-library';
 
 function executeCommand(command: string, args: string[]): void {
@@ -64,6 +63,15 @@ export function runScenarios(buildConfigPath: string): void {
 
       "project": {
         "entryPointSourceFile": `./lib/${scenarioFolderName}/index.d.ts`
+      },
+
+      "messages": {
+        "extractorMessageReporting": {
+          "ae-cyclic-inherit-doc": {
+            "logLevel": "warning",
+            "addToApiReviewFile": true
+          }
+        }
       },
 
       "testMode": true

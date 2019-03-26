@@ -149,7 +149,7 @@ export {
 } from './model/ApiVariable';
 export {
   IResolveDeclarationReferenceResult
-} from './model/DeclarationReferenceResolver';
+} from './model/ModelReferenceResolver';
 export {
   HeritageType
 } from './model/HeritageType';

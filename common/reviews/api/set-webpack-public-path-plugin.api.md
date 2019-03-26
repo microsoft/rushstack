@@ -33,7 +33,6 @@ export const registryVariableName: string;
 
 // @public
 export class SetPublicPathPlugin implements Webpack.Plugin {
-    // (undocumented)
     constructor(options: ISetWebpackPublicPathPluginOptions);
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;

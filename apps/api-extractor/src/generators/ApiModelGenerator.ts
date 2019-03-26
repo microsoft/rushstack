@@ -29,8 +29,7 @@ import {
   ApiIndexSignature,
   ApiVariable,
   ApiTypeAlias,
-  ApiCallSignature,
-  AedocDefinitions
+  ApiCallSignature
 } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
@@ -227,27 +226,8 @@ export class ApiModelGenerator {
         nodesToCapture
       });
 
-      let docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
+      const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
-
-      // Constructors always do pretty much the same thing, so it's annoying to require people to write
-      // descriptions for them.  Instead, if the constructor lacks a TSDoc summary, then API Extractor
-      // will auto-generate one.
-      const configuration: tsdoc.TSDocConfiguration = AedocDefinitions.tsdocConfiguration;
-      if (docComment === undefined) {
-        docComment = new tsdoc.DocComment({ configuration });
-      }
-
-      if (!tsdoc.PlainTextEmitter.hasAnyTextContent(docComment.summarySection)) {
-        docComment.summarySection.appendNodesInParagraph([
-          new tsdoc.DocPlainText({ configuration, text: 'Constructs a new instance of the ' }),
-          new tsdoc.DocCodeSpan({
-            configuration,
-            code: parentApiItem.displayName
-          }),
-          new tsdoc.DocPlainText({ configuration, text: ' class' })
-        ]);
-      }
 
       apiConstructor = new ApiConstructor({ docComment, releaseTag, isStatic, parameters, overloadIndex,
         excerptTokens });

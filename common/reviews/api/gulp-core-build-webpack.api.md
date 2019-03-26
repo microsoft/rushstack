@@ -33,7 +33,6 @@ export { webpack }
 
 // @public (undocumented)
 export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConfig & TExtendedConfig> {
-    // (undocumented)
     constructor(extendedName?: string, extendedConfig?: TExtendedConfig);
     // (undocumented)
     executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void;
