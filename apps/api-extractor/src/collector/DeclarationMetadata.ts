@@ -3,12 +3,7 @@
 
 import * as tsdoc from '@microsoft/tsdoc';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
-
-export enum VisitorState {
-  Unvisited,
-  Visiting,
-  Visited
-}
+import { VisitorState } from './VisitorState';
 
 export class DeclarationMetadata {
   /**
@@ -42,5 +37,5 @@ export class DeclarationMetadata {
   // Assigned by DocCommentEnhancer
   public needsDocumentation: boolean = true;
 
-  public docCommentEnhancerVisitorStage: VisitorState = VisitorState.Unvisited;
+  public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 }

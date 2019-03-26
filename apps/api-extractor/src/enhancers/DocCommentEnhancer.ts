@@ -7,10 +7,11 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { DeclarationMetadata, VisitorState } from '../collector/DeclarationMetadata';
+import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
 import { InternalError } from '@microsoft/node-core-library';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
+import { VisitorState } from '../collector/VisitorState';
 
 export class DocCommentEnhancer {
   private readonly _collector: Collector;
@@ -38,14 +39,14 @@ export class DocCommentEnhancer {
 
   private _analyzeDeclaration(astDeclaration: AstDeclaration): void {
     const metadata: DeclarationMetadata = this._collector.fetchMetadata(astDeclaration);
-    if (metadata.docCommentEnhancerVisitorStage === VisitorState.Visited) {
+    if (metadata.docCommentEnhancerVisitorState === VisitorState.Visited) {
       return;
     }
 
-    if (metadata.docCommentEnhancerVisitorStage === VisitorState.Visiting) {
+    if (metadata.docCommentEnhancerVisitorState === VisitorState.Visiting) {
       throw new InternalError('Infinite loop in DocCommentEnhancer._analyzeDeclaration()');
     }
-    metadata.docCommentEnhancerVisitorStage = VisitorState.Visiting;
+    metadata.docCommentEnhancerVisitorState = VisitorState.Visiting;
 
     if (metadata.tsdocComment && metadata.tsdocComment.inheritDocTag) {
       this._analyzeInheritDoc(astDeclaration, metadata.tsdocComment, metadata.tsdocComment.inheritDocTag);
@@ -53,7 +54,7 @@ export class DocCommentEnhancer {
 
     this._analyzeNeedsDocumentation(astDeclaration, metadata);
 
-    metadata.docCommentEnhancerVisitorStage = VisitorState.Visited;
+    metadata.docCommentEnhancerVisitorState = VisitorState.Visited;
   }
 
   private _analyzeNeedsDocumentation(astDeclaration: AstDeclaration, metadata: DeclarationMetadata): void {
