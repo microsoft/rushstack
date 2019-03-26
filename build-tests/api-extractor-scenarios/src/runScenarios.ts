@@ -66,6 +66,15 @@ export function runScenarios(buildConfigPath: string): void {
         "entryPointSourceFile": `./lib/${scenarioFolderName}/index.d.ts`
       },
 
+      "messages": {
+        "extractorMessageReporting": {
+          "ae-cyclic-inherit-doc": {
+            "logLevel": "warning",
+            "addToApiReviewFile": true
+          }
+        }
+      },
+
       "testMode": true
     };
 

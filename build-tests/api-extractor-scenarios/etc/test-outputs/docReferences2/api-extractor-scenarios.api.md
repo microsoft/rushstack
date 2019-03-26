@@ -16,6 +16,16 @@ export class CyclicB {
     methodB4(): void;
 }
 
+// @public (undocumented)
+export class FailWithSelfReference {
+    // Warning: (ae-cyclic-inherit-doc) The @inheritDoc tag for "method1" refers to its own declaration
+    // 
+    // (undocumented)
+    method1(): void;
+    // (undocumented)
+    method2(): void;
+}
+
 
 // (No @packageDocumentation comment for this package)
 

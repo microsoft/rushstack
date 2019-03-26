@@ -15,4 +15,12 @@ export declare class CyclicB {
     methodB4(): void;
 }
 
+/** @public */
+export declare class FailWithSelfReference {
+    /** {@inheritDoc FailWithSelfReference.method2} */
+    method1(): void;
+    /** {@inheritDoc FailWithSelfReference.method1} */
+    method2(): void;
+}
+
 export { }

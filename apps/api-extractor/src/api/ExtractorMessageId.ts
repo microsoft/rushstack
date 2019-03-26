@@ -70,7 +70,12 @@ export const enum ExtractorMessageId {
    * will find a corresponding member from a base class (or implemented interface).  Until then, the tag
    * always needs an explicit declaration reference such as `{@inhertDoc MyBaseClass.sameMethod}`.
    */
-  UnresolvedInheritDocBase = 'ae-unresolved-inheritdoc-base'
+  UnresolvedInheritDocBase = 'ae-unresolved-inheritdoc-base',
+
+  /**
+   * "The `@inheritDoc` tag for ____ refers to its own declaration".
+   */
+  CyclicInheritDoc = 'ae-cyclic-inherit-doc'
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
@@ -84,5 +89,6 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-preapproved-unsupported-type',
   'ae-preapproved-bad-release-tag',
   'ae-unresolved-inheritdoc-reference',
-  'ae-unresolved-inheritdoc-base'
+  'ae-unresolved-inheritdoc-base',
+  'ae-cyclic-inherit-doc'
 ]);

@@ -9,7 +9,6 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
-import { InternalError } from '@microsoft/node-core-library';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
 
@@ -44,7 +43,12 @@ export class DocCommentEnhancer {
     }
 
     if (metadata.docCommentEnhancerVisitorState === VisitorState.Visiting) {
-      throw new InternalError('Infinite loop in DocCommentEnhancer._analyzeDeclaration()');
+      this._collector.messageRouter.addAnalyzerIssue(
+        ExtractorMessageId.CyclicInheritDoc,
+        `The @inheritDoc tag for "${astDeclaration.astSymbol.localName}" refers to its own declaration`,
+        astDeclaration
+      );
+      return;
     }
     metadata.docCommentEnhancerVisitorState = VisitorState.Visiting;
 

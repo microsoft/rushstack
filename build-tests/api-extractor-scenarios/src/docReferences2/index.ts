@@ -20,3 +20,13 @@ export class CyclicB {
   public methodB4(): void {
   }
 }
+
+/** @public */
+export class FailWithSelfReference {
+  /** {@inheritDoc FailWithSelfReference.method2} */
+  public method1(): void {
+  }
+  /** {@inheritDoc FailWithSelfReference.method1} */
+  public method2(): void {
+  }
+}
