@@ -12,6 +12,7 @@ This project tests various documentation generation scenarios and doc comment sy
 |  --- | --- |
 |  [DocBaseClass](./api-documenter-test.docbaseclass.md) | Example base class |
 |  [DocClass1](./api-documenter-test.docclass1.md) | This is an example class. |
+|  [Generic](./api-documenter-test.generic.md) | Generic class. |
 |  [SystemEvent](./api-documenter-test.systemevent.md) | A class used to exposed events. |
 
 ## Enumerations
@@ -33,6 +34,7 @@ This project tests various documentation generation scenarios and doc comment sy
 |  [IDocInterface1](./api-documenter-test.idocinterface1.md) |  |
 |  [IDocInterface2](./api-documenter-test.idocinterface2.md) |  |
 |  [IDocInterface3](./api-documenter-test.idocinterface3.md) | Some less common TypeScript declaration kinds. |
+|  [IDocInterface4](./api-documenter-test.idocinterface4.md) | Type union in an interface. |
 
 ## Namespaces
 

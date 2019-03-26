@@ -1,0 +1,11 @@
+[Home](./index) &gt; [api-documenter-test](./api-documenter-test.md) &gt; [IDocInterface4](./api-documenter-test.idocinterface4.md) &gt; [stringOrNumber](./api-documenter-test.idocinterface4.stringornumber.md)
+
+## IDocInterface4.stringOrNumber property
+
+a union type
+
+<b>Signature:</b>
+
+```typescript
+stringOrNumber: string | number;
+```

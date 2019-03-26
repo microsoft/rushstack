@@ -79,11 +79,11 @@ export class MarkdownEmitter {
 
   protected getTableEscapedText(text: string): string {
     return text
-      .replace(/&/g, "&amp;")
-      .replace(/"/g, "&quot;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/\|/g, "&#124;");
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\|/g, '&#124;');
   }
 
   /**
@@ -106,23 +106,23 @@ export class MarkdownEmitter {
         break;
       }
       case DocNodeKind.CodeSpan: {
-        const docCodeSpan = docNode as DocCodeSpan;
+        const docCodeSpan: DocCodeSpan = docNode as DocCodeSpan;
         if (context.insideTable) {
-          writer.write("<code>");
+          writer.write('<code>');
         } else {
-          writer.write("`");
+          writer.write('`');
         }
         if (context.insideTable) {
-          const code = this.getTableEscapedText(docCodeSpan.code);
-          const parts = code.split(/\r?\n/g);
-          writer.write(parts.join("`<p/>`"));
+          const code: string = this.getTableEscapedText(docCodeSpan.code);
+          const parts: string[] = code.split(/\r?\n/g);
+          writer.write(parts.join('`<p/>`'));
         } else {
           writer.write(docCodeSpan.code);
         }
         if (context.insideTable) {
-          writer.write("</code>");
+          writer.write('</code>');
         } else {
-          writer.write("`");
+          writer.write('`');
         }
         break;
       }

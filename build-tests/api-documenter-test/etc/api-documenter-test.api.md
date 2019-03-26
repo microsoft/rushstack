@@ -39,6 +39,10 @@ declare enum DocEnum {
 declare type ExampleTypeAlias = Promise<boolean>;
 
 // @public
+declare class Generic<T> {
+}
+
+// @public
 declare function globalFunction(x: number): number;
 
 // @public (undocumented)
@@ -57,6 +61,13 @@ interface IDocInterface3 {
     (x: number): number;
     [x: string]: string;
     new (): IDocInterface1;
+}
+
+// @public
+interface IDocInterface4 {
+    generic: Generic<number>;
+    numberOrFunction: number | (() => number);
+    stringOrNumber: string | number;
 }
 
 // @public
