@@ -106,10 +106,17 @@ export class AstSymbolTable {
     return this._exportAnalyzer.fetchAstModuleFromSourceFile(sourceFile, undefined);
   }
 
+  /**
+   * This crawls the specified entry point and collects the full set of exported AstSymbols.
+   */
   public fetchAstModuleExportInfo(astModule: AstModule): AstModuleExportInfo {
     return this._exportAnalyzer.fetchAstModuleExportInfo(astModule);
   }
 
+  /**
+   * Attempts to retrieve an export by name from the specified `AstModule`.
+   * Returns undefined if no match was found.
+   */
   public tryGetExportOfAstModule(exportName: string, astModule: AstModule): AstEntity | undefined {
     return this._exportAnalyzer.tryGetExportOfAstModule(exportName, astModule);
   }

@@ -66,9 +66,9 @@ export const enum ExtractorMessageId {
    * "The `@inheritDoc` tag needs a TSDoc declaration reference; signature matching is not supported yet".
    *
    * @privateRemarks
-   * In the future, we can implement signature matching so that you can write `{@inheritDoc}` and API Extractor
-   * will find the corresponding member from a base class (or implemented interface).  Until then, the tag needs
-   * an explicit declaration reference such as `{@inhertDoc MyBaseClass.sameMethod}`.
+   * In the future, we will implement signature matching so that you can write `{@inheritDoc}` and API Extractor
+   * will find a corresponding member from a base class (or implemented interface).  Until then, the tag
+   * always needs an explicit declaration reference such as `{@inhertDoc MyBaseClass.sameMethod}`.
    */
   UnresolvedInheritDocBase = 'ae-unresolved-inheritdoc-base'
 }

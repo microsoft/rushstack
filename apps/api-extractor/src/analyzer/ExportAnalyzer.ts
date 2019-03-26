@@ -212,7 +212,7 @@ export class ExportAnalyzer {
   }
 
   /**
-   * This crawls the specified entry point and collects the full set of exported AstSymbols.
+   * Implementation of {@link AstSymbolTable.fetchAstModuleExportInfo}.
    */
   public fetchAstModuleExportInfo(entryPointAstModule: AstModule): AstModuleExportInfo {
     if (entryPointAstModule.isExternal) {
@@ -542,6 +542,9 @@ export class ExportAnalyzer {
     return astEntity;
   }
 
+  /**
+   * Implementation of {@link AstSymbolTable.tryGetExportOfAstModule}.
+   */
   public tryGetExportOfAstModule(exportName: string, astModule: AstModule): AstEntity | undefined {
     const visitedAstModules: Set<AstModule> = new Set<AstModule>();
     return this._tryGetExportOfAstModule(exportName, astModule,
