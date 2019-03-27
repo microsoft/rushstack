@@ -7,7 +7,7 @@ export class SystemEvent {
   /**
    * Adds an handler for the event.
    */
-  public addHandler(handler: ()=>void): void {
+  public addHandler(handler: () => void): void {
   }
 }
 
@@ -59,6 +59,33 @@ export interface IDocInterface3 {
    * @param x - the parameter
    */
   [x: string]: string;
+}
+
+/**
+ * Generic class.
+ * @public
+ */
+export class Generic<T> { }
+
+/**
+ * Type union in an interface.
+ * @public
+ */
+export interface IDocInterface4 {
+  /**
+   * a union type
+   */
+  stringOrNumber: string | number;
+
+  /**
+   * a union type with a function
+   */
+  numberOrFunction: number | (() => number);
+
+  /**
+   * make sure html entities are escaped in tables.
+   */
+  generic: Generic<number>;
 }
 
 /**

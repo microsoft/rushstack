@@ -11,12 +11,16 @@ items:
             uid: api-documenter-test.DocClass1
           - name: DocEnum
             uid: api-documenter-test.DocEnum
+          - name: Generic
+            uid: api-documenter-test.Generic
           - name: IDocInterface1
             uid: api-documenter-test.IDocInterface1
           - name: IDocInterface2
             uid: api-documenter-test.IDocInterface2
           - name: IDocInterface3
             uid: api-documenter-test.IDocInterface3
+          - name: IDocInterface4
+            uid: api-documenter-test.IDocInterface4
           - name: OuterNamespace
             items:
               - name: InnerNamespace

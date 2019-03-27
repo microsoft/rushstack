@@ -14,7 +14,7 @@ export declare enum DocEnum
 
 |  Member | Value | Description |
 |  --- | --- | --- |
-|  One | `1` | These are some docs for One |
-|  Two | `2` | These are some docs for Two |
-|  Zero | `0` | These are some docs for Zero |
+|  One | <code>1</code> | These are some docs for One |
+|  Two | <code>2</code> | These are some docs for Two |
+|  Zero | <code>0</code> | These are some docs for Zero |
 

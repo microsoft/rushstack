@@ -77,6 +77,15 @@ export class MarkdownEmitter {
     return textWithBackslashes;
   }
 
+  protected getTableEscapedText(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\|/g, '&#124;');
+  }
+
   /**
    * @virtual
    */
@@ -98,14 +107,23 @@ export class MarkdownEmitter {
       }
       case DocNodeKind.CodeSpan: {
         const docCodeSpan: DocCodeSpan = docNode as DocCodeSpan;
-        writer.write('`');
         if (context.insideTable) {
-          const parts: string[] = docCodeSpan.code.split(/\r?\n/g);
+          writer.write('<code>');
+        } else {
+          writer.write('`');
+        }
+        if (context.insideTable) {
+          const code: string = this.getTableEscapedText(docCodeSpan.code);
+          const parts: string[] = code.split(/\r?\n/g);
           writer.write(parts.join('`<p/>`'));
         } else {
           writer.write(docCodeSpan.code);
         }
-        writer.write('`');
+        if (context.insideTable) {
+          writer.write('</code>');
+        } else {
+          writer.write('`');
+        }
         break;
       }
       case DocNodeKind.LinkTag: {

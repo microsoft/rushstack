@@ -14,8 +14,8 @@ static sumWithExample(x: number, y: number): number;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  x | `number` | the first number to add |
-|  y | `number` | the second number to add |
+|  x | <code>number</code> | the first number to add |
+|  y | <code>number</code> | the second number to add |
 
 <b>Returns:</b>
 
