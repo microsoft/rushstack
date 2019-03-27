@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 26 Mar 2019 20:54:18 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Mar 2019 19:57:45 GMT and should not be manually modified.
+
+## 7.0.41
+Wed, 27 Mar 2019 19:57:45 GMT
+
+### Patches
+
+- Fix an issue with type unions rendering in markdown tables (addresses #1065)
 
 ## 7.0.40
 Tue, 26 Mar 2019 20:54:18 GMT

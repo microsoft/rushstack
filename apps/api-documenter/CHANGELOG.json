@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.41",
+      "tag": "@microsoft/api-documenter_v7.0.41",
+      "date": "Wed, 27 Mar 2019 19:57:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with type unions rendering in markdown tables (addresses #1065)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.40",
       "tag": "@microsoft/api-documenter_v7.0.40",
       "date": "Tue, 26 Mar 2019 20:54:18 GMT",
