@@ -108,15 +108,23 @@ export class DocCommentEnhancer {
   private _checkForBrokenLinksRecursive(astDeclaration: AstDeclaration, node: tsdoc.DocNode): void {
     if (node instanceof tsdoc.DocLinkTag) {
       if (node.codeDestination) {
-        const referencedAstDeclaration: AstDeclaration | ResolverFailure = this._collector.astReferenceResolver
-          .resolve(node.codeDestination);
 
-        if (referencedAstDeclaration instanceof ResolverFailure) {
-          this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedLink,
-            'The @link reference could not be resolved: ' + referencedAstDeclaration.reason,
-            astDeclaration);
+        // Is it referring to the working package?  If so, we don't do any link validation, because
+        // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
+        // TODO: We need to come back and fix this.
+        if (node.codeDestination.packageName === undefined
+          || node.codeDestination.packageName === this._collector.workingPackage.name) {
+
+          const referencedAstDeclaration: AstDeclaration | ResolverFailure = this._collector.astReferenceResolver
+            .resolve(node.codeDestination);
+
+          if (referencedAstDeclaration instanceof ResolverFailure) {
+            this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedLink,
+              'The @link reference could not be resolved: ' + referencedAstDeclaration.reason,
+              astDeclaration);
+          }
+
         }
-
       }
     }
     for (const childNode of node.getChildNodes()) {

@@ -19,13 +19,16 @@ export interface A {
     myProperty: string;
 }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved:The package "api-extractor-scenarios" does not have an export "MyNamespace"
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "api-extractor-scenarios" does not have an export "MyNamespace"
 // 
 // @public
 export function failWithAmbiguity(): void;
 
 // @public
-export function success(): void;
+export function succeedWithExternalReference(): void;
+
+// @public
+export function succeedWithSelector(): void;
 
 
 // (No @packageDocumentation comment for this package)

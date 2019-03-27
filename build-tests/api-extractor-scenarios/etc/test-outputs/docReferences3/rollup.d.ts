@@ -17,10 +17,18 @@ export declare interface A {
 export declare function failWithAmbiguity(): void;
 
 /**
+ * NOTE: The broken link checker currently is not able to validate references to external packages.
+ * We need to fix that.
+ * {@link nonexistent#nonexistent}
+ * @public
+ */
+export declare function succeedWithExternalReference(): void;
+
+/**
  * {@link (A:namespace).B.myMethod | the method}
  * {@link (A:interface).myProperty | the property}
  * @public
  */
-export declare function success(): void;
+export declare function succeedWithSelector(): void;
 
 export { }

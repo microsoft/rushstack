@@ -27,3 +27,12 @@ export function failWithAmbiguity() {
  */
 export function succeedWithSelector() {
 }
+
+/**
+ * NOTE: The broken link checker currently is not able to validate references to external packages.
+ * We need to fix that.
+ * {@link nonexistent#nonexistent}
+ * @public
+ */
+export function succeedWithExternalReference(): void {
+}
