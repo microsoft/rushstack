@@ -55,6 +55,6 @@ export class PublishGit {
     PublishUtilities.execCommand(
       !!this._targetBranch,
       'git',
-      ['push', 'origin', 'HEAD:' + branchName, '--follow-tags', '--verbose']);
+      ['push', 'origin', 'HEAD:' + branchName, '--follow-tags', '--verbose', '--no-verify']);
   }
 }
