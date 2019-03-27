@@ -71,6 +71,10 @@
       "ae-unresolved-inheritdoc-base": {
         "logLevel": "warning",
         "addToApiReviewFile": true
+      },
+      "ae-unresolved-link": {
+        "logLevel": "warning",
+        "addToApiReviewFile": true
       }
     },
     "tsdocMessageReporting": {
