@@ -1,6 +1,31 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Mon, 18 Mar 2019 04:28:43 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Mar 2019 20:54:18 GMT and should not be manually modified.
+
+## 6.0.45
+Tue, 26 Mar 2019 20:54:18 GMT
+
+*Version update only*
+
+## 6.0.44
+Sat, 23 Mar 2019 03:48:31 GMT
+
+*Version update only*
+
+## 6.0.43
+Thu, 21 Mar 2019 04:59:11 GMT
+
+*Version update only*
+
+## 6.0.42
+Thu, 21 Mar 2019 01:15:32 GMT
+
+*Version update only*
+
+## 6.0.41
+Wed, 20 Mar 2019 19:14:49 GMT
+
+*Version update only*
 
 ## 6.0.40
 Mon, 18 Mar 2019 04:28:43 GMT

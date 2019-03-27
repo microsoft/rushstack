@@ -4,8 +4,10 @@
 
 ```ts
 
+import * as argparse from 'argparse';
+
 // @public
-declare abstract class CommandLineAction extends CommandLineParameterProvider {
+export abstract class CommandLineAction extends CommandLineParameterProvider {
     // (undocumented)
     constructor(options: ICommandLineActionOptions);
     // (undocumented)
@@ -28,8 +30,8 @@ declare abstract class CommandLineAction extends CommandLineParameterProvider {
 }
 
 // @public
-declare class CommandLineChoiceParameter extends CommandLineParameter {
-    // @internal (undocumented)
+export class CommandLineChoiceParameter extends CommandLineParameter {
+    // @internal
     constructor(definition: ICommandLineChoiceDefinition);
     // (undocumented)
     readonly alternatives: ReadonlyArray<string>;
@@ -47,8 +49,8 @@ declare class CommandLineChoiceParameter extends CommandLineParameter {
     }
 
 // @public
-declare class CommandLineFlagParameter extends CommandLineParameter {
-    // @internal (undocumented)
+export class CommandLineFlagParameter extends CommandLineParameter {
+    // @internal
     constructor(definition: ICommandLineFlagDefinition);
     // @override (undocumented)
     appendToArgList(argList: string[]): void;
@@ -60,8 +62,8 @@ declare class CommandLineFlagParameter extends CommandLineParameter {
     }
 
 // @public
-declare class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
-    // @internal (undocumented)
+export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
+    // @internal
     constructor(definition: ICommandLineIntegerDefinition);
     // @override (undocumented)
     appendToArgList(argList: string[]): void;
@@ -77,8 +79,8 @@ declare class CommandLineIntegerParameter extends CommandLineParameterWithArgume
     }
 
 // @public
-declare abstract class CommandLineParameter {
-    // @internal (undocumented)
+export abstract class CommandLineParameter {
+    // @internal
     constructor(definition: IBaseCommandLineDefinition);
     abstract appendToArgList(argList: string[]): void;
     // (undocumented)
@@ -104,7 +106,7 @@ declare abstract class CommandLineParameter {
 }
 
 // @public
-declare enum CommandLineParameterKind {
+export enum CommandLineParameterKind {
     Choice = 0,
     Flag = 1,
     Integer = 2,
@@ -113,8 +115,8 @@ declare enum CommandLineParameterKind {
 }
 
 // @public
-declare abstract class CommandLineParameterProvider {
-    // @internal (undocumented)
+export abstract class CommandLineParameterProvider {
+    // @internal
     constructor();
     defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
     defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
@@ -136,15 +138,15 @@ declare abstract class CommandLineParameterProvider {
 }
 
 // @public
-declare abstract class CommandLineParameterWithArgument extends CommandLineParameter {
-    // @internal (undocumented)
+export abstract class CommandLineParameterWithArgument extends CommandLineParameter {
+    // @internal
     constructor(definition: IBaseCommandLineDefinitionWithArgument);
     // (undocumented)
     readonly argumentName: string;
     }
 
 // @public
-declare abstract class CommandLineParser extends CommandLineParameterProvider {
+export abstract class CommandLineParser extends CommandLineParameterProvider {
     // (undocumented)
     constructor(options: ICommandLineParserOptions);
     readonly actions: ReadonlyArray<CommandLineAction>;
@@ -164,8 +166,8 @@ declare abstract class CommandLineParser extends CommandLineParameterProvider {
 }
 
 // @public
-declare class CommandLineStringListParameter extends CommandLineParameterWithArgument {
-    // @internal (undocumented)
+export class CommandLineStringListParameter extends CommandLineParameterWithArgument {
+    // @internal
     constructor(definition: ICommandLineStringListDefinition);
     // @override (undocumented)
     appendToArgList(argList: string[]): void;
@@ -177,8 +179,8 @@ declare class CommandLineStringListParameter extends CommandLineParameterWithArg
     }
 
 // @public
-declare class CommandLineStringParameter extends CommandLineParameterWithArgument {
-    // @internal (undocumented)
+export class CommandLineStringParameter extends CommandLineParameterWithArgument {
+    // @internal
     constructor(definition: ICommandLineStringDefinition);
     // @override (undocumented)
     appendToArgList(argList: string[]): void;
@@ -194,7 +196,7 @@ declare class CommandLineStringParameter extends CommandLineParameterWithArgumen
     }
 
 // @public (undocumented)
-declare class DynamicCommandLineAction extends CommandLineAction {
+export class DynamicCommandLineAction extends CommandLineAction {
     // (undocumented)
     protected onDefineParameters(): void;
     // (undocumented)
@@ -202,13 +204,13 @@ declare class DynamicCommandLineAction extends CommandLineAction {
 }
 
 // @public (undocumented)
-declare class DynamicCommandLineParser extends CommandLineParser {
+export class DynamicCommandLineParser extends CommandLineParser {
     // (undocumented)
     protected onDefineParameters(): void;
 }
 
 // @public
-interface IBaseCommandLineDefinition {
+export interface IBaseCommandLineDefinition {
     description: string;
     environmentVariable?: string;
     parameterLongName: string;
@@ -217,36 +219,36 @@ interface IBaseCommandLineDefinition {
 }
 
 // @public
-interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
+export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
     argumentName: string;
 }
 
 // @public
-interface ICommandLineActionOptions {
+export interface ICommandLineActionOptions {
     actionName: string;
     documentation: string;
     summary: string;
 }
 
 // @public
-interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
+export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
     alternatives: string[];
     // (undocumented)
     defaultValue?: string;
 }
 
 // @public
-interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
+export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
 }
 
 // @public
-interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument {
+export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument {
     // (undocumented)
     defaultValue?: number;
 }
 
 // @internal
-interface _ICommandLineParserData {
+export interface _ICommandLineParserData {
     // (undocumented)
     [key: string]: any;
     // (undocumented)
@@ -254,18 +256,18 @@ interface _ICommandLineParserData {
 }
 
 // @public
-interface ICommandLineParserOptions {
+export interface ICommandLineParserOptions {
     toolDescription: string;
     toolFilename: string;
 }
 
 // @public
-interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument {
+export interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument {
     defaultValue?: string;
 }
 
 // @public
-interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {
+export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {
 }
 
 

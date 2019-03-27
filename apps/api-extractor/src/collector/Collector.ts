@@ -35,6 +35,7 @@ import { DeclarationMetadata } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
+import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 
 /**
  * Options for Collector constructor.
@@ -72,6 +73,7 @@ export class Collector {
   public readonly program: ts.Program;
   public readonly typeChecker: ts.TypeChecker;
   public readonly astSymbolTable: AstSymbolTable;
+  public readonly astReferenceResolver: AstReferenceResolver;
 
   public readonly packageJsonLookup: PackageJsonLookup;
   public readonly messageRouter: MessageRouter;
@@ -130,6 +132,7 @@ export class Collector {
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
     this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup, this.logger);
+    this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
   }
 
   /**
@@ -523,7 +526,8 @@ export class Collector {
 
               this.messageRouter.addAnalyzerIssue(
                 ExtractorMessageId.MissingReleaseTag,
-                'Missing release tag',
+                `"${entity.nameForEmit}" is exported by the package, but it is missing `
+                + `a release tag (@alpha, @beta, @public, or @internal)`,
                 astSymbol
               );
             }
@@ -599,9 +603,34 @@ export class Collector {
       declarationMetadata.isSealed = modifierTagSet.isSealed();
       declarationMetadata.isVirtual = modifierTagSet.isVirtual();
 
-      // Require the summary to contain at least 10 non-spacing characters
-      declarationMetadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
-        parserContext.docComment.summarySection, 10);
+      if (modifierTagSet.hasTag(AedocDefinitions.preapprovedTag)) {
+        // This feature only makes sense for potentially big declarations.
+        switch (astDeclaration.declaration.kind) {
+          case ts.SyntaxKind.ClassDeclaration:
+          case ts.SyntaxKind.EnumDeclaration:
+          case ts.SyntaxKind.InterfaceDeclaration:
+          case ts.SyntaxKind.ModuleDeclaration:
+            if (declaredReleaseTag === ReleaseTag.Internal) {
+              declarationMetadata.isPreapproved = true;
+            } else {
+              this.messageRouter.addAnalyzerIssue(
+                ExtractorMessageId.PreapprovedBadReleaseTag,
+                `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
+                  + ` without an @internal release tag`,
+                astDeclaration
+              );
+            }
+            break;
+          default:
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.PreapprovedUnsupportedType,
+              `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
+                + ` because it is not a supported declaration type`,
+              astDeclaration
+            );
+            break;
+        }
+      }
     }
   }
 

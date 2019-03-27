@@ -5,6 +5,7 @@
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
+    "declarationMap": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
     "lib": [

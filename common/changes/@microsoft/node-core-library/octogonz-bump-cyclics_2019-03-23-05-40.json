@@ -1,9 +1,9 @@
 {
   "changes": [
     {
+      "comment": "",
       "packageName": "@microsoft/node-core-library",
-      "comment": "Add two new APIs PackageJsonLookup.loadNodePackageJson() and tryLoadNodePackageJsonFor() that return INodePackageJson",
-      "type": "minor"
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/node-core-library",

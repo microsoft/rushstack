@@ -5,7 +5,8 @@
 export class X { }
 export { X as Y }
 
-/** @public */
+/** @internal */
 class A { }
+// The underscore warning should get printed next to these export statements, not next to the class declaration
 export { A as B }
 export { A as C }

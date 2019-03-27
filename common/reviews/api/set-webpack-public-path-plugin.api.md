@@ -4,11 +4,13 @@
 
 ```ts
 
-// @public
-declare function getGlobalRegisterCode(debug?: boolean): string;
+import * as Webpack from 'webpack';
 
 // @public
-interface ISetWebpackPublicPathOptions {
+export function getGlobalRegisterCode(debug?: boolean): string;
+
+// @public
+export interface ISetWebpackPublicPathOptions {
     getPostProcessScript?: (varName: string) => string;
     preferLastFoundScript?: boolean;
     publicPath?: string;
@@ -19,7 +21,7 @@ interface ISetWebpackPublicPathOptions {
 }
 
 // @public
-interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPathOptions {
+export interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPathOptions {
     scriptName?: {
         name: string;
         isTokenized: boolean;
@@ -27,11 +29,10 @@ interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPathOption
 }
 
 // @public (undocumented)
-declare const registryVariableName: string;
+export const registryVariableName: string;
 
 // @public
-declare class SetPublicPathPlugin implements Webpack.Plugin {
-    // (undocumented)
+export class SetPublicPathPlugin implements Webpack.Plugin {
     constructor(options: ISetWebpackPublicPathPluginOptions);
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;

@@ -1,29 +1,54 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as path from 'path';
 import * as ts from 'typescript';
 
-import { Collector } from './Collector';
+import { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { SymbolMetadata } from './SymbolMetadata';
-import { CollectorEntity } from './CollectorEntity';
+import { SymbolMetadata } from '../collector/SymbolMetadata';
+import { CollectorEntity } from '../collector/CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
 
-export class VisibilityChecker {
+export class ValidationEnhancer {
 
-  public static check(collector: Collector): void {
+  public static analyze(collector: Collector): void {
     const alreadyWarnedSymbols: Set<AstSymbol> = new Set<AstSymbol>();
 
     for (const entity of collector.entities) {
       if (entity.astEntity instanceof AstSymbol) {
         if (entity.exported) {
           entity.astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-            VisibilityChecker._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
+            ValidationEnhancer._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
           });
 
+          ValidationEnhancer._checkForInternalUnderscore(collector, entity, entity.astEntity);
         }
       }
     }
+  }
+
+  private static _checkForInternalUnderscore(collector: Collector, collectorEntity: CollectorEntity,
+    astSymbol: AstSymbol): void {
+
+    const astSymbolMetadata: SymbolMetadata = collector.fetchMetadata(astSymbol);
+
+    if (astSymbolMetadata.releaseTag === ReleaseTag.Internal && !astSymbolMetadata.releaseTagSameAsParent) {
+      for (const exportName of collectorEntity.exportNames) {
+        if (exportName[0] !== '_') {
+          collector.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.InternalMissingUnderscore,
+            `The name ${exportName} should be prefixed with an underscore`
+            + ` because the declaration is marked as "@internal"`,
+            astSymbol,
+            { exportName }
+          );
+        }
+      }
+    }
+
   }
 
   private static _checkReferences(collector: Collector, astDeclaration: AstDeclaration,
@@ -64,7 +89,7 @@ export class VisibilityChecker {
 
               // The main usage scenario for ECMAScript symbols is to attach private data to a JavaScript object,
               // so as a special case, we do NOT report them as forgotten exports.
-              if (!VisibilityChecker._isEcmaScriptSymbol(referencedEntity)) {
+              if (!ValidationEnhancer._isEcmaScriptSymbol(referencedEntity)) {
 
                 collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.ForgottenExport,
                   `The symbol "${rootSymbol.localName}" needs to be exported`

@@ -2,6 +2,77 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.33",
+      "tag": "@microsoft/api-extractor_v7.0.33",
+      "date": "Tue, 26 Mar 2019 20:54:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reintroduce support for `@inheritDoc` tags"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.32",
+      "tag": "@microsoft/api-extractor_v7.0.32",
+      "date": "Sat, 23 Mar 2019 03:48:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "If the TSDoc summary is missing for a class constructor, then automatically generate it"
+          },
+          {
+            "comment": "Reintroduce support for the `@preapproved` TSDoc tag"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.31",
+      "tag": "@microsoft/api-extractor_v7.0.31",
+      "date": "Thu, 21 Mar 2019 04:59:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reintroduce \"ae-internal-missing-underscore\" warning for API items marked as `@internal` but whose name does not start with an underscore"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.30",
+      "tag": "@microsoft/api-extractor_v7.0.30",
+      "date": "Thu, 21 Mar 2019 01:15:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the API review file generation to include imports and support multiple exports"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.29",
+      "tag": "@microsoft/api-extractor_v7.0.29",
+      "date": "Wed, 20 Mar 2019 19:14:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "API Extractor can now analyze packages whose package.json file is missing the \"version\" field"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.27` to `7.0.28`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.1` to `3.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.28",
       "tag": "@microsoft/api-extractor_v7.0.28",
       "date": "Mon, 18 Mar 2019 04:28:43 GMT",

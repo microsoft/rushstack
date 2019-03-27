@@ -2,6 +2,69 @@
   "name": "@microsoft/rush-stack-compiler-2.4",
   "entries": [
     {
+      "version": "0.5.18",
+      "tag": "@microsoft/rush-stack-compiler-2.4_v0.5.18",
+      "date": "Tue, 26 Mar 2019 20:54:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.32` to `7.0.33`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.17",
+      "tag": "@microsoft/rush-stack-compiler-2.4_v0.5.17",
+      "date": "Sat, 23 Mar 2019 03:48:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.31` to `7.0.32`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.16",
+      "tag": "@microsoft/rush-stack-compiler-2.4_v0.5.16",
+      "date": "Thu, 21 Mar 2019 04:59:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.30` to `7.0.31`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.15",
+      "tag": "@microsoft/rush-stack-compiler-2.4_v0.5.15",
+      "date": "Thu, 21 Mar 2019 01:15:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.29` to `7.0.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.14",
+      "tag": "@microsoft/rush-stack-compiler-2.4_v0.5.14",
+      "date": "Wed, 20 Mar 2019 19:14:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.28` to `7.0.29`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.1` to `3.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.13",
       "tag": "@microsoft/rush-stack-compiler-2.4_v0.5.13",
       "date": "Mon, 18 Mar 2019 04:28:43 GMT",

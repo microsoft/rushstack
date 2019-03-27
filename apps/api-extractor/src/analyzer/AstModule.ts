@@ -6,6 +6,9 @@ import * as ts from 'typescript';
 import { AstSymbol } from './AstSymbol';
 import { AstEntity } from './AstSymbolTable';
 
+/**
+ * Represents information collected by {@link AstSymbolTable.fetchAstModuleExportInfo}
+ */
 export class AstModuleExportInfo {
   public readonly exportedLocalEntities: Map<string, AstEntity> = new Map<string, AstEntity>();
   public readonly starExportedExternalModules: Set<AstModule> = new Set<AstModule>();

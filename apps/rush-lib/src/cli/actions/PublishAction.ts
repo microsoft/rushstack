@@ -41,6 +41,7 @@ export class PublishAction extends BaseRushAction {
   private _registryUrl: CommandLineStringParameter;
   private _targetBranch: CommandLineStringParameter;
   private _prereleaseName: CommandLineStringParameter;
+  private _partialPrerelease: CommandLineFlagParameter;
   private _suffix: CommandLineStringParameter;
   private _force: CommandLineFlagParameter;
   private _prereleaseToken: PrereleaseToken;
@@ -172,6 +173,11 @@ export class PublishAction extends BaseRushAction {
       argumentName: 'NAME',
       description: 'Bump up to a prerelease version with the provided prerelease name. Cannot be used with --suffix'
     });
+    this._partialPrerelease = this.defineFlagParameter({
+      parameterLongName: '--partial-prerelease',
+      parameterShortName: undefined,
+      description: 'Used with --prerelease-name. Only bump packages to a prerelease version if they have changes.'
+    });
     this._suffix = this.defineStringParameter({
       parameterLongName: '--suffix',
       argumentName: 'SUFFIX',
@@ -204,7 +210,11 @@ export class PublishAction extends BaseRushAction {
       if (this._includeAll.value) {
         this._publishAll(allPackages);
       } else {
-        this._prereleaseToken = new PrereleaseToken(this._prereleaseName.value, this._suffix.value);
+        this._prereleaseToken = new PrereleaseToken(
+          this._prereleaseName.value,
+          this._suffix.value,
+          this._partialPrerelease.value
+        );
         this._publishChanges(allPackages);
       }
 
@@ -348,16 +358,7 @@ export class PublishAction extends BaseRushAction {
     const args: string[] = ['publish'];
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
-      let registry: string = '//registry.npmjs.org/';
-      if (this._registryUrl.value) {
-        const registryUrl: string = this._registryUrl.value;
-        env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
-        registry = registryUrl.substring(registryUrl.indexOf('//'));
-      }
-
-      if (this._npmAuthToken.value) {
-        args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
-      }
+      this._addSharedNpmConfig(env, args);
 
       if (this._npmTag.value) {
         args.push(`--tag`, this._npmTag.value);
@@ -390,12 +391,13 @@ export class PublishAction extends BaseRushAction {
 
   private _packageExists(packageConfig: RushConfigurationProject): boolean {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
-    if (this._registryUrl.value) {
-      env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
-    }
+    const args: string[] = [];
+    this._addSharedNpmConfig(env, args);
+
     const publishedVersions: string[] = Npm.publishedVersions(packageConfig.packageName,
       packageConfig.projectFolder,
-      env);
+      env,
+      args);
     return publishedVersions.indexOf(packageConfig.packageJson.version) >= 0;
   }
 
@@ -506,6 +508,19 @@ export class PublishAction extends BaseRushAction {
           versionPolicy.setDependenciesBeforePublish(project.packageName, this.rushConfiguration);
         }
       }
+    }
+  }
+
+  private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
+    let registry: string = '//registry.npmjs.org/';
+    if (this._registryUrl.value) {
+      const registryUrl: string = this._registryUrl.value;
+      env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
+      registry = registryUrl.substring(registryUrl.indexOf('//'));
+    }
+
+    if (this._npmAuthToken.value) {
+      args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
     }
   }
 }

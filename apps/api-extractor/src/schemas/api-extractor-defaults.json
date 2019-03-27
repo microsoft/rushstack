@@ -59,6 +59,18 @@
       "ae-incompatible-release-tags": {
         "logLevel": "warning",
         "addToApiReviewFile": true
+      },
+      "ae-internal-missing-underscore": {
+        "logLevel": "warning",
+        "addToApiReviewFile": true
+      },
+      "ae-unresolved-inheritdoc-reference": {
+        "logLevel": "warning",
+        "addToApiReviewFile": true
+      },
+      "ae-unresolved-inheritdoc-base": {
+        "logLevel": "warning",
+        "addToApiReviewFile": true
       }
     },
     "tsdocMessageReporting": {

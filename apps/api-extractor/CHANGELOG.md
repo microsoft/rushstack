@@ -1,6 +1,42 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 18 Mar 2019 04:28:43 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Mar 2019 20:54:18 GMT and should not be manually modified.
+
+## 7.0.33
+Tue, 26 Mar 2019 20:54:18 GMT
+
+### Patches
+
+- Reintroduce support for `@inheritDoc` tags
+
+## 7.0.32
+Sat, 23 Mar 2019 03:48:31 GMT
+
+### Patches
+
+- If the TSDoc summary is missing for a class constructor, then automatically generate it
+- Reintroduce support for the `@preapproved` TSDoc tag
+
+## 7.0.31
+Thu, 21 Mar 2019 04:59:11 GMT
+
+### Patches
+
+- Reintroduce "ae-internal-missing-underscore" warning for API items marked as `@internal` but whose name does not start with an underscore
+
+## 7.0.30
+Thu, 21 Mar 2019 01:15:32 GMT
+
+### Patches
+
+- Improve the API review file generation to include imports and support multiple exports
+
+## 7.0.29
+Wed, 20 Mar 2019 19:14:49 GMT
+
+### Patches
+
+- API Extractor can now analyze packages whose package.json file is missing the "version" field
 
 ## 7.0.28
 Mon, 18 Mar 2019 04:28:43 GMT

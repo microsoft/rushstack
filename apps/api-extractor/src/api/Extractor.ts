@@ -31,7 +31,8 @@ import { ApiModelGenerator } from '../generators/ApiModelGenerator';
 import { ApiPackage } from '@microsoft/api-extractor-model';
 import { ReviewFileGenerator } from '../generators/ReviewFileGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
-import { VisibilityChecker } from '../collector/VisibilityChecker';
+import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
+import { DocCommentEnhancer } from '../enhancers/DocCommentEnhancer';
 
 /**
  * Options for {@link Extractor.processProject}.
@@ -392,7 +393,8 @@ export class Extractor {
 
     collector.analyze();
 
-    VisibilityChecker.check(collector);
+    DocCommentEnhancer.analyze(collector);
+    ValidationEnhancer.analyze(collector);
 
     const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();

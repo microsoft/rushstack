@@ -4,18 +4,21 @@
 
 ```ts
 
-// @public
-declare function addSuppression(suppression: string | RegExp): void;
-
-// @public (undocumented)
-declare const clean: IExecutable;
-
-// @public (undocumented)
-declare const cleanFlag: IExecutable;
+import gulp = require('gulp');
+import * as gulp_2 from 'gulp';
+import Orchestrator = require('orchestrator');
 
 // @public
-declare class CleanFlagTask extends CleanTask {
-    // (undocumented)
+export function addSuppression(suppression: string | RegExp): void;
+
+// @public (undocumented)
+export const clean: IExecutable;
+
+// @public (undocumented)
+export const cleanFlag: IExecutable;
+
+// @public
+export class CleanFlagTask extends CleanTask {
     constructor();
     // (undocumented)
     executeTask(gulp: typeof gulp_2, completeCallback: (error?: string | Error) => void): void;
@@ -24,17 +27,16 @@ declare class CleanFlagTask extends CleanTask {
 }
 
 // @public
-declare class CleanTask extends GulpTask<void> {
+export class CleanTask extends GulpTask<void> {
     constructor();
     executeTask(gulp: typeof gulp_2, completeCallback: (error?: string | Error) => void): void;
 }
 
 // @public (undocumented)
-declare const copyStaticAssets: CopyStaticAssetsTask;
+export const copyStaticAssets: CopyStaticAssetsTask;
 
 // @public
-declare class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {
-    // (undocumented)
+export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {
     constructor();
     // (undocumented)
     executeTask(gulp: typeof gulp_2, completeCallback: (error?: string) => void): NodeJS.ReadWriteStream;
@@ -43,47 +45,47 @@ declare class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig>
 }
 
 // @public
-declare class CopyTask extends GulpTask<ICopyConfig> {
+export class CopyTask extends GulpTask<ICopyConfig> {
     constructor();
     executeTask(gulp: typeof gulp_2, completeCallback: (error?: string | Error) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
     loadSchema(): Object;
 }
 
 // @public
-declare function coverageData(coverage: number, threshold: number, filePath: string): void;
+export function coverageData(coverage: number, threshold: number, filePath: string): void;
 
 // @public
-declare function error(...args: Array<string>): void;
+export function error(...args: Array<string>): void;
 
 // @public
-declare function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
+export function fileError(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
 // @public
-declare function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
+export function fileLog(write: (text: string) => void, taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
 // @public
-declare function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
+export function fileWarning(taskName: string, filePath: string, line: number, column: number, errorCode: string, message: string): void;
 
 // @public
-declare function functionalTestRun(name: string, result: TestResultState, duration: number): void;
+export function functionalTestRun(name: string, result: TestResultState, duration: number): void;
 
 // @public
-declare class GenerateShrinkwrapTask extends GulpTask<void> {
+export class GenerateShrinkwrapTask extends GulpTask<void> {
     constructor();
     executeTask(gulp: gulp.Gulp, completeCallback: (error?: string | Error) => void): NodeJS.ReadWriteStream | void;
 }
 
 // @public
-declare function getConfig(): IBuildConfig;
+export function getConfig(): IBuildConfig;
 
 // @public
-declare function getErrors(): string[];
+export function getErrors(): string[];
 
 // @public
-declare function getWarnings(): string[];
+export function getWarnings(): string[];
 
 // @public
-declare abstract class GulpTask<TTaskConfig> implements IExecutable {
+export abstract class GulpTask<TTaskConfig> implements IExecutable {
     constructor(name: string, initialTaskConfig?: Partial<TTaskConfig>);
     buildConfig: IBuildConfig;
     cleanMatch: string[];
@@ -115,7 +117,7 @@ declare abstract class GulpTask<TTaskConfig> implements IExecutable {
 }
 
 // @public (undocumented)
-interface IBuildConfig {
+export interface IBuildConfig {
     args: {
         [name: string]: string | boolean;
     };
@@ -147,7 +149,7 @@ interface IBuildConfig {
 }
 
 // @public
-interface ICopyConfig {
+export interface ICopyConfig {
     copyTo: {
         [destPath: string]: string[];
     };
@@ -155,7 +157,7 @@ interface ICopyConfig {
 }
 
 // @public
-interface ICopyStaticAssetsTaskConfig {
+export interface ICopyStaticAssetsTaskConfig {
     // (undocumented)
     excludeExtensions?: string[];
     // (undocumented)
@@ -167,13 +169,13 @@ interface ICopyStaticAssetsTaskConfig {
 }
 
 // @public
-interface ICustomGulpTask {
+export interface ICustomGulpTask {
     // (undocumented)
     (gulp: typeof gulp_2 | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void): Promise<Object> | NodeJS.ReadWriteStream | void;
 }
 
 // @public (undocumented)
-interface IExecutable {
+export interface IExecutable {
     execute: (config: IBuildConfig) => Promise<void>;
     getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
     isEnabled?: (buildConfig: IBuildConfig) => boolean;
@@ -182,7 +184,7 @@ interface IExecutable {
 }
 
 // @alpha
-interface IJestConfig {
+export interface IJestConfig {
     cache?: boolean;
     collectCoverageFrom?: string[];
     coverage?: boolean;
@@ -196,19 +198,18 @@ interface IJestConfig {
 }
 
 // @public
-declare function initialize(gulp: typeof gulp_2): void;
+export function initialize(gulp: typeof gulp_2): void;
 
 // @internal
-declare function _isJestEnabled(rootFolder: string): boolean;
+export function _isJestEnabled(rootFolder: string): boolean;
 
 // Warning: (ae-incompatible-release-tags) The symbol "jest" is marked as @public, but its signature references "JestTask" which is marked as @alpha
 // 
 // @public (undocumented)
-declare const jest: JestTask;
+export const jest: JestTask;
 
 // @alpha
-declare class JestTask extends GulpTask<IJestConfig> {
-    // (undocumented)
+export class JestTask extends GulpTask<IJestConfig> {
     constructor();
     // (undocumented)
     executeTask(gulp: typeof gulp_2, completeCallback: (error?: string | Error) => void): void;
@@ -218,37 +219,37 @@ declare class JestTask extends GulpTask<IJestConfig> {
 }
 
 // @public
-declare function log(...args: Array<string>): void;
+export function log(...args: Array<string>): void;
 
 // @public
-declare function logSummary(value: string): void;
+export function logSummary(value: string): void;
 
 // @public
-declare function mergeConfig(config: Partial<IBuildConfig>): void;
+export function mergeConfig(config: Partial<IBuildConfig>): void;
 
 // @public
-declare function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
+export function parallel(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
 // @public
-declare function replaceConfig(config: IBuildConfig): void;
+export function replaceConfig(config: IBuildConfig): void;
 
 // @public
-declare function reset(): void;
+export function reset(): void;
 
 // @public
-declare function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
+export function serial(...tasks: Array<IExecutable[] | IExecutable>): IExecutable;
 
 // @public
-declare function setConfig(config: Partial<IBuildConfig>): void;
+export function setConfig(config: Partial<IBuildConfig>): void;
 
 // @public
-declare function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
+export function subTask(taskName: string, fn: ICustomGulpTask): IExecutable;
 
 // @public
-declare function task(taskName: string, taskExecutable: IExecutable): IExecutable;
+export function task(taskName: string, taskExecutable: IExecutable): IExecutable;
 
 // @public
-declare enum TestResultState {
+export enum TestResultState {
     // (undocumented)
     Failed = 1,
     // (undocumented)
@@ -260,19 +261,19 @@ declare enum TestResultState {
 }
 
 // @public
-declare class ValidateShrinkwrapTask extends GulpTask<void> {
+export class ValidateShrinkwrapTask extends GulpTask<void> {
     constructor();
     executeTask(gulp: gulp.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void;
     }
 
 // @public
-declare function verbose(...args: Array<string>): void;
+export function verbose(...args: Array<string>): void;
 
 // @public
-declare function warn(...args: Array<string>): void;
+export function warn(...args: Array<string>): void;
 
 // @public
-declare function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;
+export function watch(watchMatch: string | string[], taskExecutable: IExecutable): IExecutable;
 
 
 // (No @packageDocumentation comment for this package)

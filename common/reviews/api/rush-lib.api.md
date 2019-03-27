@@ -4,9 +4,10 @@
 
 ```ts
 
+import { IPackageJson } from '@microsoft/node-core-library';
+
 // @public
-declare class ApprovedPackagesConfiguration {
-    // (undocumented)
+export class ApprovedPackagesConfiguration {
     constructor(jsonFilename: string);
     // (undocumented)
     addOrUpdatePackage(packageName: string, reviewCategory: string): void;
@@ -21,16 +22,16 @@ declare class ApprovedPackagesConfiguration {
 }
 
 // @public
-declare class ApprovedPackagesItem {
+export class ApprovedPackagesItem {
     allowedCategories: Set<string>;
     packageName: string;
 }
 
 // @public
-declare class ApprovedPackagesPolicy {
+export class ApprovedPackagesPolicy {
     // Warning: (ae-forgotten-export) The symbol "IRushConfigurationJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson);
     readonly browserApprovedPackages: ApprovedPackagesConfiguration;
     readonly enabled: boolean;
@@ -40,7 +41,7 @@ declare class ApprovedPackagesPolicy {
     }
 
 // @beta
-declare enum BumpType {
+export enum BumpType {
     // (undocumented)
     'major' = 5,
     // (undocumented)
@@ -56,12 +57,12 @@ declare enum BumpType {
 }
 
 // @public
-declare class ChangeManager {
+export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 
 // @public
-declare class CommonVersionsConfiguration {
+export class CommonVersionsConfiguration {
     readonly allowedAlternativeVersions: Map<string, ReadonlyArray<string>>;
     readonly filePath: string;
     getAllPreferredVersions(): Map<string, string>;
@@ -72,7 +73,7 @@ declare class CommonVersionsConfiguration {
     }
 
 // @beta (undocumented)
-declare const enum DependencyType {
+export const enum DependencyType {
     // (undocumented)
     Dev = "devDependencies",
     // (undocumented)
@@ -84,7 +85,7 @@ declare const enum DependencyType {
 }
 
 // @public
-declare const enum EnvironmentVariableNames {
+export const enum EnvironmentVariableNames {
     RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
     RUSH_TEMP_FOLDER = "RUSH_TEMP_FOLDER",
@@ -92,7 +93,7 @@ declare const enum EnvironmentVariableNames {
 }
 
 // @beta
-declare enum Event {
+export enum Event {
     postRushBuild = 4,
     postRushInstall = 2,
     preRushBuild = 3,
@@ -100,19 +101,19 @@ declare enum Event {
 }
 
 // @beta
-declare class EventHooks {
+export class EventHooks {
     // Warning: (ae-forgotten-export) The symbol "IEventHooksJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(eventHooksJson: IEventHooksJson);
     get(event: Event): string[];
     }
 
 // @beta
-declare class IndividualVersionPolicy extends VersionPolicy {
+export class IndividualVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(versionPolicyJson: IIndividualVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
@@ -123,13 +124,13 @@ declare class IndividualVersionPolicy extends VersionPolicy {
 }
 
 // @public
-interface ITryFindRushJsonLocationOptions {
+export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
     startingFolder?: string;
 }
 
 // @internal
-declare class _LastInstallFlag {
+export class _LastInstallFlag {
     constructor(folderPath: string, state?: Object);
     clear(): void;
     create(): void;
@@ -138,10 +139,10 @@ declare class _LastInstallFlag {
     }
 
 // @beta
-declare class LockStepVersionPolicy extends VersionPolicy {
+export class LockStepVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(versionPolicyJson: ILockStepVersionJson);
     bump(bumpType?: BumpType, identifier?: string): void;
     ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
@@ -155,8 +156,7 @@ declare class LockStepVersionPolicy extends VersionPolicy {
     }
 
 // @beta (undocumented)
-declare class PackageJsonDependency {
-    // (undocumented)
+export class PackageJsonDependency {
     constructor(name: string, version: string, type: DependencyType, onChange: () => void);
     // (undocumented)
     readonly dependencyType: DependencyType;
@@ -169,7 +169,7 @@ declare class PackageJsonDependency {
     }
 
 // @beta (undocumented)
-declare class PackageJsonEditor {
+export class PackageJsonEditor {
     // (undocumented)
     addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
     readonly dependencyList: ReadonlyArray<PackageJsonDependency>;
@@ -193,26 +193,26 @@ declare class PackageJsonEditor {
 }
 
 // @public
-declare type PackageManager = 'pnpm' | 'npm' | 'yarn';
+export type PackageManager = 'pnpm' | 'npm' | 'yarn';
 
 // @public
-declare class PnpmOptionsConfiguration {
+export class PnpmOptionsConfiguration {
     // Warning: (ae-forgotten-export) The symbol "IPnpmOptionsJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(json: IPnpmOptionsJson);
     readonly strictPeerDependencies: boolean;
 }
 
 // @public
-declare class Rush {
+export class Rush {
     static launch(launcherVersion: string, isManaged: boolean): void;
     static launchRushX(launcherVersion: string, isManaged: boolean): void;
     static readonly version: string;
 }
 
 // @public
-declare class RushConfiguration {
+export class RushConfiguration {
     readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
     readonly changesFolder: string;
     // @deprecated
@@ -246,7 +246,6 @@ declare class RushConfiguration {
     readonly packageManager: PackageManager;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
-    // (undocumented)
     readonly pnpmOptions: PnpmOptionsConfiguration;
     readonly pnpmStoreFolder: string;
     readonly projectFolderMaxDepth: number;
@@ -269,15 +268,14 @@ declare class RushConfiguration {
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;
     readonly yarnCacheFolder: string;
-    // (undocumented)
     readonly yarnOptions: YarnOptionsConfiguration;
     }
 
 // @public
-declare class RushConfigurationProject {
+export class RushConfigurationProject {
     // Warning: (ae-forgotten-export) The symbol "IRushConfigurationProjectJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
     readonly cyclicDependencyProjects: Set<string>;
     readonly downstreamDependencyProjects: string[];
@@ -302,16 +300,15 @@ declare class RushConfigurationProject {
     }
 
 // @internal
-declare class _RushGlobalFolder {
-    // (undocumented)
+export class _RushGlobalFolder {
     constructor();
     readonly nodeSpecificPath: string;
     readonly path: string;
     }
 
 // @beta
-declare abstract class VersionPolicy {
-    // @internal (undocumented)
+export abstract class VersionPolicy {
+    // @internal
     constructor(versionPolicyJson: IVersionPolicyJson);
     abstract bump(bumpType?: BumpType, identifier?: string): void;
     readonly definitionName: VersionPolicyDefinitionName;
@@ -330,8 +327,8 @@ declare abstract class VersionPolicy {
     }
 
 // @beta
-declare class VersionPolicyConfiguration {
-    // @internal (undocumented)
+export class VersionPolicyConfiguration {
+    // @internal
     constructor(jsonFileName: string);
     bump(versionPolicyName?: string, bumpType?: BumpType, identifier?: string, shouldCommit?: boolean): void;
     getVersionPolicy(policyName: string): VersionPolicy;
@@ -341,7 +338,7 @@ declare class VersionPolicyConfiguration {
     }
 
 // @beta
-declare enum VersionPolicyDefinitionName {
+export enum VersionPolicyDefinitionName {
     // (undocumented)
     'individualVersion' = 1,
     // (undocumented)
@@ -349,10 +346,10 @@ declare enum VersionPolicyDefinitionName {
 }
 
 // @public
-declare class YarnOptionsConfiguration {
+export class YarnOptionsConfiguration {
     // Warning: (ae-forgotten-export) The symbol "IYarnOptionsJson" needs to be exported by the entry point index.d.ts
     // 
-    // @internal (undocumented)
+    // @internal
     constructor(json: IYarnOptionsJson);
     readonly ignoreEngines: boolean;
 }

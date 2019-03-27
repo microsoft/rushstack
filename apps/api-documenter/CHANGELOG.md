@@ -1,6 +1,31 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 18 Mar 2019 04:28:43 GMT and should not be manually modified.
+This log was last generated on Tue, 26 Mar 2019 20:54:18 GMT and should not be manually modified.
+
+## 7.0.40
+Tue, 26 Mar 2019 20:54:18 GMT
+
+*Version update only*
+
+## 7.0.39
+Sat, 23 Mar 2019 03:48:31 GMT
+
+*Version update only*
+
+## 7.0.38
+Thu, 21 Mar 2019 04:59:11 GMT
+
+*Version update only*
+
+## 7.0.37
+Thu, 21 Mar 2019 01:15:32 GMT
+
+*Version update only*
+
+## 7.0.36
+Wed, 20 Mar 2019 19:14:49 GMT
+
+*Version update only*
 
 ## 7.0.35
 Mon, 18 Mar 2019 04:28:43 GMT

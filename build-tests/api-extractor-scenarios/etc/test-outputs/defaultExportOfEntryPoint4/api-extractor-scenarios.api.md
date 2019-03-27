@@ -5,7 +5,9 @@
 ```ts
 
 // @public (undocumented)
-declare const _default: "literal";
+const _default: "literal";
+
+export default _default;
 
 
 // (No @packageDocumentation comment for this package)

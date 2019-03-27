@@ -5,25 +5,25 @@
 ```ts
 
 // @public
-abstract class AbstractClass {
+export abstract class AbstractClass {
     // (undocumented)
     abstract test(): void;
 }
 
 // @public
-declare abstract class AbstractClass2 {
+export abstract class AbstractClass2 {
     // (undocumented)
     abstract test2(): void;
 }
 
 // @public
-declare abstract class AbstractClass3 {
+export abstract class AbstractClass3 {
     // (undocumented)
     abstract test3(): void;
 }
 
 // @public
-declare class AmbientConsumer {
+export class AmbientConsumer {
     builtinDefinition1(): Map<string, string>;
     builtinDefinition2(): Promise<void>;
     definitelyTyped(): jest.Context;
@@ -31,11 +31,11 @@ declare class AmbientConsumer {
 }
 
 // @public
-class ClassExportedAsDefault {
+export class ClassExportedAsDefault {
 }
 
 // @public
-declare class ClassWithAccessModifiers {
+export class ClassWithAccessModifiers {
     defaultPublicMethod(): void;
     protected protectedField: number;
     protected readonly protectedGetter: string;
@@ -44,7 +44,7 @@ declare class ClassWithAccessModifiers {
 }
 
 // @public (undocumented)
-declare class ClassWithSymbols {
+export class ClassWithSymbols {
     // (undocumented)
     readonly [unexportedCustomSymbol]: number;
     // (undocumented)
@@ -54,7 +54,7 @@ declare class ClassWithSymbols {
 }
 
 // @public
-declare class ClassWithTypeLiterals {
+export class ClassWithTypeLiterals {
     method1(vector: {
         x: number;
         y: number;
@@ -66,7 +66,7 @@ declare class ClassWithTypeLiterals {
 }
 
 // @public (undocumented)
-declare const enum ConstEnum {
+export const enum ConstEnum {
     // (undocumented)
     One = 1,
     // (undocumented)
@@ -76,17 +76,17 @@ declare const enum ConstEnum {
 }
 
 // @public
-declare class DecoratorTest {
+export class DecoratorTest {
     test(): void;
 }
 
 // @public (undocumented)
-declare class DefaultExportEdgeCase {
+export class DefaultExportEdgeCase {
     reference: ClassExportedAsDefault;
 }
 
 // @public (undocumented)
-declare class ForgottenExportConsumer1 {
+export class ForgottenExportConsumer1 {
     // Warning: (ae-forgotten-export) The symbol "IForgottenExport" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
@@ -94,7 +94,7 @@ declare class ForgottenExportConsumer1 {
 }
 
 // @public (undocumented)
-declare class ForgottenExportConsumer2 {
+export class ForgottenExportConsumer2 {
     // Warning: (ae-forgotten-export) The symbol "IForgottenExport" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
@@ -102,7 +102,7 @@ declare class ForgottenExportConsumer2 {
 }
 
 // @beta
-declare class ForgottenExportConsumer3 {
+export class ForgottenExportConsumer3 {
     // Warning: (ae-forgotten-export) The symbol "IForgottenDirectDependency" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
@@ -110,15 +110,15 @@ declare class ForgottenExportConsumer3 {
 }
 
 // @public (undocumented)
-declare const fullyExportedCustomSymbol: unique symbol;
+export const fullyExportedCustomSymbol: unique symbol;
 
 // @public
-interface IInterfaceAsDefaultExport {
+export interface IInterfaceAsDefaultExport {
     member: string;
 }
 
 // @alpha
-interface IMergedInterface {
+export interface IMergedInterface {
     // (undocumented)
     reference: IMergedInterfaceReferencee;
     // (undocumented)
@@ -126,7 +126,7 @@ interface IMergedInterface {
 }
 
 // @alpha
-interface IMergedInterface {
+export interface IMergedInterface {
     // (undocumented)
     reference: IMergedInterfaceReferencee;
     // (undocumented)
@@ -134,21 +134,21 @@ interface IMergedInterface {
 }
 
 // @alpha (undocumented)
-interface IMergedInterfaceReferencee {
+export interface IMergedInterfaceReferencee {
 }
 
 // @public
-interface ISimpleInterface {
+export interface ISimpleInterface {
 }
 
 // @public (undocumented)
-declare namespace NamespaceContainingVariable {
+export namespace NamespaceContainingVariable {
     let // @internal (undocumented)
     variable: object[];
 }
 
 // @public
-declare class ReexportedClass {
+export class ReexportedClass {
     // (undocumented)
     getSelfReference(): ReexportedClass;
     // (undocumented)
@@ -156,30 +156,29 @@ declare class ReexportedClass {
 }
 
 // @public (undocumented)
-declare class ReferenceLibDirective extends Intl.PluralRules {
+export class ReferenceLibDirective extends Intl.PluralRules {
 }
 
 // @public (undocumented)
-declare enum RegularEnum {
+export enum RegularEnum {
     One = 1,
     Two = 2,
     Zero = 0
 }
 
 // @public
-declare class TypeReferencesInAedoc {
+export class TypeReferencesInAedoc {
     getValue(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
-    // (undocumented)
     getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
     // (undocumented)
     getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
 }
 
 // @alpha (undocumented)
-declare const VARIABLE: string;
+export const VARIABLE: string;
 
 // @public
-declare function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
+export function virtual(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<any>): void;
 
 
 ```

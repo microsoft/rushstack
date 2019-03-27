@@ -5,7 +5,7 @@
 ```ts
 
 // @public (undocumented)
-declare class A {
+export class A {
 }
 
 

@@ -10,7 +10,7 @@ import { ToolPaths } from './ToolPaths';
 import { RushStackCompilerBase } from './RushStackCompilerBase';
 
 /**
- * @beta
+ * @public
  */
 export type WriteFileIssueFunction = (
   filePath: string,
