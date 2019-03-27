@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-documenter",
-      "comment": "Fix #1065: rendering of type unions in tables.",
+      "comment": "Fix an issue with type unions rendering in markdown tables (addresses #1065)",
       "type": "patch"
     }
   ],
