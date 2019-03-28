@@ -67,7 +67,13 @@ export function runScenarios(buildConfigPath: string): void {
 
       "messages": {
         "extractorMessageReporting": {
+          // For test purposes, write these warnings into .api.md
+          // TODO: Capture the full list of warnings in the tracked test output file
           "ae-cyclic-inherit-doc": {
+            "logLevel": "warning",
+            "addToApiReviewFile": true
+          },
+          "ae-unresolved-link": {
             "logLevel": "warning",
             "addToApiReviewFile": true
           }
