@@ -8,10 +8,11 @@ import { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
-import { AedocDefinitions } from '@microsoft/api-extractor-model';
+import { AedocDefinitions, ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
 import { ResolverFailure } from '../analyzer/AstReferenceResolver';
+import { SymbolMetadata } from '../collector/SymbolMetadata';
 
 export class DocCommentEnhancer {
   private readonly _collector: Collector;
@@ -72,6 +73,9 @@ export class DocCommentEnhancer {
       // will auto-generate one.
       metadata.needsDocumentation = false;
 
+      // The class that contains this constructor
+      const classDeclaration: AstDeclaration = astDeclaration.parent!;
+
       const configuration: tsdoc.TSDocConfiguration = AedocDefinitions.tsdocConfiguration;
 
       if (!metadata.tsdocComment) {
@@ -83,10 +87,48 @@ export class DocCommentEnhancer {
           new tsdoc.DocPlainText({ configuration, text: 'Constructs a new instance of the ' }),
           new tsdoc.DocCodeSpan({
             configuration,
-            code: astDeclaration.astSymbol.parentAstSymbol!.localName
+            code: classDeclaration.astSymbol.localName
           }),
           new tsdoc.DocPlainText({ configuration, text: ' class' })
         ]);
+      }
+
+      const symbolMetadata: SymbolMetadata = this._collector.fetchMetadata(astDeclaration.astSymbol);
+
+      if (symbolMetadata.releaseTag === ReleaseTag.Internal) {
+        // If the constructor is marked as internal, then add a boilerplate notice for the containing class
+
+        const classMetadata: DeclarationMetadata = this._collector.fetchMetadata(classDeclaration);
+
+        if (!classMetadata.tsdocComment) {
+          classMetadata.tsdocComment = new tsdoc.DocComment({ configuration });
+        }
+
+        if (classMetadata.tsdocComment.remarksBlock === undefined) {
+          classMetadata.tsdocComment.remarksBlock = new tsdoc.DocBlock({
+            configuration,
+            blockTag: new tsdoc.DocBlockTag({
+              configuration,
+              tagName: tsdoc.StandardTags.remarks.tagName
+            })
+          });
+        }
+
+        classMetadata.tsdocComment.remarksBlock.content.appendNode(
+          new tsdoc.DocParagraph({ configuration}, [
+            new tsdoc.DocPlainText({
+              configuration,
+              text: `The constructor for this class is marked as internal. Third-party code should not`
+                + ` call the constructor directly or create subclasses that extend the `
+            }),
+            new tsdoc.DocCodeSpan({
+              configuration,
+              code: classDeclaration.astSymbol.localName
+            }),
+            new tsdoc.DocPlainText({ configuration, text: ' class.' })
+          ])
+        );
+
       }
 
     } else if (metadata.tsdocComment) {

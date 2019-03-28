@@ -98,7 +98,8 @@ export interface IDocInterface4 {
  */
 export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
   /**
-   * The class constructor
+   * An internal class constructor.
+   * @internal
    */
   public constructor(name: string) {
     super();
