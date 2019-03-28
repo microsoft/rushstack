@@ -135,7 +135,7 @@
       "properties": {
         "parameterKind": {
           "title": "Parameter Kind",
-          "description": "Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\"",
+          "description": "Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\" or \"string\"",
           "type": "string",
           "enum": [ "flag", "choice", "string" ]
         },
