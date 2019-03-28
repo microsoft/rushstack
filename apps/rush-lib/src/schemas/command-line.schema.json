@@ -137,7 +137,7 @@
           "title": "Parameter Kind",
           "description": "Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\"",
           "type": "string",
-          "enum": [ "flag", "choice" ]
+          "enum": [ "flag", "choice", "string" ]
         },
         "longName": {
           "title": "Long Name",
@@ -191,6 +191,41 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "associatedCommands": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+    "stringParameter": {
+      "title": "String Parameter",
+      "description": "A custom command-line parameter whose value is intepreted as a string",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["argumentName"],
+          "properties": {
+            "parameterKind": {
+              "enum": [ "string" ]
+            },
+            "argumentName": {
+              "title": "Argument Name",
+              "description": "The name of the argument for this parameter.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "associatedCommands": { "$ref": "#/definitions/anything" },
+            "argumentName": { "$ref": "#/definitions/anything" }
           }
         }
       ]
@@ -287,7 +322,8 @@
         "type": "object",
         "oneOf": [
           { "$ref": "#/definitions/flagParameter" },
-          { "$ref": "#/definitions/choiceParameter" }
+          { "$ref": "#/definitions/choiceParameter" },
+          { "$ref": "#/definitions/stringParameter" }
         ]
       }
     }
