@@ -55,7 +55,7 @@ export class DocCommentEnhancer {
     metadata.docCommentEnhancerVisitorState = VisitorState.Visiting;
 
     if (metadata.tsdocComment && metadata.tsdocComment.inheritDocTag) {
-      this._analyzeInheritDoc(astDeclaration, metadata.tsdocComment, metadata.tsdocComment.inheritDocTag);
+      this._applyInheritDoc(astDeclaration, metadata.tsdocComment, metadata.tsdocComment.inheritDocTag);
     }
 
     this._analyzeNeedsDocumentation(astDeclaration, metadata);
@@ -151,7 +151,7 @@ export class DocCommentEnhancer {
     if (node instanceof tsdoc.DocLinkTag) {
       if (node.codeDestination) {
 
-        // Is it referring to the working package?  If so, we don't do any link validation, because
+        // Is it referring to the working package?  If not, we don't do any link validation, because
         // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
         // TODO: We need to come back and fix this.
         if (node.codeDestination.packageName === undefined
@@ -177,13 +177,21 @@ export class DocCommentEnhancer {
   /**
    * Follow an `{@inheritDoc ___}` reference and copy the content that we find in the referenced comment.
    */
-  private _analyzeInheritDoc(astDeclaration: AstDeclaration, docComment: tsdoc.DocComment,
+  private _applyInheritDoc(astDeclaration: AstDeclaration, docComment: tsdoc.DocComment,
     inheritDocTag: tsdoc.DocInheritDocTag): void {
 
     if (!inheritDocTag.declarationReference) {
       this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedInheritDocBase,
         'The `@inheritDoc` tag needs a TSDoc declaration reference; signature matching is not supported yet',
         astDeclaration);
+      return;
+    }
+
+    // Is it referring to the working package?  If not, skip this inheritDoc tag, because
+    // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
+    // As a workaround, this tag will get handled later by api-documenter.
+    if (inheritDocTag.declarationReference.packageName === undefined
+      || inheritDocTag.declarationReference.packageName === this._collector.workingPackage.name) {
       return;
     }
 
