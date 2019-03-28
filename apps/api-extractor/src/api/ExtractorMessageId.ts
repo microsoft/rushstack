@@ -75,7 +75,12 @@ export const enum ExtractorMessageId {
   /**
    * "The `@inheritDoc` tag for ____ refers to its own declaration".
    */
-  CyclicInheritDoc = 'ae-cyclic-inherit-doc'
+  CyclicInheritDoc = 'ae-cyclic-inherit-doc',
+
+  /**
+   * "The `@link` reference could not be resolved".
+   */
+  UnresolvedLink = 'ae-unresolved-link'
 }
 
 export const allExtractorMessageIds: Set<string> = new Set<string>([
@@ -90,5 +95,6 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-preapproved-bad-release-tag',
   'ae-unresolved-inheritdoc-reference',
   'ae-unresolved-inheritdoc-base',
-  'ae-cyclic-inherit-doc'
+  'ae-cyclic-inherit-doc',
+  'ae-unresolved-link'
 ]);

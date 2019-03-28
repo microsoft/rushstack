@@ -59,6 +59,8 @@ export class DocCommentEnhancer {
 
     this._analyzeNeedsDocumentation(astDeclaration, metadata);
 
+    this._checkForBrokenLinks(astDeclaration, metadata);
+
     metadata.docCommentEnhancerVisitorState = VisitorState.Visited;
   }
 
@@ -93,6 +95,40 @@ export class DocCommentEnhancer {
         metadata.tsdocComment.summarySection, 10);
     } else {
       metadata.needsDocumentation = true;
+    }
+  }
+
+  private _checkForBrokenLinks(astDeclaration: AstDeclaration, metadata: DeclarationMetadata): void {
+    if (!metadata.tsdocComment) {
+      return;
+    }
+    this._checkForBrokenLinksRecursive(astDeclaration, metadata.tsdocComment);
+  }
+
+  private _checkForBrokenLinksRecursive(astDeclaration: AstDeclaration, node: tsdoc.DocNode): void {
+    if (node instanceof tsdoc.DocLinkTag) {
+      if (node.codeDestination) {
+
+        // Is it referring to the working package?  If so, we don't do any link validation, because
+        // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
+        // TODO: We need to come back and fix this.
+        if (node.codeDestination.packageName === undefined
+          || node.codeDestination.packageName === this._collector.workingPackage.name) {
+
+          const referencedAstDeclaration: AstDeclaration | ResolverFailure = this._collector.astReferenceResolver
+            .resolve(node.codeDestination);
+
+          if (referencedAstDeclaration instanceof ResolverFailure) {
+            this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedLink,
+              'The @link reference could not be resolved: ' + referencedAstDeclaration.reason,
+              astDeclaration);
+          }
+
+        }
+      }
+    }
+    for (const childNode of node.getChildNodes()) {
+      this._checkForBrokenLinksRecursive(astDeclaration, childNode);
     }
   }
 
