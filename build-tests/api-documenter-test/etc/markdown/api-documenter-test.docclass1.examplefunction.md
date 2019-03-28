@@ -14,8 +14,8 @@ exampleFunction(a: string, b: string): string;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  a | `string` | the first string |
-|  b | `string` | the second string |
+|  a | <code>string</code> | the first string |
+|  b | <code>string</code> | the second string |
 
 <b>Returns:</b>
 
