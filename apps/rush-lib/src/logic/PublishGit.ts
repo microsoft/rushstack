@@ -55,6 +55,8 @@ export class PublishGit {
     PublishUtilities.execCommand(
       !!this._targetBranch,
       'git',
+      // We append "--no-verify" to prevent Git hooks from running.  For example, people may
+      // want to invoke "rush change -v" as a pre-push hook.
       ['push', 'origin', 'HEAD:' + branchName, '--follow-tags', '--verbose', '--no-verify']);
   }
 }
