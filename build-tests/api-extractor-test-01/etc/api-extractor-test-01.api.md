@@ -138,6 +138,10 @@ export interface IMergedInterfaceReferencee {
 }
 
 // @public
+export interface _InternalExportMissingReleaseTag {
+}
+
+// @public
 export interface ISimpleInterface {
 }
 

@@ -114,3 +114,6 @@ export { TypeReferencesInAedoc } from './TypeReferencesInAedoc';
 export { ReferenceLibDirective } from './ReferenceLibDirective';
 
 export { VARIABLE, NamespaceContainingVariable } from './variableDeclarations';
+
+export { InternalExportMissingReleaseTag as _InternalExportMissingReleaseTag } from './InternalExportMissingReleaseTag';
+

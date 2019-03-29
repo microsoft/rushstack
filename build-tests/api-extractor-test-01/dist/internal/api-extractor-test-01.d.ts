@@ -248,6 +248,12 @@ export declare interface IMergedInterfaceReferencee {
 }
 
 /**
+ * Missing release tag
+ */
+export declare interface _InternalExportMissingReleaseTag {
+}
+
+/**
  * A simple, normal definition
  * @public
  */

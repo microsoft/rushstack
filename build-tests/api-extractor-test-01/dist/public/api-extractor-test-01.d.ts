@@ -221,6 +221,12 @@ export declare interface IInterfaceAsDefaultExport {
 /* Excluded from this release type: IMergedInterfaceReferencee */
 
 /**
+ * Missing release tag
+ */
+export declare interface _InternalExportMissingReleaseTag {
+}
+
+/**
  * A simple, normal definition
  * @public
  */
