@@ -49,7 +49,6 @@ export class PublishAction extends BaseRushAction {
 
   private _releaseFolder: CommandLineStringParameter;
   private _pack: CommandLineFlagParameter;
-  private _releaseType: CommandLineStringParameter;
 
   private _hotfixTagOverride: string;
 
@@ -146,13 +145,6 @@ export class PublishAction extends BaseRushAction {
       `This parameter is used with --pack parameter to provide customized location for the tarballs instead of ` +
       `the default value. `
     });
-    this._releaseType = this.defineStringParameter({
-      parameterLongName: '--release-type',
-      argumentName: 'RELEASE_TYPE',
-      description:
-      `This parameter is used with --pack parameter to provide release type for the generated tarballs. ` +
-      `The default value is 'internal'. The valid values include 'public', 'beta', 'internal'`
-    });
     // End of NPM pack tarball related parameters
 
     this._includeAll = this.defineFlagParameter({
@@ -231,9 +223,6 @@ export class PublishAction extends BaseRushAction {
     }
     if (this._releaseFolder.value && !this._pack.value) {
       throw new Error(`--release-folder can only be used with --pack`);
-    }
-    if (this._releaseType.value && !this._pack.value) {
-      throw new Error(`--release-type can only be used with --pack`);
     }
     if (this._registryUrl.value && this._pack.value) {
       throw new Error(`--registry cannot be used with --pack`);
@@ -405,14 +394,6 @@ export class PublishAction extends BaseRushAction {
     const args: string[] = ['pack'];
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
 
-    if (this._releaseType.value && this._releaseType.value !== 'internal') {
-      // a temporary workaround. Will replace it with npm or rush hooks.
-      if (this._releaseType.value !== 'public' && this._releaseType.value !== 'beta') {
-        throw new Error(`Invalid release type "${this._releaseType.value}"`);
-      }
-      this._updateAPIFile(packageName, project);
-    }
-
     PublishUtilities.execCommand(
       !!this._publish.value,
       this.rushConfiguration.packageManagerToolFilename,
@@ -433,44 +414,6 @@ export class PublishAction extends BaseRushAction {
         destinationPath: path.join(destFolder, tarballName),
         overwrite: true
       });
-    }
-  }
-
-  private _updateAPIFile(packageName: string, project: RushConfigurationProject): void {
-    const apiConfigPath: string = path.join(project.projectFolder,
-      'config', 'api-extractor.json');
-
-    if (FileSystem.exists(apiConfigPath)) {
-      // Read api-extractor.json file
-      const apiConfig: {} = JsonFile.load(apiConfigPath);
-      /* tslint:disable:no-string-literal */
-      if (!!apiConfig['generateDtsRollup'] &&  !!apiConfig['dtsRollupTrimming']) {
-        // copy all files from publishFolderForPublic or publishFolderForBeta to publishFolderForInternal
-        const toApiFolder: string = !!apiConfig['publishFolderForInternal'] ?
-          apiConfig['publishFolderForInternal'] : './dist';
-        let fromApiFolder: string | undefined = undefined;
-        if (this._releaseType.value === 'public') {
-          fromApiFolder = !!apiConfig['publishFolderForPublic'] ?
-            apiConfig['publishFolderForPublic'] : './dist/public';
-        } else if (this._releaseType.value === 'beta') {
-          fromApiFolder = !!apiConfig['publishFolderForBeta'] ? apiConfig['publishFolderForBeta'] : './dist/beta';
-        }
-
-        if (fromApiFolder) {
-          const fromApiFolderPath: string = path.join(project.projectFolder, fromApiFolder);
-          const toApiFolderPath: string = path.join(project.projectFolder, toApiFolder);
-          if (FileSystem.exists(fromApiFolderPath) && FileSystem.exists(toApiFolderPath)) {
-            FileSystem.readFolder(fromApiFolderPath).forEach(fileName => {
-              FileSystem.copyFile({
-                sourcePath: path.join(fromApiFolderPath, fileName),
-                destinationPath: path.join(toApiFolderPath, fileName)
-              });
-              console.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
-            });
-          }
-        }
-      }
-      /* tslint:enable:no-string-literal */
     }
   }
 
