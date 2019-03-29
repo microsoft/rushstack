@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 26 Mar 2019 20:54:18 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Mar 2019 19:14:27 GMT and should not be manually modified.
+
+## 7.0.34
+Thu, 28 Mar 2019 19:14:27 GMT
+
+### Patches
+
+- Validate `@link` tags and report a warning if the link cannot be resolved
 
 ## 7.0.33
 Tue, 26 Mar 2019 20:54:18 GMT
