@@ -9,7 +9,7 @@ import {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@microsoft/ts-command-line';
-import { JsonFile, FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
