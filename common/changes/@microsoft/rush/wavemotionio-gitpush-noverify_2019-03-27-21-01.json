@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Adds --no-verify to git push during a rush publish",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "wavemotionio@gmail.com"
+}

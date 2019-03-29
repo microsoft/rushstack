@@ -38,7 +38,7 @@ export type CommandJson = IBulkCommandJson | IGlobalCommandJson;
  * "baseParameter" from command-line.schema.json
  */
 export interface IBaseParameterJson {
-  parameterKind: 'flag' | 'choice';
+  parameterKind: 'flag' | 'choice' | 'string';
   longName: string;
   shortName?: string;
   description: string;
@@ -69,7 +69,12 @@ export interface IChoiceParameterJson extends IBaseParameterJson {
   defaultValue?: string;
 }
 
-export type ParameterJson = IFlagParameterJson | IChoiceParameterJson;
+export interface IStringParameterJson extends IBaseParameterJson {
+  parameterKind: 'string';
+  argumentName: string;
+}
+
+export type ParameterJson = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
 
 /**
  * Interfaces for the file format described by command-line.schema.json

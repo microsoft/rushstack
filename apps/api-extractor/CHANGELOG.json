@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.34",
+      "tag": "@microsoft/api-extractor_v7.0.34",
+      "date": "Thu, 28 Mar 2019 19:14:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Validate `@link` tags and report a warning if the link cannot be resolved"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.33",
       "tag": "@microsoft/api-extractor_v7.0.33",
       "date": "Tue, 26 Mar 2019 20:54:18 GMT",

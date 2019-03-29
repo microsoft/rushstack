@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support for string parameter for custom commands.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "kinhln@microsoft.com"
+}
