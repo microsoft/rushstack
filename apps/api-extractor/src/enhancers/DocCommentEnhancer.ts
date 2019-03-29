@@ -97,7 +97,6 @@ export class DocCommentEnhancer {
 
       if (symbolMetadata.releaseTag === ReleaseTag.Internal) {
         // If the constructor is marked as internal, then add a boilerplate notice for the containing class
-
         const classMetadata: DeclarationMetadata = this._collector.fetchMetadata(classDeclaration);
 
         if (!classMetadata.tsdocComment) {
@@ -153,7 +152,7 @@ export class DocCommentEnhancer {
 
         // Is it referring to the working package?  If not, we don't do any link validation, because
         // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
-        // TODO: We need to come back and fix this.
+        // Tracked by:  https://github.com/Microsoft/web-build-tools/issues/1195
         if (node.codeDestination.packageName === undefined
           || node.codeDestination.packageName === this._collector.workingPackage.name) {
 
@@ -187,11 +186,13 @@ export class DocCommentEnhancer {
       return;
     }
 
-    // Is it referring to the working package?  If not, skip this inheritDoc tag, because
-    // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
-    // As a workaround, this tag will get handled later by api-documenter.
-    if (inheritDocTag.declarationReference.packageName === undefined
-      || inheritDocTag.declarationReference.packageName === this._collector.workingPackage.name) {
+    // Is it referring to the working package?
+    if (!(inheritDocTag.declarationReference.packageName === undefined
+      || inheritDocTag.declarationReference.packageName === this._collector.workingPackage.name)) {
+
+      // It's referencing an external package, so skip this inheritDoc tag, since AstReferenceResolver doesn't
+      // support it yet.  As a workaround, this tag will get handled later by api-documenter.
+      // Tracked by:  https://github.com/Microsoft/web-build-tools/issues/1195
       return;
     }
 

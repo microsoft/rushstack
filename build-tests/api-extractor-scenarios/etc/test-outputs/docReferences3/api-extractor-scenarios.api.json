@@ -184,7 +184,7 @@
         {
           "kind": "Function",
           "canonicalReference": "(succeedWithExternalReference:0)",
-          "docComment": "/**\n * NOTE: The broken link checker currently is not able to validate references to external packages. We need to fix that. {@link nonexistent#nonexistent}\n *\n * @public\n */\n",
+          "docComment": "/**\n * NOTE: The broken link checker currently is not able to validate references to external packages. Tracked by: https://github.com/Microsoft/web-build-tools/issues/1195 {@link nonexistent#nonexistent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
