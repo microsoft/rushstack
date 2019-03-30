@@ -177,11 +177,12 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
           context.writer.write(encodedLinkText);
           context.writer.write(`](${filename!})`);
         } else {
-          console.log(colors.red('WARNING: Unable to determine link text'));
+          console.log(colors.yellow('WARNING: Unable to determine link text'));
         }
       }
     } else if (result.errorMessage) {
-      console.log(colors.red('WARNING: Unable to resolve reference: ' + result.errorMessage));
+      console.log(colors.yellow(`WARNING: Unable to resolve reference "${docLinkTag.codeDestination!.emitAsTsdoc()}": `
+        + result.errorMessage));
     }
   }
 

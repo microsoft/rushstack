@@ -526,7 +526,7 @@ export class Collector {
 
               this.messageRouter.addAnalyzerIssue(
                 ExtractorMessageId.MissingReleaseTag,
-                `"${entity.nameForEmit}" is exported by the package, but it is missing `
+                `"${entity.astEntity.localName}" is exported by the package, but it is missing `
                 + `a release tag (@alpha, @beta, @public, or @internal)`,
                 astSymbol
               );

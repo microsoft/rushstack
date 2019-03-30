@@ -13,6 +13,7 @@ export class DocBaseClass {
 
 // @public
 export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
+    // @internal
     constructor(name: string);
     // @deprecated (undocumented)
     deprecatedExample(): void;
