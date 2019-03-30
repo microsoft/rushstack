@@ -201,8 +201,12 @@ export class PnpmOptionsConfiguration {
     // 
     // @internal
     constructor(json: IPnpmOptionsJson);
+    readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
 }
+
+// @public
+export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 // @public
 export class Rush {

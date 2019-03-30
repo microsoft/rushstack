@@ -1134,6 +1134,8 @@ export class InstallManager {
       if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
         args.push('--strict-peer-dependencies');
       }
+
+      args.push('--resolution-strategy', this._rushConfiguration.pnpmOptions.resolutionStrategy);
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');
       args.push('--cache-folder', this._rushConfiguration.yarnCacheFolder);

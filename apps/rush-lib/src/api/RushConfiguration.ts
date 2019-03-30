@@ -81,6 +81,7 @@ export interface IRushRepositoryJson {
  */
 export interface IPnpmOptionsJson {
   strictPeerDependencies?: boolean;
+  resolutionStrategy?: ResolutionStrategy;
 }
 
 /**
@@ -161,9 +162,18 @@ export class PnpmOptionsConfiguration {
    */
   public readonly strictPeerDependencies: boolean;
 
+  /**
+   * The resolution strategy that will be used by PNPM.
+   *
+   * The default value is "fewer-dependencies" i.e. PNPM will prefer package versions
+   * that have already been resolved previously.
+   */
+  public readonly resolutionStrategy: ResolutionStrategy;
+
   /** @internal */
   public constructor(json: IPnpmOptionsJson) {
     this.strictPeerDependencies = !!json.strictPeerDependencies;
+    this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
   }
 }
 
@@ -213,6 +223,12 @@ export interface ITryFindRushJsonLocationOptions {
  * @public
  */
 export type PackageManager = 'pnpm' | 'npm' | 'yarn';
+
+/**
+ * This represents the available PNPM resolution strategies as a string
+ * @public
+ */
+export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 /**
  * This represents the Rush configuration for a repository, based on the "rush.json"
