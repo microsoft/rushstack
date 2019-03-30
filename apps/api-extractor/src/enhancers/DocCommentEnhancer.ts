@@ -114,7 +114,7 @@ export class DocCommentEnhancer {
         }
 
         classMetadata.tsdocComment.remarksBlock.content.appendNode(
-          new tsdoc.DocParagraph({ configuration}, [
+          new tsdoc.DocParagraph({ configuration }, [
             new tsdoc.DocPlainText({
               configuration,
               text: `The constructor for this class is marked as internal. Third-party code should not`
