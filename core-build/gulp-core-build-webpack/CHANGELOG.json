@@ -2,6 +2,24 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "3.4.88",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.88",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.23` to `3.9.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.19` to `0.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.46` to `6.0.47`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.87",
       "tag": "@microsoft/gulp-core-build-webpack_v3.4.87",
       "date": "Thu, 28 Mar 2019 19:14:27 GMT",

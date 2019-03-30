@@ -2,6 +2,26 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.0.43",
+      "tag": "@microsoft/api-documenter_v7.0.43",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add limited support for resolving @inheritDoc references to external packages by postprocessing them in api-documenter"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.19` to `0.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.46` to `6.0.47`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.42",
       "tag": "@microsoft/api-documenter_v7.0.42",
       "date": "Thu, 28 Mar 2019 19:14:27 GMT",

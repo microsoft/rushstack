@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 28 Mar 2019 19:14:27 GMT and should not be manually modified.
+This log was last generated on Sat, 30 Mar 2019 22:27:16 GMT and should not be manually modified.
+
+## 7.0.35
+Sat, 30 Mar 2019 22:27:16 GMT
+
+### Patches
+
+- Reintroduce the generated documentation notice for internal constructors
+- Add limited support for resolving @inheritDoc references to external packages by postprocessing them in api-documenter
 
 ## 7.0.34
 Thu, 28 Mar 2019 19:14:27 GMT

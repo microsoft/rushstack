@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.35",
+      "tag": "@microsoft/api-extractor_v7.0.35",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reintroduce the generated documentation notice for internal constructors"
+          },
+          {
+            "comment": "Add limited support for resolving @inheritDoc references to external packages by postprocessing them in api-documenter"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.34",
       "tag": "@microsoft/api-extractor_v7.0.34",
       "date": "Thu, 28 Mar 2019 19:14:27 GMT",

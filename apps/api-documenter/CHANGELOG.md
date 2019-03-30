@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 28 Mar 2019 19:14:27 GMT and should not be manually modified.
+This log was last generated on Sat, 30 Mar 2019 22:27:16 GMT and should not be manually modified.
+
+## 7.0.43
+Sat, 30 Mar 2019 22:27:16 GMT
+
+### Patches
+
+- Add limited support for resolving @inheritDoc references to external packages by postprocessing them in api-documenter
 
 ## 7.0.42
 Thu, 28 Mar 2019 19:14:27 GMT
