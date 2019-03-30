@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import * as tsdoc from '@microsoft/tsdoc';
+import * as colors from 'colors';
 
 import {
   CommandLineAction,
@@ -82,8 +83,8 @@ export abstract class BaseAction extends CommandLineAction {
             = apiModel.resolveDeclarationReference(inheritDocTag.declarationReference, apiItem);
 
           if (result.errorMessage) {
-            console.log(`Warning: Unresolved @inheritDoc tag for ${apiItem.displayName}: `
-              + result.errorMessage);
+            console.log(colors.yellow(`Warning: Unresolved @inheritDoc tag for ${apiItem.displayName}: `
+              + result.errorMessage));
           } else {
             if (result.resolvedApiItem instanceof ApiDocumentedItem
               && result.resolvedApiItem.tsdocComment
