@@ -1,45 +1,34 @@
 {
-  // ("compiler" is required)
+  // ("mainEntryPointFile" is required)
 
-  "project": {
-    // ("entryPointSourceFile" is required)
+  "compiler": {
+    "rootFolder": "<lookup>",
+    "skipLibCheck": false
   },
 
-  "policies": {
-    "namespaceSupport": "conservative"
-  },
-
-  "validationRules": {
-    "missingReleaseTags": "error"
-  },
-
-  "apiReviewFile": {
-    "enabled": true,
-    "apiReviewFolder": "./etc",
+  "apiReport": {
+    // ("enabled" is required)
+    "reportFileName": "<packageBaseName>.api.md",
+    "reportFolder": "./etc",
     "tempFolder": "./temp"
   },
 
-  "apiJsonFile": {
-    "enabled": true,
-    "outputFolder": "./dist"
+  "docModel": {
+    // ("enabled" is required)
+    "apiJsonFilePath": "./temp/<packageBaseName>.api.json"
   },
 
   "dtsRollup": {
-    "enabled": false,
-    "trimming": false,
+    // ("enabled" is required)
 
-    "publishFolder": "./dist",
-
-    "publishFolderForInternal": "./dist/internal",
-    "publishFolderForBeta": "./dist/beta",
-    "publishFolderForPublic": "./dist/public",
-
-    "mainDtsRollupPath": ""
+    "untrimmedFilePath": "./dist/<packageBaseName>.d.ts",
+    "betaTrimmedFilePath": "",
+    "publicTrimmedFilePath": ""
   },
 
   "tsdocMetadata": {
     "enabled": true,
-    "tsdocMetadataPath": ""
+    "tsdocMetadataFilePath": "<lookup>"
   },
 
   "messages": {
@@ -80,6 +69,5 @@
     }
   },
 
-  "skipLibCheck": false,
   "testMode": false
 }

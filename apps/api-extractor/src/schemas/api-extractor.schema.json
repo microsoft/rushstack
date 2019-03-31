@@ -9,119 +9,75 @@
     },
 
     "extends": {
-      "description": "Optional field. Path to json config file from which config should extend",
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "mainEntryPointFile": {
+      "description": "Specifies the .d.ts file to be used as the starting point for analysis. API Extractor analyzes the symbols exported by this module. The path is resolved relative to the \"rootFolder\" location.",
       "type": "string"
     },
 
     "compiler": {
-      "description": "Determines how the TypeScript compiler will be invoked. The compiler.configType selects the type of configuration. Different options are available according to the configuration type.",
-      "type": "object",
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "configType": {
-              "description": "configType=tsconfig indicates that the compiler settings will be taken from a tsconfig.json file",
-              "type": "string",
-              "enum": [ "tsconfig" ]
-            },
-            "rootFolder": {
-              "description": "The root folder for the project. This folder typically contains the tsconfig.json and package.json config files.",
-              "type": "string"
-            },
-            "overrideTsconfig": {
-              "description": "Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema: http://json.schemastore.org/tsconfig If omitted, then the tsconfig.json file will be read.",
-              "type": "object"
-            }
-          },
-          "required": [ "configType", "rootFolder" ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "configType": {
-              "description": "configType=runtime indicates that the compiler settings will be provided by a tool chain via a runtime API",
-              "type": "string",
-              "enum": [ "runtime" ]
-            }
-          },
-          "required": [ "configType" ],
-          "additionalProperties": false
-        }
-      ]
-    },
-
-    "project": {
-      "description": "Describes a specific project that will be analyzed.",
+      "description": "Determines how the TypeScript compiler engine will be invoked by API Extractor.",
       "type": "object",
       "properties": {
-        "entryPointSourceFile": {
-          "description": "Specifies the TypeScript source file that will be treated as the entry point for compilation.",
+        "rootFolder": {
+          "description": "The root folder for the project. This folder typically contains the tsconfig.json and package.json config files. The rootFolder path is resolved relative to the folder containing api-extractor.json. The default value for rootFolder is the token \"<lookup>\", which means the folder is determined by traversing parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error will be reported.",
           "type": "string"
-        }
+        },
+        "overrideTsconfig": {
+          "description": "Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema: http://json.schemastore.org/tsconfig If omitted, then the tsconfig.json file will be read from the rootFolder.",
+          "type": "object"
+        },
+        "skipLibCheck": {
+          "description": "This option causes the compiler to be invoked with the --skipLibCheck option. This option is not recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it may be required when dependencies contain declarations that are incompatible with the TypeScript engine that API Extractor uses for its analysis.  Where possible, the underlying issue should be fixed rather than relying on skipLibCheck.",
+          "type": "boolean"
+        },
       },
-      "required": [ "entryPointSourceFile" ],
+      "required": [ ],
       "additionalProperties": false
     },
 
-    "policies": {
-      "description": "These policies determine how API Extractor validates various best practices for API design.",
-      "type": "object",
-      "properties": {
-        "namespaceSupport": {
-          "description": "Controls how API Extractor treats the TypeScript namespace keyword:\n\nconservative - (the default) namespaces may only be used to represent tables of constants\n\npermissive - arbitrary nesting of namespaces is allowed",
-          "type": "string",
-          "enum": [ "conservative", "permissive" ]
-        }
-      },
-      "additionalProperties": false
-    },
-
-    "validationRules": {
-      "description": "Configuration for various validation checks that ensure good API design",
-      "type": "object",
-      "properties": {
-        "missingReleaseTags": {
-          "description": "This rule checks for top-level API items that are missing a release tag such as \"@beta\" or \"@internal\". If \"allow\" is chosen, then missing release tags will be assumed to be \"@public\". The default policy is \"error\".",
-          "type": "string",
-          "enum": [ "error", "allow" ]
-        }
-      },
-      "additionalProperties": false
-    },
-
-    "apiReviewFile": {
-      "description": "Configures how the API review files (*.api.md) will be generated.",
+    "apiReport": {
+      "description": "Configures how the API report file (*.api.md) will be generated.",
       "type": "object",
       "properties": {
         "enabled": {
-          "description": "Whether to generate review files at all.  The default is true.",
+          "description": "Whether to generate an API report.",
           "type": "boolean"
         },
-        "apiReviewFolder": {
-          "description": "The file path of the folder containing API review file, relative to the project folder. The default value is \"./etc\".",
+
+        "reportFileName": {
+          "description": "The filename for the API report files.  It will be combined with \"trackedFolder\" or \"tempFolder\" to produce a full output filename. The file extension should be \".api.md\", and the string should not contain a path separator such as \"\\\" or \"/\".",
           "type": "string"
         },
+
+        "reportFolder": {
+          "description": "Specifies the folder where the API report file is written.  The file name portion is determined by the \"reportFileName\" setting. The API report file is normally tracked by Git.  Changes to it can be used to trigger a branch policy, e.g. for an API review. The path is resolved relative to the \"rootFolder\" location.",
+          "type": "string"
+        },
+
         "tempFolder": {
-          "description": "The *.api.md report is saved into this folder.  During a production build, the temporary file will be compared with the file in apiReviewFolder; if there are differences, and error will be reported. The default value is \"./temp\".",
+          "description": "Specifies the folder where the temporary report file is written.  The file name portion is determined by the \"reportFileName\" setting. fter the temporary file is written to disk, it is compared with the file in the \"reportFolder\". If they are different, a production build will fail. The path is resolved relative to the \"rootFolder\" location.",
           "type": "string"
         }
+
       },
       "required": [ "enabled" ],
       "additionalProperties": false
     },
 
-    "apiJsonFile": {
-      "description": "Configures how the API JSON files (*.api.json) will be generated.",
+    "docModel": {
+      "description": "Configures how the doc model file (*.api.json) will be generated.",
       "type": "object",
       "properties": {
         "enabled": {
-          "description": "Whether to generate API JSON files at all.  The default is true.",
+          "description": "Whether to generate doc model file.",
           "type": "boolean"
         },
         "outputFolder": {
-          "description": "Specifies where the *.api.json file should be written. The default value is \"./dist\"",
+          "description": "The output path for the doc model file.  The file extension should be \".api.json\". The path is resolved relative to the \"rootFolder\" location.",
           "type": "string"
         }
       },
@@ -130,35 +86,23 @@
     },
 
     "dtsRollup": {
-      "description": "Configures how the *.d.ts rollup files will be generated.",
+      "description": "Configures how the .d.ts rollup file will be generated.",
       "type": "object",
       "properties": {
         "enabled": {
-          "description": "Whether to generate rollup *.d.ts files.  The default is false.",
+          "description": "Whether to generate the .d.ts rollup file.",
           "type": "boolean"
         },
-        "trimming": {
-          "description": "If \"trimming\" is false (the default), then a single *.d.ts rollup file will be generated in the \"publishFolder\".  If \"trimming\" is true, then three separate *.d.ts rollups will be generated in \"publishFolderForInternal\", \"publishFolderForBeta\", and \"publishFolderForPublic\".",
-          "type": "boolean"
-        },
-        "publishFolder": {
-          "description": "This setting is only used if \"trimming\" is false. It indicates the folder where \"npm publish\" will be run.  The default value is \"./dist\".",
+        "untrimmedFilePath": {
+          "description": "Specifies the output path for a .d.ts rollup file to be generated without any trimming. This file will include all declarations that are exported by the main entry point. If the path is an empty string, then this file will not be written. The path is resolved relative to the \"rootFolder\" location.",
           "type": "string"
         },
-        "publishFolderForInternal": {
-          "description": "This setting is only used if \"trimming\" is true. It indicates the folder where \"npm publish\" will be run for an internal release. The default value is \"./dist/internal\". An internal release will contain all definitions that are reachable from the entry point.",
+        "betaTrimmedFilePath": {
+          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for a \"beta\" release. This file will include only declarations that are marked as \"@public\" or \"@beta\". If the path is an empty string, then this file will not be written. The path is resolved relative to the \"rootFolder\" location.",
           "type": "string"
         },
-        "publishFolderForBeta": {
-          "description": "This setting is only used if \"trimming\" is true. It indicates the folder where \"npm publish\" will be run for a beta release. The default value is \"./dist/beta\". A beta release will contain all definitions that are reachable from the entry point, except definitions marked as @alpha or @internal.",
-          "type": "string"
-        },
-        "publishFolderForPublic": {
-          "description": "This setting is only used if \"trimming\" is true. It indicates the folder where \"npm publish\" will be run for a public release. The default value is \"./dist/public\". A public release will contain all definitions that are reachable from the entry point, except definitions marked as @beta, @alpha, or @internal.",
-          "type": "string"
-        },
-        "mainDtsRollupPath": {
-          "description": "Specifies the relative path for the *.d.ts rollup file to be generated for the package's main entry point. The default value is an empty string, which causes the path to be automatically inferred from the \"typings\" field of the project's package.json file. If specified, the value must be a relative path that can be combined with one of the publish folder settings.",
+        "publicTrimmedFilePath": {
+          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for a \"public\" release. This file will include only declarations that are marked as \"@public\". If the path is an empty string, then this file will not be written. The path is resolved relative to the \"rootFolder\" location.",
           "type": "string"
         }
       },
@@ -167,19 +111,19 @@
     },
 
     "tsdocMetadata": {
-      "description": "Configures how the TSDoc metadata file will be generated",
+      "description": "Configures how the tsdoc-metadata.json file will be generated.",
       "type": "object",
       "properties": {
         "enabled": {
-          "description": "Whether to generate the TSDoc metadata file. The default is true.",
+          "description": "Whether to generate the tsdoc-metadata.json file.",
           "type": "boolean"
         },
         "tsdocMetadataPath": {
-          "description": "Specifies where the TSDoc metadata file should be written. The default value is an empty string, which causes the path to be automatically inferred from the \"tsdocMetadata\", \"typings\" or \"main\" fields of the project's package.json. If none of these fields are set, it defaults to \"tsdoc-metadata.json\".",
+          "description": "Specifies where the TSDoc metadata file should be written. The default value is \"<lookup>\", which causes the path to be automatically inferred from the \"tsdocMetadata\", \"typings\" or \"main\" fields of the project's package.json.  If none of these fields are set, the lookup falls back to \"./tsdoc-metadata.json\".",
           "type": "string"
         },
       },
-      "required": [ "enabled" ],
+      "required": [ ],
       "additionalProperties": false
     },
 
@@ -203,16 +147,12 @@
       "additionalProperties": false
     },
 
-    "skipLibCheck": {
-      "description": "This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it may be required when dependencies contain declarations that are incompatible with the TypeScript engine that API Extractor uses for its analysis. If this option is used, it is strongly recommended that broken dependencies be fixed or upgraded.",
-      "type": "boolean"
-    },
     "testMode": {
       "description": "Set to true invoking API Extractor's test harness. When \"testMode\" is true, the \"toolVersion\" field in the .api.json file is assigned an empty string to prevent spurious diffs in output files tracked for tests.",
       "type": "boolean"
     }
   },
-  "required": [ "compiler", "project" ],
+  "required": [ "mainEntryPointFile" ],
   "additionalProperties": false,
 
   "definitions": {

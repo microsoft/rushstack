@@ -12,16 +12,17 @@
   // "extends": "./node_modules/your-tool-chain/include/api-extractor-base.json"
 
   /**
-   * (REQUIRED) Settings that configure the TypeScript compiler engine used by API Extractor to perform the analysis.
+    * (REQUIRED) Specifies the .d.ts file to be used as the starting point for analysis.  API Extractor
+    * analyzes the symbols exported by this module.
+    *
+    * The path is resolved relative to the "rootFolder" location.
+    */
+  // "mainEntryPointFile": "./lib/index.d.ts"
+
+  /**
+   * Determines how the TypeScript compiler engine will be invoked by API Extractor.
    */
   "compiler": {
-    /**
-     * (REQUIRED) For a JSON configuration file file, this value is always "tsconfig".  (When invoking the
-     * API Extractor engine programmatically, you can instead specify "runtime" to provide an already prepared
-     * compiler state.)
-     */
-    "configType": "tsconfig",
-
     /**
      * The root folder for the project.  This folder typically contains the tsconfig.json and package.json
      * config files.
@@ -38,10 +39,22 @@
     // "rootFolder": "",
 
     /**
-     * This option causes the typechecker to be invoked with the --skipLibCheck option. This option is not recommended
+     * Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema:
+     * http://json.schemastore.org/tsconfig
+     *
+     * If omitted, then the tsconfig.json file will instead be read from the rootFolder.
+     *
+     * DEFAULT VALUE: no overrideTsconfig section
+     */
+    // "overrideTsconfig": {
+    //   . . .
+    // }
+
+    /**
+     * This option causes the compiler to be invoked with the --skipLibCheck option. This option is not recommended
      * and may cause API Extractor to produce incomplete or incorrect declarations, but it may be required when
      * dependencies contain declarations that are incompatible with the TypeScript engine that API Extractor uses
-     * for its analysis.  Where possible, broken dependencies should be fixed rather than relying on skipLibCheck.
+     * for its analysis.  Where possible, the underlying issue should be fixed rather than relying on skipLibCheck.
      *
      * DEFAULT VALUE: false
      */
@@ -49,21 +62,11 @@
   },
 
   /**
-    * (REQUIRED) Specifies the .d.ts file to be used as the starting point for analysis.  API Extractor
-    * analyzes the symbols exported by this module.
-    *
-    * The path is resolved relative to the "rootFolder" location.
-    */
-  // "mainEntryPointFile": "./lib/index.d.ts"
-
-  /**
    * Configures how the API report file (*.api.md) will be generated.
    */
   "apiReport": {
     /**
-     * Whether to generate an API report.
-     *
-     * DEFAULT VALUE: true
+     * (REQUIRED) Whether to generate an API report.
      */
     "enabled": true,
 
@@ -109,9 +112,7 @@
    */
   "docModel": {
     /**
-     * Whether to generate doc model file.
-     *
-     * DEFAULT VALUE: true
+     * (REQUIRED) Whether to generate doc model file.
      */
     "enabled": true,
 
@@ -130,9 +131,7 @@
    */
   "dtsRollup": {
     /**
-     * Whether to generate the .d.ts rollup file.
-     *
-     * DEFAULT VALUE: true
+     * (REQUIRED) Whether to generate the .d.ts rollup file.
      */
     "enabled": true,
 
@@ -245,7 +244,7 @@
     },
 
     /**
-     * Configures handling of diagnostic messages reported by API Extractor during its analysis.
+     * Configures handling of messages reported by API Extractor during its analysis.
      *
      * API Extractor message identifiers start with "ae-".  For example: "ae-extra-release-tag"
      *
