@@ -122,7 +122,7 @@
      *
      * DEFAULT VALUE: "./temp/<packageBaseName>.api.json"
      */
-    "apiJsonFilePath": "./temp/<packageBaseName>.api.json"
+    // "apiJsonFilePath": "./temp/<packageBaseName>.api.json"
   },
 
   /**
@@ -146,7 +146,7 @@
      *
      * DEFAULT VALUE: "./dist/<packageBaseName>.d.ts"
      */
-    "untrimmedFilePath": "./dist/<packageBaseName>.d.ts",
+    // "untrimmedFilePath": "./dist/<packageBaseName>.d.ts",
 
     /**
      * Specifies the output path for a .d.ts rollup file to be generated with trimming for a "beta" release.
