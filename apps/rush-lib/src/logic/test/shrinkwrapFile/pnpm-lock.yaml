@@ -30,7 +30,7 @@ packages:
       q: 1.5.3
       '@scope/testDep': example.pkgs.visualstudio.com/@scope/testDep/1.0.0
 registry: 'http://localhost:4873/'
-shrinkwrapVersion: 3
+lockfileVersion: 5
 specifiers:
   '@rush-temp/project1': 'file:./projects/project1.tgz'
   '@rush-temp/project2': 'file:./projects/project2.tgz'

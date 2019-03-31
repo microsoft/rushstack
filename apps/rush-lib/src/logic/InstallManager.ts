@@ -949,7 +949,7 @@ export class InstallManager {
           }
 
           if (options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
-            // Copy (or delete) common\temp\shrinkwrap.yaml --> common\config\rush\shrinkwrap.yaml
+            // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
             this._syncFile(this._rushConfiguration.tempShrinkwrapFilename,
               this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
           } else {
@@ -1119,7 +1119,7 @@ export class InstallManager {
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
 
-      // Ensure that Rush's tarball dependencies get synchronized properly with the shrinkwrap.yaml file.
+      // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
       // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
       args.push('--no-prefer-frozen-shrinkwrap');
 

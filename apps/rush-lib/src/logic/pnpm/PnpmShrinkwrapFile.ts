@@ -27,7 +27,7 @@ interface IPnpmShrinkwrapDependencyYaml {
 }
 
 /**
- * This interface represents the raw shrinkwrap.YAML file
+ * This interface represents the raw pnpm-lock.YAML file
  * Example:
  *  {
  *    "dependencies": {

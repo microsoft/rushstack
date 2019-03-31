@@ -115,7 +115,7 @@ describe('RushConfiguration', () => {
 
     expect(rushConfiguration.packageManager).toEqual('pnpm');
     assertPathProperty('committedShrinkwrapFilename',
-      rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/shrinkwrap.yaml');
+      rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/pnpm-lock.yaml');
     assertPathProperty('commonFolder',
       rushConfiguration.commonFolder, './repo/common');
     assertPathProperty('commonRushConfigFolder',

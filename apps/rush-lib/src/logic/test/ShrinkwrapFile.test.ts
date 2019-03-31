@@ -33,7 +33,7 @@ describe('npm ShrinkwrapFile', () => {
 
 describe('pnpm ShrinkwrapFile', () => {
 const filename: string = path.resolve(path.join(
-  __dirname, '../../../src/logic/test/shrinkwrapFile/shrinkwrap.yaml'));
+  __dirname, '../../../src/logic/test/shrinkwrapFile/pnpm-lock.yaml'));
 const shrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile('pnpm', filename)!;
 
   it('verifies root-level dependency', () => {

@@ -585,7 +585,7 @@ export class RushConfiguration {
    * command uses a temporary copy, whose path is tempShrinkwrapFilename.)
    * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: `C:\MyRepo\common\npm-shrinkwrap.json` or `C:\MyRepo\common\shrinkwrap.yaml`
+   * Example: `C:\MyRepo\common\npm-shrinkwrap.json` or `C:\MyRepo\common\pnpm-lock.yaml`
    *
    * @deprecated Use `getCommittedShrinkwrapFilename` instead, which gets the correct common
    * shrinkwrap file name for a given active variant.
@@ -599,7 +599,7 @@ export class RushConfiguration {
    * This file may get rewritten by the package manager during installation.
    * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
-   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap.json` or `C:\MyRepo\common\temp\shrinkwrap.yaml`
+   * Example: `C:\MyRepo\common\temp\npm-shrinkwrap.json` or `C:\MyRepo\common\temp\pnpm-lock.yaml`
    */
   public get tempShrinkwrapFilename(): string {
     return this._tempShrinkwrapFilename;
@@ -612,7 +612,7 @@ export class RushConfiguration {
    * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
    * Example: `C:\MyRepo\common\temp\npm-shrinkwrap-preinstall.json`
-   * or `C:\MyRepo\common\temp\shrinkwrap-preinstall.yaml`
+   * or `C:\MyRepo\common\temp\pnpm-lock-preinstall.yaml`
    */
   public get tempShrinkwrapPreinstallFilename(): string {
     return this._tempShrinkwrapPreinstallFilename;
@@ -1038,7 +1038,7 @@ export class RushConfiguration {
         'yarn-local', 'node_modules', '.bin', 'yarn'));
     }
 
-    /// From "C:\repo\common\temp\shrinkwrap.yaml" --> "C:\repo\common\temp\shrinkwrap-preinstall.yaml"
+    /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
     const parsedPath: path.ParsedPath = path.parse(this._tempShrinkwrapFilename);
     this._tempShrinkwrapPreinstallFilename = path.join(parsedPath.dir,
       parsedPath.name + '-preinstall' + parsedPath.ext);
