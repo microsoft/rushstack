@@ -76,7 +76,7 @@
           "description": "Whether to generate doc model file.",
           "type": "boolean"
         },
-        "outputFolder": {
+        "apiJsonFilePath": {
           "description": "The output path for the doc model file.  The file extension should be \".api.json\". The path is resolved relative to the \"rootFolder\" location.",
           "type": "string"
         }
@@ -118,7 +118,7 @@
           "description": "Whether to generate the tsdoc-metadata.json file.",
           "type": "boolean"
         },
-        "tsdocMetadataPath": {
+        "tsdocMetadataFilePath": {
           "description": "Specifies where the TSDoc metadata file should be written. The default value is \"<lookup>\", which causes the path to be automatically inferred from the \"tsdocMetadata\", \"typings\" or \"main\" fields of the project's package.json.  If none of these fields are set, the lookup falls back to \"./tsdoc-metadata.json\".",
           "type": "string"
         },

@@ -15,6 +15,7 @@
     * (REQUIRED) Specifies the .d.ts file to be used as the starting point for analysis.  API Extractor
     * analyzes the symbols exported by this module.
     *
+    * The file extension must be ".d.ts" and not ".ts".
     * The path is resolved relative to the "rootFolder" location.
     */
   // "mainEntryPointFile": "./lib/index.d.ts"
@@ -182,7 +183,7 @@
      *
      * DEFAULT VALUE: true
      */
-    "enabled": true,
+    // "enabled": true,
 
     /**
      * Specifies where the TSDoc metadata file should be written.
