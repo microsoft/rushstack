@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.2",
+      "comment": "Enable declaration maps in the default TSConfigs.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.2",
+  "email": "iclanton@users.noreply.github.com"
+}
