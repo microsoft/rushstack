@@ -262,6 +262,7 @@ export class RushConfiguration {
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
     readonly rushLinkJsonFilename: string;
+    readonly shrinkwrapFilename: string;
     readonly shrinkwrapFilePhrase: string;
     // @beta
     readonly telemetryEnabled: boolean;

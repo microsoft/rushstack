@@ -168,6 +168,28 @@ describe('RushConfiguration', () => {
     done();
   });
 
+  it('can load repo/rush-pnpm-2.json', (done: jest.DoneCallback) => {
+    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-2.json');
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+
+    expect(rushConfiguration.packageManager).toEqual('pnpm');
+    expect(rushConfiguration.packageManagerToolVersion).toEqual('2.0.0');
+    expect(rushConfiguration.shrinkwrapFilename).toEqual('shrinkwrap.yaml');
+
+    done();
+  });
+
+  it('can load repo/rush-pnpm-3.json', (done: jest.DoneCallback) => {
+    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-3.json');
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+
+    expect(rushConfiguration.packageManager).toEqual('pnpm');
+    expect(rushConfiguration.packageManagerToolVersion).toEqual('3.0.0');
+    expect(rushConfiguration.shrinkwrapFilename).toEqual('pnpm-lock.yaml');
+
+    done();
+  });
+
   it('allows the temp directory to be set via environment variable', () => {
     const expectedValue: string = path.resolve('/var/temp');
     process.env['RUSH_TEMP_FOLDER'] = expectedValue; // tslint:disable-line:no-string-literal

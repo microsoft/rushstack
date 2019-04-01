@@ -596,6 +596,16 @@ export class RushConfiguration {
   }
 
   /**
+   * The filename of the shrinkwrap file that is used by the package manager.
+   * @remarks
+   * This property merely reports the filename; the file itself may not actually exist.
+   * Example: `npm-shrinkwrap.json` or `pnpm-lock.yaml`
+   */
+  public get shrinkwrapFilename(): string {
+    return this._shrinkwrapFilename;
+  }
+
+  /**
    * The full path of the temporary shrinkwrap file that is used during "rush install".
    * This file may get rewritten by the package manager during installation.
    * @remarks
