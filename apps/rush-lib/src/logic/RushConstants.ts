@@ -70,9 +70,20 @@ export namespace RushConstants {
   export const npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 
   /**
-   * The filename ("pnpm-lock.yaml") used to store state for pnpm
+   * The filename ("shrinkwrap.yaml" or "pnpm-lock.yaml") used to store state for pnpm.
+   * @param pnpmVersion - the version of pnpm.
+   * @returns the filename used by the {@param pnpmVersion} to store state.
    */
-  export const pnpmShrinkwrapFilename: string = 'pnpm-lock.yaml';
+  export function pnpmShrinkwrapFilename(pnpmVersion: string): PnpmShrinkwrapFilename {
+    const majorVersion: string = pnpmVersion.split('.')[0];
+
+    return majorVersion < '3' ? 'shrinkwrap.yaml' : 'pnpm-lock.yaml';
+  }
+
+  /**
+   * The type of filename used to store state for pnpm.
+   */
+  export type PnpmShrinkwrapFilename = 'shrinkwrap.yaml' | 'pnpm-lock.yaml';
 
   /**
    * The filename ("pnpmfile.js") used to add custom configuration to PNPM

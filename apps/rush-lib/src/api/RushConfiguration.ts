@@ -250,6 +250,7 @@ export class RushConfiguration {
   private _npmTmpFolder: string;
   private _pnpmStoreFolder: string;
   private _yarnCacheFolder: string;
+  private _shrinkwrapFilename: string;
   private _tempShrinkwrapFilename: string;
   private _tempShrinkwrapPreinstallFilename: string;
   private _rushLinkJsonFilename: string;
@@ -421,7 +422,11 @@ export class RushConfiguration {
    * _validateCommonRushConfigFolder() function makes sure that this folder only contains
    * recognized config files.
    */
-  private static _validateCommonRushConfigFolder(commonRushConfigFolder: string, packageManager: PackageManager): void {
+  private static _validateCommonRushConfigFolder(
+      commonRushConfigFolder: string,
+      packageManager: PackageManager,
+      shrinkwrapFilename: string
+  ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
       FileSystem.ensureFolder(commonRushConfigFolder);
@@ -443,17 +448,13 @@ export class RushConfiguration {
       }
 
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map(x => x.toUpperCase()));
-      switch (packageManager) {
-        case 'npm':
-          knownSet.add(RushConstants.npmShrinkwrapFilename.toUpperCase());
-          break;
-        case 'pnpm':
-          knownSet.add(RushConstants.pnpmShrinkwrapFilename.toUpperCase());
-          knownSet.add(RushConstants.pnpmfileFilename.toUpperCase());
-          break;
-        case 'yarn':
-          knownSet.add(RushConstants.yarnShrinkwrapFilename.toUpperCase());
-          break;
+
+      // Add the shrinkwrap filename for the package manager to the known set.
+      knownSet.add(shrinkwrapFilename.toUpperCase());
+
+      // If the package manager is pnpm, then also add the pnpm file to the known set.
+      if (packageManager === 'pnpm') {
+        knownSet.add(RushConstants.pnpmfileFilename.toUpperCase());
       }
 
       // Is the filename something we know?  If not, report an error.
@@ -847,21 +848,7 @@ export class RushConfiguration {
 
     const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
 
-    if (this.packageManager === 'pnpm') {
-      return path.join(
-        variantConfigFolderPath,
-        RushConstants.pnpmShrinkwrapFilename);
-    } else if (this.packageManager === 'npm') {
-      return path.join(
-        variantConfigFolderPath,
-        RushConstants.npmShrinkwrapFilename);
-      } else if (this.packageManager === 'yarn') {
-        return path.join(
-          variantConfigFolderPath,
-          RushConstants.yarnShrinkwrapFilename);
-    } else {
-      throw new Error('Invalid package manager.');
-    }
+    return path.join(variantConfigFolderPath, this._shrinkwrapFilename);
   }
 
   /**
@@ -1019,31 +1006,33 @@ export class RushConfiguration {
     }
 
     if (this._packageManager === 'npm') {
-      this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.npmShrinkwrapFilename);
-
       this._packageManagerToolVersion = rushConfigurationJson.npmVersion!;
-      this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
-        'npm-local', 'node_modules', '.bin', 'npm'));
+      this._shrinkwrapFilename = RushConstants.npmShrinkwrapFilename;
     } else if (this._packageManager === 'pnpm') {
-      this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.pnpmShrinkwrapFilename);
-
       this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
-      this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
-        'pnpm-local', 'node_modules', '.bin', 'pnpm'));
+      this._shrinkwrapFilename = RushConstants.pnpmShrinkwrapFilename(this._packageManagerToolVersion);
     } else {
-      this._tempShrinkwrapFilename = path.join(this._commonTempFolder, RushConstants.yarnShrinkwrapFilename);
-
       this._packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
-      this._packageManagerToolFilename = path.resolve(path.join(this._commonTempFolder,
-        'yarn-local', 'node_modules', '.bin', 'yarn'));
+      this._shrinkwrapFilename = RushConstants.yarnShrinkwrapFilename;
     }
+
+    this._tempShrinkwrapFilename = path.join(
+        this._commonTempFolder, this._shrinkwrapFilename
+    );
+    this._packageManagerToolFilename = path.resolve(path.join(
+        this._commonTempFolder, `${this.packageManager}-local`, 'node_modules', '.bin', `${this.packageManager}`
+    ));
 
     /// From "C:\repo\common\temp\pnpm-lock.yaml" --> "C:\repo\common\temp\pnpm-lock-preinstall.yaml"
     const parsedPath: path.ParsedPath = path.parse(this._tempShrinkwrapFilename);
     this._tempShrinkwrapPreinstallFilename = path.join(parsedPath.dir,
       parsedPath.name + '-preinstall' + parsedPath.ext);
 
-    RushConfiguration._validateCommonRushConfigFolder(this._commonRushConfigFolder, this.packageManager);
+    RushConfiguration._validateCommonRushConfigFolder(
+        this._commonRushConfigFolder,
+        this.packageManager,
+        this._shrinkwrapFilename
+    );
 
     this._projectFolderMinDepth = rushConfigurationJson.projectFolderMinDepth !== undefined
       ? rushConfigurationJson.projectFolderMinDepth : 1;
