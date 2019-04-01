@@ -2,7 +2,12 @@
 items:
   - uid: api-documenter-test.DocClass1
     summary: This is an example class.
-    remarks: These are some remarks.
+    remarks: >-
+      These are some remarks.
+
+
+      The constructor for this class is marked as internal. Third-party code should not call the constructor directly or
+      create subclasses that extend the `DocClass1` class.
     name: DocClass1
     fullName: DocClass1
     langs:
@@ -15,7 +20,6 @@ items:
       - api-documenter-test.IDocInterface2
     package: api-documenter-test
     children:
-      - api-documenter-test.DocClass1.(constructor)
       - api-documenter-test.DocClass1.deprecatedExample
       - api-documenter-test.DocClass1.exampleFunction
       - api-documenter-test.DocClass1.exampleFunction_1
@@ -25,20 +29,6 @@ items:
       - api-documenter-test.DocClass1.regularProperty
       - api-documenter-test.DocClass1.sumWithExample
       - api-documenter-test.DocClass1.tableExample
-  - uid: api-documenter-test.DocClass1.(constructor)
-    summary: The class constructor
-    name: (constructor)(name)
-    fullName: (constructor)(name)
-    langs:
-      - typeScript
-    type: constructor
-    syntax:
-      content: 'constructor(name: string);'
-      parameters:
-        - id: name
-          description: ''
-          type:
-            - string
   - uid: api-documenter-test.DocClass1.deprecatedExample
     deprecated:
       content: Use `otherThing()` instead.

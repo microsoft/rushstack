@@ -18,7 +18,7 @@ export declare function failWithAmbiguity(): void;
 
 /**
  * NOTE: The broken link checker currently is not able to validate references to external packages.
- * We need to fix that.
+ * Tracked by:  https://github.com/Microsoft/web-build-tools/issues/1195
  * {@link nonexistent#nonexistent}
  * @public
  */

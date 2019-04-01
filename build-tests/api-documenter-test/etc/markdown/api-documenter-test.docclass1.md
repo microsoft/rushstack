@@ -38,3 +38,5 @@ export declare class DocClass1 extends DocBaseClass implements IDocInterface1, I
 
 These are some remarks.
 
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.
+

@@ -40,7 +40,7 @@
         {
           "kind": "Class",
           "canonicalReference": "(DocClass1:class)",
-          "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * @defaultValue\n *\n * a default value for this function\n *\n * @public\n */\n",
+          "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.\n *\n * @defaultValue\n *\n * a default value for this function\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -86,45 +86,6 @@
           "releaseTag": "Public",
           "name": "DocClass1",
           "members": [
-            {
-              "kind": "Constructor",
-              "canonicalReference": "(:constructor,instance,0)",
-              "docComment": "/**\n * The class constructor\n */\n",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "constructor("
-                },
-                {
-                  "kind": "Reference",
-                  "text": "name"
-                },
-                {
-                  "kind": "Content",
-                  "text": ": "
-                },
-                {
-                  "kind": "Content",
-                  "text": "string"
-                },
-                {
-                  "kind": "Content",
-                  "text": ");"
-                }
-              ],
-              "isStatic": false,
-              "releaseTag": "Public",
-              "overloadIndex": 0,
-              "parameters": [
-                {
-                  "parameterName": "name",
-                  "parameterTypeTokenRange": {
-                    "startIndex": 3,
-                    "endIndex": 4
-                  }
-                }
-              ]
-            },
             {
               "kind": "Method",
               "canonicalReference": "(deprecatedExample:instance,0)",
