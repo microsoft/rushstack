@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@microsoft/api-extractor": "7.0.35",
-    "@microsoft/api-documenter": "7.0.43",
+    "@microsoft/api-documenter": "7.0.44",
     "@types/jest": "23.3.11",
     "@types/node": "8.5.8",
     "fs-extra": "~7.0.1",
