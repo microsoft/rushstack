@@ -8,20 +8,20 @@
 
   "apiReport": {
     // ("enabled" is required)
-    "reportFileName": "<packageBaseName>.api.md",
+    "reportFileName": "<unscopedPackageName>.api.md",
     "reportFolder": "./etc",
     "tempFolder": "./temp"
   },
 
   "docModel": {
     // ("enabled" is required)
-    "apiJsonFilePath": "./temp/<packageBaseName>.api.json"
+    "apiJsonFilePath": "./temp/<unscopedPackageName>.api.json"
   },
 
   "dtsRollup": {
     // ("enabled" is required)
 
-    "untrimmedFilePath": "./dist/<packageBaseName>.d.ts",
+    "untrimmedFilePath": "./dist/<unscopedPackageName>.d.ts",
     "betaTrimmedFilePath": "",
     "publicTrimmedFilePath": ""
   },

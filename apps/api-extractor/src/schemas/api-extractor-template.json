@@ -5,11 +5,14 @@
    * Optionally specifies another JSON config file that this file extends from.  This provides a way for
    * standard settings to be shared across multiple projects.
    *
-   * The path is resolved relative to the folder of the file with the "extends" field.
+   * If the first path segment is "." or "..", the path resolved relative to the folder of the file with
+   * the "extends" field.  Otherwise, the first path segment is interpreted as an NPM package name, and will be
+   * resolved using NodeJS require().
    *
    * DEFAULT VALUE: ""
    */
-  // "extends": "./node_modules/your-tool-chain/include/api-extractor-base.json"
+  // "extends": "./shared/api-extractor-base.json"
+  // "extends": "my-package/include/api-extractor-base.json"
 
   /**
     * (REQUIRED) Specifies the .d.ts file to be used as the starting point for analysis.  API Extractor
@@ -77,9 +80,9 @@
      *
      * The file extension should be ".api.md", and the string should not contain a path separator such as "\" or "/".
      *
-     * DEFAULT VALUE: "<packageBaseName>.api.md"
+     * DEFAULT VALUE: "<unscopedPackageName>.api.md"
      */
-    // "reportFileName": "<packageBaseName>.api.md",
+    // "reportFileName": "<unscopedPackageName>.api.md",
 
     /**
      * Specifies the folder where the API report file is written.  The file name portion is determined by
@@ -122,9 +125,9 @@
      *
      * The path is resolved relative to the "rootFolder" location.
      *
-     * DEFAULT VALUE: "./temp/<packageBaseName>.api.json"
+     * DEFAULT VALUE: "./temp/<unscopedPackageName>.api.json"
      */
-    // "apiJsonFilePath": "./temp/<packageBaseName>.api.json"
+    // "apiJsonFilePath": "./temp/<unscopedPackageName>.api.json"
   },
 
   /**
@@ -144,9 +147,9 @@
      *
      * The path is resolved relative to the "rootFolder" location.
      *
-     * DEFAULT VALUE: "./dist/<packageBaseName>.d.ts"
+     * DEFAULT VALUE: "./dist/<unscopedPackageName>.d.ts"
      */
-    // "untrimmedFilePath": "./dist/<packageBaseName>.d.ts",
+    // "untrimmedFilePath": "./dist/<unscopedPackageName>.d.ts",
 
     /**
      * Specifies the output path for a .d.ts rollup file to be generated with trimming for a "beta" release.
@@ -158,7 +161,7 @@
      *
      * DEFAULT VALUE: ""
      */
-    // "betaTrimmedFilePath": "./dist/<packageBaseName>-beta.d.ts",
+    // "betaTrimmedFilePath": "./dist/<unscopedPackageName>-beta.d.ts",
 
 
     /**
@@ -171,7 +174,7 @@
      *
      * DEFAULT VALUE: ""
      */
-    // "publicTrimmedFilePath": "./dist/<packageBaseName>-public.d.ts",
+    // "publicTrimmedFilePath": "./dist/<unscopedPackageName>-public.d.ts",
   },
 
   /**
