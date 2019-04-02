@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-2.7",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.6.0",
+      "date": "Tue, 02 Apr 2019 01:12:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable declaration maps in the default TSConfigs."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.20",
       "tag": "@microsoft/rush-stack-compiler-2.7_v0.5.20",
       "date": "Sat, 30 Mar 2019 22:27:16 GMT",
