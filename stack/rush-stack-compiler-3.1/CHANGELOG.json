@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-3.1",
   "entries": [
     {
+      "version": "0.6.1",
+      "tag": "@microsoft/rush-stack-compiler-3.1_v0.6.1",
+      "date": "Wed, 03 Apr 2019 02:58:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.35` to `7.0.36`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@microsoft/rush-stack-compiler-3.1_v0.6.0",
       "date": "Tue, 02 Apr 2019 01:12:02 GMT",

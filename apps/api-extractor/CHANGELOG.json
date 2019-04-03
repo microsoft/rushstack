@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.36",
+      "tag": "@microsoft/api-extractor_v7.0.36",
+      "date": "Wed, 03 Apr 2019 02:58:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where .d.ts.map file were sometimes mapped to the wrong location"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.35",
       "tag": "@microsoft/api-extractor_v7.0.35",
       "date": "Sat, 30 Mar 2019 22:27:16 GMT",

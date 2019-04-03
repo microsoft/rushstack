@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 30 Mar 2019 22:27:16 GMT and should not be manually modified.
+This log was last generated on Wed, 03 Apr 2019 02:58:33 GMT and should not be manually modified.
+
+## 7.0.36
+Wed, 03 Apr 2019 02:58:33 GMT
+
+### Patches
+
+- Fix an issue where .d.ts.map file were sometimes mapped to the wrong location
 
 ## 7.0.35
 Sat, 30 Mar 2019 22:27:16 GMT
