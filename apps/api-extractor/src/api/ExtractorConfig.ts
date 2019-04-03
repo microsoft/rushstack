@@ -53,7 +53,7 @@ export interface IExtractorConfigParseConfigObjectOptions {
   /**
    * An already prepared configuration object as returned by {@link ExtractorConfig.loadJsonFileWithInheritance}.
    */
-  configObject: Partial<IExtractorConfig>;
+  configObject: IExtractorConfig;
 
   /**
    * The absolute path of the file that the `configObject` object was loaded from.  This is used for error messages
@@ -232,7 +232,7 @@ export class ExtractorConfig {
    */
   public static loadAndParseConfig(configJsonFilePath: string): ExtractorConfig {
     const configObjectFullPath: string = path.resolve(configJsonFilePath);
-    const configObject: Partial<IExtractorConfig> = ExtractorConfig.loadJsonFileWithInheritance(configObjectFullPath);
+    const configObject: IExtractorConfig = ExtractorConfig.loadJsonFileWithInheritance(configObjectFullPath);
 
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
     const packageJsonFullPath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
@@ -257,7 +257,7 @@ export class ExtractorConfig {
    * If the "extends" field is present, the referenced file(s) will be merged,
    * along with the API Extractor defaults.
    */
-  public static loadJsonFileWithInheritance(jsonFilePath: string): Partial<IExtractorConfig> {
+  public static loadJsonFileWithInheritance(jsonFilePath: string): IExtractorConfig {
     // Set to keep track of config files which have been processed.
     const visitedPaths: Set<string> = new Set<string>();
 
@@ -310,7 +310,10 @@ export class ExtractorConfig {
     // Lastly, apply the defaults
     configObject = lodash.merge(lodash.cloneDeep(ExtractorConfig._defaultConfig), configObject);
 
-    return configObject;
+    ExtractorConfig.jsonSchema.validateObject(configObject, jsonFilePath);
+
+    // The schema validation should ensure that this object conforms to IExtractorConfig
+    return configObject as IExtractorConfig;
   }
 
   /**

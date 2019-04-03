@@ -35,7 +35,7 @@ export class ExtractorConfig {
     static hasDtsFileExtension(filePath: string): boolean;
     static readonly jsonSchema: JsonSchema;
     static loadAndParseConfig(configJsonFilePath: string): ExtractorConfig;
-    static loadJsonFileWithInheritance(jsonFilePath: string): Partial<IExtractorConfig>;
+    static loadJsonFileWithInheritance(jsonFilePath: string): IExtractorConfig;
     readonly mainEntryPointFile: string;
     readonly messages: IExtractorMessagesConfig;
     readonly overrideTsconfig: {} | undefined;
@@ -146,7 +146,7 @@ export interface IExtractorConfig {
 
 // @public
 export interface IExtractorConfigParseConfigObjectOptions {
-    configObject: Partial<IExtractorConfig>;
+    configObject: IExtractorConfig;
     configObjectFullPath: string | undefined;
     packageJson?: INodePackageJson | undefined;
     packageJsonFullPath: string | undefined;

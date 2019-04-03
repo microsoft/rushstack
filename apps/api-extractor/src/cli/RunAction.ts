@@ -123,7 +123,7 @@ export class RunAction extends CommandLineAction {
     }
 
     const configFullPath: string = path.resolve(configFilename);
-    const mergedConfig: Partial<IExtractorConfig> = ExtractorConfig.loadJsonFileWithInheritance(configFullPath);
+    const mergedConfig: IExtractorConfig = ExtractorConfig.loadJsonFileWithInheritance(configFullPath);
 
     const extractorConfig: ExtractorConfig = ExtractorConfig.parseConfigObject({
       configObject: mergedConfig,
