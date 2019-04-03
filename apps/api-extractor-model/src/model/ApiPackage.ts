@@ -68,7 +68,13 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
    */
   toolVersion?: string;
 
-  /** {@inheritDoc IExtractorConfig.testMode} */
+  /**
+   * Set to true only when invoking API Extractor's test harness.
+   *
+   * @remarks
+   * When `testMode` is true, the `toolVersion` field in the .api.json file is assigned an empty string
+   * to prevent spurious diffs in output files tracked for tests.
+   */
   testMode?: boolean;
 }
 
