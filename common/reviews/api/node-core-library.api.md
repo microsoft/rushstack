@@ -309,7 +309,6 @@ export class InternalError extends Error {
 
 // @public
 export interface IPackageJson extends INodePackageJson {
-    // (undocumented)
     version: string;
 }
 

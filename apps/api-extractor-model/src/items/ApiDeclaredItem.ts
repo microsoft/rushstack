@@ -5,7 +5,7 @@ import { ApiDocumentedItem, IApiDocumentedItemJson, IApiDocumentedItemOptions } 
 import { Excerpt, ExcerptToken, IExcerptTokenRange, IExcerptToken } from '../mixins/Excerpt';
 
 /**
- * Constructor options for {@link (ApiDeclaredItem:interface)}.
+ * Constructor options for {@link ApiDeclaredItem}.
  * @public
  */
 export interface IApiDeclaredItemOptions extends IApiDocumentedItemOptions {

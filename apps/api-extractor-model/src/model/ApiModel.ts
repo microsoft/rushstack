@@ -17,8 +17,8 @@ import { DocDeclarationReference } from '@microsoft/tsdoc';
  * important information needed to generate documentation, without any reliance on the TypeScript compiler engine.
  *
  * An `ApiModel` acts as the root of a tree of objects that all inherit from the `ApiItem` base class.
- * The tree children are determined by the {@link ApiItemContainerMixin} mixin base class.  The model contains
- * packages.  Packages have an entry point (today, only one).  And the entry point can contain various types
+ * The tree children are determined by the {@link (ApiItemContainerMixin:interface)} mixin base class.  The model
+ * contains packages.  Packages have an entry point (today, only one).  And the entry point can contain various types
  * of API declarations.  The container relationships might look like this:
  *
  * ```
