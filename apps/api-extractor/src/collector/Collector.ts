@@ -5,7 +5,6 @@ import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import {
   PackageJsonLookup,
-  INodePackageJson,
   Sort,
   InternalError
 } from '@microsoft/node-core-library';
@@ -15,7 +14,6 @@ import {
 } from '@microsoft/api-extractor-model';
 
 import { ILogger } from '../api/ILogger';
-import { IExtractorConfig } from '../api/IExtractorConfig';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 import { CollectorEntity } from './CollectorEntity';
@@ -31,6 +29,7 @@ import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
+import { ExtractorConfig } from '../api/ExtractorConfig';
 
 /**
  * Options for Collector constructor.
@@ -46,16 +45,9 @@ export interface ICollectorOptions {
    */
   program: ts.Program;
 
-  /**
-   * The entry point to be processed by API Extractor.  Normally this should correspond to
-   * the "main" field from the package.json file.  If it is a relative path, it will be
-   * relative to the project folder described by IExtractorAnalyzeOptions.compilerOptions.
-   */
-  entryPointFile: string;
-
   logger: ILogger;
 
-  extractorConfig: IExtractorConfig;
+  extractorConfig: ExtractorConfig;
 }
 
 /**
@@ -98,21 +90,24 @@ export class Collector {
     this.logger = options.logger;
     this._program = options.program;
 
-    const packageFolder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
-    if (!packageFolder) {
-      throw new Error('Unable to find a package.json for entry point: ' + options.entryPointFile);
+    const extractorConfig: ExtractorConfig = options.extractorConfig;
+
+    const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
+      extractorConfig.mainEntryPointFile);
+
+    if (!entryPointSourceFile) {
+      throw new Error('Unable to load file: ' + extractorConfig.mainEntryPointFile);
     }
 
-    const packageJson: INodePackageJson = this.packageJsonLookup.tryLoadNodePackageJsonFor(packageFolder)!;
-
-    const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);
-    if (!entryPointSourceFile) {
-      throw new Error('Unable to load file: ' + options.entryPointFile);
+    if (!extractorConfig.packageJsonFullPath || !extractorConfig.packageJson) {
+      // TODO: We should be able to analyze projects that don't have any package.json.
+      // The ExtractorConfig class is already designed to allow this.
+      throw new Error('Unable to find a package.json file for the project being analyzed');
     }
 
     this.workingPackage = new WorkingPackage({
-      packageFolder,
-      packageJson,
+      packageFolder: extractorConfig.packageJsonFullPath,
+      packageJson: extractorConfig.packageJson,
       entryPointSourceFile
     });
 

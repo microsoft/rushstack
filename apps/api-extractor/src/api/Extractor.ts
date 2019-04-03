@@ -177,7 +177,6 @@ export class Extractor {
 
     const collector: Collector = new Collector({
       program: compilerState.program,
-      entryPointFile: extractorConfig.mainEntryPointFile,
       logger: monitoredLogger,
       extractorConfig: extractorConfig
     });
