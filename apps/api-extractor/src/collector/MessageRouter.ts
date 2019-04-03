@@ -19,8 +19,8 @@ import { ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMess
 import {
   IExtractorMessagesConfig,
   ExtractorMessageLogLevel,
-  IExtractorMessageReportingRuleConfig
-} from '../api/IExtractorConfig';
+  IConfigMessageReportingRule
+} from '../api/IConfigFile';
 import { ILogger } from '../api/ILogger';
 import { SourceMapper } from './SourceMapper';
 
@@ -118,7 +118,7 @@ export class MessageRouter {
     }
   }
 
-  private static _getNormalizedRule(rule: IExtractorMessageReportingRuleConfig): IReportingRule {
+  private static _getNormalizedRule(rule: IConfigMessageReportingRule): IReportingRule {
     return {
       logLevel: rule.logLevel || 'none',
       addToApiReviewFile: rule.addToApiReviewFile || false

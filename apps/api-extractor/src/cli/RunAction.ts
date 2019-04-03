@@ -17,7 +17,7 @@ import {
 } from '@microsoft/ts-command-line';
 
 import { Extractor, ExtractorResult } from '../api/Extractor';
-import { IExtractorConfig } from '../api/IExtractorConfig';
+import { IConfigFile } from '../api/IConfigFile';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 import { ExtractorConfig } from '../api/ExtractorConfig';
@@ -123,7 +123,7 @@ export class RunAction extends CommandLineAction {
     }
 
     const configFullPath: string = path.resolve(configFilename);
-    const mergedConfig: IExtractorConfig = ExtractorConfig.loadJsonFileWithInheritance(configFullPath);
+    const mergedConfig: IConfigFile = ExtractorConfig.loadJsonFileWithInheritance(configFullPath);
 
     const extractorConfig: ExtractorConfig = ExtractorConfig.parseConfigObject({
       configObject: mergedConfig,

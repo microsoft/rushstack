@@ -5,11 +5,11 @@
  * Determines how the TypeScript compiler engine will be invoked by API Extractor.
  *
  * @remarks
- * This is part of the {@link IExtractorConfig} structure.
+ * This is part of the {@link IConfigFile} structure.
  *
  * @public
  */
-export interface IExtractorCompilerConfig {
+export interface IConfigCompiler {
 
   /**
    * The root folder for the project.  This folder typically contains the tsconfig.json and package.json
@@ -54,11 +54,11 @@ export interface IExtractorCompilerConfig {
  * Configures how the API review files (*.api.md) will be generated.
  *
  * @remarks
- * This is part of the {@link IExtractorConfig} structure.
+ * This is part of the {@link IConfigFile} structure.
  *
  * @public
  */
-export interface IExtractorApiReportConfig {
+export interface IConfigApiReport {
   /**
    * Whether to generate an API report.
    */
@@ -102,11 +102,11 @@ export interface IExtractorApiReportConfig {
  * Configures how the doc model file (*.api.json) will be generated.
  *
  * @remarks
- * This is part of the {@link IExtractorConfig} structure.
+ * This is part of the {@link IConfigFile} structure.
  *
  * @public
  */
-export interface IExtractorDocModelConfig {
+export interface IConfigDocModel {
   /**
    * Whether to generate doc model file.
    */
@@ -126,11 +126,11 @@ export interface IExtractorDocModelConfig {
  * Configures how the .d.ts rollup file will be generated.
  *
  * @remarks
- * This is part of the {@link IExtractorConfig} structure.
+ * This is part of the {@link IConfigFile} structure.
  *
  * @public
  */
-export interface IExtractorDtsRollupConfig {
+export interface IConfigDtsRollup {
   /**
    * Whether to generate the .d.ts rollup file.
    */
@@ -177,11 +177,11 @@ export interface IExtractorDtsRollupConfig {
  * Configures how the tsdoc-metadata.json file will be generated.
  *
  * @remarks
- * This is part of the {@link IExtractorConfig} structure.
+ * This is part of the {@link IConfigFile} structure.
  *
  * @public
  */
-export interface IExtractorTsdocMetadataConfig {
+export interface IConfigTsdocMetadata {
   /**
    * Whether to generate the tsdoc-metadata.json file.
    */
@@ -199,10 +199,10 @@ export interface IExtractorTsdocMetadataConfig {
 }
 
 /**
- * Used with {@link IExtractorMessageReportingRuleConfig.logLevel}.
+ * Used with {@link IConfigMessageReportingRule.logLevel}.
  *
  * @remarks
- * This is part of the {@link IExtractorConfig} structure.
+ * This is part of the {@link IConfigFile} structure.
  *
  * @public
  */
@@ -234,11 +234,11 @@ export const enum ExtractorMessageLogLevel {
  * Configures reporting for a given message identifier.
  *
  * @remarks
- * This is part of the {@link IExtractorConfig} structure.
+ * This is part of the {@link IConfigFile} structure.
  *
  * @public
  */
-export interface IExtractorMessageReportingRuleConfig {
+export interface IConfigMessageReportingRule {
   /**
    * Specifies whether the message should be written to the the tool's output log.
    *
@@ -260,24 +260,24 @@ export interface IExtractorMessageReportingRuleConfig {
  * identifiers that do not appear in the table.
  *
  * @remarks
- * This is part of the {@link IExtractorConfig} structure.
+ * This is part of the {@link IConfigFile} structure.
  *
  * @public
  */
-export interface IExtractorMessageReportingTableConfig {
+export interface IConfigMessageReportingTable {
   /**
    * The key is a message identifier for the associated type of message, or "default" to specify the default policy.
    * For example, the key might be `TS2551` (a compiler message), `tsdoc-link-tag-unescaped-text` (a TSDOc message),
    * or `ae-extra-release-tag` (a message related to the API Extractor analysis).
    */
-  [messageId: string]: IExtractorMessageReportingRuleConfig;
+  [messageId: string]: IConfigMessageReportingRule;
 }
 
 /**
  * Configures how API Extractor reports error and warning messages produced during analysis.
  *
  * @remarks
- * This is part of the {@link IExtractorConfig} structure.
+ * This is part of the {@link IConfigFile} structure.
  *
  * @public
  */
@@ -286,17 +286,17 @@ export interface IExtractorMessagesConfig {
    * Configures handling of diagnostic messages generating the TypeScript compiler while analyzing the
    * input .d.ts files.
    */
-  compilerMessageReporting?: IExtractorMessageReportingTableConfig;
+  compilerMessageReporting?: IConfigMessageReportingTable;
 
   /**
    * Configures handling of messages reported by API Extractor during its analysis.
    */
-  extractorMessageReporting?: IExtractorMessageReportingTableConfig;
+  extractorMessageReporting?: IConfigMessageReportingTable;
 
   /**
    * Configures handling of messages reported by the TSDoc parser when analyzing code comments.
    */
-  tsdocMessageReporting?: IExtractorMessageReportingTableConfig;
+  tsdocMessageReporting?: IConfigMessageReportingTable;
 }
 
 /**
@@ -305,7 +305,7 @@ export interface IExtractorMessagesConfig {
  *
  * @public
  */
-export interface IExtractorConfig {
+export interface IConfigFile {
   /**
    * Path to json config file from which config should extend.
    * The path specified in this field is relative to current config file path.
@@ -324,31 +324,31 @@ export interface IExtractorConfig {
   mainEntryPointFile: string;
 
   /**
-   * {@inheritDoc IExtractorCompilerConfig}
+   * {@inheritDoc IConfigCompiler}
    */
-  compiler?: IExtractorCompilerConfig;
+  compiler?: IConfigCompiler;
 
   /**
-   * {@inheritDoc IExtractorApiReportConfig}
+   * {@inheritDoc IConfigApiReport}
    */
-  apiReport?: IExtractorApiReportConfig;
+  apiReport?: IConfigApiReport;
 
   /**
-   * {@inheritDoc IExtractorDocModelConfig}
+   * {@inheritDoc IConfigDocModel}
    */
-  docModel?: IExtractorDocModelConfig;
+  docModel?: IConfigDocModel;
 
   /**
-   * {@inheritDoc IExtractorDtsRollupConfig}
+   * {@inheritDoc IConfigDtsRollup}
    * @beta
    */
-  dtsRollup?: IExtractorDtsRollupConfig;
+  dtsRollup?: IConfigDtsRollup;
 
   /**
-   * {@inheritDoc IExtractorTsdocMetadataConfig}
+   * {@inheritDoc IConfigTsdocMetadata}
    * @beta
    */
-  tsdocMetadata?: IExtractorTsdocMetadataConfig;
+  tsdocMetadata?: IConfigTsdocMetadata;
 
   /**
    * {@inheritDoc IExtractorMessagesConfig}

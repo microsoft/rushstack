@@ -16,9 +16,9 @@ import {
   InternalError
 } from '@microsoft/node-core-library';
 import {
-  IExtractorConfig,
+  IConfigFile,
   IExtractorMessagesConfig
-} from './IExtractorConfig';
+} from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 
 /**
@@ -53,7 +53,7 @@ export interface IExtractorConfigParseConfigObjectOptions {
   /**
    * An already prepared configuration object as returned by {@link ExtractorConfig.loadJsonFileWithInheritance}.
    */
-  configObject: IExtractorConfig;
+  configObject: IConfigFile;
 
   /**
    * The absolute path of the file that the `configObject` object was loaded from.  This is used for error messages
@@ -126,12 +126,12 @@ export class ExtractorConfig {
    */
   public static readonly FILENAME: string = 'api-extractor.json';
 
-  private static readonly _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
+  private static readonly _defaultConfig: Partial<IConfigFile> = JsonFile.load(path.join(__dirname,
     '../schemas/api-extractor-defaults.json'));
 
   private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;
 
-  /** {@inheritDoc IExtractorCompilerConfig.rootFolder} */
+  /** {@inheritDoc IConfigCompiler.rootFolder} */
   public readonly rootFolder: string;
 
   /**
@@ -146,16 +146,16 @@ export class ExtractorConfig {
    */
   public readonly packageJsonFullPath: string | undefined;
 
-  /** {@inheritDoc IExtractorConfig.mainEntryPointFile} */
+  /** {@inheritDoc IConfigFile.mainEntryPointFile} */
   public readonly mainEntryPointFile: string;
 
-  /** {@inheritDoc IExtractorCompilerConfig.overrideTsconfig} */
+  /** {@inheritDoc IConfigCompiler.overrideTsconfig} */
   public readonly overrideTsconfig: { } | undefined;
 
-  /** {@inheritDoc IExtractorCompilerConfig.skipLibCheck} */
+  /** {@inheritDoc IConfigCompiler.skipLibCheck} */
   public readonly skipLibCheck: boolean;
 
-  /** {@inheritDoc IExtractorApiReportConfig.enabled} */
+  /** {@inheritDoc IConfigApiReport.enabled} */
   public readonly apiReportEnabled: boolean;
 
   /** The `reportFolder` path combined with the `reportFileName`. */
@@ -163,29 +163,29 @@ export class ExtractorConfig {
   /** The `tempFolder` path combined with the `reportFileName`. */
   public readonly tempReportFilePath: string;
 
-  /** {@inheritDoc IExtractorDocModelConfig.enabled} */
+  /** {@inheritDoc IConfigDocModel.enabled} */
   public readonly docModelEnabled: boolean;
-  /** {@inheritDoc IExtractorDocModelConfig.apiJsonFilePath} */
+  /** {@inheritDoc IConfigDocModel.apiJsonFilePath} */
   public readonly apiJsonFilePath: string;
 
-  /** {@inheritDoc IExtractorDtsRollupConfig.enabled} */
+  /** {@inheritDoc IConfigDtsRollup.enabled} */
   public readonly rollupEnabled: boolean;
-  /** {@inheritDoc IExtractorDtsRollupConfig.untrimmedFilePath} */
+  /** {@inheritDoc IConfigDtsRollup.untrimmedFilePath} */
   public readonly untrimmedFilePath: string;
-  /** {@inheritDoc IExtractorDtsRollupConfig.betaTrimmedFilePath} */
+  /** {@inheritDoc IConfigDtsRollup.betaTrimmedFilePath} */
   public readonly betaTrimmedFilePath: string;
-  /** {@inheritDoc IExtractorDtsRollupConfig.publicTrimmedFilePath} */
+  /** {@inheritDoc IConfigDtsRollup.publicTrimmedFilePath} */
   public readonly publicTrimmedFilePath: string;
 
-  /** {@inheritDoc IExtractorTsdocMetadataConfig.enabled} */
+  /** {@inheritDoc IConfigTsdocMetadata.enabled} */
   public readonly tsdocMetadataEnabled: boolean;
-  /** {@inheritDoc IExtractorTsdocMetadataConfig.tsdocMetadataFilePath} */
+  /** {@inheritDoc IConfigTsdocMetadata.tsdocMetadataFilePath} */
   public readonly tsdocMetadataFilePath: string;
 
-  /** {@inheritDoc IExtractorConfig.messages} */
+  /** {@inheritDoc IConfigFile.messages} */
   public readonly messages: IExtractorMessagesConfig;
 
-  /** {@inheritDoc IExtractorConfig.testMode} */
+  /** {@inheritDoc IConfigFile.testMode} */
   public readonly testMode: boolean;
 
   private constructor(parameters: IExtractorConfigParameters) {
@@ -232,7 +232,7 @@ export class ExtractorConfig {
    */
   public static loadAndParseConfig(configJsonFilePath: string): ExtractorConfig {
     const configObjectFullPath: string = path.resolve(configJsonFilePath);
-    const configObject: IExtractorConfig = ExtractorConfig.loadJsonFileWithInheritance(configObjectFullPath);
+    const configObject: IConfigFile = ExtractorConfig.loadJsonFileWithInheritance(configObjectFullPath);
 
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
     const packageJsonFullPath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
@@ -257,14 +257,14 @@ export class ExtractorConfig {
    * If the "extends" field is present, the referenced file(s) will be merged,
    * along with the API Extractor defaults.
    */
-  public static loadJsonFileWithInheritance(jsonFilePath: string): IExtractorConfig {
+  public static loadJsonFileWithInheritance(jsonFilePath: string): IConfigFile {
     // Set to keep track of config files which have been processed.
     const visitedPaths: Set<string> = new Set<string>();
 
     // Get absolute path of config file.
     let currentConfigFilePath: string = path.resolve(process.cwd(), jsonFilePath);
 
-    let configObject: Partial<IExtractorConfig> = JsonFile.load(currentConfigFilePath);
+    let configObject: Partial<IConfigFile> = JsonFile.load(currentConfigFilePath);
 
     try {
       while (configObject.extends) {
@@ -293,7 +293,7 @@ export class ExtractorConfig {
         }
 
         // Load the extractor config defined in extends property.
-        const baseConfig: IExtractorConfig = JsonFile.load(currentConfigFilePath);
+        const baseConfig: IConfigFile = JsonFile.load(currentConfigFilePath);
 
         // Delete the "extends" field, since we've already expanded it
         delete configObject.extends;
@@ -312,8 +312,8 @@ export class ExtractorConfig {
 
     ExtractorConfig.jsonSchema.validateObject(configObject, jsonFilePath);
 
-    // The schema validation should ensure that this object conforms to IExtractorConfig
-    return configObject as IExtractorConfig;
+    // The schema validation should ensure that this object conforms to IConfigFile
+    return configObject as IConfigFile;
   }
 
   /**
@@ -322,7 +322,7 @@ export class ExtractorConfig {
    */
   public static parseConfigObject(options: IExtractorConfigParseConfigObjectOptions): ExtractorConfig {
     const filenameForErrors: string = options.configObjectFullPath || 'the configuration object';
-    const configObject: Partial<IExtractorConfig> = options.configObject;
+    const configObject: Partial<IConfigFile> = options.configObject;
 
     if (options.configObjectFullPath) {
       if (!path.isAbsolute(options.configObjectFullPath)) {

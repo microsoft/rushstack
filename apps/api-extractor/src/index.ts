@@ -31,16 +31,16 @@ export {
 export { ExtractorMessageId } from './api/ExtractorMessageId';
 
 export {
-  IExtractorCompilerConfig,
-  IExtractorApiReportConfig,
-  IExtractorDocModelConfig,
-  IExtractorDtsRollupConfig,
-  IExtractorTsdocMetadataConfig,
+  IConfigCompiler,
+  IConfigApiReport,
+  IConfigDocModel,
+  IConfigDtsRollup,
+  IConfigTsdocMetadata,
   ExtractorMessageLogLevel,
-  IExtractorMessageReportingRuleConfig,
-  IExtractorMessageReportingTableConfig,
+  IConfigMessageReportingRule,
+  IConfigMessageReportingTable,
   IExtractorMessagesConfig,
-  IExtractorConfig
-} from './api/IExtractorConfig';
+  IConfigFile
+} from './api/IConfigFile';
 
 export { ILogger } from './api/ILogger';

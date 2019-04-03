@@ -35,7 +35,7 @@ export class ExtractorConfig {
     static hasDtsFileExtension(filePath: string): boolean;
     static readonly jsonSchema: JsonSchema;
     static loadAndParseConfig(configJsonFilePath: string): ExtractorConfig;
-    static loadJsonFileWithInheritance(jsonFilePath: string): IExtractorConfig;
+    static loadJsonFileWithInheritance(jsonFilePath: string): IConfigFile;
     readonly mainEntryPointFile: string;
     readonly messages: IExtractorMessagesConfig;
     readonly overrideTsconfig: {} | undefined;
@@ -115,7 +115,7 @@ export class ExtractorResult {
 }
 
 // @public
-export interface IExtractorApiReportConfig {
+export interface IConfigApiReport {
     enabled: boolean;
     reportFileName?: string;
     reportFolder?: string;
@@ -123,47 +123,64 @@ export interface IExtractorApiReportConfig {
 }
 
 // @public
-export interface IExtractorCompilerConfig {
+export interface IConfigCompiler {
     overrideTsconfig?: {};
     rootFolder: string;
     skipLibCheck?: boolean;
 }
 
 // @public
-export interface IExtractorConfig {
-    apiReport?: IExtractorApiReportConfig;
-    compiler?: IExtractorCompilerConfig;
-    docModel?: IExtractorDocModelConfig;
-    // @beta
-    dtsRollup?: IExtractorDtsRollupConfig;
-    extends?: string;
-    mainEntryPointFile: string;
-    messages?: IExtractorMessagesConfig;
-    testMode?: boolean;
-    // @beta
-    tsdocMetadata?: IExtractorTsdocMetadataConfig;
-}
-
-// @public
-export interface IExtractorConfigParseConfigObjectOptions {
-    configObject: IExtractorConfig;
-    configObjectFullPath: string | undefined;
-    packageJson?: INodePackageJson | undefined;
-    packageJsonFullPath: string | undefined;
-}
-
-// @public
-export interface IExtractorDocModelConfig {
+export interface IConfigDocModel {
     apiJsonFilePath?: string;
     enabled: boolean;
 }
 
 // @public
-export interface IExtractorDtsRollupConfig {
+export interface IConfigDtsRollup {
     betaTrimmedFilePath?: string;
     enabled: boolean;
     publicTrimmedFilePath?: string;
     untrimmedFilePath?: string;
+}
+
+// @public
+export interface IConfigFile {
+    apiReport?: IConfigApiReport;
+    compiler?: IConfigCompiler;
+    docModel?: IConfigDocModel;
+    // @beta
+    dtsRollup?: IConfigDtsRollup;
+    extends?: string;
+    mainEntryPointFile: string;
+    messages?: IExtractorMessagesConfig;
+    testMode?: boolean;
+    // @beta
+    tsdocMetadata?: IConfigTsdocMetadata;
+}
+
+// @public
+export interface IConfigMessageReportingRule {
+    addToApiReviewFile?: boolean;
+    logLevel: ExtractorMessageLogLevel;
+}
+
+// @public
+export interface IConfigMessageReportingTable {
+    [messageId: string]: IConfigMessageReportingRule;
+}
+
+// @public
+export interface IConfigTsdocMetadata {
+    enabled: boolean;
+    tsdocMetadataFilePath?: string;
+}
+
+// @public
+export interface IExtractorConfigParseConfigObjectOptions {
+    configObject: IConfigFile;
+    configObjectFullPath: string | undefined;
+    packageJson?: INodePackageJson | undefined;
+    packageJsonFullPath: string | undefined;
 }
 
 // @public
@@ -180,27 +197,10 @@ export interface IExtractorMessageProperties {
 }
 
 // @public
-export interface IExtractorMessageReportingRuleConfig {
-    addToApiReviewFile?: boolean;
-    logLevel: ExtractorMessageLogLevel;
-}
-
-// @public
-export interface IExtractorMessageReportingTableConfig {
-    [messageId: string]: IExtractorMessageReportingRuleConfig;
-}
-
-// @public
 export interface IExtractorMessagesConfig {
-    compilerMessageReporting?: IExtractorMessageReportingTableConfig;
-    extractorMessageReporting?: IExtractorMessageReportingTableConfig;
-    tsdocMessageReporting?: IExtractorMessageReportingTableConfig;
-}
-
-// @public
-export interface IExtractorTsdocMetadataConfig {
-    enabled: boolean;
-    tsdocMetadataFilePath?: string;
+    compilerMessageReporting?: IConfigMessageReportingTable;
+    extractorMessageReporting?: IConfigMessageReportingTable;
+    tsdocMessageReporting?: IConfigMessageReportingTable;
 }
 
 // @public
