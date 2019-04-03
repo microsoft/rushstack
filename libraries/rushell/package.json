@@ -7,7 +7,7 @@
     "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/rushell"
   },
   "main": "lib/index.js",
-  "typings": "dist/index-internal.d.ts",
+  "typings": "dist/rushell.d.ts",
   "tsdoc": {
     "tsdocFlavor": "AEDoc"
   },
