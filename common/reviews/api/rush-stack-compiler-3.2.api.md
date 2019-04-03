@@ -5,8 +5,8 @@
 ```ts
 
 import * as ApiExtractor from '@microsoft/api-extractor';
-import { IExtractorConfig } from '@microsoft/api-extractor';
-import { IExtractorOptions } from '@microsoft/api-extractor';
+import { ExtractorConfig } from '@microsoft/api-extractor';
+import { IExtractorInvokeOptions } from '@microsoft/api-extractor';
 import { IPackageJson } from '@microsoft/node-core-library';
 import { ITerminalProvider } from '@microsoft/node-core-library';
 import { Terminal } from '@microsoft/node-core-library';
@@ -15,7 +15,7 @@ import * as Typescript from 'typescript';
 
 // @beta
 export class ApiExtractorRunner extends RushStackCompilerBase {
-    constructor(extractorConfig: IExtractorConfig, extractorOptions: IExtractorOptions, rootPath: string, terminalProvider: ITerminalProvider);
+    constructor(extractorConfig: ExtractorConfig, extractorOptions: IExtractorInvokeOptions, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
     static apiExtractor: typeof ApiExtractor;
     // (undocumented)
