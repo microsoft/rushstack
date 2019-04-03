@@ -2,26 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import * as colors from 'colors';
 import { JsonFile, Executable, FileSystem } from '@microsoft/node-core-library';
 import { Extractor, ExtractorConfig, CompilerState, ExtractorResult } from '@microsoft/api-extractor';
-
-function executeCommand(command: string, args: string[]): void {
-  console.log(`---> ${command} ${args.join(' ')}`);
-
-  // Redirect STDERR --> STDOUT since we don't want this warning to break the Rush build:
-  // 'You have changed the public API signature for this project'
-  //
-  // TODO: Remove this after the 'Create an empty file' workaround below is removed
-  const result = Executable.spawnSync(command, args, { stdio: [ 0, 1, 1 ] });
-
-  if (result.error) {
-    throw result.error.toString();
-  }
-
-  if (result.status !== 0) {
-    throw new Error('The process returned a nonzero exit code');
-  }
-}
 
 export function runScenarios(buildConfigPath: string): void {
   const buildConfig = JsonFile.load(buildConfigPath);
@@ -88,6 +71,8 @@ export function runScenarios(buildConfigPath: string): void {
   }
 
   let compilerState: CompilerState | undefined = undefined;
+  let anyErrors: boolean = false;
+  process.exitCode = 1;
 
   for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
     const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
@@ -101,7 +86,31 @@ export function runScenarios(buildConfigPath: string): void {
       });
     }
 
-    Extractor.invoke(extractorConfig, { localBuild: true, compilerState });
+    const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig, {
+      localBuild: true,
+      customLogger: {
+        logWarning: (message: string): void => {
+          // This will get fixed with https://github.com/Microsoft/web-build-tools/issues/1133
+          if (message.indexOf('You have changed') >= 0) {
+            // ignore the "You have changed the public API signature for this project."
+            // warning for now.
+          } else {
+            console.warn(colors.yellow(message));
+          }
+        },
+        logVerbose: (message: string): void => {
+          // ignore verbose output
+        }
+      },
+      compilerState
+    });
+
+    if (extractorResult.errorCount > 0) {
+      anyErrors = true;
+    }
   }
 
+  if (!anyErrors) {
+    process.exitCode = 0;
+  }
 }
