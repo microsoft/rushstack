@@ -4,23 +4,56 @@
 
 ```ts
 
+import { INodePackageJson } from '@microsoft/node-core-library';
 import { JsonSchema } from '@microsoft/node-core-library';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
 // @public
+export class CompilerState {
+    static create(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): CompilerState;
+    readonly program: ts.Program;
+    }
+
+// @public
 export class Extractor {
-    constructor(config: IExtractorConfig, options?: IExtractorOptions);
-    readonly actualConfig: IExtractorConfig;
-    // @deprecated
-    analyzeProject(options?: IAnalyzeProjectOptions): void;
-    static generateFilePathsForAnalysis(inputFilePaths: string[]): string[];
-    static jsonSchema: JsonSchema;
-    static loadConfigObject(jsonConfigFile: string): IExtractorConfig;
+    static invokeUsingConfig(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult;
+    static invokeUsingConfigFromFile(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult;
     static readonly packageName: string;
-    processProject(options?: IAnalyzeProjectOptions): boolean;
-    static processProjectFromConfigFile(jsonConfigFile: string, options?: IExtractorOptions): void;
     static readonly version: string;
+}
+
+// @public
+export class ExtractorConfig {
+    constructor();
+    apiJsonFilePath: string;
+    apiReportEnabled: boolean;
+    betaTrimmedFilePath: string;
+    docModelEnabled: boolean;
+    static readonly FILENAME: string;
+    // @internal
+    _getShortFilePath(absolutePath: string): string;
+    static hasDtsFileExtension(filePath: string): boolean;
+    static readonly jsonSchema: JsonSchema;
+    static loadAndParseConfig(jsonFilePath: string): ExtractorConfig;
+    static loadJsonFileWithInheritance(jsonFilePath: string): Partial<IExtractorConfig>;
+    mainEntryPointFile: string;
+    messages: IExtractorMessagesConfig;
+    overrideTsconfig?: {};
+    packageFolder: string;
+    packageJson: INodePackageJson;
+    static parseConfigObject(options: IExtractorConfigParseConfigOptions): ExtractorConfig;
+    publicTrimmedFilePath: string;
+    reportFilePath: string;
+    rollupEnabled: boolean;
+    rootFolder: string;
+    skipLibCheck: boolean;
+    tempReportFilePath: string;
+    testMode: boolean;
+    readonly tokens: IExtractorConfigTokens;
+    tsdocMetadataEnabled: boolean;
+    tsdocMetadataFilePath: string;
+    untrimmedFilePath: string;
 }
 
 // @public
@@ -73,56 +106,82 @@ export const enum ExtractorMessageLogLevel {
 }
 
 // @public
-export const enum ExtractorValidationRulePolicy {
-    allow = "allow",
-    error = "error"
+export class ExtractorResult {
+    // @internal
+    constructor(properties: ExtractorResult);
+    readonly compilerState: CompilerState;
+    readonly errorCount: number;
+    readonly extractorConfig: ExtractorConfig;
+    readonly succeeded: boolean;
+    readonly warningCount: number;
 }
 
 // @public
-export interface IAnalyzeProjectOptions {
-    projectConfig?: IExtractorProjectConfig;
-}
-
-// @public
-export interface IExtractorApiJsonFileConfig {
+export interface IExtractorApiReportConfig {
     enabled: boolean;
-    outputFolder?: string;
-}
-
-// @public
-export interface IExtractorApiReviewFileConfig {
-    apiReviewFolder?: string;
-    enabled: boolean;
+    reportFileName?: string;
+    reportFolder?: string;
     tempFolder?: string;
 }
 
 // @public
+export interface IExtractorCompilerConfig {
+    overrideTsconfig?: {};
+    rootFolder: string;
+    skipLibCheck?: boolean;
+}
+
+// @public
 export interface IExtractorConfig {
-    apiJsonFile?: IExtractorApiJsonFileConfig;
-    apiReviewFile?: IExtractorApiReviewFileConfig;
-    compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
+    apiReport?: IExtractorApiReportConfig;
+    compiler?: IExtractorCompilerConfig;
+    docModel?: IExtractorDocModelConfig;
     // @beta
     dtsRollup?: IExtractorDtsRollupConfig;
     extends?: string;
+    mainEntryPointFile: string;
     messages?: IExtractorMessagesConfig;
-    policies?: IExtractorPoliciesConfig;
-    project: IExtractorProjectConfig;
-    skipLibCheck?: boolean;
     testMode?: boolean;
     // @beta
     tsdocMetadata?: IExtractorTsdocMetadataConfig;
-    validationRules?: IExtractorValidationRulesConfig;
 }
 
-// @beta
-export interface IExtractorDtsRollupConfig {
+// @public
+export interface IExtractorConfigParseConfigOptions {
+    // (undocumented)
+    mergedConfig: Partial<IExtractorConfig>;
+    // (undocumented)
+    mergedConfigFullPath: string;
+    // (undocumented)
+    packageJsonPath: string | undefined;
+}
+
+// @public
+export interface IExtractorConfigTokens {
+    packageName: string;
+    unscopedPackageName: string;
+}
+
+// @public
+export interface IExtractorDocModelConfig {
+    apiJsonFilePath?: string;
     enabled: boolean;
-    mainDtsRollupPath?: string;
-    publishFolder?: string;
-    publishFolderForBeta?: string;
-    publishFolderForInternal?: string;
-    publishFolderForPublic?: string;
-    trimming?: boolean;
+}
+
+// @public
+export interface IExtractorDtsRollupConfig {
+    betaTrimmedFilePath?: string;
+    enabled: boolean;
+    publicTrimmedFilePath?: string;
+    untrimmedFilePath?: string;
+}
+
+// @public
+export interface IExtractorInvokeOptions {
+    compilerState?: CompilerState;
+    customLogger?: Partial<ILogger>;
+    localBuild?: boolean;
+    typescriptCompilerFolder?: string;
 }
 
 // @public
@@ -149,47 +208,9 @@ export interface IExtractorMessagesConfig {
 }
 
 // @public
-export interface IExtractorOptions {
-    compilerProgram?: ts.Program;
-    customLogger?: Partial<ILogger>;
-    localBuild?: boolean;
-    // @beta
-    typescriptCompilerFolder?: string;
-}
-
-// @public
-export interface IExtractorPoliciesConfig {
-    namespaceSupport?: 'conservative' | 'permissive';
-}
-
-// @public
-export interface IExtractorProjectConfig {
-    entryPointSourceFile: string;
-}
-
-// @public
-export interface IExtractorRuntimeCompilerConfig {
-    // (undocumented)
-    configType: 'runtime';
-}
-
-// @public
-export interface IExtractorTsconfigCompilerConfig {
-    // (undocumented)
-    configType: 'tsconfig';
-    overrideTsconfig?: {};
-    rootFolder: string;
-}
-
-// @beta
 export interface IExtractorTsdocMetadataConfig {
     enabled: boolean;
-    tsdocMetadataPath?: string;
-}
-
-// @public
-export interface IExtractorValidationRulesConfig {
-    missingReleaseTags?: ExtractorValidationRulePolicy;
+    tsdocMetadataFilePath?: string;
 }
 
 // @public
