@@ -20,8 +20,8 @@
     "@microsoft/node-core-library": "3.13.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.3.0",
-    "@microsoft/node-library-build": "6.0.48",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.1",
+    "@microsoft/node-library-build": "6.0.49",
     "@types/jest": "23.3.11",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",
