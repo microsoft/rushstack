@@ -18,7 +18,6 @@ export {
 } from './api/Extractor';
 
 export {
-  IExtractorConfigTokens,
   IExtractorConfigParseConfigObjectOptions,
   ExtractorConfig
 } from './api/ExtractorConfig';

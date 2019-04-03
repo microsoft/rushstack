@@ -49,7 +49,6 @@ export class ExtractorConfig {
     readonly skipLibCheck: boolean;
     readonly tempReportFilePath: string;
     readonly testMode: boolean;
-    readonly tokens: IExtractorConfigTokens;
     readonly tsdocMetadataEnabled: boolean;
     readonly tsdocMetadataFilePath: string;
     readonly untrimmedFilePath: string;
@@ -151,12 +150,6 @@ export interface IExtractorConfigParseConfigObjectOptions {
     configObjectFullPath: string | undefined;
     packageJson?: INodePackageJson | undefined;
     packageJsonFullPath: string | undefined;
-}
-
-// @public
-export interface IExtractorConfigTokens {
-    packageName: string;
-    unscopedPackageName: string;
 }
 
 // @public

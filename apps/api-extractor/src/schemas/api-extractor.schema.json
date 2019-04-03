@@ -35,7 +35,6 @@
           "type": "boolean"
         },
       },
-      "required": [ ],
       "additionalProperties": false
     },
 
@@ -123,7 +122,6 @@
           "type": "string"
         },
       },
-      "required": [ ],
       "additionalProperties": false
     },
 
@@ -144,7 +142,6 @@
           "$ref": "#/definitions/extractorMessageReportingTable"
         }
       },
-      "required": [ ],
       "additionalProperties": false
     },
 

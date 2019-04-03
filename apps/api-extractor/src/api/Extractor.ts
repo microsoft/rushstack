@@ -271,6 +271,10 @@ export class Extractor {
       PackageMetadataManager.writeTsdocMetadataFile(extractorConfig.tsdocMetadataFilePath);
     }
 
+    // Show out all the messages that we collected during analysis
+    collector.messageRouter.reportMessagesToLogger(monitoredLogger, collector.workingPackage.packageFolder);
+
+    // Determine success
     let succeeded: boolean;
     if (localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
@@ -280,8 +284,6 @@ export class Extractor {
       succeeded = monitoredLogger.errorCount + monitoredLogger.warningCount === 0;
     }
 
-    // Show out all the messages that we collected during analysis
-    collector.messageRouter.reportMessagesToLogger(monitoredLogger, collector.workingPackage.packageFolder);
     return new ExtractorResult({
       compilerState,
       extractorConfig,

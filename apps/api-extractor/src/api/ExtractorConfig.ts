@@ -23,9 +23,8 @@ import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 
 /**
  * Tokens used during variable expansion of path fields from api-extractor.json.
- * @public
  */
-export interface IExtractorConfigTokens {
+interface IExtractorConfigTokenContext {
   /**
    * The `<unscopedPackageName>` token returns the project's NPM package name, without any NPM scope.
    * If there is no associated package.json file, then the value is `unknown-package`.
@@ -41,6 +40,8 @@ export interface IExtractorConfigTokens {
    * Example: `@scope/my-project`
    */
   packageName: string;
+
+  rootFolder: string;
 }
 
 /**
@@ -91,7 +92,6 @@ interface IExtractorConfigParameters {
   rootFolder: string;
   packageJson: INodePackageJson | undefined;
   packageJsonFullPath: string | undefined;
-  tokens: IExtractorConfigTokens;
   mainEntryPointFile: string;
   overrideTsconfig: { } | undefined;
   skipLibCheck: boolean;
@@ -146,9 +146,6 @@ export class ExtractorConfig {
    */
   public readonly packageJsonFullPath: string | undefined;
 
-  /** {@inheritDoc IExtractorConfigTokens} */
-  public readonly tokens: IExtractorConfigTokens;
-
   /** {@inheritDoc IExtractorConfig.mainEntryPointFile} */
   public readonly mainEntryPointFile: string;
 
@@ -195,7 +192,6 @@ export class ExtractorConfig {
     this.rootFolder = parameters.rootFolder;
     this.packageJson = parameters.packageJson;
     this.packageJsonFullPath = parameters.packageJsonFullPath;
-    this.tokens = parameters.tokens;
     this.mainEntryPointFile = parameters.mainEntryPointFile;
     this.overrideTsconfig = parameters.overrideTsconfig;
     this.skipLibCheck = parameters.skipLibCheck;
@@ -336,7 +332,11 @@ export class ExtractorConfig {
     let packageJson: INodePackageJson | undefined = undefined;
     const packageJsonFullPath: string | undefined = options.packageJsonFullPath;
     if (packageJsonFullPath) {
-      if (path.isAbsolute(packageJsonFullPath)) {
+      if (!/.json$/i.test(packageJsonFullPath)) {
+        // Catch common mistakes e.g. where someone passes a folder path instead of a file path
+        throw new Error('The packageJsonFullPath does not have a .json file extension');
+      }
+      if (!path.isAbsolute(packageJsonFullPath)) {
         throw new Error('packageJsonFullPath must be an absolute path');
       }
 
@@ -367,7 +367,7 @@ export class ExtractorConfig {
         for (; ; ) {
           const tsconfigPath: string = path.join(currentFolder, 'tsconfig.json');
           if (FileSystem.exists(tsconfigPath)) {
-            rootFolder = tsconfigPath;
+            rootFolder = currentFolder;
             break;
           }
           const parentFolder: string = path.dirname(currentFolder);
@@ -391,36 +391,23 @@ export class ExtractorConfig {
         rootFolder = configObject.compiler.rootFolder;
       }
 
-      const tokens: IExtractorConfigTokens = {
+      const tokenContext: IExtractorConfigTokenContext = {
         unscopedPackageName: 'unknown-package',
-        packageName: 'unknown-package'
+        packageName: 'unknown-package',
+        rootFolder
       };
 
-      // Closure for `rootFolder` and `tokens`
-      function _resolvePathWithTokens(fieldName: string, value: string | undefined): string {
-        value = value ? value.trim() : '';
-        if (value !== '') {
-          value = Text.replaceAll(value, '<unscopedPackageName>', tokens.unscopedPackageName);
-          value = Text.replaceAll(value, '<packageName>', tokens.packageName);
-          if (value.indexOf('<lookup>') >= 0) {
-            throw new Error(`The ${fieldName} value incorrectly uses the "<lookup>" token`);
-          }
-          ExtractorConfig._rejectAnyTokensInPath(value, fieldName);
-          value = path.resolve(this.rootFolder, value);
-        }
-        return value;
-      }
-
       if (packageJson) {
-        tokens.packageName = packageJson.name;
-        tokens.unscopedPackageName = PackageName.getUnscopedName(packageJson.name);
+        tokenContext.packageName = packageJson.name;
+        tokenContext.unscopedPackageName = PackageName.getUnscopedName(packageJson.name);
       }
 
       if (!configObject.mainEntryPointFile) {
         // A merged configuration should have this
         throw new Error('mainEntryPointFile is missing');
       }
-      const mainEntryPointFile: string = _resolvePathWithTokens('mainEntryPointFile', configObject.mainEntryPointFile);
+      const mainEntryPointFile: string = ExtractorConfig._resolvePathWithTokens('mainEntryPointFile',
+        configObject.mainEntryPointFile, tokenContext);
 
       if (!ExtractorConfig.hasDtsFileExtension(mainEntryPointFile)) {
         throw new Error('The mainEntryPointFile is not a declaration file: ' + mainEntryPointFile);
@@ -436,7 +423,9 @@ export class ExtractorConfig {
       if (configObject.apiReport) {
         apiReportEnabled = !!configObject.apiReport.enabled;
 
-        const reportFilename: string = configObject.apiReport.reportFileName || '';
+        const reportFilename: string = ExtractorConfig._expandStringWithTokens('reportFileName',
+          configObject.apiReport.reportFileName || '', tokenContext);
+
         if (!reportFilename) {
           // A merged configuration should have this
           throw new Error('reportFilename is missing');
@@ -446,8 +435,10 @@ export class ExtractorConfig {
           throw new Error(`The reportFilename contains invalid characters: "${reportFilename}"`);
         }
 
-        const reportFolder: string = _resolvePathWithTokens('reportFolder', configObject.apiReport.reportFolder);
-        const tempFolder: string = _resolvePathWithTokens('tempFolder', configObject.apiReport.tempFolder);
+        const reportFolder: string = ExtractorConfig._resolvePathWithTokens('reportFolder',
+          configObject.apiReport.reportFolder, tokenContext);
+        const tempFolder: string = ExtractorConfig._resolvePathWithTokens('tempFolder',
+          configObject.apiReport.tempFolder, tokenContext);
 
         reportFilePath = path.join(reportFolder, reportFilename);
         tempReportFilePath = path.join(tempFolder, reportFilename);
@@ -457,7 +448,8 @@ export class ExtractorConfig {
       let apiJsonFilePath: string = '';
       if (configObject.docModel) {
         docModelEnabled = !!configObject.docModel.enabled;
-        apiJsonFilePath = _resolvePathWithTokens('apiJsonFilePath', configObject.docModel.apiJsonFilePath);
+        apiJsonFilePath = ExtractorConfig._resolvePathWithTokens('apiJsonFilePath',
+          configObject.docModel.apiJsonFilePath, tokenContext);
       }
 
       let tsdocMetadataEnabled: boolean = false;
@@ -465,27 +457,30 @@ export class ExtractorConfig {
       if (configObject.tsdocMetadata) {
         tsdocMetadataEnabled = !!configObject.tsdocMetadata.enabled;
 
-        if (configObject.compiler.rootFolder.trim() === '<lookup>') {
-          if (!packageJson) {
-            throw new Error('The "<lookup>" token cannot be used with compiler.rootFolder because'
-              + 'the "packageJson" option was not provided');
-          }
-          if (!packageJsonFullPath) {
-            throw new Error('The "<lookup>" token cannot be used with compiler.rootFolder because'
-              + 'the "packageJsonFullPath" option was not provided');
-          }
-          tsdocMetadataFilePath = PackageMetadataManager.resolveTsdocMetadataPath(
-            path.dirname(packageJsonFullPath),
-            packageJson,
-            tsdocMetadataFilePath
-          );
-        } else {
-          tsdocMetadataFilePath = _resolvePathWithTokens('tsdocMetadataFilePath',
-            configObject.tsdocMetadata.tsdocMetadataFilePath);
-        }
+        if (tsdocMetadataEnabled) {
+          tsdocMetadataFilePath = configObject.tsdocMetadata.tsdocMetadataFilePath || '';
 
-        if (!tsdocMetadataFilePath) {
-          throw new Error('The tsdocMetadata.enabled was specified, but tsdocMetadataFilePath is not assigned');
+          if (tsdocMetadataFilePath.trim() === '<lookup>') {
+            if (!packageJson) {
+              throw new Error('The "<lookup>" token cannot be used with compiler.rootFolder because'
+                + 'the "packageJson" option was not provided');
+            }
+            if (!packageJsonFullPath) {
+              throw new Error('The "<lookup>" token cannot be used with compiler.rootFolder because'
+                + 'the "packageJsonFullPath" option was not provided');
+            }
+            tsdocMetadataFilePath = PackageMetadataManager.resolveTsdocMetadataPath(
+              path.dirname(packageJsonFullPath),
+              packageJson
+            );
+          } else {
+            tsdocMetadataFilePath = ExtractorConfig._resolvePathWithTokens('tsdocMetadataFilePath',
+              configObject.tsdocMetadata.tsdocMetadataFilePath, tokenContext);
+          }
+
+          if (!tsdocMetadataFilePath) {
+            throw new Error('The tsdocMetadata.enabled was specified, but tsdocMetadataFilePath is not specified');
+          }
         }
       }
 
@@ -496,19 +491,18 @@ export class ExtractorConfig {
 
       if (configObject.dtsRollup) {
         rollupEnabled = !!configObject.dtsRollup.enabled;
-        untrimmedFilePath = _resolvePathWithTokens('untrimmedFilePath',
-          configObject.dtsRollup.untrimmedFilePath);
-        betaTrimmedFilePath = _resolvePathWithTokens('betaTrimmedFilePath',
-          configObject.dtsRollup.betaTrimmedFilePath);
-        publicTrimmedFilePath = _resolvePathWithTokens('publicTrimmedFilePath',
-          configObject.dtsRollup.publicTrimmedFilePath);
+        untrimmedFilePath = ExtractorConfig._resolvePathWithTokens('untrimmedFilePath',
+          configObject.dtsRollup.untrimmedFilePath, tokenContext);
+        betaTrimmedFilePath = ExtractorConfig._resolvePathWithTokens('betaTrimmedFilePath',
+          configObject.dtsRollup.betaTrimmedFilePath, tokenContext);
+        publicTrimmedFilePath = ExtractorConfig._resolvePathWithTokens('publicTrimmedFilePath',
+          configObject.dtsRollup.publicTrimmedFilePath, tokenContext);
       }
 
       return new ExtractorConfig({
         rootFolder,
         packageJson,
         packageJsonFullPath,
-        tokens,
         mainEntryPointFile,
         overrideTsconfig: configObject.compiler.overrideTsconfig,
         skipLibCheck: !!configObject.compiler.skipLibCheck,
@@ -530,6 +524,30 @@ export class ExtractorConfig {
     } catch (e) {
       throw new Error(`Error parsing ${filenameForErrors}:\n` + e.message);
     }
+  }
+
+  private static _resolvePathWithTokens(fieldName: string, value: string | undefined,
+    tokenContext: IExtractorConfigTokenContext): string {
+
+    value = ExtractorConfig._expandStringWithTokens(fieldName, value, tokenContext);
+    if (value !== '') {
+      value = path.resolve(tokenContext.rootFolder, value);
+    }
+    return value;
+  }
+
+  private static _expandStringWithTokens(fieldName: string, value: string | undefined,
+    tokenContext: IExtractorConfigTokenContext): string {
+    value = value ? value.trim() : '';
+    if (value !== '') {
+      value = Text.replaceAll(value, '<unscopedPackageName>', tokenContext.unscopedPackageName);
+      value = Text.replaceAll(value, '<packageName>', tokenContext.packageName);
+      if (value.indexOf('<lookup>') >= 0) {
+        throw new Error(`The ${fieldName} value incorrectly uses the "<lookup>" token`);
+      }
+      ExtractorConfig._rejectAnyTokensInPath(value, fieldName);
+    }
+    return value;
   }
 
   /**

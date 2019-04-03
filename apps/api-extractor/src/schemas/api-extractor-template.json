@@ -21,7 +21,7 @@
     * The file extension must be ".d.ts" and not ".ts".
     * The path is resolved relative to the "rootFolder" location.
     */
-  // "mainEntryPointFile": "./lib/index.d.ts"
+  "mainEntryPointFile": "./lib/index.d.ts",
 
   /**
    * Determines how the TypeScript compiler engine will be invoked by API Extractor.

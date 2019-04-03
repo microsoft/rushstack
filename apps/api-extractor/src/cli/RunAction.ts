@@ -127,7 +127,7 @@ export class RunAction extends CommandLineAction {
     const extractorConfig: ExtractorConfig = ExtractorConfig.parseConfigObject({
       configObject: mergedConfig,
       configObjectFullPath: configFilename,
-      packageJsonFullPath: lookup.tryGetPackageFolderFor(configFilename)
+      packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configFilename)
     });
 
     const extractorResult: ExtractorResult = Extractor.invokeUsingConfig(extractorConfig,
