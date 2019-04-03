@@ -7,9 +7,9 @@ function executeCommand(command: string, args: string[]): void {
   console.log(`---> ${command} ${args.join(' ')}`);
 
   // Redirect STDERR --> STDOUT since we don't want this warning to break the Rush build:
-  // "You have changed the public API signature for this project"
+  // 'You have changed the public API signature for this project'
   //
-  // TODO: Remove this after the "Create an empty file" workaround below is removed
+  // TODO: Remove this after the 'Create an empty file' workaround below is removed
   const result = Executable.spawnSync(command, args, { stdio: [ 0, 1, 1 ] });
 
   if (result.error) {
@@ -29,58 +29,44 @@ export function runScenarios(buildConfigPath: string): void {
   // TODO: Eliminate this workaround
   // See GitHub issue https://github.com/Microsoft/web-build-tools/issues/1017
   for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
-    const apiExtractorJson =
-    {
-      "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/api-extractor.schema.json",
-      "compiler" : {
-        "configType": "tsconfig",
-        "rootFolder": "."
+    const apiExtractorJson = {
+      '$schema': 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
+
+      'mainEntryPointFile': `./lib/${scenarioFolderName}/index.d.ts`,
+
+      'apiReport': {
+        'enabled': true,
+        'reportFolder': `./etc/test-outputs/${scenarioFolderName}`,
+        'tempFolder': './temp'
       },
 
-      "apiReviewFile": {
-        "enabled": true,
-        "apiReviewFolder": `./etc/test-outputs/${scenarioFolderName}`,
-        "tempFolder": "./temp"
+      'dtsRollup': {
+        'enabled': true,
+
+        'untrimmedFilePath': `./etc/test-outputs/${scenarioFolderName}/rollup.d.ts`
       },
 
-      "apiJsonFile": {
-        "enabled": true,
-        "outputFolder": `./etc/test-outputs/${scenarioFolderName}`
+      'docModel': {
+        'enabled': true,
+        'apiJsonFilePath': `./etc/test-outputs/${scenarioFolderName}/<unscopedPackageName>.api.json`
       },
 
-      "dtsRollup": {
-        "enabled": true,
-        "trimming": false,
-
-        "publishFolder": ".",
-
-        "publishFolderForInternal": ".",
-        "publishFolderForBeta": ".",
-        "publishFolderForPublic": ".",
-
-        "mainDtsRollupPath": `./etc/test-outputs/${scenarioFolderName}/rollup.d.ts`
-      },
-
-      "project": {
-        "entryPointSourceFile": `./lib/${scenarioFolderName}/index.d.ts`
-      },
-
-      "messages": {
-        "extractorMessageReporting": {
+      'messages': {
+        'extractorMessageReporting': {
           // For test purposes, write these warnings into .api.md
           // TODO: Capture the full list of warnings in the tracked test output file
-          "ae-cyclic-inherit-doc": {
-            "logLevel": "warning",
-            "addToApiReviewFile": true
+          'ae-cyclic-inherit-doc': {
+            'logLevel': 'warning',
+            'addToApiReviewFile': true
           },
-          "ae-unresolved-link": {
-            "logLevel": "warning",
-            "addToApiReviewFile": true
+          'ae-unresolved-link': {
+            'logLevel': 'warning',
+            'addToApiReviewFile': true
           }
         }
       },
 
-      "testMode": true
+      'testMode': true
     };
 
     const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
