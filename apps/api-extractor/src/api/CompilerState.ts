@@ -15,6 +15,20 @@ import { IExtractorInvokeOptions } from './Extractor';
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
 
 /**
+ * Options for {@link CompilerState.create}
+ * @public
+ */
+export interface ICompilerStateCreateOptions {
+  /** {@inheritDoc IExtractorInvokeOptions.typescriptCompilerFolder} */
+  typescriptCompilerFolder?: string;
+
+  /**
+   * Additional .d.ts files to include in the analysis.
+   */
+  additionalEntryPoints?: string[];
+}
+
+/**
  * This class represents the TypeScript compiler state.  This allows an optimization where multiple invocations
  * of API Extractor can reuse the same TypeScript compiler analysis.
  *
@@ -33,7 +47,7 @@ export class CompilerState {
   /**
    * Create a compiler state for use with the specified `IExtractorInvokeOptions`.
    */
-  public static create(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): CompilerState {
+  public static create(extractorConfig: ExtractorConfig, options?: ICompilerStateCreateOptions): CompilerState {
 
     let tsconfig: {} | undefined = extractorConfig.overrideTsconfig;
     if (!tsconfig) {
@@ -57,10 +71,13 @@ export class CompilerState {
 
     CompilerState._updateCommandLineForTypescriptPackage(commandLine, options);
 
-    // Append the mainEntryPointFile and remove any non-declaration files from the list
-    const analysisFilePaths: string[] = CompilerState._generateFilePathsForAnalysis(
-      commandLine.fileNames.concat(extractorConfig.mainEntryPointFile)
-    );
+    const inputFilePaths: string[] = commandLine.fileNames.concat(extractorConfig.mainEntryPointFile);
+    if (options && options.additionalEntryPoints) {
+      inputFilePaths.push(...options.additionalEntryPoints);
+    }
+
+    // Append the entry points and remove any non-declaration files from the list
+    const analysisFilePaths: string[] = CompilerState._generateFilePathsForAnalysis(inputFilePaths);
 
     const program: ts.Program = ts.createProgram(analysisFilePaths, commandLine.options);
 

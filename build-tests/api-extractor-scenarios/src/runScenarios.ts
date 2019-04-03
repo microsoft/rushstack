@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import { JsonFile, Executable, FileSystem } from '@microsoft/node-core-library';
+import { Extractor, ExtractorConfig, CompilerState, ExtractorResult } from '@microsoft/api-extractor';
 
 function executeCommand(command: string, args: string[]): void {
   console.log(`---> ${command} ${args.join(' ')}`);
@@ -26,13 +28,18 @@ export function runScenarios(buildConfigPath: string): void {
 
   const apiExtractorBinary = 'node_modules/.bin/api-extractor';
 
+  const entryPoints: string[] = [];
+
   // TODO: Eliminate this workaround
   // See GitHub issue https://github.com/Microsoft/web-build-tools/issues/1017
   for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
+    const entryPoint: string = `./lib/${scenarioFolderName}/index.d.ts`;
+    entryPoints.push(path.resolve(entryPoint));
+
     const apiExtractorJson = {
       '$schema': 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
 
-      'mainEntryPointFile': `./lib/${scenarioFolderName}/index.d.ts`,
+      'mainEntryPointFile': entryPoint,
 
       'apiReport': {
         'enabled': true,
@@ -80,11 +87,21 @@ export function runScenarios(buildConfigPath: string): void {
       { ensureFolderExists: true });
   }
 
+  let compilerState: CompilerState | undefined = undefined;
+
   for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
     const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
 
     // Run the API Extractor command-line
-    executeCommand(apiExtractorBinary, ['run', '--local', '--config', apiExtractorJsonPath]);
+    const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(apiExtractorJsonPath);
+
+    if (!compilerState) {
+      compilerState = CompilerState.create(extractorConfig, {
+        additionalEntryPoints: entryPoints
+      });
+    }
+
+    Extractor.invoke(extractorConfig, { localBuild: true, compilerState });
   }
 
 }

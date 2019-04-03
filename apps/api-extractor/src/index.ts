@@ -9,7 +9,7 @@
  * @packageDocumentation
  */
 
-export { CompilerState } from './api/CompilerState';
+export { CompilerState, ICompilerStateCreateOptions } from './api/CompilerState';
 
 export {
   Extractor,

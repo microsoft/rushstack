@@ -11,7 +11,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 
 // @public
 export class CompilerState {
-    static create(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): CompilerState;
+    static create(extractorConfig: ExtractorConfig, options?: ICompilerStateCreateOptions): CompilerState;
     readonly program: ts.Program;
     }
 
@@ -112,6 +112,12 @@ export class ExtractorResult {
     readonly extractorConfig: ExtractorConfig;
     readonly succeeded: boolean;
     readonly warningCount: number;
+}
+
+// @public
+export interface ICompilerStateCreateOptions {
+    additionalEntryPoints?: string[];
+    typescriptCompilerFolder?: string;
 }
 
 // @public
