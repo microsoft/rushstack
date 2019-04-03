@@ -35,14 +35,14 @@ export class ExtractorConfig {
     _getShortFilePath(absolutePath: string): string;
     static hasDtsFileExtension(filePath: string): boolean;
     static readonly jsonSchema: JsonSchema;
-    static loadAndParseConfig(jsonFilePath: string): ExtractorConfig;
+    static loadAndParseConfig(configJsonFilePath: string): ExtractorConfig;
     static loadJsonFileWithInheritance(jsonFilePath: string): Partial<IExtractorConfig>;
     mainEntryPointFile: string;
     messages: IExtractorMessagesConfig;
     overrideTsconfig?: {};
-    packageFolder: string;
-    packageJson: INodePackageJson;
-    static parseConfigObject(options: IExtractorConfigParseConfigOptions): ExtractorConfig;
+    packageJson: INodePackageJson | undefined;
+    packageJsonFullPath: string | undefined;
+    static parseConfigObject(options: IExtractorConfigParseConfigObjectOptions): ExtractorConfig;
     publicTrimmedFilePath: string;
     reportFilePath: string;
     rollupEnabled: boolean;
@@ -147,13 +147,11 @@ export interface IExtractorConfig {
 }
 
 // @public
-export interface IExtractorConfigParseConfigOptions {
-    // (undocumented)
-    mergedConfig: Partial<IExtractorConfig>;
-    // (undocumented)
-    mergedConfigFullPath: string;
-    // (undocumented)
-    packageJsonPath: string | undefined;
+export interface IExtractorConfigParseConfigObjectOptions {
+    configObject: Partial<IExtractorConfig>;
+    configObjectFullPath: string | undefined;
+    packageJson?: INodePackageJson | undefined;
+    packageJsonFullPath: string | undefined;
 }
 
 // @public

@@ -125,9 +125,9 @@ export class RunAction extends CommandLineAction {
     const mergedConfig: Partial<IExtractorConfig> = ExtractorConfig.loadJsonFileWithInheritance(configFilename);
 
     const extractorConfig: ExtractorConfig = ExtractorConfig.parseConfigObject({
-      mergedConfig,
-      mergedConfigFullPath: configFilename,
-      packageJsonPath: undefined
+      configObject: mergedConfig,
+      configObjectFullPath: configFilename,
+      packageJsonFullPath: lookup.tryGetPackageFolderFor(configFilename)
     });
 
     const extractorResult: ExtractorResult = Extractor.invokeUsingConfig(extractorConfig,
