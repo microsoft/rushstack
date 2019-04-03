@@ -7,17 +7,16 @@ import { FileSystem } from '@microsoft/node-core-library';
 import { CommandLineAction } from '@microsoft/ts-command-line';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
-
-const AE_CONFIG_FILENAME: string = 'api-extractor.json';
+import { ExtractorConfig } from '../api/ExtractorConfig';
 
 export class InitAction extends CommandLineAction {
 
   constructor(parser: ApiExtractorCommandLine) {
     super({
       actionName: 'init',
-      summary: `Create an ${AE_CONFIG_FILENAME} config file`,
+      summary: `Create an ${ExtractorConfig.FILENAME} config file`,
       documentation: `Use this command when setting up API Extractor for a new project.  It writes an`
-        + ` ${AE_CONFIG_FILENAME} config file template with code comments that describe all the settings.`
+        + ` ${ExtractorConfig.FILENAME} config file template with code comments that describe all the settings.`
         + ` The file will be written in the current directory.`
     });
   }
@@ -28,7 +27,7 @@ export class InitAction extends CommandLineAction {
 
   protected onExecute(): Promise<void> { // override
     const inputFilePath: string = path.resolve(__dirname, '../schemas/api-extractor-template.json');
-    const outputFilePath: string = path.resolve(AE_CONFIG_FILENAME);
+    const outputFilePath: string = path.resolve(ExtractorConfig.FILENAME);
 
     if (FileSystem.exists(outputFilePath)) {
       console.log(colors.red('The output file already exists:'));

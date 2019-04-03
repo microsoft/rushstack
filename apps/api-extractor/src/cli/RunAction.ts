@@ -16,12 +16,11 @@ import {
   CommandLineFlagParameter
 } from '@microsoft/ts-command-line';
 
-import { Extractor } from '../api/Extractor';
+import { Extractor, ExtractorResult } from '../api/Extractor';
 import { IExtractorConfig } from '../api/IExtractorConfig';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
-
-const AE_CONFIG_FILENAME: string = 'api-extractor.json';
+import { ExtractorConfig } from '../api/ExtractorConfig';
 
 export class RunAction extends CommandLineAction {
   private _configFileParameter: CommandLineStringParameter;
@@ -41,7 +40,7 @@ export class RunAction extends CommandLineAction {
       parameterLongName: '--config',
       parameterShortName: '-c',
       argumentName: 'FILE',
-      description: `Use the specified ${AE_CONFIG_FILENAME} file path, rather than guessing its location`
+      description: `Use the specified ${ExtractorConfig.FILENAME} file path, rather than guessing its location`
     });
 
     this._localParameter = this.defineFlagParameter({
@@ -106,36 +105,48 @@ export class RunAction extends CommandLineAction {
       const baseFolder: string = packageFolder ? packageFolder : process.cwd();
 
       // First try the standard "config" subfolder:
-      configFilename = path.join(baseFolder, 'config', AE_CONFIG_FILENAME);
+      configFilename = path.join(baseFolder, 'config', ExtractorConfig.FILENAME);
       if (FileSystem.exists(configFilename)) {
-        if (FileSystem.exists(path.join(baseFolder, AE_CONFIG_FILENAME))) {
-          throw new Error(`Found conflicting ${AE_CONFIG_FILENAME} files in "." and "./config" folders`);
+        if (FileSystem.exists(path.join(baseFolder, ExtractorConfig.FILENAME))) {
+          throw new Error(`Found conflicting ${ExtractorConfig.FILENAME} files in "." and "./config" folders`);
         }
       } else {
         // Otherwise try the top-level folder
-        configFilename = path.join(baseFolder, AE_CONFIG_FILENAME);
+        configFilename = path.join(baseFolder, ExtractorConfig.FILENAME);
 
         if (!FileSystem.exists(configFilename)) {
-          throw new Error(`Unable to find an ${AE_CONFIG_FILENAME} file`);
+          throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
         }
       }
 
       console.log(`Using configuration from ${configFilename}` + os.EOL + os.EOL);
     }
 
-    const config: IExtractorConfig = Extractor.loadConfigObject(configFilename);
-    const extractor: Extractor = new Extractor(
-      config,
+    const mergedConfig: Partial<IExtractorConfig> = ExtractorConfig.loadJsonFileWithInheritance(configFilename);
+
+    const extractorConfig: ExtractorConfig = ExtractorConfig.parseConfigObject({
+      mergedConfig,
+      mergedConfigFullPath: configFilename,
+      packageJsonPath: undefined
+    });
+
+    const extractorResult: ExtractorResult = Extractor.invokeUsingConfig(extractorConfig,
       {
         localBuild: this._localParameter.value,
         typescriptCompilerFolder: typescriptCompilerFolder
       }
     );
 
-    if (!extractor.processProject()) {
-      console.log(os.EOL + colors.yellow('API Extractor completed with errors or warnings'));
+    if (!extractorResult.succeeded) {
       process.exitCode = 1;
+
+      if (extractorResult.errorCount > 0) {
+        console.log(os.EOL + colors.red('API Extractor completed with errors'));
+      } else {
+        console.log(os.EOL + colors.yellow('API Extractor completed with warnings'));
+      }
     }
+
     return Promise.resolve();
   }
 }

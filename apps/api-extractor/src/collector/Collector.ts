@@ -15,12 +15,7 @@ import {
 } from '@microsoft/api-extractor-model';
 
 import { ILogger } from '../api/ILogger';
-import {
-  IExtractorPoliciesConfig,
-  IExtractorValidationRulesConfig,
-  ExtractorValidationRulePolicy,
-  IExtractorConfig
-} from '../api/IExtractorConfig';
+import { IExtractorConfig } from '../api/IExtractorConfig';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 import { CollectorEntity } from './CollectorEntity';
@@ -78,9 +73,6 @@ export class Collector {
   public readonly packageJsonLookup: PackageJsonLookup;
   public readonly messageRouter: MessageRouter;
 
-  public readonly policies: IExtractorPoliciesConfig;
-  public readonly validationRules: IExtractorValidationRulesConfig;
-
   public readonly logger: ILogger;
 
   public readonly workingPackage: WorkingPackage;
@@ -102,9 +94,6 @@ export class Collector {
   constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
     this.messageRouter = new MessageRouter(options.extractorConfig.messages || { });
-
-    this.policies = options.extractorConfig.policies || { };
-    this.validationRules = options.extractorConfig.validationRules || { };
 
     this.logger = options.logger;
     this._program = options.program;
@@ -515,22 +504,20 @@ export class Collector {
     }
 
     if (effectiveReleaseTag === ReleaseTag.None) {
-      if (this.validationRules.missingReleaseTags !== ExtractorValidationRulePolicy.allow) {
-        if (!astSymbol.isExternal) { // for now, don't report errors for external code
-          // Don't report missing release tags for forgotten exports
-          const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
-          if (entity && entity.exported) {
-            // We also don't report errors for the default export of an entry point, since its doc comment
-            // isn't easy to obtain from the .d.ts file
-            if (astSymbol.rootAstSymbol.localName !== '_default') {
+      if (!astSymbol.isExternal) { // for now, don't report errors for external code
+        // Don't report missing release tags for forgotten exports
+        const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
+        if (entity && entity.exported) {
+          // We also don't report errors for the default export of an entry point, since its doc comment
+          // isn't easy to obtain from the .d.ts file
+          if (astSymbol.rootAstSymbol.localName !== '_default') {
 
-              this.messageRouter.addAnalyzerIssue(
-                ExtractorMessageId.MissingReleaseTag,
-                `"${entity.astEntity.localName}" is exported by the package, but it is missing `
-                + `a release tag (@alpha, @beta, @public, or @internal)`,
-                astSymbol
-              );
-            }
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.MissingReleaseTag,
+              `"${entity.astEntity.localName}" is exported by the package, but it is missing `
+              + `a release tag (@alpha, @beta, @public, or @internal)`,
+              astSymbol
+            );
           }
         }
       }

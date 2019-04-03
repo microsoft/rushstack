@@ -39,7 +39,7 @@ export interface IExtractorCompilerConfig {
   overrideTsconfig?: { };
 
   /**
-   * This option causes the compiler to be invoked with the --skipLibCheck option.
+   * This option causes the compiler to be invoked with the `--skipLibCheck` option.
    *
    * @remarks
    * This option is not recommended and may cause API Extractor to produce incomplete or incorrect declarations,

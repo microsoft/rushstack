@@ -12,12 +12,14 @@ import {
   PackageJsonLookup,
   INodePackageJson,
   PackageName,
-  Text
+  Text,
+  InternalError
 } from '@microsoft/node-core-library';
 import {
   IExtractorConfig,
   IExtractorMessagesConfig
 } from './IExtractorConfig';
+import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 
 /**
  * Tokens used during variable expansion of path fields from api-extractor.json.
@@ -26,19 +28,30 @@ import {
 export interface IExtractorConfigTokens {
   /**
    * The `<unscopedPackageName>` token returns the project's NPM package name, without any NPM scope.
-   * If there is no associated package.json file, then the value is "unknown-package".
+   * If there is no associated package.json file, then the value is `unknown-package`.
    *
-   * Example: "my-project"
+   * Example: `my-project`
    */
   unscopedPackageName: string;
 
   /**
    * The `<packageName>` token returns the project's full NPM package name including any NPM scope.
-   * If there is no associated package.json file, then the value is "unknown-package".
+   * If there is no associated package.json file, then the value is `unknown-package`.
    *
-   * Example: "@scope/my-project"
+   * Example: `@scope/my-project`
    */
   packageName: string;
+}
+
+/**
+ * Options for {@link ExtractorConfig.parseConfig}.
+ *
+ * @public
+ */
+export interface IExtractorConfigParseConfigOptions {
+  mergedConfig: Partial<IExtractorConfig>;
+  mergedConfigFullPath: string;
+  packageJsonPath: string | undefined;
 }
 
 /**
@@ -49,14 +62,38 @@ export class ExtractorConfig {
   /**
    * The JSON Schema for API Extractor config file (api-extractor.schema.json).
    */
-  public static jsonSchema: JsonSchema = JsonSchema.fromFile(
+  public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../schemas/api-extractor.schema.json'));
 
-  private static _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
+  /**
+   * The config file name "api-extractor.json".
+   */
+  public static readonly FILENAME: string = 'api-extractor.json';
+
+  private static readonly _defaultConfig: Partial<IExtractorConfig> = JsonFile.load(path.join(__dirname,
     '../schemas/api-extractor-defaults.json'));
+
+  private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;
 
   /** {@inheritDoc IExtractorCompilerConfig.rootFolder} */
   public rootFolder: string = '';
+
+  /**
+   * Returns the folder for the package.json file of the working package.
+   *
+   * @remarks
+   * If the entry point is `C:\Folder\project\src\index.ts` and the nearest package.json
+   * is `C:\Folder\project\package.json`, then the packageFolder is `C:\Folder\project`
+   */
+  public packageFolder: string = '';
+
+  /**
+   * The parsed package.json file for the working package.
+   */
+  public packageJson: INodePackageJson;
+
+  /** {@inheritDoc IExtractorConfigTokens} */
+  public readonly tokens: IExtractorConfigTokens;
 
   /** {@inheritDoc IExtractorConfig.mainEntryPointFile} */
   public mainEntryPointFile: string = '';
@@ -100,18 +137,57 @@ export class ExtractorConfig {
   /** {@inheritDoc IExtractorConfig.testMode} */
   public testMode: boolean = false;
 
-  /** {@inheritDoc IExtractorConfigTokens} */
-  public readonly tokens: IExtractorConfigTokens = {
-    unscopedPackageName: 'unknown-package',
-    packageName: 'unknown-package'
-  };
+  public constructor() {
+    this.packageJson = { name: 'unknown-package' };
+    this.tokens = {
+      unscopedPackageName: 'unknown-package',
+      packageName: 'unknown-package'
+    };
+  }
 
   /**
+   * Returns a simplified file path for use in error messages.
+   * @internal
+   */
+  public _getShortFilePath(absolutePath: string): string {
+    if (!path.isAbsolute(absolutePath)) {
+      throw new InternalError('Expected absolute path: ' + absolutePath);
+    }
+    return path.relative(this.rootFolder, absolutePath).replace(/\\/g, '/');
+  }
+
+  /**
+   * Loads the api-extractor.json config file from the specified file path, and returns the parsed result.
+   *
+   * @remarks
+   * Loads the api-extractor.json config file from the specified file path.
+   * If the "extends" field is present, the referenced file(s) will be merged,
+   * along with the API Extractor defaults.
+   * The result is parsed and returned.
+   */
+  public static loadAndParseConfig(jsonFilePath: string): ExtractorConfig {
+    const mergedConfig: Partial<IExtractorConfig> = ExtractorConfig.loadJsonFileWithInheritance(jsonFilePath);
+
+    const extractorConfig: ExtractorConfig = ExtractorConfig.parseConfigObject({
+      mergedConfig,
+      mergedConfigFullPath: jsonFilePath,
+      packageJsonPath: undefined
+    });
+
+    return extractorConfig;
+  }
+
+  /**
+   * Performs only the first half of {@link ExtractorConfig.loadAndParseFile}, providing an opportunity to
+   * modify the object before it is pssed to {@link ExtractorConfig.parseConfigObject}.
+   *
+   * @remarks
+   *
    * Loads the api-extractor.json config file from the specified file path.
    * If the "extends" field is present, the referenced file(s) will be merged,
    * along with the API Extractor defaults.
    */
-  public static loadFileWithInheritance(jsonFilePath: string): Partial<IExtractorConfig> {
+  public static loadJsonFileWithInheritance(jsonFilePath: string): Partial<IExtractorConfig> {
     // Set to keep track of config files which have been processed.
     const visitedPaths: Set<string> = new Set<string>();
 
@@ -168,10 +244,13 @@ export class ExtractorConfig {
   }
 
   /**
-   * Validates that the `mergedConfig` is a complete configuration, and then expands any variables/paths
-   * to their final values, returning an `ExtractorConfig` object.
+   * Parses the api-extractor.json configuration provided as a runtime object, rather than reading it from disk.
+   * This allows configurations to be customized or constructed programmatically.
    */
-  public static parseConfig(mergedConfig: Partial<IExtractorConfig>, mergedConfigFullPath: string): ExtractorConfig {
+  public static parseConfigObject(options: IExtractorConfigParseConfigOptions): ExtractorConfig {
+    const mergedConfigFullPath: string = options.mergedConfigFullPath;
+    const mergedConfig: Partial<IExtractorConfig> = options.mergedConfig;
+
     if (!path.isAbsolute(mergedConfigFullPath)) {
       throw new Error('filenameForErrors must be an absolute path');
     }
@@ -181,6 +260,7 @@ export class ExtractorConfig {
     const result: ExtractorConfig = new ExtractorConfig();
 
     try {
+
       if (!mergedConfig.compiler) {
         // A merged configuration should have this
         throw new Error('The "compiler" section is missing');
@@ -200,10 +280,11 @@ export class ExtractorConfig {
             break;
           }
           const parentFolder: string = path.dirname(currentFolder);
-          if (currentFolder === '' || currentFolder === parentFolder) {
+          if (parentFolder === '' || parentFolder === currentFolder) {
             throw new Error('The rootFolder was set to "<lookup>", but a tsconfig.json file cannot be'
               + ' found in this folder or any parent folder.');
           }
+          currentFolder = parentFolder;
         }
       } else {
         if (!mergedConfig.compiler.rootFolder) {
@@ -219,11 +300,14 @@ export class ExtractorConfig {
         result.rootFolder = mergedConfig.compiler.rootFolder;
       }
 
-      const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-      const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadNodePackageJsonFor(mergedConfigFullPath);
-      if (packageJson) {
-        result.tokens.packageName = packageJson.name;
-        result.tokens.unscopedPackageName = PackageName.getUnscopedName(packageJson.name);
+      if (options.packageJsonPath !== undefined) {
+        result.packageFolder = path.dirname(options.packageJsonPath);
+        const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+        result.packageJson = packageJsonLookup.loadNodePackageJson(options.packageJsonPath);
+        result.tokens.packageName = result.packageJson.name;
+        result.tokens.unscopedPackageName = PackageName.getUnscopedName(result.packageJson.name);
+      } else {
+        result.packageFolder = result.rootFolder;
       }
 
       if (!mergedConfig.mainEntryPointFile) {
@@ -231,6 +315,11 @@ export class ExtractorConfig {
         throw new Error('mainEntryPointFile is missing');
       }
       result.mainEntryPointFile = result._resolvePathWithTokens('mainEntryPointFile', mergedConfig.mainEntryPointFile);
+
+      if (!ExtractorConfig.hasDtsFileExtension(result.mainEntryPointFile)) {
+        throw new Error('The mainEntryPointFile is not a declaration file: ' + result.mainEntryPointFile);
+      }
+
       if (!FileSystem.exists(result.mainEntryPointFile)) {
         throw new Error('The mainEntryPointFile does not exist: ' + result.mainEntryPointFile);
       }
@@ -268,8 +357,17 @@ export class ExtractorConfig {
 
       if (mergedConfig.tsdocMetadata) {
         result.tsdocMetadataEnabled = !!mergedConfig.tsdocMetadata.enabled;
-        result.tsdocMetadataFilePath = result._resolvePathWithTokens('tsdocMetadataFilePath',
+
+        if (mergedConfig.compiler.rootFolder.trim() === '<lookup>') {
+          result.tsdocMetadataFilePath = PackageMetadataManager.resolveTsdocMetadataPath(
+            result.packageFolder,
+            result.packageJson,
+            result.tsdocMetadataFilePath
+          );
+        } else {
+          result.tsdocMetadataFilePath = result._resolvePathWithTokens('tsdocMetadataFilePath',
           mergedConfig.tsdocMetadata.tsdocMetadataFilePath);
+        }
       }
 
       if (mergedConfig.messages) {
@@ -281,6 +379,13 @@ export class ExtractorConfig {
       throw new Error(`Error parsing ${mergedConfigFullPath}:\n` + e.message);
     }
     return result;
+  }
+
+  /**
+   * Returns true if the specified file path has the ".d.ts" file extension.
+   */
+  public static hasDtsFileExtension(filePath: string): boolean {
+    return ExtractorConfig._declarationFileExtensionRegExp.test(filePath);
   }
 
   private _resolvePathWithTokens(fieldName: string, value: string | undefined): string {
@@ -298,8 +403,8 @@ export class ExtractorConfig {
   }
 
   /**
-   * Given a path string that may have originally contained expandable tokens such as "<rootFolder>",
-   * this reports an error if any token-looking substrings remain after expansion (e.g. "c:\blah\<invalid>\blah").
+   * Given a path string that may have originally contained expandable tokens such as `<rootFolder>"`
+   * this reports an error if any token-looking substrings remain after expansion (e.g. `c:\blah\<invalid>\blah`).
    */
   private static _rejectAnyTokensInPath(value: string, fieldName: string): void {
     if (value.indexOf('<') < 0 && value.indexOf('>') < 0) {
@@ -308,11 +413,10 @@ export class ExtractorConfig {
 
     // Can we determine the name of a token?
     const tokenRegExp: RegExp = /(\<[^<]*?\>)/;
-    const match = tokenRegExp.exec(value);
+    const match: RegExpExecArray | null = tokenRegExp.exec(value);
     if (match) {
       throw new Error(`The ${fieldName} value contains an unrecognized token "${match[1]}"`);
     }
     throw new Error(`The ${fieldName} value contains extra token characters ("<" or ">"): ${value}`);
   }
 }
-

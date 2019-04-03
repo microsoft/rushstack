@@ -9,22 +9,32 @@
  * @packageDocumentation
  */
 
-export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './api/Extractor';
+export { CompilerState } from './api/CompilerState';
+
+export {
+  Extractor,
+  IExtractorInvokeOptions,
+  ExtractorResult
+} from './api/Extractor';
+
+export {
+  IExtractorConfigTokens,
+  IExtractorConfigParseConfigOptions,
+  ExtractorConfig
+} from './api/ExtractorConfig';
+
 export {
   ExtractorMessage,
   IExtractorMessageProperties,
   ExtractorMessageCategory
 } from './api/ExtractorMessage';
+
 export { ExtractorMessageId } from './api/ExtractorMessageId';
+
 export {
-  IExtractorTsconfigCompilerConfig,
-  IExtractorRuntimeCompilerConfig,
-  IExtractorProjectConfig,
-  IExtractorPoliciesConfig,
-  ExtractorValidationRulePolicy,
-  IExtractorValidationRulesConfig,
-  IExtractorApiReviewFileConfig,
-  IExtractorApiJsonFileConfig,
+  IExtractorCompilerConfig,
+  IExtractorApiReportConfig,
+  IExtractorDocModelConfig,
   IExtractorDtsRollupConfig,
   IExtractorTsdocMetadataConfig,
   ExtractorMessageLogLevel,
