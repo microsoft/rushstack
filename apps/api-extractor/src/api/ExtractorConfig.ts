@@ -87,6 +87,29 @@ export interface IExtractorConfigParseConfigObjectOptions {
   packageJsonFullPath: string | undefined;
 }
 
+interface IExtractorConfigParameters {
+  rootFolder: string;
+  packageJson: INodePackageJson | undefined;
+  packageJsonFullPath: string | undefined;
+  tokens: IExtractorConfigTokens;
+  mainEntryPointFile: string;
+  overrideTsconfig: { } | undefined;
+  skipLibCheck: boolean;
+  apiReportEnabled: boolean;
+  reportFilePath: string;
+  tempReportFilePath: string;
+  docModelEnabled: boolean;
+  apiJsonFilePath: string;
+  rollupEnabled: boolean;
+  untrimmedFilePath: string;
+  betaTrimmedFilePath: string;
+  publicTrimmedFilePath: string;
+  tsdocMetadataEnabled: boolean;
+  tsdocMetadataFilePath: string;
+  messages: IExtractorMessagesConfig;
+  testMode: boolean;
+}
+
 /**
  * The `ExtractorConfig` class loads, validates, interprets, and represents the api-extractor.json config file.
  * @public
@@ -109,71 +132,86 @@ export class ExtractorConfig {
   private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;
 
   /** {@inheritDoc IExtractorCompilerConfig.rootFolder} */
-  public rootFolder: string = '';
+  public readonly rootFolder: string;
 
   /**
    * The parsed package.json file for the working package, or undefined if API Extractor was invoked without
    * a package.json file.
    */
-  public packageJson: INodePackageJson | undefined = undefined;
+  public readonly packageJson: INodePackageJson | undefined;
 
   /**
    * The absolute path of the file that package.json was loaded from, or undefined if API Extractor was invoked without
    * a package.json file.
    */
-  public packageJsonFullPath: string | undefined = undefined;
+  public readonly packageJsonFullPath: string | undefined;
 
   /** {@inheritDoc IExtractorConfigTokens} */
   public readonly tokens: IExtractorConfigTokens;
 
   /** {@inheritDoc IExtractorConfig.mainEntryPointFile} */
-  public mainEntryPointFile: string = '';
+  public readonly mainEntryPointFile: string;
 
   /** {@inheritDoc IExtractorCompilerConfig.overrideTsconfig} */
-  public overrideTsconfig?: { } = undefined;
+  public readonly overrideTsconfig: { } | undefined;
 
   /** {@inheritDoc IExtractorCompilerConfig.skipLibCheck} */
-  public skipLibCheck: boolean = false;
+  public readonly skipLibCheck: boolean;
 
   /** {@inheritDoc IExtractorApiReportConfig.enabled} */
-  public apiReportEnabled: boolean = false;
+  public readonly apiReportEnabled: boolean;
 
   /** The `reportFolder` path combined with the `reportFileName`. */
-  public reportFilePath: string = '';
+  public readonly reportFilePath: string;
   /** The `tempFolder` path combined with the `reportFileName`. */
-  public tempReportFilePath: string = '';
+  public readonly tempReportFilePath: string;
 
   /** {@inheritDoc IExtractorDocModelConfig.enabled} */
-  public docModelEnabled: boolean = false;
+  public readonly docModelEnabled: boolean;
   /** {@inheritDoc IExtractorDocModelConfig.apiJsonFilePath} */
-  public apiJsonFilePath: string = '';
+  public readonly apiJsonFilePath: string;
 
   /** {@inheritDoc IExtractorDtsRollupConfig.enabled} */
-  public rollupEnabled: boolean = false;
+  public readonly rollupEnabled: boolean;
   /** {@inheritDoc IExtractorDtsRollupConfig.untrimmedFilePath} */
-  public untrimmedFilePath: string = '';
+  public readonly untrimmedFilePath: string;
   /** {@inheritDoc IExtractorDtsRollupConfig.betaTrimmedFilePath} */
-  public betaTrimmedFilePath: string = '';
+  public readonly betaTrimmedFilePath: string;
   /** {@inheritDoc IExtractorDtsRollupConfig.publicTrimmedFilePath} */
-  public publicTrimmedFilePath: string = '';
+  public readonly publicTrimmedFilePath: string;
 
   /** {@inheritDoc IExtractorTsdocMetadataConfig.enabled} */
-  public tsdocMetadataEnabled: boolean = false;
+  public readonly tsdocMetadataEnabled: boolean;
   /** {@inheritDoc IExtractorTsdocMetadataConfig.tsdocMetadataFilePath} */
-  public tsdocMetadataFilePath: string = '';
+  public readonly tsdocMetadataFilePath: string;
 
   /** {@inheritDoc IExtractorConfig.messages} */
-  public messages: IExtractorMessagesConfig = { };
+  public readonly messages: IExtractorMessagesConfig;
 
   /** {@inheritDoc IExtractorConfig.testMode} */
-  public testMode: boolean = false;
+  public readonly testMode: boolean;
 
-  public constructor() {
-    this.packageJson = { name: 'unknown-package' };
-    this.tokens = {
-      unscopedPackageName: 'unknown-package',
-      packageName: 'unknown-package'
-    };
+  private constructor(parameters: IExtractorConfigParameters) {
+    this.rootFolder = parameters.rootFolder;
+    this.packageJson = parameters.packageJson;
+    this.packageJsonFullPath = parameters.packageJsonFullPath;
+    this.tokens = parameters.tokens;
+    this.mainEntryPointFile = parameters.mainEntryPointFile;
+    this.overrideTsconfig = parameters.overrideTsconfig;
+    this.skipLibCheck = parameters.skipLibCheck;
+    this.apiReportEnabled = parameters.apiReportEnabled;
+    this.reportFilePath = parameters.reportFilePath;
+    this.tempReportFilePath = parameters.tempReportFilePath;
+    this.docModelEnabled = parameters.docModelEnabled;
+    this.apiJsonFilePath = parameters.apiJsonFilePath;
+    this.rollupEnabled = parameters.rollupEnabled;
+    this.untrimmedFilePath = parameters.untrimmedFilePath;
+    this.betaTrimmedFilePath = parameters.betaTrimmedFilePath;
+    this.publicTrimmedFilePath = parameters.publicTrimmedFilePath;
+    this.tsdocMetadataEnabled = parameters.tsdocMetadataEnabled;
+    this.tsdocMetadataFilePath = parameters.tsdocMetadataFilePath;
+    this.messages = parameters.messages;
+    this.testMode = parameters.testMode;
   }
 
   /**
@@ -295,16 +333,16 @@ export class ExtractorConfig {
 
     ExtractorConfig.jsonSchema.validateObject(configObject, filenameForErrors);
 
-    const result: ExtractorConfig = new ExtractorConfig();
-
-    if (options.packageJsonFullPath) {
-      if (path.isAbsolute(options.packageJsonFullPath)) {
+    let packageJson: INodePackageJson | undefined = undefined;
+    const packageJsonFullPath: string | undefined = options.packageJsonFullPath;
+    if (packageJsonFullPath) {
+      if (path.isAbsolute(packageJsonFullPath)) {
         throw new Error('packageJsonFullPath must be an absolute path');
       }
 
       if (!options.packageJson) {
         const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-        result.packageJson = packageJsonLookup.loadNodePackageJson(options.packageJsonFullPath);
+        packageJson = packageJsonLookup.loadNodePackageJson(packageJsonFullPath);
       }
     }
 
@@ -315,6 +353,7 @@ export class ExtractorConfig {
         throw new Error('The "compiler" section is missing');
       }
 
+      let rootFolder: string;
       if (configObject.compiler.rootFolder.trim() === '<lookup>') {
         if (!options.configObjectFullPath) {
           throw new Error('The "<lookup>" token cannot be expanded because configObjectFullPath was not specified');
@@ -328,7 +367,7 @@ export class ExtractorConfig {
         for (; ; ) {
           const tsconfigPath: string = path.join(currentFolder, 'tsconfig.json');
           if (FileSystem.exists(tsconfigPath)) {
-            result.rootFolder = tsconfigPath;
+            rootFolder = tsconfigPath;
             break;
           }
           const parentFolder: string = path.dirname(currentFolder);
@@ -349,33 +388,53 @@ export class ExtractorConfig {
           throw new Error('The specified rootFolder does not exist: ' + configObject.compiler.rootFolder);
         }
 
-        result.rootFolder = configObject.compiler.rootFolder;
+        rootFolder = configObject.compiler.rootFolder;
       }
 
-      if (result.packageJson) {
-        result.tokens.packageName = result.packageJson.name;
-        result.tokens.unscopedPackageName = PackageName.getUnscopedName(result.packageJson.name);
+      const tokens: IExtractorConfigTokens = {
+        unscopedPackageName: 'unknown-package',
+        packageName: 'unknown-package'
+      };
+
+      // Closure for `rootFolder` and `tokens`
+      function _resolvePathWithTokens(fieldName: string, value: string | undefined): string {
+        value = value ? value.trim() : '';
+        if (value !== '') {
+          value = Text.replaceAll(value, '<unscopedPackageName>', tokens.unscopedPackageName);
+          value = Text.replaceAll(value, '<packageName>', tokens.packageName);
+          if (value.indexOf('<lookup>') >= 0) {
+            throw new Error(`The ${fieldName} value incorrectly uses the "<lookup>" token`);
+          }
+          ExtractorConfig._rejectAnyTokensInPath(value, fieldName);
+          value = path.resolve(this.rootFolder, value);
+        }
+        return value;
+      }
+
+      if (packageJson) {
+        tokens.packageName = packageJson.name;
+        tokens.unscopedPackageName = PackageName.getUnscopedName(packageJson.name);
       }
 
       if (!configObject.mainEntryPointFile) {
         // A merged configuration should have this
         throw new Error('mainEntryPointFile is missing');
       }
-      result.mainEntryPointFile = result._resolvePathWithTokens('mainEntryPointFile', configObject.mainEntryPointFile);
+      const mainEntryPointFile: string = _resolvePathWithTokens('mainEntryPointFile', configObject.mainEntryPointFile);
 
-      if (!ExtractorConfig.hasDtsFileExtension(result.mainEntryPointFile)) {
-        throw new Error('The mainEntryPointFile is not a declaration file: ' + result.mainEntryPointFile);
+      if (!ExtractorConfig.hasDtsFileExtension(mainEntryPointFile)) {
+        throw new Error('The mainEntryPointFile is not a declaration file: ' + mainEntryPointFile);
       }
 
-      if (!FileSystem.exists(result.mainEntryPointFile)) {
-        throw new Error('The mainEntryPointFile does not exist: ' + result.mainEntryPointFile);
+      if (!FileSystem.exists(mainEntryPointFile)) {
+        throw new Error('The mainEntryPointFile does not exist: ' + mainEntryPointFile);
       }
 
-      result.overrideTsconfig = configObject.compiler.overrideTsconfig;
-      result.skipLibCheck = !!configObject.compiler.skipLibCheck;
-
+      let apiReportEnabled: boolean = false;
+      let reportFilePath: string = '';
+      let tempReportFilePath: string = '';
       if (configObject.apiReport) {
-        result.apiReportEnabled = !!configObject.apiReport.enabled;
+        apiReportEnabled = !!configObject.apiReport.enabled;
 
         const reportFilename: string = configObject.apiReport.reportFileName || '';
         if (!reportFilename) {
@@ -387,53 +446,90 @@ export class ExtractorConfig {
           throw new Error(`The reportFilename contains invalid characters: "${reportFilename}"`);
         }
 
-        const reportFolder: string = result._resolvePathWithTokens('reportFolder',
-          configObject.apiReport.reportFolder);
-        const tempFolder: string = result._resolvePathWithTokens('tempFolder',
-          configObject.apiReport.tempFolder);
+        const reportFolder: string = _resolvePathWithTokens('reportFolder', configObject.apiReport.reportFolder);
+        const tempFolder: string = _resolvePathWithTokens('tempFolder', configObject.apiReport.tempFolder);
 
-        result.reportFilePath = path.join(reportFolder, reportFilename);
-        result.tempReportFilePath = path.join(tempFolder, reportFilename);
+        reportFilePath = path.join(reportFolder, reportFilename);
+        tempReportFilePath = path.join(tempFolder, reportFilename);
       }
 
+      let docModelEnabled: boolean = false;
+      let apiJsonFilePath: string = '';
       if (configObject.docModel) {
-        result.apiReportEnabled = !!configObject.docModel.enabled;
-        result.apiJsonFilePath = result._resolvePathWithTokens('apiJsonFilePath',
-          configObject.docModel.apiJsonFilePath);
+        docModelEnabled = !!configObject.docModel.enabled;
+        apiJsonFilePath = _resolvePathWithTokens('apiJsonFilePath', configObject.docModel.apiJsonFilePath);
       }
 
+      let tsdocMetadataEnabled: boolean = false;
+      let tsdocMetadataFilePath: string = '';
       if (configObject.tsdocMetadata) {
-        result.tsdocMetadataEnabled = !!configObject.tsdocMetadata.enabled;
+        tsdocMetadataEnabled = !!configObject.tsdocMetadata.enabled;
 
         if (configObject.compiler.rootFolder.trim() === '<lookup>') {
-          if (!result.packageJson) {
+          if (!packageJson) {
             throw new Error('The "<lookup>" token cannot be used with compiler.rootFolder because'
               + 'the "packageJson" option was not provided');
           }
-          if (!result.packageJsonFullPath) {
+          if (!packageJsonFullPath) {
             throw new Error('The "<lookup>" token cannot be used with compiler.rootFolder because'
               + 'the "packageJsonFullPath" option was not provided');
           }
-          result.tsdocMetadataFilePath = PackageMetadataManager.resolveTsdocMetadataPath(
-            path.dirname(result.packageJsonFullPath),
-            result.packageJson,
-            result.tsdocMetadataFilePath
+          tsdocMetadataFilePath = PackageMetadataManager.resolveTsdocMetadataPath(
+            path.dirname(packageJsonFullPath),
+            packageJson,
+            tsdocMetadataFilePath
           );
         } else {
-          result.tsdocMetadataFilePath = result._resolvePathWithTokens('tsdocMetadataFilePath',
-          configObject.tsdocMetadata.tsdocMetadataFilePath);
+          tsdocMetadataFilePath = _resolvePathWithTokens('tsdocMetadataFilePath',
+            configObject.tsdocMetadata.tsdocMetadataFilePath);
+        }
+
+        if (!tsdocMetadataFilePath) {
+          throw new Error('The tsdocMetadata.enabled was specified, but tsdocMetadataFilePath is not assigned');
         }
       }
 
-      if (configObject.messages) {
-        result.messages = configObject.messages;
+      let rollupEnabled: boolean = false;
+      let untrimmedFilePath: string = '';
+      let betaTrimmedFilePath: string = '';
+      let publicTrimmedFilePath: string = '';
+
+      if (configObject.dtsRollup) {
+        rollupEnabled = !!configObject.dtsRollup.enabled;
+        untrimmedFilePath = _resolvePathWithTokens('untrimmedFilePath',
+          configObject.dtsRollup.untrimmedFilePath);
+        betaTrimmedFilePath = _resolvePathWithTokens('betaTrimmedFilePath',
+          configObject.dtsRollup.betaTrimmedFilePath);
+        publicTrimmedFilePath = _resolvePathWithTokens('publicTrimmedFilePath',
+          configObject.dtsRollup.publicTrimmedFilePath);
       }
 
-      result.testMode = !!configObject.testMode;
+      return new ExtractorConfig({
+        rootFolder,
+        packageJson,
+        packageJsonFullPath,
+        tokens,
+        mainEntryPointFile,
+        overrideTsconfig: configObject.compiler.overrideTsconfig,
+        skipLibCheck: !!configObject.compiler.skipLibCheck,
+        apiReportEnabled,
+        reportFilePath,
+        tempReportFilePath,
+        docModelEnabled,
+        apiJsonFilePath,
+        rollupEnabled,
+        untrimmedFilePath,
+        betaTrimmedFilePath,
+        publicTrimmedFilePath,
+        tsdocMetadataEnabled,
+        tsdocMetadataFilePath,
+        messages: configObject.messages || { },
+        testMode: !!configObject.testMode
+      });
+
     } catch (e) {
       throw new Error(`Error parsing ${filenameForErrors}:\n` + e.message);
     }
-    return result;
   }
 
   /**
@@ -441,20 +537,6 @@ export class ExtractorConfig {
    */
   public static hasDtsFileExtension(filePath: string): boolean {
     return ExtractorConfig._declarationFileExtensionRegExp.test(filePath);
-  }
-
-  private _resolvePathWithTokens(fieldName: string, value: string | undefined): string {
-    value = value ? value.trim() : '';
-    if (value !== '') {
-      value = Text.replaceAll(value, '<unscopedPackageName>', this.tokens.unscopedPackageName);
-      value = Text.replaceAll(value, '<packageName>', this.tokens.packageName);
-      if (value.indexOf('<lookup>') >= 0) {
-        throw new Error(`The ${fieldName} value incorrectly uses the "<lookup>" token`);
-      }
-      ExtractorConfig._rejectAnyTokensInPath(value, fieldName);
-      value = path.resolve(this.rootFolder, value);
-    }
-    return value;
   }
 
   /**

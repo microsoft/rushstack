@@ -25,11 +25,10 @@ export class Extractor {
 
 // @public
 export class ExtractorConfig {
-    constructor();
-    apiJsonFilePath: string;
-    apiReportEnabled: boolean;
-    betaTrimmedFilePath: string;
-    docModelEnabled: boolean;
+    readonly apiJsonFilePath: string;
+    readonly apiReportEnabled: boolean;
+    readonly betaTrimmedFilePath: string;
+    readonly docModelEnabled: boolean;
     static readonly FILENAME: string;
     // @internal
     _getShortFilePath(absolutePath: string): string;
@@ -37,23 +36,23 @@ export class ExtractorConfig {
     static readonly jsonSchema: JsonSchema;
     static loadAndParseConfig(configJsonFilePath: string): ExtractorConfig;
     static loadJsonFileWithInheritance(jsonFilePath: string): Partial<IExtractorConfig>;
-    mainEntryPointFile: string;
-    messages: IExtractorMessagesConfig;
-    overrideTsconfig?: {};
-    packageJson: INodePackageJson | undefined;
-    packageJsonFullPath: string | undefined;
+    readonly mainEntryPointFile: string;
+    readonly messages: IExtractorMessagesConfig;
+    readonly overrideTsconfig: {} | undefined;
+    readonly packageJson: INodePackageJson | undefined;
+    readonly packageJsonFullPath: string | undefined;
     static parseConfigObject(options: IExtractorConfigParseConfigObjectOptions): ExtractorConfig;
-    publicTrimmedFilePath: string;
-    reportFilePath: string;
-    rollupEnabled: boolean;
-    rootFolder: string;
-    skipLibCheck: boolean;
-    tempReportFilePath: string;
-    testMode: boolean;
+    readonly publicTrimmedFilePath: string;
+    readonly reportFilePath: string;
+    readonly rollupEnabled: boolean;
+    readonly rootFolder: string;
+    readonly skipLibCheck: boolean;
+    readonly tempReportFilePath: string;
+    readonly testMode: boolean;
     readonly tokens: IExtractorConfigTokens;
-    tsdocMetadataEnabled: boolean;
-    tsdocMetadataFilePath: string;
-    untrimmedFilePath: string;
+    readonly tsdocMetadataEnabled: boolean;
+    readonly tsdocMetadataFilePath: string;
+    readonly untrimmedFilePath: string;
 }
 
 // @public
