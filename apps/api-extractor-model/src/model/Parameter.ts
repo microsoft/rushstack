@@ -30,7 +30,7 @@ export interface IParameterOptions {
  * }
  * ```
  *
- * `Parameter` objects belong to the {@link ApiParameterListMixin.parameters} collection.
+ * `Parameter` objects belong to the {@link (ApiParameterListMixin:interface).parameters} collection.
  *
  * @public
  */

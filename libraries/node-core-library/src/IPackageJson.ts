@@ -175,6 +175,6 @@ export interface IPackageJsonTsdocConfiguration {
  */
 export interface IPackageJson extends INodePackageJson {
   // Make the "version" field non-optional.
-  /** {@inheritDoc IPackageJson.version} */
+  /** {@inheritDoc INodePackageJson.version} */
   version: string;
 }

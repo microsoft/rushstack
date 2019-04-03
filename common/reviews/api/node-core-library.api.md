@@ -88,14 +88,10 @@ export enum ColorValue {
 
 // @beta
 export class ConsoleTerminalProvider implements ITerminalProvider {
-    // (undocumented)
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
-    // (undocumented)
     readonly eolCharacter: string;
-    // (undocumented)
     readonly supportsColor: boolean;
     verboseEnabled: boolean;
-    // (undocumented)
     write(data: string, severity: TerminalProviderSeverity): void;
 }
 
@@ -313,7 +309,6 @@ export class InternalError extends Error {
 
 // @public
 export interface IPackageJson extends INodePackageJson {
-    // (undocumented)
     version: string;
 }
 
@@ -423,7 +418,6 @@ export const enum NewlineKind {
 
 // @public
 export class PackageJsonLookup {
-    // (undocumented)
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
     loadNodePackageJson(jsonFilename: string): INodePackageJson;
@@ -438,9 +432,7 @@ export class PackageJsonLookup {
 // @public
 export class PackageName {
     static combineParts(scope: string, unscopedName: string): string;
-    // (undocumented)
     static getScope(packageName: string): string;
-    // (undocumented)
     static getUnscopedName(packageName: string): string;
     static isValidName(packageName: string): boolean;
     static parse(packageName: string): IParsedPackageName;
@@ -473,7 +465,6 @@ export const enum PosixModeBits {
 
 // @public
 export class ProtectableMap<K, V> {
-    // (undocumented)
     constructor(parameters: IProtectableMapParameters<K, V>);
     clear(): void;
     delete(key: K): boolean;
@@ -498,33 +489,25 @@ export class Sort {
 
 // @beta
 export class StringBufferTerminalProvider implements ITerminalProvider {
-    // (undocumented)
     constructor(supportsColor?: boolean);
-    // (undocumented)
     readonly eolCharacter: string;
     getErrorOutput(): string;
     getOutput(): string;
     getVerbose(): string;
     getWarningOutput(): string;
-    // (undocumented)
     readonly supportsColor: boolean;
-    // (undocumented)
     write(data: string, severity: TerminalProviderSeverity): void;
 }
 
 // @public
 export class StringBuilder implements IStringBuilder {
-    // (undocumented)
     constructor();
-    // (undocumented)
     append(text: string): void;
-    // (undocumented)
     toString(): string;
 }
 
 // @beta
 export class Terminal {
-    // (undocumented)
     constructor(provider: ITerminalProvider);
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;

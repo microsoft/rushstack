@@ -178,8 +178,8 @@ export class PackageJsonLookup {
   }
 
   /**
-   * This function is similar to {@link tryLoadPackageJsonFor}, except that it does not report an error if the
-   * `version` field is missing from the package.json file.
+   * This function is similar to {@link PackageJsonLookup.tryLoadPackageJsonFor}, except that it does not report
+   * an error if the `version` field is missing from the package.json file.
    */
   public tryLoadNodePackageJsonFor(fileOrFolderPath: string): INodePackageJson | undefined {
     const packageJsonFilePath: string | undefined = this.tryGetPackageJsonFilePathFor(fileOrFolderPath);
@@ -212,8 +212,8 @@ export class PackageJsonLookup {
   }
 
   /**
-   * This function is similar to {@link loadPackageJson}, except that it does not report an error if the
-   * `version` field is missing from the package.json file.
+   * This function is similar to {@link PackageJsonLookup.loadPackageJson}, except that it does not report an error
+   * if the `version` field is missing from the package.json file.
    */
   public loadNodePackageJson(jsonFilename: string): INodePackageJson {
     if (!FileSystem.exists(jsonFilename)) {

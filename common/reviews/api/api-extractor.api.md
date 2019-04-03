@@ -10,7 +10,6 @@ import * as tsdoc from '@microsoft/tsdoc';
 
 // @public
 export class Extractor {
-    // (undocumented)
     constructor(config: IExtractorConfig, options?: IExtractorOptions);
     readonly actualConfig: IExtractorConfig;
     // @deprecated
@@ -99,25 +98,19 @@ export interface IExtractorApiReviewFileConfig {
 
 // @public
 export interface IExtractorConfig {
-    // (undocumented)
     apiJsonFile?: IExtractorApiJsonFileConfig;
-    // (undocumented)
     apiReviewFile?: IExtractorApiReviewFileConfig;
     compiler: IExtractorTsconfigCompilerConfig | IExtractorRuntimeCompilerConfig;
-    // @beta (undocumented)
+    // @beta
     dtsRollup?: IExtractorDtsRollupConfig;
     extends?: string;
-    // (undocumented)
     messages?: IExtractorMessagesConfig;
-    // (undocumented)
     policies?: IExtractorPoliciesConfig;
-    // (undocumented)
     project: IExtractorProjectConfig;
     skipLibCheck?: boolean;
     testMode?: boolean;
-    // @beta (undocumented)
+    // @beta
     tsdocMetadata?: IExtractorTsdocMetadataConfig;
-    // (undocumented)
     validationRules?: IExtractorValidationRulesConfig;
 }
 

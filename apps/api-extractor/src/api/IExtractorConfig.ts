@@ -268,7 +268,7 @@ export interface IExtractorTsdocMetadataConfig {
 }
 
 /**
- * Used with {@link IExtractorMessageRoutingConfig.logLevel}.
+ * Used with {@link IExtractorMessageReportingRuleConfig.logLevel}.
  *
  * @public
  */
