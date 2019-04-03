@@ -15,7 +15,6 @@ import * as Typescript from 'typescript';
 
 // @beta
 export class ApiExtractorRunner extends RushStackCompilerBase {
-    // (undocumented)
     constructor(extractorConfig: IExtractorConfig, extractorOptions: IExtractorOptions, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
     static apiExtractor: typeof ApiExtractor;
@@ -39,7 +38,6 @@ export interface ITypescriptCompilerOptions {
 
 // @beta (undocumented)
 export abstract class RushStackCompilerBase<TOptions = {}> {
-    // (undocumented)
     constructor(taskOptions: TOptions, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
     protected _standardBuildFolders: StandardBuildFolders;
@@ -51,7 +49,6 @@ export abstract class RushStackCompilerBase<TOptions = {}> {
 
 // @beta (undocumented)
 export class StandardBuildFolders {
-    // (undocumented)
     constructor(projectFolderPath: string);
     // (undocumented)
     readonly distFolderPath: string;
@@ -89,7 +86,6 @@ export class ToolPaths {
 
 // @beta (undocumented)
 export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
-    // (undocumented)
     constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
     invoke(): Promise<void>;
@@ -97,9 +93,7 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
 
 // @beta (undocumented)
 export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
-    // (undocumented)
     constructor(rootPath: string, terminalProvider: ITerminalProvider);
-    // (undocumented)
     constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider);
     // (undocumented)
     invoke(): Promise<void>;
