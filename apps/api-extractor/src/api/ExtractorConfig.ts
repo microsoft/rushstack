@@ -45,13 +45,13 @@ interface IExtractorConfigTokenContext {
 }
 
 /**
- * Options for {@link ExtractorConfig.parseConfigObject}.
+ * Options for {@link ExtractorConfig.prepare}.
  *
  * @public
  */
-export interface IExtractorConfigParseConfigObjectOptions {
+export interface IExtractorConfigPrepareOptions {
   /**
-   * An already prepared configuration object as returned by {@link ExtractorConfig.loadJsonFileWithInheritance}.
+   * An already prepared configuration object as returned by {@link ExtractorConfig.loadFile}.
    */
   configObject: IConfigFile;
 
@@ -230,15 +230,15 @@ export class ExtractorConfig {
    * along with the API Extractor defaults.
    * The result is parsed and returned.
    */
-  public static loadAndParseConfig(configJsonFilePath: string): ExtractorConfig {
+  public static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig {
     const configObjectFullPath: string = path.resolve(configJsonFilePath);
-    const configObject: IConfigFile = ExtractorConfig.loadJsonFileWithInheritance(configObjectFullPath);
+    const configObject: IConfigFile = ExtractorConfig.loadFile(configObjectFullPath);
 
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
     const packageJsonFullPath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
       configObjectFullPath);
 
-    const extractorConfig: ExtractorConfig = ExtractorConfig.parseConfigObject({
+    const extractorConfig: ExtractorConfig = ExtractorConfig.prepare({
       configObject,
       configObjectFullPath,
       packageJsonFullPath
@@ -248,8 +248,8 @@ export class ExtractorConfig {
   }
 
   /**
-   * Performs only the first half of {@link ExtractorConfig.loadAndParseConfig}, providing an opportunity to
-   * modify the object before it is pssed to {@link ExtractorConfig.parseConfigObject}.
+   * Performs only the first half of {@link ExtractorConfig.loadFileAndPrepare}, providing an opportunity to
+   * modify the object before it is pssed to {@link ExtractorConfig.prepare}.
    *
    * @remarks
    *
@@ -257,7 +257,7 @@ export class ExtractorConfig {
    * If the "extends" field is present, the referenced file(s) will be merged,
    * along with the API Extractor defaults.
    */
-  public static loadJsonFileWithInheritance(jsonFilePath: string): IConfigFile {
+  public static loadFile(jsonFilePath: string): IConfigFile {
     // Set to keep track of config files which have been processed.
     const visitedPaths: Set<string> = new Set<string>();
 
@@ -320,7 +320,7 @@ export class ExtractorConfig {
    * Parses the api-extractor.json configuration provided as a runtime object, rather than reading it from disk.
    * This allows configurations to be customized or constructed programmatically.
    */
-  public static parseConfigObject(options: IExtractorConfigParseConfigObjectOptions): ExtractorConfig {
+  public static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig {
     const filenameForErrors: string = options.configObjectFullPath || 'the configuration object';
     const configObject: Partial<IConfigFile> = options.configObject;
 

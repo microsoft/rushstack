@@ -123,15 +123,15 @@ export class RunAction extends CommandLineAction {
     }
 
     const configFullPath: string = path.resolve(configFilename);
-    const mergedConfig: IConfigFile = ExtractorConfig.loadJsonFileWithInheritance(configFullPath);
+    const mergedConfig: IConfigFile = ExtractorConfig.loadFile(configFullPath);
 
-    const extractorConfig: ExtractorConfig = ExtractorConfig.parseConfigObject({
+    const extractorConfig: ExtractorConfig = ExtractorConfig.prepare({
       configObject: mergedConfig,
       configObjectFullPath: configFullPath,
       packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configFullPath)
     });
 
-    const extractorResult: ExtractorResult = Extractor.invokeUsingConfig(extractorConfig,
+    const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig,
       {
         localBuild: this._localParameter.value,
         typescriptCompilerFolder: typescriptCompilerFolder

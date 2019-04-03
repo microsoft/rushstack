@@ -17,8 +17,8 @@ export class CompilerState {
 
 // @public
 export class Extractor {
-    static invokeUsingConfig(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult;
-    static invokeUsingConfigFromFile(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult;
+    static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult;
+    static loadConfigAndInvoke(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult;
     static readonly packageName: string;
     static readonly version: string;
 }
@@ -34,14 +34,14 @@ export class ExtractorConfig {
     _getShortFilePath(absolutePath: string): string;
     static hasDtsFileExtension(filePath: string): boolean;
     static readonly jsonSchema: JsonSchema;
-    static loadAndParseConfig(configJsonFilePath: string): ExtractorConfig;
-    static loadJsonFileWithInheritance(jsonFilePath: string): IConfigFile;
+    static loadFile(jsonFilePath: string): IConfigFile;
+    static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig;
     readonly mainEntryPointFile: string;
     readonly messages: IExtractorMessagesConfig;
     readonly overrideTsconfig: {} | undefined;
     readonly packageJson: INodePackageJson | undefined;
     readonly packageJsonFullPath: string | undefined;
-    static parseConfigObject(options: IExtractorConfigParseConfigObjectOptions): ExtractorConfig;
+    static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
     readonly publicTrimmedFilePath: string;
     readonly reportFilePath: string;
     readonly rollupEnabled: boolean;
@@ -176,7 +176,7 @@ export interface IConfigTsdocMetadata {
 }
 
 // @public
-export interface IExtractorConfigParseConfigObjectOptions {
+export interface IExtractorConfigPrepareOptions {
     configObject: IConfigFile;
     configObjectFullPath: string | undefined;
     packageJson?: INodePackageJson | undefined;

@@ -140,17 +140,16 @@ export class Extractor {
   /**
    * Load the api-extractor.json config file from the specified path, and then invoke API Extractor.
    */
-  public static invokeUsingConfigFromFile(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult {
-    const extractorConfig: ExtractorConfig = ExtractorConfig.loadAndParseConfig(configFilePath);
+  public static loadConfigAndInvoke(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult {
+    const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(configFilePath);
 
-    return Extractor.invokeUsingConfig(extractorConfig, options);
+    return Extractor.invoke(extractorConfig, options);
   }
 
   /**
    * Invoke API Extractor using an already prepared `ExtractorConfig` object.
    */
-  public static invokeUsingConfig(extractorConfig: ExtractorConfig,
-    options?: IExtractorInvokeOptions): ExtractorResult {
+  public static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult {
 
     if (!options) {
       options = { };
