@@ -97,7 +97,7 @@ interface IExtractorConfigParameters {
   skipLibCheck: boolean;
   apiReportEnabled: boolean;
   reportFilePath: string;
-  tempReportFilePath: string;
+  reportTempFilePath: string;
   docModelEnabled: boolean;
   apiJsonFilePath: string;
   rollupEnabled: boolean;
@@ -160,8 +160,8 @@ export class ExtractorConfig {
 
   /** The `reportFolder` path combined with the `reportFileName`. */
   public readonly reportFilePath: string;
-  /** The `tempFolder` path combined with the `reportFileName`. */
-  public readonly tempReportFilePath: string;
+  /** The `reportTempFolder` path combined with the `reportFileName`. */
+  public readonly reportTempFilePath: string;
 
   /** {@inheritDoc IConfigDocModel.enabled} */
   public readonly docModelEnabled: boolean;
@@ -197,7 +197,7 @@ export class ExtractorConfig {
     this.skipLibCheck = parameters.skipLibCheck;
     this.apiReportEnabled = parameters.apiReportEnabled;
     this.reportFilePath = parameters.reportFilePath;
-    this.tempReportFilePath = parameters.tempReportFilePath;
+    this.reportTempFilePath = parameters.reportTempFilePath;
     this.docModelEnabled = parameters.docModelEnabled;
     this.apiJsonFilePath = parameters.apiJsonFilePath;
     this.rollupEnabled = parameters.rollupEnabled;
@@ -422,7 +422,7 @@ export class ExtractorConfig {
 
       let apiReportEnabled: boolean = false;
       let reportFilePath: string = '';
-      let tempReportFilePath: string = '';
+      let reportTempFilePath: string = '';
       if (configObject.apiReport) {
         apiReportEnabled = !!configObject.apiReport.enabled;
 
@@ -440,11 +440,11 @@ export class ExtractorConfig {
 
         const reportFolder: string = ExtractorConfig._resolvePathWithTokens('reportFolder',
           configObject.apiReport.reportFolder, tokenContext);
-        const tempFolder: string = ExtractorConfig._resolvePathWithTokens('tempFolder',
-          configObject.apiReport.tempFolder, tokenContext);
+        const reportTempFolder: string = ExtractorConfig._resolvePathWithTokens('reportTempFolder',
+          configObject.apiReport.reportTempFolder, tokenContext);
 
         reportFilePath = path.join(reportFolder, reportFilename);
-        tempReportFilePath = path.join(tempFolder, reportFilename);
+        reportTempFilePath = path.join(reportTempFolder, reportFilename);
       }
 
       let docModelEnabled: boolean = false;
@@ -511,7 +511,7 @@ export class ExtractorConfig {
         skipLibCheck: !!configObject.compiler.skipLibCheck,
         apiReportEnabled,
         reportFilePath,
-        tempReportFilePath,
+        reportTempFilePath,
         docModelEnabled,
         apiJsonFilePath,
         rollupEnabled,

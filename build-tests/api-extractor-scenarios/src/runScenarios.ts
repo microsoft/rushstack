@@ -26,13 +26,11 @@ export function runScenarios(buildConfigPath: string): void {
 
       'apiReport': {
         'enabled': true,
-        'reportFolder': `./etc/test-outputs/${scenarioFolderName}`,
-        'tempFolder': './temp'
+        'reportFolder': `./etc/test-outputs/${scenarioFolderName}`
       },
 
       'dtsRollup': {
         'enabled': true,
-
         'untrimmedFilePath': `./etc/test-outputs/${scenarioFolderName}/rollup.d.ts`
       },
 

@@ -44,10 +44,10 @@ export class ExtractorConfig {
     static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
     readonly publicTrimmedFilePath: string;
     readonly reportFilePath: string;
+    readonly reportTempFilePath: string;
     readonly rollupEnabled: boolean;
     readonly rootFolder: string;
     readonly skipLibCheck: boolean;
-    readonly tempReportFilePath: string;
     readonly testMode: boolean;
     readonly tsdocMetadataEnabled: boolean;
     readonly tsdocMetadataFilePath: string;
@@ -125,7 +125,7 @@ export interface IConfigApiReport {
     enabled: boolean;
     reportFileName?: string;
     reportFolder?: string;
-    tempFolder?: string;
+    reportTempFolder?: string;
 }
 
 // @public

@@ -65,7 +65,7 @@ export interface IConfigApiReport {
   enabled: boolean;
 
   /**
-   * The filename for the API report files.  It will be combined with `trackedFolder` or `tempFolder` to produce
+   * The filename for the API report files.  It will be combined with `reportFolder` or `reportTempFolder` to produce
    * a full output filename.
    *
    * @remarks
@@ -95,7 +95,7 @@ export interface IConfigApiReport {
    *
    * The path is resolved relative to the `rootFolder` location.
    */
-  tempFolder?: string;
+  reportTempFolder?: string;
 }
 
 /**

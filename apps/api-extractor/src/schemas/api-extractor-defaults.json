@@ -10,7 +10,7 @@
     // ("enabled" is required)
     "reportFileName": "<unscopedPackageName>.api.md",
     "reportFolder": "etc/",
-    "tempFolder": "temp/"
+    "reportTempFolder": "temp/"
   },
 
   "docModel": {

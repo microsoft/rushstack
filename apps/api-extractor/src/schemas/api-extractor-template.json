@@ -80,7 +80,7 @@
     "enabled": true,
 
     /**
-     * The filename for the API report files.  It will be combined with "trackedFolder" or "tempFolder" to produce
+     * The filename for the API report files.  It will be combined with "reportFolder" or "reportTempFolder" to produce
      * a full output filename.
      *
      * The file extension should be ".api.md", and the string should not contain a path separator such as "\" or "/".
@@ -113,7 +113,7 @@
      *
      * DEFAULT VALUE: "temp/"
      */
-    // "tempFolder": "temp/"
+    // "reportTempFolder": "temp/"
   },
 
   /**

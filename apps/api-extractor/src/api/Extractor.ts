@@ -201,8 +201,8 @@ export class Extractor {
     }
 
     if (extractorConfig.apiReportEnabled) {
-      const actualApiReportPath: string = extractorConfig.tempReportFilePath;
-      const actualApiReviewShortPath: string = extractorConfig._getShortFilePath(extractorConfig.tempReportFilePath);
+      const actualApiReportPath: string = extractorConfig.reportTempFilePath;
+      const actualApiReviewShortPath: string = extractorConfig._getShortFilePath(extractorConfig.reportTempFilePath);
 
       const expectedApiReviewPath: string = extractorConfig.reportFilePath;
       const expectedApiReviewShortPath: string = extractorConfig._getShortFilePath(extractorConfig.reportFilePath);
