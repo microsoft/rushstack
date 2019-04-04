@@ -300,8 +300,8 @@ export interface IExtractorMessagesConfig {
 }
 
 /**
- * Configuration options for the API Extractor tool.  These options can be loaded
- * from a JSON config file.
+ * Configuration options for the API Extractor tool.  These options can be constructed programmatically
+ * or loaded from the api-extractor.json config file using the {@link ExtractorConfig} class.
  *
  * @public
  */

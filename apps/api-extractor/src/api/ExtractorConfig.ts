@@ -51,7 +51,7 @@ interface IExtractorConfigTokenContext {
  */
 export interface IExtractorConfigPrepareOptions {
   /**
-   * An already prepared configuration object as returned by {@link ExtractorConfig.loadFile}.
+   * A configuration object as returned by {@link ExtractorConfig.loadFile}.
    */
   configObject: IConfigFile;
 
@@ -222,13 +222,13 @@ export class ExtractorConfig {
   }
 
   /**
-   * Loads the api-extractor.json config file from the specified file path, and returns the parsed result.
+   * Loads the api-extractor.json config file from the specified file path, and prepares an `ExtractorConfig` object.
    *
    * @remarks
-   * Loads the api-extractor.json config file from the specified file path.
-   * If the "extends" field is present, the referenced file(s) will be merged,
-   * along with the API Extractor defaults.
-   * The result is parsed and returned.
+   * Loads the api-extractor.json config file from the specified file path.   If the "extends" field is present,
+   * the referenced file(s) will be merged.  For any omitted fields, the API Extractor default values are merged.
+   *
+   * The result is prepared using `ExtractorConfig.prepare()`.
    */
   public static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig {
     const configObjectFullPath: string = path.resolve(configJsonFilePath);
@@ -249,13 +249,11 @@ export class ExtractorConfig {
 
   /**
    * Performs only the first half of {@link ExtractorConfig.loadFileAndPrepare}, providing an opportunity to
-   * modify the object before it is pssed to {@link ExtractorConfig.prepare}.
+   * modify the object before it is passed to {@link ExtractorConfig.prepare}.
    *
    * @remarks
-   *
-   * Loads the api-extractor.json config file from the specified file path.
-   * If the "extends" field is present, the referenced file(s) will be merged,
-   * along with the API Extractor defaults.
+   * Loads the api-extractor.json config file from the specified file path.   If the "extends" field is present,
+   * the referenced file(s) will be merged.  For any omitted fields, the API Extractor default values are merged.
    */
   public static loadFile(jsonFilePath: string): IConfigFile {
     // Set to keep track of config files which have been processed.
@@ -317,8 +315,9 @@ export class ExtractorConfig {
   }
 
   /**
-   * Parses the api-extractor.json configuration provided as a runtime object, rather than reading it from disk.
-   * This allows configurations to be customized or constructed programmatically.
+   * Prepares an `ExtractorConfig` object using a configuration that is provided as a runtime object,
+   * rather than reading it from disk.  This allows configurations to be constructed programmatically,
+   * loaded from an alternate source, and/or customized after loading.
    */
   public static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig {
     const filenameForErrors: string = options.configObjectFullPath || 'the configuration object';

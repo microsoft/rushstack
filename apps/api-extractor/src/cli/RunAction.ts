@@ -122,13 +122,13 @@ export class RunAction extends CommandLineAction {
       console.log(`Using configuration from ${configFilename}` + os.EOL + os.EOL);
     }
 
-    const configFullPath: string = path.resolve(configFilename);
-    const mergedConfig: IConfigFile = ExtractorConfig.loadFile(configFullPath);
+    const configObjectFullPath: string = path.resolve(configFilename);
+    const configObject: IConfigFile = ExtractorConfig.loadFile(configObjectFullPath);
 
     const extractorConfig: ExtractorConfig = ExtractorConfig.prepare({
-      configObject: mergedConfig,
-      configObjectFullPath: configFullPath,
-      packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configFullPath)
+      configObject: configObject,
+      configObjectFullPath: configObjectFullPath,
+      packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configObjectFullPath)
     });
 
     const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig,
