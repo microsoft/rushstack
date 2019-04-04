@@ -1,3 +1,6 @@
+/**
+ * Config file for API Extractor.  For more info, please visit: https://api-extractor.com
+ */
 {
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
 
@@ -5,7 +8,7 @@
    * Optionally specifies another JSON config file that this file extends from.  This provides a way for
    * standard settings to be shared across multiple projects.
    *
-   * If the first path segment is "." or "..", the path resolved relative to the folder of the file with
+   * If the path starts with "." or "..", the path is resolved relative to the folder of the file with
    * the "extends" field.  Otherwise, the first path segment is interpreted as an NPM package name, and will be
    * resolved using NodeJS require().
    *
@@ -19,7 +22,7 @@
     * analyzes the symbols exported by this module.
     *
     * The file extension must be ".d.ts" and not ".ts".
-    * The path is resolved relative to the "rootFolder" location.
+    * The path is resolved relative to the "rootFolder" location described below.
     */
   "mainEntryPointFile": "./lib/index.d.ts",
 
@@ -43,10 +46,12 @@
     // "rootFolder": "",
 
     /**
-     * Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema:
+     * Provides compiler configuration that will be used instead of reading the tsconfig.json file from disk.
+     * The object must conform to the TypeScript tsconfig schema:
+     *
      * http://json.schemastore.org/tsconfig
      *
-     * If omitted, then the tsconfig.json file will instead be read from the rootFolder.
+     * If omitted, then the tsconfig.json file will be read from the rootFolder.
      *
      * DEFAULT VALUE: no overrideTsconfig section
      */
@@ -224,6 +229,10 @@
          * the "addToApiReviewFile" property may supersede this option.
          *
          * Possible values: "error", "warning", "none"
+         *
+         * Errors cause the build to fail and return a nonzero exit code.  Warnings cause a production build fail
+         * and return a nonzero exit code.  For a non-production build (e.g. when "api-extractor run" includes
+         * the "--local" option), the warning is displayed but the build will not fail.
          *
          * DEFAULT VALUE: "warning"
          */
