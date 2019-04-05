@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-typescript",
+      "comment": "Update to use the new rush-stack-compiler contract for API Extractor 7",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-typescript",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

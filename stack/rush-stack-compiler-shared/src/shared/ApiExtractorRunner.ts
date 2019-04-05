@@ -4,8 +4,8 @@
 import { ITerminalProvider } from '@microsoft/node-core-library';
 import {
   Extractor,
-  IExtractorOptions,
-  IExtractorConfig
+  ExtractorConfig,
+  IExtractorInvokeOptions
 } from '@microsoft/api-extractor';
 import * as ApiExtractor from '@microsoft/api-extractor';
 
@@ -20,12 +20,12 @@ import { ToolPaths } from './ToolPaths';
  */
 export class ApiExtractorRunner extends RushStackCompilerBase {
   public static apiExtractor: typeof ApiExtractor = ApiExtractor;
-  private _extractorConfig: IExtractorConfig;
-  private _extractorOptions: IExtractorOptions;
+  private _extractorConfig: ExtractorConfig;
+  private _extractorOptions: IExtractorInvokeOptions;
 
   constructor(
-    extractorConfig: IExtractorConfig,
-    extractorOptions: IExtractorOptions,
+    extractorConfig: ExtractorConfig,
+    extractorOptions: IExtractorInvokeOptions,
     rootPath: string,
     terminalProvider: ITerminalProvider
   ) {
@@ -37,7 +37,7 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
 
   public invoke(): Promise<void> {
     try {
-      const extractorOptions: IExtractorOptions = {
+      const extractorOptions: IExtractorInvokeOptions = {
         ...this._extractorOptions,
         customLogger: {
           logVerbose: this._terminal.writeVerboseLine.bind(this._terminal),
@@ -48,11 +48,9 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
         typescriptCompilerFolder: ToolPaths.typescriptPackagePath
       };
 
-      const extractor: Extractor = new Extractor(this._extractorConfig, extractorOptions);
-
-      // NOTE: processProject() returns false if errors or warnings occurred, however we
+      // NOTE: ExtractorResult.succeeded indicates whether errors or warnings occurred, however we
       // already handle this above via our customLogger
-      extractor.processProject();
+      Extractor.invoke(this._extractorConfig, extractorOptions);
 
       return Promise.resolve();
     } catch (e) {
