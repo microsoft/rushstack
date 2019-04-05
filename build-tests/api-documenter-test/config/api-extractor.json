@@ -7,13 +7,13 @@
     "enabled": true,
   },
 
-  "dtsRollup": {
-    "enabled": false
-  },
-
   "docModel": {
     "enabled": true,
     "apiJsonFilePath": "./etc/<unscopedPackageName>.api.json"
+  },
+
+  "dtsRollup": {
+    "enabled": false
   },
 
   "testMode": true

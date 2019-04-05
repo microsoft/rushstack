@@ -7,13 +7,11 @@
     "enabled": true,
   },
 
-  "dtsRollup": {
-    "enabled": true,
-
-    "untrimmedFilePath": "./dist/internal/<unscopedPackageName>.d.ts"
+  "docModel": {
+    "enabled": true
   },
 
-  "docModel": {
+  "dtsRollup": {
     "enabled": true
   },
 
