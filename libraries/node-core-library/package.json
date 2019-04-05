@@ -3,7 +3,7 @@
   "version": "3.13.0",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
-  "typings": "dist/rollup.d.ts",
+  "typings": "dist/node-core-library.d.ts",
   "tsdoc": {
     "tsdocFlavor": "AEDoc"
   },

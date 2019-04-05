@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "main": "lib/index.js",
-  "typings": "dist/internal/api-extractor-lib3-test.d.ts",
+  "typings": "dist/api-extractor-lib3-test.d.ts",
   "scripts": {
     "build": "node build.js"
   },
