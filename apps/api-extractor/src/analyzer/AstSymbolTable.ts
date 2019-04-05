@@ -9,9 +9,9 @@ import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { PackageMetadataManager } from './PackageMetadataManager';
-import { ILogger } from '../api/ILogger';
 import { ExportAnalyzer } from './ExportAnalyzer';
 import { AstImport } from './AstImport';
+import { MessageRouter } from '../collector/MessageRouter';
 
 export type AstEntity = AstSymbol | AstImport;
 
@@ -83,11 +83,11 @@ export class AstSymbolTable {
     = new Map<ts.Identifier, AstEntity | undefined>();
 
   public constructor(program: ts.Program, typeChecker: ts.TypeChecker, packageJsonLookup: PackageJsonLookup,
-    logger: ILogger) {
+    messageRouter: MessageRouter) {
 
     this._program = program;
     this._typeChecker = typeChecker;
-    this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup, logger);
+    this._packageMetadataManager = new PackageMetadataManager(packageJsonLookup, messageRouter);
 
     this._exportAnalyzer = new ExportAnalyzer(
       this._program,

@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import { Sort } from '@microsoft/node-core-library';
+import { Sort, InternalError } from '@microsoft/node-core-library';
 import { AedocDefinitions } from '@microsoft/api-extractor-model';
 
 import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
@@ -20,9 +21,9 @@ import {
   IExtractorMessagesConfig,
   IConfigMessageReportingRule
 } from '../api/IConfigFile';
-import { ILogger } from '../api/ILogger';
 import { SourceMapper } from './SourceMapper';
 import { ExtractorLogLevel } from '../api/ExtractorLogLevel';
+import { ConsoleMessageId } from '../api/ConsoleMessageId';
 
 interface IReportingRule {
   logLevel: ExtractorLogLevel;
@@ -30,14 +31,14 @@ interface IReportingRule {
 }
 
 export class MessageRouter {
+  private readonly _workingPackageFolder: string;
+  private readonly _messageCallback: ((message: ExtractorMessage) => void) | undefined;
+
   // All messages
   private readonly _messages: ExtractorMessage[];
 
   // For each AstDeclaration, the messages associated with it.  This is used when addToApiReviewFile=true
   private readonly _associatedMessagesForAstDeclaration: Map<AstDeclaration, ExtractorMessage[]>;
-
-  // Messages that got written to the API review file
-  private readonly _messagesAddedToApiReviewFile: Set<ExtractorMessage>;
 
   private readonly _sourceMapper: SourceMapper;
 
@@ -50,10 +51,19 @@ export class MessageRouter {
   private _tsdocDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None,
     addToApiReviewFile: false };
 
-  public constructor(messagesConfig: IExtractorMessagesConfig) {
+  public errorCount: number = 0;
+  public warningCount: number = 0;
+  public showVerboseMessages: boolean = false;
+
+  public constructor(workingPackageFolder: string,
+    messageCallback: ((message: ExtractorMessage) => void) | undefined,
+    messagesConfig: IExtractorMessagesConfig) {
+
+    this._workingPackageFolder = workingPackageFolder;
+    this._messageCallback = messageCallback;
+
     this._messages = [];
     this._associatedMessagesForAstDeclaration = new Map<AstDeclaration, ExtractorMessage[]>();
-    this._messagesAddedToApiReviewFile = new Set<ExtractorMessage>();
     this._sourceMapper = new SourceMapper();
 
     this._applyMessagesConfig(messagesConfig);
@@ -266,7 +276,7 @@ export class MessageRouter {
     for (const associatedMessage of associatedMessages) {
 
       // Make sure we didn't already report this message for some reason
-      if (!this._messagesAddedToApiReviewFile.has(associatedMessage)) {
+      if (!associatedMessage.handled) {
 
         // Is this message type configured to go in the API review file?
         const reportingRule: IReportingRule = this._getRuleForMessage(associatedMessage);
@@ -274,7 +284,7 @@ export class MessageRouter {
 
           // Include it in the result, and record that it went to the API review file
           messagesForApiReviewFile.push(associatedMessage);
-          this._messagesAddedToApiReviewFile.add(associatedMessage);
+          associatedMessage.handled = true;
         }
       }
 
@@ -294,7 +304,7 @@ export class MessageRouter {
     for (const unassociatedMessage of this.messages) {
 
       // Make sure we didn't already report this message for some reason
-      if (!this._messagesAddedToApiReviewFile.has(unassociatedMessage)) {
+      if (!unassociatedMessage.handled) {
 
         // Is this message type configured to go in the API review file?
         const reportingRule: IReportingRule = this._getRuleForMessage(unassociatedMessage);
@@ -302,7 +312,7 @@ export class MessageRouter {
 
           // Include it in the result, and record that it went to the API review file
           messagesForApiReviewFile.push(unassociatedMessage);
-          this._messagesAddedToApiReviewFile.add(unassociatedMessage);
+          unassociatedMessage.handled = true;
         }
       }
 
@@ -317,13 +327,12 @@ export class MessageRouter {
    * `fetchAssociatedMessagesForReviewFile()` or `fetchUnassociatedMessagesForReviewFile()`.
    * These messages will be shown on the console.
    */
-  public reportMessagesToLogger(logger: ILogger, workingPackageFolderPath: string): ExtractorMessage[] {
+  public handleRemainingNonConsoleMessages(): void {
     const messagesForLogger: ExtractorMessage[] = [];
 
     for (const message of this.messages) {
-
       // Make sure we didn't already report this message
-      if (!this._messagesAddedToApiReviewFile.has(message)) {
+      if (!message.handled) {
         messagesForLogger.push(message);
       }
     }
@@ -331,23 +340,99 @@ export class MessageRouter {
     this._sortMessagesForOutput(messagesForLogger);
 
     for (const message of messagesForLogger) {
-      // Is this message type configured to go to the console?
-      const reportingRule: IReportingRule = this._getRuleForMessage(message);
-      switch (reportingRule.logLevel) {
-        case ExtractorLogLevel.Error:
-          logger.logError('Error: ' + message.formatMessageWithLocation(workingPackageFolderPath));
-          break;
-        case ExtractorLogLevel.Warning:
-          logger.logWarning('Warning: ' + message.formatMessageWithLocation(workingPackageFolderPath));
-          break;
-        case ExtractorLogLevel.None:
-          break;
-        default:
-          throw new Error(`Invalid logLevel value: ${JSON.stringify(reportingRule.logLevel)}`);
+      this._handleMessage(message);
+    }
+  }
+
+  public logError(messageId: ConsoleMessageId, message: string, properties?: IExtractorMessageProperties): void {
+    this._handleMessage(new ExtractorMessage({
+      category: ExtractorMessageCategory.Console,
+      messageId,
+      text: message,
+      properties,
+      logLevel: ExtractorLogLevel.Error
+    }));
+  }
+
+  public logWarning(messageId: ConsoleMessageId, message: string, properties?: IExtractorMessageProperties): void {
+    this._handleMessage(new ExtractorMessage({
+      category: ExtractorMessageCategory.Console,
+      messageId,
+      text: message,
+      properties,
+      logLevel: ExtractorLogLevel.Warning
+    }));
+  }
+
+  public logInfo(messageId: ConsoleMessageId, message: string, properties?: IExtractorMessageProperties): void {
+    this._handleMessage(new ExtractorMessage({
+      category: ExtractorMessageCategory.Console,
+      messageId,
+      text: message,
+      properties,
+      logLevel: ExtractorLogLevel.Info
+    }));
+  }
+
+  public logVerbose(messageId: ConsoleMessageId, message: string, properties?: IExtractorMessageProperties): void {
+    this._handleMessage(new ExtractorMessage({
+      category: ExtractorMessageCategory.Console,
+      messageId,
+      text: message,
+      properties,
+      logLevel: ExtractorLogLevel.Verbose
+    }));
+  }
+
+  /**
+   * Give the calling application a chance to handle the `ExtractorMessage`, and if not, display it on the console.
+   */
+  private _handleMessage(message: ExtractorMessage): void {
+    if (message.handled) {
+      return;
+    }
+
+    if (this._messageCallback) {
+      this._messageCallback(message);
+
+      if (message.handled) {
+        return;
       }
     }
 
-    return messagesForLogger;
+    message.handled = true;
+
+    if (message.logLevel === ExtractorLogLevel.None) {
+      return;
+    }
+
+    let messageText: string;
+    if (message.category === ExtractorMessageCategory.Console) {
+      messageText = message.text;
+    } else {
+      messageText = message.formatMessageWithLocation(this._workingPackageFolder);
+    }
+
+    switch (message.logLevel) {
+      case ExtractorLogLevel.Error:
+        ++this.errorCount;
+        console.error(colors.red('Error: ' + messageText));
+        break;
+      case ExtractorLogLevel.Warning:
+        ++this.warningCount;
+        console.warn(colors.yellow('Warning: ' + messageText));
+        break;
+      case ExtractorLogLevel.Info:
+        console.log(messageText);
+        break;
+      case ExtractorLogLevel.Verbose:
+        if (this.showVerboseMessages) {
+          console.log(colors.cyan(messageText));
+        }
+        break;
+      default:
+        throw new Error(`Invalid logLevel value: ${JSON.stringify(message.logLevel)}`);
+    }
   }
 
   /**
@@ -365,6 +450,8 @@ export class MessageRouter {
         return this._extractorDefaultRule;
       case ExtractorMessageCategory.TSDoc:
         return this._tsdocDefaultRule;
+      case ExtractorMessageCategory.Console:
+        throw new InternalError('ExtractorMessageCategory.Console is not supported with IReportingRule');
     }
   }
 

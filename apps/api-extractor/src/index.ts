@@ -9,6 +9,8 @@
  * @packageDocumentation
  */
 
+export { ConsoleMessageId } from './api/ConsoleMessageId';
+
 export { CompilerState, ICompilerStateCreateOptions } from './api/CompilerState';
 
 export {
@@ -43,5 +45,3 @@ export {
   IExtractorMessagesConfig,
   IConfigFile
 } from './api/IConfigFile';
-
-export { ILogger } from './api/ILogger';

@@ -16,6 +16,17 @@ export class CompilerState {
     }
 
 // @public
+export const enum ConsoleMessageId {
+    ApiReportCopied = "console-api-report-copied",
+    ApiReportMissing = "console-api-report-missing",
+    ApiReportNotCopied = "console-api-report-not-copied",
+    ApiReportUnchanged = "console-api-report-unchanged",
+    FoundTSDocMetadata = "console-found-tsdoc-metadata",
+    WritingDocModelFile = "console-writing-doc-model-file",
+    WritingDtsRollup = "console-writing-dts-rollup"
+}
+
+// @public
 export class Extractor {
     static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult;
     static loadConfigAndInvoke(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult;
@@ -75,7 +86,7 @@ export class ExtractorMessage {
     formatMessageWithoutLocation(): string;
     handled: boolean;
     logLevel: ExtractorLogLevel;
-    readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
+    readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | ConsoleMessageId | string;
     readonly properties: IExtractorMessageProperties;
     readonly sourceFileColumn: number | undefined;
     readonly sourceFileLine: number | undefined;
@@ -86,6 +97,7 @@ export class ExtractorMessage {
 // @public
 export const enum ExtractorMessageCategory {
     Compiler = "Compiler",
+    Console = "console",
     Extractor = "Extractor",
     TSDoc = "TSDoc"
 }
@@ -196,9 +208,9 @@ export interface IExtractorConfigPrepareOptions {
 // @public
 export interface IExtractorInvokeOptions {
     compilerState?: CompilerState;
-    customLogger?: Partial<ILogger>;
     localBuild?: boolean;
     messageCallback?: (message: ExtractorMessage) => void;
+    showVerboseMessages?: boolean;
     typescriptCompilerFolder?: string;
 }
 
@@ -212,14 +224,6 @@ export interface IExtractorMessagesConfig {
     compilerMessageReporting?: IConfigMessageReportingTable;
     extractorMessageReporting?: IConfigMessageReportingTable;
     tsdocMessageReporting?: IConfigMessageReportingTable;
-}
-
-// @public
-export interface ILogger {
-    logError(message: string): void;
-    logInfo(message: string): void;
-    logVerbose(message: string): void;
-    logWarning(message: string): void;
 }
 
 

@@ -13,7 +13,6 @@ import {
   AedocDefinitions
 } from '@microsoft/api-extractor-model';
 
-import { ILogger } from '../api/ILogger';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 import { CollectorEntity } from './CollectorEntity';
@@ -30,6 +29,7 @@ import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
+import { ExtractorMessage } from '../api/ExtractorMessage';
 
 /**
  * Options for Collector constructor.
@@ -45,7 +45,7 @@ export interface ICollectorOptions {
    */
   program: ts.Program;
 
-  logger: ILogger;
+  messageCallback: ((message: ExtractorMessage) => void) | undefined;
 
   extractorConfig: ExtractorConfig;
 }
@@ -65,8 +65,6 @@ export class Collector {
   public readonly packageJsonLookup: PackageJsonLookup;
   public readonly messageRouter: MessageRouter;
 
-  public readonly logger: ILogger;
-
   public readonly workingPackage: WorkingPackage;
 
   private readonly _program: ts.Program;
@@ -85,9 +83,7 @@ export class Collector {
 
   constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
-    this.messageRouter = new MessageRouter(options.extractorConfig.messages || { });
 
-    this.logger = options.logger;
     this._program = options.program;
 
     const extractorConfig: ExtractorConfig = options.extractorConfig;
@@ -111,11 +107,17 @@ export class Collector {
       entryPointSourceFile
     });
 
+    this.messageRouter = new MessageRouter(
+      this.workingPackage.packageFolder,
+      options.messageCallback,
+      options.extractorConfig.messages || { });
+
     this.program = options.program;
     this.typeChecker = options.program.getTypeChecker();
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
-    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup, this.logger);
+    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
+      this.messageRouter);
     this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
   }
 

@@ -39,11 +39,24 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
     try {
       const extractorOptions: IExtractorInvokeOptions = {
         ...this._extractorOptions,
-        customLogger: {
-          logVerbose: this._terminal.writeVerboseLine.bind(this._terminal),
-          logInfo: this._terminal.writeLine.bind(this._terminal),
-          logWarning: this._terminal.writeWarningLine.bind(this._terminal),
-          logError: this._terminal.writeErrorLine.bind(this._terminal)
+        messageCallback: (message: ApiExtractor.ExtractorMessage) => {
+          switch (message.logLevel) {
+            case ApiExtractor.ExtractorLogLevel.Error:
+              this._terminal.writeErrorLine.bind(this._terminal);
+              break;
+            case ApiExtractor.ExtractorLogLevel.Warning:
+              this._terminal.writeWarningLine.bind(this._terminal);
+              break;
+            case ApiExtractor.ExtractorLogLevel.Info:
+              this._terminal.writeLine.bind(this._terminal);
+              break;
+            case ApiExtractor.ExtractorLogLevel.Verbose:
+              this._terminal.writeVerboseLine.bind(this._terminal);
+              break;
+            default:
+              return;
+          }
+          message.handled = true;
         },
         typescriptCompilerFolder: ToolPaths.typescriptPackagePath
       };

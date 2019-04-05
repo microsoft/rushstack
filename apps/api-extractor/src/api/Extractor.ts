@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import lodash = require('lodash');
-import colors = require('colors');
-
 import {
   FileSystem,
   NewlineKind,
@@ -11,10 +8,8 @@ import {
   IPackageJson
 } from '@microsoft/node-core-library';
 import { ExtractorConfig } from './ExtractorConfig';
-import { ILogger } from './ILogger';
 import { Collector } from '../collector/Collector';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
-import { MonitoredLogger } from './MonitoredLogger';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
 import { ApiPackage } from '@microsoft/api-extractor-model';
 import { ReviewFileGenerator } from '../generators/ReviewFileGenerator';
@@ -23,6 +18,8 @@ import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
 import { DocCommentEnhancer } from '../enhancers/DocCommentEnhancer';
 import { CompilerState } from './CompilerState';
 import { ExtractorMessage } from './ExtractorMessage';
+import { MessageRouter } from '../collector/MessageRouter';
+import { ConsoleMessageId } from './ConsoleMessageId';
 
 /**
  * Runtime options for Extractor.
@@ -37,12 +34,6 @@ export interface IExtractorInvokeOptions {
   compilerState?: CompilerState;
 
   /**
-   * Allows the caller to customize how API Extractor's errors, warnings, and informational logging is processed.
-   * If omitted, the output will be printed to the console.
-   */
-  customLogger?: Partial<ILogger>;
-
-  /**
    * Indicates that API Extractor is running as part of a local build, e.g. on developer's
    * machine. This disables certain validation that would normally be performed
    * for a ship/production build. For example, the *.api.md review file is
@@ -51,6 +42,11 @@ export interface IExtractorInvokeOptions {
    * The default value is false.
    */
   localBuild?: boolean;
+
+  /**
+   * If true, API Extractor will include {@link ExtractorLogLevel.Verbose} messages in its output.
+   */
+  showVerboseMessages?: boolean;
 
   /**
    * By default API Extractor uses its own TypeScript compiler version to analyze your project.
@@ -99,12 +95,18 @@ export class ExtractorResult {
   public readonly succeeded: boolean;
 
   /**
-   * Reports the number of times that {@link ILogger.logError} was called.
+   * Reports the number of errors encountered during analysis.
+   *
+   * @remarks
+   * This does not count exceptions, where unexpected issues prematurely abort the operation.
    */
   public readonly errorCount: number;
 
   /**
-   * Reports the number of times that {@link ILogger.logWarning} was called.
+   * Reports the number of warnings encountered during analysis.
+   *
+   * @remarks
+   * This does not count warnings that are emitted in the API report file.
    */
   public readonly warningCount: number;
 
@@ -141,13 +143,6 @@ export class Extractor {
     return PackageJsonLookup.loadOwnPackageJson(__dirname);
   }
 
-  private static _defaultLogger: ILogger = {
-    logVerbose: (message: string) => console.log('(Verbose) ' + message),
-    logInfo: (message: string) => console.log(message),
-    logWarning: (message: string) => console.warn(colors.yellow(message)),
-    logError: (message: string) => console.error(colors.red(message))
-  };
-
   /**
    * Load the api-extractor.json config file from the specified path, and then invoke API Extractor.
    */
@@ -166,17 +161,7 @@ export class Extractor {
       options = { };
     }
 
-    let mergedLogger: ILogger;
-    if (options && options.customLogger) {
-      mergedLogger = lodash.merge(lodash.clone(Extractor._defaultLogger), options.customLogger);
-    } else {
-      mergedLogger = Extractor._defaultLogger;
-    }
-    const monitoredLogger: MonitoredLogger = new MonitoredLogger(mergedLogger);
-
     const localBuild: boolean = options.localBuild || false;
-
-    monitoredLogger.resetCounters();
 
     let compilerState: CompilerState | undefined;
     if (options.compilerState) {
@@ -187,9 +172,12 @@ export class Extractor {
 
     const collector: Collector = new Collector({
       program: compilerState.program,
-      logger: monitoredLogger,
+      messageCallback: options.messageCallback,
       extractorConfig: extractorConfig
     });
+
+    const messageRouter: MessageRouter = collector.messageRouter;
+    messageRouter.showVerboseMessages = !!options.showVerboseMessages;
 
     collector.analyze();
 
@@ -200,7 +188,7 @@ export class Extractor {
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
 
     if (extractorConfig.docModelEnabled) {
-      monitoredLogger.logVerbose('Writing: ' + extractorConfig.apiJsonFilePath);
+      messageRouter.logVerbose(ConsoleMessageId.WritingDocModelFile, 'Writing: ' + extractorConfig.apiJsonFilePath);
       apiPackage.saveToJsonFile(extractorConfig.apiJsonFilePath, {
         toolPackage: Extractor.packageName,
         toolVersion: Extractor.version,
@@ -233,7 +221,8 @@ export class Extractor {
         if (!ReviewFileGenerator.areEquivalentApiFileContents(actualApiReviewContent, expectedApiReviewContent)) {
           if (!localBuild) {
             // For production, issue a warning that will break the CI build.
-            monitoredLogger.logWarning('You have changed the public API signature for this project.'
+            messageRouter.logWarning(ConsoleMessageId.ApiReportNotCopied,
+              'You have changed the public API signature for this project.'
               // @microsoft/gulp-core-build seems to run JSON.stringify() on the error messages for some reason,
               // so try to avoid escaped characters:
               + ` Please overwrite ${expectedApiReviewShortPath} with a`
@@ -241,7 +230,8 @@ export class Extractor {
               + ' and then request an API review. See the Git repository README.md for more info.');
           } else {
             // For a local build, just copy the file automatically.
-            monitoredLogger.logWarning('You have changed the public API signature for this project.'
+            messageRouter.logWarning(ConsoleMessageId.ApiReportCopied,
+              'You have changed the public API signature for this project.'
               + ` Updating ${expectedApiReviewShortPath}`);
 
             FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent, {
@@ -250,30 +240,23 @@ export class Extractor {
             });
           }
         } else {
-          monitoredLogger.logVerbose(`The API signature is up to date: ${actualApiReviewShortPath}`);
+          messageRouter.logVerbose(ConsoleMessageId.ApiReportUnchanged,
+            `The API signature is up to date: ${actualApiReviewShortPath}`);
         }
       } else {
         // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
         // For example, when projects were moved into category folders, the relative path for
         // the API review files ended up in the wrong place.
-        monitoredLogger.logError(`The API review file has not been set up.`
+        messageRouter.logError(ConsoleMessageId.ApiReportMissing, `The API review file has not been set up.`
           + ` Do this by copying ${actualApiReviewShortPath}`
           + ` to ${expectedApiReviewShortPath} and committing it.`);
       }
     }
 
     if (extractorConfig.rollupEnabled) {
-      Extractor._generateRollupDtsFile(collector, monitoredLogger,
-        extractorConfig.publicTrimmedFilePath,
-        DtsRollupKind.PublicRelease);
-
-      Extractor._generateRollupDtsFile(collector, monitoredLogger,
-        extractorConfig.betaTrimmedFilePath,
-        DtsRollupKind.BetaRelease);
-
-      Extractor._generateRollupDtsFile(collector, monitoredLogger,
-        extractorConfig.untrimmedFilePath,
-        DtsRollupKind.InternalRelease);
+      Extractor._generateRollupDtsFile(collector, extractorConfig.publicTrimmedFilePath, DtsRollupKind.PublicRelease);
+      Extractor._generateRollupDtsFile(collector, extractorConfig.betaTrimmedFilePath, DtsRollupKind.BetaRelease);
+      Extractor._generateRollupDtsFile(collector, extractorConfig.untrimmedFilePath, DtsRollupKind.InternalRelease);
     }
 
     if (extractorConfig.tsdocMetadataEnabled) {
@@ -281,33 +264,31 @@ export class Extractor {
       PackageMetadataManager.writeTsdocMetadataFile(extractorConfig.tsdocMetadataFilePath);
     }
 
-    // Show out all the messages that we collected during analysis
-    collector.messageRouter.reportMessagesToLogger(monitoredLogger, collector.workingPackage.packageFolder);
+    // Show all the messages that we collected during analysis
+    messageRouter.handleRemainingNonConsoleMessages();
 
     // Determine success
     let succeeded: boolean;
     if (localBuild) {
       // For a local build, fail if there were errors (but ignore warnings)
-      succeeded = monitoredLogger.errorCount === 0;
+      succeeded = messageRouter.errorCount === 0;
     } else {
       // For a production build, fail if there were any errors or warnings
-      succeeded = monitoredLogger.errorCount + monitoredLogger.warningCount === 0;
+      succeeded = messageRouter.errorCount + messageRouter.warningCount === 0;
     }
 
     return new ExtractorResult({
       compilerState,
       extractorConfig,
       succeeded,
-      errorCount: monitoredLogger.errorCount,
-      warningCount: monitoredLogger.warningCount
+      errorCount: messageRouter.errorCount,
+      warningCount: messageRouter.warningCount
     });
   }
 
-  private static _generateRollupDtsFile(collector: Collector, monitoredLogger: MonitoredLogger,
-    outputPath: string, dtsKind: DtsRollupKind): void {
-
+  private static _generateRollupDtsFile(collector: Collector, outputPath: string, dtsKind: DtsRollupKind): void {
     if (outputPath !== '') {
-      monitoredLogger.logVerbose(`Writing package typings: ${outputPath}`);
+      collector.messageRouter.logVerbose(ConsoleMessageId.WritingDtsRollup, `Writing package typings: ${outputPath}`);
       DtsRollupGenerator.writeTypingsFile(collector, outputPath, dtsKind);
     }
   }
