@@ -33,7 +33,7 @@
         "skipLibCheck": {
           "description": "This option causes the compiler to be invoked with the --skipLibCheck option. This option is not recommended and may cause API Extractor to produce incomplete or incorrect declarations, but it may be required when dependencies contain declarations that are incompatible with the TypeScript engine that API Extractor uses for its analysis.  Where possible, the underlying issue should be fixed rather than relying on skipLibCheck.",
           "type": "boolean"
-        },
+        }
       },
       "additionalProperties": false
     },
@@ -120,7 +120,7 @@
         "tsdocMetadataFilePath": {
           "description": "Specifies where the TSDoc metadata file should be written. The default value is \"<lookup>\", which causes the path to be automatically inferred from the \"tsdocMetadata\", \"typings\" or \"main\" fields of the project's package.json.  If none of these fields are set, the lookup falls back to \"tsdoc-metadata.json\" in the package folder.",
           "type": "string"
-        },
+        }
       },
       "additionalProperties": false
     },
