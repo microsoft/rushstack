@@ -18,14 +18,14 @@ import {
 import { ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
 import {
   IExtractorMessagesConfig,
-  ExtractorMessageLogLevel,
   IConfigMessageReportingRule
 } from '../api/IConfigFile';
 import { ILogger } from '../api/ILogger';
 import { SourceMapper } from './SourceMapper';
+import { ExtractorLogLevel } from '../api/ExtractorLogLevel';
 
 interface IReportingRule {
-  logLevel: ExtractorMessageLogLevel;
+  logLevel: ExtractorLogLevel;
   addToApiReviewFile: boolean;
 }
 
@@ -43,11 +43,11 @@ export class MessageRouter {
 
   // Normalized representation of the routing rules from api-extractor.json
   private _reportingRuleByMessageId: Map<string, IReportingRule> = new Map<string, IReportingRule>();
-  private _compilerDefaultRule: IReportingRule = { logLevel: ExtractorMessageLogLevel.None,
+  private _compilerDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None,
     addToApiReviewFile: false };
-  private _extractorDefaultRule: IReportingRule = { logLevel: ExtractorMessageLogLevel.None,
+  private _extractorDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None,
     addToApiReviewFile: false };
-  private _tsdocDefaultRule: IReportingRule = { logLevel: ExtractorMessageLogLevel.None,
+  private _tsdocDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None,
     addToApiReviewFile: false };
 
   public constructor(messagesConfig: IExtractorMessagesConfig) {
@@ -334,13 +334,13 @@ export class MessageRouter {
       // Is this message type configured to go to the console?
       const reportingRule: IReportingRule = this._getRuleForMessage(message);
       switch (reportingRule.logLevel) {
-        case ExtractorMessageLogLevel.Error:
+        case ExtractorLogLevel.Error:
           logger.logError('Error: ' + message.formatMessageWithLocation(workingPackageFolderPath));
           break;
-        case ExtractorMessageLogLevel.Warning:
+        case ExtractorLogLevel.Warning:
           logger.logWarning('Warning: ' + message.formatMessageWithLocation(workingPackageFolderPath));
           break;
-        case ExtractorMessageLogLevel.None:
+        case ExtractorLogLevel.None:
           break;
         default:
           throw new Error(`Invalid logLevel value: ${JSON.stringify(reportingRule.logLevel)}`);

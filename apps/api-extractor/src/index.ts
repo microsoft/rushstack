@@ -22,6 +22,8 @@ export {
   ExtractorConfig
 } from './api/ExtractorConfig';
 
+export { ExtractorLogLevel } from './api/ExtractorLogLevel';
+
 export {
   ExtractorMessage,
   IExtractorMessageProperties,
@@ -36,7 +38,6 @@ export {
   IConfigDocModel,
   IConfigDtsRollup,
   IConfigTsdocMetadata,
-  ExtractorMessageLogLevel,
   IConfigMessageReportingRule,
   IConfigMessageReportingTable,
   IExtractorMessagesConfig,

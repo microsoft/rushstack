@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { ExtractorLogLevel } from './ExtractorLogLevel';
+
 /**
  * Determines how the TypeScript compiler engine will be invoked by API Extractor.
  *
@@ -199,53 +201,6 @@ export interface IConfigTsdocMetadata {
 }
 
 /**
- * Used with {@link IConfigMessageReportingRule.logLevel}.
- *
- * @remarks
- * This is part of the {@link IConfigFile} structure.
- *
- * @public
- */
-export const enum ExtractorMessageLogLevel {
-  /**
-   * The message will be displayed as an error.
-   *
-   * @remarks
-   * Errors typically cause the build to fail and return a nonzero exit code.
-   */
-  Error = 'error',
-
-  /**
-   * The message will be displayed as an warning.
-   *
-   * @remarks
-   * Warnings typically cause a production build fail and return a nonzero exit code.  For a non-production build
-   * (e.g. using the `--local` option with `api-extractor run`), the warning is displayed but the build will not fail.
-   */
-  Warning = 'warning',
-
-  /**
-   * The message will be displayed as an informational message.
-   *
-   * @remarks
-   * Informational messages may contain newlines to ensure nice formatting of the output,
-   * however word-wrapping is the responsibility of the message handler.
-   */
-  Info = 'info',
-
-  /**
-   * The message will be displayed only when "verbose" output is requested, e.g. using the `--verbose`
-   * command line option.
-   */
-  Verbose = 'verbose',
-
-  /**
-   * The message will be discarded entirely.
-   */
-  None = 'none'
-}
-
-/**
  * Configures reporting for a given message identifier.
  *
  * @remarks
@@ -260,7 +215,7 @@ export interface IConfigMessageReportingRule {
    * @remarks
    * Note that the `addToApiReviewFile` property may supersede this option.
    */
-  logLevel: ExtractorMessageLogLevel;
+  logLevel: ExtractorLogLevel;
 
   /**
    * If API Extractor is configured to write an API review file (.api.md), then the message will be written

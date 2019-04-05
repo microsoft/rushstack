@@ -55,6 +55,15 @@ export class ExtractorConfig {
 }
 
 // @public
+export const enum ExtractorLogLevel {
+    Error = "error",
+    Info = "info",
+    None = "none",
+    Verbose = "verbose",
+    Warning = "warning"
+}
+
+// @public
 export class ExtractorMessage {
     // Warning: (ae-forgotten-export) The symbol "IExtractorMessageOptions" needs to be exported by the entry point index.d.ts
     // 
@@ -64,6 +73,8 @@ export class ExtractorMessage {
     formatMessageWithLocation(workingPackageFolderPath: string): string;
     // (undocumented)
     formatMessageWithoutLocation(): string;
+    handled: boolean;
+    logLevel: ExtractorLogLevel;
     readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
     readonly properties: IExtractorMessageProperties;
     readonly sourceFileColumn: number | undefined;
@@ -94,13 +105,6 @@ export const enum ExtractorMessageId {
     UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
     UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference",
     UnresolvedLink = "ae-unresolved-link"
-}
-
-// @public
-export const enum ExtractorMessageLogLevel {
-    Error = "error",
-    None = "none",
-    Warning = "warning"
 }
 
 // @public
@@ -167,7 +171,7 @@ export interface IConfigFile {
 // @public
 export interface IConfigMessageReportingRule {
     addToApiReviewFile?: boolean;
-    logLevel: ExtractorMessageLogLevel;
+    logLevel: ExtractorLogLevel;
 }
 
 // @public
@@ -194,6 +198,7 @@ export interface IExtractorInvokeOptions {
     compilerState?: CompilerState;
     customLogger?: Partial<ILogger>;
     localBuild?: boolean;
+    messageCallback?: (message: ExtractorMessage) => void;
     typescriptCompilerFolder?: string;
 }
 

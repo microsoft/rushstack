@@ -5,6 +5,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 import * as path from 'path';
 import { ExtractorMessageId } from './ExtractorMessageId';
 import { Path, Text } from '@microsoft/node-core-library';
+import { ExtractorLogLevel } from './ExtractorLogLevel';
 
 /**
  * Used by {@link ExtractorMessage.properties}.
@@ -114,7 +115,7 @@ export class ExtractorMessage {
    *
    * To discard a message entirely, assign `logLevel = none`.
    */
-  public logLevel: ExtractorMessageLogLevel;
+  public logLevel: ExtractorLogLevel;
 
   /**
    * The text description of this issue.
