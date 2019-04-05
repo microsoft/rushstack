@@ -2,6 +2,27 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.37",
+      "tag": "@microsoft/api-extractor_v7.0.37",
+      "date": "Fri, 05 Apr 2019 04:16:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Introduce \"api-extractor init\" command-line that helps enable API Extractor for a new project"
+          },
+          {
+            "comment": "(Breaking change) Major redesign of the API used to invoke API Extractor"
+          },
+          {
+            "comment": "(Breaking change) Major redesign of the api-extractor.json config file format"
+          },
+          {
+            "comment": "Add a CompilerState API that allows an optimization where multiple invocations of Extractor can reuse the same TypeScript compiler analysis"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.36",
       "tag": "@microsoft/api-extractor_v7.0.36",
       "date": "Wed, 03 Apr 2019 02:58:33 GMT",

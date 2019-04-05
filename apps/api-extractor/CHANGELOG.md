@@ -1,6 +1,16 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 03 Apr 2019 02:58:33 GMT and should not be manually modified.
+This log was last generated on Fri, 05 Apr 2019 04:16:16 GMT and should not be manually modified.
+
+## 7.0.37
+Fri, 05 Apr 2019 04:16:16 GMT
+
+### Patches
+
+- Introduce "api-extractor init" command-line that helps enable API Extractor for a new project
+- (Breaking change) Major redesign of the API used to invoke API Extractor
+- (Breaking change) Major redesign of the api-extractor.json config file format
+- Add a CompilerState API that allows an optimization where multiple invocations of Extractor can reuse the same TypeScript compiler analysis
 
 ## 7.0.36
 Wed, 03 Apr 2019 02:58:33 GMT

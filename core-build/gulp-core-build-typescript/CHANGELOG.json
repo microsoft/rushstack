@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "8.1.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.1.0",
+      "date": "Fri, 05 Apr 2019 04:16:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update to use the new rush-stack-compiler contract for API Extractor 7"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.36` to `7.0.37`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.6.1` to `0.6.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "8.0.23",
       "tag": "@microsoft/gulp-core-build-typescript_v8.0.23",
       "date": "Wed, 03 Apr 2019 02:58:33 GMT",
