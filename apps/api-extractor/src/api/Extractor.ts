@@ -22,6 +22,7 @@ import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
 import { DocCommentEnhancer } from '../enhancers/DocCommentEnhancer';
 import { CompilerState } from './CompilerState';
+import { ExtractorMessage } from './ExtractorMessage';
 
 /**
  * Runtime options for Extractor.
@@ -57,6 +58,16 @@ export interface IExtractorInvokeOptions {
    * Use this option to specify the folder path for your compiler version.
    */
   typescriptCompilerFolder?: string;
+
+  /**
+   * An optional callback function that will be called for each `ExtractorMessage` before it is displayed by
+   * API Extractor.  The callback can customize the message, handle it, or discard it.
+   *
+   * @remarks
+   * If a `messageCallback` is not provided, then by default API Extractor will print the messages to
+   * the STDERR/STDOUT console.
+   */
+  messageCallback?: (message: ExtractorMessage) => void;
 }
 
 /**

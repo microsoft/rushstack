@@ -88,6 +88,35 @@ export class ExtractorMessage {
   public readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
 
   /**
+   * If the {@link IExtractorInvokeOptions.messageCallback} sets this property to true, it will prevent the message
+   * from being displayed by API Extractor.
+   *
+   * @remarks
+   * If the `messageCallback` routes the message to a custom handler (e.g. a toolchain logger), it should
+   * assign `handled = true` to prevent API Extractor from displaying it.  Assigning `handled = true` for all messages
+   * would effectively disable all console output from the `Extractor` API.
+   *
+   * If `handled` is set to true, the message will still be included in the count of errors/warnings;
+   * to discard a message entirely, instead assign `logLevel = none`.
+   */
+  public handled: boolean;
+
+  /**
+   * Specifies how the message should be reported.
+   *
+   * @remarks
+   * If the {@link IExtractorInvokeOptions.messageCallback} handles the message (i.e. sets `handled = true`),
+   * it can use the `logLevel` to determine how to display the message.
+   *
+   * Alternatively, if API Extractor is handling the message, the `messageCallback` could assign `logLevel` to change
+   * how it will be processed.  However, in general the recommended practice is to configure message routing
+   * using the `messages` section in api-extractor.json.
+   *
+   * To discard a message entirely, assign `logLevel = none`.
+   */
+  public logLevel: ExtractorMessageLogLevel;
+
+  /**
    * The text description of this issue.
    */
   public readonly text: string;
