@@ -90,10 +90,9 @@ export function runScenarios(buildConfigPath: string): void {
       localBuild: true,
       showVerboseMessages: true,
       messageCallback: (message: ExtractorMessage) => {
-          // This will get fixed with https://github.com/Microsoft/web-build-tools/issues/1133
           if (message.messageId === ConsoleMessageId.ApiReportCopied) {
           // ignore the "You have changed the public API signature for this project."
-          // warning for now.
+          // warning for until the above issue #1018 is fixed.
           message.handled = true;
         }
       },

@@ -95,6 +95,11 @@ export class ExtractorResult {
   public readonly succeeded: boolean;
 
   /**
+   * Returns true if the API report was found to have changed.
+   */
+  public readonly apiReportChanged: boolean;
+
+  /**
    * Reports the number of errors encountered during analysis.
    *
    * @remarks
@@ -115,6 +120,7 @@ export class ExtractorResult {
     this.compilerState = properties.compilerState;
     this.extractorConfig = properties.extractorConfig;
     this.succeeded = properties.succeeded;
+    this.apiReportChanged = properties.apiReportChanged;
     this.errorCount = properties.errorCount;
     this.warningCount = properties.warningCount;
   }
@@ -199,6 +205,8 @@ export class Extractor {
       });
     }
 
+    let apiReportChanged: boolean = false;
+
     if (extractorConfig.apiReportEnabled) {
       const actualApiReportPath: string = extractorConfig.reportTempFilePath;
       const actualApiReviewShortPath: string = extractorConfig._getShortFilePath(extractorConfig.reportTempFilePath);
@@ -239,6 +247,8 @@ export class Extractor {
               convertLineEndings: NewlineKind.CrLf
             });
           }
+
+          apiReportChanged = true;
         } else {
           messageRouter.logVerbose(ConsoleMessageId.ApiReportUnchanged,
             `The API signature is up to date: ${actualApiReviewShortPath}`);
@@ -281,6 +291,7 @@ export class Extractor {
       compilerState,
       extractorConfig,
       succeeded,
+      apiReportChanged,
       errorCount: messageRouter.errorCount,
       warningCount: messageRouter.warningCount
     });

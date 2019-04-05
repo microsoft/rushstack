@@ -123,6 +123,7 @@ export const enum ExtractorMessageId {
 export class ExtractorResult {
     // @internal
     constructor(properties: ExtractorResult);
+    readonly apiReportChanged: boolean;
     readonly compilerState: CompilerState;
     readonly errorCount: number;
     readonly extractorConfig: ExtractorConfig;
