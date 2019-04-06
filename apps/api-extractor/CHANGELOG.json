@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.38",
+      "tag": "@microsoft/api-extractor_v7.0.38",
+      "date": "Sat, 06 Apr 2019 02:05:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "(Breaking change) Removed the ILogger API and renamed ExtractorMessageLogLevel to ExtractorLogLevel"
+          },
+          {
+            "comment": "(Breaking change) Extractor console output is now modeled as ExtractorMessage objects and can be customized/filtered/handled by IExtractorInvokeOptions.messageCallback"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.37",
       "tag": "@microsoft/api-extractor_v7.0.37",
       "date": "Fri, 05 Apr 2019 04:16:16 GMT",

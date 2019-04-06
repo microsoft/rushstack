@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 05 Apr 2019 04:16:16 GMT and should not be manually modified.
+This log was last generated on Sat, 06 Apr 2019 02:05:51 GMT and should not be manually modified.
+
+## 7.0.38
+Sat, 06 Apr 2019 02:05:51 GMT
+
+### Patches
+
+- (Breaking change) Removed the ILogger API and renamed ExtractorMessageLogLevel to ExtractorLogLevel
+- (Breaking change) Extractor console output is now modeled as ExtractorMessage objects and can be customized/filtered/handled by IExtractorInvokeOptions.messageCallback
 
 ## 7.0.37
 Fri, 05 Apr 2019 04:16:16 GMT
