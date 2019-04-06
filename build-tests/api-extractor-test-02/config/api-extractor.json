@@ -7,16 +7,15 @@
     "enabled": true,
   },
 
+  "docModel": {
+    "enabled": true
+  },
+
   "dtsRollup": {
     "enabled": true,
 
-    "untrimmedFilePath": "./dist/internal/<unscopedPackageName>.d.ts",
-    "betaTrimmedFilePath": "./dist/beta/<unscopedPackageName>.d.ts",
-    "publicTrimmedFilePath": "./dist/public/<unscopedPackageName>.d.ts",
-  },
-
-  "docModel": {
-    "enabled": true
+    "betaTrimmedFilePath": "./dist/<unscopedPackageName>-beta.d.ts",
+    "publicTrimmedFilePath": "./dist/<unscopedPackageName>-public.d.ts"
   },
 
   "testMode": true
