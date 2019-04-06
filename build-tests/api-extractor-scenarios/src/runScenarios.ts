@@ -3,8 +3,8 @@
 
 import * as path from 'path';
 import * as colors from 'colors';
-import { JsonFile, Executable, FileSystem } from '@microsoft/node-core-library';
-import { Extractor, ExtractorConfig, CompilerState, ExtractorResult } from '@microsoft/api-extractor';
+import { JsonFile, FileSystem } from '@microsoft/node-core-library';
+import { Extractor, ExtractorConfig, CompilerState, ExtractorResult, ExtractorMessage, ConsoleMessageId } from '@microsoft/api-extractor';
 
 export function runScenarios(buildConfigPath: string): void {
   const buildConfig = JsonFile.load(buildConfigPath);
@@ -75,6 +75,8 @@ export function runScenarios(buildConfigPath: string): void {
   for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
     const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
 
+    console.log('Scenario: ' + scenarioFolderName);
+
     // Run the API Extractor command-line
     const extractorConfig: ExtractorConfig = ExtractorConfig.loadFileAndPrepare(apiExtractorJsonPath);
 
@@ -86,18 +88,12 @@ export function runScenarios(buildConfigPath: string): void {
 
     const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig, {
       localBuild: true,
-      customLogger: {
-        logWarning: (message: string): void => {
-          // This will get fixed with https://github.com/Microsoft/web-build-tools/issues/1133
-          if (message.indexOf('You have changed') >= 0) {
-            // ignore the "You have changed the public API signature for this project."
-            // warning for now.
-          } else {
-            console.warn(colors.yellow(message));
-          }
-        },
-        logVerbose: (message: string): void => {
-          // ignore verbose output
+      showVerboseMessages: true,
+      messageCallback: (message: ExtractorMessage) => {
+          if (message.messageId === ConsoleMessageId.ApiReportCopied) {
+          // ignore the "You have changed the public API signature for this project."
+          // warning for until the above issue #1018 is fixed.
+          message.handled = true;
         }
       },
       compilerState

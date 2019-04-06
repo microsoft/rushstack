@@ -9,6 +9,8 @@
  * @packageDocumentation
  */
 
+export { ConsoleMessageId } from './api/ConsoleMessageId';
+
 export { CompilerState, ICompilerStateCreateOptions } from './api/CompilerState';
 
 export {
@@ -21,6 +23,8 @@ export {
   IExtractorConfigPrepareOptions,
   ExtractorConfig
 } from './api/ExtractorConfig';
+
+export { ExtractorLogLevel } from './api/ExtractorLogLevel';
 
 export {
   ExtractorMessage,
@@ -36,11 +40,8 @@ export {
   IConfigDocModel,
   IConfigDtsRollup,
   IConfigTsdocMetadata,
-  ExtractorMessageLogLevel,
   IConfigMessageReportingRule,
   IConfigMessageReportingTable,
   IExtractorMessagesConfig,
   IConfigFile
 } from './api/IConfigFile';
-
-export { ILogger } from './api/ILogger';

@@ -5,6 +5,8 @@ import * as tsdoc from '@microsoft/tsdoc';
 import * as path from 'path';
 import { ExtractorMessageId } from './ExtractorMessageId';
 import { Path, Text } from '@microsoft/node-core-library';
+import { ExtractorLogLevel } from './ExtractorLogLevel';
+import { ConsoleMessageId } from './ConsoleMessageId';
 
 /**
  * Used by {@link ExtractorMessage.properties}.
@@ -54,7 +56,17 @@ export const enum ExtractorMessageCategory {
    * These strings begin with the prefix "ae-".
    * Example: `ae-extra-release-tag`
    */
-  Extractor =  'Extractor'
+  Extractor = 'Extractor',
+
+  /**
+   * Console messages communicate the progress of the overall operation.  They may include newlines to ensure
+   * nice formatting.  They are output in real time, and cannot be routed to the API Report file.
+   *
+   * @remarks
+   * These strings begin with the prefix "console-".
+   * Example: `console-writing-typings-file`
+   */
+  Console = 'console'
 }
 
 /**
@@ -62,12 +74,13 @@ export const enum ExtractorMessageCategory {
  */
 export interface IExtractorMessageOptions {
   category: ExtractorMessageCategory;
-  messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
+  messageId: tsdoc.TSDocMessageId | ExtractorMessageId | ConsoleMessageId | string;
   text: string;
   sourceFilePath?: string;
   sourceFileLine?: number;
   sourceFileColumn?: number;
   properties?: IExtractorMessageProperties;
+  logLevel?: ExtractorLogLevel;
 }
 
 /**
@@ -76,6 +89,9 @@ export interface IExtractorMessageOptions {
  * @public
  */
 export class ExtractorMessage {
+  private _handled: boolean;
+  private _logLevel: ExtractorLogLevel;
+
   /**
    * The category of issue.
    */
@@ -85,7 +101,7 @@ export class ExtractorMessage {
    * A text string that uniquely identifies the issue type.  This identifier can be used to suppress
    * or configure the reporting of issues, and also to search for help about an issue.
    */
-  public readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
+  public readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | ConsoleMessageId | string;
 
   /**
    * The text description of this issue.
@@ -124,6 +140,62 @@ export class ExtractorMessage {
     this.sourceFileLine = options.sourceFileLine;
     this.sourceFileColumn = options.sourceFileColumn;
     this.properties = options.properties || { };
+
+    this._handled = false;
+    this._logLevel = options.logLevel || ExtractorLogLevel.None;
+  }
+
+  /**
+   * If the {@link IExtractorInvokeOptions.messageCallback} sets this property to true, it will prevent the message
+   * from being displayed by API Extractor.
+   *
+   * @remarks
+   * If the `messageCallback` routes the message to a custom handler (e.g. a toolchain logger), it should
+   * assign `handled = true` to prevent API Extractor from displaying it.  Assigning `handled = true` for all messages
+   * would effectively disable all console output from the `Extractor` API.
+   *
+   * If `handled` is set to true, the message will still be included in the count of errors/warnings;
+   * to discard a message entirely, instead assign `logLevel = none`.
+   */
+  public get handled(): boolean {
+    return this._handled;
+  }
+
+  public set handled(value: boolean) {
+    if (this._handled && !value) {
+      throw new Error('One a message has been marked as handled, the "handled" property cannot be set to false');
+    }
+    this._handled = value;
+  }
+
+  /**
+   * Specifies how the message should be reported.
+   *
+   * @remarks
+   * If the {@link IExtractorInvokeOptions.messageCallback} handles the message (i.e. sets `handled = true`),
+   * it can use the `logLevel` to determine how to display the message.
+   *
+   * Alternatively, if API Extractor is handling the message, the `messageCallback` could assign `logLevel` to change
+   * how it will be processed.  However, in general the recommended practice is to configure message routing
+   * using the `messages` section in api-extractor.json.
+   *
+   * To discard a message entirely, assign `logLevel = none`.
+   */
+  public get logLevel(): ExtractorLogLevel {
+    return this._logLevel;
+  }
+
+  public set logLevel(value: ExtractorLogLevel) {
+    switch (value) {
+      case ExtractorLogLevel.Error:
+      case ExtractorLogLevel.Info:
+      case ExtractorLogLevel.None:
+      case ExtractorLogLevel.Verbose:
+      case ExtractorLogLevel.Warning:
+        break;
+      default:
+        throw new Error('Invalid log level');
+    }
   }
 
   /**

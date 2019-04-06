@@ -25,6 +25,7 @@ import { ExtractorConfig } from '../api/ExtractorConfig';
 export class RunAction extends CommandLineAction {
   private _configFileParameter: CommandLineStringParameter;
   private _localParameter: CommandLineFlagParameter;
+  private _verboseParameter: CommandLineFlagParameter;
   private _typescriptCompilerFolder: CommandLineStringParameter;
 
   constructor(parser: ApiExtractorCommandLine) {
@@ -50,6 +51,12 @@ export class RunAction extends CommandLineAction {
         + ' e.g. on a developer\'s machine. This disables certain validation that would'
         + ' normally be performed for a ship/production build. For example, the *.api.md'
         + ' review file is automatically copied in a local build.'
+    });
+
+    this._verboseParameter = this.defineFlagParameter({
+      parameterLongName: '--verbose',
+      parameterShortName: '-v',
+      description: 'Show additional diagnostic messages in the output.'
     });
 
     this._typescriptCompilerFolder = this.defineStringParameter({
@@ -119,7 +126,7 @@ export class RunAction extends CommandLineAction {
         }
       }
 
-      console.log(`Using configuration from ${configFilename}` + os.EOL + os.EOL);
+      console.log(`Using configuration from ${configFilename}` + os.EOL);
     }
 
     const configObjectFullPath: string = path.resolve(configFilename);
@@ -134,11 +141,14 @@ export class RunAction extends CommandLineAction {
     const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig,
       {
         localBuild: this._localParameter.value,
+        showVerboseMessages: this._verboseParameter.value,
         typescriptCompilerFolder: typescriptCompilerFolder
       }
     );
 
-    if (!extractorResult.succeeded) {
+    if (extractorResult.succeeded) {
+      console.log(os.EOL + 'API Extractor completed successfully');
+    } else {
       process.exitCode = 1;
 
       if (extractorResult.errorCount > 0) {

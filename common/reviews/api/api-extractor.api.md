@@ -16,6 +16,17 @@ export class CompilerState {
     }
 
 // @public
+export const enum ConsoleMessageId {
+    ApiReportCopied = "console-api-report-copied",
+    ApiReportMissing = "console-api-report-missing",
+    ApiReportNotCopied = "console-api-report-not-copied",
+    ApiReportUnchanged = "console-api-report-unchanged",
+    FoundTSDocMetadata = "console-found-tsdoc-metadata",
+    WritingDocModelFile = "console-writing-doc-model-file",
+    WritingDtsRollup = "console-writing-dts-rollup"
+}
+
+// @public
 export class Extractor {
     static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult;
     static loadConfigAndInvoke(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult;
@@ -55,6 +66,15 @@ export class ExtractorConfig {
 }
 
 // @public
+export const enum ExtractorLogLevel {
+    Error = "error",
+    Info = "info",
+    None = "none",
+    Verbose = "verbose",
+    Warning = "warning"
+}
+
+// @public
 export class ExtractorMessage {
     // Warning: (ae-forgotten-export) The symbol "IExtractorMessageOptions" needs to be exported by the entry point index.d.ts
     // 
@@ -64,7 +84,9 @@ export class ExtractorMessage {
     formatMessageWithLocation(workingPackageFolderPath: string): string;
     // (undocumented)
     formatMessageWithoutLocation(): string;
-    readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | string;
+    handled: boolean;
+    logLevel: ExtractorLogLevel;
+    readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | ConsoleMessageId | string;
     readonly properties: IExtractorMessageProperties;
     readonly sourceFileColumn: number | undefined;
     readonly sourceFileLine: number | undefined;
@@ -75,6 +97,7 @@ export class ExtractorMessage {
 // @public
 export const enum ExtractorMessageCategory {
     Compiler = "Compiler",
+    Console = "console",
     Extractor = "Extractor",
     TSDoc = "TSDoc"
 }
@@ -97,16 +120,10 @@ export const enum ExtractorMessageId {
 }
 
 // @public
-export const enum ExtractorMessageLogLevel {
-    Error = "error",
-    None = "none",
-    Warning = "warning"
-}
-
-// @public
 export class ExtractorResult {
     // @internal
     constructor(properties: ExtractorResult);
+    readonly apiReportChanged: boolean;
     readonly compilerState: CompilerState;
     readonly errorCount: number;
     readonly extractorConfig: ExtractorConfig;
@@ -167,7 +184,7 @@ export interface IConfigFile {
 // @public
 export interface IConfigMessageReportingRule {
     addToApiReviewFile?: boolean;
-    logLevel: ExtractorMessageLogLevel;
+    logLevel: ExtractorLogLevel;
 }
 
 // @public
@@ -192,8 +209,9 @@ export interface IExtractorConfigPrepareOptions {
 // @public
 export interface IExtractorInvokeOptions {
     compilerState?: CompilerState;
-    customLogger?: Partial<ILogger>;
     localBuild?: boolean;
+    messageCallback?: (message: ExtractorMessage) => void;
+    showVerboseMessages?: boolean;
     typescriptCompilerFolder?: string;
 }
 
@@ -207,14 +225,6 @@ export interface IExtractorMessagesConfig {
     compilerMessageReporting?: IConfigMessageReportingTable;
     extractorMessageReporting?: IConfigMessageReportingTable;
     tsdocMessageReporting?: IConfigMessageReportingTable;
-}
-
-// @public
-export interface ILogger {
-    logError(message: string): void;
-    logInfo(message: string): void;
-    logVerbose(message: string): void;
-    logWarning(message: string): void;
 }
 
 
