@@ -8,11 +8,11 @@
     "reportFolder": "../../common/reviews/api"
   },
 
-  "dtsRollup": {
+  "docModel": {
     "enabled": true
   },
 
-  "docModel": {
+  "dtsRollup": {
     "enabled": true
   }
 }
