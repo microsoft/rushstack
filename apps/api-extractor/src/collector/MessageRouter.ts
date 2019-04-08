@@ -270,7 +270,7 @@ export class MessageRouter {
    * being shown on the console.
    */
   public fetchAssociatedMessagesForReviewFile(astDeclaration: AstDeclaration): ExtractorMessage[] {
-    const messagesForApiReviewFile: ExtractorMessage[] = [];
+    const messagesForApiReportFile: ExtractorMessage[] = [];
 
     const associatedMessages: ExtractorMessage[] = this._associatedMessagesForAstDeclaration.get(astDeclaration) || [];
     for (const associatedMessage of associatedMessages) {
@@ -283,15 +283,15 @@ export class MessageRouter {
         if (reportingRule.addToApiReportFile) {
 
           // Include it in the result, and record that it went to the API review file
-          messagesForApiReviewFile.push(associatedMessage);
+          messagesForApiReportFile.push(associatedMessage);
           associatedMessage.handled = true;
         }
       }
 
     }
 
-    this._sortMessagesForOutput(messagesForApiReviewFile);
-    return messagesForApiReviewFile;
+    this._sortMessagesForOutput(messagesForApiReportFile);
+    return messagesForApiReportFile;
   }
 
   /**
@@ -299,7 +299,7 @@ export class MessageRouter {
    * retreieved using `fetchAssociatedMessagesForReviewFile()`.
    */
   public fetchUnassociatedMessagesForReviewFile(): ExtractorMessage[] {
-    const messagesForApiReviewFile: ExtractorMessage[] = [];
+    const messagesForApiReportFile: ExtractorMessage[] = [];
 
     for (const unassociatedMessage of this.messages) {
 
@@ -311,15 +311,15 @@ export class MessageRouter {
         if (reportingRule.addToApiReportFile) {
 
           // Include it in the result, and record that it went to the API review file
-          messagesForApiReviewFile.push(unassociatedMessage);
+          messagesForApiReportFile.push(unassociatedMessage);
           unassociatedMessage.handled = true;
         }
       }
 
     }
 
-    this._sortMessagesForOutput(messagesForApiReviewFile);
-    return messagesForApiReviewFile;
+    this._sortMessagesForOutput(messagesForApiReportFile);
+    return messagesForApiReportFile;
   }
 
   /**
