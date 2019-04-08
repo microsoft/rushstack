@@ -36,7 +36,7 @@ export interface IExtractorInvokeOptions {
   /**
    * Indicates that API Extractor is running as part of a local build, e.g. on developer's
    * machine. This disables certain validation that would normally be performed
-   * for a ship/production build. For example, the *.api.md review file is
+   * for a ship/production build. For example, the *.api.md report file is
    * automatically updated in a local build.
    *
    * The default value is false.
@@ -256,8 +256,8 @@ export class Extractor {
       } else {
         // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
         // For example, when projects were moved into category folders, the relative path for
-        // the API review files ended up in the wrong place.
-        messageRouter.logError(ConsoleMessageId.ApiReportMissing, `The API review file has not been set up.`
+        // the API report files ended up in the wrong place.
+        messageRouter.logError(ConsoleMessageId.ApiReportMissing, `The API report file has not been set up.`
           + ` Do this by copying ${actualApiReportShortPath}`
           + ` to ${expectedApiReportShortPath} and committing it.`);
       }

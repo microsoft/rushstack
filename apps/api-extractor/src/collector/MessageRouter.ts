@@ -265,8 +265,8 @@ export class MessageRouter {
   }
 
   /**
-   * This is used when writing the API review file.  It looks up any messages that were configured to get emitted
-   * in the API review file and returns them.  It also records that they were emitted, which suppresses them from
+   * This is used when writing the API report file.  It looks up any messages that were configured to get emitted
+   * in the API report file and returns them.  It also records that they were emitted, which suppresses them from
    * being shown on the console.
    */
   public fetchAssociatedMessagesForReviewFile(astDeclaration: AstDeclaration): ExtractorMessage[] {
@@ -278,11 +278,11 @@ export class MessageRouter {
       // Make sure we didn't already report this message for some reason
       if (!associatedMessage.handled) {
 
-        // Is this message type configured to go in the API review file?
+        // Is this message type configured to go in the API report file?
         const reportingRule: IReportingRule = this._getRuleForMessage(associatedMessage);
         if (reportingRule.addToApiReportFile) {
 
-          // Include it in the result, and record that it went to the API review file
+          // Include it in the result, and record that it went to the API report file
           messagesForApiReportFile.push(associatedMessage);
           associatedMessage.handled = true;
         }
@@ -306,11 +306,11 @@ export class MessageRouter {
       // Make sure we didn't already report this message for some reason
       if (!unassociatedMessage.handled) {
 
-        // Is this message type configured to go in the API review file?
+        // Is this message type configured to go in the API report file?
         const reportingRule: IReportingRule = this._getRuleForMessage(unassociatedMessage);
         if (reportingRule.addToApiReportFile) {
 
-          // Include it in the result, and record that it went to the API review file
+          // Include it in the result, and record that it went to the API report file
           messagesForApiReportFile.push(unassociatedMessage);
           unassociatedMessage.handled = true;
         }

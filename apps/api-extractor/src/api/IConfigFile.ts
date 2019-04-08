@@ -53,7 +53,7 @@ export interface IConfigCompiler {
 }
 
 /**
- * Configures how the API review files (*.api.md) will be generated.
+ * Configures how the API report files (*.api.md) will be generated.
  *
  * @remarks
  * This is part of the {@link IConfigFile} structure.
@@ -218,8 +218,8 @@ export interface IConfigMessageReportingRule {
   logLevel: ExtractorLogLevel;
 
   /**
-   * If API Extractor is configured to write an API review file (.api.md), then the message will be written
-   * inside that file.  If the API review file is NOT being written, then the message is instead logged according
+   * If API Extractor is configured to write an API report file (.api.md), then the message will be written
+   * inside that file.  If the API report file is NOT being written, then the message is instead logged according
    * to the `logLevel` option.
    */
   addToApiReportFile?: boolean;
