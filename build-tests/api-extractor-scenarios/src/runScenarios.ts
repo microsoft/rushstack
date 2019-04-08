@@ -16,8 +16,6 @@ import {
 export function runScenarios(buildConfigPath: string): void {
   const buildConfig = JsonFile.load(buildConfigPath);
 
-  const apiExtractorBinary = 'node_modules/.bin/api-extractor';
-
   const entryPoints: string[] = [];
 
   // TODO: Eliminate this workaround
