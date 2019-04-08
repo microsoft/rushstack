@@ -2,9 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as colors from 'colors';
-import { JsonFile, FileSystem } from '@microsoft/node-core-library';
-import { Extractor, ExtractorConfig, CompilerState, ExtractorResult, ExtractorMessage, ConsoleMessageId, ExtractorLogLevel } from '@microsoft/api-extractor';
+import { JsonFile } from '@microsoft/node-core-library';
+import {
+  Extractor,
+  ExtractorConfig,
+  CompilerState,
+  ExtractorResult,
+  ExtractorMessage,
+  ConsoleMessageId,
+  ExtractorLogLevel
+} from '@microsoft/api-extractor';
 
 export function runScenarios(buildConfigPath: string): void {
   const buildConfig = JsonFile.load(buildConfigPath);
