@@ -36,7 +36,7 @@ export interface IExtractorInvokeOptions {
   /**
    * Indicates that API Extractor is running as part of a local build, e.g. on developer's
    * machine. This disables certain validation that would normally be performed
-   * for a ship/production build. For example, the *.api.md review file is
+   * for a ship/production build. For example, the *.api.md report file is
    * automatically updated in a local build.
    *
    * The default value is false.
@@ -209,40 +209,40 @@ export class Extractor {
 
     if (extractorConfig.apiReportEnabled) {
       const actualApiReportPath: string = extractorConfig.reportTempFilePath;
-      const actualApiReviewShortPath: string = extractorConfig._getShortFilePath(extractorConfig.reportTempFilePath);
+      const actualApiReportShortPath: string = extractorConfig._getShortFilePath(extractorConfig.reportTempFilePath);
 
-      const expectedApiReviewPath: string = extractorConfig.reportFilePath;
-      const expectedApiReviewShortPath: string = extractorConfig._getShortFilePath(extractorConfig.reportFilePath);
+      const expectedApiReportPath: string = extractorConfig.reportFilePath;
+      const expectedApiReportShortPath: string = extractorConfig._getShortFilePath(extractorConfig.reportFilePath);
 
-      const actualApiReviewContent: string = ReviewFileGenerator.generateReviewFileContent(collector);
+      const actualApiReportContent: string = ReviewFileGenerator.generateReviewFileContent(collector);
 
       // Write the actual file
-      FileSystem.writeFile(actualApiReportPath, actualApiReviewContent, {
+      FileSystem.writeFile(actualApiReportPath, actualApiReportContent, {
         ensureFolderExists: true,
         convertLineEndings: NewlineKind.CrLf
       });
 
       // Compare it against the expected file
-      if (FileSystem.exists(expectedApiReviewPath)) {
-        const expectedApiReviewContent: string = FileSystem.readFile(expectedApiReviewPath);
+      if (FileSystem.exists(expectedApiReportPath)) {
+        const expectedApiReportContent: string = FileSystem.readFile(expectedApiReportPath);
 
-        if (!ReviewFileGenerator.areEquivalentApiFileContents(actualApiReviewContent, expectedApiReviewContent)) {
+        if (!ReviewFileGenerator.areEquivalentApiFileContents(actualApiReportContent, expectedApiReportContent)) {
           if (!localBuild) {
             // For production, issue a warning that will break the CI build.
             messageRouter.logWarning(ConsoleMessageId.ApiReportNotCopied,
               'You have changed the public API signature for this project.'
               // @microsoft/gulp-core-build seems to run JSON.stringify() on the error messages for some reason,
               // so try to avoid escaped characters:
-              + ` Please overwrite ${expectedApiReviewShortPath} with a`
-              + ` copy of ${actualApiReviewShortPath}`
+              + ` Please overwrite ${expectedApiReportShortPath} with a`
+              + ` copy of ${actualApiReportShortPath}`
               + ' and then request an API review. See the Git repository README.md for more info.');
           } else {
             // For a local build, just copy the file automatically.
             messageRouter.logWarning(ConsoleMessageId.ApiReportCopied,
               'You have changed the public API signature for this project.'
-              + ` Updating ${expectedApiReviewShortPath}`);
+              + ` Updating ${expectedApiReportShortPath}`);
 
-            FileSystem.writeFile(expectedApiReviewPath, actualApiReviewContent, {
+            FileSystem.writeFile(expectedApiReportPath, actualApiReportContent, {
               ensureFolderExists: true,
               convertLineEndings: NewlineKind.CrLf
             });
@@ -251,15 +251,15 @@ export class Extractor {
           apiReportChanged = true;
         } else {
           messageRouter.logVerbose(ConsoleMessageId.ApiReportUnchanged,
-            `The API signature is up to date: ${actualApiReviewShortPath}`);
+            `The API signature is up to date: ${actualApiReportShortPath}`);
         }
       } else {
         // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
         // For example, when projects were moved into category folders, the relative path for
-        // the API review files ended up in the wrong place.
-        messageRouter.logError(ConsoleMessageId.ApiReportMissing, `The API review file has not been set up.`
-          + ` Do this by copying ${actualApiReviewShortPath}`
-          + ` to ${expectedApiReviewShortPath} and committing it.`);
+        // the API report files ended up in the wrong place.
+        messageRouter.logError(ConsoleMessageId.ApiReportMissing, `The API report file has not been set up.`
+          + ` Do this by copying ${actualApiReportShortPath}`
+          + ` to ${expectedApiReportShortPath} and committing it.`);
       }
     }
 

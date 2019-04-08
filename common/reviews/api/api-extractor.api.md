@@ -77,7 +77,7 @@ export const enum ExtractorLogLevel {
 // @public
 export class ExtractorMessage {
     // Warning: (ae-forgotten-export) The symbol "IExtractorMessageOptions" needs to be exported by the entry point index.d.ts
-    // 
+    //
     // @internal
     constructor(options: IExtractorMessageOptions);
     readonly category: ExtractorMessageCategory;
@@ -183,7 +183,7 @@ export interface IConfigFile {
 
 // @public
 export interface IConfigMessageReportingRule {
-    addToApiReviewFile?: boolean;
+    addToApiReportFile?: boolean;
     logLevel: ExtractorLogLevel;
 }
 

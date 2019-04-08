@@ -226,7 +226,7 @@
       "default": {
         /**
          * Specifies whether the message should be written to the the tool's output log.  Note that
-         * the "addToApiReviewFile" property may supersede this option.
+         * the "addToApiReportFile" property may supersede this option.
          *
          * Possible values: "error", "warning", "none"
          *
@@ -239,18 +239,18 @@
         // "logLevel": "warning",
 
         /**
-         * When addToApiReviewFile is true:  If API Extractor is configured to write an API report file (.api.md),
+         * When addToApiReportFile is true:  If API Extractor is configured to write an API report file (.api.md),
          * then the message will be written inside that file; otherwise, the message is instead logged according to
          * the "logLevel" option.
          *
          * DEFAULT VALUE: false
          */
-        // "addToApiReviewFile": false
+        // "addToApiReportFile": false
       },
 
       // "TS2551": {
       //   "logLevel": "warning",
-      //   "addToApiReviewFile": true
+      //   "addToApiReportFile": true
       // },
       //
       // . . .
@@ -266,12 +266,12 @@
     "extractorMessageReporting": {
       "default": {
         // "logLevel": "warning",
-        // "addToApiReviewFile": false
+        // "addToApiReportFile": false
       },
 
       // "ae-extra-release-tag": {
       //   "logLevel": "warning",
-      //   "addToApiReviewFile": true
+      //   "addToApiReportFile": true
       // },
       //
       // . . .
@@ -287,12 +287,12 @@
     "tsdocMessageReporting": {
       "default": {
         // "logLevel": "warning",
-        // "addToApiReviewFile": false
+        // "addToApiReportFile": false
       }
 
       // "tsdoc-link-tag-unescaped-text": {
       //   "logLevel": "warning",
-      //   "addToApiReviewFile": true
+      //   "addToApiReportFile": true
       // },
       //
       // . . .

@@ -44,7 +44,7 @@ export const enum ConsoleMessageId {
   ApiReportUnchanged = 'console-api-report-unchanged',
 
   /**
-   * "The API review file has not been set up. Do this by copying ___ to ___ and committing it."
+   * "The API report file has not been set up. Do this by copying ___ to ___ and committing it."
    */
   ApiReportMissing = 'console-api-report-missing'
 }
