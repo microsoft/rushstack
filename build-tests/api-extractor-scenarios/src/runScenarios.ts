@@ -45,11 +45,11 @@ export function runScenarios(buildConfigPath: string): void {
           // TODO: Capture the full list of warnings in the tracked test output file
           'ae-cyclic-inherit-doc': {
             'logLevel': 'warning',
-            'addToApiReviewFile': true
+            'addToApiReportFile': true
           },
           'ae-unresolved-link': {
             'logLevel': 'warning',
-            'addToApiReviewFile': true
+            'addToApiReportFile': true
           }
         }
       },

@@ -27,7 +27,7 @@ import { ConsoleMessageId } from '../api/ConsoleMessageId';
 
 interface IReportingRule {
   logLevel: ExtractorLogLevel;
-  addToApiReviewFile: boolean;
+  addToApiReportFile: boolean;
 }
 
 export class MessageRouter {
@@ -37,7 +37,7 @@ export class MessageRouter {
   // All messages
   private readonly _messages: ExtractorMessage[];
 
-  // For each AstDeclaration, the messages associated with it.  This is used when addToApiReviewFile=true
+  // For each AstDeclaration, the messages associated with it.  This is used when addToApiReportFile=true
   private readonly _associatedMessagesForAstDeclaration: Map<AstDeclaration, ExtractorMessage[]>;
 
   private readonly _sourceMapper: SourceMapper;
@@ -45,11 +45,11 @@ export class MessageRouter {
   // Normalized representation of the routing rules from api-extractor.json
   private _reportingRuleByMessageId: Map<string, IReportingRule> = new Map<string, IReportingRule>();
   private _compilerDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None,
-    addToApiReviewFile: false };
+    addToApiReportFile: false };
   private _extractorDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None,
-    addToApiReviewFile: false };
+    addToApiReportFile: false };
   private _tsdocDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None,
-    addToApiReviewFile: false };
+    addToApiReportFile: false };
 
   public errorCount: number = 0;
   public warningCount: number = 0;
@@ -131,7 +131,7 @@ export class MessageRouter {
   private static _getNormalizedRule(rule: IConfigMessageReportingRule): IReportingRule {
     return {
       logLevel: rule.logLevel || 'none',
-      addToApiReviewFile: rule.addToApiReviewFile || false
+      addToApiReportFile: rule.addToApiReportFile || false
     };
   }
 
@@ -280,7 +280,7 @@ export class MessageRouter {
 
         // Is this message type configured to go in the API review file?
         const reportingRule: IReportingRule = this._getRuleForMessage(associatedMessage);
-        if (reportingRule.addToApiReviewFile) {
+        if (reportingRule.addToApiReportFile) {
 
           // Include it in the result, and record that it went to the API review file
           messagesForApiReviewFile.push(associatedMessage);
@@ -295,7 +295,7 @@ export class MessageRouter {
   }
 
   /**
-   * This returns all remaining messages that were flagged with `addToApiReviewFile`, but which were not
+   * This returns all remaining messages that were flagged with `addToApiReportFile`, but which were not
    * retreieved using `fetchAssociatedMessagesForReviewFile()`.
    */
   public fetchUnassociatedMessagesForReviewFile(): ExtractorMessage[] {
@@ -308,7 +308,7 @@ export class MessageRouter {
 
         // Is this message type configured to go in the API review file?
         const reportingRule: IReportingRule = this._getRuleForMessage(unassociatedMessage);
-        if (reportingRule.addToApiReviewFile) {
+        if (reportingRule.addToApiReportFile) {
 
           // Include it in the result, and record that it went to the API review file
           messagesForApiReviewFile.push(unassociatedMessage);

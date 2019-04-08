@@ -43,23 +43,23 @@
       },
       "ae-forgotten-export": {
         "logLevel": "warning",
-        "addToApiReviewFile": true
+        "addToApiReportFile": true
       },
       "ae-incompatible-release-tags": {
         "logLevel": "warning",
-        "addToApiReviewFile": true
+        "addToApiReportFile": true
       },
       "ae-internal-missing-underscore": {
         "logLevel": "warning",
-        "addToApiReviewFile": true
+        "addToApiReportFile": true
       },
       "ae-unresolved-inheritdoc-reference": {
         "logLevel": "warning",
-        "addToApiReviewFile": true
+        "addToApiReportFile": true
       },
       "ae-unresolved-inheritdoc-base": {
         "logLevel": "warning",
-        "addToApiReviewFile": true
+        "addToApiReportFile": true
       }
     },
     "tsdocMessageReporting": {

@@ -213,7 +213,7 @@ export interface IConfigMessageReportingRule {
    * Specifies whether the message should be written to the the tool's output log.
    *
    * @remarks
-   * Note that the `addToApiReviewFile` property may supersede this option.
+   * Note that the `addToApiReportFile` property may supersede this option.
    */
   logLevel: ExtractorLogLevel;
 
@@ -222,7 +222,7 @@ export interface IConfigMessageReportingRule {
    * inside that file.  If the API review file is NOT being written, then the message is instead logged according
    * to the `logLevel` option.
    */
-  addToApiReviewFile?: boolean;
+  addToApiReportFile?: boolean;
 }
 
 /**
