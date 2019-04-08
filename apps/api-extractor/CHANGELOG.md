@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 06 Apr 2019 02:05:51 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Apr 2019 19:12:52 GMT and should not be manually modified.
+
+## 7.0.39
+Mon, 08 Apr 2019 19:12:52 GMT
+
+### Patches
+
+- Rename "addToApiReviewFile" setting to "addToApiReportFile"
 
 ## 7.0.38
 Sat, 06 Apr 2019 02:05:51 GMT

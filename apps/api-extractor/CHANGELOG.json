@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.39",
+      "tag": "@microsoft/api-extractor_v7.0.39",
+      "date": "Mon, 08 Apr 2019 19:12:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename \"addToApiReviewFile\" setting to \"addToApiReportFile\""
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.38",
       "tag": "@microsoft/api-extractor_v7.0.38",
       "date": "Sat, 06 Apr 2019 02:05:51 GMT",
