@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import {
   FileSystem,
   NewlineKind,
   PackageJsonLookup,
   IPackageJson
 } from '@microsoft/node-core-library';
+
 import { ExtractorConfig } from './ExtractorConfig';
 import { Collector } from '../collector/Collector';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
@@ -227,15 +229,15 @@ export class Extractor {
         const expectedApiReportContent: string = FileSystem.readFile(expectedApiReportPath);
 
         if (!ReviewFileGenerator.areEquivalentApiFileContents(actualApiReportContent, expectedApiReportContent)) {
+          apiReportChanged = true;
+
           if (!localBuild) {
-            // For production, issue a warning that will break the CI build.
+            // For a production build, issue a warning that will break the CI build.
             messageRouter.logWarning(ConsoleMessageId.ApiReportNotCopied,
               'You have changed the public API signature for this project.'
-              // @microsoft/gulp-core-build seems to run JSON.stringify() on the error messages for some reason,
-              // so try to avoid escaped characters:
-              + ` Please overwrite ${expectedApiReportShortPath} with a`
-              + ` copy of ${actualApiReportShortPath}`
-              + ' and then request an API review. See the Git repository README.md for more info.');
+              + ` Please copy the file "${actualApiReportShortPath}" to "${expectedApiReportShortPath}",`
+              + ` or perform a local build which does this automatically.`
+              + ` See the Git repo documentation for more info.`);
           } else {
             // For a local build, just copy the file automatically.
             messageRouter.logWarning(ConsoleMessageId.ApiReportCopied,
@@ -247,19 +249,43 @@ export class Extractor {
               convertLineEndings: NewlineKind.CrLf
             });
           }
-
-          apiReportChanged = true;
-        } else {
+       } else {
           messageRouter.logVerbose(ConsoleMessageId.ApiReportUnchanged,
             `The API signature is up to date: ${actualApiReportShortPath}`);
         }
       } else {
-        // NOTE: This warning seems like a nuisance, but it has caught genuine mistakes.
-        // For example, when projects were moved into category folders, the relative path for
-        // the API report files ended up in the wrong place.
-        messageRouter.logError(ConsoleMessageId.ApiReportMissing, `The API report file has not been set up.`
-          + ` Do this by copying ${actualApiReportShortPath}`
-          + ` to ${expectedApiReportShortPath} and committing it.`);
+        // The target file does not exist, so we are setting up the API review file for the first time.
+        //
+        // NOTE: People sometimes make a mistake where they move a project and forget to update the "reportFolder"
+        // setting, which causes a new file to silently get written to the wrong place.  This can be confusing.
+        // Thus we treat the initial creation of the file specially.
+        apiReportChanged = true;
+
+        if (!localBuild) {
+          // For a production build, issue a warning that will break the CI build.
+          messageRouter.logWarning(ConsoleMessageId.ApiReportNotCopied,
+            'You have changed the public API signature for this project.'
+            + ` Please copy the file "${actualApiReportShortPath}" to "${expectedApiReportShortPath}",`
+            + ` or perform a local build which does this automatically.`
+            + ` See the Git repo documentation for more info.`);
+        } else {
+          messageRouter.logWarning(ConsoleMessageId.ApiReportCreated,
+            'The API report file was missing, so a new file was created. Please add this file to Git:\n'
+            + expectedApiReportPath
+          );
+
+          const expectedApiReportFolder: string = path.dirname(expectedApiReportPath);
+          if (!FileSystem.exists(expectedApiReportFolder)) {
+            messageRouter.logError(ConsoleMessageId.ApiReportFolderMissing,
+              'Unable to create the API report file. Please make sure the target folder exists:\n'
+              + expectedApiReportFolder
+            );
+          } else {
+            FileSystem.writeFile(expectedApiReportPath, actualApiReportContent, {
+              convertLineEndings: NewlineKind.CrLf
+            });
+          }
+        }
       }
     }
 

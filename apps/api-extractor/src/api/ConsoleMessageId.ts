@@ -28,8 +28,8 @@ export const enum ConsoleMessageId {
   WritingDtsRollup = 'console-writing-dts-rollup',
 
   /**
-   * "You have changed the public API signature for this project.  Please overwrite ___ with a
-   * copy of ___ and then request an API review. See the Git repository README.md for more info."
+   * "You have changed the public API signature for this project. Please copy the file ___ to ___,
+   * or perform a local build which does this automatically.  See the Git repo documentation for more info."
    */
   ApiReportNotCopied = 'console-api-report-not-copied',
 
@@ -39,12 +39,17 @@ export const enum ConsoleMessageId {
   ApiReportCopied = 'console-api-report-copied',
 
   /**
-   * "The API signature is up to date: ___"
+   * "The API report is up to date: ___"
    */
   ApiReportUnchanged = 'console-api-report-unchanged',
 
   /**
-   * "The API report file has not been set up. Do this by copying ___ to ___ and committing it."
+   * "The API report file was missing, so a new file was created. Please add this file to Git: ___"
    */
-  ApiReportMissing = 'console-api-report-missing'
+  ApiReportCreated = 'console-api-report-created',
+
+  /**
+   * "Unable to create the API report file. Please make sure the target folder exists: ___"
+   */
+  ApiReportFolderMissing = 'console-api-report-folder-missing'
 }
