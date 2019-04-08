@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as colors from 'colors';
 import { JsonFile, FileSystem } from '@microsoft/node-core-library';
-import { Extractor, ExtractorConfig, CompilerState, ExtractorResult, ExtractorMessage, ConsoleMessageId } from '@microsoft/api-extractor';
+import { Extractor, ExtractorConfig, CompilerState, ExtractorResult, ExtractorMessage, ConsoleMessageId, ExtractorLogLevel } from '@microsoft/api-extractor';
 
 export function runScenarios(buildConfigPath: string): void {
   const buildConfig = JsonFile.load(buildConfigPath);
@@ -60,12 +60,6 @@ export function runScenarios(buildConfigPath: string): void {
     const apiExtractorJsonPath: string = `./temp/configs/api-extractor-${scenarioFolderName}.json`;
 
     JsonFile.save(apiExtractorJson, apiExtractorJsonPath, { ensureFolderExists: true });
-
-    // Create an empty file to force API Extractor to create a missing output file
-    // TODO: Add an api-extractor option to force creation of a missing .api.md file
-    // See GitHub issue https://github.com/Microsoft/web-build-tools/issues/1018
-    FileSystem.writeFile(`./etc/test-outputs/${scenarioFolderName}/api-extractor-scenarios.api.md`, '',
-      { ensureFolderExists: true });
   }
 
   let compilerState: CompilerState | undefined = undefined;
@@ -90,10 +84,9 @@ export function runScenarios(buildConfigPath: string): void {
       localBuild: true,
       showVerboseMessages: true,
       messageCallback: (message: ExtractorMessage) => {
-          if (message.messageId === ConsoleMessageId.ApiReportCopied) {
-          // ignore the "You have changed the public API signature for this project."
-          // warning for until the above issue #1018 is fixed.
-          message.handled = true;
+        if (message.messageId === ConsoleMessageId.ApiReportCreated) {
+          // This script deletes the outputs for a clean build, so don't issue a warning if the file gets created
+          message.logLevel = ExtractorLogLevel.None;
         }
       },
       compilerState
