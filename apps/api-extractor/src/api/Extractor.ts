@@ -236,7 +236,7 @@ export class Extractor {
             messageRouter.logWarning(ConsoleMessageId.ApiReportNotCopied,
               'You have changed the public API signature for this project.'
               + ` Please copy the file "${actualApiReportShortPath}" to "${expectedApiReportShortPath}",`
-              + ` or perform a local build which does this automatically.`
+              + ` or else perform a local build (which does this automatically).`
               + ` See the Git repo documentation for more info.`);
           } else {
             // For a local build, just copy the file automatically.
@@ -251,7 +251,7 @@ export class Extractor {
           }
        } else {
           messageRouter.logVerbose(ConsoleMessageId.ApiReportUnchanged,
-            `The API signature is up to date: ${actualApiReportShortPath}`);
+            `The API report is up to date: ${actualApiReportShortPath}`);
         }
       } else {
         // The target file does not exist, so we are setting up the API review file for the first time.
@@ -266,7 +266,7 @@ export class Extractor {
           messageRouter.logWarning(ConsoleMessageId.ApiReportNotCopied,
             'You have changed the public API signature for this project.'
             + ` Please copy the file "${actualApiReportShortPath}" to "${expectedApiReportShortPath}",`
-            + ` or perform a local build which does this automatically.`
+            + ` or else perform a local build (which does this automatically).`
             + ` See the Git repo documentation for more info.`);
         } else {
           messageRouter.logWarning(ConsoleMessageId.ApiReportCreated,

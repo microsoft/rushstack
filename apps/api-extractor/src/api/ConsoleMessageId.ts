@@ -29,7 +29,7 @@ export const enum ConsoleMessageId {
 
   /**
    * "You have changed the public API signature for this project. Please copy the file ___ to ___,
-   * or perform a local build which does this automatically.  See the Git repo documentation for more info."
+   * or else perform a local build (which does this automatically). See the Git repo documentation for more info.
    */
   ApiReportNotCopied = 'console-api-report-not-copied',
 
