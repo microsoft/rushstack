@@ -18,7 +18,8 @@ export class CompilerState {
 // @public
 export const enum ConsoleMessageId {
     ApiReportCopied = "console-api-report-copied",
-    ApiReportMissing = "console-api-report-missing",
+    ApiReportCreated = "console-api-report-created",
+    ApiReportFolderMissing = "console-api-report-folder-missing",
     ApiReportNotCopied = "console-api-report-not-copied",
     ApiReportUnchanged = "console-api-report-unchanged",
     FoundTSDocMetadata = "console-found-tsdoc-metadata",
@@ -77,7 +78,7 @@ export const enum ExtractorLogLevel {
 // @public
 export class ExtractorMessage {
     // Warning: (ae-forgotten-export) The symbol "IExtractorMessageOptions" needs to be exported by the entry point index.d.ts
-    //
+    // 
     // @internal
     constructor(options: IExtractorMessageOptions);
     readonly category: ExtractorMessageCategory;

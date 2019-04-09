@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Rename \"addToApiReviewFile\" setting to \"addToApiReportFile\"",
+      "comment": "Improve the \"--local\" option to automatically create the API report file if it is missing",
       "type": "patch"
     }
   ],
