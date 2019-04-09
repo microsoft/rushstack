@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 08 Apr 2019 19:12:52 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Apr 2019 05:31:01 GMT and should not be manually modified.
+
+## 7.0.40
+Tue, 09 Apr 2019 05:31:01 GMT
+
+### Patches
+
+- Improve the "--local" option to automatically create the API report file if it is missing
 
 ## 7.0.39
 Mon, 08 Apr 2019 19:12:52 GMT

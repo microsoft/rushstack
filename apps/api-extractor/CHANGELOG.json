@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.40",
+      "tag": "@microsoft/api-extractor_v7.0.40",
+      "date": "Tue, 09 Apr 2019 05:31:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the \"--local\" option to automatically create the API report file if it is missing"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.39",
       "tag": "@microsoft/api-extractor_v7.0.39",
       "date": "Mon, 08 Apr 2019 19:12:52 GMT",

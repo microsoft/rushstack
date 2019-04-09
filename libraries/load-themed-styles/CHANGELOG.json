@@ -2,6 +2,21 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.8.82",
+      "tag": "@microsoft/load-themed-styles_v1.8.82",
+      "date": "Tue, 09 Apr 2019 05:31:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.4` to `0.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.52` to `6.0.53`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.81",
       "tag": "@microsoft/load-themed-styles_v1.8.81",
       "date": "Mon, 08 Apr 2019 19:12:53 GMT",

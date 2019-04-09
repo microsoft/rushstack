@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 08 Apr 2019 19:12:52 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Apr 2019 05:31:01 GMT and should not be manually modified.
+
+## 7.0.49
+Tue, 09 Apr 2019 05:31:01 GMT
+
+### Patches
+
+- Add 'do not edit' header to generated documentation files
 
 ## 7.0.48
 Mon, 08 Apr 2019 19:12:52 GMT
