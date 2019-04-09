@@ -19,8 +19,8 @@
   // "extends": "my-package/include/api-extractor-base.json"
 
   /**
-   * The main folder for the project.  This folder typically contains the tsconfig.json and package.json
-   * config files.
+   * Determines the "<projectFolder>" token that can be used with other config file settings.  The project folder
+   * typically contains the tsconfig.json and package.json config files, but the path is user-defined.
    *
    * The path is resolved relative to the folder of the config file that contains the setting.
    *
@@ -57,7 +57,7 @@
      *
      * http://json.schemastore.org/tsconfig
      *
-     * If omitted, then the tsconfig.json file will be read from the projectFolder.
+     * If omitted, then the tsconfig.json file will be read from the "projectFolder".
      *
      * DEFAULT VALUE: no overrideTsconfig section
      */
