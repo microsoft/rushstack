@@ -8,50 +8,56 @@
    * Optionally specifies another JSON config file that this file extends from.  This provides a way for
    * standard settings to be shared across multiple projects.
    *
-   * If the path starts with "./" or "../", the path is resolved relative to the folder of the file with
+   * If the path starts with "./" or "../", the path is resolved relative to the folder of the file that contains
    * the "extends" field.  Otherwise, the first path segment is interpreted as an NPM package name, and will be
    * resolved using NodeJS require().
    *
+   * SUPPORTED TOKENS: none
    * DEFAULT VALUE: ""
    */
   // "extends": "./shared/api-extractor-base.json"
   // "extends": "my-package/include/api-extractor-base.json"
 
   /**
-    * (REQUIRED) Specifies the .d.ts file to be used as the starting point for analysis.  API Extractor
-    * analyzes the symbols exported by this module.
-    *
-    * The file extension must be ".d.ts" and not ".ts".
-    * The path is resolved relative to the "rootFolder" location described below.
-    */
-  "mainEntryPointFile": "lib/index.d.ts",
+   * The root folder for the project.  This folder typically contains the tsconfig.json and package.json
+   * config files.
+   *
+   * The path is resolved relative to the folder of the config file that contains the setting.
+   *
+   * The default value for "projectFolder" is the token "<lookup>", which means the folder is determined by traversing
+   * parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder
+   * that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error
+   * will be reported.
+   *
+   * SUPPORTED TOKENS: <lookup>
+   * DEFAULT VALUE: "<lookup>"
+   */
+  // "projectFolder": "",
+
+  /**
+   * (REQUIRED) Specifies the .d.ts file to be used as the starting point for analysis.  API Extractor
+   * analyzes the symbols exported by this module.
+   *
+   * The file extension must be ".d.ts" and not ".ts".
+   *
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as "<projectFolder>".
+   *
+   * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
+   */
+  "mainEntryPointFile": "<projectFolder>/lib/index.d.ts",
 
   /**
    * Determines how the TypeScript compiler engine will be invoked by API Extractor.
    */
   "compiler": {
     /**
-     * The root folder for the project.  This folder typically contains the tsconfig.json and package.json
-     * config files.
-     *
-     * The "rootFolder" path is resolved relative to the folder containing api-extractor.json.
-     *
-     * The default value for "rootFolder" is the token "<lookup>", which means the folder is determined by traversing
-     * parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder
-     * that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error
-     * will be reported.
-     *
-     * DEFAULT VALUE: "<lookup>"
-     */
-    // "rootFolder": "",
-
-    /**
      * Provides compiler configuration that will be used instead of reading the tsconfig.json file from disk.
      * The object must conform to the TypeScript tsconfig schema:
      *
      * http://json.schemastore.org/tsconfig
      *
-     * If omitted, then the tsconfig.json file will be read from the rootFolder.
+     * If omitted, then the tsconfig.json file will be read from the projectFolder.
      *
      * DEFAULT VALUE: no overrideTsconfig section
      */
@@ -81,10 +87,11 @@
 
     /**
      * The filename for the API report files.  It will be combined with "reportFolder" or "reportTempFolder" to produce
-     * a full output filename.
+     * a full file path.
      *
      * The file extension should be ".api.md", and the string should not contain a path separator such as "\" or "/".
      *
+     * SUPPORTED TOKENS: <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: "<unscopedPackageName>.api.md"
      */
     // "reportFileName": "<unscopedPackageName>.api.md",
@@ -96,11 +103,13 @@
      * The API report file is normally tracked by Git.  Changes to it can be used to trigger a branch policy,
      * e.g. for an API review.
      *
-     * The path is resolved relative to the "rootFolder" location.
+     * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+     * prepend a folder token such as "<projectFolder>".
      *
-     * DEFAULT VALUE: "etc/"
+     * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
+     * DEFAULT VALUE: "<projectFolder>/etc/"
      */
-    // "reportFolder": "etc/",
+    // "reportFolder": "<projectFolder>/etc/",
 
     /**
      * Specifies the folder where the temporary report file is written.  The file name portion is determined by
@@ -109,11 +118,13 @@
      * After the temporary file is written to disk, it is compared with the file in the "reportFolder".
      * If they are different, a production build will fail.
      *
-     * The path is resolved relative to the "rootFolder" location.
+     * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+     * prepend a folder token such as "<projectFolder>".
      *
-     * DEFAULT VALUE: "temp/"
+     * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
+     * DEFAULT VALUE: "<projectFolder>/temp/"
      */
-    // "reportTempFolder": "temp/"
+    // "reportTempFolder": "<projectFolder>/temp/"
   },
 
   /**
@@ -128,11 +139,13 @@
     /**
      * The output path for the doc model file.  The file extension should be ".api.json".
      *
-     * The path is resolved relative to the "rootFolder" location.
+     * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+     * prepend a folder token such as "<projectFolder>".
      *
-     * DEFAULT VALUE: "temp/<unscopedPackageName>.api.json"
+     * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
+     * DEFAULT VALUE: "<projectFolder>/temp/<unscopedPackageName>.api.json"
      */
-    // "apiJsonFilePath": "temp/<unscopedPackageName>.api.json"
+    // "apiJsonFilePath": "<projectFolder>/temp/<unscopedPackageName>.api.json"
   },
 
   /**
@@ -150,23 +163,25 @@
      *
      * If the path is an empty string, then this file will not be written.
      *
-     * The path is resolved relative to the "rootFolder" location.
+     * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+     * prepend a folder token such as "<projectFolder>".
      *
-     * DEFAULT VALUE: "dist/<unscopedPackageName>.d.ts"
+     * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
+     * DEFAULT VALUE: "<projectFolder>/dist/<unscopedPackageName>.d.ts"
      */
-    // "untrimmedFilePath": "dist/<unscopedPackageName>.d.ts",
+    // "untrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts",
 
     /**
      * Specifies the output path for a .d.ts rollup file to be generated with trimming for a "beta" release.
      * This file will include only declarations that are marked as "@public" or "@beta".
      *
-     * If the path is an empty string, then this file will not be written.
+     * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+     * prepend a folder token such as "<projectFolder>".
      *
-     * The path is resolved relative to the "rootFolder" location.
-     *
+     * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: ""
      */
-    // "betaTrimmedFilePath": "dist/<unscopedPackageName>-beta.d.ts",
+    // "betaTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>-beta.d.ts",
 
 
     /**
@@ -175,11 +190,13 @@
      *
      * If the path is an empty string, then this file will not be written.
      *
-     * The path is resolved relative to the "rootFolder" location.
+     * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+     * prepend a folder token such as "<projectFolder>".
      *
+     * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: ""
      */
-    // "publicTrimmedFilePath": "dist/<unscopedPackageName>-public.d.ts",
+    // "publicTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>-public.d.ts",
   },
 
   /**
@@ -196,13 +213,17 @@
     /**
      * Specifies where the TSDoc metadata file should be written.
      *
+     * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+     * prepend a folder token such as "<projectFolder>".
+     *
      * The default value is "<lookup>", which causes the path to be automatically inferred from the "tsdocMetadata",
      * "typings" or "main" fields of the project's package.json.  If none of these fields are set, the lookup
      * falls back to "tsdoc-metadata.json" in the package folder.
      *
+     * SUPPORTED TOKENS: <projectFolder>, <packageName>, <unscopedPackageName>
      * DEFAULT VALUE: "<lookup>"
      */
-    // "tsdocMetadataFilePath": "dist/tsdoc-metadata.json"
+    // "tsdocMetadataFilePath": "<projectFolder>/dist/tsdoc-metadata.json"
   },
 
   /**
@@ -236,7 +257,7 @@
          *
          * DEFAULT VALUE: "warning"
          */
-        // "logLevel": "warning",
+        "logLevel": "warning",
 
         /**
          * When addToApiReportFile is true:  If API Extractor is configured to write an API report file (.api.md),
@@ -265,7 +286,7 @@
      */
     "extractorMessageReporting": {
       "default": {
-        // "logLevel": "warning",
+        "logLevel": "warning",
         // "addToApiReportFile": false
       },
 
@@ -286,7 +307,7 @@
      */
     "tsdocMessageReporting": {
       "default": {
-        // "logLevel": "warning",
+        "logLevel": "warning",
         // "addToApiReportFile": false
       }
 
