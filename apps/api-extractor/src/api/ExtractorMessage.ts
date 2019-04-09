@@ -196,6 +196,7 @@ export class ExtractorMessage {
       default:
         throw new Error('Invalid log level');
     }
+    this._logLevel = value;
   }
 
   /**
