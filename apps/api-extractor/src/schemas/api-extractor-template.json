@@ -19,7 +19,7 @@
   // "extends": "my-package/include/api-extractor-base.json"
 
   /**
-   * The root folder for the project.  This folder typically contains the tsconfig.json and package.json
+   * The main folder for the project.  This folder typically contains the tsconfig.json and package.json
    * config files.
    *
    * The path is resolved relative to the folder of the config file that contains the setting.

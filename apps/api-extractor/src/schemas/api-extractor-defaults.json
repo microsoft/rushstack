@@ -1,27 +1,28 @@
 {
   // ("mainEntryPointFile" is required)
 
+  "projectFolder": "<lookup>",
+
   "compiler": {
-    "rootFolder": "<lookup>",
     "skipLibCheck": false
   },
 
   "apiReport": {
     // ("enabled" is required)
     "reportFileName": "<unscopedPackageName>.api.md",
-    "reportFolder": "etc/",
-    "reportTempFolder": "temp/"
+    "reportFolder": "<projectFolder>/etc/",
+    "reportTempFolder": "<projectFolder>/temp/"
   },
 
   "docModel": {
     // ("enabled" is required)
-    "apiJsonFilePath": "temp/<unscopedPackageName>.api.json"
+    "apiJsonFilePath": "<projectFolder>/temp/<unscopedPackageName>.api.json"
   },
 
   "dtsRollup": {
     // ("enabled" is required)
 
-    "untrimmedFilePath": "dist/<unscopedPackageName>.d.ts",
+    "untrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts",
     "betaTrimmedFilePath": "",
     "publicTrimmedFilePath": ""
   },
