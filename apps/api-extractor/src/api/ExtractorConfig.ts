@@ -323,6 +323,10 @@ export class ExtractorConfig {
     const filenameForErrors: string = options.configObjectFullPath || 'the configuration object';
     const configObject: Partial<IConfigFile> = options.configObject;
 
+    if (configObject.extends) {
+      throw new Error('The IConfigFile.extends field must be expanded before calling ExtractorConfig.prepare()');
+    }
+
     if (options.configObjectFullPath) {
       if (!path.isAbsolute(options.configObjectFullPath)) {
         throw new Error('configObjectFullPath must be an absolute path');
@@ -357,7 +361,7 @@ export class ExtractorConfig {
 
       if (!configObject.projectFolder) {
         // A merged configuration should have this
-        throw new Error('The "projectFolder" section is missing');
+        throw new Error('The "projectFolder" field is missing');
       }
 
       let projectFolder: string;
@@ -545,6 +549,19 @@ export class ExtractorConfig {
     if (value !== '') {
       value = Text.replaceAll(value, '<unscopedPackageName>', tokenContext.unscopedPackageName);
       value = Text.replaceAll(value, '<packageName>', tokenContext.packageName);
+
+      const projectFolderToken: string = '<projectFolder>';
+      if (value.indexOf(projectFolderToken) === 0) {
+        // Replace "<projectFolder>" at the start of a string
+        value = path.join(tokenContext.projectFolder, value.substr(projectFolderToken.length));
+      }
+
+      if (value.indexOf(projectFolderToken) >= 0) {
+        // If after all replacements, "<projectFolder>" appears somewhere in the string, report an error
+        throw new Error(`The ${fieldName} value incorrectly uses the "<projectFolder>" token.`
+          + ` It must appear at the start of the string.`);
+      }
+
       if (value.indexOf('<lookup>') >= 0) {
         throw new Error(`The ${fieldName} value incorrectly uses the "<lookup>" token`);
       }
