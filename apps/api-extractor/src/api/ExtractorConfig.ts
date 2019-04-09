@@ -13,7 +13,8 @@ import {
   INodePackageJson,
   PackageName,
   Text,
-  InternalError
+  InternalError,
+  Path
 } from '@microsoft/node-core-library';
 import {
   IConfigFile,
@@ -218,7 +219,10 @@ export class ExtractorConfig {
     if (!path.isAbsolute(absolutePath)) {
       throw new InternalError('Expected absolute path: ' + absolutePath);
     }
-    return path.relative(this.projectFolder, absolutePath).replace(/\\/g, '/');
+    if (Path.isUnderOrEqual(absolutePath, this.projectFolder)) {
+      return path.relative(this.projectFolder, absolutePath).replace(/\\/g, '/');
+    }
+    return absolutePath;
   }
 
   /**
@@ -259,13 +263,11 @@ export class ExtractorConfig {
     // Set to keep track of config files which have been processed.
     const visitedPaths: Set<string> = new Set<string>();
 
-    // Get absolute path of config file.
     let currentConfigFilePath: string = path.resolve(process.cwd(), jsonFilePath);
-
-    let configObject: Partial<IConfigFile> = JsonFile.load(currentConfigFilePath);
+    let configObject: Partial<IConfigFile> = { };
 
     try {
-      while (configObject.extends) {
+      do {
         // Check if this file was already processed.
         if (visitedPaths.has(currentConfigFilePath)) {
           throw new Error(`The API Extractor config files contain a cycle. "${currentConfigFilePath}"`
@@ -275,32 +277,46 @@ export class ExtractorConfig {
 
         const currentConfigFolderPath: string = path.dirname(currentConfigFilePath);
 
-        if (configObject.extends.match(/^\.\.?[\\/]/)) {
-          // EXAMPLE:  "./subfolder/api-extractor-base.json"
-          currentConfigFilePath = path.resolve(currentConfigFolderPath, configObject.extends);
-        } else {
-          // EXAMPLE:  "my-package/api-extractor-base.json"
-          //
-          // Resolve "my-package" from the perspective of the current folder.
-          currentConfigFilePath = resolve.sync(
-            configObject.extends,
-            {
-              basedir: currentConfigFolderPath
-            }
-          );
-        }
-
         // Load the extractor config defined in extends property.
         const baseConfig: IConfigFile = JsonFile.load(currentConfigFilePath);
 
-        // Delete the "extends" field, since we've already expanded it
-        delete configObject.extends;
+        let extendsField: string = baseConfig.extends || '';
+
+        // Delete the "extends" field so it doesn't get merged
+        delete baseConfig.extends;
+
+        if (extendsField) {
+          if (extendsField.match(/^\.\.?[\\/]/)) {
+            // EXAMPLE:  "./subfolder/api-extractor-base.json"
+            extendsField = path.resolve(currentConfigFolderPath, extendsField);
+          } else {
+            // EXAMPLE:  "my-package/api-extractor-base.json"
+            //
+            // Resolve "my-package" from the perspective of the current folder.
+            try {
+              extendsField = resolve.sync(
+                extendsField,
+                {
+                  basedir: currentConfigFolderPath
+                }
+              );
+            } catch (e) {
+              throw new Error(`Error resolving NodeJS path "${extendsField}": ${e.message}`);
+            }
+          }
+        }
+
+        // This step has to be performed in advance, since the currentConfigFolderPath information will be lost
+        // after lodash.merge() is performed.
+        ExtractorConfig._resolveConfigFileRelativePaths(baseConfig, currentConfigFolderPath);
 
         // Merge extractorConfig into baseConfig, mutating baseConfig
         lodash.merge(baseConfig, configObject);
-
         configObject = baseConfig;
-      }
+
+        currentConfigFilePath = extendsField;
+      } while (currentConfigFilePath);
+
     } catch (e) {
       throw new Error(`Error loading ${currentConfigFilePath}:\n` + e.message);
     }
@@ -312,6 +328,73 @@ export class ExtractorConfig {
 
     // The schema validation should ensure that this object conforms to IConfigFile
     return configObject as IConfigFile;
+  }
+
+  private static _resolveConfigFileRelativePaths(configFile: IConfigFile, currentConfigFolderPath: string): void {
+
+    if (configFile.projectFolder) {
+      configFile.projectFolder = ExtractorConfig._resolveConfigFileRelativePath(
+        'projectFolder', configFile.projectFolder, currentConfigFolderPath);
+    }
+
+    if (configFile.mainEntryPointFile) {
+      configFile.mainEntryPointFile = ExtractorConfig._resolveConfigFileRelativePath(
+        'mainEntryPointFile', configFile.mainEntryPointFile, currentConfigFolderPath);
+    }
+
+    if (configFile.apiReport) {
+      if (configFile.apiReport.reportFolder) {
+        configFile.apiReport.reportFolder = ExtractorConfig._resolveConfigFileRelativePath(
+          'reportFolder', configFile.apiReport.reportFolder, currentConfigFolderPath);
+      }
+      if (configFile.apiReport.reportTempFolder) {
+        configFile.apiReport.reportTempFolder = ExtractorConfig._resolveConfigFileRelativePath(
+          'reportTempFolder', configFile.apiReport.reportTempFolder, currentConfigFolderPath);
+      }
+    }
+
+    if (configFile.docModel) {
+      if (configFile.docModel.apiJsonFilePath) {
+        configFile.docModel.apiJsonFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'apiJsonFilePath', configFile.docModel.apiJsonFilePath, currentConfigFolderPath);
+      }
+    }
+
+    if (configFile.dtsRollup) {
+      if (configFile.dtsRollup.untrimmedFilePath) {
+        configFile.dtsRollup.untrimmedFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'untrimmedFilePath', configFile.dtsRollup.untrimmedFilePath, currentConfigFolderPath);
+      }
+      if (configFile.dtsRollup.betaTrimmedFilePath) {
+        configFile.dtsRollup.betaTrimmedFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'betaTrimmedFilePath', configFile.dtsRollup.betaTrimmedFilePath, currentConfigFolderPath);
+      }
+      if (configFile.dtsRollup.publicTrimmedFilePath) {
+        configFile.dtsRollup.publicTrimmedFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'publicTrimmedFilePath', configFile.dtsRollup.publicTrimmedFilePath, currentConfigFolderPath);
+      }
+    }
+
+    if (configFile.tsdocMetadata) {
+      if (configFile.tsdocMetadata.tsdocMetadataFilePath) {
+        configFile.tsdocMetadata.tsdocMetadataFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'tsdocMetadataFilePath', configFile.tsdocMetadata.tsdocMetadataFilePath, currentConfigFolderPath);
+      }
+    }
+  }
+
+  private static _resolveConfigFileRelativePath(fieldName: string, fieldValue: string,
+    currentConfigFolderPath: string): string {
+
+    if (!path.isAbsolute(fieldValue)) {
+      if (fieldValue.indexOf('<projectFolder>') !== 0) {
+        // If the path is not absolute and does not start with "<projectFolder>", then resolve it relative
+        // to the folder of the config file that it appears in
+        return path.join(currentConfigFolderPath, fieldValue);
+      }
+    }
+
+    return fieldValue;
   }
 
   /**
