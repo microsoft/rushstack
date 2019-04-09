@@ -13,7 +13,7 @@
  */
 export const enum ConsoleMessageId {
   /**
-   * "'Found metadata in ___"
+   * "Found metadata in ___"
    */
   FoundTSDocMetadata = 'console-found-tsdoc-metadata',
 
@@ -28,8 +28,15 @@ export const enum ConsoleMessageId {
   WritingDtsRollup = 'console-writing-dts-rollup',
 
   /**
-   * "You have changed the public API signature for this project. Please copy the file ___ to ___,
-   * or else perform a local build (which does this automatically). See the Git repo documentation for more info.
+   * "You have changed the public API signature for this project.
+   * Please copy the file ___ to ___, or perform a local build (which does this automatically).
+   * See the Git repo documentation for more info."
+   *
+   * OR
+   *
+   * "The API report file is missing.
+   * Please copy the file ___ to ___, or perform a local build (which does this automatically).
+   * See the Git repo documentation for more info."
    */
   ApiReportNotCopied = 'console-api-report-not-copied',
 

@@ -236,7 +236,7 @@ export class Extractor {
             messageRouter.logWarning(ConsoleMessageId.ApiReportNotCopied,
               'You have changed the public API signature for this project.'
               + ` Please copy the file "${actualApiReportShortPath}" to "${expectedApiReportShortPath}",`
-              + ` or else perform a local build (which does this automatically).`
+              + ` or perform a local build (which does this automatically).`
               + ` See the Git repo documentation for more info.`);
           } else {
             // For a local build, just copy the file automatically.
@@ -264,16 +264,11 @@ export class Extractor {
         if (!localBuild) {
           // For a production build, issue a warning that will break the CI build.
           messageRouter.logWarning(ConsoleMessageId.ApiReportNotCopied,
-            'You have changed the public API signature for this project.'
+            'The API report file is missing.'
             + ` Please copy the file "${actualApiReportShortPath}" to "${expectedApiReportShortPath}",`
-            + ` or else perform a local build (which does this automatically).`
+            + ` or perform a local build (which does this automatically).`
             + ` See the Git repo documentation for more info.`);
         } else {
-          messageRouter.logWarning(ConsoleMessageId.ApiReportCreated,
-            'The API report file was missing, so a new file was created. Please add this file to Git:\n'
-            + expectedApiReportPath
-          );
-
           const expectedApiReportFolder: string = path.dirname(expectedApiReportPath);
           if (!FileSystem.exists(expectedApiReportFolder)) {
             messageRouter.logError(ConsoleMessageId.ApiReportFolderMissing,
@@ -284,6 +279,10 @@ export class Extractor {
             FileSystem.writeFile(expectedApiReportPath, actualApiReportContent, {
               convertLineEndings: NewlineKind.CrLf
             });
+            messageRouter.logWarning(ConsoleMessageId.ApiReportCreated,
+              'The API report file was missing, so a new file was created. Please add this file to Git:\n'
+              + expectedApiReportPath
+            );
           }
         }
       }
