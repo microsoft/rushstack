@@ -41,7 +41,7 @@ interface IExtractorConfigTokenContext {
    */
   packageName: string;
 
-  rootFolder: string;
+  projectFolder: string;
 }
 
 /**
@@ -61,7 +61,7 @@ export interface IExtractorConfigPrepareOptions {
    *
    * @remarks
    *
-   * If this is omitted, then the `rootFolder` must not be specified using the `<lookup>` token.
+   * If this is omitted, then the `projectFolder` must not be specified using the `<lookup>` token.
    */
   configObjectFullPath: string | undefined;
 
@@ -89,7 +89,7 @@ export interface IExtractorConfigPrepareOptions {
 }
 
 interface IExtractorConfigParameters {
-  rootFolder: string;
+  projectFolder: string;
   packageJson: INodePackageJson | undefined;
   packageJsonFullPath: string | undefined;
   mainEntryPointFile: string;
@@ -131,8 +131,8 @@ export class ExtractorConfig {
 
   private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;
 
-  /** {@inheritDoc IConfigCompiler.rootFolder} */
-  public readonly rootFolder: string;
+  /** {@inheritDoc IConfigFile.projectFolder} */
+  public readonly projectFolder: string;
 
   /**
    * The parsed package.json file for the working package, or undefined if API Extractor was invoked without
@@ -189,7 +189,7 @@ export class ExtractorConfig {
   public readonly testMode: boolean;
 
   private constructor(parameters: IExtractorConfigParameters) {
-    this.rootFolder = parameters.rootFolder;
+    this.projectFolder = parameters.projectFolder;
     this.packageJson = parameters.packageJson;
     this.packageJsonFullPath = parameters.packageJsonFullPath;
     this.mainEntryPointFile = parameters.mainEntryPointFile;
@@ -218,7 +218,7 @@ export class ExtractorConfig {
     if (!path.isAbsolute(absolutePath)) {
       throw new InternalError('Expected absolute path: ' + absolutePath);
     }
-    return path.relative(this.rootFolder, absolutePath).replace(/\\/g, '/');
+    return path.relative(this.projectFolder, absolutePath).replace(/\\/g, '/');
   }
 
   /**
@@ -355,12 +355,17 @@ export class ExtractorConfig {
         throw new Error('The "compiler" section is missing');
       }
 
-      let rootFolder: string;
-      if (configObject.compiler.rootFolder.trim() === '<lookup>') {
+      if (!configObject.projectFolder) {
+        // A merged configuration should have this
+        throw new Error('The "projectFolder" section is missing');
+      }
+
+      let projectFolder: string;
+      if (configObject.projectFolder.trim() === '<lookup>') {
         if (!options.configObjectFullPath) {
           throw new Error('The "<lookup>" token cannot be expanded because configObjectFullPath was not specified');
         }
-        // "The default value for `rootFolder` is the token `<lookup>`, which means the folder is determined
+        // "The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined
         // by traversing parent folders, starting from the folder containing api-extractor.json, and stopping
         // at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in
         // this way, then an error will be reported."
@@ -369,34 +374,30 @@ export class ExtractorConfig {
         for (; ; ) {
           const tsconfigPath: string = path.join(currentFolder, 'tsconfig.json');
           if (FileSystem.exists(tsconfigPath)) {
-            rootFolder = currentFolder;
+            projectFolder = currentFolder;
             break;
           }
           const parentFolder: string = path.dirname(currentFolder);
           if (parentFolder === '' || parentFolder === currentFolder) {
-            throw new Error('The rootFolder was set to "<lookup>", but a tsconfig.json file cannot be'
+            throw new Error('The projectFolder was set to "<lookup>", but a tsconfig.json file cannot be'
               + ' found in this folder or any parent folder.');
           }
           currentFolder = parentFolder;
         }
       } else {
-        if (!configObject.compiler.rootFolder) {
-          throw new Error('The rootFolder must be specified');
+        ExtractorConfig._rejectAnyTokensInPath(configObject.projectFolder, 'projectFolder');
+
+        if (!FileSystem.exists(configObject.projectFolder)) {
+          throw new Error('The specified projectFolder does not exist: ' + configObject.projectFolder);
         }
 
-        ExtractorConfig._rejectAnyTokensInPath(configObject.compiler.rootFolder, 'rootFolder');
-
-        if (!FileSystem.exists(configObject.compiler.rootFolder)) {
-          throw new Error('The specified rootFolder does not exist: ' + configObject.compiler.rootFolder);
-        }
-
-        rootFolder = configObject.compiler.rootFolder;
+        projectFolder = configObject.projectFolder;
       }
 
       const tokenContext: IExtractorConfigTokenContext = {
         unscopedPackageName: 'unknown-package',
         packageName: 'unknown-package',
-        rootFolder
+        projectFolder: projectFolder
       };
 
       if (packageJson) {
@@ -464,11 +465,11 @@ export class ExtractorConfig {
 
           if (tsdocMetadataFilePath.trim() === '<lookup>') {
             if (!packageJson) {
-              throw new Error('The "<lookup>" token cannot be used with compiler.rootFolder because'
+              throw new Error('The "<lookup>" token cannot be used with compiler.projectFolder because'
                 + 'the "packageJson" option was not provided');
             }
             if (!packageJsonFullPath) {
-              throw new Error('The "<lookup>" token cannot be used with compiler.rootFolder because'
+              throw new Error('The "<lookup>" token cannot be used with compiler.projectFolder because'
                 + 'the "packageJsonFullPath" option was not provided');
             }
             tsdocMetadataFilePath = PackageMetadataManager.resolveTsdocMetadataPath(
@@ -502,7 +503,7 @@ export class ExtractorConfig {
       }
 
       return new ExtractorConfig({
-        rootFolder,
+        projectFolder: projectFolder,
         packageJson,
         packageJsonFullPath,
         mainEntryPointFile,
@@ -533,7 +534,7 @@ export class ExtractorConfig {
 
     value = ExtractorConfig._expandStringWithTokens(fieldName, value, tokenContext);
     if (value !== '') {
-      value = path.resolve(tokenContext.rootFolder, value);
+      value = path.resolve(tokenContext.projectFolder, value);
     }
     return value;
   }
@@ -560,7 +561,7 @@ export class ExtractorConfig {
   }
 
   /**
-   * Given a path string that may have originally contained expandable tokens such as `<rootFolder>"`
+   * Given a path string that may have originally contained expandable tokens such as `<projectFolder>"`
    * this reports an error if any token-looking substrings remain after expansion (e.g. `c:\blah\<invalid>\blah`).
    */
   private static _rejectAnyTokensInPath(value: string, fieldName: string): void {

@@ -14,21 +14,6 @@ import { ExtractorLogLevel } from './ExtractorLogLevel';
 export interface IConfigCompiler {
 
   /**
-   * The root folder for the project.  This folder typically contains the tsconfig.json and package.json
-   * config files.
-   *
-   * @remarks
-   *
-   * The `rootFolder` path is resolved relative to the folder containing api-extractor.json.
-   *
-   * The default value for `rootFolder` is the token `<lookup>`, which means the folder is determined by traversing
-   * parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder
-   * that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error
-   * will be reported.
-   */
-  rootFolder: string;
-
-  /**
    * Provides already parsed tsconfig.json contents.
    *
    * @remarks
@@ -36,7 +21,7 @@ export interface IConfigCompiler {
    *
    * http://json.schemastore.org/tsconfig
    *
-   * If omitted, then the tsconfig.json file will instead be read from the rootFolder.
+   * If omitted, then the tsconfig.json file will instead be read from the projectFolder.
    */
   overrideTsconfig?: { };
 
@@ -83,7 +68,7 @@ export interface IConfigApiReport {
    * The API report file is normally tracked by Git.  Changes to it can be used to trigger a branch policy,
    * e.g. for an API review.
    *
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the `projectFolder` location.
    */
   reportFolder?: string;
 
@@ -95,7 +80,7 @@ export interface IConfigApiReport {
    * After the temporary file is written to disk, it is compared with the file in the `reportFolder`.
    * If they are different, a production build will fail.
    *
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the `projectFolder` location.
    */
   reportTempFolder?: string;
 }
@@ -119,7 +104,7 @@ export interface IConfigDocModel {
    *
    * @remarks
    * The file extension should be ".api.json".
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the `projectFolder` location.
    */
   apiJsonFilePath?: string;
 }
@@ -146,7 +131,7 @@ export interface IConfigDtsRollup {
    *
    * If the path is an empty string, then this file will not be written.
    *
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the `projectFolder` location.
    */
   untrimmedFilePath?: string;
 
@@ -158,7 +143,7 @@ export interface IConfigDtsRollup {
    *
    * If the path is an empty string, then this file will not be written.
    *
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the `projectFolder` location.
    */
   betaTrimmedFilePath?: string;
 
@@ -170,7 +155,7 @@ export interface IConfigDtsRollup {
    *
    * If the path is an empty string, then this file will not be written.
    *
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the `projectFolder` location.
    */
   publicTrimmedFilePath?: string;
 }
@@ -283,13 +268,28 @@ export interface IConfigFile {
   extends?: string;
 
   /**
+   * The root folder for the project.  This folder typically contains the tsconfig.json and package.json
+   * config files.
+   *
+   * @remarks
+   *
+   * The `projectFolder` path is resolved relative to the folder containing api-extractor.json.
+   *
+   * The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined by traversing
+   * parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder
+   * that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error
+   * will be reported.
+   */
+  projectFolder?: string;
+
+  /**
    * Specifies the .d.ts file to be used as the starting point for analysis.  API Extractor
    * analyzes the symbols exported by this module.
    *
    * @remarks
    *
    * The file extension must be ".d.ts" and not ".ts".
-   * The path is resolved relative to the "rootFolder" location.
+   * The path is resolved relative to the "projectFolder" location.
    */
   mainEntryPointFile: string;
 
