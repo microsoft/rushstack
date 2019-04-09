@@ -10,7 +10,7 @@ import { StringWriter } from './StringWriter';
 import { Collector } from '../collector/Collector';
 
 /**
- * Some common code shared between DtsRollupGenerator and ReviewFileGenerator.
+ * Some common code shared between DtsRollupGenerator and ApiReportGenerator.
  */
 export class DtsEmitHelpers {
   public static emitImport(stringWriter: StringWriter, collectorEntity: CollectorEntity, astImport: AstImport): void {
