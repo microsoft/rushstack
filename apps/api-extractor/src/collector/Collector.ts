@@ -52,7 +52,7 @@ export interface ICollectorOptions {
 
 /**
  * The `Collector` manages the overall data set that is used by `ApiModelGenerator`,
- * `DtsRollupGenerator`, and `ReviewFileGenerator`.  Starting from the working package's entry point,
+ * `DtsRollupGenerator`, and `ApiReportGenerator`.  Starting from the working package's entry point,
  * the `Collector` collects all exported symbols, determines how to import any symbols they reference,
  * assigns unique names, and sorts everything into a normalized alphabetical ordering.
  */

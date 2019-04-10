@@ -14,7 +14,7 @@ import { Collector } from '../collector/Collector';
 import { DtsRollupGenerator, DtsRollupKind } from '../generators/DtsRollupGenerator';
 import { ApiModelGenerator } from '../generators/ApiModelGenerator';
 import { ApiPackage } from '@microsoft/api-extractor-model';
-import { ReviewFileGenerator } from '../generators/ReviewFileGenerator';
+import { ApiReportGenerator } from '../generators/ApiReportGenerator';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { ValidationEnhancer } from '../enhancers/ValidationEnhancer';
 import { DocCommentEnhancer } from '../enhancers/DocCommentEnhancer';
@@ -216,7 +216,7 @@ export class Extractor {
       const expectedApiReportPath: string = extractorConfig.reportFilePath;
       const expectedApiReportShortPath: string = extractorConfig._getShortFilePath(extractorConfig.reportFilePath);
 
-      const actualApiReportContent: string = ReviewFileGenerator.generateReviewFileContent(collector);
+      const actualApiReportContent: string = ApiReportGenerator.generateReviewFileContent(collector);
 
       // Write the actual file
       FileSystem.writeFile(actualApiReportPath, actualApiReportContent, {
@@ -228,7 +228,7 @@ export class Extractor {
       if (FileSystem.exists(expectedApiReportPath)) {
         const expectedApiReportContent: string = FileSystem.readFile(expectedApiReportPath);
 
-        if (!ReviewFileGenerator.areEquivalentApiFileContents(actualApiReportContent, expectedApiReportContent)) {
+        if (!ApiReportGenerator.areEquivalentApiFileContents(actualApiReportContent, expectedApiReportContent)) {
           apiReportChanged = true;
 
           if (!localBuild) {
