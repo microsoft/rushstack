@@ -234,7 +234,14 @@
         }
       },
       "additionalProperties": false
-    }
+    },
+    "suppressedWarnings": {
+      "description": "A list of warning messages which should be treated as standard log messages instead of warnings.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+}
   },
   "additionalProperties": false,
   "required": [

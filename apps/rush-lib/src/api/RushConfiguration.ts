@@ -122,6 +122,7 @@ export interface IRushConfigurationJson {
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
+  suppressedWarnings?: string[];
 }
 
 /**
@@ -246,6 +247,7 @@ export class RushConfiguration {
   private _variants: {
     [variantName: string]: boolean;
   };
+  private _suppressedWarnings: string[];
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -735,6 +737,14 @@ export class RushConfiguration {
   }
 
   /**
+   * Gets the list of warning message substrings which should be suppressed (treated as standard
+   * log messages rather than warnings).
+   */
+  public get suppressedWarnings(): string[] {
+    return this._suppressedWarnings;
+  }
+
+  /**
    * Indicates whether telemetry collection is enabled for Rush runs.
    * @beta
    */
@@ -973,6 +983,8 @@ export class RushConfiguration {
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
+
+    this._suppressedWarnings = rushConfigurationJson.suppressedWarnings || [];
 
     this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {});
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || { });

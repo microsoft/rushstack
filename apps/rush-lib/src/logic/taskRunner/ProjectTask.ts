@@ -160,8 +160,14 @@ export class ProjectTask implements ITaskDefinition {
         });
 
         task.stderr.on('data', (data: string) => {
-          writer.writeError(data);
-          this._hasWarningOrError = true;
+          // If this error matches any of the suppressed warnings from the config, write it to
+          // stdout instead of stderr and don't treat the task as having a warning/error.
+          if (this._rushConfiguration.suppressedWarnings.some((warning: string) => data.indexOf(warning) !== -1)) {
+            writer.write(data);
+          } else {
+            writer.writeError(data);
+            this._hasWarningOrError = true;
+          }
         });
 
         return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
