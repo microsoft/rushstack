@@ -1,15 +1,15 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 11 Apr 2019 07:14:01 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Apr 2019 07:47:23 GMT and should not be manually modified.
 
 ## 7.0.41
 Thu, 11 Apr 2019 07:14:01 GMT
 
 ### Patches
 
-- (Breaking change) Rename "mainEntryPointFile" to "mainEntryPointFilePath" so all settings use a consistent naming convention
-- (Breaking change) Paths that appear in api-extractor.json are now resolved relative to the config file unless prefixed with the "<projectFolder>" token
 - THIS IS A RELEASE CANDIDATE FOR API-EXTRACTOR 7
+- (Breaking change) Rename "mainEntryPointFile" to "mainEntryPointFilePath" so all settings use a consistent naming convention
+- (Breaking change) Paths that appear in api-extractor.json are now resolved relative to the config file unless prefixed with the `<projectFolder>` token
 - Add a new api-extractor.json setting "tsconfigFilePath" for customizing the tsconfig.json path
 - Replace ExtractorConfig.packageJsonFullPath with ExtractorConfig.packageFolder
 - Upgrade API Extractor to use TypeScript 3.4 for analysis
