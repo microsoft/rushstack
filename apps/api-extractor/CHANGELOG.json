@@ -2,6 +2,33 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.0.41",
+      "tag": "@microsoft/api-extractor_v7.0.41",
+      "date": "Thu, 11 Apr 2019 07:14:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "(Breaking change) Rename \"mainEntryPointFile\" to \"mainEntryPointFilePath\" so all settings use a consistent naming convention"
+          },
+          {
+            "comment": "(Breaking change) Paths that appear in api-extractor.json are now resolved relative to the config file unless prefixed with the \"<projectFolder>\" token"
+          },
+          {
+            "comment": "THIS IS A RELEASE CANDIDATE FOR API-EXTRACTOR 7"
+          },
+          {
+            "comment": "Add a new api-extractor.json setting \"tsconfigFilePath\" for customizing the tsconfig.json path"
+          },
+          {
+            "comment": "Replace ExtractorConfig.packageJsonFullPath with ExtractorConfig.packageFolder"
+          },
+          {
+            "comment": "Upgrade API Extractor to use TypeScript 3.4 for analysis"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.40",
       "tag": "@microsoft/api-extractor_v7.0.40",
       "date": "Tue, 09 Apr 2019 05:31:01 GMT",
