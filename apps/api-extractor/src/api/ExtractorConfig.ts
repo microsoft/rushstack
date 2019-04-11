@@ -275,8 +275,8 @@ export class ExtractorConfig {
       do {
         // Check if this file was already processed.
         if (visitedPaths.has(currentConfigFilePath)) {
-          throw new Error(`The API Extractor config files contain a cycle. "${currentConfigFilePath}"`
-            + ` is included twice.  Please check the "extends" values in config files.`);
+          throw new Error(`The API Extractor "extends" setting contains a cycle.`
+            + `  This file is included twice: "${currentConfigFilePath}"`);
         }
         visitedPaths.add(currentConfigFilePath);
 
@@ -424,7 +424,7 @@ export class ExtractorConfig {
 
     if (options.configObjectFullPath) {
       if (!path.isAbsolute(options.configObjectFullPath)) {
-        throw new Error('configObjectFullPath must be an absolute path');
+        throw new Error('The "configObjectFullPath" setting must be an absolute path');
       }
     }
 
@@ -435,10 +435,10 @@ export class ExtractorConfig {
     if (packageJsonFullPath) {
       if (!/.json$/i.test(packageJsonFullPath)) {
         // Catch common mistakes e.g. where someone passes a folder path instead of a file path
-        throw new Error('The packageJsonFullPath does not have a .json file extension');
+        throw new Error('The "packageJsonFullPath" setting does not have a .json file extension');
       }
       if (!path.isAbsolute(packageJsonFullPath)) {
-        throw new Error('packageJsonFullPath must be an absolute path');
+        throw new Error('The "packageJsonFullPath" setting must be an absolute path');
       }
 
       if (!options.packageJson) {
@@ -456,14 +456,16 @@ export class ExtractorConfig {
 
       if (!configObject.projectFolder) {
         // A merged configuration should have this
-        throw new Error('The "projectFolder" field is missing');
+        throw new Error('The "projectFolder" setting is missing');
       }
 
       let projectFolder: string;
       if (configObject.projectFolder.trim() === '<lookup>') {
         if (!options.configObjectFullPath) {
-          throw new Error('The "<lookup>" token cannot be expanded because configObjectFullPath was not specified');
+          throw new Error('The "projectFolder" setting uses the "<lookup>" token, but it cannot be expanded because'
+            + ' the "configObjectFullPath" setting was not specified');
         }
+
         // "The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined
         // by traversing parent folders, starting from the folder containing api-extractor.json, and stopping
         // at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in
@@ -478,7 +480,7 @@ export class ExtractorConfig {
           }
           const parentFolder: string = path.dirname(currentFolder);
           if (parentFolder === '' || parentFolder === currentFolder) {
-            throw new Error('The projectFolder was set to "<lookup>", but a tsconfig.json file cannot be'
+            throw new Error('The "projectFolder" setting uses the "<lookup>" token, but a tsconfig.json file cannot be'
               + ' found in this folder or any parent folder.');
           }
           currentFolder = parentFolder;
@@ -487,7 +489,7 @@ export class ExtractorConfig {
         ExtractorConfig._rejectAnyTokensInPath(configObject.projectFolder, 'projectFolder');
 
         if (!FileSystem.exists(configObject.projectFolder)) {
-          throw new Error('The specified projectFolder does not exist: ' + configObject.projectFolder);
+          throw new Error('The specified "projectFolder" path does not exist: ' + configObject.projectFolder);
         }
 
         projectFolder = configObject.projectFolder;
@@ -512,11 +514,11 @@ export class ExtractorConfig {
         configObject.mainEntryPointFile, tokenContext);
 
       if (!ExtractorConfig.hasDtsFileExtension(mainEntryPointFile)) {
-        throw new Error('The "mainEntryPointFile" is not a declaration file: ' + mainEntryPointFile);
+        throw new Error('The "mainEntryPointFile" value is not a declaration file: ' + mainEntryPointFile);
       }
 
       if (!FileSystem.exists(mainEntryPointFile)) {
-        throw new Error('The "mainEntryPointFile" does not exist: ' + mainEntryPointFile);
+        throw new Error('The "mainEntryPointFile" path does not exist: ' + mainEntryPointFile);
       }
 
       const tsconfigFilePath: string = ExtractorConfig._resolvePathWithTokens('tsconfigFilePath',
@@ -527,7 +529,7 @@ export class ExtractorConfig {
           throw new Error('Either the "tsconfigFilePath" or "overrideTsconfig" setting must be specified');
         }
         if (!FileSystem.exists(configObject.compiler.tsconfigFilePath)) {
-          throw new Error('The "tsconfigFilePath" does not exist: ' + configObject.compiler.tsconfigFilePath);
+          throw new Error('The "tsconfigFilePath" path does not exist: ' + configObject.compiler.tsconfigFilePath);
         }
       }
 
@@ -542,11 +544,11 @@ export class ExtractorConfig {
 
         if (!reportFilename) {
           // A merged configuration should have this
-          throw new Error('reportFilename is missing');
+          throw new Error('The "reportFilename" setting is missing');
         }
         if (reportFilename.indexOf('/') >= 0 || reportFilename.indexOf('\\') >= 0) {
           // A merged configuration should have this
-          throw new Error(`The reportFilename contains invalid characters: "${reportFilename}"`);
+          throw new Error(`The "reportFilename" setting contains invalid characters: "${reportFilename}"`);
         }
 
         const reportFolder: string = ExtractorConfig._resolvePathWithTokens('reportFolder',
@@ -576,11 +578,11 @@ export class ExtractorConfig {
 
           if (tsdocMetadataFilePath.trim() === '<lookup>') {
             if (!packageJson) {
-              throw new Error('The "<lookup>" token cannot be used with compiler.projectFolder because'
-                + 'the "packageJson" option was not provided');
+              throw new Error('The "<lookup>" token cannot be used with the "tsdocMetadataFilePath" setting because'
+                + ' the "packageJson" option was not provided');
             }
             if (!packageJsonFullPath) {
-              throw new Error('The "<lookup>" token cannot be used with compiler.projectFolder because'
+              throw new Error('The "<lookup>" token cannot be used with "tsdocMetadataFilePath" because'
                 + 'the "packageJsonFullPath" option was not provided');
             }
             tsdocMetadataFilePath = PackageMetadataManager.resolveTsdocMetadataPath(
@@ -593,7 +595,8 @@ export class ExtractorConfig {
           }
 
           if (!tsdocMetadataFilePath) {
-            throw new Error('The tsdocMetadata.enabled was specified, but tsdocMetadataFilePath is not specified');
+            throw new Error('The "tsdocMetadata.enabled" setting is enabled,'
+              + ' but "tsdocMetadataFilePath" is not specified');
           }
         }
       }
@@ -666,12 +669,12 @@ export class ExtractorConfig {
 
       if (value.indexOf(projectFolderToken) >= 0) {
         // If after all replacements, "<projectFolder>" appears somewhere in the string, report an error
-        throw new Error(`The ${fieldName} value incorrectly uses the "<projectFolder>" token.`
+        throw new Error(`The "${fieldName}" value incorrectly uses the "<projectFolder>" token.`
           + ` It must appear at the start of the string.`);
       }
 
       if (value.indexOf('<lookup>') >= 0) {
-        throw new Error(`The ${fieldName} value incorrectly uses the "<lookup>" token`);
+        throw new Error(`The "${fieldName}" value incorrectly uses the "<lookup>" token`);
       }
       ExtractorConfig._rejectAnyTokensInPath(value, fieldName);
     }
@@ -698,8 +701,8 @@ export class ExtractorConfig {
     const tokenRegExp: RegExp = /(\<[^<]*?\>)/;
     const match: RegExpExecArray | null = tokenRegExp.exec(value);
     if (match) {
-      throw new Error(`The ${fieldName} value contains an unrecognized token "${match[1]}"`);
+      throw new Error(`The "${fieldName}" value contains an unrecognized token "${match[1]}"`);
     }
-    throw new Error(`The ${fieldName} value contains extra token characters ("<" or ">"): ${value}`);
+    throw new Error(`The "${fieldName}" value contains extra token characters ("<" or ">"): ${value}`);
   }
 }
