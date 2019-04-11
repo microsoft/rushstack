@@ -247,7 +247,7 @@ export class RushConfiguration {
   private _variants: {
     [variantName: string]: boolean;
   };
-  private _suppressedWarnings: string[];
+  private _suppressedWarnings: RegExp[];
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -737,10 +737,10 @@ export class RushConfiguration {
   }
 
   /**
-   * Gets the list of warning message substrings which should be suppressed (treated as standard
-   * log messages rather than warnings).
+   * Gets a list of regular expressions for suppressing warnings. If a warning message
+   * matches any of these, it should be treated as a standard message rather than an error.
    */
-  public get suppressedWarnings(): string[] {
+  public get suppressedWarnings(): RegExp[] {
     return this._suppressedWarnings;
   }
 
@@ -984,7 +984,8 @@ export class RushConfiguration {
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
-    this._suppressedWarnings = rushConfigurationJson.suppressedWarnings || [];
+    const suppressedWarnings: string[] = rushConfigurationJson.suppressedWarnings || [];
+    this._suppressedWarnings = suppressedWarnings.map((value: string) => new RegExp(value));
 
     this._pnpmOptions = new PnpmOptionsConfiguration(rushConfigurationJson.pnpmOptions || {});
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || { });

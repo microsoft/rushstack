@@ -271,14 +271,10 @@
   /*[LINE "HYPOTHETICAL"]*/ "hotfixChangeEnabled": false,
 
   /**
-   * If a warning message includes any substrings listed here, it should be treated as a standard
-   * log message rather than a warning. This prevents inconsequential warning messages caused by
-   * external packages from breaking incremental builds (packages marked as "success with warnings"
-   * will be rebuilt on each rush build).
-   *
-   * For example, certain npm packages with C++ bindings intermittently cause Node to display a warning
-   * starting with "Using a domain property in MakeCallback is deprecated." The source of this warning
-   * has been hard to track down, so it can be added to this list to make incremental builds work.
+   * If a warning message matches any of the regular expressions listed here, it should be treated
+   * as a standard log message rather than a warning. This prevents inconsequential warning messages
+   * caused by external packages from breaking incremental builds (packages marked as "success with
+   * warnings" will be rebuilt on each rush build).
    */
   /*[LINE "HYPOTHETICAL"]*/ "suppressedWarnings": [],
 
