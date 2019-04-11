@@ -89,10 +89,10 @@ export class Collector {
     const extractorConfig: ExtractorConfig = options.extractorConfig;
 
     const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
-      extractorConfig.mainEntryPointFile);
+      extractorConfig.mainEntryPointFilePath);
 
     if (!entryPointSourceFile) {
-      throw new Error('Unable to load file: ' + extractorConfig.mainEntryPointFile);
+      throw new Error('Unable to load file: ' + extractorConfig.mainEntryPointFilePath);
     }
 
     if (!extractorConfig.packageFolder || !extractorConfig.packageJson) {

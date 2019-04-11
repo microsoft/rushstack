@@ -48,7 +48,7 @@ export class ExtractorConfig {
     static readonly jsonSchema: JsonSchema;
     static loadFile(jsonFilePath: string): IConfigFile;
     static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig;
-    readonly mainEntryPointFile: string;
+    readonly mainEntryPointFilePath: string;
     readonly messages: IExtractorMessagesConfig;
     readonly overrideTsconfig: {} | undefined;
     readonly packageFolder: string | undefined;
@@ -176,7 +176,7 @@ export interface IConfigFile {
     // @beta
     dtsRollup?: IConfigDtsRollup;
     extends?: string;
-    mainEntryPointFile: string;
+    mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;
     projectFolder?: string;
     testMode?: boolean;
