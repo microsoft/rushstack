@@ -71,7 +71,7 @@ export class CompilerState {
 
     CompilerState._updateCommandLineForTypescriptPackage(commandLine, options);
 
-    const inputFilePaths: string[] = commandLine.fileNames.concat(extractorConfig.mainEntryPointFile);
+    const inputFilePaths: string[] = commandLine.fileNames.concat(extractorConfig.mainEntryPointFilePath);
     if (options && options.additionalEntryPoints) {
       inputFilePaths.push(...options.additionalEntryPoints);
     }

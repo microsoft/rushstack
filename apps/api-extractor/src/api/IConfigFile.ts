@@ -312,7 +312,7 @@ export interface IConfigFile {
    * The file extension must be ".d.ts" and not ".ts".
    * The path is resolved relative to the "projectFolder" location.
    */
-  mainEntryPointFile: string;
+  mainEntryPointFilePath: string;
 
   /**
    * {@inheritDoc IConfigCompiler}

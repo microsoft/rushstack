@@ -1,5 +1,5 @@
 {
-  // ("mainEntryPointFile" is required)
+  // ("mainEntryPointFilePath" is required)
 
   "projectFolder": "<lookup>",
 
