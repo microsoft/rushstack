@@ -92,7 +92,7 @@ export interface IExtractorConfigPrepareOptions {
 interface IExtractorConfigParameters {
   projectFolder: string;
   packageJson: INodePackageJson | undefined;
-  packageJsonFullPath: string | undefined;
+  packageFolder: string | undefined;
   mainEntryPointFile: string;
   tsconfigFilePath: string;
   overrideTsconfig: { } | undefined;
@@ -143,10 +143,10 @@ export class ExtractorConfig {
   public readonly packageJson: INodePackageJson | undefined;
 
   /**
-   * The absolute path of the file that package.json was loaded from, or undefined if API Extractor was invoked without
-   * a package.json file.
+   * The absolute path of the folder containing the package.json file for the working package, or undefined
+   * if API Extractor was invoked without a package.json file.
    */
-  public readonly packageJsonFullPath: string | undefined;
+  public readonly packageFolder: string | undefined;
 
   /** {@inheritDoc IConfigFile.mainEntryPointFile} */
   public readonly mainEntryPointFile: string;
@@ -196,7 +196,7 @@ export class ExtractorConfig {
   private constructor(parameters: IExtractorConfigParameters) {
     this.projectFolder = parameters.projectFolder;
     this.packageJson = parameters.packageJson;
-    this.packageJsonFullPath = parameters.packageJsonFullPath;
+    this.packageFolder = parameters.packageFolder;
     this.mainEntryPointFile = parameters.mainEntryPointFile;
     this.tsconfigFilePath = parameters.tsconfigFilePath;
     this.overrideTsconfig = parameters.overrideTsconfig;
@@ -430,8 +430,10 @@ export class ExtractorConfig {
 
     ExtractorConfig.jsonSchema.validateObject(configObject, filenameForErrors);
 
-    let packageJson: INodePackageJson | undefined = undefined;
     const packageJsonFullPath: string | undefined = options.packageJsonFullPath;
+    let packageFolder: string | undefined = undefined;
+    let packageJson: INodePackageJson | undefined = undefined;
+
     if (packageJsonFullPath) {
       if (!/.json$/i.test(packageJsonFullPath)) {
         // Catch common mistakes e.g. where someone passes a folder path instead of a file path
@@ -445,6 +447,8 @@ export class ExtractorConfig {
         const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
         packageJson = packageJsonLookup.loadNodePackageJson(packageJsonFullPath);
       }
+
+      packageFolder = path.dirname(packageJsonFullPath);
     }
 
     try {
@@ -525,11 +529,11 @@ export class ExtractorConfig {
         configObject.compiler.tsconfigFilePath, tokenContext);
 
       if (configObject.compiler.overrideTsconfig === undefined) {
-        if (!configObject.compiler.tsconfigFilePath) {
+        if (!tsconfigFilePath) {
           throw new Error('Either the "tsconfigFilePath" or "overrideTsconfig" setting must be specified');
         }
-        if (!FileSystem.exists(configObject.compiler.tsconfigFilePath)) {
-          throw new Error('The "tsconfigFilePath" path does not exist: ' + configObject.compiler.tsconfigFilePath);
+        if (!FileSystem.exists(tsconfigFilePath)) {
+          throw new Error('The "tsconfigFilePath" path does not exist: ' + tsconfigFilePath);
         }
       }
 
@@ -619,7 +623,7 @@ export class ExtractorConfig {
       return new ExtractorConfig({
         projectFolder: projectFolder,
         packageJson,
-        packageJsonFullPath,
+        packageFolder,
         mainEntryPointFile,
         tsconfigFilePath,
         overrideTsconfig: configObject.compiler.overrideTsconfig,

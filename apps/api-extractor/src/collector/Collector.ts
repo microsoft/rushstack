@@ -95,14 +95,14 @@ export class Collector {
       throw new Error('Unable to load file: ' + extractorConfig.mainEntryPointFile);
     }
 
-    if (!extractorConfig.packageJsonFullPath || !extractorConfig.packageJson) {
+    if (!extractorConfig.packageFolder || !extractorConfig.packageJson) {
       // TODO: We should be able to analyze projects that don't have any package.json.
       // The ExtractorConfig class is already designed to allow this.
       throw new Error('Unable to find a package.json file for the project being analyzed');
     }
 
     this.workingPackage = new WorkingPackage({
-      packageFolder: extractorConfig.packageJsonFullPath,
+      packageFolder: extractorConfig.packageFolder,
       packageJson: extractorConfig.packageJson,
       entryPointSourceFile
     });

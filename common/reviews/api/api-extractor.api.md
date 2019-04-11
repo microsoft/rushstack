@@ -51,8 +51,8 @@ export class ExtractorConfig {
     readonly mainEntryPointFile: string;
     readonly messages: IExtractorMessagesConfig;
     readonly overrideTsconfig: {} | undefined;
+    readonly packageFolder: string | undefined;
     readonly packageJson: INodePackageJson | undefined;
-    readonly packageJsonFullPath: string | undefined;
     static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
     readonly projectFolder: string;
     readonly publicTrimmedFilePath: string;
