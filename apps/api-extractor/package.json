@@ -43,7 +43,7 @@
     "lodash": "~4.17.5",
     "resolve": "1.8.1",
     "source-map": "~0.6.1",
-    "typescript": "~3.1.6"
+    "typescript": "~3.4.3"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.0.51",
@@ -51,7 +51,6 @@
     "@types/jest": "23.3.11",
     "@types/lodash": "4.14.116",
     "@types/node": "8.5.8",
-    "gulp": "~3.9.1",
-    "tslint-microsoft-contrib": "~5.2.1"
+    "gulp": "~3.9.1"
   }
 }
