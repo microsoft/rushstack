@@ -94,6 +94,7 @@ interface IExtractorConfigParameters {
   packageJson: INodePackageJson | undefined;
   packageJsonFullPath: string | undefined;
   mainEntryPointFile: string;
+  tsconfigFilePath: string;
   overrideTsconfig: { } | undefined;
   skipLibCheck: boolean;
   apiReportEnabled: boolean;
@@ -150,6 +151,9 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigFile.mainEntryPointFile} */
   public readonly mainEntryPointFile: string;
 
+  /** {@inheritDoc IConfigCompiler.tsconfigFilePath} */
+  public readonly tsconfigFilePath: string;
+
   /** {@inheritDoc IConfigCompiler.overrideTsconfig} */
   public readonly overrideTsconfig: { } | undefined;
 
@@ -194,6 +198,7 @@ export class ExtractorConfig {
     this.packageJson = parameters.packageJson;
     this.packageJsonFullPath = parameters.packageJsonFullPath;
     this.mainEntryPointFile = parameters.mainEntryPointFile;
+    this.tsconfigFilePath = parameters.tsconfigFilePath;
     this.overrideTsconfig = parameters.overrideTsconfig;
     this.skipLibCheck = parameters.skipLibCheck;
     this.apiReportEnabled = parameters.apiReportEnabled;
@@ -340,6 +345,13 @@ export class ExtractorConfig {
     if (configFile.mainEntryPointFile) {
       configFile.mainEntryPointFile = ExtractorConfig._resolveConfigFileRelativePath(
         'mainEntryPointFile', configFile.mainEntryPointFile, currentConfigFolderPath);
+    }
+
+    if (configFile.compiler) {
+      if (configFile.compiler.tsconfigFilePath) {
+        configFile.compiler.tsconfigFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'tsconfigFilePath', configFile.compiler.tsconfigFilePath, currentConfigFolderPath);
+      }
     }
 
     if (configFile.apiReport) {
@@ -494,17 +506,29 @@ export class ExtractorConfig {
 
       if (!configObject.mainEntryPointFile) {
         // A merged configuration should have this
-        throw new Error('mainEntryPointFile is missing');
+        throw new Error('The "mainEntryPointFile" setting is missing');
       }
       const mainEntryPointFile: string = ExtractorConfig._resolvePathWithTokens('mainEntryPointFile',
         configObject.mainEntryPointFile, tokenContext);
 
       if (!ExtractorConfig.hasDtsFileExtension(mainEntryPointFile)) {
-        throw new Error('The mainEntryPointFile is not a declaration file: ' + mainEntryPointFile);
+        throw new Error('The "mainEntryPointFile" is not a declaration file: ' + mainEntryPointFile);
       }
 
       if (!FileSystem.exists(mainEntryPointFile)) {
-        throw new Error('The mainEntryPointFile does not exist: ' + mainEntryPointFile);
+        throw new Error('The "mainEntryPointFile" does not exist: ' + mainEntryPointFile);
+      }
+
+      const tsconfigFilePath: string = ExtractorConfig._resolvePathWithTokens('tsconfigFilePath',
+        configObject.compiler.tsconfigFilePath, tokenContext);
+
+      if (configObject.compiler.overrideTsconfig === undefined) {
+        if (!configObject.compiler.tsconfigFilePath) {
+          throw new Error('Either the "tsconfigFilePath" or "overrideTsconfig" setting must be specified');
+        }
+        if (!FileSystem.exists(configObject.compiler.tsconfigFilePath)) {
+          throw new Error('The "tsconfigFilePath" does not exist: ' + configObject.compiler.tsconfigFilePath);
+        }
       }
 
       let apiReportEnabled: boolean = false;
@@ -594,6 +618,7 @@ export class ExtractorConfig {
         packageJson,
         packageJsonFullPath,
         mainEntryPointFile,
+        tsconfigFilePath,
         overrideTsconfig: configObject.compiler.overrideTsconfig,
         skipLibCheck: !!configObject.compiler.skipLibCheck,
         apiReportEnabled,

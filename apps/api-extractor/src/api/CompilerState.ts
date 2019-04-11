@@ -52,7 +52,7 @@ export class CompilerState {
     let tsconfig: {} | undefined = extractorConfig.overrideTsconfig;
     if (!tsconfig) {
       // If it wasn't overridden, then load it from disk
-      tsconfig = JsonFile.load(path.join(extractorConfig.projectFolder, 'tsconfig.json'));
+      tsconfig = JsonFile.load(extractorConfig.tsconfigFilePath);
     }
 
     const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(

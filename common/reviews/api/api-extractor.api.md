@@ -61,6 +61,7 @@ export class ExtractorConfig {
     readonly rollupEnabled: boolean;
     readonly skipLibCheck: boolean;
     readonly testMode: boolean;
+    readonly tsconfigFilePath: string;
     readonly tsdocMetadataEnabled: boolean;
     readonly tsdocMetadataFilePath: string;
     readonly untrimmedFilePath: string;
@@ -150,6 +151,7 @@ export interface IConfigApiReport {
 export interface IConfigCompiler {
     overrideTsconfig?: {};
     skipLibCheck?: boolean;
+    tsconfigFilePath?: string;
 }
 
 // @public
