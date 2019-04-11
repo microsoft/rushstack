@@ -8434,6 +8434,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-jjOcCZvpkl2+z7JFn0yBOoLQyLoIkNZAs/fYJkUG6VKy6zLPHJGfQJYFHzibB6GJaF/8QrcECtlQ5cpvRHSMEA==
+  /typescript/3.4.3:
+    dev: false
+    engines:
+      node: '>=4.2.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-FFgHdPt4T/duxx6Ndf7hwgMZZjZpB+U0nMNGVCYPq0rEzWKjEDobm4J6yb3CS7naZ0yURFqdw9Gwc7UOh/P9oQ==
   /uglify-js/2.8.29:
     dependencies:
       source-map: 0.5.7
@@ -9197,11 +9204,11 @@ packages:
       resolve: 1.8.1
       source-map: 0.6.1
       tslint-microsoft-contrib: 5.2.1
-      typescript: 3.1.6
+      typescript: 3.4.3
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-Pbw/nerU1SyiEdTy6trOiUDyZPMWZwhN+bQtfptE0/cOdURAgAciw9arZTgtwkGvdx51vLCyFYEjAZK0UpJxew==
+      integrity: sha512-iTFnk777Ngr5MzFj1tAQ6PRJDE+51EINW6IIW1+OnftFdDxHja0wrfT5kl9A7UTEnIr1DabTOwwo98F3ok+9sg==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-mocha.tgz':
