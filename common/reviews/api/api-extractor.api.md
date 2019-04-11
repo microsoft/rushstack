@@ -54,11 +54,11 @@ export class ExtractorConfig {
     readonly packageJson: INodePackageJson | undefined;
     readonly packageJsonFullPath: string | undefined;
     static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig;
+    readonly projectFolder: string;
     readonly publicTrimmedFilePath: string;
     readonly reportFilePath: string;
     readonly reportTempFilePath: string;
     readonly rollupEnabled: boolean;
-    readonly rootFolder: string;
     readonly skipLibCheck: boolean;
     readonly testMode: boolean;
     readonly tsdocMetadataEnabled: boolean;
@@ -149,7 +149,6 @@ export interface IConfigApiReport {
 // @public
 export interface IConfigCompiler {
     overrideTsconfig?: {};
-    rootFolder: string;
     skipLibCheck?: boolean;
 }
 
@@ -177,6 +176,7 @@ export interface IConfigFile {
     extends?: string;
     mainEntryPointFile: string;
     messages?: IExtractorMessagesConfig;
+    projectFolder?: string;
     testMode?: boolean;
     // @beta
     tsdocMetadata?: IConfigTsdocMetadata;

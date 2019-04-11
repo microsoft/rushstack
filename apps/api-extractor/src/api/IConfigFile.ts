@@ -14,21 +14,6 @@ import { ExtractorLogLevel } from './ExtractorLogLevel';
 export interface IConfigCompiler {
 
   /**
-   * The root folder for the project.  This folder typically contains the tsconfig.json and package.json
-   * config files.
-   *
-   * @remarks
-   *
-   * The `rootFolder` path is resolved relative to the folder containing api-extractor.json.
-   *
-   * The default value for `rootFolder` is the token `<lookup>`, which means the folder is determined by traversing
-   * parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder
-   * that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error
-   * will be reported.
-   */
-  rootFolder: string;
-
-  /**
    * Provides already parsed tsconfig.json contents.
    *
    * @remarks
@@ -36,7 +21,7 @@ export interface IConfigCompiler {
    *
    * http://json.schemastore.org/tsconfig
    *
-   * If omitted, then the tsconfig.json file will instead be read from the rootFolder.
+   * If omitted, then the tsconfig.json file will instead be read from the projectFolder.
    */
   overrideTsconfig?: { };
 
@@ -77,25 +62,27 @@ export interface IConfigApiReport {
 
   /**
    * Specifies the folder where the API report file is written.  The file name portion is determined by
-   * the "reportFileName" setting.
+   * the `reportFileName` setting.
    *
    * @remarks
    * The API report file is normally tracked by Git.  Changes to it can be used to trigger a branch policy,
    * e.g. for an API review.
    *
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as `<projectFolder>`.
    */
   reportFolder?: string;
 
   /**
    * Specifies the folder where the temporary report file is written.  The file name portion is determined by
-   * the "reportFileName" setting.
+   * the `reportFileName` setting.
    *
    * @remarks
    * After the temporary file is written to disk, it is compared with the file in the `reportFolder`.
    * If they are different, a production build will fail.
    *
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as `<projectFolder>`.
    */
   reportTempFolder?: string;
 }
@@ -115,11 +102,11 @@ export interface IConfigDocModel {
   enabled: boolean;
 
   /**
-   * The output path for the doc model file.
+   * The output path for the doc model file.  The file extension should be ".api.json".
    *
    * @remarks
-   * The file extension should be ".api.json".
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as `<projectFolder>`.
    */
   apiJsonFilePath?: string;
 }
@@ -146,7 +133,8 @@ export interface IConfigDtsRollup {
    *
    * If the path is an empty string, then this file will not be written.
    *
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as `<projectFolder>`.
    */
   untrimmedFilePath?: string;
 
@@ -156,9 +144,8 @@ export interface IConfigDtsRollup {
    * @remarks
    * This file will include only declarations that are marked as `@public` or `@beta`.
    *
-   * If the path is an empty string, then this file will not be written.
-   *
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as `<projectFolder>`.
    */
   betaTrimmedFilePath?: string;
 
@@ -170,7 +157,8 @@ export interface IConfigDtsRollup {
    *
    * If the path is an empty string, then this file will not be written.
    *
-   * The path is resolved relative to the `rootFolder` location.
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as `<projectFolder>`.
    */
   publicTrimmedFilePath?: string;
 }
@@ -193,9 +181,12 @@ export interface IConfigTsdocMetadata {
    * Specifies where the TSDoc metadata file should be written.
    *
    * @remarks
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as `<projectFolder>`.
+   *
    * The default value is `<lookup>`, which causes the path to be automatically inferred from the `tsdocMetadata`,
    * `typings` or `main` fields of the project's package.json.  If none of these fields are set, the lookup
-   * falls back to `./tsdoc-metadata.json`.
+   * falls back to `tsdoc-metadata.json` in the package folder.
    */
   tsdocMetadataFilePath?: string;
 }
@@ -218,9 +209,9 @@ export interface IConfigMessageReportingRule {
   logLevel: ExtractorLogLevel;
 
   /**
-   * If API Extractor is configured to write an API report file (.api.md), then the message will be written
-   * inside that file.  If the API report file is NOT being written, then the message is instead logged according
-   * to the `logLevel` option.
+   * When `addToApiReportFile` is true:  If API Extractor is configured to write an API report file (.api.md),
+   * then the message will be written inside that file; otherwise, the message is instead logged according to
+   * the `logLevel` option.
    */
   addToApiReportFile?: boolean;
 }
@@ -277,10 +268,30 @@ export interface IExtractorMessagesConfig {
  */
 export interface IConfigFile {
   /**
-   * Path to json config file from which config should extend.
-   * The path specified in this field is relative to current config file path.
+   * Optionally specifies another JSON config file that this file extends from.  This provides a way for
+   * standard settings to be shared across multiple projects.
+   *
+   * @remarks
+   * If the path starts with `./` or `../`, the path is resolved relative to the folder of the file that contains
+   * the `extends` field.  Otherwise, the first path segment is interpreted as an NPM package name, and will be
+   * resolved using NodeJS `require()`.
    */
   extends?: string;
+
+  /**
+   * Determines the `<projectFolder>` token that can be used with other config file settings.  The project folder
+   * typically contains the tsconfig.json and package.json config files, but the path is user-defined.
+   *
+   * @remarks
+   *
+   * The path is resolved relative to the folder of the config file that contains the setting.
+   *
+   * The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined by traversing
+   * parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder
+   * that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error
+   * will be reported.
+   */
+  projectFolder?: string;
 
   /**
    * Specifies the .d.ts file to be used as the starting point for analysis.  API Extractor
@@ -289,7 +300,7 @@ export interface IConfigFile {
    * @remarks
    *
    * The file extension must be ".d.ts" and not ".ts".
-   * The path is resolved relative to the "rootFolder" location.
+   * The path is resolved relative to the "projectFolder" location.
    */
   mainEntryPointFile: string;
 

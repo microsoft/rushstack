@@ -21,8 +21,8 @@ export function runScenarios(buildConfigPath: string): void {
   // TODO: Eliminate this workaround
   // See GitHub issue https://github.com/Microsoft/web-build-tools/issues/1017
   for (const scenarioFolderName of buildConfig.scenarioFolderNames) {
-    const entryPoint: string = `./lib/${scenarioFolderName}/index.d.ts`;
-    entryPoints.push(path.resolve(entryPoint));
+    const entryPoint: string = path.resolve(`./lib/${scenarioFolderName}/index.d.ts`);
+    entryPoints.push(entryPoint);
 
     const apiExtractorJson = {
       '$schema': 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
@@ -31,17 +31,17 @@ export function runScenarios(buildConfigPath: string): void {
 
       'apiReport': {
         'enabled': true,
-        'reportFolder': `./etc/test-outputs/${scenarioFolderName}`
+        'reportFolder': `<projectFolder>/etc/test-outputs/${scenarioFolderName}`
       },
 
       'dtsRollup': {
         'enabled': true,
-        'untrimmedFilePath': `./etc/test-outputs/${scenarioFolderName}/rollup.d.ts`
+        'untrimmedFilePath': `<projectFolder>/etc/test-outputs/${scenarioFolderName}/rollup.d.ts`
       },
 
       'docModel': {
         'enabled': true,
-        'apiJsonFilePath': `./etc/test-outputs/${scenarioFolderName}/<unscopedPackageName>.api.json`
+        'apiJsonFilePath': `<projectFolder>/etc/test-outputs/${scenarioFolderName}/<unscopedPackageName>.api.json`
       },
 
       'messages': {

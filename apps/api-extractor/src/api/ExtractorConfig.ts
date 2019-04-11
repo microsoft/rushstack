@@ -13,7 +13,8 @@ import {
   INodePackageJson,
   PackageName,
   Text,
-  InternalError
+  InternalError,
+  Path
 } from '@microsoft/node-core-library';
 import {
   IConfigFile,
@@ -41,7 +42,7 @@ interface IExtractorConfigTokenContext {
    */
   packageName: string;
 
-  rootFolder: string;
+  projectFolder: string;
 }
 
 /**
@@ -61,7 +62,7 @@ export interface IExtractorConfigPrepareOptions {
    *
    * @remarks
    *
-   * If this is omitted, then the `rootFolder` must not be specified using the `<lookup>` token.
+   * If this is omitted, then the `projectFolder` must not be specified using the `<lookup>` token.
    */
   configObjectFullPath: string | undefined;
 
@@ -89,7 +90,7 @@ export interface IExtractorConfigPrepareOptions {
 }
 
 interface IExtractorConfigParameters {
-  rootFolder: string;
+  projectFolder: string;
   packageJson: INodePackageJson | undefined;
   packageJsonFullPath: string | undefined;
   mainEntryPointFile: string;
@@ -131,8 +132,8 @@ export class ExtractorConfig {
 
   private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;
 
-  /** {@inheritDoc IConfigCompiler.rootFolder} */
-  public readonly rootFolder: string;
+  /** {@inheritDoc IConfigFile.projectFolder} */
+  public readonly projectFolder: string;
 
   /**
    * The parsed package.json file for the working package, or undefined if API Extractor was invoked without
@@ -189,7 +190,7 @@ export class ExtractorConfig {
   public readonly testMode: boolean;
 
   private constructor(parameters: IExtractorConfigParameters) {
-    this.rootFolder = parameters.rootFolder;
+    this.projectFolder = parameters.projectFolder;
     this.packageJson = parameters.packageJson;
     this.packageJsonFullPath = parameters.packageJsonFullPath;
     this.mainEntryPointFile = parameters.mainEntryPointFile;
@@ -218,7 +219,10 @@ export class ExtractorConfig {
     if (!path.isAbsolute(absolutePath)) {
       throw new InternalError('Expected absolute path: ' + absolutePath);
     }
-    return path.relative(this.rootFolder, absolutePath).replace(/\\/g, '/');
+    if (Path.isUnderOrEqual(absolutePath, this.projectFolder)) {
+      return path.relative(this.projectFolder, absolutePath).replace(/\\/g, '/');
+    }
+    return absolutePath;
   }
 
   /**
@@ -259,13 +263,11 @@ export class ExtractorConfig {
     // Set to keep track of config files which have been processed.
     const visitedPaths: Set<string> = new Set<string>();
 
-    // Get absolute path of config file.
     let currentConfigFilePath: string = path.resolve(process.cwd(), jsonFilePath);
-
-    let configObject: Partial<IConfigFile> = JsonFile.load(currentConfigFilePath);
+    let configObject: Partial<IConfigFile> = { };
 
     try {
-      while (configObject.extends) {
+      do {
         // Check if this file was already processed.
         if (visitedPaths.has(currentConfigFilePath)) {
           throw new Error(`The API Extractor config files contain a cycle. "${currentConfigFilePath}"`
@@ -275,32 +277,46 @@ export class ExtractorConfig {
 
         const currentConfigFolderPath: string = path.dirname(currentConfigFilePath);
 
-        if (configObject.extends.match(/^\.\.?[\\/]/)) {
-          // EXAMPLE:  "./subfolder/api-extractor-base.json"
-          currentConfigFilePath = path.resolve(currentConfigFolderPath, configObject.extends);
-        } else {
-          // EXAMPLE:  "my-package/api-extractor-base.json"
-          //
-          // Resolve "my-package" from the perspective of the current folder.
-          currentConfigFilePath = resolve.sync(
-            configObject.extends,
-            {
-              basedir: currentConfigFolderPath
-            }
-          );
-        }
-
         // Load the extractor config defined in extends property.
         const baseConfig: IConfigFile = JsonFile.load(currentConfigFilePath);
 
-        // Delete the "extends" field, since we've already expanded it
-        delete configObject.extends;
+        let extendsField: string = baseConfig.extends || '';
+
+        // Delete the "extends" field so it doesn't get merged
+        delete baseConfig.extends;
+
+        if (extendsField) {
+          if (extendsField.match(/^\.\.?[\\/]/)) {
+            // EXAMPLE:  "./subfolder/api-extractor-base.json"
+            extendsField = path.resolve(currentConfigFolderPath, extendsField);
+          } else {
+            // EXAMPLE:  "my-package/api-extractor-base.json"
+            //
+            // Resolve "my-package" from the perspective of the current folder.
+            try {
+              extendsField = resolve.sync(
+                extendsField,
+                {
+                  basedir: currentConfigFolderPath
+                }
+              );
+            } catch (e) {
+              throw new Error(`Error resolving NodeJS path "${extendsField}": ${e.message}`);
+            }
+          }
+        }
+
+        // This step has to be performed in advance, since the currentConfigFolderPath information will be lost
+        // after lodash.merge() is performed.
+        ExtractorConfig._resolveConfigFileRelativePaths(baseConfig, currentConfigFolderPath);
 
         // Merge extractorConfig into baseConfig, mutating baseConfig
         lodash.merge(baseConfig, configObject);
-
         configObject = baseConfig;
-      }
+
+        currentConfigFilePath = extendsField;
+      } while (currentConfigFilePath);
+
     } catch (e) {
       throw new Error(`Error loading ${currentConfigFilePath}:\n` + e.message);
     }
@@ -314,6 +330,73 @@ export class ExtractorConfig {
     return configObject as IConfigFile;
   }
 
+  private static _resolveConfigFileRelativePaths(configFile: IConfigFile, currentConfigFolderPath: string): void {
+
+    if (configFile.projectFolder) {
+      configFile.projectFolder = ExtractorConfig._resolveConfigFileRelativePath(
+        'projectFolder', configFile.projectFolder, currentConfigFolderPath);
+    }
+
+    if (configFile.mainEntryPointFile) {
+      configFile.mainEntryPointFile = ExtractorConfig._resolveConfigFileRelativePath(
+        'mainEntryPointFile', configFile.mainEntryPointFile, currentConfigFolderPath);
+    }
+
+    if (configFile.apiReport) {
+      if (configFile.apiReport.reportFolder) {
+        configFile.apiReport.reportFolder = ExtractorConfig._resolveConfigFileRelativePath(
+          'reportFolder', configFile.apiReport.reportFolder, currentConfigFolderPath);
+      }
+      if (configFile.apiReport.reportTempFolder) {
+        configFile.apiReport.reportTempFolder = ExtractorConfig._resolveConfigFileRelativePath(
+          'reportTempFolder', configFile.apiReport.reportTempFolder, currentConfigFolderPath);
+      }
+    }
+
+    if (configFile.docModel) {
+      if (configFile.docModel.apiJsonFilePath) {
+        configFile.docModel.apiJsonFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'apiJsonFilePath', configFile.docModel.apiJsonFilePath, currentConfigFolderPath);
+      }
+    }
+
+    if (configFile.dtsRollup) {
+      if (configFile.dtsRollup.untrimmedFilePath) {
+        configFile.dtsRollup.untrimmedFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'untrimmedFilePath', configFile.dtsRollup.untrimmedFilePath, currentConfigFolderPath);
+      }
+      if (configFile.dtsRollup.betaTrimmedFilePath) {
+        configFile.dtsRollup.betaTrimmedFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'betaTrimmedFilePath', configFile.dtsRollup.betaTrimmedFilePath, currentConfigFolderPath);
+      }
+      if (configFile.dtsRollup.publicTrimmedFilePath) {
+        configFile.dtsRollup.publicTrimmedFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'publicTrimmedFilePath', configFile.dtsRollup.publicTrimmedFilePath, currentConfigFolderPath);
+      }
+    }
+
+    if (configFile.tsdocMetadata) {
+      if (configFile.tsdocMetadata.tsdocMetadataFilePath) {
+        configFile.tsdocMetadata.tsdocMetadataFilePath = ExtractorConfig._resolveConfigFileRelativePath(
+          'tsdocMetadataFilePath', configFile.tsdocMetadata.tsdocMetadataFilePath, currentConfigFolderPath);
+      }
+    }
+  }
+
+  private static _resolveConfigFileRelativePath(fieldName: string, fieldValue: string,
+    currentConfigFolderPath: string): string {
+
+    if (!path.isAbsolute(fieldValue)) {
+      if (fieldValue.indexOf('<projectFolder>') !== 0) {
+        // If the path is not absolute and does not start with "<projectFolder>", then resolve it relative
+        // to the folder of the config file that it appears in
+        return path.join(currentConfigFolderPath, fieldValue);
+      }
+    }
+
+    return fieldValue;
+  }
+
   /**
    * Prepares an `ExtractorConfig` object using a configuration that is provided as a runtime object,
    * rather than reading it from disk.  This allows configurations to be constructed programmatically,
@@ -322,6 +405,10 @@ export class ExtractorConfig {
   public static prepare(options: IExtractorConfigPrepareOptions): ExtractorConfig {
     const filenameForErrors: string = options.configObjectFullPath || 'the configuration object';
     const configObject: Partial<IConfigFile> = options.configObject;
+
+    if (configObject.extends) {
+      throw new Error('The IConfigFile.extends field must be expanded before calling ExtractorConfig.prepare()');
+    }
 
     if (options.configObjectFullPath) {
       if (!path.isAbsolute(options.configObjectFullPath)) {
@@ -355,12 +442,17 @@ export class ExtractorConfig {
         throw new Error('The "compiler" section is missing');
       }
 
-      let rootFolder: string;
-      if (configObject.compiler.rootFolder.trim() === '<lookup>') {
+      if (!configObject.projectFolder) {
+        // A merged configuration should have this
+        throw new Error('The "projectFolder" field is missing');
+      }
+
+      let projectFolder: string;
+      if (configObject.projectFolder.trim() === '<lookup>') {
         if (!options.configObjectFullPath) {
           throw new Error('The "<lookup>" token cannot be expanded because configObjectFullPath was not specified');
         }
-        // "The default value for `rootFolder` is the token `<lookup>`, which means the folder is determined
+        // "The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined
         // by traversing parent folders, starting from the folder containing api-extractor.json, and stopping
         // at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in
         // this way, then an error will be reported."
@@ -369,34 +461,30 @@ export class ExtractorConfig {
         for (; ; ) {
           const tsconfigPath: string = path.join(currentFolder, 'tsconfig.json');
           if (FileSystem.exists(tsconfigPath)) {
-            rootFolder = currentFolder;
+            projectFolder = currentFolder;
             break;
           }
           const parentFolder: string = path.dirname(currentFolder);
           if (parentFolder === '' || parentFolder === currentFolder) {
-            throw new Error('The rootFolder was set to "<lookup>", but a tsconfig.json file cannot be'
+            throw new Error('The projectFolder was set to "<lookup>", but a tsconfig.json file cannot be'
               + ' found in this folder or any parent folder.');
           }
           currentFolder = parentFolder;
         }
       } else {
-        if (!configObject.compiler.rootFolder) {
-          throw new Error('The rootFolder must be specified');
+        ExtractorConfig._rejectAnyTokensInPath(configObject.projectFolder, 'projectFolder');
+
+        if (!FileSystem.exists(configObject.projectFolder)) {
+          throw new Error('The specified projectFolder does not exist: ' + configObject.projectFolder);
         }
 
-        ExtractorConfig._rejectAnyTokensInPath(configObject.compiler.rootFolder, 'rootFolder');
-
-        if (!FileSystem.exists(configObject.compiler.rootFolder)) {
-          throw new Error('The specified rootFolder does not exist: ' + configObject.compiler.rootFolder);
-        }
-
-        rootFolder = configObject.compiler.rootFolder;
+        projectFolder = configObject.projectFolder;
       }
 
       const tokenContext: IExtractorConfigTokenContext = {
         unscopedPackageName: 'unknown-package',
         packageName: 'unknown-package',
-        rootFolder
+        projectFolder: projectFolder
       };
 
       if (packageJson) {
@@ -464,11 +552,11 @@ export class ExtractorConfig {
 
           if (tsdocMetadataFilePath.trim() === '<lookup>') {
             if (!packageJson) {
-              throw new Error('The "<lookup>" token cannot be used with compiler.rootFolder because'
+              throw new Error('The "<lookup>" token cannot be used with compiler.projectFolder because'
                 + 'the "packageJson" option was not provided');
             }
             if (!packageJsonFullPath) {
-              throw new Error('The "<lookup>" token cannot be used with compiler.rootFolder because'
+              throw new Error('The "<lookup>" token cannot be used with compiler.projectFolder because'
                 + 'the "packageJsonFullPath" option was not provided');
             }
             tsdocMetadataFilePath = PackageMetadataManager.resolveTsdocMetadataPath(
@@ -502,7 +590,7 @@ export class ExtractorConfig {
       }
 
       return new ExtractorConfig({
-        rootFolder,
+        projectFolder: projectFolder,
         packageJson,
         packageJsonFullPath,
         mainEntryPointFile,
@@ -533,7 +621,7 @@ export class ExtractorConfig {
 
     value = ExtractorConfig._expandStringWithTokens(fieldName, value, tokenContext);
     if (value !== '') {
-      value = path.resolve(tokenContext.rootFolder, value);
+      value = path.resolve(tokenContext.projectFolder, value);
     }
     return value;
   }
@@ -544,6 +632,19 @@ export class ExtractorConfig {
     if (value !== '') {
       value = Text.replaceAll(value, '<unscopedPackageName>', tokenContext.unscopedPackageName);
       value = Text.replaceAll(value, '<packageName>', tokenContext.packageName);
+
+      const projectFolderToken: string = '<projectFolder>';
+      if (value.indexOf(projectFolderToken) === 0) {
+        // Replace "<projectFolder>" at the start of a string
+        value = path.join(tokenContext.projectFolder, value.substr(projectFolderToken.length));
+      }
+
+      if (value.indexOf(projectFolderToken) >= 0) {
+        // If after all replacements, "<projectFolder>" appears somewhere in the string, report an error
+        throw new Error(`The ${fieldName} value incorrectly uses the "<projectFolder>" token.`
+          + ` It must appear at the start of the string.`);
+      }
+
       if (value.indexOf('<lookup>') >= 0) {
         throw new Error(`The ${fieldName} value incorrectly uses the "<lookup>" token`);
       }
@@ -560,7 +661,7 @@ export class ExtractorConfig {
   }
 
   /**
-   * Given a path string that may have originally contained expandable tokens such as `<rootFolder>"`
+   * Given a path string that may have originally contained expandable tokens such as `<projectFolder>"`
    * this reports an error if any token-looking substrings remain after expansion (e.g. `c:\blah\<invalid>\blah`).
    */
   private static _rejectAnyTokensInPath(value: string, fieldName: string): void {

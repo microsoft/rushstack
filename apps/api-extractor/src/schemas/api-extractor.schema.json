@@ -13,8 +13,13 @@
       "type": "string"
     },
 
+    "projectFolder": {
+      "description": "Determines the \"<projectFolder>\" token that can be used with other config file settings.  The project folder typically contains the tsconfig.json and package.json config files, but the path is user-defined.  The path is resolved relative to the folder of the config file that contains the setting. The default value for \"projectFolder\" is the token \"<lookup>\", which means the folder is determined by traversing parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error will be reported.",
+      "type": "string"
+    },
+
     "mainEntryPointFile": {
-      "description": "Specifies the .d.ts file to be used as the starting point for analysis. API Extractor analyzes the symbols exported by this module. The path is resolved relative to the \"rootFolder\" location.",
+      "description": "Specifies the .d.ts file to be used as the starting point for analysis.  API Extractor analyzes the symbols exported by this module. The file extension must be \".d.ts\" and not \".ts\". The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
       "type": "string"
     },
 
@@ -22,12 +27,8 @@
       "description": "Determines how the TypeScript compiler engine will be invoked by API Extractor.",
       "type": "object",
       "properties": {
-        "rootFolder": {
-          "description": "The root folder for the project. This folder typically contains the tsconfig.json and package.json config files. The rootFolder path is resolved relative to the folder containing api-extractor.json. The default value for rootFolder is the token \"<lookup>\", which means the folder is determined by traversing parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error will be reported.",
-          "type": "string"
-        },
         "overrideTsconfig": {
-          "description": "Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema: http://json.schemastore.org/tsconfig If omitted, then the tsconfig.json file will be read from the rootFolder.",
+          "description": "Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema: http://json.schemastore.org/tsconfig If omitted, then the tsconfig.json file will be read from the \"projectFolder\".",
           "type": "object"
         },
         "skipLibCheck": {
@@ -48,17 +49,17 @@
         },
 
         "reportFileName": {
-          "description": "The filename for the API report files.  It will be combined with \"reportFolder\" or \"reportTempFolder\" to produce a full output filename. The file extension should be \".api.md\", and the string should not contain a path separator such as \"\\\" or \"/\".",
+          "description": "The filename for the API report files.  It will be combined with \"reportFolder\" or \"reportTempFolder\" to produce a full file path. The file extension should be \".api.md\", and the string should not contain a path separator such as \"\\\" or \"/\".",
           "type": "string"
         },
 
         "reportFolder": {
-          "description": "Specifies the folder where the API report file is written.  The file name portion is determined by the \"reportFileName\" setting. The API report file is normally tracked by Git.  Changes to it can be used to trigger a branch policy, e.g. for an API review. The path is resolved relative to the \"rootFolder\" location.",
+          "description": "Specifies the folder where the API report file is written.  The file name portion is determined by the \"reportFileName\" setting. The API report file is normally tracked by Git.  Changes to it can be used to trigger a branch policy, e.g. for an API review. The path is resolved relative to the folder of the config file that contains the setting; to change this,  prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         },
 
         "reportTempFolder": {
-          "description": "Specifies the folder where the temporary report file is written.  The file name portion is determined by the \"reportFileName\" setting. fter the temporary file is written to disk, it is compared with the file in the \"reportFolder\". If they are different, a production build will fail. The path is resolved relative to the \"rootFolder\" location.",
+          "description": "Specifies the folder where the temporary report file is written.  The file name portion is determined by the \"reportFileName\" setting. After the temporary file is written to disk, it is compared with the file in the \"reportFolder\". If they are different, a production build will fail. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         }
 
@@ -76,7 +77,7 @@
           "type": "boolean"
         },
         "apiJsonFilePath": {
-          "description": "The output path for the doc model file.  The file extension should be \".api.json\". The path is resolved relative to the \"rootFolder\" location.",
+          "description": "The output path for the doc model file.  The file extension should be \".api.json\". The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         }
       },
@@ -93,15 +94,15 @@
           "type": "boolean"
         },
         "untrimmedFilePath": {
-          "description": "Specifies the output path for a .d.ts rollup file to be generated without any trimming. This file will include all declarations that are exported by the main entry point. If the path is an empty string, then this file will not be written. The path is resolved relative to the \"rootFolder\" location.",
+          "description": "Specifies the output path for a .d.ts rollup file to be generated without any trimming. This file will include all declarations that are exported by the main entry point. If the path is an empty string, then this file will not be written. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         },
         "betaTrimmedFilePath": {
-          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for a \"beta\" release. This file will include only declarations that are marked as \"@public\" or \"@beta\". If the path is an empty string, then this file will not be written. The path is resolved relative to the \"rootFolder\" location.",
+          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for a \"beta\" release. This file will include only declarations that are marked as \"@public\" or \"@beta\". The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         },
         "publicTrimmedFilePath": {
-          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for a \"public\" release. This file will include only declarations that are marked as \"@public\". If the path is an empty string, then this file will not be written. The path is resolved relative to the \"rootFolder\" location.",
+          "description": "Specifies the output path for a .d.ts rollup file to be generated with trimming for a \"public\" release. This file will include only declarations that are marked as \"@public\". If the path is an empty string, then this file will not be written. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".",
           "type": "string"
         }
       },
@@ -118,7 +119,7 @@
           "type": "boolean"
         },
         "tsdocMetadataFilePath": {
-          "description": "Specifies where the TSDoc metadata file should be written. The default value is \"<lookup>\", which causes the path to be automatically inferred from the \"tsdocMetadata\", \"typings\" or \"main\" fields of the project's package.json.  If none of these fields are set, the lookup falls back to \"tsdoc-metadata.json\" in the package folder.",
+          "description": "Specifies where the TSDoc metadata file should be written. The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\". The default value is \"<lookup>\", which causes the path to be automatically inferred from the \"tsdocMetadata\", \"typings\" or \"main\" fields of the project's package.json.  If none of these fields are set, the lookup falls back to \"tsdoc-metadata.json\" in the package folder.",
           "type": "string"
         }
       },
