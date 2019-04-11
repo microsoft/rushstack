@@ -12,6 +12,16 @@ import { ExtractorLogLevel } from './ExtractorLogLevel';
  * @public
  */
 export interface IConfigCompiler {
+  /**
+   * Specifies the path to the tsconfig.json file to be used by API Extractor when analyzing the project.
+   *
+   * @remarks
+   * The path is resolved relative to the folder of the config file that contains the setting; to change this,
+   * prepend a folder token such as `<projectFolder>`.
+   *
+   * Note: This setting will be ignored if `overrideTsconfig` is used.
+   */
+  tsconfigFilePath?: string;
 
   /**
    * Provides already parsed tsconfig.json contents.
