@@ -24,7 +24,7 @@ export interface IConfigCompiler {
   tsconfigFilePath?: string;
 
   /**
-   * Provides already parsed tsconfig.json contents.
+   * Provides a compiler configuration that will be used instead of reading the tsconfig.json file from disk.
    *
    * @remarks
    * The value must conform to the TypeScript tsconfig schema:
@@ -107,7 +107,7 @@ export interface IConfigApiReport {
  */
 export interface IConfigDocModel {
   /**
-   * Whether to generate doc model file.
+   * Whether to generate a doc model file.
    */
   enabled: boolean;
 

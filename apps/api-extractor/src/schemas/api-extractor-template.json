@@ -32,7 +32,7 @@
    * SUPPORTED TOKENS: <lookup>
    * DEFAULT VALUE: "<lookup>"
    */
-  // "projectFolder": "",
+  // "projectFolder": "..",
 
   /**
    * (REQUIRED) Specifies the .d.ts file to be used as the starting point for analysis.  API Extractor
@@ -65,7 +65,7 @@
     // "tsconfigFilePath": "<projectFolder>/tsconfig.json",
 
     /**
-     * Provides compiler configuration that will be used instead of reading the tsconfig.json file from disk.
+     * Provides a compiler configuration that will be used instead of reading the tsconfig.json file from disk.
      * The object must conform to the TypeScript tsconfig schema:
      *
      * http://json.schemastore.org/tsconfig
@@ -145,7 +145,7 @@
    */
   "docModel": {
     /**
-     * (REQUIRED) Whether to generate doc model file.
+     * (REQUIRED) Whether to generate a doc model file.
      */
     "enabled": true,
 
