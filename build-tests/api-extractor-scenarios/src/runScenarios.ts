@@ -27,7 +27,7 @@ export function runScenarios(buildConfigPath: string): void {
     const apiExtractorJson = {
       '$schema': 'https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json',
 
-      'mainEntryPointFile': entryPoint,
+      'mainEntryPointFilePath': entryPoint,
 
       'apiReport': {
         'enabled': true,
