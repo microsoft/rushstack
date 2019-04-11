@@ -8,13 +8,13 @@
       "comments": {
         "patch": [
           {
+            "comment": "THIS IS A RELEASE CANDIDATE FOR API-EXTRACTOR 7"
+          },
+          {
             "comment": "(Breaking change) Rename \"mainEntryPointFile\" to \"mainEntryPointFilePath\" so all settings use a consistent naming convention"
           },
           {
-            "comment": "(Breaking change) Paths that appear in api-extractor.json are now resolved relative to the config file unless prefixed with the \"<projectFolder>\" token"
-          },
-          {
-            "comment": "THIS IS A RELEASE CANDIDATE FOR API-EXTRACTOR 7"
+            "comment": "(Breaking change) Paths that appear in api-extractor.json are now resolved relative to the config file unless prefixed with the `<projectFolder>` token"
           },
           {
             "comment": "Add a new api-extractor.json setting \"tsconfigFilePath\" for customizing the tsconfig.json path"
