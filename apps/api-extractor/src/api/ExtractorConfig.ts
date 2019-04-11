@@ -533,7 +533,7 @@ export class ExtractorConfig {
           throw new Error('Either the "tsconfigFilePath" or "overrideTsconfig" setting must be specified');
         }
         if (!FileSystem.exists(tsconfigFilePath)) {
-          throw new Error('The "tsconfigFilePath" path does not exist: ' + tsconfigFilePath);
+          throw new Error('The file referenced by "tsconfigFilePath" does not exist: ' + tsconfigFilePath);
         }
       }
 
