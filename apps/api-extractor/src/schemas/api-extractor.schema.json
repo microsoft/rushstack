@@ -27,6 +27,10 @@
       "description": "Determines how the TypeScript compiler engine will be invoked by API Extractor.",
       "type": "object",
       "properties": {
+        "tsconfigFilePath": {
+          "description": " Specifies the path to the tsconfig.json file to be used by API Extractor when analyzing the project.  The path is resolved relative to the folder of the config file that contains the setting; to change this, prepend a folder token such as \"<projectFolder>\".  Note: This setting will be ignored if \"overrideTsconfig\" is used.",
+          "type": "string"
+        },
         "overrideTsconfig": {
           "description": "Provides already parsed tsconfig.json contents conforming to the TypeScript tsconfig schema: http://json.schemastore.org/tsconfig If omitted, then the tsconfig.json file will be read from the \"projectFolder\".",
           "type": "object"

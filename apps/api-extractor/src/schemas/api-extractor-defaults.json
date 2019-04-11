@@ -4,6 +4,7 @@
   "projectFolder": "<lookup>",
 
   "compiler": {
+    "tsconfigFilePath": "<projectFolder>/tsconfig.json",
     "skipLibCheck": false
   },
 
