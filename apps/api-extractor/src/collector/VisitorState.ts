@@ -8,17 +8,17 @@ export enum VisitorState {
   /**
    * We have not visited the node yet.
    */
-  Unvisited,
+  Unvisited = 0,
 
   /**
    * We have visited the node, but have not finished traversing its references yet.
    * If we reach a node that is already in the `Visiting` state, this means we have
    * encountered a cyclic reference.
    */
-  Visiting,
+  Visiting = 1,
 
   /**
    * We are finished vising the node and all its references.
    */
-  Visited
+  Visited = 2
 }

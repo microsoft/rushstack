@@ -73,7 +73,7 @@ export const enum ExtractorMessageId {
   UnresolvedInheritDocBase = 'ae-unresolved-inheritdoc-base',
 
   /**
-   * "The `@inheritDoc` tag for ____ refers to its own declaration".
+   * "The `@inheritDoc` tag for ___ refers to its own declaration".
    */
   CyclicInheritDoc = 'ae-cyclic-inherit-doc',
 
