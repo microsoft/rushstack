@@ -392,6 +392,14 @@ export class MessageRouter {
       return;
     }
 
+    // Assign the ExtractorMessage.logLevel; the message callback may adjust it below
+    if (message.category === ExtractorMessageCategory.Console) {
+      // Console messages have their category log level assigned via logInfo(), logVerbose(), etc.
+    } else {
+      const reportingRule: IReportingRule = this._getRuleForMessage(message);
+      message.logLevel = reportingRule.logLevel;
+    }
+
     if (this._messageCallback) {
       this._messageCallback(message);
 
