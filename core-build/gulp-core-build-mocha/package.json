@@ -24,8 +24,8 @@
     "gulp-mocha": "~6.0.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.3.3",
-    "@microsoft/node-library-build": "6.0.51",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.6",
+    "@microsoft/node-library-build": "6.0.54",
     "@types/glob": "5.0.30",
     "@types/gulp": "3.8.32",
     "@types/gulp-istanbul": "0.9.30",
