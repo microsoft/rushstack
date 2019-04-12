@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 11 Apr 2019 07:47:23 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Apr 2019 06:13:16 GMT and should not be manually modified.
+
+## 7.0.42
+Fri, 12 Apr 2019 06:13:16 GMT
+
+### Patches
+
+- Fix a regression that prevented certain types of warnings from being reported
 
 ## 7.0.41
 Thu, 11 Apr 2019 07:14:01 GMT
