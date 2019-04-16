@@ -181,7 +181,7 @@ export class DocCommentEnhancer {
 
     if (!inheritDocTag.declarationReference) {
       this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedInheritDocBase,
-        'The `@inheritDoc` tag needs a TSDoc declaration reference; signature matching is not supported yet',
+        'The @inheritDoc tag needs a TSDoc declaration reference; signature matching is not supported yet',
         astDeclaration);
       return;
     }
@@ -201,7 +201,7 @@ export class DocCommentEnhancer {
 
     if (referencedAstDeclaration instanceof ResolverFailure) {
       this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedInheritDocReference,
-        'The `@inheritDoc` reference could not be resolved: ' + referencedAstDeclaration.reason, astDeclaration);
+        'The @inheritDoc reference could not be resolved: ' + referencedAstDeclaration.reason, astDeclaration);
       return;
     }
 

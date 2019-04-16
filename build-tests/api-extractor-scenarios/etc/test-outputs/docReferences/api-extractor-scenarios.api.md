@@ -4,12 +4,12 @@
 
 ```ts
 
-// Warning: (ae-unresolved-inheritdoc-reference) The `@inheritDoc` reference could not be resolved: No member was found with name "nonExistentMethod"
+// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: No member was found with name "nonExistentMethod"
 // 
 // @public (undocumented)
 export function failWithBrokenLink(): void;
 
-// Warning: (ae-unresolved-inheritdoc-base) The `@inheritDoc` tag needs a TSDoc declaration reference; signature matching is not supported yet
+// Warning: (ae-unresolved-inheritdoc-base) The @inheritDoc tag needs a TSDoc declaration reference; signature matching is not supported yet
 // 
 // @public (undocumented)
 export function failWithMissingReference(): void;
