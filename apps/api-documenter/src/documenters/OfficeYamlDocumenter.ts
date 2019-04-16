@@ -133,7 +133,7 @@ export class OfficeYamlDocumenter extends YamlDocumenter {
   }
 
   private _generateExampleSnippetText(snippets: string[]): string {
-    const text: string[] = ['\n#### Examples\n'];
+    const text: string[] = ['\n\n#### Examples\n'];
     for (const snippet of snippets) {
       if (snippet.search(/await/) === -1) {
         text.push('```javascript');
