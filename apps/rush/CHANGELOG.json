@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.6.4",
+      "tag": "@microsoft/rush_v5.6.4",
+      "date": "Mon, 15 Apr 2019 06:40:00 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add support for string parameter for custom commands."
+          },
+          {
+            "comment": "Remove the obsolete \"--release-type\" option which only worked if you used a specific version of gulp-core-build-typescript"
+          },
+          {
+            "comment": "Adds --no-verify to git push during a rush publish"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.6.3",
       "tag": "@microsoft/rush_v5.6.3",
       "date": "Mon, 25 Mar 2019 03:15:21 GMT",

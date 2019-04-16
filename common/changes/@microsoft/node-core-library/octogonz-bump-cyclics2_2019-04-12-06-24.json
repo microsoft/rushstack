@@ -2,10 +2,10 @@
   "changes": [
     {
       "comment": "",
-      "packageName": "@microsoft/rush",
+      "packageName": "@microsoft/node-core-library",
       "type": "none"
     }
   ],
-  "packageName": "@microsoft/rush",
+  "packageName": "@microsoft/node-core-library",
   "email": "4673363+octogonz@users.noreply.github.com"
 }

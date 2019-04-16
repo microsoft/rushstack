@@ -2,10 +2,10 @@
   "changes": [
     {
       "comment": "",
-      "packageName": "@microsoft/rush",
+      "packageName": "@microsoft/rush-stack-compiler-3.2",
       "type": "none"
     }
   ],
-  "packageName": "@microsoft/rush",
+  "packageName": "@microsoft/rush-stack-compiler-3.2",
   "email": "4673363+octogonz@users.noreply.github.com"
 }
