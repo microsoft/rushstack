@@ -86,6 +86,10 @@ export interface IDocInterface4 {
    * make sure html entities are escaped in tables.
    */
   generic: Generic<number>;
+  /**
+   * Test newline rendering when code blocks are used in tables
+   */
+  Context: ({ children }: { children: string }) => boolean;
 }
 
 /**

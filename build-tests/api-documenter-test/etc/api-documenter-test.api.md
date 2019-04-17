@@ -66,6 +66,9 @@ export interface IDocInterface3 {
 
 // @public
 export interface IDocInterface4 {
+    Context: ({ children }: {
+        children: string;
+    }) => boolean;
     generic: Generic<number>;
     numberOrFunction: number | (() => number);
     stringOrNumber: string | number;

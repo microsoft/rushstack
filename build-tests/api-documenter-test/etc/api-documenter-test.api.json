@@ -992,6 +992,51 @@
           "members": [
             {
               "kind": "PropertySignature",
+              "canonicalReference": "Context",
+              "docComment": "/**\n * Test newline rendering when code blocks are used in tables\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "Context"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "({ "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "children"
+                },
+                {
+                  "kind": "Content",
+                  "text": " }: {\n        "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "children"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": string;\n    }) => boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "Context",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 7
+              }
+            },
+            {
+              "kind": "PropertySignature",
               "canonicalReference": "generic",
               "docComment": "/**\n * make sure html entities are escaped in tables.\n */\n",
               "excerptTokens": [

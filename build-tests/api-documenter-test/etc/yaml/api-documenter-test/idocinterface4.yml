@@ -9,9 +9,28 @@ items:
     type: interface
     package: api-documenter-test
     children:
+      - api-documenter-test.IDocInterface4.Context
       - api-documenter-test.IDocInterface4.generic
       - api-documenter-test.IDocInterface4.numberOrFunction
       - api-documenter-test.IDocInterface4.stringOrNumber
+  - uid: api-documenter-test.IDocInterface4.Context
+    summary: Test newline rendering when code blocks are used in tables
+    name: Context
+    fullName: Context
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: |-
+        Context: ({ children }: {
+                children: string;
+            }) => boolean;
+      return:
+        type:
+          - |-
+            ({ children }: {
+                    children: string;
+                }) => boolean
   - uid: api-documenter-test.IDocInterface4.generic
     summary: make sure html entities are escaped in tables.
     name: generic
