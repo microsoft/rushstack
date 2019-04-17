@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 16 Apr 2019 11:01:37 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Apr 2019 19:12:31 GMT and should not be manually modified.
+
+## 7.1.1
+Wed, 17 Apr 2019 19:12:31 GMT
+
+### Patches
+
+- Fix newline rendering when code blocks are used in tables
 
 ## 7.1.0
 Tue, 16 Apr 2019 11:01:37 GMT

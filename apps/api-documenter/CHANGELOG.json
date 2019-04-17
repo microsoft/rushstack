@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.1.1",
+      "tag": "@microsoft/api-documenter_v7.1.1",
+      "date": "Wed, 17 Apr 2019 19:12:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix newline rendering when code blocks are used in tables"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.0",
       "tag": "@microsoft/api-documenter_v7.1.0",
       "date": "Tue, 16 Apr 2019 11:01:37 GMT",
