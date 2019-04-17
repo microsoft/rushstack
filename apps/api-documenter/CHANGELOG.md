@@ -1,6 +1,17 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 12 Apr 2019 06:13:16 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Apr 2019 11:01:37 GMT and should not be manually modified.
+
+## 7.1.0
+Tue, 16 Apr 2019 11:01:37 GMT
+
+### Minor changes
+
+- Initial stable release of API Extractor 7
+
+### Patches
+
+- Adding an extra newline to the OfficeYamlDocumenter Examples header insertion
 
 ## 7.0.51
 Fri, 12 Apr 2019 06:13:16 GMT

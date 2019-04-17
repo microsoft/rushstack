@@ -8,10 +8,10 @@
 class A {
 }
 
-// Warning: (ae-internal-missing-underscore) The name B should be prefixed with an underscore because the declaration is marked as "@internal"
+// Warning: (ae-internal-missing-underscore) The name "B" should be prefixed with an underscore because the declaration is marked as @internal
 export { A as B }
 
-// Warning: (ae-internal-missing-underscore) The name C should be prefixed with an underscore because the declaration is marked as "@internal"
+// Warning: (ae-internal-missing-underscore) The name "C" should be prefixed with an underscore because the declaration is marked as @internal
 export { A as C }
 
 // @public (undocumented)
