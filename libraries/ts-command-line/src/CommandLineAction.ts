@@ -39,13 +39,13 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   // Example: "do-something"
   private static _actionNameRegExp: RegExp = /^[a-z]+(-[a-z]+)*$/;
 
-  /** {@inheritdoc ICommandLineActionOptions.actionName} */
+  /** {@inheritDoc ICommandLineActionOptions.actionName} */
   public readonly actionName: string;
 
-  /** {@inheritdoc ICommandLineActionOptions.summary} */
+  /** {@inheritDoc ICommandLineActionOptions.summary} */
   public readonly summary: string;
 
-  /** {@inheritdoc ICommandLineActionOptions.documentation} */
+  /** {@inheritDoc ICommandLineActionOptions.documentation} */
   public readonly documentation: string;
 
   private _argumentParser: argparse.ArgumentParser | undefined;
@@ -95,7 +95,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   }
 
   /**
-   * {@inheritdoc CommandLineParameterProvider._getArgumentParser}
+   * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
    */
   protected _getArgumentParser(): argparse.ArgumentParser { // override
@@ -108,7 +108,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
   }
 
   /**
-   * {@inheritdoc CommandLineParameterProvider.onDefineParameters}
+   * {@inheritDoc CommandLineParameterProvider.onDefineParameters}
    */
   protected abstract onDefineParameters(): void;
 

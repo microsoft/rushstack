@@ -9,7 +9,7 @@
  * It tests the basic types of definitions, and all the weird cases for following
  * chains of type aliases.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 /**

@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.5.4",
+  "rushVersion": "5.6.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "2.25.1",
+  "pnpmVersion": "2.25.7",
 
   // "npmVersion": "4.5.0",
   // "yarnVersion": "1.9.4",
@@ -292,6 +292,16 @@
       ]
     },
     {
+      "packageName": "@microsoft/api-extractor-model",
+      "projectFolder": "apps/api-extractor-model",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler-3.2"
+      ]
+    },
+    {
       "packageName": "@microsoft/api-documenter",
       "projectFolder": "apps/api-documenter",
       "reviewCategory": "libraries",
@@ -433,7 +443,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {
@@ -442,7 +453,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {
@@ -463,7 +475,8 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
-        "@microsoft/node-library-build"
+        "@microsoft/node-library-build",
+        "@microsoft/rush-stack-compiler-3.2"
       ]
     },
     {

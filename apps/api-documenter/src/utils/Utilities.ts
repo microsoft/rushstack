@@ -4,7 +4,7 @@
 import {
   ApiParameterListMixin,
   ApiItem
-} from '@microsoft/api-extractor';
+} from '@microsoft/api-extractor-model';
 
 export class Utilities {
   /**

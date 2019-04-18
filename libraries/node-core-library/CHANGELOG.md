@@ -1,6 +1,35 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Mon, 18 Feb 2019 17:13:23 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Mar 2019 19:14:49 GMT and should not be manually modified.
+
+## 3.13.0
+Wed, 20 Mar 2019 19:14:49 GMT
+
+### Minor changes
+
+- Introduce an interface INodePackageJson for loading package.json files whose "version" field may be missing.
+- Add two new APIs PackageJsonLookup.loadNodePackageJson() and tryLoadNodePackageJsonFor() that return INodePackageJson
+
+## 3.12.1
+Mon, 18 Mar 2019 04:28:43 GMT
+
+### Patches
+
+- Export ColorValue and TextAttribute to eliminate the ae-forgotten-export warning
+
+## 3.12.0
+Wed, 27 Feb 2019 22:13:58 GMT
+
+### Minor changes
+
+- Treat `types` as an alias for `typings` in package.json
+
+## 3.11.1
+Wed, 27 Feb 2019 17:13:17 GMT
+
+### Patches
+
+- Include an enum that had been missing from the exports.
 
 ## 3.11.0
 Mon, 18 Feb 2019 17:13:23 GMT

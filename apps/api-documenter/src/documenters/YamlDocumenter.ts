@@ -32,7 +32,7 @@ import {
   ApiConstructor,
   ApiFunction,
   ApiReturnTypeMixin
-} from '@microsoft/api-extractor';
+} from '@microsoft/api-extractor-model';
 
 import {
   IYamlApiFile,

@@ -2,27 +2,23 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import * as path from 'path';
 import * as tsdoc from '@microsoft/tsdoc';
 import {
   PackageJsonLookup,
-  IPackageJson,
   Sort,
   InternalError
 } from '@microsoft/node-core-library';
-
-import { ILogger } from '../api/ILogger';
 import {
-  IExtractorPoliciesConfig,
-  IExtractorValidationRulesConfig,
-  ExtractorValidationRulePolicy
-} from '../api/IExtractorConfig';
-import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
+  ReleaseTag,
+  AedocDefinitions
+} from '@microsoft/api-extractor-model';
+
+import { ExtractorMessageId } from '../api/ExtractorMessageId';
+
 import { CollectorEntity } from './CollectorEntity';
 import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
 import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
@@ -30,6 +26,10 @@ import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { DeclarationMetadata } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
+import { MessageRouter } from './MessageRouter';
+import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
+import { ExtractorConfig } from '../api/ExtractorConfig';
+import { ExtractorMessage } from '../api/ExtractorMessage';
 
 /**
  * Options for Collector constructor.
@@ -45,23 +45,14 @@ export interface ICollectorOptions {
    */
   program: ts.Program;
 
-  /**
-   * The entry point to be processed by API Extractor.  Normally this should correspond to
-   * the "main" field from the package.json file.  If it is a relative path, it will be
-   * relative to the project folder described by IExtractorAnalyzeOptions.compilerOptions.
-   */
-  entryPointFile: string;
+  messageCallback: ((message: ExtractorMessage) => void) | undefined;
 
-  logger: ILogger;
-
-  policies: IExtractorPoliciesConfig;
-
-  validationRules: IExtractorValidationRulesConfig;
+  extractorConfig: ExtractorConfig;
 }
 
 /**
  * The `Collector` manages the overall data set that is used by `ApiModelGenerator`,
- * `DtsRollupGenerator`, and `ReviewFileGenerator`.  Starting from the working package's entry point,
+ * `DtsRollupGenerator`, and `ApiReportGenerator`.  Starting from the working package's entry point,
  * the `Collector` collects all exported symbols, determines how to import any symbols they reference,
  * assigns unique names, and sorts everything into a normalized alphabetical ordering.
  */
@@ -69,13 +60,10 @@ export class Collector {
   public readonly program: ts.Program;
   public readonly typeChecker: ts.TypeChecker;
   public readonly astSymbolTable: AstSymbolTable;
+  public readonly astReferenceResolver: AstReferenceResolver;
 
   public readonly packageJsonLookup: PackageJsonLookup;
-
-  public readonly policies: IExtractorPoliciesConfig;
-  public readonly validationRules: IExtractorValidationRulesConfig;
-
-  public readonly logger: ILogger;
+  public readonly messageRouter: MessageRouter;
 
   public readonly workingPackage: WorkingPackage;
 
@@ -96,35 +84,41 @@ export class Collector {
   constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
-    this.policies = options.policies;
-    this.validationRules = options.validationRules;
-
-    this.logger = options.logger;
     this._program = options.program;
 
-    const packageFolder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
-    if (!packageFolder) {
-      throw new Error('Unable to find a package.json for entry point: ' + options.entryPointFile);
+    const extractorConfig: ExtractorConfig = options.extractorConfig;
+
+    const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
+      extractorConfig.mainEntryPointFilePath);
+
+    if (!entryPointSourceFile) {
+      throw new Error('Unable to load file: ' + extractorConfig.mainEntryPointFilePath);
     }
 
-    const packageJson: IPackageJson = this.packageJsonLookup.tryLoadPackageJsonFor(packageFolder)!;
-
-    const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);
-    if (!entryPointSourceFile) {
-      throw new Error('Unable to load file: ' + options.entryPointFile);
+    if (!extractorConfig.packageFolder || !extractorConfig.packageJson) {
+      // TODO: We should be able to analyze projects that don't have any package.json.
+      // The ExtractorConfig class is already designed to allow this.
+      throw new Error('Unable to find a package.json file for the project being analyzed');
     }
 
     this.workingPackage = new WorkingPackage({
-      packageFolder,
-      packageJson,
+      packageFolder: extractorConfig.packageFolder,
+      packageJson: extractorConfig.packageJson,
       entryPointSourceFile
     });
+
+    this.messageRouter = new MessageRouter(
+      this.workingPackage.packageFolder,
+      options.messageCallback,
+      options.extractorConfig.messages || { });
 
     this.program = options.program;
     this.typeChecker = options.program.getTypeChecker();
 
-    this._tsdocParser = new tsdoc.TSDocParser();
-    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup, this.logger);
+    this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
+    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
+      this.messageRouter);
+    this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
   }
 
   /**
@@ -173,23 +167,28 @@ export class Collector {
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
     // compile errors that would result from a full compilation.
     for (const diagnostic of this._program.getSemanticDiagnostics()) {
-      const errorText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
-      this.reportError(`TypeScript: ${errorText}`, diagnostic.file, diagnostic.start);
+      this.messageRouter.addCompilerDiagnostic(diagnostic);
     }
 
     // Build the entry point
+    const entryPointSourceFile: ts.SourceFile = this.workingPackage.entryPointSourceFile;
+
     const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleFromWorkingPackage(
-      this.workingPackage.entryPointSourceFile);
+      entryPointSourceFile);
     this._astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
-      this.workingPackage.entryPointSourceFile, this);
+      entryPointSourceFile, this);
 
     if (packageDocCommentTextRange) {
-      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(this.workingPackage.entryPointSourceFile.text,
+      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(entryPointSourceFile.text,
         packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
 
       this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
+
+      this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext,
+        entryPointSourceFile);
+
       this.workingPackage.tsdocComment = this.workingPackage.tsdocParserContext!.docComment;
     }
 
@@ -242,6 +241,13 @@ export class Collector {
       return this._entitiesByAstEntity.get(astEntity);
     }
     return undefined;
+  }
+
+  /**
+   * Returns the associated `CollectorEntity` for the given `astEntity`, if one was created during analysis.
+   */
+  public tryGetCollectorEntity(astEntity: AstEntity): CollectorEntity | undefined {
+    return this._entitiesByAstEntity.get(astEntity);
   }
 
   public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
@@ -443,26 +449,6 @@ export class Collector {
     }
   }
 
-  /**
-   * Reports an error message to the registered ApiErrorHandler.
-   */
-  public reportError(message: string, sourceFile: ts.SourceFile | undefined, start: number | undefined): void {
-    if (sourceFile && start) {
-      const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(start);
-
-      // If the file is under the packageFolder, then show a relative path
-      const relativePath: string = path.relative(this.workingPackage.packageFolder, sourceFile.fileName);
-      const shownPath: string = relativePath.substr(0, 2) === '..' ? sourceFile.fileName : relativePath;
-
-      // Format the error so that VS Code can follow it.  For example:
-      // "src\MyClass.ts(15,1): The JSDoc tag "@blah" is not supported by AEDoc"
-      this.logger.logError(`${shownPath}(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1}): `
-        + message);
-    } else {
-      this.logger.logError(message);
-    }
-  }
-
   private _fetchSymbolMetadata(astSymbol: AstSymbol): void {
     if (astSymbol.metadata) {
       return;
@@ -495,8 +481,11 @@ export class Collector {
       if (declaredReleaseTag !== ReleaseTag.None) {
         if (effectiveReleaseTag !== ReleaseTag.None && effectiveReleaseTag !== declaredReleaseTag) {
           if (!astSymbol.isExternal) { // for now, don't report errors for external code
-            // TODO: Report error message
-            this.reportError('Inconsistent release tags between declarations', undefined, undefined);
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.DifferentReleaseTags,
+              'This symbol has another declaration with a different release tag',
+              astDeclaration
+            );
           }
         } else {
           effectiveReleaseTag = declaredReleaseTag;
@@ -512,19 +501,20 @@ export class Collector {
     }
 
     if (effectiveReleaseTag === ReleaseTag.None) {
-      if (this.validationRules.missingReleaseTags !== ExtractorValidationRulePolicy.allow) {
-        if (!astSymbol.isExternal) { // for now, don't report errors for external code
-          // For now, don't report errors for forgotten exports
-          const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
-          if (entity && entity.exported) {
-            // We also don't report errors for the default export of an entry point, since its doc comment
-            // isn't easy to obtain from the .d.ts file
-            if (astSymbol.rootAstSymbol.localName !== '_default') {
-              // TODO: Report error message
-              const loc: string = astSymbol.rootAstSymbol.localName + ' in '
-                + astSymbol.rootAstSymbol.astDeclarations[0].declaration.getSourceFile().fileName;
-              this.reportError('Missing release tag for ' + loc, undefined, undefined);
-            }
+      if (!astSymbol.isExternal) { // for now, don't report errors for external code
+        // Don't report missing release tags for forgotten exports
+        const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
+        if (entity && entity.exported) {
+          // We also don't report errors for the default export of an entry point, since its doc comment
+          // isn't easy to obtain from the .d.ts file
+          if (astSymbol.rootAstSymbol.localName !== '_default') {
+
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.MissingReleaseTag,
+              `"${entity.astEntity.localName}" is exported by the package, but it is missing `
+              + `a release tag (@alpha, @beta, @public, or @internal)`,
+              astSymbol
+            );
           }
         }
       }
@@ -551,37 +541,39 @@ export class Collector {
       const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;
 
       let declaredReleaseTag: ReleaseTag = ReleaseTag.None;
-      let inconsistentReleaseTags: boolean = false;
+      let extraReleaseTags: boolean = false;
 
       if (modifierTagSet.isPublic()) {
         declaredReleaseTag = ReleaseTag.Public;
       }
       if (modifierTagSet.isBeta()) {
         if (declaredReleaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
+          extraReleaseTags = true;
         } else {
           declaredReleaseTag = ReleaseTag.Beta;
         }
       }
       if (modifierTagSet.isAlpha()) {
         if (declaredReleaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
+          extraReleaseTags = true;
         } else {
           declaredReleaseTag = ReleaseTag.Alpha;
         }
       }
       if (modifierTagSet.isInternal()) {
         if (declaredReleaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
+          extraReleaseTags = true;
         } else {
           declaredReleaseTag = ReleaseTag.Internal;
         }
       }
 
-      if (inconsistentReleaseTags) {
+      if (extraReleaseTags) {
         if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
-          // TODO: Report error message
-          this.reportError('Inconsistent release tags in doc comment', undefined, undefined);
+          this.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.ExtraReleaseTag,
+            'The doc comment should not contain more than one release tag',
+            astDeclaration);
         }
       }
 
@@ -595,9 +587,34 @@ export class Collector {
       declarationMetadata.isSealed = modifierTagSet.isSealed();
       declarationMetadata.isVirtual = modifierTagSet.isVirtual();
 
-      // Require the summary to contain at least 10 non-spacing characters
-      declarationMetadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
-        parserContext.docComment.summarySection, 10);
+      if (modifierTagSet.hasTag(AedocDefinitions.preapprovedTag)) {
+        // This feature only makes sense for potentially big declarations.
+        switch (astDeclaration.declaration.kind) {
+          case ts.SyntaxKind.ClassDeclaration:
+          case ts.SyntaxKind.EnumDeclaration:
+          case ts.SyntaxKind.InterfaceDeclaration:
+          case ts.SyntaxKind.ModuleDeclaration:
+            if (declaredReleaseTag === ReleaseTag.Internal) {
+              declarationMetadata.isPreapproved = true;
+            } else {
+              this.messageRouter.addAnalyzerIssue(
+                ExtractorMessageId.PreapprovedBadReleaseTag,
+                `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
+                  + ` without an @internal release tag`,
+                astDeclaration
+              );
+            }
+            break;
+          default:
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.PreapprovedUnsupportedType,
+              `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
+                + ` because it is not a supported declaration type`,
+              astDeclaration
+            );
+            break;
+        }
+      }
     }
   }
 
@@ -641,7 +658,15 @@ export class Collector {
     const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
       range.pos, range.end);
 
-    return this._tsdocParser.parseRange(tsdocTextRange);
+    const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
+
+    this.messageRouter.addTsdocMessages(parserContext, declaration.getSourceFile(), astDeclaration);
+
+    // We delete the @privateRemarks block as early as possible, to ensure that it never leaks through
+    // into one of the output files.
+    parserContext.docComment.privateRemarks = undefined;
+
+    return parserContext;
   }
 
   private _collectReferenceDirectives(astSymbol: AstSymbol): void {

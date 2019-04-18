@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import { JsonFile } from './JsonFile';
-import { IPackageJson } from './IPackageJson';
+import { IPackageJson, INodePackageJson } from './IPackageJson';
 import { FileConstants } from './Constants';
 import { FileSystem } from './FileSystem';
 
@@ -75,7 +75,14 @@ export class PackageJsonLookup {
         + `  The __dirname was: ${dirnameOfCaller}`);
     }
 
-    return packageJson;
+    if (packageJson.version !== undefined) {
+      return packageJson as IPackageJson;
+    }
+
+    const errorPath: string = PackageJsonLookup._loadOwnPackageJsonLookup.tryGetPackageJsonFilePathFor(dirnameOfCaller)
+      || 'package.json';
+    throw new Error(`PackageJsonLookup.loadOwnPackageJson() failed because the "version" field is missing in`
+      + ` ${errorPath}`);
   }
 
   constructor(parameters?: IPackageJsonLookupParameters) {
@@ -171,6 +178,18 @@ export class PackageJsonLookup {
   }
 
   /**
+   * This function is similar to {@link PackageJsonLookup.tryLoadPackageJsonFor}, except that it does not report
+   * an error if the `version` field is missing from the package.json file.
+   */
+  public tryLoadNodePackageJsonFor(fileOrFolderPath: string): INodePackageJson | undefined {
+    const packageJsonFilePath: string | undefined = this.tryGetPackageJsonFilePathFor(fileOrFolderPath);
+    if (!packageJsonFilePath) {
+      return undefined;
+    }
+    return this.loadNodePackageJson(packageJsonFilePath);
+  }
+
+  /**
    * Loads the specified package.json file, if it is not already present in the cache.
    *
    * @remarks
@@ -182,6 +201,21 @@ export class PackageJsonLookup {
    * @param jsonFilename - a relative or absolute path to a package.json file
    */
   public loadPackageJson(jsonFilename: string): IPackageJson {
+    const packageJson: INodePackageJson = this.loadNodePackageJson(jsonFilename);
+
+    if (!packageJson.version) {
+      throw new Error(`Error reading "${jsonFilename}":\n  `
+        + 'The required field "version" was not found');
+    }
+
+    return packageJson as IPackageJson;
+  }
+
+  /**
+   * This function is similar to {@link PackageJsonLookup.loadPackageJson}, except that it does not report an error
+   * if the `version` field is missing from the package.json file.
+   */
+  public loadNodePackageJson(jsonFilename: string): INodePackageJson {
     if (!FileSystem.exists(jsonFilename)) {
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
@@ -200,10 +234,6 @@ export class PackageJsonLookup {
       if (!loadedPackageJson.name) {
         throw new Error(`Error reading "${jsonFilename}":\n  `
           + 'The required field "name" was not found');
-      }
-      if (!loadedPackageJson.version) {
-        throw new Error(`Error reading "${jsonFilename}":\n  `
-          + 'The required field "version" was not found');
       }
 
       if (this._loadExtraFields) {
@@ -224,7 +254,7 @@ export class PackageJsonLookup {
         packageJson.peerDependencies = loadedPackageJson.peerDependencies;
         packageJson.private = loadedPackageJson.private;
         packageJson.scripts = loadedPackageJson.scripts;
-        packageJson.typings = loadedPackageJson.typings;
+        packageJson.typings = loadedPackageJson.typings || loadedPackageJson.types;
         packageJson.tsdoc = loadedPackageJson.tsdoc;
         packageJson.tsdocMetadata = loadedPackageJson.tsdocMetadata;
         packageJson.version = loadedPackageJson.version;

@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
 import {
-  IPackageJson
+  INodePackageJson
 } from '@microsoft/node-core-library';
 
 /**
@@ -13,7 +13,7 @@ import {
  */
 export interface IWorkingPackageOptions {
   packageFolder: string;
-  packageJson: IPackageJson;
+  packageJson: INodePackageJson;
   entryPointSourceFile: ts.SourceFile;
 }
 
@@ -44,7 +44,7 @@ export class WorkingPackage {
   /**
    * The parsed package.json file for the working package.
    */
-  public readonly packageJson: IPackageJson;
+  public readonly packageJson: INodePackageJson;
 
   /**
    * The entry point being processed during this invocation of API Extractor.
@@ -57,7 +57,7 @@ export class WorkingPackage {
   public readonly entryPointSourceFile: ts.SourceFile;
 
   /**
-   * The `@packagedocumentation` comment, if any, for the working package.
+   * The `@packageDocumentation` comment, if any, for the working package.
    */
   public tsdocComment: tsdoc.DocComment | undefined;
 

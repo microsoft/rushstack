@@ -7,7 +7,7 @@
     "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/rushell"
   },
   "main": "lib/index.js",
-  "typings": "dist/index-internal.d.ts",
+  "typings": "dist/rushell.d.ts",
   "tsdoc": {
     "tsdocFlavor": "AEDoc"
   },
@@ -17,11 +17,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.11.0"
+    "@microsoft/node-core-library": "3.13.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.2.4",
-    "@microsoft/node-library-build": "6.0.31",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.8",
+    "@microsoft/node-library-build": "6.0.56",
     "@types/jest": "23.3.11",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",

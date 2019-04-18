@@ -6,6 +6,9 @@ import * as ts from 'typescript';
 import { AstSymbol } from './AstSymbol';
 import { AstEntity } from './AstSymbolTable';
 
+/**
+ * Represents information collected by {@link AstSymbolTable.fetchAstModuleExportInfo}
+ */
 export class AstModuleExportInfo {
   public readonly exportedLocalEntities: Map<string, AstEntity> = new Map<string, AstEntity>();
   public readonly starExportedExternalModules: Set<AstModule> = new Set<AstModule>();
@@ -23,7 +26,7 @@ export interface IAstModuleOptions {
 /**
  * An internal data structure that represents a source file that is analyzed by AstSymbolTable.
  *
- * @privateremarks
+ * @privateRemarks
  * Our naming convention is to use I____Parameters for constructor options and
  * I____Options for general function options.  However the word "parameters" is
  * confusingly similar to the terminology for function parameters modeled by API Extractor,

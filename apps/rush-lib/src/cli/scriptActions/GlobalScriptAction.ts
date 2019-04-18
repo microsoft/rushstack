@@ -49,11 +49,16 @@ export class GlobalScriptAction extends BaseScriptAction {
         shellCommand += ' ' + customParameterValues.join(' ');
       }
 
-      const exitCode: number = Utilities.executeLifecycleCommand(shellCommand,
+      const exitCode: number = Utilities.executeLifecycleCommand(
+        shellCommand,
         {
+          rushConfiguration: this.rushConfiguration,
           workingDirectory: this.rushConfiguration.rushJsonFolder,
           initCwd: this.rushConfiguration.commonTempFolder,
-          handleOutput: false
+          handleOutput: false,
+          environmentPathOptions: {
+            includeRepoBin: true
+          }
         }
       );
 

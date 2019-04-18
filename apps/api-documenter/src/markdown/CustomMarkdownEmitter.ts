@@ -6,6 +6,12 @@ import * as colors from 'colors';
 import {
   DocNode, DocLinkTag, StringBuilder
 } from '@microsoft/tsdoc';
+import {
+  ApiModel,
+  IResolveDeclarationReferenceResult,
+  ApiItem
+} from '@microsoft/api-extractor-model';
+
 import { CustomDocNodeKind } from '../nodes/CustomDocNodeKind';
 import { DocHeading } from '../nodes/DocHeading';
 import { DocNoteBox } from '../nodes/DocNoteBox';
@@ -17,12 +23,7 @@ import {
   IMarkdownEmitterContext,
   IMarkdownEmitterOptions
 } from './MarkdownEmitter';
-import {
-  ApiModel,
-  IResolveDeclarationReferenceResult,
-  ApiItem,
-  IndentedWriter
-} from '@microsoft/api-extractor';
+import { IndentedWriter } from '../utils/IndentedWriter';
 
 export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
   contextApiItem: ApiItem | undefined;
@@ -176,11 +177,12 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
           context.writer.write(encodedLinkText);
           context.writer.write(`](${filename!})`);
         } else {
-          console.log(colors.red('WARNING: Unable to determine link text'));
+          console.log(colors.yellow('WARNING: Unable to determine link text'));
         }
       }
     } else if (result.errorMessage) {
-      console.log(colors.red('WARNING: Unable to resolve reference: ' + result.errorMessage));
+      console.log(colors.yellow(`WARNING: Unable to resolve reference "${docLinkTag.codeDestination!.emitAsTsdoc()}": `
+        + result.errorMessage));
     }
   }
 

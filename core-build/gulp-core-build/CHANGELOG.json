@@ -2,6 +2,234 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.9.26",
+      "tag": "@microsoft/gulp-core-build_v3.9.26",
+      "date": "Wed, 03 Apr 2019 02:58:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.0` to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.25",
+      "tag": "@microsoft/gulp-core-build_v3.9.25",
+      "date": "Tue, 02 Apr 2019 01:12:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.20` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.24",
+      "tag": "@microsoft/gulp-core-build_v3.9.24",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.19` to `0.2.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.23",
+      "tag": "@microsoft/gulp-core-build_v3.9.23",
+      "date": "Thu, 28 Mar 2019 19:14:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.18` to `0.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.22",
+      "tag": "@microsoft/gulp-core-build_v3.9.22",
+      "date": "Tue, 26 Mar 2019 20:54:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.17` to `0.2.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.21",
+      "tag": "@microsoft/gulp-core-build_v3.9.21",
+      "date": "Sat, 23 Mar 2019 03:48:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.16` to `0.2.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.20",
+      "tag": "@microsoft/gulp-core-build_v3.9.20",
+      "date": "Thu, 21 Mar 2019 04:59:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.15` to `0.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.19",
+      "tag": "@microsoft/gulp-core-build_v3.9.19",
+      "date": "Thu, 21 Mar 2019 01:15:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.14` to `0.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.18",
+      "tag": "@microsoft/gulp-core-build_v3.9.18",
+      "date": "Wed, 20 Mar 2019 19:14:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.1` to `3.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.13` to `0.2.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.17",
+      "tag": "@microsoft/gulp-core-build_v3.9.17",
+      "date": "Mon, 18 Mar 2019 04:28:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.0` to `3.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.12` to `0.2.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.16",
+      "tag": "@microsoft/gulp-core-build_v3.9.16",
+      "date": "Fri, 15 Mar 2019 19:13:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.11` to `0.2.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.15",
+      "tag": "@microsoft/gulp-core-build_v3.9.15",
+      "date": "Wed, 13 Mar 2019 19:13:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.10` to `0.2.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.14",
+      "tag": "@microsoft/gulp-core-build_v3.9.14",
+      "date": "Wed, 13 Mar 2019 01:14:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.9` to `0.2.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.13",
+      "tag": "@microsoft/gulp-core-build_v3.9.13",
+      "date": "Mon, 11 Mar 2019 16:13:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.8` to `0.2.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.12",
+      "tag": "@microsoft/gulp-core-build_v3.9.12",
+      "date": "Tue, 05 Mar 2019 17:13:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.7` to `0.2.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.11",
+      "tag": "@microsoft/gulp-core-build_v3.9.11",
+      "date": "Mon, 04 Mar 2019 17:13:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.6` to `0.2.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.10",
+      "tag": "@microsoft/gulp-core-build_v3.9.10",
+      "date": "Wed, 27 Feb 2019 22:13:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.11.1` to `3.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.5` to `0.2.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.9",
+      "tag": "@microsoft/gulp-core-build_v3.9.9",
+      "date": "Wed, 27 Feb 2019 17:13:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.11.0` to `3.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.4` to `0.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.9.8",
       "tag": "@microsoft/gulp-core-build_v3.9.8",
       "date": "Mon, 18 Feb 2019 17:13:23 GMT",

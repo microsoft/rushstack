@@ -1,0 +1,5 @@
+variables:
+  NodeVersion: 10
+  VersionPolicy: rush
+steps:
+- template: templates/buildAndPublish.yaml

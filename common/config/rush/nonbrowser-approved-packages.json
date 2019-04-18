@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@microsoft/api-extractor-model",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/decorators",
       "allowedCategories": [ "libraries" ]
     },
@@ -85,6 +89,10 @@
     {
       "name": "@microsoft/rush-stack-compiler-3.2",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.3",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-shared",
@@ -176,7 +184,7 @@
     },
     {
       "name": "colors",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "deasync",
@@ -432,6 +440,10 @@
     },
     {
       "name": "sinon-chai",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "source-map",
       "allowedCategories": [ "libraries" ]
     },
     {

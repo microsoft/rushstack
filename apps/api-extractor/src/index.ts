@@ -6,166 +6,42 @@
  * It helps with validation, documentation, and reviewing of the exported API
  * for a TypeScript library.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
-export { ReleaseTag } from './aedoc/ReleaseTag';
+export { ConsoleMessageId } from './api/ConsoleMessageId';
 
-export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './api/Extractor';
-export {
-  IExtractorTsconfigCompilerConfig,
-  IExtractorRuntimeCompilerConfig,
-  IExtractorProjectConfig,
-  IExtractorPoliciesConfig,
-  ExtractorValidationRulePolicy,
-  IExtractorValidationRulesConfig,
-  IExtractorApiReviewFileConfig,
-  IExtractorApiJsonFileConfig,
-  IExtractorDtsRollupConfig,
-  IExtractorTsdocMetadataConfig,
-  IExtractorConfig
-} from './api/IExtractorConfig';
+export { CompilerState, ICompilerStateCreateOptions } from './api/CompilerState';
 
-export { ILogger } from './api/ILogger';
+export {
+  Extractor,
+  IExtractorInvokeOptions,
+  ExtractorResult
+} from './api/Extractor';
 
-export { IndentedWriter } from './api/IndentedWriter';
+export {
+  IExtractorConfigPrepareOptions,
+  ExtractorConfig
+} from './api/ExtractorConfig';
 
-// items
-export {
-  IApiDeclaredItemOptions,
-  ApiDeclaredItem
-} from './api/items/ApiDeclaredItem';
-export {
-  IApiDocumentedItemOptions,
-  ApiDocumentedItem
-} from './api/items/ApiDocumentedItem';
-export {
-  ApiItemKind,
-  IApiItemOptions,
-  ApiItem
-} from './api/items/ApiItem';
-export {
-  IApiPropertyItemOptions,
-  ApiPropertyItem
-} from './api/items/ApiPropertyItem';
+export { ExtractorLogLevel } from './api/ExtractorLogLevel';
 
-// mixins
 export {
-  IApiParameterListMixinOptions,
-  ApiParameterListMixin
-} from './api/mixins/ApiParameterListMixin';
-export {
-  IApiItemContainerMixinOptions,
-  ApiItemContainerMixin
-} from './api/mixins/ApiItemContainerMixin';
-export {
-  IApiReleaseTagMixinOptions,
-  ApiReleaseTagMixin
-} from './api/mixins/ApiReleaseTagMixin';
-export {
-  IApiReturnTypeMixinOptions,
-  ApiReturnTypeMixin
-} from './api/mixins/ApiReturnTypeMixin';
-export {
-  IApiStaticMixinOptions,
-  ApiStaticMixin
-} from './api/mixins/ApiStaticMixin';
-export {
-  ExcerptTokenKind,
-  IExcerptTokenRange,
-  IExcerptToken,
-  ExcerptToken,
-  Excerpt
-} from './api/mixins/Excerpt';
-export {
-  Constructor,
-  PropertiesOf
-} from './api/mixins/Mixin';
+  ExtractorMessage,
+  IExtractorMessageProperties,
+  ExtractorMessageCategory
+} from './api/ExtractorMessage';
 
-// model
+export { ExtractorMessageId } from './api/ExtractorMessageId';
+
 export {
-  IApiCallSignatureOptions,
-  ApiCallSignature
-} from './api/model/ApiCallSignature';
-export {
-  IApiClassOptions,
-  ApiClass
-} from './api/model/ApiClass';
-export {
-  IApiConstructorOptions,
-  ApiConstructor
-} from './api/model/ApiConstructor';
-export {
-  IApiConstructSignatureOptions,
-  ApiConstructSignature
-} from './api/model/ApiConstructSignature';
-export {
-  IApiEntryPointOptions,
-  ApiEntryPoint
-} from './api/model/ApiEntryPoint';
-export {
-  IApiEnumOptions,
-  ApiEnum
-} from './api/model/ApiEnum';
-export {
-  IApiEnumMemberOptions,
-  ApiEnumMember
-} from './api/model/ApiEnumMember';
-export {
-  IApiFunctionOptions,
-  ApiFunction
-} from './api/model/ApiFunction';
-export {
-  IApiIndexSignatureOptions,
-  ApiIndexSignature
-} from './api/model/ApiIndexSignature';
-export {
-  IApiInterfaceOptions,
-  ApiInterface
-} from './api/model/ApiInterface';
-export {
-  IApiMethodOptions,
-  ApiMethod
-} from './api/model/ApiMethod';
-export {
-  IApiMethodSignatureOptions,
-  ApiMethodSignature
-} from './api/model/ApiMethodSignature';
-export {
-  ApiModel
-} from './api/model/ApiModel';
-export {
-  IApiNamespaceOptions,
-  ApiNamespace
-} from './api/model/ApiNamespace';
-export {
-  IApiPackageOptions,
-  ApiPackage,
-  IApiPackageSaveOptions
-} from './api/model/ApiPackage';
-export {
-  IParameterOptions,
-  Parameter
-} from './api/model/Parameter';
-export {
-  IApiPropertyOptions,
-  ApiProperty
-} from './api/model/ApiProperty';
-export {
-  IApiPropertySignatureOptions,
-  ApiPropertySignature
-} from './api/model/ApiPropertySignature';
-export {
-  IApiTypeAliasOptions,
-  ApiTypeAlias
-} from './api/model/ApiTypeAlias';
-export {
-  IApiVariableOptions,
-  ApiVariable
-} from './api/model/ApiVariable';
-export {
-  IResolveDeclarationReferenceResult
-} from './api/model/DeclarationReferenceResolver';
-export {
-  HeritageType
-} from './api/model/HeritageType';
+  IConfigCompiler,
+  IConfigApiReport,
+  IConfigDocModel,
+  IConfigDtsRollup,
+  IConfigTsdocMetadata,
+  IConfigMessageReportingRule,
+  IConfigMessageReportingTable,
+  IExtractorMessagesConfig,
+  IConfigFile
+} from './api/IConfigFile';

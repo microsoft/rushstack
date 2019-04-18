@@ -4,12 +4,12 @@
   "version": "1.0.0",
   "private": true,
   "main": "lib/index.js",
-  "typings": "dist/internal/api-extractor-lib1-test.d.ts",
+  "typings": "dist/api-extractor-lib1-test.d.ts",
   "scripts": {
     "build": "node build.js"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.0.19",
+    "@microsoft/api-extractor": "7.1.0",
     "@types/jest": "23.3.11",
     "@types/node": "8.5.8",
     "fs-extra": "~7.0.1",

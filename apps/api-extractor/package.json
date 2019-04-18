@@ -1,14 +1,18 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "7.0.19",
-  "description": "Validate, document, and review the exported API for a TypeScript library",
+  "version": "7.1.0",
+  "description": "Analyze the exported API for a TypeScript library and generate reviews, documentation, and .d.ts rollups",
   "keywords": [
     "typescript",
     "API",
     "JSDoc",
     "AEDoc",
+    "TSDoc",
     "generate",
     "documentation",
+    "declaration",
+    ".d.ts",
+    "rollup",
     "compiler",
     "alpha",
     "beta"
@@ -31,23 +35,22 @@
     "build": "gulp test --clean"
   },
   "dependencies": {
-    "@microsoft/node-core-library": "3.11.0",
+    "@microsoft/api-extractor-model": "7.1.0",
+    "@microsoft/node-core-library": "3.13.0",
     "@microsoft/ts-command-line": "4.2.3",
-    "@microsoft/tsdoc": "0.12.5",
-    "@types/node": "8.5.8",
-    "@types/z-schema": "3.16.31",
+    "@microsoft/tsdoc": "0.12.9",
     "colors": "~1.2.1",
     "lodash": "~4.17.5",
-    "typescript": "~3.1.6",
-    "z-schema": "~3.18.3",
-    "resolve": "1.8.1"
+    "resolve": "1.8.1",
+    "source-map": "~0.6.1",
+    "typescript": "~3.4.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.2.2",
-    "tslint-microsoft-contrib": "~5.2.1",
+    "@microsoft/node-library-build": "6.0.55",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.7",
+    "@types/jest": "23.3.11",
     "@types/lodash": "4.14.116",
-    "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "6.0.29",
-    "@types/jest": "23.3.11"
+    "@types/node": "8.5.8",
+    "gulp": "~3.9.1"
   }
 }

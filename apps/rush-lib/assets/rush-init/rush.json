@@ -164,7 +164,16 @@
      * of a recommended email.  Make sure it conforms to one of the allowedEmailRegExps
      * expressions.
      */
-    /*[LINE "DEMO"]*/ "sampleEmail": "mrexample@users.noreply.github.com"
+    /*[LINE "DEMO"]*/ "sampleEmail": "mrexample@users.noreply.github.com",
+
+    /**
+     * The commit message to use when committing changes during 'rush publish'.
+     *
+     * For example, if you want to prevent these commits from triggering a CI build,
+     * you might configure your system's trigger to look for a special string such as "[skip-ci]"
+     * in the commit message, and then customize Rush's message to contain that string.
+     */
+    /*[LINE "DEMO"]*/ "versionBumpCommitMessage": "Applying package updates. [skip-ci]"
   },
 
   "repository": {

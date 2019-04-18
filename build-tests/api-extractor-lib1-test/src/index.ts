@@ -7,7 +7,7 @@
  * @remarks
  * This library is consumed by api-extractor-scenarios.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 class Lib1ForgottenExport {

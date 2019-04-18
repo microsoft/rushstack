@@ -2,6 +2,449 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "8.1.6",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.1.6",
+      "date": "Tue, 16 Apr 2019 11:01:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.42` to `7.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.6.7` to `0.6.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.1.5",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.1.5",
+      "date": "Fri, 12 Apr 2019 06:13:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.41` to `7.0.42`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.6.6` to `0.6.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.1.4",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.1.4",
+      "date": "Thu, 11 Apr 2019 07:14:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.40` to `7.0.41`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.6.5` to `0.6.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.1.3",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.1.3",
+      "date": "Tue, 09 Apr 2019 05:31:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.39` to `7.0.40`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.6.4` to `0.6.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.1.2",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.1.2",
+      "date": "Mon, 08 Apr 2019 19:12:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.38` to `7.0.39`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.6.3` to `0.6.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.1.1",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.1.1",
+      "date": "Sat, 06 Apr 2019 02:05:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.37` to `7.0.38`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.6.2` to `0.6.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.1.0",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.1.0",
+      "date": "Fri, 05 Apr 2019 04:16:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update to use the new rush-stack-compiler contract for API Extractor 7"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.36` to `7.0.37`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" from `0.6.1` to `0.6.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.23",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.23",
+      "date": "Wed, 03 Apr 2019 02:58:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.0` to `0.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.25` to `3.9.26`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.35` to `7.0.36`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.22",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.22",
+      "date": "Tue, 02 Apr 2019 01:12:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.20` to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.24` to `3.9.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.21",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.21",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.19` to `0.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.23` to `3.9.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.34` to `7.0.35`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.20",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.20",
+      "date": "Thu, 28 Mar 2019 19:14:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.18` to `0.2.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.22` to `3.9.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.33` to `7.0.34`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.19",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.19",
+      "date": "Tue, 26 Mar 2019 20:54:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.17` to `0.2.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.21` to `3.9.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.32` to `7.0.33`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.18",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.18",
+      "date": "Sat, 23 Mar 2019 03:48:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.16` to `0.2.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.20` to `3.9.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.31` to `7.0.32`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.17",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.17",
+      "date": "Thu, 21 Mar 2019 04:59:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.15` to `0.2.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.19` to `3.9.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.30` to `7.0.31`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.16",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.16",
+      "date": "Thu, 21 Mar 2019 01:15:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.14` to `0.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.18` to `3.9.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.29` to `7.0.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.15",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.15",
+      "date": "Wed, 20 Mar 2019 19:14:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.13` to `0.2.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.17` to `3.9.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.1` to `3.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.28` to `7.0.29`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.14",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.14",
+      "date": "Mon, 18 Mar 2019 04:28:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.12` to `0.2.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.16` to `3.9.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.0` to `3.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.27` to `7.0.28`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.13",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.13",
+      "date": "Fri, 15 Mar 2019 19:13:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.11` to `0.2.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.15` to `3.9.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.26` to `7.0.27`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.12",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.12",
+      "date": "Wed, 13 Mar 2019 19:13:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.10` to `0.2.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.14` to `3.9.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.25` to `7.0.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.11",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.11",
+      "date": "Wed, 13 Mar 2019 01:14:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.9` to `0.2.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.13` to `3.9.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.24` to `7.0.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.10",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.10",
+      "date": "Mon, 11 Mar 2019 16:13:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.8` to `0.2.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.12` to `3.9.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.23` to `7.0.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.9",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.9",
+      "date": "Tue, 05 Mar 2019 17:13:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.7` to `0.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.11` to `3.9.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.22` to `7.0.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.8",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.8",
+      "date": "Mon, 04 Mar 2019 17:13:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.6` to `0.2.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.10` to `3.9.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.21` to `7.0.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.7",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.7",
+      "date": "Wed, 27 Feb 2019 22:13:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.5` to `0.2.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.9` to `3.9.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.11.1` to `3.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.20` to `7.0.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.0.6",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.0.6",
+      "date": "Wed, 27 Feb 2019 17:13:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.4` to `0.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.8` to `3.9.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.11.0` to `3.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.19` to `7.0.20`"
+          }
+        ]
+      }
+    },
+    {
       "version": "8.0.5",
       "tag": "@microsoft/gulp-core-build-typescript_v8.0.5",
       "date": "Mon, 18 Feb 2019 17:13:23 GMT",

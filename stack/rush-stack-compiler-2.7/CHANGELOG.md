@@ -1,6 +1,135 @@
 # Change Log - @microsoft/rush-stack-compiler-2.7
 
-This log was last generated on Mon, 18 Feb 2019 17:13:23 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Apr 2019 11:01:37 GMT and should not be manually modified.
+
+## 0.6.8
+Tue, 16 Apr 2019 11:01:37 GMT
+
+*Version update only*
+
+## 0.6.7
+Fri, 12 Apr 2019 06:13:16 GMT
+
+*Version update only*
+
+## 0.6.6
+Thu, 11 Apr 2019 07:14:01 GMT
+
+*Version update only*
+
+## 0.6.5
+Tue, 09 Apr 2019 05:31:01 GMT
+
+*Version update only*
+
+## 0.6.4
+Mon, 08 Apr 2019 19:12:52 GMT
+
+*Version update only*
+
+## 0.6.3
+Sat, 06 Apr 2019 02:05:51 GMT
+
+*Version update only*
+
+## 0.6.2
+Fri, 05 Apr 2019 04:16:17 GMT
+
+*Version update only*
+
+## 0.6.1
+Wed, 03 Apr 2019 02:58:33 GMT
+
+*Version update only*
+
+## 0.6.0
+Tue, 02 Apr 2019 01:12:02 GMT
+
+### Minor changes
+
+- Enable declaration maps in the default TSConfigs.
+
+## 0.5.20
+Sat, 30 Mar 2019 22:27:16 GMT
+
+*Version update only*
+
+## 0.5.19
+Thu, 28 Mar 2019 19:14:27 GMT
+
+*Version update only*
+
+## 0.5.18
+Tue, 26 Mar 2019 20:54:18 GMT
+
+*Version update only*
+
+## 0.5.17
+Sat, 23 Mar 2019 03:48:31 GMT
+
+*Version update only*
+
+## 0.5.16
+Thu, 21 Mar 2019 04:59:11 GMT
+
+*Version update only*
+
+## 0.5.15
+Thu, 21 Mar 2019 01:15:33 GMT
+
+*Version update only*
+
+## 0.5.14
+Wed, 20 Mar 2019 19:14:49 GMT
+
+*Version update only*
+
+## 0.5.13
+Mon, 18 Mar 2019 04:28:43 GMT
+
+### Patches
+
+- Export StandardBuildFolders to eliminate the ae-forgotten-export warning
+
+## 0.5.12
+Fri, 15 Mar 2019 19:13:25 GMT
+
+*Version update only*
+
+## 0.5.11
+Wed, 13 Mar 2019 19:13:14 GMT
+
+*Version update only*
+
+## 0.5.10
+Wed, 13 Mar 2019 01:14:05 GMT
+
+*Version update only*
+
+## 0.5.9
+Mon, 11 Mar 2019 16:13:36 GMT
+
+*Version update only*
+
+## 0.5.8
+Tue, 05 Mar 2019 17:13:11 GMT
+
+*Version update only*
+
+## 0.5.7
+Mon, 04 Mar 2019 17:13:20 GMT
+
+*Version update only*
+
+## 0.5.6
+Wed, 27 Feb 2019 22:13:58 GMT
+
+*Version update only*
+
+## 0.5.5
+Wed, 27 Feb 2019 17:13:17 GMT
+
+*Version update only*
 
 ## 0.5.4
 Mon, 18 Feb 2019 17:13:23 GMT

@@ -47,8 +47,7 @@ export class PublishGit {
       ['tag', '-a', tagName, '-m', `${packageName} v${packageVersion}`]);
   }
 
-  public commit(message?: string): void {
-    const commitMessage: string = message ? message : 'Applying package updates.';
+  public commit(commitMessage: string): void {
     PublishUtilities.execCommand(!!this._targetBranch, 'git', ['commit', '-m', commitMessage]);
   }
 
@@ -56,6 +55,8 @@ export class PublishGit {
     PublishUtilities.execCommand(
       !!this._targetBranch,
       'git',
-      ['push', 'origin', 'HEAD:' + branchName, '--follow-tags', '--verbose']);
+      // We append "--no-verify" to prevent Git hooks from running.  For example, people may
+      // want to invoke "rush change -v" as a pre-push hook.
+      ['push', 'origin', 'HEAD:' + branchName, '--follow-tags', '--verbose', '--no-verify']);
   }
 }

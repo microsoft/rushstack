@@ -1,0 +1,69 @@
+### YamlMime:UniversalReference
+items:
+  - uid: api-documenter-test.IDocInterface4
+    summary: Type union in an interface.
+    name: IDocInterface4
+    fullName: IDocInterface4
+    langs:
+      - typeScript
+    type: interface
+    package: api-documenter-test
+    children:
+      - api-documenter-test.IDocInterface4.Context
+      - api-documenter-test.IDocInterface4.generic
+      - api-documenter-test.IDocInterface4.numberOrFunction
+      - api-documenter-test.IDocInterface4.stringOrNumber
+  - uid: api-documenter-test.IDocInterface4.Context
+    summary: Test newline rendering when code blocks are used in tables
+    name: Context
+    fullName: Context
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: |-
+        Context: ({ children }: {
+                children: string;
+            }) => boolean;
+      return:
+        type:
+          - |-
+            ({ children }: {
+                    children: string;
+                }) => boolean
+  - uid: api-documenter-test.IDocInterface4.generic
+    summary: make sure html entities are escaped in tables.
+    name: generic
+    fullName: generic
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'generic: Generic<number>;'
+      return:
+        type:
+          - Generic<number>
+  - uid: api-documenter-test.IDocInterface4.numberOrFunction
+    summary: a union type with a function
+    name: numberOrFunction
+    fullName: numberOrFunction
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'numberOrFunction: number | (() => number);'
+      return:
+        type:
+          - number | (() => number)
+  - uid: api-documenter-test.IDocInterface4.stringOrNumber
+    summary: a union type
+    name: stringOrNumber
+    fullName: stringOrNumber
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'stringOrNumber: string | number;'
+      return:
+        type:
+          - string | number

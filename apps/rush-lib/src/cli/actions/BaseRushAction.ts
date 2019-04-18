@@ -115,9 +115,9 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
 
   protected get eventHooksManager(): EventHooksManager {
     if (!this._eventHooksManager) {
-      this._eventHooksManager = new EventHooksManager(this.rushConfiguration.eventHooks,
-        this.rushConfiguration.commonTempFolder);
+      this._eventHooksManager = new EventHooksManager(this.rushConfiguration);
     }
+
     return this._eventHooksManager;
   }
 }

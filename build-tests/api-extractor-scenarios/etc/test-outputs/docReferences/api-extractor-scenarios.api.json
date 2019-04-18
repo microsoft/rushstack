@@ -1,0 +1,263 @@
+{
+  "metadata": {
+    "toolPackage": "@microsoft/api-extractor",
+    "toolVersion": "[test mode]",
+    "schemaVersion": 1000
+  },
+  "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios",
+  "docComment": "",
+  "name": "api-extractor-scenarios",
+  "members": [
+    {
+      "kind": "EntryPoint",
+      "canonicalReference": "",
+      "name": "",
+      "members": [
+        {
+          "kind": "Function",
+          "canonicalReference": "(failWithBrokenLink:0)",
+          "docComment": "/**\n * {@inheritDoc MyNamespace.MyClass.nonExistentMethod}\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function "
+            },
+            {
+              "kind": "Reference",
+              "text": "failWithBrokenLink"
+            },
+            {
+              "kind": "Content",
+              "text": "(): "
+            },
+            {
+              "kind": "Content",
+              "text": "void"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 4
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 0,
+          "parameters": [],
+          "name": "failWithBrokenLink"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "(failWithMissingReference:0)",
+          "docComment": "/**\n * {@inheritDoc}\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function "
+            },
+            {
+              "kind": "Reference",
+              "text": "failWithMissingReference"
+            },
+            {
+              "kind": "Content",
+              "text": "(): "
+            },
+            {
+              "kind": "Content",
+              "text": "void"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 4
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 0,
+          "parameters": [],
+          "name": "failWithMissingReference"
+        },
+        {
+          "kind": "Namespace",
+          "canonicalReference": "(MyNamespace:namespace)",
+          "docComment": "/**\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare namespace "
+            },
+            {
+              "kind": "Reference",
+              "text": "MyNamespace"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "MyNamespace",
+          "members": [
+            {
+              "kind": "Class",
+              "canonicalReference": "(MyClass:class)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "class "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "MyClass"
+                },
+                {
+                  "kind": "Content",
+                  "text": " "
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "MyClass",
+              "members": [
+                {
+                  "kind": "Method",
+                  "canonicalReference": "(myMethod:instance,0)",
+                  "docComment": "/**\n * Summary for myMethod\n *\n * @remarks\n *\n * Remarks for myMethod\n *\n * @param x - the parameter\n *\n * @returns a number\n *\n * @beta\n */\n",
+                  "excerptTokens": [
+                    {
+                      "kind": "Reference",
+                      "text": "myMethod"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "("
+                    },
+                    {
+                      "kind": "Reference",
+                      "text": "x"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ": "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "number"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "): "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "number"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isStatic": false,
+                  "returnTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 7
+                  },
+                  "releaseTag": "Beta",
+                  "overloadIndex": 0,
+                  "parameters": [
+                    {
+                      "parameterName": "x",
+                      "parameterTypeTokenRange": {
+                        "startIndex": 4,
+                        "endIndex": 5
+                      }
+                    }
+                  ],
+                  "name": "myMethod"
+                }
+              ],
+              "implementsTokenRanges": []
+            }
+          ]
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "(succeedForNow:0)",
+          "docComment": "/**\n * {@inheritDoc nonexistent-package#MyNamespace.MyClass.nonExistentMethod}\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function "
+            },
+            {
+              "kind": "Reference",
+              "text": "succeedForNow"
+            },
+            {
+              "kind": "Content",
+              "text": "(): "
+            },
+            {
+              "kind": "Content",
+              "text": "void"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 4
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 0,
+          "parameters": [],
+          "name": "succeedForNow"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "(testSimple:0)",
+          "docComment": "/**\n * Summary for myMethod\n *\n * @remarks\n *\n * Remarks for myMethod\n *\n * @param x - the parameter\n *\n * @returns a number\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function "
+            },
+            {
+              "kind": "Reference",
+              "text": "testSimple"
+            },
+            {
+              "kind": "Content",
+              "text": "(): "
+            },
+            {
+              "kind": "Content",
+              "text": "void"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 4
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 0,
+          "parameters": [],
+          "name": "testSimple"
+        }
+      ]
+    }
+  ]
+}
