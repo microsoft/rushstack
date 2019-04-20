@@ -662,6 +662,10 @@ export class Collector {
 
     this.messageRouter.addTsdocMessages(parserContext, declaration.getSourceFile(), astDeclaration);
 
+    // We delete the @privateRemarks block as early as possible, to ensure that it never leaks through
+    // into one of the output files.
+    parserContext.docComment.privateRemarks = undefined;
+
     return parserContext;
   }
 

@@ -40,8 +40,8 @@ export class ValidationEnhancer {
         if (exportName[0] !== '_') {
           collector.messageRouter.addAnalyzerIssue(
             ExtractorMessageId.InternalMissingUnderscore,
-            `The name ${exportName} should be prefixed with an underscore`
-            + ` because the declaration is marked as "@internal"`,
+            `The name "${exportName}" should be prefixed with an underscore`
+            + ` because the declaration is marked as @internal`,
             astSymbol,
             { exportName }
           );

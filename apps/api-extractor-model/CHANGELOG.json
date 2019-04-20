@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.1.0",
+      "tag": "@microsoft/api-extractor-model_v7.1.0",
+      "date": "Tue, 16 Apr 2019 11:01:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial stable release of API Extractor 7"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.28",
       "tag": "@microsoft/api-extractor-model_v7.0.28",
       "date": "Wed, 20 Mar 2019 19:14:49 GMT",
