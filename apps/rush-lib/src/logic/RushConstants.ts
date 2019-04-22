@@ -70,13 +70,13 @@ export namespace RushConstants {
 
   /**
    * The filename ("shrinkwrap.yaml") used to store an installation plan for the PNPM package manger
-   * (version 2.x and earlier).
+   * (PNPM version 2.x and earlier).
    */
   export const pnpmV1ShrinkwrapFilename: string = 'shrinkwrap.yaml';
 
   /**
    * The filename ("pnpm-lock.yaml") used to store an installation plan for the PNPM package manger
-   * (version 3.x and later).
+   * (PNPM version 3.x and later).
    */
   export const pnpmV3ShrinkwrapFilename: string = 'pnpm-lock.yaml';
 
