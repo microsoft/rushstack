@@ -153,6 +153,8 @@ export interface ICurrentVariantJson {
 export class PnpmOptionsConfiguration {
   /**
    * If true, then Rush will add the "--strict-peer-dependencies" option when invoking PNPM.
+   *
+   * @remarks
    * This causes "rush install" to fail if there are unsatisfied peer dependencies, which is
    * an invalid state that can cause build failures or incompatible dependency versions.
    * (For historical reasons, JavaScript package managers generally do not treat this invalid state
@@ -165,6 +167,7 @@ export class PnpmOptionsConfiguration {
   /**
    * The resolution strategy that will be used by PNPM.
    *
+   * @remarks
    * The default value is "fewer-dependencies" i.e. PNPM will prefer package versions
    * that have already been resolved previously.
    */
@@ -596,7 +599,7 @@ export class RushConfiguration {
   }
 
   /**
-   * The filename of the shrinkwrap file that is used by the package manager.
+   * The filename (without any path) of the shrinkwrap file that is used by the package manager.
    * @remarks
    * This property merely reports the filename; the file itself may not actually exist.
    * Example: `npm-shrinkwrap.json` or `pnpm-lock.yaml`
@@ -1020,7 +1023,13 @@ export class RushConfiguration {
       this._shrinkwrapFilename = RushConstants.npmShrinkwrapFilename;
     } else if (this._packageManager === 'pnpm') {
       this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
-      this._shrinkwrapFilename = RushConstants.pnpmShrinkwrapFilename(this._packageManagerToolVersion);
+
+      const parsedVersion: semver.SemVer = new semver.SemVer(this._packageManagerToolVersion);
+      if (parsedVersion.major < 3) {
+        this._shrinkwrapFilename = RushConstants.pnpmV1ShrinkwrapFilename;
+      } else {
+        this._shrinkwrapFilename = RushConstants.pnpmV3ShrinkwrapFilename;
+      }
     } else {
       this._packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
       this._shrinkwrapFilename = RushConstants.yarnShrinkwrapFilename;
