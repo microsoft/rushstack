@@ -86,6 +86,10 @@ export interface IDocInterface4 {
    * make sure html entities are escaped in tables.
    */
   generic: Generic<number>;
+  /**
+   * Test newline rendering when code blocks are used in tables
+   */
+  Context: ({ children }: { children: string }) => boolean;
 }
 
 /**
@@ -98,7 +102,8 @@ export interface IDocInterface4 {
  */
 export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
   /**
-   * The class constructor
+   * An internal class constructor.
+   * @internal
    */
   public constructor(name: string) {
     super();

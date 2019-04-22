@@ -189,7 +189,7 @@ export class SourceMapper {
 
       if (diff < 0) {
         startIndex = middleIndex + 1;
-      } if (diff > 0) {
+      } else if (diff > 0) {
         endIndex = middleIndex - 1;
       } else {
         // Exact match

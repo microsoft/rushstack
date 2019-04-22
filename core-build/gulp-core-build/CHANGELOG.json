@@ -2,6 +2,42 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.9.26",
+      "tag": "@microsoft/gulp-core-build_v3.9.26",
+      "date": "Wed, 03 Apr 2019 02:58:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.0` to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.25",
+      "tag": "@microsoft/gulp-core-build_v3.9.25",
+      "date": "Tue, 02 Apr 2019 01:12:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.20` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.24",
+      "tag": "@microsoft/gulp-core-build_v3.9.24",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.19` to `0.2.20`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.9.23",
       "tag": "@microsoft/gulp-core-build_v3.9.23",
       "date": "Thu, 28 Mar 2019 19:14:27 GMT",

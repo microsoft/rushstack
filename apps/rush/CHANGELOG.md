@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 25 Mar 2019 03:15:21 GMT and should not be manually modified.
+This log was last generated on Mon, 15 Apr 2019 06:40:00 GMT and should not be manually modified.
+
+## 5.6.4
+Mon, 15 Apr 2019 06:40:00 GMT
+
+### Updates
+
+- Add support for string parameter for custom commands.
+- Remove the obsolete "--release-type" option which only worked if you used a specific version of gulp-core-build-typescript
+- Adds --no-verify to git push during a rush publish
 
 ## 5.6.3
 Mon, 25 Mar 2019 03:15:21 GMT

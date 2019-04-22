@@ -1,6 +1,73 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 28 Mar 2019 19:14:27 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Apr 2019 19:12:31 GMT and should not be manually modified.
+
+## 7.1.1
+Wed, 17 Apr 2019 19:12:31 GMT
+
+### Patches
+
+- Fix newline rendering when code blocks are used in tables
+
+## 7.1.0
+Tue, 16 Apr 2019 11:01:37 GMT
+
+### Minor changes
+
+- Initial stable release of API Extractor 7
+
+### Patches
+
+- Adding an extra newline to the OfficeYamlDocumenter Examples header insertion
+
+## 7.0.51
+Fri, 12 Apr 2019 06:13:16 GMT
+
+*Version update only*
+
+## 7.0.50
+Thu, 11 Apr 2019 07:14:01 GMT
+
+*Version update only*
+
+## 7.0.49
+Tue, 09 Apr 2019 05:31:01 GMT
+
+### Patches
+
+- Add 'do not edit' header to generated documentation files
+
+## 7.0.48
+Mon, 08 Apr 2019 19:12:52 GMT
+
+*Version update only*
+
+## 7.0.47
+Sat, 06 Apr 2019 02:05:51 GMT
+
+*Version update only*
+
+## 7.0.46
+Fri, 05 Apr 2019 04:16:17 GMT
+
+*Version update only*
+
+## 7.0.45
+Wed, 03 Apr 2019 02:58:33 GMT
+
+*Version update only*
+
+## 7.0.44
+Tue, 02 Apr 2019 01:12:02 GMT
+
+*Version update only*
+
+## 7.0.43
+Sat, 30 Mar 2019 22:27:16 GMT
+
+### Patches
+
+- Add limited support for resolving @inheritDoc references to external packages by postprocessing them in api-documenter
 
 ## 7.0.42
 Thu, 28 Mar 2019 19:14:27 GMT

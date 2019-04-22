@@ -12,7 +12,7 @@ import {
   Terminal
 } from '@microsoft/node-core-library';
 import { GulpTask } from '@microsoft/gulp-core-build';
-import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.2';
+import * as TRushStackCompiler from '@microsoft/rush-stack-compiler-3.1';
 import { GCBTerminalProvider } from './GCBTerminalProvider';
 
 export interface IRSCTaskConfig extends Object {

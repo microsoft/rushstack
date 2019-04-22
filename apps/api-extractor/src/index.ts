@@ -9,29 +9,39 @@
  * @packageDocumentation
  */
 
-export { Extractor, IAnalyzeProjectOptions, IExtractorOptions } from './api/Extractor';
+export { ConsoleMessageId } from './api/ConsoleMessageId';
+
+export { CompilerState, ICompilerStateCreateOptions } from './api/CompilerState';
+
+export {
+  Extractor,
+  IExtractorInvokeOptions,
+  ExtractorResult
+} from './api/Extractor';
+
+export {
+  IExtractorConfigPrepareOptions,
+  ExtractorConfig
+} from './api/ExtractorConfig';
+
+export { ExtractorLogLevel } from './api/ExtractorLogLevel';
+
 export {
   ExtractorMessage,
   IExtractorMessageProperties,
   ExtractorMessageCategory
 } from './api/ExtractorMessage';
-export { ExtractorMessageId } from './api/ExtractorMessageId';
-export {
-  IExtractorTsconfigCompilerConfig,
-  IExtractorRuntimeCompilerConfig,
-  IExtractorProjectConfig,
-  IExtractorPoliciesConfig,
-  ExtractorValidationRulePolicy,
-  IExtractorValidationRulesConfig,
-  IExtractorApiReviewFileConfig,
-  IExtractorApiJsonFileConfig,
-  IExtractorDtsRollupConfig,
-  IExtractorTsdocMetadataConfig,
-  ExtractorMessageLogLevel,
-  IExtractorMessageReportingRuleConfig,
-  IExtractorMessageReportingTableConfig,
-  IExtractorMessagesConfig,
-  IExtractorConfig
-} from './api/IExtractorConfig';
 
-export { ILogger } from './api/ILogger';
+export { ExtractorMessageId } from './api/ExtractorMessageId';
+
+export {
+  IConfigCompiler,
+  IConfigApiReport,
+  IConfigDocModel,
+  IConfigDtsRollup,
+  IConfigTsdocMetadata,
+  IConfigMessageReportingRule,
+  IConfigMessageReportingTable,
+  IExtractorMessagesConfig,
+  IConfigFile
+} from './api/IConfigFile';

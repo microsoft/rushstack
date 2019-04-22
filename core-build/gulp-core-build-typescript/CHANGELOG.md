@@ -1,6 +1,58 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Thu, 28 Mar 2019 19:14:27 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Apr 2019 11:01:37 GMT and should not be manually modified.
+
+## 8.1.6
+Tue, 16 Apr 2019 11:01:37 GMT
+
+*Version update only*
+
+## 8.1.5
+Fri, 12 Apr 2019 06:13:16 GMT
+
+*Version update only*
+
+## 8.1.4
+Thu, 11 Apr 2019 07:14:01 GMT
+
+*Version update only*
+
+## 8.1.3
+Tue, 09 Apr 2019 05:31:01 GMT
+
+*Version update only*
+
+## 8.1.2
+Mon, 08 Apr 2019 19:12:52 GMT
+
+*Version update only*
+
+## 8.1.1
+Sat, 06 Apr 2019 02:05:51 GMT
+
+*Version update only*
+
+## 8.1.0
+Fri, 05 Apr 2019 04:16:17 GMT
+
+### Minor changes
+
+- Update to use the new rush-stack-compiler contract for API Extractor 7
+
+## 8.0.23
+Wed, 03 Apr 2019 02:58:33 GMT
+
+*Version update only*
+
+## 8.0.22
+Tue, 02 Apr 2019 01:12:02 GMT
+
+*Version update only*
+
+## 8.0.21
+Sat, 30 Mar 2019 22:27:16 GMT
+
+*Version update only*
 
 ## 8.0.20
 Thu, 28 Mar 2019 19:14:27 GMT

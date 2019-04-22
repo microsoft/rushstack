@@ -36,7 +36,8 @@ const _membersByName: unique symbol = Symbol('ApiItemContainerMixin._membersByNa
  *
  * Examples of `ApiItemContainerMixin` child classes include `ApiModel`, `ApiPackage`, `ApiEntryPoint`,
  * and `ApiEnum`.  But note that `Parameter` is not considered a "member" of an `ApiMethod`; this relationship
- * is modeled using {@link ApiParameterListMixin.parameters} instead of {@link ApiItemContainerMixin.members}.
+ * is modeled using {@link (ApiParameterListMixin:interface).parameters} instead
+ * of {@link (ApiItemContainerMixin:interface).members}.
  *
  * @public
  */
@@ -70,7 +71,7 @@ export interface ApiItemContainerMixin extends ApiItem {
 }
 
 /**
- * Mixin function for {@link (ApiDeclaredItem:interface)}.
+ * Mixin function for {@link ApiDeclaredItem}.
  *
  * @param baseClass - The base class to be extended
  * @returns A child class that extends baseClass, adding the {@link (ApiItemContainerMixin:interface)} functionality.

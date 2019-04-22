@@ -16,16 +16,16 @@ import {
   CommandLineFlagParameter
 } from '@microsoft/ts-command-line';
 
-import { Extractor } from '../api/Extractor';
-import { IExtractorConfig } from '../api/IExtractorConfig';
+import { Extractor, ExtractorResult } from '../api/Extractor';
+import { IConfigFile } from '../api/IConfigFile';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
-
-const AE_CONFIG_FILENAME: string = 'api-extractor.json';
+import { ExtractorConfig } from '../api/ExtractorConfig';
 
 export class RunAction extends CommandLineAction {
   private _configFileParameter: CommandLineStringParameter;
   private _localParameter: CommandLineFlagParameter;
+  private _verboseParameter: CommandLineFlagParameter;
   private _typescriptCompilerFolder: CommandLineStringParameter;
 
   constructor(parser: ApiExtractorCommandLine) {
@@ -41,7 +41,7 @@ export class RunAction extends CommandLineAction {
       parameterLongName: '--config',
       parameterShortName: '-c',
       argumentName: 'FILE',
-      description: `Use the specified ${AE_CONFIG_FILENAME} file path, rather than guessing its location`
+      description: `Use the specified ${ExtractorConfig.FILENAME} file path, rather than guessing its location`
     });
 
     this._localParameter = this.defineFlagParameter({
@@ -50,7 +50,13 @@ export class RunAction extends CommandLineAction {
       description: 'Indicates that API Extractor is running as part of a local build,'
         + ' e.g. on a developer\'s machine. This disables certain validation that would'
         + ' normally be performed for a ship/production build. For example, the *.api.md'
-        + ' review file is automatically copied in a local build.'
+        + ' report file is automatically copied in a local build.'
+    });
+
+    this._verboseParameter = this.defineFlagParameter({
+      parameterLongName: '--verbose',
+      parameterShortName: '-v',
+      description: 'Show additional diagnostic messages in the output.'
     });
 
     this._typescriptCompilerFolder = this.defineStringParameter({
@@ -106,36 +112,52 @@ export class RunAction extends CommandLineAction {
       const baseFolder: string = packageFolder ? packageFolder : process.cwd();
 
       // First try the standard "config" subfolder:
-      configFilename = path.join(baseFolder, 'config', AE_CONFIG_FILENAME);
+      configFilename = path.join(baseFolder, 'config', ExtractorConfig.FILENAME);
       if (FileSystem.exists(configFilename)) {
-        if (FileSystem.exists(path.join(baseFolder, AE_CONFIG_FILENAME))) {
-          throw new Error(`Found conflicting ${AE_CONFIG_FILENAME} files in "." and "./config" folders`);
+        if (FileSystem.exists(path.join(baseFolder, ExtractorConfig.FILENAME))) {
+          throw new Error(`Found conflicting ${ExtractorConfig.FILENAME} files in "." and "./config" folders`);
         }
       } else {
         // Otherwise try the top-level folder
-        configFilename = path.join(baseFolder, AE_CONFIG_FILENAME);
+        configFilename = path.join(baseFolder, ExtractorConfig.FILENAME);
 
         if (!FileSystem.exists(configFilename)) {
-          throw new Error(`Unable to find an ${AE_CONFIG_FILENAME} file`);
+          throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
         }
       }
 
-      console.log(`Using configuration from ${configFilename}` + os.EOL + os.EOL);
+      console.log(`Using configuration from ${configFilename}` + os.EOL);
     }
 
-    const config: IExtractorConfig = Extractor.loadConfigObject(configFilename);
-    const extractor: Extractor = new Extractor(
-      config,
+    const configObjectFullPath: string = path.resolve(configFilename);
+    const configObject: IConfigFile = ExtractorConfig.loadFile(configObjectFullPath);
+
+    const extractorConfig: ExtractorConfig = ExtractorConfig.prepare({
+      configObject: configObject,
+      configObjectFullPath: configObjectFullPath,
+      packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configObjectFullPath)
+    });
+
+    const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig,
       {
         localBuild: this._localParameter.value,
+        showVerboseMessages: this._verboseParameter.value,
         typescriptCompilerFolder: typescriptCompilerFolder
       }
     );
 
-    if (!extractor.processProject()) {
-      console.log(os.EOL + colors.yellow('API Extractor completed with errors or warnings'));
+    if (extractorResult.succeeded) {
+      console.log(os.EOL + 'API Extractor completed successfully');
+    } else {
       process.exitCode = 1;
+
+      if (extractorResult.errorCount > 0) {
+        console.log(os.EOL + colors.red('API Extractor completed with errors'));
+      } else {
+        console.log(os.EOL + colors.yellow('API Extractor completed with warnings'));
+      }
     }
+
     return Promise.resolve();
   }
 }

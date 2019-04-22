@@ -2,10 +2,10 @@
   "changes": [
     {
       "comment": "",
-      "packageName": "@microsoft/api-extractor-model",
+      "packageName": "@microsoft/node-core-library",
       "type": "none"
     }
   ],
-  "packageName": "@microsoft/api-extractor-model",
+  "packageName": "@microsoft/node-core-library",
   "email": "4673363+octogonz@users.noreply.github.com"
 }

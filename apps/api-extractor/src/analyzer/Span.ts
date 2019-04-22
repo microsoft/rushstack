@@ -14,19 +14,19 @@ export class SpanModification {
    * @remarks
    * Also, the modify() operation will not recurse into these spans.
    */
-  public omitChildren: boolean;
+  public omitChildren: boolean = false;
 
   /**
    * If true, then the Span.separator will be removed from the Span.getModifiedText() output.
    */
-  public omitSeparatorAfter: boolean;
+  public omitSeparatorAfter: boolean = false;
 
   /**
    * If true, then Span.getModifiedText() will sort the immediate children according to their Span.sortKey
    * property.  The separators will also be fixed up to ensure correct indentation.  If the Span.sortKey is undefined
    * for some items, those items will not be moved, i.e. their array indexes will be unchanged.
    */
-  public sortChildren: boolean;
+  public sortChildren: boolean = false;
 
   /**
    * Used if the parent span has Span.sortChildren=true.
@@ -133,7 +133,7 @@ export class Span {
 
   public constructor(node: ts.Node) {
     this.node = node;
-    this.startIndex = node.getStart();
+    this.startIndex = node.kind === ts.SyntaxKind.SourceFile ? node.getFullStart() : node.getStart();
     this.endIndex = node.end;
     this._separatorStartIndex = 0;
     this._separatorEndIndex = 0;

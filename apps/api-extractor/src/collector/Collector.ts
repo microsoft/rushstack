@@ -5,7 +5,6 @@ import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import {
   PackageJsonLookup,
-  INodePackageJson,
   Sort,
   InternalError
 } from '@microsoft/node-core-library';
@@ -14,13 +13,6 @@ import {
   AedocDefinitions
 } from '@microsoft/api-extractor-model';
 
-import { ILogger } from '../api/ILogger';
-import {
-  IExtractorPoliciesConfig,
-  IExtractorValidationRulesConfig,
-  ExtractorValidationRulePolicy,
-  IExtractorConfig
-} from '../api/IExtractorConfig';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 import { CollectorEntity } from './CollectorEntity';
@@ -36,6 +28,8 @@ import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
+import { ExtractorConfig } from '../api/ExtractorConfig';
+import { ExtractorMessage } from '../api/ExtractorMessage';
 
 /**
  * Options for Collector constructor.
@@ -51,21 +45,14 @@ export interface ICollectorOptions {
    */
   program: ts.Program;
 
-  /**
-   * The entry point to be processed by API Extractor.  Normally this should correspond to
-   * the "main" field from the package.json file.  If it is a relative path, it will be
-   * relative to the project folder described by IExtractorAnalyzeOptions.compilerOptions.
-   */
-  entryPointFile: string;
+  messageCallback: ((message: ExtractorMessage) => void) | undefined;
 
-  logger: ILogger;
-
-  extractorConfig: IExtractorConfig;
+  extractorConfig: ExtractorConfig;
 }
 
 /**
  * The `Collector` manages the overall data set that is used by `ApiModelGenerator`,
- * `DtsRollupGenerator`, and `ReviewFileGenerator`.  Starting from the working package's entry point,
+ * `DtsRollupGenerator`, and `ApiReportGenerator`.  Starting from the working package's entry point,
  * the `Collector` collects all exported symbols, determines how to import any symbols they reference,
  * assigns unique names, and sorts everything into a normalized alphabetical ordering.
  */
@@ -77,11 +64,6 @@ export class Collector {
 
   public readonly packageJsonLookup: PackageJsonLookup;
   public readonly messageRouter: MessageRouter;
-
-  public readonly policies: IExtractorPoliciesConfig;
-  public readonly validationRules: IExtractorValidationRulesConfig;
-
-  public readonly logger: ILogger;
 
   public readonly workingPackage: WorkingPackage;
 
@@ -101,37 +83,41 @@ export class Collector {
 
   constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
-    this.messageRouter = new MessageRouter(options.extractorConfig.messages || { });
 
-    this.policies = options.extractorConfig.policies || { };
-    this.validationRules = options.extractorConfig.validationRules || { };
-
-    this.logger = options.logger;
     this._program = options.program;
 
-    const packageFolder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
-    if (!packageFolder) {
-      throw new Error('Unable to find a package.json for entry point: ' + options.entryPointFile);
+    const extractorConfig: ExtractorConfig = options.extractorConfig;
+
+    const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
+      extractorConfig.mainEntryPointFilePath);
+
+    if (!entryPointSourceFile) {
+      throw new Error('Unable to load file: ' + extractorConfig.mainEntryPointFilePath);
     }
 
-    const packageJson: INodePackageJson = this.packageJsonLookup.tryLoadNodePackageJsonFor(packageFolder)!;
-
-    const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);
-    if (!entryPointSourceFile) {
-      throw new Error('Unable to load file: ' + options.entryPointFile);
+    if (!extractorConfig.packageFolder || !extractorConfig.packageJson) {
+      // TODO: We should be able to analyze projects that don't have any package.json.
+      // The ExtractorConfig class is already designed to allow this.
+      throw new Error('Unable to find a package.json file for the project being analyzed');
     }
 
     this.workingPackage = new WorkingPackage({
-      packageFolder,
-      packageJson,
+      packageFolder: extractorConfig.packageFolder,
+      packageJson: extractorConfig.packageJson,
       entryPointSourceFile
     });
+
+    this.messageRouter = new MessageRouter(
+      this.workingPackage.packageFolder,
+      options.messageCallback,
+      options.extractorConfig.messages || { });
 
     this.program = options.program;
     this.typeChecker = options.program.getTypeChecker();
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
-    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup, this.logger);
+    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
+      this.messageRouter);
     this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
   }
 
@@ -515,22 +501,20 @@ export class Collector {
     }
 
     if (effectiveReleaseTag === ReleaseTag.None) {
-      if (this.validationRules.missingReleaseTags !== ExtractorValidationRulePolicy.allow) {
-        if (!astSymbol.isExternal) { // for now, don't report errors for external code
-          // Don't report missing release tags for forgotten exports
-          const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
-          if (entity && entity.exported) {
-            // We also don't report errors for the default export of an entry point, since its doc comment
-            // isn't easy to obtain from the .d.ts file
-            if (astSymbol.rootAstSymbol.localName !== '_default') {
+      if (!astSymbol.isExternal) { // for now, don't report errors for external code
+        // Don't report missing release tags for forgotten exports
+        const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
+        if (entity && entity.exported) {
+          // We also don't report errors for the default export of an entry point, since its doc comment
+          // isn't easy to obtain from the .d.ts file
+          if (astSymbol.rootAstSymbol.localName !== '_default') {
 
-              this.messageRouter.addAnalyzerIssue(
-                ExtractorMessageId.MissingReleaseTag,
-                `"${entity.nameForEmit}" is exported by the package, but it is missing `
-                + `a release tag (@alpha, @beta, @public, or @internal)`,
-                astSymbol
-              );
-            }
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.MissingReleaseTag,
+              `"${entity.astEntity.localName}" is exported by the package, but it is missing `
+              + `a release tag (@alpha, @beta, @public, or @internal)`,
+              astSymbol
+            );
           }
         }
       }
@@ -677,6 +661,10 @@ export class Collector {
     const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
 
     this.messageRouter.addTsdocMessages(parserContext, declaration.getSourceFile(), astDeclaration);
+
+    // We delete the @privateRemarks block as early as possible, to ensure that it never leaks through
+    // into one of the output files.
+    parserContext.docComment.privateRemarks = undefined;
 
     return parserContext;
   }

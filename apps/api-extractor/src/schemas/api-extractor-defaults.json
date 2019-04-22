@@ -1,45 +1,36 @@
 {
-  // ("compiler" is required)
+  // ("mainEntryPointFilePath" is required)
 
-  "project": {
-    // ("entryPointSourceFile" is required)
+  "projectFolder": "<lookup>",
+
+  "compiler": {
+    "tsconfigFilePath": "<projectFolder>/tsconfig.json",
+    "skipLibCheck": false
   },
 
-  "policies": {
-    "namespaceSupport": "conservative"
+  "apiReport": {
+    // ("enabled" is required)
+    "reportFileName": "<unscopedPackageName>.api.md",
+    "reportFolder": "<projectFolder>/etc/",
+    "reportTempFolder": "<projectFolder>/temp/"
   },
 
-  "validationRules": {
-    "missingReleaseTags": "error"
-  },
-
-  "apiReviewFile": {
-    "enabled": true,
-    "apiReviewFolder": "./etc",
-    "tempFolder": "./temp"
-  },
-
-  "apiJsonFile": {
-    "enabled": true,
-    "outputFolder": "./dist"
+  "docModel": {
+    // ("enabled" is required)
+    "apiJsonFilePath": "<projectFolder>/temp/<unscopedPackageName>.api.json"
   },
 
   "dtsRollup": {
-    "enabled": false,
-    "trimming": false,
+    // ("enabled" is required)
 
-    "publishFolder": "./dist",
-
-    "publishFolderForInternal": "./dist/internal",
-    "publishFolderForBeta": "./dist/beta",
-    "publishFolderForPublic": "./dist/public",
-
-    "mainDtsRollupPath": ""
+    "untrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts",
+    "betaTrimmedFilePath": "",
+    "publicTrimmedFilePath": ""
   },
 
   "tsdocMetadata": {
     "enabled": true,
-    "tsdocMetadataPath": ""
+    "tsdocMetadataFilePath": "<lookup>"
   },
 
   "messages": {
@@ -54,23 +45,23 @@
       },
       "ae-forgotten-export": {
         "logLevel": "warning",
-        "addToApiReviewFile": true
+        "addToApiReportFile": true
       },
       "ae-incompatible-release-tags": {
         "logLevel": "warning",
-        "addToApiReviewFile": true
+        "addToApiReportFile": true
       },
       "ae-internal-missing-underscore": {
         "logLevel": "warning",
-        "addToApiReviewFile": true
+        "addToApiReportFile": true
       },
       "ae-unresolved-inheritdoc-reference": {
         "logLevel": "warning",
-        "addToApiReviewFile": true
+        "addToApiReportFile": true
       },
       "ae-unresolved-inheritdoc-base": {
         "logLevel": "warning",
-        "addToApiReviewFile": true
+        "addToApiReportFile": true
       }
     },
     "tsdocMessageReporting": {
@@ -80,6 +71,5 @@
     }
   },
 
-  "skipLibCheck": false,
   "testMode": false
 }

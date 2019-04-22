@@ -1,6 +1,79 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 28 Mar 2019 19:14:27 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Apr 2019 11:01:37 GMT and should not be manually modified.
+
+## 7.1.0
+Tue, 16 Apr 2019 11:01:37 GMT
+
+### Minor changes
+
+- Initial stable release of API Extractor 7
+
+## 7.0.42
+Fri, 12 Apr 2019 06:13:16 GMT
+
+### Patches
+
+- Fix a regression that prevented certain types of warnings from being reported
+
+## 7.0.41
+Thu, 11 Apr 2019 07:14:01 GMT
+
+### Patches
+
+- THIS IS A RELEASE CANDIDATE FOR API-EXTRACTOR 7
+- (Breaking change) Rename "mainEntryPointFile" to "mainEntryPointFilePath" so all settings use a consistent naming convention
+- (Breaking change) Paths that appear in api-extractor.json are now resolved relative to the config file unless prefixed with the `<projectFolder>` token
+- Add a new api-extractor.json setting "tsconfigFilePath" for customizing the tsconfig.json path
+- Replace ExtractorConfig.packageJsonFullPath with ExtractorConfig.packageFolder
+- Upgrade API Extractor to use TypeScript 3.4 for analysis
+
+## 7.0.40
+Tue, 09 Apr 2019 05:31:01 GMT
+
+### Patches
+
+- Improve the "--local" option to automatically create the API report file if it is missing
+
+## 7.0.39
+Mon, 08 Apr 2019 19:12:52 GMT
+
+### Patches
+
+- Rename "addToApiReviewFile" setting to "addToApiReportFile"
+
+## 7.0.38
+Sat, 06 Apr 2019 02:05:51 GMT
+
+### Patches
+
+- (Breaking change) Removed the ILogger API and renamed ExtractorMessageLogLevel to ExtractorLogLevel
+- (Breaking change) Extractor console output is now modeled as ExtractorMessage objects and can be customized/filtered/handled by IExtractorInvokeOptions.messageCallback
+
+## 7.0.37
+Fri, 05 Apr 2019 04:16:16 GMT
+
+### Patches
+
+- Introduce "api-extractor init" command-line that helps enable API Extractor for a new project
+- (Breaking change) Major redesign of the API used to invoke API Extractor
+- (Breaking change) Major redesign of the api-extractor.json config file format
+- Add a CompilerState API that allows an optimization where multiple invocations of Extractor can reuse the same TypeScript compiler analysis
+
+## 7.0.36
+Wed, 03 Apr 2019 02:58:33 GMT
+
+### Patches
+
+- Fix an issue where .d.ts.map file were sometimes mapped to the wrong location
+
+## 7.0.35
+Sat, 30 Mar 2019 22:27:16 GMT
+
+### Patches
+
+- Reintroduce the generated documentation notice for internal constructors
+- Add limited support for resolving @inheritDoc references to external packages by postprocessing them in api-documenter
 
 ## 7.0.34
 Thu, 28 Mar 2019 19:14:27 GMT

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Wed, 20 Mar 2019 19:14:49 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Apr 2019 11:01:37 GMT and should not be manually modified.
+
+## 7.1.0
+Tue, 16 Apr 2019 11:01:37 GMT
+
+### Minor changes
+
+- Initial stable release of API Extractor 7
 
 ## 7.0.28
 Wed, 20 Mar 2019 19:14:49 GMT

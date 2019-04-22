@@ -2,6 +2,285 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "7.0.32",
+      "tag": "@microsoft/web-library-build_v7.0.32",
+      "date": "Tue, 16 Apr 2019 11:01:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.6.27` to `4.6.28`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.3.29` to `3.3.30`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.5` to `8.1.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.96` to `3.4.97`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.55` to `6.0.56`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.7` to `0.3.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.31",
+      "tag": "@microsoft/web-library-build_v7.0.31",
+      "date": "Fri, 12 Apr 2019 06:13:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.6.26` to `4.6.27`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.3.28` to `3.3.29`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.4` to `8.1.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.95` to `3.4.96`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.54` to `6.0.55`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.6` to `0.3.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.30",
+      "tag": "@microsoft/web-library-build_v7.0.30",
+      "date": "Thu, 11 Apr 2019 07:14:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.6.25` to `4.6.26`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.3.27` to `3.3.28`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.3` to `8.1.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.94` to `3.4.95`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.53` to `6.0.54`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.5` to `0.3.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.29",
+      "tag": "@microsoft/web-library-build_v7.0.29",
+      "date": "Tue, 09 Apr 2019 05:31:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.6.24` to `4.6.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.3.26` to `3.3.27`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.2` to `8.1.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.93` to `3.4.94`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.52` to `6.0.53`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.4` to `0.3.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.28",
+      "tag": "@microsoft/web-library-build_v7.0.28",
+      "date": "Mon, 08 Apr 2019 19:12:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.6.23` to `4.6.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.3.25` to `3.3.26`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.1` to `8.1.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.92` to `3.4.93`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.51` to `6.0.52`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.3` to `0.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.27",
+      "tag": "@microsoft/web-library-build_v7.0.27",
+      "date": "Sat, 06 Apr 2019 02:05:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.6.22` to `4.6.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.3.24` to `3.3.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.0` to `8.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.91` to `3.4.92`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.50` to `6.0.51`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.2` to `0.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.26",
+      "tag": "@microsoft/web-library-build_v7.0.26",
+      "date": "Fri, 05 Apr 2019 04:16:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.6.21` to `4.6.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.3.23` to `3.3.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.0.23` to `8.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.90` to `3.4.91`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.49` to `6.0.50`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.1` to `0.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.25",
+      "tag": "@microsoft/web-library-build_v7.0.25",
+      "date": "Wed, 03 Apr 2019 02:58:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.25` to `3.9.26`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.6.20` to `4.6.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.3.22` to `3.3.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.0.22` to `8.0.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.89` to `3.4.90`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.48` to `6.0.49`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.0` to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.24",
+      "tag": "@microsoft/web-library-build_v7.0.24",
+      "date": "Tue, 02 Apr 2019 01:12:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.24` to `3.9.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.6.19` to `4.6.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.3.21` to `3.3.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.0.21` to `8.0.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.88` to `3.4.89`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.47` to `6.0.48`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.20` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.23",
+      "tag": "@microsoft/web-library-build_v7.0.23",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.23` to `3.9.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" from `4.6.18` to `4.6.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-serve\" from `3.3.20` to `3.3.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.0.20` to `8.0.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-webpack\" from `3.4.87` to `3.4.88`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.46` to `6.0.47`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.19` to `0.2.20`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.22",
       "tag": "@microsoft/web-library-build_v7.0.22",
       "date": "Thu, 28 Mar 2019 19:14:27 GMT",

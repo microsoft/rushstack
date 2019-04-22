@@ -2,6 +2,126 @@
   "name": "@microsoft/rush-stack-compiler-3.3",
   "entries": [
     {
+      "version": "0.2.8",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.2.8",
+      "date": "Tue, 16 Apr 2019 11:01:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.42` to `7.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.7",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.2.7",
+      "date": "Fri, 12 Apr 2019 06:13:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.41` to `7.0.42`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.6",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.2.6",
+      "date": "Thu, 11 Apr 2019 07:14:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.40` to `7.0.41`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.5",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.2.5",
+      "date": "Tue, 09 Apr 2019 05:31:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.39` to `7.0.40`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.4",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.2.4",
+      "date": "Mon, 08 Apr 2019 19:12:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.38` to `7.0.39`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.3",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.2.3",
+      "date": "Sat, 06 Apr 2019 02:05:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.37` to `7.0.38`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.2.2",
+      "date": "Fri, 05 Apr 2019 04:16:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.36` to `7.0.37`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.2.1",
+      "date": "Wed, 03 Apr 2019 02:58:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.35` to `7.0.36`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.2.0",
+      "date": "Tue, 02 Apr 2019 01:12:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable declaration maps in the default TSConfigs."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.18",
+      "tag": "@microsoft/rush-stack-compiler-3.3_v0.1.18",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.0.34` to `7.0.35`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.17",
       "tag": "@microsoft/rush-stack-compiler-3.3_v0.1.17",
       "date": "Thu, 28 Mar 2019 19:14:27 GMT",
