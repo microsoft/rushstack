@@ -168,8 +168,11 @@ export class PnpmOptionsConfiguration {
    * The resolution strategy that will be used by PNPM.
    *
    * @remarks
-   * The default value is "fewer-dependencies" i.e. PNPM will prefer package versions
-   * that have already been resolved previously.
+   * This corresponds to the `--resolution-strategy` command-line option for PNPM.  Possible values are
+   * `"fast"` and `"fewer-dependencies"`.  PNPM's default is `"fast"`, but this may be incompatible with certain
+   * packages, for example the `@types` packages from DefinitelyTyped.  Rush's default is `"fewer-dependencies"`,
+   * which causes PNPM to avoid installing a newer version if an already installed version can be reused;
+   * this is more similar to NPM's algorithm.
    */
   public readonly resolutionStrategy: ResolutionStrategy;
 
