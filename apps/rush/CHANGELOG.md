@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 15 Apr 2019 06:40:00 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Apr 2019 07:55:34 GMT and should not be manually modified.
+
+## 5.7.0
+Tue, 23 Apr 2019 07:55:34 GMT
+
+### Updates
+
+- Add support for PNPM version 3 (which changed the shrinkwrap file name to "pnpm-lock.yaml")
+- Add a new rush.json setting "pnpmOptions.resolutionStrategy"
 
 ## 5.6.4
 Mon, 15 Apr 2019 06:40:00 GMT
