@@ -19,7 +19,7 @@ export {
 } from './api/RushConfiguration';
 
 export {
-  PackageManager,
+  PackageManagerName,
   PackageManagerFeatureSet
 } from './api/PackageManagerFeatureSet';
 

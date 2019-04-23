@@ -55,7 +55,7 @@ const MAX_INSTALL_ATTEMPTS: number = 2;
  */
 import { CreateOptions } from 'tar';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { PackageManager } from '../api/PackageManagerFeatureSet';
+import { PackageManagerName } from '../api/PackageManagerFeatureSet';
 
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
@@ -390,7 +390,7 @@ export class InstallManager {
       FileSystem.ensureFolder(rushUserFolder);
     }
 
-    const packageManager: PackageManager = this._rushConfiguration.packageManager;
+    const packageManager: PackageManagerName = this._rushConfiguration.packageManager;
     const packageManagerVersion: string = this._rushConfiguration.packageManagerToolVersion;
 
     const packageManagerAndVersion: string = `${packageManager}-${packageManagerVersion}`;

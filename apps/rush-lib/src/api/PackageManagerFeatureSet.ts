@@ -8,7 +8,7 @@ import { RushConstants } from '../logic/RushConstants';
  * This represents the available Package Manager tools as a string
  * @public
  */
-export type PackageManager = 'pnpm' | 'npm' | 'yarn';
+export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 
 /**
  * Reports the known features of a package manager as detected from its version number.
@@ -18,7 +18,7 @@ export class PackageManagerFeatureSet {
   /**
    * The package manager.
    */
-  public readonly packageManager: PackageManager;
+  public readonly packageManager: PackageManagerName;
 
   /**
    * The SemVer version of the package manager.
@@ -38,7 +38,7 @@ export class PackageManagerFeatureSet {
    */
   public readonly supportsPnpmResolutionStrategy: boolean;
 
-  public constructor(packageManager: PackageManager, version: string) {
+  public constructor(packageManager: PackageManagerName, version: string) {
     this.packageManager = packageManager;
     this.version = version;
 

@@ -21,7 +21,7 @@ import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { Utilities } from '../utilities/Utilities';
-import { PackageManager, PackageManagerFeatureSet } from './PackageManagerFeatureSet';
+import { PackageManagerName, PackageManagerFeatureSet } from './PackageManagerFeatureSet';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -250,7 +250,7 @@ export class RushConfiguration {
   private _commonTempFolder: string;
   private _commonScriptsFolder: string;
   private _commonRushConfigFolder: string;
-  private _packageManager: PackageManager;
+  private _packageManager: PackageManagerName;
   private _packageManagerFeatureSet: PackageManagerFeatureSet;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
@@ -430,7 +430,7 @@ export class RushConfiguration {
    */
   private static _validateCommonRushConfigFolder(
       commonRushConfigFolder: string,
-      packageManager: PackageManager,
+      packageManager: PackageManagerName,
       shrinkwrapFilename: string
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
@@ -482,7 +482,7 @@ export class RushConfiguration {
   /**
    * The name of the package manager being used to install dependencies
    */
-  public get packageManager(): PackageManager {
+  public get packageManager(): PackageManagerName {
     return this._packageManager;
   }
 

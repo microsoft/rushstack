@@ -1,11 +1,11 @@
-import { PackageManager } from '../api/PackageManagerFeatureSet';
+import { PackageManagerName } from '../api/PackageManagerFeatureSet';
 import { BaseShrinkwrapFile } from './base/BaseShrinkwrapFile';
 import { NpmShrinkwrapFile } from './npm/NpmShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { YarnShrinkwrapFile } from './yarn/YarnShrinkwrapFile';
 
 export class ShrinkwrapFileFactory {
-  public static getShrinkwrapFile(packageManager: PackageManager,
+  public static getShrinkwrapFile(packageManager: PackageManagerName,
     shrinkwrapFilename: string): BaseShrinkwrapFile | undefined {
 
     switch (packageManager) {

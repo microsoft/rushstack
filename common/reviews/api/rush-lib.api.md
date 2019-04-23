@@ -192,17 +192,17 @@ export class PackageJsonEditor {
     readonly version: string;
 }
 
-// @public
-export type PackageManager = 'pnpm' | 'npm' | 'yarn';
-
 // @beta
 export class PackageManagerFeatureSet {
-    constructor(packageManager: PackageManager, version: string);
-    readonly packageManager: PackageManager;
+    constructor(packageManager: PackageManagerName, version: string);
+    readonly packageManager: PackageManagerName;
     readonly shrinkwrapFilename: string;
     readonly supportsPnpmResolutionStrategy: boolean;
     readonly version: string;
 }
+
+// @public
+export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 
 // @public
 export class PnpmOptionsConfiguration {
@@ -256,7 +256,7 @@ export class RushConfiguration {
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
     readonly npmCacheFolder: string;
     readonly npmTmpFolder: string;
-    readonly packageManager: PackageManager;
+    readonly packageManager: PackageManagerName;
     // @beta
     readonly packageManagerFeatureSet: PackageManagerFeatureSet;
     readonly packageManagerToolFilename: string;
