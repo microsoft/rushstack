@@ -39,7 +39,7 @@
 *.jpg             binary
 *.js              text eol=crlf
 *.json            text eol=crlf
-*.json            linguist-language=JSON5
+*.json            linguist-language=JSON-with-Comments
 *.less            text eol=crlf
 *.map             text eol=lf
 *.md              text eol=crlf
