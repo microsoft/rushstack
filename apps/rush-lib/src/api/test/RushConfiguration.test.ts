@@ -115,7 +115,7 @@ describe('RushConfiguration', () => {
 
     expect(rushConfiguration.packageManager).toEqual('pnpm');
     assertPathProperty('committedShrinkwrapFilename',
-      rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/shrinkwrap.yaml');
+      rushConfiguration.committedShrinkwrapFilename, './repo/common/config/rush/pnpm-lock.yaml');
     assertPathProperty('commonFolder',
       rushConfiguration.commonFolder, './repo/common');
     assertPathProperty('commonRushConfigFolder',
@@ -164,6 +164,28 @@ describe('RushConfiguration', () => {
     assertPathProperty('project1.projectFolder', project1.projectFolder, './repo/project1');
     expect(project1.tempProjectName).toEqual('@rush-temp/project1');
     expect(project1.unscopedTempProjectName).toEqual('project1');
+
+    done();
+  });
+
+  it('can load repo/rush-pnpm-2.json', (done: jest.DoneCallback) => {
+    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-2.json');
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+
+    expect(rushConfiguration.packageManager).toEqual('pnpm');
+    expect(rushConfiguration.packageManagerToolVersion).toEqual('2.0.0');
+    expect(rushConfiguration.shrinkwrapFilename).toEqual('shrinkwrap.yaml');
+
+    done();
+  });
+
+  it('can load repo/rush-pnpm-3.json', (done: jest.DoneCallback) => {
+    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-3.json');
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+
+    expect(rushConfiguration.packageManager).toEqual('pnpm');
+    expect(rushConfiguration.packageManagerToolVersion).toEqual('3.0.0');
+    expect(rushConfiguration.shrinkwrapFilename).toEqual('pnpm-lock.yaml');
 
     done();
   });

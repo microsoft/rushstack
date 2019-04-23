@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add a new rush.json setting \"pnpmOptions.resolutionStrategy\"",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "17160067+tnc1997@users.noreply.github.com"
+}

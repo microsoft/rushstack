@@ -192,8 +192,19 @@ export class PackageJsonEditor {
     readonly version: string;
 }
 
+// @beta
+export abstract class PackageManager {
+    // @internal
+    protected constructor(version: string, packageManager: PackageManagerName);
+    readonly packageManager: PackageManagerName;
+    readonly shrinkwrapFilename: string;
+    // (undocumented)
+    protected _shrinkwrapFilename: string;
+    readonly version: string;
+}
+
 // @public
-export type PackageManager = 'pnpm' | 'npm' | 'yarn';
+export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 
 // @public
 export class PnpmOptionsConfiguration {
@@ -201,8 +212,12 @@ export class PnpmOptionsConfiguration {
     // 
     // @internal
     constructor(json: IPnpmOptionsJson);
+    readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
 }
+
+// @public
+export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 // @public
 export class Rush {
@@ -243,9 +258,11 @@ export class RushConfiguration {
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
     readonly npmCacheFolder: string;
     readonly npmTmpFolder: string;
-    readonly packageManager: PackageManager;
+    readonly packageManager: PackageManagerName;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
+    // @beta
+    readonly packageManagerWrapper: PackageManager;
     readonly pnpmOptions: PnpmOptionsConfiguration;
     readonly pnpmStoreFolder: string;
     readonly projectFolderMaxDepth: number;
@@ -258,6 +275,7 @@ export class RushConfiguration {
     readonly rushJsonFile: string;
     readonly rushJsonFolder: string;
     readonly rushLinkJsonFilename: string;
+    readonly shrinkwrapFilename: string;
     readonly shrinkwrapFilePhrase: string;
     // @beta
     readonly telemetryEnabled: boolean;
