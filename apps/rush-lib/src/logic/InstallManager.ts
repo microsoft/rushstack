@@ -33,7 +33,7 @@ import { Git } from '../logic/Git';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { PurgeManager } from './PurgeManager';
-import { RushConfiguration, PackageManager, ICurrentVariantJson } from '../api/RushConfiguration';
+import { RushConfiguration, ICurrentVariantJson } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
@@ -55,6 +55,7 @@ const MAX_INSTALL_ATTEMPTS: number = 2;
  */
 import { CreateOptions } from 'tar';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { PackageManager } from '../api/PackageManagerFeatureSet';
 
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
@@ -1135,7 +1136,9 @@ export class InstallManager {
         args.push('--strict-peer-dependencies');
       }
 
-      args.push('--resolution-strategy', this._rushConfiguration.pnpmOptions.resolutionStrategy);
+      if (this._rushConfiguration.packageManagerFeatureSet.supportsPnpmResolutionStrategy) {
+        args.push('--resolution-strategy', this._rushConfiguration.pnpmOptions.resolutionStrategy);
+      }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');
       args.push('--cache-folder', this._rushConfiguration.yarnCacheFolder);

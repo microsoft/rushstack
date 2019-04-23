@@ -1,4 +1,4 @@
-import { PackageManager } from '../api/RushConfiguration';
+import { PackageManager } from '../api/PackageManagerFeatureSet';
 import { BaseShrinkwrapFile } from './base/BaseShrinkwrapFile';
 import { NpmShrinkwrapFile } from './npm/NpmShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';

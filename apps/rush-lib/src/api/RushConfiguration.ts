@@ -21,6 +21,7 @@ import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { Utilities } from '../utilities/Utilities';
+import { PackageManager, PackageManagerFeatureSet } from './PackageManagerFeatureSet';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -168,11 +169,15 @@ export class PnpmOptionsConfiguration {
    * The resolution strategy that will be used by PNPM.
    *
    * @remarks
-   * This corresponds to the `--resolution-strategy` command-line option for PNPM.  Possible values are
-   * `"fast"` and `"fewer-dependencies"`.  PNPM's default is `"fast"`, but this may be incompatible with certain
-   * packages, for example the `@types` packages from DefinitelyTyped.  Rush's default is `"fewer-dependencies"`,
-   * which causes PNPM to avoid installing a newer version if an already installed version can be reused;
-   * this is more similar to NPM's algorithm.
+   * Configures the strategy used to select versions during installation.
+   *
+   * This feature requires PNPM version 3.1 or newer.  It corresponds to the `--resolution-strategy` command-line
+   * option for PNPM.  Possible values are `"fast"` and `"fewer-dependencies"`.  PNPM's default is `"fast"`, but this
+   * may be incompatible with certain packages, for example the `@types` packages from DefinitelyTyped.  Rush's default
+   * is `"fewer-dependencies"`, which causes PNPM to avoid installing a newer version if an already installed version
+   * can be reused; this is more similar to NPM's algorithm.
+   *
+   * For more background, see this discussion: {@link https://github.com/pnpm/pnpm/issues/1187}
    */
   public readonly resolutionStrategy: ResolutionStrategy;
 
@@ -225,12 +230,6 @@ export interface ITryFindRushJsonLocationOptions {
 }
 
 /**
- * This represents the available Package Manager tools as a string
- * @public
- */
-export type PackageManager = 'pnpm' | 'npm' | 'yarn';
-
-/**
  * This represents the available PNPM resolution strategies as a string
  * @public
  */
@@ -252,6 +251,7 @@ export class RushConfiguration {
   private _commonScriptsFolder: string;
   private _commonRushConfigFolder: string;
   private _packageManager: PackageManager;
+  private _packageManagerFeatureSet: PackageManagerFeatureSet;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
   private _pnpmStoreFolder: string;
@@ -484,6 +484,14 @@ export class RushConfiguration {
    */
   public get packageManager(): PackageManager {
     return this._packageManager;
+  }
+
+  /**
+   * {@inheritdoc PackageManagerFeatureSet}
+   * @beta
+   */
+  public get packageManagerFeatureSet(): PackageManagerFeatureSet {
+    return this._packageManagerFeatureSet;
   }
 
   /**
@@ -1023,20 +1031,15 @@ export class RushConfiguration {
 
     if (this._packageManager === 'npm') {
       this._packageManagerToolVersion = rushConfigurationJson.npmVersion!;
-      this._shrinkwrapFilename = RushConstants.npmShrinkwrapFilename;
     } else if (this._packageManager === 'pnpm') {
       this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
-
-      const parsedVersion: semver.SemVer = new semver.SemVer(this._packageManagerToolVersion);
-      if (parsedVersion.major < 3) {
-        this._shrinkwrapFilename = RushConstants.pnpmV1ShrinkwrapFilename;
-      } else {
-        this._shrinkwrapFilename = RushConstants.pnpmV3ShrinkwrapFilename;
-      }
     } else {
       this._packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
-      this._shrinkwrapFilename = RushConstants.yarnShrinkwrapFilename;
     }
+
+    this._packageManagerFeatureSet = new PackageManagerFeatureSet(this._packageManager,
+      this._packageManagerToolVersion);
+    this._shrinkwrapFilename = this._packageManagerFeatureSet.shrinkwrapFilename;
 
     this._tempShrinkwrapFilename = path.join(
         this._commonTempFolder, this._shrinkwrapFilename

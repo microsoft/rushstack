@@ -195,6 +195,15 @@ export class PackageJsonEditor {
 // @public
 export type PackageManager = 'pnpm' | 'npm' | 'yarn';
 
+// @beta
+export class PackageManagerFeatureSet {
+    constructor(packageManager: PackageManager, version: string);
+    readonly packageManager: PackageManager;
+    readonly shrinkwrapFilename: string;
+    readonly supportsPnpmResolutionStrategy: boolean;
+    readonly version: string;
+}
+
 // @public
 export class PnpmOptionsConfiguration {
     // Warning: (ae-forgotten-export) The symbol "IPnpmOptionsJson" needs to be exported by the entry point index.d.ts
@@ -248,6 +257,8 @@ export class RushConfiguration {
     readonly npmCacheFolder: string;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManager;
+    // @beta
+    readonly packageManagerFeatureSet: PackageManagerFeatureSet;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
     readonly pnpmOptions: PnpmOptionsConfiguration;
