@@ -21,7 +21,10 @@ import { VersionPolicyConfiguration } from './VersionPolicyConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { Utilities } from '../utilities/Utilities';
-import { PackageManagerName, PackageManagerFeatureSet } from './PackageManagerFeatureSet';
+import { PackageManagerName, PackageManager } from './packageManager/PackageManager';
+import { NpmPackageManager } from './packageManager/NpmPackageManager';
+import { YarnPackageManager } from './packageManager/YarnPackageManager';
+import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 
@@ -251,7 +254,7 @@ export class RushConfiguration {
   private _commonScriptsFolder: string;
   private _commonRushConfigFolder: string;
   private _packageManager: PackageManagerName;
-  private _packageManagerFeatureSet: PackageManagerFeatureSet;
+  private _packageManagerWrapper: PackageManager;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
   private _pnpmStoreFolder: string;
@@ -487,11 +490,16 @@ export class RushConfiguration {
   }
 
   /**
-   * {@inheritdoc PackageManagerFeatureSet}
+   * {@inheritdoc PackageManager}
+   *
+   * @privateremarks
+   * In the next major breaking API change, we will rename this property to "packageManager" and eliminate the
+   * old property with that name.
+   *
    * @beta
    */
-  public get packageManagerFeatureSet(): PackageManagerFeatureSet {
-    return this._packageManagerFeatureSet;
+  public get packageManagerWrapper(): PackageManager {
+    return this._packageManagerWrapper;
   }
 
   /**
@@ -1031,15 +1039,16 @@ export class RushConfiguration {
 
     if (this._packageManager === 'npm') {
       this._packageManagerToolVersion = rushConfigurationJson.npmVersion!;
+      this._packageManagerWrapper = new NpmPackageManager(this._packageManagerToolVersion);
     } else if (this._packageManager === 'pnpm') {
       this._packageManagerToolVersion = rushConfigurationJson.pnpmVersion!;
+      this._packageManagerWrapper = new PnpmPackageManager(this._packageManagerToolVersion);
     } else {
       this._packageManagerToolVersion = rushConfigurationJson.yarnVersion!;
+      this._packageManagerWrapper = new YarnPackageManager(this._packageManagerToolVersion);
     }
 
-    this._packageManagerFeatureSet = new PackageManagerFeatureSet(this._packageManager,
-      this._packageManagerToolVersion);
-    this._shrinkwrapFilename = this._packageManagerFeatureSet.shrinkwrapFilename;
+    this._shrinkwrapFilename = this._packageManagerWrapper.shrinkwrapFilename;
 
     this._tempShrinkwrapFilename = path.join(
         this._commonTempFolder, this._shrinkwrapFilename

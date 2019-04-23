@@ -20,8 +20,8 @@ export {
 
 export {
   PackageManagerName,
-  PackageManagerFeatureSet
-} from './api/PackageManagerFeatureSet';
+  PackageManager
+} from './api/packageManager/PackageManager';
 
 export {
   EnvironmentVariableNames

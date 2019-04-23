@@ -193,11 +193,13 @@ export class PackageJsonEditor {
 }
 
 // @beta
-export class PackageManagerFeatureSet {
-    constructor(packageManager: PackageManagerName, version: string);
+export abstract class PackageManager {
+    // @internal
+    protected constructor(version: string, packageManager: PackageManagerName);
     readonly packageManager: PackageManagerName;
     readonly shrinkwrapFilename: string;
-    readonly supportsPnpmResolutionStrategy: boolean;
+    // (undocumented)
+    protected _shrinkwrapFilename: string;
     readonly version: string;
 }
 
@@ -257,10 +259,10 @@ export class RushConfiguration {
     readonly npmCacheFolder: string;
     readonly npmTmpFolder: string;
     readonly packageManager: PackageManagerName;
-    // @beta
-    readonly packageManagerFeatureSet: PackageManagerFeatureSet;
     readonly packageManagerToolFilename: string;
     readonly packageManagerToolVersion: string;
+    // @beta
+    readonly packageManagerWrapper: PackageManager;
     readonly pnpmOptions: PnpmOptionsConfiguration;
     readonly pnpmStoreFolder: string;
     readonly projectFolderMaxDepth: number;

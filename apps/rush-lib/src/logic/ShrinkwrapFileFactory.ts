@@ -1,4 +1,4 @@
-import { PackageManagerName } from '../api/PackageManagerFeatureSet';
+import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { BaseShrinkwrapFile } from './base/BaseShrinkwrapFile';
 import { NpmShrinkwrapFile } from './npm/NpmShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';

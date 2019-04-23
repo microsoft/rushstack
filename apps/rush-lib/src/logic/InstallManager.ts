@@ -55,7 +55,8 @@ const MAX_INSTALL_ATTEMPTS: number = 2;
  */
 import { CreateOptions } from 'tar';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
-import { PackageManagerName } from '../api/PackageManagerFeatureSet';
+import { PackageManagerName } from '../api/packageManager/PackageManager';
+import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
@@ -1136,7 +1137,7 @@ export class InstallManager {
         args.push('--strict-peer-dependencies');
       }
 
-      if (this._rushConfiguration.packageManagerFeatureSet.supportsPnpmResolutionStrategy) {
+      if ((this._rushConfiguration.packageManagerWrapper as PnpmPackageManager).supportsResolutionStrategy) {
         args.push('--resolution-strategy', this._rushConfiguration.pnpmOptions.resolutionStrategy);
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
