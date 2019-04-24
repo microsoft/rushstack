@@ -79,7 +79,17 @@ export function extractVersionFromPnpmVersionSpecifier(version: string): string 
 
   // it had no slashes, so we know it is a version like "0.0.5"
   if (versionParts.length === 1) {
-    extractedVersion = version; // e.g. "0.0.5"
+    const underscoreIndex: number = version.indexOf('_');
+    if (underscoreIndex >= 0) {
+      // This form was introduced in PNPM 3 (lockfile version 5):
+      //
+      // Example: 23.6.0_babel-core@6.26.3
+      // Example: 1.0.7_request@2.88.0
+      // Example: 1.0.3_@pnpm+logger@1.0.2
+      extractedVersion = version.substr(0, underscoreIndex);
+    } else {
+      extractedVersion = version; // e.g. "0.0.5"
+    }
   } else {
     const isScoped: boolean = versionParts[1].indexOf('@') === 0;
 
@@ -198,7 +208,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean { // override
-    // dependencyVersion could be a relattive or absolute path, for those cases we
+    // dependencyVersion could be a relative or absolute path, for those cases we
     // need to extract the version from the end of the path.
     return super.checkValidVersionRange(dependencyVersion.split('/').pop()!, versionRange);
   }
