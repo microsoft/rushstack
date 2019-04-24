@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.7.1",
+      "tag": "@microsoft/rush_v5.7.1",
+      "date": "Wed, 24 Apr 2019 06:32:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where Rush sometimes failed to parse versions from PNPM 3.x's pnpm-lock.yaml"
+          },
+          {
+            "comment": "Update the .gitattributes file written by \"rush init\" to use a better syntax highlighter for JSON files"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.7.0",
       "tag": "@microsoft/rush_v5.7.0",
       "date": "Tue, 23 Apr 2019 07:55:34 GMT",
