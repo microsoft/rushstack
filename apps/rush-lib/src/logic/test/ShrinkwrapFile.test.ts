@@ -77,6 +77,12 @@ describe('extractVersionFromPnpmVersionSpecifier', () => {
     expect(extractVersionFromPnpmVersionSpecifier('example.pkgs.visualstudio.com/@scope/testDep/1.2.3-beta.3'))
       .toEqual('1.2.3-beta.3');
   });
+  it('extracts a V5 version without a scope', () => {
+    expect(extractVersionFromPnpmVersionSpecifier('23.6.0_babel-core@6.26.3')).toEqual('23.6.0');
+  });
+  it('extracts a V5 peer dependency with a scope', () => {
+    expect(extractVersionFromPnpmVersionSpecifier('1.0.3_@pnpm+logger@1.0.2')).toEqual('1.0.3');
+  });
   it('handles bad cases', () => {
     expect(extractVersionFromPnpmVersionSpecifier('/foo/gulp-karma/0.0.5/karma@0.13.22')).toEqual(undefined);
     expect(extractVersionFromPnpmVersionSpecifier('/@ms/3.1.1/foo@13.1.0')).toEqual(undefined);

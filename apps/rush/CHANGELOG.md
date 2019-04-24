@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 23 Apr 2019 07:55:34 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Apr 2019 06:32:17 GMT and should not be manually modified.
+
+## 5.7.1
+Wed, 24 Apr 2019 06:32:17 GMT
+
+### Updates
+
+- Fix an issue where Rush sometimes failed to parse versions from PNPM 3.x's pnpm-lock.yaml
+- Update the .gitattributes file written by "rush init" to use a better syntax highlighter for JSON files
 
 ## 5.7.0
 Tue, 23 Apr 2019 07:55:34 GMT
