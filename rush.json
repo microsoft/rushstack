@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.6.1",
+  "rushVersion": "5.7.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "2.25.7",
+  "pnpmVersion": "3.1.1",
 
   // "npmVersion": "4.5.0",
   // "yarnVersion": "1.9.4",
@@ -46,7 +46,19 @@
      * The default value is false to avoid legacy compatibility issues.
      * It is strongly recommended to set strictPeerDependencies=true.
      */
-    "strictPeerDependencies": true
+    // "strictPeerDependencies": true,
+
+
+    /**
+     * Configures the strategy used to select versions during installation.
+     *
+     * This feature requires PNPM version 3.1 or newer.  It corresponds to the "--resolution-strategy" command-line
+     * option for PNPM.  Possible values are "fast" and "fewer-dependencies".  PNPM's default is "fast", but this may
+     * be incompatible with certain packages, for example the "@types" packages from DefinitelyTyped.  Rush's default
+     * is "fewer-dependencies", which causes PNPM to avoid installing a newer version if an already installed version
+     * can be reused; this is more similar to NPM's algorithm.
+     */
+    // "resolutionStrategy": "fast"
   },
 
   /**
@@ -61,9 +73,12 @@
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
-   * uncomment this line. Note this is effectively like running "rush check" before the following:
+   * uncomment this line. This is effectively similar to running "rush check" before any
+   * of the following commands:
+   *
    *   rush install, rush update, rush link, rush version, rush publish
-   * In some cases you may want this turned on, but need to allow some packages to use a different
+   *
+   * In some cases you may want this turned on, but need to allow certain packages to use a different
    * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
    * section of the common-versions.json.
    */
@@ -87,7 +102,7 @@
    * that brings people together, and maybe also identifies poor coding practices (e.g. file
    * references that reach into other project's folders without using NodeJS module resolution).
    *
-   * The defaults are projectFolderMinDepth=2 and projectFolderMaxDepth=2.
+   * The defaults are projectFolderMinDepth=1 and projectFolderMaxDepth=2.
    *
    * To remove these restrictions, you could set projectFolderMinDepth=1
    * and set projectFolderMaxDepth to a large number.
@@ -126,7 +141,7 @@
       * if the underlying package was already approved, this would imply that the typings
       * are also approved.
       */
-      "ignoredNpmScopes": [ "@types" ]
+     "ignoredNpmScopes": [ "@types" ]
    },
 
   /**
@@ -146,8 +161,8 @@
      * RegExp escapes need two backspashes, and ordinary periods should be "\\.".
      */
     // "allowedEmailRegExps": [
-    //  "[^@]+@users\\.noreply\\.github\\.com",
-    //  "travis@example\\.org"
+    //   "[^@]+@users\\.noreply\\.github\\.com",
+    //   "travis@example\\.org"
     // ],
     "allowedEmailRegExps": [
       "[^@]+@users\\.noreply\\.github\\.com",
@@ -160,6 +175,15 @@
      * expressions.
      */
     "sampleEmail": "mrexample@users.noreply.github.com"
+
+    /**
+     * The commit message to use when committing changes during 'rush publish'.
+     *
+     * For example, if you want to prevent these commits from triggering a CI build,
+     * you might configure your system's trigger to look for a special string such as "[skip-ci]"
+     * in the commit message, and then customize Rush's message to contain that string.
+     */
+    // "versionBumpCommitMessage": "Applying package updates. [skip-ci]"
   },
 
   "repository": {
@@ -207,6 +231,37 @@
      */
     "postRushBuild": []
   },
+
+  /**
+   * Installation variants allow you to maintain a parallel set of configuration files that can be
+   * used to build the entire monorepo with an alternate set of dependencies.  For example, suppose
+   * you upgrade all your projects to use a new release of an important framework, but during a transition period
+   * you intend to maintain compability with the old release.  In this situation, you probably want your
+   * CI validation to build the entire repo twice: once with the old release, and once with the new release.
+   *
+   * Rush "installation variants" correspond to sets of config files located under this folder:
+   *
+   *   common/config/rush/variants/<variant_name>
+   *
+   * The variant folder can contain an alternate common-versions.json file.  Its "preferredVersions" field can be used
+   * to select older versions of dependencies (within a loose SemVer range specified in your package.json files).
+   * To install a variant, run "rush install --variant <variant_name>".
+   *
+   * For more details and instructions, see this article:  https://rushjs.io/pages/advanced/installation_variants/
+   */
+  "variants": [
+    // {
+    //   /**
+    //    * The folder name for this variant.
+    //    */
+    //   "variantName": "old-sdk",
+    //
+    //   /**
+    //    * An informative description
+    //    */
+    //   "description": "Build this repo using the previous release of the SDK"
+    // }
+  ],
 
   /**
    * Rush can collect anonymous telemetry about everyday developer activity such as
