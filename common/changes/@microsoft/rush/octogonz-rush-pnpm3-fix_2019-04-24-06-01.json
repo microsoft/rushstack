@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix an issue where Rush sometimes failed to parse versions from PNPM 3.x's pnpm-lockfile.yaml",
+      "comment": "Fix an issue where Rush sometimes failed to parse versions from PNPM 3.x's pnpm-lock.yaml",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
