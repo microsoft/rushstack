@@ -72,7 +72,7 @@ dependencies:
   '@types/inquirer': 0.0.43
   '@types/jest': 23.3.11
   '@types/jju': 1.4.1
-  '@types/js-yaml': 3.9.1
+  '@types/js-yaml': 3.12.1
   '@types/loader-utils': 1.1.3
   '@types/lodash': 4.14.116
   '@types/mime': 0.0.29
@@ -131,7 +131,7 @@ dependencies:
   jest-environment-jsdom: 22.4.3
   jest-resolve: 22.4.3
   jju: 1.4.0
-  js-yaml: 3.9.1
+  js-yaml: 3.13.1
   jsdom: 11.11.0
   loader-utils: 1.1.0
   lodash: 4.17.11
@@ -201,7 +201,7 @@ packages:
       lodash: 4.17.11
       resolve: 1.8.1
       source-map: 0.6.1
-      typescript: 3.4.4
+      typescript: 3.4.5
     dev: false
     hasBin: true
     resolution:
@@ -499,10 +499,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-LFt+YA7Lv2IZROMwokZKiPNORAV5N3huMs3IKnzlE430HWhWYZ8b+78HiwJXJJP1V2IEjinyJURuRJfGoaFSIA==
-  /@types/js-yaml/3.9.1:
+  /@types/js-yaml/3.12.1:
     dev: false
     resolution:
-      integrity: sha512-6ejot8/A47YhEGg8K/Gi+/Nu4vohMgxEG383aBaHKjrGjJUQE7umk+vg5I7TaPe4C99nUZrCDw+weK3M7gg/oA==
+      integrity: sha512-SGGAhXLHDx+PK4YLNcNGa6goPf9XRWQNAUUbffkwVGGXIxmDKWyGGL4inzq2sPmExu431Ekb9aEMn9BkPqEYFA==
   /@types/loader-utils/1.1.3:
     dependencies:
       '@types/node': 8.5.8
@@ -1160,7 +1160,7 @@ packages:
   /autoprefixer/9.1.5:
     dependencies:
       browserslist: 4.5.5
-      caniuse-lite: 1.0.30000962
+      caniuse-lite: 1.0.30000963
       normalize-range: 0.1.2
       num2fraction: 1.2.2
       postcss: 7.0.5
@@ -1581,9 +1581,9 @@ packages:
       integrity: sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==
   /browserslist/4.5.5:
     dependencies:
-      caniuse-lite: 1.0.30000962
-      electron-to-chromium: 1.3.125
-      node-releases: 1.1.15
+      caniuse-lite: 1.0.30000963
+      electron-to-chromium: 1.3.127
+      node-releases: 1.1.17
     dev: false
     hasBin: true
     resolution:
@@ -1693,10 +1693,10 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-1UVjW+HjPFQmScaRc+Xeas+uNN0=
-  /caniuse-lite/1.0.30000962:
+  /caniuse-lite/1.0.30000963:
     dev: false
     resolution:
-      integrity: sha512-WXYsW38HK+6eaj5IZR16Rn91TGhU3OhbwjKZvJ4HN/XBIABLKfbij9Mnd3pM0VEwZSlltWjoWg3I8FQ0DGgNOA==
+      integrity: sha512-n4HUiullc7Lw0LyzpeLa2ffP8KxFBGdxqD/8G3bSL6oB758hZ2UE2CVK+tQN958tJIi0/tfpjAc67aAtoHgnrQ==
   /capture-exit/1.2.0:
     dependencies:
       rsvp: 3.6.2
@@ -2456,10 +2456,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
-  /electron-to-chromium/1.3.125:
+  /electron-to-chromium/1.3.127:
     dev: false
     resolution:
-      integrity: sha512-XxowpqQxJ4nDwUXHtVtmEhRqBpm2OnjBomZmZtHD0d2Eo0244+Ojezhk3sD/MBSSe2nxCdGQFRXHIsf/LUTL9A==
+      integrity: sha512-1o25iFRf/dbgauTWalEzmD1EmRN3a2CzP/K7UVpYLEBduk96LF0FyUdCcf4Ry2mAWJ1VxyblFjC93q6qlLwA2A==
   /elliptic/6.4.1:
     dependencies:
       bn.js: 4.11.8
@@ -3729,7 +3729,7 @@ packages:
       node: '>=0.4.7'
     hasBin: true
     optionalDependencies:
-      uglify-js: 3.5.6
+      uglify-js: 3.5.8
     resolution:
       integrity: sha512-nvfrjqvt9xQ8Z/w0ijewdD/vvWDTOweBUm96NTr66Wfvo1mJenBLwcYmPs3TIBP5ruzYGD7Hx/DaM9RmhroGPw==
   /har-schema/2.0.0:
@@ -4439,7 +4439,7 @@ packages:
       istanbul-lib-report: 1.1.5
       istanbul-lib-source-maps: 1.2.6
       istanbul-reports: 1.5.1
-      js-yaml: 3.9.1
+      js-yaml: 3.13.1
       mkdirp: 0.5.1
       once: 1.4.0
     dev: false
@@ -4507,7 +4507,7 @@ packages:
       esprima: 2.5.0
       fileset: 0.2.1
       handlebars: 4.1.2
-      js-yaml: 3.9.1
+      js-yaml: 3.13.1
       mkdirp: 0.5.1
       nopt: 3.0.6
       once: 1.4.0
@@ -4531,7 +4531,7 @@ packages:
       esprima: 2.7.3
       glob: 5.0.15
       handlebars: 4.1.2
-      js-yaml: 3.9.1
+      js-yaml: 3.13.1
       mkdirp: 0.5.1
       nopt: 3.0.6
       once: 1.4.0
@@ -5121,14 +5121,14 @@ packages:
     dev: false
     resolution:
       integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==
-  /js-yaml/3.9.1:
+  /js-yaml/3.13.1:
     dependencies:
       argparse: 1.0.10
       esprima: 4.0.1
     dev: false
     hasBin: true
     resolution:
-      integrity: sha512-CbcG379L1e+mWBnLvHWWeLs8GyV/EMw862uLI3c+GxVyDHWZcjZinwuBd3iW2pgxgIlksW/1vNJa4to+RvDOww==
+      integrity: sha512-YfbcO7jXDdyj0DGxYVSlSeQNHbD7XPWvrVWeVUujrQEoZzWJIRrCPoyk6kL6IAjAG2IolMK4T0hNUe0HOUs5Jw==
   /jsbn/0.1.1:
     dev: false
     resolution:
@@ -6043,12 +6043,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-SUDEb+o71XR5lXSTyivXd9J7fCloE3SyP4lSgt3lU2oSANiox+SxlNRGPjDKrwU1YN3ix2KN/VGGCg0t01rttQ==
-  /node-releases/1.1.15:
+  /node-releases/1.1.17:
     dependencies:
       semver: 5.3.0
     dev: false
     resolution:
-      integrity: sha512-cKV097BQaZr8LTSRUa2+oc/aX5L8UkZtPQrMSTgiJEeaW7ymTDCoRaGCoaTqk0lqnalcoSHu4wjSl0Cmj2+bMw==
+      integrity: sha512-/SCjetyta1m7YXLgtACZGDYJdCSIBAWorDWkGCGZlydP2Ll7J48l7j/JxNYZ+xsgSPbWfdulVS/aY+GdjUsQ7Q==
   /node-sass/4.9.3:
     dependencies:
       async-foreach: 0.1.3
@@ -6087,7 +6087,7 @@ packages:
   /normalize-package-data/2.5.0:
     dependencies:
       hosted-git-info: 2.7.1
-      resolve: 1.10.0
+      resolve: 1.10.1
       semver: 5.3.0
       validate-npm-package-license: 3.0.4
     dev: false
@@ -7250,12 +7250,12 @@ packages:
     dev: false
     resolution:
       integrity: sha1-IDEU2CrSxe2ejgQRs5ModeiJ6Xs=
-  /resolve/1.10.0:
+  /resolve/1.10.1:
     dependencies:
       path-parse: 1.0.6
     dev: false
     resolution:
-      integrity: sha512-3sUr9aq5OfSg2S9pNtPA9hL1FVEAjvfOC4leW0SNf/mpnaakz2a9femSd6LqAww2RaFctwyf1lCqnTHuF1rxDg==
+      integrity: sha512-KuIe4mf++td/eFb6wkaPbMDnP6kObCaEtIDuHOUED6MNUo4K670KZUHuuvYPZDxNF0WVLw49n06M2m2dXphEzA==
   /resolve/1.8.1:
     dependencies:
       path-parse: 1.0.6
@@ -8276,7 +8276,7 @@ packages:
       commander: 2.20.0
       diff: 3.5.0
       glob: 7.1.3
-      js-yaml: 3.9.1
+      js-yaml: 3.13.1
       minimatch: 3.0.4
       resolve: 1.8.1
       semver: 5.3.0
@@ -8395,13 +8395,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-jjOcCZvpkl2+z7JFn0yBOoLQyLoIkNZAs/fYJkUG6VKy6zLPHJGfQJYFHzibB6GJaF/8QrcECtlQ5cpvRHSMEA==
-  /typescript/3.4.4:
+  /typescript/3.4.5:
     dev: false
     engines:
       node: '>=4.2.0'
     hasBin: true
     resolution:
-      integrity: sha512-xt5RsIRCEaf6+j9AyOBgvVuAec0i92rgCaS3S+UVf5Z/vF2Hvtsw08wtUTJqp4djwznoAgjSxeCcU4r+CcDBJA==
+      integrity: sha512-YycBxUb49UUhdNMU5aJ7z5Ej2XGmaIBL0x34vZ82fn3hGvD+bgrMrVDpatgz2f7YxUMJxMkbWxJZeAvDxVe7Vw==
   /uglify-js/2.8.29:
     dependencies:
       source-map: 0.5.7
@@ -8424,7 +8424,7 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-0h/qGay016GG2lVav3Kz174F3T2Vjlz2v6HCt+WDQpoXfco0hWwF5gHK9yh88mUYvIC+N7Z8NT8WpjSp1yoqGA==
-  /uglify-js/3.5.6:
+  /uglify-js/3.5.8:
     dependencies:
       commander: 2.20.0
       source-map: 0.6.1
@@ -8434,7 +8434,7 @@ packages:
     hasBin: true
     optional: true
     resolution:
-      integrity: sha512-YDKRX8F0Y+Jr7LhoVk0n4G7ltR3Y7qFAj+DtVBthlOgCcIj1hyMigCfousVfn9HKmvJ+qiFlLDwaHx44/e5ZKw==
+      integrity: sha512-GFSjB1nZIzoIq70qvDRtWRORHX3vFkAnyK/rDExc0BN7r9+/S+Voz3t/fwJuVfjppAMz+ceR2poE7tkhvnVwQQ==
   /uglify-to-browserify/1.0.2:
     dev: false
     optional: true
@@ -9027,16 +9027,16 @@ packages:
     dependencies:
       '@microsoft/tsdoc': 0.12.9
       '@types/jest': 23.3.11
-      '@types/js-yaml': 3.9.1
+      '@types/js-yaml': 3.12.1
       '@types/node': 8.5.8
       colors: 1.2.5
       gulp: 3.9.1
       jest: 23.6.0
-      js-yaml: 3.9.1
+      js-yaml: 3.13.1
     dev: false
     name: '@rush-temp/api-documenter'
     resolution:
-      integrity: sha512-WX18L5ODsCbDzOHk/a3fl1DFtpSaD/btCS1F4WtU0vVXtO6SdWD4UfQ9vef2mtSCQVyJpHYo/ONRQNxe0vaoJg==
+      integrity: sha512-TOiVMiHpB7wNqTxg3tRkHJ8ktpYIySF7LleY4gJqeRWCrAvQ/lGFW8iPaEv4nXOI0Ks8NE9m1b+HXqyW01QJ9A==
       tarball: 'file:projects/api-documenter.tgz'
     version: 0.0.0
   'file:projects/api-extractor-lib1-test.tgz':
@@ -9164,7 +9164,7 @@ packages:
       lodash: 4.17.11
       resolve: 1.8.1
       source-map: 0.6.1
-      typescript: 3.4.4
+      typescript: 3.4.5
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
@@ -9463,7 +9463,7 @@ packages:
       '@types/glob': 5.0.30
       '@types/inquirer': 0.0.43
       '@types/jest': 23.3.11
-      '@types/js-yaml': 3.9.1
+      '@types/js-yaml': 3.12.1
       '@types/lodash': 4.14.116
       '@types/minimatch': 2.0.29
       '@types/node': 8.5.8
@@ -9480,7 +9480,7 @@ packages:
       gulp: 3.9.1
       https-proxy-agent: 2.2.1
       inquirer: 6.2.2
-      js-yaml: 3.9.1
+      js-yaml: 3.13.1
       lodash: 4.17.11
       minimatch: 3.0.4
       node-fetch: 2.1.2
@@ -9494,7 +9494,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-lib'
     resolution:
-      integrity: sha512-2TbCqfqerBdqizUgFpJ4nEsZqkKfMAtjCfk4i97DF3yK+nLsEtGvUCiUWgNfe+pK6hVhrAptzJuvYI+dVjfpjg==
+      integrity: sha512-brssnYf6iM0oq2JNGkVj3eOENSAtnEpnLlsWrUoD+BtfbvNXVm0BHMu23AyjEFZZX9fjD8lGIVJptxZqyJMYWQ==
       tarball: 'file:projects/rush-lib.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-2.4-library-test.tgz':
@@ -9712,7 +9712,7 @@ packages:
     dev: false
     name: '@rush-temp/rush'
     resolution:
-      integrity: sha512-ZZNfjgXV9CI2UKg85IUs2UMPkZx9aLxPGNQIbD7Dgqoe/sEXMmMQqL3kxibdkJeuWONQvF2bJ7Ffk/p3BRa8og==
+      integrity: sha512-3Q8d5bkWmQveOQc7Z66Kz7yGllrB3MwEaOAJvQ+nAXRmxMLYaP6mDvjC6+T2e+f9TMHMSC+zJZopmQni3fDcJA==
       tarball: 'file:projects/rush.tgz'
     version: 0.0.0
   'file:projects/rushell.tgz':
@@ -9876,7 +9876,7 @@ specifiers:
   '@types/inquirer': 0.0.43
   '@types/jest': 23.3.11
   '@types/jju': ~1.4.0
-  '@types/js-yaml': 3.9.1
+  '@types/js-yaml': 3.12.1
   '@types/loader-utils': 1.1.3
   '@types/lodash': 4.14.116
   '@types/mime': 0.0.29
@@ -9935,7 +9935,7 @@ specifiers:
   jest-environment-jsdom: ~22.4.3
   jest-resolve: ~22.4.3
   jju: ~1.4.0
-  js-yaml: ~3.9.1
+  js-yaml: ~3.13.1
   jsdom: ~11.11.0
   loader-utils: ~1.1.0
   lodash: ~4.17.5

@@ -36,7 +36,7 @@
     "https-proxy-agent": "~2.2.1",
     "@types/inquirer": "0.0.43",
     "inquirer": "~6.2.0",
-    "js-yaml": "~3.9.1",
+    "js-yaml": "~3.13.1",
     "lodash": "~4.17.5",
     "minimatch": "~3.0.2",
     "node-fetch": "~2.1.2",
@@ -58,7 +58,7 @@
     "gulp": "~3.9.1",
     "@types/glob": "5.0.30",
     "@types/jest": "23.3.11",
-    "@types/js-yaml": "3.9.1",
+    "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "2.0.29",
     "@types/semver": "5.3.33"

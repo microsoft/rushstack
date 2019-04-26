@@ -20,12 +20,12 @@
     "@microsoft/ts-command-line": "4.2.3",
     "@microsoft/tsdoc": "0.12.9",
     "colors": "~1.2.1",
-    "js-yaml": "~3.9.1"
+    "js-yaml": "~3.13.1"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.2": "0.3.8",
     "@microsoft/node-library-build": "6.0.56",
-    "@types/js-yaml": "3.9.1",
+    "@types/js-yaml": "3.12.1",
     "@types/node": "8.5.8",
     "gulp": "~3.9.1",
     "@types/jest": "23.3.11",
