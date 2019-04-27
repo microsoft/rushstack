@@ -696,7 +696,7 @@ export class MarkdownDocumenter {
       configuration: this._tsdocConfiguration,
       tagName: '@link',
       linkText: 'Home',
-      urlDestination: './index'
+      urlDestination: './index.md'
     }));
 
     for (const hierarchyItem of apiItem.getHierarchy()) {
