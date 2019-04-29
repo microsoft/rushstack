@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 17 Apr 2019 19:12:31 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Apr 2019 19:13:03 GMT and should not be manually modified.
+
+## 7.1.2
+Mon, 29 Apr 2019 19:13:03 GMT
+
+### Patches
+
+- Fix the "Home" link in the breadcrumb when viewing docs using GitHub's markdown renderer
 
 ## 7.1.1
 Wed, 17 Apr 2019 19:12:31 GMT
