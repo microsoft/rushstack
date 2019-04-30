@@ -13,10 +13,15 @@ export {
 export {
   RushConfiguration,
   ITryFindRushJsonLocationOptions,
-  PackageManager,
+  ResolutionStrategy,
   PnpmOptionsConfiguration,
   YarnOptionsConfiguration
 } from './api/RushConfiguration';
+
+export {
+  PackageManagerName,
+  PackageManager
+} from './api/packageManager/PackageManager';
 
 export {
   EnvironmentVariableNames

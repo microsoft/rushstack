@@ -33,7 +33,7 @@ import { Git } from '../logic/Git';
 import { LastInstallFlag } from '../api/LastInstallFlag';
 import { LinkManagerFactory } from '../logic/LinkManagerFactory';
 import { PurgeManager } from './PurgeManager';
-import { RushConfiguration, PackageManager, ICurrentVariantJson } from '../api/RushConfiguration';
+import { RushConfiguration, ICurrentVariantJson } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { ShrinkwrapFileFactory } from '../logic/ShrinkwrapFileFactory';
@@ -55,6 +55,8 @@ const MAX_INSTALL_ATTEMPTS: number = 2;
  */
 import { CreateOptions } from 'tar';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { PackageManagerName } from '../api/packageManager/PackageManager';
+import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
 export interface CreateOptions { // tslint:disable-line:interface-name
   /**
@@ -389,7 +391,7 @@ export class InstallManager {
       FileSystem.ensureFolder(rushUserFolder);
     }
 
-    const packageManager: PackageManager = this._rushConfiguration.packageManager;
+    const packageManager: PackageManagerName = this._rushConfiguration.packageManager;
     const packageManagerVersion: string = this._rushConfiguration.packageManagerToolVersion;
 
     const packageManagerAndVersion: string = `${packageManager}-${packageManagerVersion}`;
@@ -949,7 +951,7 @@ export class InstallManager {
           }
 
           if (options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
-            // Copy (or delete) common\temp\shrinkwrap.yaml --> common\config\rush\shrinkwrap.yaml
+            // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
             this._syncFile(this._rushConfiguration.tempShrinkwrapFilename,
               this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
           } else {
@@ -1119,7 +1121,7 @@ export class InstallManager {
       // last install flag, which encapsulates the entire installation
       args.push('--no-lock');
 
-      // Ensure that Rush's tarball dependencies get synchronized properly with the shrinkwrap.yaml file.
+      // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
       // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
       args.push('--no-prefer-frozen-shrinkwrap');
 
@@ -1133,6 +1135,10 @@ export class InstallManager {
 
       if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
         args.push('--strict-peer-dependencies');
+      }
+
+      if ((this._rushConfiguration.packageManagerWrapper as PnpmPackageManager).supportsResolutionStrategy) {
+        args.push('--resolution-strategy', this._rushConfiguration.pnpmOptions.resolutionStrategy);
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');

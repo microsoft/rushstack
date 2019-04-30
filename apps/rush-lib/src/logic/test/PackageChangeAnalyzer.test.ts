@@ -25,7 +25,7 @@ describe('PackageChangeAnalyzer', () => {
     const repoHashDeps: IPackageDeps = {
       files: {
         [fileA]: HASH,
-        [path.posix.join('common', 'config', 'rush', 'shrinkwrap.yaml')]: HASH
+        [path.posix.join('common', 'config', 'rush', 'pnpm-lock.yaml')]: HASH
       }
     };
 
@@ -37,7 +37,7 @@ describe('PackageChangeAnalyzer', () => {
       }],
       rushJsonFolder: '',
       getCommittedShrinkwrapFilename(): string {
-        return 'common/config/rush/shrinkwrap.yaml';
+        return 'common/config/rush/pnpm-lock.yaml';
       }
     } as any; // tslint:disable-line:no-any
 

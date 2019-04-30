@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "jquery": "^3.2.1",
+    "lodash": "^4.17.11",
     "react": "^0.14.9"
   }
 }
