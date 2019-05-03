@@ -26,7 +26,7 @@
       /**
        * (Required) The name that will be typed as part of the command line.  This is also the name
        * of the "scripts" hook in the project's package.json file.
-       * The name should be comprised of lower case words separated by hyphens.
+       * The name should be comprised of lower case words separated by hyphens or colons.
        */
       "name": "my-bulk-command",
 
