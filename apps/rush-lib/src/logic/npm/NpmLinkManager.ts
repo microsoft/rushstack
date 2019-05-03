@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
 import readPackageTree = require('read-package-tree');
+import pnpmLinkBins from '@pnpm/link-bins';
 
 import {
   JsonFile,
@@ -27,8 +28,7 @@ import {
 } from './NpmPackage';
 import { PackageLookup } from '../PackageLookup';
 import {
-  BaseLinkManager,
-  SymlinkKind
+  BaseLinkManager
 } from '../base/BaseLinkManager';
 
 interface IQueueItem {
@@ -83,7 +83,7 @@ export class NpmLinkManager extends BaseLinkManager {
     project: RushConfigurationProject,
     commonRootPackage: NpmPackage,
     commonPackageLookup: PackageLookup,
-    rushLinkJson: IRushLinkJson): void {
+    rushLinkJson: IRushLinkJson): Promise<void> {
 
     let commonProjectPackage: NpmPackage | undefined =
       commonRootPackage.getChildByName(project.tempProjectName) as NpmPackage;
@@ -311,17 +311,11 @@ export class NpmLinkManager extends BaseLinkManager {
     NpmLinkManager._createSymlinksForTopLevelProject(localProjectPackage);
 
     // Also symlink the ".bin" folder
-    if (localProjectPackage.children.length > 0) {
-      const commonBinFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin');
-      const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
+    const projectFolder: string = path.join(localProjectPackage.folderPath, 'node_modules');
+    const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
-      if (FileSystem.exists(commonBinFolder)) {
-        NpmLinkManager._createSymlink({
-          linkTargetPath: commonBinFolder,
-          newLinkPath: projectBinFolder,
-          symlinkKind: SymlinkKind.Directory
-        });
-      }
-    }
+    // Return type is Promise<void[]> because the API returns Promise.all()
+    return pnpmLinkBins(projectFolder, projectBinFolder)
+      .then(() => { /* empty block */ });
   }
 }
