@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Allow colons in command line action names",
+      "packageName": "@microsoft/ts-command-line",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "96068+bsiegel@users.noreply.github.com"
+}
