@@ -55,6 +55,7 @@ const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '..',
 export class YamlDocumenter {
   private readonly _apiModel: ApiModel;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
+  private readonly _configFolder: string;
 
   // This is used by the _linkToUidIfPossible() workaround.
   // It stores a mapping from type name (e.g. "MyClass") to the corresponding ApiItem.
@@ -65,10 +66,11 @@ export class YamlDocumenter {
 
   private _outputFolder: string;
 
-  public constructor(apiModel: ApiModel) {
+  public constructor(apiModel: ApiModel, configFolder: string) {
     this._apiModel = apiModel;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
     this._apiItemsByTypeName = new Map<string, ApiItem>();
+    this._configFolder = configFolder;
 
     this._initApiItemsByTypeName();
   }

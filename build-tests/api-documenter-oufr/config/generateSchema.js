@@ -168,7 +168,7 @@ function generateConfig(stateObj) {
 
   // writing file
   const json = JSON.stringify(config);
-  fs.writeFileSync("apiTocConfig.json", json, "utf8");
+  fs.writeFileSync("api-documenter.json", json, "utf8");
 }
 
 generateConfig(categories);

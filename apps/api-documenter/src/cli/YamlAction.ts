@@ -39,7 +39,7 @@ export class YamlAction extends BaseAction {
 
     const yamlDocumenter: YamlDocumenter = this._officeParameter.value
        ? new OfficeYamlDocumenter(apiModel, this.inputFolder)
-       : new YamlDocumenter(apiModel);
+       : new YamlDocumenter(apiModel, this.configFolder);
 
     yamlDocumenter.generateFiles(this.outputFolder);
     return Promise.resolve();
