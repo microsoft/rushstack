@@ -55,29 +55,35 @@ const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '..',
 export class YamlDocumenter {
   private readonly _apiModel: ApiModel;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
-  private readonly _configFolder: string;
-
+  
   // This is used by the _linkToUidIfPossible() workaround.
   // It stores a mapping from type name (e.g. "MyClass") to the corresponding ApiItem.
   // If the mapping would be ambiguous (e.g. "MyClass" is defined by multiple packages)
   // then it is excluded from the mapping.  Also excluded are ApiItem objects (such as package
   // and function) which are not typically used as a data type.
   private _apiItemsByTypeName: Map<string, ApiItem>;
-
+  
   private _outputFolder: string;
 
-  public constructor(apiModel: ApiModel, configFolder: string) {
+  // ideally this needs to be an interface with a defined shape a config file can take. And whoever creates the config
+  // should use it to leverage the type safety.
+  private _config: {};
+
+  public constructor(apiModel: ApiModel) {
     this._apiModel = apiModel;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
     this._apiItemsByTypeName = new Map<string, ApiItem>();
-    this._configFolder = configFolder;
-
+    
     this._initApiItemsByTypeName();
   }
-
+  
   /** @virtual */
-  public generateFiles(outputFolder: string): void {
+  public generateFiles(outputFolder: string, configFolder?: string): void {
     this._outputFolder = outputFolder;
+
+    const configFilePath: string = configFolder ? path.join(configFolder, 'api-documenter.json') : '';
+    this._config = configFilePath && JsonFile.load(configFilePath);
+    console.log(this._config);
 
     console.log();
     this._deleteOldOutputFiles();
