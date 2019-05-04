@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 16 Apr 2019 11:01:37 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Apr 2019 23:08:02 GMT and should not be manually modified.
+
+## 7.1.1
+Tue, 30 Apr 2019 23:08:02 GMT
+
+### Patches
+
+- Fix an issue where API signatures were sometimes truncated in the .api.json file (GitHub #1249)
 
 ## 7.1.0
 Tue, 16 Apr 2019 11:01:37 GMT
