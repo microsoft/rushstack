@@ -67,6 +67,8 @@ export class Collector {
 
   public readonly workingPackage: WorkingPackage;
 
+  public readonly extractorConfig: ExtractorConfig;
+
   private readonly _program: ts.Program;
 
   private readonly _tsdocParser: tsdoc.TSDocParser;
@@ -85,25 +87,24 @@ export class Collector {
     this.packageJsonLookup = new PackageJsonLookup();
 
     this._program = options.program;
-
-    const extractorConfig: ExtractorConfig = options.extractorConfig;
+    this.extractorConfig = options.extractorConfig;
 
     const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
-      extractorConfig.mainEntryPointFilePath);
+      this.extractorConfig.mainEntryPointFilePath);
 
     if (!entryPointSourceFile) {
-      throw new Error('Unable to load file: ' + extractorConfig.mainEntryPointFilePath);
+      throw new Error('Unable to load file: ' + this.extractorConfig.mainEntryPointFilePath);
     }
 
-    if (!extractorConfig.packageFolder || !extractorConfig.packageJson) {
+    if (!this.extractorConfig.packageFolder || !this.extractorConfig.packageJson) {
       // TODO: We should be able to analyze projects that don't have any package.json.
       // The ExtractorConfig class is already designed to allow this.
       throw new Error('Unable to find a package.json file for the project being analyzed');
     }
 
     this.workingPackage = new WorkingPackage({
-      packageFolder: extractorConfig.packageFolder,
-      packageJson: extractorConfig.packageJson,
+      packageFolder: this.extractorConfig.packageFolder,
+      packageJson: this.extractorConfig.packageJson,
       entryPointSourceFile
     });
 

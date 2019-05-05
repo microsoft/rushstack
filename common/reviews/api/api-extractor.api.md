@@ -50,6 +50,7 @@ export class ExtractorConfig {
     static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig;
     readonly mainEntryPointFilePath: string;
     readonly messages: IExtractorMessagesConfig;
+    readonly omitTrimmingComments: boolean;
     readonly overrideTsconfig: {} | undefined;
     readonly packageFolder: string | undefined;
     readonly packageJson: INodePackageJson | undefined;
@@ -164,6 +165,7 @@ export interface IConfigDocModel {
 export interface IConfigDtsRollup {
     betaTrimmedFilePath?: string;
     enabled: boolean;
+    omitTrimmingComments?: boolean;
     publicTrimmedFilePath?: string;
     untrimmedFilePath?: string;
 }
