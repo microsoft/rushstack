@@ -21,11 +21,9 @@ import {
 export abstract class BaseAction extends CommandLineAction {
   protected inputFolder: string;
   protected outputFolder: string;
-  protected configFolder: string
 
   private _inputFolderParameter: CommandLineStringParameter;
   private _outputFolderParameter: CommandLineStringParameter;
-  private _configFolderParameter: CommandLineStringParameter;
 
   protected onDefineParameters(): void { // override
     this._inputFolderParameter = this.defineStringParameter({
@@ -44,14 +42,6 @@ export abstract class BaseAction extends CommandLineAction {
         + ` ANY EXISTING CONTENTS WILL BE DELETED!`
         + ` If omitted, the default is "./${this.actionName}"`
     });
-
-    this._configFolderParameter = this.defineStringParameter({
-      parameterLongName: '--config-folder',
-      parameterShortName: '-c',
-      argumentName: 'FOLDER3',
-      description: `Specifies the path string where the config file is located`
-        + ` If omitted, the default is "./config"`
-    });
   }
 
   protected buildApiModel(): ApiModel {
@@ -60,11 +50,6 @@ export abstract class BaseAction extends CommandLineAction {
     this.inputFolder = this._inputFolderParameter.value || './input';
     if (!FileSystem.exists(this.inputFolder)) {
       throw new Error('The input folder does not exist: ' + this.inputFolder);
-    }
-    
-    this.configFolder = this._configFolderParameter.value || './config';
-    if (!FileSystem.exists(this.configFolder)) {
-      throw new Error('The config folder does not exist: ' + this.configFolder);
     }
 
     this.outputFolder = this._outputFolderParameter.value || `./${this.actionName}`;

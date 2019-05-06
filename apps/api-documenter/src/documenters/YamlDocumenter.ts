@@ -65,8 +65,8 @@ export class YamlDocumenter {
   
   private _outputFolder: string;
 
-  // ideally this needs to be an interface with a defined shape a config file can take. And whoever creates the config
-  // should use it to leverage the type safety.
+  // ideally the type needs to be an interface with a defined shape a config file can take.
+  // And whoever creates the config should use it to leverage the type safety.
   private _config: {};
 
   public constructor(apiModel: ApiModel) {
@@ -78,13 +78,16 @@ export class YamlDocumenter {
   }
   
   /** @virtual */
-  public generateFiles(outputFolder: string, configFolder?: string): void {
+  public generateFiles(outputFolder: string): void {
     this._outputFolder = outputFolder;
 
-    const configFilePath: string = configFolder ? path.join(configFolder, 'api-documenter.json') : '';
-    this._config = configFilePath && JsonFile.load(configFilePath);
-    console.log(this._config);
-
+    try {
+      this._config = JsonFile.load('./api-documenter.json');
+      console.log('Loaded custom configuration');
+    } catch (error) {
+      console.log('No configuration found. Using the default');
+    }
+    
     console.log();
     this._deleteOldOutputFiles();
 
