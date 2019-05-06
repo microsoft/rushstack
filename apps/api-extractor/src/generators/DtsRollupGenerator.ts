@@ -102,8 +102,10 @@ export class DtsRollupGenerator {
       const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
 
       if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-        stringWriter.writeLine();
-        stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+        if (!collector.extractorConfig.omitTrimmingComments) {
+          stringWriter.writeLine();
+          stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+        }
         continue;
       }
 
@@ -284,7 +286,11 @@ export class DtsRollupGenerator {
             const name: string = childAstDeclaration.astSymbol.localName;
             modification.omitChildren = true;
 
-            modification.prefix = `/* Excluded from this release type: ${name} */`;
+            if (!collector.extractorConfig.omitTrimmingComments) {
+              modification.prefix = `/* Excluded from this release type: ${name} */`;
+            } else {
+              modification.prefix = '';
+            }
             modification.suffix = '';
 
             if (nodeToTrim.children.length > 0) {
