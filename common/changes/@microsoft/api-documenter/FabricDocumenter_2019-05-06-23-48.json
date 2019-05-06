@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Adds optional config file `api-documenter.json` to allow building custom TOC for YamlDocumenter.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "vibraga@microsoft.com"
+}
