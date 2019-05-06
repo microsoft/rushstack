@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 06 May 2019 19:11:16 GMT and should not be manually modified.
+This log was last generated on Mon, 06 May 2019 19:34:54 GMT and should not be manually modified.
+
+## 7.1.3
+Mon, 06 May 2019 19:34:54 GMT
+
+### Patches
+
+- Add a new setting "omitTrimmingComments" to prevent extra comments from being emitted in the .d.ts rollup
 
 ## 7.1.2
 Mon, 06 May 2019 19:11:16 GMT
