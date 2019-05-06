@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Allow colons in command line action names (add missing dependency from 5.7.2)",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

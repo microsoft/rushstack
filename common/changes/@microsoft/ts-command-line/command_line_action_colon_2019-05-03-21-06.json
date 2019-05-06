@@ -3,7 +3,7 @@
     {
       "comment": "Allow colons in command line action names",
       "packageName": "@microsoft/ts-command-line",
-      "type": "none"
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/ts-command-line",
