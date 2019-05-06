@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.1.2",
+      "tag": "@microsoft/api-extractor_v7.1.2",
+      "date": "Mon, 06 May 2019 19:11:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where ExtractorResult.warningCount was not incremented for messages handled by IExtractorInvokeOptions.messageCallback (GitHub #1258)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.1",
       "tag": "@microsoft/api-extractor_v7.1.1",
       "date": "Tue, 30 Apr 2019 23:08:02 GMT",
