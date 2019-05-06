@@ -42,7 +42,8 @@ import {
 } from '../yaml/IYamlApiFile';
 import {
   IYamlTocFile,
-  IYamlTocItem
+  IYamlTocItem,
+  IYamlTocConfigSchema
 } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter} from '../markdown/CustomMarkdownEmitter';
@@ -65,14 +66,9 @@ export class YamlDocumenter {
 
   private _outputFolder: string;
 
-  // ideally the types needs to be an interface with a defined shape a config file can take.
-  // And whoever creates the config should use it to leverage the type safety.
-// tslint:disable-next-line: no-any
-  private _config: any;
-// tslint:disable-next-line: no-any
-  private _tocPointerMap: any; // type could be an indexer
-// tslint:disable-next-line: no-any
-  private _catchAllPointer: any;
+  private _config: IYamlTocConfigSchema;
+  private _tocPointerMap: { [key: string]: IYamlTocItem };
+  private _catchAllPointer: IYamlTocItem;
 
   public constructor(apiModel: ApiModel) {
     this._apiModel = apiModel;
@@ -250,11 +246,16 @@ export class YamlDocumenter {
           // Filtering out the api-items as we build the tocItems array.
           if (apiItem instanceof ApiDocumentedItem) {
             const docInlineTag: DocInlineTag | undefined =
-              (this._config && this._config.filterByInlineTag) &&
-              this._findInlineTagByName(this._config.filterByInlineTag, apiItem.tsdocComment);
+              (this._config && this._config.filterByInlineTag)
+                ? this._findInlineTagByName(this._config.filterByInlineTag, apiItem.tsdocComment)
+                : undefined;
 
-            if (docInlineTag !== undefined && this._tocPointerMap[docInlineTag.tagContent.trim()]) {
-              this._tocPointerMap[docInlineTag.tagContent.trim()].items.push(tocItem);
+                const tagContent: string | undefined =
+              docInlineTag && docInlineTag.tagContent && docInlineTag.tagContent.trim();
+
+            if (tagContent && this._tocPointerMap[tagContent]) {
+              // null assertion used because when pointer map was created we checked for presence of empty `items` array
+              this._tocPointerMap[tagContent].items!.push(tocItem);
             } else {
               if (this._catchAllPointer && this._catchAllPointer.items) {
                 this._catchAllPointer.items.push(tocItem);
@@ -709,17 +710,18 @@ export class YamlDocumenter {
   }
 
   // Parses the tocConfig object to build a pointers map of nodes where we want to sort out the API items
-  // tslint:disable-next-line: no-any
-  private _generateTocPointersMap(tocConfig: any): void {
-    for (const tocItem of tocConfig.items) {
-      if (tocItem.items && tocItem.items.length > 0) {
+  private _generateTocPointersMap(tocConfig: IYamlTocFile | IYamlTocItem): void {
+    if (tocConfig.items) {
+      for (const tocItem of tocConfig.items) {
+        if (tocItem.items && tocItem.items.length > 0) {
           this._generateTocPointersMap(tocItem);
-      } else {
-        // check for presence of the `catchAllCategory` config option
-        if (this._config && this._config.catchAllCategory && tocItem.name === this._config.catchAllCategory) {
-          this._catchAllPointer = tocItem;
         } else {
-          this._tocPointerMap[tocItem.name] = tocItem;
+          // check for presence of the `catchAllCategory` config option
+          if (this._config && this._config.catchAllCategory && tocItem.name === this._config.catchAllCategory) {
+            this._catchAllPointer = tocItem;
+          } else {
+            this._tocPointerMap[tocItem.name] = tocItem;
+          }
         }
       }
     }

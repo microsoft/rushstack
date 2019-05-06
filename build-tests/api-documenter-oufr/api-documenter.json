@@ -1,1 +1,119 @@
-{"tocConfig":{"items":[{"name":"Office UI Fabric React","href":"~/homepage/homepage.md"},{"name":"Office UI Fabric React","href":"office-ui-fabric-react","extended":true,"items":[{"name":"Basic Inputs","items":[{"name":"Button","items":[]},{"name":"Checkbox","items":[]},{"name":"ChoiceGroup","items":[]},{"name":"ComboBox","items":[]},{"name":"Dropdown","items":[]},{"name":"Label","items":[]},{"name":"Link","items":[]},{"name":"Rating","items":[]},{"name":"SearchBox","items":[]},{"name":"Slider","items":[]},{"name":"SpinButton","items":[]},{"name":"TextField","items":[]},{"name":"Toggle","items":[]}]},{"name":"Galleries & Pickers","items":[{"name":"Pickers","items":[]},{"name":"Calendar","items":[]},{"name":"ColorPicker","items":[]},{"name":"DatePicker","items":[]},{"name":"PeoplePicker","items":[]},{"name":"SwatchColorPicker","items":[]}]},{"name":"Items & Lists","items":[{"name":"List","items":[]},{"name":"DetailsList","items":[]},{"name":"GroupedList","items":[]},{"name":"ActivityItem","items":[]},{"name":"DocumentCard","items":[]},{"name":"Facepile","items":[]},{"name":"HoverCard","items":[]},{"name":"Persona","items":[]}]},{"name":"Commands, Menus & Navs","items":[{"name":"Breadcrumb","items":[]},{"name":"CommandBar","items":[]},{"name":"ContextualMenu","items":[]},{"name":"Nav","items":[]},{"name":"OverflowSet","items":[]},{"name":"Pivot","items":[]}]},{"name":"Notification & Engagement","items":[{"name":"Coachmark","items":[]},{"name":"MessageBar","items":[]},{"name":"TeachingBubble","items":[]}]},{"name":"Progress","items":[{"name":"ProgressIndicator","items":[]},{"name":"Shimmer","items":[]},{"name":"Spinner","items":[]}]},{"name":"Surfaces","items":[{"name":"Callout","items":[]},{"name":"Dialog","items":[]},{"name":"Modal","items":[]},{"name":"Panel","items":[]},{"name":"ScrollablePane","items":[]},{"name":"Tooltip","items":[]}]},{"name":"Utilities","items":[{"name":"Announced","items":[]},{"name":"FocusTrapZone","items":[]},{"name":"FocusZone","items":[]},{"name":"Icon","items":[]},{"name":"Image","items":[]},{"name":"Keytips","items":[]},{"name":"Layer","items":[]},{"name":"MarqueeSelection","items":[]},{"name":"Overlay","items":[]},{"name":"ResizeGroup","items":[]},{"name":"Selection","items":[]},{"name":"Separator","items":[]},{"name":"Stack","items":[]},{"name":"Text","items":[]},{"name":"Themes","items":[]}]},{"name":"References","items":[]}]}]},"catchAllCategory":"References","noDuplicateEntries":true,"filterByApiItemName":false,"filterByInlineTag":"@docCategory"}
+{
+  "tocConfig": {
+    "items": [
+      { "name": "Office UI Fabric React", "href": "~/homepage/homepage.md" },
+      {
+        "name": "Office UI Fabric React",
+        "href": "office-ui-fabric-react",
+        "extended": true,
+        "items": [
+          {
+            "name": "Basic Inputs",
+            "items": [
+              { "name": "Button", "items": [] },
+              { "name": "Checkbox", "items": [] },
+              { "name": "ChoiceGroup", "items": [] },
+              { "name": "ComboBox", "items": [] },
+              { "name": "Dropdown", "items": [] },
+              { "name": "Label", "items": [] },
+              { "name": "Link", "items": [] },
+              { "name": "Rating", "items": [] },
+              { "name": "SearchBox", "items": [] },
+              { "name": "Slider", "items": [] },
+              { "name": "SpinButton", "items": [] },
+              { "name": "TextField", "items": [] },
+              { "name": "Toggle", "items": [] }
+            ]
+          },
+          {
+            "name": "Galleries & Pickers",
+            "items": [
+              { "name": "Pickers", "items": [] },
+              { "name": "Calendar", "items": [] },
+              { "name": "ColorPicker", "items": [] },
+              { "name": "DatePicker", "items": [] },
+              { "name": "PeoplePicker", "items": [] },
+              { "name": "SwatchColorPicker", "items": [] }
+            ]
+          },
+          {
+            "name": "Items & Lists",
+            "items": [
+              { "name": "List", "items": [] },
+              { "name": "DetailsList", "items": [] },
+              { "name": "GroupedList", "items": [] },
+              { "name": "ActivityItem", "items": [] },
+              { "name": "DocumentCard", "items": [] },
+              { "name": "Facepile", "items": [] },
+              { "name": "HoverCard", "items": [] },
+              { "name": "Persona", "items": [] }
+            ]
+          },
+          {
+            "name": "Commands, Menus & Navs",
+            "items": [
+              { "name": "Breadcrumb", "items": [] },
+              { "name": "CommandBar", "items": [] },
+              { "name": "ContextualMenu", "items": [] },
+              { "name": "Nav", "items": [] },
+              { "name": "OverflowSet", "items": [] },
+              { "name": "Pivot", "items": [] }
+            ]
+          },
+          {
+            "name": "Notification & Engagement",
+            "items": [
+              { "name": "Coachmark", "items": [] },
+              { "name": "MessageBar", "items": [] },
+              { "name": "TeachingBubble", "items": [] }
+            ]
+          },
+          {
+            "name": "Progress",
+            "items": [
+              { "name": "ProgressIndicator", "items": [] },
+              { "name": "Shimmer", "items": [] },
+              { "name": "Spinner", "items": [] }
+            ]
+          },
+          {
+            "name": "Surfaces",
+            "items": [
+              { "name": "Callout", "items": [] },
+              { "name": "Dialog", "items": [] },
+              { "name": "Modal", "items": [] },
+              { "name": "Panel", "items": [] },
+              { "name": "ScrollablePane", "items": [] },
+              { "name": "Tooltip", "items": [] }
+            ]
+          },
+          {
+            "name": "Utilities",
+            "items": [
+              { "name": "Announced", "items": [] },
+              { "name": "FocusTrapZone", "items": [] },
+              { "name": "FocusZone", "items": [] },
+              { "name": "Icon", "items": [] },
+              { "name": "Image", "items": [] },
+              { "name": "Keytips", "items": [] },
+              { "name": "Layer", "items": [] },
+              { "name": "MarqueeSelection", "items": [] },
+              { "name": "Overlay", "items": [] },
+              { "name": "ResizeGroup", "items": [] },
+              { "name": "Selection", "items": [] },
+              { "name": "Separator", "items": [] },
+              { "name": "Stack", "items": [] },
+              { "name": "Text", "items": [] },
+              { "name": "Themes", "items": [] }
+            ]
+          },
+          { "name": "References", "items": [] }
+        ]
+      }
+    ]
+  },
+  "catchAllCategory": "References",
+  "noDuplicateEntries": true,
+  "filterByApiItemName": false,
+  "filterByInlineTag": "@docCategory"
+}
