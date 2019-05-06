@@ -712,16 +712,14 @@ export class YamlDocumenter {
   // tslint:disable-next-line: no-any
   private _generateTocPointersMap(tocConfig: any): void {
     for (const tocItem of tocConfig.items) {
-      if (tocItem.items) {
-        if (tocItem.items.length > 0) {
+      if (tocItem.items && tocItem.items.length > 0) {
           this._generateTocPointersMap(tocItem);
+      } else {
+        // check for presence of the `catchAllCategory` config option
+        if (this._config && this._config.catchAllCategory && tocItem.name === this._config.catchAllCategory) {
+          this._catchAllPointer = tocItem;
         } else {
-          // check for presence of the `catchAllCategory` config option
-          if (this._config && this._config.catchAllCategory && tocItem.name === this._config.catchAllCategory) {
-            this._catchAllPointer = tocItem;
-          } else {
-            this._tocPointerMap[tocItem.name] = tocItem;
-          }
+          this._tocPointerMap[tocItem.name] = tocItem;
         }
       }
     }
