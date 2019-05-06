@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fix an issue where ExtractorResult.warningCount was not incremented for messages handled by IExtractorInvokeOptions.messageCallback (GitHub #1258)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

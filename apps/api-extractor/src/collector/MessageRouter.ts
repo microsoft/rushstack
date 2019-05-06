@@ -388,6 +388,7 @@ export class MessageRouter {
    * Give the calling application a chance to handle the `ExtractorMessage`, and if not, display it on the console.
    */
   private _handleMessage(message: ExtractorMessage): void {
+    // Don't tally messages that were already "handled" by writing them into the API report
     if (message.handled) {
       return;
     }
@@ -400,14 +401,26 @@ export class MessageRouter {
       message.logLevel = reportingRule.logLevel;
     }
 
+    // If there is a callback, allow it to modify and/or handle the message
     if (this._messageCallback) {
       this._messageCallback(message);
-
-      if (message.handled) {
-        return;
-      }
     }
 
+    // Update the statistics
+    switch (message.logLevel) {
+      case ExtractorLogLevel.Error:
+        ++this.errorCount;
+        break;
+      case ExtractorLogLevel.Warning:
+        ++this.warningCount;
+        break;
+    }
+
+    if (message.handled) {
+      return;
+    }
+
+    // The messageCallback did not handle the message, so perform default handling
     message.handled = true;
 
     if (message.logLevel === ExtractorLogLevel.None) {
@@ -423,11 +436,9 @@ export class MessageRouter {
 
     switch (message.logLevel) {
       case ExtractorLogLevel.Error:
-        ++this.errorCount;
         console.error(colors.red('Error: ' + messageText));
         break;
       case ExtractorLogLevel.Warning:
-        ++this.warningCount;
         console.warn(colors.yellow('Warning: ' + messageText));
         break;
       case ExtractorLogLevel.Info:
