@@ -8,6 +8,7 @@
     "declarationMap": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
+    "esModuleInterop": true,
     "types": [
     ],
     "lib": [

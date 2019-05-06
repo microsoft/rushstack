@@ -474,11 +474,15 @@ export class ExportAnalyzer {
         //   StringLiteral:  pre=['./A']
         //   SemicolonToken:  pre=[;]
 
+        const importClause: ts.ImportClause = declaration as ts.ImportClause;
+        const exportName: string = importClause.name ?
+          importClause.name.getText().trim() : ts.InternalSymbolName.Default;
+
         if (externalModulePath !== undefined) {
           return this._fetchAstImport(declarationSymbol, {
-            importKind: AstImportKind.NamedImport,
+            importKind: AstImportKind.DefaultImport,
             modulePath: externalModulePath,
-            exportName: ts.InternalSymbolName.Default
+            exportName
           });
         }
 
