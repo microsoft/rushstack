@@ -12,8 +12,10 @@
             "cwd": "${workspaceFolder}/../../build-tests/api-documenter-test",
             "args": [
               "yaml",
-              "--input-folder etc",
-              "--output-folder etc/yaml"
+              "--input-folder",
+              "etc",
+              "--output-folder",
+              "etc/yaml"
             ],
             "sourceMaps": true
           },
