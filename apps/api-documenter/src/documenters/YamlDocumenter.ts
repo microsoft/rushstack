@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// tslint:disable:member-ordering
+
 import * as path from 'path';
 
 import yaml = require('js-yaml');
@@ -12,7 +14,7 @@ import {
   NewlineKind,
   InternalError
 } from '@microsoft/node-core-library';
-import { StringBuilder, DocSection, DocComment, DocInlineTag } from '@microsoft/tsdoc';
+import { StringBuilder, DocSection, DocComment } from '@microsoft/tsdoc';
 import {
   ApiModel,
   ApiItem,
@@ -42,8 +44,7 @@ import {
 } from '../yaml/IYamlApiFile';
 import {
   IYamlTocFile,
-  IYamlTocItem,
-  IYamlTocConfigSchema
+  IYamlTocItem
 } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter} from '../markdown/CustomMarkdownEmitter';
@@ -66,15 +67,10 @@ export class YamlDocumenter {
 
   private _outputFolder: string;
 
-  private _config: IYamlTocConfigSchema;
-  private _tocPointerMap: { [key: string]: IYamlTocItem };
-  private _catchAllPointer: IYamlTocItem;
-
   public constructor(apiModel: ApiModel) {
     this._apiModel = apiModel;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
     this._apiItemsByTypeName = new Map<string, ApiItem>();
-    this._tocPointerMap = {}; // need a type?
 
     this._initApiItemsByTypeName();
   }
@@ -82,16 +78,6 @@ export class YamlDocumenter {
   /** @virtual */
   public generateFiles(outputFolder: string): void {
     this._outputFolder = outputFolder;
-
-    try {
-      this._config = JsonFile.load('./api-documenter.json');
-      console.log('Loaded custom configuration');
-      if (this._config.tocConfig) {
-        this._generateTocPointersMap(this._config.tocConfig);
-      }
-    } catch (error) {
-      console.log('No configuration found. Using the default');
-    }
 
     console.log();
     this._deleteOldOutputFiles();
@@ -200,6 +186,15 @@ export class YamlDocumenter {
    * Write the table of contents
    */
   private _writeTocFile(apiItems: ReadonlyArray<ApiItem>): void {
+    const tocFile: IYamlTocFile = this.buildYamlTocFile(apiItems);
+
+    const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
+    console.log('Writing ' + tocFilePath);
+    this._writeYamlFile(tocFile, tocFilePath, '', undefined);
+  }
+
+  /** @virtual */
+  protected buildYamlTocFile(apiItems: ReadonlyArray<ApiItem>): IYamlTocFile {
     const tocFile: IYamlTocFile = {
       items: [ ]
     };
@@ -208,13 +203,7 @@ export class YamlDocumenter {
     tocFile.items.push(rootItem);
 
     rootItem.items!.push(...this._buildTocItems(apiItems));
-
-    const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
-
-    const tocFileToWrite: IYamlTocFile = this._config && this._config.tocConfig ? this._config.tocConfig : tocFile;
-
-    console.log('Writing ' + tocFilePath);
-    this._writeYamlFile(tocFileToWrite, tocFilePath, '', undefined);
+    return tocFile;
   }
 
   private _buildTocItems(apiItems: ReadonlyArray<ApiItem>): IYamlTocItem[] {
@@ -243,26 +232,6 @@ export class YamlDocumenter {
             name: apiItem.displayName,
             uid: this._getUid(apiItem)
           };
-          // Filtering out the api-items as we build the tocItems array.
-          if (apiItem instanceof ApiDocumentedItem) {
-            const docInlineTag: DocInlineTag | undefined =
-              (this._config && this._config.filterByInlineTag)
-                ? this._findInlineTagByName(this._config.filterByInlineTag, apiItem.tsdocComment)
-                : undefined;
-
-                const tagContent: string | undefined =
-              docInlineTag && docInlineTag.tagContent && docInlineTag.tagContent.trim();
-
-            if (tagContent && this._tocPointerMap[tagContent]) {
-              // null assertion used because when pointer map was created we checked for presence of empty `items` array
-              this._tocPointerMap[tagContent].items!.push(tocItem);
-            } else {
-              if (this._catchAllPointer && this._catchAllPointer.items) {
-                this._catchAllPointer.items.push(tocItem);
-              }
-            }
-          }
-
         }
       }
 
@@ -284,7 +253,7 @@ export class YamlDocumenter {
     return tocItems;
   }
 
-  private _shouldEmbed(apiItemKind: ApiItemKind): boolean {
+  protected _shouldEmbed(apiItemKind: ApiItemKind): boolean {
     switch (apiItemKind) {
       case ApiItemKind.Class:
       case ApiItemKind.Package:
@@ -529,8 +498,7 @@ export class YamlDocumenter {
     JsonFile.validateNoUndefinedMembers(dataObject);
 
     let stringified: string = yaml.safeDump(dataObject, {
-      lineWidth: 120,
-      noRefs: this._config && this._config.noDuplicateEntries ? true : false
+      lineWidth: 120
     });
 
     if (yamlMimeType) {
@@ -551,7 +519,7 @@ export class YamlDocumenter {
    * Calculate the DocFX "uid" for the ApiItem
    * Example:  node-core-library.JsonFile.load
    */
-  private _getUid(apiItem: ApiItem): string {
+  protected _getUid(apiItem: ApiItem): string {
     let result: string = '';
     for (const hierarchyItem of apiItem.getHierarchy()) {
 
@@ -707,42 +675,5 @@ export class YamlDocumenter {
   private _deleteOldOutputFiles(): void {
     console.log('Deleting old output from ' + this._outputFolder);
     FileSystem.ensureEmptyFolder(this._outputFolder);
-  }
-
-  // Parses the tocConfig object to build a pointers map of nodes where we want to sort out the API items
-  private _generateTocPointersMap(tocConfig: IYamlTocFile | IYamlTocItem): void {
-    if (tocConfig.items) {
-      for (const tocItem of tocConfig.items) {
-        if (tocItem.items && tocItem.items.length > 0) {
-          this._generateTocPointersMap(tocItem);
-        } else {
-          // check for presence of the `catchAllCategory` config option
-          if (this._config && this._config.catchAllCategory && tocItem.name === this._config.catchAllCategory) {
-            this._catchAllPointer = tocItem;
-          } else {
-            this._tocPointerMap[tocItem.name] = tocItem;
-          }
-        }
-      }
-    }
-  }
-
-  // This is a direct copy of a @docCategory inline tag finder in office-ui-fabric-react,
-  // but is generic enough to be used for any inline tag
-  private _findInlineTagByName(tagName: string, docComment: DocComment | undefined): DocInlineTag | undefined {
-    if (docComment instanceof DocInlineTag) {
-      if (docComment.tagName === tagName) {
-        return docComment;
-      }
-    }
-    if (docComment) {
-      for (const childNode of docComment.getChildNodes()) {
-        const result: DocInlineTag | undefined = this._findInlineTagByName(tagName, childNode as DocComment);
-        if (result !== undefined) {
-          return result;
-        }
-      }
-    }
-    return undefined;
   }
 }
