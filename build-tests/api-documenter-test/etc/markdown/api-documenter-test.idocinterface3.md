@@ -6,6 +6,7 @@
 
 Some less common TypeScript declaration kinds.
 
+
 <b>Signature:</b>
 
 ```typescript

@@ -17,7 +17,7 @@
         {
           "kind": "Class",
           "canonicalReference": "(DocBaseClass:class)",
-          "docComment": "/**\n * Example base class\n *\n * @public\n */\n",
+          "docComment": "/**\n * Example base class\n *\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -40,7 +40,7 @@
         {
           "kind": "Class",
           "canonicalReference": "(DocClass1:class)",
-          "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.\n *\n * @defaultValue\n *\n * a default value for this function\n *\n * @public\n */\n",
+          "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.\n *\n * @defaultValue\n *\n * a default value for this function\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -513,7 +513,7 @@
         {
           "kind": "Enum",
           "canonicalReference": "(DocEnum:enum)",
-          "docComment": "/**\n * Docs for DocEnum\n *\n * @public\n */\n",
+          "docComment": "/**\n * Docs for DocEnum\n *\n * {@docCategory SystemEvent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -701,7 +701,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "(IDocInterface1:interface)",
-          "docComment": "/**\n * @public\n */\n",
+          "docComment": "/**\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -754,7 +754,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "(IDocInterface2:interface)",
-          "docComment": "/**\n * @public\n */\n",
+          "docComment": "/**\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -822,7 +822,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "(IDocInterface3:interface)",
-          "docComment": "/**\n * Some less common TypeScript declaration kinds.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Some less common TypeScript declaration kinds.\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -972,7 +972,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "(IDocInterface4:interface)",
-          "docComment": "/**\n * Type union in an interface.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Type union in an interface.\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1262,7 +1262,7 @@
         {
           "kind": "Class",
           "canonicalReference": "(SystemEvent:class)",
-          "docComment": "/**\n * A class used to exposed events.\n *\n * @public\n */\n",
+          "docComment": "/**\n * A class used to exposed events.\n *\n * {@docCategory SystemEvent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

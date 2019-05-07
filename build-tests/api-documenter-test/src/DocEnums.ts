@@ -4,6 +4,7 @@
 /**
  * Docs for DocEnum
  * @public
+ * {@docCategory SystemEvent}
  */
 export enum DocEnum {
   /**

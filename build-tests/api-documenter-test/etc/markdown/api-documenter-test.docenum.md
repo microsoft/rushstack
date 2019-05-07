@@ -6,6 +6,7 @@
 
 Docs for DocEnum
 
+
 <b>Signature:</b>
 
 ```typescript

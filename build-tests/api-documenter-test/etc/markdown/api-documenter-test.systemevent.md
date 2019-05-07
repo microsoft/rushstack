@@ -6,6 +6,7 @@
 
 A class used to exposed events.
 
+
 <b>Signature:</b>
 
 ```typescript

@@ -9,9 +9,11 @@
             "request": "launch",
             "name": "Example",
             "program": "${workspaceFolder}/lib/start.js",
-            "cwd": "${workspaceFolder}/../../build-tests/api-documenter-oufr",
+            "cwd": "${workspaceFolder}/../../build-tests/api-documenter-test",
             "args": [
-              "yaml"
+              "yaml",
+              "--input-folder etc",
+              "--output-folder etc/yaml"
             ],
             "sourceMaps": true
           },

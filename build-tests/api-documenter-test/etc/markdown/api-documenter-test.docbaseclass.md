@@ -6,6 +6,7 @@
 
 Example base class
 
+
 <b>Signature:</b>
 
 ```typescript
