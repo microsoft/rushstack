@@ -367,6 +367,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "long",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "md5",
       "allowedCategories": [ "libraries" ]
     },
