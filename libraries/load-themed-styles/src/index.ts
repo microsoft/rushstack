@@ -104,7 +104,7 @@ let _injectStylesWithCssText: boolean;
 const _root: any = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
 
 // Nonce string to inject into script tag if one provided. This is used in CSP (Content Security Policy).
-let _styleNonce: string = _root && _root.CSPSettings && _root.CSPSettings.nonce;
+const _styleNonce: string = _root && _root.CSPSettings && _root.CSPSettings.nonce;
 
 const _themeState: IThemeState = initializeThemeState();
 

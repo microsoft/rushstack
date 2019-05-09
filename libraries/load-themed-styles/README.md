@@ -49,6 +49,13 @@ loadStyles('body { background: "[theme:primaryBackgroundColor, default: #FFAAFA]
 
 This will register #EAEAEA as the body's background color. If you call loadTheme again after styles have already been registered, it will replace the style elements with retokenized values.
 
+Specify nonce string to add as attribute for Content Security Policy.
+
+```js
+window.CSPSettings = {
+  nonce: 'nonce'
+}
+```
 ## License
 
 MIT © [Microsoft](http://github.com/Microsoft)
