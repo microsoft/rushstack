@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Add nonce attribute to style element if provided.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "anpablo@microsoft.com"
+}
