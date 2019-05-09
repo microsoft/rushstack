@@ -2,6 +2,18 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.9.0",
+      "tag": "@microsoft/load-themed-styles_v1.9.0",
+      "date": "Thu, 09 May 2019 19:12:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add nonce attribute to style element if provided."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.8.89",
       "tag": "@microsoft/load-themed-styles_v1.8.89",
       "date": "Mon, 06 May 2019 20:46:22 GMT",
