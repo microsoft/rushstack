@@ -72,6 +72,11 @@
               "title": "Ignore Missing Script",
               "description": "Normally Rush requires that each project's package.json has a \"scripts\" entry matching the custom command name. To disable this check, set \"ignoreMissingScript\" to true.",
               "type": "boolean"
+            },
+            "ignoreDependencies": {
+              "title": "Ignore dependency relation between projects and just run everything in parallel",
+              "description": "Ignore dependency relation between projects and just run everything in parallel",
+              "type": "boolean"
             }
           }
         },
@@ -86,7 +91,8 @@
             "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
-            "ignoreMissingScript": { "$ref": "#/definitions/anything" }
+            "ignoreMissingScript": { "$ref": "#/definitions/anything" },
+            "ignoreDependencies": { "$ref": "#/definitions/anything" }
           }
         }
       ]

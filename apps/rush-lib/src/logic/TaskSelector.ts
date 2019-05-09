@@ -20,6 +20,7 @@ export interface ITaskSelectorConstructor {
   isIncrementalBuildAllowed: boolean;
   changedProjectsOnly: boolean;
   ignoreMissingScript: boolean;
+  ignoreDependencies: boolean;
 }
 
 /**
@@ -60,7 +61,7 @@ export class TaskSelector {
       this._registerFromFlags(this._options.fromFlags);
     }
     if (this._options.toFlags.length === 0 && this._options.fromFlags.length === 0) {
-      this._registerAll();
+      this._registerAll(this._options.ignoreDependencies);
     }
   }
 
@@ -114,15 +115,17 @@ export class TaskSelector {
     }
   }
 
-  private _registerAll(): void {
+  private _registerAll(addDependencies: boolean): void {
+    console.log(addDependencies);
     // Register all tasks
     for (const rushProject of this._options.rushConfiguration.projects) {
       this._registerTask(rushProject);
     }
-
-    // Add all dependencies
-    for (const projectName of Object.keys(this._rushLinkJson.localLinks)) {
-      this._taskRunner.addDependencies(projectName, this._rushLinkJson.localLinks[projectName]);
+    if (addDependencies) {
+       // Add all dependencies
+      for (const projectName of Object.keys(this._rushLinkJson.localLinks)) {
+        this._taskRunner.addDependencies(projectName, this._rushLinkJson.localLinks[projectName]);
+      }
     }
   }
 
