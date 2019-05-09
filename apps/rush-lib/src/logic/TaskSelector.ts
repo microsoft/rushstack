@@ -115,13 +115,12 @@ export class TaskSelector {
     }
   }
 
-  private _registerAll(addDependencies: boolean): void {
-    console.log(addDependencies);
+  private _registerAll(ignoreDependencies: boolean): void {
     // Register all tasks
     for (const rushProject of this._options.rushConfiguration.projects) {
       this._registerTask(rushProject);
     }
-    if (addDependencies) {
+    if (!ignoreDependencies) {
        // Add all dependencies
       for (const projectName of Object.keys(this._rushLinkJson.localLinks)) {
         this._taskRunner.addDependencies(projectName, this._rushLinkJson.localLinks[projectName]);

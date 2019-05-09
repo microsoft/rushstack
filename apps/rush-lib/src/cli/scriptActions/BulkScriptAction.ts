@@ -28,7 +28,7 @@ import { FileSystem } from '@microsoft/node-core-library';
 export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
-  ignoreDependencies?: boolean;
+  ignoreDependencies: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -65,7 +65,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._commandToRun = options.commandToRun || options.actionName;
-    this._ignoreDependencies = !! options.ignoreDependencies;
+    this._ignoreDependencies = options.ignoreDependencies;
   }
 
   public run(): Promise<void> {
