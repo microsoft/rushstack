@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Adding ability to ignore dependencies for bulk commands",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "aboktor@users.noreply.github.com"
+}
