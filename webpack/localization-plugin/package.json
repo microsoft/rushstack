@@ -1,0 +1,28 @@
+{
+  "name": "@microsoft/localization-plugin",
+  "version": "0.1.0",
+  "description": "This plugin facilitates localization with Webpack.",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/webpack/localization-plugin"
+  },
+  "scripts": {
+    "build": "gulp test --clean"
+  },
+  "dependencies": {
+    "@types/node": "8.5.8",
+    "@types/webpack": "4.4.0",
+    "@types/tapable": "1.0.2"
+  },
+  "devDependencies": {
+    "@microsoft/rush-stack-compiler-3.2": "0.3.12",
+    "gulp": "~3.9.1",
+    "@microsoft/node-library-build": "6.0.60"
+  }
+}
