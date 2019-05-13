@@ -20,7 +20,7 @@
     "@microsoft/node-core-library": "3.13.0",
     "@types/node": "8.5.8",
     "decomment": "~0.9.1",
-    "glob": "~7.0.5",
+    "glob": "~7.1.4",
     "glob-escape": "~0.0.1",
     "resolve": "1.8.1"
   },
@@ -29,7 +29,7 @@
     "@microsoft/node-library-build": "6.0.55",
     "@microsoft/rush-stack-compiler-3.1": "0.6.12",
     "@microsoft/rush-stack-compiler-3.2": "0.3.7",
-    "@types/glob": "5.0.30",
+    "@types/glob": "7.1.1",
     "@types/resolve": "0.0.8",
     "gulp": "~3.9.1",
     "tslint-microsoft-contrib": "~5.2.1",

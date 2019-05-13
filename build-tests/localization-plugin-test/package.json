@@ -1,6 +1,6 @@
 {
   "name": "localization-plugin-test",
-  "description": "Building this project is a regression test for @microsoft/localization-plugin",
+  "description": "Building this project exercises @microsoft/localization-plugin",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,9 +9,9 @@
   "dependencies": {
     "webpack": "~4.31.0",
     "@microsoft/localization-plugin": "0.1.0",
-    "typescript": "~3.1.6",
     "fs-extra": "~7.0.1",
     "@microsoft/rush-stack-compiler-3.2": "0.3.12",
-    "webpack-cli": "~3.3.2"
+    "webpack-cli": "~3.3.2",
+    "ts-loader": "6.0.0"
   }
 }

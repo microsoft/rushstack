@@ -28,10 +28,10 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-  // tslint-microsoft-contrib, tslint, and ts-jest have peerDependencies on typescript, but now we have two copies
+  // these packages have peerDependencies on typescript, but now we have multiple copies
   // in the repo so it doesn't know which one to pick
   // See this issue: https://github.com/pnpm/pnpm/issues/1187
-  if (packageJson.name === 'tslint-microsoft-contrib' || packageJson.name === 'tslint' || packageJson.name === 'ts-jest') {
+  if (packageJson.name === 'tslint-microsoft-contrib' || packageJson.name === 'tslint' || packageJson.name === 'ts-jest' || packageJson.name === 'ts-loader') {
     packageJson.dependencies['typescript'] = '~3.0.0';
     delete packageJson.peerDependencies['typescript'];
   }
