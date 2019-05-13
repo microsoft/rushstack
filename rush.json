@@ -640,7 +640,7 @@
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-2.8",
-     "projectFolder": "stack/rush-stack-compiler-2.8",
+      "projectFolder": "stack/rush-stack-compiler-2.8",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": [
