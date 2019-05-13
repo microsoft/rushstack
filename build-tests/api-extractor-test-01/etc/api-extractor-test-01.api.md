@@ -4,6 +4,9 @@
 
 ```ts
 
+import Long from 'long';
+import { MAX_UNSIGNED_VALUE } from 'long';
+
 // @public
 export abstract class AbstractClass {
     // (undocumented)
@@ -141,6 +144,8 @@ export interface IMergedInterfaceReferencee {
 export interface ISimpleInterface {
 }
 
+export { MAX_UNSIGNED_VALUE }
+
 // @public (undocumented)
 export namespace NamespaceContainingVariable {
     let // @internal (undocumented)
@@ -172,6 +177,12 @@ export class TypeReferencesInAedoc {
     getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
     // (undocumented)
     getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
+}
+
+// @public (undocumented)
+export class UseLong {
+    // (undocumented)
+    use_long(): Long;
 }
 
 // @alpha (undocumented)

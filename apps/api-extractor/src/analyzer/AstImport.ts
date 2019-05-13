@@ -9,6 +9,11 @@ import { InternalError } from '@microsoft/node-core-library';
  */
 export enum AstImportKind {
   /**
+   * An import statement such as `import X from "y";`.
+   */
+  DefaultImport,
+
+  /**
    * An import statement such as `import { X } from "y";`.
    */
   NamedImport,
@@ -62,6 +67,9 @@ export class AstImport {
    * The name depends on the type of import:
    *
    * ```ts
+   * // For AstImportKind.DefaultImport style, exportName would be "X" in this example:
+   * import X from "y";
+   *
    * // For AstImportKind.NamedImport style, exportName would be "X" in this example:
    * import { X } from "y";
    *
@@ -110,6 +118,8 @@ export class AstImport {
    */
   public static getKey(options: IAstImportOptions): string {
     switch (options.importKind) {
+      case AstImportKind.DefaultImport:
+        return `${options.modulePath}:${options.exportName}`;
       case AstImportKind.NamedImport:
         return `${options.modulePath}:${options.exportName}`;
       case AstImportKind.StarImport:
