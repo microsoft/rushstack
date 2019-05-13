@@ -8,7 +8,7 @@ import * as child_process from 'child_process';
 import * as fs from 'fs';
 
 // @beta
-export type callback<TResult, TError> = (error: TError, result: TResult) => void;
+export type callback<TResult, TError> = (error: TError | null, result: TResult) => void;
 
 // @beta
 export class Colors {

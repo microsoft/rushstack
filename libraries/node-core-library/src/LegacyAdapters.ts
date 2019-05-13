@@ -5,7 +5,7 @@
  * Callback used by {@link LegacyAdapters}.
  * @beta
  */
-export type callback<TResult, TError> = (error: TError, result: TResult) => void;
+export type callback<TResult, TError> = (error: TError | null, result: TResult) => void;
 
 /**
  * Helper functions used when interacting with APIs that do not follow modern coding practices.
