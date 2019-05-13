@@ -1,6 +1,13 @@
 # Change Log - @microsoft/ts-command-line
 
-This log was last generated on Fri, 07 Dec 2018 17:04:56 GMT and should not be manually modified.
+This log was last generated on Mon, 06 May 2019 20:46:21 GMT and should not be manually modified.
+
+## 4.2.4
+Mon, 06 May 2019 20:46:21 GMT
+
+### Patches
+
+- Allow colons in command line action names
 
 ## 4.2.3
 Fri, 07 Dec 2018 17:04:56 GMT

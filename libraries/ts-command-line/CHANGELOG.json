@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "4.2.4",
+      "tag": "@microsoft/ts-command-line_v4.2.4",
+      "date": "Mon, 06 May 2019 20:46:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow colons in command line action names"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.3",
       "tag": "@microsoft/ts-command-line_v4.2.3",
       "date": "Fri, 07 Dec 2018 17:04:56 GMT",

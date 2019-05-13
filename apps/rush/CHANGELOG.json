@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.7.3",
+      "tag": "@microsoft/rush_v5.7.3",
+      "date": "Mon, 06 May 2019 21:03:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow colons in command line action names (add missing dependency from 5.7.2)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.7.2",
+      "tag": "@microsoft/rush_v5.7.2",
+      "date": "Mon, 06 May 2019 19:52:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow colons in command line action names"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.7.1",
       "tag": "@microsoft/rush_v5.7.1",
       "date": "Wed, 24 Apr 2019 06:32:17 GMT",

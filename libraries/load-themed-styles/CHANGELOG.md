@@ -1,6 +1,28 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Tue, 30 Apr 2019 23:08:02 GMT and should not be manually modified.
+This log was last generated on Thu, 09 May 2019 19:12:31 GMT and should not be manually modified.
+
+## 1.9.0
+Thu, 09 May 2019 19:12:31 GMT
+
+### Minor changes
+
+- Add nonce attribute to style element if provided.
+
+## 1.8.89
+Mon, 06 May 2019 20:46:22 GMT
+
+*Version update only*
+
+## 1.8.88
+Mon, 06 May 2019 19:34:54 GMT
+
+*Version update only*
+
+## 1.8.87
+Mon, 06 May 2019 19:11:16 GMT
+
+*Version update only*
 
 ## 1.8.86
 Tue, 30 Apr 2019 23:08:02 GMT

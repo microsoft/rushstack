@@ -106,6 +106,7 @@ interface IExtractorConfigParameters {
   untrimmedFilePath: string;
   betaTrimmedFilePath: string;
   publicTrimmedFilePath: string;
+  omitTrimmingComments: boolean;
   tsdocMetadataEnabled: boolean;
   tsdocMetadataFilePath: string;
   messages: IExtractorMessagesConfig;
@@ -181,6 +182,8 @@ export class ExtractorConfig {
   public readonly betaTrimmedFilePath: string;
   /** {@inheritDoc IConfigDtsRollup.publicTrimmedFilePath} */
   public readonly publicTrimmedFilePath: string;
+  /** {@inheritDoc IConfigDtsRollup.omitTrimmingComments} */
+  public readonly omitTrimmingComments: boolean;
 
   /** {@inheritDoc IConfigTsdocMetadata.enabled} */
   public readonly tsdocMetadataEnabled: boolean;
@@ -210,6 +213,7 @@ export class ExtractorConfig {
     this.untrimmedFilePath = parameters.untrimmedFilePath;
     this.betaTrimmedFilePath = parameters.betaTrimmedFilePath;
     this.publicTrimmedFilePath = parameters.publicTrimmedFilePath;
+    this.omitTrimmingComments = parameters.omitTrimmingComments;
     this.tsdocMetadataEnabled = parameters.tsdocMetadataEnabled;
     this.tsdocMetadataFilePath = parameters.tsdocMetadataFilePath;
     this.messages = parameters.messages;
@@ -609,6 +613,7 @@ export class ExtractorConfig {
       let untrimmedFilePath: string = '';
       let betaTrimmedFilePath: string = '';
       let publicTrimmedFilePath: string = '';
+      let omitTrimmingComments: boolean = false;
 
       if (configObject.dtsRollup) {
         rollupEnabled = !!configObject.dtsRollup.enabled;
@@ -618,6 +623,7 @@ export class ExtractorConfig {
           configObject.dtsRollup.betaTrimmedFilePath, tokenContext);
         publicTrimmedFilePath = ExtractorConfig._resolvePathWithTokens('publicTrimmedFilePath',
           configObject.dtsRollup.publicTrimmedFilePath, tokenContext);
+        omitTrimmingComments = !!configObject.dtsRollup.omitTrimmingComments;
       }
 
       return new ExtractorConfig({
@@ -637,6 +643,7 @@ export class ExtractorConfig {
         untrimmedFilePath,
         betaTrimmedFilePath,
         publicTrimmedFilePath,
+        omitTrimmingComments,
         tsdocMetadataEnabled,
         tsdocMetadataFilePath,
         messages: configObject.messages || { },

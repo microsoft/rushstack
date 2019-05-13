@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 24 Apr 2019 06:32:17 GMT and should not be manually modified.
+This log was last generated on Mon, 06 May 2019 21:03:32 GMT and should not be manually modified.
+
+## 5.7.3
+Mon, 06 May 2019 21:03:32 GMT
+
+### Updates
+
+- Allow colons in command line action names (add missing dependency from 5.7.2)
+
+## 5.7.2
+Mon, 06 May 2019 19:52:37 GMT
+
+### Updates
+
+- Allow colons in command line action names
 
 ## 5.7.1
 Wed, 24 Apr 2019 06:32:17 GMT

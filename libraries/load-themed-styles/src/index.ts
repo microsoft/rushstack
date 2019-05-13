@@ -103,6 +103,9 @@ let _injectStylesWithCssText: boolean;
 // load-themed-styles hosted on the page.
 const _root: any = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
 
+// Nonce string to inject into script tag if one provided. This is used in CSP (Content Security Policy).
+const _styleNonce: string = _root && _root.CSPSettings && _root.CSPSettings.nonce;
+
 const _themeState: IThemeState = initializeThemeState();
 
 /**
@@ -399,6 +402,9 @@ function registerStyles(styleArray: ThemableArray): void {
   } = resolveThemableArray(styleArray);
 
   styleElement.type = 'text/css';
+  if (_styleNonce) {
+    styleElement.setAttribute('nonce', _styleNonce);
+  }
   styleElement.appendChild(document.createTextNode(styleString));
   _themeState.perf.count++;
   head.appendChild(styleElement);

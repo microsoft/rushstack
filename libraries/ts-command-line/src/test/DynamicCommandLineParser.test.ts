@@ -16,7 +16,7 @@ describe('DynamicCommandLineParser', () => {
     );
 
     const action: DynamicCommandLineAction = new DynamicCommandLineAction({
-      actionName: 'do-job',
+      actionName: 'do:the-job',
       summary: 'does the job',
       documentation: 'a longer description'
     });
@@ -26,7 +26,7 @@ describe('DynamicCommandLineParser', () => {
       description: 'The flag'
     });
 
-    return commandLineParser.execute(['do-job', '--flag']).then(() => {
+    return commandLineParser.execute(['do:the-job', '--flag']).then(() => {
       expect(commandLineParser.selectedAction).toEqual(action);
 
       const retrievedParameter: CommandLineFlagParameter = action.getFlagParameter('--flag');
