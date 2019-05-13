@@ -10,7 +10,7 @@
     "webpack": "~4.31.0",
     "@microsoft/localization-plugin": "0.1.0",
     "fs-extra": "~7.0.1",
-    "@microsoft/rush-stack-compiler-3.2": "0.3.12",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.13",
     "webpack-cli": "~3.3.2",
     "ts-loader": "6.0.0"
   }
