@@ -563,6 +563,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "ts-loader",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "tslint",
       "allowedCategories": [ "libraries" ]
     },

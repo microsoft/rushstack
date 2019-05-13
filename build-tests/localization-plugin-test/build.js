@@ -3,6 +3,8 @@ const child_process = require('child_process');
 const path = require('path');
 const process = require('process');
 
+const { LocJsonPreprocessor } = require('@microsoft/localization-plugin');
+
 function executeCommand(command) {
   console.log('---> ' + command);
   child_process.execSync(command, { stdio: 'inherit' });
@@ -14,8 +16,10 @@ fsx.emptyDirSync('dist');
 fsx.emptyDirSync('lib');
 fsx.emptyDirSync('temp');
 
-// Run the TypeScript compiler
-executeCommand('node node_modules/typescript/lib/tsc');
+LocJsonPreprocessor.preprocessLocJsonFiles({
+  srcFolder: path.resolve(__dirname, 'src'),
+  generatedTsFolder: path.resolve(__dirname, 'temp', 'loc-json-ts')
+});
 
 // Run Webpack
 executeCommand('node node_modules/webpack-cli/bin/cli');
