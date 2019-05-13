@@ -4,6 +4,7 @@
 import * as Webpack from 'webpack';
 import * as path from 'path';
 import * as lodash from 'lodash';
+import * as Tapable from 'tapable';
 
 export interface ILocJsonFileData {
   [stringName: string]: string;
@@ -46,6 +47,12 @@ interface IAsset {
   source(): string;
 }
 
+interface IMainTemplate extends Webpack.compilation.MainTemplate {
+  hooks: {
+    localVars: Tapable.SyncHook<string, Webpack.compilation.Chunk, string>;
+  };
+}
+
 /**
  * This plugin facilitates localization in webpack.
  *
@@ -63,6 +70,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _stringPlaceholderCounter: number;
   private _stringPlaceholderMap: Map<string, { [locale: string]: string }>;
   private _locales: Set<string>;
+  private _localeNamePlaceholder: string;
 
   constructor(options: ILocalizationPluginOptions) {
     this._options = options;
@@ -76,12 +84,20 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
 
     const errors: Error[] = this._initializeAndValidateOptions(compiler.options);
-    this._ammendWebpackConfiguration(compiler.options);
+    this._amendWebpackConfiguration(compiler.options);
 
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
       if (errors.length > 0) {
         compilation.errors.push(...errors);
+        return;
       }
+
+      (compilation.mainTemplate as IMainTemplate).hooks.localVars.tap(
+        PLUGIN_NAME,
+        (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
+          return source.replace(LOCALE_FILENAME_PLACEHOLDER_REGEX, this._localeNamePlaceholder);
+        }
+      );
     });
 
     compiler.hooks.emit.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
@@ -221,7 +237,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     return result;
   }
 
-  private _ammendWebpackConfiguration(configuration: Webpack.Configuration): void {
+  private _amendWebpackConfiguration(configuration: Webpack.Configuration): void {
     if (!configuration.module) {
       configuration.module = {
         rules: []
@@ -295,6 +311,11 @@ export class LocalizationPlugin implements Webpack.Plugin {
       const normalizedLocales: Set<string> = new Set<string>();
       this._locales = new Set<string>();
 
+      const localeNamePlaceholder: IStringPlaceholder = this._getPlaceholderString();
+      this._localeNamePlaceholder = localeNamePlaceholder.value;
+      const localeNameMap: { [localeName: string]: string } = {};
+      this._stringPlaceholderMap.set(localeNamePlaceholder.suffix, localeNameMap);
+
       for (const localeName in localizedStrings) {
         if (localizedStrings.hasOwnProperty(localeName)) {
           const normalizedLocaleName: string = localeName.toUpperCase();
@@ -308,6 +329,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
           this._locales.add(localeName);
           normalizedLocales.add(normalizedLocaleName);
+          localeNameMap[localeName] = localeName;
 
           if (!localeName.match(localeNameRegex)) {
             errors.push(new Error(
