@@ -51,6 +51,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@microsoft/localization-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/node-core-library",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -580,7 +584,11 @@
     },
     {
       "name": "webpack",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "webpack-cli",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "wordwrap",

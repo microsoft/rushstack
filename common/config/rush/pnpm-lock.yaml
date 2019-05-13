@@ -31,6 +31,8 @@ dependencies:
   '@rush-temp/loader-load-themed-styles': 'file:projects/loader-load-themed-styles.tgz'
   '@rush-temp/loader-raw-script': 'file:projects/loader-raw-script.tgz'
   '@rush-temp/loader-set-webpack-public-path': 'file:projects/loader-set-webpack-public-path.tgz'
+  '@rush-temp/localization-plugin': 'file:projects/localization-plugin.tgz'
+  '@rush-temp/localization-plugin-test': 'file:projects/localization-plugin-test.tgz'
   '@rush-temp/node-core-library': 'file:projects/node-core-library.tgz'
   '@rush-temp/node-library-build': 'file:projects/node-library-build.tgz'
   '@rush-temp/node-library-build-eslint-test': 'file:projects/node-library-build-eslint-test.tgz'
@@ -203,6 +205,7 @@ dependencies:
   uglify-js: 3.0.28
   vinyl: 2.2.0
   webpack: 4.31.0
+  webpack-cli: 3.3.10
   wordwrap: 1.0.0
   xml: 1.0.1
   yargs: 4.6.0
@@ -1936,6 +1939,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-+hN/Zh2D08Mx65pZ/4g5bsmNiZUuChDiQfTUQ7qJr4/kuopCr88xZsAXv6mBoZEsUI4OuGHlX59qE94K2mMW8Q==
+  /big.js/5.2.2:
+    dev: false
+    resolution:
+      integrity: sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==
   /binary-extensions/1.13.1:
     dev: false
     engines:
@@ -2253,6 +2260,12 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha1-1UVjW+HjPFQmScaRc+Xeas+uNN0=
+  /camelcase/5.3.1:
+    dev: false
+    engines:
+      node: '>=6'
+    resolution:
+      integrity: sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
   /caniuse-lite/1.0.30001023:
     dev: false
     resolution:
@@ -2414,6 +2427,14 @@ packages:
     dev: false
     resolution:
       integrity: sha512-4FG+RSG9DL7uEwRUZXZn3SS34DiDPfzP0VOiEwtUWlE+AR2EIg+hSyvrIgUUfhdgR/UkAeW2QHgeP+hWrXs7jQ==
+  /cliui/5.0.0:
+    dependencies:
+      string-width: 3.1.0
+      strip-ansi: 5.2.0
+      wrap-ansi: 5.1.0
+    dev: false
+    resolution:
+      integrity: sha512-PYeGSEmmHM6zvoef2w8TPzlrnNpXIjTipYK780YswmIP9vjxmd6Y2a3CB2Ks6/AU8NHjZugXvo8w3oWM2qnwXA==
   /clone-buffer/1.0.0:
     dev: false
     engines:
@@ -3142,6 +3163,16 @@ packages:
     dev: false
     resolution:
       integrity: sha1-6TUyWLqpEIll78QcsO+K3i88+wc=
+  /enhanced-resolve/4.1.0:
+    dependencies:
+      graceful-fs: 4.2.3
+      memory-fs: 0.4.1
+      tapable: 1.1.3
+    dev: false
+    engines:
+      node: '>=6.9.0'
+    resolution:
+      integrity: sha512-F/7vkyTtyc/llOIn8oWclcB25KdRaiPBpZYDgJHgh/UHtpgT2p2eldQgtQnLtUvfMKPKxbRaQM/hHkvLHt1Vng==
   /enhanced-resolve/4.1.1:
     dependencies:
       graceful-fs: 4.2.3
@@ -4189,6 +4220,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-3t6rVToeoZfYSGd8YoLFR2DJkiQrIiUrGcjvFX2mDw3bn6k2OtwHN0TNCLbBO+w8qTvimhDkv+LSscbJY1vE6w==
+  /get-caller-file/2.0.5:
+    dev: false
+    engines:
+      node: 6.* || 8.* || >= 10.*
+    resolution:
+      integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
   /get-stdin/4.0.1:
     dev: false
     engines:
@@ -4354,6 +4391,14 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-sKzpEkf11GpOFuw0Zzjzmt4B4UZwjOcG757PPvrfhxcLFbq0wpsgpOqxpxtxFiCG4DtG93M6XRVbF2oGdev7bg==
+  /global-modules/2.0.0:
+    dependencies:
+      global-prefix: 3.0.0
+    dev: false
+    engines:
+      node: '>=6'
+    resolution:
+      integrity: sha512-NGbfmJBp9x8IxyJSd1P+otYK8vonoJactOogrVfFRIAEY1ukil8RSKDz2Yo7wh1oihl51l/r6W4epkeKJHqL8A==
   /global-prefix/1.0.2:
     dependencies:
       expand-tilde: 2.0.2
@@ -4366,6 +4411,16 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-2/dDxsFJklk8ZVVoy2btMsASLr4=
+  /global-prefix/3.0.0:
+    dependencies:
+      ini: 1.3.5
+      kind-of: 6.0.3
+      which: 1.3.1
+    dev: false
+    engines:
+      node: '>=6'
+    resolution:
+      integrity: sha512-awConJSVCHVGND6x3tmMaKcQvwXLhjdkmomy2W+Goaui8YPgYgXJZewhg3fWC+DlfqqQuWg8AwqjGTD2nAPVWg==
   /globals/11.12.0:
     dev: false
     engines:
@@ -4869,6 +4924,16 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-vAaZHieK9qjGo58agRBg+bhHX3hoTZU/Oa3GESWLz7t1U62fk63aHuDJJEteXoDeTCcPmUT+z38gkHPZkkmpmQ==
+  /import-local/2.0.0:
+    dependencies:
+      pkg-dir: 3.0.0
+      resolve-cwd: 2.0.0
+    dev: false
+    engines:
+      node: '>=6'
+    hasBin: true
+    resolution:
+      integrity: sha512-b6s04m3O+s3CGSbqDIyP4R6aAwAeYlVq9+WUWep6iHa8ETRf9yei1U48C5MmfJmV9AiLYYBKPMq/W+/WRpQmCQ==
   /imurmurhash/0.1.4:
     dev: false
     engines:
@@ -6161,6 +6226,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha1-Hq3nrMASA0rYTiOWdn6tn6VJWCE=
+  /json5/1.0.1:
+    dependencies:
+      minimist: 1.2.0
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha512-aKS4WQjPenRxiQsC93MNfjx+nbF4PAdYzmd/1JIj8HYzqfbu86beTuNgXDzPknWk0n0uARlyewZo4s++ES36Ow==
   /json5/2.1.1:
     dependencies:
       minimist: 1.2.0
@@ -6380,6 +6452,16 @@ packages:
       node: '>=4.0.0'
     resolution:
       integrity: sha1-yYrvSIvM7aL/teLeZG1qdUQp9c0=
+  /loader-utils/1.2.3:
+    dependencies:
+      big.js: 5.2.2
+      emojis-list: 2.1.0
+      json5: 1.0.1
+    dev: false
+    engines:
+      node: '>=4.0.0'
+    resolution:
+      integrity: sha512-fkpz8ejdnEMG3s37wGL07iSBDg99O9D5yflE9RGNH3hRdx9SOwYfnGYdZOUIZitN8E+E2vkq3MUMYMvPYl5ZZA==
   /locate-path/2.0.0:
     dependencies:
       p-locate: 2.0.0
@@ -8511,6 +8593,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-l/cXtp1IeE9fUmpsWqj/3aBVpNE=
+  /require-main-filename/2.0.0:
+    dev: false
+    resolution:
+      integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==
   /resolve-cwd/2.0.0:
     dependencies:
       resolve-from: 3.0.0
@@ -10127,6 +10213,10 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
+  /v8-compile-cache/2.0.3:
+    dev: false
+    resolution:
+      integrity: sha512-CNmdbwQMBjwr9Gsmohvm0pbL954tJrNzf6gWL3K+QMQf00PF7ERGrEiLgjuU3mKreLC2MeGhUsNV9ybTbLgd3w==
   /v8-compile-cache/2.1.0:
     dev: false
     resolution:
@@ -10279,6 +10369,49 @@ packages:
     dev: false
     resolution:
       integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==
+  /webpack-cli/3.3.10:
+    dependencies:
+      chalk: 2.4.2
+      cross-spawn: 6.0.5
+      enhanced-resolve: 4.1.0
+      findup-sync: 3.0.0
+      global-modules: 2.0.0
+      import-local: 2.0.0
+      interpret: 1.2.0
+      loader-utils: 1.2.3
+      supports-color: 6.1.0
+      v8-compile-cache: 2.0.3
+      yargs: 13.2.4
+    dev: false
+    engines:
+      node: '>=6.11.5'
+    hasBin: true
+    peerDependencies:
+      webpack: 4.x.x
+    resolution:
+      integrity: sha512-u1dgND9+MXaEt74sJR4PR7qkPxXUSQ0RXYq8x1L6Jg1MYVEmGPrH6Ah6C4arD4r0J1P5HKjRqpab36k0eIzPqg==
+  /webpack-cli/3.3.10_webpack@4.31.0:
+    dependencies:
+      chalk: 2.4.2
+      cross-spawn: 6.0.5
+      enhanced-resolve: 4.1.0
+      findup-sync: 3.0.0
+      global-modules: 2.0.0
+      import-local: 2.0.0
+      interpret: 1.2.0
+      loader-utils: 1.2.3
+      supports-color: 6.1.0
+      v8-compile-cache: 2.0.3
+      webpack: 4.31.0
+      yargs: 13.2.4
+    dev: false
+    engines:
+      node: '>=6.11.5'
+    hasBin: true
+    peerDependencies:
+      webpack: 4.x.x
+    resolution:
+      integrity: sha512-u1dgND9+MXaEt74sJR4PR7qkPxXUSQ0RXYq8x1L6Jg1MYVEmGPrH6Ah6C4arD4r0J1P5HKjRqpab36k0eIzPqg==
   /webpack-sources/1.4.3:
     dependencies:
       source-list-map: 2.0.1
@@ -10419,6 +10552,16 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-2Pw9KE3QV5T+hJc8rs3Rz4JP3YU=
+  /wrap-ansi/5.1.0:
+    dependencies:
+      ansi-styles: 3.2.1
+      string-width: 3.1.0
+      strip-ansi: 5.2.0
+    dev: false
+    engines:
+      node: '>=6'
+    resolution:
+      integrity: sha512-QC1/iN/2/RPVJ5jYK8BGttj5z83LmSKmvbvrXPNCLZSEb32KKVDJDl/MOt2N01qU2H/FkzEa9PKto1BqDjtd7Q==
   /wrappy/1.0.2:
     dev: false
     resolution:
@@ -10512,6 +10655,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==
+  /yargs-parser/13.1.1:
+    dependencies:
+      camelcase: 5.3.1
+      decamelize: 1.2.0
+    dev: false
+    resolution:
+      integrity: sha512-oVAVsHz6uFrg3XQheFII8ESO2ssAf9luWuAd6Wexsu4F3OtIW0o8IribPXYrD4WC24LWtPrJlGy87y5udK+dxQ==
   /yargs-parser/2.4.1:
     dependencies:
       camelcase: 3.0.0
@@ -10571,6 +10721,22 @@ packages:
     dev: false
     resolution:
       integrity: sha512-PRU7gJrJaXv3q3yQZ/+/X6KBswZiaQ+zOmdprZcouPYtQgvNU35i+68M4b1ZHLZtYFT5QObFLV+ZkmJYcwKdiw==
+  /yargs/13.2.4:
+    dependencies:
+      cliui: 5.0.0
+      find-up: 3.0.0
+      get-caller-file: 2.0.5
+      os-locale: 3.1.0
+      require-directory: 2.1.1
+      require-main-filename: 2.0.0
+      set-blocking: 2.0.0
+      string-width: 3.1.0
+      which-module: 2.0.0
+      y18n: 4.0.0
+      yargs-parser: 13.1.1
+    dev: false
+    resolution:
+      integrity: sha512-HG/DWAJa1PAnHT9JAhNa8AbAv3FPaiLzioSjCcmuXXhP8MlpHO5vwls4g4j6n30Z74GVQj8Xa62dWVx1QCGklg==
   /yargs/4.6.0:
     dependencies:
       camelcase: 2.1.1
@@ -11063,6 +11229,30 @@ packages:
     resolution:
       integrity: sha512-DbJsm/1EuRkBrAvjADHyG/RiBjxhFeXNqCWHHkapN+NGJBdbQo7rx5aN414s6qD6b8oFER8kul2J6Vrg+8Tutw==
       tarball: 'file:projects/loader-set-webpack-public-path.tgz'
+    version: 0.0.0
+  'file:projects/localization-plugin-test.tgz':
+    dependencies:
+      fs-extra: 7.0.1
+      typescript: 3.1.6
+      webpack: 4.31.0
+      webpack-cli: 3.3.10_webpack@4.31.0
+    dev: false
+    name: '@rush-temp/localization-plugin-test'
+    resolution:
+      integrity: sha512-Qq0MsTnXwWTEvfvJnNcQ0u9QDgLaRC4kRn6Ce1Npl2wyDzeV49yYrR3QmUSY9wMMkVdq5s9ESK+EJH16tlH8HA==
+      tarball: 'file:projects/localization-plugin-test.tgz'
+    version: 0.0.0
+  'file:projects/localization-plugin.tgz':
+    dependencies:
+      '@types/node': 10.17.13
+      '@types/tapable': 1.0.4
+      '@types/webpack': 4.39.8
+      gulp: 4.0.2
+    dev: false
+    name: '@rush-temp/localization-plugin'
+    resolution:
+      integrity: sha512-8zjj1tYWklEMMiKVxe9Y/PGDYmXasa5VsTYoCGeX+udBPtJO7+qz3lG7yiom9WfO6Xolyc4/+p975M+y/DTY2Q==
+      tarball: 'file:projects/localization-plugin.tgz'
     version: 0.0.0
   'file:projects/node-core-library.tgz':
     dependencies:
@@ -11662,6 +11852,7 @@ packages:
       integrity: sha512-t2TdVMzng8QQAWq/MY04yLWs6AlzoZaalRuhDqZLPaJBxtTHfpqAoZjOj3vCYH7uTi1oZppQ3TTlNRrcGdBYrQ==
       tarball: 'file:projects/web-library-build.tgz'
     version: 0.0.0
+registry: ''
 specifiers:
   '@microsoft/node-library-build': 6.3.11
   '@microsoft/rush-stack-compiler-3.5': 0.3.11
@@ -11695,6 +11886,8 @@ specifiers:
   '@rush-temp/loader-load-themed-styles': 'file:./projects/loader-load-themed-styles.tgz'
   '@rush-temp/loader-raw-script': 'file:./projects/loader-raw-script.tgz'
   '@rush-temp/loader-set-webpack-public-path': 'file:./projects/loader-set-webpack-public-path.tgz'
+  '@rush-temp/localization-plugin': 'file:./projects/localization-plugin.tgz'
+  '@rush-temp/localization-plugin-test': 'file:./projects/localization-plugin-test.tgz'
   '@rush-temp/node-core-library': 'file:./projects/node-core-library.tgz'
   '@rush-temp/node-library-build': 'file:./projects/node-library-build.tgz'
   '@rush-temp/node-library-build-eslint-test': 'file:./projects/node-library-build-eslint-test.tgz'
@@ -11867,6 +12060,7 @@ specifiers:
   uglify-js: ~3.0.28
   vinyl: ~2.2.0
   webpack: ~4.31.0
+  webpack-cli: ~3.3.2
   wordwrap: ~1.0.0
   xml: ~1.0.1
   yargs: ~4.6.0

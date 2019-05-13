@@ -455,6 +455,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "localization-plugin-test",
+      "projectFolder": "build-tests/localization-plugin-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "node-library-build-eslint-test",
       "projectFolder": "build-tests/node-library-build-eslint-test",
       "reviewCategory": "tests",
@@ -846,6 +852,11 @@
       "projectFolder": "webpack/loader-set-webpack-public-path",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@microsoft/localization-plugin",
+      "projectFolder": "webpack/localization-plugin",
+      "reviewCategory": "libraries"
     },
     {
       "packageName": "@microsoft/loader-raw-script",
