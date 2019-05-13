@@ -41,6 +41,8 @@ dependencies:
   '@rush-temp/rush-stack-compiler-2.4-library-test': 'file:projects/rush-stack-compiler-2.4-library-test.tgz'
   '@rush-temp/rush-stack-compiler-2.7': 'file:projects/rush-stack-compiler-2.7.tgz'
   '@rush-temp/rush-stack-compiler-2.7-library-test': 'file:projects/rush-stack-compiler-2.7-library-test.tgz'
+  '@rush-temp/rush-stack-compiler-2.8': 'file:projects/rush-stack-compiler-2.8.tgz'
+  '@rush-temp/rush-stack-compiler-2.8-library-test': 'file:projects/rush-stack-compiler-2.8-library-test.tgz'
   '@rush-temp/rush-stack-compiler-2.9': 'file:projects/rush-stack-compiler-2.9.tgz'
   '@rush-temp/rush-stack-compiler-2.9-library-test': 'file:projects/rush-stack-compiler-2.9-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.0': 'file:projects/rush-stack-compiler-3.0.tgz'
@@ -51,6 +53,8 @@ dependencies:
   '@rush-temp/rush-stack-compiler-3.2-library-test': 'file:projects/rush-stack-compiler-3.2-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.3': 'file:projects/rush-stack-compiler-3.3.tgz'
   '@rush-temp/rush-stack-compiler-3.3-library-test': 'file:projects/rush-stack-compiler-3.3-library-test.tgz'
+  '@rush-temp/rush-stack-compiler-3.4': 'file:projects/rush-stack-compiler-3.4.tgz'
+  '@rush-temp/rush-stack-compiler-3.4-library-test': 'file:projects/rush-stack-compiler-3.4-library-test.tgz'
   '@rush-temp/rush-stack-compiler-shared': 'file:projects/rush-stack-compiler-shared.tgz'
   '@rush-temp/rush-stack-library-test': 'file:projects/rush-stack-library-test.tgz'
   '@rush-temp/rushell': 'file:projects/rushell.tgz'
@@ -1762,7 +1766,7 @@ packages:
     dependencies:
       caniuse-lite: 1.0.30000967
       electron-to-chromium: 1.3.133
-      node-releases: 1.1.18
+      node-releases: 1.1.19
     dev: false
     hasBin: true
     resolution:
@@ -2278,7 +2282,7 @@ packages:
       babel-runtime: 6.26.0
       chokidar: 1.7.0
       duplexer: 0.1.1
-      glob: 7.1.4
+      glob: 7.0.6
       glob2base: 0.0.12
       minimatch: 3.0.4
       mkdirp: 0.5.1
@@ -3326,7 +3330,7 @@ packages:
       integrity: sha1-WI74lzxmI7KnbfRlEFaWuWqsgGc=
   /fileset/2.0.3:
     dependencies:
-      glob: 7.1.4
+      glob: 7.0.6
       minimatch: 3.0.4
     dev: false
     resolution:
@@ -3845,7 +3849,7 @@ packages:
     dependencies:
       array-union: 1.0.2
       arrify: 1.0.1
-      glob: 7.1.4
+      glob: 7.0.6
       object-assign: 4.1.1
       pify: 2.3.0
       pinkie-promise: 2.0.1
@@ -6470,7 +6474,7 @@ packages:
   /node-gyp/3.8.0:
     dependencies:
       fstream: 1.0.11
-      glob: 7.1.4
+      glob: 7.0.6
       graceful-fs: 4.1.15
       mkdirp: 0.5.1
       nopt: 3.0.6
@@ -6538,12 +6542,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-SUDEb+o71XR5lXSTyivXd9J7fCloE3SyP4lSgt3lU2oSANiox+SxlNRGPjDKrwU1YN3ix2KN/VGGCg0t01rttQ==
-  /node-releases/1.1.18:
+  /node-releases/1.1.19:
     dependencies:
       semver: 5.3.0
     dev: false
     resolution:
-      integrity: sha512-/mnVgm6u/8OwlIsoyRXtTI0RfQcxZoAZbdwyXap0EeWwcOpDDymyCHM2/aR9XKmHXrvizHoPAOs0pcbiJ6RUaA==
+      integrity: sha512-SH/B4WwovHbulIALsQllAVwqZZD1kPmKCqrhGfR29dXjLAVZMHvBjD3S6nL9D/J9QkmZ1R92/0wCMDKXUUvyyA==
   /node-sass/4.9.3:
     dependencies:
       async-foreach: 0.1.3
@@ -6551,7 +6555,7 @@ packages:
       cross-spawn: 3.0.1
       gaze: 1.1.3
       get-stdin: 4.0.1
-      glob: 7.1.4
+      glob: 7.0.6
       in-publish: 2.0.0
       lodash.assign: 4.2.0
       lodash.clonedeep: 4.5.0
@@ -7970,7 +7974,7 @@ packages:
       integrity: sha1-tNwYYcIbQn6SlQej51HiosuKs/o=
   /sass-graph/2.2.4:
     dependencies:
-      glob: 7.1.4
+      glob: 7.0.6
       lodash: 4.17.11
       scss-tokenizer: 0.2.3
       yargs: 7.1.0
@@ -9103,6 +9107,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-p5TCYZDAO0m4G344hD+wx/LATebLWZNkkh2asWUFqSsD2OrDNhbAHuSjobrmsUmdzjJjEeZVU9g1h3O6vpstnw==
+  /typescript/2.8.4:
+    dev: false
+    engines:
+      node: '>=4.2.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-IIU5cN1mR5J3z9jjdESJbnxikTrEz3lzAw/D0Tf45jHpBp55nY31UkUvmVHoffCfKHTqJs3fCLPDxknQTTFegQ==
   /typescript/2.9.2:
     dev: false
     engines:
@@ -9183,11 +9194,10 @@ packages:
     optional: true
     resolution:
       integrity: sha1-bgkk1r2mta/jSeOabWMoUKD4grc=
-  /uglifyjs-webpack-plugin/0.4.6_webpack@3.11.0:
+  /uglifyjs-webpack-plugin/0.4.6:
     dependencies:
       source-map: 0.5.7
       uglify-js: 2.8.29
-      webpack: 3.11.0_webpack@3.11.0
       webpack-sources: 1.3.0
     dev: false
     engines:
@@ -9517,7 +9527,7 @@ packages:
     dev: false
     resolution:
       integrity: sha512-OiVgSrbGu7NEnEvQJJgdSFPl2qWKkWq5lHMhgiToIiN9w34EBnjYzSYs+VbL5KoYiLNtFFa7BZIKxRED3I32pA==
-  /webpack/3.11.0_webpack@3.11.0:
+  /webpack/3.11.0:
     dependencies:
       acorn: 5.7.3
       acorn-dynamic-import: 2.0.2
@@ -9537,17 +9547,14 @@ packages:
       source-map: 0.5.7
       supports-color: 4.5.0
       tapable: 0.2.9
-      uglifyjs-webpack-plugin: 0.4.6_webpack@3.11.0
+      uglifyjs-webpack-plugin: 0.4.6
       watchpack: 1.6.0
-      webpack: 3.11.0_webpack@3.11.0
       webpack-sources: 1.3.0
       yargs: 8.0.2
     dev: false
     engines:
       node: '>=4.3.0 <5.0.0 || >=5.10'
     hasBin: true
-    peerDependencies:
-      webpack: '*'
     resolution:
       integrity: sha512-3kOFejWqj5ISpJk4Qj/V7w98h9Vl52wak3CLiw/cDOfbVTq7FeoZ0SdoHHY9PYlHr50ZS42OfvzE2vB4nncKQg==
   /webpack/4.31.0_webpack@4.31.0:
@@ -9575,7 +9582,6 @@ packages:
       tapable: 1.1.3
       terser-webpack-plugin: 1.2.3_webpack@4.31.0
       watchpack: 1.6.0
-      webpack: 4.31.0_webpack@4.31.0
       webpack-sources: 1.3.0
     dev: false
     engines:
@@ -10160,7 +10166,7 @@ packages:
       '@types/webpack': 4.4.0
       colors: 1.2.5
       gulp: 3.9.1
-      webpack: 3.11.0_webpack@3.11.0
+      webpack: 3.11.0
     dev: false
     name: '@rush-temp/gulp-core-build-webpack'
     resolution:
@@ -10468,6 +10474,31 @@ packages:
       integrity: sha512-+b+XotNAfZ4zIOi2AP06gCHl3O4fjQGXja3tMXJwKVgarnzGWyrzoFzMBBVQ+2+vFcFdC/QA0etSs0z3YS0D2Q==
       tarball: 'file:projects/rush-stack-compiler-2.7.tgz'
     version: 0.0.0
+  'file:projects/rush-stack-compiler-2.8-library-test.tgz':
+    dependencies:
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-2.8-library-test'
+    resolution:
+      integrity: sha512-QrApEM4jRHoVD2y/uNlwEkbQtN9hHCkL5VKP3OQbViSJaOmZoxB+TVm7ef6ibP1ptJ04UQHe/1mdlRlkolgXZQ==
+      tarball: 'file:projects/rush-stack-compiler-2.8-library-test.tgz'
+    version: 0.0.0
+  'file:projects/rush-stack-compiler-2.8.tgz':
+    dependencies:
+      '@microsoft/node-library-build': 6.0.55
+      '@microsoft/rush-stack-compiler-3.2': 0.3.7
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+      tslint: 5.12.1
+      tslint-microsoft-contrib: 5.2.1_tslint@5.12.1
+      typescript: 2.8.4
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-2.8'
+    resolution:
+      integrity: sha512-kEdF3A1rku8Vx7UCIUHomj4uEAtpv976bF42J5Nr25byvbnW7YLZp3fzEM6nt4PZgaxwmkDzfny9g7E3JAo4MA==
+      tarball: 'file:projects/rush-stack-compiler-2.8.tgz'
+    version: 0.0.0
   'file:projects/rush-stack-compiler-2.9-library-test.tgz':
     dependencies:
       '@types/node': 8.5.8
@@ -10592,6 +10623,31 @@ packages:
     resolution:
       integrity: sha512-Dw0qK1yPclagjf1PAV8EaUwrkJfed+EDM/j8ixIHalKGFbVonZeqC0AWBWW6womFGQEEqSn6ng3mxR/FPYTF7g==
       tarball: 'file:projects/rush-stack-compiler-3.3.tgz'
+    version: 0.0.0
+  'file:projects/rush-stack-compiler-3.4-library-test.tgz':
+    dependencies:
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-3.4-library-test'
+    resolution:
+      integrity: sha512-JuhoSqIRMCAIcFe2yikDwgyFKc1VyWSVlAoQ6tyx1IpS8GMBHGL/bhjcVPOi08KUho5P69QCg4ODeN40Q+ZLmQ==
+      tarball: 'file:projects/rush-stack-compiler-3.4-library-test.tgz'
+    version: 0.0.0
+  'file:projects/rush-stack-compiler-3.4.tgz':
+    dependencies:
+      '@microsoft/node-library-build': 6.0.55
+      '@microsoft/rush-stack-compiler-3.2': 0.3.7
+      '@types/node': 8.5.8
+      gulp: 3.9.1
+      tslint: 5.12.1
+      tslint-microsoft-contrib: 5.2.1_tslint@5.12.1
+      typescript: 3.4.5
+    dev: false
+    name: '@rush-temp/rush-stack-compiler-3.4'
+    resolution:
+      integrity: sha512-W6e3HUa/vKySI7S7LhS9kl2rdACEzfvhbdJGFULs71gqpsIgZixnbTANbJ20EqFuUcQPrbu3+KC9PAxKhuJTFg==
+      tarball: 'file:projects/rush-stack-compiler-3.4.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-shared.tgz':
     dev: false
@@ -10767,6 +10823,8 @@ specifiers:
   '@rush-temp/rush-stack-compiler-2.4-library-test': 'file:./projects/rush-stack-compiler-2.4-library-test.tgz'
   '@rush-temp/rush-stack-compiler-2.7': 'file:./projects/rush-stack-compiler-2.7.tgz'
   '@rush-temp/rush-stack-compiler-2.7-library-test': 'file:./projects/rush-stack-compiler-2.7-library-test.tgz'
+  '@rush-temp/rush-stack-compiler-2.8': 'file:./projects/rush-stack-compiler-2.8.tgz'
+  '@rush-temp/rush-stack-compiler-2.8-library-test': 'file:./projects/rush-stack-compiler-2.8-library-test.tgz'
   '@rush-temp/rush-stack-compiler-2.9': 'file:./projects/rush-stack-compiler-2.9.tgz'
   '@rush-temp/rush-stack-compiler-2.9-library-test': 'file:./projects/rush-stack-compiler-2.9-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.0': 'file:./projects/rush-stack-compiler-3.0.tgz'
@@ -10777,6 +10835,8 @@ specifiers:
   '@rush-temp/rush-stack-compiler-3.2-library-test': 'file:./projects/rush-stack-compiler-3.2-library-test.tgz'
   '@rush-temp/rush-stack-compiler-3.3': 'file:./projects/rush-stack-compiler-3.3.tgz'
   '@rush-temp/rush-stack-compiler-3.3-library-test': 'file:./projects/rush-stack-compiler-3.3-library-test.tgz'
+  '@rush-temp/rush-stack-compiler-3.4': 'file:./projects/rush-stack-compiler-3.4.tgz'
+  '@rush-temp/rush-stack-compiler-3.4-library-test': 'file:./projects/rush-stack-compiler-3.4-library-test.tgz'
   '@rush-temp/rush-stack-compiler-shared': 'file:./projects/rush-stack-compiler-shared.tgz'
   '@rush-temp/rush-stack-library-test': 'file:./projects/rush-stack-library-test.tgz'
   '@rush-temp/rushell': 'file:./projects/rushell.tgz'
