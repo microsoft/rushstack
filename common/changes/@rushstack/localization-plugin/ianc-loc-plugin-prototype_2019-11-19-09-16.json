@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Initial implementation of plugin.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
