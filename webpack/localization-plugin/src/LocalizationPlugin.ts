@@ -18,6 +18,16 @@ export interface ILocales {
   [locale: string]: ILocale;
 }
 
+export interface IDefaultLocaleOptions {
+  locale?: string;
+  usePassthroughLocale?: boolean;
+
+  /**
+   * If {@see usePassthroughLocale} is set, use this name for the passthrough locale. Defaults to "passthrough"
+   */
+  passthroughLocaleName?: string;
+}
+
 /**
  * The options for localization.
  *
@@ -25,7 +35,7 @@ export interface ILocales {
  */
 export interface ILocalizationPluginOptions {
   localizedStrings: ILocales;
-
+  defaultLocale: IDefaultLocaleOptions;
   filesToIgnore?: string[];
 }
 
@@ -69,8 +79,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
   private _locJsonFilesToIgnore: Set<string>;
   private _stringPlaceholderCounter: number;
   private _stringPlaceholderMap: Map<string, { [locale: string]: string }>;
+  private _passthroughStringsMap: Map<string, string>;
   private _locales: Set<string>;
-  private _localeNamePlaceholder: string;
+  private _localeNamePlaceholder: IStringPlaceholder;
+  private _defaultLocale: string;
 
   constructor(options: ILocalizationPluginOptions) {
     this._options = options;
@@ -95,7 +107,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       (compilation.mainTemplate as IMainTemplate).hooks.localVars.tap(
         PLUGIN_NAME,
         (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
-          return source.replace(LOCALE_FILENAME_PLACEHOLDER_REGEX, this._localeNamePlaceholder);
+          return source.replace(LOCALE_FILENAME_PLACEHOLDER_REGEX, this._localeNamePlaceholder.value);
         }
       );
     });
@@ -129,16 +141,15 @@ export class LocalizationPlugin implements Webpack.Plugin {
             asset
           );
 
+          // Delete the existing asset because it's been renamed
+          delete compilation.assets[assetName];
+
           for (const newAssetName in resultingAssets) {
             if (resultingAssets.hasOwnProperty(newAssetName)) {
               const newAsset: IAsset = resultingAssets[newAssetName];
               compilation.assets[newAssetName] = newAsset;
             }
           }
-
-          // TODO:
-          //  - Decide what to do with the non-localized files
-          //    (?) delete compilation.assets[assetName];
         }
       }
     });
@@ -207,7 +218,6 @@ export class LocalizationPlugin implements Webpack.Plugin {
     reconstructionSeries.push(lastElement);
 
     this._locales.forEach((locale) => {
-      const resultFilename: string = assetName.replace(LOCALE_FILENAME_PLACEHOLDER_REGEX, locale);
       const reconstruction: string[] = [];
 
       let sizeDiff: number = 0;
@@ -222,13 +232,20 @@ export class LocalizationPlugin implements Webpack.Plugin {
         }
       }
 
+      let newAsset: IAsset;
+      if (locale === this._defaultLocale) {
+        newAsset = asset;
+      } else {
+        newAsset = lodash.clone(asset);
+      }
+
       // TODO:
       //  - Ensure hot reloading works
       //  - Ensure stats.json is correct
       //  - Fixup source maps
-      const newAsset: IAsset = lodash.clone(asset);
+      const resultFilename: string = assetName.replace(LOCALE_FILENAME_PLACEHOLDER_REGEX, locale);
       const newAssetSource: string = reconstruction.join('');
-      const newAssetSize: number = newAsset.size() + sizeDiff;
+      const newAssetSize: number = asset.size() + sizeDiff;
       newAsset.source = () => newAssetSource;
       newAsset.size = () => newAssetSize;
       result[resultFilename] = newAsset;
@@ -310,11 +327,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
       this._stringPlaceholderMap = new Map<string, { [locale: string]: string }>();
       const normalizedLocales: Set<string> = new Set<string>();
       this._locales = new Set<string>();
+      this._passthroughStringsMap = new Map<string, string>();
 
-      const localeNamePlaceholder: IStringPlaceholder = this._getPlaceholderString();
-      this._localeNamePlaceholder = localeNamePlaceholder.value;
+      // Create a special placeholder for the locale's name
+      this._localeNamePlaceholder = this._getPlaceholderString();
       const localeNameMap: { [localeName: string]: string } = {};
-      this._stringPlaceholderMap.set(localeNamePlaceholder.suffix, localeNameMap);
+      this._stringPlaceholderMap.set(this._localeNamePlaceholder.suffix, localeNameMap);
 
       for (const localeName in localizedStrings) {
         if (localizedStrings.hasOwnProperty(localeName)) {
@@ -382,6 +400,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   const placeholder: IStringPlaceholder = this.stringKeys.get(stringKey)!;
                   if (!this._stringPlaceholderMap.has(placeholder.suffix)) {
                     this._stringPlaceholderMap.set(placeholder.suffix, {});
+                    this._passthroughStringsMap.set(placeholder.suffix, stringName);
                   }
 
                   this._stringPlaceholderMap.get(placeholder.suffix)![localeName] = locJsonFileData[stringName];
@@ -423,6 +442,47 @@ export class LocalizationPlugin implements Webpack.Plugin {
       }
     }
     // END options.localizedStrings
+
+    // START options.defaultLocale
+    {
+      if (
+        !this._options.defaultLocale ||
+        (!this._options.defaultLocale.locale && !this._options.defaultLocale.usePassthroughLocale)
+      ) {
+        if (this._locales.size === 1) {
+          this._defaultLocale = this._locales.entries[0];
+        } else {
+          errors.push(new Error(
+            'Either options.defaultLocale.locale must be provided or options.defaultLocale.usePassthroughLocale ' +
+            'must be set to true if more than one locale\'s data is provided'
+          ));
+        }
+      } else {
+        const { locale, usePassthroughLocale, passthroughLocaleName } = this._options.defaultLocale;
+        if (locale && usePassthroughLocale) {
+          errors.push(new Error(
+            'Either options.defaultLocale.locale must be provided or options.defaultLocale.usePassthroughLocale ' +
+            'must be set to true, but not both'
+          ));
+        } else if (usePassthroughLocale) {
+          this._defaultLocale = passthroughLocaleName || 'passthrough';
+          this._locales.add(this._defaultLocale);
+          this._stringPlaceholderMap.get(this._localeNamePlaceholder.suffix)![this._defaultLocale] =
+            this._defaultLocale;
+          this._passthroughStringsMap.forEach((stringName: string, stringKey: string) => {
+            this._stringPlaceholderMap.get(stringKey)![this._defaultLocale] = stringName;
+          });
+        } else if (locale) {
+          this._defaultLocale = locale;
+          if (!this._locales.has(locale)) {
+            errors.push(new Error(`The specified default locale "${locale}" was not provided in the localized data`));
+          }
+        } else {
+          errors.push(new Error('Unknown error occurred processing default locale.'));
+        }
+      }
+    }
+    // END options.defaultLocale
 
     return errors;
   }
