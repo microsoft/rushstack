@@ -65,6 +65,9 @@ module.exports = function(env) {
               "string2": "la cuarta cadena",
             }
           }
+        },
+        defaultLocale: {
+          usePassthroughLocale: true
         }
       })
     ]
