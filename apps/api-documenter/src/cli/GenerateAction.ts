@@ -5,12 +5,12 @@ import * as path from 'path';
 
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
-
-import { ExperimentYamlDocumenter } from '../documenters/ExperimentYamlDocumenter';
-import { ApiModel } from '@microsoft/api-extractor-model';
 import { DocumenterConfig } from '../documenters/DocumenterConfig';
-import { FileSystem } from '@microsoft/node-core-library';
+import { ExperimentYamlDocumenter } from '../documenters/ExperimentYamlDocumenter';
 import { IConfigFile } from '../documenters/IConfigFile';
+
+import { ApiModel } from '@microsoft/api-extractor-model';
+import { FileSystem } from '@microsoft/node-core-library';
 
 export class GenerateAction extends BaseAction {
   constructor(parser: ApiDocumenterCommandLine) {
