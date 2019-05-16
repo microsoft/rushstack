@@ -6,10 +6,11 @@
 
 A class used to exposed events.
 
+
 <b>Signature:</b>
 
 ```typescript
-export declare class SystemEvent
+export declare class SystemEvent 
 ```
 
 ## Methods
