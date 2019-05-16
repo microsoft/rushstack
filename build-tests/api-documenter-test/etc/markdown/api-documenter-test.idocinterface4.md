@@ -6,11 +6,10 @@
 
 Type union in an interface.
 
-
 <b>Signature:</b>
 
 ```typescript
-export interface IDocInterface4 
+export interface IDocInterface4
 ```
 
 ## Properties
