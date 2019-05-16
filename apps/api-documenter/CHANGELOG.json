@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.2.0",
+      "tag": "@microsoft/api-documenter_v7.2.0",
+      "date": "Thu, 16 May 2019 22:15:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add optional config file `api-documenter.json` to allow building custom Table of Contents for YamlDocumenter."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.7",
       "tag": "@microsoft/api-documenter_v7.1.7",
       "date": "Mon, 13 May 2019 02:08:35 GMT",

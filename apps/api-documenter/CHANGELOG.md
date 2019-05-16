@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+This log was last generated on Thu, 16 May 2019 22:15:20 GMT and should not be manually modified.
+
+## 7.2.0
+Thu, 16 May 2019 22:15:20 GMT
+
+### Minor changes
+
+- Add optional config file `api-documenter.json` to allow building custom Table of Contents for YamlDocumenter.
 
 ## 7.1.7
 Mon, 13 May 2019 02:08:35 GMT
