@@ -173,7 +173,6 @@ export class NpmLinkManager extends BaseLinkManager {
 
         if (matchedRushPackage) {
           const matchedVersion: string = matchedRushPackage.packageJsonEditor.version;
-
           // The dependency name matches an Rush project, but are there any other reasons not
           // to create a local link?
           if (cyclicSubtreeRoot) {
@@ -239,7 +238,16 @@ export class NpmLinkManager extends BaseLinkManager {
 
         // We can't symlink to an Rush project, so instead we will symlink to a folder
         // under the "Common" folder
-        const commonDependencyPackage: NpmPackage | undefined = commonPackage.resolve(dependency.name);
+        let commonDependencyPackage: NpmPackage | undefined = commonPackage.resolve(dependency.name);
+        if (
+          !commonDependencyPackage &&
+          dependency.versionRange.indexOf('npm:') === 0
+        ) {
+          commonDependencyPackage = commonPackage.resolve(
+            dependency.versionRange.split('npm:')[1]
+          );
+        }
+
         if (commonDependencyPackage) {
           // This is the version that was chosen when "npm install" ran in the common folder
           const effectiveDependencyVersion: string | undefined = commonDependencyPackage.version;

@@ -1,0 +1,10 @@
+{
+  "yarnVersion": "1.15.2",
+  "rushVersion": "2.5.0-dev.123",
+  "projects": [
+    {
+      "packageName": "project-a",
+      "projectFolder": "project-a"
+    }
+  ]
+}
