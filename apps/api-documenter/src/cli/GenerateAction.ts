@@ -6,7 +6,7 @@ import * as path from 'path';
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 import { DocumenterConfig } from '../documenters/DocumenterConfig';
-import { ExperimentYamlDocumenter } from '../documenters/ExperimentYamlDocumenter';
+import { ExperimentalYamlDocumenter } from '../documenters/ExperimentalYamlDocumenter';
 import { IConfigFile } from '../documenters/IConfigFile';
 
 import { ApiModel } from '@microsoft/api-extractor-model';
@@ -40,7 +40,7 @@ export class GenerateAction extends BaseAction {
 
     const apiModel: ApiModel = this.buildApiModel();
 
-    const yamlDocumenter: ExperimentYamlDocumenter = new ExperimentYamlDocumenter(apiModel, configFile);
+    const yamlDocumenter: ExperimentalYamlDocumenter = new ExperimentalYamlDocumenter(apiModel, configFile);
     yamlDocumenter.generateFiles(this.outputFolder);
     return Promise.resolve();
   }

@@ -13,7 +13,7 @@ import { YamlDocumenter } from './YamlDocumenter';
  * EXPERIMENTAL - This documenter is a prototype of a new config file driven mode of operation for
  * API Documenter.  It is not ready for general usage yet.  Its design may change in the future.
  */
-export class ExperimentYamlDocumenter extends YamlDocumenter {
+export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _config: IConfigTableOfContents;
   private _tocPointerMap: { [key: string]: IYamlTocItem };
   private _catchAllPointer: IYamlTocItem;
@@ -22,7 +22,7 @@ export class ExperimentYamlDocumenter extends YamlDocumenter {
     super(apiModel);
     this._config = configFile.tableOfContents!;
 
-    this._tocPointerMap = {}; // need a type?
+    this._tocPointerMap = {};
 
     this._generateTocPointersMap(this._config.tocConfig);
   }

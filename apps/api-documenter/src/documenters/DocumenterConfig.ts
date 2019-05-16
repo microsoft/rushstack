@@ -15,7 +15,7 @@ export class DocumenterConfig {
    * The JSON Schema for API Extractor config file (api-extractor.schema.json).
    */
   public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/api-documenter.schema.json'));
+    path.join(__dirname, '..', 'schemas', 'api-documenter.schema.json'));
 
   /**
    * The config file name "api-extractor.json".
