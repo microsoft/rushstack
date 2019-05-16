@@ -2,6 +2,7 @@
 /**
  * A class used to exposed events.
  * @public
+ * {@docCategory SystemEvent}
  */
 export class SystemEvent {
   /**
@@ -14,12 +15,14 @@ export class SystemEvent {
 /**
  * Example base class
  * @public
+ * {@docCategory DocBaseClass}
  */
 export class DocBaseClass {
 }
 
 /**
  * @public
+ * {@docCategory DocBaseClass}
  */
 export interface IDocInterface1 {
   /**
@@ -30,6 +33,7 @@ export interface IDocInterface1 {
 
 /**
  * @public
+ * {@docCategory DocBaseClass}
  */
 export interface IDocInterface2 extends IDocInterface1 {
   /**
@@ -41,6 +45,7 @@ export interface IDocInterface2 extends IDocInterface1 {
 /**
  * Some less common TypeScript declaration kinds.
  * @public
+ * {@docCategory DocClass1}
  */
 export interface IDocInterface3 {
   /**
@@ -70,6 +75,7 @@ export class Generic<T> { }
 /**
  * Type union in an interface.
  * @public
+ * {@docCategory DocClass1}
  */
 export interface IDocInterface4 {
   /**
@@ -99,6 +105,7 @@ export interface IDocInterface4 {
  * These are some remarks.
  * @defaultValue a default value for this function
  * @public
+ * {@docCategory DocClass1}
  */
 export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
   /**

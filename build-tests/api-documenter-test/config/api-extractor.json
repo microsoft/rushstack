@@ -16,5 +16,13 @@
     "enabled": false
   },
 
-  "testMode": true
+  "testMode": true,
+
+  "messages": {
+    "tsdocMessageReporting": {
+      "tsdoc-undefined-tag": {
+        "logLevel": "none"
+      }
+    }
+  }
 }

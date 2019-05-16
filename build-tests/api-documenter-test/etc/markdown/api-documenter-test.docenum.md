@@ -9,7 +9,7 @@ Docs for DocEnum
 <b>Signature:</b>
 
 ```typescript
-export declare enum DocEnum 
+export declare enum DocEnum
 ```
 
 ## Enumeration Members

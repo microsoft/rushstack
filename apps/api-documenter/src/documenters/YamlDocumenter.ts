@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// tslint:disable:member-ordering
+
 import * as path from 'path';
 
 import yaml = require('js-yaml');
@@ -184,6 +186,15 @@ export class YamlDocumenter {
    * Write the table of contents
    */
   private _writeTocFile(apiItems: ReadonlyArray<ApiItem>): void {
+    const tocFile: IYamlTocFile = this.buildYamlTocFile(apiItems);
+
+    const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
+    console.log('Writing ' + tocFilePath);
+    this._writeYamlFile(tocFile, tocFilePath, '', undefined);
+  }
+
+  /** @virtual */
+  protected buildYamlTocFile(apiItems: ReadonlyArray<ApiItem>): IYamlTocFile {
     const tocFile: IYamlTocFile = {
       items: [ ]
     };
@@ -192,10 +203,7 @@ export class YamlDocumenter {
     tocFile.items.push(rootItem);
 
     rootItem.items!.push(...this._buildTocItems(apiItems));
-
-    const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
-    console.log('Writing ' + tocFilePath);
-    this._writeYamlFile(tocFile, tocFilePath, '', undefined);
+    return tocFile;
   }
 
   private _buildTocItems(apiItems: ReadonlyArray<ApiItem>): IYamlTocItem[] {
@@ -245,7 +253,7 @@ export class YamlDocumenter {
     return tocItems;
   }
 
-  private _shouldEmbed(apiItemKind: ApiItemKind): boolean {
+  protected _shouldEmbed(apiItemKind: ApiItemKind): boolean {
     switch (apiItemKind) {
       case ApiItemKind.Class:
       case ApiItemKind.Package:
@@ -511,7 +519,7 @@ export class YamlDocumenter {
    * Calculate the DocFX "uid" for the ApiItem
    * Example:  node-core-library.JsonFile.load
    */
-  private _getUid(apiItem: ApiItem): string {
+  protected _getUid(apiItem: ApiItem): string {
     let result: string = '';
     for (const hierarchyItem of apiItem.getHierarchy()) {
 
