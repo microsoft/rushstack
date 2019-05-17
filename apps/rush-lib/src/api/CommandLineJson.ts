@@ -5,7 +5,7 @@
  * "baseCommand" from command-line.schema.json
  */
 export interface IBaseCommandJson {
-  commandKind: 'bulk' | 'global';
+  commandKind: 'bulk' | 'global' | 'unordered-bulk';
   name: string;
   summary: string;
   /**
@@ -22,7 +22,11 @@ export interface IBulkCommandJson extends IBaseCommandJson {
   commandKind: 'bulk';
   enableParallelism: boolean;
   ignoreMissingScript?: boolean;
-  ignoreDependencies?: boolean;
+}
+
+export interface IUnorderedBulkCommandJson extends IBaseCommandJson {
+  commandKind: 'unordered-bulk';
+  ignoreMissingScript?: boolean;
 }
 
 /**
@@ -33,7 +37,7 @@ export interface IGlobalCommandJson extends IBaseCommandJson {
   shellCommand: string;
 }
 
-export type CommandJson = IBulkCommandJson | IGlobalCommandJson;
+export type CommandJson = IBulkCommandJson | IGlobalCommandJson | IUnorderedBulkCommandJson;
 
 /**
  * "baseParameter" from command-line.schema.json
