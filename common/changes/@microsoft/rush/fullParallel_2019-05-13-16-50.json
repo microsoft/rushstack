@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Adding ability to ignore dependencies for bulk commands",
+      "comment": "Add new unordered-bulk command kind that allows running scripts as soon as possible (as parallelism allows) for all projects, ignoring dependency order",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
