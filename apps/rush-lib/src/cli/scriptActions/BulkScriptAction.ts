@@ -28,7 +28,7 @@ import { FileSystem } from '@microsoft/node-core-library';
 export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
-  ignoreDependencies: boolean;
+  ignoreDependencyOrder: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -56,7 +56,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _toVersionPolicy: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
-  private _ignoreDependencies: boolean;
+  private _ignoreDependencyOrder: boolean;
 
   constructor(
     options: IBulkScriptActionOptions
@@ -65,7 +65,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._commandToRun = options.commandToRun || options.actionName;
-    this._ignoreDependencies = options.ignoreDependencies;
+    this._ignoreDependencyOrder = options.ignoreDependencyOrder;
   }
 
   public run(): Promise<void> {
@@ -93,12 +93,13 @@ export class BulkScriptAction extends BaseScriptAction {
     }
 
     const changedProjectsOnly: boolean = this.actionName === 'build' && this._changedProjectsOnly.value;
-
+    const toFlags: string[] = this._ignoreDependencyOrder ? [] : this._mergeToProjects();
+    const fromFlags: ReadonlyArray<string> = this._ignoreDependencyOrder ? [] : this._fromFlag.values;
     const tasks: TaskSelector = new TaskSelector(
       {
         rushConfiguration: this.rushConfiguration,
-        toFlags: this._mergeToProjects(),
-        fromFlags: this._fromFlag.values,
+        toFlags,
+        fromFlags,
         commandToRun: this._commandToRun,
         customParameterValues,
         isQuietMode,
@@ -106,7 +107,7 @@ export class BulkScriptAction extends BaseScriptAction {
         isIncrementalBuildAllowed: this.actionName === 'build',
         changedProjectsOnly,
         ignoreMissingScript: this._ignoreMissingScript,
-        ignoreDependencies: this._ignoreDependencies
+        ignoreDependencyOrder: this._ignoreDependencyOrder
       }
     );
 

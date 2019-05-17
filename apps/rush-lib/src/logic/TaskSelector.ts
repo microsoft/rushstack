@@ -20,7 +20,7 @@ export interface ITaskSelectorConstructor {
   isIncrementalBuildAllowed: boolean;
   changedProjectsOnly: boolean;
   ignoreMissingScript: boolean;
-  ignoreDependencies: boolean;
+  ignoreDependencyOrder: boolean;
 }
 
 /**
@@ -61,7 +61,7 @@ export class TaskSelector {
       this._registerFromFlags(this._options.fromFlags);
     }
     if (this._options.toFlags.length === 0 && this._options.fromFlags.length === 0) {
-      this._registerAll(this._options.ignoreDependencies);
+      this._registerAll(this._options.ignoreDependencyOrder);
     }
   }
 

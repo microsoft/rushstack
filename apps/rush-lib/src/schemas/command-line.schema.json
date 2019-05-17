@@ -25,7 +25,7 @@
           "title": "Command Kind",
           "description": "Indicates the kind of command: \"bulk\" commands are run separately for each project; \"global\" commands are run once for the entire repository.",
           "type": "string",
-          "enum": [ "bulk", "global" ]
+          "enum": [ "bulk", "global", "unordered-bulk" ]
         },
         "name": {
           "title": "Custom Command Name",
@@ -76,6 +76,43 @@
             "ignoreDependencies": {
               "title": "Ignore dependency relation between projects and just run everything in parallel",
               "description": "Ignore dependency relation between projects and just run everything in parallel",
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "commandKind": { "$ref": "#/definitions/anything" },
+            "name": { "$ref": "#/definitions/anything" },
+            "summary": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
+
+            "enableParallelism": { "$ref": "#/definitions/anything" },
+            "ignoreMissingScript": { "$ref": "#/definitions/anything" },
+            "ignoreDependencies": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+    "unorderedBulkCommand": {
+      "title": "Unordered Bulk Command",
+      "description": "A custom command that is run as soon as possible for each project in the repository ignoring dependency order",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseCommand" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "commandKind": {
+              "enum": [ "unordered-bulk" ]
+            },
+            "ignoreMissingScript": {
+              "title": "Ignore Missing Script",
+              "description": "Normally Rush requires that each project's package.json has a \"scripts\" entry matching the custom command name. To disable this check, set \"ignoreMissingScript\" to true.",
               "type": "boolean"
             }
           }
@@ -315,7 +352,8 @@
         "type": "object",
         "oneOf": [
           { "$ref": "#/definitions/bulkCommand" },
-          { "$ref": "#/definitions/globalCommand" }
+          { "$ref": "#/definitions/globalCommand" },
+          { "$ref": "#/definitions/unorderedBulkCommand" }
         ]
       }
     },
