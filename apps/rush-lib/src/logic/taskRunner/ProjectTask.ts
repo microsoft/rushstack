@@ -42,6 +42,7 @@ export class ProjectTask implements ITaskDefinition {
   }
 
   public isIncrementalBuildAllowed: boolean;
+  public hadEmptyScript: boolean = false;
 
   private _hasWarningOrError: boolean;
   private _rushProject: RushConfigurationProject;
@@ -64,6 +65,9 @@ export class ProjectTask implements ITaskDefinition {
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     try {
       const taskCommand: string = this._getScriptToRun();
+      if (!taskCommand) {
+        this.hadEmptyScript = true;
+      }
       const deps: IPackageDependencies | undefined = this._getPackageDependencies(taskCommand, writer);
       return this._executeTask(taskCommand, writer, deps);
     } catch (error) {
