@@ -128,9 +128,15 @@ export class ProjectTask implements ITaskDefinition {
         FileSystem.deleteFile(currentDepsPath);
 
         if (!taskCommand) {
-          // tslint:disable-next-line:max-line-length
-          writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank, so no action will be taken.`);
-          return Promise.resolve(TaskStatus.Skipped);
+          writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank,`
+            + ` so no action will be taken.`);
+
+          // Write deps on success.
+          if (currentPackageDeps) {
+            JsonFile.save(currentPackageDeps, currentDepsPath);
+          }
+
+          return Promise.resolve(TaskStatus.Success);
         }
 
         // Run the task
@@ -166,7 +172,7 @@ export class ProjectTask implements ITaskDefinition {
 
         return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
           task.on('close', (code: number) => {
-              this._writeLogsToDisk(writer);
+            this._writeLogsToDisk(writer);
 
             if (code !== 0) {
               reject(new TaskError('error', `Returned error code: ${code}`));
