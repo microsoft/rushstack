@@ -9,7 +9,7 @@ import {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@microsoft/ts-command-line';
-import { JsonFile, FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@microsoft/node-core-library';
 
 import {
   IChangeInfo,
@@ -27,6 +27,7 @@ import { PublishGit } from '../../logic/PublishGit';
 import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { VersionPolicy } from '../../api/VersionPolicy';
+import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails: CommandLineFlagParameter;
@@ -40,6 +41,7 @@ export class PublishAction extends BaseRushAction {
   private _registryUrl: CommandLineStringParameter;
   private _targetBranch: CommandLineStringParameter;
   private _prereleaseName: CommandLineStringParameter;
+  private _partialPrerelease: CommandLineFlagParameter;
   private _suffix: CommandLineStringParameter;
   private _force: CommandLineFlagParameter;
   private _prereleaseToken: PrereleaseToken;
@@ -47,7 +49,6 @@ export class PublishAction extends BaseRushAction {
 
   private _releaseFolder: CommandLineStringParameter;
   private _pack: CommandLineFlagParameter;
-  private _releaseType: CommandLineStringParameter;
 
   private _hotfixTagOverride: string;
 
@@ -123,10 +124,11 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--set-access-level',
       parameterShortName: undefined,
       description:
-      `The access option to pass to npm publish. By default NPM will publish scoped packages with an access ` +
-      `level of 'restricted'. Scoped packages can be published with an access level of 'public' by specifying ` +
-      `that value for this flag with the initial publication. NPM always publishes unscoped packages with an ` +
-      `access level of 'public'.`
+      `By default, when Rush invokes "npm publish" it will publish scoped packages with an access level ` +
+      `of "restricted". Scoped packages can be published with an access level of "public" by specifying ` +
+      `that value for this flag with the initial publication. NPM always publishes unscoped packages with ` +
+      `an access level of "public". For more information, see the NPM documentation for the "--access" ` +
+      `option of "npm publish".`
     });
 
     // NPM pack tarball related parameters
@@ -142,13 +144,6 @@ export class PublishAction extends BaseRushAction {
       description:
       `This parameter is used with --pack parameter to provide customized location for the tarballs instead of ` +
       `the default value. `
-    });
-    this._releaseType = this.defineStringParameter({
-      parameterLongName: '--release-type',
-      argumentName: 'RELEASE_TYPE',
-      description:
-      `This parameter is used with --pack parameter to provide release type for the generated tarballs. ` +
-      `The default value is 'internal'. The valid values include 'public', 'beta', 'internal'`
     });
     // End of NPM pack tarball related parameters
 
@@ -169,6 +164,11 @@ export class PublishAction extends BaseRushAction {
       parameterLongName: '--prerelease-name',
       argumentName: 'NAME',
       description: 'Bump up to a prerelease version with the provided prerelease name. Cannot be used with --suffix'
+    });
+    this._partialPrerelease = this.defineFlagParameter({
+      parameterLongName: '--partial-prerelease',
+      parameterShortName: undefined,
+      description: 'Used with --prerelease-name. Only bump packages to a prerelease version if they have changes.'
     });
     this._suffix = this.defineStringParameter({
       parameterLongName: '--suffix',
@@ -202,7 +202,11 @@ export class PublishAction extends BaseRushAction {
       if (this._includeAll.value) {
         this._publishAll(allPackages);
       } else {
-        this._prereleaseToken = new PrereleaseToken(this._prereleaseName.value, this._suffix.value);
+        this._prereleaseToken = new PrereleaseToken(
+          this._prereleaseName.value,
+          this._suffix.value,
+          this._partialPrerelease.value
+        );
         this._publishChanges(allPackages);
       }
 
@@ -219,9 +223,6 @@ export class PublishAction extends BaseRushAction {
     }
     if (this._releaseFolder.value && !this._pack.value) {
       throw new Error(`--release-folder can only be used with --pack`);
-    }
-    if (this._releaseType.value && !this._pack.value) {
-      throw new Error(`--release-type can only be used with --pack`);
     }
     if (this._registryUrl.value && this._pack.value) {
       throw new Error(`--registry cannot be used with --pack`);
@@ -253,7 +254,7 @@ export class PublishAction extends BaseRushAction {
       if (VersionControl.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
         git.addChanges();
-        git.commit();
+        git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
         git.push(tempBranch);
 
         this._setDependenciesBeforePublish();
@@ -346,16 +347,7 @@ export class PublishAction extends BaseRushAction {
     const args: string[] = ['publish'];
 
     if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
-      let registry: string = '//registry.npmjs.org/';
-      if (this._registryUrl.value) {
-        const registryUrl: string = this._registryUrl.value;
-        env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
-        registry = registryUrl.substring(registryUrl.indexOf('//'));
-      }
-
-      if (this._npmAuthToken.value) {
-        args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
-      }
+      this._addSharedNpmConfig(env, args);
 
       if (this._npmTag.value) {
         args.push(`--tag`, this._npmTag.value);
@@ -388,26 +380,19 @@ export class PublishAction extends BaseRushAction {
 
   private _packageExists(packageConfig: RushConfigurationProject): boolean {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
-    if (this._registryUrl.value) {
-      env['npm_config_registry'] = this._registryUrl.value; // tslint:disable-line:no-string-literal
-    }
+    const args: string[] = [];
+    this._addSharedNpmConfig(env, args);
+
     const publishedVersions: string[] = Npm.publishedVersions(packageConfig.packageName,
       packageConfig.projectFolder,
-      env);
+      env,
+      args);
     return publishedVersions.indexOf(packageConfig.packageJson.version) >= 0;
   }
 
   private _npmPack(packageName: string, project: RushConfigurationProject): void {
     const args: string[] = ['pack'];
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
-
-    if (this._releaseType.value && this._releaseType.value !== 'internal') {
-      // a temporary workaround. Will replace it with npm or rush hooks.
-      if (this._releaseType.value !== 'public' && this._releaseType.value !== 'beta') {
-        throw new Error(`Invalid release type "${this._releaseType.value}"`);
-      }
-      this._updateAPIFile(packageName, project);
-    }
 
     PublishUtilities.execCommand(
       !!this._publish.value,
@@ -429,44 +414,6 @@ export class PublishAction extends BaseRushAction {
         destinationPath: path.join(destFolder, tarballName),
         overwrite: true
       });
-    }
-  }
-
-  private _updateAPIFile(packageName: string, project: RushConfigurationProject): void {
-    const apiConfigPath: string = path.join(project.projectFolder,
-      'config', 'api-extractor.json');
-
-    if (FileSystem.exists(apiConfigPath)) {
-      // Read api-extractor.json file
-      const apiConfig: {} = JsonFile.load(apiConfigPath);
-      /* tslint:disable:no-string-literal */
-      if (!!apiConfig['generateDtsRollup'] &&  !!apiConfig['dtsRollupTrimming']) {
-        // copy all files from publishFolderForPublic or publishFolderForBeta to publishFolderForInternal
-        const toApiFolder: string = !!apiConfig['publishFolderForInternal'] ?
-          apiConfig['publishFolderForInternal'] : './dist';
-        let fromApiFolder: string | undefined = undefined;
-        if (this._releaseType.value === 'public') {
-          fromApiFolder = !!apiConfig['publishFolderForPublic'] ?
-            apiConfig['publishFolderForPublic'] : './dist/public';
-        } else if (this._releaseType.value === 'beta') {
-          fromApiFolder = !!apiConfig['publishFolderForBeta'] ? apiConfig['publishFolderForBeta'] : './dist/beta';
-        }
-
-        if (fromApiFolder) {
-          const fromApiFolderPath: string = path.join(project.projectFolder, fromApiFolder);
-          const toApiFolderPath: string = path.join(project.projectFolder, toApiFolder);
-          if (FileSystem.exists(fromApiFolderPath) && FileSystem.exists(toApiFolderPath)) {
-            FileSystem.readFolder(fromApiFolderPath).forEach(fileName => {
-              FileSystem.copyFile({
-                sourcePath: path.join(fromApiFolderPath, fileName),
-                destinationPath: path.join(toApiFolderPath, fileName)
-              });
-              console.log(`Copied file ${fileName} from ${fromApiFolderPath} to ${toApiFolderPath}`);
-            });
-          }
-        }
-      }
-      /* tslint:enable:no-string-literal */
     }
   }
 
@@ -504,6 +451,19 @@ export class PublishAction extends BaseRushAction {
           versionPolicy.setDependenciesBeforePublish(project.packageName, this.rushConfiguration);
         }
       }
+    }
+  }
+
+  private _addSharedNpmConfig(env: { [key: string]: string | undefined }, args: string[]): void {
+    let registry: string = '//registry.npmjs.org/';
+    if (this._registryUrl.value) {
+      const registryUrl: string = this._registryUrl.value;
+      env['npm_config_registry'] = registryUrl; // tslint:disable-line:no-string-literal
+      registry = registryUrl.substring(registryUrl.indexOf('//'));
+    }
+
+    if (this._npmAuthToken.value) {
+      args.push(`--${registry}:_authToken=${this._npmAuthToken.value}`);
     }
   }
 }

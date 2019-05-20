@@ -1,6 +1,151 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Wed, 27 Feb 2019 22:13:58 GMT and should not be manually modified.
+This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+
+## 1.7.159
+Mon, 13 May 2019 02:08:35 GMT
+
+*Version update only*
+
+## 1.7.158
+Thu, 09 May 2019 19:12:31 GMT
+
+*Version update only*
+
+## 1.7.157
+Mon, 06 May 2019 20:46:22 GMT
+
+*Version update only*
+
+## 1.7.156
+Mon, 06 May 2019 19:34:54 GMT
+
+*Version update only*
+
+## 1.7.155
+Mon, 06 May 2019 19:11:16 GMT
+
+*Version update only*
+
+## 1.7.154
+Tue, 30 Apr 2019 23:08:02 GMT
+
+*Version update only*
+
+## 1.7.153
+Tue, 16 Apr 2019 11:01:37 GMT
+
+*Version update only*
+
+## 1.7.152
+Fri, 12 Apr 2019 06:13:17 GMT
+
+*Version update only*
+
+## 1.7.151
+Thu, 11 Apr 2019 07:14:01 GMT
+
+*Version update only*
+
+## 1.7.150
+Tue, 09 Apr 2019 05:31:01 GMT
+
+*Version update only*
+
+## 1.7.149
+Mon, 08 Apr 2019 19:12:53 GMT
+
+*Version update only*
+
+## 1.7.148
+Sat, 06 Apr 2019 02:05:51 GMT
+
+*Version update only*
+
+## 1.7.147
+Fri, 05 Apr 2019 04:16:17 GMT
+
+*Version update only*
+
+## 1.7.146
+Wed, 03 Apr 2019 02:58:33 GMT
+
+*Version update only*
+
+## 1.7.145
+Tue, 02 Apr 2019 01:12:02 GMT
+
+*Version update only*
+
+## 1.7.144
+Sat, 30 Mar 2019 22:27:16 GMT
+
+*Version update only*
+
+## 1.7.143
+Thu, 28 Mar 2019 19:14:27 GMT
+
+*Version update only*
+
+## 1.7.142
+Tue, 26 Mar 2019 20:54:18 GMT
+
+*Version update only*
+
+## 1.7.141
+Sat, 23 Mar 2019 03:48:31 GMT
+
+*Version update only*
+
+## 1.7.140
+Thu, 21 Mar 2019 04:59:11 GMT
+
+*Version update only*
+
+## 1.7.139
+Thu, 21 Mar 2019 01:15:32 GMT
+
+*Version update only*
+
+## 1.7.138
+Wed, 20 Mar 2019 19:14:49 GMT
+
+*Version update only*
+
+## 1.7.137
+Mon, 18 Mar 2019 04:28:43 GMT
+
+*Version update only*
+
+## 1.7.136
+Fri, 15 Mar 2019 19:13:25 GMT
+
+*Version update only*
+
+## 1.7.135
+Wed, 13 Mar 2019 19:13:14 GMT
+
+*Version update only*
+
+## 1.7.134
+Wed, 13 Mar 2019 01:14:05 GMT
+
+*Version update only*
+
+## 1.7.133
+Mon, 11 Mar 2019 16:13:36 GMT
+
+*Version update only*
+
+## 1.7.132
+Tue, 05 Mar 2019 17:13:11 GMT
+
+*Version update only*
+
+## 1.7.131
+Mon, 04 Mar 2019 17:13:19 GMT
+
+*Version update only*
 
 ## 1.7.130
 Wed, 27 Feb 2019 22:13:58 GMT

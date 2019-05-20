@@ -8,6 +8,9 @@
     "defaultExportOfEntryPoint2",
     "defaultExportOfEntryPoint3",
     "defaultExportOfEntryPoint4",
+    "docReferences",
+    "docReferences2",
+    "docReferences3",
     "exportDuplicate",
     "exportEquals",
     "exportImportedExternal",
@@ -15,6 +18,9 @@
     "exportStar",
     "exportStar2",
     "exportStar3",
+    "importEquals",
+    "inconsistentReleaseTags",
+    "preapproved",
     "typeOf"
   ]
 }

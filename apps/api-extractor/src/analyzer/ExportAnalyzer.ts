@@ -6,7 +6,7 @@ import { InternalError } from '@microsoft/node-core-library';
 
 import { TypeScriptHelpers } from './TypeScriptHelpers';
 import { AstSymbol } from './AstSymbol';
-import { AstImport, IAstImportOptions } from './AstImport';
+import { AstImport, IAstImportOptions, AstImportKind } from './AstImport';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
 import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
@@ -212,7 +212,7 @@ export class ExportAnalyzer {
   }
 
   /**
-   * This crawls the specified entry point and collects the full set of exported AstSymbols.
+   * Implementation of {@link AstSymbolTable.fetchAstModuleExportInfo}.
    */
   public fetchAstModuleExportInfo(entryPointAstModule: AstModule): AstModuleExportInfo {
     if (entryPointAstModule.isExternal) {
@@ -294,9 +294,9 @@ export class ExportAnalyzer {
       current = TypeScriptHelpers.followAliases(symbol, this._typeChecker);
     } else {
       while (true) { // tslint:disable-line:no-constant-condition
-
         // Is this symbol an import/export that we need to follow to find the real declaration?
         for (const declaration of current.declarations || []) {
+
           let matchedAstEntity: AstEntity | undefined;
           matchedAstEntity = this._tryMatchExportDeclaration(declaration, current);
           if (matchedAstEntity !== undefined) {
@@ -370,6 +370,7 @@ export class ExportAnalyzer {
 
         if (externalModulePath !== undefined) {
           return this._fetchAstImport(declarationSymbol, {
+            importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
             exportName: exportName
           });
@@ -383,7 +384,6 @@ export class ExportAnalyzer {
   }
 
   private _tryMatchImportDeclaration(declaration: ts.Declaration, declarationSymbol: ts.Symbol): AstEntity | undefined {
-
     const importDeclaration: ts.ImportDeclaration | undefined
       = TypeScriptHelpers.findFirstParent<ts.ImportDeclaration>(declaration, ts.SyntaxKind.ImportDeclaration);
 
@@ -416,9 +416,9 @@ export class ExportAnalyzer {
         // Here importSymbol=undefined because {@inheritDoc} and such are not going to work correctly for
         // a package or source file.
         return this._fetchAstImport(undefined, {
+          importKind: AstImportKind.StarImport,
           exportName: declarationSymbol.name,
-          modulePath: externalModulePath,
-          starImport: true
+          modulePath: externalModulePath
         });
       }
 
@@ -448,6 +448,7 @@ export class ExportAnalyzer {
 
         if (externalModulePath !== undefined) {
           return this._fetchAstImport(declarationSymbol, {
+            importKind: AstImportKind.NamedImport,
             modulePath: externalModulePath,
             exportName: exportName
           });
@@ -473,16 +474,51 @@ export class ExportAnalyzer {
         //   StringLiteral:  pre=['./A']
         //   SemicolonToken:  pre=[;]
 
+        const importClause: ts.ImportClause = declaration as ts.ImportClause;
+        const exportName: string = importClause.name ?
+          importClause.name.getText().trim() : ts.InternalSymbolName.Default;
+
         if (externalModulePath !== undefined) {
           return this._fetchAstImport(declarationSymbol, {
+            importKind: AstImportKind.DefaultImport,
             modulePath: externalModulePath,
-            exportName: ts.InternalSymbolName.Default
+            exportName
           });
         }
 
         return this._getExportOfSpecifierAstModule(ts.InternalSymbolName.Default, importDeclaration, declarationSymbol);
       } else {
         throw new InternalError('Unimplemented import declaration kind: ' + declaration.getText());
+      }
+    }
+
+    if (ts.isImportEqualsDeclaration(declaration)) {
+      // EXAMPLE:
+      // import myLib = require('my-lib');
+      //
+      // ImportEqualsDeclaration:
+      //   ImportKeyword:  pre=[import] sep=[ ]
+      //   Identifier:  pre=[myLib] sep=[ ]
+      //   FirstAssignment:  pre=[=] sep=[ ]
+      //   ExternalModuleReference:
+      //     RequireKeyword:  pre=[require]
+      //     OpenParenToken:  pre=[(]
+      //     StringLiteral:  pre=['my-lib']
+      //     CloseParenToken:  pre=[)]
+      //   SemicolonToken:  pre=[;]
+      if (ts.isExternalModuleReference(declaration.moduleReference)) {
+        if (ts.isStringLiteralLike(declaration.moduleReference.expression)) {
+          const variableName: string = TypeScriptInternals.getTextOfIdentifierOrLiteral(
+            declaration.name);
+          const externalModuleName: string = TypeScriptInternals.getTextOfIdentifierOrLiteral(
+            declaration.moduleReference.expression);
+
+          return this._fetchAstImport(declarationSymbol, {
+            importKind: AstImportKind.EqualsImport,
+            modulePath: externalModuleName,
+            exportName: variableName
+          });
+        }
       }
     }
 
@@ -508,6 +544,15 @@ export class ExportAnalyzer {
         + astModule.sourceFile.fileName);
     }
     return astEntity;
+  }
+
+  /**
+   * Implementation of {@link AstSymbolTable.tryGetExportOfAstModule}.
+   */
+  public tryGetExportOfAstModule(exportName: string, astModule: AstModule): AstEntity | undefined {
+    const visitedAstModules: Set<AstModule> = new Set<AstModule>();
+    return this._tryGetExportOfAstModule(exportName, astModule,
+      visitedAstModules);
   }
 
   private _tryGetExportOfAstModule(exportName: string, astModule: AstModule,
@@ -547,6 +592,7 @@ export class ExportAnalyzer {
           // This entity was obtained from an external module, so return an AstImport instead
           const astSymbol: AstSymbol = astEntity as AstSymbol;
           return this._fetchAstImport(astSymbol.followedSymbol, {
+            importKind: AstImportKind.NamedImport,
             modulePath: starExportedModule.externalModulePath,
             exportName: exportName
           });

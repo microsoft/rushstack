@@ -1,0 +1,85 @@
+{
+  "name": "@microsoft/api-extractor-model",
+  "entries": [
+    {
+      "version": "7.1.0",
+      "tag": "@microsoft/api-extractor-model_v7.1.0",
+      "date": "Tue, 16 Apr 2019 11:01:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial stable release of API Extractor 7"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.28",
+      "tag": "@microsoft/api-extractor-model_v7.0.28",
+      "date": "Wed, 20 Mar 2019 19:14:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.1` to `3.13.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.27",
+      "tag": "@microsoft/api-extractor-model_v7.0.27",
+      "date": "Mon, 18 Mar 2019 04:28:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add helper functions for ReleaseTag"
+          },
+          {
+            "comment": "Export IApiItemConstructor to eliminate the ae-forgotten-export warning"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.0` to `3.12.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.26",
+      "tag": "@microsoft/api-extractor-model_v7.0.26",
+      "date": "Wed, 13 Mar 2019 19:13:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Refactor code to move the IndentedWriter API from api-extractor-model to api-documenter"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.25",
+      "tag": "@microsoft/api-extractor-model_v7.0.25",
+      "date": "Wed, 13 Mar 2019 01:14:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade TSDoc"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.24",
+      "tag": "@microsoft/api-extractor-model_v7.0.24",
+      "date": "Mon, 11 Mar 2019 16:13:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Initial setup of new package @microsoft/api-extractor-model"
+          }
+        ]
+      }
+    }
+  ]
+}

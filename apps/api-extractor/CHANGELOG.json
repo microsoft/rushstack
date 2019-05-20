@@ -2,6 +2,423 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.1.5",
+      "tag": "@microsoft/api-extractor_v7.1.5",
+      "date": "Mon, 13 May 2019 02:08:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Broaden support for default imports"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.4",
+      "tag": "@microsoft/api-extractor_v7.1.4",
+      "date": "Mon, 06 May 2019 20:46:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.3` to `4.2.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.3",
+      "tag": "@microsoft/api-extractor_v7.1.3",
+      "date": "Mon, 06 May 2019 19:34:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add a new setting \"omitTrimmingComments\" to prevent extra comments from being emitted in the .d.ts rollup"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.2",
+      "tag": "@microsoft/api-extractor_v7.1.2",
+      "date": "Mon, 06 May 2019 19:11:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where ExtractorResult.warningCount was not incremented for messages handled by IExtractorInvokeOptions.messageCallback (GitHub #1258)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.1",
+      "tag": "@microsoft/api-extractor_v7.1.1",
+      "date": "Tue, 30 Apr 2019 23:08:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where API signatures were sometimes truncated in the .api.json file (GitHub #1249)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.0",
+      "tag": "@microsoft/api-extractor_v7.1.0",
+      "date": "Tue, 16 Apr 2019 11:01:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial stable release of API Extractor 7"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.28` to `7.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.42",
+      "tag": "@microsoft/api-extractor_v7.0.42",
+      "date": "Fri, 12 Apr 2019 06:13:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression that prevented certain types of warnings from being reported"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.41",
+      "tag": "@microsoft/api-extractor_v7.0.41",
+      "date": "Thu, 11 Apr 2019 07:14:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "THIS IS A RELEASE CANDIDATE FOR API-EXTRACTOR 7"
+          },
+          {
+            "comment": "(Breaking change) Rename \"mainEntryPointFile\" to \"mainEntryPointFilePath\" so all settings use a consistent naming convention"
+          },
+          {
+            "comment": "(Breaking change) Paths that appear in api-extractor.json are now resolved relative to the config file unless prefixed with the `<projectFolder>` token"
+          },
+          {
+            "comment": "Add a new api-extractor.json setting \"tsconfigFilePath\" for customizing the tsconfig.json path"
+          },
+          {
+            "comment": "Replace ExtractorConfig.packageJsonFullPath with ExtractorConfig.packageFolder"
+          },
+          {
+            "comment": "Upgrade API Extractor to use TypeScript 3.4 for analysis"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.40",
+      "tag": "@microsoft/api-extractor_v7.0.40",
+      "date": "Tue, 09 Apr 2019 05:31:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the \"--local\" option to automatically create the API report file if it is missing"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.39",
+      "tag": "@microsoft/api-extractor_v7.0.39",
+      "date": "Mon, 08 Apr 2019 19:12:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename \"addToApiReviewFile\" setting to \"addToApiReportFile\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.38",
+      "tag": "@microsoft/api-extractor_v7.0.38",
+      "date": "Sat, 06 Apr 2019 02:05:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "(Breaking change) Removed the ILogger API and renamed ExtractorMessageLogLevel to ExtractorLogLevel"
+          },
+          {
+            "comment": "(Breaking change) Extractor console output is now modeled as ExtractorMessage objects and can be customized/filtered/handled by IExtractorInvokeOptions.messageCallback"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.37",
+      "tag": "@microsoft/api-extractor_v7.0.37",
+      "date": "Fri, 05 Apr 2019 04:16:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Introduce \"api-extractor init\" command-line that helps enable API Extractor for a new project"
+          },
+          {
+            "comment": "(Breaking change) Major redesign of the API used to invoke API Extractor"
+          },
+          {
+            "comment": "(Breaking change) Major redesign of the api-extractor.json config file format"
+          },
+          {
+            "comment": "Add a CompilerState API that allows an optimization where multiple invocations of Extractor can reuse the same TypeScript compiler analysis"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.36",
+      "tag": "@microsoft/api-extractor_v7.0.36",
+      "date": "Wed, 03 Apr 2019 02:58:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where .d.ts.map file were sometimes mapped to the wrong location"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.35",
+      "tag": "@microsoft/api-extractor_v7.0.35",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reintroduce the generated documentation notice for internal constructors"
+          },
+          {
+            "comment": "Add limited support for resolving @inheritDoc references to external packages by postprocessing them in api-documenter"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.34",
+      "tag": "@microsoft/api-extractor_v7.0.34",
+      "date": "Thu, 28 Mar 2019 19:14:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Validate `@link` tags and report a warning if the link cannot be resolved"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.33",
+      "tag": "@microsoft/api-extractor_v7.0.33",
+      "date": "Tue, 26 Mar 2019 20:54:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reintroduce support for `@inheritDoc` tags"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.32",
+      "tag": "@microsoft/api-extractor_v7.0.32",
+      "date": "Sat, 23 Mar 2019 03:48:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "If the TSDoc summary is missing for a class constructor, then automatically generate it"
+          },
+          {
+            "comment": "Reintroduce support for the `@preapproved` TSDoc tag"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.31",
+      "tag": "@microsoft/api-extractor_v7.0.31",
+      "date": "Thu, 21 Mar 2019 04:59:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reintroduce \"ae-internal-missing-underscore\" warning for API items marked as `@internal` but whose name does not start with an underscore"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.30",
+      "tag": "@microsoft/api-extractor_v7.0.30",
+      "date": "Thu, 21 Mar 2019 01:15:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the API review file generation to include imports and support multiple exports"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.29",
+      "tag": "@microsoft/api-extractor_v7.0.29",
+      "date": "Wed, 20 Mar 2019 19:14:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "API Extractor can now analyze packages whose package.json file is missing the \"version\" field"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.27` to `7.0.28`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.1` to `3.13.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.28",
+      "tag": "@microsoft/api-extractor_v7.0.28",
+      "date": "Mon, 18 Mar 2019 04:28:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Rename the \"ae-inconsistent-release-tags\" warning to \"ae-different-release-tags\""
+          },
+          {
+            "comment": "Introduce a new warning \"ae-incompatible-release-tags\" that checks for API signatures that reference types with incompatible release tags"
+          },
+          {
+            "comment": "Fix an issue where this error was sometimes reported incorrectly: \"The messages.extractorMessageReporting table contains an unrecognized identifier ___\""
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.26` to `7.0.27`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.0` to `3.12.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.27",
+      "tag": "@microsoft/api-extractor_v7.0.27",
+      "date": "Fri, 15 Mar 2019 19:13:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "(Breaking change) The file extension for API review files has changed from \".api.ts\" to \"api.md\".  For details see https://github.com/Microsoft/web-build-tools/issues/1123"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.26",
+      "tag": "@microsoft/api-extractor_v7.0.26",
+      "date": "Wed, 13 Mar 2019 19:13:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Refactor code to move the IndentedWriter API from api-extractor-model to api-documenter"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.25` to `7.0.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.25",
+      "tag": "@microsoft/api-extractor_v7.0.25",
+      "date": "Wed, 13 Mar 2019 01:14:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade TSDoc"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.24` to `7.0.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.24",
+      "tag": "@microsoft/api-extractor_v7.0.24",
+      "date": "Mon, 11 Mar 2019 16:13:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where spurious TSDoc warnings were issued because the TSDoc parser was configured improperly"
+          },
+          {
+            "comment": "Move the .api.json related APIs into a new NPM package @microsoft/api-extractor-model"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.0.23` to `7.0.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.23",
+      "tag": "@microsoft/api-extractor_v7.0.23",
+      "date": "Tue, 05 Mar 2019 17:13:11 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Issue a warning when an exported type refers to another local type that is not exported (ae-forgotten-export)"
+          },
+          {
+            "comment": "The export analyzer now correctly handles symbols imported using \"import x = require('y');\" notation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.22",
+      "tag": "@microsoft/api-extractor_v7.0.22",
+      "date": "Mon, 04 Mar 2019 17:13:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Every error/warning message reported by API Extractor now has an associated message identifier"
+          },
+          {
+            "comment": "Add a new section to api-extractor.json for configuring how errors get reported, with ability to suppress individual errors"
+          },
+          {
+            "comment": "Reintroduce the ability to report issues by writing warnings into the API review file"
+          },
+          {
+            "comment": "Fix an issue where members of type literals were incorrectly being flagged as \"(undocumented)\""
+          },
+          {
+            "comment": "Error messages now cite the original .ts source file, if a source map is present. (To enable this, specify `\"declarationMap\": true` in tsconfig.json.)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.0.21",
       "tag": "@microsoft/api-extractor_v7.0.21",
       "date": "Wed, 27 Feb 2019 22:13:58 GMT",

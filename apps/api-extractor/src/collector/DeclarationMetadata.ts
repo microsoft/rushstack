@@ -2,10 +2,20 @@
 // See LICENSE in the project root for license information.
 
 import * as tsdoc from '@microsoft/tsdoc';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
+import { VisitorState } from './VisitorState';
 
 export class DeclarationMetadata {
+  /**
+   * This is the original TSDoc comment parsed from the source code.
+   * It may be modified (or constructed artificially) by the DocCommentEnhancer.
+   */
   public tsdocComment: tsdoc.DocComment | undefined = undefined;
+
+  /**
+   * The ParserContext from when the TSDoc comment was parsed from the source code.
+   * If the source code did not contain a doc comment, then this will be undefined.
+   */
   public tsdocParserContext: tsdoc.ParserContext | undefined = undefined;
 
   /**
@@ -22,5 +32,10 @@ export class DeclarationMetadata {
   public isSealed: boolean = false;
   public isVirtual: boolean = false;
 
+  public isPreapproved: boolean = false;
+
+  // Assigned by DocCommentEnhancer
   public needsDocumentation: boolean = true;
+
+  public docCommentEnhancerVisitorState: VisitorState = VisitorState.Unvisited;
 }

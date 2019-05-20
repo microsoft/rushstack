@@ -2,24 +2,27 @@
 /**
  * A class used to exposed events.
  * @public
+ * {@docCategory SystemEvent}
  */
 export class SystemEvent {
   /**
    * Adds an handler for the event.
    */
-  public addHandler(handler: ()=>void): void {
+  public addHandler(handler: () => void): void {
   }
 }
 
 /**
  * Example base class
  * @public
+ * {@docCategory DocBaseClass}
  */
 export class DocBaseClass {
 }
 
 /**
  * @public
+ * {@docCategory DocBaseClass}
  */
 export interface IDocInterface1 {
   /**
@@ -30,6 +33,7 @@ export interface IDocInterface1 {
 
 /**
  * @public
+ * {@docCategory DocBaseClass}
  */
 export interface IDocInterface2 extends IDocInterface1 {
   /**
@@ -41,6 +45,7 @@ export interface IDocInterface2 extends IDocInterface1 {
 /**
  * Some less common TypeScript declaration kinds.
  * @public
+ * {@docCategory DocClass1}
  */
 export interface IDocInterface3 {
   /**
@@ -62,16 +67,50 @@ export interface IDocInterface3 {
 }
 
 /**
+ * Generic class.
+ * @public
+ */
+export class Generic<T> { }
+
+/**
+ * Type union in an interface.
+ * @public
+ * {@docCategory DocClass1}
+ */
+export interface IDocInterface4 {
+  /**
+   * a union type
+   */
+  stringOrNumber: string | number;
+
+  /**
+   * a union type with a function
+   */
+  numberOrFunction: number | (() => number);
+
+  /**
+   * make sure html entities are escaped in tables.
+   */
+  generic: Generic<number>;
+  /**
+   * Test newline rendering when code blocks are used in tables
+   */
+  Context: ({ children }: { children: string }) => boolean;
+}
+
+/**
  * This is an example class.
  *
  * @remarks
  * These are some remarks.
- * @defaultvalue a default value for this function
+ * @defaultValue a default value for this function
  * @public
+ * {@docCategory DocClass1}
  */
 export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
   /**
-   * The class constructor
+   * An internal class constructor.
+   * @internal
    */
   public constructor(name: string) {
     super();
@@ -96,13 +135,13 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
 
   /**
    * This event is fired whenever the object is modified.
-   * @eventproperty
+   * @eventProperty
    */
   public readonly modifiedEvent: SystemEvent;
 
   /**
    * This event should have been marked as readonly.
-   * @eventproperty
+   * @eventProperty
    */
   public malformedEvent: SystemEvent;
 

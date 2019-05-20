@@ -1,7 +1,7 @@
 
 import * as path from 'path';
 import { PackageMetadataManager } from '../PackageMetadataManager';
-import { FileSystem, PackageJsonLookup, IPackageJson } from '@microsoft/node-core-library';
+import { FileSystem, PackageJsonLookup, INodePackageJson } from '@microsoft/node-core-library';
 
 /* tslint:disable:typedef */
 
@@ -123,9 +123,9 @@ function resolveInTestPackage(testPackageName: string, ...args: string[]): strin
   return path.resolve(__dirname, 'test-data/tsdoc-metadata-path-inference', testPackageName, ...args);
 }
 
-function getPackageMetadata(testPackageName: string): { packageFolder: string, packageJson: IPackageJson } {
+function getPackageMetadata(testPackageName: string): { packageFolder: string, packageJson: INodePackageJson } {
   const packageFolder: string = resolveInTestPackage(testPackageName);
-  const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(packageFolder);
+  const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(packageFolder);
   if (!packageJson) {
     throw new Error('There should be a package.json file in the test package');
   }

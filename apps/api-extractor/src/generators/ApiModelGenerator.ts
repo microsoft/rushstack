@@ -5,39 +5,42 @@
 
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
+import {
+  ApiModel,
+  ApiClass,
+  ApiPackage,
+  ApiEntryPoint,
+  ApiMethod,
+  ApiNamespace,
+  ApiInterface,
+  ApiItem,
+  ApiDeclaredItem,
+  ApiPropertySignature,
+  ApiItemContainerMixin,
+  ReleaseTag,
+  ApiProperty,
+  ApiMethodSignature,
+  IApiParameterOptions,
+  ApiEnum,
+  ApiEnumMember,
+  IExcerptTokenRange,
+  IExcerptToken,
+  ExcerptToken,
+  ExcerptToken_referencedSymbol,
+  ExcerptToken_setReference,
+  ApiConstructor,
+  ApiConstructSignature,
+  ApiFunction,
+  ApiIndexSignature,
+  ApiVariable,
+  ApiTypeAlias,
+  ApiCallSignature
+} from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
-import { ApiModel } from '../api/model/ApiModel';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiClass } from '../api/model/ApiClass';
-import { ApiPackage } from '../api/model/ApiPackage';
-import { ApiEntryPoint } from '../api/model/ApiEntryPoint';
-import { ApiMethod } from '../api/model/ApiMethod';
-import { ApiNamespace } from '../api/model/ApiNamespace';
-import { ApiInterface } from '../api/model/ApiInterface';
-import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
-import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { ApiProperty } from '../api/model/ApiProperty';
-import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
-import { IApiParameterOptions } from '../api/mixins/ApiParameterListMixin';
-import { ApiEnum } from '../api/model/ApiEnum';
-import { ApiEnumMember } from '../api/model/ApiEnumMember';
-import {
-  IExcerptTokenRange, IExcerptToken, ExcerptToken,
-  ExcerptToken_referencedSymbol, ExcerptToken_setReference
-} from '../api/mixins/Excerpt';
 import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
-import { ApiConstructor } from '../api/model/ApiConstructor';
-import { ApiConstructSignature } from '../api/model/ApiConstructSignature';
-import { ApiFunction } from '../api/model/ApiFunction';
-import { ApiIndexSignature } from '../api/model/ApiIndexSignature';
-import { ApiVariable } from '../api/model/ApiVariable';
-import { ApiTypeAlias } from '../api/model/ApiTypeAlias';
-import { ApiCallSignature } from '../api/model/ApiCallSignature';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { ApiItem } from '../api/items/ApiItem';
-import { ApiDeclaredItem } from '../api/items/ApiDeclaredItem';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -304,7 +307,7 @@ export class ApiModelGenerator {
 
       const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        nodeToStopAt: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
+        stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
         nodesToCapture
       });
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
@@ -365,7 +368,7 @@ export class ApiModelGenerator {
     if (apiEnum === undefined) {
       const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        nodeToStopAt: ts.SyntaxKind.FirstPunctuation  // FirstPunctuation = "{"
+        stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation  // FirstPunctuation = "{"
       });
 
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
@@ -506,7 +509,7 @@ export class ApiModelGenerator {
 
       const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        nodeToStopAt: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
+        stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
         nodesToCapture
       });
 
@@ -605,7 +608,7 @@ export class ApiModelGenerator {
     if (apiNamespace === undefined) {
       const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        nodeToStopAt: ts.SyntaxKind.ModuleBlock  // ModuleBlock = the "{ ... }" block
+        stopBeforeChildKind: ts.SyntaxKind.ModuleBlock  // ModuleBlock = the "{ ... }" block
       });
 
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;

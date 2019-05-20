@@ -1,6 +1,146 @@
 # Change Log - @microsoft/rush-stack
 
-This log was last generated on Wed, 27 Feb 2019 22:13:58 GMT and should not be manually modified.
+This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+
+## 0.1.81
+Mon, 13 May 2019 02:08:35 GMT
+
+*Version update only*
+
+## 0.1.80
+Mon, 06 May 2019 20:46:22 GMT
+
+*Version update only*
+
+## 0.1.79
+Mon, 06 May 2019 19:34:54 GMT
+
+*Version update only*
+
+## 0.1.78
+Mon, 06 May 2019 19:11:16 GMT
+
+*Version update only*
+
+## 0.1.77
+Tue, 30 Apr 2019 23:08:02 GMT
+
+*Version update only*
+
+## 0.1.76
+Tue, 16 Apr 2019 11:01:37 GMT
+
+*Version update only*
+
+## 0.1.75
+Fri, 12 Apr 2019 06:13:17 GMT
+
+*Version update only*
+
+## 0.1.74
+Thu, 11 Apr 2019 07:14:01 GMT
+
+*Version update only*
+
+## 0.1.73
+Tue, 09 Apr 2019 05:31:01 GMT
+
+*Version update only*
+
+## 0.1.72
+Mon, 08 Apr 2019 19:12:53 GMT
+
+*Version update only*
+
+## 0.1.71
+Sat, 06 Apr 2019 02:05:51 GMT
+
+*Version update only*
+
+## 0.1.70
+Fri, 05 Apr 2019 04:16:17 GMT
+
+*Version update only*
+
+## 0.1.69
+Wed, 03 Apr 2019 02:58:33 GMT
+
+*Version update only*
+
+## 0.1.68
+Tue, 02 Apr 2019 01:12:02 GMT
+
+*Version update only*
+
+## 0.1.67
+Sat, 30 Mar 2019 22:27:16 GMT
+
+*Version update only*
+
+## 0.1.66
+Thu, 28 Mar 2019 19:14:27 GMT
+
+*Version update only*
+
+## 0.1.65
+Tue, 26 Mar 2019 20:54:19 GMT
+
+*Version update only*
+
+## 0.1.64
+Sat, 23 Mar 2019 03:48:31 GMT
+
+*Version update only*
+
+## 0.1.63
+Thu, 21 Mar 2019 04:59:11 GMT
+
+*Version update only*
+
+## 0.1.62
+Thu, 21 Mar 2019 01:15:33 GMT
+
+*Version update only*
+
+## 0.1.61
+Wed, 20 Mar 2019 19:14:49 GMT
+
+*Version update only*
+
+## 0.1.60
+Mon, 18 Mar 2019 04:28:43 GMT
+
+*Version update only*
+
+## 0.1.59
+Fri, 15 Mar 2019 19:13:25 GMT
+
+*Version update only*
+
+## 0.1.58
+Wed, 13 Mar 2019 19:13:14 GMT
+
+*Version update only*
+
+## 0.1.57
+Wed, 13 Mar 2019 01:14:05 GMT
+
+*Version update only*
+
+## 0.1.56
+Mon, 11 Mar 2019 16:13:36 GMT
+
+*Version update only*
+
+## 0.1.55
+Tue, 05 Mar 2019 17:13:11 GMT
+
+*Version update only*
+
+## 0.1.54
+Mon, 04 Mar 2019 17:13:20 GMT
+
+*Version update only*
 
 ## 0.1.53
 Wed, 27 Feb 2019 22:13:58 GMT

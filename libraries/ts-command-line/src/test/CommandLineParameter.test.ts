@@ -22,7 +22,7 @@ function createParser(): DynamicCommandLineParser {
   });
 
   const action: DynamicCommandLineAction = new DynamicCommandLineAction({
-    actionName: 'do-job',
+    actionName: 'do:the-job',
     summary: 'does the job',
     documentation: 'a longer description'
   });
@@ -133,17 +133,17 @@ describe('CommandLineParameter', () => {
 
   it('prints the action help', () => {
     const commandLineParser: CommandLineParser = createParser();
-    const helpText: string = colors.stripColors(commandLineParser.getAction('do-job').renderHelpText());
+    const helpText: string = colors.stripColors(commandLineParser.getAction('do:the-job').renderHelpText());
     expect(helpText).toMatchSnapshot();
   });
 
   it('parses an input with ALL parameters', () => {
     const commandLineParser: CommandLineParser = createParser();
-    const action: CommandLineAction = commandLineParser.getAction('do-job');
+    const action: CommandLineAction = commandLineParser.getAction('do:the-job');
 
     const args: string[] = [
       '--global-flag',
-      'do-job',
+      'do:the-job',
       '--choice', 'two',
       '--flag',
       '--integer', '123',
@@ -209,8 +209,8 @@ describe('CommandLineParameter', () => {
 
   it('parses an input with NO parameters', () => {
     const commandLineParser: CommandLineParser = createParser();
-    const action: CommandLineAction = commandLineParser.getAction('do-job');
-    const args: string[] = [ 'do-job', '--integer-required', '123'];
+    const action: CommandLineAction = commandLineParser.getAction('do:the-job');
+    const args: string[] = [ 'do:the-job', '--integer-required', '123'];
 
     return commandLineParser.execute(args).then(() => {
       expect(commandLineParser.selectedAction).toBe(action);

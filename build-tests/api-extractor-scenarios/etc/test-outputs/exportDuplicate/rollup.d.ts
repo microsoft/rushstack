@@ -1,5 +1,5 @@
 
-/** @public */
+/** @internal */
 declare class A {
 }
 export { A as B }

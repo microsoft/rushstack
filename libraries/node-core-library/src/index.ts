@@ -4,7 +4,7 @@
 /**
  * Core libraries that every NodeJS toolchain project should use.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 export {
@@ -19,6 +19,7 @@ export {
   Executable
 } from './Executable';
 export {
+  INodePackageJson,
   IPackageJson,
   IPackageJsonDependencyTable,
   IPackageJsonScriptTable,
@@ -82,7 +83,9 @@ export { StringBuilder, IStringBuilder } from './StringBuilder';
 export { Terminal } from './Terminal/Terminal';
 export {
   Colors,
-  IColorableSequence
+  IColorableSequence,
+  ColorValue,
+  TextAttribute
 } from './Terminal/Colors';
 export {
   ITerminalProvider,

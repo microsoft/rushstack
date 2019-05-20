@@ -3,7 +3,7 @@
 
 /**
  * A library for writing scripts that interact with the Rush tool.
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 export {
@@ -13,10 +13,15 @@ export {
 export {
   RushConfiguration,
   ITryFindRushJsonLocationOptions,
-  PackageManager,
+  ResolutionStrategy,
   PnpmOptionsConfiguration,
   YarnOptionsConfiguration
 } from './api/RushConfiguration';
+
+export {
+  PackageManagerName,
+  PackageManager
+} from './api/packageManager/PackageManager';
 
 export {
   EnvironmentVariableNames

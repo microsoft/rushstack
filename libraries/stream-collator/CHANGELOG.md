@@ -1,6 +1,146 @@
 # Change Log - @microsoft/stream-collator
 
-This log was last generated on Wed, 27 Feb 2019 22:13:58 GMT and should not be manually modified.
+This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+
+## 3.0.67
+Mon, 13 May 2019 02:08:35 GMT
+
+*Version update only*
+
+## 3.0.66
+Mon, 06 May 2019 20:46:22 GMT
+
+*Version update only*
+
+## 3.0.65
+Mon, 06 May 2019 19:34:54 GMT
+
+*Version update only*
+
+## 3.0.64
+Mon, 06 May 2019 19:11:16 GMT
+
+*Version update only*
+
+## 3.0.63
+Tue, 30 Apr 2019 23:08:02 GMT
+
+*Version update only*
+
+## 3.0.62
+Tue, 16 Apr 2019 11:01:37 GMT
+
+*Version update only*
+
+## 3.0.61
+Fri, 12 Apr 2019 06:13:17 GMT
+
+*Version update only*
+
+## 3.0.60
+Thu, 11 Apr 2019 07:14:01 GMT
+
+*Version update only*
+
+## 3.0.59
+Tue, 09 Apr 2019 05:31:01 GMT
+
+*Version update only*
+
+## 3.0.58
+Mon, 08 Apr 2019 19:12:53 GMT
+
+*Version update only*
+
+## 3.0.57
+Sat, 06 Apr 2019 02:05:51 GMT
+
+*Version update only*
+
+## 3.0.56
+Fri, 05 Apr 2019 04:16:17 GMT
+
+*Version update only*
+
+## 3.0.55
+Wed, 03 Apr 2019 02:58:33 GMT
+
+*Version update only*
+
+## 3.0.54
+Tue, 02 Apr 2019 01:12:02 GMT
+
+*Version update only*
+
+## 3.0.53
+Sat, 30 Mar 2019 22:27:16 GMT
+
+*Version update only*
+
+## 3.0.52
+Thu, 28 Mar 2019 19:14:27 GMT
+
+*Version update only*
+
+## 3.0.51
+Tue, 26 Mar 2019 20:54:19 GMT
+
+*Version update only*
+
+## 3.0.50
+Sat, 23 Mar 2019 03:48:31 GMT
+
+*Version update only*
+
+## 3.0.49
+Thu, 21 Mar 2019 04:59:11 GMT
+
+*Version update only*
+
+## 3.0.48
+Thu, 21 Mar 2019 01:15:33 GMT
+
+*Version update only*
+
+## 3.0.47
+Wed, 20 Mar 2019 19:14:49 GMT
+
+*Version update only*
+
+## 3.0.46
+Mon, 18 Mar 2019 04:28:43 GMT
+
+*Version update only*
+
+## 3.0.45
+Fri, 15 Mar 2019 19:13:25 GMT
+
+*Version update only*
+
+## 3.0.44
+Wed, 13 Mar 2019 19:13:14 GMT
+
+*Version update only*
+
+## 3.0.43
+Wed, 13 Mar 2019 01:14:05 GMT
+
+*Version update only*
+
+## 3.0.42
+Mon, 11 Mar 2019 16:13:36 GMT
+
+*Version update only*
+
+## 3.0.41
+Tue, 05 Mar 2019 17:13:11 GMT
+
+*Version update only*
+
+## 3.0.40
+Mon, 04 Mar 2019 17:13:20 GMT
+
+*Version update only*
 
 ## 3.0.39
 Wed, 27 Feb 2019 22:13:58 GMT

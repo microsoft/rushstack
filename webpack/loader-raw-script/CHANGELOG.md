@@ -1,6 +1,146 @@
 # Change Log - @microsoft/loader-raw-script
 
-This log was last generated on Wed, 27 Feb 2019 22:13:58 GMT and should not be manually modified.
+This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+
+## 1.2.151
+Mon, 13 May 2019 02:08:35 GMT
+
+*Version update only*
+
+## 1.2.150
+Mon, 06 May 2019 20:46:22 GMT
+
+*Version update only*
+
+## 1.2.149
+Mon, 06 May 2019 19:34:54 GMT
+
+*Version update only*
+
+## 1.2.148
+Mon, 06 May 2019 19:11:16 GMT
+
+*Version update only*
+
+## 1.2.147
+Tue, 30 Apr 2019 23:08:02 GMT
+
+*Version update only*
+
+## 1.2.146
+Tue, 16 Apr 2019 11:01:37 GMT
+
+*Version update only*
+
+## 1.2.145
+Fri, 12 Apr 2019 06:13:17 GMT
+
+*Version update only*
+
+## 1.2.144
+Thu, 11 Apr 2019 07:14:01 GMT
+
+*Version update only*
+
+## 1.2.143
+Tue, 09 Apr 2019 05:31:01 GMT
+
+*Version update only*
+
+## 1.2.142
+Mon, 08 Apr 2019 19:12:53 GMT
+
+*Version update only*
+
+## 1.2.141
+Sat, 06 Apr 2019 02:05:51 GMT
+
+*Version update only*
+
+## 1.2.140
+Fri, 05 Apr 2019 04:16:17 GMT
+
+*Version update only*
+
+## 1.2.139
+Wed, 03 Apr 2019 02:58:33 GMT
+
+*Version update only*
+
+## 1.2.138
+Tue, 02 Apr 2019 01:12:02 GMT
+
+*Version update only*
+
+## 1.2.137
+Sat, 30 Mar 2019 22:27:16 GMT
+
+*Version update only*
+
+## 1.2.136
+Thu, 28 Mar 2019 19:14:27 GMT
+
+*Version update only*
+
+## 1.2.135
+Tue, 26 Mar 2019 20:54:18 GMT
+
+*Version update only*
+
+## 1.2.134
+Sat, 23 Mar 2019 03:48:31 GMT
+
+*Version update only*
+
+## 1.2.133
+Thu, 21 Mar 2019 04:59:11 GMT
+
+*Version update only*
+
+## 1.2.132
+Thu, 21 Mar 2019 01:15:33 GMT
+
+*Version update only*
+
+## 1.2.131
+Wed, 20 Mar 2019 19:14:49 GMT
+
+*Version update only*
+
+## 1.2.130
+Mon, 18 Mar 2019 04:28:43 GMT
+
+*Version update only*
+
+## 1.2.129
+Fri, 15 Mar 2019 19:13:25 GMT
+
+*Version update only*
+
+## 1.2.128
+Wed, 13 Mar 2019 19:13:14 GMT
+
+*Version update only*
+
+## 1.2.127
+Wed, 13 Mar 2019 01:14:05 GMT
+
+*Version update only*
+
+## 1.2.126
+Mon, 11 Mar 2019 16:13:36 GMT
+
+*Version update only*
+
+## 1.2.125
+Tue, 05 Mar 2019 17:13:11 GMT
+
+*Version update only*
+
+## 1.2.124
+Mon, 04 Mar 2019 17:13:19 GMT
+
+*Version update only*
 
 ## 1.2.123
 Wed, 27 Feb 2019 22:13:58 GMT

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-documenter.schema.json",
+
+  "tableOfContents": {
+    "tocConfig": {
+      "items": [
+        { "name": "Test api-documenter", "href": "~/homepage/homepage.md" },
+        {
+          "name": "Test Sample for AD",
+          "href": "api-documenter-test",
+          "extended": true,
+          "items": [
+            {
+              "name": "Classes",
+              "items": [
+                { "name": "DocBaseClass", "items": [] },
+                { "name": "DocClass1", "items": [] }
+              ]
+            },
+            { "name": "References", "items": [] }
+          ]
+        }
+      ]
+    },
+    "catchAllCategory": "References",
+    "noDuplicateEntries": true,
+    "filterByApiItemName": false,
+    "filterByInlineTag": "@docCategory"
+  }
+}

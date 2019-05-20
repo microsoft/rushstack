@@ -7,7 +7,7 @@
  * This project tests various documentation generation scenarios and
  * doc comment syntaxes.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 export * from './DocClass1';

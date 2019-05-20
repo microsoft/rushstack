@@ -9,6 +9,7 @@
     "jsx": "react",
     "declaration": true,
     "sourceMap": true,
+    "declarationMap": true,
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,

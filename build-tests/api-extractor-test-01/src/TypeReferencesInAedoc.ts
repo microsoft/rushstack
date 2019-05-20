@@ -15,7 +15,7 @@ export class TypeReferencesInAedoc {
     return this;
   }
 
-  /** {@inheritdoc api-extractor-test-01#TypeReferencesInAedoc.getValue} */
+  /** {@inheritDoc api-extractor-test-01#TypeReferencesInAedoc.getValue} */
   public getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc {
     return this;
   }

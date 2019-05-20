@@ -1,0 +1,60 @@
+/**
+ * Config file for API Documenter.  For more info, please visit: https://api-extractor.com
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-documenter.schema.json",
+
+  /**
+   * Configures how the table of contents is generated.
+   */
+  "tableOfContents": {
+    /**
+     * Allows hand-coded items to be injected into the table of contents.
+     *
+     * DEFAULT VALUE: (none)
+     */
+    // "items": [
+    //   { "name": "Example Node", "href": "~/homepage/homepage.md" },
+    //   {
+    //     "name": "API Reference",
+    //     "items": [
+    //       { "name": "References" }
+    //     ]
+    //   }
+    // ],
+
+    /**
+     * Optional category name that is recommended to include in the `tocConfig`,
+     * along with one of the filters: `filterByApiItemName` or `filterByInlineTag`.
+     * Any items that are not matched to the mentioned filters will be placed under this
+     * catchAll category. If none provided the items will not be included in the final toc.yml file.
+     *
+     * DEFAULT VALUE: (none)
+     */
+    // "catchAllCategory": "References",
+
+    /**
+     * When loading more than one api.json files that might include the same API items,
+     * toggle either to show duplicates or not.
+     *
+     * DEFAULT VALUE: false
+     */
+    // "noDuplicateEntries": true,
+
+    /**
+     * Toggle either sorting of the API items should be made based on category name presence
+     * in the API item's name.
+     *
+     * DEFAULT VALUE: false
+     */
+    // "filterByApiItemName": false,
+
+    /**
+     * Filter that can be used to sort the API items according to an inline custom tag
+     * that is present on them.
+     *
+     * DEFAULT VALUE: (none)
+     */
+    // "filterByInlineTag": "@docCategory"
+  }
+}

@@ -1,6 +1,212 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 27 Feb 2019 22:13:58 GMT and should not be manually modified.
+This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+
+## 7.1.5
+Mon, 13 May 2019 02:08:35 GMT
+
+### Patches
+
+- Broaden support for default imports
+
+## 7.1.4
+Mon, 06 May 2019 20:46:21 GMT
+
+*Version update only*
+
+## 7.1.3
+Mon, 06 May 2019 19:34:54 GMT
+
+### Patches
+
+- Add a new setting "omitTrimmingComments" to prevent extra comments from being emitted in the .d.ts rollup
+
+## 7.1.2
+Mon, 06 May 2019 19:11:16 GMT
+
+### Patches
+
+- Fix an issue where ExtractorResult.warningCount was not incremented for messages handled by IExtractorInvokeOptions.messageCallback (GitHub #1258)
+
+## 7.1.1
+Tue, 30 Apr 2019 23:08:02 GMT
+
+### Patches
+
+- Fix an issue where API signatures were sometimes truncated in the .api.json file (GitHub #1249)
+
+## 7.1.0
+Tue, 16 Apr 2019 11:01:37 GMT
+
+### Minor changes
+
+- Initial stable release of API Extractor 7
+
+## 7.0.42
+Fri, 12 Apr 2019 06:13:16 GMT
+
+### Patches
+
+- Fix a regression that prevented certain types of warnings from being reported
+
+## 7.0.41
+Thu, 11 Apr 2019 07:14:01 GMT
+
+### Patches
+
+- THIS IS A RELEASE CANDIDATE FOR API-EXTRACTOR 7
+- (Breaking change) Rename "mainEntryPointFile" to "mainEntryPointFilePath" so all settings use a consistent naming convention
+- (Breaking change) Paths that appear in api-extractor.json are now resolved relative to the config file unless prefixed with the `<projectFolder>` token
+- Add a new api-extractor.json setting "tsconfigFilePath" for customizing the tsconfig.json path
+- Replace ExtractorConfig.packageJsonFullPath with ExtractorConfig.packageFolder
+- Upgrade API Extractor to use TypeScript 3.4 for analysis
+
+## 7.0.40
+Tue, 09 Apr 2019 05:31:01 GMT
+
+### Patches
+
+- Improve the "--local" option to automatically create the API report file if it is missing
+
+## 7.0.39
+Mon, 08 Apr 2019 19:12:52 GMT
+
+### Patches
+
+- Rename "addToApiReviewFile" setting to "addToApiReportFile"
+
+## 7.0.38
+Sat, 06 Apr 2019 02:05:51 GMT
+
+### Patches
+
+- (Breaking change) Removed the ILogger API and renamed ExtractorMessageLogLevel to ExtractorLogLevel
+- (Breaking change) Extractor console output is now modeled as ExtractorMessage objects and can be customized/filtered/handled by IExtractorInvokeOptions.messageCallback
+
+## 7.0.37
+Fri, 05 Apr 2019 04:16:16 GMT
+
+### Patches
+
+- Introduce "api-extractor init" command-line that helps enable API Extractor for a new project
+- (Breaking change) Major redesign of the API used to invoke API Extractor
+- (Breaking change) Major redesign of the api-extractor.json config file format
+- Add a CompilerState API that allows an optimization where multiple invocations of Extractor can reuse the same TypeScript compiler analysis
+
+## 7.0.36
+Wed, 03 Apr 2019 02:58:33 GMT
+
+### Patches
+
+- Fix an issue where .d.ts.map file were sometimes mapped to the wrong location
+
+## 7.0.35
+Sat, 30 Mar 2019 22:27:16 GMT
+
+### Patches
+
+- Reintroduce the generated documentation notice for internal constructors
+- Add limited support for resolving @inheritDoc references to external packages by postprocessing them in api-documenter
+
+## 7.0.34
+Thu, 28 Mar 2019 19:14:27 GMT
+
+### Patches
+
+- Validate `@link` tags and report a warning if the link cannot be resolved
+
+## 7.0.33
+Tue, 26 Mar 2019 20:54:18 GMT
+
+### Patches
+
+- Reintroduce support for `@inheritDoc` tags
+
+## 7.0.32
+Sat, 23 Mar 2019 03:48:31 GMT
+
+### Patches
+
+- If the TSDoc summary is missing for a class constructor, then automatically generate it
+- Reintroduce support for the `@preapproved` TSDoc tag
+
+## 7.0.31
+Thu, 21 Mar 2019 04:59:11 GMT
+
+### Patches
+
+- Reintroduce "ae-internal-missing-underscore" warning for API items marked as `@internal` but whose name does not start with an underscore
+
+## 7.0.30
+Thu, 21 Mar 2019 01:15:32 GMT
+
+### Patches
+
+- Improve the API review file generation to include imports and support multiple exports
+
+## 7.0.29
+Wed, 20 Mar 2019 19:14:49 GMT
+
+### Patches
+
+- API Extractor can now analyze packages whose package.json file is missing the "version" field
+
+## 7.0.28
+Mon, 18 Mar 2019 04:28:43 GMT
+
+### Patches
+
+- Rename the "ae-inconsistent-release-tags" warning to "ae-different-release-tags"
+- Introduce a new warning "ae-incompatible-release-tags" that checks for API signatures that reference types with incompatible release tags
+- Fix an issue where this error was sometimes reported incorrectly: "The messages.extractorMessageReporting table contains an unrecognized identifier ___"
+
+## 7.0.27
+Fri, 15 Mar 2019 19:13:25 GMT
+
+### Patches
+
+- (Breaking change) The file extension for API review files has changed from ".api.ts" to "api.md".  For details see https://github.com/Microsoft/web-build-tools/issues/1123
+
+## 7.0.26
+Wed, 13 Mar 2019 19:13:14 GMT
+
+### Patches
+
+- Refactor code to move the IndentedWriter API from api-extractor-model to api-documenter
+
+## 7.0.25
+Wed, 13 Mar 2019 01:14:05 GMT
+
+### Patches
+
+- Upgrade TSDoc
+
+## 7.0.24
+Mon, 11 Mar 2019 16:13:36 GMT
+
+### Patches
+
+- Fix an issue where spurious TSDoc warnings were issued because the TSDoc parser was configured improperly
+- Move the .api.json related APIs into a new NPM package @microsoft/api-extractor-model
+
+## 7.0.23
+Tue, 05 Mar 2019 17:13:11 GMT
+
+### Patches
+
+- Issue a warning when an exported type refers to another local type that is not exported (ae-forgotten-export)
+- The export analyzer now correctly handles symbols imported using "import x = require('y');" notation
+
+## 7.0.22
+Mon, 04 Mar 2019 17:13:19 GMT
+
+### Patches
+
+- Every error/warning message reported by API Extractor now has an associated message identifier
+- Add a new section to api-extractor.json for configuring how errors get reported, with ability to suppress individual errors
+- Reintroduce the ability to report issues by writing warnings into the API review file
+- Fix an issue where members of type literals were incorrectly being flagged as "(undocumented)"
+- Error messages now cite the original .ts source file, if a source map is present. (To enable this, specify `"declarationMap": true` in tsconfig.json.)
 
 ## 7.0.21
 Wed, 27 Feb 2019 22:13:58 GMT

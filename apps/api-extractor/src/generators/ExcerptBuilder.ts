@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-
 import {
   ExcerptTokenKind,
-  IExcerptTokenRange,
   IExcerptToken,
+  IExcerptTokenRange,
   ExcerptToken_referencedSymbol
-} from '../api/mixins/Excerpt';
+} from '@microsoft/api-extractor-model';
+
 import { Span } from '../analyzer/Span';
 
 /**
@@ -33,13 +33,18 @@ export interface ISignatureBuilderOptions {
   /**
    * The AST node that we will traverse to extract tokens
    */
-
   startingNode: ts.Node;
+
   /**
-   * An AST node to stop at (e.g. the "{" after a class declaration).
-   * If omitted, then all child nodes for `startingNode` will be processed
+   * Normally, the excerpt will include all child nodes for `startingNode`; whereas if `childKindToStopBefore`
+   * is specified, then the node traversal will stop before (i.e. excluding) the first immediate child
+   * of `startingNode` with the specified syntax kind.
+   *
+   * @remarks
+   * For example, suppose the signature is `interface X: Y { z: string }`.  The token `{` has syntax kind
+   * `ts.SyntaxKind.FirstPunctuation`, so we can specify that to truncate the excerpt to `interface X: Y`.
    */
-  nodeToStopAt?: ts.SyntaxKind;
+  stopBeforeChildKind?: ts.SyntaxKind;
 
   /**
    * A list of child nodes whose token ranges we want to capture
@@ -51,7 +56,9 @@ export interface ISignatureBuilderOptions {
  * Internal state for ExcerptBuilder
  */
 interface IBuildSpanState {
-  nodeToStopAt?: ts.SyntaxKind;
+  startingNode: ts.Node;
+  stopBeforeChildKind: ts.SyntaxKind | undefined;
+
   tokenRangesByNode: Map<ts.Node, IExcerptTokenRange>;
 
   /**
@@ -82,7 +89,8 @@ export class ExcerptBuilder {
     const excerptTokens: IExcerptToken[] = [];
 
     this._buildSpan(excerptTokens, span, {
-      nodeToStopAt: options.nodeToStopAt,
+      startingNode: options.startingNode,
+      stopBeforeChildKind: options.stopBeforeChildKind,
       tokenRangesByNode,
       disableMergingForNextToken: false
     });
@@ -95,11 +103,6 @@ export class ExcerptBuilder {
   }
 
   private _buildSpan(excerptTokens: IExcerptToken[], span: Span, state: IBuildSpanState): boolean {
-
-    if (state.nodeToStopAt && span.kind === state.nodeToStopAt) {
-      return false;
-    }
-
     if (span.kind === ts.SyntaxKind.JSDocComment) {
       // Discard any comments
       return true;
@@ -127,6 +130,13 @@ export class ExcerptBuilder {
     }
 
     for (const child of span.children) {
+      if (span.node === state.startingNode) {
+        if (state.stopBeforeChildKind && child.kind === state.stopBeforeChildKind) {
+          // We reached the a child whose kind is stopBeforeChildKind, so stop traversing
+          return false;
+        }
+      }
+
       if (!this._buildSpan(excerptTokens, child, state)) {
         return false;
       }

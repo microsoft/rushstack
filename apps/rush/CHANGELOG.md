@@ -1,6 +1,89 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 13 Dec 2018 02:58:10 GMT and should not be manually modified.
+This log was last generated on Mon, 06 May 2019 21:03:32 GMT and should not be manually modified.
+
+## 5.7.3
+Mon, 06 May 2019 21:03:32 GMT
+
+### Updates
+
+- Allow colons in command line action names (add missing dependency from 5.7.2)
+
+## 5.7.2
+Mon, 06 May 2019 19:52:37 GMT
+
+### Updates
+
+- Allow colons in command line action names
+
+## 5.7.1
+Wed, 24 Apr 2019 06:32:17 GMT
+
+### Updates
+
+- Fix an issue where Rush sometimes failed to parse versions from PNPM 3.x's pnpm-lock.yaml
+- Update the .gitattributes file written by "rush init" to use a better syntax highlighter for JSON files
+
+## 5.7.0
+Tue, 23 Apr 2019 07:55:34 GMT
+
+### Updates
+
+- Add support for PNPM version 3 (which changed the shrinkwrap file name to "pnpm-lock.yaml")
+- Add a new rush.json setting "pnpmOptions.resolutionStrategy"
+
+## 5.6.4
+Mon, 15 Apr 2019 06:40:00 GMT
+
+### Updates
+
+- Add support for string parameter for custom commands.
+- Remove the obsolete "--release-type" option which only worked if you used a specific version of gulp-core-build-typescript
+- Adds --no-verify to git push during a rush publish
+
+## 5.6.3
+Mon, 25 Mar 2019 03:15:21 GMT
+
+### Updates
+
+- Update the "rush init" template with a .gitattributes rule to allow comments in JSON files
+- Add ability to publish partial prereleases
+
+## 5.6.2
+Thu, 21 Mar 2019 23:09:56 GMT
+
+### Updates
+
+- Publish: pass auth token through to npm view when checking if package exists
+
+## 5.6.1
+Mon, 18 Mar 2019 04:48:37 GMT
+
+### Updates
+
+- Remove the "rush check" step from the travis.yml template, since this is now handled by "ensureConsistentVersions" from rush.json
+- Improve "rush change" to ignore the ".git" file extension when appended to the "repository.url" setting in rush.json
+
+## 5.6.0
+Fri, 15 Mar 2019 03:21:02 GMT
+
+### Minor changes
+
+- Add "--set-access-level" parameter for "rush publish" to control whether NPM packages are published as "public" or "restricted"
+- Add a "dependencies" configuration property to version-policies.json to customize the way dependency versions are published and stored in source control
+
+### Updates
+
+- Add support for the Yarn --ignore-engines, exposed as yarnOptions.ignoreEngines in rush.json
+- Add the ability to configure the version bump and publish git commit message, exposed as gitPolicy.versionBumpCommitMessage in rush.json
+- Fix an issue with "rush publish --pack" when using yarn.
+- Remove the "rush check" step from the travis.yml template, since this is now handled by "ensureConsistentVersions" from rush.json
+- Fix an issue where "rush change" sometimes could not detect changes correctly when invoked on a forked GitHub repo
+- Fix an issue where "rushx" and "rush build" did not search for commands in the current project's local node_modules/.bin folder (GitHub issue #706)
+- The `--debug` parameter now automatically breaks in the debugger when an InternalError is thrown
+- Support overriding 'build' and 'rebuild' commands in command-line.json
+- Update README.md
+- Change "rush build" to print stdout if stderr is empty and a task fails. This improves Webpack support
 
 ## 5.5.4
 Thu, 13 Dec 2018 02:58:10 GMT

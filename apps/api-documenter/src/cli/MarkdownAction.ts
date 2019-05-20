@@ -4,7 +4,7 @@
 import { ApiDocumenterCommandLine } from './ApiDocumenterCommandLine';
 import { BaseAction } from './BaseAction';
 import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
-import { ApiModel } from '@microsoft/api-extractor';
+import { ApiModel } from '@microsoft/api-extractor-model';
 
 export class MarkdownAction extends BaseAction {
   constructor(parser: ApiDocumenterCommandLine) {

@@ -1,24 +1,33 @@
 items:
-  - name: SharePoint Framework reference
-    href: ~/overview/sharepoint.md
+  - name: Test api-documenter
+    href: ~/homepage/homepage.md
+  - name: Test Sample for AD
+    href: api-documenter-test
+    extended: true
     items:
-      - name: api-documenter-test
-        uid: api-documenter-test
+      - name: Classes
         items:
           - name: DocBaseClass
-            uid: api-documenter-test.DocBaseClass
+            items:
+              - name: DocBaseClass
+                uid: api-documenter-test.DocBaseClass
+              - name: IDocInterface1
+                uid: api-documenter-test.IDocInterface1
+              - name: IDocInterface2
+                uid: api-documenter-test.IDocInterface2
           - name: DocClass1
-            uid: api-documenter-test.DocClass1
+            items:
+              - name: DocClass1
+                uid: api-documenter-test.DocClass1
+              - name: IDocInterface3
+                uid: api-documenter-test.IDocInterface3
+              - name: IDocInterface4
+                uid: api-documenter-test.IDocInterface4
+      - name: References
+        items:
           - name: DocEnum
             uid: api-documenter-test.DocEnum
-          - name: IDocInterface1
-            uid: api-documenter-test.IDocInterface1
-          - name: IDocInterface2
-            uid: api-documenter-test.IDocInterface2
-          - name: IDocInterface3
-            uid: api-documenter-test.IDocInterface3
-          - name: OuterNamespace
-            items:
-              - name: InnerNamespace
+          - name: Generic
+            uid: api-documenter-test.Generic
           - name: SystemEvent
             uid: api-documenter-test.SystemEvent

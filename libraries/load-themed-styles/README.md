@@ -47,7 +47,17 @@ loadTheme({
 loadStyles('body { background: "[theme:primaryBackgroundColor, default: #FFAAFA]"');
 ```
 
-This will register #EAEAEA as the body's background color. If you call loadTheme again after styles have already been registered, it will replace the style elements with retokenized values.
+This will register #EAEAEA as the body's background color. If you call `loadTheme` again after styles have already been registered, it will replace the style elements with retokenized values. 
+
+## Security considerations
+
+In order for `style` elements to be added to the DOM, a `nonce` attribute may need to be attached to the elements to adhere to a CSP requirements. To provide the value, you can specify the `nonce` value by defining a `CSPSettings` object on the page in global scope:
+
+```js
+window.CSPSettings = {
+  nonce: 'nonce'
+};
+```
 
 ## License
 

@@ -149,14 +149,14 @@ export class PackageName {
   }
 
   /**
-   * {@inheritdoc IParsedPackageName.scope}
+   * {@inheritDoc IParsedPackageName.scope}
    */
   public static getScope(packageName: string): string {
     return PackageName.parse(packageName).scope;
   }
 
   /**
-   * {@inheritdoc IParsedPackageName.unscopedName}
+   * {@inheritDoc IParsedPackageName.unscopedName}
    */
   public static getUnscopedName(packageName: string): string {
     return PackageName.parse(packageName).unscopedName;

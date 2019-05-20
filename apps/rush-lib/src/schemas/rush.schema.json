@@ -56,6 +56,11 @@
         "strictPeerDependencies": {
           "description": "If true, then Rush will add the \"--strict-peer-dependencies\" option when invoking PNPM. This causes \"rush install\" to fail if there are unsatisfied peer dependencies, which is an invalid state that can cause build failures or incompatible dependency versions. (For historical reasons, JavaScript package managers generally do not treat this invalid state as an error.) The default value is false.",
           "type": "boolean"
+        },
+        "resolutionStrategy": {
+          "description": "Configures the strategy used to select versions during installation.  This feature requires PNPM version 3.1 or newer.  It corresponds to the \"--resolution-strategy\" command-line option for PNPM.  Possible values are \"fast\" and \"fewer-dependencies\".  PNPM's default is \"fast\", but this may be incompatible with certain packages, for example the \"@types\" packages from DefinitelyTyped.  Rush's default is \"fewer-dependencies\", which causes PNPM to avoid installing a newer version if an already installed version can be reused; this is more similar to NPM's algorithm.",
+          "type": "string",
+          "enum": ["fewer-dependencies", "fast"]
         }
       },
       "additionalProperties": false
@@ -111,6 +116,10 @@
         "sampleEmail": {
           "description": "An example valid e-mail address for \"Mr. Example\" that conforms to one of the allowedEmailRegExps.  Example: \"mr-example@contoso\\.com\"",
           "type": "string"
+        },
+        "versionBumpCommitMessage": {
+          "description": "The commit message to use when committing changes during \"rush publish\". Defaults to \"Applying package updates.\"",
+          "type": "string"
         }
       },
       "additionalProperties": false
@@ -132,7 +141,7 @@
         },
         "required": [
           "variantName",
-           "description"
+          "description"
         ]
       }
     },

@@ -9,9 +9,10 @@ import {
 } from '@microsoft/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
-import * as TTypescript from 'typescript';
 import * as decomment from 'decomment';
-import { TypescriptCompiler as TTypescriptCompiler } from '@microsoft/rush-stack-compiler-3.2';
+import { TypescriptCompiler as TTypescriptCompiler, ToolPackages } from '@microsoft/rush-stack-compiler-3.1';
+
+type TTypescript = typeof ToolPackages.typescript;
 
 import {
   RSCTask,
@@ -134,13 +135,14 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     }
   }
 
-  private _removeComments(typescript: typeof TTypescript): Promise<void> {
+  private _removeComments(typescript: TTypescript): Promise<void> {
     const configFilePath: string | undefined = typescript.findConfigFile(this.buildConfig.rootPath, FileSystem.exists);
     if (!configFilePath) {
       return Promise.reject(new Error('Unable to resolve tsconfig file to determine outDir.'));
     }
 
-    const tsConfig: TTypescript.ParsedCommandLine = typescript.parseJsonConfigFileContent(
+    // tslint:disable-next-line:typedef
+    const tsConfig = typescript.parseJsonConfigFileContent(
       JsonFile.load(configFilePath),
       new TsParseConfigHost(),
       path.dirname(configFilePath)
