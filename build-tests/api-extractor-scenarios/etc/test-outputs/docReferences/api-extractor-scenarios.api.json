@@ -95,7 +95,8 @@
             },
             {
               "kind": "Reference",
-              "text": "MyNamespace"
+              "text": "MyNamespace",
+              "reference": "api-extractor-scenarios#MyNamespace"
             },
             {
               "kind": "Content",
@@ -116,7 +117,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "MyClass"
+                  "text": "MyClass",
+                  "reference": "api-extractor-scenarios#MyNamespace.MyClass"
                 },
                 {
                   "kind": "Content",
@@ -133,7 +135,8 @@
                   "excerptTokens": [
                     {
                       "kind": "Reference",
-                      "text": "myMethod"
+                      "text": "myMethod",
+                      "reference": "api-extractor-scenarios#MyNamespace.MyClass.myMethod"
                     },
                     {
                       "kind": "Content",

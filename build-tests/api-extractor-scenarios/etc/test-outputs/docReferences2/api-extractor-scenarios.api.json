@@ -25,7 +25,8 @@
             },
             {
               "kind": "Reference",
-              "text": "CyclicA"
+              "text": "CyclicA",
+              "reference": "api-extractor-scenarios#CyclicA"
             },
             {
               "kind": "Content",
@@ -42,7 +43,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "methodA1"
+                  "text": "methodA1",
+                  "reference": "api-extractor-scenarios#CyclicA.methodA1"
                 },
                 {
                   "kind": "Content",
@@ -74,7 +76,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "methodA3"
+                  "text": "methodA3",
+                  "reference": "api-extractor-scenarios#CyclicA.methodA3"
                 },
                 {
                   "kind": "Content",
@@ -113,7 +116,8 @@
             },
             {
               "kind": "Reference",
-              "text": "CyclicB"
+              "text": "CyclicB",
+              "reference": "api-extractor-scenarios#CyclicB"
             },
             {
               "kind": "Content",
@@ -130,7 +134,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "methodB2"
+                  "text": "methodB2",
+                  "reference": "api-extractor-scenarios#CyclicB.methodB2"
                 },
                 {
                   "kind": "Content",
@@ -162,7 +167,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "methodB4"
+                  "text": "methodB4",
+                  "reference": "api-extractor-scenarios#CyclicB.methodB4"
                 },
                 {
                   "kind": "Content",
@@ -201,7 +207,8 @@
             },
             {
               "kind": "Reference",
-              "text": "FailWithSelfReference"
+              "text": "FailWithSelfReference",
+              "reference": "api-extractor-scenarios#FailWithSelfReference"
             },
             {
               "kind": "Content",
@@ -218,7 +225,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "method1"
+                  "text": "method1",
+                  "reference": "api-extractor-scenarios#FailWithSelfReference.method1"
                 },
                 {
                   "kind": "Content",
@@ -250,7 +258,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "method2"
+                  "text": "method2",
+                  "reference": "api-extractor-scenarios#FailWithSelfReference.method2"
                 },
                 {
                   "kind": "Content",

@@ -25,7 +25,8 @@
             },
             {
               "kind": "Reference",
-              "text": "A"
+              "text": "A",
+              "reference": "api-extractor-scenarios#A"
             },
             {
               "kind": "Content",
@@ -48,7 +49,8 @@
             },
             {
               "kind": "Reference",
-              "text": "B"
+              "text": "B",
+              "reference": "api-extractor-scenarios#B"
             },
             {
               "kind": "Content",
@@ -71,7 +73,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IFile"
+              "text": "IFile",
+              "reference": "api-extractor-scenarios#IFile"
             },
             {
               "kind": "Content",
@@ -88,7 +91,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "containingFolder"
+                  "text": "containingFolder",
+                  "reference": "api-extractor-scenarios#IFile.containingFolder"
                 },
                 {
                   "kind": "Content",
@@ -96,7 +100,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "IFolder"
+                  "text": "IFolder",
+                  "reference": "api-extractor-scenarios#IFolder"
                 },
                 {
                   "kind": "Content",
@@ -125,7 +130,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IFolder"
+              "text": "IFolder",
+              "reference": "api-extractor-scenarios#IFolder"
             },
             {
               "kind": "Content",
@@ -142,7 +148,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "containingFolder"
+                  "text": "containingFolder",
+                  "reference": "api-extractor-scenarios#IFolder.containingFolder"
                 },
                 {
                   "kind": "Content",
@@ -150,7 +157,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "IFolder"
+                  "text": "IFolder",
+                  "reference": "api-extractor-scenarios#IFolder"
                 },
                 {
                   "kind": "Content",
@@ -176,7 +184,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "files"
+                  "text": "files",
+                  "reference": "api-extractor-scenarios#IFolder.files"
                 },
                 {
                   "kind": "Content",
@@ -184,7 +193,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "IFile"
+                  "text": "IFile",
+                  "reference": "api-extractor-scenarios#IFile"
                 },
                 {
                   "kind": "Content",

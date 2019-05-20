@@ -16,14 +16,14 @@ export declare class DocClass1 extends DocBaseClass implements IDocInterface1, I
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [malformedEvent](./api-documenter-test.docclass1.malformedevent.md) |  | <code>SystemEvent</code> | This event should have been marked as readonly. |
-|  [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md) |  | <code>SystemEvent</code> | This event is fired whenever the object is modified. |
+|  [malformedEvent](./api-documenter-test.docclass1.malformedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This event should have been marked as readonly. |
+|  [modifiedEvent](./api-documenter-test.docclass1.modifiedevent.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This event is fired whenever the object is modified. |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | <code>SystemEvent</code> | This is a regular property that happens to use the SystemEvent type. |
+|  [regularProperty](./api-documenter-test.docclass1.regularproperty.md) |  | [SystemEvent](./api-documenter-test.systemevent.md) | This is a regular property that happens to use the SystemEvent type. |
 
 ## Methods
 

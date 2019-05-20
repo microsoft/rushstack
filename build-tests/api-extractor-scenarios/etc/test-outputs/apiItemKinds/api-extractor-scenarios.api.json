@@ -25,7 +25,8 @@
             },
             {
               "kind": "Reference",
-              "text": "AbstractClass"
+              "text": "AbstractClass",
+              "reference": "api-extractor-scenarios#AbstractClass"
             },
             {
               "kind": "Content",
@@ -46,7 +47,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "member"
+                  "text": "member",
+                  "reference": "api-extractor-scenarios#AbstractClass.member"
                 },
                 {
                   "kind": "Content",
@@ -85,7 +87,8 @@
             },
             {
               "kind": "Reference",
-              "text": "ClassWithTypeLiterals"
+              "text": "ClassWithTypeLiterals",
+              "reference": "api-extractor-scenarios#ClassWithTypeLiterals"
             },
             {
               "kind": "Content",
@@ -102,7 +105,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "method1"
+                  "text": "method1",
+                  "reference": "api-extractor-scenarios#ClassWithTypeLiterals.method1"
                 },
                 {
                   "kind": "Content",
@@ -118,7 +122,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "{\n        "
+                  "text": "{\r\n        "
                 },
                 {
                   "kind": "Reference",
@@ -126,7 +130,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ": number;\n        "
+                  "text": ": number;\r\n        "
                 },
                 {
                   "kind": "Reference",
@@ -134,7 +138,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ": number;\n    }"
+                  "text": ": number;\r\n    }"
                 },
                 {
                   "kind": "Content",
@@ -174,7 +178,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "method2"
+                  "text": "method2",
+                  "reference": "api-extractor-scenarios#ClassWithTypeLiterals.method2"
                 },
                 {
                   "kind": "Content",
@@ -182,7 +187,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "{\n        "
+                  "text": "{\r\n        "
                 },
                 {
                   "kind": "Reference",
@@ -194,11 +199,12 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "ClassWithTypeLiterals"
+                  "text": "ClassWithTypeLiterals",
+                  "reference": "api-extractor-scenarios#ClassWithTypeLiterals"
                 },
                 {
                   "kind": "Content",
-                  "text": ";\n        "
+                  "text": ";\r\n        "
                 },
                 {
                   "kind": "Reference",
@@ -206,7 +212,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ": () => number;\n    } | undefined"
+                  "text": ": () => number;\r\n    } | undefined"
                 },
                 {
                   "kind": "Content",
@@ -237,7 +243,8 @@
             },
             {
               "kind": "Reference",
-              "text": "ConstEnum"
+              "text": "ConstEnum",
+              "reference": "api-extractor-scenarios#ConstEnum"
             },
             {
               "kind": "Content",
@@ -254,7 +261,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "One"
+                  "text": "One",
+                  "reference": "api-extractor-scenarios#ConstEnum.One"
                 },
                 {
                   "kind": "Content",
@@ -279,7 +287,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "Two"
+                  "text": "Two",
+                  "reference": "api-extractor-scenarios#ConstEnum.Two"
                 },
                 {
                   "kind": "Content",
@@ -304,7 +313,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "Zero"
+                  "text": "Zero",
+                  "reference": "api-extractor-scenarios#ConstEnum.Zero"
                 },
                 {
                   "kind": "Content",
@@ -335,7 +345,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IInterface"
+              "text": "IInterface",
+              "reference": "api-extractor-scenarios#IInterface"
             },
             {
               "kind": "Content",
@@ -352,7 +363,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "member"
+                  "text": "member",
+                  "reference": "api-extractor-scenarios#IInterface.member"
                 },
                 {
                   "kind": "Content",
@@ -388,7 +400,8 @@
             },
             {
               "kind": "Reference",
-              "text": "NamespaceContainingVariable"
+              "text": "NamespaceContainingVariable",
+              "reference": "api-extractor-scenarios#NamespaceContainingVariable"
             },
             {
               "kind": "Content",
@@ -461,7 +474,8 @@
             },
             {
               "kind": "Reference",
-              "text": "RegularEnum"
+              "text": "RegularEnum",
+              "reference": "api-extractor-scenarios#RegularEnum"
             },
             {
               "kind": "Content",
@@ -478,7 +492,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "One"
+                  "text": "One",
+                  "reference": "api-extractor-scenarios#RegularEnum.One"
                 },
                 {
                   "kind": "Content",
@@ -503,7 +518,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "Two"
+                  "text": "Two",
+                  "reference": "api-extractor-scenarios#RegularEnum.Two"
                 },
                 {
                   "kind": "Content",
@@ -528,7 +544,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "Zero"
+                  "text": "Zero",
+                  "reference": "api-extractor-scenarios#RegularEnum.Zero"
                 },
                 {
                   "kind": "Content",
@@ -559,7 +576,8 @@
             },
             {
               "kind": "Reference",
-              "text": "SimpleClass"
+              "text": "SimpleClass",
+              "reference": "api-extractor-scenarios#SimpleClass"
             },
             {
               "kind": "Content",
@@ -576,7 +594,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "member"
+                  "text": "member",
+                  "reference": "api-extractor-scenarios#SimpleClass.member"
                 },
                 {
                   "kind": "Content",

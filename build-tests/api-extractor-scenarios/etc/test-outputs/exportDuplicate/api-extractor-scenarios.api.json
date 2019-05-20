@@ -25,7 +25,8 @@
             },
             {
               "kind": "Reference",
-              "text": "X"
+              "text": "X",
+              "reference": "api-extractor-scenarios#X"
             },
             {
               "kind": "Content",

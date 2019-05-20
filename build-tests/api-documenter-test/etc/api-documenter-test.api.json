@@ -25,7 +25,8 @@
             },
             {
               "kind": "Reference",
-              "text": "DocBaseClass"
+              "text": "DocBaseClass",
+              "reference": "api-documenter-test#DocBaseClass"
             },
             {
               "kind": "Content",
@@ -48,7 +49,8 @@
             },
             {
               "kind": "Reference",
-              "text": "DocClass1"
+              "text": "DocClass1",
+              "reference": "api-documenter-test#DocClass1"
             },
             {
               "kind": "Content",
@@ -56,7 +58,8 @@
             },
             {
               "kind": "Reference",
-              "text": "DocBaseClass"
+              "text": "DocBaseClass",
+              "reference": "api-documenter-test#DocBaseClass"
             },
             {
               "kind": "Content",
@@ -68,7 +71,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IDocInterface1"
+              "text": "IDocInterface1",
+              "reference": "api-documenter-test#IDocInterface1"
             },
             {
               "kind": "Content",
@@ -76,7 +80,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IDocInterface2"
+              "text": "IDocInterface2",
+              "reference": "api-documenter-test#IDocInterface2"
             },
             {
               "kind": "Content",
@@ -93,7 +98,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "deprecatedExample"
+                  "text": "deprecatedExample",
+                  "reference": "api-documenter-test#DocClass1.deprecatedExample"
                 },
                 {
                   "kind": "Content",
@@ -125,7 +131,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "exampleFunction"
+                  "text": "exampleFunction",
+                  "reference": "api-documenter-test#DocClass1.exampleFunction"
                 },
                 {
                   "kind": "Content",
@@ -204,7 +211,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "exampleFunction"
+                  "text": "exampleFunction",
+                  "reference": "api-documenter-test#DocClass1.exampleFunction"
                 },
                 {
                   "kind": "Content",
@@ -260,7 +268,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "interestingEdgeCases"
+                  "text": "interestingEdgeCases",
+                  "reference": "api-documenter-test#DocClass1.interestingEdgeCases"
                 },
                 {
                   "kind": "Content",
@@ -292,7 +301,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "malformedEvent"
+                  "text": "malformedEvent",
+                  "reference": "api-documenter-test#DocClass1.malformedEvent"
                 },
                 {
                   "kind": "Content",
@@ -300,7 +310,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "SystemEvent"
+                  "text": "SystemEvent",
+                  "reference": "api-documenter-test#SystemEvent"
                 },
                 {
                   "kind": "Content",
@@ -326,7 +337,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "modifiedEvent"
+                  "text": "modifiedEvent",
+                  "reference": "api-documenter-test#DocClass1.modifiedEvent"
                 },
                 {
                   "kind": "Content",
@@ -334,7 +346,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "SystemEvent"
+                  "text": "SystemEvent",
+                  "reference": "api-documenter-test#SystemEvent"
                 },
                 {
                   "kind": "Content",
@@ -356,7 +369,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "regularProperty"
+                  "text": "regularProperty",
+                  "reference": "api-documenter-test#DocClass1.regularProperty"
                 },
                 {
                   "kind": "Content",
@@ -364,7 +378,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "SystemEvent"
+                  "text": "SystemEvent",
+                  "reference": "api-documenter-test#SystemEvent"
                 },
                 {
                   "kind": "Content",
@@ -390,7 +405,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "sumWithExample"
+                  "text": "sumWithExample",
+                  "reference": "api-documenter-test#DocClass1.sumWithExample"
                 },
                 {
                   "kind": "Content",
@@ -469,7 +485,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "tableExample"
+                  "text": "tableExample",
+                  "reference": "api-documenter-test#DocClass1.tableExample"
                 },
                 {
                   "kind": "Content",
@@ -521,7 +538,8 @@
             },
             {
               "kind": "Reference",
-              "text": "DocEnum"
+              "text": "DocEnum",
+              "reference": "api-documenter-test#DocEnum"
             },
             {
               "kind": "Content",
@@ -538,7 +556,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "One"
+                  "text": "One",
+                  "reference": "api-documenter-test#DocEnum.One"
                 },
                 {
                   "kind": "Content",
@@ -563,7 +582,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "Two"
+                  "text": "Two",
+                  "reference": "api-documenter-test#DocEnum.Two"
                 },
                 {
                   "kind": "Content",
@@ -588,7 +608,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "Zero"
+                  "text": "Zero",
+                  "reference": "api-documenter-test#DocEnum.Zero"
                 },
                 {
                   "kind": "Content",
@@ -619,7 +640,8 @@
             },
             {
               "kind": "Reference",
-              "text": "Generic"
+              "text": "Generic",
+              "reference": "api-documenter-test#Generic"
             },
             {
               "kind": "Content",
@@ -709,7 +731,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IDocInterface1"
+              "text": "IDocInterface1",
+              "reference": "api-documenter-test#IDocInterface1"
             },
             {
               "kind": "Content",
@@ -726,7 +749,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "regularProperty"
+                  "text": "regularProperty",
+                  "reference": "api-documenter-test#IDocInterface1.regularProperty"
                 },
                 {
                   "kind": "Content",
@@ -734,7 +758,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "SystemEvent"
+                  "text": "SystemEvent",
+                  "reference": "api-documenter-test#SystemEvent"
                 },
                 {
                   "kind": "Content",
@@ -762,7 +787,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IDocInterface2"
+              "text": "IDocInterface2",
+              "reference": "api-documenter-test#IDocInterface2"
             },
             {
               "kind": "Content",
@@ -770,7 +796,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IDocInterface1"
+              "text": "IDocInterface1",
+              "reference": "api-documenter-test#IDocInterface1"
             },
             {
               "kind": "Content",
@@ -787,7 +814,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "deprecatedExample"
+                  "text": "deprecatedExample",
+                  "reference": "api-documenter-test#IDocInterface2.deprecatedExample"
                 },
                 {
                   "kind": "Content",
@@ -830,7 +858,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IDocInterface3"
+              "text": "IDocInterface3",
+              "reference": "api-documenter-test#IDocInterface3"
             },
             {
               "kind": "Content",
@@ -951,7 +980,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "IDocInterface1"
+                  "text": "IDocInterface1",
+                  "reference": "api-documenter-test#IDocInterface1"
                 },
                 {
                   "kind": "Content",
@@ -980,7 +1010,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IDocInterface4"
+              "text": "IDocInterface4",
+              "reference": "api-documenter-test#IDocInterface4"
             },
             {
               "kind": "Content",
@@ -997,7 +1028,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "Context"
+                  "text": "Context",
+                  "reference": "api-documenter-test#IDocInterface4.Context"
                 },
                 {
                   "kind": "Content",
@@ -1013,7 +1045,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": " }: {\n        "
+                  "text": " }: {\r\n        "
                 },
                 {
                   "kind": "Reference",
@@ -1021,7 +1053,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ": string;\n    }) => boolean"
+                  "text": ": string;\r\n    }) => boolean"
                 },
                 {
                   "kind": "Content",
@@ -1042,7 +1074,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "generic"
+                  "text": "generic",
+                  "reference": "api-documenter-test#IDocInterface4.generic"
                 },
                 {
                   "kind": "Content",
@@ -1050,7 +1083,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "Generic"
+                  "text": "Generic",
+                  "reference": "api-documenter-test#Generic"
                 },
                 {
                   "kind": "Content",
@@ -1075,7 +1109,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "numberOrFunction"
+                  "text": "numberOrFunction",
+                  "reference": "api-documenter-test#IDocInterface4.numberOrFunction"
                 },
                 {
                   "kind": "Content",
@@ -1104,7 +1139,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "stringOrNumber"
+                  "text": "stringOrNumber",
+                  "reference": "api-documenter-test#IDocInterface4.stringOrNumber"
                 },
                 {
                   "kind": "Content",
@@ -1140,7 +1176,8 @@
             },
             {
               "kind": "Reference",
-              "text": "OuterNamespace"
+              "text": "OuterNamespace",
+              "reference": "api-documenter-test#OuterNamespace"
             },
             {
               "kind": "Content",
@@ -1161,7 +1198,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "InnerNamespace"
+                  "text": "InnerNamespace",
+                  "reference": "api-documenter-test#OuterNamespace.InnerNamespace"
                 },
                 {
                   "kind": "Content",
@@ -1270,7 +1308,8 @@
             },
             {
               "kind": "Reference",
-              "text": "SystemEvent"
+              "text": "SystemEvent",
+              "reference": "api-documenter-test#SystemEvent"
             },
             {
               "kind": "Content",
@@ -1287,7 +1326,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "addHandler"
+                  "text": "addHandler",
+                  "reference": "api-documenter-test#SystemEvent.addHandler"
                 },
                 {
                   "kind": "Content",

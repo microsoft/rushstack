@@ -25,7 +25,8 @@
             },
             {
               "kind": "Reference",
-              "text": "ITeamsContext"
+              "text": "ITeamsContext",
+              "reference": "api-extractor-scenarios#ITeamsContext"
             },
             {
               "kind": "Content",
@@ -42,7 +43,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "context"
+                  "text": "context",
+                  "reference": "api-extractor-scenarios#ITeamsContext.context"
                 },
                 {
                   "kind": "Content",

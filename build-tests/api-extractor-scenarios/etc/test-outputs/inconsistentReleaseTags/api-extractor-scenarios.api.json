@@ -25,7 +25,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IBeta"
+              "text": "IBeta",
+              "reference": "api-extractor-scenarios#IBeta"
             },
             {
               "kind": "Content",
@@ -42,7 +43,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "x"
+                  "text": "x",
+                  "reference": "api-extractor-scenarios#IBeta.x"
                 },
                 {
                   "kind": "Content",
@@ -86,7 +88,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IBeta"
+              "text": "IBeta",
+              "reference": "api-extractor-scenarios#IBeta"
             },
             {
               "kind": "Content",

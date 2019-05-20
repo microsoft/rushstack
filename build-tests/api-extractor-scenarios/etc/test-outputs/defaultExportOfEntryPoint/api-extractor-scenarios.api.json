@@ -25,7 +25,8 @@
             },
             {
               "kind": "Reference",
-              "text": "DefaultClass"
+              "text": "DefaultClass",
+              "reference": "api-extractor-scenarios#DefaultClass"
             },
             {
               "kind": "Content",

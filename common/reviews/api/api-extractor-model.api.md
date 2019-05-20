@@ -220,6 +220,7 @@ export class ApiItem {
     // @virtual
     readonly displayName: string;
     getAssociatedPackage(): ApiPackage | undefined;
+    getDocDeclarationReference(): DocDeclarationReference;
     getHierarchy(): ReadonlyArray<ApiItem>;
     getScopedNameWithinPackage(): string;
     // @virtual (undocumented)
@@ -529,9 +530,15 @@ export class Excerpt {
 
 // @public (undocumented)
 export class ExcerptToken {
-    constructor(kind: ExcerptTokenKind, text: string);
+    constructor(data: IExcerptToken);
     // (undocumented)
     readonly kind: ExcerptTokenKind;
+    // (undocumented)
+    readonly reference: DocDeclarationReference | undefined;
+    // (undocumented)
+    setReference(reference: DocDeclarationReference): void;
+    // (undocumented)
+    setText(text: string): void;
     // (undocumented)
     readonly text: string;
     }
@@ -575,7 +582,7 @@ export interface IApiConstructSignatureOptions extends IApiParameterListMixinOpt
 // @public
 export interface IApiDeclaredItemOptions extends IApiDocumentedItemOptions {
     // (undocumented)
-    excerptTokens: IExcerptToken[];
+    excerptTokens: Array<IExcerptToken | ExcerptToken>;
 }
 
 // @public
@@ -711,6 +718,7 @@ export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTa
 export interface IExcerptToken {
     // (undocumented)
     readonly kind: ExcerptTokenKind;
+    readonly reference?: string;
     // (undocumented)
     text: string;
 }

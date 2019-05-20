@@ -25,7 +25,8 @@
             },
             {
               "kind": "Reference",
-              "text": "A"
+              "text": "A",
+              "reference": "api-extractor-scenarios#A"
             },
             {
               "kind": "Content",
@@ -42,7 +43,8 @@
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "myProperty"
+                  "text": "myProperty",
+                  "reference": "api-extractor-scenarios#A.myProperty"
                 },
                 {
                   "kind": "Content",
@@ -78,7 +80,8 @@
             },
             {
               "kind": "Reference",
-              "text": "A"
+              "text": "A",
+              "reference": "api-extractor-scenarios#A"
             },
             {
               "kind": "Content",
@@ -99,7 +102,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "B"
+                  "text": "B",
+                  "reference": "api-extractor-scenarios#A.B"
                 },
                 {
                   "kind": "Content",
@@ -116,7 +120,8 @@
                   "excerptTokens": [
                     {
                       "kind": "Reference",
-                      "text": "myMethod"
+                      "text": "myMethod",
+                      "reference": "api-extractor-scenarios#A.B.myMethod"
                     },
                     {
                       "kind": "Content",
