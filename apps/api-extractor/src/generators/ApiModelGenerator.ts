@@ -104,7 +104,7 @@ export class ApiModelGenerator {
     const apiItemsBySymbol: Map<ts.Symbol, ApiItem> = this._apiItemsBySymbol;
 
     function forEachExcerptToken(excerptToken: ExcerptToken): void {
-      const referencedSymbol: ts.Symbol|undefined = excerptToken[ExcerptToken_referencedSymbol];
+      const referencedSymbol: ts.Symbol|undefined = excerptToken[ExcerptToken_referencedSymbol] as ts.Symbol;
       const referencedApiItem: ApiItem|undefined = referencedSymbol && apiItemsBySymbol.get(referencedSymbol);
       if (referencedApiItem) {
         excerptToken[ExcerptToken_setReference](referencedApiItem.getDocDeclarationReference());

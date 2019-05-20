@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Text } from '@microsoft/node-core-library';
-import * as ts from 'typescript';
+// import * as ts from 'typescript';
 import { DocDeclarationReference, DocNode, DocLinkTag, TSDocParser, ParserContext } from '@microsoft/tsdoc';
 
 // tslint:disable-next-line:variable-name
@@ -30,7 +30,8 @@ export interface IExcerptToken {
   text: string;
   /** reference to the api item, as {@link @microsoft/tsdoc#DocDeclarationReference} format. */
   readonly reference?: string;
-  readonly [ExcerptToken_referencedSymbol]?: ts.Symbol;
+  // readonly [ExcerptToken_referencedSymbol]?: ts.Symbol;
+  readonly [ExcerptToken_referencedSymbol]?: {};
 }
 
 /** @public */
@@ -56,7 +57,8 @@ export class ExcerptToken {
   private readonly _kind: ExcerptTokenKind;
   private readonly _text: string;
   protected _reference?: DocDeclarationReference;
-  private readonly _referencedSymbol?: ts.Symbol;
+  // private readonly _referencedSymbol?: ts.Symbol;
+  private readonly _referencedSymbol?: {};
 
   public constructor(data: IExcerptToken) {
     this._kind = data.kind;
@@ -82,7 +84,8 @@ export class ExcerptToken {
     return this._reference;
   }
 
-  public get [ExcerptToken_referencedSymbol](): ts.Symbol | undefined {
+  // public get [ExcerptToken_referencedSymbol](): ts.Symbol | undefined {
+  public get [ExcerptToken_referencedSymbol](): {} | undefined {
     return this._referencedSymbol;
   }
 
