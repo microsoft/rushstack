@@ -61,7 +61,7 @@ export {
   ExcerptToken,
   Excerpt,
   ExcerptToken_referencedSymbol,
-  ExcerptToken_setReference,
+  ExcerptToken_setReference
 } from './mixins/Excerpt';
 export {
   Constructor,
