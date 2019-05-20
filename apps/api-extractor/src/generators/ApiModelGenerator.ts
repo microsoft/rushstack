@@ -24,10 +24,7 @@ import {
   ApiEnum,
   ApiEnumMember,
   IExcerptTokenRange,
-  IExcerptToken,
   ExcerptToken,
-  ExcerptToken_referencedSymbol,
-  ExcerptToken_setReference,
   ApiConstructor,
   ApiConstructSignature,
   ApiFunction,
@@ -88,7 +85,7 @@ export class ApiModelGenerator {
       }
     }
 
-    this._updateTokenApiReferences(apiPackage);
+    this._updateTokenApiReferences(apiPackage, this._excerptBuilder._tsSymbolsByToken);
 
     return apiPackage;
   }
@@ -100,14 +97,16 @@ export class ApiModelGenerator {
    *   - not-exported api items
    *   - not-parsed ts.Symbol (e.g. function Parameter, TypeParameter)
    */
-  private _updateTokenApiReferences(apiPackage: ApiPackage): void {
+  private _updateTokenApiReferences(apiPackage: ApiPackage,
+    tsSymbolsByToken: ReadonlyMap<ExcerptToken, ts.Symbol>): void {
+
     const apiItemsBySymbol: Map<ts.Symbol, ApiItem> = this._apiItemsBySymbol;
 
     function forEachExcerptToken(excerptToken: ExcerptToken): void {
-      const referencedSymbol: ts.Symbol|undefined = excerptToken[ExcerptToken_referencedSymbol] as ts.Symbol;
+      const referencedSymbol: ts.Symbol|undefined = tsSymbolsByToken.get(excerptToken);
       const referencedApiItem: ApiItem|undefined = referencedSymbol && apiItemsBySymbol.get(referencedSymbol);
       if (referencedApiItem) {
-        excerptToken[ExcerptToken_setReference](referencedApiItem.getDocDeclarationReference());
+        excerptToken.setReference(referencedApiItem.getDocDeclarationReference());
       }
     }
 
@@ -229,7 +228,7 @@ export class ApiModelGenerator {
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, callSignature.parameters);
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -260,7 +259,7 @@ export class ApiModelGenerator {
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture,
         constructorDeclaration.parameters);
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -305,7 +304,7 @@ export class ApiModelGenerator {
         }
       }
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
         nodesToCapture
@@ -343,7 +342,7 @@ export class ApiModelGenerator {
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, constructSignature.parameters);
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -366,7 +365,7 @@ export class ApiModelGenerator {
     let apiEnum: ApiEnum | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiEnum;
 
     if (apiEnum === undefined) {
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation  // FirstPunctuation = "{"
       });
@@ -398,7 +397,7 @@ export class ApiModelGenerator {
       const initializerTokenRange: IExcerptTokenRange = this._excerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: enumMember.initializer, tokenRange: initializerTokenRange });
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -436,7 +435,7 @@ export class ApiModelGenerator {
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture,
         functionDeclaration.parameters);
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -469,7 +468,7 @@ export class ApiModelGenerator {
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, indexSignature.parameters);
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -507,7 +506,7 @@ export class ApiModelGenerator {
         }
       }
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
         nodesToCapture
@@ -545,7 +544,7 @@ export class ApiModelGenerator {
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, methodDeclaration.parameters);
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -582,7 +581,7 @@ export class ApiModelGenerator {
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, methodSignature.parameters);
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -606,7 +605,7 @@ export class ApiModelGenerator {
     let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiNamespace;
 
     if (apiNamespace === undefined) {
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         stopBeforeChildKind: ts.SyntaxKind.ModuleBlock  // ModuleBlock = the "{ ... }" block
       });
@@ -642,7 +641,7 @@ export class ApiModelGenerator {
       const propertyTypeTokenRange: IExcerptTokenRange = this._excerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: propertyDeclaration.type, tokenRange: propertyTypeTokenRange });
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -675,7 +674,7 @@ export class ApiModelGenerator {
       const propertyTypeTokenRange: IExcerptTokenRange = this._excerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: propertySignature.type, tokenRange: propertyTypeTokenRange });
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -705,7 +704,7 @@ export class ApiModelGenerator {
     if (apiTypeAlias === undefined) {
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });
@@ -736,7 +735,7 @@ export class ApiModelGenerator {
       const variableTypeTokenRange: IExcerptTokenRange = this._excerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: variableDeclaration.type, tokenRange: variableTypeTokenRange });
 
-      const excerptTokens: IExcerptToken[] = this._excerptBuilder.build({
+      const excerptTokens: ExcerptToken[] = this._excerptBuilder.build({
         startingNode: astDeclaration.declaration,
         nodesToCapture
       });

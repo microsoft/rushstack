@@ -59,9 +59,7 @@ export {
   IExcerptTokenRange,
   IExcerptToken,
   ExcerptToken,
-  Excerpt,
-  ExcerptToken_referencedSymbol,
-  ExcerptToken_setReference
+  Excerpt
 } from './mixins/Excerpt';
 export {
   Constructor,

@@ -4,9 +4,8 @@
 import * as ts from 'typescript';
 import {
   ExcerptTokenKind,
-  IExcerptToken,
-  IExcerptTokenRange,
-  ExcerptToken_referencedSymbol
+  ExcerptToken,
+  IExcerptTokenRange
 } from '@microsoft/api-extractor-model';
 
 import { Span } from '../analyzer/Span';
@@ -72,12 +71,13 @@ interface IBuildSpanState {
 
 export class ExcerptBuilder {
   private readonly _typeChecker: ts.TypeChecker;
+  public readonly _tsSymbolsByToken: Map<ExcerptToken, ts.Symbol> = new Map();
 
   constructor(typeChecker: ts.TypeChecker) {
     this._typeChecker = typeChecker;
   }
 
-  public build(options: ISignatureBuilderOptions): IExcerptToken[] {
+  public build(options: ISignatureBuilderOptions): ExcerptToken[] {
     const span: Span = new Span(options.startingNode);
 
     const tokenRangesByNode: Map<ts.Node, IExcerptTokenRange> = new Map<ts.Node, IExcerptTokenRange>();
@@ -87,7 +87,7 @@ export class ExcerptBuilder {
       }
     }
 
-    const excerptTokens: IExcerptToken[] = [];
+    const excerptTokens: ExcerptToken[] = [];
 
     this._buildSpan(excerptTokens, span, {
       startingNode: options.startingNode,
@@ -103,7 +103,7 @@ export class ExcerptBuilder {
     return { startIndex: 0, endIndex: 0 };
   }
 
-  private _buildSpan(excerptTokens: IExcerptToken[], span: Span, state: IBuildSpanState): boolean {
+  private _buildSpan(excerptTokens: ExcerptToken[], span: Span, state: IBuildSpanState): boolean {
     if (span.kind === ts.SyntaxKind.JSDocComment) {
       // Discard any comments
       return true;
@@ -163,7 +163,15 @@ export class ExcerptBuilder {
     return true;
   }
 
-  private _appendToken(excerptTokens: IExcerptToken[], excerptTokenKind: ExcerptTokenKind,
+  private _createToken(kind: ExcerptTokenKind, text: string, referencedSymbol?: ts.Symbol): ExcerptToken {
+    const token: ExcerptToken = new ExcerptToken({ kind, text });
+    if (referencedSymbol) {
+      this._tsSymbolsByToken.set(token, referencedSymbol);
+    }
+    return token;
+  }
+
+  private _appendToken(excerptTokens: ExcerptToken[], excerptTokenKind: ExcerptTokenKind,
     text: string, state: IBuildSpanState, referencedSymbol?: ts.Symbol): void {
 
     if (text.length === 0) {
@@ -171,21 +179,21 @@ export class ExcerptBuilder {
     }
 
     if (excerptTokenKind !== ExcerptTokenKind.Content) {
-      excerptTokens.push({ kind: excerptTokenKind, text: text, [ExcerptToken_referencedSymbol]: referencedSymbol });
+      excerptTokens.push(this._createToken(excerptTokenKind, text, referencedSymbol));
       state.disableMergingForNextToken = false;
 
     } else {
       // If someone referenced this index, then we need to start a new token
       if (excerptTokens.length > 0 && !state.disableMergingForNextToken) {
         // Otherwise, can we merge with the previous token?
-        const previousToken: IExcerptToken = excerptTokens[excerptTokens.length - 1];
+        const previousToken: ExcerptToken = excerptTokens[excerptTokens.length - 1];
         if (previousToken.kind === excerptTokenKind) {
-          previousToken.text += text;
+          previousToken.setText(previousToken.text + text);
           return;
         }
       }
 
-      excerptTokens.push({ kind: excerptTokenKind, text: text, [ExcerptToken_referencedSymbol]: referencedSymbol });
+      excerptTokens.push(this._createToken(excerptTokenKind, text, referencedSymbol));
       state.disableMergingForNextToken = false;
     }
   }

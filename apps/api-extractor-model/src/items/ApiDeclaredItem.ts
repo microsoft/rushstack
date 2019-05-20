@@ -9,11 +9,11 @@ import { Excerpt, ExcerptToken, IExcerptTokenRange, IExcerptToken } from '../mix
  * @public
  */
 export interface IApiDeclaredItemOptions extends IApiDocumentedItemOptions {
-  excerptTokens: IExcerptToken[];
+  excerptTokens: Array<IExcerptToken | ExcerptToken>;
 }
 
 export interface IApiDeclaredItemJson extends IApiDocumentedItemJson {
-  excerptTokens: IExcerptToken[];
+  excerptTokens: Array<IExcerptToken | ExcerptToken>;
 }
 
 /**
@@ -46,7 +46,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   public constructor(options: IApiDeclaredItemOptions) {
     super(options);
 
-    this._excerptTokens = options.excerptTokens.map(x => new ExcerptToken(x));
+    this._excerptTokens = options.excerptTokens.map(x => x instanceof ExcerptToken ? x : new ExcerptToken(x));
     this._excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
   }
 
