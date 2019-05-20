@@ -171,11 +171,27 @@ export class MarkdownDocumenter {
           new DocFencedCode({ configuration, code: apiItem.getExcerptWithModifiers(), language: 'typescript' })
         );
 
+        /**
+         * Previously for each declaration item, we generate a code section like:
+         *
+         *  ```typescript
+         *  export class SubClass extends SuperClass implements IInterface
+         *  ```
+         *
+         * But there is no place to inject reference links.
+         * Instead following code generates pure texts with links like:
+         *
+         *  export class [SubClass](./subclass.md) extends [SuperClass](./superclass.md)
+         *    implements [IInterface](./iinterface.md)
+         *
+         * But the display format looks bad.
+         * Uncomment the code to show reference links when finding a better display format.
+         */
         // show api references if there're.
-        const excerptContentWithLinks: DocNode[] = this._createExcerptContent(apiItem.excerpt, apiItem);
-        if (excerptContentWithLinks.some(x => x instanceof DocLinkTag)) {
-          output.appendNodesInParagraph(excerptContentWithLinks);
-        }
+        // const excerptContentWithLinks: DocNode[] = this._createExcerptContent(apiItem.excerpt, apiItem);
+        // if (excerptContentWithLinks.some(x => x instanceof DocLinkTag)) {
+        //   output.appendNodesInParagraph(excerptContentWithLinks);
+        // }
       }
     }
 
