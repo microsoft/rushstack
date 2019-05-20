@@ -10,6 +10,7 @@ import {
 } from '@microsoft/api-extractor-model';
 
 import { Span } from '../analyzer/Span';
+import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 
 /**
  * Used to provide ExcerptBuilder with a list of nodes whose token range we want to capture.
@@ -122,7 +123,7 @@ export class ExcerptBuilder {
       if (span.kind === ts.SyntaxKind.Identifier) {
         const referencedSymbol: ts.Symbol|undefined = this._typeChecker.getSymbolAtLocation(span.node);
         this._appendToken(excerptTokens, ExcerptTokenKind.Reference,
-          span.prefix, state, referencedSymbol);
+          span.prefix, state, referencedSymbol && TypeScriptHelpers.followAliases(referencedSymbol, this._typeChecker));
       } else {
         this._appendToken(excerptTokens, ExcerptTokenKind.Content,
           span.prefix, state);
