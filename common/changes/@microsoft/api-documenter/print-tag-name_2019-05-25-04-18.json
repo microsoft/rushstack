@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "print out tag name for unknown block tags",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "enjoyjava@gmail.com"
+}
