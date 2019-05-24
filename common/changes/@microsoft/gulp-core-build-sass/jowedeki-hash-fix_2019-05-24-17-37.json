@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Make class name hashes consistent regardless of path.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-sass",
+  "email": "halfnibble@users.noreply.github.com"
+}
