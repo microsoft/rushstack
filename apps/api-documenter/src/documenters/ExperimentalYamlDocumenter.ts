@@ -66,7 +66,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
                 ? this._findInlineTagByName(this._config.filterByInlineTag, apiItem.tsdocComment)
                 : undefined;
 
-                const tagContent: string | undefined =
+            const tagContent: string | undefined =
               docInlineTag && docInlineTag.tagContent && docInlineTag.tagContent.trim();
 
             if (tagContent && this._tocPointerMap[tagContent]) {
@@ -104,7 +104,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _generateTocPointersMap(tocConfig: IYamlTocFile | IYamlTocItem): void {
     if (tocConfig.items) {
       for (const tocItem of tocConfig.items) {
-        if (tocItem.items && tocItem.items.length > 0) {
+        if (tocItem.items && tocItem.items.length > 0 && this._shouldNotIncludeInPointersMap(tocItem)) {
           this._generateTocPointersMap(tocItem);
         } else {
           // check for presence of the `catchAllCategory` config option
@@ -135,5 +135,13 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
       }
     }
     return undefined;
+  }
+
+  private _shouldNotIncludeInPointersMap(item: IYamlTocItem): boolean {
+    const { categoryNodes } = this._config;
+    if (categoryNodes && categoryNodes.length) {
+      return categoryNodes.indexOf(item.name) === -1;
+    }
+    return true;
   }
 }

@@ -17,11 +17,17 @@
                 { "name": "DocClass1", "items": [] }
               ]
             },
-            { "name": "References", "items": [] }
+            {
+              "name": "References",
+              "items": [
+                { "name": "InjectedCustomItem", "uid": "customUrl" }
+              ]
+            }
           ]
         }
       ]
     },
+    "categoryNodes": ["References"],
     "catchAllCategory": "References",
     "noDuplicateEntries": true,
     "filterByApiItemName": false,

@@ -24,12 +24,6 @@ export interface IConfigTableOfContents {
   catchAllCategory?: string;
 
   /**
-   * When loading more than one api.json files that might include the same API items,
-   * toggle either to show duplicates or not.
-   */
-  noDuplicateEntries?: boolean;
-
-  /**
    * Toggle either sorting of the API items should be made based on category name presence
    * in the API item's name.
    */
@@ -40,6 +34,11 @@ export interface IConfigTableOfContents {
    * that is present on them.
    */
   filterByInlineTag?: string;
+
+  /**
+   * Array of node names to which API items will be pushed when filtered
+   */
+  categoryNodes?: string[];
 }
 
 /**

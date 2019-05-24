@@ -25,6 +25,8 @@ items:
                 uid: api-documenter-test.IDocInterface4
       - name: References
         items:
+          - name: InjectedCustomItem
+            uid: customUrl
           - name: DocEnum
             uid: api-documenter-test.DocEnum
           - name: Generic
