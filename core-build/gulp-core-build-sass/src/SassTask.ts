@@ -90,7 +90,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
   private _modulePostCssAdditionalPlugins: postcss.AcceptedPlugin[] = [
     cssModules({
-      getJSON: this._generateModuleStub.bind(this),
+      getJSON: this.generateModuleStub.bind(this),
       generateScopedName: this.generateScopedName.bind(this)
     })
   ];
@@ -127,6 +127,10 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     }).then(() => { /* collapse void[] to void */ });
   }
 
+  public generateModuleStub(cssFileName: string, json: Object): void {
+    _classMaps[cssFileName] = json;
+  }
+
   public generateScopedName(name: string, fileName: string, css: string): string {
     const fileBaseName: string = path.basename(fileName);
     const hash: string = crypto.createHmac('sha1', fileBaseName)
@@ -134,10 +138,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
                                .digest('hex')
                                .substring(0, 8);
     return `${name}_${hash}`;
-  }
-
-  private _generateModuleStub(cssFileName: string, json: Object): void {
-    _classMaps[cssFileName] = json;
   }
 
   private _processFile(filePath: string): Promise<void> {

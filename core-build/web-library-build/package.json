@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.9.26",
-    "@microsoft/gulp-core-build-sass": "4.6.34",
+    "@microsoft/gulp-core-build-sass": "4.6.35",
     "@microsoft/gulp-core-build-serve": "3.3.35",
     "@microsoft/gulp-core-build-typescript": "8.1.11",
     "@microsoft/gulp-core-build-webpack": "3.4.102",
