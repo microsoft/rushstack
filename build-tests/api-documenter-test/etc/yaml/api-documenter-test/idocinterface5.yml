@@ -1,0 +1,24 @@
+### YamlMime:UniversalReference
+items:
+  - uid: api-documenter-test.IDocInterface5
+    summary: Interface without inline tag to test custom TOC
+    name: IDocInterface5
+    fullName: IDocInterface5
+    langs:
+      - typeScript
+    type: interface
+    package: api-documenter-test
+    children:
+      - api-documenter-test.IDocInterface5.string
+  - uid: api-documenter-test.IDocInterface5.string
+    summary: string property
+    name: string
+    fullName: string
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'string: string;'
+      return:
+        type:
+          - string

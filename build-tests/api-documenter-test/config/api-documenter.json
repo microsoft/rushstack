@@ -18,6 +18,13 @@
               ]
             },
             {
+              "name": "Interfaces",
+              "items": [
+                { "name": "Interface5", "items": [] },
+                { "name": "Interface6", "items": [{ "name": "InjectedCustomInterface", "uid": "customUid" }] }
+              ]
+            },
+            {
               "name": "References",
               "items": [
                 { "name": "InjectedCustomItem", "uid": "customUrl" }
@@ -27,10 +34,9 @@
         }
       ]
     },
-    "categoryNodes": ["References"],
+    "nonEmptyCategoryNodeNames": ["References", "Interface6"],
     "catchAllCategory": "References",
-    "noDuplicateEntries": true,
-    "filterByApiItemName": false,
-    "filterByInlineTag": "@docCategory"
+    "categorizeByName": true,
+    "categoryInlineTag": "docCategory"
   }
 }

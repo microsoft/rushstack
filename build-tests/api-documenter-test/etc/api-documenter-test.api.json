@@ -1183,6 +1183,112 @@
           "extendsTokenRanges": []
         },
         {
+          "kind": "Interface",
+          "canonicalReference": "(IDocInterface5:interface)",
+          "docComment": "/**\n * Interface without inline tag to test custom TOC\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface5"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "IDocInterface5",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "string",
+              "docComment": "/**\n * string property\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "string",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "(IDocInterface6:interface)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface6"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "IDocInterface6",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "number",
+              "docComment": "/**\n * number property\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "number",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
           "kind": "Namespace",
           "canonicalReference": "(OuterNamespace:namespace)",
           "docComment": "/**\n * A top-level namespace\n *\n * @public\n */\n",

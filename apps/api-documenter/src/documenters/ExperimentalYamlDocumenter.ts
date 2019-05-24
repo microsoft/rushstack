@@ -59,26 +59,7 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
             name: apiItem.displayName,
             uid: this._getUid(apiItem)
           };
-          // Filtering out the api-items as we build the tocItems array.
-          if (apiItem instanceof ApiDocumentedItem) {
-            const docInlineTag: DocInlineTag | undefined =
-              (this._config && this._config.filterByInlineTag)
-                ? this._findInlineTagByName(this._config.filterByInlineTag, apiItem.tsdocComment)
-                : undefined;
-
-            const tagContent: string | undefined =
-              docInlineTag && docInlineTag.tagContent && docInlineTag.tagContent.trim();
-
-            if (tagContent && this._tocPointerMap[tagContent]) {
-              // null assertion used because when pointer map was created we checked for presence of empty `items` array
-              this._tocPointerMap[tagContent].items!.push(tocItem);
-            } else {
-              if (this._catchAllPointer && this._catchAllPointer.items) {
-                this._catchAllPointer.items.push(tocItem);
-              }
-            }
-          }
-
+          this._filterItem(apiItem, tocItem);
         }
       }
 
@@ -102,13 +83,15 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
   // Parses the tocConfig object to build a pointers map of nodes where we want to sort out the API items
   private _generateTocPointersMap(tocConfig: IYamlTocFile | IYamlTocItem): void {
+    const { catchAllCategory } = this._config;
+
     if (tocConfig.items) {
       for (const tocItem of tocConfig.items) {
         if (tocItem.items && tocItem.items.length > 0 && this._shouldNotIncludeInPointersMap(tocItem)) {
           this._generateTocPointersMap(tocItem);
         } else {
           // check for presence of the `catchAllCategory` config option
-          if (this._config && this._config.catchAllCategory && tocItem.name === this._config.catchAllCategory) {
+          if (catchAllCategory && tocItem.name === catchAllCategory) {
             this._catchAllPointer = tocItem;
           } else {
             this._tocPointerMap[tocItem.name] = tocItem;
@@ -118,11 +101,57 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
     }
   }
 
+  /**
+   * Filtering out the api-item by inlineTags or category name presence in the item name.
+   */
+  private _filterItem(apiItem: ApiItem, tocItem: IYamlTocItem): void {
+    const { categoryInlineTag, categorizeByName } = this._config;
+    const { name: itemName } = tocItem;
+    let filtered: boolean = false;
+
+    // First we attempt to filter by inline tag if provided.
+    if (apiItem instanceof ApiDocumentedItem) {
+      const docInlineTag: DocInlineTag | undefined =
+        categoryInlineTag
+          ? this._findInlineTagByName(categoryInlineTag, apiItem.tsdocComment)
+          : undefined;
+
+      const tagContent: string | undefined =
+        docInlineTag && docInlineTag.tagContent && docInlineTag.tagContent.trim();
+
+      if (tagContent && this._tocPointerMap[tagContent]) {
+        // null assertion used because when pointer map was created we checked for presence of empty `items` array
+        this._tocPointerMap[tagContent].items!.push(tocItem);
+        filtered = true;
+      }
+    }
+
+    // If not filtered by inline tag and `categorizeByName` config is enabled attempt to filter it by category name.
+    if (!filtered && categorizeByName) {
+      const pointers: string[] = Object.keys(this._tocPointerMap);
+      for (let i: number = 0, length: number = pointers.length; i < length; i++) {
+        if (itemName.indexOf(pointers[i]) !== -1) {
+          // null assertion used because when pointer map was created we checked for presence of empty `items` array
+          this._tocPointerMap[pointers[i]].items!.push(tocItem);
+          filtered = true;
+          break;
+        }
+      }
+    }
+
+    // If item still not filtered and a `catchAllCategory` config provided push it to it.
+    if (!filtered && this._catchAllPointer && this._catchAllPointer.items) {
+      this._catchAllPointer.items.push(tocItem);
+    }
+  }
+
   // This is a direct copy of a @docCategory inline tag finder in office-ui-fabric-react,
   // but is generic enough to be used for any inline tag
   private _findInlineTagByName(tagName: string, docComment: DocComment | undefined): DocInlineTag | undefined {
+    const tagNameToCheck: string = `@${tagName}`;
+
     if (docComment instanceof DocInlineTag) {
-      if (docComment.tagName === tagName) {
+      if (docComment.tagName === tagNameToCheck) {
         return docComment;
       }
     }
@@ -138,9 +167,9 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
   }
 
   private _shouldNotIncludeInPointersMap(item: IYamlTocItem): boolean {
-    const { categoryNodes } = this._config;
-    if (categoryNodes && categoryNodes.length) {
-      return categoryNodes.indexOf(item.name) === -1;
+    const { nonEmptyCategoryNodeNames } = this._config;
+    if (nonEmptyCategoryNodeNames && nonEmptyCategoryNodeNames.length) {
+      return nonEmptyCategoryNodeNames.indexOf(item.name) === -1;
     }
     return true;
   }

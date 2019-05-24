@@ -216,3 +216,21 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
     return x + y;
   }
 }
+
+/**
+ * Interface without inline tag to test custom TOC
+ * @public
+ */
+export interface IDocInterface5 {
+  /**
+   * string property
+   */
+  string: string;
+}
+
+export interface IDocInterface6 {
+  /**
+   * number property
+   */
+  number: number;
+}

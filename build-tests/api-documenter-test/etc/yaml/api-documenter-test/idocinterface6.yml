@@ -1,0 +1,23 @@
+### YamlMime:UniversalReference
+items:
+  - uid: api-documenter-test.IDocInterface6
+    name: IDocInterface6
+    fullName: IDocInterface6
+    langs:
+      - typeScript
+    type: interface
+    package: api-documenter-test
+    children:
+      - api-documenter-test.IDocInterface6.number
+  - uid: api-documenter-test.IDocInterface6.number
+    summary: number property
+    name: number
+    fullName: number
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'number: number;'
+      return:
+        type:
+          - number
