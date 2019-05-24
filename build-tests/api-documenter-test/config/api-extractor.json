@@ -23,12 +23,6 @@
       "tsdoc-undefined-tag": {
         "logLevel": "none"
       }
-    },
-    "extractorMessageReporting": {
-      "ae-incompatible-release-tags": {
-        "logLevel": "none",
-        "addToApiReportFile": true
-      }
     }
   }
 }
