@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Add new `nonEmptyCategoryNodeNames` config option to the ExperimentalYamlDocumenter. Refactor filter logic. Add documentation and modify the test package.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "vibraga@microsoft.com"
+}
