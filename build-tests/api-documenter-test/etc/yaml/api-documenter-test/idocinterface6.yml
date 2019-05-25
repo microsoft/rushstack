@@ -1,6 +1,7 @@
 ### YamlMime:UniversalReference
 items:
   - uid: api-documenter-test.IDocInterface6
+    summary: Interface without inline tag to test custom TOC
     name: IDocInterface6
     fullName: IDocInterface6
     langs:
