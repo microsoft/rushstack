@@ -1238,7 +1238,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "(IDocInterface6:interface)",
-          "docComment": "",
+          "docComment": "/**\n * Interface without inline tag to test custom TOC\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

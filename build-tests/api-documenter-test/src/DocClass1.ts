@@ -228,6 +228,10 @@ export interface IDocInterface5 {
   string: string;
 }
 
+/**
+ * Interface without inline tag to test custom TOC
+ * @public
+ */
 export interface IDocInterface6 {
   /**
    * number property

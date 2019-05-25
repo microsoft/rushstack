@@ -81,7 +81,7 @@ export interface IDocInterface5 {
     string: string;
 }
 
-// @public (undocumented)
+// @public
 export interface IDocInterface6 {
     number: number;
 }
