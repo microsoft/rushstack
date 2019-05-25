@@ -98,6 +98,10 @@ export class MarkdownDocumenter {
       case ApiItemKind.Interface:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} interface` }));
         break;
+      case ApiItemKind.Constructor:
+      case ApiItemKind.ConstructSignature:
+        output.appendNode(new DocHeading({ configuration, title: `${scopedName} constructor` }));
+        break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} method` }));
@@ -182,6 +186,8 @@ export class MarkdownDocumenter {
       case ApiItemKind.Interface:
         this._writeInterfaceTables(output, apiItem as ApiInterface);
         break;
+      case ApiItemKind.Constructor:
+      case ApiItemKind.ConstructSignature:
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
       case ApiItemKind.Function:
@@ -387,6 +393,7 @@ export class MarkdownDocumenter {
     for (const apiMember of apiClass.members) {
 
       switch (apiMember.kind) {
+        case ApiItemKind.Constructor:
         case ApiItemKind.Method: {
           methodsTable.addRow(
             new DocTableRow({ configuration }, [
