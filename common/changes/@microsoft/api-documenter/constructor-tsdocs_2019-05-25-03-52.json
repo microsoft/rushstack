@@ -2,10 +2,10 @@
   "changes": [
     {
       "packageName": "@microsoft/api-documenter",
-      "comment": "allow constructor tsdocs to be generated",
+      "comment": "Improve the markdown generator to document class constructors",
       "type": "patch"
     }
   ],
   "packageName": "@microsoft/api-documenter",
-  "email": "enjoyjava@gmail.com"
+  "email": "raymondfeng@users.noreply.github.com"
 }
