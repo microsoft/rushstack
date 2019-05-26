@@ -100,7 +100,7 @@ export class MarkdownDocumenter {
         break;
       case ApiItemKind.Constructor:
       case ApiItemKind.ConstructSignature:
-        output.appendNode(new DocHeading({ configuration, title: `${scopedName} constructor` }));
+        output.appendNode(new DocHeading({ configuration, title: scopedName }));
         break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
@@ -382,6 +382,10 @@ export class MarkdownDocumenter {
       headerTitles: [ 'Property', 'Modifiers', 'Type', 'Description' ]
     });
 
+    const constructorsTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Constructor', 'Modifiers', 'Description' ]
+    });
+
     const propertiesTable: DocTable = new DocTable({ configuration,
       headerTitles: [ 'Property', 'Modifiers', 'Type', 'Description' ]
     });
@@ -393,7 +397,18 @@ export class MarkdownDocumenter {
     for (const apiMember of apiClass.members) {
 
       switch (apiMember.kind) {
-        case ApiItemKind.Constructor:
+        case ApiItemKind.Constructor: {
+          constructorsTable.addRow(
+            new DocTableRow({ configuration }, [
+              this._createTitleCell(apiMember),
+              this._createModifiersCell(apiMember),
+              this._createDescriptionCell(apiMember)
+            ])
+          );
+
+          this._writeApiItemPage(apiMember);
+          break;
+        }
         case ApiItemKind.Method: {
           methodsTable.addRow(
             new DocTableRow({ configuration }, [
@@ -438,6 +453,11 @@ export class MarkdownDocumenter {
     if (eventsTable.rows.length > 0) {
       output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Events' }));
       output.appendNode(eventsTable);
+    }
+
+    if (constructorsTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Constructors' }));
+      output.appendNode(constructorsTable);
     }
 
     if (propertiesTable.rows.length > 0) {
@@ -509,6 +529,7 @@ export class MarkdownDocumenter {
     for (const apiMember of apiClass.members) {
 
       switch (apiMember.kind) {
+        case ApiItemKind.ConstructSignature:
         case ApiItemKind.MethodSignature: {
           methodsTable.addRow(
             new DocTableRow({ configuration }, [
