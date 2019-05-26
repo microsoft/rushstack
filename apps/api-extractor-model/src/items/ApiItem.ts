@@ -107,9 +107,9 @@ export class ApiItem {
    */
   public get displayName(): string {
     switch (this.kind) {
-      case ApiItemKind.CallSignature: return '(call signature)';
+      case ApiItemKind.CallSignature: return '(call)';
       case ApiItemKind.Constructor: return '(constructor)';
-      case ApiItemKind.ConstructSignature: return '(construct signature)';
+      case ApiItemKind.ConstructSignature: return '(new)';
       case ApiItemKind.IndexSignature: return '(indexer)';
       case ApiItemKind.Model: return '(model)';
     }
@@ -166,8 +166,19 @@ export class ApiItem {
       }
       if (reversedParts.length !== 0) {
         reversedParts.push('.');
-      } else if (ApiParameterListMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
-        reversedParts.push('()');
+      } else {
+        switch (current.kind) {
+          case ApiItemKind.CallSignature:
+          case ApiItemKind.ConstructSignature:
+          case ApiItemKind.Constructor:
+          case ApiItemKind.IndexSignature:
+            // These functional forms don't have a proper name, so we don't append the "()" suffix
+            break;
+          default:
+            if (ApiParameterListMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
+              reversedParts.push('()');
+            }
+        }
       }
       reversedParts.push(current.displayName);
     }
