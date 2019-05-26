@@ -9,6 +9,8 @@ export const constVariable: number;
 
 // @public
 export class DocBaseClass {
+    constructor();
+    constructor(x: number);
 }
 
 // @public
