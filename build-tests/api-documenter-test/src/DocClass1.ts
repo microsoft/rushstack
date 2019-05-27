@@ -18,6 +18,18 @@ export class SystemEvent {
  * {@docCategory DocBaseClass}
  */
 export class DocBaseClass {
+  /**
+   * The simple constructor for `DocBaseClass`
+   */
+  public constructor();
+
+  /**
+   * The overloaded constructor for `DocBaseClass`
+   */
+  public constructor(x: number);
+
+  public constructor(x?: number) {
+  }
 }
 
 /**
