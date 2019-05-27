@@ -66,6 +66,14 @@
       "enableParallelism": false,
 
       /**
+       * Normally projects will be processed according to their dependency order: a given project will not start
+       * processing the command until all of its dependencies have completed.  This restriction doesn't apply for
+       * certain operations, for example a "clean" task that deletes output files.  In this case
+       * you can set "ignoreDependencyOrder" to true to increase parallelism.
+       */
+      "ignoreDependencyOrder": false,
+
+      /**
        * Normally Rush requires that each project's package.json has a "scripts" entry matching
        * the custom command name.  To disable this check, set "ignoreMissingScript" to true;
        * projects with a missing definition will be skipped.

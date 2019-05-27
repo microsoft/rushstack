@@ -247,7 +247,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
             enableParallelism: command.enableParallelism,
             ignoreMissingScript: command.ignoreMissingScript || false,
-            ignoreDependencyOrder: false
+            ignoreDependencyOrder: command.ignoreDependencyOrder || false
           }));
           break;
         case 'global':
