@@ -92,26 +92,7 @@
        * values will be appended to the end of this string.
        */
       "shellCommand": "node common/scripts/my-global-command.js"
-    },
-
-    {
-      /**
-       * (Required) Determines the type of custom command.
-       * Rush's "unordered-bulk" commands are invoked as soon as possible (limited by parallelism) for each project
-       * in the repo, ignoring dependency order.
-       */
-      "commandKind": "unordered-bulk",
-      "name": "my-unordered-bulk-command",
-      "summary": "Example unordered-bulk command",
-      "description": "This is an example custom command that runs as soon as possible for each project in the repo ignoring dependency order",
-
-      /**
-       * Normally Rush requires that each project's package.json has a "scripts" entry matching
-       * the custom command name.  To disable this check, set "ignoreMissingScript" to true;
-       * projects with a missing definition will be skipped.
-       */
-      "ignoreMissingScript": false
-    },
+    }
     /*[END "DEMO"]*/
   ],
 

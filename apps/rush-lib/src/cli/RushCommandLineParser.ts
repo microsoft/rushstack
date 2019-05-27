@@ -250,19 +250,6 @@ export class RushCommandLineParser extends CommandLineParser {
             ignoreDependencyOrder: false
           }));
           break;
-        case 'unordered-bulk':
-          this.addAction(new BulkScriptAction({
-            actionName: command.name,
-            summary: command.summary,
-            documentation: command.description || command.summary,
-            safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
-            parser: this,
-            commandLineConfiguration: commandLineConfiguration,
-            enableParallelism: true,
-            ignoreMissingScript: command.ignoreMissingScript || false,
-            ignoreDependencyOrder: true
-          }));
-          break;
         case 'global':
           this.addAction(new GlobalScriptAction({
             actionName: command.name,

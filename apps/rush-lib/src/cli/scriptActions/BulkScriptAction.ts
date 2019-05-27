@@ -93,13 +93,12 @@ export class BulkScriptAction extends BaseScriptAction {
     }
 
     const changedProjectsOnly: boolean = this.actionName === 'build' && this._changedProjectsOnly.value;
-    const toFlags: string[] = this._ignoreDependencyOrder ? [] : this._mergeToProjects();
-    const fromFlags: ReadonlyArray<string> = this._ignoreDependencyOrder ? [] : this._fromFlag.values;
+
     const tasks: TaskSelector = new TaskSelector(
       {
         rushConfiguration: this.rushConfiguration,
-        toFlags,
-        fromFlags,
+        toFlags: this._mergeToProjects(),
+        fromFlags: this._fromFlag.values,
         commandToRun: this._commandToRun,
         customParameterValues,
         isQuietMode,
