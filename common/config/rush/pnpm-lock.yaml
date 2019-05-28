@@ -9313,15 +9313,12 @@ packages:
     version: 0.0.0
   'file:projects/gulp-core-build-sass.tgz':
     dependencies:
-      '@types/chai': 3.4.34
       '@types/clean-css': 4.2.1
       '@types/glob': 5.0.30
       '@types/gulp': 3.8.32
-      '@types/mocha': 5.2.5
       '@types/node': 8.5.8
       '@types/node-sass': 3.10.32
       autoprefixer: 9.1.5
-      chai: 3.5.0
       clean-css: 4.2.1
       glob: 7.0.6
       gulp: 3.9.1
@@ -9952,7 +9949,6 @@ packages:
     version: 0.0.0
   'file:projects/web-library-build-test.tgz':
     dependencies:
-      '@microsoft/gulp-core-build-sass': 4.6.35
       '@types/jest': 23.3.11
       gulp: 3.9.1
       ts-jest: 22.4.6
