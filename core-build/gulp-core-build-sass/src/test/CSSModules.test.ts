@@ -3,12 +3,23 @@
 import * as path from 'path';
 import { expect } from 'chai';
 
-import { SassTask } from '../SassTask';
+import CSSModules from '../CSSModules';
 
 interface IScopedNameArgs {
   name: string;
   fileName: string;
   css: string;
+}
+
+interface ITestCSSModules {
+  testGenerateScopedName: (name: string, fileName: string, css: string) => string;
+}
+
+class TestCSSModules extends CSSModules {
+  public testGenerateScopedName = (name: string, fileName: string, css: string)
+      : string => {
+    return this.generateScopedName(name, fileName, css);
+  }
 }
 
 describe('class name hashing', () => {
@@ -23,11 +34,11 @@ describe('class name hashing', () => {
       fileName: path.join(__dirname, 'Sally', 'src', 'main.sass'),
       css: 'color: pink;'
     };
-    const sassTask: SassTask = new SassTask();
-    const output1: string = sassTask.generateScopedName(
+    const cssModules: ITestCSSModules = new TestCSSModules();
+    const output1: string = cssModules.testGenerateScopedName(
       version1.name, version1.fileName, version1.css
     );
-    const output2: string = sassTask.generateScopedName(
+    const output2: string = cssModules.testGenerateScopedName(
       version2.name, version2.fileName, version2.css
     );
     expect(output1).to.not.equal(output2);
@@ -45,11 +56,11 @@ describe('class name hashing', () => {
       fileName: path.join(__dirname, 'Suzan', 'workspace', 'src', 'main.sass'),
       css: 'color: blue;'
     };
-    const sassTask: SassTask = new SassTask();
-    const output1: string = sassTask.generateScopedName(
+    const cssModules: ITestCSSModules = new TestCSSModules();
+    const output1: string = cssModules.testGenerateScopedName(
       version1.name, version1.fileName, version1.css
     );
-    const output2: string = sassTask.generateScopedName(
+    const output2: string = cssModules.testGenerateScopedName(
       version2.name, version2.fileName, version2.css
     );
     expect(output1).to.equal(output2);

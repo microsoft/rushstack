@@ -17,8 +17,7 @@ import * as nodeSass from 'node-sass';
 import * as postcss from 'postcss';
 import * as CleanCss from 'clean-css';
 import * as autoprefixer from 'autoprefixer';
-import * as cssModules from 'postcss-modules';
-import * as crypto from 'crypto';
+import CSSModules, { ICSSModules } from './CSSModules';
 
 export interface ISassTaskConfig {
   /**
@@ -27,7 +26,8 @@ export interface ISassTaskConfig {
   preamble?: string;
 
   /**
-   * An optional parameter for text to include at the end of the generated TypeScript file.
+   * An optional parameter for text to include at the end of the generated
+   * TypeScript file.
    */
   postamble?: string;
 
@@ -37,46 +37,47 @@ export interface ISassTaskConfig {
   sassMatch?: string[];
 
   /**
-   * If this option is specified, ALL files will be treated as module.sass or module.scss and will
-   * automatically generate a corresponding TypeScript file. All classes will be
-   * appended with a hash to help ensure uniqueness on a page. This file can be
-   * imported directly, and will contain an object describing the mangled class names.
+   * If this option is specified, ALL files will be treated as module.sass or
+   * module.scss and will automatically generate a corresponding TypeScript
+   * file. All classes will be appended with a hash to help ensure uniqueness
+   * on a page. This file can be imported directly, and will contain an object
+   * describing the mangled class names.
    */
   useCSSModules?: boolean;
 
   /**
-   * If false, we will set the CSS property naming warning to verbose message while the module generates
-   * to prevent task exit with exitcode: 1.
-   * Default value is true
+   * If false, we will set the CSS property naming warning to verbose message
+   * while the module generates to prevent task exit with exitcode: 1.
+   * Default value is true.
    */
   warnOnCssInvalidPropertyName?: boolean;
 
   /**
-   * If true, we will generate a CSS in the lib folder. If false, the CSS is directly embedded
-   * into the TypeScript file
+   * If true, we will generate CSS in the lib folder. If false, the CSS is
+   * directly embedded into the TypeScript file.
    */
   dropCssFiles?: boolean;
 
   /**
-   * If files are matched by sassMatch which do not end in .module.sass or .module.scss, log a warning.
+   * If files are matched by sassMatch which do not end in .module.sass or
+   * .module.scss, log a warning.
    */
   warnOnNonCSSModules?: boolean;
 
   /**
-   * If this option is specified, module CSS will be exported using the name provided. If an
-   * empty value is specified, the styles will be exported using 'export =', rather than a
-   * named export. By default we use the 'default' export name.
+   * If this option is specified, module CSS will be exported using the name
+   * provided. If an empty value is specified, the styles will be exported
+   * using 'export =', rather than a named export. By default, we use the
+   * 'default' export name.
    */
   moduleExportName?: string;
 
   /**
-   * Allows the override of the options passed to clean-css.  Options such a returnPromise and
-   * sourceMap will be ignored.
+   * Allows the override of the options passed to clean-css. Options such a
+   * returnPromise and sourceMap will be ignored.
    */
   cleanCssOptions?: CleanCss.Options;
 }
-
-const _classMaps: { [file: string]: Object } = {};
 
 export class SassTask extends GulpTask<ISassTaskConfig> {
   public cleanMatch: string[] = [
@@ -86,13 +87,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
   private _postCSSPlugins: postcss.AcceptedPlugin[] = [
     autoprefixer({ browsers: ['> 1%', 'last 2 versions', 'ie >= 10'] })
-  ];
-
-  private _modulePostCssAdditionalPlugins: postcss.AcceptedPlugin[] = [
-    cssModules({
-      getJSON: this._generateModuleStub.bind(this),
-      generateScopedName: this.generateScopedName.bind(this)
-    })
   ];
 
   constructor() {
@@ -127,19 +121,6 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     }).then(() => { /* collapse void[] to void */ });
   }
 
-  public generateScopedName(name: string, fileName: string, css: string): string {
-    const fileBaseName: string = path.basename(fileName);
-    const hash: string = crypto.createHmac('sha1', fileBaseName)
-                               .update(css)
-                               .digest('hex')
-                               .substring(0, 8);
-    return `${name}_${hash}`;
-  }
-
-  private _generateModuleStub(cssFileName: string, json: Object): void {
-    _classMaps[cssFileName] = json;
-  }
-
   private _processFile(filePath: string): Promise<void> {
     // Ignore files that start with underscores
     if (path.basename(filePath).match(/^\_/)) {
@@ -148,11 +129,16 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
     const isFileModuleCss: boolean = !!filePath.match(/\.module\.s(a|c)ss/);
     const processAsModuleCss: boolean = isFileModuleCss || !!this.taskConfig.useCSSModules;
+    const cssModules: ICSSModules = new CSSModules();
 
-    if (!isFileModuleCss && !this.taskConfig.useCSSModules && this.taskConfig.warnOnNonCSSModules) {
-      // If the file doesn't end with .module.scss and we don't treat all files as module-scss, warn
-      const relativeFilePath: string = path.relative(this.buildConfig.rootPath, filePath);
-      this.logWarning(`${relativeFilePath}: filename should end with module.sass or module.scss`);
+    if (!processAsModuleCss && this.taskConfig.warnOnNonCSSModules) {
+      const relativeFilePath: string = path.relative(
+        this.buildConfig.rootPath, filePath
+      );
+      this.logWarning(
+        `${relativeFilePath}: filename should end with either .module.sass ` +
+        `or .module.scss`
+      );
     }
 
     let cssOutputPath: string | undefined = undefined;
@@ -190,10 +176,10 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         };
       }
 
-      const plugins: postcss.AcceptedPlugin[] = [
-        ...this._postCSSPlugins,
-        ...(processAsModuleCss ? this._modulePostCssAdditionalPlugins : [])
-      ];
+      const plugins: postcss.AcceptedPlugin[] = [...this._postCSSPlugins];
+      if (processAsModuleCss) {
+        plugins.push(cssModules.getPlugin());
+      }
       return postcss(plugins).process(result.css.toString(), options) as PromiseLike<postcss.Result>;
     }).then((result: postcss.Result) => {
       let cleanCssOptions: CleanCss.Options = { level: 1, returnPromise: true };
@@ -210,44 +196,40 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
           result.styles.toString()
         ];
         if (result.sourceMap && !this.buildConfig.production) {
-          const encodedSourceMap: string = Buffer.from(result.sourceMap.toString()).toString('base64');
-          generatedFileLines.push(...[
+          const encodedSourceMap: string = Buffer.from(result.sourceMap.toString())
+                                                 .toString('base64');
+          generatedFileLines.push(
             `/*# sourceMappingURL=data:application/json;base64,${encodedSourceMap} */`
-          ]);
+          );
         }
 
-        FileSystem.writeFile(cssOutputPathAbsolute, generatedFileLines.join(EOL), { ensureFolderExists: true });
+        FileSystem.writeFile(
+          cssOutputPathAbsolute,
+          generatedFileLines.join(EOL),
+          { ensureFolderExists: true }
+        );
       }
 
       const scssTsOutputPath: string = `${filePath}.ts`;
-      const classNames: Object = _classMaps[filePath];
+      const classMap: Object = cssModules.getCssJSON();
       let exportClassNames: string = '';
       const content: string | undefined = result.styles;
 
-      if (classNames) {
-        const classNamesLines: string[] = [
-          'const styles = {'
-        ];
-
-        const classKeys: string[] = Object.keys(classNames);
-        classKeys.forEach((key: string, index: number) => {
-          const value: string = classNames[key];
-          let line: string = '';
+      if (classMap) {
+        const classKeys: string[] = Object.keys(classMap);
+        const styleLines: string[] = [];
+        classKeys.forEach((key: string) => {
+          const value: string = classMap[key];
           if (key.indexOf('-') !== -1) {
-            const message: string = `The local CSS class '${key}' is not camelCase and will not be type-safe.`;
-            this.taskConfig.warnOnCssInvalidPropertyName ?
-              this.logWarning(message) :
+            const message: string = `The local CSS class '${key}' is not ` +
+                                    `camelCase and will not be type-safe.`;
+            if (this.taskConfig.warnOnCssInvalidPropertyName) {
+              this.logWarning(message);
+            } else {
               this.logVerbose(message);
-            line = `  '${key}': '${value}'`;
-          } else {
-            line = `  ${key}: '${value}'`;
+            }
           }
-
-          if ((index + 1) <= classKeys.length) {
-            line += ',';
-          }
-
-          classNamesLines.push(line);
+          styleLines.push(`  ${key}: '${value}'`);
         });
 
         let exportString: string = 'export default styles;';
@@ -258,17 +240,16 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
           // exportString = `export const ${this.taskConfig.moduleExportName} = styles;`;
         }
 
-        classNamesLines.push(
+        exportClassNames = [
+          'const styles = {',
+          styleLines.join(`,${EOL}`),
           '};',
           '',
           exportString
-        );
-
-        exportClassNames = classNamesLines.join(EOL);
+        ].join(EOL);
       }
 
       let lines: string[] = [];
-
       lines.push(this.taskConfig.preamble || '');
 
       if (cssOutputPathAbsolute) {
