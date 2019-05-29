@@ -212,42 +212,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
 
       const scssTsOutputPath: string = `${filePath}.ts`;
       const classMap: Object = cssModules.getCssJSON();
-      let exportClassNames: string = '';
+      const stylesExportString: string = this._getStylesExportString(classMap);
       const content: string | undefined = result.styles;
-
-      if (classMap) {
-        const classKeys: string[] = Object.keys(classMap);
-        const styleLines: string[] = [];
-        classKeys.forEach((key: string) => {
-          const value: string = classMap[key];
-          if (key.indexOf('-') !== -1) {
-            const message: string = `The local CSS class '${key}' is not ` +
-                                    `camelCase and will not be type-safe.`;
-            if (this.taskConfig.warnOnCssInvalidPropertyName) {
-              this.logWarning(message);
-            } else {
-              this.logVerbose(message);
-            }
-          }
-          styleLines.push(`  ${key}: '${value}'`);
-        });
-
-        let exportString: string = 'export default styles;';
-
-        if (this.taskConfig.moduleExportName === '') {
-          exportString = 'export = styles;';
-        } else if (!!this.taskConfig.moduleExportName) {
-          // exportString = `export const ${this.taskConfig.moduleExportName} = styles;`;
-        }
-
-        exportClassNames = [
-          'const styles = {',
-          styleLines.join(`,${EOL}`),
-          '};',
-          '',
-          exportString
-        ].join(EOL);
-      }
 
       let lines: string[] = [];
       lines.push(this.taskConfig.preamble || '');
@@ -255,13 +221,13 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       if (cssOutputPathAbsolute) {
         lines = lines.concat([
           `require(${JSON.stringify(`./${path.basename(cssOutputPathAbsolute)}`)});`,
-          exportClassNames
+          stylesExportString
         ]);
       } else if (!!content) {
         lines = lines.concat([
           'import { loadStyles } from \'@microsoft/load-themed-styles\';',
           '',
-          exportClassNames,
+          stylesExportString,
           '',
           `loadStyles(${JSON.stringify(splitStyles(content))});`
         ]);
@@ -307,5 +273,39 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     }
 
     return url;
+  }
+
+  private _getStylesExportString(classMap: Object): string {
+    const classKeys: string[] = Object.keys(classMap);
+    const styleLines: string[] = [];
+    classKeys.forEach((key: string) => {
+      const value: string = classMap[key];
+      if (key.indexOf('-') !== -1) {
+        const message: string = `The local CSS class '${key}' is not ` +
+                                `camelCase and will not be type-safe.`;
+        if (this.taskConfig.warnOnCssInvalidPropertyName) {
+          this.logWarning(message);
+        } else {
+          this.logVerbose(message);
+        }
+      }
+      styleLines.push(`  ${key}: '${value}'`);
+    });
+
+    let exportString: string = 'export default styles;';
+
+    if (this.taskConfig.moduleExportName === '') {
+      exportString = 'export = styles;';
+    } else if (!!this.taskConfig.moduleExportName) {
+      // exportString = `export const ${this.taskConfig.moduleExportName} = styles;`;
+    }
+
+    return [
+      'const styles = {',
+      styleLines.join(`,${EOL}`),
+      '};',
+      '',
+      exportString
+    ].join(EOL);
   }
 }

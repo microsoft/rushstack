@@ -5,7 +5,15 @@ import * as cssModules from 'postcss-modules';
 import * as crypto from 'crypto';
 
 export interface ICSSModules {
+  /**
+   * Return a configured postcss plugin that will map class names to a
+   * consistently generated scoped name.
+   */
   getPlugin: () => postcss.AcceptedPlugin;
+
+  /**
+   * Return the CSS class map that is stored after postcss-modules runs.
+   */
   getCssJSON: () => Object;
 }
 
