@@ -136,8 +136,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         this.buildConfig.rootPath, filePath
       );
       this.logWarning(
-        `${relativeFilePath}: filename should end with either .module.sass ` +
-        `or .module.scss`
+        `${relativeFilePath}: filename should end with module.sass or module.scss`
       );
     }
 
@@ -287,6 +286,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
         } else {
           this.logVerbose(message);
         }
+        key = `'${key}'`;
       }
       styleLines.push(`  ${key}: '${value}'`);
     });
