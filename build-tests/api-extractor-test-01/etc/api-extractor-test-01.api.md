@@ -49,11 +49,11 @@ export class ClassWithAccessModifiers {
 // @public (undocumented)
 export class ClassWithSymbols {
     // (undocumented)
-    readonly [unexportedCustomSymbol]: number;
+    [fullyExportedCustomSymbol](): void;
     // (undocumented)
     readonly [locallyExportedCustomSymbol]: string;
     // (undocumented)
-    [fullyExportedCustomSymbol](): void;
+    readonly [unexportedCustomSymbol]: number;
 }
 
 // @public

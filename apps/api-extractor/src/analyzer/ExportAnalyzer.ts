@@ -171,7 +171,8 @@ export class ExportAnalyzer {
   private _getModuleSymbolFromSourceFile(sourceFile: ts.SourceFile,
     moduleReference: IAstModuleReference | undefined): ts.Symbol {
 
-    const moduleSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(sourceFile);
+    const moduleSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(sourceFile,
+      this._typeChecker);
     if (moduleSymbol !== undefined) {
       // This is the normal case.  The SourceFile acts is a module and has a symbol.
       return moduleSymbol;

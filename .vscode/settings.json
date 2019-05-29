@@ -17,5 +17,8 @@
     "temp": true,
     "**/test/**/temp": false,
     "coverage": true
+  },
+  "files.associations": {
+    "rush.json": "jsonc",
   }
 }

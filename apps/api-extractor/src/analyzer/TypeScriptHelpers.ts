@@ -96,8 +96,8 @@ export class TypeScriptHelpers {
    * Same semantics as tryGetSymbolForDeclaration(), but throws an exception if the symbol
    * cannot be found.
    */
-  public static getSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol {
-    const symbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(declaration);
+  public static getSymbolForDeclaration(declaration: ts.Declaration, checker: ts.TypeChecker): ts.Symbol {
+    const symbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(declaration, checker);
     if (!symbol) {
       throw new Error(TypeScriptMessageFormatter.formatFileAndLineNumber(declaration) + ': '
         + 'Unable to determine semantic information for this declaration');
@@ -208,5 +208,38 @@ export class TypeScriptHelpers {
     }
 
     return highest;
+  }
+
+  private static readonly _wellKnownSymbolNameRegExp: RegExp = /^__@\w+$/;
+
+  /**
+   * Returns whether the provided name was generated for a built-in ECMAScript symbol.
+   */
+  public static isWellKnownSymbolName(name: string): boolean {
+    return TypeScriptHelpers._wellKnownSymbolNameRegExp.test(name);
+  }
+
+  private static readonly _uniqueSymbolNameRegExp: RegExp = /^__@.*@\d+$/;
+
+  /**
+   * Returns whether the provided name was generated for a TypeScript `unique symbol`.
+   */
+  public static isUniqueSymbolName(name: string): boolean {
+    return TypeScriptHelpers._uniqueSymbolNameRegExp.test(name);
+  }
+
+  public static tryGetLateBoundName(declarationName: ts.ComputedPropertyName): string | undefined {
+    // Only a ComputedPropertyName whose expression is an EntityNameExpression can be
+    // used as a late-bound name.
+    let expressionName: string = '';
+    let expression: ts.EntityNameExpression = declarationName.expression as ts.EntityNameExpression;
+    while (expression.kind === ts.SyntaxKind.PropertyAccessExpression) {
+      expressionName = `.${expression.name.getText().trim()}${expressionName}`;
+      expression = expression.expression;
+    }
+    if (expression.kind !== ts.SyntaxKind.Identifier) {
+      return undefined;
+    }
+    return `[${expression.getText().trim()}${expressionName}]`;
   }
 }

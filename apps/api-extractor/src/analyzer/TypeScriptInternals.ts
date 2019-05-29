@@ -21,9 +21,23 @@ export class TypeScriptInternals {
    * @returns The associated Symbol.  If there is no semantic information (e.g. if the
    * declaration is an extra semicolon somewhere), then "undefined" is returned.
    */
-  public static tryGetSymbolForDeclaration(declaration: ts.Declaration): ts.Symbol | undefined {
-    const symbol: ts.Symbol = (declaration as any).symbol;
+  public static tryGetSymbolForDeclaration(declaration: ts.Declaration, checker: ts.TypeChecker): ts.Symbol
+    | undefined {
+    let symbol: ts.Symbol | undefined = (declaration as any).symbol;
+    if (symbol && symbol.escapedName === '__computed') {
+      const name: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
+      symbol = name && checker.getSymbolAtLocation(name) || symbol;
+    }
     return symbol;
+  }
+
+  public static isLateBoundSymbol(symbol: ts.Symbol): boolean {
+    // tslint:disable-next-line:no-bitwise
+    if (symbol.flags & ts.SymbolFlags.Transient &&
+        (symbol as any).checkFlags === (ts as any).CheckFlags.Late) {
+      return true;
+    }
+    return false;
   }
 
   /**
