@@ -18,7 +18,17 @@ export interface ICSSModules {
 }
 
 export default class CSSModules implements ICSSModules {
-  private _classMap: Object = {};
+  private _classMap: Object;
+  private _rootPath: string;
+
+  constructor(rootPath?: string) {
+    this._classMap = {};
+    if (rootPath) {
+      this._rootPath = rootPath;
+    } else {
+      this._rootPath = process.cwd();
+    }
+  }
 
   public getPlugin = () => {
     return cssModules({
@@ -37,7 +47,7 @@ export default class CSSModules implements ICSSModules {
 
   protected generateScopedName = (name: string, fileName: string, css: string)
       : string => {
-    const fileBaseName: string = path.basename(fileName);
+    const fileBaseName: string = path.relative(this._rootPath, fileName);
     const hash: string = crypto.createHmac('sha1', fileBaseName)
                                .update(css)
                                .digest('hex')
