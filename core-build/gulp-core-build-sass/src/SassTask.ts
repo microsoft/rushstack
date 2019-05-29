@@ -17,7 +17,7 @@ import * as nodeSass from 'node-sass';
 import * as postcss from 'postcss';
 import * as CleanCss from 'clean-css';
 import * as autoprefixer from 'autoprefixer';
-import CSSModules, { ICSSModules } from './CSSModules';
+import CSSModules, { ICSSModules, IClassMap } from './CSSModules';
 
 export interface ISassTaskConfig {
   /**
@@ -196,8 +196,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
           result.styles.toString()
         ];
         if (result.sourceMap && !this.buildConfig.production) {
-          const encodedSourceMap: string = Buffer.from(result.sourceMap.toString())
-                                                 .toString('base64');
+          const encodedSourceMap: string = Buffer.from(result.sourceMap.toString()).toString('base64');
           generatedFileLines.push(
             `/*# sourceMappingURL=data:application/json;base64,${encodedSourceMap} */`
           );
@@ -211,7 +210,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       }
 
       const scssTsOutputPath: string = `${filePath}.ts`;
-      const classMap: Object = cssModules.getCssJSON();
+      const classMap: IClassMap = cssModules.getClassMap();
       const stylesExportString: string = this._getStylesExportString(classMap);
       const content: string | undefined = result.styles;
 
@@ -275,7 +274,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     return url;
   }
 
-  private _getStylesExportString(classMap: Object): string {
+  private _getStylesExportString(classMap: IClassMap): string {
     const classKeys: string[] = Object.keys(classMap);
     const styleLines: string[] = [];
     classKeys.forEach((key: string) => {

@@ -4,6 +4,10 @@ import * as postcss from 'postcss';
 import * as cssModules from 'postcss-modules';
 import * as crypto from 'crypto';
 
+export interface IClassMap {
+  [className: string]: string;
+}
+
 export interface ICSSModules {
   /**
    * Return a configured postcss plugin that will map class names to a
@@ -14,13 +18,19 @@ export interface ICSSModules {
   /**
    * Return the CSS class map that is stored after postcss-modules runs.
    */
-  getCssJSON: () => Object;
+  getClassMap: () => IClassMap;
 }
 
 export default class CSSModules implements ICSSModules {
-  private _classMap: Object;
+  private _classMap: IClassMap;
   private _rootPath: string;
 
+  /**
+   * CSSModules includes the source file's path relative to the project root
+   * as part of the class name hashing algorithm.
+   * This should be configured with `buildConfig.rootPath` for SassTask, but
+   * will default the process' current working dir.
+   */
   constructor(rootPath?: string) {
     this._classMap = {};
     if (rootPath) {
@@ -32,16 +42,16 @@ export default class CSSModules implements ICSSModules {
 
   public getPlugin = () => {
     return cssModules({
-      getJSON: this.saveJSON,
+      getJSON: this.saveJson,
       generateScopedName: this.generateScopedName
     });
   }
 
-  public getCssJSON = (): Object => {
+  public getClassMap = (): IClassMap => {
     return this._classMap;
   }
 
-  protected saveJSON = (cssFileName: string, json: Object): void => {
+  protected saveJson = (cssFileName: string, json: IClassMap): void => {
     this._classMap = json;
   }
 
