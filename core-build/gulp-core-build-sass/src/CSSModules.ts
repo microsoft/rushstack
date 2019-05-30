@@ -13,12 +13,12 @@ export interface ICSSModules {
    * Return a configured postcss plugin that will map class names to a
    * consistently generated scoped name.
    */
-  getPlugin: () => postcss.AcceptedPlugin;
+  getPlugin(): postcss.AcceptedPlugin;
 
   /**
    * Return the CSS class map that is stored after postcss-modules runs.
    */
-  getClassMap: () => IClassMap;
+  getClassMap(): IClassMap;
 }
 
 export default class CSSModules implements ICSSModules {
@@ -42,8 +42,8 @@ export default class CSSModules implements ICSSModules {
 
   public getPlugin(): postcss.AcceptedPlugin {
     return cssModules({
-      getJSON: this.saveJson,
-      generateScopedName: this.generateScopedName
+      getJSON: this.saveJson.bind(this),
+      generateScopedName: this.generateScopedName.bind(this)
     });
   }
 
@@ -51,12 +51,12 @@ export default class CSSModules implements ICSSModules {
     return this._classMap;
   }
 
-  protected saveJson = (cssFileName: string, json: IClassMap): void => {
+  protected saveJson(cssFileName: string, json: IClassMap): void {
     this._classMap = json;
   }
 
-  protected generateScopedName = (name: string, fileName: string, css: string)
-      : string => {
+  protected generateScopedName(name: string, fileName: string, css: string)
+      : string {
     const fileBaseName: string = path.relative(this._rootPath, fileName);
     const hash: string = crypto.createHmac('sha1', fileBaseName)
                                .update(css)

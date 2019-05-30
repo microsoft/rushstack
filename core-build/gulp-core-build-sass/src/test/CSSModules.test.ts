@@ -11,12 +11,12 @@ interface IScopedNameArgs {
 }
 
 interface ITestCSSModules {
-  testGenerateScopedName: (name: string, fileName: string, css: string) => string;
+  testGenerateScopedName(name: string, fileName: string, css: string): string;
 }
 
 class TestCSSModules extends CSSModules {
-  public testGenerateScopedName = (name: string, fileName: string, css: string)
-      : string => {
+  public testGenerateScopedName(name: string, fileName: string, css: string)
+      : string {
     return this.generateScopedName(name, fileName, css);
   }
 }
