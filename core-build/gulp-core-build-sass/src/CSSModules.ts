@@ -28,8 +28,10 @@ export default class CSSModules implements ICSSModules {
   /**
    * CSSModules includes the source file's path relative to the project root
    * as part of the class name hashing algorithm.
-   * This should be configured with `buildConfig.rootPath` for SassTask, but
-   * will default the process' current working dir.
+   * This should be configured with the setting:
+   * {@link @microsoft/gulp-core-build#IBuildConfig.rootPath}
+   * That is used in {@link ./SassTask#SassTask}
+   * But will default the process' current working dir.
    */
   constructor(rootPath?: string) {
     this._classMap = {};
@@ -58,7 +60,8 @@ export default class CSSModules implements ICSSModules {
   protected generateScopedName(name: string, fileName: string, css: string)
       : string {
     const fileBaseName: string = path.relative(this._rootPath, fileName);
-    const hash: string = crypto.createHmac('sha1', fileBaseName)
+    const safeFileBaseName: string = fileBaseName.replace(/\\/g, '/');
+    const hash: string = crypto.createHmac('sha1', safeFileBaseName)
                                .update(css)
                                .digest('hex')
                                .substring(0, 8);
