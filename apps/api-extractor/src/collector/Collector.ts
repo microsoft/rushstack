@@ -2,34 +2,34 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import * as path from 'path';
 import * as tsdoc from '@microsoft/tsdoc';
 import {
   PackageJsonLookup,
-  IPackageJson,
   Sort,
   InternalError
 } from '@microsoft/node-core-library';
-
-import { ILogger } from '../api/ILogger';
 import {
-  IExtractorPoliciesConfig,
-  IExtractorValidationRulesConfig,
-  ExtractorValidationRulePolicy
-} from '../api/IExtractorConfig';
-import { TypeScriptMessageFormatter } from '../analyzer/TypeScriptMessageFormatter';
+  ReleaseTag,
+  AedocDefinitions
+} from '@microsoft/api-extractor-model';
+
+import { ExtractorMessageId } from '../api/ExtractorMessageId';
+
 import { CollectorEntity } from './CollectorEntity';
-import { AstSymbolTable } from '../analyzer/AstSymbolTable';
+import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
 import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
-import { CollectorPackage } from './CollectorPackage';
+import { WorkingPackage } from './WorkingPackage';
 import { PackageDocComment } from '../aedoc/PackageDocComment';
 import { DeclarationMetadata } from './DeclarationMetadata';
 import { SymbolMetadata } from './SymbolMetadata';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
+import { MessageRouter } from './MessageRouter';
+import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
+import { ExtractorConfig } from '../api/ExtractorConfig';
+import { ExtractorMessage } from '../api/ExtractorMessage';
 
 /**
  * Options for Collector constructor.
@@ -45,38 +45,29 @@ export interface ICollectorOptions {
    */
   program: ts.Program;
 
-  /**
-   * The entry point for the project.  This should correspond to the "main" field
-   * from NPM's package.json file.  If it is a relative path, it will be relative to
-   * the project folder described by IExtractorAnalyzeOptions.compilerOptions.
-   */
-  entryPointFile: string;
+  messageCallback: ((message: ExtractorMessage) => void) | undefined;
 
-  logger: ILogger;
-
-  policies: IExtractorPoliciesConfig;
-
-  validationRules: IExtractorValidationRulesConfig;
+  extractorConfig: ExtractorConfig;
 }
 
 /**
- * The main entry point for the "api-extractor" utility.  The Analyzer object invokes the
- * TypeScript Compiler API to analyze a project, and constructs the AstItem
- * abstract syntax tree.
+ * The `Collector` manages the overall data set that is used by `ApiModelGenerator`,
+ * `DtsRollupGenerator`, and `ApiReportGenerator`.  Starting from the working package's entry point,
+ * the `Collector` collects all exported symbols, determines how to import any symbols they reference,
+ * assigns unique names, and sorts everything into a normalized alphabetical ordering.
  */
 export class Collector {
   public readonly program: ts.Program;
   public readonly typeChecker: ts.TypeChecker;
   public readonly astSymbolTable: AstSymbolTable;
+  public readonly astReferenceResolver: AstReferenceResolver;
 
   public readonly packageJsonLookup: PackageJsonLookup;
+  public readonly messageRouter: MessageRouter;
 
-  public readonly policies: IExtractorPoliciesConfig;
-  public readonly validationRules: IExtractorValidationRulesConfig;
+  public readonly workingPackage: WorkingPackage;
 
-  public readonly logger: ILogger;
-
-  public readonly package: CollectorPackage;
+  public readonly extractorConfig: ExtractorConfig;
 
   private readonly _program: ts.Program;
 
@@ -85,8 +76,7 @@ export class Collector {
   private _astEntryPoint: AstModule | undefined;
 
   private readonly _entities: CollectorEntity[] = [];
-  private readonly _entitiesByAstSymbol: Map<AstSymbol, CollectorEntity> = new Map<AstSymbol, CollectorEntity>();
-  private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
+  private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<AstEntity, CollectorEntity>();
 
   private readonly _starExportedExternalModulePaths: string[] = [];
 
@@ -96,35 +86,40 @@ export class Collector {
   constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
-    this.policies = options.policies;
-    this.validationRules = options.validationRules;
-
-    this.logger = options.logger;
     this._program = options.program;
+    this.extractorConfig = options.extractorConfig;
 
-    const packageFolder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(options.entryPointFile);
-    if (!packageFolder) {
-      throw new Error('Unable to find a package.json for entry point: ' + options.entryPointFile);
-    }
+    const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
+      this.extractorConfig.mainEntryPointFilePath);
 
-    const packageJson: IPackageJson = this.packageJsonLookup.tryLoadPackageJsonFor(packageFolder)!;
-
-    const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(options.entryPointFile);
     if (!entryPointSourceFile) {
-      throw new Error('Unable to load file: ' + options.entryPointFile);
+      throw new Error('Unable to load file: ' + this.extractorConfig.mainEntryPointFilePath);
     }
 
-    this.package = new CollectorPackage({
-      packageFolder,
-      packageJson,
+    if (!this.extractorConfig.packageFolder || !this.extractorConfig.packageJson) {
+      // TODO: We should be able to analyze projects that don't have any package.json.
+      // The ExtractorConfig class is already designed to allow this.
+      throw new Error('Unable to find a package.json file for the project being analyzed');
+    }
+
+    this.workingPackage = new WorkingPackage({
+      packageFolder: this.extractorConfig.packageFolder,
+      packageJson: this.extractorConfig.packageJson,
       entryPointSourceFile
     });
+
+    this.messageRouter = new MessageRouter(
+      this.workingPackage.packageFolder,
+      options.messageCallback,
+      options.extractorConfig.messages || { });
 
     this.program = options.program;
     this.typeChecker = options.program.getTypeChecker();
 
-    this._tsdocParser = new tsdoc.TSDocParser();
-    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup, this.logger);
+    this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
+    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
+      this.messageRouter);
+    this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
   }
 
   /**
@@ -173,45 +168,52 @@ export class Collector {
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
     // compile errors that would result from a full compilation.
     for (const diagnostic of this._program.getSemanticDiagnostics()) {
-      const errorText: string = TypeScriptMessageFormatter.format(diagnostic.messageText);
-      this.reportError(`TypeScript: ${errorText}`, diagnostic.file, diagnostic.start);
+      this.messageRouter.addCompilerDiagnostic(diagnostic);
     }
 
     // Build the entry point
-    const astEntryPoint: AstModule = this.astSymbolTable.fetchEntryPointModule(
-      this.package.entryPointSourceFile);
+    const entryPointSourceFile: ts.SourceFile = this.workingPackage.entryPointSourceFile;
+
+    const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleFromWorkingPackage(
+      entryPointSourceFile);
     this._astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
-      this.package.entryPointSourceFile, this);
+      entryPointSourceFile, this);
 
     if (packageDocCommentTextRange) {
-      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(this.package.entryPointSourceFile.text,
+      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(entryPointSourceFile.text,
         packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
 
-      this.package.tsdocParserContext = this._tsdocParser.parseRange(range);
-      this.package.tsdocComment = this.package.tsdocParserContext!.docComment;
+      this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
+
+      this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext,
+        entryPointSourceFile);
+
+      this.workingPackage.tsdocComment = this.workingPackage.tsdocParserContext!.docComment;
     }
 
-    const exportedAstSymbols: AstSymbol[] = [];
+    const exportedAstEntities: AstEntity[] = [];
 
     // Create a CollectorEntity for each top-level export
 
     const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
-    for (const [exportName, astSymbol] of astModuleExportInfo.exportedLocalSymbols) {
-      this._createEntityForSymbol(astSymbol, exportName);
+    for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
+      this._createCollectorEntity(astEntity, exportName);
 
-      exportedAstSymbols.push(astSymbol);
+      exportedAstEntities.push(astEntity);
     }
 
     // Create a CollectorEntity for each indirectly referenced export.
     // Note that we do this *after* the above loop, so that references to exported AstSymbols
     // are encountered first as exports.
     const alreadySeenAstSymbols: Set<AstSymbol> = new Set<AstSymbol>();
-    for (const exportedAstSymbol of exportedAstSymbols) {
-      this._createEntityForIndirectReferences(exportedAstSymbol, alreadySeenAstSymbols);
+    for (const exportedAstEntity of exportedAstEntities) {
+      this._createEntityForIndirectReferences(exportedAstEntity, alreadySeenAstSymbols);
 
-      this.fetchMetadata(exportedAstSymbol);
+      if (exportedAstEntity instanceof AstSymbol) {
+        this.fetchMetadata(exportedAstEntity);
+      }
     }
 
     this._makeUniqueNames();
@@ -228,8 +230,25 @@ export class Collector {
     this._starExportedExternalModulePaths.sort();
   }
 
-  public tryGetEntityBySymbol(symbol: ts.Symbol): CollectorEntity | undefined {
-    return this._entitiesBySymbol.get(symbol);
+  /**
+   * For a given ts.Identifier that is part of an AstSymbol that we analyzed, return the CollectorEntity that
+   * it refers to.  Returns undefined if it doesn't refer to anything interesting.
+   * @remarks
+   * Throws an Error if the ts.Identifier is not part of node tree that was analyzed.
+   */
+  public tryGetEntityForIdentifierNode(identifier: ts.Identifier): CollectorEntity | undefined {
+    const astEntity: AstEntity | undefined = this.astSymbolTable.tryGetEntityForIdentifierNode(identifier);
+    if (astEntity) {
+      return this._entitiesByAstEntity.get(astEntity);
+    }
+    return undefined;
+  }
+
+  /**
+   * Returns the associated `CollectorEntity` for the given `astEntity`, if one was created during analysis.
+   */
+  public tryGetCollectorEntity(astEntity: AstEntity): CollectorEntity | undefined {
+    return this._entitiesByAstEntity.get(astEntity);
   }
 
   public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
@@ -241,6 +260,16 @@ export class Collector {
       this._fetchSymbolMetadata(astSymbol);
     }
     return symbolOrDeclaration.metadata as SymbolMetadata | DeclarationMetadata;
+  }
+
+  public tryFetchMetadataForAstEntity(astEntity: AstEntity): SymbolMetadata | undefined {
+    if (astEntity instanceof AstSymbol) {
+      return this.fetchMetadata(astEntity);
+    }
+    if (astEntity.astSymbol) { // astImport
+      return this.fetchMetadata(astEntity.astSymbol);
+    }
+    return undefined;
   }
 
   /**
@@ -264,17 +293,18 @@ export class Collector {
     return parts.join('');
   }
 
-  private _createEntityForSymbol(astSymbol: AstSymbol, exportedName: string | undefined): void {
-    let entity: CollectorEntity | undefined = this._entitiesByAstSymbol.get(astSymbol);
+  private _createCollectorEntity(astEntity: AstEntity, exportedName: string | undefined): void {
+    let entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
 
     if (!entity) {
-      entity = new CollectorEntity(astSymbol);
+      entity = new CollectorEntity(astEntity);
 
-      this._entitiesByAstSymbol.set(astSymbol, entity);
-      this._entitiesBySymbol.set(astSymbol.followedSymbol, entity);
+      this._entitiesByAstEntity.set(astEntity, entity);
       this._entities.push(entity);
 
-      this._collectReferenceDirectives(astSymbol);
+      if (astEntity instanceof AstSymbol) {
+        this._collectReferenceDirectives(astEntity);
+      }
     }
 
     if (exportedName) {
@@ -282,18 +312,30 @@ export class Collector {
     }
   }
 
-  private _createEntityForIndirectReferences(astSymbol: AstSymbol, alreadySeenAstSymbols: Set<AstSymbol>): void {
-    if (alreadySeenAstSymbols.has(astSymbol)) {
+  private _createEntityForIndirectReferences(astEntity: AstEntity, alreadySeenAstEntities: Set<AstEntity>): void {
+    if (alreadySeenAstEntities.has(astEntity)) {
       return;
     }
-    alreadySeenAstSymbols.add(astSymbol);
+    alreadySeenAstEntities.add(astEntity);
 
-    astSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-      for (const referencedAstSymbol of astDeclaration.referencedAstSymbols) {
-        this._createEntityForSymbol(referencedAstSymbol, undefined);
-        this._createEntityForIndirectReferences(referencedAstSymbol, alreadySeenAstSymbols);
-      }
-    });
+    if (astEntity instanceof AstSymbol) {
+      astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+        for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
+          if (referencedAstEntity instanceof AstSymbol) {
+            // We only create collector entities for root-level symbols.
+            // For example, if a symbols is nested inside a namespace, only the root-level namespace
+            // get a collector entity
+            if (referencedAstEntity.parentAstSymbol === undefined) {
+              this._createCollectorEntity(referencedAstEntity, undefined);
+            }
+          } else {
+            this._createCollectorEntity(referencedAstEntity, undefined);
+          }
+
+          this._createEntityForIndirectReferences(referencedAstEntity, alreadySeenAstEntities);
+        }
+      });
+    }
   }
 
   /**
@@ -301,6 +343,7 @@ export class Collector {
    */
   private _makeUniqueNames(): void {
     const usedNames: Set<string> = new Set<string>();
+    this._collectGlobalNames(usedNames);
 
     // First collect the explicit package exports (named)
     for (const entity of this._entities) {
@@ -324,16 +367,16 @@ export class Collector {
       }
 
       // If the localName happens to be the same as one of the exports, then emit that name
-      if (entity.exportNames.has(entity.astSymbol.localName)) {
-        entity.nameForEmit = entity.astSymbol.localName;
+      if (entity.exportNames.has(entity.astEntity.localName)) {
+        entity.nameForEmit = entity.astEntity.localName;
         continue;
       }
 
       // In all other cases, generate a unique name based on the localName
       let suffix: number = 1;
-      let nameForEmit: string = entity.astSymbol.localName;
+      let nameForEmit: string = entity.astEntity.localName;
       while (usedNames.has(nameForEmit)) {
-        nameForEmit = `${entity.astSymbol.localName}_${++suffix}`;
+        nameForEmit = `${entity.astEntity.localName}_${++suffix}`;
       }
       entity.nameForEmit = nameForEmit;
       usedNames.add(nameForEmit);
@@ -341,22 +384,69 @@ export class Collector {
   }
 
   /**
-   * Reports an error message to the registered ApiErrorHandler.
+   * Adds global names to the usedNames set, to prevent API Extractor from emitting names that conflict with
+   * a global name.
    */
-  public reportError(message: string, sourceFile: ts.SourceFile | undefined, start: number | undefined): void {
-    if (sourceFile && start) {
-      const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(start);
-
-      // If the file is under the packageFolder, then show a relative path
-      const relativePath: string = path.relative(this.package.packageFolder, sourceFile.fileName);
-      const shownPath: string = relativePath.substr(0, 2) === '..' ? sourceFile.fileName : relativePath;
-
-      // Format the error so that VS Code can follow it.  For example:
-      // "src\MyClass.ts(15,1): The JSDoc tag "@blah" is not supported by AEDoc"
-      this.logger.logError(`${shownPath}(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1}): `
-        + message);
-    } else {
-      this.logger.logError(message);
+  private _collectGlobalNames(usedNames: Set<string>): void {
+    // As a temporary workaround, this a short list of names that appear in typical projects.
+    // The full solution is tracked by this issue:
+    // https://github.com/Microsoft/web-build-tools/issues/1095
+    const globalNames: string[] = [
+      'Array',
+      'ArrayConstructor',
+      'Console',
+      'Date',
+      'DateConstructor',
+      'Error',
+      'ErrorConstructor',
+      'Float32Array',
+      'Float32ArrayConstructor',
+      'Float64Array',
+      'Float64ArrayConstructor',
+      'IArguments',
+      'Int16Array',
+      'Int16ArrayConstructor',
+      'Int32Array',
+      'Int32ArrayConstructor',
+      'Int8Array',
+      'Int8ArrayConstructor',
+      'Iterable',
+      'IterableIterator',
+      'Iterator',
+      'IteratorResult',
+      'Map',
+      'MapConstructor',
+      'Promise',
+      'PromiseConstructor',
+      'ReadonlyArray',
+      'ReadonlyMap',
+      'ReadonlySet',
+      'Set',
+      'SetConstructor',
+      'String',
+      'Symbol',
+      'SymbolConstructor',
+      'Uint16Array',
+      'Uint16ArrayConstructor',
+      'Uint32Array',
+      'Uint32ArrayConstructor',
+      'Uint8Array',
+      'Uint8ArrayConstructor',
+      'Uint8ClampedArray',
+      'Uint8ClampedArrayConstructor',
+      'WeakMap',
+      'WeakMapConstructor',
+      'WeakSet',
+      'WeakSetConstructor',
+      'clearInterval',
+      'clearTimeout',
+      'console',
+      'setInterval',
+      'setTimeout',
+      'undefined'
+    ];
+    for (const globalName of globalNames) {
+      usedNames.add(globalName);
     }
   }
 
@@ -391,9 +481,12 @@ export class Collector {
 
       if (declaredReleaseTag !== ReleaseTag.None) {
         if (effectiveReleaseTag !== ReleaseTag.None && effectiveReleaseTag !== declaredReleaseTag) {
-          if (!astSymbol.rootAstSymbol.imported) { // for now, don't report errors for external code
-            // TODO: Report error message
-            this.reportError('Inconsistent release tags between declarations', undefined, undefined);
+          if (!astSymbol.isExternal) { // for now, don't report errors for external code
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.DifferentReleaseTags,
+              'This symbol has another declaration with a different release tag',
+              astDeclaration
+            );
           }
         } else {
           effectiveReleaseTag = declaredReleaseTag;
@@ -409,19 +502,20 @@ export class Collector {
     }
 
     if (effectiveReleaseTag === ReleaseTag.None) {
-      if (this.validationRules.missingReleaseTags !== ExtractorValidationRulePolicy.allow) {
-        if (!astSymbol.rootAstSymbol.imported) { // for now, don't report errors for external code
-          // For now, don't report errors for forgotten exports
-          const entity: CollectorEntity | undefined = this._entitiesByAstSymbol.get(astSymbol.rootAstSymbol);
-          if (entity && entity.exported) {
-            // We also don't report errors for the default export of an entry point, since its doc comment
-            // isn't easy to obtain from the .d.ts file
-            if (astSymbol.rootAstSymbol.localName !== '_default') {
-              // TODO: Report error message
-              const loc: string = astSymbol.rootAstSymbol.localName + ' in '
-                + astSymbol.rootAstSymbol.astDeclarations[0].declaration.getSourceFile().fileName;
-              this.reportError('Missing release tag for ' + loc, undefined, undefined);
-            }
+      if (!astSymbol.isExternal) { // for now, don't report errors for external code
+        // Don't report missing release tags for forgotten exports
+        const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
+        if (entity && entity.exported) {
+          // We also don't report errors for the default export of an entry point, since its doc comment
+          // isn't easy to obtain from the .d.ts file
+          if (astSymbol.rootAstSymbol.localName !== '_default') {
+
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.MissingReleaseTag,
+              `"${entity.astEntity.localName}" is exported by the package, but it is missing `
+              + `a release tag (@alpha, @beta, @public, or @internal)`,
+              astSymbol
+            );
           }
         }
       }
@@ -448,37 +542,39 @@ export class Collector {
       const modifierTagSet: tsdoc.StandardModifierTagSet = parserContext.docComment.modifierTagSet;
 
       let declaredReleaseTag: ReleaseTag = ReleaseTag.None;
-      let inconsistentReleaseTags: boolean = false;
+      let extraReleaseTags: boolean = false;
 
       if (modifierTagSet.isPublic()) {
         declaredReleaseTag = ReleaseTag.Public;
       }
       if (modifierTagSet.isBeta()) {
         if (declaredReleaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
+          extraReleaseTags = true;
         } else {
           declaredReleaseTag = ReleaseTag.Beta;
         }
       }
       if (modifierTagSet.isAlpha()) {
         if (declaredReleaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
+          extraReleaseTags = true;
         } else {
           declaredReleaseTag = ReleaseTag.Alpha;
         }
       }
       if (modifierTagSet.isInternal()) {
         if (declaredReleaseTag !== ReleaseTag.None) {
-          inconsistentReleaseTags = true;
+          extraReleaseTags = true;
         } else {
           declaredReleaseTag = ReleaseTag.Internal;
         }
       }
 
-      if (inconsistentReleaseTags) {
-        if (!astDeclaration.astSymbol.rootAstSymbol.imported) { // for now, don't report errors for external code
-          // TODO: Report error message
-          this.reportError('Inconsistent release tags in doc comment', undefined, undefined);
+      if (extraReleaseTags) {
+        if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
+          this.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.ExtraReleaseTag,
+            'The doc comment should not contain more than one release tag',
+            astDeclaration);
         }
       }
 
@@ -492,9 +588,34 @@ export class Collector {
       declarationMetadata.isSealed = modifierTagSet.isSealed();
       declarationMetadata.isVirtual = modifierTagSet.isVirtual();
 
-      // Require the summary to contain at least 10 non-spacing characters
-      declarationMetadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
-        parserContext.docComment.summarySection, 10);
+      if (modifierTagSet.hasTag(AedocDefinitions.preapprovedTag)) {
+        // This feature only makes sense for potentially big declarations.
+        switch (astDeclaration.declaration.kind) {
+          case ts.SyntaxKind.ClassDeclaration:
+          case ts.SyntaxKind.EnumDeclaration:
+          case ts.SyntaxKind.InterfaceDeclaration:
+          case ts.SyntaxKind.ModuleDeclaration:
+            if (declaredReleaseTag === ReleaseTag.Internal) {
+              declarationMetadata.isPreapproved = true;
+            } else {
+              this.messageRouter.addAnalyzerIssue(
+                ExtractorMessageId.PreapprovedBadReleaseTag,
+                `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
+                  + ` without an @internal release tag`,
+                astDeclaration
+              );
+            }
+            break;
+          default:
+            this.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.PreapprovedUnsupportedType,
+              `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
+                + ` because it is not a supported declaration type`,
+              astDeclaration
+            );
+            break;
+        }
+      }
     }
   }
 
@@ -538,15 +659,18 @@ export class Collector {
     const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
       range.pos, range.end);
 
-    return this._tsdocParser.parseRange(tsdocTextRange);
+    const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
+
+    this.messageRouter.addTsdocMessages(parserContext, declaration.getSourceFile(), astDeclaration);
+
+    // We delete the @privateRemarks block as early as possible, to ensure that it never leaks through
+    // into one of the output files.
+    parserContext.docComment.privateRemarks = undefined;
+
+    return parserContext;
   }
 
   private _collectReferenceDirectives(astSymbol: AstSymbol): void {
-    // Are we emitting declarations?
-    if (astSymbol.astImport) {
-      return; // no, it's an import
-    }
-
     const seenFilenames: Set<string> = new Set<string>();
 
     for (const astDeclaration of astSymbol.astDeclarations) {

@@ -9,7 +9,7 @@
  * It tests the basic types of definitions, and all the weird cases for following
  * chains of type aliases.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 /**
@@ -95,6 +95,16 @@ export {
   DefaultExportEdgeCase,
   default as ClassExportedAsDefault
 } from './DefaultExportEdgeCase';
+
+/**
+ * Test that we can correctly carry default imports into the rollup .d.ts file
+ */
+import Long, { MAX_UNSIGNED_VALUE } from "long";
+export { MAX_UNSIGNED_VALUE };
+/** @public */
+export declare class UseLong {
+  use_long(): Long;
+}
 
 export { ClassWithSymbols, fullyExportedCustomSymbol } from './EcmaScriptSymbols';
 

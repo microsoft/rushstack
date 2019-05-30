@@ -1,9 +1,9 @@
 {
   "name": "@microsoft/node-core-library",
-  "version": "3.9.0",
+  "version": "3.13.0",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
-  "typings": "dist/index-internal.d.ts",
+  "typings": "dist/node-core-library.d.ts",
   "tsdoc": {
     "tsdocFlavor": "AEDoc"
   },
@@ -28,7 +28,7 @@
     "tslint-microsoft-contrib": "~5.2.1",
     "@types/jest": "23.3.11",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "6.0.15",
-    "@microsoft/rush-stack-compiler-3.0": "0.1.0"
+    "@microsoft/node-library-build": "6.0.55",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.7"
   }
 }

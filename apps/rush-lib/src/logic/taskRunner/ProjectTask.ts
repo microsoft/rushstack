@@ -42,6 +42,7 @@ export class ProjectTask implements ITaskDefinition {
   }
 
   public isIncrementalBuildAllowed: boolean;
+  public hadEmptyScript: boolean = false;
 
   private _hasWarningOrError: boolean;
   private _rushProject: RushConfigurationProject;
@@ -64,6 +65,9 @@ export class ProjectTask implements ITaskDefinition {
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     try {
       const taskCommand: string = this._getScriptToRun();
+      if (!taskCommand) {
+        this.hadEmptyScript = true;
+      }
       const deps: IPackageDependencies | undefined = this._getPackageDependencies(taskCommand, writer);
       return this._executeTask(taskCommand, writer, deps);
     } catch (error) {
@@ -128,9 +132,15 @@ export class ProjectTask implements ITaskDefinition {
         FileSystem.deleteFile(currentDepsPath);
 
         if (!taskCommand) {
-          // tslint:disable-next-line:max-line-length
-          writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank, so no action will be taken.`);
-          return Promise.resolve(TaskStatus.Skipped);
+          writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank,`
+            + ` so no action will be taken.`);
+
+          // Write deps on success.
+          if (currentPackageDeps) {
+            JsonFile.save(currentPackageDeps, currentDepsPath);
+          }
+
+          return Promise.resolve(TaskStatus.Success);
         }
 
         // Run the task
@@ -141,8 +151,18 @@ export class ProjectTask implements ITaskDefinition {
 
         writer.writeLine(normalizedTaskCommand);
         const task: child_process.ChildProcess =
-          Utilities.executeLifecycleCommandAsync(normalizedTaskCommand, projectFolder,
-            this._rushConfiguration.commonTempFolder, true);
+            Utilities.executeLifecycleCommandAsync(
+            normalizedTaskCommand,
+            {
+              rushConfiguration: this._rushConfiguration,
+              workingDirectory: projectFolder,
+              initCwd: this._rushConfiguration.commonTempFolder,
+              handleOutput: true,
+              environmentPathOptions: {
+                includeProjectBin: true
+              }
+            }
+          );
 
         // Hook into events, in order to get live streaming of build log
         task.stdout.on('data', (data: string) => {
@@ -156,7 +176,7 @@ export class ProjectTask implements ITaskDefinition {
 
         return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
           task.on('close', (code: number) => {
-              this._writeLogsToDisk(writer);
+            this._writeLogsToDisk(writer);
 
             if (code !== 0) {
               reject(new TaskError('error', `Returned error code: ${code}`));
@@ -180,27 +200,12 @@ export class ProjectTask implements ITaskDefinition {
     }
   }
 
-  private _isBuildCommand(): boolean {
-    return this._commandToRun === 'build' || this._commandToRun === 'rebuild';
-  }
-
   private _getScriptToRun(): string {
-    let script: string | undefined = undefined;
-    if (this._isBuildCommand()) {
-      script = this._getScriptCommand('build');
+    const script: string | undefined = this._getScriptCommand(this._commandToRun);
 
-      if (script === undefined) {
-        // tslint:disable-next-line:max-line-length
-        throw new Error(`The project [${this._rushProject.packageName}] does not define a 'build' command in the 'scripts' section of its package.json`);
-      }
-
-    } else {
-      script = this._getScriptCommand(this._commandToRun);
-
-      if (script === undefined && !this._ignoreMissingScript) {
-        // tslint:disable-next-line:max-line-length
-        throw new Error(`The project [${this._rushProject.packageName}] does not define a '${this._commandToRun}' command in the 'scripts' section of its package.json`);
-      }
+    if (script === undefined && !this._ignoreMissingScript) {
+      // tslint:disable-next-line:max-line-length
+      throw new Error(`The project [${this._rushProject.packageName}] does not define a '${this._commandToRun}' command in the 'scripts' section of its package.json`);
     }
 
     if (!script) {

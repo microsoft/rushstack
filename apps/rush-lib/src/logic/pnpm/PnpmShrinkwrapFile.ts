@@ -27,7 +27,7 @@ interface IPnpmShrinkwrapDependencyYaml {
 }
 
 /**
- * This interface represents the raw shrinkwrap.YAML file
+ * This interface represents the raw pnpm-lock.YAML file
  * Example:
  *  {
  *    "dependencies": {
@@ -68,40 +68,58 @@ interface IPnpmShrinkwrapYaml {
   specifiers: { [dependency: string]: string };
 }
 
+/**
+ * Given an encoded "dependency path" from the PNPM shrinkwrap file, this extracts the version component.
+ * @returns a SemVer string, or undefined if the version specifier cannot be parsed
+ */
 export function extractVersionFromPnpmVersionSpecifier(version: string): string | undefined {
-  let extractedVersion: string | undefined = undefined;
-
   if (!version) {
     return undefined;
   }
 
+  // Does the string contain any slashes?
   const versionParts: string[] = version.split('/');
 
-  // it had no slashes, so we know it is a version like "0.0.5"
   if (versionParts.length === 1) {
-    extractedVersion = version; // e.g. "0.0.5"
-  } else {
-    const isScoped: boolean = versionParts[1].indexOf('@') === 0;
+    // No slashes
 
-    // e.g. "/gulp-karma/0.0.5/karma@0.13.22"
-    // if it has 4 parts, then it should be unscoped
-    if (versionParts.length === 4 && !isScoped) {
-      extractedVersion = versionParts[2]; // e.g. "0.0.5"
-    }
-
-    // e.g. "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
-    // if it has 5 parts, it should be scoped
-    if (versionParts.length === 5 && isScoped) {
-      extractedVersion = versionParts[3]; // e.g. "3.1.1"
-    }
-
-    // e.g. "path.pkgs.visualstudio.com/@scope/depame/1.4.0"
-    if (!extractedVersion && semver.valid(versionParts[versionParts.length - 1]) !== null) {
-      extractedVersion = versionParts[versionParts.length - 1];
+    // Does it contain the V5 underscore delimiter?
+    const underscoreIndex: number = version.indexOf('_');
+    if (underscoreIndex >= 0) {
+      // This form was introduced in PNPM 3 (lockfile version 5):
+      //
+      // Example: "23.6.0_babel-core@6.26.3"
+      // Example: "1.0.7_request@2.88.0"
+      // Example: "1.0.3_@pnpm+logger@1.0.2"
+      return version.substr(0, underscoreIndex); // e.g. "23.6.0"
+    } else {
+      // It is a simple version.
+      //
+      // Example: "0.0.5"
+      return version;
     }
   }
 
-  return extractedVersion;
+  // Does it contain an NPM scope?
+  const isScoped: boolean = versionParts[1].indexOf('@') === 0;
+
+  if (versionParts.length === 4 && !isScoped) {
+    // Example: "/gulp-karma/0.0.5/karma@0.13.22"
+    // Example: "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7")
+    return versionParts[2]; // e.g. "0.0.5"
+  }
+
+  if (versionParts.length === 5 && isScoped) {
+    // Example: "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
+    return versionParts[3]; // e.g. "3.1.1"
+  }
+
+  if (semver.valid(versionParts[versionParts.length - 1]) !== null) {
+    // Example: "path.pkgs.visualstudio.com/@scope/depame/1.4.0"
+    return versionParts[versionParts.length - 1];  // e.g. "1.4.0"
+  }
+
+  return undefined;
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
@@ -198,7 +216,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean { // override
-    // dependencyVersion could be a relattive or absolute path, for those cases we
+    // dependencyVersion could be a relative or absolute path, for those cases we
     // need to extract the version from the end of the path.
     return super.checkValidVersionRange(dependencyVersion.split('/').pop()!, versionRange);
   }
@@ -261,18 +279,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   private _normalizeDependencyVersion(dependencyName: string, version: string): string | undefined {
-    // version will be either:
-    // A - the version (e.g. "0.0.5")
-    // B - a peer dep version (e.g. "/gulp-karma/0.0.5/karma@0.13.22"
-    //                           or "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
-    //                           or "/sinon-chai/2.8.0/chai@3.5.0+sinon@1.17.7")
-    // C -The dependency path is relative or absolute (e.g., /foo/1.0.0)
-
-    // check to see if this is the special style of specifiers
-    // e.g.:  "/gulp-karma/0.0.5/karma@0.13.22" or
-    //     or "/@ms/sp-client-utilities/3.1.1/foo@13.1.0"
-    // split it by forward slashes, then grab the second group (or the 3rd, if the package name is scoped)
-    // if the second group doesn't exist, return the version directly
     if (version) {
       const extractedVersion: string | undefined = extractVersionFromPnpmVersionSpecifier(version);
 

@@ -11,11 +11,12 @@
  * - [tslint](https://github.com/palantir/tslint#readme)
  * - [API Extractor](https://api-extractor.com/)
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
-export { RushStackCompilerBase }  from './RushStackCompilerBase';
 export { ApiExtractorRunner } from './ApiExtractorRunner';
+export { RushStackCompilerBase }  from './RushStackCompilerBase';
+export { StandardBuildFolders } from './StandardBuildFolders';
 export {
   TypescriptCompiler,
   ITypescriptCompilerOptions
@@ -26,4 +27,4 @@ export {
   TslintRunner
 } from './TslintRunner';
 export { ToolPaths } from './ToolPaths';
-export { ToolPackages } from './ToolPackages';
+export { ToolPackages } from  './ToolPackages';

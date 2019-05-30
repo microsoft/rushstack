@@ -10,7 +10,7 @@ import { PosixModeBits } from './PosixModeBits';
 
 /**
  * Typings for one of the streams inside IExecutableSpawnSyncOptions.stdio.
- * @beta
+ * @public
  */
 export type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit'
   | NodeJS.WritableStream | NodeJS.ReadableStream
@@ -18,13 +18,13 @@ export type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit'
 
 /**
  * Typings for IExecutableSpawnSyncOptions.stdio.
- * @beta
+ * @public
  */
 export type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableStdioStreamMapping[];
 
 /**
  * Options for Executable.tryResolve().
- * @beta
+ * @public
  */
 export interface IExecutableResolveOptions {
   /**
@@ -40,7 +40,7 @@ export interface IExecutableResolveOptions {
 
 /**
  * Options for Executable.execute().
- * @beta
+ * @public
  */
 export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
   /**
@@ -131,7 +131,7 @@ export class Executable {
    * @param options - Additional options
    * @returns the same data type as returned by the NodeJS child_process.spawnSync() API
    *
-   * @internalremarks
+   * @privateRemarks
    *
    * NOTE: The NodeJS spawnSync() returns SpawnSyncReturns<string> or SpawnSyncReturns<Buffer>
    * polymorphically based on the options.encoding parameter value.  This is a fairly confusing

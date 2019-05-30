@@ -64,15 +64,21 @@ export namespace RushConstants {
   export const rushVariantsFolderName: string = 'variants';
 
   /**
-   * The filename ("npm-shrinkwrap.json") used to store state for the "npm shrinkwrap"
-   * command.
+   * The filename ("npm-shrinkwrap.json") used to store an installation plan for the NPM package manger.
    */
   export const npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 
   /**
-   * The filename ("shrinkwrap.yaml") used to store state for pnpm
+   * The filename ("shrinkwrap.yaml") used to store an installation plan for the PNPM package manger
+   * (PNPM version 2.x and earlier).
    */
-  export const pnpmShrinkwrapFilename: string = 'shrinkwrap.yaml';
+  export const pnpmV1ShrinkwrapFilename: string = 'shrinkwrap.yaml';
+
+  /**
+   * The filename ("pnpm-lock.yaml") used to store an installation plan for the PNPM package manger
+   * (PNPM version 3.x and later).
+   */
+  export const pnpmV3ShrinkwrapFilename: string = 'pnpm-lock.yaml';
 
   /**
    * The filename ("pnpmfile.js") used to add custom configuration to PNPM

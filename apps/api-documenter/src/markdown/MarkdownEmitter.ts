@@ -17,8 +17,9 @@ import {
   DocEscapedText,
   DocErrorText
 } from '@microsoft/tsdoc';
-import { IndentedWriter } from '@microsoft/api-extractor';
 import { InternalError } from '@microsoft/node-core-library';
+
+import { IndentedWriter } from '../utils/IndentedWriter';
 
 export interface IMarkdownEmitterOptions {
 }
@@ -76,6 +77,15 @@ export class MarkdownEmitter {
     return textWithBackslashes;
   }
 
+  protected getTableEscapedText(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\|/g, '&#124;');
+  }
+
   /**
    * @virtual
    */
@@ -97,14 +107,23 @@ export class MarkdownEmitter {
       }
       case DocNodeKind.CodeSpan: {
         const docCodeSpan: DocCodeSpan = docNode as DocCodeSpan;
-        writer.write('`');
         if (context.insideTable) {
-          const parts: string[] = docCodeSpan.code.split(/\r?\n/g);
-          writer.write(parts.join('`<p/>`'));
+          writer.write('<code>');
+        } else {
+          writer.write('`');
+        }
+        if (context.insideTable) {
+          const code: string = this.getTableEscapedText(docCodeSpan.code);
+          const parts: string[] = code.split(/\r?\n/g);
+          writer.write(parts.join('</code><br/><code>'));
         } else {
           writer.write(docCodeSpan.code);
         }
-        writer.write('`');
+        if (context.insideTable) {
+          writer.write('</code>');
+        } else {
+          writer.write('`');
+        }
         break;
       }
       case DocNodeKind.LinkTag: {

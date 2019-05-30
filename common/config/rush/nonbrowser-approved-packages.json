@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@microsoft/api-extractor-model",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/decorators",
       "allowedCategories": [ "libraries" ]
     },
@@ -71,6 +75,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@microsoft/rush-stack-compiler-2.8",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/rush-stack-compiler-2.9",
       "allowedCategories": [ "tests" ]
     },
@@ -80,10 +88,18 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.1",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.2",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.3",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.4",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -139,6 +155,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "api-extractor-lib3-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "api-extractor-test-01",
       "allowedCategories": [ "tests" ]
     },
@@ -172,7 +192,7 @@
     },
     {
       "name": "colors",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "deasync",
@@ -355,6 +375,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "long",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "md5",
       "allowedCategories": [ "libraries" ]
     },
@@ -428,6 +452,10 @@
     },
     {
       "name": "sinon-chai",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "source-map",
       "allowedCategories": [ "libraries" ]
     },
     {

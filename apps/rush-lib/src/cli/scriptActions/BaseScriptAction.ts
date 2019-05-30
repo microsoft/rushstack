@@ -68,6 +68,14 @@ export abstract class BaseScriptAction extends BaseRushAction {
               defaultValue: parameter.defaultValue
             });
             break;
+          case 'string':
+            customParameter = this.defineStringParameter({
+              parameterLongName: parameter.longName,
+              parameterShortName: parameter.shortName,
+              description: parameter.description,
+              argumentName: parameter.argumentName
+            });
+            break;
           default:
             throw new Error(`${RushConstants.commandLineFilename} defines a parameter "${parameter!.longName}"`
               + ` using an unsupported parameter kind "${parameter!.parameterKind}"`);

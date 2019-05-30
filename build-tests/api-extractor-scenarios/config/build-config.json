@@ -1,17 +1,26 @@
 {
   "scenarioFolderNames": [
+    "ambientNameConflict",
     "apiItemKinds",
-    "circularImport1",
+    "circularImport",
     "circularImport2",
-    "exportDuplicate1",
-    "exportEquals",
-    "exportImportedExternal",
-    "exportStar1",
-    "exportStar2",
-    "exportStar3",
-    "defaultExportOfEntryPoint1",
+    "defaultExportOfEntryPoint",
     "defaultExportOfEntryPoint2",
     "defaultExportOfEntryPoint3",
-    "defaultExportOfEntryPoint4"
+    "defaultExportOfEntryPoint4",
+    "docReferences",
+    "docReferences2",
+    "docReferences3",
+    "exportDuplicate",
+    "exportEquals",
+    "exportImportedExternal",
+    "exportImportedExternal2",
+    "exportStar",
+    "exportStar2",
+    "exportStar3",
+    "importEquals",
+    "inconsistentReleaseTags",
+    "preapproved",
+    "typeOf"
   ]
 }

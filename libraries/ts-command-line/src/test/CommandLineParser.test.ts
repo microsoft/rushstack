@@ -11,7 +11,7 @@ class TestAction extends CommandLineAction {
 
   public constructor() {
     super({
-      actionName: 'do-job',
+      actionName: 'do:the-job',
       summary: 'does the job',
       documentation: 'a longer description'
     });
@@ -51,9 +51,9 @@ describe('CommandLineParser', () => {
   it('executes an action', () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 
-    return commandLineParser.execute(['do-job', '--flag']).then(() => {
+    return commandLineParser.execute(['do:the-job', '--flag']).then(() => {
       expect(commandLineParser.selectedAction).toBeDefined();
-      expect(commandLineParser.selectedAction!.actionName).toEqual('do-job');
+      expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job');
 
       const action: TestAction = commandLineParser.selectedAction as TestAction;
       expect(action.done).toBe(true);

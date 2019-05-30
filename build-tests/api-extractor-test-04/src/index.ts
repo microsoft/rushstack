@@ -6,7 +6,7 @@
  *
  * Test scenarios for trimming alpha/beta/internal definitions from the generated *.d.ts files.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 export { AlphaClass } from './AlphaClass';
@@ -34,3 +34,5 @@ import { AlphaClass } from './AlphaClass';
 export type ExportedAlias = AlphaClass;
 
 export { IPublicComplexInterface } from './IPublicComplexInterface';
+
+export { Lib1Interface } from 'api-extractor-lib1-test';

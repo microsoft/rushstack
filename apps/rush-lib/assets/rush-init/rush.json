@@ -46,7 +46,19 @@
      * The default value is false to avoid legacy compatibility issues.
      * It is strongly recommended to set strictPeerDependencies=true.
      */
-    /*[LINE "DEMO"]*/ "strictPeerDependencies": true
+    /*[LINE "DEMO"]*/ "strictPeerDependencies": true,
+
+
+    /**
+     * Configures the strategy used to select versions during installation.
+     *
+     * This feature requires PNPM version 3.1 or newer.  It corresponds to the "--resolution-strategy" command-line
+     * option for PNPM.  Possible values are "fast" and "fewer-dependencies".  PNPM's default is "fast", but this may
+     * be incompatible with certain packages, for example the "@types" packages from DefinitelyTyped.  Rush's default
+     * is "fewer-dependencies", which causes PNPM to avoid installing a newer version if an already installed version
+     * can be reused; this is more similar to NPM's algorithm.
+     */
+    /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast"
   },
 
   /**
@@ -57,7 +69,7 @@
    * Specify a SemVer range to ensure developers use a NodeJS version that is appropriate
    * for your repo.
    */
-  "nodeSupportedVersionRange": ">=8.9.4 <9.0.0",
+  "nodeSupportedVersionRange": ">=10.13.0 <11.0.0",
 
   /**
    * If you would like the version specifiers for your dependencies to be consistent, then
@@ -164,7 +176,16 @@
      * of a recommended email.  Make sure it conforms to one of the allowedEmailRegExps
      * expressions.
      */
-    /*[LINE "DEMO"]*/ "sampleEmail": "mrexample@users.noreply.github.com"
+    /*[LINE "DEMO"]*/ "sampleEmail": "mrexample@users.noreply.github.com",
+
+    /**
+     * The commit message to use when committing changes during 'rush publish'.
+     *
+     * For example, if you want to prevent these commits from triggering a CI build,
+     * you might configure your system's trigger to look for a special string such as "[skip-ci]"
+     * in the commit message, and then customize Rush's message to contain that string.
+     */
+    /*[LINE "DEMO"]*/ "versionBumpCommitMessage": "Applying package updates. [skip-ci]"
   },
 
   "repository": {

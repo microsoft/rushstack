@@ -80,7 +80,7 @@
         "run",
         "--local",
         "--config",
-        "./temp/configs/api-extractor-defaultExportOfEntryPoint1.json"
+        "./temp/configs/api-extractor-typeof.json"
       ],
       "sourceMaps": true
     },

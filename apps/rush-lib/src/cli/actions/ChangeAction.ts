@@ -113,7 +113,7 @@ export class ChangeAction extends BaseRushAction {
 
     this._sortedProjectList = this._getChangedPackageNames().sort();
     if (this._sortedProjectList.length === 0) {
-      console.log('No change descriptions are needed.');
+      console.log('No changes were detected on this branch. Nothing to do.');
       this._warnUncommittedChanges();
       return Promise.resolve();
     }
@@ -147,7 +147,7 @@ export class ChangeAction extends BaseRushAction {
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
-      console.log('No change descriptions are needed.');
+      console.log('No changes were detected on this branch.');
     }
   }
 

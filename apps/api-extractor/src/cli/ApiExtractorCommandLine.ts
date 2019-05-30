@@ -8,6 +8,7 @@ import { CommandLineParser, CommandLineFlagParameter } from '@microsoft/ts-comma
 import { InternalError } from '@microsoft/node-core-library';
 
 import { RunAction } from './RunAction';
+import { InitAction } from './InitAction';
 
 export class ApiExtractorCommandLine extends CommandLineParser {
   private _debugParameter: CommandLineFlagParameter;
@@ -15,7 +16,11 @@ export class ApiExtractorCommandLine extends CommandLineParser {
   constructor() {
     super({
       toolFilename: 'api-extractor',
-      toolDescription: 'This is an experimental command line interface for the API Extractor tool.'
+      toolDescription: 'API Extractor helps you build better TypeScript libraries.  It analyzes the main entry'
+        + ' point for your package, collects the inventory of exported declarations, and then generates three kinds'
+        + ' of output:  an API report file (.api.md) to facilitate reviews, a declaration rollup (.d.ts) to be'
+        + ' published with your NPM package, and a doc model file (.api.json) to be used with a documentation'
+        + ' tool such as api-documenter.  For details, please visit the web site.'
     });
     this._populateActions();
   }
@@ -46,6 +51,7 @@ export class ApiExtractorCommandLine extends CommandLineParser {
   }
 
   private _populateActions(): void {
+    this.addAction(new InitAction(this));
     this.addAction(new RunAction(this));
   }
 }

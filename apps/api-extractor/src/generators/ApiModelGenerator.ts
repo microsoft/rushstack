@@ -5,33 +5,37 @@
 
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
+import {
+  ApiModel,
+  ApiClass,
+  ApiPackage,
+  ApiEntryPoint,
+  ApiMethod,
+  ApiNamespace,
+  ApiInterface,
+  ApiPropertySignature,
+  ApiItemContainerMixin,
+  ReleaseTag,
+  ApiProperty,
+  ApiMethodSignature,
+  IApiParameterOptions,
+  ApiEnum,
+  ApiEnumMember,
+  IExcerptTokenRange,
+  IExcerptToken,
+  ApiConstructor,
+  ApiConstructSignature,
+  ApiFunction,
+  ApiIndexSignature,
+  ApiVariable,
+  ApiTypeAlias,
+  ApiCallSignature
+} from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
-import { ApiModel } from '../api/model/ApiModel';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { ApiClass } from '../api/model/ApiClass';
-import { ApiPackage } from '../api/model/ApiPackage';
-import { ApiEntryPoint } from '../api/model/ApiEntryPoint';
-import { ApiMethod } from '../api/model/ApiMethod';
-import { ApiNamespace } from '../api/model/ApiNamespace';
-import { ApiInterface } from '../api/model/ApiInterface';
-import { ApiPropertySignature } from '../api/model/ApiPropertySignature';
-import { ApiItemContainerMixin } from '../api/mixins/ApiItemContainerMixin';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
-import { ApiProperty } from '../api/model/ApiProperty';
-import { ApiMethodSignature } from '../api/model/ApiMethodSignature';
-import { IApiParameterOptions } from '../api/mixins/ApiParameterListMixin';
-import { ApiEnum } from '../api/model/ApiEnum';
-import { ApiEnumMember } from '../api/model/ApiEnumMember';
-import { IExcerptTokenRange, IExcerptToken } from '../api/mixins/Excerpt';
 import { ExcerptBuilder, IExcerptBuilderNodeToCapture } from './ExcerptBuilder';
-import { ApiConstructor } from '../api/model/ApiConstructor';
-import { ApiConstructSignature } from '../api/model/ApiConstructSignature';
-import { ApiFunction } from '../api/model/ApiFunction';
-import { ApiIndexSignature } from '../api/model/ApiIndexSignature';
-import { ApiVariable } from '../api/model/ApiVariable';
-import { ApiTypeAlias } from '../api/model/ApiTypeAlias';
-import { ApiCallSignature } from '../api/model/ApiCallSignature';
+import { AstSymbol } from '../analyzer/AstSymbol';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -49,10 +53,10 @@ export class ApiModelGenerator {
   }
 
   public buildApiPackage(): ApiPackage {
-    const packageDocComment: tsdoc.DocComment | undefined = this._collector.package.tsdocComment;
+    const packageDocComment: tsdoc.DocComment | undefined = this._collector.workingPackage.tsdocComment;
 
     const apiPackage: ApiPackage = new ApiPackage({
-      name: this._collector.package.name,
+      name: this._collector.workingPackage.name,
       docComment: packageDocComment
     });
     this._apiModel.addMember(apiPackage);
@@ -62,15 +66,15 @@ export class ApiModelGenerator {
 
     // Create a CollectorEntity for each top-level export
     for (const entity of this._collector.entities) {
-      for (const astDeclaration of entity.astSymbol.astDeclarations) {
-        if (entity.exported) {
-          if (!entity.astSymbol.imported) {
+      if (entity.exported) {
+        if (entity.astEntity instanceof AstSymbol) {
+          for (const astDeclaration of entity.astEntity.astDeclarations) {
             this._processDeclaration(astDeclaration, entity.nameForEmit, apiEntryPoint);
-          } else {
-            // TODO: Figure out how to represent reexported definitions.  Basically we need to introduce a new
-            // ApiItem subclass for "export alias", similar to a type alias, but representing declarations of the
-            // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
           }
+        } else {
+          // TODO: Figure out how to represent reexported AstImport objects.  Basically we need to introduce a new
+          // ApiItem subclass for "export alias", similar to a type alias, but representing declarations of the
+          // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
         }
       }
     }
@@ -264,7 +268,7 @@ export class ApiModelGenerator {
 
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        nodeToStopAt: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
+        stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
         nodesToCapture
       });
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
@@ -324,7 +328,7 @@ export class ApiModelGenerator {
     if (apiEnum === undefined) {
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        nodeToStopAt: ts.SyntaxKind.FirstPunctuation  // FirstPunctuation = "{"
+        stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation  // FirstPunctuation = "{"
       });
 
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
@@ -463,7 +467,7 @@ export class ApiModelGenerator {
 
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        nodeToStopAt: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
+        stopBeforeChildKind: ts.SyntaxKind.FirstPunctuation,  // FirstPunctuation = "{"
         nodesToCapture
       });
 
@@ -559,7 +563,7 @@ export class ApiModelGenerator {
     if (apiNamespace === undefined) {
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
-        nodeToStopAt: ts.SyntaxKind.ModuleBlock  // ModuleBlock = the "{ ... }" block
+        stopBeforeChildKind: ts.SyntaxKind.ModuleBlock  // ModuleBlock = the "{ ... }" block
       });
 
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;

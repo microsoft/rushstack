@@ -14,10 +14,12 @@ items:
       - api-documenter-test.DocBaseClass
       - api-documenter-test.DocClass1
       - api-documenter-test.DocEnum
+      - api-documenter-test.Generic
       - api-documenter-test.globalFunction
       - api-documenter-test.IDocInterface1
       - api-documenter-test.IDocInterface2
       - api-documenter-test.IDocInterface3
+      - api-documenter-test.IDocInterface4
       - api-documenter-test.OuterNamespace.InnerNamespace.nestedFunction
       - api-documenter-test.SystemEvent
   - uid: api-documenter-test.globalFunction
@@ -63,11 +65,15 @@ references:
     name: DocClass1
   - uid: api-documenter-test.DocEnum
     name: DocEnum
+  - uid: api-documenter-test.Generic
+    name: Generic
   - uid: api-documenter-test.IDocInterface1
     name: IDocInterface1
   - uid: api-documenter-test.IDocInterface2
     name: IDocInterface2
   - uid: api-documenter-test.IDocInterface3
     name: IDocInterface3
+  - uid: api-documenter-test.IDocInterface4
+    name: IDocInterface4
   - uid: api-documenter-test.SystemEvent
     name: SystemEvent

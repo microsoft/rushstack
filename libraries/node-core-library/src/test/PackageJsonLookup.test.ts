@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { PackageJsonLookup } from '../PackageJsonLookup';
-import { IPackageJson } from '../IPackageJson';
+import { IPackageJson, INodePackageJson } from '../IPackageJson';
 import { FileConstants } from '../Constants';
 
 describe('PackageJsonLookup', () => {
@@ -22,6 +22,20 @@ describe('PackageJsonLookup', () => {
       if (packageJson) {
         expect(packageJson.name).toEqual('example-package');
         expect(packageJson.version).toEqual('1.0.0');
+
+        // The "nonstandardField" should have been trimmed because loadExtraFields=false
+        expect(packageJson).not.toHaveProperty('nonstandardField');
+      }
+    });
+
+    test('tryLoadNodePackageJsonFor() test package with no version', () => {
+      const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+      const sourceFilePath: string = path.join(__dirname, './test-data/example-package-no-version');
+      const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadNodePackageJsonFor(sourceFilePath);
+      expect(packageJson).toBeDefined();
+      if (packageJson) {
+        expect(packageJson.name).toEqual('example-package');
+        expect(packageJson.version).not.toBeDefined();
 
         // The "nonstandardField" should have been trimmed because loadExtraFields=false
         expect(packageJson).not.toHaveProperty('nonstandardField');

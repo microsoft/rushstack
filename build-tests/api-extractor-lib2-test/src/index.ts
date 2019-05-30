@@ -7,13 +7,13 @@
  * @remarks
  * This library is consumed by api-extractor-scenarios.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
 /** @public */
 export class Lib2Class {
 }
 
-/** @public */
+/** @alpha */
 export interface Lib2Interface {
 }

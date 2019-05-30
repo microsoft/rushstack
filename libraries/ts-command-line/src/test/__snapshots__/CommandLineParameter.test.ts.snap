@@ -359,12 +359,12 @@ Array [
 `;
 
 exports[`CommandLineParameter prints the action help 1`] = `
-"usage: example do-job [-h] [-c {one,two,three,default}]
-                      [--choice-with-default {one,two,three,default}] [-f]
-                      [-i NUMBER] [--integer-with-default NUMBER]
-                      --integer-required NUMBER [-s TEXT]
-                      [--string-with-default TEXT] [-l LIST]
-                      
+"usage: example do:the-job [-h] [-c {one,two,three,default}]
+                          [--choice-with-default {one,two,three,default}] [-f]
+                          [-i NUMBER] [--integer-with-default NUMBER]
+                          --integer-required NUMBER [-s TEXT]
+                          [--string-with-default TEXT] [-l LIST]
+                          
 
 a longer description
 
@@ -408,7 +408,7 @@ An example project
 
 Positional arguments:
   <command>
-    do-job           does the job
+    do:the-job       does the job
 
 Optional arguments:
   -h, --help         Show this help message and exit.

@@ -1,6 +1,232 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 31 Jan 2019 17:03:49 GMT and should not be manually modified.
+This log was last generated on Mon, 27 May 2019 04:13:44 GMT and should not be manually modified.
+
+## 7.2.1
+Mon, 27 May 2019 04:13:44 GMT
+
+### Patches
+
+- Improve the markdown generator to document class constructors
+
+## 7.2.0
+Thu, 16 May 2019 22:15:20 GMT
+
+### Minor changes
+
+- Add optional config file `api-documenter.json` to allow building custom Table of Contents for YamlDocumenter.
+
+## 7.1.7
+Mon, 13 May 2019 02:08:35 GMT
+
+*Version update only*
+
+## 7.1.6
+Mon, 06 May 2019 20:46:21 GMT
+
+*Version update only*
+
+## 7.1.5
+Mon, 06 May 2019 19:34:54 GMT
+
+*Version update only*
+
+## 7.1.4
+Mon, 06 May 2019 19:11:16 GMT
+
+*Version update only*
+
+## 7.1.3
+Tue, 30 Apr 2019 23:08:02 GMT
+
+*Version update only*
+
+## 7.1.2
+Mon, 29 Apr 2019 19:13:03 GMT
+
+### Patches
+
+- Fix the "Home" link in the breadcrumb when viewing docs using GitHub's markdown renderer
+
+## 7.1.1
+Wed, 17 Apr 2019 19:12:31 GMT
+
+### Patches
+
+- Fix newline rendering when code blocks are used in tables
+
+## 7.1.0
+Tue, 16 Apr 2019 11:01:37 GMT
+
+### Minor changes
+
+- Initial stable release of API Extractor 7
+
+### Patches
+
+- Adding an extra newline to the OfficeYamlDocumenter Examples header insertion
+
+## 7.0.51
+Fri, 12 Apr 2019 06:13:16 GMT
+
+*Version update only*
+
+## 7.0.50
+Thu, 11 Apr 2019 07:14:01 GMT
+
+*Version update only*
+
+## 7.0.49
+Tue, 09 Apr 2019 05:31:01 GMT
+
+### Patches
+
+- Add 'do not edit' header to generated documentation files
+
+## 7.0.48
+Mon, 08 Apr 2019 19:12:52 GMT
+
+*Version update only*
+
+## 7.0.47
+Sat, 06 Apr 2019 02:05:51 GMT
+
+*Version update only*
+
+## 7.0.46
+Fri, 05 Apr 2019 04:16:17 GMT
+
+*Version update only*
+
+## 7.0.45
+Wed, 03 Apr 2019 02:58:33 GMT
+
+*Version update only*
+
+## 7.0.44
+Tue, 02 Apr 2019 01:12:02 GMT
+
+*Version update only*
+
+## 7.0.43
+Sat, 30 Mar 2019 22:27:16 GMT
+
+### Patches
+
+- Add limited support for resolving @inheritDoc references to external packages by postprocessing them in api-documenter
+
+## 7.0.42
+Thu, 28 Mar 2019 19:14:27 GMT
+
+*Version update only*
+
+## 7.0.41
+Wed, 27 Mar 2019 19:57:45 GMT
+
+### Patches
+
+- Fix an issue with type unions rendering in markdown tables (addresses #1065)
+
+## 7.0.40
+Tue, 26 Mar 2019 20:54:18 GMT
+
+*Version update only*
+
+## 7.0.39
+Sat, 23 Mar 2019 03:48:31 GMT
+
+*Version update only*
+
+## 7.0.38
+Thu, 21 Mar 2019 04:59:11 GMT
+
+*Version update only*
+
+## 7.0.37
+Thu, 21 Mar 2019 01:15:32 GMT
+
+*Version update only*
+
+## 7.0.36
+Wed, 20 Mar 2019 19:14:49 GMT
+
+*Version update only*
+
+## 7.0.35
+Mon, 18 Mar 2019 04:28:43 GMT
+
+*Version update only*
+
+## 7.0.34
+Fri, 15 Mar 2019 19:13:25 GMT
+
+*Version update only*
+
+## 7.0.33
+Wed, 13 Mar 2019 19:13:14 GMT
+
+### Patches
+
+- Refactor code to move the IndentedWriter API from api-extractor-model to api-documenter
+
+## 7.0.32
+Wed, 13 Mar 2019 01:14:05 GMT
+
+### Patches
+
+- Upgrade TSDoc
+
+## 7.0.31
+Mon, 11 Mar 2019 16:13:36 GMT
+
+### Patches
+
+- Update api-documenter to use the new NPM package @microsoft/api-extractor-model; eliminate dependencies on @microsoft/api-extractor or the TypeScript compiler
+
+## 7.0.30
+Tue, 05 Mar 2019 17:13:11 GMT
+
+*Version update only*
+
+## 7.0.29
+Mon, 04 Mar 2019 17:13:19 GMT
+
+*Version update only*
+
+## 7.0.28
+Wed, 27 Feb 2019 22:13:58 GMT
+
+*Version update only*
+
+## 7.0.27
+Wed, 27 Feb 2019 17:13:17 GMT
+
+*Version update only*
+
+## 7.0.26
+Mon, 18 Feb 2019 17:13:23 GMT
+
+*Version update only*
+
+## 7.0.25
+Tue, 12 Feb 2019 17:13:12 GMT
+
+*Version update only*
+
+## 7.0.24
+Mon, 11 Feb 2019 10:32:37 GMT
+
+*Version update only*
+
+## 7.0.23
+Mon, 11 Feb 2019 08:55:57 GMT
+
+*Version update only*
+
+## 7.0.22
+Mon, 11 Feb 2019 03:31:55 GMT
+
+*Version update only*
 
 ## 7.0.21
 Thu, 31 Jan 2019 17:03:49 GMT

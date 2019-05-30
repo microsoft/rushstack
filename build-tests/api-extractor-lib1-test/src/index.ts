@@ -7,13 +7,16 @@
  * @remarks
  * This library is consumed by api-extractor-scenarios.
  *
- * @packagedocumentation
+ * @packageDocumentation
  */
 
-/** @public */
-export class Lib1Class {
+class Lib1ForgottenExport {
 }
 
 /** @public */
+export class Lib1Class extends Lib1ForgottenExport {
+}
+
+/** @alpha */
 export interface Lib1Interface {
 }

@@ -3,7 +3,7 @@ const child_process = require('child_process');
 const path = require('path');
 const process = require('process');
 
-console.log(`==> Invoking tsc in the "preview-consumer" folder`);
+console.log(`==> Invoking tsc in the "beta-consumer" folder`);
 
 function executeCommand(command, cwd) {
   console.log('---> ' + command);
@@ -26,11 +26,11 @@ if (process.argv.indexOf('--production') >= 0) {
   executeCommand('node node_modules/@microsoft/api-extractor/lib/start run --local');
 }
 
-// Run the TypeScript compiler in the preview-consumer folder
-console.log(`==> Invoking tsc in the "preview-consumer" folder`);
+// Run the TypeScript compiler in the beta-consumer folder
+console.log(`==> Invoking tsc in the "beta-consumer" folder`);
 
-fsx.emptyDirSync('preview-consumer/lib');
+fsx.emptyDirSync('beta-consumer/lib');
 const tscPath = path.resolve('node_modules/typescript/lib/tsc');
-executeCommand(`node ${tscPath}`, 'preview-consumer');
+executeCommand(`node ${tscPath}`, 'beta-consumer');
 
 console.log(`==> Finished build.js for ${path.basename(process.cwd())}`);

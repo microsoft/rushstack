@@ -5,16 +5,19 @@
 
 import * as ts from 'typescript';
 import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
-import { IndentedWriter } from '../api/IndentedWriter';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { Span, SpanModification } from '../analyzer/Span';
-import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { AstSymbol } from '../analyzer/AstSymbol';
+import { SymbolMetadata } from '../collector/SymbolMetadata';
+import { StringWriter } from './StringWriter';
+import { DtsEmitHelpers } from './DtsEmitHelpers';
 
 /**
  * Used with DtsRollupGenerator.writeTypingsFile()
@@ -48,101 +51,90 @@ export class DtsRollupGenerator {
    * @param dtsFilename    - The *.d.ts output filename
    */
   public static writeTypingsFile(collector: Collector, dtsFilename: string, dtsKind: DtsRollupKind): void {
-    const indentedWriter: IndentedWriter = new IndentedWriter();
+    const stringWriter: StringWriter = new StringWriter();
 
-    DtsRollupGenerator._generateTypingsFileContent(collector, indentedWriter, dtsKind);
+    DtsRollupGenerator._generateTypingsFileContent(collector, stringWriter, dtsKind);
 
-    FileSystem.writeFile(dtsFilename, indentedWriter.toString(), {
+    FileSystem.writeFile(dtsFilename, stringWriter.toString(), {
       convertLineEndings: NewlineKind.CrLf,
       ensureFolderExists: true
     });
   }
 
-  private static _generateTypingsFileContent(collector: Collector, indentedWriter: IndentedWriter,
+  private static _generateTypingsFileContent(collector: Collector, stringWriter: StringWriter,
     dtsKind: DtsRollupKind): void {
 
-    if (collector.package.tsdocParserContext) {
-      indentedWriter.writeLine(collector.package.tsdocParserContext.sourceRange.toString());
-      indentedWriter.writeLine();
+    if (collector.workingPackage.tsdocParserContext) {
+      stringWriter.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
+      stringWriter.writeLine();
     }
 
     // Emit the triple slash directives
     for (const typeDirectiveReference of collector.dtsTypeReferenceDirectives) {
       // tslint:disable-next-line:max-line-length
       // https://github.com/Microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
-      indentedWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+      stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
     }
 
     for (const libDirectiveReference of collector.dtsLibReferenceDirectives) {
-      indentedWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
+      stringWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
     }
 
     // Emit the imports
     for (const entity of collector.entities) {
-      if (entity.astSymbol.astImport) {
+      if (entity.astEntity instanceof AstImport) {
+        const astImport: AstImport = entity.astEntity;
 
-        const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astSymbol).releaseTag;
+        // For example, if the imported API comes from an external package that supports AEDoc,
+        // and it was marked as `@internal`, then don't emit it.
+        const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(astImport);
+        const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
+
         if (this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-          const astImport: AstImport = entity.astSymbol.astImport;
-
-          if (astImport.exportName === '*') {
-            indentedWriter.write(`import * as ${entity.nameForEmit}`);
-          } else if (entity.nameForEmit !== astImport.exportName) {
-            indentedWriter.write(`import { ${astImport.exportName} as ${entity.nameForEmit} }`);
-          } else {
-            indentedWriter.write(`import { ${astImport.exportName} }`);
-          }
-          indentedWriter.writeLine(` from '${astImport.modulePath}';`);
-
+          DtsEmitHelpers.emitImport(stringWriter, entity, astImport);
         }
       }
     }
 
     // Emit the regular declarations
     for (const entity of collector.entities) {
-      if (!entity.astSymbol.astImport) {
-        const releaseTag: ReleaseTag = collector.fetchMetadata(entity.astSymbol).releaseTag;
-        if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
-          indentedWriter.writeLine();
-          indentedWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
-          continue;
+      const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(entity.astEntity);
+      const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
+
+      if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
+        if (!collector.extractorConfig.omitTrimmingComments) {
+          stringWriter.writeLine();
+          stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
         }
+        continue;
+      }
+
+      if (entity.astEntity instanceof AstSymbol) {
 
         // Emit all the declarations for this entry
-        for (const astDeclaration of entity.astSymbol.astDeclarations || []) {
+        for (const astDeclaration of entity.astEntity.astDeclarations || []) {
 
-          indentedWriter.writeLine();
+          stringWriter.writeLine();
 
           const span: Span = new Span(astDeclaration.declaration);
           DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
-          indentedWriter.writeLine(span.getModifiedText());
+          stringWriter.writeLine(span.getModifiedText());
         }
       }
 
       if (!entity.shouldInlineExport) {
         for (const exportName of entity.exportNames) {
-          if (exportName === ts.InternalSymbolName.Default) {
-            indentedWriter.writeLine(`export default ${entity.nameForEmit};`);
-          } else if (entity.nameForEmit !== exportName) {
-            indentedWriter.writeLine(`export { ${entity.nameForEmit} as ${exportName} }`);
-          } else {
-            indentedWriter.writeLine(`export { ${exportName} }`);
-          }
+          DtsEmitHelpers.emitNamedExport(stringWriter, exportName, entity);
         }
       }
     }
 
-    if (collector.starExportedExternalModulePaths.length > 0) {
-      indentedWriter.writeLine();
-      for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
-        indentedWriter.writeLine(`export * from "${starExportedExternalModulePath}";`);
-      }
-    }
+    DtsEmitHelpers.emitStarExports(stringWriter, collector);
 
     // Emit "export { }" which is a special directive that prevents consumers from importing declarations
     // that don't have an explicit "export" modifier.
-    indentedWriter.writeLine();
-    indentedWriter.writeLine('export { }');
+    stringWriter.writeLine();
+    stringWriter.writeLine('export { }');
   }
 
   /**
@@ -156,9 +148,9 @@ export class DtsRollupGenerator {
     let recurseChildren: boolean = true;
     switch (span.kind) {
       case ts.SyntaxKind.JSDocComment:
-        // If the @packagedocumentation comment seems to be attached to one of the regular API items,
+        // If the @packageDocumentation comment seems to be attached to one of the regular API items,
         // omit it.  It gets explictly emitted at the top of the file.
-        if (span.node.getText().match(/(?:\s|\*)@packagedocumentation(?:\s|\*)/g)) {
+        if (span.node.getText().match(/(?:\s|\*)@packageDocumentation(?:\s|\*)/gi)) {
           span.modification.skipAll();
         }
 
@@ -244,28 +236,20 @@ export class DtsRollupGenerator {
         break;
 
       case ts.SyntaxKind.Identifier:
-        let nameFixup: boolean = false;
-        const identifierSymbol: ts.Symbol | undefined = collector.typeChecker.getSymbolAtLocation(span.node);
-        if (identifierSymbol) {
-          const followedSymbol: ts.Symbol = TypeScriptHelpers.followAliases(identifierSymbol, collector.typeChecker);
+        const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForIdentifierNode(
+          span.node as ts.Identifier
+        );
 
-          const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityBySymbol(followedSymbol);
-
-          if (referencedEntity) {
-            if (!referencedEntity.nameForEmit) {
-              // This should never happen
-              throw new Error('referencedEntry.uniqueName is undefined');
-            }
-
-            span.modification.prefix = referencedEntity.nameForEmit;
-            nameFixup = true;
-            // For debugging:
-            // span.modification.prefix += '/*R=FIX*/';
+        if (referencedEntity) {
+          if (!referencedEntity.nameForEmit) {
+            // This should never happen
+            throw new InternalError('referencedEntry.nameForEmit is undefined');
           }
 
-        }
-
-        if (!nameFixup) {
+          span.modification.prefix = referencedEntity.nameForEmit;
+          // For debugging:
+          // span.modification.prefix += '/*R=FIX*/';
+        } else {
           // For debugging:
           // span.modification.prefix += '/*R=KEEP*/';
         }
@@ -302,7 +286,11 @@ export class DtsRollupGenerator {
             const name: string = childAstDeclaration.astSymbol.localName;
             modification.omitChildren = true;
 
-            modification.prefix = `/* Excluded from this release type: ${name} */`;
+            if (!collector.extractorConfig.omitTrimmingComments) {
+              modification.prefix = `/* Excluded from this release type: ${name} */`;
+            } else {
+              modification.prefix = '';
+            }
             modification.suffix = '';
 
             if (nodeToTrim.children.length > 0) {

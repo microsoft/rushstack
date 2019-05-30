@@ -20,9 +20,15 @@ export * from '@microsoft/gulp-core-build-typescript';
 export * from '@microsoft/gulp-core-build-mocha';
 
 // pre copy and post copy allows you to specify a map of dest: [sources] to copy from one place to another.
+/**
+ * @public
+ */
 export const preCopy: CopyTask = new CopyTask();
 preCopy.name = 'pre-copy';
 
+/**
+ * @public
+ */
 export const postCopy: CopyTask = new CopyTask();
 postCopy.name = 'post-copy';
 
@@ -38,8 +44,20 @@ const buildSubtask: IExecutable = serial(
   apiExtractor,
   postCopy
 );
+
+/**
+ * @public
+ */
 export const buildTasks: IExecutable = task('build', buildSubtask);
+
+/**
+ * @public
+ */
 export const testTasks: IExecutable = task('test', serial(buildSubtask, mocha, jest));
+
+/**
+ * @public
+ */
 export const defaultTasks: IExecutable = task('default', serial(buildSubtask, instrument, mocha, jest));
 
 task('watch', watch('src/**.ts', testTasks));

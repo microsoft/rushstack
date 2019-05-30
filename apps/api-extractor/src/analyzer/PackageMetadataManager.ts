@@ -5,13 +5,14 @@ import * as path from 'path';
 
 import {
   PackageJsonLookup,
-  IPackageJson,
   FileSystem,
   JsonFile,
-  NewlineKind
+  NewlineKind,
+  INodePackageJson
 } from '@microsoft/node-core-library';
 import { Extractor } from '../api/Extractor';
-import { ILogger } from '../api/ILogger';
+import { MessageRouter } from '../collector/MessageRouter';
+import { ConsoleMessageId } from '../api/ConsoleMessageId';
 
 /**
  * Represents analyzed information for a package.json file.
@@ -26,14 +27,14 @@ export class PackageMetadata {
    * The parsed contents of package.json.  Note that PackageJsonLookup
    * only includes essential fields.
    */
-  public readonly packageJson: IPackageJson;
+  public readonly packageJson: INodePackageJson;
   /**
    * If true, then the package's documentation comments can be assumed
    * to contain API Extractor compatible TSDoc tags.
    */
   public readonly aedocSupported: boolean;
 
-  public constructor(packageJsonPath: string, packageJson: IPackageJson, aedocSupported: boolean) {
+  public constructor(packageJsonPath: string, packageJson: INodePackageJson, aedocSupported: boolean) {
     this.packageJsonPath = packageJsonPath;
     this.packageJson = packageJson;
     this.aedocSupported = aedocSupported;
@@ -57,30 +58,89 @@ export class PackageMetadataManager {
   public static tsdocMetadataFilename: string = 'tsdoc-metadata.json';
 
   private readonly _packageJsonLookup: PackageJsonLookup;
-  private readonly _logger: ILogger;
+  private readonly _messageRouter: MessageRouter;
   private readonly _packageMetadataByPackageJsonPath: Map<string, PackageMetadata>
     = new Map<string, PackageMetadata>();
 
-  public static writeTsdocMetadataFile(packageJsonFolder: string): void {
-    // This feature is still being standardized: https://github.com/Microsoft/tsdoc/issues/7
-    // In the future we will use the @microsoft/tsdoc library to read this file.
-    const tsdocMetadataPath: string = path.join(packageJsonFolder,
-      'dist', PackageMetadataManager.tsdocMetadataFilename);
+  // This feature is still being standardized: https://github.com/Microsoft/tsdoc/issues/7
+  // In the future we will use the @microsoft/tsdoc library to read this file.
+  private static _resolveTsdocMetadataPathFromPackageJson(packageFolder: string,
+    packageJson: INodePackageJson): string {
 
+    const tsdocMetadataFilename: string = PackageMetadataManager.tsdocMetadataFilename;
+
+    let tsdocMetadataRelativePath: string;
+
+    if (packageJson.tsdocMetadata) {
+      // 1. If package.json contains a field such as "tsdocMetadata": "./path1/path2/tsdoc-metadata.json",
+      // then that takes precedence.  This convention will be rarely needed, since the other rules below generally
+      // produce a good result.
+      tsdocMetadataRelativePath = packageJson.tsdocMetadata;
+    } else if (packageJson.typings) {
+      // 2. If package.json contains a field such as "typings": "./path1/path2/index.d.ts", then we look
+      // for the file under "./path1/path2/tsdoc-metadata.json"
+      tsdocMetadataRelativePath = path.join(
+        path.dirname(packageJson.typings),
+        tsdocMetadataFilename
+      );
+    } else if (packageJson.main) {
+      // 3. If package.json contains a field such as "main": "./path1/path2/index.js", then we look for
+      // the file under "./path1/path2/tsdoc-metadata.json"
+      tsdocMetadataRelativePath = path.join(
+        path.dirname(packageJson.main),
+        tsdocMetadataFilename
+      );
+    } else {
+      // 4. If none of the above rules apply, then by default we look for the file under "./tsdoc-metadata.json"
+      // since the default entry point is "./index.js"
+      tsdocMetadataRelativePath = tsdocMetadataFilename;
+    }
+
+    // Always resolve relative to the package folder.
+    const tsdocMetadataPath: string = path.resolve(
+      packageFolder,
+      tsdocMetadataRelativePath
+    );
+    return tsdocMetadataPath;
+  }
+
+  /**
+   * @param tsdocMetadataPath - An explicit path that can be configured in api-extractor.json.
+   * If this parameter is not an empty string, it overrides the normal path calculation.
+   * @returns the absolute path to the TSDoc metadata file
+   */
+  public static resolveTsdocMetadataPath(
+    packageFolder: string,
+    packageJson: INodePackageJson,
+    tsdocMetadataPath?: string
+  ): string {
+    if (tsdocMetadataPath) {
+      return path.resolve(packageFolder, tsdocMetadataPath);
+    }
+    return PackageMetadataManager._resolveTsdocMetadataPathFromPackageJson(
+      packageFolder,
+      packageJson
+    );
+  }
+
+  /**
+   * Writes the TSDoc metadata file to the specified output file.
+   */
+  public static writeTsdocMetadataFile(tsdocMetadataPath: string): void {
     const fileObject: Object = {
       tsdocVersion: '0.12',
       toolPackages: [
         {
-           packageName: '@microsoft/api-extractor',
-           packageVersion: Extractor.version
+          packageName: '@microsoft/api-extractor',
+          packageVersion: Extractor.version
         }
       ]
     };
 
     const fileContent: string =
-      '// This file is read by tools that parse documentation comments conforming to the TSDoc standard.\n'
-      + '// It should be published with your NPM package.  It should not be tracked by Git.\n'
-      + JsonFile.stringify(fileObject);
+      '// This file is read by tools that parse documentation comments conforming to the TSDoc standard.\n' +
+      '// It should be published with your NPM package.  It should not be tracked by Git.\n' +
+      JsonFile.stringify(fileObject);
 
     FileSystem.writeFile(tsdocMetadataPath, fileContent, {
       convertLineEndings: NewlineKind.CrLf,
@@ -88,9 +148,9 @@ export class PackageMetadataManager {
     });
   }
 
-  public constructor(packageJsonLookup: PackageJsonLookup, logger: ILogger) {
+  public constructor(packageJsonLookup: PackageJsonLookup, messageRouter: MessageRouter) {
     this._packageJsonLookup = packageJsonLookup;
-    this._logger = logger;
+    this._messageRouter = messageRouter;
   }
 
   /**
@@ -108,19 +168,19 @@ export class PackageMetadataManager {
       = this._packageMetadataByPackageJsonPath.get(packageJsonFilePath);
 
     if (!packageMetadata) {
-      const packageJson: IPackageJson = this._packageJsonLookup.loadPackageJson(packageJsonFilePath);
+      const packageJson: INodePackageJson = this._packageJsonLookup.loadNodePackageJson(packageJsonFilePath);
 
       const packageJsonFolder: string = path.dirname(packageJsonFilePath);
 
-      // This feature is still being standardized: https://github.com/Microsoft/tsdoc/issues/7
-      // In the future we will use the @microsoft/tsdoc library to read this file.
       let aedocSupported: boolean = false;
 
-      const tsdocMetadataPath: string = path.join(packageJsonFolder,
-        'dist', PackageMetadataManager.tsdocMetadataFilename);
+      const tsdocMetadataPath: string = PackageMetadataManager._resolveTsdocMetadataPathFromPackageJson(
+        packageJsonFolder,
+        packageJson
+      );
 
       if (FileSystem.exists(tsdocMetadataPath)) {
-        this._logger.logVerbose('Found metadata in ' + tsdocMetadataPath);
+        this._messageRouter.logVerbose(ConsoleMessageId.FoundTSDocMetadata, 'Found metadata in ' + tsdocMetadataPath);
         // If the file exists at all, assume it was written by API Extractor
         aedocSupported = true;
       }

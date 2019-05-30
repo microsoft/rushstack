@@ -9,7 +9,7 @@ import { PackageName, FileSystem } from '@microsoft/node-core-library';
 import { RushConstants } from '../../logic/RushConstants';
 
 /**
- * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's shrinkwrap.yaml file formats.
+ * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
  */
 export abstract class BaseShrinkwrapFile {
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();

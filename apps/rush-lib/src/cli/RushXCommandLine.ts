@@ -69,21 +69,26 @@ export class RushXCommandLine {
 
       // Are we in a Rush repo?
       let rushConfiguration: RushConfiguration | undefined = undefined;
-      if (RushConfiguration.tryFindRushJsonLocation(false)) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation();
+      if (RushConfiguration.tryFindRushJsonLocation()) {
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
       }
 
       console.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
-      const exitCode: number = Utilities.executeLifecycleCommand(scriptBody,
+      const exitCode: number = Utilities.executeLifecycleCommand(
+        scriptBody,
         {
+          rushConfiguration,
           workingDirectory: packageFolder,
           // If there is a rush.json then use its .npmrc from the temp folder.
           // Otherwise look for npmrc in the project folder.
           initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
-          handleOutput: false
+          handleOutput: false,
+          environmentPathOptions: {
+            includeProjectBin: true
+          }
         }
       );
 

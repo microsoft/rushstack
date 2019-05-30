@@ -108,7 +108,6 @@ export class TaskRunner {
    * Defines the list of dependencies for an individual task.
    * @param taskName - the string name of the task for which we are defining dependencies. A task with this
    * name must already have been registered.
-   * @taskDependencies
    */
   public addDependencies(taskName: string, taskDependencies: string[]): void {
     const task: ITask | undefined = this._tasks.get(taskName);
@@ -273,8 +272,13 @@ export class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
+    if (task.hadEmptyScript) {
+      this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
+      + `[${task.name}] had an empty script`));
+    } else {
+      this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
       + `[${task.name}] completed successfully in ${task.stopwatch.toString()}`));
+    }
     task.status = TaskStatus.Success;
 
     task.dependents.forEach((dependent: ITask) => {
@@ -418,7 +422,7 @@ export class TaskRunner {
           case TaskStatus.SuccessWithWarning:
           case TaskStatus.Blocked:
           case TaskStatus.Failure:
-            if (task.stopwatch) {
+            if (task.stopwatch && !task.hadEmptyScript) {
               const time: string = task.stopwatch.toString();
               this._terminal.writeLine(headingColor(`${task.name} (${time})`));
             } else {
@@ -428,19 +432,36 @@ export class TaskRunner {
         }
 
         if (task.writer) {
-          let stderr: string = task.writer.getStdError();
-          if (stderr && (task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning)) {
-            stderr = stderr.split(os.EOL)
-              .map(text => text.trim())
-              .filter(text => text)
-              .join(os.EOL);
-            this._terminal.writeLine(stderr + (i !== tasks.length - 1 ? os.EOL : ''));
+          const stderr: string = task.writer.getStdError();
+          const shouldPrintDetails: boolean =
+            task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning;
+          let details: string = stderr ? stderr : task.writer.getStdOutput();
+          if (details && shouldPrintDetails) {
+            details = this._abridgeTaskReport(details);
+            this._terminal.writeLine(details + (i !== tasks.length - 1 ? os.EOL : ''));
           }
         }
       }
 
       this._terminal.writeLine(color('================================' + os.EOL));
     }
+  }
+
+  /**
+   * Remove trailing blanks, and all middle lines if text is large
+   */
+  private _abridgeTaskReport(text: string): string {
+    const headSize: number = 10;
+    const tailSize: number = 20;
+    const margin: number = 10;
+    const lines: Array<string> = text.split(/\s*\r?\n/).filter(line => line);
+    if (lines.length < headSize + tailSize + margin) {
+      return lines.join(os.EOL);
+    }
+    const amountRemoved: number = lines.length - headSize - tailSize;
+    const head: string = lines.splice(0, headSize).join(os.EOL);
+    const tail: string = lines.splice(-tailSize).join(os.EOL);
+    return `${head}${os.EOL}[...${amountRemoved} lines omitted...]${os.EOL}${tail}`;
   }
 
 }

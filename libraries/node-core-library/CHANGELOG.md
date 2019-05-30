@@ -1,6 +1,54 @@
 # Change Log - @microsoft/node-core-library
 
-This log was last generated on Thu, 10 Jan 2019 01:57:52 GMT and should not be manually modified.
+This log was last generated on Wed, 20 Mar 2019 19:14:49 GMT and should not be manually modified.
+
+## 3.13.0
+Wed, 20 Mar 2019 19:14:49 GMT
+
+### Minor changes
+
+- Introduce an interface INodePackageJson for loading package.json files whose "version" field may be missing.
+- Add two new APIs PackageJsonLookup.loadNodePackageJson() and tryLoadNodePackageJsonFor() that return INodePackageJson
+
+## 3.12.1
+Mon, 18 Mar 2019 04:28:43 GMT
+
+### Patches
+
+- Export ColorValue and TextAttribute to eliminate the ae-forgotten-export warning
+
+## 3.12.0
+Wed, 27 Feb 2019 22:13:58 GMT
+
+### Minor changes
+
+- Treat `types` as an alias for `typings` in package.json
+
+## 3.11.1
+Wed, 27 Feb 2019 17:13:17 GMT
+
+### Patches
+
+- Include an enum that had been missing from the exports.
+
+## 3.11.0
+Mon, 18 Feb 2019 17:13:23 GMT
+
+### Minor changes
+
+- Exposing field tsdocMetadata in package.json
+
+## 3.10.0
+Mon, 11 Feb 2019 03:31:55 GMT
+
+### Minor changes
+
+- Include support for text formatting in the Terminal API.
+- Add new API `InternalError.breakInDebugger`
+
+### Patches
+
+- Exposing utility class StringBufferTerminalProvider, useful to clients of Terminal API for their own unit tests
 
 ## 3.9.0
 Thu, 10 Jan 2019 01:57:52 GMT
