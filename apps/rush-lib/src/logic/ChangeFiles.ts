@@ -45,10 +45,12 @@ export class ChangeFiles {
     if (projectsMissingChangeDescriptions.size > 0) {
       const projectsMissingChangeDescriptionsArray: string[] = [];
       projectsMissingChangeDescriptions.forEach(name => projectsMissingChangeDescriptionsArray.push(name));
-      throw new Error(
-        `The following projects have been changed, but are missing change descriptions: ` +
-        `${projectsMissingChangeDescriptionsArray.join(',')}.`
-      );
+      throw new Error([
+        'The following projects have been changed and require change descriptions, but are missing them:',
+        ...projectsMissingChangeDescriptionsArray.map((projectName) => `- ${projectName}`),
+        'To resolve this error, run "rush change." This will generate change description files that must be ' +
+          'committed to source control.'
+      ].join(EOL));
     }
   }
 
