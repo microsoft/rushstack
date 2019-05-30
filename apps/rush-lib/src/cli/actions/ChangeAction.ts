@@ -96,24 +96,24 @@ export class ChangeAction extends BaseRushAction {
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
       argumentName: 'BRANCH',
-      description: 'If this parameter is specified, compare current branch with the target branch to get changes. ' +
-        'If this parameter is not specified, the current branch is compared against the "master" branch.'
+      description: 'If this parameter is specified, compare the checked out branch with the specified branch to' +
+        'determine which projects were changed. If this parameter is not specified, the checked out branch ' +
+        'is compared against the "master" branch.'
     });
   }
 
   public run(): Promise<void> {
-    console.log(`Target branch is ${this._targetBranch}`);
+    console.log(`The target branch is ${this._targetBranch}`);
     this._projectHostMap = this._generateHostMap();
 
     if (this._verifyParameter.value) {
       this._verify();
       return Promise.resolve();
     }
-    this._sortedProjectList = this._getChangedPackageNames()
-      .sort();
 
+    this._sortedProjectList = this._getChangedPackageNames().sort();
     if (this._sortedProjectList.length === 0) {
-      console.log('No change file is needed.');
+      console.log('No change descriptions are needed.');
       this._warnUncommittedChanges();
       return Promise.resolve();
     }
@@ -124,7 +124,7 @@ export class ChangeAction extends BaseRushAction {
 
     return this._promptLoop()
       .catch((error: Error) => {
-        throw new Error(`There was an error creating the change file: ${error.toString()}`);
+        throw new Error(`There was an error creating a change file: ${error.toString()}`);
       });
   }
 
@@ -147,14 +147,15 @@ export class ChangeAction extends BaseRushAction {
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
-      console.log('No change is needed.');
+      console.log('No change descriptions are needed.');
     }
   }
 
   private get _targetBranch(): string {
     if (!this._targetBranchName) {
-      this._targetBranchName = this._targetBranchParameter.value ||
-        VersionControl.getRemoteMasterBranch(this.rushConfiguration.repositoryUrl);
+      this._targetBranchName = (
+        this._targetBranchParameter.value || VersionControl.getRemoteMasterBranch(this.rushConfiguration.repositoryUrl)
+      );
     }
 
     return this._targetBranchName;
@@ -184,9 +185,6 @@ export class ChangeAction extends BaseRushAction {
 
   private _validateChangeFile(changedPackages: string[]): void {
     const files: string[] = this._getChangeFiles();
-    if (files.length === 0) {
-      throw new Error(`No change file is found. Run "rush change" to generate a change file.`);
-    }
     ChangeFiles.validate(files, changedPackages);
   }
 
@@ -221,7 +219,7 @@ export class ChangeAction extends BaseRushAction {
       return this._askQuestions(this._sortedProjectList.pop()!)
         .then((answers: IChangeInfo) => {
           if (answers) {
-            // Save the info into the changefile
+            // Save the info into the change file
             let changeFile: IChangeFile | undefined = this._changeFileData.get(answers.packageName);
             if (!changeFile) {
               changeFile = {
@@ -417,24 +415,27 @@ export class ChangeAction extends BaseRushAction {
         }
       }
     ])
-      .then(({ email }) => {
-        return email;
-      });
+    .then(({ email }) => email);
   }
 
   private _warnUncommittedChanges(): void {
     try {
       if (VersionControl.hasUncommittedChanges()) {
-        console.log(os.EOL +
-          colors.yellow('Warning: You have uncommitted changes, which do not trigger a change entry.'));
+        console.log(
+          os.EOL +
+          colors.yellow(
+            'Warning: You have uncommitted changes, which do not trigger prompting for change ' +
+            'descriptions.'
+          )
+        );
       }
     } catch (error) {
-      console.log('Ignore the failure of checking uncommitted changes');
+      console.log(`An error occurred when detected uncommitted changes: ${error}`);
     }
   }
 
   /**
-   * Writes changefile to the common/changes folder. Will prompt for overwrite if file already exists.
+   * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
   private _writeChangeFiles(): void {
     this._changeFileData.forEach((changeFile: IChangeFile) => {
@@ -455,12 +456,11 @@ export class ChangeAction extends BaseRushAction {
           type: 'confirm',
           message: `Overwrite ${filePath} ?`
         }
-      ]).then(({ overwrite }: { overwrite: string }) => {
+      ]).then(({ overwrite }) => {
         if (overwrite) {
-          return this._writeFile(filePath, output);
+          this._writeFile(filePath, output);
         } else {
           console.log(`Not overwriting ${filePath}...`);
-          return Promise.resolve();
         }
       }).catch((error) => {
         console.error(colors.red(error.message));
@@ -474,9 +474,7 @@ export class ChangeAction extends BaseRushAction {
    * Writes a file to disk, ensuring the directory structure up to that point exists
    */
   private _writeFile(fileName: string, output: string): void {
-    FileSystem.writeFile(fileName, output, {
-      ensureFolderExists: true
-    });
-    console.log('Created file: ' + fileName);
+    FileSystem.writeFile(fileName, output, { ensureFolderExists: true });
+    console.log(`Created file: ${fileName}`);
   }
 }
