@@ -430,7 +430,7 @@ export class ChangeAction extends BaseRushAction {
         );
       }
     } catch (error) {
-      console.log(`An error occurred when detected uncommitted changes: ${error}`);
+      console.log(`An error occurred when detecting uncommitted changes: ${error}`);
     }
   }
 
