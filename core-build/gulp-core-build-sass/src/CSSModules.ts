@@ -40,14 +40,14 @@ export default class CSSModules implements ICSSModules {
     }
   }
 
-  public getPlugin = () => {
+  public getPlugin(): postcss.AcceptedPlugin {
     return cssModules({
       getJSON: this.saveJson,
       generateScopedName: this.generateScopedName
     });
   }
 
-  public getClassMap = (): IClassMap => {
+  public getClassMap(): IClassMap {
     return this._classMap;
   }
 
