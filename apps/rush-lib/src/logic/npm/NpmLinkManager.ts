@@ -243,8 +243,15 @@ export class NpmLinkManager extends BaseLinkManager {
           !commonDependencyPackage &&
           dependency.versionRange.indexOf('npm:') === 0
         ) {
+          let depName = dependency.versionRange.split('npm:')[1];
+
+          // Strip versioning like @1.0.0-0 from the end of the string
+          if (depName.lastIndexOf('@') > 0) {
+            depName = depName.substring(0, depName.lastIndexOf('@'))
+          }
+
           commonDependencyPackage = commonPackage.resolve(
-            dependency.versionRange.split('npm:')[1]
+            depName
           );
         }
 
