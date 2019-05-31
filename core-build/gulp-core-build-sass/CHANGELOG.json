@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.7.0",
+      "tag": "@microsoft/gulp-core-build-sass_v4.7.0",
+      "date": "Fri, 31 May 2019 01:13:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Make css modules class hash names consistent relative to root path."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.6.35",
       "tag": "@microsoft/gulp-core-build-sass_v4.6.35",
       "date": "Mon, 27 May 2019 04:13:44 GMT",
