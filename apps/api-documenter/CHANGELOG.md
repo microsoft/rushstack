@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 16 May 2019 22:15:20 GMT and should not be manually modified.
+This log was last generated on Mon, 27 May 2019 04:13:44 GMT and should not be manually modified.
+
+## 7.2.1
+Mon, 27 May 2019 04:13:44 GMT
+
+### Patches
+
+- Improve the markdown generator to document class constructors
 
 ## 7.2.0
 Thu, 16 May 2019 22:15:20 GMT

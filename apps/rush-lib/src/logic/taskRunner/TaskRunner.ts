@@ -272,8 +272,13 @@ export class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
+    if (task.hadEmptyScript) {
+      this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
+      + `[${task.name}] had an empty script`));
+    } else {
+      this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
       + `[${task.name}] completed successfully in ${task.stopwatch.toString()}`));
+    }
     task.status = TaskStatus.Success;
 
     task.dependents.forEach((dependent: ITask) => {
@@ -417,7 +422,7 @@ export class TaskRunner {
           case TaskStatus.SuccessWithWarning:
           case TaskStatus.Blocked:
           case TaskStatus.Failure:
-            if (task.stopwatch) {
+            if (task.stopwatch && !task.hadEmptyScript) {
               const time: string = task.stopwatch.toString();
               this._terminal.writeLine(headingColor(`${task.name} (${time})`));
             } else {

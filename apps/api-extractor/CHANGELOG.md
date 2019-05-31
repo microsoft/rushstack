@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+This log was last generated on Mon, 27 May 2019 04:13:44 GMT and should not be manually modified.
+
+## 7.1.6
+Mon, 27 May 2019 04:13:44 GMT
+
+### Patches
+
+- Fix incorrect path resolution for the "extends" field when loading tsconfig.json
 
 ## 7.1.5
 Mon, 13 May 2019 02:08:35 GMT
