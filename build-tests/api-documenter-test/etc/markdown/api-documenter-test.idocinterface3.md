@@ -12,3 +12,10 @@ Some less common TypeScript declaration kinds.
 ```typescript
 export interface IDocInterface3 
 ```
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [(new)()](./api-documenter-test.idocinterface3.(new).md) | Construct signature |
+

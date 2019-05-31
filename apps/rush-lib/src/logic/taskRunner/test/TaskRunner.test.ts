@@ -14,7 +14,8 @@ function createDummyTask(name: string, action?: () => void): ITaskDefinition {
         action();
       }
       return Promise.resolve(TaskStatus.Success);
-    }
+    },
+    hadEmptyScript: false
   };
 }
 
@@ -95,7 +96,8 @@ describe('TaskRunner', () => {
           writer.write('Build step 1' + EOL);
           writer.writeError('Error: step 1 failed' + EOL);
           return Promise.resolve(TaskStatus.Failure);
-        }
+        },
+        hadEmptyScript: false
       });
       return taskRunner
         .execute()
@@ -117,7 +119,8 @@ describe('TaskRunner', () => {
           writer.write('Build step 1' + EOL);
           writer.write('Error: step 1 failed' + EOL);
           return Promise.resolve(TaskStatus.Failure);
-        }
+        },
+        hadEmptyScript: false
       });
       return taskRunner
         .execute()
@@ -139,7 +142,8 @@ describe('TaskRunner', () => {
             writer.write(` - unit #${i};${EOL}`);
           }
           return Promise.resolve(TaskStatus.Failure);
-        }
+        },
+        hadEmptyScript: false
       });
       return taskRunner
         .execute()
@@ -162,7 +166,8 @@ describe('TaskRunner', () => {
             writer.writeError(` - error #${i};  ${EOL}`);
           }
           return Promise.resolve(TaskStatus.Failure);
-        }
+        },
+        hadEmptyScript: false
       });
       return taskRunner
         .execute()

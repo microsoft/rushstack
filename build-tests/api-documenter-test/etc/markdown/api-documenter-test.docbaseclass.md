@@ -12,3 +12,11 @@ Example base class
 ```typescript
 export declare class DocBaseClass 
 ```
+
+## Constructors
+
+|  Constructor | Modifiers | Description |
+|  --- | --- | --- |
+|  [(constructor)()](./api-documenter-test.docbaseclass.(constructor).md) |  | The simple constructor for <code>DocBaseClass</code> |
+|  [(constructor)(x)](./api-documenter-test.docbaseclass.(constructor)_1.md) |  | The overloaded constructor for <code>DocBaseClass</code> |
+

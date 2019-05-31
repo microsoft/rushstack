@@ -73,8 +73,8 @@ Optional arguments:
                         be appended after an \\"@\\" sign. WARNING: Symbol 
                         characters are usually interpreted by your shell, so 
                         it's recommended to use quotes. For example, write 
-                        \\"rush add --project \\"example@^1.2.3\\"\\" instead of 
-                        \\"rush add --project example@^1.2.3\\".
+                        \\"rush add --package \\"example@^1.2.3\\"\\" instead of 
+                        \\"rush add --package example@^1.2.3\\".
   --exact               If specified, the SemVer specifier added to the 
                         package.json will be an exact version (e.g. without 
                         tilde or caret).
