@@ -13,7 +13,7 @@
     "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/gulp-core-build-sass"
   },
   "scripts": {
-    "build": "gulp --clean"
+    "build": "gulp test --clean"
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.9.26",
@@ -34,6 +34,8 @@
     "@types/glob": "5.0.30",
     "@types/node-sass": "3.10.32",
     "@types/clean-css": "4.2.1",
-    "gulp": "~3.9.1"
+    "gulp": "~3.9.1",
+    "@types/jest": "23.3.11",
+    "jest": "~23.6.0"
   }
 }
