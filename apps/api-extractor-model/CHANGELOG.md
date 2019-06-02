@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Tue, 16 Apr 2019 11:01:37 GMT and should not be manually modified.
+This log was last generated on Mon, 27 May 2019 04:13:44 GMT and should not be manually modified.
+
+## 7.1.1
+Mon, 27 May 2019 04:13:44 GMT
+
+### Patches
+
+- Make the strings returned by ApiItem.displayName less verbose
+- Improve formatting of the strings returned by ApiItem.getScopedNameWithinPackage()
 
 ## 7.1.0
 Tue, 16 Apr 2019 11:01:37 GMT

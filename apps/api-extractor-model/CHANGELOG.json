@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.1.1",
+      "tag": "@microsoft/api-extractor-model_v7.1.1",
+      "date": "Mon, 27 May 2019 04:13:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make the strings returned by ApiItem.displayName less verbose"
+          },
+          {
+            "comment": "Improve formatting of the strings returned by ApiItem.getScopedNameWithinPackage()"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.0",
       "tag": "@microsoft/api-extractor-model_v7.1.0",
       "date": "Tue, 16 Apr 2019 11:01:37 GMT",
