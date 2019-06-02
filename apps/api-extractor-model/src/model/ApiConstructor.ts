@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
@@ -14,7 +13,6 @@ import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiRel
 export interface IApiConstructorOptions extends
   IApiParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiStaticMixinOptions,
   IApiDeclaredItemOptions {
 }
 
@@ -45,14 +43,10 @@ export interface IApiConstructorOptions extends
  *
  * @public
  */
-export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(ApiStaticMixin(ApiDeclaredItem))) {
+export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
 
-  public static getCanonicalReference(isStatic: boolean, overloadIndex: number): string {
-    if (isStatic) {
-      return `(:constructor,static,${overloadIndex})`;
-    } else {
-      return `(:constructor,instance,${overloadIndex})`;
-    }
+  public static getCanonicalReference(overloadIndex: number): string {
+    return `(:constructor,${overloadIndex})`;
   }
 
   public constructor(options: IApiConstructorOptions) {
@@ -66,6 +60,6 @@ export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(Api
 
   /** @override */
   public get canonicalReference(): string {
-    return ApiConstructor.getCanonicalReference(this.isStatic, this.overloadIndex);
+    return ApiConstructor.getCanonicalReference(this.overloadIndex);
   }
 }
