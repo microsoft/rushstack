@@ -210,6 +210,8 @@ export class TypeScriptHelpers {
     return highest;
   }
 
+  // Matches TypeScript's encoded names for well-known ECMAScript symbols like
+  // "__@iterator" or "__@toStringTag".
   private static readonly _wellKnownSymbolNameRegExp: RegExp = /^__@\w+$/;
 
   /**
@@ -219,6 +221,8 @@ export class TypeScriptHelpers {
     return TypeScriptHelpers._wellKnownSymbolNameRegExp.test(name);
   }
 
+  // Matches TypeScript's encoded names for late-bound symbols derived from `unique symbol` declarations
+  // which have the form of "__@<variableName>@<symbolId>", i.e. "__@someSymbol@12345".
   private static readonly _uniqueSymbolNameRegExp: RegExp = /^__@.*@\d+$/;
 
   /**
@@ -228,18 +232,25 @@ export class TypeScriptHelpers {
     return TypeScriptHelpers._uniqueSymbolNameRegExp.test(name);
   }
 
+  /**
+   * Derives the string representation of a TypeScript late-bound symbol.
+   */
   public static tryGetLateBoundName(declarationName: ts.ComputedPropertyName): string | undefined {
-    // Only a ComputedPropertyName whose expression is an EntityNameExpression can be
-    // used as a late-bound name.
-    let expressionName: string = '';
-    let expression: ts.EntityNameExpression = declarationName.expression as ts.EntityNameExpression;
-    while (expression.kind === ts.SyntaxKind.PropertyAccessExpression) {
-      expressionName = `.${expression.name.getText().trim()}${expressionName}`;
-      expression = expression.expression;
-    }
-    if (expression.kind !== ts.SyntaxKind.Identifier) {
-      return undefined;
-    }
-    return `[${expression.getText().trim()}${expressionName}]`;
+    // Create a node printer that ignores comments and indentation that we can use to convert
+    // declarationName to a string.
+    const printer: ts.Printer = ts.createPrinter({ removeComments: true }, {
+      onEmitNode(hint: ts.EmitHint, node: ts.Node | undefined,
+        emit: (hint: ts.EmitHint, node: ts.Node | undefined) => void): void {
+        if (node) {
+          ts.setEmitFlags(declarationName, ts.EmitFlags.NoIndentation | ts.EmitFlags.SingleLine);
+        }
+        emit(hint, node);
+      }
+    });
+    const sourceFile: ts.SourceFile = declarationName.getSourceFile();
+    const text: string = printer.printNode(ts.EmitHint.Unspecified, declarationName, sourceFile);
+    // clean up any emit flags we've set on any nodes in the tree.
+    ts.disposeEmitNodes(sourceFile);
+    return text;
   }
 }

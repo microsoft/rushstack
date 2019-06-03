@@ -433,6 +433,8 @@ export class AstSymbolTable {
         // but the declaration name is "X".
         localName = followedSymbol.name;
         if (TypeScriptHelpers.isWellKnownSymbolName(localName)) {
+          // TypeScript binds well-known ECMAScript symbols like "Symbol.iterator" as "__@iterator".
+          // This converts a string like "__@iterator" into the property name "[Symbol.iterator]".
           localName = `[Symbol.${localName.slice(3)}]`;
         } else {
           const isUniqueSymbol: boolean = TypeScriptHelpers.isUniqueSymbolName(localName);

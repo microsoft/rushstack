@@ -49,9 +49,17 @@ export class ClassWithAccessModifiers {
 // @public (undocumented)
 export class ClassWithSymbols {
     // (undocumented)
+    [ANamespace.fullyExportedCustomSymbol](): void;
+    // Warning: (ae-forgotten-export) The symbol "ANamespace" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    readonly [ANamespace.locallyExportedCustomSymbol]: string;
+    // (undocumented)
     [fullyExportedCustomSymbol](): void;
     // (undocumented)
     readonly [locallyExportedCustomSymbol]: string;
+    // (undocumented)
+    readonly [Symbol.toStringTag]: string;
     // (undocumented)
     readonly [unexportedCustomSymbol]: number;
 }

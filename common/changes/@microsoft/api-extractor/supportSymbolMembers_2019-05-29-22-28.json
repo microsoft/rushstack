@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Improved handling of symbolic property and method names.",
+      "comment": "Improve handling of symbolic property and method names.",
       "type": "patch"
     }
   ],

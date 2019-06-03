@@ -24,13 +24,17 @@ export class TypeScriptInternals {
   public static tryGetSymbolForDeclaration(declaration: ts.Declaration, checker: ts.TypeChecker): ts.Symbol
     | undefined {
     let symbol: ts.Symbol | undefined = (declaration as any).symbol;
-    if (symbol && symbol.escapedName === '__computed') {
+    if (symbol && symbol.escapedName === ts.InternalSymbolName.Computed) {
       const name: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
       symbol = name && checker.getSymbolAtLocation(name) || symbol;
     }
     return symbol;
   }
 
+  /**
+   * Returns whether the provided Symbol is a TypeScript "late-bound" Symbol (i.e. was created by the Checker
+   * for a computed property based on its type, rather than by the Binder).
+   */
   public static isLateBoundSymbol(symbol: ts.Symbol): boolean {
     // tslint:disable-next-line:no-bitwise
     if (symbol.flags & ts.SymbolFlags.Transient &&
