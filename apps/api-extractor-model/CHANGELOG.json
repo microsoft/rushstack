@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.1.2",
+      "tag": "@microsoft/api-extractor-model_v7.1.2",
+      "date": "Tue, 04 Jun 2019 05:51:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where ApiConstructor inherited from ApiStaticMixin, but TypeScript constructors cannot be static"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.1",
       "tag": "@microsoft/api-extractor-model_v7.1.1",
       "date": "Mon, 27 May 2019 04:13:44 GMT",

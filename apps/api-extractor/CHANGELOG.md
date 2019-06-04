@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 27 May 2019 04:13:44 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Jun 2019 05:51:53 GMT and should not be manually modified.
+
+## 7.1.7
+Tue, 04 Jun 2019 05:51:53 GMT
+
+### Patches
+
+- Upgrade api-extractor-model to remove ApiConstructor.isStatic, since TypeScript constructors cannot be static
+- Improve handling of symbolic property and method names.
 
 ## 7.1.6
 Mon, 27 May 2019 04:13:44 GMT

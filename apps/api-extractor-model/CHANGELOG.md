@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Mon, 27 May 2019 04:13:44 GMT and should not be manually modified.
+This log was last generated on Tue, 04 Jun 2019 05:51:53 GMT and should not be manually modified.
+
+## 7.1.2
+Tue, 04 Jun 2019 05:51:53 GMT
+
+### Patches
+
+- Fix an issue where ApiConstructor inherited from ApiStaticMixin, but TypeScript constructors cannot be static
 
 ## 7.1.1
 Mon, 27 May 2019 04:13:44 GMT
