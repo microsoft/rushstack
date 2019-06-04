@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Fix an issue where ApiConstructor inherited from ApiStaticMixin, but TypeScript constructors cannot be static",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

@@ -66,7 +66,7 @@ export class ApiConstructor extends ApiConstructor_base {
     // @override (undocumented)
     readonly canonicalReference: string;
     // (undocumented)
-    static getCanonicalReference(isStatic: boolean, overloadIndex: number): string;
+    static getCanonicalReference(overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -565,7 +565,7 @@ export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNam
 }
 
 // @public
-export interface IApiConstructorOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiStaticMixinOptions, IApiDeclaredItemOptions {
+export interface IApiConstructorOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
