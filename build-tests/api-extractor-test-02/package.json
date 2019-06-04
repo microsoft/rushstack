@@ -12,7 +12,7 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "7.1.6",
+    "@microsoft/api-extractor": "7.1.7",
     "@types/semver": "5.3.33",
     "@types/node": "8.5.8",
     "api-extractor-test-01": "1.0.0",
