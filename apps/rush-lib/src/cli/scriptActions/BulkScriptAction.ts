@@ -21,6 +21,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { FileSystem } from '@microsoft/node-core-library';
+import { IFlagParameterJson } from '../../api/CommandLineJson';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -88,8 +89,18 @@ export class BulkScriptAction extends BaseScriptAction {
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
 
+    let shouldFailOnWarnings: boolean = false;
     for (const customParameter of this.customParameters) {
       customParameter.appendToArgList(customParameterValues);
+
+      if (customParameter instanceof CommandLineFlagParameter && customParameter.value) {
+        const parameterJson: IFlagParameterJson | undefined = this.customParamterMap.get(
+          customParameter
+        ) as IFlagParameterJson;
+        if (parameterJson && parameterJson.shouldFailBuildWithWarnings) {
+          shouldFailOnWarnings = true;
+        }
+      }
     }
 
     const changedProjectsOnly: boolean = this.actionName === 'build' && this._changedProjectsOnly.value;
@@ -106,7 +117,8 @@ export class BulkScriptAction extends BaseScriptAction {
         isIncrementalBuildAllowed: this.actionName === 'build',
         changedProjectsOnly,
         ignoreMissingScript: this._ignoreMissingScript,
-        ignoreDependencyOrder: this._ignoreDependencyOrder
+        ignoreDependencyOrder: this._ignoreDependencyOrder,
+        shouldFailOnWarnings
       }
     );
 

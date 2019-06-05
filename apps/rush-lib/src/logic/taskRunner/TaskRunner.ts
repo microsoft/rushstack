@@ -15,6 +15,14 @@ import { ITask, ITaskDefinition } from './ITask';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 
+export interface ITaskRunnerOptions {
+  quietMode: boolean;
+  parallelism: string | undefined;
+  changedProjectsOnly: boolean;
+  shouldFailOnWarnings: boolean;
+  terminal?: Terminal;
+}
+
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
  * Any class of task definition may be registered, and dependencies between tasks are
@@ -27,25 +35,31 @@ export class TaskRunner {
   private _changedProjectsOnly: boolean;
   private _buildQueue: ITask[];
   private _quietMode: boolean;
+  private _shouldFailOnWarnings: boolean;
   private _hasAnyFailures: boolean;
+  private _hasAnyWarnings: boolean;
   private _parallelism: number;
   private _currentActiveTasks: number;
   private _totalTasks: number;
   private _completedTasks: number;
   private _terminal: Terminal;
 
-  constructor(
-    quietMode: boolean,
-    parallelism: string | undefined,
-    changedProjectsOnly: boolean,
-    terminal?: Terminal
-  ) {
+  constructor(options: ITaskRunnerOptions) {
+    const {
+      quietMode,
+      parallelism,
+      changedProjectsOnly,
+      shouldFailOnWarnings,
+      terminal = new Terminal(new ConsoleTerminalProvider())
+    } = options;
     this._tasks = new Map<string, ITask>();
     this._buildQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
+    this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
-    this._terminal = terminal || new Terminal(new ConsoleTerminalProvider());
+    this._shouldFailOnWarnings = shouldFailOnWarnings;
+    this._terminal = terminal;
 
     const numberOfCores: number = os.cpus().length;
 
@@ -161,6 +175,11 @@ export class TaskRunner {
 
       if (this._hasAnyFailures) {
         return Promise.reject(new Error('Project(s) failed to build'));
+      } else if (this._hasAnyWarnings && this._shouldFailOnWarnings) {
+        return Promise.reject(new Error(
+          'Project(s) succeeded with errors and one or more arguments were provided that caused the ' +
+          'build to fail on warnings.'
+        ));
       } else {
         return Promise.resolve();
       }
@@ -217,6 +236,7 @@ export class TaskRunner {
               this._markTaskAsSuccess(task);
               break;
             case TaskStatus.SuccessWithWarning:
+              this._hasAnyWarnings = true;
               this._markTaskAsSuccessWithWarning(task);
               break;
             case TaskStatus.Skipped:

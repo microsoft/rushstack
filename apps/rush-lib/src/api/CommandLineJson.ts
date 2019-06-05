@@ -51,6 +51,7 @@ export interface IBaseParameterJson {
  */
 export interface IFlagParameterJson extends IBaseParameterJson {
   parameterKind: 'flag';
+  shouldFailBuildWithWarnings: boolean;
 }
 
 /**

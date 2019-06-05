@@ -185,6 +185,9 @@
           "properties": {
             "parameterKind": {
               "enum": [ "flag" ]
+            },
+            "shouldFailBuildWithWarnings": {
+              "type": "boolean"
             }
           }
         },
