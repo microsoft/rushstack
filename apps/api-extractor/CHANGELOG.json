@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.1.8",
+      "tag": "@microsoft/api-extractor_v7.1.8",
+      "date": "Wed, 05 Jun 2019 19:12:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.1.2` to `7.1.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.7",
       "tag": "@microsoft/api-extractor_v7.1.7",
       "date": "Tue, 04 Jun 2019 05:51:53 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 04 Jun 2019 05:51:53 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Jun 2019 19:12:34 GMT and should not be manually modified.
+
+## 7.1.8
+Wed, 05 Jun 2019 19:12:34 GMT
+
+### Patches
+
+- Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number
 
 ## 7.1.7
 Tue, 04 Jun 2019 05:51:53 GMT

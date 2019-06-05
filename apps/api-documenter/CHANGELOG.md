@@ -1,6 +1,17 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 04 Jun 2019 05:51:53 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Jun 2019 19:12:34 GMT and should not be manually modified.
+
+## 7.3.0
+Wed, 05 Jun 2019 19:12:34 GMT
+
+### Minor changes
+
+- Improved the experimental api-documenter generate command.
+
+### Patches
+
+- Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number
 
 ## 7.2.2
 Tue, 04 Jun 2019 05:51:53 GMT
