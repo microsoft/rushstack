@@ -37,6 +37,8 @@ This project tests various documentation generation scenarios and doc comment sy
 |  [IDocInterface2](./api-documenter-test.idocinterface2.md) |  |
 |  [IDocInterface3](./api-documenter-test.idocinterface3.md) | Some less common TypeScript declaration kinds. |
 |  [IDocInterface4](./api-documenter-test.idocinterface4.md) | Type union in an interface. |
+|  [IDocInterface5](./api-documenter-test.idocinterface5.md) | Interface without inline tag to test custom TOC |
+|  [IDocInterface6](./api-documenter-test.idocinterface6.md) | Interface without inline tag to test custom TOC with injection |
 
 ## Namespaces
 

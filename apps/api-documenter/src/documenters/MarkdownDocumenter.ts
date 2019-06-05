@@ -793,8 +793,10 @@ export class MarkdownDocumenter {
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
       let qualifiedName: string = hierarchyItem.displayName;
       if (ApiParameterListMixin.isBaseClassOf(hierarchyItem)) {
-        if (hierarchyItem.overloadIndex > 0) {
-          qualifiedName += `_${hierarchyItem.overloadIndex}`;
+        if (hierarchyItem.overloadIndex > 1) {
+          // Subtract one for compatibility with earlier releases of API Documenter.
+          // (This will get revamped when we fix GitHub issue #1308)
+          qualifiedName += `_${hierarchyItem.overloadIndex - 1}`;
         }
       }
 
