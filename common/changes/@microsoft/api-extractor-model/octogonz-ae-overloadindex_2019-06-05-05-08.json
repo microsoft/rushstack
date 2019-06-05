@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
