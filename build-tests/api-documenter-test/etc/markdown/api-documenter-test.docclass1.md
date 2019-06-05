@@ -31,7 +31,7 @@ export declare class DocClass1 extends DocBaseClass implements IDocInterface1, I
 |  --- | --- | --- |
 |  [deprecatedExample()](./api-documenter-test.docclass1.deprecatedexample.md) |  |  |
 |  [exampleFunction(a, b)](./api-documenter-test.docclass1.examplefunction.md) |  | This is an overloaded function. |
-|  [exampleFunction(x)](./api-documenter-test.docclass1.examplefunction_2.md) |  | This is also an overloaded function. |
+|  [exampleFunction(x)](./api-documenter-test.docclass1.examplefunction_1.md) |  | This is also an overloaded function. |
 |  [interestingEdgeCases()](./api-documenter-test.docclass1.interestingedgecases.md) |  | Example: "<!-- -->{ \\<!-- -->"maxItemsToShow<!-- -->\\<!-- -->": 123 }<!-- -->"<!-- -->The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/ |
 |  [sumWithExample(x, y)](./api-documenter-test.docclass1.sumwithexample.md) | <code>static</code> | Returns the sum of two numbers. |
 |  [tableExample()](./api-documenter-test.docclass1.tableexample.md) |  | An example with tables: |
