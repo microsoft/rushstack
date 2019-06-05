@@ -9,37 +9,45 @@ import { IYamlTocFile } from '../yaml/IYamlTocFile';
 export interface IConfigTableOfContents {
   /**
    * Represents the tree structure describing the toc.file format.
-   * Only the nodes that have an empty `items` array will be filled with API items
-   * that are matched with the filters provided. Everything else will be placed under a catchAll category
-   * that is highly recommended to be provided.
+   * Nodes that have an empty `items` array property or their name will be included in the
+   * {@link IConfigTableOfContents.nonEmptyCategoryNodeNames} will be filled with API items
+   * that are matched with the filters provided. Everything else will be placed under
+   * {@link IConfigTableOfContents.catchAllCategory} if provided, which is highly recommended.
    */
   tocConfig: IYamlTocFile;
 
   /**
-   * Optional category name that is recommended to include in the `tocConfig`,
-   * along with one of the filters: `filterByApiItemName` or `filterByInlineTag`.
-   * Any items that are not matched to the mentioned filters will be placed under this
+   * Optional category name that is recommended to be included along with
+   * one of the configs: {@link IConfigTableOfContents.categorizeByName} or
+   * {@link IConfigTableOfContents.categoryInlineTag}.
+   * Any items that are not matched according to the mentioned configuration options will be placed under this
    * catchAll category. If none provided the items will not be included in the final toc.yml file.
    */
   catchAllCategory?: string;
 
   /**
-   * When loading more than one api.json files that might include the same API items,
-   * toggle either to show duplicates or not.
+   * Toggle either categorization of the API items should be made based on category name presence
+   * in the API item's name. Useful when there are API items without an inline tag to categorize them,
+   * but still need to place the items under categories. Note: this type of categorization might place some items
+   * under wrong categories if the names are similar but belong to different categories.
+   * In case that {@link IConfigTableOfContents.categoryInlineTag} is provided it will try categorize by
+   * using it and only if it didn't, it will attempt to categorize by name.
    */
-  noDuplicateEntries?: boolean;
+  categorizeByName?: boolean;
 
   /**
-   * Toggle either sorting of the API items should be made based on category name presence
-   * in the API item's name.
+   * Inline tag that will be used to categorize the API items. Will take precedence over the
+   * {@link IConfigTableOfContents.categorizeByName} flag in trying to place the API item according to the
+   * custom inline tag present in documentation of the source code.
    */
-  filterByApiItemName?: boolean;
+  categoryInlineTag?: string;
 
   /**
-   * Filter that can be used to sort the API items according to an inline custom tag
-   * that is present on them.
+   * Array of node names that might have already items injected at the time of creating the
+   * {@link IConfigTableOfContents.tocConfig} tree structure but are still needed to be included as category
+   * nodes where API items will be pushed during the categorization algorithm.
    */
-  filterByInlineTag?: string;
+  nonEmptyCategoryNodeNames?: string[];
 }
 
 /**

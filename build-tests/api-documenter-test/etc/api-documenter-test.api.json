@@ -37,7 +37,7 @@
           "members": [
             {
               "kind": "Constructor",
-              "canonicalReference": "(:constructor,0)",
+              "canonicalReference": "(:constructor,instance,0)",
               "docComment": "/**\n * The simple constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -45,13 +45,14 @@
                   "text": "constructor();"
                 }
               ],
+              "isStatic": false,
               "releaseTag": "Public",
               "overloadIndex": 0,
               "parameters": []
             },
             {
               "kind": "Constructor",
-              "canonicalReference": "(:constructor,1)",
+              "canonicalReference": "(:constructor,instance,1)",
               "docComment": "/**\n * The overloaded constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -75,6 +76,7 @@
                   "text": ");"
                 }
               ],
+              "isStatic": false,
               "releaseTag": "Public",
               "overloadIndex": 1,
               "parameters": [
@@ -1174,6 +1176,112 @@
               ],
               "releaseTag": "Public",
               "name": "stringOrNumber",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "(IDocInterface5:interface)",
+          "docComment": "/**\n * Interface without inline tag to test custom TOC\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface5"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "IDocInterface5",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "regularProperty",
+              "docComment": "/**\n * Property of type string that does something\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "regularProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "regularProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
+          "kind": "Interface",
+          "canonicalReference": "(IDocInterface6:interface)",
+          "docComment": "/**\n * Interface without inline tag to test custom TOC with injection\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface "
+            },
+            {
+              "kind": "Reference",
+              "text": "IDocInterface6"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "IDocInterface6",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "regularProperty",
+              "docComment": "/**\n * Property of type number that does something\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "regularProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "number"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "regularProperty",
               "propertyTypeTokenRange": {
                 "startIndex": 2,
                 "endIndex": 3
