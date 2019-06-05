@@ -37,7 +37,7 @@
           "members": [
             {
               "kind": "Constructor",
-              "canonicalReference": "(:constructor,0)",
+              "canonicalReference": "(:constructor,1)",
               "docComment": "/**\n * The simple constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -46,12 +46,12 @@
                 }
               ],
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": []
             },
             {
               "kind": "Constructor",
-              "canonicalReference": "(:constructor,1)",
+              "canonicalReference": "(:constructor,2)",
               "docComment": "/**\n * The overloaded constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -76,7 +76,7 @@
                 }
               ],
               "releaseTag": "Public",
-              "overloadIndex": 1,
+              "overloadIndex": 2,
               "parameters": [
                 {
                   "parameterName": "x",
@@ -173,7 +173,7 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(exampleFunction:instance,0)",
+              "canonicalReference": "(exampleFunction:instance,1)",
               "docComment": "/**\n * This is an overloaded function.\n *\n * @param a - the first string\n *\n * @param b - the second string\n */\n",
               "excerptTokens": [
                 {
@@ -231,7 +231,7 @@
                 "endIndex": 11
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "a",
@@ -252,7 +252,7 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(exampleFunction:instance,1)",
+              "canonicalReference": "(exampleFunction:instance,2)",
               "docComment": "/**\n * This is also an overloaded function.\n *\n * @param x - the number\n */\n",
               "excerptTokens": [
                 {
@@ -294,7 +294,7 @@
                 "endIndex": 7
               },
               "releaseTag": "Public",
-              "overloadIndex": 1,
+              "overloadIndex": 2,
               "parameters": [
                 {
                   "parameterName": "x",

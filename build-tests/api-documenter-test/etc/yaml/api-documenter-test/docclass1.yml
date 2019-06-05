@@ -22,7 +22,7 @@ items:
     children:
       - api-documenter-test.DocClass1.deprecatedExample
       - api-documenter-test.DocClass1.exampleFunction
-      - api-documenter-test.DocClass1.exampleFunction_1
+      - api-documenter-test.DocClass1.exampleFunction_2
       - api-documenter-test.DocClass1.interestingEdgeCases
       - api-documenter-test.DocClass1.malformedEvent
       - api-documenter-test.DocClass1.modifiedEvent
@@ -65,7 +65,7 @@ items:
           description: the second string
           type:
             - string
-  - uid: api-documenter-test.DocClass1.exampleFunction_1
+  - uid: api-documenter-test.DocClass1.exampleFunction_2
     summary: This is also an overloaded function.
     name: exampleFunction(x)
     fullName: exampleFunction(x)
