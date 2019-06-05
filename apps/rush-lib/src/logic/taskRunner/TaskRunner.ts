@@ -177,7 +177,7 @@ export class TaskRunner {
         return Promise.reject(new Error('Project(s) failed to build'));
       } else if (this._hasAnyWarnings && this._shouldFailOnWarnings) {
         return Promise.reject(new Error(
-          'Project(s) succeeded with errors and one or more arguments were provided that caused the ' +
+          'Project(s) succeeded with warnings and one or more arguments were provided that caused the ' +
           'build to fail on warnings.'
         ));
       } else {
