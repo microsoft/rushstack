@@ -37,7 +37,7 @@
           "members": [
             {
               "kind": "Constructor",
-              "canonicalReference": "(:constructor,0)",
+              "canonicalReference": "(:constructor,instance,0)",
               "docComment": "/**\n * The simple constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -45,13 +45,14 @@
                   "text": "constructor();"
                 }
               ],
+              "isStatic": false,
               "releaseTag": "Public",
               "overloadIndex": 0,
               "parameters": []
             },
             {
               "kind": "Constructor",
-              "canonicalReference": "(:constructor,1)",
+              "canonicalReference": "(:constructor,instance,1)",
               "docComment": "/**\n * The overloaded constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -75,6 +76,7 @@
                   "text": ");"
                 }
               ],
+              "isStatic": false,
               "releaseTag": "Public",
               "overloadIndex": 1,
               "parameters": [
