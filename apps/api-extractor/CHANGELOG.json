@@ -2,6 +2,46 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.1.7",
+      "tag": "@microsoft/api-extractor_v7.1.7",
+      "date": "Tue, 04 Jun 2019 05:51:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade api-extractor-model to remove ApiConstructor.isStatic, since TypeScript constructors cannot be static"
+          },
+          {
+            "comment": "Improve handling of symbolic property and method names."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.1.1` to `7.1.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.6",
+      "tag": "@microsoft/api-extractor_v7.1.6",
+      "date": "Mon, 27 May 2019 04:13:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix incorrect path resolution for the \"extends\" field when loading tsconfig.json"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.1.0` to `7.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.4` to `4.2.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.5",
       "tag": "@microsoft/api-extractor_v7.1.5",
       "date": "Mon, 13 May 2019 02:08:35 GMT",

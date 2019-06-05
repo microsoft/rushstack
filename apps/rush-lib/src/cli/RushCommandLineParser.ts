@@ -192,7 +192,8 @@ export class RushCommandLineParser extends CommandLineParser {
         commandLineConfiguration: commandLineConfiguration,
 
         enableParallelism: true,
-        ignoreMissingScript: false
+        ignoreMissingScript: false,
+        ignoreDependencyOrder: false
       }));
     }
 
@@ -213,7 +214,8 @@ export class RushCommandLineParser extends CommandLineParser {
         commandLineConfiguration: commandLineConfiguration,
 
         enableParallelism: true,
-        ignoreMissingScript: false
+        ignoreMissingScript: false,
+        ignoreDependencyOrder: false
       }));
     }
   }
@@ -244,7 +246,8 @@ export class RushCommandLineParser extends CommandLineParser {
             commandLineConfiguration: commandLineConfiguration,
 
             enableParallelism: command.enableParallelism,
-            ignoreMissingScript: command.ignoreMissingScript || false
+            ignoreMissingScript: command.ignoreMissingScript || false,
+            ignoreDependencyOrder: command.ignoreDependencyOrder || false
           }));
           break;
         case 'global':

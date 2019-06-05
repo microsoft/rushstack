@@ -28,6 +28,7 @@ import { FileSystem } from '@microsoft/node-core-library';
 export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
+  ignoreDependencyOrder: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -55,6 +56,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _toVersionPolicy: CommandLineStringListParameter;
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
+  private _ignoreDependencyOrder: boolean;
 
   constructor(
     options: IBulkScriptActionOptions
@@ -63,6 +65,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._commandToRun = options.commandToRun || options.actionName;
+    this._ignoreDependencyOrder = options.ignoreDependencyOrder;
   }
 
   public run(): Promise<void> {
@@ -102,7 +105,8 @@ export class BulkScriptAction extends BaseScriptAction {
         parallelism,
         isIncrementalBuildAllowed: this.actionName === 'build',
         changedProjectsOnly,
-        ignoreMissingScript: this._ignoreMissingScript
+        ignoreMissingScript: this._ignoreMissingScript,
+        ignoreDependencyOrder: this._ignoreDependencyOrder
       }
     );
 

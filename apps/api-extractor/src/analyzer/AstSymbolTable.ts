@@ -12,6 +12,7 @@ import { PackageMetadataManager } from './PackageMetadataManager';
 import { ExportAnalyzer } from './ExportAnalyzer';
 import { AstImport } from './AstImport';
 import { MessageRouter } from '../collector/MessageRouter';
+import { TypeScriptInternals } from './TypeScriptInternals';
 
 export type AstEntity = AstSymbol | AstImport;
 
@@ -302,7 +303,8 @@ export class AstSymbolTable {
       return undefined;
     }
 
-    const symbol: ts.Symbol | undefined = TypeScriptHelpers.getSymbolForDeclaration(node as ts.Declaration);
+    const symbol: ts.Symbol | undefined = TypeScriptHelpers.getSymbolForDeclaration(node as ts.Declaration,
+      this._typeChecker);
     if (!symbol) {
       throw new InternalError('Unable to find symbol for node');
     }
@@ -338,7 +340,8 @@ export class AstSymbolTable {
     const arbitraryDeclaration: ts.Declaration = followedSymbol.declarations[0];
 
     // tslint:disable-next-line:no-bitwise
-    if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient)) {
+    if (followedSymbol.flags & (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient)
+      && !TypeScriptInternals.isLateBoundSymbol(followedSymbol)) {
       return undefined;
     }
 
@@ -406,7 +409,8 @@ export class AstSymbolTable {
 
         if (arbitraryParentDeclaration) {
           const parentSymbol: ts.Symbol = TypeScriptHelpers.getSymbolForDeclaration(
-            arbitraryParentDeclaration as ts.Declaration);
+            arbitraryParentDeclaration as ts.Declaration,
+            this._typeChecker);
 
           parentAstSymbol = this._fetchAstSymbol({
             followedSymbol: parentSymbol,
@@ -428,11 +432,25 @@ export class AstSymbolTable {
         // This handles cases such as "export default class X { }" where the symbol name is "default"
         // but the declaration name is "X".
         localName = followedSymbol.name;
-        for (const declaration of followedSymbol.declarations || []) {
-          const declarationNameIdentifier: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
-          if (declarationNameIdentifier && ts.isIdentifier(declarationNameIdentifier)) {
-            localName = declarationNameIdentifier.getText().trim();
-            break;
+        if (TypeScriptHelpers.isWellKnownSymbolName(localName)) {
+          // TypeScript binds well-known ECMAScript symbols like "Symbol.iterator" as "__@iterator".
+          // This converts a string like "__@iterator" into the property name "[Symbol.iterator]".
+          localName = `[Symbol.${localName.slice(3)}]`;
+        } else {
+          const isUniqueSymbol: boolean = TypeScriptHelpers.isUniqueSymbolName(localName);
+          for (const declaration of followedSymbol.declarations || []) {
+            const declarationName: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
+            if (declarationName && ts.isIdentifier(declarationName)) {
+              localName = declarationName.getText().trim();
+              break;
+            }
+            if (isUniqueSymbol && declarationName && ts.isComputedPropertyName(declarationName)) {
+              const lateBoundName: string | undefined = TypeScriptHelpers.tryGetLateBoundName(declarationName);
+              if (lateBoundName) {
+                localName = lateBoundName;
+                break;
+              }
+            }
           }
         }
       }

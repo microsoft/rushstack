@@ -207,9 +207,8 @@ export class ApiModelGenerator {
   private _processApiConstructor(astDeclaration: AstDeclaration, exportedName: string | undefined,
     parentApiItem: ApiItemContainerMixin): void {
 
-    const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
     const overloadIndex: number = this._getOverloadIndex(astDeclaration);
-    const canonicalReference: string = ApiConstructor.getCanonicalReference(isStatic, overloadIndex);
+    const canonicalReference: string = ApiConstructor.getCanonicalReference(overloadIndex);
 
     let apiConstructor: ApiConstructor | undefined = parentApiItem.tryGetMember(canonicalReference) as ApiConstructor;
 
@@ -229,7 +228,7 @@ export class ApiModelGenerator {
       const docComment: tsdoc.DocComment | undefined = this._collector.fetchMetadata(astDeclaration).tsdocComment;
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
-      apiConstructor = new ApiConstructor({ docComment, releaseTag, isStatic, parameters, overloadIndex,
+      apiConstructor = new ApiConstructor({ docComment, releaseTag, parameters, overloadIndex,
         excerptTokens });
 
       parentApiItem.addMember(apiConstructor);

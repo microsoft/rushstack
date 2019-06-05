@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "1.9.1",
+  "version": "1.9.3",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
@@ -14,12 +14,12 @@
   "keywords": [],
   "dependencies": {},
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.3.13",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.15",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
     "@types/webpack-env": "1.13.0",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "@microsoft/node-library-build": "6.0.61"
+    "@microsoft/node-library-build": "6.0.63"
   }
 }

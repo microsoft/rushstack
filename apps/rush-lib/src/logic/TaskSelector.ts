@@ -20,6 +20,7 @@ export interface ITaskSelectorConstructor {
   isIncrementalBuildAllowed: boolean;
   changedProjectsOnly: boolean;
   ignoreMissingScript: boolean;
+  ignoreDependencyOrder: boolean;
 }
 
 /**
@@ -81,8 +82,10 @@ export class TaskSelector {
       // Register any dependencies it may have
       deps.forEach(dep => this._registerTask(this._options.rushConfiguration.getProjectByName(dep)));
 
-      // Register the dependency graph to the TaskRunner
-      deps.forEach(dep => this._taskRunner.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
+      if (!this._options.ignoreDependencyOrder) {
+        // Add ordering relationships for each dependency
+        deps.forEach(dep => this._taskRunner.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
+      }
     }
   }
 
@@ -106,11 +109,13 @@ export class TaskSelector {
         this._registerTask(this._options.rushConfiguration.getProjectByName(dependent));
       });
 
-      // Only register dependencies graph for projects which have been registered
-      // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
-      dependents.forEach(dependent =>
-        this._taskRunner.addDependencies(dependent,
-          (this._rushLinkJson.localLinks[dependent] || []).filter(dep => dependents.has(dep))));
+      if (!this._options.ignoreDependencyOrder) {
+        // Only add ordering relationships for projects which have been registered
+        // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
+        dependents.forEach(dependent =>
+          this._taskRunner.addDependencies(dependent,
+            (this._rushLinkJson.localLinks[dependent] || []).filter(dep => dependents.has(dep))));
+      }
     }
   }
 
@@ -119,10 +124,11 @@ export class TaskSelector {
     for (const rushProject of this._options.rushConfiguration.projects) {
       this._registerTask(rushProject);
     }
-
-    // Add all dependencies
-    for (const projectName of Object.keys(this._rushLinkJson.localLinks)) {
-      this._taskRunner.addDependencies(projectName, this._rushLinkJson.localLinks[projectName]);
+    if (!this._options.ignoreDependencyOrder) {
+      // Add ordering relationships for each dependency
+      for (const projectName of Object.keys(this._rushLinkJson.localLinks)) {
+        this._taskRunner.addDependencies(projectName, this._rushLinkJson.localLinks[projectName]);
+      }
     }
   }
 
