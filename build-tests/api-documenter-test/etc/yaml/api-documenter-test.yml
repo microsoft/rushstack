@@ -20,6 +20,8 @@ items:
       - api-documenter-test.IDocInterface2
       - api-documenter-test.IDocInterface3
       - api-documenter-test.IDocInterface4
+      - api-documenter-test.IDocInterface5
+      - api-documenter-test.IDocInterface6
       - api-documenter-test.OuterNamespace.InnerNamespace.nestedFunction
       - api-documenter-test.SystemEvent
   - uid: api-documenter-test.globalFunction
@@ -75,5 +77,9 @@ references:
     name: IDocInterface3
   - uid: api-documenter-test.IDocInterface4
     name: IDocInterface4
+  - uid: api-documenter-test.IDocInterface5
+    name: IDocInterface5
+  - uid: api-documenter-test.IDocInterface6
+    name: IDocInterface6
   - uid: api-documenter-test.SystemEvent
     name: SystemEvent
