@@ -223,18 +223,18 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
  */
 export interface IDocInterface5 {
   /**
-   * string property
+   * Property of type string that does something
    */
-  string: string;
+  regularProperty: string;
 }
 
 /**
- * Interface without inline tag to test custom TOC
+ * Interface without inline tag to test custom TOC with injection
  * @public
  */
 export interface IDocInterface6 {
   /**
-   * number property
+   * Property of type number that does something
    */
-  number: number;
+  regularProperty: number;
 }

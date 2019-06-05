@@ -1205,12 +1205,12 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "string",
-              "docComment": "/**\n * string property\n */\n",
+              "canonicalReference": "regularProperty",
+              "docComment": "/**\n * Property of type string that does something\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "string"
+                  "text": "regularProperty"
                 },
                 {
                   "kind": "Content",
@@ -1226,7 +1226,7 @@
                 }
               ],
               "releaseTag": "Public",
-              "name": "string",
+              "name": "regularProperty",
               "propertyTypeTokenRange": {
                 "startIndex": 2,
                 "endIndex": 3
@@ -1238,7 +1238,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "(IDocInterface6:interface)",
-          "docComment": "/**\n * Interface without inline tag to test custom TOC\n *\n * @public\n */\n",
+          "docComment": "/**\n * Interface without inline tag to test custom TOC with injection\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1258,12 +1258,12 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "number",
-              "docComment": "/**\n * number property\n */\n",
+              "canonicalReference": "regularProperty",
+              "docComment": "/**\n * Property of type number that does something\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Reference",
-                  "text": "number"
+                  "text": "regularProperty"
                 },
                 {
                   "kind": "Content",
@@ -1279,7 +1279,7 @@
                 }
               ],
               "releaseTag": "Public",
-              "name": "number",
+              "name": "regularProperty",
               "propertyTypeTokenRange": {
                 "startIndex": 2,
                 "endIndex": 3

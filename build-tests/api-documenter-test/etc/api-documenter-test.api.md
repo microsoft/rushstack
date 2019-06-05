@@ -78,12 +78,12 @@ export interface IDocInterface4 {
 
 // @public
 export interface IDocInterface5 {
-    string: string;
+    regularProperty: string;
 }
 
 // @public
 export interface IDocInterface6 {
-    number: number;
+    regularProperty: number;
 }
 
 // @public

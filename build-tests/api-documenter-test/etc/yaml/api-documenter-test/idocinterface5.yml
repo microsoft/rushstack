@@ -9,16 +9,16 @@ items:
     type: interface
     package: api-documenter-test
     children:
-      - api-documenter-test.IDocInterface5.string
-  - uid: api-documenter-test.IDocInterface5.string
-    summary: string property
-    name: string
-    fullName: string
+      - api-documenter-test.IDocInterface5.regularProperty
+  - uid: api-documenter-test.IDocInterface5.regularProperty
+    summary: Property of type string that does something
+    name: regularProperty
+    fullName: regularProperty
     langs:
       - typeScript
     type: property
     syntax:
-      content: 'string: string;'
+      content: 'regularProperty: string;'
       return:
         type:
           - string
