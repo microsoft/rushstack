@@ -38,13 +38,25 @@ describe('TaskRunner', () => {
 
   describe('Constructor', () => {
     it('throwsErrorOnInvalidParallelism', () => {
-      expect(() => new TaskRunner(false, 'tequila', false, terminal)).toThrowErrorMatchingSnapshot();
+      expect(() => new TaskRunner({
+        quietMode: false,
+        parallelism: 'tequila',
+        changedProjectsOnly: false,
+        terminal,
+        shouldFailOnWarnings: false
+      })).toThrowErrorMatchingSnapshot();
     });
   });
 
   describe('Dependencies', () => {
     beforeEach(() => {
-      taskRunner = new TaskRunner(false, '1', false, terminal);
+      taskRunner = new TaskRunner({
+          quietMode: false,
+          parallelism: '1',
+          changedProjectsOnly: false,
+          terminal,
+          shouldFailOnWarnings: false
+      });
     });
 
     it('throwsErrorOnNonExistentTask', () => {
@@ -83,7 +95,13 @@ describe('TaskRunner', () => {
 
   describe('Error logging', () => {
     beforeEach(() => {
-      taskRunner = new TaskRunner(false, '1', false, terminal);
+      taskRunner = new TaskRunner({
+        quietMode: false,
+        parallelism: '1',
+        changedProjectsOnly: false,
+        terminal,
+        shouldFailOnWarnings: false
+      });
     });
 
     const EXPECTED_FAIL: string = 'Promise returned by execute() resolved but was expected to fail';
@@ -178,6 +196,79 @@ describe('TaskRunner', () => {
             .toMatch(/List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/);
           checkConsoleOutput(terminalProvider);
         });
+    });
+  });
+
+  describe('Warning logging', () => {
+    describe('Fail on warning', () => {
+      beforeEach(() => {
+        taskRunner = new TaskRunner({
+          quietMode: false,
+          parallelism: '1',
+          changedProjectsOnly: false,
+          terminal,
+          shouldFailOnWarnings: true
+        });
+      });
+
+      it('Logs warnings correctly', () => {
+        taskRunner.addTask({
+          name: 'success with warnings (failure)',
+          isIncrementalBuildAllowed: false,
+          execute: (writer: ITaskWriter) => {
+            writer.write('Build step 1' + EOL);
+            writer.write('Warning: step 1 succeeded with warnings' + EOL);
+            return Promise.resolve(TaskStatus.SuccessWithWarning);
+          },
+          hadEmptyScript: false
+        });
+
+        return taskRunner
+          .execute()
+          .then(() => fail('Promise returned by execute() resolved but was expected to fail'))
+          .catch(err => {
+            expect(err.message).toMatchSnapshot();
+            const allMessages: string = terminalProvider.getOutput();
+            expect(allMessages).toContain('Build step 1');
+            expect(allMessages).toContain('step 1 succeeded with warnings');
+            checkConsoleOutput(terminalProvider);
+          });
+      });
+    });
+
+    describe('Success on warning', () => {
+      beforeEach(() => {
+        taskRunner = new TaskRunner({
+          quietMode: false,
+          parallelism: '1',
+          changedProjectsOnly: false,
+          terminal,
+          shouldFailOnWarnings: false
+        });
+      });
+
+      it('Logs warnings correctly', () => {
+        taskRunner.addTask({
+          name: 'success with warnings (success)',
+          isIncrementalBuildAllowed: false,
+          execute: (writer: ITaskWriter) => {
+            writer.write('Build step 1' + EOL);
+            writer.write('Warning: step 1 succeeded with warnings' + EOL);
+            return Promise.resolve(TaskStatus.SuccessWithWarning);
+          },
+          hadEmptyScript: false
+        });
+
+        return taskRunner
+          .execute()
+          .then(() => {
+            const allMessages: string = terminalProvider.getOutput();
+            expect(allMessages).toContain('Build step 1');
+            expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
+            checkConsoleOutput(terminalProvider);
+          })
+          .catch(err => fail('Promise returned by execute() rejected but was expected to resolve'));
+      });
     });
   });
 });
