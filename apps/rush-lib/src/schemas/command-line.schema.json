@@ -199,7 +199,8 @@
             "longName": { "$ref": "#/definitions/anything" },
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
-            "associatedCommands": { "$ref": "#/definitions/anything" }
+            "associatedCommands": { "$ref": "#/definitions/anything" },
+            "shouldFailBuildWithWarnings": { "$ref": "#/definitions/anything" }
           }
         }
       ]
