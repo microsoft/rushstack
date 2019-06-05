@@ -526,7 +526,7 @@ export class YamlDocumenter {
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
       let qualifiedName: string = hierarchyItem.displayName;
       if (ApiParameterListMixin.isBaseClassOf(hierarchyItem)) {
-        if (hierarchyItem.overloadIndex > 0) {
+        if (hierarchyItem.overloadIndex > 1) {
           qualifiedName += `_${hierarchyItem.overloadIndex}`;
         }
       }

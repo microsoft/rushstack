@@ -724,7 +724,8 @@ export class ApiModelGenerator {
     let overloadIndex: number | undefined = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
 
     if (overloadIndex === undefined) {
-      let nextIndex: number = 0;
+      // TSDoc index selectors are positive integers counting from 1
+      let nextIndex: number = 1;
       for (const other of allDeclarations) {
         // Filter out other declarations that are not overloads.  For example, an overloaded function can also
         // be a namespace.

@@ -60,8 +60,13 @@ export interface ApiParameterListMixin extends ApiItem {
    *
    * ```ts
    * export namespace Versioning {
+   *   // TSDoc: Versioning.(addVersions:1)
    *   export function addVersions(x: number, y: number): number;
+   *
+   *   // TSDoc: Versioning.(addVersions:2)
    *   export function addVersions(x: string, y: string): string;
+   *
+   *   // (implementation)
    *   export function addVersions(x: number|string, y: number|string): number|string {
    *     // . . .
    *   }
@@ -69,7 +74,7 @@ export interface ApiParameterListMixin extends ApiItem {
    * ```
    *
    * In the above example, there are two overloaded declarations.  The overload using numbers will have
-   * `overloadIndex = 0`.  The overload using strings will have `overloadIndex = 1`.  The third declaration that
+   * `overloadIndex = 1`.  The overload using strings will have `overloadIndex = 2`.  The third declaration that
    * accepts all possible inputs is considered part of the implementation, and is not processed by API Extractor.
    */
   readonly overloadIndex: number;
