@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix git process in rush version",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dahajek@microsoft.com"
+}
