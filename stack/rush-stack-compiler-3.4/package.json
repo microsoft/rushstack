@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-stack-compiler-3.4",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain. This version selects TypeScript 3.4.",
   "license": "MIT",
   "repository": {
