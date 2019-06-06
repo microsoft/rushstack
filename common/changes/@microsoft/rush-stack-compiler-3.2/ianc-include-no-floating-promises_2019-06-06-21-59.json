@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.2",
+      "comment": "Include accidentally omitted no-floating-promises TSLint rule.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.2",
+  "email": "iclanton@users.noreply.github.com"
+}
