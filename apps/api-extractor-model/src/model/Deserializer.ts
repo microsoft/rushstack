@@ -20,7 +20,7 @@ import { ApiConstructSignature, IApiConstructSignatureOptions } from './ApiConst
 import { ApiFunction, IApiFunctionOptions } from './ApiFunction';
 import { ApiCallSignature, IApiCallSignatureOptions } from './ApiCallSignature';
 import { ApiIndexSignature, IApiIndexSignatureOptions } from './ApiIndexSignature';
-import { ApiTypeAlias, IApiTypeAliasOptions } from './ApiTypeAlias';
+import { ApiTypeAlias, IApiTypeAliasOptions, IApiTypeAliasJson } from './ApiTypeAlias';
 import { ApiVariable, IApiVariableOptions, IApiVariableJson } from './ApiVariable';
 import { IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 
@@ -79,8 +79,8 @@ export class Deserializer {
       case ApiItemKind.PropertySignature:
         ApiPropertySignature.onDeserializeInto(options, jsonObject as IApiPropertyItemJson);
         return new ApiPropertySignature(options as IApiPropertySignatureOptions);
-        case ApiItemKind.TypeAlias:
-        ApiTypeAlias.onDeserializeInto(options, jsonObject as IApiDeclaredItemJson);
+      case ApiItemKind.TypeAlias:
+        ApiTypeAlias.onDeserializeInto(options, jsonObject as IApiTypeAliasJson);
         return new ApiTypeAlias(options as IApiTypeAliasOptions);
       case ApiItemKind.Variable:
         ApiVariable.onDeserializeInto(options, jsonObject as IApiVariableJson);

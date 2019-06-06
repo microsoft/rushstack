@@ -39,6 +39,11 @@ export {
   ApiParameterListMixin
 } from './mixins/ApiParameterListMixin';
 export {
+  IApiTypeParameterOptions,
+  IApiTypeParameterListMixinOptions,
+  ApiTypeParameterListMixin
+} from './mixins/ApiTypeParameterListMixin';
+export {
   IApiItemContainerMixinOptions,
   ApiItemContainerMixin
 } from './mixins/ApiItemContainerMixin';
@@ -54,6 +59,10 @@ export {
   IApiStaticMixinOptions,
   ApiStaticMixin
 } from './mixins/ApiStaticMixin';
+export {
+  IApiNameMixinOptions,
+  ApiNameMixin
+} from './mixins/ApiNameMixin';
 export {
   ExcerptTokenKind,
   IExcerptTokenRange,
@@ -143,6 +152,10 @@ export {
   IApiTypeAliasOptions,
   ApiTypeAlias
 } from './model/ApiTypeAlias';
+export {
+  ITypeParameterOptions,
+  TypeParameter
+} from './model/TypeParameter';
 export {
   IApiVariableOptions,
   ApiVariable

@@ -688,6 +688,20 @@
             }
           ],
           "releaseTag": "Public",
+          "typeParameters": [
+            {
+              "kind": "TypeParameter",
+              "canonicalReference": "(T:typeparam)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "T"
+                }
+              ],
+              "name": "T"
+            }
+          ],
           "name": "Generic",
           "members": [],
           "implementsTokenRanges": []
@@ -1546,11 +1560,19 @@
             },
             {
               "kind": "Content",
-              "text": "<boolean>;"
+              "text": "<boolean>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
             }
           ],
           "releaseTag": "Public",
-          "name": "ExampleTypeAlias"
+          "name": "ExampleTypeAlias",
+          "aliasTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 5
+          }
         }
       ]
     }

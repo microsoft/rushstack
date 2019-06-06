@@ -1,10 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
+import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson
+  } from '../mixins/ApiTypeParameterListMixin';
 
 /**
  * Constructor options for {@link ApiTypeAlias}.
@@ -13,7 +16,15 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 export interface IApiTypeAliasOptions extends
   IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
+  IApiDeclaredItemOptions,
+  IApiTypeParameterListMixinOptions {
+  aliasTypeTokenRange: IExcerptTokenRange;
+}
+
+export interface IApiTypeAliasJson extends
+  IApiDeclaredItemJson,
+  IApiTypeParameterListMixinJson {
+  aliasTypeTokenRange: IExcerptTokenRange;
 }
 
 /**
@@ -42,13 +53,29 @@ export interface IApiTypeAliasOptions extends
  *
  * @public
  */
-export class ApiTypeAlias extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
+export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+  /**
+   * An {@link Excerpt} that describes the type of the alias.
+   */
+  public readonly aliasTypeExcerpt: Excerpt;
+
+  /** @override */
+  public static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, jsonObject: IApiTypeAliasJson): void {
+    super.onDeserializeInto(options, jsonObject);
+
+    // NOTE: This did not exist in the initial release, so we apply a default
+    //       in the event it doesn't exist in 'jsonObject'.
+    options.aliasTypeTokenRange = jsonObject.aliasTypeTokenRange || { startIndex: 0, endIndex: 0 };
+  }
+
   public static getCanonicalReference(name: string): string {
     return name;
   }
 
   public constructor(options: IApiTypeAliasOptions) {
     super(options);
+
+    this.aliasTypeExcerpt = this.buildExcerpt(options.aliasTypeTokenRange);
   }
 
   /** @override */
@@ -59,5 +86,12 @@ export class ApiTypeAlias extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIte
   /** @override */
   public get canonicalReference(): string {
     return ApiTypeAlias.getCanonicalReference(this.name);
+  }
+
+  /** @override */
+  public serializeInto(jsonObject: Partial<IApiTypeAliasJson>): void {
+    super.serializeInto(jsonObject);
+
+    jsonObject.aliasTypeTokenRange = this.aliasTypeExcerpt.tokenRange;
   }
 }

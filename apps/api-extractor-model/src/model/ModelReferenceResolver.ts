@@ -102,7 +102,7 @@ export class ModelReferenceResolver {
         return result;
       }
 
-      const foundMembers: ReadonlyArray<ApiItem> = currentItem.findMembersByName(identifier);
+      const foundMembers: ReadonlyArray<ApiItem> | undefined = currentItem.findMembersByName(identifier);
       if (foundMembers.length === 0) {
         result.errorMessage = `The member reference ${JSON.stringify(identifier)} was not found` ;
         return result;

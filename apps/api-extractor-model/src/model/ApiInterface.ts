@@ -2,12 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
+import { ApiItemContainerMixin, IApiItemContainerMixinOptions, IApiItemContainerJson
+  } from '../mixins/ApiItemContainerMixin';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
-import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
+import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin, IApiReleaseTagMixinJson } from '../mixins/ApiReleaseTagMixin';
 import { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
-import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { IApiNameMixinOptions, ApiNameMixin, IApiNameMixinJson } from '../mixins/ApiNameMixin';
+import { IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson, ApiTypeParameterListMixin
+  } from '../mixins/ApiTypeParameterListMixin';
 
 /**
  * Constructor options for {@link ApiInterface}.
@@ -16,13 +19,20 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 export interface IApiInterfaceOptions extends
   IApiItemContainerMixinOptions,
   IApiNameMixinOptions,
+  IApiTypeParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiDeclaredItemOptions {
 
   extendsTokenRanges: IExcerptTokenRange[];
 }
 
-export interface IApiInterfaceJson extends IApiDeclaredItemJson {
+export interface IApiInterfaceJson extends
+  IApiItemContainerJson,
+  IApiNameMixinJson,
+  IApiTypeParameterListMixinJson,
+  IApiReleaseTagMixinJson,
+  IApiDeclaredItemJson {
+
   extendsTokenRanges: IExcerptTokenRange[];
 }
 
@@ -43,7 +53,8 @@ export interface IApiInterfaceJson extends IApiDeclaredItemJson {
  *
  * @public
  */
-export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(
+  ApiDeclaredItem)))) {
 
   private readonly _extendsTypes: HeritageType[] = [];
 
