@@ -83,10 +83,14 @@
         "mainProject": {
           "description": "The main project for this version policy",
           "type": "string"
+        },
+        "shouldSkipChangelogVerification": {
+          "description": "If true, the version policy will not require changelog files.",
+          "type": "boolean"
         }
       },
       "required": ["policyName", "definitionName", "version", "nextBump"],
-      "additionalProperties": false
+      "additionalProperties": true
     },
 
     "individualVersion": {
@@ -105,10 +109,14 @@
         "lockedMajor": {
           "description": "The locked major version",
           "type": "number"
+        },
+        "shouldSkipChangelogVerification": {
+          "description": "If true, the version policy will not require changelog files.",
+          "type": "boolean"
         }
       },
       "required": ["policyName", "definitionName"],
-      "additionalProperties": false
+      "additionalProperties": true
     }
   }
 }

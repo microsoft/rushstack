@@ -341,6 +341,7 @@ export abstract class VersionPolicy {
     readonly policyName: string;
     setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
     setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
+    readonly shouldSkipChangelogVerification: boolean;
     abstract validate(versionString: string, packageName: string): void;
     }
 
