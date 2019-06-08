@@ -690,16 +690,7 @@
           "releaseTag": "Public",
           "typeParameters": [
             {
-              "kind": "TypeParameter",
-              "canonicalReference": "(T:typeparam)",
-              "docComment": "",
-              "excerptTokens": [
-                {
-                  "kind": "Reference",
-                  "text": "T"
-                }
-              ],
-              "name": "T"
+              "typeParameterName": "T"
             }
           ],
           "name": "Generic",

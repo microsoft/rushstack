@@ -221,6 +221,14 @@
 				"content": {
 					"type": "string"
 				},
+				"typeParameters": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/parameter"
+					},
+					"minItems": 1,
+					"uniqueItems": true
+				},
 				"parameters": {
 					"type": "array",
 					"items": {

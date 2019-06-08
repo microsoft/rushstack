@@ -112,5 +112,6 @@ export interface IYamlSource {
 export interface IYamlSyntax {
   content?: string;
   parameters?: IYamlParameter[];
+  typeParameters?: IYamlParameter[];
   return?: IYamlReturn;
 }
