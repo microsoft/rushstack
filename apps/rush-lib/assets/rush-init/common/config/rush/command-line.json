@@ -78,7 +78,13 @@
        * the custom command name.  To disable this check, set "ignoreMissingScript" to true;
        * projects with a missing definition will be skipped.
        */
-      "ignoreMissingScript": false
+      "ignoreMissingScript": false,
+
+      /**
+       * By default, Rush returns a nonzero exit code if a warning or an error occurs during a command. To make Rush
+       * return a zero exit code if a warning occurs, set this property to "true."
+       */
+      "allowWarningsInSuccessfulBuild": false
     },
 
     {
