@@ -26,7 +26,17 @@ export interface ITypeParameterOptions {
  * `TypeParameter` represents a TypeScript declaration such as `T` in this example:
  *
  * ```ts
- * export interface Array<T> {
+ * interface IIdentifier {
+ *     getCode(): string;
+ * }
+ *
+ * class BarCode implements IIdentifier {
+ *     private _value: number;
+ *     public getCode(): string { return this._value.toString(); }
+ * }
+ *
+ * class Book<TIdentifier extends IIdentifier = BarCode> {
+ *     public identifier: TIdentifier;
  * }
  * ```
  *
@@ -37,11 +47,29 @@ export interface ITypeParameterOptions {
 export class TypeParameter {
   /**
    * An {@link Excerpt} that describes the base constraint of the type parameter.
+   *
+   * @remarks
+   * In the example below, the `constraintExcerpt` would correspond to the `IIdentifier` subexpression:
+   *
+   * ```ts
+   * class Book<TIdentifier extends IIdentifier = BarCode> {
+   *     public identifier: TIdentifier;
+   * }
+   * ```
    */
   public readonly constraintExcerpt: Excerpt | undefined;
 
   /**
    * An {@link Excerpt} that describes the default type of the type parameter.
+   *
+   * @remarks
+   * In the example below, the `defaultTypeExcerpt` would correspond to the `BarCode` subexpression:
+   *
+   * ```ts
+   * class Book<TIdentifier extends IIdentifier = BarCode> {
+   *     public identifier: TIdentifier;
+   * }
+   * ```
    */
   public readonly defaultTypeExcerpt: Excerpt | undefined;
 
