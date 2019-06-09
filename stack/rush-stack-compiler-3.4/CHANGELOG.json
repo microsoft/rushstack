@@ -2,6 +2,18 @@
   "name": "@microsoft/rush-stack-compiler-3.4",
   "entries": [
     {
+      "version": "0.1.4",
+      "tag": "@microsoft/rush-stack-compiler-3.4_v0.1.4",
+      "date": "Thu, 06 Jun 2019 22:33:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include accidentally omitted no-floating-promises TSLint rule."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.3",
       "tag": "@microsoft/rush-stack-compiler-3.4_v0.1.3",
       "date": "Wed, 05 Jun 2019 19:12:34 GMT",
