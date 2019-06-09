@@ -25,3 +25,6 @@ items:
         type:
           - void
         description: ''
+references:
+  - uid: api-documenter-test.IDocInterface1
+    name: IDocInterface1

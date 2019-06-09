@@ -159,10 +159,37 @@
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
+				"uid": {
+					"type": "string"
+				},
 				"name": {
 					"type": "string"
 				},
+				"name.typeScript": {
+					"type": "string"
+				},
+				"fullName.typeScript": {
+					"type": "string"
+				},
+				"spec.typeScript": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/spec"
+					}
+				}
+			}
+		},
+		"spec": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
 				"uid": {
+					"type": "string"
+				},
+				"name": {
+					"type": "string"
+				},
+				"fullName": {
 					"type": "string"
 				}
 			}

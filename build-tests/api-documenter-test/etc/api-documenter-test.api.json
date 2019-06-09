@@ -1270,6 +1270,144 @@
           "name": "IDocInterface6",
           "members": [
             {
+              "kind": "MethodSignature",
+              "canonicalReference": "(genericReferenceMethod:0)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "genericReferenceMethod"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "T"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">("
+                },
+                {
+                  "kind": "Reference",
+                  "text": "x"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "T"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "T"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 8,
+                "endIndex": 9
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 0,
+              "parameters": [
+                {
+                  "parameterName": "x",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 7
+                  }
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "T"
+                }
+              ],
+              "name": "genericReferenceMethod"
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "arrayProperty",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "arrayProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "arrayProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 4
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "intersectionProperty",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "intersectionProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1"
+                },
+                {
+                  "kind": "Content",
+                  "text": " & "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface2"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "intersectionProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 5
+              }
+            },
+            {
               "kind": "PropertySignature",
               "canonicalReference": "regularProperty",
               "docComment": "/**\n * Property of type number that does something\n */\n",
@@ -1296,6 +1434,129 @@
               "propertyTypeTokenRange": {
                 "startIndex": 2,
                 "endIndex": 3
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "tupleProperty",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "tupleProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "["
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface2"
+                },
+                {
+                  "kind": "Content",
+                  "text": "]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "tupleProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 7
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "typeReferenceProperty",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "typeReferenceProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Generic"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "typeReferenceProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 6
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "unionProperty",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "unionProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface2"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "unionProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 5
               }
             }
           ],

@@ -27,10 +27,7 @@ items:
             }) => boolean;
       return:
         type:
-          - |-
-            ({ children }: {
-                    children: string;
-                }) => boolean
+          - 'anonymous0:local'
   - uid: api-documenter-test.IDocInterface4.generic
     summary: make sure html entities are escaped in tables.
     name: generic
@@ -42,7 +39,7 @@ items:
       content: 'generic: Generic<number>;'
       return:
         type:
-          - Generic<number>
+          - 'api-documenter-test.Generic{number}'
   - uid: api-documenter-test.IDocInterface4.numberOrFunction
     summary: a union type with a function
     name: numberOrFunction
@@ -67,3 +64,43 @@ items:
       return:
         type:
           - string | number
+references:
+  - uid: 'anonymous0:local'
+    name.typeScript: |-
+      ({ children }: {
+              children: string;
+          }) => boolean
+    fullName.typeScript: |-
+      ({ children }: {
+              children: string;
+          }) => boolean
+    spec.typeScript:
+      - name: '({ '
+        fullName: '({ '
+      - uid: children
+        name: children
+        fullName: children
+      - name: |2-
+           }: {
+                  
+        fullName: |2-
+           }: {
+                  
+      - uid: children
+        name: children
+        fullName: children
+      - name: |-
+          : string;
+              }) => boolean
+        fullName: |-
+          : string;
+              }) => boolean
+  - uid: 'api-documenter-test.Generic{number}'
+    name.typeScript: Generic<number>
+    fullName.typeScript: Generic<number>
+    spec.typeScript:
+      - uid: api-documenter-test.Generic
+        name: Generic
+        fullName: Generic
+      - name: <number>
+        fullName: <number>

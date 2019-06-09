@@ -21,3 +21,6 @@ items:
       return:
         type:
           - api-documenter-test.SystemEvent
+references:
+  - uid: api-documenter-test.SystemEvent
+    name: SystemEvent
