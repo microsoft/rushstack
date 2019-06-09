@@ -62,13 +62,13 @@ exports[`TaskRunner Error logging printedStdoutAfterErrorWithEmptyStderr 4`] = `
 
 exports[`TaskRunner Error logging printedStdoutAfterErrorWithEmptyStderr 5`] = `"[x][31m[-n-]1 of 1: [stdout only] failed to build![x][39m[n]"`;
 
-exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 1`] = `"Project(s) succeeded with warnings and one or more arguments were provided that caused the build to fail on warnings."`;
+exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 1`] = `"An error occurred."`;
 
 exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 2`] = `"Registered success with warnings (failure)[n]Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[success with warnings (failure)] started[x][39m[n][n][x][33m[x][4mSUCCESS WITH WARNINGS (1)[x][24m[x][39m[n][x][33m================================[x][39m[n][x][33m[x][4msuccess with warnings (failure) (0.00 seconds)[x][24m[x][39m[n]Build step 1[-n-]Warning: step 1 succeeded with warnings[n][x][33m================================[-n-][x][39m[n][n]"`;
 
 exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 3`] = `""`;
 
-exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 4`] = `"[x][33m1 of 1: [success with warnings (failure)] completed with warnings in 0.00 seconds[x][39m[n]"`;
+exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 4`] = `"[x][33m1 of 1: [success with warnings (failure)] completed with warnings in 0.00 seconds[x][39m[n][x][33mProject(s) succeeded with warnings[x][39m[n]"`;
 
 exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 5`] = `""`;
 

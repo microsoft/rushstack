@@ -23,6 +23,7 @@ export interface IBulkCommandJson extends IBaseCommandJson {
   enableParallelism: boolean;
   ignoreDependencyOrder?: boolean;
   ignoreMissingScript?: boolean;
+  allowWarningsInSuccessfulBuild?: boolean;
 }
 
 /**
@@ -51,7 +52,6 @@ export interface IBaseParameterJson {
  */
 export interface IFlagParameterJson extends IBaseParameterJson {
   parameterKind: 'flag';
-  shouldFailBuildWithWarnings: boolean;
 }
 
 /**

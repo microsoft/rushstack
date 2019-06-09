@@ -21,7 +21,6 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { FileSystem } from '@microsoft/node-core-library';
-import { IFlagParameterJson } from '../../api/CommandLineJson';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -30,6 +29,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
+  doNotFailOnWarnings: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -58,15 +58,15 @@ export class BulkScriptAction extends BaseScriptAction {
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreDependencyOrder: boolean;
+  private _doNotFailOnWarnings: boolean;
 
-  constructor(
-    options: IBulkScriptActionOptions
-  ) {
+  constructor(options: IBulkScriptActionOptions) {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
+    this._doNotFailOnWarnings = options.doNotFailOnWarnings;
   }
 
   public run(): Promise<void> {
@@ -89,54 +89,42 @@ export class BulkScriptAction extends BaseScriptAction {
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
 
-    let shouldFailOnWarnings: boolean = false;
-    for (const customParameter of this.customParameters) {
-      customParameter.appendToArgList(customParameterValues);
-
-      if (customParameter instanceof CommandLineFlagParameter && customParameter.value) {
-        const parameterJson: IFlagParameterJson | undefined = this.customParamterMap.get(
-          customParameter
-        ) as IFlagParameterJson;
-        if (parameterJson && parameterJson.shouldFailBuildWithWarnings) {
-          shouldFailOnWarnings = true;
-        }
-      }
-    }
-
     const changedProjectsOnly: boolean = this.actionName === 'build' && this._changedProjectsOnly.value;
 
-    const tasks: TaskSelector = new TaskSelector(
-      {
-        rushConfiguration: this.rushConfiguration,
-        toFlags: this._mergeToProjects(),
-        fromFlags: this._fromFlag.values,
-        commandToRun: this._commandToRun,
-        customParameterValues,
-        isQuietMode,
-        parallelism,
-        isIncrementalBuildAllowed: this.actionName === 'build',
-        changedProjectsOnly,
-        ignoreMissingScript: this._ignoreMissingScript,
-        ignoreDependencyOrder: this._ignoreDependencyOrder,
-        shouldFailOnWarnings
-      }
-    );
+    const tasks: TaskSelector = new TaskSelector({
+      rushConfiguration: this.rushConfiguration,
+      toFlags: this._mergeToProjects(),
+      fromFlags: this._fromFlag.values,
+      commandToRun: this._commandToRun,
+      customParameterValues,
+      isQuietMode,
+      parallelism,
+      isIncrementalBuildAllowed: this.actionName === 'build',
+      changedProjectsOnly,
+      ignoreMissingScript: this._ignoreMissingScript,
+      ignoreDependencyOrder: this._ignoreDependencyOrder,
+      doNotFailOnWarnings: this._doNotFailOnWarnings
+    });
 
-    return tasks.execute().then(
-      () => {
-        stopwatch.stop();
+    return tasks.execute().then(() => {
+      stopwatch.stop();
+      console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+      this._doAfterTask(stopwatch, true);
+    }).catch((error: Error) => {
+      stopwatch.stop();
+      if (error instanceof AlreadyReportedError) {
         console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-        this._doAfterTask(stopwatch, true);
-      })
-      .catch((error: Error) => {
+      } else {
         if (error && error.message) {
           console.log('Error: ' + error.message);
         }
-        stopwatch.stop();
+
         console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
-        this._doAfterTask(stopwatch, false);
-        throw new AlreadyReportedError();
-      });
+      }
+
+      this._doAfterTask(stopwatch, false);
+      throw new AlreadyReportedError();
+    });
   }
 
   protected onDefineParameters(): void {

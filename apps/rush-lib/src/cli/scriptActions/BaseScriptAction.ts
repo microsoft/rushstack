@@ -5,7 +5,6 @@ import { CommandLineParameter } from '@microsoft/ts-command-line';
 import { BaseRushAction, IBaseRushActionOptions } from '../actions/BaseRushAction';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
-import { ParameterJson } from '../../api/CommandLineJson';
 
 /**
  * Constructor parameters for BaseScriptAction
@@ -27,8 +26,6 @@ export interface IBaseScriptActionOptions extends IBaseRushActionOptions {
 export abstract class BaseScriptAction extends BaseRushAction {
   protected readonly _commandLineConfiguration: CommandLineConfiguration | undefined;
   protected readonly customParameters: CommandLineParameter[] = [];
-  protected readonly customParamterMap: Map<CommandLineParameter, ParameterJson> =
-    new Map<CommandLineParameter, ParameterJson>();
 
   constructor(
     options: IBaseScriptActionOptions
@@ -86,7 +83,6 @@ export abstract class BaseScriptAction extends BaseRushAction {
 
         if (customParameter) {
           this.customParameters.push(customParameter);
-          this.customParamterMap.set(customParameter, parameterJson);
         }
       }
     }

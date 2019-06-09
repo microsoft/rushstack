@@ -14,12 +14,13 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { ITask, ITaskDefinition } from './ITask';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export interface ITaskRunnerOptions {
   quietMode: boolean;
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
-  shouldFailOnWarnings: boolean;
+  doNotFailOnWarnings: boolean;
   terminal?: Terminal;
 }
 
@@ -33,9 +34,9 @@ export interface ITaskRunnerOptions {
 export class TaskRunner {
   private _tasks: Map<string, ITask>;
   private _changedProjectsOnly: boolean;
+  private _doNotFailOnWarnings: boolean;
   private _buildQueue: ITask[];
   private _quietMode: boolean;
-  private _shouldFailOnWarnings: boolean;
   private _hasAnyFailures: boolean;
   private _hasAnyWarnings: boolean;
   private _parallelism: number;
@@ -49,7 +50,7 @@ export class TaskRunner {
       quietMode,
       parallelism,
       changedProjectsOnly,
-      shouldFailOnWarnings,
+      doNotFailOnWarnings,
       terminal = new Terminal(new ConsoleTerminalProvider())
     } = options;
     this._tasks = new Map<string, ITask>();
@@ -58,7 +59,7 @@ export class TaskRunner {
     this._hasAnyFailures = false;
     this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
-    this._shouldFailOnWarnings = shouldFailOnWarnings;
+    this._doNotFailOnWarnings = doNotFailOnWarnings;
     this._terminal = terminal;
 
     const numberOfCores: number = os.cpus().length;
@@ -175,11 +176,9 @@ export class TaskRunner {
 
       if (this._hasAnyFailures) {
         return Promise.reject(new Error('Project(s) failed to build'));
-      } else if (this._hasAnyWarnings && this._shouldFailOnWarnings) {
-        return Promise.reject(new Error(
-          'Project(s) succeeded with warnings and one or more arguments were provided that caused the ' +
-          'build to fail on warnings.'
-        ));
+      } else if (this._hasAnyWarnings && !this._doNotFailOnWarnings) {
+        this._terminal.writeWarningLine('Project(s) succeeded with warnings');
+        return Promise.reject(new AlreadyReportedError());
       } else {
         return Promise.resolve();
       }

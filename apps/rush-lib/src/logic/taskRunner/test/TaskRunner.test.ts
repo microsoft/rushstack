@@ -43,7 +43,7 @@ describe('TaskRunner', () => {
         parallelism: 'tequila',
         changedProjectsOnly: false,
         terminal,
-        shouldFailOnWarnings: false
+        doNotFailOnWarnings: false
       })).toThrowErrorMatchingSnapshot();
     });
   });
@@ -55,7 +55,7 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           terminal,
-          shouldFailOnWarnings: false
+          doNotFailOnWarnings: false
       });
     });
 
@@ -100,7 +100,7 @@ describe('TaskRunner', () => {
         parallelism: '1',
         changedProjectsOnly: false,
         terminal,
-        shouldFailOnWarnings: false
+        doNotFailOnWarnings: false
       });
     });
 
@@ -207,7 +207,7 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           terminal,
-          shouldFailOnWarnings: true
+          doNotFailOnWarnings: false
         });
       });
 
@@ -243,7 +243,7 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           terminal,
-          shouldFailOnWarnings: false
+          doNotFailOnWarnings: true
         });
       });
 
