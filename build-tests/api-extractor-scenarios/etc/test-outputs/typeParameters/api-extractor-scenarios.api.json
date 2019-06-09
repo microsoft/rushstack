@@ -367,7 +367,8 @@
             },
             {
               "kind": "Reference",
-              "text": "T"
+              "text": "T",
+              "canonicalReference": "T"
             },
             {
               "kind": "Content",
@@ -505,7 +506,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "T"
+                  "text": "T",
+                  "canonicalReference": "T"
                 },
                 {
                   "kind": "Content",

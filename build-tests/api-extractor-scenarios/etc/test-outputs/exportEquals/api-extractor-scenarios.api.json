@@ -51,7 +51,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "Context"
+                  "text": "Context",
+                  "canonicalReference": "!microsoftTeams.Context:interface"
                 },
                 {
                   "kind": "Content",

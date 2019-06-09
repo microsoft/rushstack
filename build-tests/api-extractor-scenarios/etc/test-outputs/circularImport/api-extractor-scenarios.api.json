@@ -51,7 +51,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "IFolder"
+                  "text": "IFolder",
+                  "canonicalReference": "api-extractor-scenarios!IFolder:class"
                 },
                 {
                   "kind": "Content",
@@ -105,7 +106,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "IFolder"
+                  "text": "IFolder",
+                  "canonicalReference": "api-extractor-scenarios!IFolder:class"
                 },
                 {
                   "kind": "Content",
@@ -139,7 +141,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "IFile"
+                  "text": "IFile",
+                  "canonicalReference": "api-extractor-scenarios!IFile:class"
                 },
                 {
                   "kind": "Content",

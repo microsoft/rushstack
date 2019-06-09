@@ -613,12 +613,18 @@ export class Excerpt {
 
 // @public (undocumented)
 export class ExcerptToken {
-    constructor(kind: ExcerptTokenKind, text: string);
+    constructor(kind: ExcerptTokenKind, text: string, canonicalReference?: DeclarationReference);
+    // (undocumented)
+    readonly canonicalReference: DeclarationReference | undefined;
+    // (undocumented)
+    static fromJSON(object: IExcerptToken): ExcerptToken;
     // (undocumented)
     readonly kind: ExcerptTokenKind;
     // (undocumented)
     readonly text: string;
-    }
+    // (undocumented)
+    toJSON(): IExcerptToken;
+}
 
 // @public (undocumented)
 export const enum ExcerptTokenKind {
@@ -815,6 +821,8 @@ export interface IApiVariableOptions extends IApiNameMixinOptions, IApiReleaseTa
 
 // @public (undocumented)
 export interface IExcerptToken {
+    // (undocumented)
+    canonicalReference?: string;
     // (undocumented)
     readonly kind: ExcerptTokenKind;
     // (undocumented)

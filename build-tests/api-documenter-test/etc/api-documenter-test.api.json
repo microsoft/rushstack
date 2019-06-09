@@ -135,7 +135,8 @@
             },
             {
               "kind": "Reference",
-              "text": "DocBaseClass"
+              "text": "DocBaseClass",
+              "canonicalReference": "api-documenter-test!DocBaseClass:class"
             },
             {
               "kind": "Content",
@@ -147,7 +148,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IDocInterface1"
+              "text": "IDocInterface1",
+              "canonicalReference": "api-documenter-test!IDocInterface1:interface"
             },
             {
               "kind": "Content",
@@ -155,7 +157,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IDocInterface2"
+              "text": "IDocInterface2",
+              "canonicalReference": "api-documenter-test!IDocInterface2:interface"
             },
             {
               "kind": "Content",
@@ -379,7 +382,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "SystemEvent"
+                  "text": "SystemEvent",
+                  "canonicalReference": "api-documenter-test!SystemEvent:class"
                 },
                 {
                   "kind": "Content",
@@ -413,7 +417,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "SystemEvent"
+                  "text": "SystemEvent",
+                  "canonicalReference": "api-documenter-test!SystemEvent:class"
                 },
                 {
                   "kind": "Content",
@@ -443,7 +448,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "SystemEvent"
+                  "text": "SystemEvent",
+                  "canonicalReference": "api-documenter-test!SystemEvent:class"
                 },
                 {
                   "kind": "Content",
@@ -754,7 +760,8 @@
             },
             {
               "kind": "Reference",
-              "text": "Promise"
+              "text": "Promise",
+              "canonicalReference": "!Promise:interface"
             },
             {
               "kind": "Content",
@@ -911,7 +918,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "SystemEvent"
+                  "text": "SystemEvent",
+                  "canonicalReference": "api-documenter-test!SystemEvent:class"
                 },
                 {
                   "kind": "Content",
@@ -947,7 +955,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IDocInterface1"
+              "text": "IDocInterface1",
+              "canonicalReference": "api-documenter-test!IDocInterface1:interface"
             },
             {
               "kind": "Content",
@@ -1053,15 +1062,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "EcmaSmbols"
-                },
-                {
-                  "kind": "Content",
-                  "text": "."
-                },
-                {
-                  "kind": "Reference",
-                  "text": "example"
+                  "text": "EcmaSmbols.example",
+                  "canonicalReference": "api-documenter-test!EcmaSmbols.example"
                 },
                 {
                   "kind": "Content",
@@ -1079,8 +1081,8 @@
               "releaseTag": "Public",
               "name": "[EcmaSmbols.example]",
               "propertyTypeTokenRange": {
-                "startIndex": 5,
-                "endIndex": 6
+                "startIndex": 3,
+                "endIndex": 4
               }
             },
             {
@@ -1144,7 +1146,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "IDocInterface1"
+                  "text": "IDocInterface1",
+                  "canonicalReference": "api-documenter-test!IDocInterface1:interface"
                 },
                 {
                   "kind": "Content",
@@ -1318,7 +1321,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "Generic"
+                  "text": "Generic",
+                  "canonicalReference": "api-documenter-test!Generic:class"
                 },
                 {
                   "kind": "Content",
@@ -1473,6 +1477,157 @@
           "members": [
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface6#arrayProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "arrayProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1",
+                  "canonicalReference": "api-documenter-test!IDocInterface1:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "arrayProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 4
+              }
+            },
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "api-documenter-test!IDocInterface6#genericReferenceMethod:member(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "genericReferenceMethod"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "T"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">("
+                },
+                {
+                  "kind": "Reference",
+                  "text": "x"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "T",
+                  "canonicalReference": "T"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "T",
+                  "canonicalReference": "T"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 8,
+                "endIndex": 9
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "x",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 7
+                  }
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "T",
+                  "constraintTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
+                }
+              ],
+              "name": "genericReferenceMethod"
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface6#intersectionProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "intersectionProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1",
+                  "canonicalReference": "api-documenter-test!IDocInterface1:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " & "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface2",
+                  "canonicalReference": "api-documenter-test!IDocInterface2:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "intersectionProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 5
+              }
+            },
+            {
+              "kind": "PropertySignature",
               "canonicalReference": "api-documenter-test!IDocInterface6#regularProperty:member",
               "docComment": "/**\n * Property of type number that does something\n */\n",
               "excerptTokens": [
@@ -1498,6 +1653,135 @@
               "propertyTypeTokenRange": {
                 "startIndex": 2,
                 "endIndex": 3
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface6#tupleProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "tupleProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "["
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1",
+                  "canonicalReference": "api-documenter-test!IDocInterface1:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface2",
+                  "canonicalReference": "api-documenter-test!IDocInterface2:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "tupleProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 7
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface6#typeReferenceProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "typeReferenceProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Generic",
+                  "canonicalReference": "api-documenter-test!Generic:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1",
+                  "canonicalReference": "api-documenter-test!IDocInterface1:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "typeReferenceProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 6
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface6#unionProperty:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "unionProperty"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1",
+                  "canonicalReference": "api-documenter-test!IDocInterface1:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface2",
+                  "canonicalReference": "api-documenter-test!IDocInterface2:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "unionProperty",
+              "propertyTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 5
               }
             }
           ],

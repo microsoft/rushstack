@@ -38,15 +38,8 @@
             },
             {
               "kind": "Reference",
-              "text": "colors"
-            },
-            {
-              "kind": "Content",
-              "text": "."
-            },
-            {
-              "kind": "Reference",
-              "text": "zebra"
+              "text": "colors.zebra",
+              "canonicalReference": "colors!zebra:var"
             },
             {
               "kind": "Content",
@@ -55,7 +48,7 @@
           ],
           "returnTypeTokenRange": {
             "startIndex": 3,
-            "endIndex": 7
+            "endIndex": 5
           },
           "releaseTag": "Public",
           "overloadIndex": 1,

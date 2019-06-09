@@ -38,7 +38,8 @@
             },
             {
               "kind": "Reference",
-              "text": "Lib1Class"
+              "text": "Lib1Class",
+              "canonicalReference": "api-extractor-lib1-test!Lib1Class:class"
             },
             {
               "kind": "Content",
@@ -81,7 +82,8 @@
             },
             {
               "kind": "Reference",
-              "text": "ForgottenExport"
+              "text": "ForgottenExport",
+              "canonicalReference": "!ForgottenExport:class"
             },
             {
               "kind": "Content",

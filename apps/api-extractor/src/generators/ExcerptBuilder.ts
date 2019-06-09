@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import {
   ExcerptTokenKind,
   IExcerptToken,
@@ -9,6 +10,7 @@ import {
 } from '@microsoft/api-extractor-model';
 
 import { Span } from '../analyzer/Span';
+import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
 
 /**
  * Used to provide ExcerptBuilder with a list of nodes whose token range we want to capture.
@@ -29,6 +31,7 @@ export interface IExcerptBuilderNodeToCapture {
  * Options for ExcerptBuilder
  */
 export interface ISignatureBuilderOptions {
+  referenceGenerator: DeclarationReferenceGenerator;
   /**
    * The AST node that we will traverse to extract tokens
    */
@@ -55,6 +58,7 @@ export interface ISignatureBuilderOptions {
  * Internal state for ExcerptBuilder
  */
 interface IBuildSpanState {
+  referenceGenerator: DeclarationReferenceGenerator;
   startingNode: ts.Node;
   stopBeforeChildKind: ts.SyntaxKind | undefined;
 
@@ -82,6 +86,7 @@ export class ExcerptBuilder {
     const excerptTokens: IExcerptToken[] = [];
 
     ExcerptBuilder._buildSpan(excerptTokens, span, {
+      referenceGenerator: options.referenceGenerator,
       startingNode: options.startingNode,
       stopBeforeChildKind: options.stopBeforeChildKind,
       tokenRangesByNode,
@@ -113,8 +118,12 @@ export class ExcerptBuilder {
 
     if (span.prefix) {
       if (span.kind === ts.SyntaxKind.Identifier) {
+        const name: ts.Identifier = span.node as ts.Identifier;
+        const canonicalReference: DeclarationReference | undefined = isDeclarationName(name)
+          ? undefined
+          : state.referenceGenerator.getDeclarationReferenceForIdentifier(name);
         ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Reference,
-          span.prefix, state);
+          span.prefix, state, canonicalReference);
       } else {
         ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content,
           span.prefix, state);
@@ -155,16 +164,31 @@ export class ExcerptBuilder {
   }
 
   private static _appendToken(excerptTokens: IExcerptToken[], excerptTokenKind: ExcerptTokenKind,
-    text: string, state: IBuildSpanState): void {
+    text: string, state: IBuildSpanState, canonicalReference?: DeclarationReference): void {
 
     if (text.length === 0) {
       return;
     }
 
     if (excerptTokenKind !== ExcerptTokenKind.Content) {
-      excerptTokens.push({ kind: excerptTokenKind, text: text});
-      state.disableMergingForNextToken = false;
+      if (excerptTokenKind === ExcerptTokenKind.Reference && excerptTokens.length > 1
+        && !state.disableMergingForNextToken) {
+        // If the previous two tokens were a Reference and a '.', then concatenate
+        // all three tokens as a qualified name Reference.
+        const previousTokenM1: IExcerptToken = excerptTokens[excerptTokens.length - 1];
+        const previousTokenM2: IExcerptToken = excerptTokens[excerptTokens.length - 2];
+        if (previousTokenM1.kind === ExcerptTokenKind.Content
+          && previousTokenM1.text.trim() === '.'
+          && previousTokenM2.kind === ExcerptTokenKind.Reference) {
 
+          previousTokenM2.text += '.' + text;
+          if (canonicalReference !== undefined) {
+            previousTokenM2.canonicalReference = canonicalReference.toString();
+          }
+          excerptTokens.pop(); // remove previousTokenM1;
+          return;
+        }
+      }
     } else {
       // If someone referenced this index, then we need to start a new token
       if (excerptTokens.length > 0 && !state.disableMergingForNextToken) {
@@ -175,10 +199,45 @@ export class ExcerptBuilder {
           return;
         }
       }
-
-      excerptTokens.push({ kind: excerptTokenKind, text: text});
-      state.disableMergingForNextToken = false;
     }
+
+    const excerptToken: IExcerptToken = { kind: excerptTokenKind, text: text };
+    if (canonicalReference !== undefined) {
+      excerptToken.canonicalReference = canonicalReference.toString();
+    }
+    excerptTokens.push(excerptToken);
+    state.disableMergingForNextToken = false;
   }
 
+}
+
+function isDeclaration(node: ts.Node): node is ts.NamedDeclaration {
+  switch (node.kind) {
+    case ts.SyntaxKind.FunctionDeclaration:
+    case ts.SyntaxKind.FunctionExpression:
+    case ts.SyntaxKind.VariableDeclaration:
+    case ts.SyntaxKind.Parameter:
+    case ts.SyntaxKind.EnumDeclaration:
+    case ts.SyntaxKind.ClassDeclaration:
+    case ts.SyntaxKind.ClassExpression:
+    case ts.SyntaxKind.ModuleDeclaration:
+    case ts.SyntaxKind.MethodDeclaration:
+    case ts.SyntaxKind.MethodSignature:
+    case ts.SyntaxKind.PropertyDeclaration:
+    case ts.SyntaxKind.PropertySignature:
+    case ts.SyntaxKind.GetAccessor:
+    case ts.SyntaxKind.SetAccessor:
+    case ts.SyntaxKind.InterfaceDeclaration:
+    case ts.SyntaxKind.TypeAliasDeclaration:
+    case ts.SyntaxKind.TypeParameter:
+    case ts.SyntaxKind.EnumMember:
+    case ts.SyntaxKind.BindingElement:
+      return true;
+    default:
+      return false;
+  }
+}
+
+function isDeclarationName(name: ts.Identifier): boolean {
+  return isDeclaration(name.parent) && name.parent.name === name;
 }

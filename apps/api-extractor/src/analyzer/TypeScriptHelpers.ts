@@ -222,8 +222,8 @@ export class TypeScriptHelpers {
    * If `name` is of this form, then `tryGetWellKnownSymbolName()` converts it back into e.g. `[Symbol.iterator]`.
    * If the string does not start with `__@` then `undefined` is returned.
    */
-  public static tryDecodeWellKnownSymbolName(name: string): string | undefined {
-    const match: RegExpExecArray | null = TypeScriptHelpers._wellKnownSymbolNameRegExp.exec(name);
+  public static tryDecodeWellKnownSymbolName(name: ts.__String): string | undefined {
+    const match: RegExpExecArray | null = TypeScriptHelpers._wellKnownSymbolNameRegExp.exec(name as string);
     if (match) {
       const identifier: string = match[1];
       return `[Symbol.${identifier}]`;
@@ -238,8 +238,8 @@ export class TypeScriptHelpers {
   /**
    * Returns whether the provided name was generated for a TypeScript `unique symbol`.
    */
-  public static isUniqueSymbolName(name: string): boolean {
-    return TypeScriptHelpers._uniqueSymbolNameRegExp.test(name);
+  public static isUniqueSymbolName(name: ts.__String): boolean {
+    return TypeScriptHelpers._uniqueSymbolNameRegExp.test(name as string);
   }
 
   /**

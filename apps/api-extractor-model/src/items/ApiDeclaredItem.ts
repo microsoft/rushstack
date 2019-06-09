@@ -47,7 +47,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   public constructor(options: IApiDeclaredItemOptions) {
     super(options);
 
-    this._excerptTokens = options.excerptTokens.map(x => new ExcerptToken(x.kind, x.text));
+    this._excerptTokens = options.excerptTokens.map(x => ExcerptToken.fromJSON(x));
     this._excerpt = new Excerpt(this.excerptTokens, { startIndex: 0, endIndex: this.excerptTokens.length });
   }
 
@@ -99,7 +99,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   /** @override */
   public serializeInto(jsonObject: Partial<IApiDeclaredItemJson>): void {
     super.serializeInto(jsonObject);
-    jsonObject.excerptTokens = this.excerptTokens.map(x => ({ kind: x.kind, text: x.text }));
+    jsonObject.excerptTokens = this.excerptTokens.map(x => x.toJSON());
   }
 
   /**

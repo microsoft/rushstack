@@ -87,7 +87,8 @@
             },
             {
               "kind": "Reference",
-              "text": "IBeta"
+              "text": "IBeta",
+              "canonicalReference": "api-extractor-scenarios!IBeta:interface"
             },
             {
               "kind": "Content",

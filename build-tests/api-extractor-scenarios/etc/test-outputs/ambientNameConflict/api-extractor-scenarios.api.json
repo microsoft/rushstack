@@ -42,7 +42,8 @@
             },
             {
               "kind": "Reference",
-              "text": "Promise"
+              "text": "Promise",
+              "canonicalReference": "!Promise:interface"
             },
             {
               "kind": "Content",
@@ -62,7 +63,8 @@
             },
             {
               "kind": "Reference",
-              "text": "MyPromise"
+              "text": "MyPromise",
+              "canonicalReference": "api-extractor-scenarios!Promise:class"
             },
             {
               "kind": "Content",

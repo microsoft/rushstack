@@ -195,7 +195,8 @@
                 },
                 {
                   "kind": "Reference",
-                  "text": "ClassWithTypeLiterals"
+                  "text": "ClassWithTypeLiterals",
+                  "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals:class"
                 },
                 {
                   "kind": "Content",

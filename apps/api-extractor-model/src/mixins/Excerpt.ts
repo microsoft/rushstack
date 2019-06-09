@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { Text } from '@microsoft/node-core-library';
 
 /** @public */
@@ -21,20 +22,23 @@ export interface IExcerptTokenRange {
 export interface IExcerptToken {
   readonly kind: ExcerptTokenKind;
   text: string;
+  canonicalReference?: string;
 }
 
 /** @public */
 export class ExcerptToken {
   private readonly _kind: ExcerptTokenKind;
   private readonly _text: string;
+  private readonly _canonicalReference: DeclarationReference | undefined;
 
-  public constructor(kind: ExcerptTokenKind, text: string) {
+  public constructor(kind: ExcerptTokenKind, text: string, canonicalReference?: DeclarationReference) {
     this._kind = kind;
 
     // Standardize the newlines across operating systems. Even though this may deviate from the actual
     // input source file that was parsed, it's useful because the newline gets serialized inside
     // a string literal in .api.json, which cannot be automatically normalized by Git.
     this._text = Text.convertToLf(text);
+    this._canonicalReference = canonicalReference;
   }
 
   public get kind(): ExcerptTokenKind {
@@ -43,6 +47,24 @@ export class ExcerptToken {
 
   public get text(): string {
     return this._text;
+  }
+
+  public get canonicalReference(): DeclarationReference | undefined {
+    return this._canonicalReference;
+  }
+
+  public static fromJSON(object: IExcerptToken): ExcerptToken {
+    const canonicalReference: DeclarationReference | undefined = object.canonicalReference === undefined ? undefined :
+      DeclarationReference.parse(object.canonicalReference);
+    return new ExcerptToken(object.kind, object.text, canonicalReference);
+  }
+
+  public toJSON(): IExcerptToken {
+    const excerptToken: IExcerptToken = { kind: this.kind, text: this.text };
+    if (this._canonicalReference !== undefined) {
+      excerptToken.canonicalReference = this._canonicalReference.toString();
+    }
+    return excerptToken;
   }
 }
 
