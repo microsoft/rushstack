@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "(BEHAVIOR CHANGE) Fix a regression that enabled CI jobs to succeed even if a task wrote warnings to stderr; see \"allowWarningsInSuccessfulBuild\" in command-line.json for details.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
