@@ -13,14 +13,29 @@ export enum ApiJsonSchemaVersion {
   V_1001 = 1001,
 
   /**
-   * The current latest .api.json schema version
+   * The current latest .api.json schema version.
+   *
+   * IMPORTANT: When incrementing this number, consider whether `OLDEST_SUPPORTED` or `OLDEST_FORWARDS_COMPATIBLE`
+   * should be updated.
    */
   LATEST = V_1001,
 
   /**
-   * The oldest .api.json schema version that is still supported for backwards compatibility
+   * The oldest .api.json schema version that is still supported for backwards compatibility.
+   *
+   * This must be updated if you change to the file format and do not implement compatibility logic for
+   * deserializing the older representation.
    */
-  OLDEST_SUPPORTED = V_1000
+  OLDEST_SUPPORTED = V_1001,
+
+  /**
+   * Used to assign `IApiPackageMetadataJson.oldestForwardsCompatibleVersion`.
+   *
+   * This value must be <= `ApiJsonSchemaVersion.LATEST`.  It must be reset to the `LATEST` value
+   * if the older library would not be able to deserialize your new file format.  Adding a nonessential field
+   * is generally okay.  Removing, modifying, or reinterpreting existing fields is NOT safe.
+   */
+  OLDEST_FORWARDS_COMPATIBLE = V_1001
 }
 
 export class DeserializerContext {
