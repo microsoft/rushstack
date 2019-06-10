@@ -21,7 +21,7 @@ export interface ITaskSelectorConstructor {
   changedProjectsOnly: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
-  doNotFailOnWarnings: boolean;
+  allowWarningsInSuccessfulBuild: boolean;
 }
 
 /**
@@ -47,7 +47,7 @@ export class TaskSelector {
       quietMode: this._options.isQuietMode,
       parallelism: this._options.parallelism,
       changedProjectsOnly: this._options.changedProjectsOnly,
-      doNotFailOnWarnings: this._options.doNotFailOnWarnings
+      allowWarningsInSuccessfulBuild: this._options.allowWarningsInSuccessfulBuild
     });
 
     try {

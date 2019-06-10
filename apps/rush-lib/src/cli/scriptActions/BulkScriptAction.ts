@@ -29,7 +29,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
-  doNotFailOnWarnings: boolean;
+  allowWarningsInSuccessfulBuild: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -58,7 +58,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreDependencyOrder: boolean;
-  private _doNotFailOnWarnings: boolean;
+  private _allowWarningsInSuccessfulBuild: boolean;
 
   constructor(options: IBulkScriptActionOptions) {
     super(options);
@@ -66,7 +66,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
-    this._doNotFailOnWarnings = options.doNotFailOnWarnings;
+    this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
   }
 
   public run(): Promise<void> {
@@ -103,7 +103,7 @@ export class BulkScriptAction extends BaseScriptAction {
       changedProjectsOnly,
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
-      doNotFailOnWarnings: this._doNotFailOnWarnings
+      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
     });
 
     return tasks.execute().then(() => {

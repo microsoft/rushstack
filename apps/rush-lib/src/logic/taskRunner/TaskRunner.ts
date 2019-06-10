@@ -20,7 +20,7 @@ export interface ITaskRunnerOptions {
   quietMode: boolean;
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
-  doNotFailOnWarnings: boolean;
+  allowWarningsInSuccessfulBuild: boolean;
   terminal?: Terminal;
 }
 
@@ -34,7 +34,7 @@ export interface ITaskRunnerOptions {
 export class TaskRunner {
   private _tasks: Map<string, ITask>;
   private _changedProjectsOnly: boolean;
-  private _doNotFailOnWarnings: boolean;
+  private _allowWarningsInSuccessfulBuild: boolean;
   private _buildQueue: ITask[];
   private _quietMode: boolean;
   private _hasAnyFailures: boolean;
@@ -50,7 +50,7 @@ export class TaskRunner {
       quietMode,
       parallelism,
       changedProjectsOnly,
-      doNotFailOnWarnings,
+      allowWarningsInSuccessfulBuild,
       terminal = new Terminal(new ConsoleTerminalProvider())
     } = options;
     this._tasks = new Map<string, ITask>();
@@ -59,7 +59,7 @@ export class TaskRunner {
     this._hasAnyFailures = false;
     this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
-    this._doNotFailOnWarnings = doNotFailOnWarnings;
+    this._allowWarningsInSuccessfulBuild = allowWarningsInSuccessfulBuild;
     this._terminal = terminal;
 
     const numberOfCores: number = os.cpus().length;
@@ -176,7 +176,7 @@ export class TaskRunner {
 
       if (this._hasAnyFailures) {
         return Promise.reject(new Error('Project(s) failed to build'));
-      } else if (this._hasAnyWarnings && !this._doNotFailOnWarnings) {
+      } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
         this._terminal.writeWarningLine('Project(s) succeeded with warnings');
         return Promise.reject(new AlreadyReportedError());
       } else {
