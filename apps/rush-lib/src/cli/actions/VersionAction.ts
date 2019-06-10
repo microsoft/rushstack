@@ -236,6 +236,7 @@ export class VersionAction extends BaseRushAction {
       git.push(tempBranch);
 
       // Now merge to target branch.
+      git.fetch();
       git.checkout(this._targetBranch.value);
       git.pull();
       git.merge(tempBranch);
@@ -243,6 +244,7 @@ export class VersionAction extends BaseRushAction {
       git.deleteBranch(tempBranch);
     } else {
       // skip commits
+      git.fetch();
       git.checkout(this._targetBranch.value);
       git.deleteBranch(tempBranch, false);
     }

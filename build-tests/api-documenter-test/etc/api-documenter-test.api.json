@@ -1829,7 +1829,7 @@
           ],
           "releaseTag": "Public",
           "name": "ExampleTypeAlias",
-          "aliasTypeTokenRange": {
+          "typeTokenRange": {
             "startIndex": 3,
             "endIndex": 5
           }

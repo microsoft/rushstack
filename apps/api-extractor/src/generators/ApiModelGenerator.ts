@@ -687,8 +687,8 @@ export class ApiModelGenerator {
       const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
         typeAliasDeclaration.typeParameters);
 
-      const aliasTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
-      nodesToCapture.push({ node: typeAliasDeclaration.type, tokenRange: aliasTypeTokenRange });
+      const typeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+      nodesToCapture.push({ node: typeAliasDeclaration.type, tokenRange: typeTokenRange });
 
       const excerptTokens: IExcerptToken[] = ExcerptBuilder.build({
         startingNode: astDeclaration.declaration,
@@ -698,7 +698,7 @@ export class ApiModelGenerator {
       const releaseTag: ReleaseTag = this._collector.fetchMetadata(astDeclaration.astSymbol).releaseTag;
 
       apiTypeAlias = new ApiTypeAlias({ name, docComment, typeParameters, releaseTag, excerptTokens,
-        aliasTypeTokenRange });
+        typeTokenRange });
 
       parentApiItem.addMember(apiTypeAlias);
     }

@@ -500,7 +500,6 @@ export namespace ApiStaticMixin {
 // @public
 export class ApiTypeAlias extends ApiTypeAlias_base {
     constructor(options: IApiTypeAliasOptions);
-    readonly aliasTypeExcerpt: Excerpt;
     // @override (undocumented)
     readonly canonicalReference: string;
     // (undocumented)
@@ -513,6 +512,7 @@ export class ApiTypeAlias extends ApiTypeAlias_base {
     static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, jsonObject: IApiTypeAliasJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiTypeAliasJson>): void;
+    readonly typeExcerpt: Excerpt;
 }
 
 // @public
@@ -743,7 +743,7 @@ export interface IApiStaticMixinOptions extends IApiItemOptions {
 // @public
 export interface IApiTypeAliasOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions {
     // (undocumented)
-    aliasTypeTokenRange: IExcerptTokenRange;
+    typeTokenRange: IExcerptTokenRange;
 }
 
 // @public

@@ -18,13 +18,13 @@ export interface IApiTypeAliasOptions extends
   IApiReleaseTagMixinOptions,
   IApiDeclaredItemOptions,
   IApiTypeParameterListMixinOptions {
-  aliasTypeTokenRange: IExcerptTokenRange;
+  typeTokenRange: IExcerptTokenRange;
 }
 
 export interface IApiTypeAliasJson extends
   IApiDeclaredItemJson,
   IApiTypeParameterListMixinJson {
-  aliasTypeTokenRange: IExcerptTokenRange;
+  typeTokenRange: IExcerptTokenRange;
 }
 
 /**
@@ -56,8 +56,16 @@ export interface IApiTypeAliasJson extends
 export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
   /**
    * An {@link Excerpt} that describes the type of the alias.
+   *
+   * @remarks
+   * In the example below, the `aliasTypeExcerpt` would correspond to the subexpression
+   * `T extends any[] ? BoxedArray<T[number]> : BoxedValue<T>;`:
+   *
+   * ```ts
+   * export type Boxed<T> = T extends any[] ? BoxedArray<T[number]> : BoxedValue<T>;
+   * ```
    */
-  public readonly aliasTypeExcerpt: Excerpt;
+  public readonly typeExcerpt: Excerpt;
 
   /** @override */
   public static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, jsonObject: IApiTypeAliasJson): void {
@@ -65,7 +73,7 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
 
     // NOTE: This did not exist in the initial release, so we apply a default
     //       in the event it doesn't exist in 'jsonObject'.
-    options.aliasTypeTokenRange = jsonObject.aliasTypeTokenRange || { startIndex: 0, endIndex: 0 };
+    options.typeTokenRange = jsonObject.typeTokenRange || { startIndex: 0, endIndex: 0 };
   }
 
   public static getCanonicalReference(name: string): string {
@@ -75,7 +83,7 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
   public constructor(options: IApiTypeAliasOptions) {
     super(options);
 
-    this.aliasTypeExcerpt = this.buildExcerpt(options.aliasTypeTokenRange);
+    this.typeExcerpt = this.buildExcerpt(options.typeTokenRange);
   }
 
   /** @override */
@@ -92,6 +100,6 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
   public serializeInto(jsonObject: Partial<IApiTypeAliasJson>): void {
     super.serializeInto(jsonObject);
 
-    jsonObject.aliasTypeTokenRange = this.aliasTypeExcerpt.tokenRange;
+    jsonObject.typeTokenRange = this.typeExcerpt.tokenRange;
   }
 }

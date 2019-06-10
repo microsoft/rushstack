@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler-3.4
 
-This log was last generated on Wed, 05 Jun 2019 19:12:34 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Jun 2019 22:33:36 GMT and should not be manually modified.
+
+## 0.1.4
+Thu, 06 Jun 2019 22:33:36 GMT
+
+### Patches
+
+- Include accidentally omitted no-floating-promises TSLint rule.
 
 ## 0.1.3
 Wed, 05 Jun 2019 19:12:34 GMT
