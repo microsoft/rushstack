@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Add API support for type parameters and type alias types",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "ron.buckton@microsoft.com"
+}

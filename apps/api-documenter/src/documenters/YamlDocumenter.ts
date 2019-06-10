@@ -33,7 +33,8 @@ import {
   ApiMethodSignature,
   ApiConstructor,
   ApiFunction,
-  ApiReturnTypeMixin
+  ApiReturnTypeMixin,
+  ApiTypeParameterListMixin
 } from '@microsoft/api-extractor-model';
 
 import {
@@ -328,11 +329,11 @@ export class YamlDocumenter {
         break;
       case ApiItemKind.Class:
         yamlItem.type = 'class';
-        this._populateYamlClassOrInterface(yamlItem, apiItem);
+        this._populateYamlClassOrInterface(yamlItem, apiItem as ApiClass);
         break;
       case ApiItemKind.Interface:
         yamlItem.type = 'interface';
-        this._populateYamlClassOrInterface(yamlItem, apiItem);
+        this._populateYamlClassOrInterface(yamlItem, apiItem as ApiInterface);
         break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
@@ -379,7 +380,27 @@ export class YamlDocumenter {
     return yamlItem as IYamlItem;
   }
 
-  private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, apiItem: ApiDocumentedItem): void {
+  private _populateYamlTypeParameters(apiItem: ApiTypeParameterListMixin): IYamlParameter[] {
+    const typeParameters: IYamlParameter[] = [];
+    for (const apiTypeParameter of apiItem.typeParameters) {
+      const typeParameter: IYamlParameter = {
+        id: apiTypeParameter.name
+      };
+
+      if (apiTypeParameter.tsdocTypeParamBlock) {
+        typeParameter.description = this._renderMarkdown(apiTypeParameter.tsdocTypeParamBlock.content, apiItem);
+      }
+
+      if (!apiTypeParameter.constraintExcerpt.isEmpty) {
+        typeParameter.type = [ this._linkToUidIfPossible(apiTypeParameter.constraintExcerpt.text) ];
+      }
+
+      typeParameters.push(typeParameter);
+    }
+    return typeParameters;
+  }
+
+  private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, apiItem: ApiClass | ApiInterface): void {
     if (apiItem instanceof ApiClass) {
       if (apiItem.extendsType) {
         yamlItem.extends = [ this._linkToUidIfPossible(apiItem.extendsType.excerpt.text) ];
@@ -396,6 +417,11 @@ export class YamlDocumenter {
         for (const extendsType of apiItem.extendsTypes) {
           yamlItem.extends.push(this._linkToUidIfPossible(extendsType.excerpt.text));
         }
+      }
+
+      const typeParameters: IYamlParameter[] = this._populateYamlTypeParameters(apiItem);
+      if (typeParameters.length) {
+        yamlItem.syntax = { typeParameters };
       }
     }
 
@@ -462,6 +488,14 @@ export class YamlDocumenter {
     if (parameters.length) {
       syntax.parameters = parameters;
     }
+
+    if (ApiTypeParameterListMixin.isBaseClassOf(apiItem)) {
+      const typeParameters: IYamlParameter[] = this._populateYamlTypeParameters(apiItem);
+      if (typeParameters.length) {
+        syntax.typeParameters = typeParameters;
+      }
+    }
+
   }
 
   private _populateYamlProperty(yamlItem: Partial<IYamlItem>, apiItem: ApiPropertyItem): void {

@@ -8,6 +8,9 @@ import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiRel
 import { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson
+  } from '../mixins/ApiTypeParameterListMixin';
+import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiClass}.
@@ -17,13 +20,16 @@ export interface IApiClassOptions extends
   IApiItemContainerMixinOptions,
   IApiNameMixinOptions,
   IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
+  IApiDeclaredItemOptions,
+  IApiTypeParameterListMixinOptions {
 
   extendsTokenRange: IExcerptTokenRange | undefined;
   implementsTokenRanges: IExcerptTokenRange[];
 }
 
-export interface IApiClassJson extends IApiDeclaredItemJson {
+export interface IApiClassJson extends
+  IApiDeclaredItemJson,
+  IApiTypeParameterListMixinJson {
   extendsTokenRange?: IExcerptTokenRange;
   implementsTokenRanges: IExcerptTokenRange[];
 }
@@ -44,7 +50,8 @@ export interface IApiClassJson extends IApiDeclaredItemJson {
  *
  * @public
  */
-export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
+export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(
+  ApiDeclaredItem)))) {
 
   /**
    * The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.
@@ -58,8 +65,10 @@ export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMi
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiClassOptions>, jsonObject: IApiClassJson): void {
-    super.onDeserializeInto(options, jsonObject);
+  public static onDeserializeInto(options: Partial<IApiClassOptions>, context: DeserializerContext,
+    jsonObject: IApiClassJson): void {
+
+    super.onDeserializeInto(options, context, jsonObject);
 
     options.extendsTokenRange = jsonObject.extendsTokenRange;
     options.implementsTokenRanges = jsonObject.implementsTokenRanges;

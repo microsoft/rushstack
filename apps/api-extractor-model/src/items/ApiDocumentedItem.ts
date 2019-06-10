@@ -4,6 +4,7 @@
 import * as tsdoc from '@microsoft/tsdoc';
 import { ApiItem, IApiItemOptions, IApiItemJson } from './ApiItem';
 import { AedocDefinitions } from '../aedoc/AedocDefinitions';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link ApiDocumentedItem}.
@@ -31,10 +32,10 @@ export class ApiDocumentedItem extends ApiItem {
   private _tsdocComment: tsdoc.DocComment | undefined;
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>,
+  public static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>, context: DeserializerContext,
     jsonObject: IApiItemJson): void {
 
-    super.onDeserializeInto(options, jsonObject);
+    super.onDeserializeInto(options,  context, jsonObject);
 
     const documentedJson: IApiDocumentedItemJson = jsonObject as IApiDocumentedItemJson;
 

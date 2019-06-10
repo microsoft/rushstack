@@ -6,6 +6,7 @@ import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiEnumMember}.
@@ -54,8 +55,10 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, jsonObject: IApiEnumMemberJson): void {
-    super.onDeserializeInto(options, jsonObject);
+  public static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, context: DeserializerContext,
+    jsonObject: IApiEnumMemberJson): void {
+
+    super.onDeserializeInto(options, context, jsonObject);
 
     options.initializerTokenRange = jsonObject.initializerTokenRange;
   }
