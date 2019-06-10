@@ -391,7 +391,7 @@ export class YamlDocumenter {
         typeParameter.description = this._renderMarkdown(apiTypeParameter.tsdocTypeParamBlock.content, apiItem);
       }
 
-      if (apiTypeParameter.constraintExcerpt) {
+      if (!apiTypeParameter.constraintExcerpt.isEmpty) {
         typeParameter.type = [ this._linkToUidIfPossible(apiTypeParameter.constraintExcerpt.text) ];
       }
 

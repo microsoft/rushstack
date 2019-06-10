@@ -189,7 +189,7 @@ export class ApiModelGenerator {
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: callSignature.type, tokenRange: returnTypeTokenRange });
 
-      const typeParameters: IApiTypeParameterOptions[] | undefined = this._captureTypeParameters(nodesToCapture,
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
         callSignature.typeParameters);
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, callSignature.parameters);
@@ -252,7 +252,7 @@ export class ApiModelGenerator {
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
-      const typeParameters: IApiTypeParameterOptions[] | undefined = this._captureTypeParameters(nodesToCapture,
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
         classDeclaration.typeParameters);
 
       let extendsTokenRange: IExcerptTokenRange | undefined = undefined;
@@ -308,7 +308,7 @@ export class ApiModelGenerator {
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: constructSignature.type, tokenRange: returnTypeTokenRange });
 
-      const typeParameters: IApiTypeParameterOptions[] | undefined = this._captureTypeParameters(nodesToCapture,
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
         constructSignature.typeParameters);
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, constructSignature.parameters);
@@ -401,7 +401,7 @@ export class ApiModelGenerator {
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: functionDeclaration.type, tokenRange: returnTypeTokenRange });
 
-      const typeParameters: IApiTypeParameterOptions[] | undefined = this._captureTypeParameters(nodesToCapture,
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
         functionDeclaration.typeParameters);
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture,
@@ -467,7 +467,7 @@ export class ApiModelGenerator {
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
-      const typeParameters: IApiTypeParameterOptions[] | undefined = this._captureTypeParameters(nodesToCapture,
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
         interfaceDeclaration.typeParameters);
 
       const extendsTokenRanges: IExcerptTokenRange[] = [];
@@ -519,7 +519,7 @@ export class ApiModelGenerator {
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: methodDeclaration.type, tokenRange: returnTypeTokenRange });
 
-      const typeParameters: IApiTypeParameterOptions[] | undefined = this._captureTypeParameters(nodesToCapture,
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
         methodDeclaration.typeParameters);
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, methodDeclaration.parameters);
@@ -558,7 +558,7 @@ export class ApiModelGenerator {
       const returnTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
       nodesToCapture.push({ node: methodSignature.type, tokenRange: returnTypeTokenRange });
 
-      const typeParameters: IApiTypeParameterOptions[] | undefined = this._captureTypeParameters(nodesToCapture,
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
         methodSignature.typeParameters);
 
       const parameters: IApiParameterOptions[] = this._captureParameters(nodesToCapture, methodSignature.parameters);
@@ -684,7 +684,7 @@ export class ApiModelGenerator {
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
-      const typeParameters: IApiTypeParameterOptions[] | undefined = this._captureTypeParameters(nodesToCapture,
+      const typeParameters: IApiTypeParameterOptions[] = this._captureTypeParameters(nodesToCapture,
         typeAliasDeclaration.typeParameters);
 
       const aliasTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
@@ -736,22 +736,16 @@ export class ApiModelGenerator {
   }
 
   private _captureTypeParameters(nodesToCapture: IExcerptBuilderNodeToCapture[], typeParameterNodes:
-    ts.NodeArray<ts.TypeParameterDeclaration> | undefined): IApiTypeParameterOptions[] | undefined {
+    ts.NodeArray<ts.TypeParameterDeclaration> | undefined): IApiTypeParameterOptions[] {
 
+    const typeParameters: IApiTypeParameterOptions[] = [];
     if (typeParameterNodes) {
-      const typeParameters: IApiTypeParameterOptions[] = [];
       for (const typeParameter of typeParameterNodes) {
-        let constraintTokenRange: IExcerptTokenRange | undefined;
-        if (typeParameter.constraint) {
-          constraintTokenRange = ExcerptBuilder.createEmptyTokenRange();
-          nodesToCapture.push({ node: typeParameter.constraint, tokenRange: constraintTokenRange });
-        }
+        const constraintTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+        nodesToCapture.push({ node: typeParameter.constraint, tokenRange: constraintTokenRange });
 
-        let defaultTypeTokenRange: IExcerptTokenRange | undefined;
-        if (typeParameter.default) {
-          defaultTypeTokenRange = ExcerptBuilder.createEmptyTokenRange();
-          nodesToCapture.push({ node: typeParameter.default, tokenRange: defaultTypeTokenRange });
-        }
+        const defaultTypeTokenRange: IExcerptTokenRange = ExcerptBuilder.createEmptyTokenRange();
+        nodesToCapture.push({ node: typeParameter.default, tokenRange: defaultTypeTokenRange });
 
         typeParameters.push({
           typeParameterName: typeParameter.name.getText().trim(),
@@ -759,8 +753,8 @@ export class ApiModelGenerator {
           defaultTypeTokenRange
         });
       }
-      return typeParameters;
     }
+    return typeParameters;
   }
 
   private _captureParameters(nodesToCapture: IExcerptBuilderNodeToCapture[],

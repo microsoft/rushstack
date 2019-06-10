@@ -13,8 +13,8 @@ import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
  */
 export interface IApiTypeParameterOptions {
   typeParameterName: string;
-  constraintTokenRange?: IExcerptTokenRange;
-  defaultTypeTokenRange?: IExcerptTokenRange;
+  constraintTokenRange: IExcerptTokenRange;
+  defaultTypeTokenRange: IExcerptTokenRange;
 }
 
 /**
@@ -22,11 +22,11 @@ export interface IApiTypeParameterOptions {
  * @public
  */
 export interface IApiTypeParameterListMixinOptions extends IApiItemOptions {
-  typeParameters?: IApiTypeParameterOptions[];
+  typeParameters: IApiTypeParameterOptions[];
 }
 
 export interface IApiTypeParameterListMixinJson extends IApiItemJson {
-  typeParameters?: IApiTypeParameterOptions[];
+  typeParameters: IApiTypeParameterOptions[];
 }
 
 const _typeParameters: unique symbol = Symbol('ApiTypeParameterListMixin._typeParameters');
@@ -94,10 +94,8 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
 
             const typeParameter: TypeParameter = new TypeParameter({
               name: typeParameterOptions.typeParameterName,
-              constraintExcerpt: typeParameterOptions.constraintTokenRange &&
-                this.buildExcerpt(typeParameterOptions.constraintTokenRange),
-              defaultTypeExcerpt: typeParameterOptions.defaultTypeTokenRange &&
-                this.buildExcerpt(typeParameterOptions.defaultTypeTokenRange),
+              constraintExcerpt: this.buildExcerpt(typeParameterOptions.constraintTokenRange),
+              defaultTypeExcerpt: this.buildExcerpt(typeParameterOptions.defaultTypeTokenRange),
               parent: this
             });
 
@@ -117,19 +115,16 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
     public serializeInto(jsonObject: Partial<IApiTypeParameterListMixinJson>): void {
       super.serializeInto(jsonObject);
 
-        const typeParameterObjects: IApiTypeParameterOptions[] = [];
-        for (const typeParameter of this.typeParameters) {
-          const typeParameterOptions: IApiTypeParameterOptions = {
-            typeParameterName: typeParameter.name
-          };
-          if (typeParameter.constraintExcerpt) {
-            typeParameterOptions.constraintTokenRange = typeParameter.constraintExcerpt.tokenRange;
+      const typeParameterObjects: IApiTypeParameterOptions[] = [];
+      for (const typeParameter of this.typeParameters) {
+        typeParameterObjects.push(
+          {
+            typeParameterName: typeParameter.name,
+            constraintTokenRange: typeParameter.constraintExcerpt.tokenRange,
+            defaultTypeTokenRange: typeParameter.defaultTypeExcerpt.tokenRange
           }
-          if (typeParameter.defaultTypeExcerpt) {
-            typeParameterOptions.defaultTypeTokenRange = typeParameter.defaultTypeExcerpt.tokenRange;
-          }
-          typeParameterObjects.push(typeParameterOptions);
-        }
+        );
+      }
 
       if (typeParameterObjects.length > 0) {
         jsonObject.typeParameters = typeParameterObjects;

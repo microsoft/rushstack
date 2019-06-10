@@ -13,8 +13,8 @@ import { ApiTypeParameterListMixin } from '../mixins/ApiTypeParameterListMixin';
  */
 export interface ITypeParameterOptions {
   name: string;
-  constraintExcerpt: Excerpt | undefined;
-  defaultTypeExcerpt: Excerpt | undefined;
+  constraintExcerpt: Excerpt;
+  defaultTypeExcerpt: Excerpt;
   parent: ApiTypeParameterListMixin;
 }
 
@@ -57,7 +57,7 @@ export class TypeParameter {
    * }
    * ```
    */
-  public readonly constraintExcerpt: Excerpt | undefined;
+  public readonly constraintExcerpt: Excerpt;
 
   /**
    * An {@link Excerpt} that describes the default type of the type parameter.
@@ -71,7 +71,7 @@ export class TypeParameter {
    * }
    * ```
    */
-  public readonly defaultTypeExcerpt: Excerpt | undefined;
+  public readonly defaultTypeExcerpt: Excerpt;
 
   /**
    * The parameter name.

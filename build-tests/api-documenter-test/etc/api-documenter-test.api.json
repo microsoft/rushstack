@@ -690,7 +690,15 @@
           "releaseTag": "Public",
           "typeParameters": [
             {
-              "typeParameterName": "T"
+              "typeParameterName": "T",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
             }
           ],
           "name": "Generic",

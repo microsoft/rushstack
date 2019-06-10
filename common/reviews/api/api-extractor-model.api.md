@@ -557,6 +557,8 @@ export type Constructor<T = {}> = new (...args: any[]) => T;
 export class Excerpt {
     constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange);
     // (undocumented)
+    readonly isEmpty: boolean;
+    // (undocumented)
     readonly text: string;
     // (undocumented)
     readonly tokenRange: Readonly<IExcerptTokenRange>;
@@ -747,15 +749,15 @@ export interface IApiTypeAliasOptions extends IApiNameMixinOptions, IApiReleaseT
 // @public
 export interface IApiTypeParameterListMixinOptions extends IApiItemOptions {
     // (undocumented)
-    typeParameters?: IApiTypeParameterOptions[];
+    typeParameters: IApiTypeParameterOptions[];
 }
 
 // @public
 export interface IApiTypeParameterOptions {
     // (undocumented)
-    constraintTokenRange?: IExcerptTokenRange;
+    constraintTokenRange: IExcerptTokenRange;
     // (undocumented)
-    defaultTypeTokenRange?: IExcerptTokenRange;
+    defaultTypeTokenRange: IExcerptTokenRange;
     // (undocumented)
     typeParameterName: string;
 }
@@ -801,9 +803,9 @@ export interface IResolveDeclarationReferenceResult {
 // @public
 export interface ITypeParameterOptions {
     // (undocumented)
-    constraintExcerpt: Excerpt | undefined;
+    constraintExcerpt: Excerpt;
     // (undocumented)
-    defaultTypeExcerpt: Excerpt | undefined;
+    defaultTypeExcerpt: Excerpt;
     // (undocumented)
     name: string;
     // (undocumented)
@@ -841,8 +843,8 @@ export namespace ReleaseTag {
 // @public
 export class TypeParameter {
     constructor(options: ITypeParameterOptions);
-    readonly constraintExcerpt: Excerpt | undefined;
-    readonly defaultTypeExcerpt: Excerpt | undefined;
+    readonly constraintExcerpt: Excerpt;
+    readonly defaultTypeExcerpt: Excerpt;
     name: string;
     readonly tsdocTypeParamBlock: tsdoc.DocParamBlock | undefined;
 }

@@ -75,7 +75,15 @@
               "parameters": [],
               "typeParameters": [
                 {
-                  "typeParameterName": "T"
+                  "typeParameterName": "T",
+                  "constraintTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
                 }
               ],
               "name": "method"
@@ -112,7 +120,15 @@
           "releaseTag": "Public",
           "typeParameters": [
             {
-              "typeParameterName": "T"
+              "typeParameterName": "T",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
             }
           ],
           "name": "GenericClass",
@@ -160,6 +176,10 @@
               "constraintTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
               }
             }
           ],
@@ -205,6 +225,10 @@
           "typeParameters": [
             {
               "typeParameterName": "T",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
               "defaultTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
@@ -258,7 +282,15 @@
           "parameters": [],
           "typeParameters": [
             {
-              "typeParameterName": "T"
+              "typeParameterName": "T",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
             }
           ],
           "name": "genericFunction"
@@ -292,7 +324,15 @@
           "releaseTag": "Public",
           "typeParameters": [
             {
-              "typeParameterName": "T"
+              "typeParameterName": "T",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
             }
           ],
           "name": "GenericInterface",
@@ -355,7 +395,15 @@
               "parameters": [],
               "typeParameters": [
                 {
-                  "typeParameterName": "T"
+                  "typeParameterName": "T",
+                  "constraintTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
                 }
               ]
             }
@@ -418,7 +466,15 @@
               "parameters": [],
               "typeParameters": [
                 {
-                  "typeParameterName": "T"
+                  "typeParameterName": "T",
+                  "constraintTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
                 }
               ]
             }
@@ -463,7 +519,15 @@
           "name": "GenericTypeAlias",
           "typeParameters": [
             {
-              "typeParameterName": "T"
+              "typeParameterName": "T",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
             }
           ],
           "aliasTypeTokenRange": {
