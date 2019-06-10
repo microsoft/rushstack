@@ -59,7 +59,7 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
    * An {@link Excerpt} that describes the type of the alias.
    *
    * @remarks
-   * In the example below, the `aliasTypeExcerpt` would correspond to the subexpression
+   * In the example below, the `typeExcerpt` would correspond to the subexpression
    * `T extends any[] ? BoxedArray<T[number]> : BoxedValue<T>;`:
    *
    * ```ts
