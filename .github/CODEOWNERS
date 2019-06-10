@@ -1,17 +1,17 @@
-.github/CODEOWNERS @iclanton @nickpape-msft @octogonz @patmill @aditima
-common/config/**/* @iclanton @nickpape-msft @octogonz @patmill @aditima
+.github/CODEOWNERS @iclanton @octogonz @patmill @apostolisms
+common/config/**/* @iclanton @octogonz @patmill @apostolisms
 
-common/reviews/**/* @iclanton @nickpape-msft @octogonz @mpasarin @aditima
+common/reviews/**/* @iclanton @octogonz @apostolisms
 
-apps/**/* @iclanton @nickpape-msft @octogonz @aditima @lincoded @halfnibble
-build-tests/**/* @iclanton @nickpape-msft @octogonz @aditima @lincoded @halfnibble
-core-build/**/* @iclanton @nickpape-msft @octogonz @aditima @lincoded @halfnibble
-libraries/**/* @iclanton @nickpape-msft @octogonz @aditima @lincoded @halfnibble
-stack/**/* @iclanton @nickpape-msft @octogonz @aditima @lincoded @halfnibble
-webpack/**/* @iclanton @nickpape-msft @octogonz @aditima @lincoded @halfnibble
-rush.json @iclanton @nickpape-msft @octogonz @aditima @lincoded @halfnibble
-.gitattributes @iclanton @nickpape-msft @octogonz @aditima @lincoded @halfnibble
-.gitignore @iclanton @nickpape-msft @octogonz @aditima @lincoded @halfnibble
-README.md @iclanton @nickpape-msft @octogonz @aditima @lincoded @halfnibble
+apps/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+build-tests/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+core-build/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+libraries/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+stack/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+webpack/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+rush.json @iclanton @octogonz @apostolisms @lincoded @halfnibble
+.gitattributes @iclanton @octogonz @apostolisms @lincoded @halfnibble
+.gitignore @iclanton @octogonz @apostolisms @lincoded @halfnibble
+README.md @iclanton @octogonz @apostolisms @lincoded @halfnibble
 
-libraries/load-themed-styles/**/* @iclanton @nickpape-msft @octogonz @dzearing @aditima
+libraries/load-themed-styles/**/* @iclanton @octogonz @dzearing @apostolisms
