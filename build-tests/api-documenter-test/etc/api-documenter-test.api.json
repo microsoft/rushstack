@@ -2,7 +2,8 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1000
+    "schemaVersion": 1001,
+    "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
   "canonicalReference": "api-documenter-test",

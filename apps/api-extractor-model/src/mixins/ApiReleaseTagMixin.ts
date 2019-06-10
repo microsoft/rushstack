@@ -3,6 +3,7 @@
 
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link (ApiReleaseTagMixin:interface)}.
@@ -64,10 +65,10 @@ export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseC
     public [_releaseTag]: ReleaseTag;
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiReleaseTagMixinOptions>,
+    public static onDeserializeInto(options: Partial<IApiReleaseTagMixinOptions>, context: DeserializerContext,
       jsonObject: IApiReleaseTagMixinJson): void {
 
-      baseClass.onDeserializeInto(options, jsonObject);
+      baseClass.onDeserializeInto(options, context, jsonObject);
 
       const deserializedReleaseTag: ReleaseTag | undefined = ReleaseTag[jsonObject.releaseTag];
       if (deserializedReleaseTag === undefined) {

@@ -5,6 +5,7 @@ import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../
 import { IExcerptTokenRange, Excerpt } from './Excerpt';
 import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { InternalError } from '@microsoft/node-core-library';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link (ApiReturnTypeMixin:interface)}.
@@ -61,10 +62,10 @@ export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(baseC
     public [_returnTypeExcerpt]: Excerpt;
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiReturnTypeMixinOptions>,
+    public static onDeserializeInto(options: Partial<IApiReturnTypeMixinOptions>, context: DeserializerContext,
       jsonObject: IApiReturnTypeMixinJson): void {
 
-      baseClass.onDeserializeInto(options, jsonObject);
+      baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.returnTypeTokenRange = jsonObject.returnTypeTokenRange;
     }

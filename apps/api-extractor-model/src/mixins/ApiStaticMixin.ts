@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link (IApiStaticMixinOptions:interface)}.
@@ -58,8 +59,10 @@ export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(baseClass
     public [_isStatic]: boolean;
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiStaticMixinOptions>, jsonObject: IApiStaticMixinJson): void {
-      baseClass.onDeserializeInto(options, jsonObject);
+    public static onDeserializeInto(options: Partial<IApiStaticMixinOptions>, context: DeserializerContext,
+      jsonObject: IApiStaticMixinJson): void {
+
+      baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.isStatic = jsonObject.isStatic;
     }

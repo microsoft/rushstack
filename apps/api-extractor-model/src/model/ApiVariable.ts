@@ -6,6 +6,7 @@ import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { IExcerptTokenRange, Excerpt } from '../mixins/Excerpt';
+import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiVariable}.
@@ -50,10 +51,10 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
   public readonly variableTypeExcerpt: Excerpt;
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiVariableOptions>,
+  public static onDeserializeInto(options: Partial<IApiVariableOptions>, context: DeserializerContext,
     jsonObject: IApiVariableJson): void {
 
-    super.onDeserializeInto(options, jsonObject);
+    super.onDeserializeInto(options, context, jsonObject);
 
     options.variableTypeTokenRange = jsonObject.variableTypeTokenRange;
   }
