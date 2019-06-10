@@ -10,6 +10,7 @@ import { HeritageType } from './HeritageType';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson
   } from '../mixins/ApiTypeParameterListMixin';
+import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiClass}.
@@ -64,8 +65,10 @@ export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiTypeParamete
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiClassOptions>, jsonObject: IApiClassJson): void {
-    super.onDeserializeInto(options, jsonObject);
+  public static onDeserializeInto(options: Partial<IApiClassOptions>, context: DeserializerContext,
+    jsonObject: IApiClassJson): void {
+
+    super.onDeserializeInto(options, context, jsonObject);
 
     options.extendsTokenRange = jsonObject.extendsTokenRange;
     options.implementsTokenRanges = jsonObject.implementsTokenRanges;

@@ -7,6 +7,7 @@ import { JsonFile, IJsonFileSaveOptions, PackageJsonLookup, IPackageJson } from 
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiPackage}.
@@ -16,13 +17,6 @@ export interface IApiPackageOptions extends
   IApiItemContainerMixinOptions,
   IApiNameMixinOptions,
   IApiDocumentedItemOptions {
-}
-
-export enum ApiJsonSchemaVersion {
-  /**
-   * The initial release.
-   */
-  V_1000 = 1000
 }
 
 export interface IApiPackageMetadataJson {
@@ -90,8 +84,35 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
  */
 export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
-    const jsonObject: IApiItemJson = JsonFile.load(apiJsonFilename);
-    return ApiItem.deserialize(jsonObject) as ApiPackage;
+    const jsonObject: IApiPackageJson = JsonFile.load(apiJsonFilename);
+
+    if (!jsonObject
+      || !jsonObject.metadata
+      || typeof jsonObject.metadata.schemaVersion !== 'number') {
+        throw new Error(`Error loading ${apiJsonFilename}:`
+        + `\nThe file format is not recognized; the "metadata.schemaVersion" field is missing or invalid`);
+    }
+
+    const context: DeserializerContext = new DeserializerContext({
+      apiJsonFilename,
+      toolPackage: jsonObject.metadata.toolPackage,
+      toolVersion: jsonObject.metadata.toolVersion,
+      versionToDeserialize: jsonObject.metadata.schemaVersion
+    });
+
+    if (context.versionToDeserialize < ApiJsonSchemaVersion.OLDEST_SUPPORTED) {
+      throw new Error(`Error loading ${apiJsonFilename}:`
+        + `\nThe file format is version ${context.versionToDeserialize},`
+        + ` whereas ${ApiJsonSchemaVersion.OLDEST_SUPPORTED} is the oldest version supported by this tool`);
+    }
+
+    if (context.versionToDeserialize > ApiJsonSchemaVersion.LATEST) {
+      throw new Error(`Error loading ${apiJsonFilename}:`
+        + `\nThe file format version ${context.versionToDeserialize} was written by a newer release of`
+        + ` the api-extractor-model library; you may need to upgrade your software`);
+    }
+
+    return ApiItem.deserialize(jsonObject, context) as ApiPackage;
   }
 
   public constructor(options: IApiPackageOptions) {
@@ -135,9 +156,9 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
       metadata: {
         toolPackage: options.toolPackage || packageJson.name,
         // In test mode, we don't write the real version, since that would cause spurious diffs whenever
-        // the verison is bumped.  Instead we write a placeholder string.
+        // the version is bumped.  Instead we write a placeholder string.
         toolVersion: options.testMode ? '[test mode]' : options.toolVersion || packageJson.version,
-        schemaVersion: ApiJsonSchemaVersion.V_1000
+        schemaVersion: ApiJsonSchemaVersion.LATEST
       }
     } as IApiPackageJson;
     this.serializeInto(jsonObject);

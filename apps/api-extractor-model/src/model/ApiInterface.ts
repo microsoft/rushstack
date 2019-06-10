@@ -11,6 +11,7 @@ import { HeritageType } from './HeritageType';
 import { IApiNameMixinOptions, ApiNameMixin, IApiNameMixinJson } from '../mixins/ApiNameMixin';
 import { IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson, ApiTypeParameterListMixin
   } from '../mixins/ApiTypeParameterListMixin';
+import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiInterface}.
@@ -63,8 +64,10 @@ export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiTypePara
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiInterfaceOptions>, jsonObject: IApiInterfaceJson): void {
-    super.onDeserializeInto(options, jsonObject);
+  public static onDeserializeInto(options: Partial<IApiInterfaceOptions>, context: DeserializerContext,
+    jsonObject: IApiInterfaceJson): void {
+
+    super.onDeserializeInto(options, context, jsonObject);
 
     options.extendsTokenRanges = jsonObject.extendsTokenRanges;
   }

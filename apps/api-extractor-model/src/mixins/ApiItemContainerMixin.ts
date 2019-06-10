@@ -3,6 +3,7 @@
 
 import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.
@@ -89,13 +90,13 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
     /** @override */
     public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
-      jsonObject: IApiItemContainerJson): void {
+      context: DeserializerContext, jsonObject: IApiItemContainerJson): void {
 
-      baseClass.onDeserializeInto(options, jsonObject);
+      baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.members = [];
       for (const memberObject of jsonObject.members) {
-        options.members.push(ApiItem.deserialize(memberObject));
+        options.members.push(ApiItem.deserialize(memberObject, context));
       }
     }
 

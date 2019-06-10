@@ -50,10 +50,11 @@ export class ApiClass extends ApiClass_base {
     readonly implementsTypes: ReadonlyArray<HeritageType>;
     // @override (undocumented)
     readonly kind: ApiItemKind;
+    // Warning: (ae-forgotten-export) The symbol "DeserializerContext" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "IApiClassJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiClassOptions>, jsonObject: IApiClassJson): void;
+    static onDeserializeInto(options: Partial<IApiClassOptions>, context: DeserializerContext, jsonObject: IApiClassJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiClassJson>): void;
 }
@@ -94,7 +95,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     // Warning: (ae-forgotten-export) The symbol "IApiDeclaredItemJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>, jsonObject: IApiDeclaredItemJson): void;
+    static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>, context: DeserializerContext, jsonObject: IApiDeclaredItemJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiDeclaredItemJson>): void;
 }
@@ -105,7 +106,7 @@ export class ApiDocumentedItem extends ApiItem {
     // Warning: (ae-forgotten-export) The symbol "IApiItemJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>, jsonObject: IApiItemJson): void;
+    static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>, context: DeserializerContext, jsonObject: IApiItemJson): void;
     // Warning: (ae-forgotten-export) The symbol "IApiDocumentedItemJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
@@ -157,7 +158,7 @@ export class ApiEnumMember extends ApiEnumMember_base {
     // Warning: (ae-forgotten-export) The symbol "IApiEnumMemberJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, jsonObject: IApiEnumMemberJson): void;
+    static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, context: DeserializerContext, jsonObject: IApiEnumMemberJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiEnumMemberJson>): void;
 }
@@ -203,7 +204,7 @@ export class ApiInterface extends ApiInterface_base {
     // Warning: (ae-forgotten-export) The symbol "IApiInterfaceJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiInterfaceOptions>, jsonObject: IApiInterfaceJson): void;
+    static onDeserializeInto(options: Partial<IApiInterfaceOptions>, context: DeserializerContext, jsonObject: IApiInterfaceJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiInterfaceJson>): void;
 }
@@ -216,7 +217,7 @@ export class ApiItem {
     // @virtual (undocumented)
     readonly canonicalReference: string;
     // (undocumented)
-    static deserialize(jsonObject: IApiItemJson): ApiItem;
+    static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem;
     // @virtual
     readonly displayName: string;
     getAssociatedPackage(): ApiPackage | undefined;
@@ -229,7 +230,7 @@ export class ApiItem {
     // @virtual
     readonly members: ReadonlyArray<ApiItem>;
     // @virtual (undocumented)
-    static onDeserializeInto(options: Partial<IApiItemOptions>, jsonObject: IApiItemJson): void;
+    static onDeserializeInto(options: Partial<IApiItemOptions>, context: DeserializerContext, jsonObject: IApiItemJson): void;
     // @virtual
     readonly parent: ApiItem | undefined;
     // @virtual (undocumented)
@@ -431,7 +432,7 @@ export class ApiPropertyItem extends ApiPropertyItem_base {
     // Warning: (ae-forgotten-export) The symbol "IApiPropertyItemJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiPropertyItemOptions>, jsonObject: IApiPropertyItemJson): void;
+    static onDeserializeInto(options: Partial<IApiPropertyItemOptions>, context: DeserializerContext, jsonObject: IApiPropertyItemJson): void;
     readonly propertyTypeExcerpt: Excerpt;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiPropertyItemJson>): void;
@@ -509,7 +510,7 @@ export class ApiTypeAlias extends ApiTypeAlias_base {
     // Warning: (ae-forgotten-export) The symbol "IApiTypeAliasJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, jsonObject: IApiTypeAliasJson): void;
+    static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, context: DeserializerContext, jsonObject: IApiTypeAliasJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiTypeAliasJson>): void;
     readonly typeExcerpt: Excerpt;
@@ -544,7 +545,7 @@ export class ApiVariable extends ApiVariable_base {
     // Warning: (ae-forgotten-export) The symbol "IApiVariableJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiVariableOptions>, jsonObject: IApiVariableJson): void;
+    static onDeserializeInto(options: Partial<IApiVariableOptions>, context: DeserializerContext, jsonObject: IApiVariableJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiVariableJson>): void;
     readonly variableTypeExcerpt: Excerpt;

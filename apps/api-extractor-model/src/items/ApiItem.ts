@@ -4,6 +4,7 @@
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiPackage } from '../model/ApiPackage';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -64,15 +65,16 @@ export const ApiItem_parent: unique symbol = Symbol('ApiItem._parent');
 export class ApiItem {
   public [ApiItem_parent]: ApiItem | undefined;
 
-  public static deserialize(jsonObject: IApiItemJson): ApiItem {
+  public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
     // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
     // to avoid ES5 circular imports.
     const deserializerModule: typeof import('../model/Deserializer') = require('../model/Deserializer');
-    return deserializerModule.Deserializer.deserialize(jsonObject);
+    return deserializerModule.Deserializer.deserialize(context, jsonObject);
   }
 
   /** @virtual */
-  public static onDeserializeInto(options: Partial<IApiItemOptions>, jsonObject: IApiItemJson): void {
+  public static onDeserializeInto(options: Partial<IApiItemOptions>,  context: DeserializerContext,
+    jsonObject: IApiItemJson): void {
     // (implemented by subclasses)
   }
 

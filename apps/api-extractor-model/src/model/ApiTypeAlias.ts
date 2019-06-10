@@ -8,6 +8,7 @@ import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiRel
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson
   } from '../mixins/ApiTypeParameterListMixin';
+import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiTypeAlias}.
@@ -68,8 +69,10 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
   public readonly typeExcerpt: Excerpt;
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, jsonObject: IApiTypeAliasJson): void {
-    super.onDeserializeInto(options, jsonObject);
+  public static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, context: DeserializerContext,
+    jsonObject: IApiTypeAliasJson): void {
+
+    super.onDeserializeInto(options, context, jsonObject);
 
     // NOTE: This did not exist in the initial release, so we apply a default
     //       in the event it doesn't exist in 'jsonObject'.
