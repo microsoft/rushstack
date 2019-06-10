@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.s
 
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link (IApiNameMixinOptions:interface)}.
@@ -62,8 +63,10 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: 
     public readonly [_name]: string;
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiNameMixinOptions>, jsonObject: IApiNameMixinJson): void {
-      baseClass.onDeserializeInto(options, jsonObject);
+    public static onDeserializeInto(options: Partial<IApiNameMixinOptions>, context: DeserializerContext,
+      jsonObject: IApiNameMixinJson): void {
+
+      baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.name = jsonObject.name;
     }

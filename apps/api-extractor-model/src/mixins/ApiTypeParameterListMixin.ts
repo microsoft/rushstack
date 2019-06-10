@@ -6,6 +6,7 @@ import { IExcerptTokenRange } from './Excerpt';
 import { TypeParameter } from '../model/TypeParameter';
 import { InternalError } from '@microsoft/node-core-library';
 import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Represents parameter information that is part of {@link IApiTypeParameterListMixinOptions}
@@ -72,10 +73,10 @@ export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor
     public readonly [_typeParameters]: TypeParameter[];
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiTypeParameterListMixinOptions>,
+    public static onDeserializeInto(options: Partial<IApiTypeParameterListMixinOptions>, context: DeserializerContext,
       jsonObject: IApiTypeParameterListMixinJson): void {
 
-      baseClass.onDeserializeInto(options, jsonObject);
+      baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.typeParameters = jsonObject.typeParameters || [];
     }

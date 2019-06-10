@@ -3,6 +3,7 @@
 
 import { ApiDocumentedItem, IApiDocumentedItemJson, IApiDocumentedItemOptions } from './ApiDocumentedItem';
 import { Excerpt, ExcerptToken, IExcerptTokenRange, IExcerptToken } from '../mixins/Excerpt';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link ApiDeclaredItem}.
@@ -35,10 +36,10 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   private _excerpt: Excerpt;
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>,
+  public static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>, context: DeserializerContext,
     jsonObject: IApiDeclaredItemJson): void {
 
-    super.onDeserializeInto(options, jsonObject);
+    super.onDeserializeInto(options, context, jsonObject);
 
     options.excerptTokens = jsonObject.excerptTokens;
   }
