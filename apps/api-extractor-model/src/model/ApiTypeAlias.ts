@@ -74,9 +74,7 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
 
     super.onDeserializeInto(options, context, jsonObject);
 
-    // NOTE: This did not exist in the initial release, so we apply a default
-    //       in the event it doesn't exist in 'jsonObject'.
-    options.typeTokenRange = jsonObject.typeTokenRange || { startIndex: 0, endIndex: 0 };
+    options.typeTokenRange = jsonObject.typeTokenRange;
   }
 
   public static getCanonicalReference(name: string): string {
