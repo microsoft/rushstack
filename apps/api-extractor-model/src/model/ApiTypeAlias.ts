@@ -56,6 +56,14 @@ export interface IApiTypeAliasJson extends
 export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
   /**
    * An {@link Excerpt} that describes the type of the alias.
+   *
+   * @remarks
+   * In the example below, the `aliasTypeExcerpt` would correspond to the subexpression
+   * `T extends any[] ? BoxedArray<T[number]> : BoxedValue<T>;`:
+   *
+   * ```ts
+   * export type Boxed<T> = T extends any[] ? BoxedArray<T[number]> : BoxedValue<T>;
+   * ```
    */
   public readonly aliasTypeExcerpt: Excerpt;
 
