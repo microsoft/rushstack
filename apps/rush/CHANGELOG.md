@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 11 Jun 2019 01:28:33 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Jun 2019 02:26:20 GMT and should not be manually modified.
+
+## 5.9.0
+Tue, 11 Jun 2019 02:26:20 GMT
+
+### Updates
+
+- (BEHAVIOR CHANGE) Fix an issue where CI jobs could succeed even if a task reported warnings to stderr; if your build fails due to warnings after upgrading, please see https://github.com/microsoft/web-build-tools/issues/1329
 
 ## 5.8.0
 Tue, 11 Jun 2019 01:28:33 GMT
