@@ -34,7 +34,8 @@ import {
   ApiConstructor,
   ApiFunction,
   ApiReturnTypeMixin,
-  ApiTypeParameterListMixin
+  ApiTypeParameterListMixin,
+  Parameter
 } from '@microsoft/api-extractor-model';
 
 import {
@@ -52,6 +53,12 @@ import { CustomMarkdownEmitter} from '../markdown/CustomMarkdownEmitter';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromFile(path.join(__dirname, '..', 'yaml', 'typescript.schema.json'));
 
+interface IPrecomputeContext {
+  recordedPaths: Set<string>;
+  apiItemNeedsDisambiguation: Map<ApiItem, boolean>;
+  uidFragmentCache: Map<ApiItem, string>;
+}
+
 /**
  * Writes documentation in the Universal Reference YAML file format, as defined by typescript.schema.json.
  */
@@ -65,6 +72,9 @@ export class YamlDocumenter {
   // then it is excluded from the mapping.  Also excluded are ApiItem objects (such as package
   // and function) which are not typically used as a data type.
   private _apiItemsByTypeName: Map<string, ApiItem>;
+  private _apiItemToFile: Map<ApiItem, string>;
+  private _apiItemToUid: Map<ApiItem, string>;
+  private _uidToApiItem: Map<string, ApiItem>;
 
   private _outputFolder: string;
 
@@ -72,7 +82,11 @@ export class YamlDocumenter {
     this._apiModel = apiModel;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
     this._apiItemsByTypeName = new Map<string, ApiItem>();
+    this._apiItemToUid = new Map<ApiItem, string>();
+    this._apiItemToFile = new Map<ApiItem, string>();
+    this._uidToApiItem = new Map<string, ApiItem>();
 
+    this._precompute();
     this._initApiItemsByTypeName();
   }
 
@@ -191,6 +205,8 @@ export class YamlDocumenter {
 
     const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
     console.log('Writing ' + tocFilePath);
+
+    this._disambiguateTocItems(tocFile.items);
     this._writeYamlFile(tocFile, tocFilePath, '', undefined);
   }
 
@@ -526,6 +542,53 @@ export class YamlDocumenter {
     return stringBuilder.toString().trim();
   }
 
+  private _disambiguateTocItems(items: IYamlTocItem[]): void {
+    // Track the number of times a toc item occurs for the same name at this level.
+    const nameCollisions: Map<string, IYamlTocItem[]> = new Map<string, IYamlTocItem[]>();
+    const recordedNames: Set<string> = new Set<string>();
+    for (const item of items) {
+      if (item.items) {
+        this._disambiguateTocItems(item.items);
+      }
+
+      recordedNames.add(item.name);
+      let collisions: IYamlTocItem[] | undefined = nameCollisions.get(item.name);
+      if (!collisions) {
+        nameCollisions.set(item.name, collisions = []);
+      }
+      collisions.push(item);
+    }
+
+    // Disambiguate any collisions.
+    for (const [name, collisions] of nameCollisions) {
+      if (collisions.length === 1) {
+        continue;
+      }
+
+      // find the highest precedence among collisions
+      for (const collision of collisions) {
+        // If a toc item doesn't have a uid, or the uid does not correlate to an ApiItem we know of, then it must not
+        // be renamed.
+        const apiItem: ApiItem | undefined = collision.uid ? this._uidToApiItem.get(collision.uid) : undefined;
+        if (!apiItem) {
+          continue;
+        }
+
+        // Disambiguate the name by appending its kind. Provide further disambiguation if necessary, appending
+        // something like '_2', '_3', etc. if there is still a collision.
+        let candidateName: string;
+        let attempt: number = 0;
+        do {
+          candidateName = `${name} (${apiItem.kind})${attempt === 0 ? '' : ` (${attempt + 1})`}`;
+          attempt++;
+        } while (recordedNames.has(candidateName));
+
+        recordedNames.add(candidateName);
+        collision.name = candidateName;
+      }
+    }
+  }
+
   private _writeYamlFile(dataObject: {}, filePath: string, yamlMimeType: string,
     schema: JsonSchema|undefined): void {
 
@@ -554,33 +617,303 @@ export class YamlDocumenter {
    * Example:  node-core-library.JsonFile.load
    */
   protected _getUid(apiItem: ApiItem): string {
-    let result: string = '';
-    for (const hierarchyItem of apiItem.getHierarchy()) {
+    if (!this._canHaveUid(apiItem)) {
+      return '';
+    }
 
-      // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
-      let qualifiedName: string = hierarchyItem.displayName;
-      if (ApiParameterListMixin.isBaseClassOf(hierarchyItem)) {
-        if (hierarchyItem.overloadIndex > 1) {
-          // Subtract one for compatibility with earlier releases of API Documenter.
-          // (This will get revamped when we fix GitHub issue #1308)
-          qualifiedName += `_${hierarchyItem.overloadIndex - 1}`;
+    const uid: string | undefined = this._apiItemToUid.get(apiItem);
+    if (uid === undefined) {
+      throw new InternalError(`Failed to precompute uid for ApiItem of kind '${apiItem.kind}'`);
+    }
+
+    return uid;
+  }
+
+  private _precompute(): void {
+    // In order to ensure uid and file generation and disambiguation is stable, we must precompute the uids for each
+    // item by walking the tree. We perform this computation in two phases:
+    // 1. Package, Namespace, Class, Interface, Enum, TypeAlias, Variable, EnumMember, Property, PropertySignature
+    //    - These items only depend on the uids of their containers.
+    // 2. Function, Constructor, Method, MethodSignature
+    //    - These items may have overloads and are disambiguated by the types of their parameters, which must
+    //      already be pre-computed in the phase 1.
+
+    const context: IPrecomputeContext = {
+      recordedPaths: new Set<string>(),
+      apiItemNeedsDisambiguation: new Map<ApiItem, boolean>(),
+      uidFragmentCache: new Map<ApiItem, string>()
+    };
+
+    this._precomputeNonFunctionLikeRecursive(this._apiModel, '', 0, context);
+    this._precomputeFunctionLikeRecursive(this._apiModel, '', 0, context);
+  }
+
+  private _precomputeNonFunctionLikeRecursive(apiItem: ApiItem, parentUid: string, packageLength: number,
+    context: IPrecomputeContext): void {
+
+    const uid: string = this._precomputeUidAndPath(apiItem, parentUid, packageLength, context);
+    if (apiItem.kind === ApiItemKind.Package) {
+      packageLength = uid.length;
+    }
+
+    for (const member of apiItem.members) {
+      if (!this._isFunctionLike(member)) {
+        this._precomputeNonFunctionLikeRecursive(member, uid, packageLength, context);
+      }
+    }
+  }
+
+  private _precomputeFunctionLikeRecursive(apiItem: ApiItem, parentUid: string, packageLength: number,
+    context: IPrecomputeContext): void {
+
+    if (this._isFunctionLike(apiItem)) {
+      this._precomputeUidAndPath(apiItem, parentUid, packageLength, context);
+    } else {
+      const uid: string | undefined = this._canHaveUid(apiItem) ? this._apiItemToUid.get(apiItem) : '';
+      if (uid === undefined) {
+        throw new InternalError('Failed to precompute uid for item in first pass.');
+      }
+      if (apiItem.kind === ApiItemKind.Package) {
+        packageLength = uid.length;
+      }
+      for (const member of apiItem.members) {
+        this._precomputeFunctionLikeRecursive(member, uid, packageLength, context);
+      }
+    }
+  }
+
+  private _precomputeUidAndPath(apiItem: ApiItem, parentUid: string, packageLength: number,
+    context: IPrecomputeContext): string {
+
+    if (this._canHaveUid(apiItem)) {
+      const itemUid: string = this._getUidFragment(apiItem, context);
+
+      // Compute whether an ApiItem has a uid collision with any other ApiItems in the same scope.
+      let needsDisambiguation: boolean | undefined;
+      if (apiItem.parent) {
+        needsDisambiguation = context.apiItemNeedsDisambiguation.get(apiItem);
+        if (needsDisambiguation === undefined) {
+          const collisions: ApiItem[] = apiItem.parent.members
+            .filter(item => this._getUidFragment(item, context) === itemUid);
+
+          if (collisions.length === 1) {
+            // If there is only one thing with this uid, the item does not need disambiguation.
+            needsDisambiguation = false;
+            context.apiItemNeedsDisambiguation.set(apiItem, false);
+          } else {
+            // Determine which collision has the highest precedence.
+            let highestPrecedence: number = -1;
+            for (const collision of collisions) {
+              highestPrecedence = Math.max(highestPrecedence, this._getDisambiguationPrecedence(collision));
+            }
+
+            // Store whether each collision needs disambiguation.
+            //
+            // A suffix will *not* be added if the item has the highest precedence among its siblings. The precedence
+            // is:
+            // 1. Classes, Functions, Enums, Variables
+            // 2. Interfaces, TypeAliases
+            // 3. Namespaces
+            //
+            // If a class, an interface, and a namespace all have the same uid ('MyService'), it will generate the
+            // following:
+            // - ApiClass: 'MyService'
+            // - ApiInterface: 'MyService:interface'
+            // - ApiNamespace: 'MyService:namespace'
+            //
+            // If an interface and a namespace both have the same uid ('MyService'), it will generate the following:
+            // - ApiInterface: 'MyService'
+            // - ApiNamespace: 'MyService:namespace'
+            for (const collision of collisions) {
+              const collisionNeedsDisambiguation: boolean =
+                this._getDisambiguationPrecedence(collision) < highestPrecedence;
+
+              context.apiItemNeedsDisambiguation.set(apiItem, collisionNeedsDisambiguation);
+              if (collision === apiItem) {
+                needsDisambiguation = collisionNeedsDisambiguation;
+              }
+            }
+          }
         }
       }
 
-      switch (hierarchyItem.kind) {
-        case ApiItemKind.Model:
-        case ApiItemKind.EntryPoint:
-          break;
+      // Adds something like ':interface' to disambiguate declarations with the same name but different kinds.
+      let candidateUid: string = this._combineUids(parentUid, itemUid, '.');
+      if (needsDisambiguation) {
+        candidateUid += ':' + apiItem.kind.toLowerCase();
+      }
+
+      const packagePath: string = packageLength ? this._safePath(candidateUid.slice(0, packageLength)) : '';
+      const itemFile: string = this._safePath(packageLength ? candidateUid.slice(packageLength + 1) : candidateUid);
+      const candidateFile: string = path.join(packagePath, itemFile);
+
+      // Provide further disambiguation if necessary, appending something like '_2', '_3', etc.
+      // The first item in gets the uid without a disambiguation suffix.
+      let attempt: number = 0;
+      let uid: string;
+      let file: string;
+      do {
+        uid = attempt === 0 ? candidateUid : `${candidateUid}_${attempt + 1}`;
+        file = attempt === 0 ? `${candidateFile}.yml` : `${candidateFile}_${attempt + 1}.yml`;
+        attempt++;
+      } while (this._uidToApiItem.has(uid) || context.recordedPaths.has(file));
+
+      // Record the mappings from uid and file to ApiItem.
+      this._apiItemToUid.set(apiItem, uid);
+      this._apiItemToFile.set(apiItem, file);
+
+      // Prevent any other ApiItem from using this uid or file.
+      this._uidToApiItem.set(uid, apiItem);
+      context.recordedPaths.add(file);
+      return uid;
+    } else {
+      return parentUid;
+    }
+  }
+
+  private _canHaveUid(apiItem: ApiItem): boolean {
+    switch (apiItem.kind) {
+      case ApiItemKind.Model:
+      case ApiItemKind.EntryPoint:
+      case ApiItemKind.CallSignature:
+      case ApiItemKind.ConstructSignature:
+      case ApiItemKind.IndexSignature:
+        return false;
+    }
+    return true;
+  }
+
+  private _isFunctionLike(apiItem: ApiItem): boolean {
+    switch (apiItem.kind) {
+      case ApiItemKind.CallSignature:
+      case ApiItemKind.ConstructSignature:
+      case ApiItemKind.Function:
+      case ApiItemKind.Constructor:
+      case ApiItemKind.Method:
+      case ApiItemKind.MethodSignature:
+        return true;
+    }
+    return false;
+  }
+
+  /**
+   * Gets the unscoped/non-namespaced portion of the uid for an ApiItem.
+   */
+  private _getUidFragment(apiItem: ApiItem, context: IPrecomputeContext): string {
+    let fragment: string | undefined = context.uidFragmentCache.get(apiItem);
+    if (fragment === undefined) {
+      switch (apiItem.kind) {
         case ApiItemKind.Package:
-          result += PackageName.getUnscopedName(hierarchyItem.displayName);
+          fragment = PackageName.getUnscopedName(apiItem.displayName);
+          break;
+        case ApiItemKind.Constructor:
+          fragment = `constructor${this._getSignatureUidSuffix(apiItem as ApiConstructor)}`;
+          break;
+        case ApiItemKind.Function:
+        case ApiItemKind.Method:
+        case ApiItemKind.MethodSignature:
+          fragment = `${apiItem.displayName}${this._getSignatureUidSuffix(apiItem as ApiParameterListMixin)}`;
+          break;
+        case ApiItemKind.Class:
+        case ApiItemKind.Interface:
+        case ApiItemKind.TypeAlias:
+        case ApiItemKind.Namespace:
+        case ApiItemKind.Variable:
+        case ApiItemKind.Enum:
+        case ApiItemKind.EnumMember:
+        case ApiItemKind.Property:
+        case ApiItemKind.PropertySignature:
+          fragment = apiItem.displayName;
           break;
         default:
-          result += '.';
-          result += qualifiedName;
-          break;
+            return '';
+      }
+      context.uidFragmentCache.set(apiItem, fragment);
+    }
+    return fragment;
+  }
+
+  /**
+   * Gets the precedence of an ApiItem for use when performing disambiguation.
+   * The highest precedence item often avoids needing a suffix.
+   */
+  private _getDisambiguationPrecedence(apiItem: ApiItem): number {
+    switch (apiItem.kind) {
+      case ApiItemKind.Class:
+      case ApiItemKind.Enum:
+        // Classes and Enums both exist in the type-space and value-space and cannot merge with each other.
+        return 4;
+      case ApiItemKind.Interface:
+      case ApiItemKind.TypeAlias:
+        // Interfaces and TypeAliases both exist in type-space and cannot merge with each other.
+        return 3;
+      case ApiItemKind.Function:
+      case ApiItemKind.Variable:
+        // Functions and Variables both exist in value-space and cannot merge with each other.
+        return 2;
+      case ApiItemKind.Namespace:
+        // Namespaces merge with everything except variables.
+        return 1;
+      default:
+        // Anything else we will always disambiguate.
+        return 0;
+    }
+  }
+
+  private _getSignatureUidSuffix(apiItem: ApiParameterListMixin): string {
+    // Generate a uid suffix do disambiguate function-like items by emulating the naming behavior of the .NET
+    // Metadata specification.
+    //
+    // Per the Generics section of the .NET Metadata specification:
+    // https://dotnet.github.io/docfx/spec/metadata_dotnet_spec.html#6-generics
+    //
+    // > The *ID* of a generic method uses postfix '``n', 'n' is the count of in method parameters, for example,
+    // > 'System.Tuple.Create``1(``0)'.
+    //
+    // Per the Methods section of the .NET Metadata specification:
+    // https://dotnet.github.io/docfx/spec/metadata_dotnet_spec.html#52-methods
+    //
+    // > The *ID* of a method is defined by its name, followed by the list of the *UIDs* of its parameter types.
+    // > When a method does not have parameter, its *ID* **MUST** end with parentheses.
+
+    let result: string = '';
+
+    const typeParameterToIndex: Map<string, number> = new Map<string, number>();
+    if (ApiTypeParameterListMixin.isBaseClassOf(apiItem) && apiItem.typeParameters.length) {
+      for (let i: number = 0; i < apiItem.typeParameters.length; i++) {
+        typeParameterToIndex.set(apiItem.typeParameters[i].name, i);
+      }
+      result += `\`\`${apiItem.typeParameters.length}`;
+    }
+
+    result += '(';
+    for (let i: number = 0; i < apiItem.parameters.length; i++) {
+      if (i > 0) {
+        result += ',';
+      }
+      const parameter: Parameter = apiItem.parameters[i];
+      if (!parameter.parameterTypeExcerpt.isEmpty) {
+        const typeParameterIndex: number | undefined =
+          typeParameterToIndex.get(parameter.parameterTypeExcerpt.text.trim());
+
+        if (typeParameterIndex !== undefined) {
+          result += `\`\`${typeParameterIndex}`;
+        } else {
+          result += this._linkToUidIfPossible(parameter.parameterTypeExcerpt.text);
+        }
       }
     }
-    return result;
+
+    return result + ')';
+  }
+
+  private _combineUids(left: string, right: string, sep: string): string {
+    return left ? right ? `${left}${sep}${right}` : left : right;
+  }
+
+  private _safePath(file: string): string {
+    // allow unicode word characters to support non-english language characters.
+    return file.toLowerCase().replace(/[^-.\w]/gu, () => '_');
   }
 
   /**
@@ -685,27 +1018,16 @@ export class YamlDocumenter {
   }
 
   private _getYamlFilePath(apiItem: ApiItem): string {
-    let result: string = '';
-
-    for (const current of apiItem.getHierarchy()) {
-      switch (current.kind) {
-        case ApiItemKind.Model:
-        case ApiItemKind.EntryPoint:
-          break;
-        case ApiItemKind.Package:
-          result += PackageName.getUnscopedName(current.displayName);
-          break;
-        default:
-          if (current.parent && current.parent.kind === ApiItemKind.EntryPoint) {
-            result += '/';
-          } else {
-            result += '.';
-          }
-          result += current.displayName;
-          break;
-      }
+    if (!this._canHaveUid(apiItem)) {
+      return '';
     }
-    return path.join(this._outputFolder, result.toLowerCase() + '.yml');
+
+    const file: string | undefined = this._apiItemToFile.get(apiItem);
+    if (file === undefined) {
+      throw new InternalError(`Failed to precompute path for ApiItem of kind '${apiItem.kind}'`);
+    }
+
+    return path.join(this._outputFolder, file);
   }
 
   private _deleteOldOutputFiles(): void {

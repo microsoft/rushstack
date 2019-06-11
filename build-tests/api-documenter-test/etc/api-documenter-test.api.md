@@ -4,6 +4,18 @@
 
 ```ts
 
+// @public (undocumented)
+export class Collision {
+    // (undocumented)
+    a: number;
+}
+
+// @public (undocumented)
+export interface Collision {
+    // (undocumented)
+    b: number;
+}
+
 // @public
 export const constVariable: number;
 

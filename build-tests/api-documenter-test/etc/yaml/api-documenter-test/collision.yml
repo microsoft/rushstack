@@ -1,0 +1,22 @@
+### YamlMime:UniversalReference
+items:
+  - uid: api-documenter-test.Collision
+    name: Collision
+    fullName: Collision
+    langs:
+      - typeScript
+    type: class
+    package: api-documenter-test
+    children:
+      - api-documenter-test.Collision.a
+  - uid: api-documenter-test.Collision.a
+    name: a
+    fullName: a
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'a: number;'
+      return:
+        type:
+          - number

@@ -12,6 +12,7 @@ This project tests various documentation generation scenarios and doc comment sy
 
 |  Class | Description |
 |  --- | --- |
+|  [Collision](./api-documenter-test.collision.md) |  |
 |  [DocBaseClass](./api-documenter-test.docbaseclass.md) | Example base class |
 |  [DocClass1](./api-documenter-test.docclass1.md) | This is an example class. |
 |  [Generic](./api-documenter-test.generic.md) | Generic class. |
@@ -33,6 +34,7 @@ This project tests various documentation generation scenarios and doc comment sy
 
 |  Interface | Description |
 |  --- | --- |
+|  [Collision](./api-documenter-test.collision.md) |  |
 |  [IDocInterface1](./api-documenter-test.idocinterface1.md) |  |
 |  [IDocInterface2](./api-documenter-test.idocinterface2.md) |  |
 |  [IDocInterface3](./api-documenter-test.idocinterface3.md) | Some less common TypeScript declaration kinds. |

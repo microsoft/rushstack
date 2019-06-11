@@ -10,8 +10,8 @@ items:
       - api-documenter-test.IDocInterface1
     package: api-documenter-test
     children:
-      - api-documenter-test.IDocInterface2.deprecatedExample
-  - uid: api-documenter-test.IDocInterface2.deprecatedExample
+      - api-documenter-test.IDocInterface2.deprecatedExample()
+  - uid: api-documenter-test.IDocInterface2.deprecatedExample()
     deprecated:
       content: Use `otherThing()` instead.
     name: deprecatedExample()

@@ -9,9 +9,9 @@ items:
     type: class
     package: api-documenter-test
     children:
-      - api-documenter-test.DocBaseClass.(constructor)
-      - api-documenter-test.DocBaseClass.(constructor)_1
-  - uid: api-documenter-test.DocBaseClass.(constructor)
+      - api-documenter-test.DocBaseClass.constructor()
+      - api-documenter-test.DocBaseClass.constructor(number)
+  - uid: api-documenter-test.DocBaseClass.constructor()
     summary: The simple constructor for `DocBaseClass`
     name: (constructor)()
     fullName: (constructor)()
@@ -20,7 +20,7 @@ items:
     type: constructor
     syntax:
       content: constructor();
-  - uid: api-documenter-test.DocBaseClass.(constructor)_1
+  - uid: api-documenter-test.DocBaseClass.constructor(number)
     summary: The overloaded constructor for `DocBaseClass`
     name: (constructor)(x)
     fullName: (constructor)(x)

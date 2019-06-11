@@ -55,3 +55,13 @@ export namespace OuterNamespace {
    */
   export let nestedVariable: boolean = false;
 }
+
+/** @public */
+export class Collision {
+  a = 1;
+}
+
+/** @public */
+export interface Collision {
+  b: number;
+}

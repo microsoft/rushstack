@@ -11,20 +11,22 @@ items:
       - typeScript
     type: package
     children:
+      - api-documenter-test.Collision
+      - 'api-documenter-test.Collision:interface'
       - api-documenter-test.DocBaseClass
       - api-documenter-test.DocClass1
       - api-documenter-test.DocEnum
       - api-documenter-test.Generic
-      - api-documenter-test.globalFunction
+      - globalFunction(number)
       - api-documenter-test.IDocInterface1
       - api-documenter-test.IDocInterface2
       - api-documenter-test.IDocInterface3
       - api-documenter-test.IDocInterface4
       - api-documenter-test.IDocInterface5
       - api-documenter-test.IDocInterface6
-      - api-documenter-test.OuterNamespace.InnerNamespace.nestedFunction
+      - api-documenter-test.OuterNamespace.InnerNamespace.nestedFunction(number)
       - api-documenter-test.SystemEvent
-  - uid: api-documenter-test.globalFunction
+  - uid: globalFunction(number)
     summary: An exported function
     name: globalFunction(x)
     fullName: globalFunction(x)
@@ -42,10 +44,10 @@ items:
           description: ''
           type:
             - number
-  - uid: api-documenter-test.OuterNamespace.InnerNamespace.nestedFunction
+  - uid: api-documenter-test.OuterNamespace.InnerNamespace.nestedFunction(number)
     summary: A function inside a namespace
-    name: OuterNamespace.InnerNamespace.nestedFunction
-    fullName: OuterNamespace.InnerNamespace.nestedFunction
+    name: OuterNamespace.InnerNamespace.nestedFunction(number)
+    fullName: OuterNamespace.InnerNamespace.nestedFunction(number)
     langs:
       - typeScript
     type: function
@@ -61,6 +63,10 @@ items:
           type:
             - number
 references:
+  - uid: api-documenter-test.Collision
+    name: Collision
+  - uid: 'api-documenter-test.Collision:interface'
+    name: Collision
   - uid: api-documenter-test.DocBaseClass
     name: DocBaseClass
   - uid: api-documenter-test.DocClass1

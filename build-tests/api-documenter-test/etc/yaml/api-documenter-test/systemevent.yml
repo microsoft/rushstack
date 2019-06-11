@@ -9,8 +9,8 @@ items:
     type: class
     package: api-documenter-test
     children:
-      - api-documenter-test.SystemEvent.addHandler
-  - uid: api-documenter-test.SystemEvent.addHandler
+      - api-documenter-test.SystemEvent.addHandler(() => void)
+  - uid: api-documenter-test.SystemEvent.addHandler(() => void)
     summary: Adds an handler for the event.
     name: addHandler(handler)
     fullName: addHandler(handler)

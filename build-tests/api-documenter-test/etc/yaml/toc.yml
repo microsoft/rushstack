@@ -39,6 +39,10 @@ items:
         items:
           - name: InjectedCustomItem
             uid: customUrl
+          - name: Collision (Class)
+            uid: api-documenter-test.Collision
+          - name: Collision (Interface)
+            uid: 'api-documenter-test.Collision:interface'
           - name: DocEnum
             uid: api-documenter-test.DocEnum
           - name: Generic
