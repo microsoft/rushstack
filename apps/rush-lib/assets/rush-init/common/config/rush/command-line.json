@@ -88,7 +88,7 @@
        * Rush interprets this as "one or more warnings". Warning output is printed in yellow, but does NOT prevent
        * Rush from processing downstream projects.
        *
-       * Thus, warnings thus do not interfere with local development, but they will cause a CI job to fail, because
+       * Thus, warnings do not interfere with local development, but they will cause a CI job to fail, because
        * the Rush process itself returns a nonzero exit code if there are any warnings or errors. This is by design.
        * In an active monorepo, we've found that if you allow any warnings in your master branch, it inadvertently
        * teaches developers to ignore warnings, which quickly leads to a situation where so many "expected" warnings
