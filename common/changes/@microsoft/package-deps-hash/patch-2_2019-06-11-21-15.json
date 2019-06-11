@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/package-deps-hash",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/package-deps-hash",
+  "email": "jason.a.terry@accenture.com"
+}

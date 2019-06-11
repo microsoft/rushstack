@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/ts-command-line",
+      "comment": "Update Readme.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/ts-command-line",
+  "email": "jason.a.terry@accenture.com"
+}
