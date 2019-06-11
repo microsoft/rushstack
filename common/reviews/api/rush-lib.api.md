@@ -338,10 +338,10 @@ export abstract class VersionPolicy {
     // 
     // @internal
     static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined;
+    readonly noChangeLogRequired: boolean;
     readonly policyName: string;
     setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
     setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
-    readonly shouldSkipChangelogVerification: boolean;
     abstract validate(versionString: string, packageName: string): void;
     }
 

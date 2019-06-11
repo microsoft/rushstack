@@ -14,7 +14,7 @@ export interface IVersionPolicyJson {
   policyName: string;
   definitionName: string;
   dependencies?: IVersionPolicyDependencyJson;
-  shouldSkipChangelogVerification?: boolean;
+  noChangeLogRequired?: boolean;
 }
 
 /**
