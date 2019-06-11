@@ -2,6 +2,30 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.8.0",
+      "tag": "@microsoft/rush_v5.8.0",
+      "date": "Tue, 11 Jun 2019 01:28:33 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new setting \"ignoreDependencyOrder\" in command-line.json"
+          },
+          {
+            "comment": "Clarify \"rush change\" messages."
+          },
+          {
+            "comment": "Improve 'rush version' to fetch before checkout, which avoids an error in cases where the branch wasn't fetched."
+          },
+          {
+            "comment": "Fix typo in command-line help for \"rush add\""
+          },
+          {
+            "comment": "Fix an issue where \"rush build\" ignored changes to a project with an empty build script (GitHub #1282)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.7.3",
       "tag": "@microsoft/rush_v5.7.3",
       "date": "Mon, 06 May 2019 21:03:32 GMT",
