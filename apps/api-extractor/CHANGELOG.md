@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 05 Jun 2019 19:12:34 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Jun 2019 00:48:06 GMT and should not be manually modified.
+
+## 7.2.0
+Tue, 11 Jun 2019 00:48:06 GMT
+
+### Minor changes
+
+- Generate ApiTypeParameter entries and type alias types
 
 ## 7.1.8
 Wed, 05 Jun 2019 19:12:34 GMT

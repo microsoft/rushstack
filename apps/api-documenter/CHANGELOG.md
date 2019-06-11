@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 06 Jun 2019 22:33:36 GMT and should not be manually modified.
+This log was last generated on Tue, 11 Jun 2019 00:48:06 GMT and should not be manually modified.
+
+## 7.3.2
+Tue, 11 Jun 2019 00:48:06 GMT
+
+### Patches
+
+- Add support for emitting type parameters in the YamlDocumenter
 
 ## 7.3.1
 Thu, 06 Jun 2019 22:33:36 GMT
