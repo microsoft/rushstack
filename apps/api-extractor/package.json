@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "7.2.0",
+  "version": "7.2.1",
   "description": "Analyze the exported API for a TypeScript library and generate reviews, documentation, and .d.ts rollups",
   "keywords": [
     "typescript",
@@ -37,7 +37,7 @@
   "dependencies": {
     "@microsoft/api-extractor-model": "7.2.0",
     "@microsoft/node-core-library": "3.13.0",
-    "@microsoft/ts-command-line": "4.2.5",
+    "@microsoft/ts-command-line": "4.2.6",
     "@microsoft/tsdoc": "0.12.9",
     "colors": "~1.2.1",
     "lodash": "~4.17.5",
