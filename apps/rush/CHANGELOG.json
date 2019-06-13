@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.9.1",
+      "tag": "@microsoft/rush_v5.9.1",
+      "date": "Thu, 13 Jun 2019 04:46:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where custom command-line parameters weren't passed to projects' builds."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.9.0",
       "tag": "@microsoft/rush_v5.9.0",
       "date": "Tue, 11 Jun 2019 02:26:20 GMT",
