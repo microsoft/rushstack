@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "[rush-lib] Add ability to opt out of changelog files for version policies.",
+      "comment": "Add ability to opt out of changelog files for version policies.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

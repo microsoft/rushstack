@@ -84,7 +84,7 @@
           "description": "The main project for this version policy",
           "type": "string"
         },
-        "noChangeLogRequired": {
+        "exemptFromRushChange": {
           "description": "If true, the version policy will not require changelog files.",
           "type": "boolean"
         }
@@ -110,7 +110,7 @@
           "description": "The locked major version",
           "type": "number"
         },
-        "noChangeLogRequired": {
+        "exemptFromRushChange": {
           "description": "If true, the version policy will not require changelog files.",
           "type": "boolean"
         }
