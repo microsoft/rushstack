@@ -88,6 +88,9 @@ export class BulkScriptAction extends BaseScriptAction {
 
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
+    for (const customParameter of this.customParameters) {
+      customParameter.appendToArgList(customParameterValues);
+    }
 
     const changedProjectsOnly: boolean = this.actionName === 'build' && this._changedProjectsOnly.value;
 

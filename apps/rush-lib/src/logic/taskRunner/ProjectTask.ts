@@ -150,19 +150,18 @@ export class ProjectTask implements ITaskDefinition {
           : taskCommand;
 
         writer.writeLine(normalizedTaskCommand);
-        const task: child_process.ChildProcess =
-            Utilities.executeLifecycleCommandAsync(
-            normalizedTaskCommand,
-            {
-              rushConfiguration: this._rushConfiguration,
-              workingDirectory: projectFolder,
-              initCwd: this._rushConfiguration.commonTempFolder,
-              handleOutput: true,
-              environmentPathOptions: {
-                includeProjectBin: true
-              }
+        const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
+          normalizedTaskCommand,
+          {
+            rushConfiguration: this._rushConfiguration,
+            workingDirectory: projectFolder,
+            initCwd: this._rushConfiguration.commonTempFolder,
+            handleOutput: true,
+            environmentPathOptions: {
+              includeProjectBin: true
             }
-          );
+          }
+        );
 
         // Hook into events, in order to get live streaming of build log
         task.stdout.on('data', (data: string) => {

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 11 Jun 2019 02:26:20 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Jun 2019 04:46:18 GMT and should not be manually modified.
+
+## 5.9.1
+Thu, 13 Jun 2019 04:46:18 GMT
+
+### Updates
+
+- Fix an issue where custom command-line parameters weren't passed to projects' builds.
 
 ## 5.9.0
 Tue, 11 Jun 2019 02:26:20 GMT
