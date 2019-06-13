@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.2.0",
+      "tag": "@microsoft/api-extractor-model_v7.2.0",
+      "date": "Tue, 11 Jun 2019 00:48:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the .api.json deserializer to validate the schema version and support backwards compatibility"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add API support for type parameters and type alias types"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.3",
       "tag": "@microsoft/api-extractor-model_v7.1.3",
       "date": "Wed, 05 Jun 2019 19:12:34 GMT",

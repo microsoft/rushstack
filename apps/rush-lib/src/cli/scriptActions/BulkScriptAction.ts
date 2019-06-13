@@ -29,6 +29,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
+  allowWarningsInSuccessfulBuild: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -57,15 +58,15 @@ export class BulkScriptAction extends BaseScriptAction {
   private _verboseParameter: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreDependencyOrder: boolean;
+  private _allowWarningsInSuccessfulBuild: boolean;
 
-  constructor(
-    options: IBulkScriptActionOptions
-  ) {
+  constructor(options: IBulkScriptActionOptions) {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
+    this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
   }
 
   public run(): Promise<void> {
@@ -88,43 +89,42 @@ export class BulkScriptAction extends BaseScriptAction {
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
 
-    for (const customParameter of this.customParameters) {
-      customParameter.appendToArgList(customParameterValues);
-    }
-
     const changedProjectsOnly: boolean = this.actionName === 'build' && this._changedProjectsOnly.value;
 
-    const tasks: TaskSelector = new TaskSelector(
-      {
-        rushConfiguration: this.rushConfiguration,
-        toFlags: this._mergeToProjects(),
-        fromFlags: this._fromFlag.values,
-        commandToRun: this._commandToRun,
-        customParameterValues,
-        isQuietMode,
-        parallelism,
-        isIncrementalBuildAllowed: this.actionName === 'build',
-        changedProjectsOnly,
-        ignoreMissingScript: this._ignoreMissingScript,
-        ignoreDependencyOrder: this._ignoreDependencyOrder
-      }
-    );
+    const tasks: TaskSelector = new TaskSelector({
+      rushConfiguration: this.rushConfiguration,
+      toFlags: this._mergeToProjects(),
+      fromFlags: this._fromFlag.values,
+      commandToRun: this._commandToRun,
+      customParameterValues,
+      isQuietMode,
+      parallelism,
+      isIncrementalBuildAllowed: this.actionName === 'build',
+      changedProjectsOnly,
+      ignoreMissingScript: this._ignoreMissingScript,
+      ignoreDependencyOrder: this._ignoreDependencyOrder,
+      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+    });
 
-    return tasks.execute().then(
-      () => {
-        stopwatch.stop();
+    return tasks.execute().then(() => {
+      stopwatch.stop();
+      console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+      this._doAfterTask(stopwatch, true);
+    }).catch((error: Error) => {
+      stopwatch.stop();
+      if (error instanceof AlreadyReportedError) {
         console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-        this._doAfterTask(stopwatch, true);
-      })
-      .catch((error: Error) => {
+      } else {
         if (error && error.message) {
           console.log('Error: ' + error.message);
         }
-        stopwatch.stop();
+
         console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
-        this._doAfterTask(stopwatch, false);
-        throw new AlreadyReportedError();
-      });
+      }
+
+      this._doAfterTask(stopwatch, false);
+      throw new AlreadyReportedError();
+    });
   }
 
   protected onDefineParameters(): void {

@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush-stack-compiler-2.4
 
-This log was last generated on Wed, 05 Jun 2019 19:12:34 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Jun 2019 19:12:33 GMT and should not be manually modified.
+
+## 0.6.18
+Wed, 12 Jun 2019 19:12:33 GMT
+
+*Version update only*
+
+## 0.6.17
+Tue, 11 Jun 2019 00:48:06 GMT
+
+*Version update only*
 
 ## 0.6.16
 Wed, 05 Jun 2019 19:12:34 GMT

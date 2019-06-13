@@ -21,6 +21,7 @@ export interface ITaskSelectorConstructor {
   changedProjectsOnly: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
+  allowWarningsInSuccessfulBuild: boolean;
 }
 
 /**
@@ -42,10 +43,12 @@ export class TaskSelector {
     this._options = options;
 
     this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
-    this._taskRunner = new TaskRunner(
-      this._options.isQuietMode,
-      this._options.parallelism,
-      this._options.changedProjectsOnly);
+    this._taskRunner = new TaskRunner({
+      quietMode: this._options.isQuietMode,
+      parallelism: this._options.parallelism,
+      changedProjectsOnly: this._options.changedProjectsOnly,
+      allowWarningsInSuccessfulBuild: this._options.allowWarningsInSuccessfulBuild
+    });
 
     try {
       this._rushLinkJson = JsonFile.load(this._options.rushConfiguration.rushLinkJsonFilename);

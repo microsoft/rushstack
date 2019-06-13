@@ -129,7 +129,7 @@
 					"$ref": "#/definitions/syntax"
 				},
 				"type": {
-					"enum": [ "class", "constructor", "enum", "field", "function", "interface", "method", "package", "property", "event" ]
+					"enum": [ "class", "constructor", "enum", "field", "function", "interface", "method", "package", "property", "event", "typealias", "variable" ]
 				},
 				"uid": {
 					"type": "string",
@@ -220,6 +220,14 @@
 			"properties": {
 				"content": {
 					"type": "string"
+				},
+				"typeParameters": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/parameter"
+					},
+					"minItems": 1,
+					"uniqueItems": true
 				},
 				"parameters": {
 					"type": "array",

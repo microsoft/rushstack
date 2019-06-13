@@ -2,6 +2,35 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.2.1",
+      "tag": "@microsoft/api-extractor_v7.2.1",
+      "date": "Wed, 12 Jun 2019 19:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/ts-command-line\" from `4.2.5` to `4.2.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.0",
+      "tag": "@microsoft/api-extractor_v7.2.0",
+      "date": "Tue, 11 Jun 2019 00:48:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Generate ApiTypeParameter entries and type alias types"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.1.3` to `7.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.8",
       "tag": "@microsoft/api-extractor_v7.1.8",
       "date": "Wed, 05 Jun 2019 19:12:34 GMT",
