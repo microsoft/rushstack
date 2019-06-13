@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/api-extractor-model",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "jason.a.terry@accenture.com"
+}

@@ -2,7 +2,8 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1000
+    "schemaVersion": 1001,
+    "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
   "canonicalReference": "api-documenter-test",
@@ -688,6 +689,19 @@
             }
           ],
           "releaseTag": "Public",
+          "typeParameters": [
+            {
+              "typeParameterName": "T",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
           "name": "Generic",
           "members": [],
           "implementsTokenRanges": []
@@ -1546,11 +1560,19 @@
             },
             {
               "kind": "Content",
-              "text": "<boolean>;"
+              "text": "<boolean>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
             }
           ],
           "releaseTag": "Public",
-          "name": "ExampleTypeAlias"
+          "name": "ExampleTypeAlias",
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 5
+          }
         }
       ]
     }
