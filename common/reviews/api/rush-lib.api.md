@@ -331,6 +331,7 @@ export abstract class VersionPolicy {
     abstract bump(bumpType?: BumpType, identifier?: string): void;
     readonly definitionName: VersionPolicyDefinitionName;
     abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
+    readonly exemptFromRushChange: boolean;
     readonly isLockstepped: boolean;
     // @internal
     abstract readonly _json: IVersionPolicyJson;

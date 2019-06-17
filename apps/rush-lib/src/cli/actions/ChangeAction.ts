@@ -173,6 +173,7 @@ export class ChangeAction extends BaseRushAction {
 
     this.rushConfiguration.projects
     .filter(project => project.shouldPublish)
+    .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
     .filter(project => this._hasProjectChanged(changedFolders, project))
     .forEach(project => {
       const hostName: string | undefined = this._projectHostMap.get(project.packageName);
