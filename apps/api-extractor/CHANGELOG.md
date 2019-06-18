@@ -1,6 +1,66 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 30 Apr 2019 23:08:02 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Jun 2019 19:12:33 GMT and should not be manually modified.
+
+## 7.2.1
+Wed, 12 Jun 2019 19:12:33 GMT
+
+*Version update only*
+
+## 7.2.0
+Tue, 11 Jun 2019 00:48:06 GMT
+
+### Minor changes
+
+- Generate ApiTypeParameter entries and type alias types
+
+## 7.1.8
+Wed, 05 Jun 2019 19:12:34 GMT
+
+### Patches
+
+- Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number
+
+## 7.1.7
+Tue, 04 Jun 2019 05:51:53 GMT
+
+### Patches
+
+- Upgrade api-extractor-model to remove ApiConstructor.isStatic, since TypeScript constructors cannot be static
+- Improve handling of symbolic property and method names.
+
+## 7.1.6
+Mon, 27 May 2019 04:13:44 GMT
+
+### Patches
+
+- Fix incorrect path resolution for the "extends" field when loading tsconfig.json
+
+## 7.1.5
+Mon, 13 May 2019 02:08:35 GMT
+
+### Patches
+
+- Broaden support for default imports
+
+## 7.1.4
+Mon, 06 May 2019 20:46:21 GMT
+
+*Version update only*
+
+## 7.1.3
+Mon, 06 May 2019 19:34:54 GMT
+
+### Patches
+
+- Add a new setting "omitTrimmingComments" to prevent extra comments from being emitted in the .d.ts rollup
+
+## 7.1.2
+Mon, 06 May 2019 19:11:16 GMT
+
+### Patches
+
+- Fix an issue where ExtractorResult.warningCount was not incremented for messages handled by IExtractorInvokeOptions.messageCallback (GitHub #1258)
 
 ## 7.1.1
 Tue, 30 Apr 2019 23:08:02 GMT

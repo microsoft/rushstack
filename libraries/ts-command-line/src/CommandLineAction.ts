@@ -33,11 +33,17 @@ export interface ICommandLineActionOptions {
  * Applications should create subclasses of CommandLineAction corresponding to
  * each action that they want to expose.
  *
+ * The action name should be comprised of lower case words separated by hyphens
+ * or colons. The name should include an English verb (e.g. "deploy"). Use a
+ * hyphen to separate words (e.g. "upload-docs"). A group of related commands
+ * can be prefixed with a colon (e.g. "docs:generate", "docs:deploy",
+ * "docs:serve", etc).
+ *
  * @public
  */
 export abstract class CommandLineAction extends CommandLineParameterProvider {
   // Example: "do-something"
-  private static _actionNameRegExp: RegExp = /^[a-z]+(-[a-z]+)*$/;
+  private static _actionNameRegExp: RegExp = /^[a-z]+([-:][a-z]+)*$/;
 
   /** {@inheritDoc ICommandLineActionOptions.actionName} */
   public readonly actionName: string;
@@ -55,7 +61,7 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
 
     if (!CommandLineAction._actionNameRegExp.test(options.actionName)) {
       throw new Error(`Invalid action name "${options.actionName}". `
-        + `The name must be comprised of lower-case words optionally separated by hyphens.`);
+        + `The name must be comprised of lower-case words optionally separated by hyphens or colons.`);
     }
 
     this.actionName = options.actionName;

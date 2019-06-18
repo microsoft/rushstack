@@ -6,6 +6,7 @@
 
 Type union in an interface.
 
+
 <b>Signature:</b>
 
 ```typescript

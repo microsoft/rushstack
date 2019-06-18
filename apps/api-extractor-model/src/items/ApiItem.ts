@@ -4,6 +4,7 @@
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiPackage } from '../model/ApiPackage';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -64,15 +65,16 @@ export const ApiItem_parent: unique symbol = Symbol('ApiItem._parent');
 export class ApiItem {
   public [ApiItem_parent]: ApiItem | undefined;
 
-  public static deserialize(jsonObject: IApiItemJson): ApiItem {
+  public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
     // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
     // to avoid ES5 circular imports.
     const deserializerModule: typeof import('../model/Deserializer') = require('../model/Deserializer');
-    return deserializerModule.Deserializer.deserialize(jsonObject);
+    return deserializerModule.Deserializer.deserialize(context, jsonObject);
   }
 
   /** @virtual */
-  public static onDeserializeInto(options: Partial<IApiItemOptions>, jsonObject: IApiItemJson): void {
+  public static onDeserializeInto(options: Partial<IApiItemOptions>,  context: DeserializerContext,
+    jsonObject: IApiItemJson): void {
     // (implemented by subclasses)
   }
 
@@ -107,9 +109,9 @@ export class ApiItem {
    */
   public get displayName(): string {
     switch (this.kind) {
-      case ApiItemKind.CallSignature: return '(call signature)';
+      case ApiItemKind.CallSignature: return '(call)';
       case ApiItemKind.Constructor: return '(constructor)';
-      case ApiItemKind.ConstructSignature: return '(construct signature)';
+      case ApiItemKind.ConstructSignature: return '(new)';
       case ApiItemKind.IndexSignature: return '(indexer)';
       case ApiItemKind.Model: return '(model)';
     }
@@ -166,8 +168,19 @@ export class ApiItem {
       }
       if (reversedParts.length !== 0) {
         reversedParts.push('.');
-      } else if (ApiParameterListMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
-        reversedParts.push('()');
+      } else {
+        switch (current.kind) {
+          case ApiItemKind.CallSignature:
+          case ApiItemKind.ConstructSignature:
+          case ApiItemKind.Constructor:
+          case ApiItemKind.IndexSignature:
+            // These functional forms don't have a proper name, so we don't append the "()" suffix
+            break;
+          default:
+            if (ApiParameterListMixin.isBaseClassOf(current)) { // tslint:disable-line:no-use-before-declare
+              reversedParts.push('()');
+            }
+        }
       }
       reversedParts.push(current.displayName);
     }

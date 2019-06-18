@@ -74,8 +74,8 @@ Optional arguments:
                         be appended after an \\"@\\" sign. WARNING: Symbol 
                         characters are usually interpreted by your shell, so 
                         it's recommended to use quotes. For example, write 
-                        \\"rush add --project \\"example@^1.2.3\\"\\" instead of 
-                        \\"rush add --project example@^1.2.3\\".
+                        \\"rush add --package \\"example@^1.2.3\\"\\" instead of 
+                        \\"rush add --package example@^1.2.3\\".
   --exact               If specified, the SemVer specifier added to the 
                         package.json will be an exact version (e.g. without 
                         tilde or caret).
@@ -167,10 +167,11 @@ Optional arguments:
   --no-fetch            Skips fetching the baseline branch before running 
                         \\"git diff\\" to detect changes.
   -b BRANCH, --target-branch BRANCH
-                        If this parameter is specified, compare current 
-                        branch with the target branch to get changes. If this 
-                        parameter is not specified, the current branch is 
-                        compared against the \\"master\\" branch.
+                        If this parameter is specified, compare the checked 
+                        out branch with the specified branch todetermine 
+                        which projects were changed. If this parameter is not 
+                        specified, the checked out branch is compared against 
+                        the \\"master\\" branch.
 "
 `;
 

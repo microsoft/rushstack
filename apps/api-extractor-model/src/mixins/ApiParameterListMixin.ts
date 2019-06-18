@@ -6,6 +6,7 @@ import { Parameter } from '../model/Parameter';
 import { ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IExcerptTokenRange } from './Excerpt';
 import { InternalError } from '@microsoft/node-core-library';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Represents parameter information that is part of {@link IApiParameterListMixinOptions}
@@ -60,8 +61,13 @@ export interface ApiParameterListMixin extends ApiItem {
    *
    * ```ts
    * export namespace Versioning {
+   *   // TSDoc: Versioning.(addVersions:1)
    *   export function addVersions(x: number, y: number): number;
+   *
+   *   // TSDoc: Versioning.(addVersions:2)
    *   export function addVersions(x: string, y: string): string;
+   *
+   *   // (implementation)
    *   export function addVersions(x: number|string, y: number|string): number|string {
    *     // . . .
    *   }
@@ -69,7 +75,7 @@ export interface ApiParameterListMixin extends ApiItem {
    * ```
    *
    * In the above example, there are two overloaded declarations.  The overload using numbers will have
-   * `overloadIndex = 0`.  The overload using strings will have `overloadIndex = 1`.  The third declaration that
+   * `overloadIndex = 1`.  The overload using strings will have `overloadIndex = 2`.  The third declaration that
    * accepts all possible inputs is considered part of the implementation, and is not processed by API Extractor.
    */
   readonly overloadIndex: number;
@@ -98,10 +104,10 @@ export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(ba
     public readonly [_parameters]: Parameter[];
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>,
+    public static onDeserializeInto(options: Partial<IApiParameterListMixinOptions>, context: DeserializerContext,
       jsonObject: IApiParameterListJson): void {
 
-      baseClass.onDeserializeInto(options, jsonObject);
+      baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.overloadIndex = jsonObject.overloadIndex;
       options.parameters = jsonObject.parameters || [];

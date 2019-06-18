@@ -14,6 +14,15 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { ITask, ITaskDefinition } from './ITask';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+
+export interface ITaskRunnerOptions {
+  quietMode: boolean;
+  parallelism: string | undefined;
+  changedProjectsOnly: boolean;
+  allowWarningsInSuccessfulBuild: boolean;
+  terminal?: Terminal;
+}
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
@@ -25,27 +34,33 @@ import { TaskError } from './TaskError';
 export class TaskRunner {
   private _tasks: Map<string, ITask>;
   private _changedProjectsOnly: boolean;
+  private _allowWarningsInSuccessfulBuild: boolean;
   private _buildQueue: ITask[];
   private _quietMode: boolean;
   private _hasAnyFailures: boolean;
+  private _hasAnyWarnings: boolean;
   private _parallelism: number;
   private _currentActiveTasks: number;
   private _totalTasks: number;
   private _completedTasks: number;
   private _terminal: Terminal;
 
-  constructor(
-    quietMode: boolean,
-    parallelism: string | undefined,
-    changedProjectsOnly: boolean,
-    terminal?: Terminal
-  ) {
+  constructor(options: ITaskRunnerOptions) {
+    const {
+      quietMode,
+      parallelism,
+      changedProjectsOnly,
+      allowWarningsInSuccessfulBuild,
+      terminal = new Terminal(new ConsoleTerminalProvider())
+    } = options;
     this._tasks = new Map<string, ITask>();
     this._buildQueue = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
+    this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
-    this._terminal = terminal || new Terminal(new ConsoleTerminalProvider());
+    this._allowWarningsInSuccessfulBuild = allowWarningsInSuccessfulBuild;
+    this._terminal = terminal;
 
     const numberOfCores: number = os.cpus().length;
 
@@ -161,6 +176,9 @@ export class TaskRunner {
 
       if (this._hasAnyFailures) {
         return Promise.reject(new Error('Project(s) failed to build'));
+      } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
+        this._terminal.writeWarningLine('Project(s) succeeded with warnings');
+        return Promise.reject(new AlreadyReportedError());
       } else {
         return Promise.resolve();
       }
@@ -217,6 +235,7 @@ export class TaskRunner {
               this._markTaskAsSuccess(task);
               break;
             case TaskStatus.SuccessWithWarning:
+              this._hasAnyWarnings = true;
               this._markTaskAsSuccessWithWarning(task);
               break;
             case TaskStatus.Skipped:
@@ -272,8 +291,13 @@ export class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: ITask): void {
-    this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
+    if (task.hadEmptyScript) {
+      this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
+      + `[${task.name}] had an empty script`));
+    } else {
+      this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}`
       + `[${task.name}] completed successfully in ${task.stopwatch.toString()}`));
+    }
     task.status = TaskStatus.Success;
 
     task.dependents.forEach((dependent: ITask) => {
@@ -417,7 +441,7 @@ export class TaskRunner {
           case TaskStatus.SuccessWithWarning:
           case TaskStatus.Blocked:
           case TaskStatus.Failure:
-            if (task.stopwatch) {
+            if (task.stopwatch && !task.hadEmptyScript) {
               const time: string = task.stopwatch.toString();
               this._terminal.writeLine(headingColor(`${task.name} (${time})`));
             } else {

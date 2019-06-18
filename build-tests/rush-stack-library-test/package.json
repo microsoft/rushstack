@@ -10,7 +10,7 @@
     "test": "node_modules/.bin/rush-stack test"
   },
   "dependencies": {
-    "@microsoft/rush-stack": "0.1.77",
-    "@microsoft/rush-stack-compiler-3.2": "0.3.9"
+    "@microsoft/rush-stack": "0.1.87",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.19"
   }
 }

@@ -9,6 +9,8 @@ export const constVariable: number;
 
 // @public
 export class DocBaseClass {
+    constructor();
+    constructor(x: number);
 }
 
 // @public
@@ -72,6 +74,16 @@ export interface IDocInterface4 {
     generic: Generic<number>;
     numberOrFunction: number | (() => number);
     stringOrNumber: string | number;
+}
+
+// @public
+export interface IDocInterface5 {
+    regularProperty: string;
+}
+
+// @public
+export interface IDocInterface6 {
+    regularProperty: number;
 }
 
 // @public

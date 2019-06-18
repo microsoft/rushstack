@@ -2,6 +2,78 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.9.1",
+      "tag": "@microsoft/rush_v5.9.1",
+      "date": "Thu, 13 Jun 2019 04:46:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where custom command-line parameters weren't passed to projects' builds."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.9.0",
+      "tag": "@microsoft/rush_v5.9.0",
+      "date": "Tue, 11 Jun 2019 02:26:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(BEHAVIOR CHANGE) Fix an issue where CI jobs could succeed even if a task reported warnings to stderr; if your build fails due to warnings after upgrading, please see https://github.com/microsoft/web-build-tools/issues/1329"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.8.0",
+      "tag": "@microsoft/rush_v5.8.0",
+      "date": "Tue, 11 Jun 2019 01:28:33 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a new setting \"ignoreDependencyOrder\" in command-line.json"
+          },
+          {
+            "comment": "Clarify \"rush change\" messages."
+          },
+          {
+            "comment": "Improve 'rush version' to fetch before checkout, which avoids an error in cases where the branch wasn't fetched."
+          },
+          {
+            "comment": "Fix typo in command-line help for \"rush add\""
+          },
+          {
+            "comment": "Fix an issue where \"rush build\" ignored changes to a project with an empty build script (GitHub #1282)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.7.3",
+      "tag": "@microsoft/rush_v5.7.3",
+      "date": "Mon, 06 May 2019 21:03:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow colons in command line action names (add missing dependency from 5.7.2)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.7.2",
+      "tag": "@microsoft/rush_v5.7.2",
+      "date": "Mon, 06 May 2019 19:52:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow colons in command line action names"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.7.1",
       "tag": "@microsoft/rush_v5.7.1",
       "date": "Wed, 24 Apr 2019 06:32:17 GMT",

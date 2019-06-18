@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// tslint:disable:member-ordering
+
 import * as path from 'path';
 
 import yaml = require('js-yaml');
@@ -31,7 +33,8 @@ import {
   ApiMethodSignature,
   ApiConstructor,
   ApiFunction,
-  ApiReturnTypeMixin
+  ApiReturnTypeMixin,
+  ApiTypeParameterListMixin
 } from '@microsoft/api-extractor-model';
 
 import {
@@ -184,6 +187,15 @@ export class YamlDocumenter {
    * Write the table of contents
    */
   private _writeTocFile(apiItems: ReadonlyArray<ApiItem>): void {
+    const tocFile: IYamlTocFile = this.buildYamlTocFile(apiItems);
+
+    const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
+    console.log('Writing ' + tocFilePath);
+    this._writeYamlFile(tocFile, tocFilePath, '', undefined);
+  }
+
+  /** @virtual */
+  protected buildYamlTocFile(apiItems: ReadonlyArray<ApiItem>): IYamlTocFile {
     const tocFile: IYamlTocFile = {
       items: [ ]
     };
@@ -192,10 +204,7 @@ export class YamlDocumenter {
     tocFile.items.push(rootItem);
 
     rootItem.items!.push(...this._buildTocItems(apiItems));
-
-    const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
-    console.log('Writing ' + tocFilePath);
-    this._writeYamlFile(tocFile, tocFilePath, '', undefined);
+    return tocFile;
   }
 
   private _buildTocItems(apiItems: ReadonlyArray<ApiItem>): IYamlTocItem[] {
@@ -245,7 +254,7 @@ export class YamlDocumenter {
     return tocItems;
   }
 
-  private _shouldEmbed(apiItemKind: ApiItemKind): boolean {
+  protected _shouldEmbed(apiItemKind: ApiItemKind): boolean {
     switch (apiItemKind) {
       case ApiItemKind.Class:
       case ApiItemKind.Package:
@@ -320,11 +329,11 @@ export class YamlDocumenter {
         break;
       case ApiItemKind.Class:
         yamlItem.type = 'class';
-        this._populateYamlClassOrInterface(yamlItem, apiItem);
+        this._populateYamlClassOrInterface(yamlItem, apiItem as ApiClass);
         break;
       case ApiItemKind.Interface:
         yamlItem.type = 'interface';
-        this._populateYamlClassOrInterface(yamlItem, apiItem);
+        this._populateYamlClassOrInterface(yamlItem, apiItem as ApiInterface);
         break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
@@ -371,7 +380,27 @@ export class YamlDocumenter {
     return yamlItem as IYamlItem;
   }
 
-  private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, apiItem: ApiDocumentedItem): void {
+  private _populateYamlTypeParameters(apiItem: ApiTypeParameterListMixin): IYamlParameter[] {
+    const typeParameters: IYamlParameter[] = [];
+    for (const apiTypeParameter of apiItem.typeParameters) {
+      const typeParameter: IYamlParameter = {
+        id: apiTypeParameter.name
+      };
+
+      if (apiTypeParameter.tsdocTypeParamBlock) {
+        typeParameter.description = this._renderMarkdown(apiTypeParameter.tsdocTypeParamBlock.content, apiItem);
+      }
+
+      if (!apiTypeParameter.constraintExcerpt.isEmpty) {
+        typeParameter.type = [ this._linkToUidIfPossible(apiTypeParameter.constraintExcerpt.text) ];
+      }
+
+      typeParameters.push(typeParameter);
+    }
+    return typeParameters;
+  }
+
+  private _populateYamlClassOrInterface(yamlItem: Partial<IYamlItem>, apiItem: ApiClass | ApiInterface): void {
     if (apiItem instanceof ApiClass) {
       if (apiItem.extendsType) {
         yamlItem.extends = [ this._linkToUidIfPossible(apiItem.extendsType.excerpt.text) ];
@@ -388,6 +417,11 @@ export class YamlDocumenter {
         for (const extendsType of apiItem.extendsTypes) {
           yamlItem.extends.push(this._linkToUidIfPossible(extendsType.excerpt.text));
         }
+      }
+
+      const typeParameters: IYamlParameter[] = this._populateYamlTypeParameters(apiItem);
+      if (typeParameters.length) {
+        yamlItem.syntax = { typeParameters };
       }
     }
 
@@ -454,6 +488,14 @@ export class YamlDocumenter {
     if (parameters.length) {
       syntax.parameters = parameters;
     }
+
+    if (ApiTypeParameterListMixin.isBaseClassOf(apiItem)) {
+      const typeParameters: IYamlParameter[] = this._populateYamlTypeParameters(apiItem);
+      if (typeParameters.length) {
+        syntax.typeParameters = typeParameters;
+      }
+    }
+
   }
 
   private _populateYamlProperty(yamlItem: Partial<IYamlItem>, apiItem: ApiPropertyItem): void {
@@ -511,15 +553,17 @@ export class YamlDocumenter {
    * Calculate the DocFX "uid" for the ApiItem
    * Example:  node-core-library.JsonFile.load
    */
-  private _getUid(apiItem: ApiItem): string {
+  protected _getUid(apiItem: ApiItem): string {
     let result: string = '';
     for (const hierarchyItem of apiItem.getHierarchy()) {
 
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
       let qualifiedName: string = hierarchyItem.displayName;
       if (ApiParameterListMixin.isBaseClassOf(hierarchyItem)) {
-        if (hierarchyItem.overloadIndex > 0) {
-          qualifiedName += `_${hierarchyItem.overloadIndex}`;
+        if (hierarchyItem.overloadIndex > 1) {
+          // Subtract one for compatibility with earlier releases of API Documenter.
+          // (This will get revamped when we fix GitHub issue #1308)
+          qualifiedName += `_${hierarchyItem.overloadIndex - 1}`;
         }
       }
 

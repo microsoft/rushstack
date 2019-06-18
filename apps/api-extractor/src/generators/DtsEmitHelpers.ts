@@ -15,6 +15,9 @@ import { Collector } from '../collector/Collector';
 export class DtsEmitHelpers {
   public static emitImport(stringWriter: StringWriter, collectorEntity: CollectorEntity, astImport: AstImport): void {
     switch (astImport.importKind) {
+      case AstImportKind.DefaultImport:
+        stringWriter.writeLine(`import ${astImport.exportName} from '${astImport.modulePath}';`);
+        break;
       case AstImportKind.NamedImport:
         if (collectorEntity.nameForEmit !== astImport.exportName) {
           stringWriter.write(`import { ${astImport.exportName} as ${collectorEntity.nameForEmit} }`);

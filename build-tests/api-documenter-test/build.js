@@ -26,7 +26,7 @@ if (process.argv.indexOf('--production') >= 0) {
 
 // Run the API Documenter command-line
 executeCommand('node node_modules/@microsoft/api-documenter/lib/start '
-  + 'yaml --input-folder etc --output-folder etc/yaml');
+  + 'generate --input-folder etc --output-folder etc/yaml');
 executeCommand('node node_modules/@microsoft/api-documenter/lib/start '
   + 'markdown --input-folder etc --output-folder etc/markdown');
 

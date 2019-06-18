@@ -98,6 +98,10 @@ export class MarkdownDocumenter {
       case ApiItemKind.Interface:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} interface` }));
         break;
+      case ApiItemKind.Constructor:
+      case ApiItemKind.ConstructSignature:
+        output.appendNode(new DocHeading({ configuration, title: scopedName }));
+        break;
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} method` }));
@@ -182,6 +186,8 @@ export class MarkdownDocumenter {
       case ApiItemKind.Interface:
         this._writeInterfaceTables(output, apiItem as ApiInterface);
         break;
+      case ApiItemKind.Constructor:
+      case ApiItemKind.ConstructSignature:
       case ApiItemKind.Method:
       case ApiItemKind.MethodSignature:
       case ApiItemKind.Function:
@@ -376,6 +382,10 @@ export class MarkdownDocumenter {
       headerTitles: [ 'Property', 'Modifiers', 'Type', 'Description' ]
     });
 
+    const constructorsTable: DocTable = new DocTable({ configuration,
+      headerTitles: [ 'Constructor', 'Modifiers', 'Description' ]
+    });
+
     const propertiesTable: DocTable = new DocTable({ configuration,
       headerTitles: [ 'Property', 'Modifiers', 'Type', 'Description' ]
     });
@@ -387,6 +397,18 @@ export class MarkdownDocumenter {
     for (const apiMember of apiClass.members) {
 
       switch (apiMember.kind) {
+        case ApiItemKind.Constructor: {
+          constructorsTable.addRow(
+            new DocTableRow({ configuration }, [
+              this._createTitleCell(apiMember),
+              this._createModifiersCell(apiMember),
+              this._createDescriptionCell(apiMember)
+            ])
+          );
+
+          this._writeApiItemPage(apiMember);
+          break;
+        }
         case ApiItemKind.Method: {
           methodsTable.addRow(
             new DocTableRow({ configuration }, [
@@ -431,6 +453,11 @@ export class MarkdownDocumenter {
     if (eventsTable.rows.length > 0) {
       output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Events' }));
       output.appendNode(eventsTable);
+    }
+
+    if (constructorsTable.rows.length > 0) {
+      output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Constructors' }));
+      output.appendNode(constructorsTable);
     }
 
     if (propertiesTable.rows.length > 0) {
@@ -502,6 +529,7 @@ export class MarkdownDocumenter {
     for (const apiMember of apiClass.members) {
 
       switch (apiMember.kind) {
+        case ApiItemKind.ConstructSignature:
         case ApiItemKind.MethodSignature: {
           methodsTable.addRow(
             new DocTableRow({ configuration }, [
@@ -765,8 +793,10 @@ export class MarkdownDocumenter {
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
       let qualifiedName: string = hierarchyItem.displayName;
       if (ApiParameterListMixin.isBaseClassOf(hierarchyItem)) {
-        if (hierarchyItem.overloadIndex > 0) {
-          qualifiedName += `_${hierarchyItem.overloadIndex}`;
+        if (hierarchyItem.overloadIndex > 1) {
+          // Subtract one for compatibility with earlier releases of API Documenter.
+          // (This will get revamped when we fix GitHub issue #1308)
+          qualifiedName += `_${hierarchyItem.overloadIndex - 1}`;
         }
       }
 

@@ -2,6 +2,156 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "3.4.108",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.108",
+      "date": "Wed, 12 Jun 2019 19:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.18` to `0.3.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.66` to `6.0.67`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.107",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.107",
+      "date": "Tue, 11 Jun 2019 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.17` to `0.3.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.65` to `6.0.66`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.106",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.106",
+      "date": "Thu, 06 Jun 2019 22:33:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.16` to `0.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.64` to `6.0.65`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.105",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.105",
+      "date": "Wed, 05 Jun 2019 19:12:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.15` to `0.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.63` to `6.0.64`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.104",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.104",
+      "date": "Tue, 04 Jun 2019 05:51:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.14` to `0.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.62` to `6.0.63`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.103",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.103",
+      "date": "Mon, 27 May 2019 04:13:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.13` to `0.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.61` to `6.0.62`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.102",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.102",
+      "date": "Mon, 13 May 2019 02:08:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.12` to `0.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.60` to `6.0.61`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.101",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.101",
+      "date": "Mon, 06 May 2019 20:46:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.11` to `0.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.59` to `6.0.60`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.100",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.100",
+      "date": "Mon, 06 May 2019 19:34:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.10` to `0.3.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.58` to `6.0.59`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.99",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.99",
+      "date": "Mon, 06 May 2019 19:11:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.9` to `0.3.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.57` to `6.0.58`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.98",
       "tag": "@microsoft/gulp-core-build-webpack_v3.4.98",
       "date": "Tue, 30 Apr 2019 23:08:02 GMT",

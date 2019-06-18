@@ -2,6 +2,7 @@
 /**
  * A class used to exposed events.
  * @public
+ * {@docCategory SystemEvent}
  */
 export class SystemEvent {
   /**
@@ -14,12 +15,26 @@ export class SystemEvent {
 /**
  * Example base class
  * @public
+ * {@docCategory DocBaseClass}
  */
 export class DocBaseClass {
+  /**
+   * The simple constructor for `DocBaseClass`
+   */
+  public constructor();
+
+  /**
+   * The overloaded constructor for `DocBaseClass`
+   */
+  public constructor(x: number);
+
+  public constructor(x?: number) {
+  }
 }
 
 /**
  * @public
+ * {@docCategory DocBaseClass}
  */
 export interface IDocInterface1 {
   /**
@@ -30,6 +45,7 @@ export interface IDocInterface1 {
 
 /**
  * @public
+ * {@docCategory DocBaseClass}
  */
 export interface IDocInterface2 extends IDocInterface1 {
   /**
@@ -41,6 +57,7 @@ export interface IDocInterface2 extends IDocInterface1 {
 /**
  * Some less common TypeScript declaration kinds.
  * @public
+ * {@docCategory DocClass1}
  */
 export interface IDocInterface3 {
   /**
@@ -70,6 +87,7 @@ export class Generic<T> { }
 /**
  * Type union in an interface.
  * @public
+ * {@docCategory DocClass1}
  */
 export interface IDocInterface4 {
   /**
@@ -99,6 +117,7 @@ export interface IDocInterface4 {
  * These are some remarks.
  * @defaultValue a default value for this function
  * @public
+ * {@docCategory DocClass1}
  */
 export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInterface2 {
   /**
@@ -196,4 +215,26 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   public static sumWithExample(x: number, y: number): number {
     return x + y;
   }
+}
+
+/**
+ * Interface without inline tag to test custom TOC
+ * @public
+ */
+export interface IDocInterface5 {
+  /**
+   * Property of type string that does something
+   */
+  regularProperty: string;
+}
+
+/**
+ * Interface without inline tag to test custom TOC with injection
+ * @public
+ */
+export interface IDocInterface6 {
+  /**
+   * Property of type number that does something
+   */
+  regularProperty: number;
 }

@@ -171,7 +171,8 @@ export class ExportAnalyzer {
   private _getModuleSymbolFromSourceFile(sourceFile: ts.SourceFile,
     moduleReference: IAstModuleReference | undefined): ts.Symbol {
 
-    const moduleSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(sourceFile);
+    const moduleSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(sourceFile,
+      this._typeChecker);
     if (moduleSymbol !== undefined) {
       // This is the normal case.  The SourceFile acts is a module and has a symbol.
       return moduleSymbol;
@@ -474,11 +475,15 @@ export class ExportAnalyzer {
         //   StringLiteral:  pre=['./A']
         //   SemicolonToken:  pre=[;]
 
+        const importClause: ts.ImportClause = declaration as ts.ImportClause;
+        const exportName: string = importClause.name ?
+          importClause.name.getText().trim() : ts.InternalSymbolName.Default;
+
         if (externalModulePath !== undefined) {
           return this._fetchAstImport(declarationSymbol, {
-            importKind: AstImportKind.NamedImport,
+            importKind: AstImportKind.DefaultImport,
             modulePath: externalModulePath,
-            exportName: ts.InternalSymbolName.Default
+            exportName
           });
         }
 

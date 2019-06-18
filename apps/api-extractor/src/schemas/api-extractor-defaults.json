@@ -25,7 +25,8 @@
 
     "untrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts",
     "betaTrimmedFilePath": "",
-    "publicTrimmedFilePath": ""
+    "publicTrimmedFilePath": "",
+    "omitTrimmingComments": false
   },
 
   "tsdocMetadata": {

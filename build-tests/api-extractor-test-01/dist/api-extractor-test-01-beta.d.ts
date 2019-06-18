@@ -10,7 +10,10 @@
  */
 
 /// <reference types="jest" />
+/// <reference lib="es2015.symbol.wellknown" />
 /// <reference lib="es2018.intl" />
+import Long from 'long';
+import { MAX_UNSIGNED_VALUE } from 'long';
 
 /**
  * Example of an abstract class that is directly exported.
@@ -65,6 +68,13 @@ export declare class AmbientConsumer {
     localTypings(): IAmbientInterfaceExample;
 }
 
+/** @public */
+declare namespace ANamespace {
+    const locallyExportedCustomSymbol: unique symbol;
+    /** @public */
+    const fullyExportedCustomSymbol: unique symbol;
+}
+
 /**
  * Referenced by DefaultExportEdgeCaseReferencer.
  * @public
@@ -108,6 +118,9 @@ export declare class ClassWithSymbols {
     readonly [unexportedCustomSymbol]: number;
     readonly [locallyExportedCustomSymbol]: string;
     [fullyExportedCustomSymbol](): void;
+    readonly [ANamespace.locallyExportedCustomSymbol]: string;
+    [ANamespace.fullyExportedCustomSymbol](): void;
+    readonly [Symbol.toStringTag]: string;
 }
 
 /**
@@ -235,6 +248,7 @@ export declare interface ISimpleInterface {
 }
 
 declare const locallyExportedCustomSymbol: unique symbol;
+export { MAX_UNSIGNED_VALUE }
 
 /** @public */
 export declare namespace NamespaceContainingVariable {
@@ -292,6 +306,11 @@ export declare class TypeReferencesInAedoc {
 }
 
 declare const unexportedCustomSymbol: unique symbol;
+
+/** @public */
+export declare class UseLong {
+    use_long(): Long;
+}
 
 /* Excluded from this release type: VARIABLE */
 

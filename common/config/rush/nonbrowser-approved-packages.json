@@ -75,6 +75,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@microsoft/rush-stack-compiler-2.8",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/rush-stack-compiler-2.9",
       "allowedCategories": [ "tests" ]
     },
@@ -92,6 +96,10 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.3",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.4",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -365,6 +373,10 @@
     {
       "name": "lolex",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "long",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "md5",

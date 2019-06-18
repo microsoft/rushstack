@@ -32,6 +32,10 @@ export class PublishGit {
     PublishUtilities.execCommand(!!this._targetBranch, 'git', `pull origin ${this._targetBranch}`.split(' '));
   }
 
+  public fetch(): void {
+    PublishUtilities.execCommand(!!this._targetBranch, 'git', ['fetch', 'origin']);
+  }
+
   public addChanges(pathspec?: string, workingDirectory?: string): void {
     const files: string = pathspec ? pathspec : '.';
     PublishUtilities.execCommand(!!this._targetBranch, 'git', ['add', files],

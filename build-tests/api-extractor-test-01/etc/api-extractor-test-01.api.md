@@ -4,6 +4,9 @@
 
 ```ts
 
+import Long from 'long';
+import { MAX_UNSIGNED_VALUE } from 'long';
+
 // @public
 export abstract class AbstractClass {
     // (undocumented)
@@ -46,11 +49,19 @@ export class ClassWithAccessModifiers {
 // @public (undocumented)
 export class ClassWithSymbols {
     // (undocumented)
-    readonly [unexportedCustomSymbol]: number;
+    [ANamespace.fullyExportedCustomSymbol](): void;
+    // Warning: (ae-forgotten-export) The symbol "ANamespace" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    readonly [ANamespace.locallyExportedCustomSymbol]: string;
+    // (undocumented)
+    [fullyExportedCustomSymbol](): void;
     // (undocumented)
     readonly [locallyExportedCustomSymbol]: string;
     // (undocumented)
-    [fullyExportedCustomSymbol](): void;
+    readonly [Symbol.toStringTag]: string;
+    // (undocumented)
+    readonly [unexportedCustomSymbol]: number;
 }
 
 // @public
@@ -141,6 +152,8 @@ export interface IMergedInterfaceReferencee {
 export interface ISimpleInterface {
 }
 
+export { MAX_UNSIGNED_VALUE }
+
 // @public (undocumented)
 export namespace NamespaceContainingVariable {
     let // @internal (undocumented)
@@ -172,6 +185,12 @@ export class TypeReferencesInAedoc {
     getValue2(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
     // (undocumented)
     getValue3(arg1: TypeReferencesInAedoc): TypeReferencesInAedoc;
+}
+
+// @public (undocumented)
+export class UseLong {
+    // (undocumented)
+    use_long(): Long;
 }
 
 // @alpha (undocumented)

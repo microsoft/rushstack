@@ -42,6 +42,7 @@ export class ProjectTask implements ITaskDefinition {
   }
 
   public isIncrementalBuildAllowed: boolean;
+  public hadEmptyScript: boolean = false;
 
   private _hasWarningOrError: boolean;
   private _rushProject: RushConfigurationProject;
@@ -64,6 +65,9 @@ export class ProjectTask implements ITaskDefinition {
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
     try {
       const taskCommand: string = this._getScriptToRun();
+      if (!taskCommand) {
+        this.hadEmptyScript = true;
+      }
       const deps: IPackageDependencies | undefined = this._getPackageDependencies(taskCommand, writer);
       return this._executeTask(taskCommand, writer, deps);
     } catch (error) {
@@ -128,9 +132,15 @@ export class ProjectTask implements ITaskDefinition {
         FileSystem.deleteFile(currentDepsPath);
 
         if (!taskCommand) {
-          // tslint:disable-next-line:max-line-length
-          writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank, so no action will be taken.`);
-          return Promise.resolve(TaskStatus.Skipped);
+          writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank,`
+            + ` so no action will be taken.`);
+
+          // Write deps on success.
+          if (currentPackageDeps) {
+            JsonFile.save(currentPackageDeps, currentDepsPath);
+          }
+
+          return Promise.resolve(TaskStatus.Success);
         }
 
         // Run the task
@@ -140,19 +150,18 @@ export class ProjectTask implements ITaskDefinition {
           : taskCommand;
 
         writer.writeLine(normalizedTaskCommand);
-        const task: child_process.ChildProcess =
-            Utilities.executeLifecycleCommandAsync(
-            normalizedTaskCommand,
-            {
-              rushConfiguration: this._rushConfiguration,
-              workingDirectory: projectFolder,
-              initCwd: this._rushConfiguration.commonTempFolder,
-              handleOutput: true,
-              environmentPathOptions: {
-                includeProjectBin: true
-              }
+        const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(
+          normalizedTaskCommand,
+          {
+            rushConfiguration: this._rushConfiguration,
+            workingDirectory: projectFolder,
+            initCwd: this._rushConfiguration.commonTempFolder,
+            handleOutput: true,
+            environmentPathOptions: {
+              includeProjectBin: true
             }
-          );
+          }
+        );
 
         // Hook into events, in order to get live streaming of build log
         task.stdout.on('data', (data: string) => {
@@ -166,7 +175,7 @@ export class ProjectTask implements ITaskDefinition {
 
         return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
           task.on('close', (code: number) => {
-              this._writeLogsToDisk(writer);
+            this._writeLogsToDisk(writer);
 
             if (code !== 0) {
               reject(new TaskError('error', `Returned error code: ${code}`));

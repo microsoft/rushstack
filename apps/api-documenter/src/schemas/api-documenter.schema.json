@@ -1,0 +1,18 @@
+{
+  "title": "API Documenter Configuration",
+  "description": "Describes how the API Documenter tool will process a project.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "tableOfContents": {
+      "description": "Configures how the table of contents is generated.",
+      "type": "object",
+      "additionalProperties": true
+    },
+  },
+  "additionalProperties": false
+}
