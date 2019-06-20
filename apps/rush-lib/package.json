@@ -27,14 +27,15 @@
     "@microsoft/ts-command-line": "4.2.6",
     "@pnpm/link-bins": "~1.0.1",
     "@pnpm/logger": "~1.0.1",
+    "@types/inquirer": "0.0.43",
     "@yarnpkg/lockfile": "~1.0.2",
     "builtins": "~1.0.3",
+    "cli-table": "~0.3.1",
     "colors": "~1.2.1",
     "git-repo-info": "~2.1.0",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.1",
     "https-proxy-agent": "~2.2.1",
-    "@types/inquirer": "0.0.43",
     "inquirer": "~6.2.0",
     "js-yaml": "~3.13.1",
     "lodash": "~4.17.5",
@@ -49,18 +50,18 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.3.19",
     "@microsoft/node-library-build": "6.0.67",
-    "@types/node": "8.5.8",
-    "@types/node-fetch": "1.6.9",
-    "@types/tar": "4.0.0",
-    "@types/z-schema": "3.16.31",
-    "gulp": "~3.9.1",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.19",
     "@types/glob": "5.0.30",
     "@types/jest": "23.3.11",
     "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "2.0.29",
-    "@types/semver": "5.3.33"
+    "@types/node": "8.5.8",
+    "@types/node-fetch": "1.6.9",
+    "@types/semver": "5.3.33",
+    "@types/tar": "4.0.0",
+    "@types/z-schema": "3.16.31",
+    "gulp": "~3.9.1"
   }
 }

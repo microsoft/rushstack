@@ -2,6 +2,9 @@
   "extends": "./node_modules/@microsoft/rush-stack-compiler-3.2/includes/tsconfig-node.json",
 
   "compilerOptions": {
-    "rootDir": "src"
+    "rootDir": "src",
+    "types": [
+      "node"
+    ]
   }
 }
