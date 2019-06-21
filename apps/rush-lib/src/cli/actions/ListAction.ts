@@ -47,34 +47,48 @@ export class ListAction extends BaseRushAction {
   protected run(): Promise<void> {
     return Promise.resolve().then(() => {
       const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
-      const tableHeader: string[] = ['Project'];
+      if (this._version.value || this._path.value || this._fullPath.value) {
+        this._printListTable(allPackages);
+      } else {
+        this._printList(allPackages);
+      }
+    });
+  }
+
+  private _printList(allPackages: Map<string, RushConfigurationProject>): void {
+    allPackages.forEach((_config: RushConfigurationProject, name: string) => {
+      console.log(name);
+    });
+  }
+
+  private _printListTable(allPackages: Map<string, RushConfigurationProject>): void {
+    const tableHeader: string[] = ['Project'];
+    if (this._version.value) {
+      tableHeader.push('Version');
+    }
+    if (this._path.value) {
+      tableHeader.push('Path');
+    }
+    if (this._fullPath.value) {
+      tableHeader.push('Full Path');
+    }
+    const table: typeof Table = new Table({
+      head: tableHeader
+    });
+
+    allPackages.forEach((config: RushConfigurationProject, name: string) => {
+      const packageRow: string[] = [name];
       if (this._version.value) {
-        tableHeader.push('Version');
+        packageRow.push(config.packageJson.version);
       }
       if (this._path.value) {
-        tableHeader.push('Path');
+        packageRow.push(config.projectRelativeFolder);
       }
       if (this._fullPath.value) {
-        tableHeader.push('Full Path');
+        packageRow.push(config.projectFolder);
       }
-      const table: typeof Table = new Table({
-        head: tableHeader
-      });
-
-      allPackages.forEach((config: RushConfigurationProject, name: string) => {
-        const packageRow: string[] = [name];
-        if (this._version.value) {
-          packageRow.push(config.packageJson.version);
-        }
-        if (this._path.value) {
-          packageRow.push(config.projectRelativeFolder);
-        }
-        if (this._fullPath.value) {
-          packageRow.push(config.projectFolder);
-        }
-        table.push(packageRow);
-      });
-      console.log(table.toString());
+      table.push(packageRow);
     });
+    console.log(table.toString());
   }
 }
