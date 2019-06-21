@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/node-core-library",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "halfnibble@users.noreply.github.com"
+}

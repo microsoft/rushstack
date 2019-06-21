@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Remove support for IE9",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "halfnibble@users.noreply.github.com"
+}
