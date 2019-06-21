@@ -110,9 +110,6 @@ const _themeState: IThemeState = initializeThemeState();
 // tslint:disable-next-line:max-line-length
 const _themeTokenRegex: RegExp = /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\\"\']?[\.\,\(\)\#\-\s\w]*[\.\,\(\)\#\-\w][\"\']?))?\s*\][\'\"]/g;
 
-/** Maximum style text length, for supporting IE style restrictions. */
-const MAX_STYLE_CONTENT_SIZE: number = 10000;
-
 const now: () => number =
   () => (typeof performance !== 'undefined' && !!performance.now) ? performance.now() : Date.now();
 
