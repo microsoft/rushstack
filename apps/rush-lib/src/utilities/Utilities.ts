@@ -108,9 +108,13 @@ export class Utilities {
     const unresolvedUserFolder: string | undefined = process.env[
       (process.platform === 'win32') ? 'USERPROFILE' : 'HOME'
     ];
-    const homeFolder: string = path.resolve(unresolvedUserFolder as string);
+    const dirError: string = 'Unable to determine the current user\'s home directory';
+    if (unresolvedUserFolder === undefined) {
+      throw new Error(dirError);
+    }
+    const homeFolder: string = path.resolve(unresolvedUserFolder);
     if (!FileSystem.exists(homeFolder)) {
-      throw new Error('Unable to determine the current user\'s home directory');
+      throw new Error(dirError);
     }
 
     return homeFolder;

@@ -72,7 +72,7 @@ export class ListAction extends BaseRushAction {
     if (this._fullPath.value) {
       tableHeader.push('Full Path');
     }
-    const table: typeof Table = new Table({
+    const table: Table = new Table({
       head: tableHeader
     });
 
