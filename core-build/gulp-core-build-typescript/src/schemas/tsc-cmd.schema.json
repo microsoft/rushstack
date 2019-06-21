@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "title": "Typescript Task configuration",
+  "description": "Defines configuration options for the typescript compilation task",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "staticMatch": {
+      "description": "Glob matches for files to be passed through the build",
+      "type": "array",
+       "items": {
+         "type": "string",
+         "minLength": 1
+       },
+       "minItems": 1
+    },
+    "buildDirectory": {
+      "description": "The directory in which the typescript compiler should be invoked.",
+      "type": "string"
+    }
+  }
+}

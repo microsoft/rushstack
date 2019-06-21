@@ -3,19 +3,24 @@
 
 import { GulpTask } from '@microsoft/gulp-core-build';
 import { IBuildConfig } from '@microsoft/gulp-core-build/lib/IBuildConfig';
+import { FileSystem } from '@microsoft/node-core-library';
 import * as Gulp from 'gulp';
-import * as fs from 'fs';
-import * as ChalkType from 'chalk';
+import * as colors from 'colors';
 import * as HttpType from 'http';
 import * as HttpsType from 'https';
 import * as pathType from 'path';
-import * as gUtilType from 'gulp-util';
 import * as ExpressType from 'express';
 
 import {
   ICertificate
 } from './certificates';
 
+/**
+ * @remarks
+ * If this schema is updated, dependant schemas MUST also be updated, including the spfx-serve.schema.json.
+ * The spfx-serve.schema.json is the serve.schema.json file with the spfx-specific properties included. The
+ * merge is simple, but must be done manually whenever the serve.schema.json file is changed.
+ */
 export interface IServeTaskConfig {
   /**
    * API server configuration
@@ -69,6 +74,11 @@ export interface IServeTaskConfig {
   pfxPath?: string;
 
   /**
+   * Path relative to the server root to base the server in.
+   */
+  rootFolder?: string;
+
+  /**
    * If true, when gulp-core-build-serve is initialized and a dev certificate doesn't already exist and hasn't been
    *  specified, attempt to generate one and trust it automatically.
    *
@@ -102,6 +112,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
+
     /* tslint:disable:typedef */
     const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');
@@ -109,12 +120,11 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     const https = require('https');
     /* tslint:enable:typedef */
 
-    const gutil: typeof gUtilType = require('gulp-util');
     const path: typeof pathType = require('path');
     const openBrowser: boolean = (process.argv.indexOf('--nobrowser') === -1);
     const portArgumentIndex: number = process.argv.indexOf('--port');
     let { port, initialPage }: IServeTaskConfig = this.taskConfig;
-    const { api }: IServeTaskConfig = this.taskConfig;
+    const { api, hostname }: IServeTaskConfig = this.taskConfig;
     const { rootPath }: IBuildConfig = this.buildConfig;
     const httpsServerOptions: HttpsType.ServerOptions = this._loadHttpsServerOptions();
 
@@ -128,7 +138,9 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
       livereload: true,
       middleware: (): Function[] => [this._logRequestsMiddleware, this._enableCorsMiddleware],
       port: port,
-      root: rootPath
+      root: path.join(rootPath, this.taskConfig.rootFolder || ''),
+      preferHttp1: true,
+      host: hostname
     });
 
     // If an api is provided, spin it up.
@@ -158,7 +170,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         // Load the apis.
         for (const apiMapEntry in apiMap) {
           if (apiMap.hasOwnProperty(apiMapEntry)) {
-            console.log(`Registring api: ${ gutil.colors.green(apiMapEntry) }`);
+            console.log(`Registring api: ${ colors.green(apiMapEntry) }`);
             app.get(apiMapEntry, apiMap[apiMapEntry]);
           }
         }
@@ -193,11 +205,10 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   }
 
   private _logRequestsMiddleware(req: HttpType.IncomingMessage, res: HttpType.ServerResponse, next?: () => void): void {
-    const { colors }: typeof gUtilType = require('gulp-util');
     /* tslint:disable:no-any */
     const ipAddress: string = (req as any).ip;
     /* tslint:enable:no-any */
-    let resourceColor: ChalkType.ChalkChain = colors.cyan;
+    let resourceColor: (text: string) => string = colors.cyan;
 
     if (req && req.url) {
       if (req.url.indexOf('.bundle.js') >= 0) {
@@ -237,9 +248,9 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
       if (this.taskConfig.pfxPath) {
         // There's a PFX path in the config, so try that
         this.logVerbose(`Trying PFX path: ${this.taskConfig.pfxPath}`);
-        if (fs.existsSync(this.taskConfig.pfxPath)) {
+        if (FileSystem.exists(this.taskConfig.pfxPath)) {
           try {
-            result.pfx = fs.readFileSync(this.taskConfig.pfxPath);
+            result.pfx = FileSystem.readFile(this.taskConfig.pfxPath);
             this.logVerbose(`Loaded PFX certificate.`);
           } catch (e) {
             this.logError(`Error loading PFX file: ${e}`);
@@ -249,13 +260,13 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         }
       } else if (this.taskConfig.keyPath && this.taskConfig.certPath) {
         this.logVerbose(`Trying key path "${this.taskConfig.keyPath}" and cert path "${this.taskConfig.certPath}".`);
-        const certExists: boolean = fs.existsSync(this.taskConfig.certPath);
-        const keyExists: boolean = fs.existsSync(this.taskConfig.keyPath);
+        const certExists: boolean = FileSystem.exists(this.taskConfig.certPath);
+        const keyExists: boolean = FileSystem.exists(this.taskConfig.keyPath);
 
         if (keyExists && certExists) {
           try {
-            result.cert = fs.readFileSync(this.taskConfig.certPath);
-            result.key = fs.readFileSync(this.taskConfig.keyPath);
+            result.cert = FileSystem.readFile(this.taskConfig.certPath);
+            result.key = FileSystem.readFile(this.taskConfig.keyPath);
           } catch (e) {
             this.logError(`Error loading key or cert file: ${e}`);
           }

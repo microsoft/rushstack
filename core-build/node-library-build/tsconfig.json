@@ -1,16 +1,3 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "declaration": true,
-    "sourceMap": true,
-    "strictNullChecks": true,
-    "types": [
-      "node"
-    ],
-    "lib": [
-      "es5",
-      "es2015.collection"
-    ]
-  }
+  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.2/includes/tsconfig-node.json"
 }

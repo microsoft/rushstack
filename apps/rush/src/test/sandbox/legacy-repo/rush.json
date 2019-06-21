@@ -1,0 +1,39 @@
+{
+  "npmVersion": "4.5.0",
+  "rushMinimumVersion": "2.5.0",
+  "nodeSupportedVersionRange": ">=6.9.0 <7.0.0",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 99,
+  "approvedPackagesPolicy": {
+    "reviewCategories": [
+      "first-party",
+      "third-party",
+      "prototype"
+    ],
+    "ignoredNpmScopes": [
+      "@types",
+      "@internal"
+    ]
+  },
+  "repository": {
+    "url": "someFakeUrl"
+  },
+  "gitPolicy": {
+    "allowedEmailRegExps": [
+      "[^@]+@contoso\\.com"
+    ],
+    "sampleEmail": "mrexample@contoso.com"
+  },
+  "eventHooks": {
+    "postRushBuild": [
+      "do something"
+    ]
+  },
+  "projects": [
+    {
+      "packageName": "project",
+      "projectFolder": "project",
+      "reviewCategory": "third-party"
+    }
+  ]
+}

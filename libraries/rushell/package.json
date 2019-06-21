@@ -1,0 +1,45 @@
+{
+  "name": "@microsoft/rushell",
+  "version": "0.1.0",
+  "description": "Execute shell commands using a consistent syntax on every platform",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/rushell"
+  },
+  "main": "lib/index.js",
+  "typings": "dist/rushell.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
+  "scripts": {
+    "build": "gulp test --clean",
+    "start": "jest --watch"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@microsoft/node-core-library": "3.13.0"
+  },
+  "devDependencies": {
+    "@microsoft/rush-stack-compiler-3.2": "0.3.19",
+    "@microsoft/node-library-build": "6.0.67",
+    "@types/jest": "23.3.11",
+    "@types/node": "8.5.8",
+    "gulp": "~3.9.1",
+    "jest": "~23.6.0",
+    "ts-jest": "~22.4.6"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testMatch": [
+      "<rootDir>/src/**/*.test.ts"
+    ]
+  }
+}

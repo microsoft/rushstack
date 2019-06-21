@@ -6,7 +6,8 @@ import * as os from 'os';
 
 /**
  * An writable interface for managing output of simultaneous processes.
- * @todo #168347: should we export a WritableStream or Buffer or similar?
+ *
+ * @public
  */
 export interface ITaskWriter {
   write(data: string): void;      // Writes a string to the buffer
@@ -32,17 +33,15 @@ interface ITaskWriterInfo {
 
 enum ITaskOutputStream {
   stdout = 1,
-  stderr = 2,
-  warning = 3
+  stderr = 2
 }
 
 /**
  * A static class which manages the output of multiple threads.
- * @todo #168348: make this class not be static
- * @todo #168349: add ability to inject stdout WritableStream
- * @todo #168350: add unit testing
+ *
+ * @public
  */
-export default class Interleaver {
+export class Interleaver {
   private static _tasks: Map<string, ITaskWriterInfo> = new Map<string, ITaskWriterInfo>();
   private static _activeTask: string = undefined;
   private static _stdout: { write: (text: string) => void } = process.stdout;
@@ -79,13 +78,7 @@ export default class Interleaver {
       getStdError: (): string => this._getTaskOutput(taskName, ITaskOutputStream.stderr),
       getStdOutput: (): string => this._getTaskOutput(taskName),
       write: (data: string): void => this._writeTaskOutput(taskName, data),
-      writeError: (data: string): void => {
-        const stream: ITaskOutputStream = (data.indexOf('Warning - ') === 0) ?
-          ITaskOutputStream.warning : // Warning written to stderr
-          ITaskOutputStream.stderr;
-
-        this._writeTaskOutput(taskName, data, stream);
-      },
+      writeError: (data: string): void => this._writeTaskOutput(taskName, data, ITaskOutputStream.stderr),
       writeLine: (data: string): void => this._writeTaskOutput(taskName, data + os.EOL)
     };
   }
@@ -120,10 +113,8 @@ export default class Interleaver {
     if (this._activeTask === taskName) {
       if (stream === ITaskOutputStream.stdout && !taskInfo.quietMode) {
         this._stdout.write(data);
-      } else if (stream === ITaskOutputStream.warning && !taskInfo.quietMode) {
-        this._stdout.write(colors.yellow(data));
       } else if (stream === ITaskOutputStream.stderr) {
-        this._stdout.write(colors.red(data));
+        this._stdout.write(data);
       }
     }
   }
@@ -181,10 +172,5 @@ export default class Interleaver {
     this._stdout.write(colors.red(taskInfo.stderr.join('')));
   }
 
-  /**
-   * A constructor which throws an exception if used
-   */
-  constructor() {
-    throw Error('do not use constructor directly, only static functions');
-  }
+  private constructor() { }
 }

@@ -1,35 +1,52 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * An object-oriented command-line parser for TypeScript projects.
+ *
+ * @packageDocumentation
+ */
+
 export {
-  default as CommandLineAction,
+  CommandLineAction,
   ICommandLineActionOptions
 } from './CommandLineAction';
 
 export {
   IBaseCommandLineDefinition,
+  IBaseCommandLineDefinitionWithArgument,
   ICommandLineFlagDefinition,
   ICommandLineStringDefinition,
   ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition,
-  ICommandLineOptionDefinition
+  ICommandLineChoiceDefinition
 } from './CommandLineDefinition';
 
 export {
-  ICommandLineParserData,
+  CommandLineParameterKind,
   CommandLineParameter,
+  CommandLineParameterWithArgument,
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineOptionParameter
+  CommandLineChoiceParameter
 } from './CommandLineParameter';
 
 export {
-  default as CommandLineParameterProvider
+  CommandLineParameterProvider,
+  ICommandLineParserData as _ICommandLineParserData
 } from './CommandLineParameterProvider';
 
 export {
-  ICommandListParserOptions,
-  default as CommandLineParser
+  ICommandLineParserOptions,
+  CommandLineParser
 } from './CommandLineParser';
+
+export {
+  DynamicCommandLineAction
+} from './DynamicCommandLineAction';
+
+export {
+  DynamicCommandLineParser
+} from './DynamicCommandLineParser';

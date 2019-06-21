@@ -1,0 +1,9 @@
+[
+  {
+    "policyName": "lockStep1",
+    "definitionName": "lockStepVersion",
+    "version": "1.0.0",
+    "nextBump": "prerelease",
+    "mainProject": "b"
+  }
+]

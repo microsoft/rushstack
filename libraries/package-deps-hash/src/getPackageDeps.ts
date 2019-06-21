@@ -4,8 +4,6 @@
 import * as child_process from 'child_process';
 import { IPackageDeps } from './IPackageDeps';
 
-export type GitStatusChangeType = 'D' | 'M' | 'A';
-
 /**
  * Parses the output of the "git ls-tree" command
  */
@@ -23,7 +21,7 @@ export function parseGitLsTree(output: string): Map<string, string> {
 
       if (line) {
         // Take everything after the "100644 blob", which is just the hash and filename
-        const matches: RegExpMatchArray = line.match(gitRegex);
+        const matches: RegExpMatchArray | null = line.match(gitRegex);
         if (matches && matches[3] && matches[4]) {
           const hash: string = matches[3];
           const filename: string = matches[4];
@@ -43,8 +41,8 @@ export function parseGitLsTree(output: string): Map<string, string> {
 /**
  * Parses the output of the "git status" command
  */
-export function parseGitStatus(output: string, packagePath: string): Map<string, GitStatusChangeType> {
-  const changes: Map<string, GitStatusChangeType> = new Map<string, GitStatusChangeType>();
+export function parseGitStatus(output: string, packagePath: string): Map<string, string> {
+  const changes: Map<string, string> = new Map<string, string>();
 
   /*
   * Typically, output will look something like:
@@ -63,13 +61,24 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
     .trim()
     .split('\n')
     .forEach(line => {
-      const [changeType, filename]: string[] = line.trim().split(' ');
       /*
-      * changeType == 'D' or 'M' or 'A'
-      * filename == path to the file
+      * changeType is in the format of "XY" where "X" is the status of the file in the index and "Y" is the status of
+      * the file in the working tree. Some example statuses:
+      *   - 'D' == deletion
+      *   - 'M' == modification
+      *   - 'A' == addition
+      *   - '??' == untracked
+      *   - 'R' == rename
+      *   - 'RM' == rename with modifications
+      * filenames == path to the file, or files in the case of files that have been renamed
       */
-      if (changeType && filename) {
-        changes.set(filename, changeType as GitStatusChangeType);
+      const [changeType, ...filenames]: string[] = line.trim().split(' ').filter((linePart) => !!linePart);
+
+      if (changeType && filenames && filenames.length > 0) {
+        // We always care about the last filename in the filenames array. In the case of non-rename changes,
+        // the filenames array only contains one item. In the case of rename changes, the last item in the
+        // array is the path to the file in the working tree, which is the only one that we care about.
+        changes.set(filenames[filenames.length - 1], changeType);
       }
     });
 
@@ -100,7 +109,10 @@ export function gitHashFiles(filesToHash: string[], packagePath: string): Map<st
 export function gitLsTree(path: string): string {
   return child_process.execSync(
     `git ls-tree HEAD -r`,
-    { cwd: path }).toString();
+    {
+      cwd: path,
+      stdio: 'pipe'
+    }).toString();
 }
 
 /**
@@ -109,7 +121,10 @@ export function gitLsTree(path: string): string {
 export function gitStatus(path: string): string {
   return child_process.execSync(
     `git status -s -u .`,
-    { cwd: path }).toString();
+    {
+      cwd: path,
+      stdio: 'pipe'
+    }).toString();
 }
 
 /**
@@ -138,11 +153,11 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
 
   // Update the checked in hashes with the current repo status
   const gitStatusOutput: string = gitStatus(packagePath);
-  const currentlyChangedFiles: Map<string, GitStatusChangeType > =
+  const currentlyChangedFiles: Map<string, string> =
     parseGitStatus(gitStatusOutput, packagePath);
 
   const filesToHash: string[] = [];
-  currentlyChangedFiles.forEach((changeType: GitStatusChangeType, filename: string) => {
+  currentlyChangedFiles.forEach((changeType: string, filename: string) => {
     if (changeType === 'D') {
       delete changes.files[filename];
     } else {

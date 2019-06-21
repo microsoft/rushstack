@@ -2,6 +2,472 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "4.2.6",
+      "tag": "@microsoft/ts-command-line_v4.2.6",
+      "date": "Wed, 12 Jun 2019 19:12:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update Readme."
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.5",
+      "tag": "@microsoft/ts-command-line_v4.2.5",
+      "date": "Mon, 27 May 2019 04:13:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a broken link in the README.md (GitHub issue #1285)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.4",
+      "tag": "@microsoft/ts-command-line_v4.2.4",
+      "date": "Mon, 06 May 2019 20:46:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Allow colons in command line action names"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.3",
+      "tag": "@microsoft/ts-command-line_v4.2.3",
+      "date": "Fri, 07 Dec 2018 17:04:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated to use the new InternalError class for reporting software defects"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.2",
+      "tag": "@microsoft/ts-command-line_v4.2.2",
+      "date": "Thu, 06 Sep 2018 01:25:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update \"repository\" field in package.json"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.1",
+      "tag": "@microsoft/ts-command-line_v4.2.1",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.2.0",
+      "tag": "@microsoft/ts-command-line_v4.2.0",
+      "date": "Fri, 08 Jun 2018 08:43:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add CommandLineChoiceParameter.appendToArgList() and CommandLineParser.tryGetAction()"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.1.0",
+      "tag": "@microsoft/ts-command-line_v4.1.0",
+      "date": "Fri, 27 Apr 2018 03:04:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add \"defaultValue\", \"environmentVariable\", and \"required\" features for command-line parameters"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.0",
+      "tag": "@microsoft/ts-command-line_v4.0.0",
+      "date": "Thu, 19 Apr 2018 21:25:56 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Rename \"CommandLineOptionParameter\" to \"CommandLineChoiceParameter\" (API change)"
+          },
+          {
+            "comment": "Rename \"ICommandLineChoiceDefinition.options\" to \"alternatives\" (API change)"
+          },
+          {
+            "comment": "Add DynamicCommandLineAction, DynamicCommandLineParser, and other APIs to support defining and reading command-line parameters at runtime"
+          },
+          {
+            "comment": "Rename \"actionVerb\" to \"actionName\" (API change)"
+          },
+          {
+            "comment": "Replace \"CommandLineAction.options\" with more concise top-level properties (API change)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.1",
+      "tag": "@microsoft/ts-command-line_v3.1.1",
+      "date": "Fri, 23 Mar 2018 00:34:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade colors to version ~1.2.1"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.0",
+      "tag": "@microsoft/ts-command-line_v3.1.0",
+      "date": "Thu, 15 Mar 2018 20:00:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add default error handler so the caller to CommandLineParser.execute() is not expected to handle promise rejections"
+          },
+          {
+            "comment": "Add a new API \"CommandLineParser.executeWithoutErrorHandling()\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.7",
+      "tag": "@microsoft/ts-command-line_v3.0.7",
+      "date": "Mon, 12 Mar 2018 20:36:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Locked down some \"@types/\" dependency versions to avoid upgrade conflicts"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.6",
+      "tag": "@microsoft/ts-command-line_v3.0.6",
+      "date": "Fri, 02 Mar 2018 01:13:59 GMT",
+      "comments": {}
+    },
+    {
+      "version": "3.0.5",
+      "tag": "@microsoft/ts-command-line_v3.0.5",
+      "date": "Tue, 27 Feb 2018 22:05:57 GMT",
+      "comments": {}
+    },
+    {
+      "version": "3.0.4",
+      "tag": "@microsoft/ts-command-line_v3.0.4",
+      "date": "Wed, 21 Feb 2018 22:04:19 GMT",
+      "comments": {}
+    },
+    {
+      "version": "3.0.3",
+      "tag": "@microsoft/ts-command-line_v3.0.3",
+      "date": "Wed, 21 Feb 2018 03:13:28 GMT",
+      "comments": {}
+    },
+    {
+      "version": "3.0.2",
+      "tag": "@microsoft/ts-command-line_v3.0.2",
+      "date": "Sat, 17 Feb 2018 02:53:49 GMT",
+      "comments": {}
+    },
+    {
+      "version": "3.0.1",
+      "tag": "@microsoft/ts-command-line_v3.0.1",
+      "date": "Fri, 16 Feb 2018 22:05:23 GMT",
+      "comments": {}
+    },
+    {
+      "version": "3.0.0",
+      "tag": "@microsoft/ts-command-line_v3.0.0",
+      "date": "Fri, 16 Feb 2018 17:05:11 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Change all CommandLineActions to have an asychronous API that returns a promise."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.10",
+      "tag": "@microsoft/ts-command-line_v2.3.10",
+      "date": "Wed, 07 Feb 2018 17:05:11 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.3.9",
+      "tag": "@microsoft/ts-command-line_v2.3.9",
+      "date": "Fri, 26 Jan 2018 22:05:30 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.3.8",
+      "tag": "@microsoft/ts-command-line_v2.3.8",
+      "date": "Fri, 26 Jan 2018 17:53:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force a patch bump in case the previous version was an empty package"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.7",
+      "tag": "@microsoft/ts-command-line_v2.3.7",
+      "date": "Fri, 26 Jan 2018 00:36:51 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.3.6",
+      "tag": "@microsoft/ts-command-line_v2.3.6",
+      "date": "Tue, 23 Jan 2018 17:05:28 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.3.5",
+      "tag": "@microsoft/ts-command-line_v2.3.5",
+      "date": "Thu, 18 Jan 2018 03:23:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Enable package typings generated by api-extractor"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.3.4",
+      "tag": "@microsoft/ts-command-line_v2.3.4",
+      "date": "Thu, 18 Jan 2018 00:48:06 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.3.3",
+      "tag": "@microsoft/ts-command-line_v2.3.3",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.3.2",
+      "tag": "@microsoft/ts-command-line_v2.3.2",
+      "date": "Fri, 12 Jan 2018 03:35:22 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.3.1",
+      "tag": "@microsoft/ts-command-line_v2.3.1",
+      "date": "Thu, 11 Jan 2018 22:31:51 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.3.0",
+      "tag": "@microsoft/ts-command-line_v2.3.0",
+      "date": "Wed, 10 Jan 2018 20:40:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "1271a0dc21fedb882e7953f491771724f80323a1",
+            "comment": "Upgrade to Node 8"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.14",
+      "tag": "@microsoft/ts-command-line_v2.2.14",
+      "date": "Tue, 09 Jan 2018 17:05:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "d00b6549d13610fbb6f84be3478b532be9da0747",
+            "comment": "Get web-build-tools building with pnpm"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.13",
+      "tag": "@microsoft/ts-command-line_v2.2.13",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.12",
+      "tag": "@microsoft/ts-command-line_v2.2.12",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.11",
+      "tag": "@microsoft/ts-command-line_v2.2.11",
+      "date": "Fri, 05 Jan 2018 00:48:42 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.10",
+      "tag": "@microsoft/ts-command-line_v2.2.10",
+      "date": "Fri, 22 Dec 2017 17:04:46 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.9",
+      "tag": "@microsoft/ts-command-line_v2.2.9",
+      "date": "Tue, 12 Dec 2017 03:33:27 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.8",
+      "tag": "@microsoft/ts-command-line_v2.2.8",
+      "date": "Thu, 30 Nov 2017 23:59:09 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.7",
+      "tag": "@microsoft/ts-command-line_v2.2.7",
+      "date": "Thu, 30 Nov 2017 23:12:21 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.6",
+      "tag": "@microsoft/ts-command-line_v2.2.6",
+      "date": "Wed, 29 Nov 2017 17:05:37 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.5",
+      "tag": "@microsoft/ts-command-line_v2.2.5",
+      "date": "Tue, 28 Nov 2017 23:43:55 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.4",
+      "tag": "@microsoft/ts-command-line_v2.2.4",
+      "date": "Mon, 13 Nov 2017 17:04:50 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.3",
+      "tag": "@microsoft/ts-command-line_v2.2.3",
+      "date": "Mon, 06 Nov 2017 17:04:18 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.2.2",
+      "tag": "@microsoft/ts-command-line_v2.2.2",
+      "date": "Thu, 02 Nov 2017 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "2c58095f2f13492887cc1278c9a0cff49af9735b",
+            "comment": "lock the reference version between web build tools projects"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.1",
+      "tag": "@microsoft/ts-command-line_v2.2.1",
+      "date": "Wed, 01 Nov 2017 21:06:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "e449bd6cdc3c179461be68e59590c25021cd1286",
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.2.0",
+      "tag": "@microsoft/ts-command-line_v2.2.0",
+      "date": "Tue, 31 Oct 2017 21:04:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "fe386a0305b16e6dbde953197c6dc2b89005216e",
+            "comment": "Add ability to specify default value for enum options."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.4",
+      "tag": "@microsoft/ts-command-line_v2.1.4",
+      "date": "Tue, 31 Oct 2017 16:04:55 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.1.3",
+      "tag": "@microsoft/ts-command-line_v2.1.3",
+      "date": "Wed, 25 Oct 2017 20:03:59 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.1.2",
+      "tag": "@microsoft/ts-command-line_v2.1.2",
+      "date": "Tue, 24 Oct 2017 18:17:12 GMT",
+      "comments": {}
+    },
+    {
+      "version": "2.1.1",
+      "tag": "@microsoft/ts-command-line_v2.1.1",
+      "date": "Mon, 23 Oct 2017 21:53:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5de032b254b632b8af0d0dd98913acef589f88d5",
+            "comment": "Updated cyclic dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.0",
+      "tag": "@microsoft/ts-command-line_v2.1.0",
+      "date": "Fri, 22 Sep 2017 01:04:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "481a10f460a454fb5a3e336e3cf25a1c3f710645",
+            "comment": "Upgrade to es6"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `~4.0.8` to `~4.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.7",
       "tag": "@microsoft/ts-command-line_v2.0.7",
       "date": "Fri, 08 Sep 2017 01:28:04 GMT",

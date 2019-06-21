@@ -4,16 +4,15 @@
 /// <reference path="./NodeForgeExtensions.d.ts" />
 
 import { GulpTask } from '@microsoft/gulp-core-build';
+import { FileSystem } from '@microsoft/node-core-library';
 import * as forgeType from 'node-forge';
 const forge: typeof forgeType & IForgeExtensions = require('node-forge');
-import * as fs from 'fs';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { EOL } from 'os';
 
 import { runSudoSync, ISudoSyncResult } from './sudoSync';
-
-import CertificateStore from './CertificateStore';
+import { CertificateStore } from './CertificateStore';
 
 const serialNumber: string = '731c321744e34650a202e3ef91c3c1b9';
 const friendlyName: string = 'gulp-core-build-serve Development Certificate';
@@ -194,7 +193,7 @@ function _trySetFriendlyName(certificatePath: string, parentTask: GulpTask<{}>):
       ''
     ].join(EOL);
 
-    fs.writeFileSync(friendlyNamePath, friendlyNameFile);
+    FileSystem.writeFile(friendlyNamePath, friendlyNameFile);
 
     const commands: string[] = [
       '–repairstore',
@@ -225,8 +224,10 @@ function _trySetFriendlyName(certificatePath: string, parentTask: GulpTask<{}>):
  * Get the dev certificate from the store, or, optionally, generate a new one and trust it if one doesn't exist in the
  *  store.
  */
-export function ensureCertificate(canGenerateNewCertificate: boolean,
-                                  parentTask: GulpTask<{}>): ICertificate {
+export function ensureCertificate<TGulpTask>(
+  canGenerateNewCertificate: boolean,
+  parentTask: GulpTask<TGulpTask>
+): ICertificate {
   const certificateStore: CertificateStore = CertificateStore.instance;
 
   if (certificateStore.certificateData && certificateStore.keyData) {
@@ -257,7 +258,7 @@ export function ensureCertificate(canGenerateNewCertificate: boolean,
   };
 }
 
-export function untrustCertificate(parentTask: GulpTask<{}>): boolean {
+export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): boolean {
   switch (process.platform) {
     case 'win32':
       const certutilExePath: string = _ensureCertUtilExePath(parentTask);
@@ -340,12 +341,11 @@ function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
   const now: Date = new Date();
   const certificateName: string = now.getTime().toString();
   const tempDirName: string = path.join(__dirname, '..', 'temp');
-  if (!fs.existsSync(tempDirName)) {
-    fs.mkdirSync(tempDirName); // Create the temp dir if it doesn't exist
-  }
 
   const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.cer`);
-  fs.writeFileSync(tempCertificatePath, generatedCertificate.pemCertificate);
+  FileSystem.writeFile(tempCertificatePath, generatedCertificate.pemCertificate, {
+    ensureFolderExists: true
+  });
 
   if (_tryTrustCertificate(tempCertificatePath, parentTask)) {
     certificateStore.certificateData = generatedCertificate.pemCertificate;
@@ -360,7 +360,7 @@ function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
     certificateStore.keyData = undefined;
   }
 
-  fs.unlinkSync(tempCertificatePath);
+  FileSystem.deleteFile(tempCertificatePath);
 }
 
 function _certificateHasSubjectAltName(certificateData: string): boolean {

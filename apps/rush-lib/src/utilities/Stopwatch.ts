@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import Utilities from './Utilities';
+import { Utilities } from './Utilities';
 
 /**
  * Used with the Stopwatch class.
- * @public
  */
 export enum StopwatchState {
   Stopped = 1,
@@ -15,11 +14,10 @@ export enum StopwatchState {
 /**
  * Represents a typical timer/stopwatch which keeps track
  * of elapsed time in between two events.
- * @public
  */
 export class Stopwatch {
-  private _startTime: number;
-  private _endTime: number;
+  private _startTime: number | undefined;
+  private _endTime: number | undefined;
   private _state: StopwatchState;
 
   private _getTime: () => number;

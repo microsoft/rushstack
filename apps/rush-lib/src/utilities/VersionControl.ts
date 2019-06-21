@@ -2,43 +2,63 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
+import * as colors from 'colors';
+import { Executable } from '@microsoft/node-core-library';
 
-/**
- * @public
- */
-export default class VersionControl {
-  public static getChangedFolders(targetBranch?: string): string[] {
-    const branchName: string = targetBranch ? targetBranch : 'origin/master';
-    const output: string = child_process.execSync(`git diff ${branchName}... --dirstat=files,0`)
-      .toString();
-    return output.split('\n').map(s => {
-      if (s) {
-        const delimiterIndex: number = s.indexOf('%');
-        if (delimiterIndex > 0 && delimiterIndex + 1 < s.length) {
-          return s.substring(delimiterIndex + 1).trim();
+const DEFAULT_BRANCH: string = 'master';
+const DEFAULT_REMOTE: string = 'origin';
+const DEFAULT_FULLY_QUALIFIED_BRANCH: string = `${DEFAULT_REMOTE}/${DEFAULT_BRANCH}`;
+
+export class VersionControl {
+  public static getChangedFolders(
+    targetBranch: string,
+    skipFetch: boolean = false
+  ): Array<string | undefined> | undefined {
+    if (!skipFetch) {
+      VersionControl._fetchNonDefaultBranch(targetBranch);
+    }
+
+    const output: string = child_process.execSync(`git diff ${targetBranch}... --dirstat=files,0`).toString();
+    return output.split('\n').map((line) => {
+      if (line) {
+        const delimiterIndex: number = line.indexOf('%');
+        if (delimiterIndex > 0 && delimiterIndex + 1 < line.length) {
+          return line.substring(delimiterIndex + 1).trim();
         }
       }
+
       return undefined;
     });
   }
 
-  public static getChangedFiles(prefix?: string, targetBranch?: string): string[] {
-    const branchName: string = targetBranch ? targetBranch : 'origin/master';
-    const output: string = child_process
-      .execSync(`git diff ${branchName}... --name-only --diff-filter=A`)
-      .toString();
-    const regex: RegExp = prefix ? new RegExp(`^${prefix}`, 'i') : undefined;
-    return output.split('\n').map(s => {
-      if (s) {
-        const trimmedLine: string = s.trim();
-        if (trimmedLine.match(regex)) {
+  /**
+   * @param pathPrefix - An optional path prefix "git diff"s should be filtered by.
+   * @returns
+   * An array of paths of repo-root-relative paths of files that are different from
+   * those in the provided {@param targetBranch}. If a {@param pathPrefix} is provided,
+   * this function only returns reuslts under the that path.
+   */
+  public static getChangedFiles(targetBranch: string, skipFetch: boolean = false, pathPrefix?: string): string[] {
+    if (!skipFetch) {
+      VersionControl._fetchNonDefaultBranch(targetBranch);
+    }
+
+    const output: string = child_process.execSync(
+      `git diff ${targetBranch}... --name-only --no-renames --diff-filter=A`
+    ).toString();
+    const regex: RegExp | undefined = pathPrefix ? new RegExp(`^${pathPrefix}`, 'i') : undefined;
+    return output.split('\n').map((line) => {
+      if (line) {
+        const trimmedLine: string = line.trim();
+        if (regex && trimmedLine.match(regex)) {
           return trimmedLine;
         }
       }
+
       return undefined;
-    }).filter(s => {
-      return s && s.length > 0;
-    });
+    }).filter((line) => {
+      return line && line.length > 0;
+    }) as string[];
   }
 
   /**
@@ -51,41 +71,51 @@ export default class VersionControl {
    * @param repositoryUrl - repository url
    */
   public static getRemoteMasterBranch(repositoryUrl?: string): string {
-    const defaultRemote: string = 'origin';
-    const defaultMaster: string = 'origin/master';
-    let useDefault: boolean = false;
     let matchingRemotes: string[] = [];
 
-    if (!repositoryUrl) {
-      useDefault = true;
-    } else {
+    if (repositoryUrl) {
       const output: string = child_process
-      .execSync(`git remote`)
-      .toString();
+        .execSync(`git remote`)
+        .toString();
       matchingRemotes = output.split('\n').filter(remoteName => {
         if (remoteName) {
           const remoteUrl: string = child_process.execSync(`git remote get-url ${remoteName}`)
             .toString()
             .trim();
-          if (remoteName === defaultRemote && remoteUrl === repositoryUrl) {
-            useDefault = true;
+          if (remoteUrl === repositoryUrl) {
+            return true;
           }
-          return remoteUrl === repositoryUrl;
+          // When you copy a URL from the GitHub web site, they append the ".git" file extension to the URL.
+          // So we allow that to be specified in rush.json, even though the file extension gets dropped
+          // by "git clone".
+          if (remoteUrl + '.git' === repositoryUrl) {
+            return true;
+          }
         }
         return false;
       });
+    } else {
+      console.log(colors.yellow(
+        'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
+      ));
+      return DEFAULT_FULLY_QUALIFIED_BRANCH;
     }
 
-    if (useDefault) {
-      return defaultMaster;
-    } else if (matchingRemotes.length > 0) {
+    if (matchingRemotes.length > 0) {
       if (matchingRemotes.length > 1) {
-        console.log(`More than one remotes match the repository url. Use the first remote.`);
+        console.log(
+          `More than one git remote matches the repository URL. Using the first remote (${matchingRemotes[0]}).`
+        );
       }
-      return `${matchingRemotes[0]}/master`;
+
+      return `${matchingRemotes[0]}/${DEFAULT_BRANCH}`;
+    } else {
+      console.log(colors.yellow(
+        `Unable to find a git remote matching the repository URL (${matchingRemotes[0]}). ` +
+        'Detected changes are likely to be incorrect.'
+      ));
+      return DEFAULT_FULLY_QUALIFIED_BRANCH;
     }
-    // For backward-compatible
-    return defaultMaster;
   }
 
   public static hasUncommittedChanges(): boolean {
@@ -93,7 +123,7 @@ export default class VersionControl {
   }
 
   /**
-   * The list of files changed but not commited
+   * The list of files changed but not committed
    */
   public static getUncommittedChanges(): ReadonlyArray<string> {
     const changes: string[] = [];
@@ -117,5 +147,38 @@ export default class VersionControl {
       .execSync(`git diff HEAD --name-only`)
       .toString();
     return output.trim().split('\n');
+  }
+
+  private static _tryFetchRemoteBranch(remoteBranchName: string): boolean {
+    const firstSlashIndex: number = remoteBranchName.indexOf('/');
+    if (firstSlashIndex === -1) {
+      throw new Error(
+        `Unexpected git remote branch format: ${remoteBranchName}. ` +
+        'Expected branch to be in the <remote>/<branch name> format.'
+      );
+    }
+
+    const remoteName: string = remoteBranchName.substr(0, firstSlashIndex);
+    const branchName: string = remoteBranchName.substr(firstSlashIndex + 1);
+    const spawnResult: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
+      'git',
+      ['fetch', remoteName, branchName],
+      {
+        stdio: 'ignore'
+      }
+    );
+    return spawnResult.status === 0;
+  }
+
+  private static _fetchNonDefaultBranch(remoteBranchName: string): void {
+    if (remoteBranchName !== DEFAULT_FULLY_QUALIFIED_BRANCH) {
+      console.log(`Checking for updates to ${remoteBranchName}...`);
+      const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(remoteBranchName);
+      if (!fetchResult) {
+        console.log(colors.yellow(
+          `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
+        ));
+      }
+    }
   }
 }

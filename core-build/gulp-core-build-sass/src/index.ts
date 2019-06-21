@@ -3,6 +3,9 @@
 
 import { SassTask } from './SassTask';
 
+/**
+ * @public
+ */
 export const sass: SassTask = new SassTask();
 
 /* tslint:disable:export-name */

@@ -1,0 +1,89 @@
+{
+  "name": "@microsoft/rush-stack-compiler-3.4",
+  "entries": [
+    {
+      "version": "0.1.6",
+      "tag": "@microsoft/rush-stack-compiler-3.4_v0.1.6",
+      "date": "Wed, 12 Jun 2019 19:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.2.0` to `7.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.5",
+      "tag": "@microsoft/rush-stack-compiler-3.4_v0.1.5",
+      "date": "Tue, 11 Jun 2019 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.1.8` to `7.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.4",
+      "tag": "@microsoft/rush-stack-compiler-3.4_v0.1.4",
+      "date": "Thu, 06 Jun 2019 22:33:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include accidentally omitted no-floating-promises TSLint rule."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.3",
+      "tag": "@microsoft/rush-stack-compiler-3.4_v0.1.3",
+      "date": "Wed, 05 Jun 2019 19:12:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.1.7` to `7.1.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@microsoft/rush-stack-compiler-3.4_v0.1.2",
+      "date": "Tue, 04 Jun 2019 05:51:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.1.6` to `7.1.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@microsoft/rush-stack-compiler-3.4_v0.1.1",
+      "date": "Mon, 27 May 2019 04:13:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.1.5` to `7.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@microsoft/rush-stack-compiler-3.4_v0.1.0",
+      "date": "Mon, 13 May 2019 21:46:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial package creation."
+          }
+        ]
+      }
+    }
+  ]
+}

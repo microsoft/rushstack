@@ -1,8 +1,17 @@
 // DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
+      "name": "@microsoft/api-documenter",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/api-extractor",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/api-extractor-model",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -11,10 +20,6 @@
     },
     {
       "name": "@microsoft/gulp-core-build",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@microsoft/gulp-core-build-karma",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -39,15 +44,15 @@
     },
     {
       "name": "@microsoft/load-themed-styles",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/node-core-library",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/node-library-build",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/package-deps-hash",
@@ -55,6 +60,50 @@
     },
     {
       "name": "@microsoft/rush-lib",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@microsoft/rush-stack",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-2.4",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-2.7",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-2.8",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-2.9",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.0",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.1",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.2",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.3",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-3.4",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@microsoft/rush-stack-compiler-shared",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -70,12 +119,52 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/teams-js",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@microsoft/ts-command-line",
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/tsdoc",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/web-library-build",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@pnpm/link-bins",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@pnpm/logger",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@yarnpkg/lockfile",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "api-extractor-lib1-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "api-extractor-lib2-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "api-extractor-lib3-test",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "api-extractor-test-01",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "api-extractor-test-02",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "argparse",
@@ -91,14 +180,26 @@
     },
     {
       "name": "chai",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "colors",
+      "name": "chalk",
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "clean-css",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "colors",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "deasync",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "decomment",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -110,16 +211,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "es6-promise",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "express",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "fs-extra",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "fsevents",
@@ -143,7 +240,7 @@
     },
     {
       "name": "gulp",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "gulp-cache",
@@ -186,10 +283,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "gulp-karma",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "gulp-mocha",
       "allowedCategories": [ "libraries" ]
     },
@@ -226,7 +319,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "gulp-util",
+      "name": "https-proxy-agent",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -238,6 +331,22 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-cli",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-environment-jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-resolve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jju",
       "allowedCategories": [ "libraries" ]
     },
@@ -246,31 +355,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "karma",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-coverage",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-mocha",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-mocha-clean-reporter",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-phantomjs-launcher",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-sinon-chai",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "karma-webpack",
+      "name": "jsdom",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -290,6 +375,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "long",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "md5",
       "allowedCategories": [ "libraries" ]
     },
@@ -306,11 +395,19 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "node-fetch",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "node-forge",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "node-notifier",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "node-sass",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -326,11 +423,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "phantomjs-polyfill",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "phantomjs-prebuilt",
+      "name": "postcss",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -346,12 +439,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "rimraf",
-      "allowedCategories": [ "libraries", "other" ]
+      "name": "resolve",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "semver",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "sinon",
@@ -359,6 +452,14 @@
     },
     {
       "name": "sinon-chai",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "source-map",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "strict-uri-encode",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -374,6 +475,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ts-jest",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "tslint",
       "allowedCategories": [ "libraries" ]
     },
@@ -383,10 +488,14 @@
     },
     {
       "name": "typescript",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "uglify-js",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "vinyl",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -399,7 +508,7 @@
     },
     {
       "name": "yargs",
-      "allowedCategories": [ "libraries", "other" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "z-schema",

@@ -1,0 +1,419 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CommandLineParameter parses an input with ALL parameters 1`] = `
+Object {
+  "argumentName": undefined,
+  "defaultValue": undefined,
+  "description": "A flag that affects all actions",
+  "environmentVariable": undefined,
+  "kind": 1,
+  "longName": "--global-flag",
+  "required": false,
+  "shortName": "-g",
+  "value": true,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 2`] = `
+Object {
+  "argumentName": undefined,
+  "defaultValue": undefined,
+  "description": "A choice",
+  "environmentVariable": "ENV_CHOICE",
+  "kind": 0,
+  "longName": "--choice",
+  "required": false,
+  "shortName": "-c",
+  "value": "two",
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 3`] = `
+Object {
+  "argumentName": undefined,
+  "defaultValue": "default",
+  "description": "A choice with a default",
+  "environmentVariable": "ENV_CHOICE",
+  "kind": 0,
+  "longName": "--choice-with-default",
+  "required": false,
+  "shortName": undefined,
+  "value": "default",
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 4`] = `
+Object {
+  "argumentName": undefined,
+  "defaultValue": undefined,
+  "description": "A flag",
+  "environmentVariable": "ENV_FLAG",
+  "kind": 1,
+  "longName": "--flag",
+  "required": false,
+  "shortName": "-f",
+  "value": true,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 5`] = `
+Object {
+  "argumentName": "NUMBER",
+  "defaultValue": undefined,
+  "description": "An integer",
+  "environmentVariable": "ENV_INTEGER",
+  "kind": 2,
+  "longName": "--integer",
+  "required": false,
+  "shortName": "-i",
+  "value": 123,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 6`] = `
+Object {
+  "argumentName": "NUMBER",
+  "defaultValue": 123,
+  "description": "An integer with a default",
+  "environmentVariable": "ENV_INTEGER",
+  "kind": 2,
+  "longName": "--integer-with-default",
+  "required": false,
+  "shortName": undefined,
+  "value": 123,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 7`] = `
+Object {
+  "argumentName": "NUMBER",
+  "defaultValue": undefined,
+  "description": "An integer",
+  "environmentVariable": undefined,
+  "kind": 2,
+  "longName": "--integer-required",
+  "required": true,
+  "shortName": undefined,
+  "value": 321,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 8`] = `
+Object {
+  "argumentName": "TEXT",
+  "defaultValue": undefined,
+  "description": "A string",
+  "environmentVariable": "ENV_INTEGER",
+  "kind": 3,
+  "longName": "--string",
+  "required": false,
+  "shortName": "-s",
+  "value": "hello",
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 9`] = `
+Object {
+  "argumentName": "TEXT",
+  "defaultValue": "123",
+  "description": "A string with a default",
+  "environmentVariable": "ENV_INTEGER",
+  "kind": 3,
+  "longName": "--string-with-default",
+  "required": false,
+  "shortName": undefined,
+  "value": "123",
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 10`] = `
+Object {
+  "argumentName": "LIST",
+  "defaultValue": undefined,
+  "description": "A string list",
+  "environmentVariable": "ENV_INTEGER",
+  "kind": 4,
+  "longName": "--string-list",
+  "required": false,
+  "shortName": "-l",
+  "value": undefined,
+  "values": Array [
+    "first",
+    "second",
+  ],
+}
+`;
+
+exports[`CommandLineParameter parses an input with ALL parameters 11`] = `
+Array [
+  "### --choice output: ###",
+  "--choice",
+  "two",
+  "### --choice-with-default output: ###",
+  "--choice-with-default",
+  "default",
+  "### --flag output: ###",
+  "--flag",
+  "### --integer output: ###",
+  "--integer",
+  "123",
+  "### --integer-with-default output: ###",
+  "--integer-with-default",
+  "123",
+  "### --integer-required output: ###",
+  "--integer-required",
+  "321",
+  "### --string output: ###",
+  "--string",
+  "hello",
+  "### --string-with-default output: ###",
+  "--string-with-default",
+  "123",
+  "### --string-list output: ###",
+  "--string-list",
+  "first",
+  "--string-list",
+  "second",
+]
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 1`] = `
+Object {
+  "argumentName": undefined,
+  "defaultValue": undefined,
+  "description": "A flag that affects all actions",
+  "environmentVariable": undefined,
+  "kind": 1,
+  "longName": "--global-flag",
+  "required": false,
+  "shortName": "-g",
+  "value": false,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 2`] = `
+Object {
+  "argumentName": undefined,
+  "defaultValue": undefined,
+  "description": "A choice",
+  "environmentVariable": "ENV_CHOICE",
+  "kind": 0,
+  "longName": "--choice",
+  "required": false,
+  "shortName": "-c",
+  "value": undefined,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 3`] = `
+Object {
+  "argumentName": undefined,
+  "defaultValue": "default",
+  "description": "A choice with a default",
+  "environmentVariable": "ENV_CHOICE",
+  "kind": 0,
+  "longName": "--choice-with-default",
+  "required": false,
+  "shortName": undefined,
+  "value": "default",
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 4`] = `
+Object {
+  "argumentName": undefined,
+  "defaultValue": undefined,
+  "description": "A flag",
+  "environmentVariable": "ENV_FLAG",
+  "kind": 1,
+  "longName": "--flag",
+  "required": false,
+  "shortName": "-f",
+  "value": false,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 5`] = `
+Object {
+  "argumentName": "NUMBER",
+  "defaultValue": undefined,
+  "description": "An integer",
+  "environmentVariable": "ENV_INTEGER",
+  "kind": 2,
+  "longName": "--integer",
+  "required": false,
+  "shortName": "-i",
+  "value": undefined,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 6`] = `
+Object {
+  "argumentName": "NUMBER",
+  "defaultValue": 123,
+  "description": "An integer with a default",
+  "environmentVariable": "ENV_INTEGER",
+  "kind": 2,
+  "longName": "--integer-with-default",
+  "required": false,
+  "shortName": undefined,
+  "value": 123,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 7`] = `
+Object {
+  "argumentName": "NUMBER",
+  "defaultValue": undefined,
+  "description": "An integer",
+  "environmentVariable": undefined,
+  "kind": 2,
+  "longName": "--integer-required",
+  "required": true,
+  "shortName": undefined,
+  "value": 123,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 8`] = `
+Object {
+  "argumentName": "TEXT",
+  "defaultValue": undefined,
+  "description": "A string",
+  "environmentVariable": "ENV_INTEGER",
+  "kind": 3,
+  "longName": "--string",
+  "required": false,
+  "shortName": "-s",
+  "value": undefined,
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 9`] = `
+Object {
+  "argumentName": "TEXT",
+  "defaultValue": "123",
+  "description": "A string with a default",
+  "environmentVariable": "ENV_INTEGER",
+  "kind": 3,
+  "longName": "--string-with-default",
+  "required": false,
+  "shortName": undefined,
+  "value": "123",
+  "values": undefined,
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 10`] = `
+Object {
+  "argumentName": "LIST",
+  "defaultValue": undefined,
+  "description": "A string list",
+  "environmentVariable": "ENV_INTEGER",
+  "kind": 4,
+  "longName": "--string-list",
+  "required": false,
+  "shortName": "-l",
+  "value": undefined,
+  "values": Array [],
+}
+`;
+
+exports[`CommandLineParameter parses an input with NO parameters 11`] = `
+Array [
+  "### --choice output: ###",
+  "### --choice-with-default output: ###",
+  "--choice-with-default",
+  "default",
+  "### --flag output: ###",
+  "### --integer output: ###",
+  "### --integer-with-default output: ###",
+  "--integer-with-default",
+  "123",
+  "### --integer-required output: ###",
+  "--integer-required",
+  "123",
+  "### --string output: ###",
+  "### --string-with-default output: ###",
+  "--string-with-default",
+  "123",
+  "### --string-list output: ###",
+]
+`;
+
+exports[`CommandLineParameter prints the action help 1`] = `
+"usage: example do:the-job [-h] [-c {one,two,three,default}]
+                          [--choice-with-default {one,two,three,default}] [-f]
+                          [-i NUMBER] [--integer-with-default NUMBER]
+                          --integer-required NUMBER [-s TEXT]
+                          [--string-with-default TEXT] [-l LIST]
+                          
+
+a longer description
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -c {one,two,three,default}, --choice {one,two,three,default}
+                        A choice. This parameter may alternatively specified 
+                        via the ENV_CHOICE environment variable.
+  --choice-with-default {one,two,three,default}
+                        A choice with a default. This parameter may 
+                        alternatively specified via the ENV_CHOICE 
+                        environment variable. The default value is \\"default\\".
+  -f, --flag            A flag. This parameter may alternatively specified 
+                        via the ENV_FLAG environment variable.
+  -i NUMBER, --integer NUMBER
+                        An integer. This parameter may alternatively 
+                        specified via the ENV_INTEGER environment variable.
+  --integer-with-default NUMBER
+                        An integer with a default. This parameter may 
+                        alternatively specified via the ENV_INTEGER 
+                        environment variable. The default value is 123.
+  --integer-required NUMBER
+                        An integer
+  -s TEXT, --string TEXT
+                        A string. This parameter may alternatively specified 
+                        via the ENV_INTEGER environment variable.
+  --string-with-default TEXT
+                        A string with a default. This parameter may 
+                        alternatively specified via the ENV_INTEGER 
+                        environment variable. The default value is \\"123\\".
+  -l LIST, --string-list LIST
+                        A string list. This parameter may alternatively 
+                        specified via the ENV_INTEGER environment variable.
+"
+`;
+
+exports[`CommandLineParameter prints the global help 1`] = `
+"usage: example [-h] [-g] <command> ...
+
+An example project
+
+Positional arguments:
+  <command>
+    do:the-job       does the job
+
+Optional arguments:
+  -h, --help         Show this help message and exit.
+  -g, --global-flag  A flag that affects all actions
+
+For detailed help about a specific command, use: example <command> -h
+"
+`;

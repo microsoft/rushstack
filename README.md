@@ -1,6 +1,8 @@
 # web-build-tools
 
-[![Build Status](https://travis-ci.org/Microsoft/web-build-tools.svg?branch=master)](https://travis-ci.org/Microsoft/web-build-tools)
+[![Join the chat at https://gitter.im/web-build-tools](https://badges.gitter.im/web-build-tools.svg)](https://gitter.im/web-build-tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[![Build Status](https://dev.azure.com/RushStack/Gearbox%20GitHub%20Projects/_apis/build/status/web-build-tools/web-build-tools%20CI%20Build?branchName=master)](https://dev.azure.com/RushStack/Gearbox%20GitHub%20Projects/_build/latest?definitionId=3&branchName=master)
 
 _**This repo hosts a collection of tools and libraries used to build web projects at Microsoft.**_
 
@@ -8,16 +10,45 @@ _**This repo hosts a collection of tools and libraries used to build web project
 
 Highlighted projects:
 
-- **[API Extractor](https://github.com/Microsoft/web-build-tools/wiki/API-Extractor)** helps you build better TypeScript libraries.  It standardizes your exported API surface, generates your online API reference, and makes it easy to detect and review changes that will impact your API contract.
+- **[API Extractor](https://api-extractor.com/)** helps you build better TypeScript libraries.  It standardizes your exported API surface, generates your online API reference, and makes it easy to detect and review changes that will impact your API contract.
 
 - **[Gulp Core Build](https://github.com/Microsoft/web-build-tools/wiki/Gulp-Core-Build)**: If you maintain lots of projects, **gulp-core-build** gets you out of the business of maintaining lots of Gulpfiles.  It defines reusable "rigs" that you customize using simple config files with well-defined JSON schemas.
 
-- **[Rush](https://github.com/Microsoft/web-build-tools/wiki/Rush)**: Want to consolidate all your web projects in one big repo?  Rush is a fast and reliable solution for installing, linking, building, publishing, checking, change log authoring, and anything else that involves a "package.json" file.
+- **[Rush](https://rushjs.io/)**: Want to consolidate all your web projects in one big repo?  Rush is a fast and reliable solution for installing, linking, building, publishing, checking, change log authoring, and anything else that involves a "package.json" file.
 
-# Full Project Inventory
 
+# Contributing
+
+This repo welcomes contributions and suggestions.  Most contributions require you to agree to a
+Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
+the rights to use your contribution. For details, visit https://cla.microsoft.com.
+
+When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
+a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
+provided by the bot. You will only need to do this once across all repos using our CLA.
+
+This repo has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
+contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+
+# Project Inventory
 
 ## Apps
+
+### [@microsoft/api-extractor](./apps/api-extractor/README.md)
+
+Validate, document, and review the exported API for a TypeScript library.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor)
+[![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-extractor)
+
+### [@microsoft/api-documenter](./apps/api-documenter/README.md)
+
+Read JSON files from **api-extractor**, generate documentation pages.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-documenter)
+[![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-documenter)
 
 ### [@microsoft/rush](./apps/rush/README.md)
 
@@ -43,13 +74,6 @@ Defines the build task model, config file parser, and rig framework for the **Gu
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build)
 [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build.svg)](https://david-dm.org/Microsoft/gulp-core-build)
 
-### [@microsoft/gulp-core-build-karma](./core-build/gulp-core-build-karma/README.md)
-
-A build task for running unit tests using `karma` + `phantomjs` + `mocha` + `chai`. This setup allows you to run browser-based testing.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-karma.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-karma)
-[![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-karma.svg)](https://david-dm.org/Microsoft/gulp-core-build-karma)
-
 ### [@microsoft/gulp-core-build-mocha](./core-build/gulp-core-build-mocha/README.md)
 
 A build task for running unit tests using `mocha` + `chai`. This setup is useful for unit testing build tools, as it runs in the NodeJS process rather than in a browser.
@@ -66,7 +90,7 @@ A build task which processes scss files using SASS, runs them through `postcss`,
 
 ### [@microsoft/gulp-core-build-serve](./core-build/gulp-core-build-serve/README.md)
 
-A build task for testing/serving web content on the localhost, and live reloading it when things change.  This drives the `gulp serve' experience.
+A build task for testing/serving web content on the localhost, and live reloading it when things change.  This drives the `gulp serve` experience.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-serve)
 [![Dependencies](https://david-dm.org/Microsoft/gulp-core-build-serve.svg)](https://david-dm.org/Microsoft/gulp-core-build-serve)
@@ -96,27 +120,13 @@ A **Gulp Core Build** rig which provides basic functionality for building and un
 
 ### [@microsoft/web-library-build](./core-build/web-library-build/README.md)
 
-A **Gulp Core Build** rig for building web libraries. It includes build tasks for processing css, typescript, serving, and running browser tests using karma.
+A **Gulp Core Build** rig for building web libraries. It includes build tasks for processing css, typescript, serving, and running browser tests using jest.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fweb-library-build.svg)](https://badge.fury.io/js/%40microsoft%2Fweb-library-build)
 [![Dependencies](https://david-dm.org/Microsoft/web-library-build.svg)](https://david-dm.org/Microsoft/web-library-build)
 
 
 ## Libraries
-
-### [@microsoft/api-extractor](./libraries/api-extractor/README.md)
-
-Validate, document, and review the exported API for a TypeScript library.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg)](https://badge.fury.io/js/%40microsoft%2Fapi-extractor)
-[![Dependencies](https://david-dm.org/Microsoft/api-extractor.svg)](https://david-dm.org/Microsoft/api-extractor)
-
-### [@microsoft/decorators](./libraries/decorators/README.md)
-
-A conservative set of decorators intended for use in both NodeJS and web browser projects.
-
-[![npm version](https://badge.fury.io/js/%40microsoft%2Fdecorators.svg)](https://badge.fury.io/js/%40microsoft%2Fdecorators)
-[![Dependencies](https://david-dm.org/Microsoft/decorators.svg)](https://david-dm.org/Microsoft/decorators)
 
 ### [@microsoft/load-themed-styles](./libraries/load-themed-styles/README.md)
 
@@ -168,6 +178,14 @@ engine.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fset-webpack-public-path-plugin.svg)](https://badge.fury.io/js/%40microsoft%2Fset-webpack-public-path-plugin)
 [![Dependencies](https://david-dm.org/Microsoft/set-webpack-public-path-plugin.svg)](https://david-dm.org/Microsoft/set-webpack-public-path-plugin)
+
+### [@microsoft/resolve-chunk-plugin](./webpack/resolve-chunk-plugin/README.md)
+
+`resolve-chunk-plugin` is a plugin that looks for calls to `resolveChunk` with a chunk
+name, and returns the chunk ID.
+
+[![npm version](https://badge.fury.io/js/%40microsoft%2Fresolve-chunk-plugin.svg)](https://badge.fury.io/js/%40microsoft%2Fresolve-chunk-plugin)
+[![Dependencies](https://david-dm.org/Microsoft/resolve-chunk-plugin.svg)](https://david-dm.org/Microsoft/resolve-chunk-plugin)
 
 ### [@microsoft/loader-set-webpack-public-path](./webpack/loader-set-webpack-public-path/README.md)
 

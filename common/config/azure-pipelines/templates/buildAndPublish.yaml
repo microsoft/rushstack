@@ -1,0 +1,8 @@
+steps:
+- checkout: self
+  persistCredentials: true
+- template: ./build.yaml
+- script: 'node common\scripts\install-run-rush.js version --bump --version-policy $(VersionPolicy) --target-branch $(Build.SourceBranchName)'
+  displayName: 'Rush Version'
+- script: 'node common\scripts\install-run-rush.js publish --apply --publish --include-all --target-branch $(Build.SourceBranchName) --npm-auth-token $(npmToken) --add-commit-details'
+  displayName: 'Rush Publish'

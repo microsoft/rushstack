@@ -1,0 +1,344 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush command-line.json config file",
+  "description": "For use with the Rush tool, this file defines custom command line commands. See http://rushjs.io for details.",
+
+  "definitions": {
+    "anything": {
+      "type": [
+        "array",
+        "boolean",
+        "integer",
+        "number",
+        "object",
+        "string"
+      ],
+      "items": { "$ref": "#/definitions/anything" }
+    },
+
+    "baseCommand": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [ "commandKind", "name", "summary" ],
+      "properties": {
+        "commandKind": {
+          "title": "Command Kind",
+          "description": "Indicates the kind of command: \"bulk\" commands are run separately for each project; \"global\" commands are run once for the entire repository.",
+          "type": "string",
+          "enum": [ "bulk", "global" ]
+        },
+        "name": {
+          "title": "Custom Command Name",
+          "description": "The name of the custom command, which can be invoked via \"rush <name>\"",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Custom Command Summary",
+          "description": "A short summary of the custom command, which will appear when printing command line usage (e.g. \"rush --help\")",
+          "type": "string"
+        },
+        "description": {
+          "title": "Custom Command Description",
+          "description": "A detailed description of the command, which appears when requesting help for the command (e.g. \"rush --help my-command\"). If omitted, the summary will be used.",
+          "type": "string"
+        },
+        "safeForSimultaneousRushProcesses": {
+          "title": "Safe For Simultaneous Rush Processes",
+          "description": "By default, Rush operations acquire a lock file which prevents multiple commands from executing simultaneously in the same repo folder.  (For example, it would be a mistake to run \"rush install\" and \"rush build\" at the same time.)  If your command makes sense to run concurrently with other operations, set safeForSimultaneousRushProcesses=true to disable this protection.  In particular, this is needed for custom scripts that invoke other Rush commands.",
+          "type": "boolean"
+        }
+      }
+    },
+    "bulkCommand": {
+      "title": "Bulk Command",
+      "description": "A custom command that is run separately for each project in the repository",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseCommand" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [ "enableParallelism" ],
+          "properties": {
+            "commandKind": {
+              "enum": [ "bulk" ]
+            },
+            "enableParallelism": {
+              "title": "enableParallelism",
+              "description": "If true then this command can be run in parallel, i.e. executed simultaneously for multiple projects.",
+              "type": "boolean"
+            },
+            "ignoreDependencyOrder": {
+              "title": "ignoreDependencyOrder",
+              "description": "Normally projects will be processed according to their dependency order: a given project will not start processing the command until all of its dependencies have completed.  This restriction doesn't apply for certain operations, for example, a \"clean\" task that deletes output files.  In this case you can set \"ignoreDependencyOrder\" to true to increase parallelism.",
+              "type": "boolean"
+            },
+            "ignoreMissingScript": {
+              "title": "Ignore Missing Script",
+              "description": "Normally Rush requires that each project's package.json has a \"scripts\" entry matching the custom command name. To disable this check, set \"ignoreMissingScript\" to true.",
+              "type": "boolean"
+            },
+            "allowWarningsInSuccessfulBuild": {
+              "title": "Allow Warnings in Successful Build",
+              "description": "By default, Rush returns a nonzero exit code if errors or warnings occur during build. If this option is set to \"true\", Rush will return a zero exit code if warnings occur.",
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "commandKind": { "$ref": "#/definitions/anything" },
+            "name": { "$ref": "#/definitions/anything" },
+            "summary": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
+            "allowWarningsInSuccessfulBuild": { "$ref": "#/definitions/anything" },
+
+            "enableParallelism": { "$ref": "#/definitions/anything" },
+            "ignoreDependencyOrder": { "$ref": "#/definitions/anything" },
+            "ignoreMissingScript": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+    "globalCommand": {
+      "title": "Global Command",
+      "description": "A custom command that is run once for the entire repository",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseCommand" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [ "shellCommand" ],
+          "properties": {
+            "commandKind": {
+              "enum": [ "global" ]
+            },
+            "shellCommand": {
+              "title": "Shell Command",
+              "description": "A command that that will be invoked using the OS shell. The working directory will be the folder that contains rush.json. Additional command-line parameters may be appended to the end of this string.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "commandKind": { "$ref": "#/definitions/anything" },
+            "name": { "$ref": "#/definitions/anything" },
+            "summary": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
+            "allowWarningsInSuccessfulBuild": { "$ref": "#/definitions/anything" },
+
+            "shellCommand": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+
+    "baseParameter": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [ "parameterKind", "longName", "description", "associatedCommands" ],
+      "properties": {
+        "parameterKind": {
+          "title": "Parameter Kind",
+          "description": "Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\" or \"string\"",
+          "type": "string",
+          "enum": [ "flag", "choice", "string" ]
+        },
+        "longName": {
+          "title": "Long Name",
+          "description": "The name of the parameter (e.g. \"--verbose\").  This is a required field.",
+          "type": "string",
+          "pattern": "^-(-[a-z0-9]+)+$"
+        },
+        "shortName": {
+          "title": "Short Name",
+          "description": "A optional short form of the parameter (e.g. \"-v\" instead of \"--verbose\")",
+          "type": "string",
+          "pattern": "^-[a-zA-Z]$"
+        },
+        "description": {
+          "title": "Custom Parameter Description",
+          "description": "A detailed description of the parameter, which appears when requesting help for the command (e.g. \"rush --help my-command\").",
+          "type": "string"
+        },
+        "associatedCommands": {
+          "title": "Associated Commands",
+          "description": "A list of custom commands and/or built-in Rush commands that this parameter may be used with",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "flagParameter": {
+      "title": "Flag Parameter",
+      "description": "A custom command-line parameter whose presence acts as an on/off switch",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "parameterKind": {
+              "enum": [ "flag" ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "associatedCommands": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+    "stringParameter": {
+      "title": "String Parameter",
+      "description": "A custom command-line parameter whose value is intepreted as a string",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["argumentName"],
+          "properties": {
+            "parameterKind": {
+              "enum": [ "string" ]
+            },
+            "argumentName": {
+              "title": "Argument Name",
+              "description": "The name of the argument for this parameter.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "associatedCommands": { "$ref": "#/definitions/anything" },
+            "argumentName": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    },
+    "choiceParameter": {
+      "title": "Choice Parameter",
+      "description": "A custom command-line parameter whose argument must be chosen from a list of allowable alternatives",
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/definitions/baseParameter" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [ "alternatives" ],
+          "properties": {
+            "parameterKind": {
+              "enum": [ "choice" ]
+            },
+            "alternatives": {
+              "title": "Alternatives",
+              "description": "A list of alternative argument values that can be chosen for this parameter.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [ "name", "description" ],
+                "properties": {
+                  "name": {
+                    "title": "Name of Alternative",
+                    "description": "A token that is one of the alternatives that can be used with the choice parameter, e.g. \"vanilla\" in \"--flavor vanilla\"",
+                    "type": "string"
+                  },
+                  "description": {
+                    "title": "Description of Alternative",
+                    "description": "A detailed description for the alternative that will be shown in the command-line help.",
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "defaultValue": {
+              "title": "Default Value",
+              "description": "If the parameter is omitted from the command line, this value will be inserted by default",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parameterKind": { "$ref": "#/definitions/anything" },
+            "longName": { "$ref": "#/definitions/anything" },
+            "shortName": { "$ref": "#/definitions/anything" },
+            "description": { "$ref": "#/definitions/anything" },
+            "associatedCommands": { "$ref": "#/definitions/anything" },
+
+            "alternatives": { "$ref": "#/definitions/anything" },
+            "defaultValue": { "$ref": "#/definitions/anything" }
+          }
+        }
+      ]
+    }
+  },
+
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "commands": {
+      "title": "Custom Commands",
+      "description": "A list of custom commands that affect all projects in the repository.  These commands are invoked from the Rush command line.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "oneOf": [
+          { "$ref": "#/definitions/bulkCommand" },
+          { "$ref": "#/definitions/globalCommand" }
+        ]
+      }
+    },
+
+    "parameters": {
+      "title": "Custom Parameters",
+      "description": "A list of custom command-line parameters that can be associated with custom commands and Rush's built-in commands.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "oneOf": [
+          { "$ref": "#/definitions/flagParameter" },
+          { "$ref": "#/definitions/choiceParameter" },
+          { "$ref": "#/definitions/stringParameter" }
+        ]
+      }
+    }
+  }
+}

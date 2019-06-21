@@ -21,13 +21,12 @@ let build = require('gulp-core-build');
 let lint = require('gulp-core-build-typescript').tslint;
 let typescript = require('gulp-core-build-typescript').typescript;
 let sass = require('gulp-core-build-sass').default;
-let karma = require('gulp-core-build-karma').default;
 let webpack = require('gulp-core-build-webpack').default;
 let serve = require('gulp-core-build-serve').default;
 
 // Define gulp tasks.
 let buildTasks = build.task('build', build.parallel(lint, typescript, sass));
-let testTasks = build.task('test', build.serial(buildTasks, karma));
+let testTasks = build.task('test', build.serial(buildTasks, build.jest));
 let bundleTasks = build.task('bundle', build.serial(buildTasks, webpack));
 let serveTasks = build.task('serve', build.serial(bundleTasks, serve));
 let defaultTasks = build.task('default', testTasks);
@@ -47,7 +46,7 @@ npm install --save-dev gulp gulp-core-build
 Then install the tasks you need:
 
 ```
-npm install --save-dev gulp-core-build-typescript gulp-core-build-karma gulp-core-build-webpack gulp-core-build-serve
+npm install --save-dev gulp-core-build-typescript gulp-core-build-webpack gulp-core-build-serve
 
 ```
 
@@ -63,7 +62,6 @@ let build = require('gulp-core-build');
 let lint = require('gulp-core-build-typescript').tslint;
 let typescript = require('gulp-core-build-typescript').typescript;
 let sass = require('gulp-core-build-sass').default;
-let karma = require('gulp-core-build-karma').default;
 let webpack = require('gulp-core-build-webpack').default;
 let serve = require('gulp-core-build-serve').default;
 
@@ -76,7 +74,7 @@ let helloWorldSubtask = build.subTask('do-hello-world-subtask', function(gulp, b
 
 // Define gulp tasks.
 let buildTasks = build.task('build', build.parallel(helloWorldSubtask, lint, typescript, sass));
-let testTasks = build.task('test', build.serial(buildTasks, karma));
+let testTasks = build.task('test', build.serial(buildTasks, build.jest));
 let bundleTasks = build.task('bundle', build.serial(buildTasks, webpack));
 let serveTasks = build.task('serve', build.serial(bundleTasks, serve));
 let helloWorldTasks = build.task('hello-world', helloWorldSubtask);
@@ -96,9 +94,7 @@ Once this is set up, you should be able to execute the gulp tasks and they shoul
 | [gulp-core-build-sass](https://www.npmjs.com/package/@microsoft/gulp-core-build) | Compiles sass into css, into js modules, that are theme friendly. |
 | [gulp-core-build-webpack](https://www.npmjs.com/package/@microsoft/gulp-core-build-webpack) | Runs webpack given a config, and outputs libraries plus the stats and logging. |
 | [gulp-core-build-serve](https://www.npmjs.com/package/@microsoft/gulp-core-build-serve) | Sets up a server and live reload for a quick dev loop. |
-| [gulp-core-build-karma](https://www.npmjs.com/package/@microsoft/gulp-core-build-karma) | Runs unit tests in a browser using [Karma](https://www.npmjs.com/package/karma) |
 | [gulp-core-build-mocha](https://www.npmjs.com/package/@microsoft/gulp-core-build-mocha) | Runs unit tests in a NodeJS environment with [Mocha](https://www.npmjs.com/package/mocha) |
-| [sp-build-core-tasks](https://www.npmjs.com/package/@microsoft/sp-build-core-tasks) | Special tasks for developing with the SharePoint Framework (SPFx) |
 
 # API
 

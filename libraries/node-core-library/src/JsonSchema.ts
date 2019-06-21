@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import Validator = require('z-schema');
 
 import { JsonFile } from './JsonFile';
+import { FileSystem } from './FileSystem';
 
 interface ISchemaWithId {
   id: string | undefined;
@@ -83,7 +83,7 @@ export class JsonSchema {
   public static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema {
     // This is a quick and inexpensive test to avoid the catch the most common errors early.
     // Full validation will happen later in JsonSchema.compile().
-    if (!fsx.existsSync(filename)) {
+    if (!FileSystem.exists(filename)) {
       throw new Error('Schema file not found: ' + filename);
     }
 

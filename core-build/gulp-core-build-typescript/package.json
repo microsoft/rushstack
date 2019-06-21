@@ -1,51 +1,38 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "4.0.6",
+  "version": "8.1.16",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/gulp-core-build-typescript"
   },
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp"
+    "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/api-extractor": "3.2.4",
-    "@microsoft/gulp-core-build": "3.0.6",
-    "@microsoft/node-core-library": "~0.2.8",
-    "@types/fs-extra": "0.0.37",
-    "@types/gulp": "3.8.32",
-    "@types/node": "6.0.62",
-    "fs-extra": "~0.26.7",
-    "gulp": "~3.9.1",
-    "gulp-cache": "~0.4.5",
-    "gulp-changed": "~1.3.2",
-    "gulp-decomment": "~0.1.3",
-    "gulp-plumber": "~1.1.0",
-    "gulp-sourcemaps": "~1.6.0",
-    "gulp-texttojs": "~1.0.3",
-    "gulp-typescript": "~3.1.6",
-    "gulp-util": "~3.0.7",
-    "lodash": "~4.15.0",
-    "md5": "~2.2.1",
-    "merge2": "~1.0.2",
-    "object-assign": "~4.1.0",
-    "through2": "~2.0.1",
-    "tslint": "~5.6.0",
-    "tslint-microsoft-contrib": "~5.0.0",
-    "typescript": "~2.4.1"
+    "@microsoft/gulp-core-build": "3.9.26",
+    "@microsoft/node-core-library": "3.13.0",
+    "@types/node": "8.5.8",
+    "decomment": "~0.9.1",
+    "glob": "~7.0.5",
+    "glob-escape": "~0.0.1",
+    "resolve": "1.8.1"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~3.2.0",
-    "@types/gulp-util": "3.0.30",
-    "@types/orchestrator": "0.0.30",
-    "@types/q": "0.0.32",
-    "@types/through2": "2.0.32",
-    "@types/vinyl": "1.2.30"
+    "@microsoft/api-extractor": "7.2.1",
+    "@microsoft/node-library-build": "6.0.55",
+    "@microsoft/rush-stack-compiler-3.1": "0.6.18",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.7",
+    "@types/glob": "5.0.30",
+    "@types/resolve": "0.0.8",
+    "gulp": "~3.9.1",
+    "tslint-microsoft-contrib": "~5.2.1",
+    "typescript": "~3.2.4"
   }
 }

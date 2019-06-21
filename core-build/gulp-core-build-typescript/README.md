@@ -1,6 +1,6 @@
 # @microsoft/gulp-core-build-typescript
 
-`gulp-core-build-typescript contains `gulp-core-build` subtasks for compiling and linting TypeScript code.
+`gulp-core-build-typescript` contains `gulp-core-build` subtasks for compiling and linting TypeScript code.
 
 [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-typescript.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-typescript)
 [![Build Status](https://travis-ci.org/Microsoft/gulp-core-build-typescript.svg?branch=master)](https://travis-ci.org/Microsoft/gulp-core-build-typescript)
@@ -100,7 +100,7 @@ Default: `['src/**/*.ts', 'src/**/*.tsx']`
 ### reporter
 A function which reports errors to the proper location. It should conform to the following interface:
 
-`((result: lintTypes.LintResult, file: gutil.File, options: ITSLintTaskConfig) => void;)`
+`((result: lintTypes.LintResult, file: Vinyl, options: ITSLintTaskConfig) => void;)`
 
 Defaults to using the base GulpTask's this.fileError() function.
 
@@ -147,8 +147,8 @@ To use these tasks in your build setup, simply import the package and add the ta
 # Examples
 Some examples of build packages that use this task:
 
-* [@microsoft/web-library-build](https://github.com/Microsoft/web-library-build)
-* [@microsoft/node-library-build](https://github.com/Microsoft/node-library-build)
+* [@microsoft/web-library-build](../web-library-build)
+* [@microsoft/node-library-build](../node-library-build)
 
 # Configuring task options
 

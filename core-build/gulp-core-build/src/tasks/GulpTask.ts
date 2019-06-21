@@ -1,16 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import * as path from 'path';
-import * as fs from 'fs';
-import { JsonFile, JsonSchema } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem } from '@microsoft/node-core-library';
 
 import { GulpProxy } from '../GulpProxy';
 import { IExecutable } from '../IExecutable';
 import { IBuildConfig } from '../IBuildConfig';
-import { log, verbose, error, fileError, fileWarning,
-  warn, logEndSubtask, logStartSubtask } from '../logging';
-import gutil = require('gulp-util');
+import {
+  log,
+  verbose,
+  error,
+  fileError,
+  fileWarning,
+  warn,
+  logEndSubtask,
+  logStartSubtask
+} from '../logging';
+import Vinyl = require('vinyl');
 import gulp = require('gulp');
 import through2 = require('through2');
 
@@ -154,7 +162,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param message - the message to log to standard output.
    */
   public log(message: string): void {
-    log(`[${gutil.colors.cyan(this.name)}] ${message}`);
+    log(`[${colors.cyan(this.name)}] ${message}`);
   }
 
   /**
@@ -162,7 +170,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param message - the message to log when in verbose mode
    */
   public logVerbose(message: string): void {
-    verbose(`[${gutil.colors.cyan(this.name)}] ${message}`);
+    verbose(`[${colors.cyan(this.name)}] ${message}`);
   }
 
   /**
@@ -171,7 +179,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param message - the warning description
    */
   public logWarning(message: string): void {
-    warn(`[${gutil.colors.cyan(this.name)}] ${message}`);
+    warn(`[${colors.cyan(this.name)}] ${message}`);
   }
 
   /**
@@ -179,7 +187,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param message - the error description
    */
   public logError(message: string): void {
-    error(`[${gutil.colors.cyan(this.name)}] ${message}`);
+    error(`[${colors.cyan(this.name)}] ${message}`);
   }
 
   /**
@@ -220,7 +228,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * This function is called once to execute the task. It calls executeTask() and handles the return
    * value from that function. It also provides some utilities such as logging how long each
    * task takes to execute.
-   * @param config - the buildConfig which is applied to the task instance before execution\
+   * @param config - the buildConfig which is applied to the task instance before execution
    * @returns a Promise which is completed when the task is finished executing
    */
   public execute(config: IBuildConfig): Promise<void> {
@@ -274,14 +282,12 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
 
           // Make sure the stream is completely read
           stream.pipe(through2.obj(
-            (file: gutil.File,
+            (file: Vinyl,
               encoding: string,
               callback: (p?: Object) => void) => {
-                'use strict';
                 callback();
             },
             (callback: () => void) => {
-              'use strict';
               callback();
             }));
 
@@ -324,7 +330,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     const fullPath: string = this.resolvePath(localPath);
 
     try {
-      doesExist = fs.statSync(fullPath).isFile();
+      doesExist = FileSystem.getStatistics(fullPath).isFile();
     } catch (e) { /* no-op */ }
 
     return doesExist;
@@ -336,16 +342,15 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param localDestPath - path to the destination file
    */
   public copyFile(localSourcePath: string, localDestPath?: string): void {
-    /* tslint:disable:typedef */
-    const fsx = require('fs-extra');
-    /* tslint:enable:typedef */
-
     const fullSourcePath: string = path.resolve(__dirname, localSourcePath);
     const fullDestPath: string = path.resolve(
       this.buildConfig.rootPath,
       (localDestPath || path.basename(localSourcePath)));
 
-    fsx.copySync(fullSourcePath, fullDestPath);
+    FileSystem.copyFile({
+      sourcePath: fullSourcePath,
+      destinationPath: fullDestPath
+    });
   }
 
   /**
@@ -357,7 +362,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     let result: Object | undefined = undefined;
 
     try {
-      const content: string = fs.readFileSync(fullPath, 'utf8');
+      const content: string = FileSystem.readFile(fullPath);
       result = JSON.parse(content);
     } catch (e) { /* no-op */ }
 
@@ -387,7 +392,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @returns If the configuration file is valid, returns the configuration as an object.
    */
   private _readConfigFile(filePath: string, schema?: Object): TTaskConfig | undefined {
-    if (!fs.existsSync(filePath)) {
+    if (!FileSystem.exists(filePath)) {
       return undefined;
     } else {
       if (args['verbose']) { // tslint:disable-line:no-string-literal

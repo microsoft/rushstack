@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference types='mocha' />
-
-import { assert } from 'chai';
-
 import { Stopwatch, StopwatchState } from '../Stopwatch';
 
 function pseudoTimeMilliseconds(times: number[]): () => number {
-  return () => times.shift();
+  return () => times.shift()!;
 }
 
 function pseudoTimeSeconds(times: number[]): () => number {
@@ -16,101 +12,101 @@ function pseudoTimeSeconds(times: number[]): () => number {
 }
 
 describe('Stopwatch', () => {
-  it('allows a static invocation as a quick shorthand', (done: MochaDone) => {
-    assert.equal(Stopwatch.start().reset().toString(), '0.00 seconds (stopped)');
+  it('allows a static invocation as a quick shorthand', (done: jest.DoneCallback) => {
+    expect(Stopwatch.start().reset().toString()).toEqual('0.00 seconds (stopped)');
     done();
   });
 
-  it('stopping before starting does nothing', (done: MochaDone) => {
+  it('stopping before starting does nothing', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch();
     watch.stop();
-    assert.equal(watch.toString(), '0.00 seconds (stopped)');
+    expect(watch.toString()).toEqual('0.00 seconds (stopped)');
     done();
   });
 
-  it('can\'t start twice', (done: MochaDone) => {
+  it('can\'t start twice', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch();
-    assert.throws(() => {
+    expect(() => {
       watch.start();
       watch.start();
-    });
+    }).toThrow();
     done();
   });
 
-  it('reflects the proper state', (done: MochaDone) => {
+  it('reflects the proper state', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch();
-    assert.equal(watch.state, StopwatchState.Stopped);
+    expect(watch.state).toEqual(StopwatchState.Stopped);
     watch.start();
-    assert.equal(watch.state, StopwatchState.Started);
+    expect(watch.state).toEqual(StopwatchState.Started);
     watch.stop();
-    assert.equal(watch.state, StopwatchState.Stopped);
+    expect(watch.state).toEqual(StopwatchState.Stopped);
     watch.reset();
-    assert.equal(watch.state, StopwatchState.Stopped);
+    expect(watch.state).toEqual(StopwatchState.Stopped);
     done();
   });
 
-  it('gives 0.00 seconds after being reset', (done: MochaDone) => {
+  it('gives 0.00 seconds after being reset', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch();
     watch.start();
     watch.reset();
-    assert.equal(watch.toString(), '0.00 seconds (stopped)');
-    assert.equal(watch.duration, 0);
+    expect(watch.toString()).toEqual('0.00 seconds (stopped)');
+    expect(watch.duration).toEqual(0);
     done();
   });
 
-  it('gives 0.00 seconds when not running', (done: MochaDone) => {
+  it('gives 0.00 seconds when not running', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch();
-    assert.equal(watch.toString(), '0.00 seconds (stopped)');
-    assert.equal(watch.duration, 0);
+    expect(watch.toString()).toEqual('0.00 seconds (stopped)');
+    expect(watch.duration).toEqual(0);
     done();
   });
 
-  it('uses the latest time when the clock is not stopped', (done: MochaDone) => {
+  it('uses the latest time when the clock is not stopped', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 1, 2]));
     watch.start();
-    assert.equal(watch.toString(), '1.00 seconds');
-    assert.equal(watch.toString(), '2.00 seconds');
+    expect(watch.toString()).toEqual('1.00 seconds');
+    expect(watch.toString()).toEqual('2.00 seconds');
     done();
   });
 
-  it('uses the stop time when the clock is stopped', (done: MochaDone) => {
+  it('uses the stop time when the clock is stopped', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 1, 2]));
     watch.start();
     watch.stop();
-    assert.equal(watch.toString(), '1.00 seconds');
-    assert.equal(watch.toString(), '1.00 seconds');
+    expect(watch.toString()).toEqual('1.00 seconds');
+    expect(watch.toString()).toEqual('1.00 seconds');
     done();
   });
 
-  it('gives elapsed seconds when < 1 minute', (done: MochaDone) => {
+  it('gives elapsed seconds when < 1 minute', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 1, 2, 3.25]));
     watch.start();
     watch.stop();
-    assert.equal(watch.toString(), '1.00 seconds');
+    expect(watch.toString()).toEqual('1.00 seconds');
     done();
   });
 
-  it('gives elapsed minutes and seconds when > 1 minute', (done: MochaDone) => {
+  it('gives elapsed minutes and seconds when > 1 minute', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 400]));
     watch.start();
     watch.stop();
-    assert.equal(watch.toString(), '6 minutes 40.0 seconds');
+    expect(watch.toString()).toEqual('6 minutes 40.0 seconds');
     done();
   });
 
-  it('gives elapsed minute and seconds when time >=60 <=119 seconds', (done: MochaDone) => {
+  it('gives elapsed minute and seconds when time >=60 <=119 seconds', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 61.25]));
     watch.start();
     watch.stop();
-    assert.equal(watch.toString(), '1 minute 1.3 seconds');
+    expect(watch.toString()).toEqual('1 minute 1.3 seconds');
     done();
   });
 
-  it('uses the latest time when the clock is not stopped', (done: MochaDone) => {
+  it('uses the latest time when the clock is not stopped', (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 1, 2]));
     watch.start();
-    assert.equal(watch.toString(), '1.00 seconds');
-    assert.equal(watch.toString(), '2.00 seconds');
+    expect(watch.toString()).toEqual('1.00 seconds');
+    expect(watch.toString()).toEqual('2.00 seconds');
     done();
   });
 
@@ -118,13 +114,13 @@ describe('Stopwatch', () => {
     const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 61.25]));
     watch.start();
     watch.stop();
-    assert.equal(watch.duration, 61.25);
+    expect(watch.duration).toEqual(61.25);
   });
 
   it('returns duration using the latest time when the clock is not stopped', () => {
     const watch: Stopwatch = new Stopwatch(pseudoTimeSeconds([0, 1, 2]));
     watch.start();
-    assert.equal(watch.duration, 1);
-    assert.equal(watch.duration, 2);
+    expect(watch.duration).toEqual(1);
+    expect(watch.duration).toEqual(2);
   });
 });

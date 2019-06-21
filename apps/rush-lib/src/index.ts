@@ -1,88 +1,67 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/**
+ * A library for writing scripts that interact with the Rush tool.
+ * @packageDocumentation
+ */
+
 export {
   ApprovedPackagesPolicy
-} from './data/ApprovedPackagesPolicy';
+} from './api/ApprovedPackagesPolicy';
 
 export {
-  IRushLinkJson,
-  default as RushConfiguration,
-  IEventHooksJson
-} from './data/RushConfiguration';
+  RushConfiguration,
+  ITryFindRushJsonLocationOptions,
+  ResolutionStrategy,
+  PnpmOptionsConfiguration,
+  YarnOptionsConfiguration
+} from './api/RushConfiguration';
 
 export {
-  default as RushConfigurationProject
-} from './data/RushConfigurationProject';
+  PackageManagerName,
+  PackageManager
+} from './api/packageManager/PackageManager';
+
+export {
+  EnvironmentVariableNames
+} from './api/EnvironmentConfiguration';
+
+export {
+  RushConfigurationProject
+} from './api/RushConfigurationProject';
+
+export {
+  RushGlobalFolder as _RushGlobalFolder
+} from './api/RushGlobalFolder';
 
 export {
   ApprovedPackagesItem,
   ApprovedPackagesConfiguration
-} from './data/ApprovedPackagesConfiguration';
+} from './api/ApprovedPackagesConfiguration';
 
 export {
-  PinnedVersionsConfiguration
-} from './data/PinnedVersionsConfiguration';
+  CommonVersionsConfiguration
+} from './api/CommonVersionsConfiguration';
 
 export {
-  default as EventHooks,
+  PackageJsonEditor,
+  PackageJsonDependency,
+  DependencyType
+} from './api/PackageJsonEditor';
+
+export {
+  EventHooks,
   Event
-} from './data/EventHooks';
+} from './api/EventHooks';
 
 export {
-  ChangeFile
-} from './data/ChangeFile';
+  ChangeManager
+} from './api/ChangeManager';
 
 export {
-  ChangeType,
-  IChangeFile,
-  IChangeInfo
-} from './data/ChangeManagement';
-
-export {
-  IChangelog,
-  IChangeLogEntry,
-  IChangeLogComment
-} from './data/Changelog';
-
-export {
-  VersionMismatchFinder
-} from './data/VersionMismatchFinder';
-
-export {
-  ErrorDetectionMode,
-  IErrorDetectionRule,
-  RegexErrorDetector,
-  default as ErrorDetector
-} from './errorDetection/ErrorDetector';
-
-export {
-  default as TaskError,
-  BuildTaskError
-} from './errorDetection/TaskError';
-
-export {
-  default as IPackageJson
-} from './utilities/IPackageJson';
-
-export {
-  default as VersionControl
-} from './utilities/VersionControl';
-
-export {
-  default as Utilities
-} from './utilities/Utilities';
-
-export {
-  Stopwatch,
-  StopwatchState
-} from './utilities/Stopwatch';
-
-export { RushConstants } from './RushConstants';
-
-export {
-  default as rushVersion
-} from './rushVersion';
+  LastInstallFlag as _LastInstallFlag
+} from './api/LastInstallFlag';
 
 export {
   VersionPolicyDefinitionName,
@@ -90,20 +69,10 @@ export {
   LockStepVersionPolicy,
   IndividualVersionPolicy,
   VersionPolicy
-} from './data/VersionPolicy';
+} from './api/VersionPolicy';
 
 export {
-  VersionPolicyConfiguration,
-  IVersionPolicyJson,
-  ILockStepVersionJson,
-  IIndividualVersionJson
-} from './data/VersionPolicyConfiguration';
+  VersionPolicyConfiguration
+} from './api/VersionPolicyConfiguration';
 
-export {
-  default as Npm
-} from './utilities/Npm';
-
-export { default as TestErrorDetector } from './errorDetection/rules/TestErrorDetector';
-export { default as TsErrorDetector } from './errorDetection/rules/TsErrorDetector';
-export { default as TsLintErrorDetector } from './errorDetection/rules/TsLintErrorDetector';
-export { default as AsyncRecycler } from './utilities/AsyncRecycler';
+export { Rush } from './api/Rush';

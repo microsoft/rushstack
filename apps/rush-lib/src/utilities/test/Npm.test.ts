@@ -1,24 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference types='mocha' />
-
-import { assert } from 'chai';
-import Npm from '../Npm';
 import * as process from 'process';
-import Utilities from '../Utilities';
-import * as sinon from 'sinon';
+
+import { Npm } from '../Npm';
+import { Utilities } from '../Utilities';
 
 describe('npm', () => {
   const packageName: string = '@microsoft/rush-lib-never';
-  let stub: sinon.SinonStub;
+  let stub: jest.SpyInstance;
 
   beforeEach(() => {
-    stub = sinon.stub(Utilities, 'executeCommandAndCaptureOutput');
+    stub = jest.spyOn(Utilities, 'executeCommandAndCaptureOutput');
   });
 
   afterEach(() => {
-    stub.restore();
+    stub.mockReset();
+    stub.mockRestore();
   });
 
   it('publishedVersions gets versions when package time is available.', () => {
@@ -30,14 +28,17 @@ describe('npm', () => {
       "1.4.1": "2017-01-09T19:22:00.488Z",
       "2.4.0-alpha.1": "2017-03-30T18:37:27.757Z"
     }`;
-    stub.withArgs('npm', `view ${packageName} time --json`.split(' '), sinon.match.any, sinon.match.any)
-      .returns(json);
+    stub.mockImplementationOnce(() => json);
+
     const versions: string[] = Npm.publishedVersions(packageName,
       __dirname,
       process.env);
-    assert.equal(versions.length, 4,
-      'Four versions of @microsoft/rush-lib-never should be found');
-    assert.includeMembers(versions, ['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1'], 'All versions match');
+
+    expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} time --json`.split(' '),
+    expect.anything(), expect.anything(), expect.anything());
+
+    expect(versions.length).toEqual(4);
+    expect(versions).toMatchObject(['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1']);
   });
 
   it('publishedVersions gets versions when package time is not available', () => {
@@ -47,15 +48,19 @@ describe('npm', () => {
       "1.4.1",
       "2.4.0-alpha.1"
     ]`;
-    stub.withArgs('npm', `view ${packageName} time --json`.split(' '), sinon.match.any, sinon.match.any)
-      .returns('');
-    stub.withArgs('npm', `view ${packageName} versions --json`.split(' '), sinon.match.any, sinon.match.any)
-      .returns(json);
+    stub.mockImplementationOnce(() => '');
+    stub.mockImplementationOnce(() => json);
+
     const versions: string[] = Npm.publishedVersions(packageName,
       __dirname,
       process.env);
-    assert.equal(versions.length, 4,
-      'Four versions of @microsoft/rush-lib-never should be found');
-    assert.includeMembers(versions, ['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1'], 'All versions match');
+
+    expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} time --json`.split(' '),
+      expect.anything(), expect.anything(), expect.anything());
+    expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} versions --json`.split(' '),
+    expect.anything(), expect.anything(), expect.anything());
+
+    expect(versions.length).toEqual(4);
+    expect(versions).toMatchObject(['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1']);
   });
 });

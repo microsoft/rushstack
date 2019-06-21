@@ -3,6 +3,10 @@
 
 /* tslint:disable:max-line-length */
 
+if (process.argv.indexOf('--no-color') === -1) {
+  process.argv.push('--color');
+}
+
 import * as path from 'path';
 
 import { GulpTask } from './tasks/GulpTask';
@@ -16,9 +20,10 @@ import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
 import { log } from './logging';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
-import { getFlagValue, setConfigDefaults } from './config';
+import { getFlagValue } from './config';
 import * as Gulp from 'gulp';
 import * as notifier from 'node-notifier';
+import { JestTask, _isJestEnabled } from './tasks/JestTask';
 
 export * from './IBuildConfig';
 export {
@@ -45,6 +50,7 @@ export * from './tasks/CleanTask';
 export * from './tasks/CleanFlagTask';
 export * from './tasks/ValidateShrinkwrapTask';
 export * from './tasks/copyStaticAssets/CopyStaticAssetsTask';
+export * from './tasks/JestTask';
 
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[] = [];
@@ -63,6 +69,7 @@ let _buildConfig: IBuildConfig = {
   srcFolder: 'src',
   distFolder: path.join(packageFolder, 'dist'),
   libAMDFolder: undefined,
+  libESNextFolder: undefined,
   libFolder: path.join(packageFolder, 'lib'),
   tempFolder: 'temp',
   properties: {},
@@ -195,7 +202,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
 
   let isWatchRunning: boolean = false;
   let shouldRerunWatch: boolean = false;
-  let lastError: boolean | undefined = undefined;
+  let lastError: Error | undefined = undefined;
 
   const successMessage: string = 'Build succeeded';
   const failureMessage: string = 'Build failed';
@@ -228,14 +235,14 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
                 }
                 return _finalizeWatch();
               })
-              .catch((error) => {
+              .catch((error: Error) => {
                 if (!lastError || lastError !== error) {
                   lastError = error;
 
                   if (buildConfig.showToast) {
                     notifier.notify({
                       title: failureMessage,
-                      message: error,
+                      message: error.toString(),
                       icon: buildConfig.buildErrorIconPath
                     });
                   } else {
@@ -261,7 +268,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
         setWatchMode();
         buildConfig.gulp.watch(watchMatch, _runWatch);
 
-        _runWatch();
+        _runWatch().catch(console.error);
       });
     }
   };
@@ -332,10 +339,9 @@ export function initialize(gulp: typeof Gulp): void {
   _buildConfig.rootPath = process.cwd();
   _buildConfig.gulp = new GulpProxy(gulp);
   _buildConfig.uniqueTasks = _uniqueTasks;
+  _buildConfig.jestEnabled = _isJestEnabled(_buildConfig.rootPath);
 
   _handleCommandLineArguments();
-
-  setConfigDefaults(_buildConfig);
 
   for (const uniqueTask of _buildConfig.uniqueTasks) {
     if (uniqueTask.onRegister) {
@@ -343,7 +349,7 @@ export function initialize(gulp: typeof Gulp): void {
     }
   }
 
-  initializeLogging(gulp, undefined, undefined);
+  initializeLogging(gulp, getConfig(), undefined, undefined);
 
   Object.keys(_taskMap).forEach(taskName => _registerTask(gulp, taskName, _taskMap[taskName]));
 
@@ -396,8 +402,7 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
           buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime));
         }
       },
-      // tslint:disable-next-line:no-any
-      (error: any) => {
+      (error: Error) => {
         if (buildConfig.onTaskEnd && taskExecutable.name) {
           buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime), error);
         }
@@ -458,7 +463,11 @@ function _handleTasksListArguments(): void {
 /** @public */
 export const clean: IExecutable = new CleanTask();
 
+/** @public */
 export const copyStaticAssets: CopyStaticAssetsTask = new CopyStaticAssetsTask();
+
+/** @public */
+export const jest: JestTask = new JestTask();
 
 // Register default clean task.
 task('clean', clean);

@@ -1,0 +1,141 @@
+{
+  "name": "@microsoft/api-extractor-model",
+  "entries": [
+    {
+      "version": "7.2.0",
+      "tag": "@microsoft/api-extractor-model_v7.2.0",
+      "date": "Tue, 11 Jun 2019 00:48:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the .api.json deserializer to validate the schema version and support backwards compatibility"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add API support for type parameters and type alias types"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.3",
+      "tag": "@microsoft/api-extractor-model_v7.1.3",
+      "date": "Wed, 05 Jun 2019 19:12:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.2",
+      "tag": "@microsoft/api-extractor-model_v7.1.2",
+      "date": "Tue, 04 Jun 2019 05:51:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where ApiConstructor inherited from ApiStaticMixin, but TypeScript constructors cannot be static"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.1",
+      "tag": "@microsoft/api-extractor-model_v7.1.1",
+      "date": "Mon, 27 May 2019 04:13:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make the strings returned by ApiItem.displayName less verbose"
+          },
+          {
+            "comment": "Improve formatting of the strings returned by ApiItem.getScopedNameWithinPackage()"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.0",
+      "tag": "@microsoft/api-extractor-model_v7.1.0",
+      "date": "Tue, 16 Apr 2019 11:01:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial stable release of API Extractor 7"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.28",
+      "tag": "@microsoft/api-extractor-model_v7.0.28",
+      "date": "Wed, 20 Mar 2019 19:14:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.1` to `3.13.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.27",
+      "tag": "@microsoft/api-extractor-model_v7.0.27",
+      "date": "Mon, 18 Mar 2019 04:28:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add helper functions for ReleaseTag"
+          },
+          {
+            "comment": "Export IApiItemConstructor to eliminate the ae-forgotten-export warning"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.0` to `3.12.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.26",
+      "tag": "@microsoft/api-extractor-model_v7.0.26",
+      "date": "Wed, 13 Mar 2019 19:13:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Refactor code to move the IndentedWriter API from api-extractor-model to api-documenter"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.25",
+      "tag": "@microsoft/api-extractor-model_v7.0.25",
+      "date": "Wed, 13 Mar 2019 01:14:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade TSDoc"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.0.24",
+      "tag": "@microsoft/api-extractor-model_v7.0.24",
+      "date": "Mon, 11 Mar 2019 16:13:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Initial setup of new package @microsoft/api-extractor-model"
+          }
+        ]
+      }
+    }
+  ]
+}

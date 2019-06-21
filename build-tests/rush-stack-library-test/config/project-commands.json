@@ -1,0 +1,12 @@
+{
+  "extends": "../node_modules/@microsoft/rush-stack/includes/project-commands.json",
+
+  "commands": [
+    {
+      "name": "publish",
+      "summary": "",
+      "documentation": "",
+      "script": "./scripts/publish.js"
+    }
+  ]
+}

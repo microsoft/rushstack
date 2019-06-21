@@ -1,0 +1,32 @@
+{
+  "commands": [
+    {
+      "name": "build",
+      "summary": "Builds the project",
+      "description": "",
+      "scriptPath": "../lib/start.js"
+    },
+    {
+      "name": "clean",
+      "summary": "Cleans the project",
+      "description": "",
+      "scriptPath": "../lib/start.js"
+    }
+  ],
+
+  "parameters": [
+    {
+      "longName": "--no-color",
+      "parameterType": "flag",
+      "description": "disable colors in the build log, defaults to 'true'",
+      "associatedCommands": [ "build", "clean" ]
+    },
+
+    {
+      "longName": "--production",
+      "parameterType": "flag",
+      "description": "Perform a production build, including minification and localization steps",
+      "associatedCommands": [ "build" ]
+    }
+  ]
+}

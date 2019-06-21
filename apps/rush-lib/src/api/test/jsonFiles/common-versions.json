@@ -1,0 +1,11 @@
+{
+  "preferredVersions": {
+    "@scope/library-1": "~3.2.1"
+  },
+  "xstitchPreferredVersions": {
+    "library-2": "1.2.3"
+  },
+  "allowedAlternativeVersions": {
+    "library-3": [ "^1.2.3" ]
+  }
+}

@@ -2,6 +2,1965 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.5.76",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.76",
+      "date": "Wed, 03 Apr 2019 02:58:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.25` to `3.9.26`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.0` to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.75",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.75",
+      "date": "Tue, 02 Apr 2019 01:12:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.24` to `3.9.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.20` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.74",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.74",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.23` to `3.9.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.19` to `0.2.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.73",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.73",
+      "date": "Thu, 28 Mar 2019 19:14:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.22` to `3.9.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.18` to `0.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.72",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.72",
+      "date": "Tue, 26 Mar 2019 20:54:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.21` to `3.9.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.17` to `0.2.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.71",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.71",
+      "date": "Sat, 23 Mar 2019 03:48:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.20` to `3.9.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.16` to `0.2.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.70",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.70",
+      "date": "Thu, 21 Mar 2019 04:59:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.19` to `3.9.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.15` to `0.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.69",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.69",
+      "date": "Thu, 21 Mar 2019 01:15:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.18` to `3.9.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.14` to `0.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.68",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.68",
+      "date": "Wed, 20 Mar 2019 19:14:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.17` to `3.9.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.13` to `0.2.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.67",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.67",
+      "date": "Mon, 18 Mar 2019 04:28:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.16` to `3.9.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.12` to `0.2.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.66",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.66",
+      "date": "Fri, 15 Mar 2019 19:13:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.15` to `3.9.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.11` to `0.2.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.65",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.65",
+      "date": "Wed, 13 Mar 2019 19:13:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.14` to `3.9.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.10` to `0.2.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.64",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.64",
+      "date": "Wed, 13 Mar 2019 01:14:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.13` to `3.9.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.9` to `0.2.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.63",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.63",
+      "date": "Mon, 11 Mar 2019 16:13:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.12` to `3.9.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.8` to `0.2.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.62",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.62",
+      "date": "Tue, 05 Mar 2019 17:13:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.11` to `3.9.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.7` to `0.2.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.61",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.61",
+      "date": "Mon, 04 Mar 2019 17:13:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.10` to `3.9.11`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.6` to `0.2.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.60",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.60",
+      "date": "Wed, 27 Feb 2019 22:13:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.9` to `3.9.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.5` to `0.2.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.59",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.59",
+      "date": "Wed, 27 Feb 2019 17:13:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.8` to `3.9.9`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.4` to `0.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.58",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.58",
+      "date": "Mon, 18 Feb 2019 17:13:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.7` to `3.9.8`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.3` to `0.2.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.57",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.57",
+      "date": "Tue, 12 Feb 2019 17:13:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.6` to `3.9.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.2` to `0.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.56",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.56",
+      "date": "Mon, 11 Feb 2019 10:32:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.5` to `3.9.6`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.5.1` to `0.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.55",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.55",
+      "date": "Mon, 11 Feb 2019 03:31:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.4` to `3.9.5`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.54",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.54",
+      "date": "Wed, 30 Jan 2019 20:49:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.3` to `3.9.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.4.0` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.53",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.53",
+      "date": "Sat, 19 Jan 2019 03:47:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.2` to `3.9.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.4` to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.52",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.52",
+      "date": "Tue, 15 Jan 2019 17:04:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.1` to `3.9.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.51",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.51",
+      "date": "Thu, 10 Jan 2019 01:57:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.0` to `3.9.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.3` to `0.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.50",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.50",
+      "date": "Mon, 07 Jan 2019 17:04:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.57` to `3.9.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.49",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.49",
+      "date": "Wed, 19 Dec 2018 05:57:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.56` to `3.8.57`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.2` to `0.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.48",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.48",
+      "date": "Thu, 13 Dec 2018 02:58:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.55` to `3.8.56`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.1` to `0.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.47",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.47",
+      "date": "Wed, 12 Dec 2018 17:04:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.54` to `3.8.55`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.0` to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.46",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.46",
+      "date": "Sat, 08 Dec 2018 06:35:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.53` to `3.8.54`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.2.1` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.45",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.45",
+      "date": "Fri, 07 Dec 2018 17:04:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.52` to `3.8.53`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.2.0` to `0.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.44",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.44",
+      "date": "Fri, 30 Nov 2018 23:34:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.51` to `3.8.52`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.1.1` to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.43",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.43",
+      "date": "Thu, 29 Nov 2018 07:02:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.50` to `3.8.51`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.1.0` to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.42",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.42",
+      "date": "Thu, 29 Nov 2018 00:35:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.49` to `3.8.50`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.0.0` to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.41",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.41",
+      "date": "Wed, 28 Nov 2018 19:29:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.48` to `3.8.49`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.5` to `0.5.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.40",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.40",
+      "date": "Wed, 28 Nov 2018 02:17:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.47` to `3.8.48`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.4` to `0.5.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.39",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.39",
+      "date": "Fri, 16 Nov 2018 21:37:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.46` to `3.8.47`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.3` to `0.5.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.38",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.38",
+      "date": "Fri, 16 Nov 2018 00:59:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.45` to `3.8.46`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.2` to `0.5.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.37",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.37",
+      "date": "Fri, 09 Nov 2018 23:07:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.44` to `3.8.45`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.1` to `0.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.36",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.36",
+      "date": "Wed, 07 Nov 2018 21:04:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.43` to `3.8.44`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.35",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.35",
+      "date": "Wed, 07 Nov 2018 17:03:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.42` to `3.8.43`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.4` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.34",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.34",
+      "date": "Mon, 05 Nov 2018 17:04:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.41` to `3.8.42`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.3` to `0.4.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.33",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.33",
+      "date": "Thu, 01 Nov 2018 21:33:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.40` to `3.8.41`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.2` to `0.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.32",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.32",
+      "date": "Thu, 01 Nov 2018 19:32:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.39` to `3.8.40`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.31",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.31",
+      "date": "Wed, 31 Oct 2018 17:00:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.38` to `3.8.39`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.30",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.30",
+      "date": "Sat, 27 Oct 2018 03:45:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.37` to `3.8.38`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.3.0` to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.29",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.29",
+      "date": "Sat, 27 Oct 2018 02:17:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.36` to `3.8.37`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.2.0` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.28",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.28",
+      "date": "Sat, 27 Oct 2018 00:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.35` to `3.8.36`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.20` to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.27",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.27",
+      "date": "Thu, 25 Oct 2018 23:20:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.34` to `3.8.35`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.19` to `0.1.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.26",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.26",
+      "date": "Thu, 25 Oct 2018 08:56:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.33` to `3.8.34`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.18` to `0.1.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.25",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.25",
+      "date": "Wed, 24 Oct 2018 16:03:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.32` to `3.8.33`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.17` to `0.1.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.24",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.24",
+      "date": "Thu, 18 Oct 2018 05:30:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.31` to `3.8.32`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.23",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.23",
+      "date": "Thu, 18 Oct 2018 01:32:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.30` to `3.8.31`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.16` to `0.1.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.22",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.22",
+      "date": "Wed, 17 Oct 2018 21:04:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.29` to `3.8.30`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.15` to `0.1.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.21",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.21",
+      "date": "Wed, 17 Oct 2018 14:43:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.28` to `3.8.29`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.14` to `0.1.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.20",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.20",
+      "date": "Thu, 11 Oct 2018 23:26:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.27` to `3.8.28`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.13` to `0.1.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.19",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.19",
+      "date": "Tue, 09 Oct 2018 06:58:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.26` to `3.8.27`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.12` to `0.1.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.18",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.18",
+      "date": "Mon, 08 Oct 2018 16:04:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.25` to `3.8.26`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.11` to `0.1.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.17",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.17",
+      "date": "Sun, 07 Oct 2018 06:15:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.24` to `3.8.25`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.10` to `0.1.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.16",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.16",
+      "date": "Fri, 28 Sep 2018 16:05:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.23` to `3.8.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.9` to `0.1.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.15",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.15",
+      "date": "Wed, 26 Sep 2018 21:39:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.22` to `3.8.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.8` to `0.1.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.14",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.14",
+      "date": "Mon, 24 Sep 2018 23:06:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.21` to `3.8.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.7` to `0.1.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.13",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.13",
+      "date": "Fri, 21 Sep 2018 16:04:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.20` to `3.8.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.6` to `0.1.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.12",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.12",
+      "date": "Thu, 20 Sep 2018 23:57:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.19` to `3.8.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.5` to `0.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.11",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.11",
+      "date": "Tue, 18 Sep 2018 21:04:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.18` to `3.8.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.4` to `0.1.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.10",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.10",
+      "date": "Thu, 06 Sep 2018 01:25:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update \"repository\" field in package.json"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.17` to `3.8.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.3` to `0.1.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.9",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.9",
+      "date": "Tue, 04 Sep 2018 21:34:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.16` to `3.8.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.2` to `0.1.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.8",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.8",
+      "date": "Mon, 03 Sep 2018 16:04:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.15` to `3.8.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.1` to `0.1.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.7",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.7",
+      "date": "Thu, 30 Aug 2018 19:23:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.14` to `3.8.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.1.0` to `0.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.0` to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.6",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.6",
+      "date": "Thu, 30 Aug 2018 18:45:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.13` to `3.8.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.5",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.5",
+      "date": "Wed, 29 Aug 2018 21:43:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.12` to `3.8.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.0.1` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.0.1` to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.4",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.4",
+      "date": "Wed, 29 Aug 2018 06:36:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.11` to `3.8.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.3",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.3",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.10` to `3.8.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.2",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.2",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.9` to `3.8.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.1",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.1",
+      "date": "Wed, 22 Aug 2018 16:03:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.8` to `3.8.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.5.0",
+      "date": "Thu, 09 Aug 2018 21:58:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fix an issue where the mocha task was breaking the build for projects that don't have any unit tests yet"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.3",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.4.3",
+      "date": "Thu, 09 Aug 2018 21:03:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.7` to `3.8.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.2",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.4.2",
+      "date": "Tue, 07 Aug 2018 22:27:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.6` to `3.8.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.1",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.4.1",
+      "date": "Thu, 26 Jul 2018 16:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.5` to `3.8.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.4.0",
+      "date": "Fri, 20 Jul 2018 16:04:52 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrading mocha-related pack ages to remove dependency on a version of \"growl\" with NSP warnings."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.31",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.31",
+      "date": "Tue, 03 Jul 2018 21:03:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.4` to `3.8.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.30",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.30",
+      "date": "Thu, 21 Jun 2018 08:27:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.3` to `3.8.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.29",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.29",
+      "date": "Fri, 08 Jun 2018 08:43:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.2` to `3.8.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.28",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.28",
+      "date": "Thu, 31 May 2018 01:39:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.1` to `3.8.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.27",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.27",
+      "date": "Tue, 15 May 2018 02:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.8.0` to `3.8.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.26",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.26",
+      "date": "Fri, 11 May 2018 22:43:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.7.5` to `3.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.25",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.25",
+      "date": "Fri, 04 May 2018 00:42:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.7.4` to `3.7.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.24",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.24",
+      "date": "Tue, 03 Apr 2018 16:05:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.7.3` to `3.7.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.23",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.23",
+      "date": "Mon, 02 Apr 2018 16:05:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.7.2` to `3.7.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.22",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.22",
+      "date": "Mon, 26 Mar 2018 19:12:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.7.1` to `3.7.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.21",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.21",
+      "date": "Fri, 23 Mar 2018 00:34:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.7.0` to `3.7.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.20",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.20",
+      "date": "Thu, 22 Mar 2018 18:34:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.10` to `3.7.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.19",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.19",
+      "date": "Sat, 17 Mar 2018 02:54:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.9` to `3.6.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.18",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.18",
+      "date": "Thu, 15 Mar 2018 16:05:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.8` to `3.6.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.17",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.17",
+      "date": "Fri, 02 Mar 2018 01:13:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.7` to `3.6.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.16",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.16",
+      "date": "Tue, 27 Feb 2018 22:05:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.6` to `3.6.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.15",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.15",
+      "date": "Wed, 21 Feb 2018 22:04:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.5` to `3.6.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.14",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.14",
+      "date": "Wed, 21 Feb 2018 03:13:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.4` to `3.6.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.13",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.13",
+      "date": "Sat, 17 Feb 2018 02:53:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.3` to `3.6.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.12",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.12",
+      "date": "Fri, 16 Feb 2018 22:05:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.2` to `3.6.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.11",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.11",
+      "date": "Fri, 16 Feb 2018 17:05:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.1` to `3.6.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.10",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.10",
+      "date": "Wed, 07 Feb 2018 17:05:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.6.0` to `3.6.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.9",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.9",
+      "date": "Fri, 26 Jan 2018 22:05:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.5.3` to `3.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.8",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.8",
+      "date": "Fri, 26 Jan 2018 17:53:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force a patch bump in case the previous version was an empty package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.5.2` to `3.5.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.7",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.7",
+      "date": "Fri, 26 Jan 2018 00:36:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Increase Mocha test timeout to 15 seconds"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.5.1` to `3.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.6",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.6",
+      "date": "Tue, 23 Jan 2018 17:05:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.5.0` to `3.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.5",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.5",
+      "date": "Thu, 18 Jan 2018 03:23:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.4` to `3.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.4",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.4",
+      "date": "Thu, 18 Jan 2018 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.3` to `3.4.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.3",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.3",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.2` to `3.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.2",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.2",
+      "date": "Fri, 12 Jan 2018 03:35:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.1` to `3.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.1",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.1",
+      "date": "Thu, 11 Jan 2018 22:31:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.4.0` to `3.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.3.0",
+      "date": "Wed, 10 Jan 2018 20:40:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "1271a0dc21fedb882e7953f491771724f80323a1",
+            "comment": "Upgrade to Node 8"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.7` to `3.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.17",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.17",
+      "date": "Tue, 09 Jan 2018 17:05:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "d00b6549d13610fbb6f84be3478b532be9da0747",
+            "comment": "Get web-build-tools building with pnpm"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.6` to `3.3.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.16",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.16",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.5` to `3.3.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.15",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.15",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.4` to `3.3.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.14",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.14",
+      "date": "Fri, 05 Jan 2018 00:48:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.3` to `3.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.13",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.13",
+      "date": "Fri, 22 Dec 2017 17:04:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.2` to `3.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.12",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.12",
+      "date": "Tue, 12 Dec 2017 03:33:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.1` to `3.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.11",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.11",
+      "date": "Thu, 30 Nov 2017 23:59:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.3.0` to `3.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.10",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.10",
+      "date": "Thu, 30 Nov 2017 23:12:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.9` to `3.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.9",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.9",
+      "date": "Wed, 29 Nov 2017 17:05:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.8` to `3.2.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.8",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.8",
+      "date": "Tue, 28 Nov 2017 23:43:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.7` to `3.2.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.7",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.7",
+      "date": "Mon, 13 Nov 2017 17:04:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.6` to `3.2.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.6",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.6",
+      "date": "Mon, 06 Nov 2017 17:04:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.5` to `3.2.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.5",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.5",
+      "date": "Thu, 02 Nov 2017 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "2c58095f2f13492887cc1278c9a0cff49af9735b",
+            "comment": "lock the reference version between web build tools projects"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.4` to `3.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.4",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.4",
+      "date": "Wed, 01 Nov 2017 21:06:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "e449bd6cdc3c179461be68e59590c25021cd1286",
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.3` to `3.2.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.3",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.3",
+      "date": "Tue, 31 Oct 2017 21:04:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.2` to `3.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.2",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.2",
+      "date": "Tue, 31 Oct 2017 16:04:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.1` to `3.2.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.1",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.1",
+      "date": "Wed, 25 Oct 2017 20:03:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.2.0` to `3.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.2.0",
+      "date": "Tue, 24 Oct 2017 18:17:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "5fe47765dbb3567bebc30cf5d7ac2205f6e655b0",
+            "comment": "Turn off Mocha task when Jest task is enabled"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.6` to `3.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.6",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.1.6",
+      "date": "Mon, 23 Oct 2017 21:53:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5de032b254b632b8af0d0dd98913acef589f88d5",
+            "comment": "Updated cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.5` to `3.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.5",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.1.5",
+      "date": "Fri, 20 Oct 2017 19:57:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.4` to `3.1.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.4",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.1.4",
+      "date": "Fri, 20 Oct 2017 01:52:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.3` to `3.1.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.3",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.1.3",
+      "date": "Fri, 20 Oct 2017 01:04:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.2` to `3.1.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.2",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.1.2",
+      "date": "Thu, 05 Oct 2017 01:05:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.1` to `3.1.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.1",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.1.1",
+      "date": "Thu, 28 Sep 2017 01:04:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.1.0` to `3.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.0",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.1.0",
+      "date": "Fri, 22 Sep 2017 01:04:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "481a10f460a454fb5a3e336e3cf25a1c3f710645",
+            "comment": "Upgrade to es6"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.8` to `3.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.8",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.0.8",
+      "date": "Wed, 20 Sep 2017 22:10:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.7` to `3.0.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.7",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.0.7",
+      "date": "Mon, 11 Sep 2017 13:04:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.0.6` to `3.0.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.6",
       "tag": "@microsoft/gulp-core-build-mocha_v3.0.6",
       "date": "Fri, 08 Sep 2017 01:28:04 GMT",

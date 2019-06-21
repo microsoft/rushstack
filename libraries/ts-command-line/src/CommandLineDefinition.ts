@@ -3,6 +3,8 @@
 
 /**
  * For use with CommandLineParser, this interface represents a generic command-line parameter
+ *
+ * @public
  */
 export interface IBaseCommandLineDefinition {
   /**
@@ -19,44 +21,107 @@ export interface IBaseCommandLineDefinition {
    * Documentation for the flag, that will be shown when invoking the tool with "--help"
    */
   description: string;
-}
 
-export interface IKeyedCommandLineDefinition extends IBaseCommandLineDefinition {
   /**
-   * The key used to identify the value of this parameter. This must be a unique value. If it is
-   * omitted, a unique key is created. This key name appears in the help menu.
-   * For certain definitions, the key value is not surfaced in the UI.
+   * If true, then an error occurs if the parameter was not included on the command-line.
    */
-  key?: string;
+  required?: boolean;
+
+  /**
+   * The name of an environment variable that the parameter value will be read from,
+   * if it was omitted from the command-line.  An error will be reported if the
+   * environment value cannot be parsed.
+   * @remarks
+   * The environment variable name must consist only of upper-case letters, numbers,
+   * and underscores. It may not start with a number.
+   *
+   * This feature cannot be used when {@link IBaseCommandLineDefinition.required} is true,
+   * because in that case the environmentVariable would never be used.
+   */
+  environmentVariable?: string;
 }
 
 /**
- * For use with CommandLineParser, this interface represents a boolean flag command line parameter
+ * The common base interface for parameter types that accept an argument.
+ *
+ * @remarks
+ * An argument is an accompanying command-line token, such as "123" in the
+ * example "--max-count 123".
+ * @public
  */
-export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
-
-/**
- * For use with CommandLineParser, this interface represents a string command line parameter
- */
-export interface ICommandLineStringDefinition extends IKeyedCommandLineDefinition { }
-
-/**
- * For use with CommandLineParser, this interface represents a string command line parameter
- */
-export interface ICommandLineStringListDefinition extends IKeyedCommandLineDefinition { }
+export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
+  /**
+   * The name of the argument, which will be shown in the command-line help.
+   *
+   * @remarks
+   * For example, if the parameter name is '--count" and the argument name is "NUMBER",
+   * then the command-line help would display "--count NUMBER".  The argument name must
+   * be comprised of upper-case letters, numbers, and underscores.  It should be kept short.
+   */
+  argumentName: string;
+}
 
 /**
  * For use with CommandLineParser, this interface represents a parameter which is constrained to
  * a list of possible options
+ *
+ * @public
  */
-export interface ICommandLineOptionDefinition extends IBaseCommandLineDefinition {
+export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
   /**
    * A list of strings (which contain no spaces), of possible options which can be selected
    */
-  options: string[];
+  alternatives: string[];
+
+  /**
+   * {@inheritDoc ICommandLineStringDefinition.defaultValue}
+   */
+  defaultValue?: string;
 }
 
 /**
- * For use with CommandLineParser, this interface represents an integer command line parameter
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * that is a boolean flag.
+ *
+ * @public
  */
-export interface ICommandLineIntegerDefinition extends IKeyedCommandLineDefinition { }
+export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
+
+/**
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * whose argument is an integer value.
+ *
+ * @public
+ */
+export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument {
+  /**
+   * {@inheritDoc ICommandLineStringDefinition.defaultValue}
+   */
+  defaultValue?: number;
+}
+
+/**
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * whose argument is a string value.
+ *
+ * @public
+ */
+export interface ICommandLineStringDefinition extends IBaseCommandLineDefinitionWithArgument {
+  /**
+   * The default value which will be used if the parameter is omitted from the command line.
+   *
+   * @remarks
+   * If a default value is specified, then {@link IBaseCommandLineDefinition.required}
+   * must not be true.  Instead, a custom error message should be used to report cases
+   * where a default value was not available.
+   */
+  defaultValue?: string;
+}
+
+/**
+ * For use with CommandLineParser, this interface represents a command line parameter
+ * whose argument is a list of strings.
+ *
+ * @public
+ */
+export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument { }

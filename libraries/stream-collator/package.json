@@ -1,30 +1,31 @@
 {
   "name": "@microsoft/stream-collator",
-  "version": "2.0.7",
+  "version": "3.0.73",
   "description": "Display intelligible realtime output from your asynchronous streams",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/stream-collator"
   },
   "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "typings": "dist/stream-collator.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "scripts": {
-    "build": "gulp",
-    "test": "gulp test",
-    "clean": "gulp clean"
+    "build": "gulp test --clean"
   },
   "license": "MIT",
   "dependencies": {
-    "colors": "~1.1.2",
-    "@types/node": "6.0.62"
+    "colors": "~1.2.1",
+    "@types/node": "8.5.8"
   },
   "devDependencies": {
+    "@microsoft/rush-stack-compiler-3.2": "0.3.19",
     "@types/chai": "3.4.34",
-    "@types/colors": "1.1.3",
-    "@types/mocha": "2.2.38",
+    "@types/mocha": "5.2.5",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
-    "mocha": "~3.4.2",
-    "@microsoft/node-library-build": "~4.0.6"
+    "mocha": "^5.2.0",
+    "@microsoft/node-library-build": "6.0.67"
   }
 }

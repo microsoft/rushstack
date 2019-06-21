@@ -3,9 +3,10 @@
 
 import { argv as clArgs } from 'yargs';
 import * as path from 'path';
+import { FileConstants } from '@microsoft/node-core-library';
 
 export const root: string = process.cwd();
-export const args: { [flat: string]: boolean | string} = clArgs;
+export const args: { [flat: string]: boolean | string } = clArgs;
 
 export interface IPackageJSON {
   name?: string;
@@ -24,7 +25,7 @@ let packageJson: IPackageJSON = {
   }
 };
 try {
-  packageJson = require(path.join(root, 'package.json'));
+  packageJson = require(path.join(root, FileConstants.PackageJson));
 } catch (e) {
   // Package.json probably doesn't exit
 }

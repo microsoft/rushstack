@@ -21,9 +21,10 @@ export interface ICopyStaticAssetsTaskConfig {
  * Copies files from the /src folder into the /lib folder, if they have certain file extensions
  * or file paths.
  *
- * @internalremarks
+ * @privateRemarks
  *
  * Example:
+ * ```
  *  IN:
  *    setConfig({
  *      includeExtensions: ['template.html'],
@@ -40,7 +41,7 @@ export interface ICopyStaticAssetsTaskConfig {
  *      2. excluding specific extensions (i.e. 'png')
  *      3. including specific globs (i.e. '/assets/goodAsset.png')
  *      4. excluding specific globs (i.e. '/assets/badAsset.gif')
- *
+ * ```
  * @public
  */
 export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {

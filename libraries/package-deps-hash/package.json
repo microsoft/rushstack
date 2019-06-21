@@ -1,25 +1,28 @@
 {
   "name": "@microsoft/package-deps-hash",
-  "version": "2.0.9",
+  "version": "2.2.158",
   "description": "",
   "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "typings": "dist/package-deps-hash.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/package-deps-hash"
   },
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp test"
+    "build": "gulp test --clean"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "~4.0.6",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.19",
+    "@microsoft/node-library-build": "6.0.67",
+    "@microsoft/node-core-library": "3.13.0",
     "chai": "~3.5.0",
     "gulp": "~3.9.1",
     "@types/chai": "3.4.34",
-    "@types/mocha": "2.2.38",
-    "@types/node": "6.0.62"
+    "@types/mocha": "5.2.5",
+    "@types/node": "8.5.8"
   }
 }

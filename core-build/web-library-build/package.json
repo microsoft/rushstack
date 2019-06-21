@@ -1,32 +1,35 @@
 {
   "name": "@microsoft/web-library-build",
-  "version": "4.0.6",
+  "version": "7.0.45",
   "description": "",
   "engines": {
     "npm": "3.10.8"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/web-library-build"
   },
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp"
+    "build": "gulp --clean"
   },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.0.6",
-    "@microsoft/gulp-core-build-karma": "4.0.6",
-    "@microsoft/gulp-core-build-sass": "4.0.6",
-    "@microsoft/gulp-core-build-serve": "3.0.6",
-    "@microsoft/gulp-core-build-typescript": "4.0.6",
-    "@microsoft/gulp-core-build-webpack": "3.0.6",
+    "@microsoft/gulp-core-build": "3.9.26",
+    "@microsoft/gulp-core-build-sass": "4.7.5",
+    "@microsoft/gulp-core-build-serve": "3.3.41",
+    "@microsoft/gulp-core-build-typescript": "8.1.16",
+    "@microsoft/gulp-core-build-webpack": "3.4.108",
     "@types/gulp": "3.8.32",
-    "@types/node": "6.0.62",
+    "@types/node": "8.5.8",
     "gulp": "~3.9.1",
     "gulp-replace": "^0.5.4"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@microsoft/node-library-build": "6.0.67",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.19"
+  }
 }

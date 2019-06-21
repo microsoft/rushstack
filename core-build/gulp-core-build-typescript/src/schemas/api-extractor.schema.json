@@ -9,19 +9,8 @@
     "$schema": {
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
       "type": "string"
-    },
-
-    "enabled": {
-      "description": "Indicates whether the task should be run",
-      "type": "boolean"
-    },
-    "entry": {
-      "description": "The file path of the exported entry point, relative to the project folder",
-      "type": "string"
-    },
-    "apiReviewFolder": {
-      "description": "The file path of the folder containing already approved API files, relative to the project folder",
-      "type": "string"
     }
-  }
+  },
+  "required": [ "enabled" ],
+  "additionalProperties": false
 }

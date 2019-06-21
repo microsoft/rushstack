@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush approved packages config file",
+  "description": "For use with the Rush tool, this file tracks a list of NPM packages that have been approved for usage. This schema is used by two config files browser-approved-packages.json and nonbrowser-approved-packages.jsons. See http://rushjs.io for details.",
+
+  "definitions": {
+    "packageInfo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the NPM package, e.g. \"@scope/example\"",
+          "type": "string"
+        },
+        "allowedCategories": {
+          "description": "If rush.json is using the \"reviewCategories\" field to classify projects, then the approval is limited to the listed \"allowedCategories\"; otherwise, any project may use the package.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "name" ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "packages": {
+      "description": "A list of NPM packages that are approved for usage.",
+      "type": "array",
+      "items": { "$ref": "#/definitions/packageInfo" }
+    }
+  },
+  "additionalProperties": false,
+  "required": [ "packages" ]
+}

@@ -1,7 +1,5 @@
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
- */
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
 import * as uglify from 'uglify-js';
@@ -10,6 +8,9 @@ import {
   ISetWebpackPublicPathOptions
 } from './SetPublicPathPlugin';
 
+/**
+ * @public
+ */
 export const registryVariableName: string = 'window.__setWebpackPublicPathLoaderSrcRegistry__';
 
 export interface IInternalOptions extends ISetWebpackPublicPathOptions {
@@ -55,7 +56,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
       `    var path = scripts[i].getAttribute('src');`,
       '    if (path && path.match(regex)) {',
       `      ${varName} = path.substring(0, path.lastIndexOf('/') + 1);`,
-      '      break;',
+      ...(options.preferLastFoundScript ? [] : ['      break;']),
       '    }',
       '  }',
       '}',
@@ -64,7 +65,7 @@ export function getSetPublicPathCode(options: IInternalOptions, emitWarning: (wa
       `  for (var global in ${registryVariableName}) {`,
       '    if (global && global.match(regex)) {',
       `      ${varName} = global.substring(0, global.lastIndexOf('/') + 1);`,
-      '      break;',
+      ...(options.preferLastFoundScript ? [] : ['      break;']),
       '    }',
       '  }',
       '}'

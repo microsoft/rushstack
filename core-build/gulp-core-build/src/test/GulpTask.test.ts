@@ -1,10 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-'use strict';
-
 import { assert, expect } from 'chai';
-import gutil = require('gulp-util');
+import Vinyl = require('vinyl');
 import * as Gulp  from 'gulp';
 import { Readable } from 'stream';
 import * as path from 'path';
@@ -49,9 +47,9 @@ class StreamTask extends GulpTask<IConfig> {
 
     setTimeout(() => {
 
-      const file: gutil.File = new gutil.File({
+      const file: Vinyl = new Vinyl({
         path: 'test.js',
-        contents: new Buffer('test')
+        contents: Buffer.from('test')
       });
 
       stream.push(file);

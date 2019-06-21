@@ -2,7 +2,7 @@
 
 ## Installation
 
-`npm @microsoft/loader-raw-script --save-dev`
+`npm install @microsoft/loader-raw-script --save-dev`
 
 ## Overview
 

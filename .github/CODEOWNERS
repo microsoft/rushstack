@@ -1,0 +1,17 @@
+.github/CODEOWNERS @iclanton @octogonz @patmill @apostolisms
+common/config/**/* @iclanton @octogonz @patmill @apostolisms
+
+common/reviews/**/* @iclanton @octogonz @apostolisms
+
+apps/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+build-tests/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+core-build/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+libraries/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+stack/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+webpack/**/* @iclanton @octogonz @apostolisms @lincoded @halfnibble
+rush.json @iclanton @octogonz @apostolisms @lincoded @halfnibble
+.gitattributes @iclanton @octogonz @apostolisms @lincoded @halfnibble
+.gitignore @iclanton @octogonz @apostolisms @lincoded @halfnibble
+README.md @iclanton @octogonz @apostolisms @lincoded @halfnibble
+
+libraries/load-themed-styles/**/* @iclanton @octogonz @dzearing @apostolisms

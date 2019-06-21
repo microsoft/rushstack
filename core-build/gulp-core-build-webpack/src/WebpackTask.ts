@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as colors from 'colors';
 import * as Webpack from 'webpack';
 import { GulpTask, IBuildConfig } from '@microsoft/gulp-core-build';
 import * as Gulp from 'gulp';
@@ -117,7 +118,6 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
 
       if (webpackConfig) {
         const webpack: typeof Webpack = this.taskConfig.webpack || require('webpack');
-        const gutil = require('gulp-util');
         const startTime = new Date().getTime();
         const outputDir = this.buildConfig.distFolder;
 
@@ -175,9 +175,9 @@ export class WebpackTask<TExtendedConfig = {}> extends GulpTask<IWebpackTaskConf
                 child.chunks.forEach(chunk => {
                   if (chunk.files && this.taskConfig.printStats) {
                     chunk.files.forEach(file => (
-                      this.log(`Bundled: '${gutil.colors.cyan(path.basename(file))}', ` +
-                                `size: ${gutil.colors.magenta(chunk.size)} bytes, ` +
-                                `took ${gutil.colors.magenta(duration)} ms.`)
+                      this.log(`Bundled: '${colors.cyan(path.basename(file))}', ` +
+                                `size: ${colors.magenta(chunk.size)} bytes, ` +
+                                `took ${colors.magenta(duration.toString(10))} ms.`)
                     )); // end file
                   }
                 }); // end chunk

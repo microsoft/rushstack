@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
 import * as os from 'os';
 import * as jju from 'jju';
 
 import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
+import { Text, NewlineKind } from './Text';
+import { FileSystem } from './FileSystem';
 
 /**
  * Options for JsonFile.stringify()
@@ -14,9 +15,15 @@ import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './
  */
 export interface IJsonFileStringifyOptions {
   /**
-   * If true, then "\n" will be used for newlines instead of the default "\r\n".
+   * If true, then `\n` will be used for newlines instead of the default `\r\n`.
    */
-  unixNewlines?: boolean;
+  newlineConversion?: NewlineKind;
+
+  /**
+   * If true, then the "jju" library will be used to improve the text formatting.
+   * Note that this is slightly slower than the native JSON.stringify() implementation.
+   */
+  prettyFormatting?: boolean;
 }
 
 /**
@@ -30,6 +37,20 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
    * don't write anything; this preserves the old timestamp.
    */
   onlyIfChanged?: boolean;
+
+  /**
+   * Creates the folder recursively using FileSystem.ensureFolder()
+   * Defaults to false.
+   */
+  ensureFolderExists?: boolean;
+
+  /**
+   * If true, use the "jju" library to preserve the existing JSON formatting:  The file will be loaded
+   * from the target filename, the new content will be merged in (preserving whitespace and comments),
+   * and then the file will be overwritten with the merged contents.  If the target file does not exist,
+   * then the file is saved normally.
+   */
+  updateExistingFile?: boolean;
 }
 
 /**
@@ -41,13 +62,13 @@ export class JsonFile {
    * Loads a JSON file.
    */
   public static load(jsonFilename: string): any { // tslint:disable-line:no-any
-    if (!fsx.existsSync(jsonFilename)) {
+    if (!FileSystem.exists(jsonFilename)) {
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
 
-    const buffer: Buffer = fsx.readFileSync(jsonFilename);
+    const contents: string = FileSystem.readFile(jsonFilename);
     try {
-      return jju.parse(buffer.toString());
+      return jju.parse(contents);
     } catch (error) {
       throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
     }
@@ -86,15 +107,53 @@ export class JsonFile {
    * @returns a JSON string, with newlines, and indented with two spaces
    */
   public static stringify(jsonObject: Object, options?: IJsonFileStringifyOptions): string {
-    JsonFile.validateNoUndefinedMembers(jsonObject);
-    const stringified: string = JSON.stringify(jsonObject, undefined, 2) + '\n';
+    return JsonFile.updateString('', jsonObject, options);
+  }
 
-    if (options && options.unixNewlines) {
-      return stringified;
-    } else {
-      return JsonFile._getAllReplaced(stringified, '\n', '\r\n');
+  /**
+   * Serializes the specified JSON object to a string buffer.
+   * @param jsonObject - the object to be serialized
+   * @param options - other settings that control serialization
+   * @returns a JSON string, with newlines, and indented with two spaces
+   */
+  public static updateString(previousJson: string, newJsonObject: Object,
+    options?: IJsonFileStringifyOptions): string {
+    if (!options) {
+      options = { };
     }
 
+    JsonFile.validateNoUndefinedMembers(newJsonObject);
+
+    let stringified: string;
+
+    if (previousJson !== '') {
+      // NOTE: We don't use mode=json here because comments aren't allowed by strict JSON
+      stringified = jju.update(previousJson, newJsonObject, {
+        mode: 'cjson',
+        indent: 2
+      });
+    } else if (options.prettyFormatting) {
+      stringified = jju.stringify(newJsonObject, {
+        mode: 'json',
+        indent: 2
+      });
+    } else {
+      stringified = JSON.stringify(newJsonObject, undefined, 2);
+    }
+
+    // Add the trailing newline
+    stringified = Text.ensureTrailingNewline(stringified);
+
+    if (options && options.newlineConversion) {
+      switch (options.newlineConversion) {
+        case NewlineKind.CrLf:
+          return Text.convertToCrLf(stringified);
+        case NewlineKind.Lf:
+          return Text.convertToLf(stringified);
+      }
+    }
+
+    return stringified;
   }
 
   /**
@@ -104,20 +163,17 @@ export class JsonFile {
    * @param options - other settings that control how the file is saved
    * @returns false if ISaveJsonFileOptions.onlyIfChanged didn't save anything; true otherwise
    */
-  public static save(jsonObject: Object, jsonFilename: string, options: IJsonFileSaveOptions = {}): boolean {
-    const normalized: string = JsonFile.stringify(jsonObject, options);
+  public static save(jsonObject: Object, jsonFilename: string, options?: IJsonFileSaveOptions): boolean {
+    if (!options) {
+      options = { };
+    }
 
-    const buffer: Buffer = new Buffer(normalized); // utf8 encoding happens here
-
-    if (options.onlyIfChanged) {
-      // Has the file changed?
-      if (fsx.existsSync(jsonFilename)) {
+    // Do we need to read the previous file contents?
+    let oldBuffer: Buffer | undefined = undefined;
+    if (options.updateExistingFile || options.onlyIfChanged) {
+      if (FileSystem.exists(jsonFilename)) {
         try {
-          const oldBuffer: Buffer = fsx.readFileSync(jsonFilename);
-          if (Buffer.compare(buffer, oldBuffer) === 0) {
-            // Nothing has changed, so don't touch the file
-            return false;
-          }
+          oldBuffer = FileSystem.readFileToBuffer(jsonFilename);
         } catch (error) {
           // Ignore this error, and try writing a new file.  If that fails, then we should report that
           // error instead.
@@ -125,11 +181,30 @@ export class JsonFile {
       }
     }
 
-    fsx.writeFileSync(jsonFilename, buffer);
+    let jsonToUpdate: string = '';
+    if (options.updateExistingFile && oldBuffer) {
+      jsonToUpdate = oldBuffer.toString();
+    }
+
+    const newJson: string = JsonFile.updateString(jsonToUpdate, jsonObject, options);
+
+    const newBuffer: Buffer = Buffer.from(newJson); // utf8 encoding happens here
+
+    if (options.onlyIfChanged) {
+      // Has the file changed?
+      if (oldBuffer && Buffer.compare(newBuffer, oldBuffer) === 0) {
+        // Nothing has changed, so don't touch the file
+        return false;
+      }
+    }
+
+    FileSystem.writeFile(jsonFilename, newBuffer.toString(), {
+      ensureFolderExists: options.ensureFolderExists
+    });
 
     // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.
     /*
-    const oldBuffer2: Buffer = fsx.readFileSync(jsonFilename);
+    const oldBuffer2: Buffer = FileSystem.readFileToBuffer(jsonFilename);
     if (Buffer.compare(buffer, oldBuffer2) !== 0) {
       console.log('new:' + buffer.toString('hex'));
       console.log('old:' + oldBuffer2.toString('hex'));
@@ -162,7 +237,7 @@ export class JsonFile {
         const value: any = jsonObject[key];
         if (value === undefined) {
           const fullPath: string = JsonFile._formatKeyPath(keyPath);
-          throw new Error(`The value for ${fullPath} is undefined`);
+          throw new Error(`The value for ${fullPath} is "undefined" and cannot be serialized as JSON`);
         }
 
         JsonFile._validateNoUndefinedMembers(value, keyPath);
@@ -197,16 +272,5 @@ export class JsonFile {
       }
     }
     return result;
-  }
-
-  /**
-   * Returns the same thing as targetString.replace(searchValue, replaceValue), except that
-   * all matches are replaced, rather than just the first match.
-   * @param targetString  The string to be modified
-   * @param searchValue   The value to search for
-   * @param replaceValue  The replacement text
-   */
-  private static _getAllReplaced(targetString: string, searchValue: string, replaceValue: string): string {
-    return targetString.split(searchValue).join(replaceValue);
   }
 }

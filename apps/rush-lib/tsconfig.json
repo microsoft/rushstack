@@ -1,14 +1,13 @@
 {
+  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.2/includes/tsconfig-node.json",
   "compilerOptions": {
-    "target": "es5",
-    "forceConsistentCasingInFileNames": true,
-    "module": "commonjs",
-    "jsx": "react",
-    "declaration": true,
-    "sourceMap": true,
-    "lib": [
-      "es5",
-      "es2015.collection"
+    "types": [
+      "jest"
     ]
-  }
+  },
+  "include": [
+    "./typings/tsd.d.ts",
+    "./src/**/*.ts",
+    "./src/**/*.tsx"
+  ]
 }

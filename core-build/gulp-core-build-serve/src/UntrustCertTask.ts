@@ -3,7 +3,8 @@
 
 import { GulpTask } from '@microsoft/gulp-core-build';
 import * as Gulp from 'gulp';
-import CertificateStoreType from './CertificateStore';
+import { CertificateStore } from './CertificateStore';
+import { untrustCertificate } from './certificates';
 
 /**
  * On Windows, this task removes the certificate with the expected serial number from the user's
@@ -12,19 +13,14 @@ import CertificateStoreType from './CertificateStore';
  *  other platforms, the user must untrust the certificate manually. On all platforms,
  *  the certificate and private key are deleted from the user's home directory.
  */
-export default class UntrustCertTask extends GulpTask<void> {
+export class UntrustCertTask extends GulpTask<void> {
   constructor() {
     super('untrust-cert');
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
-    /* tslint:disable */
-    const CertificateStore = require('./CertificateStore').default;
-    const { untrustCertificate } = require('./certificates');
-    /* tslint:enable */
-
     const untrustCertResult: boolean = untrustCertificate(this);
-    const certificateStore: CertificateStoreType = CertificateStore.instance;
+    const certificateStore: CertificateStore = CertificateStore.instance;
 
     // Clear out the certificate store
     certificateStore.certificateData = undefined;

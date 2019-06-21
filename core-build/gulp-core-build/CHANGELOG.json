@@ -2,6 +2,1914 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.9.26",
+      "tag": "@microsoft/gulp-core-build_v3.9.26",
+      "date": "Wed, 03 Apr 2019 02:58:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.0` to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.25",
+      "tag": "@microsoft/gulp-core-build_v3.9.25",
+      "date": "Tue, 02 Apr 2019 01:12:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.20` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.24",
+      "tag": "@microsoft/gulp-core-build_v3.9.24",
+      "date": "Sat, 30 Mar 2019 22:27:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.19` to `0.2.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.23",
+      "tag": "@microsoft/gulp-core-build_v3.9.23",
+      "date": "Thu, 28 Mar 2019 19:14:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.18` to `0.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.22",
+      "tag": "@microsoft/gulp-core-build_v3.9.22",
+      "date": "Tue, 26 Mar 2019 20:54:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.17` to `0.2.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.21",
+      "tag": "@microsoft/gulp-core-build_v3.9.21",
+      "date": "Sat, 23 Mar 2019 03:48:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.16` to `0.2.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.20",
+      "tag": "@microsoft/gulp-core-build_v3.9.20",
+      "date": "Thu, 21 Mar 2019 04:59:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.15` to `0.2.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.19",
+      "tag": "@microsoft/gulp-core-build_v3.9.19",
+      "date": "Thu, 21 Mar 2019 01:15:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.14` to `0.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.18",
+      "tag": "@microsoft/gulp-core-build_v3.9.18",
+      "date": "Wed, 20 Mar 2019 19:14:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.1` to `3.13.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.13` to `0.2.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.17",
+      "tag": "@microsoft/gulp-core-build_v3.9.17",
+      "date": "Mon, 18 Mar 2019 04:28:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.12.0` to `3.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.12` to `0.2.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.16",
+      "tag": "@microsoft/gulp-core-build_v3.9.16",
+      "date": "Fri, 15 Mar 2019 19:13:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.11` to `0.2.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.15",
+      "tag": "@microsoft/gulp-core-build_v3.9.15",
+      "date": "Wed, 13 Mar 2019 19:13:14 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.10` to `0.2.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.14",
+      "tag": "@microsoft/gulp-core-build_v3.9.14",
+      "date": "Wed, 13 Mar 2019 01:14:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.9` to `0.2.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.13",
+      "tag": "@microsoft/gulp-core-build_v3.9.13",
+      "date": "Mon, 11 Mar 2019 16:13:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.8` to `0.2.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.12",
+      "tag": "@microsoft/gulp-core-build_v3.9.12",
+      "date": "Tue, 05 Mar 2019 17:13:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.7` to `0.2.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.11",
+      "tag": "@microsoft/gulp-core-build_v3.9.11",
+      "date": "Mon, 04 Mar 2019 17:13:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.6` to `0.2.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.10",
+      "tag": "@microsoft/gulp-core-build_v3.9.10",
+      "date": "Wed, 27 Feb 2019 22:13:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.11.1` to `3.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.5` to `0.2.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.9",
+      "tag": "@microsoft/gulp-core-build_v3.9.9",
+      "date": "Wed, 27 Feb 2019 17:13:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.11.0` to `3.11.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.4` to `0.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.8",
+      "tag": "@microsoft/gulp-core-build_v3.9.8",
+      "date": "Mon, 18 Feb 2019 17:13:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.10.0` to `3.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.3` to `0.2.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.7",
+      "tag": "@microsoft/gulp-core-build_v3.9.7",
+      "date": "Tue, 12 Feb 2019 17:13:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.2.2` to `0.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.6",
+      "tag": "@microsoft/gulp-core-build_v3.9.6",
+      "date": "Mon, 11 Feb 2019 10:32:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.5.1` to `0.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.5",
+      "tag": "@microsoft/gulp-core-build_v3.9.5",
+      "date": "Mon, 11 Feb 2019 03:31:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.9.0` to `3.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.4",
+      "tag": "@microsoft/gulp-core-build_v3.9.4",
+      "date": "Wed, 30 Jan 2019 20:49:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.4.0` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.3",
+      "tag": "@microsoft/gulp-core-build_v3.9.3",
+      "date": "Sat, 19 Jan 2019 03:47:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.4` to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.2",
+      "tag": "@microsoft/gulp-core-build_v3.9.2",
+      "date": "Tue, 15 Jan 2019 17:04:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove karma task."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.1",
+      "tag": "@microsoft/gulp-core-build_v3.9.1",
+      "date": "Thu, 10 Jan 2019 01:57:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.3` to `3.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.3` to `0.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.0",
+      "tag": "@microsoft/gulp-core-build_v3.9.0",
+      "date": "Mon, 07 Jan 2019 17:04:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade Jest to version 23."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.57",
+      "tag": "@microsoft/gulp-core-build_v3.8.57",
+      "date": "Wed, 19 Dec 2018 05:57:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.2` to `3.8.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.2` to `0.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.56",
+      "tag": "@microsoft/gulp-core-build_v3.8.56",
+      "date": "Thu, 13 Dec 2018 02:58:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove unused jju dependency"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.1` to `3.8.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.1` to `0.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.55",
+      "tag": "@microsoft/gulp-core-build_v3.8.55",
+      "date": "Wed, 12 Dec 2018 17:04:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.8.0` to `3.8.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.3.0` to `0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.54",
+      "tag": "@microsoft/gulp-core-build_v3.8.54",
+      "date": "Sat, 08 Dec 2018 06:35:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.2.1` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.53",
+      "tag": "@microsoft/gulp-core-build_v3.8.53",
+      "date": "Fri, 07 Dec 2018 17:04:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.7.1` to `3.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.2.0` to `0.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.52",
+      "tag": "@microsoft/gulp-core-build_v3.8.52",
+      "date": "Fri, 30 Nov 2018 23:34:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.1.1` to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.51",
+      "tag": "@microsoft/gulp-core-build_v3.8.51",
+      "date": "Thu, 29 Nov 2018 07:02:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.7.0` to `3.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.1.0` to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.50",
+      "tag": "@microsoft/gulp-core-build_v3.8.50",
+      "date": "Thu, 29 Nov 2018 00:35:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.0\" from `0.0.0` to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.49",
+      "tag": "@microsoft/gulp-core-build_v3.8.49",
+      "date": "Wed, 28 Nov 2018 19:29:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.5` to `0.5.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.48",
+      "tag": "@microsoft/gulp-core-build_v3.8.48",
+      "date": "Wed, 28 Nov 2018 02:17:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.6.0` to `3.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.4` to `0.5.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.47",
+      "tag": "@microsoft/gulp-core-build_v3.8.47",
+      "date": "Fri, 16 Nov 2018 21:37:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.2` to `3.6.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.3` to `0.5.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.46",
+      "tag": "@microsoft/gulp-core-build_v3.8.46",
+      "date": "Fri, 16 Nov 2018 00:59:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.2` to `0.5.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.45",
+      "tag": "@microsoft/gulp-core-build_v3.8.45",
+      "date": "Fri, 09 Nov 2018 23:07:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.1` to `0.5.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.44",
+      "tag": "@microsoft/gulp-core-build_v3.8.44",
+      "date": "Wed, 07 Nov 2018 21:04:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.1` to `3.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.43",
+      "tag": "@microsoft/gulp-core-build_v3.8.43",
+      "date": "Wed, 07 Nov 2018 17:03:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.4` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.42",
+      "tag": "@microsoft/gulp-core-build_v3.8.42",
+      "date": "Mon, 05 Nov 2018 17:04:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove all dependencies on the \"rimraf\" library"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.5.0` to `3.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.3` to `0.4.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.41",
+      "tag": "@microsoft/gulp-core-build_v3.8.41",
+      "date": "Thu, 01 Nov 2018 21:33:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.2` to `0.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.40",
+      "tag": "@microsoft/gulp-core-build_v3.8.40",
+      "date": "Thu, 01 Nov 2018 19:32:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.39",
+      "tag": "@microsoft/gulp-core-build_v3.8.39",
+      "date": "Wed, 31 Oct 2018 17:00:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.38",
+      "tag": "@microsoft/gulp-core-build_v3.8.38",
+      "date": "Sat, 27 Oct 2018 03:45:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.3.0` to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.37",
+      "tag": "@microsoft/gulp-core-build_v3.8.37",
+      "date": "Sat, 27 Oct 2018 02:17:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.2.0` to `0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.36",
+      "tag": "@microsoft/gulp-core-build_v3.8.36",
+      "date": "Sat, 27 Oct 2018 00:26:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.20` to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.35",
+      "tag": "@microsoft/gulp-core-build_v3.8.35",
+      "date": "Thu, 25 Oct 2018 23:20:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.4.0` to `3.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.19` to `0.1.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.34",
+      "tag": "@microsoft/gulp-core-build_v3.8.34",
+      "date": "Thu, 25 Oct 2018 08:56:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.18` to `0.1.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.33",
+      "tag": "@microsoft/gulp-core-build_v3.8.33",
+      "date": "Wed, 24 Oct 2018 16:03:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.3.1` to `3.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.17` to `0.1.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.32",
+      "tag": "@microsoft/gulp-core-build_v3.8.32",
+      "date": "Thu, 18 Oct 2018 05:30:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace deprecated dependency gulp-util"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.31",
+      "tag": "@microsoft/gulp-core-build_v3.8.31",
+      "date": "Thu, 18 Oct 2018 01:32:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.16` to `0.1.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.30",
+      "tag": "@microsoft/gulp-core-build_v3.8.30",
+      "date": "Wed, 17 Oct 2018 21:04:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove use of a deprecated Buffer API."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.3.0` to `3.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.15` to `0.1.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.29",
+      "tag": "@microsoft/gulp-core-build_v3.8.29",
+      "date": "Wed, 17 Oct 2018 14:43:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.14` to `0.1.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.28",
+      "tag": "@microsoft/gulp-core-build_v3.8.28",
+      "date": "Thu, 11 Oct 2018 23:26:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.13` to `0.1.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.27",
+      "tag": "@microsoft/gulp-core-build_v3.8.27",
+      "date": "Tue, 09 Oct 2018 06:58:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.12` to `0.1.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.26",
+      "tag": "@microsoft/gulp-core-build_v3.8.26",
+      "date": "Mon, 08 Oct 2018 16:04:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.2.0` to `3.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.11` to `0.1.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.25",
+      "tag": "@microsoft/gulp-core-build_v3.8.25",
+      "date": "Sun, 07 Oct 2018 06:15:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.1.0` to `3.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.10` to `0.1.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.24",
+      "tag": "@microsoft/gulp-core-build_v3.8.24",
+      "date": "Fri, 28 Sep 2018 16:05:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.0.1` to `3.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.9` to `0.1.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.23",
+      "tag": "@microsoft/gulp-core-build_v3.8.23",
+      "date": "Wed, 26 Sep 2018 21:39:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.8` to `0.1.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.22",
+      "tag": "@microsoft/gulp-core-build_v3.8.22",
+      "date": "Mon, 24 Sep 2018 23:06:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.7` to `0.1.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.21",
+      "tag": "@microsoft/gulp-core-build_v3.8.21",
+      "date": "Fri, 21 Sep 2018 16:04:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.6` to `0.1.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.20",
+      "tag": "@microsoft/gulp-core-build_v3.8.20",
+      "date": "Thu, 20 Sep 2018 23:57:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.5` to `0.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.19",
+      "tag": "@microsoft/gulp-core-build_v3.8.19",
+      "date": "Tue, 18 Sep 2018 21:04:56 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.4` to `0.1.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.18",
+      "tag": "@microsoft/gulp-core-build_v3.8.18",
+      "date": "Thu, 06 Sep 2018 01:25:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update \"repository\" field in package.json"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `3.0.0` to `3.0.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.3` to `0.1.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.17",
+      "tag": "@microsoft/gulp-core-build_v3.8.17",
+      "date": "Tue, 04 Sep 2018 21:34:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.2` to `0.1.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.16",
+      "tag": "@microsoft/gulp-core-build_v3.8.16",
+      "date": "Mon, 03 Sep 2018 16:04:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.1` to `0.1.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.15",
+      "tag": "@microsoft/gulp-core-build_v3.8.15",
+      "date": "Thu, 30 Aug 2018 19:23:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.1.0` to `0.1.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.1.0` to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.14",
+      "tag": "@microsoft/gulp-core-build_v3.8.14",
+      "date": "Thu, 30 Aug 2018 18:45:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the Jest task uses the global temp directory."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.13",
+      "tag": "@microsoft/gulp-core-build_v3.8.13",
+      "date": "Wed, 29 Aug 2018 21:43:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack\" from `0.0.1` to `0.1.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler\" from `0.0.1` to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.12",
+      "tag": "@microsoft/gulp-core-build_v3.8.12",
+      "date": "Wed, 29 Aug 2018 06:36:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update to use new node-core-library API"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.2.1` to `3.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.11",
+      "tag": "@microsoft/gulp-core-build_v3.8.11",
+      "date": "Thu, 23 Aug 2018 18:18:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Republish all packages in web-build-tools to resolve GitHub issue #782"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.2.0` to `2.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.10",
+      "tag": "@microsoft/gulp-core-build_v3.8.10",
+      "date": "Wed, 22 Aug 2018 20:58:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.1.1` to `2.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.9",
+      "tag": "@microsoft/gulp-core-build_v3.8.9",
+      "date": "Wed, 22 Aug 2018 16:03:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.1.0` to `2.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.8",
+      "tag": "@microsoft/gulp-core-build_v3.8.8",
+      "date": "Thu, 09 Aug 2018 21:03:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `2.0.0` to `2.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.7",
+      "tag": "@microsoft/gulp-core-build_v3.8.7",
+      "date": "Tue, 07 Aug 2018 22:27:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add explicit dependency on jsdom to workaround Jest regression #6766"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.6",
+      "tag": "@microsoft/gulp-core-build_v3.8.6",
+      "date": "Thu, 26 Jul 2018 16:04:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.5.0` to `2.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.5",
+      "tag": "@microsoft/gulp-core-build_v3.8.5",
+      "date": "Tue, 03 Jul 2018 21:03:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.4.1` to `1.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.4",
+      "tag": "@microsoft/gulp-core-build_v3.8.4",
+      "date": "Thu, 21 Jun 2018 08:27:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.4.0` to `1.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.3",
+      "tag": "@microsoft/gulp-core-build_v3.8.3",
+      "date": "Fri, 08 Jun 2018 08:43:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.3.2` to `1.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.2",
+      "tag": "@microsoft/gulp-core-build_v3.8.2",
+      "date": "Thu, 31 May 2018 01:39:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.3.1` to `1.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.1",
+      "tag": "@microsoft/gulp-core-build_v3.8.1",
+      "date": "Tue, 15 May 2018 02:26:45 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.3.0` to `1.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.8.0",
+      "tag": "@microsoft/gulp-core-build_v3.8.0",
+      "date": "Fri, 11 May 2018 22:43:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for modulePathIgnorePatterns for the Jest task"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Upgrade to Jest 22.4.3 and remove the workaround for the symlink bug"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.5",
+      "tag": "@microsoft/gulp-core-build_v3.7.5",
+      "date": "Fri, 04 May 2018 00:42:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.2.0` to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.4",
+      "tag": "@microsoft/gulp-core-build_v3.7.4",
+      "date": "Tue, 03 Apr 2018 16:05:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.1.0` to `1.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.3",
+      "tag": "@microsoft/gulp-core-build_v3.7.3",
+      "date": "Mon, 02 Apr 2018 16:05:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `1.0.0` to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.2",
+      "tag": "@microsoft/gulp-core-build_v3.7.2",
+      "date": "Mon, 26 Mar 2018 19:12:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where snapshot filenames did not follow Jest's naming convention."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.1",
+      "tag": "@microsoft/gulp-core-build_v3.7.1",
+      "date": "Fri, 23 Mar 2018 00:34:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade colors to version ~1.2.1"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.7.0",
+      "tag": "@microsoft/gulp-core-build_v3.7.0",
+      "date": "Thu, 22 Mar 2018 18:34:13 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `libESNextFolder` option"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.10",
+      "tag": "@microsoft/gulp-core-build_v3.6.10",
+      "date": "Sat, 17 Mar 2018 02:54:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.8.0` to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.9",
+      "tag": "@microsoft/gulp-core-build_v3.6.9",
+      "date": "Thu, 15 Mar 2018 16:05:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.7.3` to `0.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.8",
+      "tag": "@microsoft/gulp-core-build_v3.6.8",
+      "date": "Fri, 02 Mar 2018 01:13:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the \"relogIssues\" buld config option."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.7.2` to `0.7.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.7",
+      "tag": "@microsoft/gulp-core-build_v3.6.7",
+      "date": "Tue, 27 Feb 2018 22:05:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.7.1` to `0.7.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.6",
+      "tag": "@microsoft/gulp-core-build_v3.6.6",
+      "date": "Wed, 21 Feb 2018 22:04:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.7.0` to `0.7.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.5",
+      "tag": "@microsoft/gulp-core-build_v3.6.5",
+      "date": "Wed, 21 Feb 2018 03:13:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.6.1` to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.4",
+      "tag": "@microsoft/gulp-core-build_v3.6.4",
+      "date": "Sat, 17 Feb 2018 02:53:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.6.0` to `0.6.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.3",
+      "tag": "@microsoft/gulp-core-build_v3.6.3",
+      "date": "Fri, 16 Feb 2018 22:05:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.5.1` to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.2",
+      "tag": "@microsoft/gulp-core-build_v3.6.2",
+      "date": "Fri, 16 Feb 2018 17:05:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.5.0` to `0.5.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.1",
+      "tag": "@microsoft/gulp-core-build_v3.6.1",
+      "date": "Wed, 07 Feb 2018 17:05:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.10` to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.6.0",
+      "tag": "@microsoft/gulp-core-build_v3.6.0",
+      "date": "Fri, 26 Jan 2018 22:05:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "made default testMatch and maxWorkers arguments in Jest task overridable"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.9` to `0.4.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.3",
+      "tag": "@microsoft/gulp-core-build_v3.5.3",
+      "date": "Fri, 26 Jan 2018 17:53:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Force a patch bump in case the previous version was an empty package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.8` to `0.4.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.2",
+      "tag": "@microsoft/gulp-core-build_v3.5.2",
+      "date": "Fri, 26 Jan 2018 00:36:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.7` to `0.4.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.1",
+      "tag": "@microsoft/gulp-core-build_v3.5.1",
+      "date": "Tue, 23 Jan 2018 17:05:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace gulp-util.colors with colors package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.6` to `0.4.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.5.0",
+      "tag": "@microsoft/gulp-core-build_v3.5.0",
+      "date": "Thu, 18 Jan 2018 03:23:46 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a feature where when shouldWarningsFailBuild is true, then we will hook stderr and fail the build if anything consequential is written there"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.5` to `0.4.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.4",
+      "tag": "@microsoft/gulp-core-build_v3.4.4",
+      "date": "Thu, 18 Jan 2018 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.4` to `0.4.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.3",
+      "tag": "@microsoft/gulp-core-build_v3.4.3",
+      "date": "Wed, 17 Jan 2018 10:49:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.2` to `0.4.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.2",
+      "tag": "@microsoft/gulp-core-build_v3.4.2",
+      "date": "Fri, 12 Jan 2018 03:35:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.1` to `0.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.1",
+      "tag": "@microsoft/gulp-core-build_v3.4.1",
+      "date": "Thu, 11 Jan 2018 22:31:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "f1ba3c91dcdb8eb661fb303583f4476bce2c099f",
+            "comment": "Fix Jest error handling"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.4.0` to `0.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.0",
+      "tag": "@microsoft/gulp-core-build_v3.4.0",
+      "date": "Wed, 10 Jan 2018 20:40:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "1271a0dc21fedb882e7953f491771724f80323a1",
+            "comment": "Upgrade to Node 8"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.26` to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.7",
+      "tag": "@microsoft/gulp-core-build_v3.3.7",
+      "date": "Tue, 09 Jan 2018 17:05:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "d00b6549d13610fbb6f84be3478b532be9da0747",
+            "comment": "Get web-build-tools building with pnpm"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.25` to `0.3.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.6",
+      "tag": "@microsoft/gulp-core-build_v3.3.6",
+      "date": "Sun, 07 Jan 2018 05:12:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.24` to `0.3.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.5",
+      "tag": "@microsoft/gulp-core-build_v3.3.5",
+      "date": "Fri, 05 Jan 2018 20:26:45 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "4626d69e54f05aaabf87479626e8c1b6fcdc7eff",
+            "comment": "Specify package version for chalk. It was used without version specified."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.23` to `0.3.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.4",
+      "tag": "@microsoft/gulp-core-build_v3.3.4",
+      "date": "Fri, 05 Jan 2018 00:48:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nicholas Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "b942f54445bf01dbdb98aaa5f0007f5b95315b58",
+            "comment": "Update Jest to ~21.2.1"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.22` to `0.3.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.3",
+      "tag": "@microsoft/gulp-core-build_v3.3.3",
+      "date": "Fri, 22 Dec 2017 17:04:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.21` to `0.3.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.2",
+      "tag": "@microsoft/gulp-core-build_v3.3.2",
+      "date": "Tue, 12 Dec 2017 03:33:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.20` to `0.3.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.1",
+      "tag": "@microsoft/gulp-core-build_v3.3.1",
+      "date": "Thu, 30 Nov 2017 23:59:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Oleg F <1832418+olfilato@users.noreply.github.com>",
+            "commit": "68ba0ac17fb415cbc5ae9ec7508e9b426e50d46b",
+            "comment": "reverted addition of rootDir as a parameter for jest task"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.19` to `0.3.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.3.0",
+      "tag": "@microsoft/gulp-core-build_v3.3.0",
+      "date": "Thu, 30 Nov 2017 23:12:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Oleg F <1832418+olfilato@users.noreply.github.com>",
+            "commit": "23b9679ff4b4adbd4fd56253e7283a92091443ee",
+            "comment": "Added optional args moduleDirectories and rootDir to JestTask"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.18` to `0.3.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.9",
+      "tag": "@microsoft/gulp-core-build_v3.2.9",
+      "date": "Wed, 29 Nov 2017 17:05:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "a3b528954bebb0e683a2a860e36a568b3f778643",
+            "comment": "Add cache configuration to Jest task"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.17` to `0.3.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.8",
+      "tag": "@microsoft/gulp-core-build_v3.2.8",
+      "date": "Tue, 28 Nov 2017 23:43:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.16` to `0.3.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.7",
+      "tag": "@microsoft/gulp-core-build_v3.2.7",
+      "date": "Mon, 13 Nov 2017 17:04:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "872d10d28296059de4e844a5ece2aa95e28ac1d3",
+            "comment": "Allow settings in jest.json to override Jest task's default options"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.15` to `0.3.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.6",
+      "tag": "@microsoft/gulp-core-build_v3.2.6",
+      "date": "Mon, 06 Nov 2017 17:04:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "f5ce31ad32c1102790b4fe1d5264b7691400cb57",
+            "comment": "Automatically use --colors unless --no-colors is specified."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.14` to `0.3.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.5",
+      "tag": "@microsoft/gulp-core-build_v3.2.5",
+      "date": "Thu, 02 Nov 2017 16:05:24 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "2c58095f2f13492887cc1278c9a0cff49af9735b",
+            "comment": "lock the reference version between web build tools projects"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `0.3.13` to `0.3.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.4",
+      "tag": "@microsoft/gulp-core-build_v3.2.4",
+      "date": "Wed, 01 Nov 2017 21:06:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "e449bd6cdc3c179461be68e59590c25021cd1286",
+            "comment": "Upgrade cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.12` to `~0.3.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.3",
+      "tag": "@microsoft/gulp-core-build_v3.2.3",
+      "date": "Tue, 31 Oct 2017 21:04:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.11` to `~0.3.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.2",
+      "tag": "@microsoft/gulp-core-build_v3.2.2",
+      "date": "Tue, 31 Oct 2017 16:04:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "Nick Pape <nickpape-msft@users.noreply.github.com>",
+            "commit": "e204dd49b5af75511cf0dd8e50eb6c6c40a694a1",
+            "comment": "Fix an issue where an exception was being thrown when displaying toasts for build failures."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.10` to `~0.3.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.1",
+      "tag": "@microsoft/gulp-core-build_v3.2.1",
+      "date": "Wed, 25 Oct 2017 20:03:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.9` to `~0.3.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.2.0",
+      "tag": "@microsoft/gulp-core-build_v3.2.0",
+      "date": "Tue, 24 Oct 2017 18:17:12 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "QZ <qz2017@users.noreply.github.com>",
+            "commit": "5fe47765dbb3567bebc30cf5d7ac2205f6e655b0",
+            "comment": "Add a Jest task to support running tests on Jest"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.8` to `~0.3.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.6",
+      "tag": "@microsoft/gulp-core-build_v3.1.6",
+      "date": "Mon, 23 Oct 2017 21:53:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "author": "pgonzal <pgonzal@users.noreply.github.com>",
+            "commit": "5de032b254b632b8af0d0dd98913acef589f88d5",
+            "comment": "Updated cyclic dependencies"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.7` to `~0.3.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.5",
+      "tag": "@microsoft/gulp-core-build_v3.1.5",
+      "date": "Fri, 20 Oct 2017 19:57:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.6` to `~0.3.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.4",
+      "tag": "@microsoft/gulp-core-build_v3.1.4",
+      "date": "Fri, 20 Oct 2017 01:52:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.5` to `~0.3.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.3",
+      "tag": "@microsoft/gulp-core-build_v3.1.3",
+      "date": "Fri, 20 Oct 2017 01:04:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.4` to `~0.3.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.2",
+      "tag": "@microsoft/gulp-core-build_v3.1.2",
+      "date": "Thu, 05 Oct 2017 01:05:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.2` to `~0.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.1",
+      "tag": "@microsoft/gulp-core-build_v3.1.1",
+      "date": "Thu, 28 Sep 2017 01:04:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.3.0` to `~0.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.0",
+      "tag": "@microsoft/gulp-core-build_v3.1.0",
+      "date": "Fri, 22 Sep 2017 01:04:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "author": "Nick Pape <nickpape@users.noreply.github.com>",
+            "commit": "481a10f460a454fb5a3e336e3cf25a1c3f710645",
+            "comment": "Upgrade to es6"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.2.11` to `~0.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.8",
+      "tag": "@microsoft/gulp-core-build_v3.0.8",
+      "date": "Wed, 20 Sep 2017 22:10:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.2.10` to `~0.2.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.0.7",
+      "tag": "@microsoft/gulp-core-build_v3.0.7",
+      "date": "Mon, 11 Sep 2017 13:04:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-core-library\" from `~0.2.9` to `~0.2.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.6",
       "tag": "@microsoft/gulp-core-build_v3.0.6",
       "date": "Fri, 08 Sep 2017 01:28:04 GMT",

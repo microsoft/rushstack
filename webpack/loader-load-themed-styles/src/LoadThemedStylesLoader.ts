@@ -1,16 +1,14 @@
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
- */
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
 /**
  * This simple loader wraps the loading of CSS in script equivalent to
  *  require("load-themed-styles").loadStyles('... css text ...').
+ * @packageDocumentation
  */
-declare const packageDescription: void; // tslint:disable-line:no-unused-variable
 
-import loaderUtils = require('loader-utils');
 import { loader } from 'webpack';
+import loaderUtils = require('loader-utils');
 
 const loadedThemedStylesPath: string = require.resolve('@microsoft/load-themed-styles');
 
@@ -42,22 +40,19 @@ export interface ILoadThemedStylesLoaderOptions {
 export class LoadThemedStylesLoader {
   private static _loadedThemedStylesPath: string = loadedThemedStylesPath;
 
-  /**
-   * Use this property to override the path to the @microsoft/load-themed-styles package.
-   */
   public static set loadedThemedStylesPath(value: string) {
     LoadThemedStylesLoader._loadedThemedStylesPath = value;
   }
 
   /**
-   * Use this property to override the path to the @microsoft/load-themed-styles package.
+   * Use this property to override the path to the `@microsoft/load-themed-styles` package.
    */
   public static get loadedThemedStylesPath(): string {
     return LoadThemedStylesLoader._loadedThemedStylesPath;
   }
 
   /**
-   * Reset the path to the @microsoft/load-themed-styles package to the default.
+   * Reset the path to the `@microsoft/load-themed-styles package` to the default.
    */
   public static resetLoadedThemedStylesPath(): void {
     LoadThemedStylesLoader._loadedThemedStylesPath = loadedThemedStylesPath;

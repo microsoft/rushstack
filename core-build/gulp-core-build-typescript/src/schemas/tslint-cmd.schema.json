@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+
+  "title": "Tslint Task configuration",
+  "description": "Defines configuration options for the tslint task",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "buildDirectory": {
+      "description": "The directory in which tslint should be invoked.",
+      "type": "string"
+    },
+    "displayAsError": {
+      "description": "If true, displays warnings as errors. Defaults to false.",
+      "type": "boolean"
+    }
+  }
+}

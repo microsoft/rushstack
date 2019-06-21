@@ -1,15 +1,9 @@
 {
+  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.2/includes/tsconfig-web.json",
   "compilerOptions": {
-    "target": "es5",
-    "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
-    "jsx": "react",
-    "declaration": true,
-    "sourceMap": true,
-    "experimentalDecorators": true,
     "types": [
       "webpack-env"
-    ],
-    "strictNullChecks": true
+    ]
   }
 }

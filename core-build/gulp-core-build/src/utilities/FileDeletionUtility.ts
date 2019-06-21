@@ -16,10 +16,10 @@ export class FileDeletionUtility {
   }
 
   public static deleteFiles(files: string[]) {
-    del.sync(this.escapeFilepaths(this.removeChildren(files)));
+    del.sync(this.escapeFilePaths(this.removeChildren(files)));
   }
 
-  public static escapeFilepaths(files: string[]): string[] {
+  public static escapeFilePaths(files: string[]): string[] {
     return files.map((file: string) => {
       return globEscape(file);
     });
@@ -56,13 +56,13 @@ export class FileDeletionUtility {
     return filesToDelete;
   }
 
-  public static isParentDirectory(directory: string | undefined, filepath: string | undefined): boolean {
-    if (!directory || !filepath) {
+  public static isParentDirectory(directory: string | undefined, filePath: string | undefined): boolean {
+    if (!directory || !filePath) {
       return false;
     }
 
     const directoryParts: string[] = path.resolve(directory).split(path.sep);
-    const fileParts: string[] = path.resolve(filepath).split(path.sep);
+    const fileParts: string[] = path.resolve(filePath).split(path.sep);
 
     if (directoryParts[directoryParts.length - 1] === '') {
       // this is to fix an issue with windows roots

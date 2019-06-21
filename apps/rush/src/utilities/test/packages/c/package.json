@@ -1,9 +1,0 @@
-{
-  "name": "c",
-  "version": "1.0.0",
-  "description": "Test package c",
-  "dependencies": {
-    "b": ">=1.0.0 <2.0.0",
-    "handlebars": "3.0.0"
-  }
-}

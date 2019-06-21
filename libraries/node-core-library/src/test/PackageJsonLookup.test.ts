@@ -1,30 +1,59 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-/// <reference types="mocha" />
-/* tslint:disable:no-function-expression - Mocha uses a poorly scoped "this" pointer */
-
-import { assert } from 'chai';
 import * as path from 'path';
 import { PackageJsonLookup } from '../PackageJsonLookup';
+import { IPackageJson, INodePackageJson } from '../IPackageJson';
+import { FileConstants } from '../Constants';
 
-describe('PackageJsonLookup', function (): void {
+describe('PackageJsonLookup', () => {
 
-  describe('basic tests', function (): void {
+  describe('basic tests', () => {
 
-    it('getPackageName() test', function (): void {
-      const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-      const sourceFilePath: string = path.join(__dirname, './test-data/example-package');
-      assert.equal(packageJsonLookup.getPackageName(sourceFilePath), 'example-package');
+    test('', () => {
+      expect(PackageJsonLookup.loadOwnPackageJson(__dirname).name).toEqual('@microsoft/node-core-library');
     });
 
-    it('tryGetPackageFolder() test', function (): void {
+    test('tryLoadPackageJsonFor() test', () => {
+      const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+      const sourceFilePath: string = path.join(__dirname, './test-data/example-package');
+      const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(sourceFilePath);
+      expect(packageJson).toBeDefined();
+      if (packageJson) {
+        expect(packageJson.name).toEqual('example-package');
+        expect(packageJson.version).toEqual('1.0.0');
+
+        // The "nonstandardField" should have been trimmed because loadExtraFields=false
+        expect(packageJson).not.toHaveProperty('nonstandardField');
+      }
+    });
+
+    test('tryLoadNodePackageJsonFor() test package with no version', () => {
+      const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+      const sourceFilePath: string = path.join(__dirname, './test-data/example-package-no-version');
+      const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadNodePackageJsonFor(sourceFilePath);
+      expect(packageJson).toBeDefined();
+      if (packageJson) {
+        expect(packageJson.name).toEqual('example-package');
+        expect(packageJson.version).not.toBeDefined();
+
+        // The "nonstandardField" should have been trimmed because loadExtraFields=false
+        expect(packageJson).not.toHaveProperty('nonstandardField');
+      }
+    });
+
+    test('tryGetPackageFolderFor() test', () => {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package/src/ExampleFile.txt');
 
       // Example: C:\web-build-tools\libraries\node-core-library\src\test\example-package
-      const foundPath: string | undefined = packageJsonLookup.tryGetPackageFolder(sourceFilePath);
-      assert.isTrue(foundPath && foundPath.search(/[\\/]example-package$/i) >= 0, 'Unexpected result: ' + foundPath);
+      const foundFolder: string | undefined = packageJsonLookup.tryGetPackageFolderFor(sourceFilePath);
+      expect(foundFolder).toBeDefined();
+      expect(foundFolder!.search(/[\\/]example-package$/i)).toBeGreaterThan(0);
+
+      const foundFile: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(sourceFilePath);
+
+      expect(foundFile).toEqual(path.join(foundFolder || '', FileConstants.PackageJson));
     });
   });
 });

@@ -1,0 +1,70 @@
+{
+  "title": "Jest Task configuration",
+  "description": "Defines Jest task configuration. Same definitions as Jest CLI has.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "isEnabled": {
+      "description": "Indicate whether the test is enabled",
+      "type": "boolean",
+      "default": false
+    },
+    "cache": {
+      "description": "Indicate whether Jest cache is enabled or not",
+      "type": "boolean"
+    },
+    "cacheDirectory": {
+      "description": "The directory where Jest should store its cached information",
+      "type": "string"
+    },
+    "collectCoverageFrom": {
+      "description": "Same as Jest CLI option collectCoverageFrom",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "coverage": {
+      "description": "Same as Jest CLI option coverage",
+      "type": "boolean",
+      "default": true
+    },
+    "coverageReporters": {
+      "description": "Same as Jest CLI option coverageReporters",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "testPathIgnorePatterns": {
+      "description": "Same as Jest CLI option testPathIgnorePatterns",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "moduleDirectories": {
+      "description": "Same as Jest CLI option moduleDirectories",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "maxWorkers": {
+      "description": "Same as Jest CLI option maxWorkers",
+      "type": "number"
+    },
+    "testMatch": {
+      "description": "Same as Jest CLI option testMatch",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

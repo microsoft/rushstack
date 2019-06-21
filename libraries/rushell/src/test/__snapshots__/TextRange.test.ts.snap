@@ -1,0 +1,681 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`construction scenarios: subRange 1`] = `
+TextRange {
+  "buffer": "0123456789",
+  "end": 6,
+  "pos": 3,
+}
+`;
+
+exports[`getLocation() CR string 1`] = `
+Object {
+  "c": "[r]",
+  "context": "[r]",
+  "i": -1,
+  "location": Object {
+    "column": 0,
+    "line": 0,
+  },
+}
+`;
+
+exports[`getLocation() CR string 2`] = `
+Object {
+  "c": "[r]",
+  "context": "[r]",
+  "i": 0,
+  "location": Object {
+    "column": 1,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() CR string 3`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": 1,
+  "location": Object {
+    "column": 1,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() CR string 4`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": 2,
+  "location": Object {
+    "column": 0,
+    "line": 0,
+  },
+}
+`;
+
+exports[`getLocation() LF string 1`] = `
+Object {
+  "c": "[n]",
+  "context": "[n]",
+  "i": -1,
+  "location": Object {
+    "column": 0,
+    "line": 0,
+  },
+}
+`;
+
+exports[`getLocation() LF string 2`] = `
+Object {
+  "c": "[n]",
+  "context": "[n]",
+  "i": 0,
+  "location": Object {
+    "column": 1,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() LF string 3`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": 1,
+  "location": Object {
+    "column": 1,
+    "line": 2,
+  },
+}
+`;
+
+exports[`getLocation() LF string 4`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": 2,
+  "location": Object {
+    "column": 0,
+    "line": 0,
+  },
+}
+`;
+
+exports[`getLocation() basic 1`] = `
+Object {
+  "c": "L",
+  "context": "L1[n]L2[n][n]L4[n]",
+  "i": -1,
+  "location": Object {
+    "column": 0,
+    "line": 0,
+  },
+}
+`;
+
+exports[`getLocation() basic 2`] = `
+Object {
+  "c": "L",
+  "context": "L1[n]L2[n][n]L4[n]",
+  "i": 0,
+  "location": Object {
+    "column": 1,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() basic 3`] = `
+Object {
+  "c": "1",
+  "context": "1[n]L2[n][n]L4[n]L",
+  "i": 1,
+  "location": Object {
+    "column": 2,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() basic 4`] = `
+Object {
+  "c": "[n]",
+  "context": "[n]L2[n][n]L4[n]L5",
+  "i": 2,
+  "location": Object {
+    "column": 3,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() basic 5`] = `
+Object {
+  "c": "L",
+  "context": "L2[n][n]L4[n]L5+",
+  "i": 3,
+  "location": Object {
+    "column": 1,
+    "line": 2,
+  },
+}
+`;
+
+exports[`getLocation() basic 6`] = `
+Object {
+  "c": "2",
+  "context": "2[n][n]L4[n]L5+C",
+  "i": 4,
+  "location": Object {
+    "column": 2,
+    "line": 2,
+  },
+}
+`;
+
+exports[`getLocation() basic 7`] = `
+Object {
+  "c": "[n]",
+  "context": "[n][n]L4[n]L5+CR",
+  "i": 5,
+  "location": Object {
+    "column": 3,
+    "line": 2,
+  },
+}
+`;
+
+exports[`getLocation() basic 8`] = `
+Object {
+  "c": "[n]",
+  "context": "[n]L4[n]L5+CR[r]",
+  "i": 6,
+  "location": Object {
+    "column": 1,
+    "line": 3,
+  },
+}
+`;
+
+exports[`getLocation() basic 9`] = `
+Object {
+  "c": "L",
+  "context": "L4[n]L5+CR[r]L",
+  "i": 7,
+  "location": Object {
+    "column": 1,
+    "line": 4,
+  },
+}
+`;
+
+exports[`getLocation() basic 10`] = `
+Object {
+  "c": "4",
+  "context": "4[n]L5+CR[r]L5",
+  "i": 8,
+  "location": Object {
+    "column": 2,
+    "line": 4,
+  },
+}
+`;
+
+exports[`getLocation() basic 11`] = `
+Object {
+  "c": "[n]",
+  "context": "[n]L5+CR[r]L5+",
+  "i": 9,
+  "location": Object {
+    "column": 3,
+    "line": 4,
+  },
+}
+`;
+
+exports[`getLocation() basic 12`] = `
+Object {
+  "c": "L",
+  "context": "L5+CR[r]L5+C",
+  "i": 10,
+  "location": Object {
+    "column": 1,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 13`] = `
+Object {
+  "c": "5",
+  "context": "5+CR[r]L5+CR",
+  "i": 11,
+  "location": Object {
+    "column": 2,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 14`] = `
+Object {
+  "c": "+",
+  "context": "+CR[r]L5+CRL",
+  "i": 12,
+  "location": Object {
+    "column": 3,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 15`] = `
+Object {
+  "c": "C",
+  "context": "CR[r]L5+CRLF",
+  "i": 13,
+  "location": Object {
+    "column": 4,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 16`] = `
+Object {
+  "c": "R",
+  "context": "R[r]L5+CRLF[r]",
+  "i": 14,
+  "location": Object {
+    "column": 5,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 17`] = `
+Object {
+  "c": "[r]",
+  "context": "[r]L5+CRLF[r][n]",
+  "i": 15,
+  "location": Object {
+    "column": 6,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 18`] = `
+Object {
+  "c": "L",
+  "context": "L5+CRLF[r][n]L",
+  "i": 16,
+  "location": Object {
+    "column": 6,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 19`] = `
+Object {
+  "c": "5",
+  "context": "5+CRLF[r][n]L6",
+  "i": 17,
+  "location": Object {
+    "column": 7,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 20`] = `
+Object {
+  "c": "+",
+  "context": "+CRLF[r][n]L6+",
+  "i": 18,
+  "location": Object {
+    "column": 8,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 21`] = `
+Object {
+  "c": "C",
+  "context": "CRLF[r][n]L6+L",
+  "i": 19,
+  "location": Object {
+    "column": 9,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 22`] = `
+Object {
+  "c": "R",
+  "context": "RLF[r][n]L6+LF",
+  "i": 20,
+  "location": Object {
+    "column": 10,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 23`] = `
+Object {
+  "c": "L",
+  "context": "LF[r][n]L6+LFC",
+  "i": 21,
+  "location": Object {
+    "column": 11,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 24`] = `
+Object {
+  "c": "F",
+  "context": "F[r][n]L6+LFCR",
+  "i": 22,
+  "location": Object {
+    "column": 12,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 25`] = `
+Object {
+  "c": "[r]",
+  "context": "[r][n]L6+LFCR[n]",
+  "i": 23,
+  "location": Object {
+    "column": 13,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 26`] = `
+Object {
+  "c": "[n]",
+  "context": "[n]L6+LFCR[n][r]",
+  "i": 24,
+  "location": Object {
+    "column": 13,
+    "line": 5,
+  },
+}
+`;
+
+exports[`getLocation() basic 27`] = `
+Object {
+  "c": "L",
+  "context": "L6+LFCR[n][r]L",
+  "i": 25,
+  "location": Object {
+    "column": 1,
+    "line": 6,
+  },
+}
+`;
+
+exports[`getLocation() basic 28`] = `
+Object {
+  "c": "6",
+  "context": "6+LFCR[n][r]L7",
+  "i": 26,
+  "location": Object {
+    "column": 2,
+    "line": 6,
+  },
+}
+`;
+
+exports[`getLocation() basic 29`] = `
+Object {
+  "c": "+",
+  "context": "+LFCR[n][r]L7",
+  "i": 27,
+  "location": Object {
+    "column": 3,
+    "line": 6,
+  },
+}
+`;
+
+exports[`getLocation() basic 30`] = `
+Object {
+  "c": "L",
+  "context": "LFCR[n][r]L7",
+  "i": 28,
+  "location": Object {
+    "column": 4,
+    "line": 6,
+  },
+}
+`;
+
+exports[`getLocation() basic 31`] = `
+Object {
+  "c": "F",
+  "context": "FCR[n][r]L7",
+  "i": 29,
+  "location": Object {
+    "column": 5,
+    "line": 6,
+  },
+}
+`;
+
+exports[`getLocation() basic 32`] = `
+Object {
+  "c": "C",
+  "context": "CR[n][r]L7",
+  "i": 30,
+  "location": Object {
+    "column": 6,
+    "line": 6,
+  },
+}
+`;
+
+exports[`getLocation() basic 33`] = `
+Object {
+  "c": "R",
+  "context": "R[n][r]L7",
+  "i": 31,
+  "location": Object {
+    "column": 7,
+    "line": 6,
+  },
+}
+`;
+
+exports[`getLocation() basic 34`] = `
+Object {
+  "c": "[n]",
+  "context": "[n][r]L7",
+  "i": 32,
+  "location": Object {
+    "column": 8,
+    "line": 6,
+  },
+}
+`;
+
+exports[`getLocation() basic 35`] = `
+Object {
+  "c": "[r]",
+  "context": "[r]L7",
+  "i": 33,
+  "location": Object {
+    "column": 1,
+    "line": 7,
+  },
+}
+`;
+
+exports[`getLocation() basic 36`] = `
+Object {
+  "c": "L",
+  "context": "L7",
+  "i": 34,
+  "location": Object {
+    "column": 1,
+    "line": 7,
+  },
+}
+`;
+
+exports[`getLocation() basic 37`] = `
+Object {
+  "c": "7",
+  "context": "7",
+  "i": 35,
+  "location": Object {
+    "column": 2,
+    "line": 7,
+  },
+}
+`;
+
+exports[`getLocation() basic 38`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": 36,
+  "location": Object {
+    "column": 3,
+    "line": 7,
+  },
+}
+`;
+
+exports[`getLocation() basic 39`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": 37,
+  "location": Object {
+    "column": 0,
+    "line": 0,
+  },
+}
+`;
+
+exports[`getLocation() empty string 1`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": -1,
+  "location": Object {
+    "column": 0,
+    "line": 0,
+  },
+}
+`;
+
+exports[`getLocation() empty string 2`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": 0,
+  "location": Object {
+    "column": 1,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() empty string 3`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": 1,
+  "location": Object {
+    "column": 0,
+    "line": 0,
+  },
+}
+`;
+
+exports[`getLocation() tab characters 1`] = `
+Object {
+  "c": "1",
+  "context": "1[t]3",
+  "i": -1,
+  "location": Object {
+    "column": 0,
+    "line": 0,
+  },
+}
+`;
+
+exports[`getLocation() tab characters 2`] = `
+Object {
+  "c": "1",
+  "context": "1[t]3",
+  "i": 0,
+  "location": Object {
+    "column": 1,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() tab characters 3`] = `
+Object {
+  "c": "[t]",
+  "context": "[t]3",
+  "i": 1,
+  "location": Object {
+    "column": 2,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() tab characters 4`] = `
+Object {
+  "c": "3",
+  "context": "3",
+  "i": 2,
+  "location": Object {
+    "column": 3,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() tab characters 5`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": 3,
+  "location": Object {
+    "column": 4,
+    "line": 1,
+  },
+}
+`;
+
+exports[`getLocation() tab characters 6`] = `
+Object {
+  "c": "",
+  "context": "",
+  "i": 4,
+  "location": Object {
+    "column": 0,
+    "line": 0,
+  },
+}
+`;

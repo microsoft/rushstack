@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush version-policies.json config file",
+  "description": "For use with the Rush tool, this file defines version policies. See http://rushjs.io for details.",
+
+  "type": "array",
+  "items": {
+    "type": "object",
+    "allOf": [
+      {
+        "oneOf": [
+          { "$ref": "#/definitions/lockStepVersion" },
+          { "$ref": "#/definitions/individualVersion" }
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "policyName": {
+            "description": "The name of the version policy",
+            "type": "string"
+          },
+          "dependencies": {
+            "type": "object",
+            "description": "Behavior when handling package dependencies during version bumps and publishing",
+            "properties": {
+              "versionFormatForPublish": {
+                "description": "The version to use for dependencies when publishing",
+                "type": "string",
+                "enum": ["original", "exact"]
+              },
+              "versionFormatForCommit": {
+                "description": "The version to use for dependencies when committing to source",
+                "type": "string",
+                "enum": ["original", "wildcard"]
+              }
+            },
+            "required": ["versionFormatForPublish", "versionFormatForCommit"],
+            "additionalProperties": false
+          }
+        }
+      }
+    ]
+  },
+
+  "definitions": {
+    "any-value": {
+      "type": [
+        "array",
+        "boolean",
+        "integer",
+        "number",
+        "object",
+        "string"
+      ],
+      "items": {
+        "$ref": "#/definitions/any-value"
+      }
+    },
+
+    "lockStepVersion": {
+      "type": "object",
+      "description": "Lockstep version policy",
+      "properties": {
+        "policyName": { "$ref": "#/definitions/any-value" },
+        "dependencies": { "$ref": "#/definitions/any-value" },
+
+        "definitionName": {
+          "description": "The name of version policy definition",
+          "type": "string",
+          "enum": ["lockStepVersion"]
+        },
+
+        "version": {
+          "description": "Current version for projects with lockStepVersion policy",
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9a-zA-Z.+\\-]+$"
+        },
+        "nextBump": {
+          "description": "Type of next version bump",
+          "enum": ["prerelease", "release", "minor", "patch", "major"]
+        },
+        "mainProject": {
+          "description": "The main project for this version policy",
+          "type": "string"
+        },
+        "exemptFromRushChange": {
+          "description": "If true, the version policy will not require changelog files.",
+          "type": "boolean"
+        }
+      },
+      "required": ["policyName", "definitionName", "version", "nextBump"],
+      "additionalProperties": false
+    },
+
+    "individualVersion": {
+      "type": "object",
+      "description": "Lockstep version policy",
+      "properties": {
+        "policyName": { "$ref": "#/definitions/any-value" },
+        "dependencies": { "$ref": "#/definitions/any-value" },
+
+        "definitionName": {
+          "description": "The name of version policy definition",
+          "type": "string",
+          "enum": ["individualVersion"]
+        },
+
+        "lockedMajor": {
+          "description": "The locked major version",
+          "type": "number"
+        },
+        "exemptFromRushChange": {
+          "description": "If true, the version policy will not require changelog files.",
+          "type": "boolean"
+        }
+      },
+      "required": ["policyName", "definitionName"],
+      "additionalProperties": false
+    }
+  }
+}

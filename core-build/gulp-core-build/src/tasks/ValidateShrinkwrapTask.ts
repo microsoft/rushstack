@@ -5,6 +5,7 @@ import { GulpTask } from './GulpTask';
 import gulpType = require('gulp');
 import * as path from 'path';
 import * as semver from 'semver';
+import { FileConstants } from '@microsoft/node-core-library';
 
 type ShrinkwrapDep = { [name: string]: { version: string } };
 type PackageDep = { [name: string]: string };
@@ -46,7 +47,7 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
    * resolvable in the npm-shrinkwrap file.
    */
   public executeTask(gulp: gulpType.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void {
-    const pathToPackageJson: string = path.join(this.buildConfig.rootPath, 'package.json');
+    const pathToPackageJson: string = path.join(this.buildConfig.rootPath, FileConstants.PackageJson);
     const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
 
     if (!this.fileExists(pathToPackageJson)) {

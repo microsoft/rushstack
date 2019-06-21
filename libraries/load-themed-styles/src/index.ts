@@ -64,11 +64,12 @@ interface IStyleRecord {
 
 /**
  * object returned from resolveThemableArray function
- * @styleString:  this string is the processed styles in string
- * @themable:     this boolean indicates if this style array is themable
  */
 interface IThemableArrayResolveResult {
+  /** this string is the processed styles in string */
   styleString: string;
+
+  /** this boolean indicates if this style array is themable */
   themable: boolean;
 }
 
@@ -84,19 +85,22 @@ export const enum Mode {
 /**
  * Themable styles and non-themable styles are tracked separately
  * Specify ClearStyleOptions when calling clearStyles API to specify which group of registered styles should be cleared.
- * @onlyThemable: only themable styles will be cleared
- * @onlyNonThemable: only non-themable styles will be cleared
- * @all: both themable and non-themable styles will be cleared
  */
 export const enum ClearStyleOptions {
+  /** only themable styles will be cleared */
   onlyThemable = 1,
+  /** only non-themable styles will be cleared */
   onlyNonThemable = 2,
+  /** both themable and non-themable styles will be cleared */
   all = 3
 }
 
 // Store the theming state in __themeState__ global scope for reuse in the case of duplicate
 // load-themed-styles hosted on the page.
 const _root: any = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
+
+// Nonce string to inject into script tag if one provided. This is used in CSP (Content Security Policy).
+const _styleNonce: string = _root && _root.CSPSettings && _root.CSPSettings.nonce;
 
 const _themeState: IThemeState = initializeThemeState();
 
@@ -249,7 +253,7 @@ export function loadTheme(theme: ITheme | undefined): void {
 
 /**
  * Clear already registered style elements and style records in theme_State object
- * @option: specify which group of registered styles should be cleared.
+ * @param option - specify which group of registered styles should be cleared.
  * Default to be both themable and non-themable styles will be cleared
  */
 export function clearStyles(option: ClearStyleOptions = ClearStyleOptions.all): void {
@@ -378,6 +382,9 @@ export function splitStyles(styles: string): ThemableArray {
  * @param {IStyleRecord} styleRecord May specify a style Element to update.
  */
 function registerStyles(styleArray: ThemableArray): void {
+  if (typeof document === 'undefined') {
+    return;
+  }
   const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
   const styleElement: HTMLStyleElement = document.createElement('style');
   const {
@@ -386,6 +393,9 @@ function registerStyles(styleArray: ThemableArray): void {
   } = resolveThemableArray(styleArray);
 
   styleElement.type = 'text/css';
+  if (_styleNonce) {
+    styleElement.setAttribute('nonce', _styleNonce);
+  }
   styleElement.appendChild(document.createTextNode(styleString));
   _themeState.perf.count++;
   head.appendChild(styleElement);

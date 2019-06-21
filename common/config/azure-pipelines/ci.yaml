@@ -1,0 +1,13 @@
+jobs:
+- job: PRBuild
+  condition: succeeded()
+  strategy:
+    maxParallel: 2
+    matrix:
+      'NodeJs 8':
+        NodeVersion: 8
+      'NodeJs 10':
+        NodeVersion: 10
+  steps:
+  - checkout: self
+  - template: templates/build.yaml

@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Sort.compareByValue cases 1`] = `
+Array [
+  "undefined = undefined",
+  "undefined < null",
+  "undefined < -1",
+  "undefined < 1",
+  "null > undefined",
+  "null = null",
+  "null < -1",
+  "null < 1",
+  "-1 > undefined",
+  "-1 > null",
+  "-1 = -1",
+  "-1 < 1",
+  "1 > undefined",
+  "1 > null",
+  "1 > -1",
+  "1 = 1",
+]
+`;

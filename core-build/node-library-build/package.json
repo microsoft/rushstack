@@ -1,26 +1,29 @@
 {
   "name": "@microsoft/node-library-build",
-  "version": "4.0.6",
+  "version": "6.0.67",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "tsdoc": {
+    "tsdocFlavor": "AEDoc"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/web-build-tools"
+    "url": "https://github.com/Microsoft/web-build-tools/tree/master/core-build/node-library-build"
   },
   "scripts": {
-    "build": "gulp",
-    "clean": "gulp clean",
-    "test": "gulp"
+    "build": "gulp --clean"
   },
   "dependencies": {
-    "@microsoft/gulp-core-build": "3.0.6",
-    "@microsoft/gulp-core-build-mocha": "3.0.6",
-    "@microsoft/gulp-core-build-typescript": "4.0.6",
+    "@microsoft/gulp-core-build": "3.9.26",
+    "@microsoft/gulp-core-build-mocha": "3.5.76",
+    "@microsoft/gulp-core-build-typescript": "8.1.16",
     "@types/gulp": "3.8.32",
-    "@types/node": "6.0.62",
+    "@types/node": "8.5.8",
     "gulp": "~3.9.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@microsoft/rush-stack-compiler-3.2": "0.3.19"
+  }
 }

@@ -2,42 +2,172 @@
 // See LICENSE in the project root for license information.
 
 import * as argparse from 'argparse';
-import * as colors from 'colors';
 import {
-  IBaseCommandLineDefinition,
   ICommandLineFlagDefinition,
   ICommandLineStringDefinition,
   ICommandLineStringListDefinition,
   ICommandLineIntegerDefinition,
-  ICommandLineOptionDefinition
+  ICommandLineChoiceDefinition
 } from './CommandLineDefinition';
 
 import {
   CommandLineParameter,
-  ICommandLineParserData,
-  IConverterFunction,
+  CommandLineParameterWithArgument,
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineIntegerParameter,
-  CommandLineOptionParameter
+  CommandLineChoiceParameter,
+  CommandLineParameterKind
 } from './CommandLineParameter';
+
+/**
+ * This is the argparse result data object
+ * @internal
+ */
+export interface ICommandLineParserData {
+  action: string;
+  [key: string]: any; // tslint:disable-line:no-any
+}
 
 /**
  * This is the common base class for CommandLineAction and CommandLineParser
  * that provides functionality for defining command-line parameters.
+ *
+ * @public
  */
-abstract class CommandLineParameterProvider {
+export abstract class CommandLineParameterProvider {
   private static _keyCounter: number = 0;
 
-  protected argumentParser: argparse.ArgumentParser;
-  /* tslint:disable-next-line:no-any */
-  private _parameters: CommandLineParameter<any>[];
-  private _keys: Map<string, string>;
+  private _parameters: CommandLineParameter[];
+  private _parametersByLongName: Map<string, CommandLineParameter>;
 
+  /** @internal */
+  // Third party code should not inherit subclasses or call this constructor
   constructor() {
     this._parameters = [];
-    this._keys = new Map<string, string>();
+    this._parametersByLongName = new Map<string, CommandLineParameter>();
+  }
+
+  /**
+   * Returns a collection of the parameters that were defined for this object.
+   */
+  public get parameters(): ReadonlyArray<CommandLineParameter> {
+    return this._parameters;
+  }
+
+  /**
+   * Defines a command-line parameter whose value must be a string from a fixed set of
+   * allowable choices (similar to an enum).
+   *
+   * @remarks
+   * Example:  example-tool --log-level warn
+   */
+  public defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
+    const parameter: CommandLineChoiceParameter = new CommandLineChoiceParameter(definition);
+    this._defineParameter(parameter);
+    return parameter;
+  }
+
+  /**
+   * Returns the CommandLineChoiceParameter with the specified long name.
+   * @remarks
+   * This method throws an exception if the parameter is not defined.
+   */
+  public getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.Choice);
+  }
+
+  /**
+   * Defines a command-line switch whose boolean value is true if the switch is provided,
+   * and false otherwise.
+   *
+   * @remarks
+   * Example:  example-tool --debug
+   */
+  public defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter {
+    const parameter: CommandLineFlagParameter = new CommandLineFlagParameter(definition);
+    this._defineParameter(parameter);
+    return parameter;
+  }
+
+  /**
+   * Returns the CommandLineFlagParameter with the specified long name.
+   * @remarks
+   * This method throws an exception if the parameter is not defined.
+   */
+  public getFlagParameter(parameterLongName: string): CommandLineFlagParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.Flag);
+  }
+
+  /**
+   * Defines a command-line parameter whose value is an integer.
+   *
+   * @remarks
+   * Example:  example-tool --max-attempts 5
+   */
+  public defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
+    const parameter: CommandLineIntegerParameter = new CommandLineIntegerParameter(definition);
+    this._defineParameter(parameter);
+    return parameter;
+  }
+
+  /**
+   * Returns the CommandLineIntegerParameter with the specified long name.
+   * @remarks
+   * This method throws an exception if the parameter is not defined.
+   */
+  public getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.Integer);
+  }
+
+  /**
+   * Defines a command-line parameter whose value is a single text string.
+   *
+   * @remarks
+   * Example:  example-tool --message "Hello, world!"
+   */
+  public defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter {
+    const parameter: CommandLineStringParameter = new CommandLineStringParameter(definition);
+    this._defineParameter(parameter);
+    return parameter;
+  }
+
+  /**
+   * Returns the CommandLineStringParameter with the specified long name.
+   * @remarks
+   * This method throws an exception if the parameter is not defined.
+   */
+  public getStringParameter(parameterLongName: string): CommandLineStringParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.String);
+  }
+
+  /**
+   * Defines a command-line parameter whose value is one or more text strings.
+   *
+   * @remarks
+   * Example:  example-tool --add file1.txt --add file2.txt --add file3.txt
+   */
+  public defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter {
+    const parameter: CommandLineStringListParameter = new CommandLineStringListParameter(definition);
+    this._defineParameter(parameter);
+    return parameter;
+  }
+
+  /**
+   * Returns the CommandLineStringListParameter with the specified long name.
+   * @remarks
+   * This method throws an exception if the parameter is not defined.
+   */
+  public getStringListParameter(parameterLongName: string): CommandLineStringListParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.StringList);
+  }
+
+  /**
+   * Generates the command-line help text.
+   */
+  public renderHelpText(): string {
+    return this._getArgumentParser().formatHelp();
   }
 
   /**
@@ -47,96 +177,90 @@ abstract class CommandLineParameterProvider {
   protected abstract onDefineParameters(): void;
 
   /**
-   * Defines a flag parameter.  See ICommandLineFlagDefinition for details.
+   * Retrieves the argparse object.
+   * @internal
    */
-  protected defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter {
-    return this._createParameter(options, {
-      action: 'storeTrue'
-    }) as CommandLineFlagParameter;
-  }
+  protected abstract _getArgumentParser(): argparse.ArgumentParser;
 
-  /**
-   * Defines a string parameter.
-   */
-  protected defineStringParameter(options: ICommandLineStringDefinition): CommandLineStringParameter {
-    return this._createParameter(options, undefined, options.key) as CommandLineStringParameter;
-  }
-
-  /**
-   * Defines a list of string by specifying the flag multiple times.
-   */
-  protected defineStringListParameter(options: ICommandLineStringListDefinition): CommandLineStringListParameter {
-    return this._createParameter(options, {
-      action: 'append'
-    }, options.key) as CommandLineStringListParameter;
-  }
-
-  /**
-   * Defines an integer parameter
-   */
-  protected defineIntegerParameter(options: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
-    return this._createParameter(options, {
-      type: 'int'
-    }, options.key) as CommandLineIntegerParameter;
-  }
-
-  protected defineOptionParameter(options: ICommandLineOptionDefinition): CommandLineOptionParameter {
-    return this._createParameter(options, {
-      choices: options.options
-    }) as CommandLineOptionParameter;
-  }
-
-  protected processParsedData(data: ICommandLineParserData): void {
+  /** @internal */
+  protected _processParsedData(data: ICommandLineParserData): void {
     // Fill in the values for the parameters
     for (const parameter of this._parameters) {
-      parameter.setValue(data);
+      const value: any = data[parameter._parserKey]; // tslint:disable-line:no-any
+      parameter._setValue(value);
     }
   }
 
-  private _getKey(
-    parameterLongName: string,
-    key: string = 'key_' + (CommandLineParameterProvider._keyCounter++).toString()): string {
-
-    if (this._keys.has(key)) {
-      const otherParam: string = this._keys.get(key);
-      throw colors.red(`The parameter "${parameterLongName}" tried to define a key which was already ` +
-        `defined by the "${otherParam}" parameter. Ensure that the keys values are unique.`);
-    }
-
-    this._keys.set(key, parameterLongName);
-    return key;
+  private _generateKey(): string {
+    return 'key_' + (CommandLineParameterProvider._keyCounter++).toString();
   }
 
-  private _createParameter(definition: IBaseCommandLineDefinition,
-                           argparseOptions?: argparse.ArgumentOptions,
-                           key?: string,
-                           /* tslint:disable-next-line:no-any */
-                           converter?: IConverterFunction<any>): CommandLineParameter<any> {
+  private _getParameter<T extends CommandLineParameter>(parameterLongName: string,
+    expectedKind: CommandLineParameterKind): T {
+
+    const parameter: CommandLineParameter | undefined = this._parametersByLongName.get(parameterLongName);
+    if (!parameter) {
+      throw new Error(`The parameter "${parameterLongName}" is not defined`);
+    }
+    if (parameter.kind !== expectedKind) {
+      throw new Error(`The parameter "${parameterLongName}" is of type "${CommandLineParameterKind[parameter.kind]}"`
+        + ` whereas the caller was expecting "${CommandLineParameterKind[expectedKind]}".`);
+    }
+    return parameter as T;
+  }
+
+  private _defineParameter(parameter: CommandLineParameter): void {
     const names: string[] = [];
-    if (definition.parameterShortName) {
-      names.push(definition.parameterShortName);
+    if (parameter.shortName) {
+      names.push(parameter.shortName);
     }
-    names.push(definition.parameterLongName);
+    names.push(parameter.longName);
 
-    /* tslint:disable:no-any */
-    const result: CommandLineParameter<any> =
-      new CommandLineParameter<any>(this._getKey(definition.parameterLongName, key), converter);
-    /* tslint:enable:no-any */
+    parameter._parserKey = this._generateKey();
 
-    this._parameters.push(result);
+    let finalDescription: string = parameter.description;
 
-    const baseArgparseOptions: argparse.ArgumentOptions = {
-      help: definition.description,
-      dest: result.key
+    const supplementaryNotes: string[] = [];
+    parameter._getSupplementaryNotes(supplementaryNotes);
+    if (supplementaryNotes.length > 0) {
+      // If they left the period off the end of their sentence, then add one.
+      if (finalDescription.match(/[a-z0-9]\s*$/i)) {
+        finalDescription = finalDescription.trimRight() + '.';
+      }
+      // Append the supplementary text
+      finalDescription += ' ' + supplementaryNotes.join(' ');
+    }
+
+    // NOTE: Our "environmentVariable" feature takes precedence over argparse's "defaultValue",
+    // so we have to reimplement that feature.
+    const argparseOptions: argparse.ArgumentOptions = {
+      help: finalDescription,
+      dest: parameter._parserKey,
+      metavar: (parameter as CommandLineParameterWithArgument).argumentName || undefined,
+      required: parameter.required
     };
 
-    Object.keys(argparseOptions || {}).forEach((keyVal: string) => {
-      baseArgparseOptions[keyVal] = argparseOptions[keyVal];
-    });
+    switch (parameter.kind) {
+      case CommandLineParameterKind.Choice:
+        const choiceParameter: CommandLineChoiceParameter = parameter as CommandLineChoiceParameter;
+        argparseOptions.choices = choiceParameter.alternatives as string[];
+        break;
+      case CommandLineParameterKind.Flag:
+        argparseOptions.action = 'storeTrue';
+        break;
+      case CommandLineParameterKind.Integer:
+        argparseOptions.type = 'int';
+        break;
+      case CommandLineParameterKind.String:
+        break;
+      case CommandLineParameterKind.StringList:
+        argparseOptions.action = 'append';
+        break;
+    }
 
-    this.argumentParser.addArgument(names, baseArgparseOptions);
-    return result;
+    this._getArgumentParser().addArgument(names, argparseOptions);
+
+    this._parameters.push(parameter);
+    this._parametersByLongName.set(parameter.longName, parameter);
   }
 }
-
-export default CommandLineParameterProvider;

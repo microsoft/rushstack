@@ -54,6 +54,11 @@ export interface IBuildConfig {
   libES6Folder?: string;
 
   /**
+   * Unbundled esnext modules folder, which can be optionally set to cause build tasks to output esnext modules.
+   */
+  libESNextFolder?: string;
+
+  /**
    * Dist folder, which includes all bundled resources which would be copied to a CDN for the project.
    */
   distFolder: string;
@@ -96,7 +101,7 @@ export interface IBuildConfig {
   /**
    * Should warnings be written to STDERR and cause build to return non-zero exit code
    */
-  shouldWarningsFailBuild?: boolean;
+  shouldWarningsFailBuild: boolean;
 
   /**
    * Arguments passed in.
@@ -122,4 +127,10 @@ export interface IBuildConfig {
    * Flag used to indicate if the build is redundant and should be exited prematurely.
    */
   isRedundantBuild?: boolean;
+
+  /**
+   * Flag to indicate whether Jest is enabled.
+   * If Jest is enabled, mocha and Karma are disabled.
+   */
+  jestEnabled?: boolean;
 }

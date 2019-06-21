@@ -1,0 +1,16 @@
+steps:
+- task: NodeTool@0
+  displayName: 'Use Node $(NodeVersion).x'
+  inputs:
+    versionSpec: '$(NodeVersion).x'
+    checkLatest: true
+- script: 'git config --local user.email rushbot@users.noreply.github.com'
+  displayName: 'git config email'
+- script: 'git config --local user.name Rushbot'
+  displayName: 'git config name'
+- script: 'node common\scripts\install-run-rush.js change --verify'
+  displayName: 'Verify Change Logs'
+- script: 'node common\scripts\install-run-rush.js install'
+  displayName: 'Rush Install'
+- script: 'node common\scripts\install-run-rush.js rebuild --verbose --production'
+  displayName: 'Rush Rebuild'
