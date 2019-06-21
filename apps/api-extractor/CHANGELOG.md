@@ -1,6 +1,40 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 13 May 2019 02:08:35 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Jun 2019 19:12:33 GMT and should not be manually modified.
+
+## 7.2.1
+Wed, 12 Jun 2019 19:12:33 GMT
+
+*Version update only*
+
+## 7.2.0
+Tue, 11 Jun 2019 00:48:06 GMT
+
+### Minor changes
+
+- Generate ApiTypeParameter entries and type alias types
+
+## 7.1.8
+Wed, 05 Jun 2019 19:12:34 GMT
+
+### Patches
+
+- Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number
+
+## 7.1.7
+Tue, 04 Jun 2019 05:51:53 GMT
+
+### Patches
+
+- Upgrade api-extractor-model to remove ApiConstructor.isStatic, since TypeScript constructors cannot be static
+- Improve handling of symbolic property and method names.
+
+## 7.1.6
+Mon, 27 May 2019 04:13:44 GMT
+
+### Patches
+
+- Fix incorrect path resolution for the "extends" field when loading tsconfig.json
 
 ## 7.1.5
 Mon, 13 May 2019 02:08:35 GMT

@@ -5,6 +5,7 @@ import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { IApiDeclaredItemOptions, ApiDeclaredItem, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link ApiPropertyItem}.
@@ -34,8 +35,10 @@ export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclared
   public readonly propertyTypeExcerpt: Excerpt;
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiPropertyItemOptions>, jsonObject: IApiPropertyItemJson): void {
-    super.onDeserializeInto(options, jsonObject);
+  public static onDeserializeInto(options: Partial<IApiPropertyItemOptions>, context: DeserializerContext,
+    jsonObject: IApiPropertyItemJson): void {
+
+    super.onDeserializeInto(options, context, jsonObject);
 
     options.propertyTypeTokenRange = jsonObject.propertyTypeTokenRange;
   }

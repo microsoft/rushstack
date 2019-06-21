@@ -104,7 +104,7 @@ To invoke the parser, the application entry point will do something like this:
 
 ```typescript
 const commandLine: WidgetCommandLine = new WidgetCommandLine();
-commandLine.execute(process.argv);
+commandLine.execute();
 ```
 
 When we run `widget --verbose push --force`, the `PushAction.onExecute()` method will get invoked and then your business logic takes over.
@@ -189,7 +189,7 @@ You can also mix the two models.  For example, we could augment the `WidgetComma
 
 ### Further reading
 
-The [API reference](http://rushstack.io/api/ts-command-line.html) has complete documentation for the library.
+The [API reference](https://microsoft.github.io/web-build-tools/api/) has complete documentation for the library.
 
 Here are some real world GitHub projects that illustrate different use cases for **ts-command-line**:
 

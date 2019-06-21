@@ -1,6 +1,31 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 06 May 2019 21:03:32 GMT and should not be manually modified.
+This log was last generated on Thu, 13 Jun 2019 04:46:18 GMT and should not be manually modified.
+
+## 5.9.1
+Thu, 13 Jun 2019 04:46:18 GMT
+
+### Updates
+
+- Fix an issue where custom command-line parameters weren't passed to projects' builds.
+
+## 5.9.0
+Tue, 11 Jun 2019 02:26:20 GMT
+
+### Updates
+
+- (BEHAVIOR CHANGE) Fix an issue where CI jobs could succeed even if a task reported warnings to stderr; if your build fails due to warnings after upgrading, please see https://github.com/microsoft/web-build-tools/issues/1329
+
+## 5.8.0
+Tue, 11 Jun 2019 01:28:33 GMT
+
+### Updates
+
+- Add a new setting "ignoreDependencyOrder" in command-line.json
+- Clarify "rush change" messages.
+- Improve 'rush version' to fetch before checkout, which avoids an error in cases where the branch wasn't fetched.
+- Fix typo in command-line help for "rush add"
+- Fix an issue where "rush build" ignored changes to a project with an empty build script (GitHub #1282)
 
 ## 5.7.3
 Mon, 06 May 2019 21:03:32 GMT

@@ -1,6 +1,46 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 16 May 2019 22:15:20 GMT and should not be manually modified.
+This log was last generated on Wed, 12 Jun 2019 19:12:33 GMT and should not be manually modified.
+
+## 7.3.3
+Wed, 12 Jun 2019 19:12:33 GMT
+
+*Version update only*
+
+## 7.3.2
+Tue, 11 Jun 2019 00:48:06 GMT
+
+### Patches
+
+- Add support for emitting type parameters in the YamlDocumenter
+
+## 7.3.1
+Thu, 06 Jun 2019 22:33:36 GMT
+
+*Version update only*
+
+## 7.3.0
+Wed, 05 Jun 2019 19:12:34 GMT
+
+### Minor changes
+
+- Improved the experimental api-documenter generate command.
+
+### Patches
+
+- Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number
+
+## 7.2.2
+Tue, 04 Jun 2019 05:51:53 GMT
+
+*Version update only*
+
+## 7.2.1
+Mon, 27 May 2019 04:13:44 GMT
+
+### Patches
+
+- Improve the markdown generator to document class constructors
 
 ## 7.2.0
 Thu, 16 May 2019 22:15:20 GMT

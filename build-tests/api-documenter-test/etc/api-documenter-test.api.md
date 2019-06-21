@@ -77,6 +77,16 @@ export interface IDocInterface4 {
 }
 
 // @public
+export interface IDocInterface5 {
+    regularProperty: string;
+}
+
+// @public
+export interface IDocInterface6 {
+    regularProperty: number;
+}
+
+// @public
 export namespace OuterNamespace {
     export namespace InnerNamespace {
         export function nestedFunction(x: number): number;

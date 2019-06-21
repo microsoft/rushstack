@@ -2,6 +2,66 @@
   "name": "@microsoft/rush-stack-compiler-2.7",
   "entries": [
     {
+      "version": "0.6.18",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.6.18",
+      "date": "Wed, 12 Jun 2019 19:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.2.0` to `7.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.17",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.6.17",
+      "date": "Tue, 11 Jun 2019 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.1.8` to `7.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.16",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.6.16",
+      "date": "Wed, 05 Jun 2019 19:12:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.1.7` to `7.1.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.15",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.6.15",
+      "date": "Tue, 04 Jun 2019 05:51:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.1.6` to `7.1.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.14",
+      "tag": "@microsoft/rush-stack-compiler-2.7_v0.6.14",
+      "date": "Mon, 27 May 2019 04:13:44 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" from `7.1.5` to `7.1.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.13",
       "tag": "@microsoft/rush-stack-compiler-2.7_v0.6.13",
       "date": "Mon, 13 May 2019 02:08:35 GMT",

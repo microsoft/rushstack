@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "Fix typo in command-line help for \"rush add\"",
+      "comment": "Add ability to opt out of changelog files for version policies.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
-  "email": "4673363+octogonz@users.noreply.github.com"
+  "email": "lahuey@users.noreply.github.com"
 }

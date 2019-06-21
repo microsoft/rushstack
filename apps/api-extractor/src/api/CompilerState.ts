@@ -50,15 +50,17 @@ export class CompilerState {
   public static create(extractorConfig: ExtractorConfig, options?: ICompilerStateCreateOptions): CompilerState {
 
     let tsconfig: {} | undefined = extractorConfig.overrideTsconfig;
+    let configBasePath: string = extractorConfig.projectFolder;
     if (!tsconfig) {
       // If it wasn't overridden, then load it from disk
       tsconfig = JsonFile.load(extractorConfig.tsconfigFilePath);
+      configBasePath = path.resolve(path.dirname(extractorConfig.tsconfigFilePath));
     }
 
     const commandLine: ts.ParsedCommandLine = ts.parseJsonConfigFileContent(
       tsconfig,
       ts.sys,
-      extractorConfig.projectFolder
+      configBasePath
     );
 
     if (!commandLine.options.skipLibCheck && extractorConfig.skipLibCheck) {

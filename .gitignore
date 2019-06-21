@@ -67,3 +67,6 @@ temp
 # Rush files
 common/temp/**
 package-deps.json
+
+# OS X
+.DS_Store
