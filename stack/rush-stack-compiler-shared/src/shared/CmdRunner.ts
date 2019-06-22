@@ -108,12 +108,15 @@ export class CmdRunner {
         }
       );
 
-      spawnResult.stdout.on('data', onData);
-      spawnResult.stderr.on('data', (data: Buffer) => {
-        this._errorHasBeenLogged = true;
-        onError(data);
-      });
-
+      if (spawnResult.stdout !== null) {
+        spawnResult.stdout.on('data', onData);
+      }
+      if (spawnResult.stderr !== null) {
+        spawnResult.stderr.on('data', (data: Buffer) => {
+          this._errorHasBeenLogged = true;
+          onError(data);
+        });
+      }
       spawnResult.on('close', (code) => onClose(code, this._errorHasBeenLogged, resolve, reject));
     });
   }
