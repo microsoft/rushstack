@@ -2,10 +2,10 @@
   "changes": [
     {
       "packageName": "@microsoft/api-documenter",
-      "comment": "print out tag name for unknown block tags",
+      "comment": "Avoid reporting a fatal error when an unknown block tag is encountered",
       "type": "patch"
     }
   ],
   "packageName": "@microsoft/api-documenter",
-  "email": "enjoyjava@gmail.com"
+  "email": "raymondfeng@users.noreply.github.com"
 }
