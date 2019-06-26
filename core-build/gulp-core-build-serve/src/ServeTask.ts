@@ -85,6 +85,21 @@ export interface IServeTaskConfig {
    * @default false
    */
   tryCreateDevCertificate?: boolean;
+
+  /**
+   * If true, the OS default browser will be launched. Defaults to true.
+   *
+   * @default true
+   */
+  launchDefaultBrowser?: boolean;
+
+  /**
+   * Additional applications to launch, e.g. specific browsers. The initial page URL is passed as the last parameter.
+   */
+  launchApps?: {
+    app: string;
+    args?: string[];
+  }[];
 }
 
 interface IApiMap {
@@ -102,6 +117,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         port: 4321,
         hostname: 'localhost',
         tryCreateDevCertificate: false,
+        launchDefaultBrowser: true,
         ...(extendedConfig as Object)
       } as IServeTaskConfig & TExtendedConfig
     );
@@ -121,7 +137,8 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     /* tslint:enable:typedef */
 
     const path: typeof pathType = require('path');
-    const openBrowser: boolean = (process.argv.indexOf('--nobrowser') === -1);
+    const launchDefaultBrowser: boolean =
+        this.taskConfig.launchDefaultBrowser && (process.argv.indexOf('--nobrowser') === -1);
     const portArgumentIndex: number = process.argv.indexOf('--port');
     let { port, initialPage }: IServeTaskConfig = this.taskConfig;
     const { api, hostname }: IServeTaskConfig = this.taskConfig;
@@ -184,21 +201,32 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
       }
     }
 
-    // Spin up the browser.
-    if (openBrowser) {
-      let uri: string = initialPage;
-      if (!initialPage.match(/^https?:\/\//)) {
-        if (!initialPage.match(/^\//)) {
-          initialPage = `/${initialPage}`;
-        }
-
-        uri = `${this.taskConfig.https ? 'https' : 'http'}://${this.taskConfig.hostname}:${port}${initialPage}`;
+    let uri: string = initialPage;
+    if (!initialPage.match(/^https?:\/\//)) {
+      if (!initialPage.match(/^\//)) {
+        initialPage = `/${initialPage}`;
       }
+      uri = `${this.taskConfig.https ? 'https' : 'http'}://${this.taskConfig.hostname}:${port}${initialPage}`;
+    }
 
+    // Spin up the browser.
+    if (launchDefaultBrowser) {
       gulp.src('')
-        .pipe(open({
-          uri: uri
-        }));
+          .pipe(open({
+            uri: uri
+          }));
+    }
+
+    // Launch additional apps
+    if (this.taskConfig.launchApps) {
+      for (const launchApp of this.taskConfig.launchApps) {
+        const app: string | string[] = launchApp.args ? [launchApp.app, ...launchApp.args] : launchApp.app;
+        gulp.src('')
+            .pipe(open({
+              app: app,
+              uri: uri
+            }));
+      }
     }
 
     completeCallback();

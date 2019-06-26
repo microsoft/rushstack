@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Serve Task Configuration",
   "description": "Defines parameters for the webserver which is spun up by the Serve Task",
 
@@ -77,6 +78,34 @@
       "title": "Should Create Dev Certificate",
       "description": "If true, when gulp-core-build-serve is initialized and a dev certificate doesn't already exist and hasn't been specified, attempt to generate one and trust it automatically.",
       "type": "boolean"
+    },
+
+    "launchDefaultBrowser": {
+      "title": "Launch the default browser",
+      "description": "If true, the OS default browser will be launched. Defaults to true.",
+      "type": "boolean",
+      "default": "true"
+    },
+
+    "launchApps": {
+      "title": "Launch applications",
+      "description": "Additional applications to launch, e.g. specific browsers. The initial page URL is passed as the last parameter.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "type": "string"
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["app"]
+      }
     }
   }
 }
