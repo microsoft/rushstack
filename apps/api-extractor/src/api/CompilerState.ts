@@ -6,8 +6,7 @@ import * as ts from 'typescript';
 import colors = require('colors');
 
 import {
-  JsonFile,
-  FileSystem
+  JsonFile
 } from '@microsoft/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
@@ -71,8 +70,6 @@ export class CompilerState {
       ));
     }
 
-    CompilerState._updateCommandLineForTypescriptPackage(commandLine, options);
-
     const inputFilePaths: string[] = commandLine.fileNames.concat(extractorConfig.mainEntryPointFilePath);
     if (options && options.additionalEntryPoints) {
       inputFilePaths.push(...options.additionalEntryPoints);
@@ -81,7 +78,9 @@ export class CompilerState {
     // Append the entry points and remove any non-declaration files from the list
     const analysisFilePaths: string[] = CompilerState._generateFilePathsForAnalysis(inputFilePaths);
 
-    const program: ts.Program = ts.createProgram(analysisFilePaths, commandLine.options);
+    const compilerHost: ts.CompilerHost = CompilerState._createCompilerHost(commandLine, options);
+
+    const program: ts.Program = ts.createProgram(analysisFilePaths, commandLine.options, compilerHost);
 
     if (commandLine.errors.length > 0) {
       const errorText: string = TypeScriptMessageFormatter.format(commandLine.errors[0].messageText);
@@ -130,54 +129,18 @@ export class CompilerState {
     return analysisFilePaths;
   }
 
-  /**
-   * Update the parsed command line to use paths from the specified TS compiler folder, if
-   * a TS compiler folder is specified.
-   */
-  private static _updateCommandLineForTypescriptPackage(
-    commandLine: ts.ParsedCommandLine,
-    options?: IExtractorInvokeOptions
-  ): void {
-    const DEFAULT_BUILTIN_LIBRARY: string = 'lib.d.ts';
-    const OTHER_BUILTIN_LIBRARIES: string[] = ['lib.es5.d.ts', 'lib.es6.d.ts'];
+  private static _createCompilerHost(commandLine: ts.ParsedCommandLine,
+    options: IExtractorInvokeOptions | undefined):  ts.CompilerHost {
+
+    // Create a default CompilerHost that we can override
+    const compilerHost: ts.CompilerHost = ts.createCompilerHost(commandLine.options);
 
     if (options && options.typescriptCompilerFolder) {
-      commandLine.options.noLib = true;
-      const compilerLibFolder: string = path.join(options.typescriptCompilerFolder, 'lib');
-
-      let foundBaseLib: boolean = false;
-      const filesToAdd: string[] = [];
-      for (const libFilename of commandLine.options.lib || []) {
-        if (libFilename === DEFAULT_BUILTIN_LIBRARY) {
-          // Ignore the default lib - it'll get added later
-          continue;
-        }
-
-        if (OTHER_BUILTIN_LIBRARIES.indexOf(libFilename) !== -1) {
-          foundBaseLib = true;
-        }
-
-        const libPath: string = path.join(compilerLibFolder, libFilename);
-        if (!FileSystem.exists(libPath)) {
-          throw new Error(`lib ${libFilename} does not exist in the compiler specified in typescriptLibPackage`);
-        }
-
-        filesToAdd.push(libPath);
-      }
-
-      if (!foundBaseLib) {
-        // If we didn't find another version of the base lib library, include the default
-        filesToAdd.push(path.join(compilerLibFolder, 'lib.d.ts'));
-      }
-
-      if (!commandLine.fileNames) {
-        commandLine.fileNames = [];
-      }
-
-      commandLine.fileNames.push(...filesToAdd);
-
-      commandLine.options.lib = undefined;
+      // Prevent a closure parameter
+      const typescriptCompilerLibFolder: string = path.join(options.typescriptCompilerFolder, 'lib');
+      compilerHost.getDefaultLibLocation = () => typescriptCompilerLibFolder;
     }
-  }
 
+    return compilerHost;
+  }
 }

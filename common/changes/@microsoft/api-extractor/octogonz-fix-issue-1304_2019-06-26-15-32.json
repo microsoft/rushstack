@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Fix GitHub issue #1304 where \"IExtractorInvokeOptions.typescriptCompilerFolder\" did not work with TypeScript 3.4",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
