@@ -164,14 +164,17 @@ export class ProjectTask implements ITaskDefinition {
         );
 
         // Hook into events, in order to get live streaming of build log
-        task.stdout.on('data', (data: string) => {
-          writer.write(data);
-        });
-
-        task.stderr.on('data', (data: string) => {
-          writer.writeError(data);
-          this._hasWarningOrError = true;
-        });
+        if (task.stdout !== null) {
+          task.stdout.on('data', (data: string) => {
+            writer.write(data);
+          });
+        }
+        if (task.stderr !== null) {
+          task.stderr.on('data', (data: string) => {
+            writer.writeError(data);
+            this._hasWarningOrError = true;
+          });
+        }
 
         return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
           task.on('close', (code: number) => {

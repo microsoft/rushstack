@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "New action added to list package name for all projects",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "32415088+Shubham-2k17@users.noreply.github.com"
+}

@@ -35,7 +35,7 @@ describe('PackageMetadataManager', () => {
             packageJson
           } = getPackageMetadata('package-inferred-from-tsdoc-metadata');
           expect(PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath))
-            .toBe(path.resolve(packageFolder, packageJson.tsdocMetadata));
+            .toBe(path.resolve(packageFolder, packageJson.tsdocMetadata as string));
         });
       });
       describe('given a package.json where the field "typings" is defined and "tsdocMetadata" is not defined', () => {
