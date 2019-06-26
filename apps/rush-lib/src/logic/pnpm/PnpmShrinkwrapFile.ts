@@ -204,6 +204,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
             this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies || {};
           dependencies[dependencyName] = latestVersion;
           this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies = dependencies;
+          
+          // TODO: 
+          // fix this._shrinkwrapJson.packages[tempProjectDependencyKey].resolution.integrity
 
           return latestVersion;
         }
