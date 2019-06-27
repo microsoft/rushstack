@@ -479,7 +479,7 @@ export class ChangeAction extends BaseRushAction {
     console.log(`Created file: ${fileName}`);
   }
 
-  private _logNoChangeFileRequired() {
+  private _logNoChangeFileRequired(): void {
     console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
   }
 }
