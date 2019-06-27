@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "When rush change detects no changes, clarify that no *relevant* changes were detected in the case that changes were in a package not versioned by rush'",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "kryan@users.noreply.github.com"
+}
