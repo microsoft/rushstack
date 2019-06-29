@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 13 Jun 2019 04:46:18 GMT and should not be manually modified.
+This log was last generated on Sat, 29 Jun 2019 02:47:42 GMT and should not be manually modified.
+
+## 5.10.0
+Sat, 29 Jun 2019 02:47:42 GMT
+
+### Updates
+
+- New action added to list package name for all projects
+- Add ability to opt out of changelog files for version policies.
+- Workaround for pnpm issue 1890: https://github.com/pnpm/pnpm/issues/1890. Fixes the issue of "rush update --full" not working correctly if the internal copy of the pnpm shrinkwrap "common/temp/node_modules/.shrinkwrap.yaml" exists even though Rush deletes the formal copy in "common/temp/shrinkwrap.yaml".
 
 ## 5.9.1
 Thu, 13 Jun 2019 04:46:18 GMT

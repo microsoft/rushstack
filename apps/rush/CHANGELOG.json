@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.10.0",
+      "tag": "@microsoft/rush_v5.10.0",
+      "date": "Sat, 29 Jun 2019 02:47:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "New action added to list package name for all projects"
+          },
+          {
+            "comment": "Add ability to opt out of changelog files for version policies."
+          },
+          {
+            "comment": "Workaround for pnpm issue 1890: https://github.com/pnpm/pnpm/issues/1890. Fixes the issue of \"rush update --full\" not working correctly if the internal copy of the pnpm shrinkwrap \"common/temp/node_modules/.shrinkwrap.yaml\" exists even though Rush deletes the formal copy in \"common/temp/shrinkwrap.yaml\"."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.9.1",
       "tag": "@microsoft/rush_v5.9.1",
       "date": "Thu, 13 Jun 2019 04:46:18 GMT",
