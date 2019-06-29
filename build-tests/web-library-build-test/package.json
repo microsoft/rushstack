@@ -14,9 +14,9 @@
   "devDependencies": {
     "ts-jest": "~22.4.6",
     "@types/jest": "23.3.11",
-    "@microsoft/rush-stack-compiler-3.2": "0.3.19",
-    "@microsoft/load-themed-styles": "1.9.7",
-    "@microsoft/web-library-build": "7.0.45",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.20",
+    "@microsoft/load-themed-styles": "1.9.8",
+    "@microsoft/web-library-build": "7.0.46",
     "gulp": "~3.9.1"
   }
 }
