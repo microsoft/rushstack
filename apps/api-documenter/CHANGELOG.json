@@ -2,6 +2,26 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.3.4",
+      "tag": "@microsoft/api-documenter_v7.3.4",
+      "date": "Sat, 29 Jun 2019 02:30:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Avoid reporting a fatal error when an unknown block tag is encountered"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.19` to `0.3.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.67` to `6.0.68`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.3",
       "tag": "@microsoft/api-documenter_v7.3.3",
       "date": "Wed, 12 Jun 2019 19:12:33 GMT",

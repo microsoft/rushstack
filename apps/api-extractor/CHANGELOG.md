@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 12 Jun 2019 19:12:33 GMT and should not be manually modified.
+This log was last generated on Sat, 29 Jun 2019 02:30:10 GMT and should not be manually modified.
+
+## 7.2.2
+Sat, 29 Jun 2019 02:30:10 GMT
+
+### Patches
+
+- Fix GitHub issue #1304 where "IExtractorInvokeOptions.typescriptCompilerFolder" did not work with TypeScript 3.4
 
 ## 7.2.1
 Wed, 12 Jun 2019 19:12:33 GMT
