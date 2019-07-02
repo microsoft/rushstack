@@ -15,7 +15,7 @@ export class VersionControl {
     skipFetch: boolean = false
   ): Array<string | undefined> | undefined {
     if (!skipFetch) {
-      VersionControl._fetchNonDefaultBranch(targetBranch);
+      VersionControl._fetchRemoteBranch(targetBranch);
     }
 
     const output: string = child_process.execSync(`git diff ${targetBranch}... --dirstat=files,0`).toString();
@@ -36,11 +36,11 @@ export class VersionControl {
    * @returns
    * An array of paths of repo-root-relative paths of files that are different from
    * those in the provided {@param targetBranch}. If a {@param pathPrefix} is provided,
-   * this function only returns reuslts under the that path.
+   * this function only returns results under the that path.
    */
   public static getChangedFiles(targetBranch: string, skipFetch: boolean = false, pathPrefix?: string): string[] {
     if (!skipFetch) {
-      VersionControl._fetchNonDefaultBranch(targetBranch);
+      VersionControl._fetchRemoteBranch(targetBranch);
     }
 
     const output: string = child_process.execSync(
@@ -170,15 +170,13 @@ export class VersionControl {
     return spawnResult.status === 0;
   }
 
-  private static _fetchNonDefaultBranch(remoteBranchName: string): void {
-    if (remoteBranchName !== DEFAULT_FULLY_QUALIFIED_BRANCH) {
-      console.log(`Checking for updates to ${remoteBranchName}...`);
-      const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(remoteBranchName);
-      if (!fetchResult) {
-        console.log(colors.yellow(
-          `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
-        ));
-      }
+  private static _fetchRemoteBranch(remoteBranchName: string): void {
+    console.log(`Checking for updates to ${remoteBranchName}...`);
+    const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(remoteBranchName);
+    if (!fetchResult) {
+      console.log(colors.yellow(
+        `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
+      ));
     }
   }
 }
