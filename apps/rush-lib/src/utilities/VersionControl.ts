@@ -71,48 +71,56 @@ export class VersionControl {
    * @param repositoryUrl - repository url
    */
   public static getRemoteMasterBranch(repositoryUrl?: string): string {
-    let matchingRemotes: string[] = [];
-
     if (repositoryUrl) {
       const output: string = child_process
         .execSync(`git remote`)
         .toString();
-      matchingRemotes = output.split('\n').filter(remoteName => {
+      const normalizedRepositoryUrl: string = repositoryUrl.toUpperCase();
+      const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
         if (remoteName) {
           const remoteUrl: string = child_process.execSync(`git remote get-url ${remoteName}`)
             .toString()
             .trim();
-          if (remoteUrl === repositoryUrl) {
+
+          if (!remoteUrl) {
+            return false;
+          }
+
+          const normalizedRemoteUrl: string = remoteUrl.toUpperCase();
+          if (normalizedRemoteUrl.toUpperCase() === normalizedRepositoryUrl) {
             return true;
           }
+
           // When you copy a URL from the GitHub web site, they append the ".git" file extension to the URL.
           // So we allow that to be specified in rush.json, even though the file extension gets dropped
           // by "git clone".
-          if (remoteUrl + '.git' === repositoryUrl) {
+          if (`${normalizedRemoteUrl}.GIT` === normalizedRepositoryUrl) {
             return true;
           }
         }
+
         return false;
       });
+
+      if (matchingRemotes.length > 0) {
+        if (matchingRemotes.length > 1) {
+          console.log(
+            `More than one git remote matches the repository URL. Using the first remote (${matchingRemotes[0]}).`
+          );
+        }
+
+        return `${matchingRemotes[0]}/${DEFAULT_BRANCH}`;
+      } else {
+        console.log(colors.yellow(
+          `Unable to find a git remote matching the repository URL (${repositoryUrl}). ` +
+          'Detected changes are likely to be incorrect.'
+        ));
+
+        return DEFAULT_FULLY_QUALIFIED_BRANCH;
+      }
     } else {
       console.log(colors.yellow(
         'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
-      ));
-      return DEFAULT_FULLY_QUALIFIED_BRANCH;
-    }
-
-    if (matchingRemotes.length > 0) {
-      if (matchingRemotes.length > 1) {
-        console.log(
-          `More than one git remote matches the repository URL. Using the first remote (${matchingRemotes[0]}).`
-        );
-      }
-
-      return `${matchingRemotes[0]}/${DEFAULT_BRANCH}`;
-    } else {
-      console.log(colors.yellow(
-        `Unable to find a git remote matching the repository URL (${matchingRemotes[0]}). ` +
-        'Detected changes are likely to be incorrect.'
       ));
       return DEFAULT_FULLY_QUALIFIED_BRANCH;
     }
