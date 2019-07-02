@@ -92,7 +92,7 @@ export class VersionControl {
           }
 
           // When you copy a URL from the GitHub web site, they append the ".git" file extension to the URL.
-          // So we allow that to be specified in rush.json, even though the file extension gets dropped
+          // We allow that to be specified in rush.json, even though the file extension gets dropped
           // by "git clone".
           if (`${normalizedRemoteUrl}.GIT` === normalizedRepositoryUrl) {
             return true;
