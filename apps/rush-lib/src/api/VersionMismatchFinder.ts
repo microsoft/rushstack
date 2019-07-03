@@ -74,6 +74,10 @@ export class VersionMismatchFinder {
 
     commonVersions.getAllPreferredVersions().forEach((version: string, dependency: string) => {
       allPreferredVersions[dependency] = version;
+      if (rushConfiguration.getProjectByName(dependency)) {
+        console.warn(colors.red('Internal project ' + dependency + ' specified in preferred versions. '
+          + 'If this is a cyclic dependency, it should be set in rush.json instead.'));
+      }
     });
 
     // Create a fake project for the purposes of reporting conflicts with preferredVersions
