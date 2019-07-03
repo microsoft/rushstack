@@ -113,7 +113,7 @@ export class ChangeAction extends BaseRushAction {
 
     this._sortedProjectList = this._getChangedPackageNames().sort();
     if (this._sortedProjectList.length === 0) {
-      console.log('No changes were detected on this branch. Nothing to do.');
+      this._logNoChangeFileRequired();
       this._warnUncommittedChanges();
       return Promise.resolve();
     }
@@ -147,7 +147,7 @@ export class ChangeAction extends BaseRushAction {
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
-      console.log('No changes were detected on this branch.');
+      this._logNoChangeFileRequired();
     }
   }
 
@@ -477,5 +477,9 @@ export class ChangeAction extends BaseRushAction {
   private _writeFile(fileName: string, output: string): void {
     FileSystem.writeFile(fileName, output, { ensureFolderExists: true });
     console.log(`Created file: ${fileName}`);
+  }
+
+  private _logNoChangeFileRequired(): void {
+    console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
   }
 }
