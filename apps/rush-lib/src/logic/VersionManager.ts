@@ -230,6 +230,7 @@ export class VersionManager {
       return false;
     }
     let updated: boolean = false;
+    let preferredVersionChange: boolean = false;
     this._updatedProjects.forEach((updatedDependentProject, updatedDependentProjectName) => {
       if (dependencies[updatedDependentProjectName]) {
         if (rushProject.cyclicDependencyProjects.has(updatedDependentProjectName)) {
@@ -255,9 +256,17 @@ export class VersionManager {
             );
           }
           dependencies[updatedDependentProjectName] = newDependencyVersion;
+          const preferredVersions: Map<string, string> = this._rushConfiguration.getCommonVersions().preferredVersions;
+          if (preferredVersions.has(updatedDependentProjectName)) {
+            preferredVersions[updatedDependentProjectName] = newDependencyVersion;
+            preferredVersionChange = true;
+          }
         }
       }
     });
+    if (preferredVersionChange) {
+      this._rushConfiguration.getCommonVersions().save();
+    }
     return updated;
   }
 
