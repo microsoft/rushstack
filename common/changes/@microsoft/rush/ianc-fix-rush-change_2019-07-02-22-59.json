@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "Add ability to opt out of changelog files for version policies.",
+      "comment": "Fix an issue where rush change will detect unrelated changes.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
-  "email": "lahuey@users.noreply.github.com"
+  "email": "iclanton@users.noreply.github.com"
 }

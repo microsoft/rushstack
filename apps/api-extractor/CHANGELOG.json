@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.2.2",
+      "tag": "@microsoft/api-extractor_v7.2.2",
+      "date": "Sat, 29 Jun 2019 02:30:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix GitHub issue #1304 where \"IExtractorInvokeOptions.typescriptCompilerFolder\" did not work with TypeScript 3.4"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.2.1",
       "tag": "@microsoft/api-extractor_v7.2.1",
       "date": "Wed, 12 Jun 2019 19:12:33 GMT",

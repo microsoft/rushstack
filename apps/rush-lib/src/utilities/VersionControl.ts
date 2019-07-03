@@ -15,7 +15,7 @@ export class VersionControl {
     skipFetch: boolean = false
   ): Array<string | undefined> | undefined {
     if (!skipFetch) {
-      VersionControl._fetchNonDefaultBranch(targetBranch);
+      VersionControl._fetchRemoteBranch(targetBranch);
     }
 
     const output: string = child_process.execSync(`git diff ${targetBranch}... --dirstat=files,0`).toString();
@@ -36,11 +36,11 @@ export class VersionControl {
    * @returns
    * An array of paths of repo-root-relative paths of files that are different from
    * those in the provided {@param targetBranch}. If a {@param pathPrefix} is provided,
-   * this function only returns reuslts under the that path.
+   * this function only returns results under the that path.
    */
   public static getChangedFiles(targetBranch: string, skipFetch: boolean = false, pathPrefix?: string): string[] {
     if (!skipFetch) {
-      VersionControl._fetchNonDefaultBranch(targetBranch);
+      VersionControl._fetchRemoteBranch(targetBranch);
     }
 
     const output: string = child_process.execSync(
@@ -71,48 +71,56 @@ export class VersionControl {
    * @param repositoryUrl - repository url
    */
   public static getRemoteMasterBranch(repositoryUrl?: string): string {
-    let matchingRemotes: string[] = [];
-
     if (repositoryUrl) {
       const output: string = child_process
         .execSync(`git remote`)
         .toString();
-      matchingRemotes = output.split('\n').filter(remoteName => {
+      const normalizedRepositoryUrl: string = repositoryUrl.toUpperCase();
+      const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
         if (remoteName) {
           const remoteUrl: string = child_process.execSync(`git remote get-url ${remoteName}`)
             .toString()
             .trim();
-          if (remoteUrl === repositoryUrl) {
+
+          if (!remoteUrl) {
+            return false;
+          }
+
+          const normalizedRemoteUrl: string = remoteUrl.toUpperCase();
+          if (normalizedRemoteUrl.toUpperCase() === normalizedRepositoryUrl) {
             return true;
           }
+
           // When you copy a URL from the GitHub web site, they append the ".git" file extension to the URL.
-          // So we allow that to be specified in rush.json, even though the file extension gets dropped
+          // We allow that to be specified in rush.json, even though the file extension gets dropped
           // by "git clone".
-          if (remoteUrl + '.git' === repositoryUrl) {
+          if (`${normalizedRemoteUrl}.GIT` === normalizedRepositoryUrl) {
             return true;
           }
         }
+
         return false;
       });
+
+      if (matchingRemotes.length > 0) {
+        if (matchingRemotes.length > 1) {
+          console.log(
+            `More than one git remote matches the repository URL. Using the first remote (${matchingRemotes[0]}).`
+          );
+        }
+
+        return `${matchingRemotes[0]}/${DEFAULT_BRANCH}`;
+      } else {
+        console.log(colors.yellow(
+          `Unable to find a git remote matching the repository URL (${repositoryUrl}). ` +
+          'Detected changes are likely to be incorrect.'
+        ));
+
+        return DEFAULT_FULLY_QUALIFIED_BRANCH;
+      }
     } else {
       console.log(colors.yellow(
         'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
-      ));
-      return DEFAULT_FULLY_QUALIFIED_BRANCH;
-    }
-
-    if (matchingRemotes.length > 0) {
-      if (matchingRemotes.length > 1) {
-        console.log(
-          `More than one git remote matches the repository URL. Using the first remote (${matchingRemotes[0]}).`
-        );
-      }
-
-      return `${matchingRemotes[0]}/${DEFAULT_BRANCH}`;
-    } else {
-      console.log(colors.yellow(
-        `Unable to find a git remote matching the repository URL (${matchingRemotes[0]}). ` +
-        'Detected changes are likely to be incorrect.'
       ));
       return DEFAULT_FULLY_QUALIFIED_BRANCH;
     }
@@ -170,15 +178,13 @@ export class VersionControl {
     return spawnResult.status === 0;
   }
 
-  private static _fetchNonDefaultBranch(remoteBranchName: string): void {
-    if (remoteBranchName !== DEFAULT_FULLY_QUALIFIED_BRANCH) {
-      console.log(`Checking for updates to ${remoteBranchName}...`);
-      const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(remoteBranchName);
-      if (!fetchResult) {
-        console.log(colors.yellow(
-          `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
-        ));
-      }
+  private static _fetchRemoteBranch(remoteBranchName: string): void {
+    console.log(`Checking for updates to ${remoteBranchName}...`);
+    const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(remoteBranchName);
+    if (!fetchResult) {
+      console.log(colors.yellow(
+        `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
+      ));
     }
   }
 }
