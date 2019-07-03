@@ -322,7 +322,7 @@ export class PackageJsonUpdater {
           + ` the version range "${initialSpec}"`);
       }
     } else {
-      if (initialSpec !== 'latest') {
+      if (!this._rushConfiguration.ensureConsistentVersions) {
         console.log(colors.gray(`The "ensureConsistentVersions" policy is NOT active,`
           + ` so we will assign the latest version.`));
         console.log();
