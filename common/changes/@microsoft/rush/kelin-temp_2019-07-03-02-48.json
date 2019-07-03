@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update preferred versions when version bumped and add warning on rush check when internal projects are preferred.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "lincoded@users.noreply.github.com"
+}
