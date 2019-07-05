@@ -13,7 +13,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 export class CompilerState {
     static create(extractorConfig: ExtractorConfig, options?: ICompilerStateCreateOptions): CompilerState;
     readonly program: ts.Program;
-    }
+}
 
 // @public
 export const enum ConsoleMessageId {
@@ -84,7 +84,7 @@ export class ExtractorMessage {
     // @internal
     constructor(options: IExtractorMessageOptions);
     readonly category: ExtractorMessageCategory;
-    formatMessageWithLocation(workingPackageFolderPath: string): string;
+    formatMessageWithLocation(workingPackageFolderPath: string | undefined): string;
     // (undocumented)
     formatMessageWithoutLocation(): string;
     handled: boolean;
@@ -216,6 +216,7 @@ export interface IExtractorInvokeOptions {
     compilerState?: CompilerState;
     localBuild?: boolean;
     messageCallback?: (message: ExtractorMessage) => void;
+    showDiagnostics?: boolean;
     showVerboseMessages?: boolean;
     typescriptCompilerFolder?: string;
 }

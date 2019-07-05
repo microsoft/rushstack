@@ -30,8 +30,16 @@ interface IReportingRule {
   addToApiReportFile: boolean;
 }
 
+export interface IMessageRouterOptions {
+  workingPackageFolder: string | undefined;
+  messageCallback: ((message: ExtractorMessage) => void) | undefined;
+  messagesConfig: IExtractorMessagesConfig;
+  showVerboseMessages: boolean;
+  showDiagnostics: boolean;
+}
+
 export class MessageRouter {
-  private readonly _workingPackageFolder: string;
+  private readonly _workingPackageFolder: string | undefined;
   private readonly _messageCallback: ((message: ExtractorMessage) => void) | undefined;
 
   // All messages
@@ -53,20 +61,30 @@ export class MessageRouter {
 
   public errorCount: number = 0;
   public warningCount: number = 0;
-  public showVerboseMessages: boolean = false;
 
-  public constructor(workingPackageFolder: string,
-    messageCallback: ((message: ExtractorMessage) => void) | undefined,
-    messagesConfig: IExtractorMessagesConfig) {
+  /**
+   * See {@link IExtractorInvokeOptions.showVerboseMessages}
+   */
+  public readonly showVerboseMessages: boolean;
 
-    this._workingPackageFolder = workingPackageFolder;
-    this._messageCallback = messageCallback;
+  /**
+   * See {@link IExtractorInvokeOptions.showDiagnostics}
+   */
+  public readonly showDiagnostics: boolean;
+
+  public constructor(options: IMessageRouterOptions) {
+    this._workingPackageFolder = options.workingPackageFolder;
+    this._messageCallback = options.messageCallback;
 
     this._messages = [];
     this._associatedMessagesForAstDeclaration = new Map<AstDeclaration, ExtractorMessage[]>();
     this._sourceMapper = new SourceMapper();
 
-    this._applyMessagesConfig(messagesConfig);
+    // showDiagnostics implies showVerboseMessages
+    this.showVerboseMessages = options.showVerboseMessages || options.showDiagnostics;
+    this.showDiagnostics = options.showDiagnostics;
+
+    this._applyMessagesConfig(options.messagesConfig);
   }
 
   /**
