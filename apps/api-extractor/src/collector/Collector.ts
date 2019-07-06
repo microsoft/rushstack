@@ -29,6 +29,7 @@ import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
+import { Profiler, ExtractorTimerId } from '../api/Profiler';
 
 /**
  * Options for Collector constructor.
@@ -47,6 +48,8 @@ export interface ICollectorOptions {
   messageRouter: MessageRouter;
 
   extractorConfig: ExtractorConfig;
+
+  profiler: Profiler<ExtractorTimerId>;
 }
 
 /**
@@ -68,6 +71,8 @@ export class Collector {
 
   public readonly extractorConfig: ExtractorConfig;
 
+  public readonly profiler: Profiler<ExtractorTimerId>;
+
   private readonly _program: ts.Program;
 
   private readonly _tsdocParser: tsdoc.TSDocParser;
@@ -87,6 +92,7 @@ export class Collector {
 
     this._program = options.program;
     this.extractorConfig = options.extractorConfig;
+    this.profiler = options.profiler;
 
     const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
       this.extractorConfig.mainEntryPointFilePath);
@@ -163,8 +169,12 @@ export class Collector {
     // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
     // compile errors that would result from a full compilation.
-    for (const diagnostic of this._program.getSemanticDiagnostics()) {
-      this.messageRouter.addCompilerDiagnostic(diagnostic);
+    this.profiler.start(ExtractorTimerId.CompilerSemanticAnalysis);
+    const compilerDiagnostics: ReadonlyArray<ts.Diagnostic> = this._program.getSemanticDiagnostics();
+    this.profiler.stop(ExtractorTimerId.CompilerSemanticAnalysis);
+
+    for (const compilerDiagnostic of compilerDiagnostics) {
+      this.messageRouter.addCompilerDiagnostic(compilerDiagnostic);
     }
 
     if (this.messageRouter.showDiagnostics) {
@@ -195,7 +205,9 @@ export class Collector {
       const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(entryPointSourceFile.text,
         packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
 
+      this.profiler.start(ExtractorTimerId.TSDocParser);
       this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
+      this.profiler.stop(ExtractorTimerId.TSDocParser);
 
       this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext,
         entryPointSourceFile);
@@ -669,7 +681,9 @@ export class Collector {
     const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
       range.pos, range.end);
 
+    this.profiler.start(ExtractorTimerId.TSDocParser);
     const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
+    this.profiler.stop(ExtractorTimerId.TSDocParser);
 
     this.messageRouter.addTsdocMessages(parserContext, declaration.getSourceFile(), astDeclaration);
 

@@ -22,6 +22,7 @@ import { CompilerState } from './CompilerState';
 import { ExtractorMessage } from './ExtractorMessage';
 import { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from './ConsoleMessageId';
+import { Profiler as Profiler, ExtractorTimerId, ProfileTimer } from './Profiler';
 
 /**
  * Runtime options for Extractor.
@@ -178,6 +179,9 @@ export class Extractor {
 
     const localBuild: boolean = options.localBuild || false;
 
+    const profiler: Profiler<ExtractorTimerId> = new Profiler<ExtractorTimerId>();
+    profiler.start(ExtractorTimerId.Overall);
+
     let compilerState: CompilerState | undefined;
     if (options.compilerState) {
       compilerState = options.compilerState;
@@ -204,16 +208,21 @@ export class Extractor {
       messageRouter.logDiagnosticFooter();
     }
 
+    profiler.start(ExtractorTimerId.CollectorProcessing);
+
     const collector: Collector = new Collector({
       program: compilerState.program,
       messageRouter,
-      extractorConfig: extractorConfig
+      extractorConfig,
+      profiler
     });
 
     collector.analyze();
 
     DocCommentEnhancer.analyze(collector);
     ValidationEnhancer.analyze(collector);
+
+    profiler.stop(ExtractorTimerId.CollectorProcessing);
 
     const modelBuilder: ApiModelGenerator = new ApiModelGenerator(collector);
     const apiPackage: ApiPackage = modelBuilder.buildApiPackage();
@@ -335,6 +344,10 @@ export class Extractor {
       succeeded = messageRouter.errorCount + messageRouter.warningCount === 0;
     }
 
+    profiler.stop(ExtractorTimerId.Overall);
+
+    Extractor._printProfilerReport(messageRouter, profiler);
+
     return new ExtractorResult({
       compilerState,
       extractorConfig,
@@ -343,6 +356,19 @@ export class Extractor {
       errorCount: messageRouter.errorCount,
       warningCount: messageRouter.warningCount
     });
+  }
+
+  private static _printProfilerReport(messageRouter: MessageRouter, simpleProfiler: Profiler<ExtractorTimerId>): void {
+    const overall: ProfileTimer = simpleProfiler.getTimer(ExtractorTimerId.Overall);
+    const compilerSemanticAnalysis: ProfileTimer = simpleProfiler.getTimer(ExtractorTimerId.CompilerSemanticAnalysis);
+    const collectorProcessing: ProfileTimer = simpleProfiler.getTimer(ExtractorTimerId.CollectorProcessing);
+    const tsdocParser: ProfileTimer = simpleProfiler.getTimer(ExtractorTimerId.TSDocParser);
+
+    console.log(`Total elapsed time: ${overall.formatStartedTime()}`);
+    console.log(`Compiler semantic analysis: ${compilerSemanticAnalysis.formatFocusedTime()}`);
+    console.log(`Collector processing: ${collectorProcessing.formatFocusedTime()}`);
+    console.log(`TSDoc parser: ${tsdocParser.formatFocusedTime()}`);
+    console.log(`Other: ${overall.formatFocusedTime()}`);
   }
 
   private static _generateRollupDtsFile(collector: Collector, outputPath: string, dtsKind: DtsRollupKind): void {
