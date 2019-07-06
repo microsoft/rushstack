@@ -22,6 +22,7 @@ export const enum ConsoleMessageId {
     ApiReportFolderMissing = "console-api-report-folder-missing",
     ApiReportNotCopied = "console-api-report-not-copied",
     ApiReportUnchanged = "console-api-report-unchanged",
+    Diagnostics = "console-diagnostics",
     FoundTSDocMetadata = "console-found-tsdoc-metadata",
     WritingDocModelFile = "console-writing-doc-model-file",
     WritingDtsRollup = "console-writing-dts-rollup"
@@ -42,6 +43,7 @@ export class ExtractorConfig {
     readonly betaTrimmedFilePath: string;
     readonly docModelEnabled: boolean;
     static readonly FILENAME: string;
+    getDiagnosticDump(): string;
     // @internal
     _getShortFilePath(absolutePath: string): string;
     static hasDtsFileExtension(filePath: string): boolean;

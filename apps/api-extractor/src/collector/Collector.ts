@@ -29,6 +29,7 @@ import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
+import { ConsoleMessageId } from '../api/ConsoleMessageId';
 
 /**
  * Options for Collector constructor.
@@ -165,6 +166,22 @@ export class Collector {
     // compile errors that would result from a full compilation.
     for (const diagnostic of this._program.getSemanticDiagnostics()) {
       this.messageRouter.addCompilerDiagnostic(diagnostic);
+    }
+
+    if (this.messageRouter.showDiagnostics) {
+
+      this.messageRouter.logVerbose(ConsoleMessageId.Diagnostics,
+        MessageRouter.DIAGNOSTICS_HEADER + '\nThe compiler analyzed these files:');
+      for (const sourceFile of this.program.getSourceFiles()) {
+        this.messageRouter.logVerbose(ConsoleMessageId.Diagnostics, sourceFile.fileName);
+      }
+
+      this.messageRouter.logVerbose(ConsoleMessageId.Diagnostics, '\nRoot filenames:');
+      for (const fileName of this.program.getRootFileNames()) {
+        this.messageRouter.logVerbose(ConsoleMessageId.Diagnostics, fileName);
+      }
+
+      this.messageRouter.logVerbose(ConsoleMessageId.Diagnostics, MessageRouter.DIAGNOSTICS_FOOTER);
     }
 
     // Build the entry point

@@ -193,6 +193,20 @@ export class Extractor {
       showDiagnostics: !!options.showDiagnostics
     });
 
+    if (messageRouter.showDiagnostics) {
+      messageRouter.logVerbose(ConsoleMessageId.Diagnostics, MessageRouter.DIAGNOSTICS_HEADER);
+
+      messageRouter.logVerbose(ConsoleMessageId.Diagnostics, 'Final prepared ExtractorConfig:');
+      messageRouter.logVerbose(ConsoleMessageId.Diagnostics, extractorConfig.getDiagnosticDump());
+
+      messageRouter.logVerbose(ConsoleMessageId.Diagnostics, '\nCompiler options:');
+      const serializedOptions: object = MessageRouter.buildJsonDumpObject(compilerState.program.getCompilerOptions());
+      messageRouter.logVerbose(ConsoleMessageId.Diagnostics,
+        JSON.stringify(serializedOptions, undefined, 2));
+
+      messageRouter.logVerbose(ConsoleMessageId.Diagnostics, MessageRouter.DIAGNOSTICS_FOOTER);
+    }
+
     const collector: Collector = new Collector({
       program: compilerState.program,
       messageRouter,

@@ -39,6 +39,9 @@ export interface IMessageRouterOptions {
 }
 
 export class MessageRouter {
+  public static readonly DIAGNOSTICS_HEADER: string = '==[DIAGNOSTICS]===================================';
+  public static readonly DIAGNOSTICS_FOOTER: string = '==================================================\n';
+
   private readonly _workingPackageFolder: string | undefined;
   private readonly _messageCallback: ((message: ExtractorMessage) => void) | undefined;
 
@@ -238,6 +241,54 @@ export class MessageRouter {
 
       this._messages.push(extractorMessage);
     }
+  }
+
+  /**
+   * Recursively collects the primitive members (numbers, strings, arrays, etc) into an object that
+   * is JSON serializable.  This is used by the "--diagnostics" feature to dump the state of configuration objects.
+   */
+  // tslint:disable-next-line:no-any
+  public static buildJsonDumpObject(input: any): any {
+    if (input === null || input === undefined) {
+      // tslint:disable-next-line:no-null-keyword
+      return null; // JSON uses null instead of undefined
+    }
+
+    switch (typeof input) {
+      case 'boolean':
+      case 'number':
+      case 'string':
+        return input;
+      case 'object':
+        if (Array.isArray(input)) {
+          // tslint:disable-next-line:no-any
+          const outputArray: any[] = [];
+          for (const element of input) {
+            // tslint:disable-next-line:no-any
+            const serializedElement: any = MessageRouter.buildJsonDumpObject(element);
+            if (serializedElement !== undefined) {
+              outputArray.push(serializedElement);
+            }
+          }
+          return outputArray;
+        }
+
+        const outputObject: object = { };
+        for (const key of Object.getOwnPropertyNames(input)) {
+          // tslint:disable-next-line:no-any
+          const value: any = input[key];
+
+          // tslint:disable-next-line:no-any
+          const serializedValue: any = MessageRouter.buildJsonDumpObject(value);
+
+          if (serializedValue !== undefined) {
+            outputObject[key] = serializedValue;
+          }
+        }
+        return outputObject;
+    }
+
+    return undefined;
   }
 
   /**
