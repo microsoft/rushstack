@@ -245,9 +245,12 @@ export class MessageRouter {
   /**
    * Recursively collects the primitive members (numbers, strings, arrays, etc) into an object that
    * is JSON serializable.  This is used by the "--diagnostics" feature to dump the state of configuration objects.
+   *
+   * @returns a JSON serializable object (possibly including `null` values)
+   *          or `undefined` if the input cannot be represented as JSON
    */
   // tslint:disable-next-line:no-any
-  public static buildJsonDumpObject(input: any): any {
+  public static buildJsonDumpObject(input: any): any | undefined {
     if (input === null || input === undefined) {
       // tslint:disable-next-line:no-null-keyword
       return null; // JSON uses null instead of undefined
