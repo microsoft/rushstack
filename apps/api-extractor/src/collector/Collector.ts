@@ -29,7 +29,6 @@ import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
-import { ConsoleMessageId } from '../api/ConsoleMessageId';
 
 /**
  * Options for Collector constructor.
@@ -169,19 +168,17 @@ export class Collector {
     }
 
     if (this.messageRouter.showDiagnostics) {
-
-      this.messageRouter.logVerbose(ConsoleMessageId.Diagnostics,
-        MessageRouter.DIAGNOSTICS_HEADER + '\nThe compiler analyzed these files:');
-      for (const sourceFile of this.program.getSourceFiles()) {
-        this.messageRouter.logVerbose(ConsoleMessageId.Diagnostics, sourceFile.fileName);
-      }
-
-      this.messageRouter.logVerbose(ConsoleMessageId.Diagnostics, '\nRoot filenames:');
+      this.messageRouter.logDiagnosticHeader('Root filenames');
       for (const fileName of this.program.getRootFileNames()) {
-        this.messageRouter.logVerbose(ConsoleMessageId.Diagnostics, fileName);
+        this.messageRouter.logDiagnostic(fileName);
       }
+      this.messageRouter.logDiagnosticFooter();
 
-      this.messageRouter.logVerbose(ConsoleMessageId.Diagnostics, MessageRouter.DIAGNOSTICS_FOOTER);
+      this.messageRouter.logDiagnosticHeader('Files analyzed by compiler');
+      for (const sourceFile of this.program.getSourceFiles()) {
+        this.messageRouter.logDiagnostic(sourceFile.fileName);
+      }
+      this.messageRouter.logDiagnosticFooter();
     }
 
     // Build the entry point

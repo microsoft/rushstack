@@ -194,17 +194,14 @@ export class Extractor {
     });
 
     if (messageRouter.showDiagnostics) {
-      messageRouter.logVerbose(ConsoleMessageId.Diagnostics, MessageRouter.DIAGNOSTICS_HEADER);
+      messageRouter.logDiagnosticHeader('Final prepared ExtractorConfig');
+      messageRouter.logDiagnostic(extractorConfig.getDiagnosticDump());
+      messageRouter.logDiagnosticFooter();
 
-      messageRouter.logVerbose(ConsoleMessageId.Diagnostics, 'Final prepared ExtractorConfig:');
-      messageRouter.logVerbose(ConsoleMessageId.Diagnostics, extractorConfig.getDiagnosticDump());
-
-      messageRouter.logVerbose(ConsoleMessageId.Diagnostics, '\nCompiler options:');
+      messageRouter.logDiagnosticHeader('Compiler options');
       const serializedOptions: object = MessageRouter.buildJsonDumpObject(compilerState.program.getCompilerOptions());
-      messageRouter.logVerbose(ConsoleMessageId.Diagnostics,
-        JSON.stringify(serializedOptions, undefined, 2));
-
-      messageRouter.logVerbose(ConsoleMessageId.Diagnostics, MessageRouter.DIAGNOSTICS_FOOTER);
+      messageRouter.logDiagnostic(JSON.stringify(serializedOptions, undefined, 2));
+      messageRouter.logDiagnosticFooter();
     }
 
     const collector: Collector = new Collector({

@@ -39,8 +39,7 @@ export interface IMessageRouterOptions {
 }
 
 export class MessageRouter {
-  public static readonly DIAGNOSTICS_HEADER: string = '==[DIAGNOSTICS]===================================';
-  public static readonly DIAGNOSTICS_FOOTER: string = '==================================================\n';
+  public static readonly DIAGNOSTICS_LINE: string = '============================================================';
 
   private readonly _workingPackageFolder: string | undefined;
   private readonly _messageCallback: ((message: ExtractorMessage) => void) | undefined;
@@ -451,6 +450,20 @@ export class MessageRouter {
       properties,
       logLevel: ExtractorLogLevel.Verbose
     }));
+  }
+
+  public logDiagnosticHeader(title: string): void {
+    this.logDiagnostic(MessageRouter.DIAGNOSTICS_LINE);
+    this.logDiagnostic(`DIAGNOSTIC: ` + title);
+    this.logDiagnostic(MessageRouter.DIAGNOSTICS_LINE);
+  }
+
+  public logDiagnosticFooter(): void {
+    this.logDiagnostic(MessageRouter.DIAGNOSTICS_LINE + '\n');
+  }
+
+  public logDiagnostic(message: string): void {
+    this.logVerbose(ConsoleMessageId.Diagnostics, message);
   }
 
   /**
