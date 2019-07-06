@@ -137,6 +137,12 @@ export interface IPackageJsonScriptTable {
    * A table of script hooks that a package manager or build tool may invoke.
    */
   scripts?: IPackageJsonScriptTable;
+
+  /**
+   * A table of package version resolutions. This feature is only available in
+   * yarn.
+   */
+  resolutions?: Object;
 }
 
 /**

@@ -12,6 +12,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as tar from 'tar';
+import { isEmpty } from 'lodash';
 import * as globEscape from 'glob-escape';
 import {
   JsonFile,
@@ -675,6 +676,14 @@ export class InstallManager {
             shrinkwrapIsUpToDate = false;
           }
         }
+      }
+
+      if (!isEmpty(packageJson.resolutions)) {
+        tempPackageJson.resolutions = tempPackageJson.resolutions || {};
+        commonPackageJson.resolutions = commonPackageJson.resolutions || {};
+
+        tempPackageJson.resolutions = packageJson.resolutions;
+        commonPackageJson.resolutions = { ...commonPackageJson.resolutions, ...packageJson.resolutions };
       }
 
       // NPM expects the root of the tarball to have a directory called 'package'

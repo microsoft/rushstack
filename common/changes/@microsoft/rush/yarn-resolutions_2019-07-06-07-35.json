@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support of resolutuions section for yarn",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "MasterLambaster@gmail.com"
+}

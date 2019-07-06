@@ -72,6 +72,10 @@ export class PackageJsonEditor {
   // SemVer range in one of the other fields for consumers.  Thus "dependencies", "optionalDependencies",
   // and "peerDependencies" are mutually exclusive, but "devDependencies" is not.
   private readonly _devDependencies: Map<string, PackageJsonDependency>;
+
+  // NOTE: The "resolutions" is yarn specific featrue that controls package
+  // resolution override within yarn.
+  private readonly _resolutions: object;
   private _modified: boolean;
 
   private constructor(filepath: string, data: IPackageJson) {
@@ -81,6 +85,7 @@ export class PackageJsonEditor {
 
     this._dependencies = new Map<string, PackageJsonDependency>();
     this._devDependencies = new Map<string, PackageJsonDependency>();
+    this._resolutions = {};
 
     const dependencies: { [key: string]: string } = data.dependencies || {};
     const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
@@ -125,6 +130,8 @@ export class PackageJsonEditor {
           new PackageJsonDependency(packageName, devDependencies[packageName], DependencyType.Dev, _onChange));
       });
 
+      this._resolutions = data.resolutions || {};
+
       Sort.sortMapKeys(this._dependencies);
       Sort.sortMapKeys(this._devDependencies);
 
@@ -165,6 +172,10 @@ export class PackageJsonEditor {
    */
   public get devDependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._devDependencies.values()];
+  }
+
+  public get resolutions(): object {
+    return { ...this._resolutions };
   }
 
   public tryGetDependency(packageName: string): PackageJsonDependency | undefined {

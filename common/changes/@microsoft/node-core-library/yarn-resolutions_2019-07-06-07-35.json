@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/node-core-library",
+      "comment": "Add support of resolutuions section for yarn",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/node-core-library",
+  "email": "MasterLambaster@gmail.com"
+}

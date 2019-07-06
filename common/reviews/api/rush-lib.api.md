@@ -204,6 +204,8 @@ export class PackageJsonEditor {
     // (undocumented)
     readonly name: string;
     // (undocumented)
+    readonly resolutions: object;
+    // (undocumented)
     saveIfModified(): boolean;
     // (undocumented)
     tryGetDependency(packageName: string): PackageJsonDependency | undefined;
