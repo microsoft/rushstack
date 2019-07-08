@@ -153,7 +153,7 @@ export class PackageJsonUpdater {
       installManagerOptions
     );
 
-    return  this._getNormalizedVersionSpec(
+    return this._getNormalizedVersionSpec(
       installManager,
       packageName,
       initialVersion,
