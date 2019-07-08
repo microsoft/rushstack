@@ -45,6 +45,7 @@ export {
 } from './api/CommonVersionsConfiguration';
 
 export {
+  IDependencyFileEditor,
   PackageJsonEditor,
   PackageJsonDependency,
   DependencyType

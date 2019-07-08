@@ -14,7 +14,11 @@ import {
 } from '../api/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
-import { DependencyType, PackageJsonEditor, PackageJsonDependency } from '../api/PackageJsonEditor';
+import {
+  DependencyType,
+  PackageJsonDependency,
+  IDependencyFileEditor
+} from '../api/PackageJsonEditor';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 
@@ -207,9 +211,10 @@ export class PackageJsonUpdater {
 
       this.updateProjects(otherPackageUpdates);
 
-      for (const project of this._rushConfiguration.projects) {
-        if (project.packageJsonEditor.saveIfModified()) {
-          console.log(colors.green('Wrote ') + project.packageJsonEditor.filePath);
+      const allPackageUpdates: IUpdateProjectOptions[] = [currentProjectUpdate, ...otherPackageUpdates];
+      for (const { project } of allPackageUpdates) {
+        if (project.editor.saveIfModified()) {
+          console.log(colors.green('Wrote ') + project.editor.filePath);
         }
       }
 
@@ -250,10 +255,10 @@ export class PackageJsonUpdater {
       packageName,
       newVersion
     } = options;
-    const packageJsonEditor: PackageJsonEditor = project.editor;
+    const editor: IDependencyFileEditor = project.editor;
 
-    const oldDependency: PackageJsonDependency | undefined = packageJsonEditor.tryGetDependency(packageName);
-    const oldDevDependency: PackageJsonDependency | undefined = packageJsonEditor.tryGetDevDependency(packageName);
+    const oldDependency: PackageJsonDependency | undefined = editor.tryGetDependency(packageName);
+    const oldDevDependency: PackageJsonDependency | undefined = editor.tryGetDevDependency(packageName);
 
     const oldDependencyType: DependencyType | undefined =
       oldDevDependency ? oldDevDependency.dependencyType :
@@ -261,7 +266,7 @@ export class PackageJsonUpdater {
 
     dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 
-    packageJsonEditor.addOrUpdateDependency(packageName, newVersion, dependencyType!);
+    editor.addOrUpdateDependency(packageName, newVersion, dependencyType!);
   }
 
   /**

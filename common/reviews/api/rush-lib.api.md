@@ -68,7 +68,7 @@ export class CommonVersionsConfiguration {
     getAllPreferredVersions(): Map<string, string>;
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
     readonly preferredVersions: Map<string, string>;
-    save(): void;
+    save(): boolean;
     readonly xstitchPreferredVersions: Map<string, string>;
     }
 
@@ -108,6 +108,22 @@ export class EventHooks {
     constructor(eventHooksJson: IEventHooksJson);
     get(event: Event): string[];
     }
+
+// @beta (undocumented)
+export interface IDependencyFileEditor {
+    // (undocumented)
+    addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
+    // (undocumented)
+    allDependencies: ReadonlyArray<PackageJsonDependency>;
+    // (undocumented)
+    filePath: string;
+    // (undocumented)
+    saveIfModified(): boolean;
+    // (undocumented)
+    tryGetDependency(packageName: string): PackageJsonDependency | undefined;
+    // (undocumented)
+    tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
+}
 
 // @beta
 export class IndividualVersionPolicy extends VersionPolicy {
@@ -169,9 +185,10 @@ export class PackageJsonDependency {
     }
 
 // @beta (undocumented)
-export class PackageJsonEditor {
+export class PackageJsonEditor implements IDependencyFileEditor {
     // (undocumented)
     addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
+    readonly allDependencies: ReadonlyArray<PackageJsonDependency>;
     readonly dependencyList: ReadonlyArray<PackageJsonDependency>;
     readonly devDependencyList: ReadonlyArray<PackageJsonDependency>;
     // (undocumented)
@@ -247,6 +264,7 @@ export class RushConfiguration {
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
+    getCommonVersionsFilePath(variant?: string | undefined): string;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     readonly gitAllowedEmailRegExps: string[];

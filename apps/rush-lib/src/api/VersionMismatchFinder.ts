@@ -5,9 +5,10 @@ import * as colors from 'colors';
 
 import { RushConfiguration } from './RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
-import { PackageJsonDependency, DependencyType, PackageJsonEditor } from './PackageJsonEditor';
+import { PackageJsonDependency, DependencyType, IDependencyFileEditor } from './PackageJsonEditor';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RushConfigurationProject } from './RushConfigurationProject';
+import { CommonVersionsEditor } from './CommonVersionsEditor';
 
 export enum VersionMismatchFinderEntityKind {
   project,
@@ -17,7 +18,7 @@ export enum VersionMismatchFinderEntityKind {
 export interface IVersionMismatchFinderEntity {
   kind: VersionMismatchFinderEntityKind;
   friendlyName: string;
-  editor: PackageJsonEditor;
+  editor: IDependencyFileEditor;
   cyclicDependencyProjects: Set<string>;
   skipRushCheck?: boolean;
 }
@@ -98,14 +99,7 @@ export class VersionMismatchFinder {
     rushConfiguration: RushConfiguration,
     options: IVersionMismatchFinderRushCheckOptions = {}
   ): VersionMismatchFinder {
-    // Collect all the preferred versions into a single table
-    const allPreferredVersions: { [dependency: string]: string } = {};
-
     const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(options.variant);
-
-    commonVersions.getAllPreferredVersions().forEach((version: string, dependency: string) => {
-      allPreferredVersions[dependency] = version;
-    });
 
     // Create a fake project for the purposes of reporting conflicts with preferredVersions
     // or xstitchPreferredVersions from common-versions.json
@@ -117,9 +111,7 @@ export class VersionMismatchFinder {
       kind: VersionMismatchFinderEntityKind.preferredVersionsFile,
       friendlyName: `preferred versions from ${RushConstants.commonVersionsFilename}`,
       cyclicDependencyProjects: new Set<string>(),
-      editor: PackageJsonEditor.fromObject(
-        { dependencies: allPreferredVersions } as any, 'preferred-versions.json' // tslint:disable-line:no-any
-      )
+      editor: new CommonVersionsEditor(commonVersions)
     });
 
     return new VersionMismatchFinder(
@@ -208,12 +200,7 @@ export class VersionMismatchFinder {
         // patterns consistent, but on the other hand different projects may have different
         // levels of compatibility -- we should wait for someone to actually request this feature
         // before we get into that.)
-        const dependencies: Array<PackageJsonDependency> = [
-          ...project.editor.dependencyList,
-          ...project.editor.devDependencyList
-        ];
-
-        dependencies.forEach((dependency: PackageJsonDependency) => {
+        project.editor.allDependencies.forEach((dependency: PackageJsonDependency) => {
           if (dependency.dependencyType !== DependencyType.Peer) {
             const version: string = dependency.version!;
 

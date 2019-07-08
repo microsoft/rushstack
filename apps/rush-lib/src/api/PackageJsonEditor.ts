@@ -12,6 +12,18 @@ import {
 /**
  * @beta
  */
+export interface IDependencyFileEditor {
+  filePath: string;
+  allDependencies: ReadonlyArray<PackageJsonDependency>;
+  tryGetDependency(packageName: string): PackageJsonDependency | undefined;
+  tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
+  addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
+  saveIfModified(): boolean;
+}
+
+/**
+ * @beta
+ */
 export const enum DependencyType {
   Regular = 'dependencies',
   Dev = 'devDependencies',
@@ -62,7 +74,7 @@ export class PackageJsonDependency {
 /**
  * @beta
  */
-export class PackageJsonEditor {
+export class PackageJsonEditor implements IDependencyFileEditor {
   private readonly _filePath: string;
   private readonly _data: IPackageJson;
   private readonly _dependencies: Map<string, PackageJsonDependency>;
@@ -108,6 +120,13 @@ export class PackageJsonEditor {
     return [...this._devDependencies.values()];
   }
 
+  /**
+   * The concatenation of {@see dependencyList} and {@see devDependencyList}
+   */
+  public get allDependencies(): ReadonlyArray<PackageJsonDependency> {
+    return [...this.dependencyList, ...this.devDependencyList];
+  }
+
   public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
     return this._dependencies.get(packageName);
   }
@@ -117,8 +136,12 @@ export class PackageJsonEditor {
   }
 
   public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
-    const dependency: PackageJsonDependency
-        = new PackageJsonDependency(packageName, newVersion, dependencyType, this._onChange.bind(this));
+    const dependency: PackageJsonDependency = new PackageJsonDependency(
+      packageName,
+      newVersion,
+      dependencyType,
+      this._onChange.bind(this)
+    );
 
     if (dependencyType === DependencyType.Regular || dependencyType === DependencyType.Optional) {
       this._dependencies.set(packageName, dependency);
