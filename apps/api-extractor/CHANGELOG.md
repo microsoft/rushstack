@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 29 Jun 2019 02:30:10 GMT and should not be manually modified.
+This log was last generated on Mon, 08 Jul 2019 19:12:18 GMT and should not be manually modified.
+
+## 7.2.3
+Mon, 08 Jul 2019 19:12:18 GMT
+
+### Patches
+
+- Fix a problem when analyzing .d.ts files that appear in the same folder as the corresponding .ts file (GitHub #1310)
 
 ## 7.2.2
 Sat, 29 Jun 2019 02:30:10 GMT
