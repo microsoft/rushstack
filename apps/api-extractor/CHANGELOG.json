@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.2.3",
+      "tag": "@microsoft/api-extractor_v7.2.3",
+      "date": "Mon, 08 Jul 2019 19:12:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a problem when analyzing .d.ts files that appear in the same folder as the corresponding .ts file (GitHub #1310)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.2.2",
       "tag": "@microsoft/api-extractor_v7.2.2",
       "date": "Sat, 29 Jun 2019 02:30:10 GMT",
