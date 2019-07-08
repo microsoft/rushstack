@@ -189,7 +189,7 @@ export class VersionAction extends BaseRushAction {
     );
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
-      rushConfig.projects,
+      VersionMismatchFinder.convertRushConfigurationProjects(rushConfig.projects),
       commonVersions.allowedAlternativeVersions
     );
     if (mismatchFinder.numberOfMismatches) {

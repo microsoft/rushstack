@@ -82,10 +82,11 @@ export class AddAction extends BaseRushAction {
   }
 
   public run(): Promise<void> {
-    const project: RushConfigurationProject | undefined
-      = this.rushConfiguration.tryGetProjectForPath(process.cwd());
+    const currentProject: RushConfigurationProject | undefined = this.rushConfiguration.tryGetProjectForPath(
+      process.cwd()
+    );
 
-    if (!project) {
+    if (!currentProject) {
       return Promise.reject(new Error('The "rush add" command must be invoked under a project'
         + ' folder that is registered in rush.json.'));
     }
@@ -116,7 +117,7 @@ export class AddAction extends BaseRushAction {
     }
 
     return new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder).doRushAdd({
-      currentProject: project,
+      currentProject: currentProject,
       packageName: packageName,
       initialVersion: version,
       devDependency: this._devDependencyFlag.value,

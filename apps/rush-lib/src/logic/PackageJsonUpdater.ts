@@ -6,12 +6,17 @@ import * as semver from 'semver';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { InstallManager, IInstallManagerOptions } from './InstallManager';
-import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { VersionMismatchFinder } from '../api/VersionMismatchFinder';
+import {
+  VersionMismatchFinder,
+  IVersionMismatchFinderEntity,
+  VersionMismatchFinderEntityKind,
+  IVersionMismatchFinderProject
+} from '../api/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
 import { DependencyType, PackageJsonEditor, PackageJsonDependency } from '../api/PackageJsonEditor';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { RushConfigurationProject } from '../api/RushConfigurationProject';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -73,7 +78,7 @@ export interface IUpdateProjectOptions {
   /**
    * The project which will have its package.json updated
    */
-  project: RushConfigurationProject;
+  project: IVersionMismatchFinderEntity;
   /**
    * The name of the dependency to be added or updated in the project
    */
@@ -156,7 +161,7 @@ export class PackageJsonUpdater {
       console.log();
 
       const currentProjectUpdate: IUpdateProjectOptions = {
-        project: currentProject,
+        project: VersionMismatchFinder.convertRushConfigurationProject(currentProject),
         packageName,
         newVersion: version,
         dependencyType: devDependency ? DependencyType.Dev : undefined
@@ -184,9 +189,12 @@ export class PackageJsonUpdater {
           if (mismatchedVersions) {
             for (const mismatchedVersion of mismatchedVersions) {
               for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
-                if (consumer !== currentProject.packageName) {
+                if (
+                  consumer.kind !== VersionMismatchFinderEntityKind.project ||
+                  (consumer as IVersionMismatchFinderProject).packageName !== currentProject.packageName
+                ) {
                   otherPackageUpdates.push({
-                    project: this._rushConfiguration.getProjectByName(consumer)!,
+                    project: consumer,
                     packageName: packageName,
                     newVersion: version
                   });
@@ -242,10 +250,10 @@ export class PackageJsonUpdater {
       packageName,
       newVersion
     } = options;
-    const packageJson: PackageJsonEditor = project.packageJsonEditor;
+    const packageJsonEditor: PackageJsonEditor = project.editor;
 
-    const oldDependency: PackageJsonDependency | undefined = packageJson.tryGetDependency(packageName);
-    const oldDevDependency: PackageJsonDependency | undefined = packageJson.tryGetDevDependency(packageName);
+    const oldDependency: PackageJsonDependency | undefined = packageJsonEditor.tryGetDependency(packageName);
+    const oldDevDependency: PackageJsonDependency | undefined = packageJsonEditor.tryGetDevDependency(packageName);
 
     const oldDependencyType: DependencyType | undefined =
       oldDevDependency ? oldDevDependency.dependencyType :
@@ -253,7 +261,7 @@ export class PackageJsonUpdater {
 
     dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 
-    packageJson.addOrUpdateDependency(packageName, newVersion, dependencyType!);
+    packageJsonEditor.addOrUpdateDependency(packageName, newVersion, dependencyType!);
   }
 
   /**
@@ -262,7 +270,7 @@ export class PackageJsonUpdater {
    * Otherwise, will choose the latest semver matching the initialSpec and append the proper range style.
    * @param packageName - the name of the package to be used
    * @param initialSpec - a semver pattern that should be used to find the latest version matching the spec
-   * @param implicitlyPinnedVersion - the implicityly preferred (aka common/primary) version of the package in use
+   * @param implicitlyPinnedVersion - the implicitly preferred (aka common/primary) version of the package in use
    * @param rangeStyle - if this version is selected by querying registry, then this range specifier is prepended to
    *   the selected version.
    */
