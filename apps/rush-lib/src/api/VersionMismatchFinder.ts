@@ -12,7 +12,7 @@ import { CommonVersionsEditor } from './CommonVersionsEditor';
 
 export enum VersionMismatchFinderEntityKind {
   project,
-  preferredVersionsFile
+  commonVersionsFile
 }
 
 export interface IVersionMismatchFinderEntity {
@@ -108,7 +108,7 @@ export class VersionMismatchFinder {
     );
 
     projects.push({
-      kind: VersionMismatchFinderEntityKind.preferredVersionsFile,
+      kind: VersionMismatchFinderEntityKind.commonVersionsFile,
       friendlyName: `preferred versions from ${RushConstants.commonVersionsFilename}`,
       cyclicDependencyProjects: new Set<string>(),
       editor: new CommonVersionsEditor(commonVersions)

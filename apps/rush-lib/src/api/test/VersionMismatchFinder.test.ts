@@ -1,12 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
+
 import {
   IVersionMismatchFinderProject,
   VersionMismatchFinder,
-  VersionMismatchFinderEntityKind
+  VersionMismatchFinderEntityKind,
+  IVersionMismatchFinderEntity
 } from '../VersionMismatchFinder';
 import { PackageJsonEditor } from '../PackageJsonEditor';
+import { CommonVersionsEditor } from '../CommonVersionsEditor';
+import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration';
 
 // tslint:disable:no-any
 describe('VersionMismatchFinder', () => {
@@ -387,6 +392,40 @@ describe('VersionMismatchFinder', () => {
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB], alternatives);
     expect(mismatchFinder.numberOfMismatches).toEqual(0);
     expect(mismatchFinder.getMismatches().length).toEqual(0);
+    done();
+  });
+
+  it('handles the common-versions.json file correctly', (done: jest.DoneCallback) => {
+    const projectA: IVersionMismatchFinderProject = {
+      kind: VersionMismatchFinderEntityKind.project,
+      packageName: 'A',
+      friendlyName: 'A',
+      editor: PackageJsonEditor.fromObject({
+        dependencies: {
+          '@scope/library-1': '1.2.3',
+          'karma': '0.0.1'
+        }
+      } as any, 'foo.json'),
+      cyclicDependencyProjects: new Set<string>()
+    };
+
+    const commonVersionsFile: CommonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(
+      path.resolve(__dirname, 'jsonFiles', 'common-versions.json')
+    );
+    const commonVersionsEntity: IVersionMismatchFinderEntity = {
+      kind: VersionMismatchFinderEntityKind.commonVersionsFile,
+      friendlyName: 'common-versions.json',
+      editor: new CommonVersionsEditor(commonVersionsFile),
+      cyclicDependencyProjects: new Set<string>()
+    };
+
+    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, commonVersionsEntity]);
+    expect(mismatchFinder.numberOfMismatches).toEqual(1);
+    expect(mismatchFinder.getMismatches().length).toEqual(1);
+    expect(mismatchFinder.getMismatches()[0]).toEqual('@scope/library-1');
+    expect(mismatchFinder.getVersionsOfMismatch('@scope/library-1')!.sort()).toEqual(['1.2.3', '~3.2.1']);
+    expect(mismatchFinder.getConsumersOfMismatch('@scope/library-1', '~3.2.1')).toEqual([commonVersionsEntity]);
+    expect(mismatchFinder.getConsumersOfMismatch('@scope/library-1', '1.2.3')).toEqual([projectA]);
     done();
   });
 });
