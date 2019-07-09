@@ -23,8 +23,7 @@ import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
-import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
+import { PnpmShrinkwrapFile } from './PnpmShrinkwrapFile';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -37,17 +36,25 @@ export class PnpmLinkManager extends BaseLinkManager {
         localLinks: {}
       };
 
-      let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
+      const pnpmShrinkwrapFileName = this._rushConfiguration.getCommittedShrinkwrapFilename(
+        this._rushConfiguration.currentInstalledVariant
+      );
 
-      shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager,
-        this._rushConfiguration.getCommittedShrinkwrapFilename(this._rushConfiguration.currentInstalledVariant));
+      let pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+        pnpmShrinkwrapFileName
+      );
+
+      if (!pnpmShrinkwrapFile)
+      {
+        throw new InternalError(`Cannot load shrinkwrap at "${pnpmShrinkwrapFileName}"`);
+      }
 
       let promise: Promise<void> = Promise.resolve();
 
       for (const rushProject of this._rushConfiguration.projects) {
         promise = promise.then(() => {
           console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-          return this._linkProject(rushProject, rushLinkJson, shrinkwrapFile);
+          return this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
         });
       }
 
@@ -68,9 +75,9 @@ export class PnpmLinkManager extends BaseLinkManager {
   private _linkProject(
     project: RushConfigurationProject,
     rushLinkJson: IRushLinkJson,
-    shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined): Promise<void> {
+    pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = undefined): Promise<void> {
 
-    console.log(shrinkwrapFile);
+    console.log(pnpmShrinkwrapFile);
 
     // first, read the temp package.json information
 
@@ -149,17 +156,29 @@ export class PnpmLinkManager extends BaseLinkManager {
     // appropriate. This folder is usually something like:
     // C:\{uri-encoed-path-to-tgz}\node_modules\{package-name}
 
+    // e.g.:
+    //   file:projects/bentleyjs-core.tgz
+    //   file:projects/build-tools.tgz_dc21d88642e18a947127a751e00b020a
+    //   file:projects/imodel-from-geojson.tgz_request@2.88.0
     const topLevelDependencyVersion: string | undefined =
-      shrinkwrapFile!.getTopLevelDependencyVersion(project.tempProjectName);
+      pnpmShrinkwrapFile!.getTopLevelDependencyVersion(project.tempProjectName);
 
-    // e.g.: C:\wbt\common\temp\projects\api-documenter.tgz
-    const pathToTgzFile: string = path.join(
-      this._rushConfiguration.commonTempFolder,
-      'projects');
+    if (!topLevelDependencyVersion)
+    {      
+      throw new InternalError(`Cannot find top level dependency for "${project.tempProjectName}"` +
+        ` in shrinkwrap.`);
+    }
 
-    // e.g.: C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
-    const escapedPathToTgzFile: string = uriEncode(Text.replaceAll(pathToTgzFile, path.sep, '/') 
-      + '/') + topLevelDependencyVersion!.substring(topLevelDependencyVersion!.lastIndexOf('/') + 1);
+    // e.g.: C:\wbt\common\temp\projects\
+    const pathToProjects: string = path.join(this._rushConfiguration.commonTempFolder,
+      'projects') + path.sep;
+
+    // e.g.: 
+    //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
+    //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fpresentation-integration-tests.tgz_jsdom@11.12.0
+    //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fbuild-tools.tgz_2a665c89609864b4e75bc5365d7f8f56
+    const dirNameInLocal: string = uriEncode(Text.replaceAll(pathToProjects, path.sep, '/')) +
+      topLevelDependencyVersion!.substring(topLevelDependencyVersion!.lastIndexOf('/') + 1);
 
     // tslint:disable-next-line:max-line-length
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
@@ -167,7 +186,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       this._rushConfiguration.commonTempFolder,
       RushConstants.nodeModulesFolderName,
       '.local',
-      escapedPathToTgzFile,
+      dirNameInLocal,
       RushConstants.nodeModulesFolderName);
 
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {

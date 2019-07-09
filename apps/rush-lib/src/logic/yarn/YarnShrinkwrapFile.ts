@@ -161,7 +161,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public getTopLevelDependencyVersion(dependencyName: string): string | undefined { // abstract
+  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined { // abstract
     throw new InternalError('Not implemented');
   }
 

@@ -78,7 +78,7 @@ export abstract class BaseShrinkwrapFile {
    */
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
-  public abstract getTopLevelDependencyVersion(dependencyName: string): string | undefined;
+  protected abstract getTopLevelDependencyVersion(dependencyName: string): string | undefined;
 
   protected abstract tryEnsureDependencyVersion(dependencyName: string,
     tempProjectName: string, versionRange: string): string | undefined;
