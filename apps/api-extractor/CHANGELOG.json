@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.3.0",
+      "tag": "@microsoft/api-extractor_v7.3.0",
+      "date": "Tue, 09 Jul 2019 19:13:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a \"--diagnostics\" command-line option to help when troubleshooting problems"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.2.3",
       "tag": "@microsoft/api-extractor_v7.2.3",
       "date": "Mon, 08 Jul 2019 19:12:18 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 08 Jul 2019 19:12:18 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Jul 2019 19:13:24 GMT and should not be manually modified.
+
+## 7.3.0
+Tue, 09 Jul 2019 19:13:24 GMT
+
+### Minor changes
+
+- Add a "--diagnostics" command-line option to help when troubleshooting problems
 
 ## 7.2.3
 Mon, 08 Jul 2019 19:12:18 GMT

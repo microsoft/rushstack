@@ -2,6 +2,21 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "6.0.70",
+      "tag": "@microsoft/node-library-build_v6.0.70",
+      "date": "Tue, 09 Jul 2019 19:13:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" from `8.1.18` to `8.1.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.21` to `0.3.22`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.0.69",
       "tag": "@microsoft/node-library-build_v6.0.69",
       "date": "Mon, 08 Jul 2019 19:12:18 GMT",
