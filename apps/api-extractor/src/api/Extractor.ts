@@ -51,6 +51,13 @@ export interface IExtractorInvokeOptions {
   showVerboseMessages?: boolean;
 
   /**
+   * If true, API Extractor will print diagnostic information used for troubleshooting problems.
+   * These messages will be included as {@link ExtractorLogLevel.Verbose} output.
+   * Setting `showDiagnostics=true` forces `showVerboseMessages=true`.
+   */
+  showDiagnostics?: boolean;
+
+  /**
    * By default API Extractor uses its own TypeScript compiler version to analyze your project.
    * This can often cause compiler errors due to incompatibilities between different TS versions.
    * Use this option to specify the folder path for your compiler version.
@@ -178,14 +185,30 @@ export class Extractor {
       compilerState = CompilerState.create(extractorConfig, options);
     }
 
-    const collector: Collector = new Collector({
-      program: compilerState.program,
+    const messageRouter: MessageRouter = new MessageRouter({
+      workingPackageFolder: extractorConfig.packageFolder,
       messageCallback: options.messageCallback,
-      extractorConfig: extractorConfig
+      messagesConfig: extractorConfig.messages || { },
+      showVerboseMessages: !!options.showVerboseMessages,
+      showDiagnostics: !!options.showDiagnostics
     });
 
-    const messageRouter: MessageRouter = collector.messageRouter;
-    messageRouter.showVerboseMessages = !!options.showVerboseMessages;
+    if (messageRouter.showDiagnostics) {
+      messageRouter.logDiagnosticHeader('Final prepared ExtractorConfig');
+      messageRouter.logDiagnostic(extractorConfig.getDiagnosticDump());
+      messageRouter.logDiagnosticFooter();
+
+      messageRouter.logDiagnosticHeader('Compiler options');
+      const serializedOptions: object = MessageRouter.buildJsonDumpObject(compilerState.program.getCompilerOptions());
+      messageRouter.logDiagnostic(JSON.stringify(serializedOptions, undefined, 2));
+      messageRouter.logDiagnosticFooter();
+    }
+
+    const collector: Collector = new Collector({
+      program: compilerState.program,
+      messageRouter,
+      extractorConfig: extractorConfig
+    });
 
     collector.analyze();
 

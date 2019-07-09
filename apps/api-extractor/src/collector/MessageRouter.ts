@@ -30,8 +30,18 @@ interface IReportingRule {
   addToApiReportFile: boolean;
 }
 
+export interface IMessageRouterOptions {
+  workingPackageFolder: string | undefined;
+  messageCallback: ((message: ExtractorMessage) => void) | undefined;
+  messagesConfig: IExtractorMessagesConfig;
+  showVerboseMessages: boolean;
+  showDiagnostics: boolean;
+}
+
 export class MessageRouter {
-  private readonly _workingPackageFolder: string;
+  public static readonly DIAGNOSTICS_LINE: string = '============================================================';
+
+  private readonly _workingPackageFolder: string | undefined;
   private readonly _messageCallback: ((message: ExtractorMessage) => void) | undefined;
 
   // All messages
@@ -53,20 +63,30 @@ export class MessageRouter {
 
   public errorCount: number = 0;
   public warningCount: number = 0;
-  public showVerboseMessages: boolean = false;
 
-  public constructor(workingPackageFolder: string,
-    messageCallback: ((message: ExtractorMessage) => void) | undefined,
-    messagesConfig: IExtractorMessagesConfig) {
+  /**
+   * See {@link IExtractorInvokeOptions.showVerboseMessages}
+   */
+  public readonly showVerboseMessages: boolean;
 
-    this._workingPackageFolder = workingPackageFolder;
-    this._messageCallback = messageCallback;
+  /**
+   * See {@link IExtractorInvokeOptions.showDiagnostics}
+   */
+  public readonly showDiagnostics: boolean;
+
+  public constructor(options: IMessageRouterOptions) {
+    this._workingPackageFolder = options.workingPackageFolder;
+    this._messageCallback = options.messageCallback;
 
     this._messages = [];
     this._associatedMessagesForAstDeclaration = new Map<AstDeclaration, ExtractorMessage[]>();
     this._sourceMapper = new SourceMapper();
 
-    this._applyMessagesConfig(messagesConfig);
+    // showDiagnostics implies showVerboseMessages
+    this.showVerboseMessages = options.showVerboseMessages || options.showDiagnostics;
+    this.showDiagnostics = options.showDiagnostics;
+
+    this._applyMessagesConfig(options.messagesConfig);
   }
 
   /**
@@ -220,6 +240,57 @@ export class MessageRouter {
 
       this._messages.push(extractorMessage);
     }
+  }
+
+  /**
+   * Recursively collects the primitive members (numbers, strings, arrays, etc) into an object that
+   * is JSON serializable.  This is used by the "--diagnostics" feature to dump the state of configuration objects.
+   *
+   * @returns a JSON serializable object (possibly including `null` values)
+   *          or `undefined` if the input cannot be represented as JSON
+   */
+  // tslint:disable-next-line:no-any
+  public static buildJsonDumpObject(input: any): any | undefined {
+    if (input === null || input === undefined) {
+      // tslint:disable-next-line:no-null-keyword
+      return null; // JSON uses null instead of undefined
+    }
+
+    switch (typeof input) {
+      case 'boolean':
+      case 'number':
+      case 'string':
+        return input;
+      case 'object':
+        if (Array.isArray(input)) {
+          // tslint:disable-next-line:no-any
+          const outputArray: any[] = [];
+          for (const element of input) {
+            // tslint:disable-next-line:no-any
+            const serializedElement: any = MessageRouter.buildJsonDumpObject(element);
+            if (serializedElement !== undefined) {
+              outputArray.push(serializedElement);
+            }
+          }
+          return outputArray;
+        }
+
+        const outputObject: object = { };
+        for (const key of Object.getOwnPropertyNames(input)) {
+          // tslint:disable-next-line:no-any
+          const value: any = input[key];
+
+          // tslint:disable-next-line:no-any
+          const serializedValue: any = MessageRouter.buildJsonDumpObject(value);
+
+          if (serializedValue !== undefined) {
+            outputObject[key] = serializedValue;
+          }
+        }
+        return outputObject;
+    }
+
+    return undefined;
   }
 
   /**
@@ -382,6 +453,20 @@ export class MessageRouter {
       properties,
       logLevel: ExtractorLogLevel.Verbose
     }));
+  }
+
+  public logDiagnosticHeader(title: string): void {
+    this.logDiagnostic(MessageRouter.DIAGNOSTICS_LINE);
+    this.logDiagnostic(`DIAGNOSTIC: ` + title);
+    this.logDiagnostic(MessageRouter.DIAGNOSTICS_LINE);
+  }
+
+  public logDiagnosticFooter(): void {
+    this.logDiagnostic(MessageRouter.DIAGNOSTICS_LINE + '\n');
+  }
+
+  public logDiagnostic(message: string): void {
+    this.logVerbose(ConsoleMessageId.Diagnostics, message);
   }
 
   /**
