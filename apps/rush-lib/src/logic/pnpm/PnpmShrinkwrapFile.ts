@@ -146,18 +146,18 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
+   * Gets the version number from the list of top-level dependencies in the "dependencies" section
+   * of the shrinkwrap file
+   */
+  public getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+  }
+
+  /**
    * Serializes the PNPM Shrinkwrap file
    */
   protected serialize(): string {
     return yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
-  }
-
-  /**
-   * Gets the version number from the list of top-level dependencies in the "dependencies" section
-   * of the shrinkwrap file
-   */
-  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
-    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
   }
 
   /**

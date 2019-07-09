@@ -23,6 +23,8 @@ import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
+import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -35,12 +37,17 @@ export class PnpmLinkManager extends BaseLinkManager {
         localLinks: {}
       };
 
+      let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
+
+      shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager,
+        this._rushConfiguration.getCommittedShrinkwrapFilename(this._rushConfiguration.currentInstalledVariant));
+
       let promise: Promise<void> = Promise.resolve();
 
       for (const rushProject of this._rushConfiguration.projects) {
         promise = promise.then(() => {
           console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-          return this._linkProject(rushProject, rushLinkJson);
+          return this._linkProject(rushProject, rushLinkJson, shrinkwrapFile);
         });
       }
 
@@ -60,7 +67,10 @@ export class PnpmLinkManager extends BaseLinkManager {
    */
   private _linkProject(
     project: RushConfigurationProject,
-    rushLinkJson: IRushLinkJson): Promise<void> {
+    rushLinkJson: IRushLinkJson,
+    shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined): Promise<void> {
+
+    console.log(shrinkwrapFile);
 
     // first, read the temp package.json information
 
@@ -139,14 +149,17 @@ export class PnpmLinkManager extends BaseLinkManager {
     // appropriate. This folder is usually something like:
     // C:\{uri-encoed-path-to-tgz}\node_modules\{package-name}
 
+    const topLevelDependencyVersion: string | undefined =
+      shrinkwrapFile!.getTopLevelDependencyVersion(project.tempProjectName);
+
     // e.g.: C:\wbt\common\temp\projects\api-documenter.tgz
     const pathToTgzFile: string = path.join(
       this._rushConfiguration.commonTempFolder,
-      'projects',
-      `${unscopedTempProjectName}.tgz`);
+      'projects');
 
     // e.g.: C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
-    const escapedPathToTgzFile: string = uriEncode(Text.replaceAll(pathToTgzFile, path.sep, '/'));
+    const escapedPathToTgzFile: string = uriEncode(Text.replaceAll(pathToTgzFile, path.sep, '/') 
+      + '/') + topLevelDependencyVersion!.substring(topLevelDependencyVersion!.lastIndexOf('/') + 1);
 
     // tslint:disable-next-line:max-line-length
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules

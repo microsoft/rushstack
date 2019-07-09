@@ -161,13 +161,13 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  protected serialize(): string { // abstract
-    return lockfile.stringify(this._shrinkwrapJson);
+  public getTopLevelDependencyVersion(dependencyName: string): string | undefined { // abstract
+    throw new InternalError('Not implemented');
   }
 
   /** @override */
-  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined { // abstract
-    throw new InternalError('Not implemented');
+  protected serialize(): string { // abstract
+    return lockfile.stringify(this._shrinkwrapJson);
   }
 
   /** @override */

@@ -49,11 +49,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
   }
 
-  protected serialize(): string {
-    return JsonFile.stringify(this._shrinkwrapJson);
-  }
-
-  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+  public getTopLevelDependencyVersion(dependencyName: string): string | undefined {
      // First, check under tempProjectName, as this is the first place "rush link" looks.
     const dependencyJson: INpmShrinkwrapDependencyJson | undefined =
       NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
@@ -63,6 +59,10 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
      }
 
      return dependencyJson.version;
+  }
+
+  protected serialize(): string {
+    return JsonFile.stringify(this._shrinkwrapJson);
   }
 
   /**
