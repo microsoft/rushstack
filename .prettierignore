@@ -1,0 +1,16 @@
+# Exclude everything by default
+/**/*
+
+# Include all folders
+!/**/*/
+
+# But exclude node_modules folders anywhere
+node_modules/
+
+# Include specific file extensions if they appear under a "src" folder
+!/*/*/src/**/*.ts
+!/*/*/src/**/*.tsx
+!/*/*/config/**/*.json
+
+# Exclude the common folder
+/common
