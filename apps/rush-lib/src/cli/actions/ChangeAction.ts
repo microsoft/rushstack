@@ -186,7 +186,7 @@ export class ChangeAction extends BaseRushAction {
 
   private _validateChangeFile(changedPackages: string[]): void {
     const files: string[] = this._getChangeFiles();
-    ChangeFiles.validate(files, changedPackages);
+    ChangeFiles.validate(files, changedPackages, this.rushConfiguration);
   }
 
   private _getChangeFiles(): string[] {
