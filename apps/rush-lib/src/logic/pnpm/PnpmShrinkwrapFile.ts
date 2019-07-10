@@ -24,7 +24,6 @@ interface IPnpmShrinkwrapDependencyYaml {
   };
   /** The list of dependencies and the resolved version */
   dependencies: { [dependency: string]: string };
-  id: string;
 }
 
 /**
@@ -147,18 +146,19 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
+   * Gets the path to the tarball file if the package is a tarball,
+   * otherwise returns undefined. Example: file:projects/build-tools.tgz
+   */
+  public getTarballPath(packageName: string): string | undefined {
+    return this._shrinkwrapJson.packages[packageName].resolution.tarball;
+  }
+
+  /**
    * Gets the version number from the list of top-level dependencies in the "dependencies" section
    * of the shrinkwrap file
    */
   public getTopLevelDependencyVersion(dependencyName: string): string | undefined {
     return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
-  }
-
-  /**
-   * Gets the id of the specified package
-   */
-  public getPackageId(packageName: string): string | undefined {
-    return this._shrinkwrapJson.packages[packageName].id;
   }
 
   /**

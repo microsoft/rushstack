@@ -76,6 +76,10 @@ export class PnpmLinkManager extends BaseLinkManager {
     rushLinkJson: IRushLinkJson,
     pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined): Promise<void> {
 
+    if (!pnpmShrinkwrapFile) {
+      throw new InternalError(`Shrinkwrap is undefined."`);
+    }
+
     // first, read the temp package.json information
 
     // Example: "project1"
@@ -158,36 +162,50 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   file:projects/build-tools.tgz_dc21d88642e18a947127a751e00b020a
     //   file:projects/imodel-from-geojson.tgz_request@2.88.0
     const topLevelDependencyVersion: string | undefined =
-      pnpmShrinkwrapFile!.getTopLevelDependencyVersion(project.tempProjectName);
+      pnpmShrinkwrapFile.getTopLevelDependencyVersion(project.tempProjectName);
 
     if (!topLevelDependencyVersion) {
       throw new InternalError(`Cannot find top level dependency for "${project.tempProjectName}"` +
         ` in shrinkwrap.`);
     }
 
-    const packageId: string | undefined = pnpmShrinkwrapFile!.getPackageId(topLevelDependencyVersion);
+    // e.g.: file:projects/project-name.tgz
+    const tarballEntry: string | undefined = pnpmShrinkwrapFile.getTarballPath(topLevelDependencyVersion);
+
+    if (!tarballEntry) {
+      throw new InternalError(`Cannot find tarball path for "${topLevelDependencyVersion}"` +
+        ` in shrinkwrap.`);
+    }
 
     // e.g.: projects\api-documenter.tgz
-    const relativePathToTgzFile: string = packageId
-     ? packageId.slice('file:'.length)
-     :  topLevelDependencyVersion.slice('file:'.length);
-
-    if (packageId) {
-      relativePathToTgzFile = packageId.slice('file:'.length);
-    } else {
-      relativePathToTgzFile = topLevelDependencyVersion.slice('file:'.length);
-    }
+    const relativePathToTgzFile: string | undefined = tarballEntry.slice(`file:`.length);
 
     // e.g.: C:\wbt\common\temp\projects\api-documenter.tgz
     const absolutePathToTgzFile: string = path.resolve(this._rushConfiguration.commonTempFolder, relativePathToTgzFile);
+
+    // The folder name in `.local` is constructed as:
+    //   UriEncode(absolutePathToTgzFile) + _suffix
+    //
+    // Note that _suffix is not encoded. The tarball attribute of the package 'file:projects/project-name.tgz_suffix'
+    // holds the tarball path 'file:projects/project-name.tgz', which can be used for the constructing the folder name.
+    //
+    // '_suffix' is extracted by stripping the tarball path from top level dependency value.
+    // tarball path = 'file:projects/project-name.tgz'
+    // top level dependency = 'file:projects/project-name.tgz_suffix'
+
+    // e.g.:
+    //   '' [empty string]
+    //   _jsdom@11.12.0
+    //   _2a665c89609864b4e75bc5365d7f8f56
+    const folderNameSuffix: string = (tarballEntry && tarballEntry.length < topLevelDependencyVersion.length ?
+      topLevelDependencyVersion.slice(tarballEntry.length) : '');
 
     // e.g.:
     //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
     //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fpresentation-integration-tests.tgz_jsdom@11.12.0
     //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fbuild-tools.tgz_2a665c89609864b4e75bc5365d7f8f56
-    const dirNameInLocal: string = uriEncode(Text.replaceAll(absolutePathToTgzFile, path.sep, '/')) +
-      (packageId && packageId.length < topLevelDependencyVersion.length ?
-        topLevelDependencyVersion.slice(packageId.length) : '');
+    const folderNameInLocalInstallationRoot: string = uriEncode(Text.replaceAll(absolutePathToTgzFile, path.sep, '/')) +
+      folderNameSuffix;
 
     // tslint:disable-next-line:max-line-length
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
@@ -195,7 +213,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       this._rushConfiguration.commonTempFolder,
       RushConstants.nodeModulesFolderName,
       '.local',
-      dirNameInLocal,
+      folderNameInLocalInstallationRoot,
       RushConstants.nodeModulesFolderName);
 
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
