@@ -218,7 +218,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean { // override
     // dependencyVersion could be a relative or absolute path, for those cases we
     // need to extract the version from the end of the path.
-    return super.checkValidVersionRange(dependencyVersion.split('/').pop()!, versionRange);
+    return super.checkValidVersionRange(this._getValidDependencyVersion(dependencyVersion), versionRange);
   }
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
@@ -270,6 +270,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return packageDescription;
+  }
+
+  private _getValidDependencyVersion(dependencyVersion: string): string {
+    return semver.valid(dependencyVersion.split('/').pop()!) ?
+          dependencyVersion.split('/').pop()! :
+          dependencyVersion.split('_')[0]!;
   }
 
   private _getTempProjectKey(tempProjectName: string): string {
