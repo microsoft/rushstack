@@ -168,7 +168,9 @@ export class PnpmLinkManager extends BaseLinkManager {
     const packageId: string | undefined = pnpmShrinkwrapFile!.getPackageId(topLevelDependencyVersion);
 
     // e.g.: projects\api-documenter.tgz
-    let relativePathToTgzFile: string;
+    const relativePathToTgzFile: string = packageId
+     ? packageId.slice('file:'.length)
+     :  topLevelDependencyVersion.slice('file:'.length);
 
     if (packageId) {
       relativePathToTgzFile = packageId.slice('file:'.length);
