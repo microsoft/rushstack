@@ -74,11 +74,7 @@ export class PnpmLinkManager extends BaseLinkManager {
   private _linkProject(
     project: RushConfigurationProject,
     rushLinkJson: IRushLinkJson,
-    pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined): Promise<void> {
-
-    if (!pnpmShrinkwrapFile) {
-      throw new InternalError(`Shrinkwrap is undefined."`);
-    }
+    pnpmShrinkwrapFile: PnpmShrinkwrapFile): Promise<void> {
 
     // first, read the temp package.json information
 

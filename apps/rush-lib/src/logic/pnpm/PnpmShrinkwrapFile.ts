@@ -146,11 +146,18 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
-   * Gets the path to the tarball file if the package is a tarball,
-   * otherwise returns undefined. Example: file:projects/build-tools.tgz
+   * Gets the path to the tarball file if the package is a tarball.
+   * Returns undefined if the package entry doesn't exist or the package isn't a tarball.
+   * Example of return value: file:projects/build-tools.tgz
    */
   public getTarballPath(packageName: string): string | undefined {
-    return this._shrinkwrapJson.packages[packageName].resolution.tarball;
+    const dependency: IPnpmShrinkwrapDependencyYaml = this._shrinkwrapJson.packages[packageName];
+
+    if (!dependency) {
+      return undefined;
+    }
+
+    return dependency.resolution.tarball;
   }
 
   /**
