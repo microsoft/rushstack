@@ -1,19 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  IDocNodeParameters,
-  DocNode,
-  DocPlainText
-} from '@microsoft/tsdoc';
+import { IDocNodeParameters, DocNode, DocPlainText } from '@microsoft/tsdoc';
 import { CustomDocNodeKind } from './CustomDocNodeKind';
 import { DocTableCell } from './DocTableCell';
 
 /**
  * Constructor parameters for {@link DocTableRow}.
  */
-export interface IDocTableRowParameters extends IDocNodeParameters {
-}
+export interface IDocTableRowParameters extends IDocNodeParameters {}
 
 /**
  * Represents table row, similar to an HTML `<tr>` element.
@@ -53,10 +48,12 @@ export class DocTableRow extends DocNode {
 
   public addPlainTextCell(cellContent: string): DocTableCell {
     const cell: DocTableCell = this.createAndAddCell();
-    cell.content.appendNodeInParagraph(new DocPlainText({
-      configuration: this.configuration,
-      text: cellContent
-    }));
+    cell.content.appendNodeInParagraph(
+      new DocPlainText({
+        configuration: this.configuration,
+        text: cellContent
+      })
+    );
     return cell;
   }
 

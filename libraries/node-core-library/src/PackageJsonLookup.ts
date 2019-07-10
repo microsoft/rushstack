@@ -31,7 +31,9 @@ export interface IPackageJsonLookupParameters {
  * @public
  */
 export class PackageJsonLookup {
-  private static _loadOwnPackageJsonLookup: PackageJsonLookup = new PackageJsonLookup({ loadExtraFields: true });
+  private static _loadOwnPackageJsonLookup: PackageJsonLookup = new PackageJsonLookup({
+    loadExtraFields: true
+  });
 
   private _loadExtraFields: boolean = false;
 
@@ -67,22 +69,28 @@ export class PackageJsonLookup {
    * loading, an exception will be thrown instead.
    */
   public static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson {
-    const packageJson: IPackageJson | undefined = PackageJsonLookup._loadOwnPackageJsonLookup
-      .tryLoadPackageJsonFor(dirnameOfCaller);
+    const packageJson:
+      | IPackageJson
+      | undefined = PackageJsonLookup._loadOwnPackageJsonLookup.tryLoadPackageJsonFor(dirnameOfCaller);
 
     if (packageJson === undefined) {
-      throw new Error(`PackageJsonLookup.loadOwnPackageJson() failed to find the caller's package.json.`
-        + `  The __dirname was: ${dirnameOfCaller}`);
+      throw new Error(
+        `PackageJsonLookup.loadOwnPackageJson() failed to find the caller's package.json.` +
+          `  The __dirname was: ${dirnameOfCaller}`
+      );
     }
 
     if (packageJson.version !== undefined) {
       return packageJson as IPackageJson;
     }
 
-    const errorPath: string = PackageJsonLookup._loadOwnPackageJsonLookup.tryGetPackageJsonFilePathFor(dirnameOfCaller)
-      || 'package.json';
-    throw new Error(`PackageJsonLookup.loadOwnPackageJson() failed because the "version" field is missing in`
-      + ` ${errorPath}`);
+    const errorPath: string =
+      PackageJsonLookup._loadOwnPackageJsonLookup.tryGetPackageJsonFilePathFor(dirnameOfCaller) ||
+      'package.json';
+    throw new Error(
+      `PackageJsonLookup.loadOwnPackageJson() failed because the "version" field is missing in` +
+        ` ${errorPath}`
+    );
   }
 
   constructor(parameters?: IPackageJsonLookupParameters) {
@@ -204,8 +212,7 @@ export class PackageJsonLookup {
     const packageJson: INodePackageJson = this.loadNodePackageJson(jsonFilename);
 
     if (!packageJson.version) {
-      throw new Error(`Error reading "${jsonFilename}":\n  `
-        + 'The required field "version" was not found');
+      throw new Error(`Error reading "${jsonFilename}":\n  ` + 'The required field "version" was not found');
     }
 
     return packageJson as IPackageJson;
@@ -232,14 +239,13 @@ export class PackageJsonLookup {
       // Make sure this is really a package.json file.  CommonJS has fairly strict requirements,
       // but NPM only requires "name" and "version"
       if (!loadedPackageJson.name) {
-        throw new Error(`Error reading "${jsonFilename}":\n  `
-          + 'The required field "name" was not found');
+        throw new Error(`Error reading "${jsonFilename}":\n  ` + 'The required field "name" was not found');
       }
 
       if (this._loadExtraFields) {
         packageJson = loadedPackageJson;
       } else {
-        packageJson = { } as IPackageJson;
+        packageJson = {} as IPackageJson;
 
         // Unless "loadExtraFields" was requested, copy over the essential fields only
         packageJson.bin = loadedPackageJson.bin;
@@ -287,7 +293,7 @@ export class PackageJsonLookup {
       // We reached the root directory without finding a package.json file,
       // so cache the negative result
       this._packageFolderCache.set(resolvedFileOrFolderPath, undefined);
-      return undefined;  // no match
+      return undefined; // no match
     }
 
     // Recurse upwards, caching every step along the way

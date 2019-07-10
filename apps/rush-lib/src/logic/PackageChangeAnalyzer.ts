@@ -4,10 +4,7 @@
 import * as path from 'path';
 import * as colors from 'colors';
 
-import {
-  getPackageDeps,
-  IPackageDeps
-} from '@microsoft/package-deps-hash';
+import { getPackageDeps, IPackageDeps } from '@microsoft/package-deps-hash';
 import { Path } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../logic/RushConstants';
@@ -57,19 +54,20 @@ export class PackageChangeAnalyzer {
     try {
       if (this._isGitSupported) {
         // Load the package deps hash for the whole repository
-        repoDeps = PackageChangeAnalyzer.getPackageDeps(
-          this._rushConfiguration.rushJsonFolder,
-          [RushConstants.packageDepsFilename]
-        );
+        repoDeps = PackageChangeAnalyzer.getPackageDeps(this._rushConfiguration.rushJsonFolder, [
+          RushConstants.packageDepsFilename
+        ]);
       } else {
         return projectHashDeps;
       }
     } catch (e) {
       // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
       // the state of the files in the repo. This can happen if the environment doesn't have Git.
-      console.log(colors.yellow(
-        `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
-      ));
+      console.log(
+        colors.yellow(
+          `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
+        )
+      );
 
       return projectHashDeps;
     }
@@ -134,10 +132,12 @@ export class PackageChangeAnalyzer {
 
     // Add the shrinkwrap file to every project's dependencies
 
-    const shrinkwrapFile: string =
-      path.relative(this._rushConfiguration.rushJsonFolder,
-        this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
-        .replace(/\\/g, '/');
+    const shrinkwrapFile: string = path
+      .relative(
+        this._rushConfiguration.rushJsonFolder,
+        this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
+      )
+      .replace(/\\/g, '/');
 
     for (const project of this._rushConfiguration.projects) {
       const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];

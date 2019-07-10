@@ -28,14 +28,14 @@ export interface IVersionMismatchFinderGetMismatchesOptions {
 }
 
 export class VersionMismatchFinder {
- /* store it like this:
-  * {
-  *   "@types/node": {
-  *     "1.0.0": [ '@ms/rush' ]
-  *   }
-  * }
-  */
-  private _allowedAlternativeVersion:  Map<string, ReadonlyArray<string>>;
+  /* store it like this:
+   * {
+   *   "@types/node": {
+   *     "1.0.0": [ '@ms/rush' ]
+   *   }
+   * }
+   */
+  private _allowedAlternativeVersion: Map<string, ReadonlyArray<string>>;
   private _mismatches: Map<string, Map<string, string[]>>;
   private _projects: IVersionMismatchFinderProject[];
 
@@ -84,13 +84,12 @@ export class VersionMismatchFinder {
       packageName: 'preferred versions from ' + RushConstants.commonVersionsFilename,
       cyclicDependencyProjects: new Set<string>(),
       packageJsonEditor: PackageJsonEditor.fromObject(
-        { dependencies: allPreferredVersions } as any, 'preferred-versions.json') // tslint:disable-line:no-any
+        { dependencies: allPreferredVersions } as any,
+        'preferred-versions.json'
+      ) // tslint:disable-line:no-any
     });
 
-    return new VersionMismatchFinder(
-      projects,
-      commonVersions.allowedAlternativeVersions
-    );
+    return new VersionMismatchFinder(projects, commonVersions.allowedAlternativeVersions);
   }
 
   private static _checkForInconsistentVersions(
@@ -98,11 +97,13 @@ export class VersionMismatchFinder {
     options: {
       isRushCheckCommand: boolean;
       variant?: string | undefined;
-    }): void {
-
+    }
+  ): void {
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
-      const mismatchFinder: VersionMismatchFinder
-        = VersionMismatchFinder.getMismatches(rushConfiguration, options);
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+        rushConfiguration,
+        options
+      );
 
       mismatchFinder.print();
 
@@ -117,8 +118,10 @@ export class VersionMismatchFinder {
     }
   }
 
-  constructor(projects: IVersionMismatchFinderProject[],
-    allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>) {
+  constructor(
+    projects: IVersionMismatchFinderProject[],
+    allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>
+  ) {
     this._projects = projects;
     this._mismatches = new Map<string, Map<string, string[]>>();
     this._allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
@@ -134,9 +137,7 @@ export class VersionMismatchFinder {
   }
 
   public getVersionsOfMismatch(mismatch: string): Array<string> | undefined {
-    return this._mismatches.has(mismatch)
-      ? this._getKeys(this._mismatches.get(mismatch))
-      : undefined;
+    return this._mismatches.has(mismatch) ? this._getKeys(this._mismatches.get(mismatch)) : undefined;
   }
 
   public getConsumersOfMismatch(mismatch: string, version: string): Array<string> | undefined {
@@ -212,11 +213,10 @@ export class VersionMismatchFinder {
     });
   }
 
-  private _isVersionAllowedAlternative(
-    dependency: string,
-    version: string): boolean {
-
-    const allowedAlternatives: ReadonlyArray<string> | undefined = this._allowedAlternativeVersion.get(dependency);
+  private _isVersionAllowedAlternative(dependency: string, version: string): boolean {
+    const allowedAlternatives: ReadonlyArray<string> | undefined = this._allowedAlternativeVersion.get(
+      dependency
+    );
     return Boolean(allowedAlternatives && allowedAlternatives.indexOf(version) > -1);
   }
 

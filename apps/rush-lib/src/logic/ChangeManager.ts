@@ -26,10 +26,7 @@ export class ChangeManager {
   private _rushConfiguration: RushConfiguration;
   private _lockStepProjectsToExclude: Set<string> | undefined;
 
-  constructor(
-    rushConfiguration: RushConfiguration,
-    lockStepProjectsToExclude?: Set<string> | undefined
-  ) {
+  constructor(rushConfiguration: RushConfiguration, lockStepProjectsToExclude?: Set<string> | undefined) {
     this._rushConfiguration = rushConfiguration;
     this._lockStepProjectsToExclude = lockStepProjectsToExclude;
   }
@@ -57,7 +54,7 @@ export class ChangeManager {
       includeCommitDetails,
       this._prereleaseToken,
       this._lockStepProjectsToExclude
-      );
+    );
     this._orderedChanges = PublishUtilities.sortChangeRequests(this._allChanges);
   }
 
@@ -74,17 +71,15 @@ export class ChangeManager {
   }
 
   public validateChanges(versionConfig: VersionPolicyConfiguration): void {
-    Object
-      .keys(this._allChanges)
-      .filter((key) => {
-        const projectInfo: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(key);
-        if (projectInfo) {
-          if (projectInfo.versionPolicy) {
-            const changeInfo: IChangeInfo = this._allChanges[key];
-            projectInfo.versionPolicy.validate(changeInfo.newVersion!, key);
-          }
+    Object.keys(this._allChanges).filter(key => {
+      const projectInfo: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(key);
+      if (projectInfo) {
+        if (projectInfo.versionPolicy) {
+          const changeInfo: IChangeInfo = this._allChanges[key];
+          projectInfo.versionPolicy.validate(changeInfo.newVersion!, key);
         }
-      });
+      }
+    });
   }
 
   /**
@@ -104,7 +99,8 @@ export class ChangeManager {
       this._rushConfiguration,
       shouldCommit,
       this._prereleaseToken,
-      this._lockStepProjectsToExclude);
+      this._lockStepProjectsToExclude
+    );
 
     return updatedPackages;
   }

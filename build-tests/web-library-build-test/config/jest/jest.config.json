@@ -6,9 +6,7 @@
       "tsConfigFile": "config/jest/tsconfig.json"
     }
   },
-  "moduleFileExtensions": [
-    "js"
-  ],
+  "moduleFileExtensions": ["js"],
   "moduleNameMapper": {
     "ts-jest": "<rootDir>/node_modules/ts-jest/index.js"
   },

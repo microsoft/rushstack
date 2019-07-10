@@ -27,8 +27,10 @@ export class InternalError extends Error {
   public readonly unformattedMessage: string;
 
   private static _formatMessage(unformattedMessage: string): string {
-    return `Internal Error: ${unformattedMessage}\n\nYou have encountered a software defect. Please consider`
-      + ` reporting the issue to the maintainers of this application.`;
+    return (
+      `Internal Error: ${unformattedMessage}\n\nYou have encountered a software defect. Please consider` +
+      ` reporting the issue to the maintainers of this application.`
+    );
   }
 
   /**

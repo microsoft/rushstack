@@ -38,36 +38,37 @@ describe('TaskRunner', () => {
 
   describe('Constructor', () => {
     it('throwsErrorOnInvalidParallelism', () => {
-      expect(() => new TaskRunner({
-        quietMode: false,
-        parallelism: 'tequila',
-        changedProjectsOnly: false,
-        terminal,
-        allowWarningsInSuccessfulBuild: false
-      })).toThrowErrorMatchingSnapshot();
+      expect(
+        () =>
+          new TaskRunner({
+            quietMode: false,
+            parallelism: 'tequila',
+            changedProjectsOnly: false,
+            terminal,
+            allowWarningsInSuccessfulBuild: false
+          })
+      ).toThrowErrorMatchingSnapshot();
     });
   });
 
   describe('Dependencies', () => {
     beforeEach(() => {
       taskRunner = new TaskRunner({
-          quietMode: false,
-          parallelism: '1',
-          changedProjectsOnly: false,
-          terminal,
-          allowWarningsInSuccessfulBuild: false
+        quietMode: false,
+        parallelism: '1',
+        changedProjectsOnly: false,
+        terminal,
+        allowWarningsInSuccessfulBuild: false
       });
     });
 
     it('throwsErrorOnNonExistentTask', () => {
-      expect(() => taskRunner.addDependencies('foo', []))
-        .toThrowErrorMatchingSnapshot();
+      expect(() => taskRunner.addDependencies('foo', [])).toThrowErrorMatchingSnapshot();
     });
 
     it('throwsErrorOnNonExistentDependency', () => {
       taskRunner.addTask(createDummyTask('foo'));
-      expect(() => taskRunner.addDependencies('foo', ['bar']))
-        .toThrowErrorMatchingSnapshot();
+      expect(() => taskRunner.addDependencies('foo', ['bar'])).toThrowErrorMatchingSnapshot();
     });
 
     it('detectsDependencyCycle', () => {
@@ -168,8 +169,9 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch(err => {
           expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput())
-            .toMatch(/Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/);
+          expect(terminalProvider.getOutput()).toMatch(
+            /Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/
+          );
           checkConsoleOutput(terminalProvider);
         });
     });
@@ -192,8 +194,9 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch(err => {
           expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput())
-            .toMatch(/List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/);
+          expect(terminalProvider.getOutput()).toMatch(
+            /List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/
+          );
           checkConsoleOutput(terminalProvider);
         });
     });

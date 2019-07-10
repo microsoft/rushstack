@@ -12,11 +12,10 @@ import { DeserializerContext } from './DeserializerContext';
  * Constructor options for {@link ApiEnumMember}.
  * @public
  */
-export interface IApiEnumMemberOptions extends
-  IApiNameMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-
+export interface IApiEnumMemberOptions
+  extends IApiNameMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions {
   initializerTokenRange: IExcerptTokenRange;
 }
 
@@ -55,9 +54,11 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, context: DeserializerContext,
-    jsonObject: IApiEnumMemberJson): void {
-
+  public static onDeserializeInto(
+    options: Partial<IApiEnumMemberOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiEnumMemberJson
+  ): void {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.initializerTokenRange = jsonObject.initializerTokenRange;

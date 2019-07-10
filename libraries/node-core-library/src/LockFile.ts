@@ -22,7 +22,7 @@ const procStatStartTimePos: number = 22;
  * @param stat The contents of a linux /proc/[pid]/stat file.
  * @returns The process start time in jiffies, or undefined if stat has an unexpected format.
  */
-export function getProcessStartTimeFromProcStat (stat: string): string | undefined {
+export function getProcessStartTimeFromProcStat(stat: string): string | undefined {
   // Parse the value at position procStatStartTimePos.
   // We cannot just split stat on spaces, because value 2 may contain spaces.
   // For example, when running the following Shell commands:
@@ -36,10 +36,11 @@ export function getProcessStartTimeFromProcStat (stat: string): string | undefin
   // trimRight to remove the trailing line terminator.
   let values: string[] = stat.trimRight().split(' ');
   let i: number = values.length - 1;
-  while (i >= 0 &&
+  while (
+    i >= 0 &&
     // charAt returns an empty string if the index is out of bounds.
     values[i].charAt(values[i].length - 1) !== ')'
-    ) {
+  ) {
     i -= 1;
   }
   // i is the index of the last part of the second value (but i need not be 1).
@@ -90,7 +91,7 @@ export function getProcessStartTime(pid: number): string | undefined {
   // zero bytes are written to stdout.
   if (psResult.status !== 0 && !psStdout && process.platform === 'linux') {
     // Try to read /proc/[pid]/stat and get the value at position procStatStartTimePos.
-    let stat: undefined|string;
+    let stat: undefined | string;
     try {
       stat = FileSystem.readFile(`/proc/${pidString}/stat`);
     } catch (error) {
@@ -102,10 +103,12 @@ export function getProcessStartTime(pid: number): string | undefined {
       return undefined;
     }
     if (stat !== undefined) {
-      const startTimeJiffies: string|undefined = getProcessStartTimeFromProcStat(stat);
+      const startTimeJiffies: string | undefined = getProcessStartTimeFromProcStat(stat);
       if (startTimeJiffies === undefined) {
-        throw new Error(`Could not retrieve the start time of process ${pidString} from the OS because the `
-          + `contents of /proc/${pidString}/stat have an unexpected format`);
+        throw new Error(
+          `Could not retrieve the start time of process ${pidString} from the OS because the ` +
+            `contents of /proc/${pidString}/stat have an unexpected format`
+        );
       }
       return startTimeJiffies;
     }
@@ -145,10 +148,16 @@ export class LockFile {
   /**
    * Returns the path to the lockfile, should it be created successfully.
    */
-  public static getLockFilePath(resourceDir: string, resourceName: string, pid: number = process.pid): string {
+  public static getLockFilePath(
+    resourceDir: string,
+    resourceName: string,
+    pid: number = process.pid
+  ): string {
     if (!resourceName.match(/^[a-zA-Z0-9][a-zA-Z0-9-.]+[a-zA-Z0-9]$/)) {
-      throw new Error(`The resource name "${resourceName}" is invalid.`
-        + ` It must be an alphanumberic string with only "-" or "." It must start with an alphanumeric character.`);
+      throw new Error(
+        `The resource name "${resourceName}" is invalid.` +
+          ` It must be an alphanumberic string with only "-" or "." It must start with an alphanumeric character.`
+      );
     }
 
     if (process.platform === 'win32') {
@@ -192,8 +201,10 @@ export class LockFile {
       if (lock) {
         return Promise.resolve(lock);
       }
-      if (maxWaitMs && (Date.now() > startTime + maxWaitMs)) {
-        return Promise.reject(new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`));
+      if (maxWaitMs && Date.now() > startTime + maxWaitMs) {
+        return Promise.reject(
+          new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`)
+        );
       }
 
       return LockFile._sleepForMs(interval).then(() => {
@@ -252,10 +263,11 @@ export class LockFile {
       let match: RegExpMatchArray | null;
       let otherPid: string;
       for (const fileInFolder of files) {
-        if ((match = fileInFolder.match(lockFileRegExp))
-          && (match[1] === resourceName)
-          && ((otherPid = match[2]) !== pid.toString())) {
-
+        if (
+          (match = fileInFolder.match(lockFileRegExp)) &&
+          match[1] === resourceName &&
+          (otherPid = match[2]) !== pid.toString()
+        ) {
           // we found at least one lockfile hanging around that isn't ours
           const fileInFolderPath: string = path.join(resourceDir, fileInFolder);
           dirtyWhenAcquired = true;
@@ -285,8 +297,11 @@ export class LockFile {
               // will hold it
               // console.log(`Ignoring lock for pid ${otherPid} because its lockfile is newer than ours.`);
               continue;
-            } else if (otherBirthtimeMs - currentBirthTimeMs < 0        // it was created before us AND
-              && otherBirthtimeMs - currentBirthTimeMs > -1000) { // it was created less than a second before
+            } else if (
+              otherBirthtimeMs - currentBirthTimeMs < 0 && // it was created before us AND
+              otherBirthtimeMs - currentBirthTimeMs > -1000
+            ) {
+              // it was created less than a second before
 
               // conservatively be unable to keep the lock
               return undefined;
@@ -414,6 +429,6 @@ export class LockFile {
   private constructor(
     private _fileWriter: FileWriter | undefined,
     private _filePath: string,
-    private _dirtyWhenAcquired: boolean) {
-  }
+    private _dirtyWhenAcquired: boolean
+  ) {}
 }

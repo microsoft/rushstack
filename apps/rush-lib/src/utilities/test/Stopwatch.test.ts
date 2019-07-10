@@ -13,7 +13,11 @@ function pseudoTimeSeconds(times: number[]): () => number {
 
 describe('Stopwatch', () => {
   it('allows a static invocation as a quick shorthand', (done: jest.DoneCallback) => {
-    expect(Stopwatch.start().reset().toString()).toEqual('0.00 seconds (stopped)');
+    expect(
+      Stopwatch.start()
+        .reset()
+        .toString()
+    ).toEqual('0.00 seconds (stopped)');
     done();
   });
 
@@ -24,7 +28,7 @@ describe('Stopwatch', () => {
     done();
   });
 
-  it('can\'t start twice', (done: jest.DoneCallback) => {
+  it("can't start twice", (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch();
     expect(() => {
       watch.start();

@@ -1,7 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../items/ApiItem';
+import {
+  ApiItem,
+  ApiItem_parent,
+  IApiItemJson,
+  IApiItemOptions,
+  IApiItemConstructor
+} from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
 
@@ -19,7 +25,9 @@ export interface IApiItemContainerJson extends IApiItemJson {
 
 const _members: unique symbol = Symbol('ApiItemContainerMixin._members');
 const _membersSorted: unique symbol = Symbol('ApiItemContainerMixin._membersSorted');
-const _membersByCanonicalReference: unique symbol = Symbol('ApiItemContainerMixin._membersByCanonicalReference');
+const _membersByCanonicalReference: unique symbol = Symbol(
+  'ApiItemContainerMixin._membersByCanonicalReference'
+);
 const _membersByName: unique symbol = Symbol('ApiItemContainerMixin._membersByName');
 
 /**
@@ -79,8 +87,10 @@ export interface ApiItemContainerMixin extends ApiItem {
  *
  * @public
  */
-export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiItemContainerMixin) { // tslint:disable-line:no-any
+export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+): TBaseClass & (new (...args: any[]) => ApiItemContainerMixin) {
+  // tslint:disable-line:no-any
 
   abstract class MixedClass extends baseClass implements ApiItemContainerMixin {
     public readonly [_members]: ApiItem[];
@@ -89,9 +99,11 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     public [_membersByName]: Map<string, ApiItem[]> | undefined;
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
-      context: DeserializerContext, jsonObject: IApiItemContainerJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiItemContainerMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiItemContainerJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.members = [];
@@ -131,7 +143,9 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
       const existingParent: ApiItem | undefined = member[ApiItem_parent];
       if (existingParent !== undefined) {
-        throw new Error(`This item has already been added to another container: "${existingParent.displayName}"`);
+        throw new Error(
+          `This item has already been added to another container: "${existingParent.displayName}"`
+        );
       }
 
       this[_members].push(member);

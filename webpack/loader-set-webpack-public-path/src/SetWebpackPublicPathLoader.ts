@@ -41,11 +41,14 @@ export class SetWebpackPublicPathLoader {
     return getSetPublicPathCode(options, self.emitWarning);
   }
 
-  private static getOptions(context: any): IInternalOptions { // tslint:disable-line:no-any
+  private static getOptions(context: any): IInternalOptions {
+    // tslint:disable-line:no-any
     const queryOptions: ISetWebpackPublicPathLoaderOptions = loaderUtils.getOptions(context);
 
-    const options: ISetWebpackPublicPathLoaderOptions & IInternalOptions =
-      merge(merge({}, SetWebpackPublicPathLoader.staticOptions), queryOptions);
+    const options: ISetWebpackPublicPathLoaderOptions & IInternalOptions = merge(
+      merge({}, SetWebpackPublicPathLoader.staticOptions),
+      queryOptions
+    );
 
     if (options.systemJs || options.publicPath) {
       // If ?systemJs or ?publicPath=... is set inline, override regexName

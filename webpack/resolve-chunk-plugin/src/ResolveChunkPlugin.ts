@@ -32,36 +32,32 @@ export class ResolveChunkPlugin implements Webpack.Plugin {
     if (isWebpack4) {
       compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation, { normalModuleFactory }) => {
         const handler: (parser: IParser) => void = (parser: IParser) => {
-          parser.hooks.call.for(EXPRESSION_NAME).tap(PLUGIN_NAME, (expression) => {
+          parser.hooks.call.for(EXPRESSION_NAME).tap(PLUGIN_NAME, expression => {
             this._resolveChunkCalled(parser, expression);
           });
 
-          parser.hooks.evaluateTypeof.for(EXPRESSION_NAME).tap(
-            PLUGIN_NAME,
-            ParserHelpers.evaluateToString('function')
-          );
-          parser.hooks.typeof.for(EXPRESSION_NAME).tap(
-            PLUGIN_NAME,
-            ParserHelpers.toConstantDependency(parser, JSON.stringify('function'))
-          );
+          parser.hooks.evaluateTypeof
+            .for(EXPRESSION_NAME)
+            .tap(PLUGIN_NAME, ParserHelpers.evaluateToString('function'));
+          parser.hooks.typeof
+            .for(EXPRESSION_NAME)
+            .tap(PLUGIN_NAME, ParserHelpers.toConstantDependency(parser, JSON.stringify('function')));
         };
 
-        normalModuleFactory.hooks.parser
-          .for('javascript/auto')
-          .tap(PLUGIN_NAME, handler);
-        normalModuleFactory.hooks.parser
-          .for('javascript/dynamic')
-          .tap(PLUGIN_NAME, handler);
+        normalModuleFactory.hooks.parser.for('javascript/auto').tap(PLUGIN_NAME, handler);
+        normalModuleFactory.hooks.parser.for('javascript/dynamic').tap(PLUGIN_NAME, handler);
 
         compilation.hooks.afterOptimizeChunkIds.tap(PLUGIN_NAME, this._afterOptimizeChunkIds.bind(this));
       });
     } else {
       compiler.plugin('compilation', (compilation, data) => {
-        data.normalModuleFactory.plugin('parser', (factory) => {
-          factory.plugin(`call ${EXPRESSION_NAME}`, (expr) => this._resolveChunkCalled(factory, expr));
+        data.normalModuleFactory.plugin('parser', factory => {
+          factory.plugin(`call ${EXPRESSION_NAME}`, expr => this._resolveChunkCalled(factory, expr));
         });
 
-        compilation.plugin('after-optimize-chunk-ids', (chunks: IV3Chunk[]) => this._afterOptimizeChunkIds.bind(this));
+        compilation.plugin('after-optimize-chunk-ids', (chunks: IV3Chunk[]) =>
+          this._afterOptimizeChunkIds.bind(this)
+        );
       });
     }
   }
@@ -80,7 +76,7 @@ export class ResolveChunkPlugin implements Webpack.Plugin {
       }
 
       const state: IModule = parser.state.current;
-      const addDependencyFn: ((dependency: IConstDependency) => void) = state.addDependency.bind(state);
+      const addDependencyFn: (dependency: IConstDependency) => void = state.addDependency.bind(state);
       (this._chunkIdMap.get(chunkName) || []).push((id: ChunkId) => {
         let value: string;
         if (id) {
@@ -103,7 +99,7 @@ export class ResolveChunkPlugin implements Webpack.Plugin {
   private _afterOptimizeChunkIds(chunks: Webpack.compilation.Chunk[]): void {
     for (const chunk of chunks) {
       if (this._chunkIdMap.has(chunk.name)) {
-        for (const dependencyFn of (this._chunkIdMap.get(chunk.name) || [])) {
+        for (const dependencyFn of this._chunkIdMap.get(chunk.name) || []) {
           dependencyFn(chunk.id);
         }
 

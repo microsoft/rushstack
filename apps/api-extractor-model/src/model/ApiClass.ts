@@ -8,28 +8,28 @@ import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiRel
 import { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson
-  } from '../mixins/ApiTypeParameterListMixin';
+import {
+  ApiTypeParameterListMixin,
+  IApiTypeParameterListMixinOptions,
+  IApiTypeParameterListMixinJson
+} from '../mixins/ApiTypeParameterListMixin';
 import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiClass}.
  * @public
  */
-export interface IApiClassOptions extends
-  IApiItemContainerMixinOptions,
-  IApiNameMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions,
-  IApiTypeParameterListMixinOptions {
-
+export interface IApiClassOptions
+  extends IApiItemContainerMixinOptions,
+    IApiNameMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions,
+    IApiTypeParameterListMixinOptions {
   extendsTokenRange: IExcerptTokenRange | undefined;
   implementsTokenRanges: IExcerptTokenRange[];
 }
 
-export interface IApiClassJson extends
-  IApiDeclaredItemJson,
-  IApiTypeParameterListMixinJson {
+export interface IApiClassJson extends IApiDeclaredItemJson, IApiTypeParameterListMixinJson {
   extendsTokenRange?: IExcerptTokenRange;
   implementsTokenRanges: IExcerptTokenRange[];
 }
@@ -50,9 +50,9 @@ export interface IApiClassJson extends
  *
  * @public
  */
-export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(
-  ApiDeclaredItem)))) {
-
+export class ApiClass extends ApiItemContainerMixin(
+  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)))
+) {
   /**
    * The base class that this class inherits from (using the `extends` keyword), or undefined if there is no base class.
    */
@@ -65,9 +65,11 @@ export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiTypeParamete
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiClassOptions>, context: DeserializerContext,
-    jsonObject: IApiClassJson): void {
-
+  public static onDeserializeInto(
+    options: Partial<IApiClassOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiClassJson
+  ): void {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.extendsTokenRange = jsonObject.extendsTokenRange;

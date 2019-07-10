@@ -115,7 +115,7 @@ export interface IFileSystemCopyFileOptions {
 /**
  * The options for FileSystem.deleteFile()
  * @public
-*/
+ */
 export interface IFileSystemDeleteFileOptions {
   /**
    * If true, will throw an exception if the file did not exist before `deleteFile()` was called.
@@ -176,7 +176,6 @@ export interface IFileSystemCreateLinkOptions {
  * @public
  */
 export class FileSystem {
-
   // ===============
   // COMMON OPERATIONS
   // ===============
@@ -245,19 +244,19 @@ export class FileSystem {
    * @param modeBits - POSIX-style file mode bits specified using the {@link PosixModeBits} enum
    */
   public static formatPosixModeBits(modeBits: PosixModeBits): string {
-    let result: string = '-';  // (later we may add support for additional states such as S_IFDIR or S_ISUID)
+    let result: string = '-'; // (later we may add support for additional states such as S_IFDIR or S_ISUID)
 
-    result += (modeBits & PosixModeBits.UserRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.UserWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.UserExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.UserRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.UserWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.UserExecute ? 'x' : '-';
 
-    result += (modeBits & PosixModeBits.GroupRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.GroupWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.GroupExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.GroupRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.GroupWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.GroupExecute ? 'x' : '-';
 
-    result += (modeBits & PosixModeBits.OthersRead) ? 'r' : '-';
-    result += (modeBits & PosixModeBits.OthersWrite) ? 'w' : '-';
-    result += (modeBits & PosixModeBits.OthersExecute) ? 'x' : '-';
+    result += modeBits & PosixModeBits.OthersRead ? 'r' : '-';
+    result += modeBits & PosixModeBits.OthersWrite ? 'w' : '-';
+    result += modeBits & PosixModeBits.OthersExecute ? 'x' : '-';
 
     return result;
   }
@@ -356,7 +355,11 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
-  public static writeFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
+  public static writeFile(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): void {
     options = {
       ensureFolderExists: false,
       convertLineEndings: undefined,
@@ -383,7 +386,11 @@ export class FileSystem {
    * @param contents - The text that should be written to the file.
    * @param options - Optional settings that can change the behavior. Type: `IWriteFileOptions`
    */
-  public static appendToFile(filePath: string, contents: string | Buffer, options?: IFileSystemWriteFileOptions): void {
+  public static appendToFile(
+    filePath: string,
+    contents: string | Buffer,
+    options?: IFileSystemWriteFileOptions
+  ): void {
     options = {
       ensureFolderExists: false,
       convertLineEndings: undefined,

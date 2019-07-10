@@ -59,10 +59,7 @@ export class LoadThemedStylesLoader {
   }
 
   public static pitch(this: loader.LoaderContext, remainingRequest: string): string {
-    const {
-      namedExport,
-      async = false
-    }: ILoadThemedStylesLoaderOptions = loaderUtils.getOptions(this) || {};
+    const { namedExport, async = false }: ILoadThemedStylesLoaderOptions = loaderUtils.getOptions(this) || {};
 
     let exportName: string = 'module.exports';
     if (namedExport) {

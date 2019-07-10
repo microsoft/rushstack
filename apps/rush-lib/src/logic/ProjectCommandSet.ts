@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  IPackageJson,
-  IPackageJsonScriptTable
- } from '@microsoft/node-core-library';
+import { IPackageJson, IPackageJsonScriptTable } from '@microsoft/node-core-library';
 
 /**
  * Parses the "scripts" section from package.json and provides support for executing scripts.
@@ -15,7 +12,7 @@ export class ProjectCommandSet {
   private readonly _scriptsByName: Map<string, string> = new Map<string, string>();
 
   public constructor(packageJson: IPackageJson) {
-    const scripts: IPackageJsonScriptTable = packageJson.scripts || { };
+    const scripts: IPackageJsonScriptTable = packageJson.scripts || {};
 
     for (const scriptName of Object.keys(scripts)) {
       if (scriptName[0] === '-' || scriptName.length === 0) {

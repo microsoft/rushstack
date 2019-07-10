@@ -11,9 +11,7 @@ import * as HttpsType from 'https';
 import * as pathType from 'path';
 import * as ExpressType from 'express';
 
-import {
-  ICertificate
-} from './certificates';
+import { ICertificate } from './certificates';
 
 /**
  * @remarks
@@ -29,12 +27,12 @@ export interface IServeTaskConfig {
     /**
      * The port on which to run the API server
      */
-    port: number,
+    port: number;
 
     /**
      * The path to the script to run as the API server
      */
-    entryPath: string
+    entryPath: string;
   };
 
   /**
@@ -88,23 +86,20 @@ export interface IServeTaskConfig {
 }
 
 interface IApiMap {
-  [ route: string ]: Function;
+  [route: string]: Function;
 }
 
 export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig & TExtendedConfig> {
   constructor(extendedName?: string, extendedConfig?: TExtendedConfig) {
-    super(
-      extendedName || 'serve',
-      {
-        api: undefined,
-        https: false,
-        initialPage: '/index.html',
-        port: 4321,
-        hostname: 'localhost',
-        tryCreateDevCertificate: false,
-        ...(extendedConfig as Object)
-      } as IServeTaskConfig & TExtendedConfig
-    );
+    super(extendedName || 'serve', {
+      api: undefined,
+      https: false,
+      initialPage: '/index.html',
+      port: 4321,
+      hostname: 'localhost',
+      tryCreateDevCertificate: false,
+      ...(extendedConfig as Object)
+    } as IServeTaskConfig & TExtendedConfig);
   }
 
   public loadSchema(): Object {
@@ -112,7 +107,6 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
   }
 
   public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
-
     /* tslint:disable:typedef */
     const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');
@@ -121,14 +115,14 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     /* tslint:enable:typedef */
 
     const path: typeof pathType = require('path');
-    const openBrowser: boolean = (process.argv.indexOf('--nobrowser') === -1);
+    const openBrowser: boolean = process.argv.indexOf('--nobrowser') === -1;
     const portArgumentIndex: number = process.argv.indexOf('--port');
     let { port, initialPage }: IServeTaskConfig = this.taskConfig;
     const { api, hostname }: IServeTaskConfig = this.taskConfig;
     const { rootPath }: IBuildConfig = this.buildConfig;
     const httpsServerOptions: HttpsType.ServerOptions = this._loadHttpsServerOptions();
 
-    if (portArgumentIndex >= 0 && process.argv.length > (portArgumentIndex + 1)) {
+    if (portArgumentIndex >= 0 && process.argv.length > portArgumentIndex + 1) {
       port = Number(process.argv[portArgumentIndex + 1]);
     }
 
@@ -170,7 +164,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         // Load the apis.
         for (const apiMapEntry in apiMap) {
           if (apiMap.hasOwnProperty(apiMapEntry)) {
-            console.log(`Registring api: ${ colors.green(apiMapEntry) }`);
+            console.log(`Registring api: ${colors.green(apiMapEntry)}`);
             app.get(apiMapEntry, apiMap[apiMapEntry]);
           }
         }
@@ -192,19 +186,26 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
           initialPage = `/${initialPage}`;
         }
 
-        uri = `${this.taskConfig.https ? 'https' : 'http'}://${this.taskConfig.hostname}:${port}${initialPage}`;
+        uri = `${this.taskConfig.https ? 'https' : 'http'}://${
+          this.taskConfig.hostname
+        }:${port}${initialPage}`;
       }
 
-      gulp.src('')
-        .pipe(open({
+      gulp.src('').pipe(
+        open({
           uri: uri
-        }));
+        })
+      );
     }
 
     completeCallback();
   }
 
-  private _logRequestsMiddleware(req: HttpType.IncomingMessage, res: HttpType.ServerResponse, next?: () => void): void {
+  private _logRequestsMiddleware(
+    req: HttpType.IncomingMessage,
+    res: HttpType.ServerResponse,
+    next?: () => void
+  ): void {
     /* tslint:disable:no-any */
     const ipAddress: string = (req as any).ip;
     /* tslint:enable:no-any */
@@ -220,22 +221,29 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
       console.log(
         [
           `  Request: `,
-          `${ ipAddress ? `[${ colors.cyan(ipAddress) }] ` : `` }`,
-          `'${ resourceColor(req.url) }'`
-        ].join(''));
+          `${ipAddress ? `[${colors.cyan(ipAddress)}] ` : ``}`,
+          `'${resourceColor(req.url)}'`
+        ].join('')
+      );
     }
 
     next();
   }
 
-  private _enableCorsMiddleware(req: HttpType.IncomingMessage, res: HttpType.ServerResponse, next?: () => void): void {
+  private _enableCorsMiddleware(
+    req: HttpType.IncomingMessage,
+    res: HttpType.ServerResponse,
+    next?: () => void
+  ): void {
     res.setHeader('Access-Control-Allow-Origin', '*');
     next();
   }
 
-  private _setJSONResponseContentTypeMiddleware(req: HttpType.IncomingMessage,
-                                                res: HttpType.ServerResponse,
-                                                next?: () => void): void {
+  private _setJSONResponseContentTypeMiddleware(
+    req: HttpType.IncomingMessage,
+    res: HttpType.ServerResponse,
+    next?: () => void
+  ): void {
     res.setHeader('content-type', 'application/json');
     next();
   }
@@ -259,7 +267,9 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
           this.logError(`PFX file not found at path "${this.taskConfig.pfxPath}"`);
         }
       } else if (this.taskConfig.keyPath && this.taskConfig.certPath) {
-        this.logVerbose(`Trying key path "${this.taskConfig.keyPath}" and cert path "${this.taskConfig.certPath}".`);
+        this.logVerbose(
+          `Trying key path "${this.taskConfig.keyPath}" and cert path "${this.taskConfig.certPath}".`
+        );
         const certExists: boolean = FileSystem.exists(this.taskConfig.certPath);
         const keyExists: boolean = FileSystem.exists(this.taskConfig.keyPath);
 
@@ -286,10 +296,12 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
           result.cert = devCertificate.pemCertificate;
           result.key = devCertificate.pemKey;
         } else {
-          this.logWarning('When serving in HTTPS mode, a PFX cert path or a cert path and a key path must be ' +
-                          'provided, or a dev certificate must be generated and trusted. If a SSL certificate isn\'t ' +
-                          'provided, a default, self-signed certificate will be used. Expect browser security ' +
-                          'warnings.');
+          this.logWarning(
+            'When serving in HTTPS mode, a PFX cert path or a cert path and a key path must be ' +
+              "provided, or a dev certificate must be generated and trusted. If a SSL certificate isn't " +
+              'provided, a default, self-signed certificate will be used. Expect browser security ' +
+              'warnings.'
+          );
         }
       }
 

@@ -27,8 +27,7 @@ interface IForgeCertificate {
   sign(privateKey: string, algorithm: IForgeSignatureAlgorithm): void; // tslint:disable-line:no-any
 }
 
-interface IForgeSignatureAlgorithm {
-}
+interface IForgeSignatureAlgorithm {}
 
 interface IForgeExtensions {
   pki: {
@@ -40,6 +39,6 @@ interface IForgeExtensions {
   md: {
     sha256: {
       create(): IForgeSignatureAlgorithm;
-    }
+    };
   };
 }

@@ -25,21 +25,32 @@ export class ApprovedPackagesChecker {
     for (const rushProject of rushConfiguration.projects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      ApprovedPackagesChecker._collectDependencies(packageJson.dependencies,
-        approvedPackagesPolicy, rushProject);
-      ApprovedPackagesChecker._collectDependencies(packageJson.optionalDependencies,
-        approvedPackagesPolicy, rushProject);
-      ApprovedPackagesChecker._collectDependencies(packageJson.devDependencies,
-        approvedPackagesPolicy, rushProject);
+      ApprovedPackagesChecker._collectDependencies(
+        packageJson.dependencies,
+        approvedPackagesPolicy,
+        rushProject
+      );
+      ApprovedPackagesChecker._collectDependencies(
+        packageJson.optionalDependencies,
+        approvedPackagesPolicy,
+        rushProject
+      );
+      ApprovedPackagesChecker._collectDependencies(
+        packageJson.devDependencies,
+        approvedPackagesPolicy,
+        rushProject
+      );
     }
 
     approvedPackagesPolicy.browserApprovedPackages.saveToFile();
     approvedPackagesPolicy.nonbrowserApprovedPackages.saveToFile();
   }
 
-  private static _collectDependencies(dependencies: { [key: string]: string } | undefined,
-    approvedPackagesPolicy: ApprovedPackagesPolicy, rushProject: RushConfigurationProject): void {
-
+  private static _collectDependencies(
+    dependencies: { [key: string]: string } | undefined,
+    approvedPackagesPolicy: ApprovedPackagesPolicy,
+    rushProject: RushConfigurationProject
+  ): void {
     if (dependencies) {
       for (const packageName of Object.keys(dependencies)) {
         const scope: string = PackageName.getScope(packageName);
@@ -51,11 +62,15 @@ export class ApprovedPackagesChecker {
           // By default we put everything in the browser file.  But if it already appears in the
           // non-browser file, then use that instead.
           if (approvedPackagesPolicy.nonbrowserApprovedPackages.getItemByName(packageName)) {
-            approvedPackagesPolicy.nonbrowserApprovedPackages
-              .addOrUpdatePackage(packageName, rushProject.reviewCategory);
+            approvedPackagesPolicy.nonbrowserApprovedPackages.addOrUpdatePackage(
+              packageName,
+              rushProject.reviewCategory
+            );
           } else {
-            approvedPackagesPolicy.browserApprovedPackages
-              .addOrUpdatePackage(packageName, rushProject.reviewCategory);
+            approvedPackagesPolicy.browserApprovedPackages.addOrUpdatePackage(
+              packageName,
+              rushProject.reviewCategory
+            );
           }
         }
       }

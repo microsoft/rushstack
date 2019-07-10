@@ -10,7 +10,12 @@ import { FileSystem } from '@microsoft/node-core-library';
 export class TsParseConfigHost implements TTypescript.ParseConfigHost {
   public useCaseSensitiveFileNames: boolean = false;
 
-  public readDirectory(rootDir: string, extensions: string[], excludes: string[], includes: string[]): string[] {
+  public readDirectory(
+    rootDir: string,
+    extensions: string[],
+    excludes: string[],
+    includes: string[]
+  ): string[] {
     return FileSystem.readFolder(rootDir);
   }
 

@@ -15,7 +15,8 @@ export class RushStackCommandLine extends CommandLineParser {
     this._populateActions();
   }
 
-  protected onDefineParameters(): void { // override
+  protected onDefineParameters(): void {
+    // override
     // No parameters
   }
 

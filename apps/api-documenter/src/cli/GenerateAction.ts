@@ -17,12 +17,14 @@ export class GenerateAction extends BaseAction {
     super({
       actionName: 'generate',
       summary: 'EXPERIMENTAL',
-      documentation: 'EXPERIMENTAL - This action is a prototype of a new config file driven mode of operation for'
-        + ' API Documenter.  It is not ready for general usage yet.  Its design may change in the future.'
+      documentation:
+        'EXPERIMENTAL - This action is a prototype of a new config file driven mode of operation for' +
+        ' API Documenter.  It is not ready for general usage yet.  Its design may change in the future.'
     });
   }
 
-  protected onExecute(): Promise<void> { // override
+  protected onExecute(): Promise<void> {
+    // override
     // Look for the config file under the current folder
 
     let configFilePath: string = path.join(process.cwd(), DocumenterConfig.FILENAME);
@@ -32,7 +34,9 @@ export class GenerateAction extends BaseAction {
       // Otherwise try the standard "config" subfolder
       configFilePath = path.join(process.cwd(), 'config', DocumenterConfig.FILENAME);
       if (!FileSystem.exists(configFilePath)) {
-        throw new Error(`Unable to find ${DocumenterConfig.FILENAME} in the current folder or in a "config" subfolder`);
+        throw new Error(
+          `Unable to find ${DocumenterConfig.FILENAME} in the current folder or in a "config" subfolder`
+        );
       }
     }
 

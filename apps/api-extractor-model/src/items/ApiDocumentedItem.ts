@@ -32,10 +32,12 @@ export class ApiDocumentedItem extends ApiItem {
   private _tsdocComment: tsdoc.DocComment | undefined;
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>, context: DeserializerContext,
-    jsonObject: IApiItemJson): void {
-
-    super.onDeserializeInto(options,  context, jsonObject);
+  public static onDeserializeInto(
+    options: Partial<IApiDocumentedItemOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiItemJson
+  ): void {
+    super.onDeserializeInto(options, context, jsonObject);
 
     const documentedJson: IApiDocumentedItemJson = jsonObject as IApiDocumentedItemJson;
 

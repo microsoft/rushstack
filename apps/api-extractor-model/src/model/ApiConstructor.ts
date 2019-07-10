@@ -10,11 +10,10 @@ import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiRel
  * Constructor options for {@link ApiConstructor}.
  * @public
  */
-export interface IApiConstructorOptions extends
-  IApiParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiConstructorOptions
+  extends IApiParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript class constructor declaration that belongs to an `ApiClass`.
@@ -44,7 +43,6 @@ export interface IApiConstructorOptions extends
  * @public
  */
 export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
-
   public static getCanonicalReference(overloadIndex: number): string {
     return `(:constructor,${overloadIndex})`;
   }

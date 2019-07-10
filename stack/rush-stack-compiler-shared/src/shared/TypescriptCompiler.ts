@@ -26,21 +26,21 @@ export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompile
 
   constructor(rootPath: string, terminalProvider: ITerminalProvider);
   constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider);
-  constructor(arg1: ITypescriptCompilerOptions | string, arg2: string | ITerminalProvider, arg3?: ITerminalProvider) {
+  constructor(
+    arg1: ITypescriptCompilerOptions | string,
+    arg2: string | ITerminalProvider,
+    arg3?: ITerminalProvider
+  ) {
     super(
       typeof arg1 === 'string' ? {} : arg1,
-      typeof arg2 === 'string' ? arg2 : arg1 as string,
-      arg3 ? arg3 : arg2 as ITerminalProvider
+      typeof arg2 === 'string' ? arg2 : (arg1 as string),
+      arg3 ? arg3 : (arg2 as ITerminalProvider)
     );
-    this._cmdRunner = new CmdRunner(
-      this._standardBuildFolders,
-      this._terminal,
-      {
-        packagePath: ToolPaths.typescriptPackagePath,
-        packageJson: ToolPaths.typescriptPackageJson,
-        packageBinPath: path.join('bin', 'tsc')
-      }
-    );
+    this._cmdRunner = new CmdRunner(this._standardBuildFolders, this._terminal, {
+      packagePath: ToolPaths.typescriptPackagePath,
+      packageJson: ToolPaths.typescriptPackageJson,
+      packageBinPath: path.join('bin', 'tsc')
+    });
   }
 
   public invoke(): Promise<void> {

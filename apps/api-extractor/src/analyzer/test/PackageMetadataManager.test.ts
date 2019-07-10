@@ -1,4 +1,3 @@
-
 import * as path from 'path';
 import { PackageMetadataManager } from '../PackageMetadataManager';
 import { FileSystem, PackageJsonLookup, INodePackageJson } from '@microsoft/node-core-library';
@@ -30,42 +29,34 @@ describe('PackageMetadataManager', () => {
       const tsdocMetadataPath: string = '';
       describe('given a package.json where the field "tsdocMetadata" is defined', () => {
         it('outputs the tsdoc metadata path as given by "tsdocMetadata" relative to the folder of package.json', () => {
-          const {
-            packageFolder,
-            packageJson
-          } = getPackageMetadata('package-inferred-from-tsdoc-metadata');
-          expect(PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath))
-            .toBe(path.resolve(packageFolder, packageJson.tsdocMetadata as string));
+          const { packageFolder, packageJson } = getPackageMetadata('package-inferred-from-tsdoc-metadata');
+          expect(
+            PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath)
+          ).toBe(path.resolve(packageFolder, packageJson.tsdocMetadata as string));
         });
       });
       describe('given a package.json where the field "typings" is defined and "tsdocMetadata" is not defined', () => {
         it('outputs the tsdoc metadata file "tsdoc-metadata.json" in the same folder as the path of "typings"', () => {
-          const {
-            packageFolder,
-            packageJson
-          } = getPackageMetadata('package-inferred-from-typings');
-          expect(PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath))
-            .toBe(path.resolve(packageFolder, path.dirname(packageJson.typings!), 'tsdoc-metadata.json'));
+          const { packageFolder, packageJson } = getPackageMetadata('package-inferred-from-typings');
+          expect(
+            PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath)
+          ).toBe(path.resolve(packageFolder, path.dirname(packageJson.typings!), 'tsdoc-metadata.json'));
         });
       });
       describe('given a package.json where the field "main" is defined but not "typings" nor "tsdocMetadata"', () => {
         it('outputs the tsdoc metadata file "tsdoc-metadata.json" in the same folder as the path of "main"', () => {
-          const {
-            packageFolder,
-            packageJson
-          } = getPackageMetadata('package-inferred-from-main');
-          expect(PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath))
-            .toBe(path.resolve(packageFolder, path.dirname(packageJson.main!), 'tsdoc-metadata.json'));
+          const { packageFolder, packageJson } = getPackageMetadata('package-inferred-from-main');
+          expect(
+            PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath)
+          ).toBe(path.resolve(packageFolder, path.dirname(packageJson.main!), 'tsdoc-metadata.json'));
         });
       });
       describe('given a package.json where the fields "main", "typings" and "tsdocMetadata" are not defined', () => {
         it('outputs the tsdoc metadata file "tsdoc-metadata.json" in the folder where package.json is located', () => {
-          const {
-            packageFolder,
-            packageJson
-          } = getPackageMetadata('package-default');
-          expect(PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath))
-            .toBe(path.resolve(packageFolder, 'tsdoc-metadata.json'));
+          const { packageFolder, packageJson } = getPackageMetadata('package-default');
+          expect(
+            PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath)
+          ).toBe(path.resolve(packageFolder, 'tsdoc-metadata.json'));
         });
       });
     });
@@ -73,42 +64,34 @@ describe('PackageMetadataManager', () => {
       const tsdocMetadataPath: string = 'path/to/custom-tsdoc-metadata.json';
       describe('given a package.json where the field "tsdocMetadata" is defined', () => {
         it('outputs the tsdoc metadata file at the provided path in the folder where package.json is located', () => {
-          const {
-            packageFolder,
-            packageJson
-          } = getPackageMetadata('package-inferred-from-tsdocMetadata');
-          expect(PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath))
-            .toBe(path.resolve(packageFolder, tsdocMetadataPath));
+          const { packageFolder, packageJson } = getPackageMetadata('package-inferred-from-tsdocMetadata');
+          expect(
+            PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath)
+          ).toBe(path.resolve(packageFolder, tsdocMetadataPath));
         });
       });
       describe('given a package.json where the field "typings" is defined and "tsdocMetadata" is not defined', () => {
         it('outputs the tsdoc metadata file at the provided path in the folder where package.json is located', () => {
-          const {
-            packageFolder,
-            packageJson
-          } = getPackageMetadata('package-inferred-from-typings');
-          expect(PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath))
-            .toBe(path.resolve(packageFolder, tsdocMetadataPath));
+          const { packageFolder, packageJson } = getPackageMetadata('package-inferred-from-typings');
+          expect(
+            PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath)
+          ).toBe(path.resolve(packageFolder, tsdocMetadataPath));
         });
       });
       describe('given a package.json where the field "main" is defined but not "typings" nor "tsdocMetadata"', () => {
         it('outputs the tsdoc metadata file at the provided path in the folder where package.json is located', () => {
-          const {
-            packageFolder,
-            packageJson
-          } = getPackageMetadata('package-inferred-from-main');
-          expect(PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath))
-            .toBe(path.resolve(packageFolder, tsdocMetadataPath));
+          const { packageFolder, packageJson } = getPackageMetadata('package-inferred-from-main');
+          expect(
+            PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath)
+          ).toBe(path.resolve(packageFolder, tsdocMetadataPath));
         });
       });
       describe('given a package.json where the fields "main", "typings" and "tsdocMetadata" are not defined', () => {
         it('outputs the tsdoc metadata file at the provided path in the folder where package.json is located', () => {
-          const {
-            packageFolder,
-            packageJson
-          } = getPackageMetadata('package-default');
-          expect(PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath))
-            .toBe(path.resolve(packageFolder, tsdocMetadataPath));
+          const { packageFolder, packageJson } = getPackageMetadata('package-default');
+          expect(
+            PackageMetadataManager.resolveTsdocMetadataPath(packageFolder, packageJson, tsdocMetadataPath)
+          ).toBe(path.resolve(packageFolder, tsdocMetadataPath));
         });
       });
     });
@@ -123,7 +106,9 @@ function resolveInTestPackage(testPackageName: string, ...args: string[]): strin
   return path.resolve(__dirname, 'test-data/tsdoc-metadata-path-inference', testPackageName, ...args);
 }
 
-function getPackageMetadata(testPackageName: string): { packageFolder: string, packageJson: INodePackageJson } {
+function getPackageMetadata(
+  testPackageName: string
+): { packageFolder: string; packageJson: INodePackageJson } {
   const packageFolder: string = resolveInTestPackage(testPackageName);
   const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(packageFolder);
   if (!packageJson) {

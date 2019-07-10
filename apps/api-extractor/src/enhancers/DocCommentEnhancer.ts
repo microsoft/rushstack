@@ -66,7 +66,6 @@ export class DocCommentEnhancer {
   }
 
   private _analyzeNeedsDocumentation(astDeclaration: AstDeclaration, metadata: DeclarationMetadata): void {
-
     if (astDeclaration.declaration.kind === ts.SyntaxKind.Constructor) {
       // Constructors always do pretty much the same thing, so it's annoying to require people to write
       // descriptions for them.  Instead, if the constructor lacks a TSDoc summary, then API Extractor
@@ -117,8 +116,9 @@ export class DocCommentEnhancer {
           new tsdoc.DocParagraph({ configuration }, [
             new tsdoc.DocPlainText({
               configuration,
-              text: `The constructor for this class is marked as internal. Third-party code should not`
-                + ` call the constructor directly or create subclasses that extend the `
+              text:
+                `The constructor for this class is marked as internal. Third-party code should not` +
+                ` call the constructor directly or create subclasses that extend the `
             }),
             new tsdoc.DocCodeSpan({
               configuration,
@@ -127,13 +127,13 @@ export class DocCommentEnhancer {
             new tsdoc.DocPlainText({ configuration, text: ' class.' })
           ])
         );
-
       }
-
     } else if (metadata.tsdocComment) {
       // Require the summary to contain at least 10 non-spacing characters
       metadata.needsDocumentation = !tsdoc.PlainTextEmitter.hasAnyTextContent(
-        metadata.tsdocComment.summarySection, 10);
+        metadata.tsdocComment.summarySection,
+        10
+      );
     } else {
       metadata.needsDocumentation = true;
     }
@@ -149,22 +149,24 @@ export class DocCommentEnhancer {
   private _checkForBrokenLinksRecursive(astDeclaration: AstDeclaration, node: tsdoc.DocNode): void {
     if (node instanceof tsdoc.DocLinkTag) {
       if (node.codeDestination) {
-
         // Is it referring to the working package?  If not, we don't do any link validation, because
         // AstReferenceResolver doesn't support it yet (but ModelReferenceResolver does of course).
         // Tracked by:  https://github.com/Microsoft/web-build-tools/issues/1195
-        if (node.codeDestination.packageName === undefined
-          || node.codeDestination.packageName === this._collector.workingPackage.name) {
-
-          const referencedAstDeclaration: AstDeclaration | ResolverFailure = this._collector.astReferenceResolver
-            .resolve(node.codeDestination);
+        if (
+          node.codeDestination.packageName === undefined ||
+          node.codeDestination.packageName === this._collector.workingPackage.name
+        ) {
+          const referencedAstDeclaration:
+            | AstDeclaration
+            | ResolverFailure = this._collector.astReferenceResolver.resolve(node.codeDestination);
 
           if (referencedAstDeclaration instanceof ResolverFailure) {
-            this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedLink,
+            this._collector.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.UnresolvedLink,
               'The @link reference could not be resolved: ' + referencedAstDeclaration.reason,
-              astDeclaration);
+              astDeclaration
+            );
           }
-
         }
       }
     }
@@ -176,32 +178,43 @@ export class DocCommentEnhancer {
   /**
    * Follow an `{@inheritDoc ___}` reference and copy the content that we find in the referenced comment.
    */
-  private _applyInheritDoc(astDeclaration: AstDeclaration, docComment: tsdoc.DocComment,
-    inheritDocTag: tsdoc.DocInheritDocTag): void {
-
+  private _applyInheritDoc(
+    astDeclaration: AstDeclaration,
+    docComment: tsdoc.DocComment,
+    inheritDocTag: tsdoc.DocInheritDocTag
+  ): void {
     if (!inheritDocTag.declarationReference) {
-      this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedInheritDocBase,
+      this._collector.messageRouter.addAnalyzerIssue(
+        ExtractorMessageId.UnresolvedInheritDocBase,
         'The @inheritDoc tag needs a TSDoc declaration reference; signature matching is not supported yet',
-        astDeclaration);
+        astDeclaration
+      );
       return;
     }
 
     // Is it referring to the working package?
-    if (!(inheritDocTag.declarationReference.packageName === undefined
-      || inheritDocTag.declarationReference.packageName === this._collector.workingPackage.name)) {
-
+    if (
+      !(
+        inheritDocTag.declarationReference.packageName === undefined ||
+        inheritDocTag.declarationReference.packageName === this._collector.workingPackage.name
+      )
+    ) {
       // It's referencing an external package, so skip this inheritDoc tag, since AstReferenceResolver doesn't
       // support it yet.  As a workaround, this tag will get handled later by api-documenter.
       // Tracked by:  https://github.com/Microsoft/web-build-tools/issues/1195
       return;
     }
 
-    const referencedAstDeclaration: AstDeclaration | ResolverFailure = this._collector.astReferenceResolver
-      .resolve(inheritDocTag.declarationReference);
+    const referencedAstDeclaration:
+      | AstDeclaration
+      | ResolverFailure = this._collector.astReferenceResolver.resolve(inheritDocTag.declarationReference);
 
     if (referencedAstDeclaration instanceof ResolverFailure) {
-      this._collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.UnresolvedInheritDocReference,
-        'The @inheritDoc reference could not be resolved: ' + referencedAstDeclaration.reason, astDeclaration);
+      this._collector.messageRouter.addAnalyzerIssue(
+        ExtractorMessageId.UnresolvedInheritDocReference,
+        'The @inheritDoc reference could not be resolved: ' + referencedAstDeclaration.reason,
+        astDeclaration
+      );
       return;
     }
 
@@ -232,5 +245,4 @@ export class DocCommentEnhancer {
 
     targetDocComment.inheritDocTag = undefined;
   }
-
 }

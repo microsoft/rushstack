@@ -3,14 +3,7 @@
 
 import { expect } from 'chai';
 
-import {
-  serial,
-  parallel,
-  getConfig,
-  setConfig,
-  IExecutable,
-  IBuildConfig
-} from '../index';
+import { serial, parallel, getConfig, setConfig, IExecutable, IBuildConfig } from '../index';
 import { mockBuildConfig } from './mockBuildConfig';
 
 /* tslint:disable:no-unused-expression */
@@ -19,54 +12,62 @@ import { mockBuildConfig } from './mockBuildConfig';
 global['dontWatchExit'] = true; // tslint:disable-line:no-string-literal
 
 describe('serial', () => {
-  it('can run a set of tasks in serial', (done) => {
+  it('can run a set of tasks in serial', done => {
     const execution: string[] = [];
     const tasks: IExecutable[] = createTasks('task', 3, command => execution.push(command));
 
-    serial(tasks).execute(mockBuildConfig).then(() => {
-      expect(execution).to.deep.equal([
-        'executing task 0',
-        'complete task 0',
-        'executing task 1',
-        'complete task 1',
-        'executing task 2',
-        'complete task 2'
-      ]);
-      done();
-    }).catch(error => done(error));
+    serial(tasks)
+      .execute(mockBuildConfig)
+      .then(() => {
+        expect(execution).to.deep.equal([
+          'executing task 0',
+          'complete task 0',
+          'executing task 1',
+          'complete task 1',
+          'executing task 2',
+          'complete task 2'
+        ]);
+        done();
+      })
+      .catch(error => done(error));
   });
-
 });
 
 describe('parallel', () => {
-  it('can run a set of tasks in parallel', (done) => {
+  it('can run a set of tasks in parallel', done => {
     const execution: string[] = [];
     const tasks: IExecutable[] = createTasks('task', 3, command => execution.push(command));
 
-    parallel(tasks).execute(mockBuildConfig).then(() => {
-      expect(execution).to.deep.equal([
-        'executing task 0',
-        'executing task 1',
-        'executing task 2',
-        'complete task 0',
-        'complete task 1',
-        'complete task 2'
-      ]);
-      done();
-    }).catch(error => done(error));
+    parallel(tasks)
+      .execute(mockBuildConfig)
+      .then(() => {
+        expect(execution).to.deep.equal([
+          'executing task 0',
+          'executing task 1',
+          'executing task 2',
+          'complete task 0',
+          'complete task 1',
+          'complete task 2'
+        ]);
+        done();
+      })
+      .catch(error => done(error));
   });
 
-  it('can mix in serial sets of tasks', (done) => {
+  it('can mix in serial sets of tasks', done => {
     const execution: string[] = [];
-    const serial1Tasks: IExecutable = serial(createTasks('serial set 1 -', 2, command => execution.push(command)));
-    const parallelTasks: IExecutable = parallel(createTasks('parallel', 2, command => execution.push(command)));
-    const serial2Tasks: IExecutable = serial(createTasks('serial set 2 -', 2, command => execution.push(command)));
+    const serial1Tasks: IExecutable = serial(
+      createTasks('serial set 1 -', 2, command => execution.push(command))
+    );
+    const parallelTasks: IExecutable = parallel(
+      createTasks('parallel', 2, command => execution.push(command))
+    );
+    const serial2Tasks: IExecutable = serial(
+      createTasks('serial set 2 -', 2, command => execution.push(command))
+    );
 
-    serial([
-      serial1Tasks,
-      parallelTasks,
-      serial2Tasks
-    ]).execute(mockBuildConfig)
+    serial([serial1Tasks, parallelTasks, serial2Tasks])
+      .execute(mockBuildConfig)
       .then(() => {
         expect(execution).to.deep.equal([
           'executing serial set 1 - 0',
@@ -87,17 +88,19 @@ describe('parallel', () => {
       .catch(error => done(error));
   });
 
-  it('stops running serial tasks on failure', (done) => {
+  it('stops running serial tasks on failure', done => {
     const execution: string[] = [];
     const tasks: IExecutable[] = createTasks('task', 1, command => execution.push(command));
 
     tasks.push(createTask('fail task', command => execution.push(command), true));
     tasks.push(createTask('should not run task', command => execution.push(command), false));
 
-    serial(tasks).execute(mockBuildConfig).then(
-      () => {
+    serial(tasks)
+      .execute(mockBuildConfig)
+      .then(() => {
         done('The task returned success unexpectedly.');
-      }).catch((error) => {
+      })
+      .catch(error => {
         expect(error).to.equal('Failure', 'Make sure the proper error is propagate');
         expect(execution).to.deep.equal([
           'executing task 0',
@@ -107,16 +110,15 @@ describe('parallel', () => {
         ]);
         done();
       });
-
   });
 
-  it('can read the current config', (done) => {
+  it('can read the current config', done => {
     const config: IBuildConfig = getConfig();
     expect(config).to.be.not.null;
     done();
   });
 
-  it('can set the config', (done) => {
+  it('can set the config', done => {
     const distFolder: string = 'testFolder';
     const newConfig: Partial<IBuildConfig> = {
       distFolder: distFolder
@@ -131,28 +133,32 @@ describe('parallel', () => {
 function createTasks(
   name: string,
   count: number,
-  executionCallback: (message: string) => void): IExecutable[] {
-  return Array.apply(undefined, Array(count))
-    .map((item, index) => createTask(name + ' ' + index, executionCallback));
+  executionCallback: (message: string) => void
+): IExecutable[] {
+  return Array.apply(undefined, Array(count)).map((item, index) =>
+    createTask(name + ' ' + index, executionCallback)
+  );
 }
 
 function createTask(
   name: string,
   executionCallback: (message: string) => void,
-  shouldFail?: boolean): IExecutable {
+  shouldFail?: boolean
+): IExecutable {
   return {
-    execute: (buildConfig): Promise<void> => new Promise<void>((done, error) => {
-      executionCallback(`executing ${name}`);
+    execute: (buildConfig): Promise<void> =>
+      new Promise<void>((done, error) => {
+        executionCallback(`executing ${name}`);
 
-      setTimeout(() => {
-        executionCallback(`complete ${name}`);
+        setTimeout(() => {
+          executionCallback(`complete ${name}`);
 
-        if (shouldFail) {
-          error('Failure');
-        } else {
-          done();
-        }
-      }, 10);
-    })
+          if (shouldFail) {
+            error('Failure');
+          } else {
+            done();
+          }
+        }, 10);
+      })
   };
 }

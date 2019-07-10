@@ -1,7 +1,4 @@
-import {
-  RushConfiguration,
-  IRushLinkJson
-} from '../api/RushConfiguration';
+import { RushConfiguration, IRushLinkJson } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { JsonFile } from '@microsoft/node-core-library';
 
@@ -53,8 +50,10 @@ export class TaskSelector {
     try {
       this._rushLinkJson = JsonFile.load(this._options.rushConfiguration.rushLinkJsonFilename);
     } catch (error) {
-      throw new Error(`Could not read "${this._options.rushConfiguration.rushLinkJsonFilename}".`
-        + ` Did you run "rush install" or "rush update"?`);
+      throw new Error(
+        `Could not read "${this._options.rushConfiguration.rushLinkJsonFilename}".` +
+          ` Did you run "rush install" or "rush update"?`
+      );
     }
 
     if (this._options.toFlags.length > 0) {
@@ -74,8 +73,9 @@ export class TaskSelector {
 
   private _registerToFlags(toFlags: ReadonlyArray<string>): void {
     for (const toFlag of toFlags) {
-      const toProject: RushConfigurationProject | undefined =
-        this._options.rushConfiguration.findProjectByShorthandName(toFlag);
+      const toProject:
+        | RushConfigurationProject
+        | undefined = this._options.rushConfiguration.findProjectByShorthandName(toFlag);
       if (!toProject) {
         throw new Error(`The project '${toFlag}' does not exist in rush.json`);
       }
@@ -94,8 +94,9 @@ export class TaskSelector {
 
   private _registerFromFlags(fromFlags: ReadonlyArray<string>): void {
     for (const fromFlag of fromFlags) {
-      const fromProject: RushConfigurationProject | undefined
-        = this._options.rushConfiguration.findProjectByShorthandName(fromFlag);
+      const fromProject:
+        | RushConfigurationProject
+        | undefined = this._options.rushConfiguration.findProjectByShorthandName(fromFlag);
       if (!fromProject) {
         throw new Error(`The project '${fromFlag}' does not exist in rush.json`);
       }
@@ -116,8 +117,11 @@ export class TaskSelector {
         // Only add ordering relationships for projects which have been registered
         // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
         dependents.forEach(dependent =>
-          this._taskRunner.addDependencies(dependent,
-            (this._rushLinkJson.localLinks[dependent] || []).filter(dep => dependents.has(dep))));
+          this._taskRunner.addDependencies(
+            dependent,
+            (this._rushLinkJson.localLinks[dependent] || []).filter(dep => dependents.has(dep))
+          )
+        );
       }
     }
   }
@@ -150,7 +154,7 @@ export class TaskSelector {
    */
   private _collectAllDependents(project: string): Set<string> {
     const deps: Set<string> = new Set<string>();
-    (this._dependentList.get(project) || new Set<string>()).forEach((dep) => {
+    (this._dependentList.get(project) || new Set<string>()).forEach(dep => {
       deps.add(dep);
     });
     deps.forEach(dep => this._collectAllDependents(dep).forEach(innerDep => deps.add(innerDep)));

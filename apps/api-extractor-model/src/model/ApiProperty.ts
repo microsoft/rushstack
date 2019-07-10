@@ -9,9 +9,7 @@ import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyIt
  * Constructor options for {@link ApiProperty}.
  * @public
  */
-export interface IApiPropertyOptions extends IApiPropertyItemOptions,
-  IApiStaticMixinOptions {
-}
+export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiStaticMixinOptions {}
 
 /**
  * Represents a TypeScript property declaration that belongs to an `ApiClass`.
@@ -48,7 +46,6 @@ export interface IApiPropertyOptions extends IApiPropertyItemOptions,
  * @public
  */
 export class ApiProperty extends ApiStaticMixin(ApiPropertyItem) {
-
   public static getCanonicalReference(name: string, isStatic: boolean): string {
     if (isStatic) {
       return `(${name}:static)`;

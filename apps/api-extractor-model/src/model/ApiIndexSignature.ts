@@ -11,12 +11,11 @@ import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiRet
  * Constructor options for {@link ApiIndexSignature}.
  * @public
  */
-export interface IApiIndexSignatureOptions extends
-  IApiParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiReturnTypeMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiIndexSignatureOptions
+  extends IApiParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiReturnTypeMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript index signature.
@@ -40,8 +39,9 @@ export interface IApiIndexSignatureOptions extends
  *
  * @public
  */
-export class ApiIndexSignature extends ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))) {
-
+export class ApiIndexSignature extends ApiParameterListMixin(
+  ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))
+) {
   public static getCanonicalReference(overloadIndex: number): string {
     return `(:index,${overloadIndex})`;
   }

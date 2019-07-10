@@ -5,10 +5,7 @@ import * as path from 'path';
 import * as tsdoc from '@microsoft/tsdoc';
 import * as colors from 'colors';
 
-import {
-  CommandLineAction,
-  CommandLineStringParameter
-} from '@microsoft/ts-command-line';
+import { CommandLineAction, CommandLineStringParameter } from '@microsoft/ts-command-line';
 import { FileSystem } from '@microsoft/node-core-library';
 import {
   ApiModel,
@@ -25,22 +22,25 @@ export abstract class BaseAction extends CommandLineAction {
   private _inputFolderParameter: CommandLineStringParameter;
   private _outputFolderParameter: CommandLineStringParameter;
 
-  protected onDefineParameters(): void { // override
+  protected onDefineParameters(): void {
+    // override
     this._inputFolderParameter = this.defineStringParameter({
       parameterLongName: '--input-folder',
       parameterShortName: '-i',
       argumentName: 'FOLDER1',
-      description: `Specifies the input folder containing the *.api.json files to be processed.`
-        + ` If omitted, the default is "./input"`
+      description:
+        `Specifies the input folder containing the *.api.json files to be processed.` +
+        ` If omitted, the default is "./input"`
     });
 
     this._outputFolderParameter = this.defineStringParameter({
       parameterLongName: '--output-folder',
       parameterShortName: '-o',
       argumentName: 'FOLDER2',
-      description: `Specifies the output folder where the documentation will be written.`
-        + ` ANY EXISTING CONTENTS WILL BE DELETED!`
-        + ` If omitted, the default is "./${this.actionName}"`
+      description:
+        `Specifies the output folder where the documentation will be written.` +
+        ` ANY EXISTING CONTENTS WILL BE DELETED!` +
+        ` If omitted, the default is "./${this.actionName}"`
     });
   }
 
@@ -72,28 +72,33 @@ export abstract class BaseAction extends CommandLineAction {
   // to apply all @inheritDoc tags before the .api.json file is written.
   // See DocCommentEnhancer._applyInheritDoc() for more info.
   private _applyInheritDoc(apiItem: ApiItem, apiModel: ApiModel): void {
-
     if (apiItem instanceof ApiDocumentedItem) {
       if (apiItem.tsdocComment) {
         const inheritDocTag: tsdoc.DocInheritDocTag | undefined = apiItem.tsdocComment.inheritDocTag;
 
         if (inheritDocTag && inheritDocTag.declarationReference) {
           // Attempt to resolve the declaration reference
-          const result: IResolveDeclarationReferenceResult
-            = apiModel.resolveDeclarationReference(inheritDocTag.declarationReference, apiItem);
+          const result: IResolveDeclarationReferenceResult = apiModel.resolveDeclarationReference(
+            inheritDocTag.declarationReference,
+            apiItem
+          );
 
           if (result.errorMessage) {
-            console.log(colors.yellow(`Warning: Unresolved @inheritDoc tag for ${apiItem.displayName}: `
-              + result.errorMessage));
+            console.log(
+              colors.yellow(
+                `Warning: Unresolved @inheritDoc tag for ${apiItem.displayName}: ` + result.errorMessage
+              )
+            );
           } else {
-            if (result.resolvedApiItem instanceof ApiDocumentedItem
-              && result.resolvedApiItem.tsdocComment
-              && result.resolvedApiItem !== apiItem) {
+            if (
+              result.resolvedApiItem instanceof ApiDocumentedItem &&
+              result.resolvedApiItem.tsdocComment &&
+              result.resolvedApiItem !== apiItem
+            ) {
               this._copyInheritedDocs(apiItem.tsdocComment, result.resolvedApiItem.tsdocComment);
             }
           }
         }
-
       }
     }
 
@@ -124,5 +129,4 @@ export abstract class BaseAction extends CommandLineAction {
 
     targetDocComment.inheritDocTag = undefined;
   }
-
 }

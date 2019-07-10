@@ -18,7 +18,6 @@ export function parseGitLsTree(output: string): Map<string, string> {
 
     // Note: The output of git ls-tree uses \n newlines regardless of OS.
     output.split('\n').forEach(line => {
-
       if (line) {
         // Take everything after the "100644 blob", which is just the hash and filename
         const matches: RegExpMatchArray | null = line.match(gitRegex);
@@ -27,7 +26,6 @@ export function parseGitLsTree(output: string): Map<string, string> {
           const filename: string = matches[4];
 
           changes.set(filename, hash);
-
         } else {
           throw new Error(`Cannot parse git ls-tree input: "${line}"`);
         }
@@ -45,10 +43,10 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
   const changes: Map<string, string> = new Map<string, string>();
 
   /*
-  * Typically, output will look something like:
-  * M temp_modules/rush-package-deps-hash/package.json
-  * D package-deps-hash/src/index.ts
-  */
+   * Typically, output will look something like:
+   * M temp_modules/rush-package-deps-hash/package.json
+   * D package-deps-hash/src/index.ts
+   */
 
   // If there was an issue with `git ls-tree`, or there are no current changes, processOutputBlocks[1]
   // will be empty or undefined
@@ -62,17 +60,20 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
     .split('\n')
     .forEach(line => {
       /*
-      * changeType is in the format of "XY" where "X" is the status of the file in the index and "Y" is the status of
-      * the file in the working tree. Some example statuses:
-      *   - 'D' == deletion
-      *   - 'M' == modification
-      *   - 'A' == addition
-      *   - '??' == untracked
-      *   - 'R' == rename
-      *   - 'RM' == rename with modifications
-      * filenames == path to the file, or files in the case of files that have been renamed
-      */
-      const [changeType, ...filenames]: string[] = line.trim().split(' ').filter((linePart) => !!linePart);
+       * changeType is in the format of "XY" where "X" is the status of the file in the index and "Y" is the status of
+       * the file in the working tree. Some example statuses:
+       *   - 'D' == deletion
+       *   - 'M' == modification
+       *   - 'A' == addition
+       *   - '??' == untracked
+       *   - 'R' == rename
+       *   - 'RM' == rename with modifications
+       * filenames == path to the file, or files in the case of files that have been renamed
+       */
+      const [changeType, ...filenames]: string[] = line
+        .trim()
+        .split(' ')
+        .filter(linePart => !!linePart);
 
       if (changeType && filenames && filenames.length > 0) {
         // We always care about the last filename in the filenames array. In the case of non-rename changes,
@@ -91,9 +92,9 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
 export function gitHashFiles(filesToHash: string[], packagePath: string): Map<string, string> {
   const changes: Map<string, string> = new Map<string, string>();
   if (filesToHash.length) {
-    const hashStdout: string = child_process.execSync(
-      'git hash-object ' + filesToHash.join(' '),
-      { cwd: packagePath }).toString();
+    const hashStdout: string = child_process
+      .execSync('git hash-object ' + filesToHash.join(' '), { cwd: packagePath })
+      .toString();
 
     // The result of hashStdout will be a list of file hashes delimited by newlines
     const hashes: string[] = hashStdout.split('\n');
@@ -107,24 +108,24 @@ export function gitHashFiles(filesToHash: string[], packagePath: string): Map<st
  * Executes "git ls-tree" in a folder
  */
 export function gitLsTree(path: string): string {
-  return child_process.execSync(
-    `git ls-tree HEAD -r`,
-    {
+  return child_process
+    .execSync(`git ls-tree HEAD -r`, {
       cwd: path,
       stdio: 'pipe'
-    }).toString();
+    })
+    .toString();
 }
 
 /**
  * Executes "git status" in a folder
  */
 export function gitStatus(path: string): string {
-  return child_process.execSync(
-    `git status -s -u .`,
-    {
+  return child_process
+    .execSync(`git status -s -u .`, {
       cwd: path,
       stdio: 'pipe'
-    }).toString();
+    })
+    .toString();
 }
 
 /**
@@ -135,7 +136,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
   const excludedHashes: { [key: string]: boolean } = {};
 
   if (excludedPaths) {
-    excludedPaths.forEach(path => excludedHashes[path] = true);
+    excludedPaths.forEach(path => (excludedHashes[path] = true));
   }
 
   const changes: IPackageDeps = {
@@ -153,8 +154,7 @@ export function getPackageDeps(packagePath: string = process.cwd(), excludedPath
 
   // Update the checked in hashes with the current repo status
   const gitStatusOutput: string = gitStatus(packagePath);
-  const currentlyChangedFiles: Map<string, string> =
-    parseGitStatus(gitStatusOutput, packagePath);
+  const currentlyChangedFiles: Map<string, string> = parseGitStatus(gitStatusOutput, packagePath);
 
   const filesToHash: string[] = [];
   currentlyChangedFiles.forEach((changeType: string, filename: string) => {

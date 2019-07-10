@@ -85,7 +85,7 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
  *
  * @public
  */
-export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
+export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {}
 
 /**
  * For use with CommandLineParser, this interface represents a command line parameter
@@ -124,4 +124,4 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
  *
  * @public
  */
-export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument { }
+export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {}

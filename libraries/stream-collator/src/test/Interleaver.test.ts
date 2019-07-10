@@ -43,8 +43,12 @@ describe('Interleaver tests', () => {
 
     it('should not let you register two tasks with the same name', (done: MochaDone) => {
       const taskName: string = 'Hello World';
-      assert.doesNotThrow(() => { Interleaver.registerTask(taskName); });
-      assert.throws(() => { Interleaver.registerTask(taskName); });
+      assert.doesNotThrow(() => {
+        Interleaver.registerTask(taskName);
+      });
+      assert.throws(() => {
+        Interleaver.registerTask(taskName);
+      });
       done();
     });
 
@@ -60,7 +64,9 @@ describe('Interleaver tests', () => {
       const taskName: string = 'Hello World';
       const task: ITaskWriter = Interleaver.registerTask(taskName);
       task.close();
-      assert.throws(() => { task.write('1'); });
+      assert.throws(() => {
+        task.write('1');
+      });
       done();
     });
   });

@@ -58,16 +58,20 @@ export interface ApiReleaseTagMixin extends ApiItem {
  *
  * @public
  */
-export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiReleaseTagMixin) { // tslint:disable-line:no-any
+export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+): TBaseClass & (new (...args: any[]) => ApiReleaseTagMixin) {
+  // tslint:disable-line:no-any
 
   abstract class MixedClass extends baseClass implements ApiReleaseTagMixin {
     public [_releaseTag]: ReleaseTag;
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiReleaseTagMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiReleaseTagMixinJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiReleaseTagMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiReleaseTagMixinJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       const deserializedReleaseTag: ReleaseTag | undefined = ReleaseTag[jsonObject.releaseTag];

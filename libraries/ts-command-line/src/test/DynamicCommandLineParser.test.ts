@@ -6,14 +6,11 @@ import { DynamicCommandLineAction } from '../DynamicCommandLineAction';
 import { CommandLineFlagParameter } from '../CommandLineParameter';
 
 describe('DynamicCommandLineParser', () => {
-
   it('parses an action', () => {
-    const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser(
-      {
-        toolFilename: 'example',
-        toolDescription: 'An example project'
-      }
-    );
+    const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
+      toolFilename: 'example',
+      toolDescription: 'An example project'
+    });
 
     const action: DynamicCommandLineAction = new DynamicCommandLineAction({
       actionName: 'do:the-job',

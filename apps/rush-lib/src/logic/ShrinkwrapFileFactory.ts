@@ -5,9 +5,10 @@ import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { YarnShrinkwrapFile } from './yarn/YarnShrinkwrapFile';
 
 export class ShrinkwrapFileFactory {
-  public static getShrinkwrapFile(packageManager: PackageManagerName,
-    shrinkwrapFilename: string): BaseShrinkwrapFile | undefined {
-
+  public static getShrinkwrapFile(
+    packageManager: PackageManagerName,
+    shrinkwrapFilename: string
+  ): BaseShrinkwrapFile | undefined {
     switch (packageManager) {
       case 'npm':
         return NpmShrinkwrapFile.loadFromFile(shrinkwrapFilename);

@@ -109,9 +109,12 @@ export class JsonSchema {
     return schema;
   }
 
-  private static _collectDependentSchemas(collectedSchemas: JsonSchema[], dependentSchemas: JsonSchema[],
-    seenObjects: Set<Object>, seenIds: Set<string>): void {
-
+  private static _collectDependentSchemas(
+    collectedSchemas: JsonSchema[],
+    dependentSchemas: JsonSchema[],
+    seenObjects: Set<Object>,
+    seenIds: Set<string>
+  ): void {
     for (const dependentSchema of dependentSchemas) {
       // It's okay for the same schema to appear multiple times in the tree, but we only process it once
       if (seenObjects.has(dependentSchema)) {
@@ -121,20 +124,27 @@ export class JsonSchema {
 
       const schemaId: string = dependentSchema._ensureLoaded();
       if (schemaId === '') {
-        throw new Error(`This schema ${dependentSchema.shortName} cannot be referenced`
-          + ' because is missing the "id" field');
+        throw new Error(
+          `This schema ${dependentSchema.shortName} cannot be referenced` +
+            ' because is missing the "id" field'
+        );
       }
       if (seenIds.has(schemaId)) {
-        throw new Error(`This schema ${dependentSchema.shortName} has the same "id" as`
-        + ' another schema in this set');
+        throw new Error(
+          `This schema ${dependentSchema.shortName} has the same "id" as` + ' another schema in this set'
+        );
       }
 
       seenIds.add(schemaId);
 
       collectedSchemas.push(dependentSchema);
 
-      JsonSchema._collectDependentSchemas(collectedSchemas, dependentSchema._dependentSchemas,
-        seenObjects, seenIds);
+      JsonSchema._collectDependentSchemas(
+        collectedSchemas,
+        dependentSchema._dependentSchemas,
+        seenObjects,
+        seenIds
+      );
     }
   }
 
@@ -148,18 +158,19 @@ export class JsonSchema {
   /**
    * Used by _formatErrorDetails.
    */
-  private static _formatErrorDetailsHelper(errorDetails: Validator.SchemaErrorDetail[], indent: string,
-    buffer: string): string {
+  private static _formatErrorDetailsHelper(
+    errorDetails: Validator.SchemaErrorDetail[],
+    indent: string,
+    buffer: string
+  ): string {
     for (const errorDetail of errorDetails) {
-
       buffer += os.EOL + indent + `Error: ${errorDetail.path}`;
 
       if (errorDetail.description) {
         const MAX_LENGTH: number = 40;
         let truncatedDescription: string = errorDetail.description.trim();
         if (truncatedDescription.length > MAX_LENGTH) {
-          truncatedDescription = truncatedDescription.substr(0, MAX_LENGTH - 3)
-            + '...';
+          truncatedDescription = truncatedDescription.substr(0, MAX_LENGTH - 3) + '...';
         }
 
         buffer += ` (${truncatedDescription})`;
@@ -212,18 +223,11 @@ export class JsonSchema {
       });
 
       const anythingSchema: Object = {
-        'type': [
-          'array',
-          'boolean',
-          'integer',
-          'number',
-          'object',
-          'string'
-        ]
+        type: ['array', 'boolean', 'integer', 'number', 'object', 'string']
       };
 
       // tslint:disable-next-line:no-any
-      (newValidator as any).setRemoteReference('http://json-schema.org/draft-04/schema',  anythingSchema);
+      (newValidator as any).setRemoteReference('http://json-schema.org/draft-04/schema', anythingSchema);
 
       const collectedSchemas: JsonSchema[] = [];
       const seenObjects: Set<Object> = new Set<Object>();
@@ -235,8 +239,11 @@ export class JsonSchema {
       // to make sure that circular references will fail to validate.
       for (const collectedSchema of collectedSchemas) {
         if (!newValidator.validateSchema(collectedSchema._schemaObject)) {
-          throw new Error(`Failed to validate schema "${collectedSchema.shortName}":` + os.EOL
-            + JsonSchema._formatErrorDetails(newValidator.getLastErrors()));
+          throw new Error(
+            `Failed to validate schema "${collectedSchema.shortName}":` +
+              os.EOL +
+              JsonSchema._formatErrorDetails(newValidator.getLastErrors())
+          );
         }
       }
 
@@ -252,13 +259,16 @@ export class JsonSchema {
    *    if not applicable
    * @param options - Other options that control the validation
    */
-  public validateObject(jsonObject: Object, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void {
+  public validateObject(
+    jsonObject: Object,
+    filenameForErrors: string,
+    options?: IJsonSchemaValidateOptions
+  ): void {
     this.validateObjectWithCallback(jsonObject, (errorInfo: IJsonSchemaErrorInfo) => {
-      const prefix: string = (options && options.customErrorHeader) ? options.customErrorHeader
-        : 'JSON validation failed:';
+      const prefix: string =
+        options && options.customErrorHeader ? options.customErrorHeader : 'JSON validation failed:';
 
-      throw new Error(prefix + os.EOL +
-        filenameForErrors + os.EOL + errorInfo.details);
+      throw new Error(prefix + os.EOL + filenameForErrors + os.EOL + errorInfo.details);
     });
   }
 
@@ -266,9 +276,10 @@ export class JsonSchema {
    * Validates the specified JSON object against this JSON schema.  If the validation fails,
    * a callback is called for each validation error.
    */
-  public validateObjectWithCallback(jsonObject: Object,
-    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void {
-
+  public validateObjectWithCallback(
+    jsonObject: Object,
+    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void
+  ): void {
     this.ensureCompiled();
 
     if (!this._validator!.validate(jsonObject, this._schemaObject)) {
@@ -281,8 +292,7 @@ export class JsonSchema {
     }
   }
 
-  private constructor() {
-  }
+  private constructor() {}
 
   private _ensureLoaded(): string {
     if (!this._schemaObject) {

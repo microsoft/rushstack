@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import {
-  ExcerptTokenKind,
-  IExcerptToken,
-  IExcerptTokenRange
-} from '@microsoft/api-extractor-model';
+import { ExcerptTokenKind, IExcerptToken, IExcerptTokenRange } from '@microsoft/api-extractor-model';
 
 import { Span } from '../analyzer/Span';
 
@@ -113,11 +109,9 @@ export class ExcerptBuilder {
 
     if (span.prefix) {
       if (span.kind === ts.SyntaxKind.Identifier) {
-        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Reference,
-          span.prefix, state);
+        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Reference, span.prefix, state);
       } else {
-        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content,
-          span.prefix, state);
+        ExcerptBuilder._appendToken(excerptTokens, ExcerptTokenKind.Content, span.prefix, state);
       }
     }
 
@@ -154,17 +148,19 @@ export class ExcerptBuilder {
     return true;
   }
 
-  private static _appendToken(excerptTokens: IExcerptToken[], excerptTokenKind: ExcerptTokenKind,
-    text: string, state: IBuildSpanState): void {
-
+  private static _appendToken(
+    excerptTokens: IExcerptToken[],
+    excerptTokenKind: ExcerptTokenKind,
+    text: string,
+    state: IBuildSpanState
+  ): void {
     if (text.length === 0) {
       return;
     }
 
     if (excerptTokenKind !== ExcerptTokenKind.Content) {
-      excerptTokens.push({ kind: excerptTokenKind, text: text});
+      excerptTokens.push({ kind: excerptTokenKind, text: text });
       state.disableMergingForNextToken = false;
-
     } else {
       // If someone referenced this index, then we need to start a new token
       if (excerptTokens.length > 0 && !state.disableMergingForNextToken) {
@@ -176,9 +172,8 @@ export class ExcerptBuilder {
         }
       }
 
-      excerptTokens.push({ kind: excerptTokenKind, text: text});
+      excerptTokens.push({ kind: excerptTokenKind, text: text });
       state.disableMergingForNextToken = false;
     }
   }
-
 }

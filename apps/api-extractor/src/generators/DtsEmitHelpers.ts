@@ -13,7 +13,11 @@ import { Collector } from '../collector/Collector';
  * Some common code shared between DtsRollupGenerator and ApiReportGenerator.
  */
 export class DtsEmitHelpers {
-  public static emitImport(stringWriter: StringWriter, collectorEntity: CollectorEntity, astImport: AstImport): void {
+  public static emitImport(
+    stringWriter: StringWriter,
+    collectorEntity: CollectorEntity,
+    astImport: AstImport
+  ): void {
     switch (astImport.importKind) {
       case AstImportKind.DefaultImport:
         stringWriter.writeLine(`import ${astImport.exportName} from '${astImport.modulePath}';`);
@@ -37,9 +41,11 @@ export class DtsEmitHelpers {
     }
   }
 
-  public static emitNamedExport(stringWriter: StringWriter, exportName: string,
-    collectorEntity: CollectorEntity): void {
-
+  public static emitNamedExport(
+    stringWriter: StringWriter,
+    exportName: string,
+    collectorEntity: CollectorEntity
+  ): void {
     if (exportName === ts.InternalSymbolName.Default) {
       stringWriter.writeLine(`export default ${collectorEntity.nameForEmit};`);
     } else if (collectorEntity.nameForEmit !== exportName) {

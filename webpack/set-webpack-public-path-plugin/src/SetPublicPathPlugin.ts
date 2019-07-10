@@ -2,22 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import {
-  cloneDeep,
-  escapeRegExp
-} from 'lodash';
+import { cloneDeep, escapeRegExp } from 'lodash';
 import * as Webpack from 'webpack';
 import * as Tapable from 'tapable';
 
-import {
-  IV3Compilation,
-  IV3Module,
-  IV3Chunk
-} from './V3Interfaces';
-import {
-  IInternalOptions,
-  getSetPublicPathCode
-} from './codeGenerator';
+import { IV3Compilation, IV3Module, IV3Chunk } from './V3Interfaces';
+import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 
 /**
  * The base options for setting the webpack public path at runtime.
@@ -131,41 +121,44 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     const isWebpack4: boolean = !!compiler.hooks;
 
     if (isWebpack4) {
-      compiler.hooks.compilation.tap('set-webpack-public-path', (compilation: Webpack.compilation.Compilation) => {
-        const v4MainTemplate: IV4MainTemplate = compilation.mainTemplate as IV4MainTemplate;
-        v4MainTemplate.hooks.startup.tap(
-          'set-webpack-public-path',
-          (source: string, chunk: IV4Chunk, hash: string) => {
-            let assetOrChunkFound: boolean = !!this.options.skipDetection;
+      compiler.hooks.compilation.tap(
+        'set-webpack-public-path',
+        (compilation: Webpack.compilation.Compilation) => {
+          const v4MainTemplate: IV4MainTemplate = compilation.mainTemplate as IV4MainTemplate;
+          v4MainTemplate.hooks.startup.tap(
+            'set-webpack-public-path',
+            (source: string, chunk: IV4Chunk, hash: string) => {
+              let assetOrChunkFound: boolean = !!this.options.skipDetection;
 
-            if (!assetOrChunkFound) {
-              for (const chunkGroup of chunk.groupsIterable) {
-                const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
-                assetOrChunkFound = assetOrChunkFound || (children.length > 0);
-              }
-            }
-
-            if (!assetOrChunkFound) {
-              for (const innerModule of chunk.modulesIterable) {
-                if (innerModule.buildInfo.assets && Object.keys(innerModule.buildInfo.assets).length > 0) {
-                  assetOrChunkFound = true;
+              if (!assetOrChunkFound) {
+                for (const chunkGroup of chunk.groupsIterable) {
+                  const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
+                  assetOrChunkFound = assetOrChunkFound || children.length > 0;
                 }
               }
-            }
 
-            if (assetOrChunkFound) {
-              return this._getStartupCode({
-                source,
-                chunk,
-                hash,
-                requireFn: v4MainTemplate.requireFn
-              });
-            } else {
-              return source;
+              if (!assetOrChunkFound) {
+                for (const innerModule of chunk.modulesIterable) {
+                  if (innerModule.buildInfo.assets && Object.keys(innerModule.buildInfo.assets).length > 0) {
+                    assetOrChunkFound = true;
+                  }
+                }
+              }
+
+              if (assetOrChunkFound) {
+                return this._getStartupCode({
+                  source,
+                  chunk,
+                  hash,
+                  requireFn: v4MainTemplate.requireFn
+                });
+              } else {
+                return source;
+              }
             }
-          }
-        );
-      });
+          );
+        }
+      );
     } else {
       compiler.plugin('compilation', (compilation: IV3Compilation, params: Object): void => {
         compilation.mainTemplate.plugin('startup', (source: string, chunk: IV3Chunk, hash: string) => {
@@ -212,7 +205,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     return [
       '// Set the webpack public path',
       '(function () {',
-        getSetPublicPathCode(moduleOptions, console.error),
+      getSetPublicPathCode(moduleOptions, console.error),
       '})();',
       '',
       options.source

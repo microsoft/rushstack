@@ -20,16 +20,9 @@ import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
-import {
-  NpmPackage,
-  IResolveOrCreateResult,
-  PackageDependencyKind
-} from './NpmPackage';
+import { NpmPackage, IResolveOrCreateResult, PackageDependencyKind } from './NpmPackage';
 import { PackageLookup } from '../PackageLookup';
-import {
-  BaseLinkManager,
-  SymlinkKind
-} from '../base/BaseLinkManager';
+import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 
 interface IQueueItem {
   // A project from somewhere under "common/temp/node_modules"
@@ -48,26 +41,24 @@ export class NpmLinkManager extends BaseLinkManager {
     return LegacyAdapters.convertCallbackToPromise<readPackageTree.PackageNode, Error, string>(
       readPackageTree,
       this._rushConfiguration.commonTempFolder
-    ).then(
-      (npmPackage: readPackageTree.PackageNode) => {
-        const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
+    ).then((npmPackage: readPackageTree.PackageNode) => {
+      const commonRootPackage: NpmPackage = NpmPackage.createFromNpm(npmPackage);
 
-        const commonPackageLookup: PackageLookup = new PackageLookup();
-        commonPackageLookup.loadTree(commonRootPackage);
+      const commonPackageLookup: PackageLookup = new PackageLookup();
+      commonPackageLookup.loadTree(commonRootPackage);
 
-        const rushLinkJson: IRushLinkJson = {
-          localLinks: {}
-        };
+      const rushLinkJson: IRushLinkJson = {
+        localLinks: {}
+      };
 
-        for (const rushProject of this._rushConfiguration.projects) {
-          console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-          this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
-        }
-
-        console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-        JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
+      for (const rushProject of this._rushConfiguration.projects) {
+        console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
+        this._linkProject(rushProject, commonRootPackage, commonPackageLookup, rushLinkJson);
       }
-    );
+
+      console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
+      JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
+    });
   }
 
   /**
@@ -83,10 +74,11 @@ export class NpmLinkManager extends BaseLinkManager {
     project: RushConfigurationProject,
     commonRootPackage: NpmPackage,
     commonPackageLookup: PackageLookup,
-    rushLinkJson: IRushLinkJson): void {
-
-    let commonProjectPackage: NpmPackage | undefined =
-      commonRootPackage.getChildByName(project.tempProjectName) as NpmPackage;
+    rushLinkJson: IRushLinkJson
+  ): void {
+    let commonProjectPackage: NpmPackage | undefined = commonRootPackage.getChildByName(
+      project.tempProjectName
+    ) as NpmPackage;
     if (!commonProjectPackage) {
       // Normally we would expect the temp project to have been installed into the common\node_modules
       // folder.  However, if it was recently added, "rush install" doesn't technically require
@@ -97,12 +89,18 @@ export class NpmLinkManager extends BaseLinkManager {
       const unscopedTempProjectName: string = PackageName.getUnscopedName(project.tempProjectName);
 
       // Example: "C:\MyRepo\common\temp\projects\project1
-      const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,
-        RushConstants.rushTempProjectsFolderName, unscopedTempProjectName);
+      const extractedFolder: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.rushTempProjectsFolderName,
+        unscopedTempProjectName
+      );
 
       // Example: "C:\MyRepo\common\temp\projects\project1.tgz"
-      const tarballFile: string = path.join(this._rushConfiguration.commonTempFolder,
-        RushConstants.rushTempProjectsFolderName, unscopedTempProjectName + '.tgz');
+      const tarballFile: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.rushTempProjectsFolderName,
+        unscopedTempProjectName + '.tgz'
+      );
 
       // Example: "C:\MyRepo\common\temp\projects\project1\package.json"
       const packageJsonFilename: string = path.join(extractedFolder, 'package', FileConstants.PackageJson);
@@ -115,8 +113,12 @@ export class NpmLinkManager extends BaseLinkManager {
       });
 
       // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp\project1"
-      const installFolderName: string = path.join(this._rushConfiguration.commonTempFolder,
-        RushConstants.nodeModulesFolderName, RushConstants.rushTempNpmScope, unscopedTempProjectName);
+      const installFolderName: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        RushConstants.rushTempNpmScope,
+        unscopedTempProjectName
+      );
 
       commonProjectPackage = NpmPackage.createVirtualTempPackage(packageJsonFilename, installFolderName);
 
@@ -168,8 +170,9 @@ export class NpmLinkManager extends BaseLinkManager {
 
         // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
         // into the Common folder)?
-        const matchedRushPackage: RushConfigurationProject | undefined =
-          this._rushConfiguration.getProjectByName(dependency.name);
+        const matchedRushPackage:
+          | RushConfigurationProject
+          | undefined = this._rushConfiguration.getProjectByName(dependency.name);
 
         if (matchedRushPackage) {
           const matchedVersion: string = matchedRushPackage.packageJsonEditor.version;
@@ -183,17 +186,23 @@ export class NpmLinkManager extends BaseLinkManager {
             // DO NOT create a local link, because we are starting a new
             // cyclicDependencyProjects subtree
             startingCyclicSubtree = true;
-          } else if (dependency.kind !== PackageDependencyKind.LocalLink
-            && !semver.satisfies(matchedVersion, dependency.versionRange)) {
+          } else if (
+            dependency.kind !== PackageDependencyKind.LocalLink &&
+            !semver.satisfies(matchedVersion, dependency.versionRange)
+          ) {
             // DO NOT create a local link, because the local project's version isn't SemVer compatible.
 
             // (Note that in order to make version bumping work as expected, we ignore SemVer for
             // immediate dependencies of top-level projects, indicated by PackageDependencyKind.LocalLink.
             // Is this wise?)
 
-            console.log(colors.yellow(`Rush will not locally link ${dependency.name} for ${localPackage.name}`
-              + ` because the requested version "${dependency.versionRange}" is incompatible`
-              + ` with the local version ${matchedVersion}`));
+            console.log(
+              colors.yellow(
+                `Rush will not locally link ${dependency.name} for ${localPackage.name}` +
+                  ` because the requested version "${dependency.versionRange}" is incompatible` +
+                  ` with the local version ${matchedVersion}`
+              )
+            );
           } else {
             // Yes, it is compatible, so create a symlink to the Rush project.
 
@@ -215,7 +224,10 @@ export class NpmLinkManager extends BaseLinkManager {
               // We did not find a suitable match, so place a new local package that
               // symlinks to the Rush project
               const newLocalFolderPath: string = path.join(
-                resolution.parentForCreate!.folderPath, 'node_modules', dependency.name);
+                resolution.parentForCreate!.folderPath,
+                'node_modules',
+                dependency.name
+              );
 
               const newLocalPackage: NpmPackage = NpmPackage.createLinkedNpmPackage(
                 dependency.name,
@@ -261,7 +273,10 @@ export class NpmLinkManager extends BaseLinkManager {
             // We did not find a suitable match, so place a new local package
 
             const newLocalFolderPath: string = path.join(
-              resolution.parentForCreate!.folderPath, 'node_modules', commonDependencyPackage.name);
+              resolution.parentForCreate!.folderPath,
+              'node_modules',
+              commonDependencyPackage.name
+            );
 
             const newLocalPackage: NpmPackage = NpmPackage.createLinkedNpmPackage(
               commonDependencyPackage.name,
@@ -270,11 +285,14 @@ export class NpmLinkManager extends BaseLinkManager {
               newLocalFolderPath
             );
 
-            const commonPackageFromLookup: NpmPackage | undefined =
-              commonPackageLookup.getPackage(newLocalPackage.nameAndVersion) as NpmPackage;
+            const commonPackageFromLookup: NpmPackage | undefined = commonPackageLookup.getPackage(
+              newLocalPackage.nameAndVersion
+            ) as NpmPackage;
             if (!commonPackageFromLookup) {
-              throw new Error(`The ${localPackage.name}@${localPackage.version} package was not found`
-                + ` in the common folder`);
+              throw new Error(
+                `The ${localPackage.name}@${localPackage.version} package was not found` +
+                  ` in the common folder`
+              );
             }
             newLocalPackage.symlinkTargetFolderPath = commonPackageFromLookup.folderPath;
 
@@ -295,8 +313,10 @@ export class NpmLinkManager extends BaseLinkManager {
           }
         } else {
           if (dependency.kind !== PackageDependencyKind.Optional) {
-            throw new Error(`The dependency "${dependency.name}" needed by "${localPackage.name}"`
-              + ` was not found in the common folder -- do you need to run "rush install"?`);
+            throw new Error(
+              `The dependency "${dependency.name}" needed by "${localPackage.name}"` +
+                ` was not found in the common folder -- do you need to run "rush install"?`
+            );
           } else {
             console.log('Skipping optional dependency: ' + dependency.name);
           }
@@ -312,7 +332,11 @@ export class NpmLinkManager extends BaseLinkManager {
 
     // Also symlink the ".bin" folder
     if (localProjectPackage.children.length > 0) {
-      const commonBinFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules', '.bin');
+      const commonBinFolder: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        'node_modules',
+        '.bin'
+      );
       const projectBinFolder: string = path.join(localProjectPackage.folderPath, 'node_modules', '.bin');
 
       if (FileSystem.exists(commonBinFolder)) {

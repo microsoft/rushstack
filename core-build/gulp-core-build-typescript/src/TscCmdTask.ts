@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  JsonFile,
-  FileSystem,
-  LegacyAdapters
-} from '@microsoft/node-core-library';
+import { JsonFile, FileSystem, LegacyAdapters } from '@microsoft/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import * as decomment from 'decomment';
@@ -14,10 +10,7 @@ import { TypescriptCompiler as TTypescriptCompiler, ToolPackages } from '@micros
 
 type TTypescript = typeof ToolPackages.typescript;
 
-import {
-  RSCTask,
-  IRSCTaskConfig
-} from './RSCTask';
+import { RSCTask, IRSCTaskConfig } from './RSCTask';
 import { TsParseConfigHost } from './TsParseConfigHost';
 
 /**
@@ -46,17 +39,10 @@ export interface ITscCmdTaskConfig extends IRSCTaskConfig {
  */
 export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
   constructor() {
-    super(
-      'tsc',
-      {
-        staticMatch: [
-          'src/**/*.js',
-          'src/**/*.json',
-          'src/**/*.jsx'
-        ],
-        removeCommentsFromJavaScript: false
-      }
-    );
+    super('tsc', {
+      staticMatch: ['src/**/*.js', 'src/**/*.json', 'src/**/*.jsx'],
+      removeCommentsFromJavaScript: false
+    });
   }
 
   public loadSchema(): Object {
@@ -81,20 +67,23 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
       libFolders.push(this.buildConfig.libESNextFolder);
     }
 
-    const resolvedLibFolders: string[] = libFolders.map((libFolder) => path.join(this.buildConfig.rootPath, libFolder));
-    const promises: Promise<void>[] = (this.taskConfig.staticMatch || []).map((pattern) =>
-      LegacyAdapters.convertCallbackToPromise(glob, path.join(globEscape(this.buildConfig.rootPath), pattern)).then(
-        (matchPaths: string[]) => {
-          for (const matchPath of matchPaths) {
-            const fileContents: string = FileSystem.readFile(matchPath);
-            const relativePath: string = path.relative(srcPath, matchPath);
-            for (const resolvedLibFolder of resolvedLibFolders) {
-              const destPath: string = path.join(resolvedLibFolder, relativePath);
-              FileSystem.writeFile(destPath, fileContents, { ensureFolderExists: true });
-            }
+    const resolvedLibFolders: string[] = libFolders.map(libFolder =>
+      path.join(this.buildConfig.rootPath, libFolder)
+    );
+    const promises: Promise<void>[] = (this.taskConfig.staticMatch || []).map(pattern =>
+      LegacyAdapters.convertCallbackToPromise(
+        glob,
+        path.join(globEscape(this.buildConfig.rootPath), pattern)
+      ).then((matchPaths: string[]) => {
+        for (const matchPath of matchPaths) {
+          const fileContents: string = FileSystem.readFile(matchPath);
+          const relativePath: string = path.relative(srcPath, matchPath);
+          for (const resolvedLibFolder of resolvedLibFolders) {
+            const destPath: string = path.join(resolvedLibFolder, relativePath);
+            FileSystem.writeFile(destPath, fileContents, { ensureFolderExists: true });
           }
         }
-      )
+      })
     );
 
     const typescriptCompiler: TTypescriptCompiler = new this._rushStackCompiler.TypescriptCompiler(
@@ -108,11 +97,13 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
       promises.push(basePromise);
     }
 
-    let buildPromise: Promise<void> = Promise.all(promises).then(() => { /* collapse void[] to void */ });
+    let buildPromise: Promise<void> = Promise.all(promises).then(() => {
+      /* collapse void[] to void */
+    });
 
     if (this.taskConfig.removeCommentsFromJavaScript === true) {
-      buildPromise = buildPromise.then(
-        () => this._removeComments(this._rushStackCompiler.ToolPackages.typescript)
+      buildPromise = buildPromise.then(() =>
+        this._removeComments(this._rushStackCompiler.ToolPackages.typescript)
       );
     }
 
@@ -136,7 +127,10 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
   }
 
   private _removeComments(typescript: TTypescript): Promise<void> {
-    const configFilePath: string | undefined = typescript.findConfigFile(this.buildConfig.rootPath, FileSystem.exists);
+    const configFilePath: string | undefined = typescript.findConfigFile(
+      this.buildConfig.rootPath,
+      FileSystem.exists
+    );
     if (!configFilePath) {
       return Promise.reject(new Error('Unable to resolve tsconfig file to determine outDir.'));
     }
@@ -157,13 +151,10 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     ).then((matches: string[]) => {
       for (const match of matches) {
         const sourceText: string = FileSystem.readFile(match);
-        const decommentedText: string = decomment(
-          sourceText,
-          {
-            // This option preserves comments that start with /*!, /**! or //! - typically copyright comments
-            safe: true
-          }
-        );
+        const decommentedText: string = decomment(sourceText, {
+          // This option preserves comments that start with /*!, /**! or //! - typically copyright comments
+          safe: true
+        });
         FileSystem.writeFile(match, decommentedText);
       }
     });

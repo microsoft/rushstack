@@ -3,16 +3,16 @@
 
 import * as os from 'os';
 import * as colors from 'colors';
-import {
-  PackageJsonLookup
-} from '@microsoft/node-core-library';
+import { PackageJsonLookup } from '@microsoft/node-core-library';
 
 import { RushStackCommandLine } from './cli/RushStackCommandLine';
 
 const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
-console.log(os.EOL + colors.bold(`rush-stack ${currentPackageVersion} `
-  + colors.cyan(' - http://rushstack.io') + os.EOL));
+console.log(
+  os.EOL +
+    colors.bold(`rush-stack ${currentPackageVersion} ` + colors.cyan(' - http://rushstack.io') + os.EOL)
+);
 
 const parser: RushStackCommandLine = new RushStackCommandLine();
 

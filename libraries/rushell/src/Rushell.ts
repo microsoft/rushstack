@@ -26,7 +26,6 @@ export interface IRushellExecuteResult {
  */
 export class Rushell {
   public execute(script: string): IRushellExecuteResult {
-
     const tokenizer: Tokenizer = new Tokenizer(script);
     const parser: Parser = new Parser(tokenizer);
     const astScript: AstScript = parser.parse();

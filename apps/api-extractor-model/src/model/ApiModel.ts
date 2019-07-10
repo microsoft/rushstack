@@ -54,7 +54,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
   private _packagesByName: Map<string, ApiPackage> | undefined = undefined;
 
   public constructor() {
-    super({ });
+    super({});
 
     this._resolver = new ModelReferenceResolver(this);
   }
@@ -136,8 +136,10 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     return this._packagesByName.get(packageName);
   }
 
-  public resolveDeclarationReference(declarationReference: DocDeclarationReference,
-    contextApiItem: ApiItem | undefined): IResolveDeclarationReferenceResult {
+  public resolveDeclarationReference(
+    declarationReference: DocDeclarationReference,
+    contextApiItem: ApiItem | undefined
+  ): IResolveDeclarationReferenceResult {
     return this._resolver.resolve(declarationReference, contextApiItem);
   }
 }

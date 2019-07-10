@@ -41,22 +41,15 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
 
   constructor(taskOptions: ITslintRunnerConfig, rootPath: string, terminalProvider: ITerminalProvider) {
     super(taskOptions, rootPath, terminalProvider);
-    this._cmdRunner = new CmdRunner(
-      this._standardBuildFolders,
-      this._terminal,
-      {
-        packagePath: ToolPaths.tslintPackagePath,
-        packageJson: ToolPaths.tslintPackageJson,
-        packageBinPath: path.join('bin', 'tslint')
-      }
-    );
+    this._cmdRunner = new CmdRunner(this._standardBuildFolders, this._terminal, {
+      packagePath: ToolPaths.tslintPackagePath,
+      packageJson: ToolPaths.tslintPackageJson,
+      packageBinPath: path.join('bin', 'tslint')
+    });
   }
 
   public invoke(): Promise<void> {
-    const args: string[] = [
-      '--format', 'json',
-      '--project', this._standardBuildFolders.projectFolderPath
-    ];
+    const args: string[] = ['--format', 'json', '--project', this._standardBuildFolders.projectFolderPath];
 
     return this._cmdRunner.runCmd({
       args: args,
@@ -76,7 +69,10 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
         try {
           const errors: TSLint.IRuleFailureJson[] = JSON.parse(dataStr);
           for (const error of errors) {
-            const pathFromRoot: string = path.relative(this._standardBuildFolders.projectFolderPath, error.name);
+            const pathFromRoot: string = path.relative(
+              this._standardBuildFolders.projectFolderPath,
+              error.name
+            );
             tslintErrorLogFn(
               pathFromRoot,
               error.startPosition.line + 1,

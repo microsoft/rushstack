@@ -5,12 +5,7 @@ import * as path from 'path';
 import { IPackageJson } from '@microsoft/node-core-library';
 
 import { VersionPolicyConfiguration } from '../VersionPolicyConfiguration';
-import {
-  VersionPolicy,
-  LockStepVersionPolicy,
-  IndividualVersionPolicy,
-  BumpType
-} from '../VersionPolicy';
+import { VersionPolicy, LockStepVersionPolicy, IndividualVersionPolicy, BumpType } from '../VersionPolicy';
 
 describe('VersionPolicy', () => {
   describe('LockStepVersion', () => {
@@ -31,10 +26,12 @@ describe('VersionPolicy', () => {
 
     it('skips packageJson if version is already the locked step version', () => {
       const lockStepVersionPolicy: LockStepVersionPolicy = versionPolicy as LockStepVersionPolicy;
-      expect(lockStepVersionPolicy.ensure({
-        name: 'a',
-        version: '1.1.0'
-      })).not.toBeDefined();
+      expect(
+        lockStepVersionPolicy.ensure({
+          name: 'a',
+          version: '1.1.0'
+        })
+      ).not.toBeDefined();
     });
 
     it('updates packageJson if version is lower than the locked step version', () => {
@@ -109,10 +106,12 @@ describe('VersionPolicy', () => {
 
     it('skips packageJson if no need to change', () => {
       const individualVersionPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
-      expect(individualVersionPolicy.ensure({
-        name: 'a',
-        version: '2.1.0'
-      })).not.toBeDefined();
+      expect(
+        individualVersionPolicy.ensure({
+          name: 'a',
+          version: '2.1.0'
+        })
+      ).not.toBeDefined();
     });
 
     it('updates packageJson if version is lower than the locked major', () => {

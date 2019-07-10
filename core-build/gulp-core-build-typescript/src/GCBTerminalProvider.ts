@@ -2,10 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask } from '@microsoft/gulp-core-build';
-import {
-  TerminalProviderSeverity,
-  ConsoleTerminalProvider
-} from '@microsoft/node-core-library';
+import { TerminalProviderSeverity, ConsoleTerminalProvider } from '@microsoft/node-core-library';
 
 export class GCBTerminalProvider<TTask = {}> extends ConsoleTerminalProvider {
   private _gcbTask: GulpTask<TTask>;

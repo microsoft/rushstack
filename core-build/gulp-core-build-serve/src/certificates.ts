@@ -36,10 +36,12 @@ function _createDevelopmentCertificate(): ICertificate {
   certificate.validity.notBefore = now;
   certificate.validity.notAfter.setFullYear(certificate.validity.notBefore.getFullYear() + 3); // Three years from now
 
-  const attrs: IAttr[] = [{
-    name: 'commonName',
-    value: 'localhost'
-  }];
+  const attrs: IAttr[] = [
+    {
+      name: 'commonName',
+      value: 'localhost'
+    }
+  ];
 
   certificate.setSubject(attrs);
   certificate.setIssuer(attrs);
@@ -47,23 +49,28 @@ function _createDevelopmentCertificate(): ICertificate {
   certificate.setExtensions([
     {
       name: 'subjectAltName',
-      altNames: [{
-        type: 2, // DNS
-        value: 'localhost'
-      }]
+      altNames: [
+        {
+          type: 2, // DNS
+          value: 'localhost'
+        }
+      ]
     },
     {
       name: 'keyUsage',
       digitalSignature: true,
       keyEncipherment: true,
       dataEncipherment: true
-    }, {
+    },
+    {
       name: 'extKeyUsage',
       serverAuth: true
-    }, {
+    },
+    {
       name: 'friendlyName',
       value: friendlyName
-    }]);
+    }
+  ]);
 
   // self-sign certificate
   certificate.sign(keys.privateKey, forge.md.sha256.create());
@@ -87,7 +94,10 @@ function _ensureCertUtilExePath(parentTask: GulpTask<{}>): string {
       parentTask.logError(`Error finding certUtil command: "${whereErr}"`);
       _certutilExePath = undefined;
     } else {
-      const lines: string[] = where.stdout.toString().trim().split(EOL);
+      const lines: string[] = where.stdout
+        .toString()
+        .trim()
+        .split(EOL);
       _certutilExePath = lines[0].trim();
     }
   }
@@ -104,22 +114,31 @@ function _tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>)
         return false;
       }
 
-      parentTask.log( 'Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
-                      'and will be stored in your local user profile to be used by other instances of ' +
-                      'gulp-core-build-serve. If you do not consent to trust this certificate, click "NO" in the ' +
-                      'dialog.');
+      parentTask.log(
+        'Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
+          'and will be stored in your local user profile to be used by other instances of ' +
+          'gulp-core-build-serve. If you do not consent to trust this certificate, click "NO" in the ' +
+          'dialog.'
+      );
 
-      const winTrustResult: child_process.SpawnSyncReturns<string> =
-        child_process.spawnSync(certutilExePath, ['-user', '-addstore', 'root', certificatePath]);
+      const winTrustResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
+        certutilExePath,
+        ['-user', '-addstore', 'root', certificatePath]
+      );
 
       if (winTrustResult.status !== 0) {
         parentTask.logError(`Error: ${winTrustResult.stdout.toString()}`);
 
-        const errorLines: string[] = winTrustResult.stdout.toString().split(EOL).map((line: string) => line.trim());
+        const errorLines: string[] = winTrustResult.stdout
+          .toString()
+          .split(EOL)
+          .map((line: string) => line.trim());
 
         // Not sure if this is always the status code for "cancelled" - should confirm.
-        if (winTrustResult.status === 2147943623 ||
-            errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0) {
+        if (
+          winTrustResult.status === 2147943623 ||
+          errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0
+        ) {
           parentTask.log('Certificate trust cancelled.');
         } else {
           parentTask.logError('Certificate trust failed with an unknown error.');
@@ -133,10 +152,12 @@ function _tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>)
       }
 
     case 'darwin': // tslint:disable-line:no-switch-case-fall-through
-      parentTask.log( 'Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
-                      'and will be stored in your local user profile to be used by other instances of ' +
-                      'gulp-core-build-serve. If you do not consent to trust this certificate, do not enter your ' +
-                      'root password in the prompt.');
+      parentTask.log(
+        'Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
+          'and will be stored in your local user profile to be used by other instances of ' +
+          'gulp-core-build-serve. If you do not consent to trust this certificate, do not enter your ' +
+          'root password in the prompt.'
+      );
 
       const commands: string[] = [
         'security',
@@ -154,21 +175,30 @@ function _tryTrustCertificate(certificatePath: string, parentTask: GulpTask<{}>)
         parentTask.logVerbose('Successfully trusted development certificate.');
         return true;
       } else {
-        if (result.stderr.some((value: string) => !!value.match(/The authorization was cancelled by the user\./))) {
+        if (
+          result.stderr.some(
+            (value: string) => !!value.match(/The authorization was cancelled by the user\./)
+          )
+        ) {
           parentTask.log('Certificate trust cancelled.');
           return false;
         } else {
-          parentTask.logError(`Certificate trust failed with an unknown error. Exit code: ${result.code}. ` +
-                              `Error: ${result.stderr.join(' ')}`);
+          parentTask.logError(
+            `Certificate trust failed with an unknown error. Exit code: ${result.code}. ` +
+              `Error: ${result.stderr.join(' ')}`
+          );
           return false;
         }
       }
 
-    default: // tslint:disable-line:no-switch-case-fall-through
+    default:
+      // tslint:disable-line:no-switch-case-fall-through
       // Linux + others: Have the user manually trust the cert if they want to
-      parentTask.log( 'Automatic certificate trust is only implemented for gulp-core-build-serve on Windows and ' +
-                      'macOS. To trust the development certificate, add this certificate to your trusted root ' +
-                      `certification authorities: "${CertificateStore.instance.certificatePath}".`);
+      parentTask.log(
+        'Automatic certificate trust is only implemented for gulp-core-build-serve on Windows and ' +
+          'macOS. To trust the development certificate, add this certificate to your trusted root ' +
+          `certification authorities: "${CertificateStore.instance.certificatePath}".`
+      );
       return true;
   }
 }
@@ -195,15 +225,11 @@ function _trySetFriendlyName(certificatePath: string, parentTask: GulpTask<{}>):
 
     FileSystem.writeFile(friendlyNamePath, friendlyNameFile);
 
-    const commands: string[] = [
-      '–repairstore',
-      '–user',
-      'root',
-      serialNumber,
-      friendlyNamePath
-    ];
-    const repairStoreResult: child_process.SpawnSyncReturns<string> =
-      child_process.spawnSync(certutilExePath, commands);
+    const commands: string[] = ['–repairstore', '–user', 'root', serialNumber, friendlyNamePath];
+    const repairStoreResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
+      certutilExePath,
+      commands
+    );
 
     if (repairStoreResult.status !== 0) {
       parentTask.logError(`CertUtil Error: ${repairStoreResult.stdout.toString()}`);
@@ -232,8 +258,9 @@ export function ensureCertificate<TGulpTask>(
 
   if (certificateStore.certificateData && certificateStore.keyData) {
     if (!_certificateHasSubjectAltName(certificateStore.certificateData)) {
-      let warningMessage: string = 'The existing development certificate is missing the subjectAltName ' +
-                                    'property and will not work with the latest versions of some browsers. ';
+      let warningMessage: string =
+        'The existing development certificate is missing the subjectAltName ' +
+        'property and will not work with the latest versions of some browsers. ';
 
       if (canGenerateNewCertificate) {
         warningMessage += ' Attempting to untrust the certificate and generate a new one.';
@@ -267,8 +294,10 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
         return false;
       }
 
-      const winUntrustResult: child_process.SpawnSyncReturns<string> =
-        child_process.spawnSync(certutilExePath, ['-user', '-delstore', 'root', serialNumber]);
+      const winUntrustResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
+        certutilExePath,
+        ['-user', '-delstore', 'root', serialNumber]
+      );
 
       if (winUntrustResult.status !== 0) {
         parentTask.logError(`Error: ${winUntrustResult.stdout.toString()}`);
@@ -281,11 +310,15 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
     case 'darwin': // tslint:disable-line:no-switch-case-fall-through
       parentTask.logVerbose('Trying to find the signature of the dev cert');
 
-      const macFindCertificateResult: child_process.SpawnSyncReturns<string> =
-        child_process.spawnSync('security', ['find-certificate', '-c', 'localhost', '-a', '-Z', macKeychain]);
+      const macFindCertificateResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
+        'security',
+        ['find-certificate', '-c', 'localhost', '-a', '-Z', macKeychain]
+      );
 
       if (macFindCertificateResult.status !== 0) {
-        parentTask.logError(`Error finding the dev certificate: ${macFindCertificateResult.output.join(' ')}`);
+        parentTask.logError(
+          `Error finding the dev certificate: ${macFindCertificateResult.output.join(' ')}`
+        );
         return false;
       }
 
@@ -313,8 +346,13 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
 
       parentTask.logVerbose(`Found the dev cert. SHA is ${shaHash}`);
 
-      const macUntrustResult: ISudoSyncResult =
-        runSudoSync(['security', 'delete-certificate', '-Z', shaHash, macKeychain]);
+      const macUntrustResult: ISudoSyncResult = runSudoSync([
+        'security',
+        'delete-certificate',
+        '-Z',
+        shaHash,
+        macKeychain
+      ]);
 
       if (macUntrustResult.code === 0) {
         parentTask.logVerbose('Successfully untrusted dev certificate.');
@@ -324,12 +362,15 @@ export function untrustCertificate<TGulpTask>(parentTask: GulpTask<TGulpTask>): 
         return false;
       }
 
-    default: // tslint:disable-line:no-switch-case-fall-through
+    default:
+      // tslint:disable-line:no-switch-case-fall-through
       // Linux + others: Have the user manually untrust the cert
-      parentTask.log( 'Automatic certificate untrust is only implemented for gulp-core-build-serve on Windows and ' +
-                      'macOS. To untrust the development certificate, remove this certificate from your trusted ' +
-                      `root certification authorities: "${CertificateStore.instance.certificatePath}". The ` +
-                      `certificate has serial number "${serialNumber}".`);
+      parentTask.log(
+        'Automatic certificate untrust is only implemented for gulp-core-build-serve on Windows and ' +
+          'macOS. To untrust the development certificate, remove this certificate from your trusted ' +
+          `root certification authorities: "${CertificateStore.instance.certificatePath}". The ` +
+          `certificate has serial number "${serialNumber}".`
+      );
       return false;
   }
 }
@@ -351,8 +392,9 @@ function _ensureCertificateInternal(parentTask: GulpTask<{}>): void {
     certificateStore.certificateData = generatedCertificate.pemCertificate;
     certificateStore.keyData = generatedCertificate.pemKey;
 
-    if (!_trySetFriendlyName(tempCertificatePath, parentTask)) { // Try to set the friendly name, and warn if we can't
-      parentTask.logWarning('Unable to set the certificate\'s friendly name.');
+    if (!_trySetFriendlyName(tempCertificatePath, parentTask)) {
+      // Try to set the friendly name, and warn if we can't
+      parentTask.logWarning("Unable to set the certificate's friendly name.");
     }
   } else {
     // Clear out the existing store data, if any exists

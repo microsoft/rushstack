@@ -10,13 +10,10 @@
  * @packageDocumentation
  */
 
-class Lib1ForgottenExport {
-}
+class Lib1ForgottenExport {}
 
 /** @public */
-export class Lib1Class extends Lib1ForgottenExport {
-}
+export class Lib1Class extends Lib1ForgottenExport {}
 
 /** @alpha */
-export interface Lib1Interface {
-}
+export interface Lib1Interface {}

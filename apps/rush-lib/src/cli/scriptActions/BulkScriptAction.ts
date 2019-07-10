@@ -4,9 +4,7 @@
 import * as os from 'os';
 import * as colors from 'colors';
 
-import {
-  Event
-} from '../../index';
+import { Event } from '../../index';
 
 import {
   CommandLineFlagParameter,
@@ -71,20 +69,19 @@ export class BulkScriptAction extends BaseScriptAction {
 
   public run(): Promise<void> {
     if (!FileSystem.exists(this.rushConfiguration.rushLinkJsonFilename)) {
-      throw new Error(`File not found: ${this.rushConfiguration.rushLinkJsonFilename}` +
-        `${os.EOL}Did you run "rush link"?`);
+      throw new Error(
+        `File not found: ${this.rushConfiguration.rushLinkJsonFilename}` + `${os.EOL}Did you run "rush link"?`
+      );
     }
     this._doBeforeTask();
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    const isQuietMode: boolean = !(this._verboseParameter.value);
+    const isQuietMode: boolean = !this._verboseParameter.value;
 
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
-    const parallelism: string | undefined = this._enableParallelism
-      ? this._parallelismParameter!.value
-      : '1';
+    const parallelism: string | undefined = this._enableParallelism ? this._parallelismParameter!.value : '1';
 
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
@@ -109,25 +106,28 @@ export class BulkScriptAction extends BaseScriptAction {
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
     });
 
-    return tasks.execute().then(() => {
-      stopwatch.stop();
-      console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-      this._doAfterTask(stopwatch, true);
-    }).catch((error: Error) => {
-      stopwatch.stop();
-      if (error instanceof AlreadyReportedError) {
+    return tasks
+      .execute()
+      .then(() => {
+        stopwatch.stop();
         console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-      } else {
-        if (error && error.message) {
-          console.log('Error: ' + error.message);
+        this._doAfterTask(stopwatch, true);
+      })
+      .catch((error: Error) => {
+        stopwatch.stop();
+        if (error instanceof AlreadyReportedError) {
+          console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+        } else {
+          if (error && error.message) {
+            console.log('Error: ' + error.message);
+          }
+
+          console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
         }
 
-        console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
-      }
-
-      this._doAfterTask(stopwatch, false);
-      throw new AlreadyReportedError();
-    });
+        this._doAfterTask(stopwatch, false);
+        throw new AlreadyReportedError();
+      });
   }
 
   protected onDefineParameters(): void {
@@ -136,9 +136,10 @@ export class BulkScriptAction extends BaseScriptAction {
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
         argumentName: 'COUNT',
-        description: 'Specify the number of concurrent build processes'
-          + ' The value "max" can be specified to indicate the number of CPU cores.'
-          + ' If this parameter omitted, the default value depends on the operating system and number of CPU cores.'
+        description:
+          'Specify the number of concurrent build processes' +
+          ' The value "max" can be specified to indicate the number of CPU cores.' +
+          ' If this parameter omitted, the default value depends on the operating system and number of CPU cores.'
       });
     }
     this._toFlag = this.defineStringListParameter({
@@ -147,10 +148,11 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'PROJECT1',
       description: 'Run command in the specified project and all of its dependencies'
     });
-    this._toVersionPolicy =  this.defineStringListParameter({
+    this._toVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--to-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
-      description: 'Run command in all projects with the specified version policy and all of their dependencies'
+      description:
+        'Run command in all projects with the specified version policy and all of their dependencies'
     });
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
@@ -167,8 +169,9 @@ export class BulkScriptAction extends BaseScriptAction {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
         parameterShortName: '-o',
-        description: 'If specified, the incremental build will only rebuild projects that have changed, '
-          + 'but not any projects that directly or indirectly depend on the changed package.'
+        description:
+          'If specified, the incremental build will only rebuild projects that have changed, ' +
+          'but not any projects that directly or indirectly depend on the changed package.'
       });
     }
 

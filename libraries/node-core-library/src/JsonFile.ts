@@ -61,7 +61,8 @@ export class JsonFile {
   /**
    * Loads a JSON file.
    */
-  public static load(jsonFilename: string): any { // tslint:disable-line:no-any
+  public static load(jsonFilename: string): any {
+    // tslint:disable-line:no-any
     if (!FileSystem.exists(jsonFilename)) {
       throw new Error(`Input file not found: ${jsonFilename}`);
     }
@@ -77,8 +78,12 @@ export class JsonFile {
   /**
    * Loads a JSON file and validate its schema.
    */
-  public static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema,
-    options?: IJsonSchemaValidateOptions): any { // tslint:disable-line:no-any
+  public static loadAndValidate(
+    jsonFilename: string,
+    jsonSchema: JsonSchema,
+    options?: IJsonSchemaValidateOptions
+  ): any {
+    // tslint:disable-line:no-any
 
     const jsonObject: any = JsonFile.load(jsonFilename); // tslint:disable-line:no-any
     jsonSchema.validateObject(jsonObject, jsonFilename, options);
@@ -91,8 +96,12 @@ export class JsonFile {
    * @remarks
    * See JsonSchema.validateObjectWithCallback() for more info.
    */
-  public static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema,
-    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): any { // tslint:disable-line:no-any
+  public static loadAndValidateWithCallback(
+    jsonFilename: string,
+    jsonSchema: JsonSchema,
+    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void
+  ): any {
+    // tslint:disable-line:no-any
 
     const jsonObject: any = JsonFile.load(jsonFilename); // tslint:disable-line:no-any
     jsonSchema.validateObjectWithCallback(jsonObject, errorCallback);
@@ -116,10 +125,13 @@ export class JsonFile {
    * @param options - other settings that control serialization
    * @returns a JSON string, with newlines, and indented with two spaces
    */
-  public static updateString(previousJson: string, newJsonObject: Object,
-    options?: IJsonFileStringifyOptions): string {
+  public static updateString(
+    previousJson: string,
+    newJsonObject: Object,
+    options?: IJsonFileStringifyOptions
+  ): string {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     JsonFile.validateNoUndefinedMembers(newJsonObject);
@@ -165,7 +177,7 @@ export class JsonFile {
    */
   public static save(jsonObject: Object, jsonFilename: string, options?: IJsonFileSaveOptions): boolean {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     // Do we need to read the previous file contents?
@@ -266,7 +278,8 @@ export class JsonFile {
 
         // Convert this:     A path: "C:\file"
         // To this:          A path: \"C:\\file\"
-        const escapedKey: string = key.replace(/[\\]/g, '\\\\') // escape backslashes
+        const escapedKey: string = key
+          .replace(/[\\]/g, '\\\\') // escape backslashes
           .replace(/["]/g, '\\'); // escape quotes
         result += `["${escapedKey}"]`;
       }

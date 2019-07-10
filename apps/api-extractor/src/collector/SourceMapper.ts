@@ -26,8 +26,7 @@ interface IOriginalFileInfo {
 
 export class SourceMapper {
   // Map from .d.ts file path --> ISourceMap if a source map was found, or null if not found
-  private _sourceMapByFilePath: Map<string, ISourceMap | null>
-    = new Map<string, ISourceMap | null>();
+  private _sourceMapByFilePath: Map<string, ISourceMap | null> = new Map<string, ISourceMap | null>();
 
   // Cache the FileSystem.exists() result for mapped .ts files
   private _originalFileInfoByPath: Map<string, IOriginalFileInfo> = new Map<string, IOriginalFileInfo>();
@@ -81,7 +80,7 @@ export class SourceMapper {
             SourceMapConsumer.GENERATED_ORDER
           );
 
-          sourceMap = { sourceMapConsumer, mappingItems};
+          sourceMap = { sourceMapConsumer, mappingItems };
         } else {
           // No source map for this filename
           sourceMap = null; // tslint:disable-line:no-null-keyword
@@ -108,7 +107,8 @@ export class SourceMapper {
       options.sourceFileColumn = 1;
     }
 
-    const nearestMappingItem: MappingItem | undefined = SourceMapper._findNearestMappingItem(sourceMap.mappingItems,
+    const nearestMappingItem: MappingItem | undefined = SourceMapper._findNearestMappingItem(
+      sourceMap.mappingItems,
       {
         line: options.sourceFileLine,
         column: options.sourceFileColumn
@@ -120,7 +120,10 @@ export class SourceMapper {
       return;
     }
 
-    const mappedFilePath: string = path.resolve(path.dirname(options.sourceFilePath), nearestMappingItem.source);
+    const mappedFilePath: string = path.resolve(
+      path.dirname(options.sourceFilePath),
+      nearestMappingItem.source
+    );
 
     // Does the mapped filename exist?  Use a cache to remember the answer.
     let originalFileInfo: IOriginalFileInfo | undefined = this._originalFileInfoByPath.get(mappedFilePath);
@@ -132,11 +135,12 @@ export class SourceMapper {
 
       if (originalFileInfo.fileExists) {
         // Read the file and measure the length of each line
-        originalFileInfo.maxColumnForLine =
-          FileSystem.readFile(mappedFilePath, { convertLineEndings: NewlineKind.Lf })
+        originalFileInfo.maxColumnForLine = FileSystem.readFile(mappedFilePath, {
+          convertLineEndings: NewlineKind.Lf
+        })
           .split('\n')
           .map(x => x.length + 1); // +1 since columns are 1-based
-        originalFileInfo.maxColumnForLine.unshift(0);  // Extra item since lines are 1-based
+        originalFileInfo.maxColumnForLine.unshift(0); // Extra item since lines are 1-based
       }
 
       this._originalFileInfoByPath.set(mappedFilePath, originalFileInfo);
@@ -151,15 +155,17 @@ export class SourceMapper {
     // the delta and apply it to the original position.
     const guessedPosition: Position = {
       line: nearestMappingItem.originalLine + options.sourceFileLine - nearestMappingItem.generatedLine,
-      column: nearestMappingItem.originalColumn + options.sourceFileColumn - nearestMappingItem.generatedColumn
+      column:
+        nearestMappingItem.originalColumn + options.sourceFileColumn - nearestMappingItem.generatedColumn
     };
 
     // Verify that the result is not out of bounds, in cause our heuristic failed
-    if (guessedPosition.line >= 1
-      && guessedPosition.line < originalFileInfo.maxColumnForLine.length
-      && guessedPosition.column >= 1
-      && guessedPosition.column <= originalFileInfo.maxColumnForLine[guessedPosition.line]) {
-
+    if (
+      guessedPosition.line >= 1 &&
+      guessedPosition.line < originalFileInfo.maxColumnForLine.length &&
+      guessedPosition.column >= 1 &&
+      guessedPosition.column <= originalFileInfo.maxColumnForLine[guessedPosition.line]
+    ) {
       options.sourceFilePath = mappedFilePath;
       options.sourceFileLine = guessedPosition.line;
       options.sourceFileColumn = guessedPosition.column;
@@ -174,7 +180,10 @@ export class SourceMapper {
   // The `mappingItems` array is sorted by generatedLine/generatedColumn (GENERATED_ORDER).
   // The _findNearestMappingItem() lookup is a simple binary search that returns the previous item
   // if there is no exact match.
-  private static _findNearestMappingItem(mappingItems: MappingItem[], position: Position): MappingItem | undefined {
+  private static _findNearestMappingItem(
+    mappingItems: MappingItem[],
+    position: Position
+  ): MappingItem | undefined {
     if (mappingItems.length === 0) {
       return undefined;
     }

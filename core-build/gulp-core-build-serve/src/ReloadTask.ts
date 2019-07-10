@@ -14,8 +14,7 @@ export class ReloadTask extends GulpTask<void> {
     const gulpConnect = require('gulp-connect');
     /* tslint:enable:typedef */
 
-    gulp.src('')
-        .pipe(gulpConnect.reload());
+    gulp.src('').pipe(gulpConnect.reload());
 
     completeCallback();
   }

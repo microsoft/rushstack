@@ -12,11 +12,7 @@ export class BasicTasks {
    * Build task: Cleans all the temporary files
    */
   public static doClean(buildContext: BuildContext): void {
-    const foldersToClean: string[] = [
-      'temp',
-      'lib',
-      'dist'
-    ];
+    const foldersToClean: string[] = ['temp', 'lib', 'dist'];
 
     for (const folderToClean of foldersToClean) {
       const fullPath: string = path.join(buildContext.projectFolder, folderToClean);

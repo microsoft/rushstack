@@ -48,7 +48,8 @@ export class ApprovedPackagesItem {
  */
 export class ApprovedPackagesConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/approved-packages.schema.json'));
+    path.join(__dirname, '../schemas/approved-packages.schema.json')
+  );
 
   public items: ApprovedPackagesItem[] = [];
 
@@ -102,8 +103,10 @@ export class ApprovedPackagesConfiguration {
     this.loadFromFile();
 
     if (!approvedPackagesPolicyEnabled) {
-      console.log(`Warning: Ignoring "${path.basename(this._jsonFilename)}" because the`
-        + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
+      console.log(
+        `Warning: Ignoring "${path.basename(this._jsonFilename)}" because the` +
+          ` "approvedPackagesPolicy" setting was not specified in rush.json`
+      );
     }
 
     return false;
@@ -113,8 +116,10 @@ export class ApprovedPackagesConfiguration {
    * Loads the configuration data from the filename that was passed to the constructor.
    */
   public loadFromFile(): void {
-    const approvedPackagesJson: IApprovedPackagesJson = JsonFile.loadAndValidate(this._jsonFilename,
-      ApprovedPackagesConfiguration._jsonSchema);
+    const approvedPackagesJson: IApprovedPackagesJson = JsonFile.loadAndValidate(
+      this._jsonFilename,
+      ApprovedPackagesConfiguration._jsonSchema
+    );
 
     this.clear();
 
@@ -130,9 +135,7 @@ export class ApprovedPackagesConfiguration {
     // Update the JSON structure that we already loaded, preserving any existing state
     // (which passed schema validation).
 
-    this._loadedJson.$schema = JsonSchemaUrls.approvedPackages,
-
-    this._loadedJson.packages = [];
+    (this._loadedJson.$schema = JsonSchemaUrls.approvedPackages), (this._loadedJson.packages = []);
 
     this.items.sort((a: ApprovedPackagesItem, b: ApprovedPackagesItem) => {
       return a.packageName.localeCompare(b.packageName);
@@ -155,16 +158,13 @@ export class ApprovedPackagesConfiguration {
     let body: string = JsonFile.stringify(this._loadedJson);
 
     // Unindent the allowedCategories array to improve readability
-    body = body.replace(
-      /("allowedCategories": +\[)([^\]]+)/g,
-      (substring: string, ...args: string[]) => {
-        return args[0] + args[1].replace(/\s+/g, ' ');
-      }
-    );
+    body = body.replace(/("allowedCategories": +\[)([^\]]+)/g, (substring: string, ...args: string[]) => {
+      return args[0] + args[1].replace(/\s+/g, ' ');
+    });
 
     // Add a header
-    body = '// DO NOT ADD COMMENTS IN THIS FILE.'
-      + '  They will be lost when the Rush tool resaves it.\n' + body;
+    body =
+      '// DO NOT ADD COMMENTS IN THIS FILE.' + '  They will be lost when the Rush tool resaves it.\n' + body;
 
     FileSystem.writeFile(this._jsonFilename, body, {
       convertLineEndings: NewlineKind.CrLf
@@ -176,8 +176,11 @@ export class ApprovedPackagesConfiguration {
    */
   private _addItemJson(itemJson: IApprovedPackagesItemJson, jsonFilename: string): void {
     if (this._itemsByName.has(itemJson.name)) {
-      throw new Error(`Error loading package review file ${jsonFilename}:` + os.EOL
-        + ` the name "${itemJson.name}" appears more than once`);
+      throw new Error(
+        `Error loading package review file ${jsonFilename}:` +
+          os.EOL +
+          ` the name "${itemJson.name}" appears more than once`
+      );
     }
 
     const item: ApprovedPackagesItem = new ApprovedPackagesItem();

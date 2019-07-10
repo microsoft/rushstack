@@ -116,7 +116,7 @@ export function extractVersionFromPnpmVersionSpecifier(version: string): string 
 
   if (semver.valid(versionParts[versionParts.length - 1]) !== null) {
     // Example: "path.pkgs.visualstudio.com/@scope/depame/1.4.0"
-    return versionParts[versionParts.length - 1];  // e.g. "1.4.0"
+    return versionParts[versionParts.length - 1]; // e.g. "1.4.0"
   }
 
   return undefined;
@@ -133,7 +133,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
-      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(FileSystem.readFile(shrinkwrapYamlFilename).toString());
+      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(
+        FileSystem.readFile(shrinkwrapYamlFilename).toString()
+      );
 
       return new PnpmShrinkwrapFile(parsedData);
     } catch (error) {
@@ -165,9 +167,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * For PNPM, we can reuse the version that another project is using.
    * Note that this function modifies the shrinkwrap data.
    */
-  protected tryEnsureDependencyVersion(dependencyName: string,
+  protected tryEnsureDependencyVersion(
+    dependencyName: string,
     tempProjectName: string,
-    versionRange: string): string | undefined {
+    versionRange: string
+  ): string | undefined {
     // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
     // or underneath the package we are looking at.
@@ -177,8 +181,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // linked to.
 
     const tempProjectDependencyKey: string = this._getTempProjectKey(tempProjectName);
-    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
-      this._getPackageDescription(tempProjectDependencyKey);
+    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this._getPackageDescription(
+      tempProjectDependencyKey
+    );
     if (!packageDescription) {
       return undefined;
     }
@@ -190,7 +195,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         let latestVersion: string | undefined = undefined;
 
         this.getTempProjectNames().forEach((otherTempProject: string) => {
-          const otherVersion: string | undefined = this._getDependencyVersion(dependencyName, otherTempProject);
+          const otherVersion: string | undefined = this._getDependencyVersion(
+            dependencyName,
+            otherTempProject
+          );
           if (otherVersion && semver.satisfies(otherVersion, versionRange)) {
             if (!latestVersion || semver.gt(otherVersion, latestVersion)) {
               latestVersion = otherVersion;
@@ -215,7 +223,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this._normalizeDependencyVersion(dependencyName, packageDescription.dependencies[dependencyName]);
   }
 
-  protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean { // override
+  protected checkValidVersionRange(dependencyVersion: string, versionRange: string): boolean {
+    // override
     // dependencyVersion could be a relative or absolute path, for those cases we
     // need to extract the version from the end of the path.
     return super.checkValidVersionRange(dependencyVersion.split('/').pop()!, versionRange);
@@ -230,13 +239,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       this._shrinkwrapJson.registry = '';
     }
     if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = { };
+      this._shrinkwrapJson.dependencies = {};
     }
     if (!this._shrinkwrapJson.specifiers) {
-      this._shrinkwrapJson.specifiers = { };
+      this._shrinkwrapJson.specifiers = {};
     }
     if (!this._shrinkwrapJson.packages) {
-      this._shrinkwrapJson.packages = { };
+      this._shrinkwrapJson.packages = {};
     }
   }
 
@@ -245,8 +254,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   private _getDependencyVersion(dependencyName: string, tempProjectName: string): string | undefined {
     const tempProjectDependencyKey: string = this._getTempProjectKey(tempProjectName);
-    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
-      this._getPackageDescription(tempProjectDependencyKey);
+    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this._getPackageDescription(
+      tempProjectDependencyKey
+    );
     if (!packageDescription) {
       return undefined;
     }
@@ -261,9 +271,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /**
    * Gets the package description for a tempProject from the shrinkwrap file.
    */
-  private _getPackageDescription(tempProjectDependencyKey: string): IPnpmShrinkwrapDependencyYaml | undefined {
-    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined
-      = BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.packages, tempProjectDependencyKey);
+  private _getPackageDescription(
+    tempProjectDependencyKey: string
+  ): IPnpmShrinkwrapDependencyYaml | undefined {
+    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = BaseShrinkwrapFile.tryGetValue(
+      this._shrinkwrapJson.packages,
+      tempProjectDependencyKey
+    );
 
     if (!packageDescription || !packageDescription.dependencies) {
       return undefined;
@@ -283,8 +297,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       const extractedVersion: string | undefined = extractVersionFromPnpmVersionSpecifier(version);
 
       if (!extractedVersion) {
-        throw new Error(`Cannot parse pnpm shrinkwrap version specifier: `
-          + `"${version}" for "${dependencyName}"`);
+        throw new Error(
+          `Cannot parse pnpm shrinkwrap version specifier: ` + `"${version}" for "${dependencyName}"`
+        );
       }
 
       return extractedVersion;

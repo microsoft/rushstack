@@ -13,7 +13,8 @@ export class Npm {
   ): string[] {
     const versions: string[] = [];
     try {
-      const packageTime: string = Utilities.executeCommandAndCaptureOutput('npm',
+      const packageTime: string = Utilities.executeCommandAndCaptureOutput(
+        'npm',
         ['view', packageName, 'time', '--json', ...extraArgs],
         cwd,
         env,
@@ -28,14 +29,15 @@ export class Npm {
       } else {
         console.log(`Package ${packageName} time value does not exist. Fall back to versions.`);
         // time property does not exist. It happens sometimes. Fall back to versions.
-        const packageVersions: string = Utilities.executeCommandAndCaptureOutput('npm',
+        const packageVersions: string = Utilities.executeCommandAndCaptureOutput(
+          'npm',
           ['view', packageName, 'versions', '--json', ...extraArgs],
           cwd,
           env,
           true
         );
         if (packageVersions && packageVersions.length > 0) {
-          (JSON.parse(packageVersions)).forEach(v => {
+          JSON.parse(packageVersions).forEach(v => {
             versions.push(v);
           });
         } else {

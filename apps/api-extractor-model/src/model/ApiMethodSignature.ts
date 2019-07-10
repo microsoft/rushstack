@@ -7,17 +7,19 @@ import { ApiParameterListMixin, IApiParameterListMixinOptions } from '../mixins/
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { IApiTypeParameterListMixinOptions, ApiTypeParameterListMixin } from '../mixins/ApiTypeParameterListMixin';
+import {
+  IApiTypeParameterListMixinOptions,
+  ApiTypeParameterListMixin
+} from '../mixins/ApiTypeParameterListMixin';
 
 /** @public */
-export interface IApiMethodSignatureOptions extends
-  IApiNameMixinOptions,
-  IApiTypeParameterListMixinOptions,
-  IApiParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiReturnTypeMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiMethodSignatureOptions
+  extends IApiNameMixinOptions,
+    IApiTypeParameterListMixinOptions,
+    IApiParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiReturnTypeMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript member function declaration that belongs to an `ApiInterface`.
@@ -40,9 +42,9 @@ export interface IApiMethodSignatureOptions extends
  *
  * @public
  */
-export class ApiMethodSignature extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(
-  ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))))) {
-
+export class ApiMethodSignature extends ApiNameMixin(
+  ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))))
+) {
   public static getCanonicalReference(name: string, overloadIndex: number): string {
     return `(${name}:${overloadIndex})`;
   }

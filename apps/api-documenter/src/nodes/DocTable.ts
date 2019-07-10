@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  IDocNodeParameters,
-  DocNode
-} from '@microsoft/tsdoc';
+import { IDocNodeParameters, DocNode } from '@microsoft/tsdoc';
 import { CustomDocNodeKind } from './CustomDocNodeKind';
 import { DocTableRow } from './DocTableRow';
 import { DocTableCell } from './DocTableCell';
@@ -34,8 +31,10 @@ export class DocTable extends DocNode {
     if (parameters) {
       if (parameters.headerTitles) {
         if (parameters.headerCells) {
-          throw new Error('IDocTableParameters.headerCells and IDocTableParameters.headerTitles'
-            + ' cannot both be specified');
+          throw new Error(
+            'IDocTableParameters.headerCells and IDocTableParameters.headerTitles' +
+              ' cannot both be specified'
+          );
         }
         for (const cellText of parameters.headerTitles) {
           this.header.addPlainTextCell(cellText);

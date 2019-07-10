@@ -3,10 +3,7 @@
 
 import { GulpTask } from '@microsoft/gulp-core-build';
 import * as Gulp from 'gulp';
-import {
-  ICertificate,
-  ensureCertificate
-} from './certificates';
+import { ICertificate, ensureCertificate } from './certificates';
 
 /**
  * This task generates and trusts a development certificate. The certificate is self-signed

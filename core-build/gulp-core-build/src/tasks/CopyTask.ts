@@ -35,13 +35,10 @@ export class CopyTask extends GulpTask<ICopyConfig> {
    * Instantiates a CopyTask with an empty configuration
    */
   constructor() {
-    super(
-      'copy',
-      {
-        copyTo: {},
-        shouldFlatten: true
-      }
-    );
+    super('copy', {
+      copyTo: {},
+      shouldFlatten: true
+    });
   }
 
   /**
@@ -71,11 +68,14 @@ export class CopyTask extends GulpTask<ICopyConfig> {
       if (copyTo.hasOwnProperty(copyDest)) {
         const sources: string[] = copyTo[copyDest];
 
-        sources.forEach(sourceMatch => allStreams.push(
-          gulp.src(sourceMatch)
-            .pipe(gulpif(shouldFlatten, flatten()))
-            .pipe(gulp.dest(copyDest))
-        ));
+        sources.forEach(sourceMatch =>
+          allStreams.push(
+            gulp
+              .src(sourceMatch)
+              .pipe(gulpif(shouldFlatten, flatten()))
+              .pipe(gulp.dest(copyDest))
+          )
+        );
       }
     }
 

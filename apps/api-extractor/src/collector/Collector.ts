@@ -3,15 +3,8 @@
 
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
-import {
-  PackageJsonLookup,
-  Sort,
-  InternalError
-} from '@microsoft/node-core-library';
-import {
-  ReleaseTag,
-  AedocDefinitions
-} from '@microsoft/api-extractor-model';
+import { PackageJsonLookup, Sort, InternalError } from '@microsoft/node-core-library';
+import { ReleaseTag, AedocDefinitions } from '@microsoft/api-extractor-model';
 
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
@@ -75,7 +68,10 @@ export class Collector {
   private _astEntryPoint: AstModule | undefined;
 
   private readonly _entities: CollectorEntity[] = [];
-  private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<AstEntity, CollectorEntity>();
+  private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<
+    AstEntity,
+    CollectorEntity
+  >();
 
   private readonly _starExportedExternalModulePaths: string[] = [];
 
@@ -89,7 +85,8 @@ export class Collector {
     this.extractorConfig = options.extractorConfig;
 
     const entryPointSourceFile: ts.SourceFile | undefined = options.program.getSourceFile(
-      this.extractorConfig.mainEntryPointFilePath);
+      this.extractorConfig.mainEntryPointFilePath
+    );
 
     if (!entryPointSourceFile) {
       throw new Error('Unable to load file: ' + this.extractorConfig.mainEntryPointFilePath);
@@ -113,8 +110,12 @@ export class Collector {
     this.typeChecker = options.program.getTypeChecker();
 
     this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
-    this.astSymbolTable = new AstSymbolTable(this.program, this.typeChecker, this.packageJsonLookup,
-      this.messageRouter);
+    this.astSymbolTable = new AstSymbolTable(
+      this.program,
+      this.typeChecker,
+      this.packageJsonLookup,
+      this.messageRouter
+    );
     this.astReferenceResolver = new AstReferenceResolver(this.astSymbolTable, this.workingPackage);
   }
 
@@ -185,20 +186,25 @@ export class Collector {
     const entryPointSourceFile: ts.SourceFile = this.workingPackage.entryPointSourceFile;
 
     const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleFromWorkingPackage(
-      entryPointSourceFile);
+      entryPointSourceFile
+    );
     this._astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
-      entryPointSourceFile, this);
+      entryPointSourceFile,
+      this
+    );
 
     if (packageDocCommentTextRange) {
-      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(entryPointSourceFile.text,
-        packageDocCommentTextRange.pos, packageDocCommentTextRange.end);
+      const range: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(
+        entryPointSourceFile.text,
+        packageDocCommentTextRange.pos,
+        packageDocCommentTextRange.end
+      );
 
       this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
 
-      this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext,
-        entryPointSourceFile);
+      this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext, entryPointSourceFile);
 
       this.workingPackage.tsdocComment = this.workingPackage.tsdocParserContext!.docComment;
     }
@@ -207,7 +213,9 @@ export class Collector {
 
     // Create a CollectorEntity for each top-level export
 
-    const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
+    const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(
+      astEntryPoint
+    );
     for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
       this._createCollectorEntity(astEntity, exportName);
 
@@ -263,10 +271,12 @@ export class Collector {
 
   public fetchMetadata(astSymbol: AstSymbol): SymbolMetadata;
   public fetchMetadata(astDeclaration: AstDeclaration): DeclarationMetadata;
-  public fetchMetadata(symbolOrDeclaration: AstSymbol | AstDeclaration): SymbolMetadata | DeclarationMetadata {
+  public fetchMetadata(
+    symbolOrDeclaration: AstSymbol | AstDeclaration
+  ): SymbolMetadata | DeclarationMetadata {
     if (symbolOrDeclaration.metadata === undefined) {
-      const astSymbol: AstSymbol = symbolOrDeclaration instanceof AstSymbol
-        ? symbolOrDeclaration : symbolOrDeclaration.astSymbol;
+      const astSymbol: AstSymbol =
+        symbolOrDeclaration instanceof AstSymbol ? symbolOrDeclaration : symbolOrDeclaration.astSymbol;
       this._fetchSymbolMetadata(astSymbol);
     }
     return symbolOrDeclaration.metadata as SymbolMetadata | DeclarationMetadata;
@@ -276,7 +286,8 @@ export class Collector {
     if (astEntity instanceof AstSymbol) {
       return this.fetchMetadata(astEntity);
     }
-    if (astEntity.astSymbol) { // astImport
+    if (astEntity.astSymbol) {
+      // astImport
       return this.fetchMetadata(astEntity.astSymbol);
     }
     return undefined;
@@ -322,7 +333,10 @@ export class Collector {
     }
   }
 
-  private _createEntityForIndirectReferences(astEntity: AstEntity, alreadySeenAstEntities: Set<AstEntity>): void {
+  private _createEntityForIndirectReferences(
+    astEntity: AstEntity,
+    alreadySeenAstEntities: Set<AstEntity>
+  ): void {
     if (alreadySeenAstEntities.has(astEntity)) {
       return;
     }
@@ -369,9 +383,11 @@ export class Collector {
 
     // Next generate unique names for the non-exports that will be emitted (and the default export)
     for (const entity of this._entities) {
-
       // If this entity is exported exactly once, then emit the exported name
-      if (entity.singleExportName !== undefined && entity.singleExportName !== ts.InternalSymbolName.Default) {
+      if (
+        entity.singleExportName !== undefined &&
+        entity.singleExportName !== ts.InternalSymbolName.Default
+      ) {
         entity.nameForEmit = entity.singleExportName;
         continue;
       }
@@ -476,7 +492,8 @@ export class Collector {
 
     // We know we solved parentAstSymbol.metadata above
     const parentSymbolMetadata: SymbolMetadata | undefined = astSymbol.parentAstSymbol
-      ? astSymbol.parentAstSymbol.metadata as SymbolMetadata : undefined;
+      ? (astSymbol.parentAstSymbol.metadata as SymbolMetadata)
+      : undefined;
 
     const symbolMetadata: SymbolMetadata = new SymbolMetadata();
 
@@ -491,7 +508,8 @@ export class Collector {
 
       if (declaredReleaseTag !== ReleaseTag.None) {
         if (effectiveReleaseTag !== ReleaseTag.None && effectiveReleaseTag !== declaredReleaseTag) {
-          if (!astSymbol.isExternal) { // for now, don't report errors for external code
+          if (!astSymbol.isExternal) {
+            // for now, don't report errors for external code
             this.messageRouter.addAnalyzerIssue(
               ExtractorMessageId.DifferentReleaseTags,
               'This symbol has another declaration with a different release tag',
@@ -512,18 +530,18 @@ export class Collector {
     }
 
     if (effectiveReleaseTag === ReleaseTag.None) {
-      if (!astSymbol.isExternal) { // for now, don't report errors for external code
+      if (!astSymbol.isExternal) {
+        // for now, don't report errors for external code
         // Don't report missing release tags for forgotten exports
         const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
         if (entity && entity.exported) {
           // We also don't report errors for the default export of an entry point, since its doc comment
           // isn't easy to obtain from the .d.ts file
           if (astSymbol.rootAstSymbol.localName !== '_default') {
-
             this.messageRouter.addAnalyzerIssue(
               ExtractorMessageId.MissingReleaseTag,
-              `"${entity.astEntity.localName}" is exported by the package, but it is missing `
-              + `a release tag (@alpha, @beta, @public, or @internal)`,
+              `"${entity.astEntity.localName}" is exported by the package, but it is missing ` +
+                `a release tag (@alpha, @beta, @public, or @internal)`,
               astSymbol
             );
           }
@@ -580,11 +598,13 @@ export class Collector {
       }
 
       if (extraReleaseTags) {
-        if (!astDeclaration.astSymbol.isExternal) { // for now, don't report errors for external code
+        if (!astDeclaration.astSymbol.isExternal) {
+          // for now, don't report errors for external code
           this.messageRouter.addAnalyzerIssue(
             ExtractorMessageId.ExtraReleaseTag,
             'The doc comment should not contain more than one release tag',
-            astDeclaration);
+            astDeclaration
+          );
         }
       }
 
@@ -610,8 +630,8 @@ export class Collector {
             } else {
               this.messageRouter.addAnalyzerIssue(
                 ExtractorMessageId.PreapprovedBadReleaseTag,
-                `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
-                  + ` without an @internal release tag`,
+                `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"` +
+                  ` without an @internal release tag`,
                 astDeclaration
               );
             }
@@ -619,8 +639,8 @@ export class Collector {
           default:
             this.messageRouter.addAnalyzerIssue(
               ExtractorMessageId.PreapprovedUnsupportedType,
-              `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"`
-                + ` because it is not a supported declaration type`,
+              `The @preapproved tag cannot be applied to "${astDeclaration.astSymbol.localName}"` +
+                ` because it is not a supported declaration type`,
               astDeclaration
             );
             break;
@@ -645,8 +665,10 @@ export class Collector {
       //
       // But _getReleaseTagForDeclaration() still receives a node corresponding to "x", so we need to walk upwards
       // and find the containing statement in order for getJSDocCommentRanges() to read the comment that we expect.
-      const statement: ts.VariableStatement | undefined = TypeScriptHelpers.findFirstParent(declaration,
-        ts.SyntaxKind.VariableStatement) as ts.VariableStatement | undefined;
+      const statement: ts.VariableStatement | undefined = TypeScriptHelpers.findFirstParent(
+        declaration,
+        ts.SyntaxKind.VariableStatement
+      ) as ts.VariableStatement | undefined;
       if (statement !== undefined) {
         // For a compound declaration, fall back to looking for C instead of A
         if (statement.declarationList.declarations.length === 1) {
@@ -656,7 +678,8 @@ export class Collector {
     }
 
     const sourceFileText: string = declaration.getSourceFile().text;
-    const ranges: ts.CommentRange[] = TypeScriptInternals.getJSDocCommentRanges(nodeForComment, sourceFileText) || [];
+    const ranges: ts.CommentRange[] =
+      TypeScriptInternals.getJSDocCommentRanges(nodeForComment, sourceFileText) || [];
 
     if (ranges.length === 0) {
       return undefined;
@@ -666,8 +689,11 @@ export class Collector {
     // the last one preceding it
     const range: ts.TextRange = ranges[ranges.length - 1];
 
-    const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(sourceFileText,
-      range.pos, range.end);
+    const tsdocTextRange: tsdoc.TextRange = tsdoc.TextRange.fromStringRange(
+      sourceFileText,
+      range.pos,
+      range.end
+    );
 
     const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
 
@@ -690,15 +716,20 @@ export class Collector {
           seenFilenames.add(sourceFile.fileName);
 
           for (const typeReferenceDirective of sourceFile.typeReferenceDirectives) {
-            const name: string = sourceFile.text.substring(typeReferenceDirective.pos, typeReferenceDirective.end);
+            const name: string = sourceFile.text.substring(
+              typeReferenceDirective.pos,
+              typeReferenceDirective.end
+            );
             this._dtsTypeReferenceDirectives.add(name);
           }
 
           for (const libReferenceDirective of sourceFile.libReferenceDirectives) {
-            const name: string = sourceFile.text.substring(libReferenceDirective.pos, libReferenceDirective.end);
+            const name: string = sourceFile.text.substring(
+              libReferenceDirective.pos,
+              libReferenceDirective.end
+            );
             this._dtsLibReferenceDirectives.add(name);
           }
-
         }
       }
     }

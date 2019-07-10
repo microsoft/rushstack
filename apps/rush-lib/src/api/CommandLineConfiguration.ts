@@ -3,26 +3,19 @@
 
 import * as path from 'path';
 
-import {
-  JsonFile,
-  JsonSchema,
-  FileSystem
-} from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../logic/RushConstants';
 
-import {
-  CommandJson,
-  ICommandLineJson,
-  ParameterJson
-} from './CommandLineJson';
+import { CommandJson, ICommandLineJson, ParameterJson } from './CommandLineJson';
 
 /**
  * Custom Commands and Options for the Rush Command Line
  */
 export class CommandLineConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/command-line.schema.json'));
+    path.join(__dirname, '../schemas/command-line.schema.json')
+  );
 
   public readonly commands: CommandJson[] = [];
   public readonly parameters: ParameterJson[] = [];
@@ -62,15 +55,16 @@ export class CommandLineConfiguration {
               const alternativeNames: string[] = parameter.alternatives.map(x => x.name);
 
               if (parameter.defaultValue && alternativeNames.indexOf(parameter.defaultValue) < 0) {
-                throw new Error(`In ${RushConstants.commandLineFilename}, the parameter "${parameter.longName}",`
-                  + ` specifies a default value "${parameter.defaultValue}"`
-                  + ` which is not one of the defined alternatives: "${alternativeNames.toString()}"`);
+                throw new Error(
+                  `In ${RushConstants.commandLineFilename}, the parameter "${parameter.longName}",` +
+                    ` specifies a default value "${parameter.defaultValue}"` +
+                    ` which is not one of the defined alternatives: "${alternativeNames.toString()}"`
+                );
               }
               break;
           }
         }
       }
-
     }
   }
 }

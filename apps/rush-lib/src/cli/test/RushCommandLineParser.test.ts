@@ -102,7 +102,8 @@ describe('RushCommandLineParser', () => {
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
 
           expect.assertions(8);
-          return expect(instance.parser.execute()).resolves.toEqual(true)
+          return expect(instance.parser.execute())
+            .resolves.toEqual(true)
             .then(() => {
               // There should be 1 build per package
               const packageCount: number = instance.spawnMock.mock.calls.length;
@@ -113,17 +114,17 @@ describe('RushCommandLineParser', () => {
 
               // tslint:disable-next-line: no-any
               const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
-              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
-                expect.stringMatching(expectedBuildTaskRegexp)
-              ]));
+              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+              );
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
               expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
-              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
-                expect.stringMatching(expectedBuildTaskRegexp)
-              ]));
+              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+              );
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
               expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
             });
@@ -136,7 +137,8 @@ describe('RushCommandLineParser', () => {
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
 
           expect.assertions(8);
-          return expect(instance.parser.execute()).resolves.toEqual(true)
+          return expect(instance.parser.execute())
+            .resolves.toEqual(true)
             .then(() => {
               // There should be 1 build per package
               const packageCount: number = instance.spawnMock.mock.calls.length;
@@ -147,17 +149,17 @@ describe('RushCommandLineParser', () => {
 
               // tslint:disable-next-line: no-any
               const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
-              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
-                expect.stringMatching(expectedBuildTaskRegexp)
-              ]));
+              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+              );
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
               expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
-              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
-                expect.stringMatching(expectedBuildTaskRegexp)
-              ]));
+              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+              );
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
               expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
             });
@@ -172,7 +174,8 @@ describe('RushCommandLineParser', () => {
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
 
           expect.assertions(8);
-          return expect(instance.parser.execute()).resolves.toEqual(true)
+          return expect(instance.parser.execute())
+            .resolves.toEqual(true)
             .then(() => {
               // There should be 1 build per package
               const packageCount: number = instance.spawnMock.mock.calls.length;
@@ -183,17 +186,17 @@ describe('RushCommandLineParser', () => {
 
               // tslint:disable-next-line: no-any
               const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
-              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
-                expect.stringMatching(expectedBuildTaskRegexp)
-              ]));
+              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+              );
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
               expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
-              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
-                expect.stringMatching(expectedBuildTaskRegexp)
-              ]));
+              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+              );
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
               expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
             });
@@ -206,7 +209,8 @@ describe('RushCommandLineParser', () => {
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
 
           expect.assertions(8);
-          return expect(instance.parser.execute()).resolves.toEqual(true)
+          return expect(instance.parser.execute())
+            .resolves.toEqual(true)
             .then(() => {
               // There should be 1 build per package
               const packageCount: number = instance.spawnMock.mock.calls.length;
@@ -217,17 +221,17 @@ describe('RushCommandLineParser', () => {
 
               // tslint:disable-next-line: no-any
               const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
-              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
-                expect.stringMatching(expectedBuildTaskRegexp)
-              ]));
+              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+              );
               expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
               expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
 
               // tslint:disable-next-line: no-any
               const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
-              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
-                expect.stringMatching(expectedBuildTaskRegexp)
-              ]));
+              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+              );
               expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
               expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
             });

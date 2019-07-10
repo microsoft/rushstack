@@ -8,8 +8,7 @@ import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyIt
  * Constructor options for {@link ApiPropertySignature}.
  * @public
  */
-export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
-}
+export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {}
 
 /**
  * Represents a TypeScript property declaration that belongs to an `ApiInterface`.
@@ -34,7 +33,6 @@ export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
  * @public
  */
 export class ApiPropertySignature extends ApiPropertyItem {
-
   public static getCanonicalReference(name: string): string {
     return name;
   }

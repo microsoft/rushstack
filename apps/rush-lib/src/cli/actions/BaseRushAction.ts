@@ -5,10 +5,7 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  CommandLineAction,
-  ICommandLineActionOptions
-} from '@microsoft/ts-command-line';
+import { CommandLineAction, ICommandLineActionOptions } from '@microsoft/ts-command-line';
 
 import { LockFile } from '@microsoft/node-core-library';
 
@@ -87,8 +84,10 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
     if (this.rushConfiguration) {
       /* tslint:disable-next-line:no-string-literal */
       let environmentPath: string | undefined = process.env['PATH'];
-      environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
-        path.delimiter + environmentPath;
+      environmentPath =
+        path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
+        path.delimiter +
+        environmentPath;
       /* tslint:disable-next-line:no-string-literal */
       process.env['PATH'] = environmentPath;
     }

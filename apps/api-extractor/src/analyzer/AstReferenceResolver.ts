@@ -48,8 +48,10 @@ export class AstReferenceResolver {
 
   public resolve(declarationReference: tsdoc.DocDeclarationReference): AstDeclaration | ResolverFailure {
     // Is it referring to the working package?
-    if (declarationReference.packageName !== undefined
-      && declarationReference.packageName !== this._workingPackage.name) {
+    if (
+      declarationReference.packageName !== undefined &&
+      declarationReference.packageName !== this._workingPackage.name
+    ) {
       return new ResolverFailure('External package references are not supported');
     }
 
@@ -59,7 +61,8 @@ export class AstReferenceResolver {
     }
 
     const astModule: AstModule = this._astSymbolTable.fetchAstModuleFromWorkingPackage(
-      this._workingPackage.entryPointSourceFile);
+      this._workingPackage.entryPointSourceFile
+    );
 
     if (declarationReference.memberReferences.length === 0) {
       return new ResolverFailure('Package references are not supported');
@@ -73,18 +76,25 @@ export class AstReferenceResolver {
     }
 
     const rootAstEntity: AstEntity | undefined = this._astSymbolTable.tryGetExportOfAstModule(
-      exportName, astModule);
+      exportName,
+      astModule
+    );
 
     if (rootAstEntity === undefined) {
-      return new ResolverFailure(`The package "${this._workingPackage.name}" does not have an export "${exportName}"`);
+      return new ResolverFailure(
+        `The package "${this._workingPackage.name}" does not have an export "${exportName}"`
+      );
     }
 
     if (rootAstEntity instanceof AstImport) {
       return new ResolverFailure('Reexported declarations are not supported');
     }
 
-    let currentDeclaration: AstDeclaration | ResolverFailure = this._selectDeclaration(rootAstEntity.astDeclarations,
-      rootMemberReference, rootAstEntity.localName);
+    let currentDeclaration: AstDeclaration | ResolverFailure = this._selectDeclaration(
+      rootAstEntity.astDeclarations,
+      rootMemberReference,
+      rootAstEntity.localName
+    );
 
     if (currentDeclaration instanceof ResolverFailure) {
       return currentDeclaration;
@@ -98,13 +108,18 @@ export class AstReferenceResolver {
         return memberName;
       }
 
-      const matchingChildren: ReadonlyArray<AstDeclaration> = currentDeclaration.findChildrenWithName(memberName);
+      const matchingChildren: ReadonlyArray<AstDeclaration> = currentDeclaration.findChildrenWithName(
+        memberName
+      );
       if (matchingChildren.length === 0) {
         return new ResolverFailure(`No member was found with name "${memberName}"`);
       }
 
-      const selectedDeclaration: AstDeclaration | ResolverFailure = this._selectDeclaration(matchingChildren,
-        memberReference, memberName);
+      const selectedDeclaration: AstDeclaration | ResolverFailure = this._selectDeclaration(
+        matchingChildren,
+        memberReference,
+        memberName
+      );
 
       if (selectedDeclaration instanceof ResolverFailure) {
         return selectedDeclaration;
@@ -126,15 +141,19 @@ export class AstReferenceResolver {
     return memberReference.memberIdentifier.identifier;
   }
 
-  private _selectDeclaration(astDeclarations: ReadonlyArray<AstDeclaration>,
-    memberReference: tsdoc.DocMemberReference, astSymbolName: string): AstDeclaration | ResolverFailure {
-
+  private _selectDeclaration(
+    astDeclarations: ReadonlyArray<AstDeclaration>,
+    memberReference: tsdoc.DocMemberReference,
+    astSymbolName: string
+  ): AstDeclaration | ResolverFailure {
     if (memberReference.selector === undefined) {
       if (astDeclarations.length === 1) {
         return astDeclarations[0];
       } else {
-        return new ResolverFailure(`The reference is ambiguous because "${astSymbolName}"`
-          + ` has more than one declaration; you need to add a TSDoc member reference selector`);
+        return new ResolverFailure(
+          `The reference is ambiguous because "${astSymbolName}"` +
+            ` has more than one declaration; you need to add a TSDoc member reference selector`
+        );
       }
     }
 
@@ -174,12 +193,15 @@ export class AstReferenceResolver {
 
     const matches: AstDeclaration[] = astDeclarations.filter(x => x.declaration.kind === selectorSyntaxKind);
     if (matches.length === 0) {
-      return new ResolverFailure(`A declaration for "${astSymbolName}" was not found that matches the`
-        + ` TSDoc selector "${selectorName}"`);
+      return new ResolverFailure(
+        `A declaration for "${astSymbolName}" was not found that matches the` +
+          ` TSDoc selector "${selectorName}"`
+      );
     }
     if (matches.length > 1) {
-      return new ResolverFailure(`More than one declaration "${astSymbolName}" matches the`
-        + ` TSDoc selector "${selectorName}"`);
+      return new ResolverFailure(
+        `More than one declaration "${astSymbolName}" matches the` + ` TSDoc selector "${selectorName}"`
+      );
     }
     return matches[0];
   }

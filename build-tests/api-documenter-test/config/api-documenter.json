@@ -12,10 +12,7 @@
           "items": [
             {
               "name": "Classes",
-              "items": [
-                { "name": "DocBaseClass", "items": [] },
-                { "name": "DocClass1", "items": [] }
-              ]
+              "items": [{ "name": "DocBaseClass", "items": [] }, { "name": "DocClass1", "items": [] }]
             },
             {
               "name": "Interfaces",
@@ -26,9 +23,7 @@
             },
             {
               "name": "References",
-              "items": [
-                { "name": "InjectedCustomItem", "uid": "customUrl" }
-              ]
+              "items": [{ "name": "InjectedCustomItem", "uid": "customUrl" }]
             }
           ]
         }

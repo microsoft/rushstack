@@ -32,13 +32,10 @@ export abstract class BaseLinkManager {
 
     let targetPath: string;
     if (EnvironmentConfiguration.absoluteSymlinks) {
-        targetPath = options.linkTargetPath;
+      targetPath = options.linkTargetPath;
     } else {
       // Link to the relative path, to avoid going outside containers such as a Docker image
-      targetPath = path.relative(
-        fs.realpathSync(newLinkFolder),
-        options.linkTargetPath
-      );
+      targetPath = path.relative(fs.realpathSync(newLinkFolder), options.linkTargetPath);
     }
 
     if (process.platform === 'win32') {
@@ -145,7 +142,6 @@ export abstract class BaseLinkManager {
           const linkStats: fs.Stats = FileSystem.getLinkStatistics(linkTarget);
 
           if (linkStats.isSymbolicLink()) {
-
             const targetStats: fs.Stats = FileSystem.getStatistics(FileSystem.getRealPath(linkTarget));
             if (targetStats.isDirectory()) {
               // Neither a junction nor a directory-symlink can have a directory-symlink
@@ -203,12 +199,11 @@ export abstract class BaseLinkManager {
     // a full "rush link" is required next time
     Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
 
-    return this._linkProjects()
-      .then(() => {
-        stopwatch.stop();
-        console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
-        console.log(os.EOL + 'Next you should probably run "rush build" or "rush rebuild"');
-      });
+    return this._linkProjects().then(() => {
+      stopwatch.stop();
+      console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));
+      console.log(os.EOL + 'Next you should probably run "rush build" or "rush rebuild"');
+    });
   }
 
   protected abstract _linkProjects(): Promise<void>;

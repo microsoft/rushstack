@@ -60,9 +60,7 @@ export class FileWriter {
       exclusive: false,
       ...flags
     };
-    return [flags.append ? 'a' : 'w',
-            flags.exclusive ? 'x' : '']
-      .join('') as NodeFileFlags;
+    return [flags.append ? 'a' : 'w', flags.exclusive ? 'x' : ''].join('') as NodeFileFlags;
   }
 
   /**

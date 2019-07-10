@@ -66,9 +66,11 @@ export class Rush {
   private static _printStartupBanner(isManaged: boolean): void {
     console.log(
       EOL +
-      colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
-      colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
-      EOL
+        colors.bold(
+          `Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')
+        ) +
+        colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
+        EOL
     );
   }
 }

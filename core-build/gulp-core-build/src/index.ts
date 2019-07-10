@@ -15,11 +15,16 @@ import { IExecutable } from './IExecutable';
 import { IBuildConfig } from './IBuildConfig';
 import { CleanTask } from './tasks/CleanTask';
 import { CleanFlagTask } from './tasks/CleanFlagTask';
-import { CopyStaticAssetsTask } from  './tasks/copyStaticAssets/CopyStaticAssetsTask';
+import { CopyStaticAssetsTask } from './tasks/copyStaticAssets/CopyStaticAssetsTask';
 import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
 import { log } from './logging';
-import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
+import {
+  initialize as initializeLogging,
+  markTaskCreationTime,
+  generateGulpError,
+  setWatchMode
+} from './logging';
 import { getFlagValue } from './config';
 import * as Gulp from 'gulp';
 import * as notifier from 'node-notifier';
@@ -55,9 +60,10 @@ export * from './tasks/JestTask';
 const _taskMap: { [key: string]: IExecutable } = {};
 const _uniqueTasks: IExecutable[] = [];
 
-const packageFolder: string = (builtPackage.directories && builtPackage.directories.packagePath)
-  ? builtPackage.directories.packagePath
-  : '';
+const packageFolder: string =
+  builtPackage.directories && builtPackage.directories.packagePath
+    ? builtPackage.directories.packagePath
+    : '';
 
 let _buildConfig: IBuildConfig = {
   // gulp and rootPath are set to undefined here because they'll be defined in the initialize function below,
@@ -158,7 +164,9 @@ export function task(taskName: string, taskExecutable: IExecutable): IExecutable
  */
 export interface ICustomGulpTask {
   (gulp: typeof Gulp | GulpProxy, buildConfig: IBuildConfig, done?: (failure?: Object) => void):
-    Promise<Object> | NodeJS.ReadWriteStream | void;
+    | Promise<Object>
+    | NodeJS.ReadWriteStream
+    | void;
 }
 
 /** @public */
@@ -169,8 +177,10 @@ class CustomTask extends GulpTask<void> {
     this._fn = fn.bind(this);
   }
 
-  public executeTask(gulp: typeof Gulp | GulpProxy, completeCallback?: (error?: string | Error) => void):
-    Promise<Object> | NodeJS.ReadWriteStream | void {
+  public executeTask(
+    gulp: typeof Gulp | GulpProxy,
+    completeCallback?: (error?: string | Error) => void
+  ): Promise<Object> | NodeJS.ReadWriteStream | void {
     return this._fn(gulp, getConfig(), completeCallback);
   }
 }
@@ -210,7 +220,6 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
   return {
     execute: (buildConfig: IBuildConfig): Promise<void> => {
       return new Promise<void>(() => {
-
         function _runWatch(): Promise<void> {
           if (isWatchRunning) {
             shouldRerunWatch = true;
@@ -226,7 +235,7 @@ export function watch(watchMatch: string | string[], taskExecutable: IExecutable
                   if (buildConfig.showToast) {
                     notifier.notify({
                       title: successMessage,
-                      message: (builtPackage ? builtPackage.name : ''),
+                      message: builtPackage ? builtPackage.name : '',
                       icon: buildConfig.buildSuccessIconPath
                     });
                   } else {
@@ -360,14 +369,15 @@ export function initialize(gulp: typeof Gulp): void {
  * Registers a given gulp task given a name and an IExecutable.
  */
 function _registerTask(gulp: typeof Gulp, taskName: string, taskExecutable: IExecutable): void {
-  gulp.task(taskName, (cb) => {
-    _executeTask(taskExecutable, _buildConfig)
-      .then(() => {
+  gulp.task(taskName, cb => {
+    _executeTask(taskExecutable, _buildConfig).then(
+      () => {
         cb();
       },
       (error: Error) => {
         cb(generateGulpError(error));
-      });
+      }
+    );
   });
 }
 
@@ -386,7 +396,11 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
 
   // If the task is missing, throw a meaningful error.
   if (!taskExecutable || !taskExecutable.execute) {
-    return Promise.reject(new Error(`A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`));
+    return Promise.reject(
+      new Error(
+        `A task was scheduled, but the task was null. This probably means the task wasn't imported correctly.`
+      )
+    );
   }
 
   if (taskExecutable.isEnabled === undefined || taskExecutable.isEnabled(buildConfig)) {
@@ -396,8 +410,8 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
       buildConfig.onTaskStart(taskExecutable.name);
     }
 
-    const taskPromise: Promise<void> = taskExecutable.execute(buildConfig)
-      .then(() => {
+    const taskPromise: Promise<void> = taskExecutable.execute(buildConfig).then(
+      () => {
         if (buildConfig.onTaskEnd && taskExecutable.name) {
           buildConfig.onTaskEnd(taskExecutable.name, process.hrtime(startTime));
         }
@@ -408,7 +422,8 @@ function _executeTask(taskExecutable: IExecutable, buildConfig: IBuildConfig): P
         }
 
         return Promise.reject(error);
-      });
+      }
+    );
 
     return taskPromise;
   }

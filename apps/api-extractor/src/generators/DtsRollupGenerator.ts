@@ -61,9 +61,11 @@ export class DtsRollupGenerator {
     });
   }
 
-  private static _generateTypingsFileContent(collector: Collector, stringWriter: StringWriter,
-    dtsKind: DtsRollupKind): void {
-
+  private static _generateTypingsFileContent(
+    collector: Collector,
+    stringWriter: StringWriter,
+    dtsKind: DtsRollupKind
+  ): void {
     if (collector.workingPackage.tsdocParserContext) {
       stringWriter.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
       stringWriter.writeLine();
@@ -98,7 +100,9 @@ export class DtsRollupGenerator {
 
     // Emit the regular declarations
     for (const entity of collector.entities) {
-      const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(entity.astEntity);
+      const symbolMetadata: SymbolMetadata | undefined = collector.tryFetchMetadataForAstEntity(
+        entity.astEntity
+      );
       const releaseTag: ReleaseTag = symbolMetadata ? symbolMetadata.releaseTag : ReleaseTag.None;
 
       if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
@@ -110,10 +114,8 @@ export class DtsRollupGenerator {
       }
 
       if (entity.astEntity instanceof AstSymbol) {
-
         // Emit all the declarations for this entry
         for (const astDeclaration of entity.astEntity.astDeclarations || []) {
-
           stringWriter.writeLine();
 
           const span: Span = new Span(astDeclaration.declaration);
@@ -140,9 +142,13 @@ export class DtsRollupGenerator {
   /**
    * Before writing out a declaration, _modifySpan() applies various fixups to make it nice.
    */
-  private static _modifySpan(collector: Collector, span: Span, entity: CollectorEntity,
-    astDeclaration: AstDeclaration, dtsKind: DtsRollupKind): void {
-
+  private static _modifySpan(
+    collector: Collector,
+    span: Span,
+    entity: CollectorEntity,
+    astDeclaration: AstDeclaration,
+    dtsKind: DtsRollupKind
+  ): void {
     const previousSpan: Span | undefined = span.previousSibling;
 
     let recurseChildren: boolean = true;
@@ -206,14 +212,17 @@ export class DtsRollupGenerator {
           // Since we are emitting a separate declaration for each one, we need to look upwards
           // in the ts.Node tree and write a copy of the enclosing VariableDeclarationList
           // content (e.g. "var" from "var x=1, y=2").
-          const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node,
-            [ts.SyntaxKind.VariableDeclarationList, ts.SyntaxKind.VariableDeclaration]);
+          const list: ts.VariableDeclarationList | undefined = TypeScriptHelpers.matchAncestor(span.node, [
+            ts.SyntaxKind.VariableDeclarationList,
+            ts.SyntaxKind.VariableDeclaration
+          ]);
           if (!list) {
             // This should not happen unless the compiler API changes somehow
             throw new InternalError('Unsupported variable declaration');
           }
-          const listPrefix: string = list.getSourceFile().text
-            .substring(list.getStart(), list.declarations[0].getStart());
+          const listPrefix: string = list
+            .getSourceFile()
+            .text.substring(list.getStart(), list.declarations[0].getStart());
           span.modification.prefix = 'declare ' + listPrefix + span.modification.prefix;
           span.modification.suffix = ';';
 
@@ -264,7 +273,10 @@ export class DtsRollupGenerator {
         // Should we trim this node?
         let trimmed: boolean = false;
         if (AstDeclaration.isSupportedSyntaxKind(child.kind)) {
-          childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(child.node, astDeclaration);
+          childAstDeclaration = collector.astSymbolTable.getChildAstDeclarationByNode(
+            child.node,
+            astDeclaration
+          );
 
           const releaseTag: ReleaseTag = collector.fetchMetadata(childAstDeclaration.astSymbol).releaseTag;
           if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
@@ -273,8 +285,9 @@ export class DtsRollupGenerator {
             // If we are trimming a variable statement, then we need to trim the outer VariableDeclarationList
             // as well.
             if (child.kind === ts.SyntaxKind.VariableDeclaration) {
-              const variableStatement: Span | undefined
-                = child.findFirstParent(ts.SyntaxKind.VariableStatement);
+              const variableStatement: Span | undefined = child.findFirstParent(
+                ts.SyntaxKind.VariableStatement
+              );
               if (variableStatement !== undefined) {
                 nodeToTrim = variableStatement;
               }
@@ -321,13 +334,14 @@ export class DtsRollupGenerator {
   }
 
   private static _shouldIncludeReleaseTag(releaseTag: ReleaseTag, dtsKind: DtsRollupKind): boolean {
-
     switch (dtsKind) {
       case DtsRollupKind.InternalRelease:
         return true;
       case DtsRollupKind.BetaRelease:
         // NOTE: If the release tag is "None", then we don't have enough information to trim it
-        return releaseTag === ReleaseTag.Beta || releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
+        return (
+          releaseTag === ReleaseTag.Beta || releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None
+        );
       case DtsRollupKind.PublicRelease:
         return releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
     }

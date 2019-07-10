@@ -94,7 +94,8 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     return this._normalizeOutput(this._warningBuffer.toString());
   }
 
-  private _normalizeOutput(s: string): string { // tslint:disable-line:export-name
+  private _normalizeOutput(s: string): string {
+    // tslint:disable-line:export-name
     return Text.convertToLf(s)
       .replace(/\u001b/g, '[x]')
       .replace(/\n/g, '[-n-]')

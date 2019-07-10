@@ -12,33 +12,44 @@ const nodeVersion: string = process.versions.node;
 
 // We are on an ancient version of NodeJS that is known not to work with Rush
 if (semver.satisfies(nodeVersion, '<= 6.4.0')) {
-  console.error(colors.red(`Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush.`
-    + ` Please upgrade to the latest Long-Term Support (LTS) version.`));
+  console.error(
+    colors.red(
+      `Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush.` +
+        ` Please upgrade to the latest Long-Term Support (LTS) version.`
+    )
+  );
   process.exit(1);
 }
 
 // We are on a much newer release than we have tested and support
 // tslint:disable-next-line
 else if (semver.satisfies(nodeVersion, '>=11.0.0')) {
-  console.warn(colors.yellow(`Your version of Node.js (${nodeVersion}) has not been tested with this release of Rush.`
-    + ` The Rush team will not accept issue reports for it.`
-    + ` Please consider upgrading Rush or downgrading Node.js.`));
+  console.warn(
+    colors.yellow(
+      `Your version of Node.js (${nodeVersion}) has not been tested with this release of Rush.` +
+        ` The Rush team will not accept issue reports for it.` +
+        ` Please consider upgrading Rush or downgrading Node.js.`
+    )
+  );
 }
 
 // We are not on an LTS release
 // tslint:disable-next-line
-else if (!semver.satisfies(nodeVersion, '^6.9.0')
-      && !semver.satisfies(nodeVersion, '^8.9.0')
-      && !semver.satisfies(nodeVersion, '^10.13.0')) {
-  console.warn(colors.yellow(`Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release.`
-    + ` These versions frequently contain bugs, and the Rush team will not accept issue reports for them.`
-    + ` Please consider installing a stable release.`));
+else if (
+  !semver.satisfies(nodeVersion, '^6.9.0') &&
+  !semver.satisfies(nodeVersion, '^8.9.0') &&
+  !semver.satisfies(nodeVersion, '^10.13.0')
+) {
+  console.warn(
+    colors.yellow(
+      `Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release.` +
+        ` These versions frequently contain bugs, and the Rush team will not accept issue reports for them.` +
+        ` Please consider installing a stable release.`
+    )
+  );
 }
 
-import {
-  Text,
-  PackageJsonLookup
-} from '@microsoft/node-core-library';
+import { Text, PackageJsonLookup } from '@microsoft/node-core-library';
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
@@ -47,7 +58,9 @@ import { RushVersionSelector } from './RushVersionSelector';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 // Load the configuration
-const configuration: MinimalRushConfiguration | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
+const configuration:
+  | MinimalRushConfiguration
+  | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
 
 const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
@@ -57,7 +70,9 @@ const previewVersion: string | undefined = process.env[EnvironmentVariableNames.
 
 if (previewVersion) {
   if (!semver.valid(previewVersion, false)) {
-    console.error(colors.red(`Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`));
+    console.error(
+      colors.red(`Invalid value for RUSH_PREVIEW_VERSION environment variable: "${previewVersion}"`)
+    );
     process.exit(1);
   }
 
@@ -72,9 +87,7 @@ if (previewVersion) {
   );
 
   if (configuration) {
-    lines.push(
-      `* The rush.json configuration asks for:   ${Text.padEnd(configuration.rushVersion, 25)} *`
-    );
+    lines.push(`* The rush.json configuration asks for:   ${Text.padEnd(configuration.rushVersion, 25)} *`);
   }
 
   lines.push(
@@ -84,10 +97,7 @@ if (previewVersion) {
     `*********************************************************************`
   );
 
-  console.error(lines
-    .map(line => colors.black(colors.bgYellow(line)))
-    .join(os.EOL));
-
+  console.error(lines.map(line => colors.black(colors.bgYellow(line))).join(os.EOL));
 } else if (configuration) {
   rushVersionToLoad = configuration.rushVersion;
 }
@@ -102,10 +112,9 @@ if (rushVersionToLoad && semver.lt(rushVersionToLoad, '5.0.0-dev.18')) {
 // install it
 if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion) {
   const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageVersion);
-  versionSelector.ensureRushVersionInstalled(rushVersionToLoad, configuration)
-    .catch((error: Error) => {
-      console.log(colors.red('Error: ' + error.message));
-    });
+  versionSelector.ensureRushVersionInstalled(rushVersionToLoad, configuration).catch((error: Error) => {
+    console.log(colors.red('Error: ' + error.message));
+  });
 } else {
   // Otherwise invoke the rush-lib that came with this rush package
 

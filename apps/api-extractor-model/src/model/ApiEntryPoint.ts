@@ -9,8 +9,7 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
  * Constructor options for {@link ApiEntryPoint}.
  * @public
  */
-export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions {
-}
+export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions {}
 
 /**
  * Represents the entry point for an NPM package.

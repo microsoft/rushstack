@@ -28,8 +28,9 @@ export class BuildContext {
       }
     }
 
-    const projectFolder: string | undefined = this.packageJsonLookup
-      .tryGetPackageFolderFor(currentWorkingDirectory);
+    const projectFolder: string | undefined = this.packageJsonLookup.tryGetPackageFolderFor(
+      currentWorkingDirectory
+    );
     if (!projectFolder) {
       throw new Error('Unable to find a package.json for the current folder: ' + currentWorkingDirectory);
     }

@@ -8,21 +8,23 @@ import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/
 import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from '../mixins/ApiReleaseTagMixin';
 import { ApiReturnTypeMixin, IApiReturnTypeMixinOptions } from '../mixins/ApiReturnTypeMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
-import { ApiTypeParameterListMixin, IApiTypeParameterListMixinOptions } from '../mixins/ApiTypeParameterListMixin';
+import {
+  ApiTypeParameterListMixin,
+  IApiTypeParameterListMixinOptions
+} from '../mixins/ApiTypeParameterListMixin';
 
 /**
  * Constructor options for {@link ApiMethod}.
  * @public
  */
-export interface IApiMethodOptions extends
-  IApiNameMixinOptions,
-  IApiTypeParameterListMixinOptions,
-  IApiParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiReturnTypeMixinOptions,
-  IApiStaticMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiMethodOptions
+  extends IApiNameMixinOptions,
+    IApiTypeParameterListMixinOptions,
+    IApiParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiReturnTypeMixinOptions,
+    IApiStaticMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript member function declaration that belongs to an `ApiClass`.
@@ -45,9 +47,11 @@ export interface IApiMethodOptions extends
  *
  * @public
  */
-export class ApiMethod extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(
-  ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiDeclaredItem)))))) {
-
+export class ApiMethod extends ApiNameMixin(
+  ApiTypeParameterListMixin(
+    ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiDeclaredItem))))
+  )
+) {
   public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
       return `(${name}:static,${overloadIndex})`;

@@ -47,7 +47,6 @@ class TestCommandLine extends CommandLineParser {
 }
 
 describe('CommandLineParser', () => {
-
   it('executes an action', () => {
     const commandLineParser: TestCommandLine = new TestCommandLine();
 
@@ -59,5 +58,4 @@ describe('CommandLineParser', () => {
       expect(action.done).toBe(true);
     });
   });
-
 });

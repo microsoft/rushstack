@@ -6,9 +6,7 @@
  * @packageDocumentation
  */
 
-export {
-  ApprovedPackagesPolicy
-} from './api/ApprovedPackagesPolicy';
+export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
 export {
   RushConfiguration,
@@ -18,50 +16,25 @@ export {
   YarnOptionsConfiguration
 } from './api/RushConfiguration';
 
-export {
-  PackageManagerName,
-  PackageManager
-} from './api/packageManager/PackageManager';
+export { PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
-export {
-  EnvironmentVariableNames
-} from './api/EnvironmentConfiguration';
+export { EnvironmentVariableNames } from './api/EnvironmentConfiguration';
 
-export {
-  RushConfigurationProject
-} from './api/RushConfigurationProject';
+export { RushConfigurationProject } from './api/RushConfigurationProject';
 
-export {
-  RushGlobalFolder as _RushGlobalFolder
-} from './api/RushGlobalFolder';
+export { RushGlobalFolder as _RushGlobalFolder } from './api/RushGlobalFolder';
 
-export {
-  ApprovedPackagesItem,
-  ApprovedPackagesConfiguration
-} from './api/ApprovedPackagesConfiguration';
+export { ApprovedPackagesItem, ApprovedPackagesConfiguration } from './api/ApprovedPackagesConfiguration';
 
-export {
-  CommonVersionsConfiguration
-} from './api/CommonVersionsConfiguration';
+export { CommonVersionsConfiguration } from './api/CommonVersionsConfiguration';
 
-export {
-  PackageJsonEditor,
-  PackageJsonDependency,
-  DependencyType
-} from './api/PackageJsonEditor';
+export { PackageJsonEditor, PackageJsonDependency, DependencyType } from './api/PackageJsonEditor';
 
-export {
-  EventHooks,
-  Event
-} from './api/EventHooks';
+export { EventHooks, Event } from './api/EventHooks';
 
-export {
-  ChangeManager
-} from './api/ChangeManager';
+export { ChangeManager } from './api/ChangeManager';
 
-export {
-  LastInstallFlag as _LastInstallFlag
-} from './api/LastInstallFlag';
+export { LastInstallFlag as _LastInstallFlag } from './api/LastInstallFlag';
 
 export {
   VersionPolicyDefinitionName,
@@ -71,8 +44,6 @@ export {
   VersionPolicy
 } from './api/VersionPolicy';
 
-export {
-  VersionPolicyConfiguration
-} from './api/VersionPolicyConfiguration';
+export { VersionPolicyConfiguration } from './api/VersionPolicyConfiguration';
 
 export { Rush } from './api/Rush';

@@ -19,7 +19,7 @@ export class VersionControl {
     }
 
     const output: string = child_process.execSync(`git diff ${targetBranch}... --dirstat=files,0`).toString();
-    return output.split('\n').map((line) => {
+    return output.split('\n').map(line => {
       if (line) {
         const delimiterIndex: number = line.indexOf('%');
         if (delimiterIndex > 0 && delimiterIndex + 1 < line.length) {
@@ -38,27 +38,34 @@ export class VersionControl {
    * those in the provided {@param targetBranch}. If a {@param pathPrefix} is provided,
    * this function only returns results under the that path.
    */
-  public static getChangedFiles(targetBranch: string, skipFetch: boolean = false, pathPrefix?: string): string[] {
+  public static getChangedFiles(
+    targetBranch: string,
+    skipFetch: boolean = false,
+    pathPrefix?: string
+  ): string[] {
     if (!skipFetch) {
       VersionControl._fetchRemoteBranch(targetBranch);
     }
 
-    const output: string = child_process.execSync(
-      `git diff ${targetBranch}... --name-only --no-renames --diff-filter=A`
-    ).toString();
+    const output: string = child_process
+      .execSync(`git diff ${targetBranch}... --name-only --no-renames --diff-filter=A`)
+      .toString();
     const regex: RegExp | undefined = pathPrefix ? new RegExp(`^${pathPrefix}`, 'i') : undefined;
-    return output.split('\n').map((line) => {
-      if (line) {
-        const trimmedLine: string = line.trim();
-        if (regex && trimmedLine.match(regex)) {
-          return trimmedLine;
+    return output
+      .split('\n')
+      .map(line => {
+        if (line) {
+          const trimmedLine: string = line.trim();
+          if (regex && trimmedLine.match(regex)) {
+            return trimmedLine;
+          }
         }
-      }
 
-      return undefined;
-    }).filter((line) => {
-      return line && line.length > 0;
-    }) as string[];
+        return undefined;
+      })
+      .filter(line => {
+        return line && line.length > 0;
+      }) as string[];
   }
 
   /**
@@ -72,13 +79,12 @@ export class VersionControl {
    */
   public static getRemoteMasterBranch(repositoryUrl?: string): string {
     if (repositoryUrl) {
-      const output: string = child_process
-        .execSync(`git remote`)
-        .toString();
+      const output: string = child_process.execSync(`git remote`).toString();
       const normalizedRepositoryUrl: string = repositoryUrl.toUpperCase();
-      const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
+      const matchingRemotes: string[] = output.split('\n').filter(remoteName => {
         if (remoteName) {
-          const remoteUrl: string = child_process.execSync(`git remote get-url ${remoteName}`)
+          const remoteUrl: string = child_process
+            .execSync(`git remote get-url ${remoteName}`)
             .toString()
             .trim();
 
@@ -111,17 +117,21 @@ export class VersionControl {
 
         return `${matchingRemotes[0]}/${DEFAULT_BRANCH}`;
       } else {
-        console.log(colors.yellow(
-          `Unable to find a git remote matching the repository URL (${repositoryUrl}). ` +
-          'Detected changes are likely to be incorrect.'
-        ));
+        console.log(
+          colors.yellow(
+            `Unable to find a git remote matching the repository URL (${repositoryUrl}). ` +
+              'Detected changes are likely to be incorrect.'
+          )
+        );
 
         return DEFAULT_FULLY_QUALIFIED_BRANCH;
       }
     } else {
-      console.log(colors.yellow(
-        'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
-      ));
+      console.log(
+        colors.yellow(
+          'A git remote URL has not been specified in rush.json. Setting the baseline remote URL is recommended.'
+        )
+      );
       return DEFAULT_FULLY_QUALIFIED_BRANCH;
     }
   }
@@ -144,16 +154,12 @@ export class VersionControl {
   }
 
   private static _getUntrackedChanges(): string[] {
-    const output: string = child_process
-      .execSync(`git ls-files --exclude-standard --others`)
-      .toString();
+    const output: string = child_process.execSync(`git ls-files --exclude-standard --others`).toString();
     return output.trim().split('\n');
   }
 
   private static _getDiffOnHEAD(): string[] {
-    const output: string = child_process
-      .execSync(`git diff HEAD --name-only`)
-      .toString();
+    const output: string = child_process.execSync(`git diff HEAD --name-only`).toString();
     return output.trim().split('\n');
   }
 
@@ -162,7 +168,7 @@ export class VersionControl {
     if (firstSlashIndex === -1) {
       throw new Error(
         `Unexpected git remote branch format: ${remoteBranchName}. ` +
-        'Expected branch to be in the <remote>/<branch name> format.'
+          'Expected branch to be in the <remote>/<branch name> format.'
       );
     }
 
@@ -182,9 +188,11 @@ export class VersionControl {
     console.log(`Checking for updates to ${remoteBranchName}...`);
     const fetchResult: boolean = VersionControl._tryFetchRemoteBranch(remoteBranchName);
     if (!fetchResult) {
-      console.log(colors.yellow(
-        `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
-      ));
+      console.log(
+        colors.yellow(
+          `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
+        )
+      );
     }
   }
 }

@@ -12,11 +12,10 @@ import { DeserializerContext } from './DeserializerContext';
  * Constructor options for {@link ApiVariable}.
  * @public
  */
-export interface IApiVariableOptions extends
-  IApiNameMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-
+export interface IApiVariableOptions
+  extends IApiNameMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions {
   variableTypeTokenRange: IExcerptTokenRange;
 }
 
@@ -51,9 +50,11 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
   public readonly variableTypeExcerpt: Excerpt;
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiVariableOptions>, context: DeserializerContext,
-    jsonObject: IApiVariableJson): void {
-
+  public static onDeserializeInto(
+    options: Partial<IApiVariableOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiVariableJson
+  ): void {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.variableTypeTokenRange = jsonObject.variableTypeTokenRange;

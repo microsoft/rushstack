@@ -91,9 +91,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @returns a z-schema schema definition
    */
   public get schema(): Object | undefined {
-    return this._schema ?
-      this._schema :
-      this._schema = this.loadSchema();
+    return this._schema ? this._schema : (this._schema = this.loadSchema());
   }
 
   /**
@@ -210,7 +208,13 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
    * @param warningCode - the custom warning code representing this warning
    * @param message - a description of the warning
    */
-  public fileWarning(filePath: string, line: number, column: number, warningCode: string, message: string): void {
+  public fileWarning(
+    filePath: string,
+    line: number,
+    column: number,
+    warningCode: string,
+    message: string
+  ): void {
     fileWarning(this.name, filePath, line, column, warningCode, message);
   }
 
@@ -268,43 +272,48 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
         } else if (stream.pipe) {
           // wait for stream to end
 
-          eos(stream, {
-            error: true,
-            readable: stream.readable,
-            writable: stream.writable && !stream.readable
-          }, (err: Object) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve();
+          eos(
+            stream,
+            {
+              error: true,
+              readable: stream.readable,
+              writable: stream.writable && !stream.readable
+            },
+            (err: Object) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve();
+              }
             }
-          });
+          );
 
           // Make sure the stream is completely read
-          stream.pipe(through2.obj(
-            (file: Vinyl,
-              encoding: string,
-              callback: (p?: Object) => void) => {
+          stream.pipe(
+            through2.obj(
+              (file: Vinyl, encoding: string, callback: (p?: Object) => void) => {
                 callback();
-            },
-            (callback: () => void) => {
-              callback();
-            }));
-
+              },
+              (callback: () => void) => {
+                callback();
+              }
+            )
+          );
         } else if (this.executeTask.length === 1) {
           resolve(stream);
         }
       } else if (this.executeTask.length === 1) {
         resolve(stream);
       }
-    })
-      .then(() => {
+    }).then(
+      () => {
         logEndSubtask(this.name, startTime);
       },
-      (ex) => {
+      ex => {
         logEndSubtask(this.name, startTime, ex);
         throw ex;
-      });
+      }
+    );
   }
 
   /**
@@ -331,7 +340,9 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
 
     try {
       doesExist = FileSystem.getStatistics(fullPath).isFile();
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
 
     return doesExist;
   }
@@ -345,7 +356,8 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     const fullSourcePath: string = path.resolve(__dirname, localSourcePath);
     const fullDestPath: string = path.resolve(
       this.buildConfig.rootPath,
-      (localDestPath || path.basename(localSourcePath)));
+      localDestPath || path.basename(localSourcePath)
+    );
 
     FileSystem.copyFile({
       sourcePath: fullSourcePath,
@@ -364,7 +376,9 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     try {
       const content: string = FileSystem.readFile(fullPath);
       result = JSON.parse(content);
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
 
     return result;
   }
@@ -395,7 +409,8 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     if (!FileSystem.exists(filePath)) {
       return undefined;
     } else {
-      if (args['verbose']) { // tslint:disable-line:no-string-literal
+      if (args['verbose']) {
+        // tslint:disable-line:no-string-literal
         console.log(`Found config file: ${path.basename(filePath)}`);
       }
 

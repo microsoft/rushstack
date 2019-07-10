@@ -4,8 +4,7 @@
 /** @public */
 export namespace A {
   export class B {
-    public myMethod(): void {
-    }
+    public myMethod(): void {}
   }
 }
 
@@ -17,16 +16,14 @@ export interface A {
  * {@link MyNamespace.MyClass.myMethod | the method}
  * @public
  */
-export function failWithAmbiguity() {
-}
+export function failWithAmbiguity() {}
 
 /**
  * {@link (A:namespace).B.myMethod | the method}
  * {@link (A:interface).myProperty | the property}
  * @public
  */
-export function succeedWithSelector() {
-}
+export function succeedWithSelector() {}
 
 /**
  * NOTE: The broken link checker currently is not able to validate references to external packages.
@@ -34,5 +31,4 @@ export function succeedWithSelector() {
  * {@link nonexistent#nonexistent}
  * @public
  */
-export function succeedWithExternalReference(): void {
-}
+export function succeedWithExternalReference(): void {}

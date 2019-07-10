@@ -40,12 +40,12 @@ export class EventHooks {
    */
   public constructor(eventHooksJson: IEventHooksJson) {
     this._hooks = new Map<Event, string[]>();
-    Object.getOwnPropertyNames(eventHooksJson).forEach((name) => {
+    Object.getOwnPropertyNames(eventHooksJson).forEach(name => {
       const eventName: Event = Event[name];
       if (eventName) {
         const foundHooks: string[] = [];
         if (eventHooksJson[name]) {
-          eventHooksJson[name].forEach((hook) => {
+          eventHooksJson[name].forEach(hook => {
             foundHooks.push(hook);
           });
         }

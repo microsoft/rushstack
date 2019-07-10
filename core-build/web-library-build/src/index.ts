@@ -39,10 +39,7 @@ preCopy.name = 'pre-copy';
 export const postCopy: CopyTask = new CopyTask();
 postCopy.name = 'post-copy';
 
-const sourceMatch: string[] = [
-  'src/**/*.{ts,tsx,scss,js,txt,html}',
-  '!src/**/*.scss.ts'
-];
+const sourceMatch: string[] = ['src/**/*.{ts,tsx,scss,js,txt,html}', '!src/**/*.scss.ts'];
 
 // tslint:disable-next-line:no-string-literal
 const PRODUCTION: boolean = !!getConfig().args['production'] || !!getConfig().args['ship'];
@@ -95,13 +92,11 @@ task('generate', generateShrinkwrapTask);
 task('test-watch', watch(sourceMatch, testTasks));
 
 // For watch scenarios like serve, make sure to exclude generated files from src (like *.scss.ts.)
-task('serve',
+task(
+  'serve',
   serial(
     serve,
-    watch(
-      sourceMatch,
-      serial(preCopy, sass, tscCmd, postCopy, webpack, postProcessSourceMapsTask, reload)
-    )
+    watch(sourceMatch, serial(preCopy, sass, tscCmd, postCopy, webpack, postProcessSourceMapsTask, reload))
   )
 );
 

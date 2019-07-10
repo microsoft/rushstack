@@ -78,7 +78,8 @@ export class EnvironmentConfiguration {
       if (process.env.hasOwnProperty(envVarName) && envVarName.match(/^RUSH_/i)) {
         const value: string | undefined = process.env[envVarName];
         // Environment variables are only case-insensitive on Windows
-        const normalizedEnvVarName: string = os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
+        const normalizedEnvVarName: string =
+          os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
         switch (normalizedEnvVarName) {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
             EnvironmentConfiguration._rushTempFolderOverride = value;
@@ -105,7 +106,7 @@ export class EnvironmentConfiguration {
     if (unknownEnvVariables.length > 0) {
       throw new Error(
         'The following environment variables were found with the "RUSH_" prefix, but they are not ' +
-        `recognized by this version of Rush: ${unknownEnvVariables.join(', ')}`
+          `recognized by this version of Rush: ${unknownEnvVariables.join(', ')}`
       );
     }
 

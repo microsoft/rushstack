@@ -39,10 +39,12 @@ export class Sort {
     }
 
     // Null is smaller than anything except undefined
-    if (x === null) { // tslint:disable-line:no-null-keyword
+    if (x === null) {
+      // tslint:disable-line:no-null-keyword
       return -1;
     }
-    if (y === null) { // tslint:disable-line:no-null-keyword
+    if (y === null) {
+      // tslint:disable-line:no-null-keyword
       return 1;
     }
 
@@ -69,8 +71,11 @@ export class Sort {
    * ```
    */
   // tslint:disable-next-line:no-any
-  public static sortBy<T>(array: T[], keySelector: (element: T) => any, comparer: (x: any, y: any) => number
-    = Sort.compareByValue): void {
+  public static sortBy<T>(
+    array: T[],
+    keySelector: (element: T) => any,
+    comparer: (x: any, y: any) => number = Sort.compareByValue
+  ): void {
     array.sort((x, y) => comparer(keySelector(x), keySelector(y)));
   }
 
@@ -100,9 +105,11 @@ export class Sort {
    * ```
    */
   // tslint:disable-next-line:no-any
-  public static isSortedBy<T>(array: T[], keySelector: (element: T) => any, comparer: (x: any, y: any) => number
-    = Sort.compareByValue): boolean {
-
+  public static isSortedBy<T>(
+    array: T[],
+    keySelector: (element: T) => any,
+    comparer: (x: any, y: any) => number = Sort.compareByValue
+  ): boolean {
     let previousKey: T | undefined = undefined;
     for (const element of array) {
       const key: T = keySelector(element);
@@ -129,7 +136,10 @@ export class Sort {
    * ```
    */
   // tslint:disable-next-line:no-any
-  public static sortMapKeys<K, V>(map: Map<K, V>, keyComparer: (x: K, y: K) => number = Sort.compareByValue): void {
+  public static sortMapKeys<K, V>(
+    map: Map<K, V>,
+    keyComparer: (x: K, y: K) => number = Sort.compareByValue
+  ): void {
     const pairs: [K, V][] = Array.from(map.entries());
 
     // Sorting a map is expensive, so first check whether it's already sorted.
@@ -159,9 +169,11 @@ export class Sort {
    * ```
    */
   // tslint:disable-next-line:no-any
-  public static sortSetBy<T>(set: Set<T>, keySelector: (element: T) => any,
-    keyComparer: (x: T, y: T) => number = Sort.compareByValue): void {
-
+  public static sortSetBy<T>(
+    set: Set<T>,
+    keySelector: (element: T) => any,
+    keyComparer: (x: T, y: T) => number = Sort.compareByValue
+  ): void {
     const array: T[] = Array.from(set);
 
     // Sorting a set is expensive, so first check whether it's already sorted.

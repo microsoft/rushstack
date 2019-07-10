@@ -12,9 +12,14 @@ import { PosixModeBits } from './PosixModeBits';
  * Typings for one of the streams inside IExecutableSpawnSyncOptions.stdio.
  * @public
  */
-export type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit'
-  | NodeJS.WritableStream | NodeJS.ReadableStream
-  | number | undefined;
+export type ExecutableStdioStreamMapping =
+  | 'pipe'
+  | 'ignore'
+  | 'inherit'
+  | NodeJS.WritableStream
+  | NodeJS.ReadableStream
+  | number
+  | undefined;
 
 /**
  * Typings for IExecutableSpawnSyncOptions.stdio.
@@ -139,11 +144,13 @@ export class Executable {
    * wants binary output or a non-default text encoding, we will introduce a separate API function
    * with a name like "spawnWithBufferSync".
    */
-  public static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions):
-    child_process.SpawnSyncReturns<string> {
-
+  public static spawnSync(
+    filename: string,
+    args: string[],
+    options?: IExecutableSpawnSyncOptions
+  ): child_process.SpawnSyncReturns<string> {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     const context: IExecutableContext = Executable._getExecutableContext(options);
@@ -185,8 +192,7 @@ export class Executable {
     // http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/
     // http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
 
-    const environment: NodeJS.ProcessEnv = options && options.environment
-      || process.env;
+    const environment: NodeJS.ProcessEnv = (options && options.environment) || process.env;
     const fileExtension: string = path.extname(resolvedPath);
 
     if (os.platform() === 'win32') {
@@ -206,8 +212,10 @@ export class Executable {
             shellPath = Executable.tryResolve('cmd.exe');
           }
           if (!shellPath) {
-            throw new Error(`Unable to execute "${path.basename(resolvedPath)}" `
-              + `because CMD.exe was not found in the PATH`);
+            throw new Error(
+              `Unable to execute "${path.basename(resolvedPath)}" ` +
+                `because CMD.exe was not found in the PATH`
+            );
           }
 
           const shellArgs: string[] = [];
@@ -226,7 +234,9 @@ export class Executable {
           return child_process.spawnSync(shellPath, shellArgs, spawnOptions);
         }
         default:
-          throw new Error(`Cannot execute "${path.basename(resolvedPath)}" because the file type is not supported`);
+          throw new Error(
+            `Cannot execute "${path.basename(resolvedPath)}" because the file type is not supported`
+          );
       }
     }
 
@@ -250,16 +260,18 @@ export class Executable {
    * @returns the absolute path of the executable, or undefined if it was not found
    */
   public static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined {
-    return Executable._tryResolve(filename, options || { }, Executable._getExecutableContext(options));
+    return Executable._tryResolve(filename, options || {}, Executable._getExecutableContext(options));
   }
 
-  private static _tryResolve(filename: string, options: IExecutableResolveOptions,
-    context: IExecutableContext): string | undefined {
-
+  private static _tryResolve(
+    filename: string,
+    options: IExecutableResolveOptions,
+    context: IExecutableContext
+  ): string | undefined {
     // NOTE: Since "filename" cannot contain command-line arguments, the "/" here
     // must be interpreted as a path delimiter
-    const hasPathSeparators: boolean = filename.indexOf('/') >= 0
-      || (os.platform() === 'win32' && filename.indexOf('\\') >= 0);
+    const hasPathSeparators: boolean =
+      filename.indexOf('/') >= 0 || (os.platform() === 'win32' && filename.indexOf('\\') >= 0);
 
     // Are there any path separators?
     if (hasPathSeparators) {
@@ -283,7 +295,10 @@ export class Executable {
     }
   }
 
-  private static _tryResolveFileExtension(resolvedPath: string, context: IExecutableContext): string | undefined {
+  private static _tryResolveFileExtension(
+    resolvedPath: string,
+    context: IExecutableContext
+  ): string | undefined {
     if (Executable._canExecute(resolvedPath, context)) {
       return resolvedPath;
     }
@@ -321,7 +336,6 @@ export class Executable {
       if (path.extname(filePath) === '') {
         return false;
       }
-
     } else {
       // For Unix, check whether any of the POSIX execute bits are set
       try {
@@ -343,7 +357,6 @@ export class Executable {
    * based on the PATH environment variable.
    */
   private static _getSearchFolders(context: IExecutableContext): string[] {
-
     const pathList: string = context.environment.PATH || '';
 
     const folders: string[] = [];
@@ -383,7 +396,7 @@ export class Executable {
 
   private static _getExecutableContext(options: IExecutableResolveOptions | undefined): IExecutableContext {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     const environment: NodeJS.ProcessEnv = options.environment || process.env;
@@ -424,7 +437,7 @@ export class Executable {
    */
   private static _getEscapedForWindowsShell(text: string): string {
     const escapableCharRegExp: RegExp = /[%\^&|<> ]/g;
-    return text.replace(escapableCharRegExp, (value) => '^' + value);
+    return text.replace(escapableCharRegExp, value => '^' + value);
   }
 
   /**
@@ -448,8 +461,10 @@ export class Executable {
         // We could work around that by adding double carets, but in general there
         // is no way to predict how many times the variable will get expanded.
         // Thus, there is no generally reliable way to pass these characters.
-        throw new Error(`The command line argument ${JSON.stringify(arg)} contains a`
-          + ` special character ${JSON.stringify(match[0])} that cannot be escaped for the Windows shell`);
+        throw new Error(
+          `The command line argument ${JSON.stringify(arg)} contains a` +
+            ` special character ${JSON.stringify(match[0])} that cannot be escaped for the Windows shell`
+        );
       }
     }
   }

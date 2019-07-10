@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 import * as path from 'path';
-import { GulpTask} from './GulpTask';
+import { GulpTask } from './GulpTask';
 import { IBuildConfig } from '../IBuildConfig';
 import * as Gulp from 'gulp';
 import * as Jest from 'jest-cli';
@@ -86,10 +86,8 @@ export function _isJestEnabled(rootFolder: string): boolean {
  * @alpha
  */
 export class JestTask extends GulpTask<IJestConfig> {
-
   constructor() {
-    super('jest',
-    {
+    super('jest', {
       cache: true,
       collectCoverageFrom: ['lib/**/*.js?(x)', '!lib/**/test/**'],
       coverage: true,
@@ -112,12 +110,13 @@ export class JestTask extends GulpTask<IJestConfig> {
     return require('./jest.schema.json');
   }
 
-  public executeTask(
-    gulp: typeof Gulp,
-    completeCallback: (error?: string | Error) => void
-  ): void {
-    const configFileFullPath: string = path.join(this.buildConfig.rootPath,
-      'config', 'jest', DEFAULT_JEST_CONFIG_FILE_NAME);
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void {
+    const configFileFullPath: string = path.join(
+      this.buildConfig.rootPath,
+      'config',
+      'jest',
+      DEFAULT_JEST_CONFIG_FILE_NAME
+    );
 
     this._copySnapshots(this.buildConfig.srcFolder, this.buildConfig.libFolder);
 
@@ -130,15 +129,13 @@ export class JestTask extends GulpTask<IJestConfig> {
       coverage: this.taskConfig.coverage,
       coverageReporters: this.taskConfig.coverageReporters,
       coverageDirectory: path.join(this.buildConfig.tempFolder, 'coverage'),
-      maxWorkers: !!this.taskConfig.maxWorkers ?
-        this.taskConfig.maxWorkers : 1,
-      moduleDirectories: !!this.taskConfig.moduleDirectories ?
-        this.taskConfig.moduleDirectories :
-        ['node_modules', this.buildConfig.libFolder],
+      maxWorkers: !!this.taskConfig.maxWorkers ? this.taskConfig.maxWorkers : 1,
+      moduleDirectories: !!this.taskConfig.moduleDirectories
+        ? this.taskConfig.moduleDirectories
+        : ['node_modules', this.buildConfig.libFolder],
       reporters: [path.join(__dirname, 'JestReporter.js')],
       rootDir: this.buildConfig.rootPath,
-      testMatch: !!this.taskConfig.testMatch ?
-        this.taskConfig.testMatch : ['**/*.test.js?(x)'],
+      testMatch: !!this.taskConfig.testMatch ? this.taskConfig.testMatch : ['**/*.test.js?(x)'],
       testPathIgnorePatterns: this.taskConfig.testPathIgnorePatterns,
       modulePathIgnorePatterns: this.taskConfig.modulePathIgnorePatterns,
       updateSnapshot: !this.buildConfig.production,
@@ -154,9 +151,8 @@ export class JestTask extends GulpTask<IJestConfig> {
     const oldTTY: true | undefined = process.stdout.isTTY;
     process.stdout.isTTY = undefined;
 
-    Jest.runCLI(jestConfig,
-      [this.buildConfig.rootPath]).then(
-      (result: { results: Jest.AggregatedResult, globalConfig: Jest.GlobalConfig }) => {
+    Jest.runCLI(jestConfig, [this.buildConfig.rootPath]).then(
+      (result: { results: Jest.AggregatedResult; globalConfig: Jest.GlobalConfig }) => {
         process.stdout.isTTY = oldTTY;
         if (result.results.numFailedTests || result.results.numFailedTestSuites) {
           completeCallback(new Error('Jest tests failed'));
@@ -167,10 +163,11 @@ export class JestTask extends GulpTask<IJestConfig> {
           completeCallback();
         }
       },
-      (err) => {
+      err => {
         process.stdout.isTTY = oldTTY;
         completeCallback(err);
-      });
+      }
+    );
   }
 
   private _copySnapshots(srcRoot: string, destRoot: string): void {
@@ -186,7 +183,9 @@ export class JestTask extends GulpTask<IJestConfig> {
       } else if (this._copyIfMatchExtension(snapFile, destination, '.test.js.snap')) {
         this.logVerbose(`Snapshot file ${snapFile} is copied to match extension ".test.js.snap".`);
       } else {
-        this.logWarning(`Snapshot file ${snapFile} is not copied because don't find that matching test file.`);
+        this.logWarning(
+          `Snapshot file ${snapFile} is not copied because don't find that matching test file.`
+        );
       }
     });
   }

@@ -4,9 +4,7 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
-import {
-  INodePackageJson
-} from '@microsoft/node-core-library';
+import { INodePackageJson } from '@microsoft/node-core-library';
 
 /**
  * Constructor options for WorkingPackage

@@ -54,7 +54,7 @@ let duringFastExit: boolean = false;
 const globalInstance: any = global as any;
 /* tslint:enable:no-any */
 
-const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance.__loggingCache || {
+const localCache: ILocalCache = (globalInstance.__loggingCache = globalInstance.__loggingCache || {
   warnings: [],
   errors: [],
   testsRun: 0,
@@ -81,7 +81,7 @@ const localCache: ILocalCache = globalInstance.__loggingCache = globalInstance._
   gulpStopCallback: undefined,
   shouldLogErrorsDuringSummary: false,
   shouldLogWarningsDuringSummary: false
-};
+});
 
 if (!localCache.start) {
   localCache.start = process.hrtime();
@@ -93,7 +93,7 @@ function isVerbose(): boolean {
 
 /* tslint:disable:no-any */
 function formatError(e: any): string | undefined {
-/* tslint:enable:no-any */
+  /* tslint:enable:no-any */
 
   if (!e.err) {
     if (isVerbose()) {
@@ -118,7 +118,7 @@ function formatError(e: any): string | undefined {
   }
 
   // unknown (string, number, etc.)
-  if (typeof (Error) === 'undefined') {
+  if (typeof Error === 'undefined') {
     if (isVerbose()) {
       return e.message + '\r\n' + e.stack;
     } else {
@@ -135,7 +135,7 @@ function formatError(e: any): string | undefined {
 
     if (isVerbose()) {
       return new Error(output).stack;
-  } else {
+    } else {
       return new Error(output).message;
     }
   }
@@ -174,7 +174,6 @@ function afterStreamsFlushed(callback: () => void): void {
 }
 
 function writeSummary(callback: () => void): void {
-
   localCache.writeSummaryCallbacks.push(callback);
 
   if (!localCache.writingSummary) {
@@ -217,19 +216,28 @@ function writeSummary(callback: () => void): void {
         //     `Subtasks run: ${colors.yellow(localCache.subTasksRun + '')}`);
 
         if (localCache.testsRun > 0) {
-          log('Tests results -',
-            'Passed:', colors.green(localCache.testsPassed + ''),
-            'Failed:', colors.red(localCache.testsFailed + ''),
+          log(
+            'Tests results -',
+            'Passed:',
+            colors.green(localCache.testsPassed + ''),
+            'Failed:',
+            colors.red(localCache.testsFailed + ''),
             // 'Flaky:', colors.yellow(localCache.testsFlakyFailed + ''),
-            'Skipped:', colors.yellow(localCache.testsSkipped + ''));
+            'Skipped:',
+            colors.yellow(localCache.testsSkipped + '')
+          );
         }
 
         if (localCache.coverageResults > 0) {
           log(
             'Coverage results -',
-            'Passed:', colors.green(localCache.coveragePass + ''),
-            'Failed:', colors.red((localCache.coverageResults - localCache.coveragePass) + ''),
-            'Avg. Cov.:', colors.yellow(Math.floor(localCache.coverageTotal / localCache.coverageResults) + '%'));
+            'Passed:',
+            colors.green(localCache.coveragePass + ''),
+            'Failed:',
+            colors.red(localCache.coverageResults - localCache.coveragePass + ''),
+            'Avg. Cov.:',
+            colors.yellow(Math.floor(localCache.coverageTotal / localCache.coverageResults) + '%')
+          );
         }
 
         if (getWarnings().length) {
@@ -239,7 +247,7 @@ function writeSummary(callback: () => void): void {
         let totalErrors: number = 0;
 
         if (localCache.taskErrors > 0 || getErrors().length) {
-          totalErrors = (localCache.taskErrors + getErrors().length);
+          totalErrors = localCache.taskErrors + getErrors().length;
           log('Task errors:', colors.red(totalErrors + ''));
         }
 
@@ -262,7 +270,7 @@ function writeSummary(callback: () => void): void {
 
 /* tslint:disable:no-any */
 function _writeTaskError(e: any): void {
-/* tslint:enable:no-any */
+  /* tslint:enable:no-any */
   if (!e || !(e.err && e.err[WROTE_ERROR_KEY])) {
     writeError(e);
     localCache.taskErrors++;
@@ -286,7 +294,7 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
     if (shouldWarningsFailBuild) {
       const oldStdErr: Function = process.stderr.write;
       // tslint:disable-next-line:no-function-expression
-      process.stderr.write = function (text: string | Buffer): boolean {
+      process.stderr.write = function(text: string | Buffer): boolean {
         if (!!text.toString()) {
           wroteToStdErr = true;
           return oldStdErr.apply(process.stderr, arguments);
@@ -297,12 +305,15 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
 
     process.on('exit', (code: number) => {
       duringFastExit = true;
-      if (!global['dontWatchExit']) { // tslint:disable-line:no-string-literal
+      if (!global['dontWatchExit']) {
+        // tslint:disable-line:no-string-literal
         if (!localCache.wroteSummary) {
           localCache.wroteSummary = true;
           console.log('About to exit with code:', code);
-          console.error('Process terminated before summary could be written, possible error in async code not ' +
-                        'continuing!');
+          console.error(
+            'Process terminated before summary could be written, possible error in async code not ' +
+              'continuing!'
+          );
           console.log('Trying to exit with exit code 1');
           exitProcess(1);
         } else {
@@ -318,23 +329,22 @@ function wireUpProcessErrorHandling(shouldWarningsFailBuild: boolean): void {
       }
     });
 
-    process.on('uncaughtException',
-      (err: Error) => {
-        console.error(err);
+    process.on('uncaughtException', (err: Error) => {
+      console.error(err);
 
-        _writeTaskError(err);
-        writeSummary(() => {
-          exitProcess(1);
+      _writeTaskError(err);
+      writeSummary(() => {
+        exitProcess(1);
 
-          if (localCache.gulp) {
-            localCache.gulp.stop();
-          }
+        if (localCache.gulp) {
+          localCache.gulp.stop();
+        }
 
-          if (localCache.gulpErrorCallback) {
-            localCache.gulpErrorCallback(err);
-          }
-        });
+        if (localCache.gulpErrorCallback) {
+          localCache.gulpErrorCallback(err);
+        }
       });
+    });
   }
 }
 
@@ -363,10 +373,12 @@ export function logSummary(value: string): void {
 export function log(...args: Array<string>): void {
   const currentTime: Date = new Date();
   const timestamp: string = colors.gray(
-    [padTimePart(currentTime.getHours()),
-     padTimePart(currentTime.getMinutes()),
-     padTimePart(currentTime.getSeconds())]
-    .join(':'));
+    [
+      padTimePart(currentTime.getHours()),
+      padTimePart(currentTime.getMinutes()),
+      padTimePart(currentTime.getSeconds())
+    ].join(':')
+  );
   console.log(`[${timestamp}] ${args.join('')}`);
 }
 
@@ -486,7 +498,6 @@ const colorCodeRegex: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
  * @public
  */
 export function addSuppression(suppression: string | RegExp): void {
-
   if (typeof suppression === 'string') {
     suppression = normalizeMessage(suppression);
   }
@@ -551,7 +562,6 @@ export function fileLog(
   errorCode: string,
   message: string
 ): void {
-
   if (!filePath) {
     filePath = '<undefined path>';
   } else if (path.isAbsolute(filePath)) {
@@ -607,7 +617,6 @@ export function fileError(
  * @public
  */
 export function verbose(...args: Array<string>): void {
-
   if (getFlagValue('verbose')) {
     log.apply(undefined, args);
   }
@@ -620,7 +629,7 @@ export function generateGulpError(err: Object): Object {
   } else {
     /* tslint:disable:no-any */
     const output: any = {
-    /* tslint:enable:no-any */
+      /* tslint:enable:no-any */
       showStack: false,
       toString: (): string => {
         return '';
@@ -640,7 +649,7 @@ export function generateGulpError(err: Object): Object {
  * @public
  */
 export function writeError(e: any): void {
-/* tslint:enable:no-any */
+  /* tslint:enable:no-any */
   if (e) {
     if (!e[WROTE_ERROR_KEY]) {
       if (e.err) {
@@ -649,7 +658,7 @@ export function writeError(e: any): void {
           const time: string = prettyTime(e.hrDuration);
 
           error(
-            '\'' + colors.cyan(e.task) + '\'',
+            "'" + colors.cyan(e.task) + "'",
             colors.red(e.subTask ? 'sub task errored after' : 'errored after'),
             colors.magenta(time),
             '\r\n',
@@ -663,30 +672,18 @@ export function writeError(e: any): void {
           error(
             e.message,
             '\r\n',
-            e.plugin + ': \'' + colors.yellow(e.fileName) + '\':' + e.lineNumber,
+            e.plugin + ": '" + colors.yellow(e.fileName) + "':" + e.lineNumber,
             '\r\n',
             e.stack
           );
         } else {
-          error(
-            e.message,
-            '\r\n',
-            e.plugin + ': \'' + colors.yellow(e.fileName) + '\':' + e.lineNumber
-          );
+          error(e.message, '\r\n', e.plugin + ": '" + colors.yellow(e.fileName) + "':" + e.lineNumber);
         }
       } else {
         if (isVerbose()) {
-          error(
-            'Unknown',
-            '\r\n',
-            colors.red(e.message),
-            '\r\n',
-            e.stack);
+          error('Unknown', '\r\n', colors.red(e.message), '\r\n', e.stack);
         } else {
-          error(
-            'Unknown',
-            '\r\n',
-            colors.red(e.message));
+          error('Unknown', '\r\n', colors.red(e.message));
         }
       }
       markErrorAsWritten(e);
@@ -782,29 +779,31 @@ export function initialize(
 
   wireUpProcessErrorHandling(config.shouldWarningsFailBuild);
 
-  localCache.gulpErrorCallback = gulpErrorCallback || (() => {
+  localCache.gulpErrorCallback =
+    gulpErrorCallback ||
+    (() => {
+      // Do Nothing
+    });
 
-    // Do Nothing
-  });
-
-  localCache.gulpStopCallback = gulpStopCallback || (() => {
-
-    // Do Nothing
-  });
+  localCache.gulpStopCallback =
+    gulpStopCallback ||
+    (() => {
+      // Do Nothing
+    });
 
   gulp.on('start', (err: Object) => {
-
     log('Starting gulp');
   });
 
   gulp.on('stop', (err: Object) => {
-
     writeSummary(() => {
       // error if we have any errors
-      if (localCache.taskErrors > 0 ||
+      if (
+        localCache.taskErrors > 0 ||
         (getWarnings().length && config.shouldWarningsFailBuild) ||
         getErrors().length ||
-        localCache.testsFailed > 0) {
+        localCache.testsFailed > 0
+      ) {
         exitProcess(1);
       }
 
@@ -816,7 +815,6 @@ export function initialize(
   });
 
   gulp.on('err', (err: Object) => {
-
     _writeTaskError(err);
     writeSummary(() => {
       exitProcess(1);
@@ -828,10 +826,10 @@ export function initialize(
 
   /* tslint:disable:no-any */
   gulp.on('task_start', (e: any) => {
-  /* tslint:enable:no-any */
+    /* tslint:enable:no-any */
 
     if (localCache.fromRunGulp) {
-      log('Starting', '\'' + colors.cyan(e.task) + '\'...');
+      log('Starting', "'" + colors.cyan(e.task) + "'...");
     }
 
     localCache.taskRun++;
@@ -839,21 +837,18 @@ export function initialize(
 
   /* tslint:disable:no-any */
   gulp.on('task_stop', (e: any) => {
-  /* tslint:enable:no-any */
+    /* tslint:enable:no-any */
 
     const time: string = prettyTime(e.hrDuration);
 
     if (localCache.fromRunGulp) {
-      log(
-        'Finished', '\'' + colors.cyan(e.task) + '\'',
-        'after', colors.magenta(time)
-      );
+      log('Finished', "'" + colors.cyan(e.task) + "'", 'after', colors.magenta(time));
     }
   });
 
   /* tslint:disable:no-any */
   gulp.on('task_err', (err: any) => {
-  /* tslint:enable:no-any */
+    /* tslint:enable:no-any */
 
     _writeTaskError(err);
     writeSummary(() => {
@@ -863,11 +858,9 @@ export function initialize(
 
   /* tslint:disable:no-any */
   gulp.on('task_not_found', (err: any) => {
-  /* tslint:enable:no-any */
+    /* tslint:enable:no-any */
 
-    log(
-      colors.red('Task \'' + err.task + '\' is not in your gulpfile')
-    );
+    log(colors.red("Task '" + err.task + "' is not in your gulpfile"));
     log('Please check the documentation for proper gulpfile formatting');
     exitProcess(1);
   });

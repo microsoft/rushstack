@@ -18,16 +18,13 @@ export class CleanFlagTask extends CleanTask {
   }
 
   public isEnabled(buildConfig: IBuildConfig): boolean {
-  // tslint:disable-next-line:no-string-literal
-  const shouldRun: boolean = (!!buildConfig.args['clean'] || !!buildConfig.args['c'])
-    && this._hasRun === false;
-  return shouldRun;
-}
+    // tslint:disable-next-line:no-string-literal
+    const shouldRun: boolean =
+      (!!buildConfig.args['clean'] || !!buildConfig.args['c']) && this._hasRun === false;
+    return shouldRun;
+  }
 
-  public executeTask(
-    gulp: typeof Gulp,
-    completeCallback: (error?: string | Error) => void
-  ): void {
+  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string | Error) => void): void {
     super.executeTask(gulp, () => {
       this._hasRun = true;
       completeCallback();

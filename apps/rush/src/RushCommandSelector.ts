@@ -17,8 +17,9 @@ type CommandName = 'rush' | 'rushx' | undefined;
 export class RushCommandSelector {
   public static failIfNotInvokedAsRush(version: string): void {
     if (RushCommandSelector._getCommandName() === 'rushx') {
-      RushCommandSelector._failWithError(`This repository is using Rush version ${version}`
-        + ` which does not support the "rushx" command`);
+      RushCommandSelector._failWithError(
+        `This repository is using Rush version ${version}` + ` which does not support the "rushx" command`
+      );
     }
   }
 
@@ -33,8 +34,10 @@ export class RushCommandSelector {
 
     if (RushCommandSelector._getCommandName() === 'rushx') {
       if (!Rush.launchRushX) {
-        RushCommandSelector._failWithError(`This repository is using Rush version ${Rush.version}`
-          + ` which does not support the "rushx" command`);
+        RushCommandSelector._failWithError(
+          `This repository is using Rush version ${Rush.version}` +
+            ` which does not support the "rushx" command`
+        );
       }
       Rush.launchRushX(launcherVersion, isManaged);
     } else {

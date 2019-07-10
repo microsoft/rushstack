@@ -54,7 +54,8 @@ interface ICommonVersionsJson {
  */
 export class CommonVersionsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/common-versions.schema.json'));
+    path.join(__dirname, '../schemas/common-versions.schema.json')
+  );
 
   private _filePath: string;
   private _preferredVersions: ProtectableMap<string, string>;
@@ -84,8 +85,8 @@ export class CommonVersionsConfiguration {
     }
   }
 
-  private static _serializeTable<TValue>(map: Map<string, TValue>): { } {
-    const table: { } = { };
+  private static _serializeTable<TValue>(map: Map<string, TValue>): {} {
+    const table: {} = {};
 
     const keys: string[] = [...map.keys()];
     keys.sort();
@@ -174,23 +175,32 @@ export class CommonVersionsConfiguration {
   }
 
   private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
-    this._preferredVersions = new ProtectableMap<string, string>(
-      { onSet: this._onSetPreferredVersions.bind(this) });
+    this._preferredVersions = new ProtectableMap<string, string>({
+      onSet: this._onSetPreferredVersions.bind(this)
+    });
 
-    this._xstitchPreferredVersions = new ProtectableMap<string, string>(
-      { onSet: this._onSetPreferredVersions.bind(this) });
+    this._xstitchPreferredVersions = new ProtectableMap<string, string>({
+      onSet: this._onSetPreferredVersions.bind(this)
+    });
 
-    this._allowedAlternativeVersions = new ProtectableMap<string, string[]>(
-      { onSet: this._onSetAllowedAlternativeVersions.bind(this) });
+    this._allowedAlternativeVersions = new ProtectableMap<string, string[]>({
+      onSet: this._onSetAllowedAlternativeVersions.bind(this)
+    });
 
     if (commonVersionsJson) {
       try {
-        CommonVersionsConfiguration._deserializeTable(this.preferredVersions,
-          commonVersionsJson.preferredVersions);
-        CommonVersionsConfiguration._deserializeTable(this.xstitchPreferredVersions,
-          commonVersionsJson.xstitchPreferredVersions);
-        CommonVersionsConfiguration._deserializeTable(this.allowedAlternativeVersions,
-          commonVersionsJson.allowedAlternativeVersions);
+        CommonVersionsConfiguration._deserializeTable(
+          this.preferredVersions,
+          commonVersionsJson.preferredVersions
+        );
+        CommonVersionsConfiguration._deserializeTable(
+          this.xstitchPreferredVersions,
+          commonVersionsJson.xstitchPreferredVersions
+        );
+        CommonVersionsConfiguration._deserializeTable(
+          this.allowedAlternativeVersions,
+          commonVersionsJson.allowedAlternativeVersions
+        );
       } catch (e) {
         throw new Error(`Error loading "${path.basename(filePath)}": ${e.message}`);
       }
@@ -198,24 +208,36 @@ export class CommonVersionsConfiguration {
     this._filePath = filePath;
   }
 
-  private _onSetPreferredVersions(source: ProtectableMap<string, string>, key: string, value: string): string {
+  private _onSetPreferredVersions(
+    source: ProtectableMap<string, string>,
+    key: string,
+    value: string
+  ): string {
     PackageName.validate(key);
 
     if (source === this._preferredVersions) {
       if (this._xstitchPreferredVersions.has(key)) {
-        throw new Error(`The package "${key}" cannot be added to preferredVersions because it was already`
-          + ` added to xstitchPreferredVersions`);
+        throw new Error(
+          `The package "${key}" cannot be added to preferredVersions because it was already` +
+            ` added to xstitchPreferredVersions`
+        );
       }
     } else {
       if (this._preferredVersions.has(key)) {
-        throw new Error(`The package "${key}" cannot be added to xstitchPreferredVersions because it was already`
-          + ` added to preferredVersions`);
+        throw new Error(
+          `The package "${key}" cannot be added to xstitchPreferredVersions because it was already` +
+            ` added to preferredVersions`
+        );
       }
     }
     return value;
   }
 
-  private _onSetAllowedAlternativeVersions(source: ProtectableMap<string, string>, key: string, value: string): string {
+  private _onSetAllowedAlternativeVersions(
+    source: ProtectableMap<string, string>,
+    key: string,
+    value: string
+  ): string {
     PackageName.validate(key);
     return value;
   }
@@ -230,11 +252,15 @@ export class CommonVersionsConfiguration {
     }
 
     if (this._xstitchPreferredVersions.size) {
-      result.xstitchPreferredVersions = CommonVersionsConfiguration._serializeTable(this.xstitchPreferredVersions);
+      result.xstitchPreferredVersions = CommonVersionsConfiguration._serializeTable(
+        this.xstitchPreferredVersions
+      );
     }
 
     if (this._allowedAlternativeVersions.size) {
-      result.allowedAlternativeVersions = CommonVersionsConfiguration._serializeTable(this.allowedAlternativeVersions);
+      result.allowedAlternativeVersions = CommonVersionsConfiguration._serializeTable(
+        this.allowedAlternativeVersions
+      );
     }
 
     return result;

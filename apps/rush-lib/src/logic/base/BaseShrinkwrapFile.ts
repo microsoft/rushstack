@@ -62,9 +62,16 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public tryEnsureCompatibleDependency(dependencyName: string, versionRange: string, tempProjectName: string): boolean {
-    const dependencyVersion: string | undefined =
-      this.tryEnsureDependencyVersion(dependencyName, tempProjectName, versionRange);
+  public tryEnsureCompatibleDependency(
+    dependencyName: string,
+    versionRange: string,
+    tempProjectName: string
+  ): boolean {
+    const dependencyVersion: string | undefined = this.tryEnsureDependencyVersion(
+      dependencyName,
+      tempProjectName,
+      versionRange
+    );
     if (!dependencyVersion) {
       return false;
     }
@@ -78,12 +85,15 @@ export abstract class BaseShrinkwrapFile {
    */
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
-  protected abstract tryEnsureDependencyVersion(dependencyName: string,
-    tempProjectName: string, versionRange: string): string | undefined;
+  protected abstract tryEnsureDependencyVersion(
+    dependencyName: string,
+    tempProjectName: string,
+    versionRange: string
+  ): string | undefined;
   protected abstract getTopLevelDependencyVersion(dependencyName: string): string | undefined;
   protected abstract serialize(): string;
 
-  protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
+  protected _getTempProjectNames(dependencies: { [key: string]: {} }): ReadonlyArray<string> {
     const result: string[] = [];
     for (const key of Object.keys(dependencies)) {
       // If it starts with @rush-temp, then include it:
@@ -91,7 +101,7 @@ export abstract class BaseShrinkwrapFile {
         result.push(key);
       }
     }
-    result.sort();  // make the result deterministic
+    result.sort(); // make the result deterministic
     return result;
   }
 
@@ -100,7 +110,11 @@ export abstract class BaseShrinkwrapFile {
     return semver.satisfies(dependencyVersion, versionRange);
   }
 
-  private _checkDependencyVerson(dependencyName: string, versionRange: string, dependencyVersion: string): boolean {
+  private _checkDependencyVerson(
+    dependencyName: string,
+    versionRange: string,
+    dependencyVersion: string
+  ): boolean {
     const result: npmPackageArg.IResult = npmPackageArg.resolve(dependencyName, versionRange);
     switch (result.type) {
       case 'version':
@@ -110,7 +124,9 @@ export abstract class BaseShrinkwrapFile {
         // Only warn once for each spec
         if (!this._alreadyWarnedSpecs.has(result.rawSpec)) {
           this._alreadyWarnedSpecs.add(result.rawSpec);
-          console.log(colors.yellow(`WARNING: Not validating ${result.type}-based specifier: "${result.rawSpec}"`));
+          console.log(
+            colors.yellow(`WARNING: Not validating ${result.type}-based specifier: "${result.rawSpec}"`)
+          );
         }
         return true;
     }

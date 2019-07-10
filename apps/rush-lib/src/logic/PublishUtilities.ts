@@ -10,16 +10,9 @@ import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 
-import {
-  IPackageJson,
-  JsonFile,
-  FileConstants
-} from '@microsoft/node-core-library';
+import { IPackageJson, JsonFile, FileConstants } from '@microsoft/node-core-library';
 
-import {
-  IChangeInfo,
-  ChangeType
-} from '../api/ChangeManagement';
+import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Utilities, IEnvironment } from '../utilities/Utilities';
 import { execSync } from 'child_process';
@@ -45,7 +38,6 @@ export class PublishUtilities {
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
   ): IChangeInfoHash {
-
     const allChanges: IChangeInfoHash = {};
     console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
 
@@ -94,15 +86,21 @@ export class PublishUtilities {
         const deps: string[] = project.downstreamDependencyProjects;
 
         // Write the new version expected for the change.
-        const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(project,
-          prereleaseToken, projectsToExclude);
+        const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(
+          project,
+          prereleaseToken,
+          projectsToExclude
+        );
         if (skipVersionBump) {
           change.newVersion = pkg.version;
         } else {
           // For hotfix changes, do not re-write new version
-          change.newVersion = (change.changeType! >= ChangeType.patch) ?
-            semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!)) :
-            (change.changeType === ChangeType.hotfix ? change.newVersion : pkg.version);
+          change.newVersion =
+            change.changeType! >= ChangeType.patch
+              ? semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!))
+              : change.changeType === ChangeType.hotfix
+              ? change.newVersion
+              : pkg.version;
         }
 
         if (deps) {
@@ -126,10 +124,9 @@ export class PublishUtilities {
    * @returns Sorted array of change requests.
    */
   public static sortChangeRequests(allChanges: IChangeInfoHash): IChangeInfo[] {
-    return Object
-      .keys(allChanges)
+    return Object.keys(allChanges)
       .map(key => allChanges[key])
-      .sort((a, b) => a.order! < b.order! ? -1 : 1);
+      .sort((a, b) => (a.order! < b.order! ? -1 : 1));
   }
 
   /**
@@ -153,7 +150,8 @@ export class PublishUtilities {
         rushConfiguration,
         shouldCommit,
         prereleaseToken,
-        projectsToExclude);
+        projectsToExclude
+      );
       updatedPackages.set(updatedPackage.name, updatedPackage);
     });
 
@@ -190,7 +188,6 @@ export class PublishUtilities {
     workingDirectory: string = process.cwd(),
     environment?: IEnvironment
   ): void {
-
     let relativeDirectory: string = path.relative(process.cwd(), workingDirectory);
 
     if (relativeDirectory) {
@@ -202,17 +199,12 @@ export class PublishUtilities {
     );
 
     if (shouldExecute) {
-      Utilities.executeCommand(
-        command,
-        args,
-        workingDirectory,
-        environment,
-        false,
-        true);
+      Utilities.executeCommand(command, args, workingDirectory, environment, false, true);
     }
   }
 
-  public static getNewDependencyVersion(dependencies: { [key: string]: string; },
+  public static getNewDependencyVersion(
+    dependencies: { [key: string]: string },
     dependencyName: string,
     newProjectVersion: string
   ): string {
@@ -256,20 +248,25 @@ export class PublishUtilities {
     return `>=${newVersion} <${upperLimit}`;
   }
 
-  private static _shouldSkipVersionBump(project: RushConfigurationProject,
+  private static _shouldSkipVersionBump(
+    project: RushConfigurationProject,
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
   ): boolean {
     // Suffix does not bump up the version.
     // Excluded projects do not bump up version.
-    return prereleaseToken && prereleaseToken.isSuffix ||
-      projectsToExclude && projectsToExclude.has(project.packageName) ||
-      !project.shouldPublish;
+    return (
+      (prereleaseToken && prereleaseToken.isSuffix) ||
+      (projectsToExclude && projectsToExclude.has(project.packageName)) ||
+      !project.shouldPublish
+    );
   }
 
   private static _updateCommitDetails(filename: string, changes: IChangeInfo[] | undefined): void {
     try {
-      const fileLog: string = execSync('git log -n 1 ' + filename, { cwd: path.dirname(filename) }).toString();
+      const fileLog: string = execSync('git log -n 1 ' + filename, {
+        cwd: path.dirname(filename)
+      }).toString();
       const author: string = fileLog.match(/Author: (.*)/)![1];
       const commit: string = fileLog.match(/commit (.*)/)![1];
 
@@ -277,7 +274,9 @@ export class PublishUtilities {
         change.author = author;
         change.commit = commit;
       });
-    } catch (e) { /* no-op, best effort. */ }
+    } catch (e) {
+      /* no-op, best effort. */
+    }
   }
 
   private static _writePackageChanges(
@@ -289,24 +288,25 @@ export class PublishUtilities {
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
   ): IPackageJson {
-
     const project: RushConfigurationProject = allPackages.get(change.packageName)!;
     const pkg: IPackageJson = project.packageJson;
 
-    const shouldSkipVersionBump: boolean = !project.shouldPublish ||
-      !!projectsToExclude && projectsToExclude.has(change.packageName);
+    const shouldSkipVersionBump: boolean =
+      !project.shouldPublish || (!!projectsToExclude && projectsToExclude.has(change.packageName));
 
-    const newVersion: string = shouldSkipVersionBump ? pkg.version :
-      PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
+    const newVersion: string = shouldSkipVersionBump
+      ? pkg.version
+      : PublishUtilities._getChangeInfoNewVersion(change, prereleaseToken);
 
     if (!shouldSkipVersionBump) {
       console.log(
         `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: ${ChangeType[change.changeType!]} update ` +
-        `for ${change.packageName} to ${newVersion}`
+          `for ${change.packageName} to ${newVersion}`
       );
     } else {
       console.log(
-        `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: update ` + `for ${change.packageName} at ${newVersion}`
+        `${EOL}* ${shouldCommit ? 'APPLYING' : 'DRYRUN'}: update ` +
+          `for ${change.packageName} at ${newVersion}`
       );
     }
 
@@ -368,14 +368,13 @@ export class PublishUtilities {
 
   private static _updateDependencies(
     packageName: string,
-    dependencies: { [key: string]: string; } | undefined,
+    dependencies: { [key: string]: string } | undefined,
     allChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
   ): void {
-
     if (dependencies) {
       Object.keys(dependencies).forEach(depName => {
         if (!PublishUtilities._isCyclicDependency(allPackages, packageName, depName)) {
@@ -385,7 +384,7 @@ export class PublishUtilities {
           }
           const depProject: RushConfigurationProject = allPackages.get(depName)!;
 
-          if (!depProject.shouldPublish || projectsToExclude && projectsToExclude.has(depName)) {
+          if (!depProject.shouldPublish || (projectsToExclude && projectsToExclude.has(depName))) {
             // No version change.
             return;
           } else if (
@@ -461,8 +460,9 @@ export class PublishUtilities {
     const project: RushConfigurationProject | undefined = allPackages.get(packageName);
 
     if (!project) {
-      console.log(`The package ${packageName} was requested for publishing but ` +
-        `does not exist. Skip this change.`);
+      console.log(
+        `The package ${packageName} was requested for publishing but ` + `does not exist. Skip this change.`
+      );
       return false;
     }
 
@@ -488,19 +488,26 @@ export class PublishUtilities {
       const oldChangeType: ChangeType = currentChange.changeType!;
 
       if (oldChangeType === ChangeType.hotfix && change.changeType! > oldChangeType) {
-        throw new Error(`Cannot apply ${this._getReleaseType(change.changeType!)} change after hotfix on same package`);
+        throw new Error(
+          `Cannot apply ${this._getReleaseType(change.changeType!)} change after hotfix on same package`
+        );
       }
       if (change.changeType! === ChangeType.hotfix && oldChangeType > change.changeType!) {
-        throw new Error(`Cannot apply hotfix alongside ${this._getReleaseType(oldChangeType!)} change on same package`);
+        throw new Error(
+          `Cannot apply hotfix alongside ${this._getReleaseType(oldChangeType!)} change on same package`
+        );
       }
 
       currentChange.changeType = Math.max(currentChange.changeType!, change.changeType!);
       currentChange.changes!.push(change);
 
-      hasChanged = hasChanged || (oldChangeType !== currentChange.changeType);
+      hasChanged = hasChanged || oldChangeType !== currentChange.changeType;
     }
-    const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(project,
-      prereleaseToken, projectsToExclude);
+    const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(
+      project,
+      prereleaseToken,
+      projectsToExclude
+    );
 
     if (skipVersionBump) {
       currentChange.newVersion = pkg.version;
@@ -525,15 +532,17 @@ export class PublishUtilities {
         if (currentChange.newVersion && semver.gt(currentChange.newVersion, pkg.version)) {
           packageVersion = currentChange.newVersion;
         }
-        currentChange.newVersion = change.changeType! >= ChangeType.patch ?
-          semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType!)) :
-          packageVersion;
+        currentChange.newVersion =
+          change.changeType! >= ChangeType.patch
+            ? semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType!))
+            : packageVersion;
       }
 
       // If hotfix change, force new range dependency to be the exact new version
-      currentChange.newRangeDependency = change.changeType === ChangeType.hotfix ?
-        currentChange.newVersion :
-        PublishUtilities._getNewRangeDependency(currentChange.newVersion!);
+      currentChange.newRangeDependency =
+        change.changeType === ChangeType.hotfix
+          ? currentChange.newVersion
+          : PublishUtilities._getNewRangeDependency(currentChange.newVersion!);
     }
     return hasChanged;
   }
@@ -546,14 +555,12 @@ export class PublishUtilities {
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
   ): void {
-
     const packageName: string = change.packageName;
     const downstreamNames: string[] = allPackages.get(packageName)!.downstreamDependencyProjects;
 
     // Iterate through all downstream dependencies for the package.
     if (downstreamNames) {
-      if ((change.changeType! >= ChangeType.hotfix) ||
-        (prereleaseToken && prereleaseToken.hasValue)) {
+      if (change.changeType! >= ChangeType.hotfix || (prereleaseToken && prereleaseToken.hasValue)) {
         for (const depName of downstreamNames) {
           const pkg: IPackageJson = allPackages.get(depName)!.packageJson;
 
@@ -592,16 +599,17 @@ export class PublishUtilities {
     prereleaseToken: PrereleaseToken | undefined,
     projectsToExclude?: Set<string>
   ): void {
-
-    if (dependencies && dependencies[change.packageName] &&
-      !PublishUtilities._isCyclicDependency(allPackages, parentPackageName, change.packageName)) {
+    if (
+      dependencies &&
+      dependencies[change.packageName] &&
+      !PublishUtilities._isCyclicDependency(allPackages, parentPackageName, change.packageName)
+    ) {
       const requiredVersion: string = dependencies[change.packageName];
-      const alwaysUpdate: boolean = !!prereleaseToken && prereleaseToken.hasValue &&
-        !allChanges.hasOwnProperty(parentPackageName);
+      const alwaysUpdate: boolean =
+        !!prereleaseToken && prereleaseToken.hasValue && !allChanges.hasOwnProperty(parentPackageName);
 
       // If the version range exists and has not yet been updated to this version, update it.
       if (requiredVersion !== change.newRangeDependency || alwaysUpdate) {
-
         let changeType: ChangeType;
         // Propagate hotfix changes to dependencies
         if (change.changeType === ChangeType.hotfix) {
@@ -609,15 +617,22 @@ export class PublishUtilities {
         } else {
           // Either it already satisfies the new version, or doesn't.
           // If not, the downstream dep needs to be republished.
-          changeType = semver.satisfies(change.newVersion!, requiredVersion) ?
-            ChangeType.dependency :
-            ChangeType.patch;
+          changeType = semver.satisfies(change.newVersion!, requiredVersion)
+            ? ChangeType.dependency
+            : ChangeType.patch;
         }
 
-        const hasChanged: boolean = PublishUtilities._addChange({
-          packageName: parentPackageName,
-          changeType
-        }, allChanges, allPackages, rushConfiguration, prereleaseToken, projectsToExclude);
+        const hasChanged: boolean = PublishUtilities._addChange(
+          {
+            packageName: parentPackageName,
+            changeType
+          },
+          allChanges,
+          allPackages,
+          rushConfiguration,
+          prereleaseToken,
+          projectsToExclude
+        );
 
         if (hasChanged || alwaysUpdate) {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
@@ -637,7 +652,7 @@ export class PublishUtilities {
 
   private static _updateDependencyVersion(
     packageName: string,
-    dependencies: { [key: string]: string; },
+    dependencies: { [key: string]: string },
     dependencyName: string,
     dependencyChange: IChangeInfo,
     allChanges: IChangeInfoHash,

@@ -58,7 +58,8 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { PackageManagerName } from '../api/packageManager/PackageManager';
 import { PnpmPackageManager } from '../api/packageManager/PnpmPackageManager';
 
-export interface CreateOptions { // tslint:disable-line:interface-name
+export interface CreateOptions {
+  // tslint:disable-line:interface-name
   /**
    * "Set to true to omit writing mtime values for entries. Note that this prevents using other
    * mtime-based features like tar.update or the keepNewer option with the resulting tar archive."
@@ -135,7 +136,7 @@ export class InstallManager {
   public static collectImplicitlyPreferredVersions(
     rushConfiguration: RushConfiguration,
     options: {
-      variant?: string | undefined
+      variant?: string | undefined;
     } = {}
   ): Map<string, string> {
     // First, collect all the direct dependencies of all local projects, and their versions:
@@ -143,23 +144,19 @@ export class InstallManager {
     const versionsForDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
 
     rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
-      InstallManager._collectVersionsForDependencies(
-        rushConfiguration,
-        {
-          versionsForDependencies,
-          dependencies: project.packageJsonEditor.dependencyList,
-          cyclicDependencies: project.cyclicDependencyProjects,
-          variant: options.variant
-        });
+      InstallManager._collectVersionsForDependencies(rushConfiguration, {
+        versionsForDependencies,
+        dependencies: project.packageJsonEditor.dependencyList,
+        cyclicDependencies: project.cyclicDependencyProjects,
+        variant: options.variant
+      });
 
-      InstallManager._collectVersionsForDependencies(
-        rushConfiguration,
-        {
-          versionsForDependencies,
-          dependencies: project.packageJsonEditor.devDependencyList,
-          cyclicDependencies: project.cyclicDependencyProjects,
-          variant: options.variant
-        });
+      InstallManager._collectVersionsForDependencies(rushConfiguration, {
+        versionsForDependencies,
+        dependencies: project.packageJsonEditor.devDependencyList,
+        cyclicDependencies: project.cyclicDependencyProjects,
+        variant: options.variant
+      });
     });
 
     // If any dependency has more than one version, then filter it out (since we don't know which version
@@ -176,8 +173,11 @@ export class InstallManager {
   }
 
   // Helper for collectImplicitlyPreferredVersions()
-  private static _updateVersionsForDependencies(versionsForDependencies: Map<string, Set<string>>,
-    dependency: string, version: string): void {
+  private static _updateVersionsForDependencies(
+    versionsForDependencies: Map<string, Set<string>>,
+    dependency: string,
+    version: string
+  ): void {
     if (!versionsForDependencies.has(dependency)) {
       versionsForDependencies.set(dependency, new Set<string>());
     }
@@ -192,22 +192,18 @@ export class InstallManager {
       dependencies: ReadonlyArray<PackageJsonDependency>;
       cyclicDependencies: Set<string>;
       variant: string | undefined;
-    }): void {
-    const {
-      variant,
-      dependencies,
-      versionsForDependencies,
-      cyclicDependencies
-    } = options;
+    }
+  ): void {
+    const { variant, dependencies, versionsForDependencies, cyclicDependencies } = options;
 
     const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(variant);
 
-    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>>
-      = commonVersions.allowedAlternativeVersions;
+    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
+      commonVersions.allowedAlternativeVersions;
 
     for (const dependency of dependencies) {
-      const alternativesForThisDependency: ReadonlyArray<string>
-        = allowedAlternativeVersions.get(dependency.name) || [];
+      const alternativesForThisDependency: ReadonlyArray<string> =
+        allowedAlternativeVersions.get(dependency.name) || [];
 
       // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
       // that appear across the repo.  If there is only one version specifier, then that's the "preferred" one.
@@ -221,21 +217,29 @@ export class InstallManager {
         ignoreVersion = true;
       } else {
         // Is it a local project?
-        const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(dependency.name);
+        const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(
+          dependency.name
+        );
         if (localProject) {
           // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
           //    never even see it.
           // However there are two ways that a local project can NOT be symlinked:
           // - if the local project doesn't satisfy the referenced semver specifier; OR
           // - if the local project was specified in "cyclicDependencyProjects" in rush.json
-          if (semver.satisfies(localProject.packageJsonEditor.version, dependency.version)
-            && !cyclicDependencies.has(dependency.name)) {
+          if (
+            semver.satisfies(localProject.packageJsonEditor.version, dependency.version) &&
+            !cyclicDependencies.has(dependency.name)
+          ) {
             ignoreVersion = true;
           }
         }
 
         if (!ignoreVersion) {
-          InstallManager._updateVersionsForDependencies(versionsForDependencies, dependency.name, dependency.version);
+          InstallManager._updateVersionsForDependencies(
+            versionsForDependencies,
+            dependency.name,
+            dependency.version
+          );
         }
       }
     }
@@ -291,90 +295,98 @@ export class InstallManager {
               sourcePath: path.join(hookSource, filename),
               destinationPath: path.join(hookDestination, filename)
             });
-            FileSystem.changePosixModeBits(path.join(hookDestination, filename),
-              PosixModeBits.UserRead | PosixModeBits.UserExecute);
+            FileSystem.changePosixModeBits(
+              path.join(hookDestination, filename),
+              PosixModeBits.UserRead | PosixModeBits.UserExecute
+            );
           }
 
-          console.log('Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL);
+          console.log(
+            'Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL
+          );
         }
       }
 
       // Ensure that the package manager is installed
-      return this.ensureLocalPackageManager()
-        .then(() => {
-          let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
+      return this.ensureLocalPackageManager().then(() => {
+        let shrinkwrapFile: BaseShrinkwrapFile | undefined = undefined;
 
-          // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
-          if (!options.fullUpgrade) {
-            try {
-              shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(this._rushConfiguration.packageManager,
-                this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
-            } catch (ex) {
-              console.log();
-              console.log(`Unable to load the ${this._shrinkwrapFilePhrase}: ${ex.message}`);
-
-              if (!options.allowShrinkwrapUpdates) {
-                console.log();
-                console.log(colors.red('You need to run "rush update" to fix this problem'));
-                throw new AlreadyReportedError();
-              }
-
-              shrinkwrapFile = undefined;
-            }
-          }
-
-          // Write a file indicating which variant is being installed.
-          // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
-          const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
-          const currentVariantJson: ICurrentVariantJson = {
-            variant: options.variant || null // tslint:disable-line:no-null-keyword
-          };
-
-          // Determine if the variant is already current by updating current-variant.json.
-          // If nothing is written, the variant has not changed.
-          const variantIsUpToDate: boolean = !JsonFile.save(currentVariantJson, currentVariantJsonFilename, {
-            onlyIfChanged: true
-          });
-
-          if (options.variant) {
+        // (If it's a full update, then we ignore the shrinkwrap from Git since it will be overwritten)
+        if (!options.fullUpgrade) {
+          try {
+            shrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+              this._rushConfiguration.packageManager,
+              this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant)
+            );
+          } catch (ex) {
             console.log();
-            console.log(colors.bold(`Using variant '${options.variant}' for installation.`));
-          } else if (!variantIsUpToDate && !options.variant) {
-            console.log();
-            console.log(colors.bold('Using the default variant for installation.'));
-          }
+            console.log(`Unable to load the ${this._shrinkwrapFilePhrase}: ${ex.message}`);
 
-          const shrinkwrapIsUpToDate: boolean =
-            this._createTempModulesAndCheckShrinkwrap({
-              shrinkwrapFile,
-              variant: options.variant
-            })
-            && !options.recheckShrinkwrap;
-
-          if (!shrinkwrapIsUpToDate) {
             if (!options.allowShrinkwrapUpdates) {
               console.log();
-              console.log(colors.red(`The ${this._shrinkwrapFilePhrase} is out of date.`
-                + `  You need to run "rush update".`));
+              console.log(colors.red('You need to run "rush update" to fix this problem'));
               throw new AlreadyReportedError();
             }
-          }
 
-          return this._installCommonModules({
-            shrinkwrapIsUpToDate,
-            variantIsUpToDate,
-            ...options
-          })
-            .then(() => {
-              if (!options.noLink) {
-                const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
-                return linkManager.createSymlinksForProjects(false);
-              } else {
-                console.log(os.EOL
-                  + colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.'));
-              }
-            });
+            shrinkwrapFile = undefined;
+          }
+        }
+
+        // Write a file indicating which variant is being installed.
+        // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
+        const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
+        const currentVariantJson: ICurrentVariantJson = {
+          variant: options.variant || null // tslint:disable-line:no-null-keyword
+        };
+
+        // Determine if the variant is already current by updating current-variant.json.
+        // If nothing is written, the variant has not changed.
+        const variantIsUpToDate: boolean = !JsonFile.save(currentVariantJson, currentVariantJsonFilename, {
+          onlyIfChanged: true
         });
+
+        if (options.variant) {
+          console.log();
+          console.log(colors.bold(`Using variant '${options.variant}' for installation.`));
+        } else if (!variantIsUpToDate && !options.variant) {
+          console.log();
+          console.log(colors.bold('Using the default variant for installation.'));
+        }
+
+        const shrinkwrapIsUpToDate: boolean =
+          this._createTempModulesAndCheckShrinkwrap({
+            shrinkwrapFile,
+            variant: options.variant
+          }) && !options.recheckShrinkwrap;
+
+        if (!shrinkwrapIsUpToDate) {
+          if (!options.allowShrinkwrapUpdates) {
+            console.log();
+            console.log(
+              colors.red(
+                `The ${this._shrinkwrapFilePhrase} is out of date.` + `  You need to run "rush update".`
+              )
+            );
+            throw new AlreadyReportedError();
+          }
+        }
+
+        return this._installCommonModules({
+          shrinkwrapIsUpToDate,
+          variantIsUpToDate,
+          ...options
+        }).then(() => {
+          if (!options.noLink) {
+            const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this._rushConfiguration);
+            return linkManager.createSymlinksForProjects(false);
+          } else {
+            console.log(
+              os.EOL +
+                colors.yellow('Since "--no-link" was specified, you will need to run "rush link" manually.')
+            );
+          }
+        });
+      });
     });
   }
 
@@ -427,7 +439,9 @@ export class InstallManager {
 
         console.log(`Successfully installed ${packageManager} version ${packageManagerVersion}`);
       } else {
-        console.log(`Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`);
+        console.log(
+          `Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`
+        );
       }
 
       packageManagerMarker.create();
@@ -436,8 +450,10 @@ export class InstallManager {
       FileSystem.ensureFolder(this._rushConfiguration.commonTempFolder);
 
       // Example: "C:\MyRepo\common\temp\pnpm-local"
-      const localPackageManagerToolFolder: string =
-        path.join(this._rushConfiguration.commonTempFolder, `${packageManager}-local`);
+      const localPackageManagerToolFolder: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        `${packageManager}-local`
+      );
 
       console.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
       console.log('  --> "' + packageManagerToolFolder + '"');
@@ -471,16 +487,15 @@ export class InstallManager {
     shrinkwrapFile: BaseShrinkwrapFile | undefined;
     variant: string | undefined;
   }): boolean {
-    const {
-      shrinkwrapFile,
-      variant
-    } = options;
+    const { shrinkwrapFile, variant } = options;
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
     // Example: "C:\MyRepo\common\temp\projects"
-    const tempProjectsFolder: string = path.join(this._rushConfiguration.commonTempFolder,
-      RushConstants.rushTempProjectsFolderName);
+    const tempProjectsFolder: string = path.join(
+      this._rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName
+    );
 
     console.log(os.EOL + colors.bold('Updating temp projects in ' + tempProjectsFolder));
 
@@ -497,15 +512,18 @@ export class InstallManager {
     }
 
     // dependency name --> version specifier
-    const allExplicitPreferredVersions: Map<string, string> = this._rushConfiguration.getCommonVersions(variant)
+    const allExplicitPreferredVersions: Map<string, string> = this._rushConfiguration
+      .getCommonVersions(variant)
       .getAllPreferredVersions();
 
     if (shrinkwrapFile) {
       // Check any (explicitly) preferred dependencies first
       allExplicitPreferredVersions.forEach((version: string, dependency: string) => {
         if (!shrinkwrapFile.hasCompatibleTopLevelDependency(dependency, version)) {
-          shrinkwrapWarnings.push(`"${dependency}" (${version}) required by the preferred versions from `
-            + RushConstants.commonVersionsFilename);
+          shrinkwrapWarnings.push(
+            `"${dependency}" (${version}) required by the preferred versions from ` +
+              RushConstants.commonVersionsFilename
+          );
           shrinkwrapIsUpToDate = false;
         }
       });
@@ -521,14 +539,18 @@ export class InstallManager {
     // Also copy down the committed .npmrc file, if there is one
     // "common\config\rush\.npmrc" --> "common\temp\.npmrc"
     // Also ensure that we remove any old one that may be hanging around
-    Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, this._rushConfiguration.commonTempFolder);
+    Utilities.syncNpmrc(
+      this._rushConfiguration.commonRushConfigFolder,
+      this._rushConfiguration.commonTempFolder
+    );
 
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {
-      const committedPnpmFilePath: string =
-        this._rushConfiguration.getPnpmfilePath(this._options.variant);
-      const tempPnpmFilePath: string
-        = path.join(this._rushConfiguration.commonTempFolder, RushConstants.pnpmfileFilename);
+      const committedPnpmFilePath: string = this._rushConfiguration.getPnpmfilePath(this._options.variant);
+      const tempPnpmFilePath: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.pnpmfileFilename
+      );
 
       // ensure that we remove any old one that may be hanging around
       this._syncFile(committedPnpmFilePath, tempPnpmFilePath);
@@ -547,10 +569,12 @@ export class InstallManager {
     // (e.g. every package that depends on react uses an identical specifier)
 
     // dependency name --> version specifier
-    const allPreferredVersions: Map<string, string> =
-      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration, {
+    const allPreferredVersions: Map<string, string> = InstallManager.collectImplicitlyPreferredVersions(
+      this._rushConfiguration,
+      {
         variant
-      });
+      }
+    );
 
     // Add in the explicitly preferred versions.
     // Note that these take precedence over implicitly preferred versions.
@@ -577,8 +601,9 @@ export class InstallManager {
       const unscopedTempProjectName: string = rushProject.unscopedTempProjectName;
 
       // Example: dependencies["@rush-temp/my-project-2"] = "file:./projects/my-project-2.tgz"
-      commonPackageJson.dependencies![rushProject.tempProjectName]
-        = `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`;
+      commonPackageJson.dependencies![
+        rushProject.tempProjectName
+      ] = `file:./${RushConstants.rushTempProjectsFolderName}/${rushProject.unscopedTempProjectName}.tgz`;
 
       const tempPackageJson: IRushTempPackageJson = {
         name: rushProject.tempProjectName,
@@ -593,7 +618,6 @@ export class InstallManager {
       // These can be regular, optional, or peer dependencies (but NOT dev dependencies).
       // (A given packageName will never appear more than once in this list.)
       for (const dependency of packageJson.dependencyList) {
-
         // If there are any optional dependencies, copy directly into the optionalDependencies field.
         if (dependency.dependencyType === DependencyType.Optional) {
           if (!tempPackageJson.optionalDependencies) {
@@ -618,17 +642,16 @@ export class InstallManager {
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
         // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
-        const localProject: RushConfigurationProject | undefined =
-          this._rushConfiguration.getProjectByName(packageName);
+        const localProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
+          packageName
+        );
 
         if (localProject) {
           // Don't locally link if it's listed in the cyclicDependencyProjects
           if (!rushProject.cyclicDependencyProjects.has(packageName)) {
-
             // Also, don't locally link if the SemVer doesn't match
             const localProjectVersion: string = localProject.packageJsonEditor.version;
             if (semver.satisfies(localProjectVersion, packageVersion)) {
-
               // We will locally link this package, so instead add it to our special "rushDependencies"
               // field in the package.json file.
               if (!tempPackageJson.rushDependencies) {
@@ -644,10 +667,16 @@ export class InstallManager {
         tempPackageJson.dependencies![packageName] = packageVersion;
 
         if (shrinkwrapFile) {
-          if (!shrinkwrapFile.tryEnsureCompatibleDependency(packageName, packageVersion,
-            rushProject.tempProjectName)) {
-            shrinkwrapWarnings.push(`"${packageName}" (${packageVersion}) required by`
-              + ` "${rushProject.packageName}"`);
+          if (
+            !shrinkwrapFile.tryEnsureCompatibleDependency(
+              packageName,
+              packageVersion,
+              rushProject.tempProjectName
+            )
+          ) {
+            shrinkwrapWarnings.push(
+              `"${packageName}" (${packageVersion}) required by` + ` "${rushProject.packageName}"`
+            );
             shrinkwrapIsUpToDate = false;
           }
         }
@@ -660,7 +689,8 @@ export class InstallManager {
       const tempProjectFolder: string = path.join(
         this._rushConfiguration.commonTempFolder,
         RushConstants.rushTempProjectsFolderName,
-        unscopedTempProjectName);
+        unscopedTempProjectName
+      );
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2\package.json"
       const tempPackageJsonFilename: string = path.join(tempProjectFolder, FileConstants.PackageJson);
@@ -670,7 +700,6 @@ export class InstallManager {
       try {
         // if the tarball and the temp file still exist, then compare the contents
         if (FileSystem.exists(tarballFile) && FileSystem.exists(tempPackageJsonFilename)) {
-
           // compare the extracted package.json with the one we are about to write
           const oldBuffer: Buffer = FileSystem.readFileToBuffer(tempPackageJsonFilename);
           const newBuffer: Buffer = Buffer.from(JsonFile.stringify(tempPackageJson));
@@ -698,16 +727,19 @@ export class InstallManager {
           JsonFile.save(tempPackageJson, tempPackageJsonFilename);
 
           // create the new tarball
-          tar.create({
-            gzip: true,
-            file: tarballFile,
-            cwd: tempProjectFolder,
-            portable: true,
-            noMtime: true,
-            noPax: true,
-            sync: true,
-            prefix: npmPackageFolder
-          } as CreateOptions, [FileConstants.PackageJson]);
+          tar.create(
+            {
+              gzip: true,
+              file: tarballFile,
+              cwd: tempProjectFolder,
+              portable: true,
+              noMtime: true,
+              noPax: true,
+              sync: true,
+              prefix: npmPackageFolder
+            } as CreateOptions,
+            [FileConstants.PackageJson]
+          );
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
@@ -719,8 +751,10 @@ export class InstallManager {
     }
 
     // Example: "C:\MyRepo\common\temp\package.json"
-    const commonPackageJsonFilename: string = path.join(this._rushConfiguration.commonTempFolder,
-      FileConstants.PackageJson);
+    const commonPackageJsonFilename: string = path.join(
+      this._rushConfiguration.commonTempFolder,
+      FileConstants.PackageJson
+    );
 
     if (shrinkwrapFile) {
       // If we have a (possibly incomplete) shrinkwrap file, save it as the temporary file.
@@ -731,7 +765,10 @@ export class InstallManager {
       FileSystem.deleteFile(this._rushConfiguration.tempShrinkwrapFilename);
 
       if (this._rushConfiguration.packageManager === 'pnpm') {
-        const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules');
+        const commonNodeModulesFolder: string = path.join(
+          this._rushConfiguration.commonTempFolder,
+          'node_modules'
+        );
 
         // Workaround for https://github.com/pnpm/pnpm/issues/1890
         //
@@ -742,8 +779,10 @@ export class InstallManager {
         // ensures that a new lockfile will be generated with "rush update --full".
 
         // Note that there is period in the file name: common/temp/node_modules/.pnpm-lock.yaml
-        const pnpmShrinkwrapInNodeModulesFolder: string = path.join(commonNodeModulesFolder, '.'
-          + this._rushConfiguration.shrinkwrapFilename);
+        const pnpmShrinkwrapInNodeModulesFolder: string = path.join(
+          commonNodeModulesFolder,
+          '.' + this._rushConfiguration.shrinkwrapFilename
+        );
         FileSystem.deleteFile(pnpmShrinkwrapInNodeModulesFolder);
       }
     }
@@ -757,8 +796,11 @@ export class InstallManager {
 
     if (shrinkwrapWarnings.length > 0) {
       console.log();
-      console.log(colors.yellow(Utilities.wrapWords(
-        `The ${this._shrinkwrapFilePhrase} is missing the following dependencies:`)));
+      console.log(
+        colors.yellow(
+          Utilities.wrapWords(`The ${this._shrinkwrapFilePhrase} is missing the following dependencies:`)
+        )
+      );
 
       for (const shrinkwrapWarning of shrinkwrapWarnings) {
         console.log(colors.yellow('  ' + shrinkwrapWarning));
@@ -772,21 +814,23 @@ export class InstallManager {
   /**
    * Runs "npm install" in the common folder.
    */
-  private _installCommonModules(options: {
-    shrinkwrapIsUpToDate: boolean;
-    variantIsUpToDate: boolean;
-  } & IInstallManagerOptions): Promise<void> {
-    const {
-      shrinkwrapIsUpToDate,
-      variantIsUpToDate
-    } = options;
+  private _installCommonModules(
+    options: {
+      shrinkwrapIsUpToDate: boolean;
+      variantIsUpToDate: boolean;
+    } & IInstallManagerOptions
+  ): Promise<void> {
+    const { shrinkwrapIsUpToDate, variantIsUpToDate } = options;
 
     return Promise.resolve().then(() => {
-      console.log(os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder)
-        + os.EOL);
+      console.log(
+        os.EOL + colors.bold('Checking node_modules in ' + this._rushConfiguration.commonTempFolder) + os.EOL
+      );
 
-      const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonTempFolder,
-        'node_modules');
+      const commonNodeModulesFolder: string = path.join(
+        this._rushConfiguration.commonTempFolder,
+        'node_modules'
+      );
 
       // This marker file indicates that the last "rush install" completed successfully
       const markerFileExistedAndWasValidAtStart: boolean = this._commonNodeModulesMarker.isValid();
@@ -820,9 +864,11 @@ export class InstallManager {
         // Also consider timestamps for all the temp tarballs. (createTempModulesAndCheckShrinkwrap() will
         // carefully preserve these timestamps unless something has changed.)
         // Example: "C:\MyRepo\common\temp\projects\my-project-2.tgz"
-        potentiallyChangedFiles.push(...this._rushConfiguration.projects.map(x => {
-          return this._getTarballFilePath(x);
-        }));
+        potentiallyChangedFiles.push(
+          ...this._rushConfiguration.projects.map(x => {
+            return this._getTarballFilePath(x);
+          })
+        );
 
         // NOTE: If commonNodeModulesMarkerFilename (or any of the potentiallyChangedFiles) does not
         // exist, then isFileTimestampCurrent() returns false.
@@ -833,14 +879,16 @@ export class InstallManager {
       }
 
       return this._checkIfReleaseIsPublished()
-        .catch((error) => {
+        .catch(error => {
           // If the user is working in an environment that can't reach the registry,
           // don't bother them with errors.
           return undefined;
-        }).then((publishedRelease: boolean | undefined) => {
-
+        })
+        .then((publishedRelease: boolean | undefined) => {
           if (publishedRelease === false) {
-            console.log(colors.yellow('Warning: This release of the Rush tool was unpublished; it may be unstable.'));
+            console.log(
+              colors.yellow('Warning: This release of the Rush tool was unpublished; it may be unstable.')
+            );
           }
 
           // Since we're going to be tampering with common/node_modules, delete the "rush link" flag file if it exists;
@@ -883,27 +931,41 @@ export class InstallManager {
 
               // note: it is not necessary to run "prune" with pnpm
               if (this._rushConfiguration.packageManager === 'npm') {
-                console.log(`Running "${this._rushConfiguration.packageManager} prune"`
-                  + ` in ${this._rushConfiguration.commonTempFolder}`);
+                console.log(
+                  `Running "${this._rushConfiguration.packageManager} prune"` +
+                    ` in ${this._rushConfiguration.commonTempFolder}`
+                );
                 const args: string[] = ['prune'];
                 this._pushConfigurationArgs(args, options);
 
-                Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename, args,
-                  this._rushConfiguration.commonTempFolder);
+                Utilities.executeCommandWithRetry(
+                  MAX_INSTALL_ATTEMPTS,
+                  packageManagerFilename,
+                  args,
+                  this._rushConfiguration.commonTempFolder
+                );
 
                 // Delete the (installed image of) the temp projects, since "npm install" does not
                 // detect changes for "file:./" references.
                 // We recognize the temp projects by their names, which always start with "rush-".
 
                 // Example: "C:\MyRepo\common\temp\node_modules\@rush-temp"
-                const pathToDeleteWithoutStar: string = path.join(commonNodeModulesFolder,
-                  RushConstants.rushTempNpmScope);
+                const pathToDeleteWithoutStar: string = path.join(
+                  commonNodeModulesFolder,
+                  RushConstants.rushTempNpmScope
+                );
                 console.log(`Deleting ${pathToDeleteWithoutStar}\\*`);
                 // Glob can't handle Windows paths
-                const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
+                const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(
+                  pathToDeleteWithoutStar,
+                  '\\',
+                  '/'
+                );
 
                 // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*"
-                for (const tempModulePath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*')) {
+                for (const tempModulePath of glob.sync(
+                  globEscape(normalizedpathToDeleteWithoutStar) + '/*'
+                )) {
                   // We could potentially use AsyncRecycler here, but in practice these folders tend
                   // to be very small
                   Utilities.dangerouslyDeletePath(tempModulePath);
@@ -915,7 +977,9 @@ export class InstallManager {
           if (this._rushConfiguration.packageManager === 'yarn') {
             // Yarn does not correctly detect changes to a tarball, so we need to forcibly clear its cache
             const yarnRushTempCacheFolder: string = path.join(
-              this._rushConfiguration.yarnCacheFolder, 'v2', 'npm-@rush-temp'
+              this._rushConfiguration.yarnCacheFolder,
+              'v2',
+              'npm-@rush-temp'
             );
             if (FileSystem.exists(yarnRushTempCacheFolder)) {
               console.log('Deleting ' + yarnRushTempCacheFolder);
@@ -927,20 +991,35 @@ export class InstallManager {
           const installArgs: string[] = ['install'];
           this._pushConfigurationArgs(installArgs, options);
 
-          console.log(os.EOL + colors.bold(`Running "${this._rushConfiguration.packageManager} install" in`
-            + ` ${this._rushConfiguration.commonTempFolder}`) + os.EOL);
+          console.log(
+            os.EOL +
+              colors.bold(
+                `Running "${this._rushConfiguration.packageManager} install" in` +
+                  ` ${this._rushConfiguration.commonTempFolder}`
+              ) +
+              os.EOL
+          );
 
           // If any diagnostic options were specified, then show the full command-line
           if (options.debug || options.collectLogFile || options.networkConcurrency) {
-            console.log(os.EOL + colors.green('Invoking package manager: ')
-              + FileSystem.getRealPath(packageManagerFilename) + ' ' + installArgs.join(' ') + os.EOL);
+            console.log(
+              os.EOL +
+                colors.green('Invoking package manager: ') +
+                FileSystem.getRealPath(packageManagerFilename) +
+                ' ' +
+                installArgs.join(' ') +
+                os.EOL
+            );
           }
 
-          Utilities.executeCommandWithRetry(MAX_INSTALL_ATTEMPTS, packageManagerFilename,
+          Utilities.executeCommandWithRetry(
+            MAX_INSTALL_ATTEMPTS,
+            packageManagerFilename,
             installArgs,
             this._rushConfiguration.commonTempFolder,
             undefined,
-            false, () => {
+            false,
+            () => {
               if (this._rushConfiguration.packageManager === 'pnpm') {
                 // If there is a failure in pnpm, it is possible that it left the
                 // store in a bad state. Therefore, we should clean out the store
@@ -953,15 +1032,18 @@ export class InstallManager {
 
                 Utilities.createFolderWithRetry(commonNodeModulesFolder);
               }
-            });
+            }
+          );
 
           if (this._rushConfiguration.packageManager === 'npm') {
-
             console.log(os.EOL + colors.bold('Running "npm shrinkwrap"...'));
             const npmArgs: string[] = ['shrinkwrap'];
             this._pushConfigurationArgs(npmArgs, options);
-            Utilities.executeCommand(this._rushConfiguration.packageManagerToolFilename,
-              npmArgs, this._rushConfiguration.commonTempFolder);
+            Utilities.executeCommand(
+              this._rushConfiguration.packageManagerToolFilename,
+              npmArgs,
+              this._rushConfiguration.commonTempFolder
+            );
             console.log('"npm shrinkwrap" completed' + os.EOL);
 
             this._fixupNpm5Regression();
@@ -969,8 +1051,10 @@ export class InstallManager {
 
           if (options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
             // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
-            this._syncFile(this._rushConfiguration.tempShrinkwrapFilename,
-              this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant));
+            this._syncFile(
+              this._rushConfiguration.tempShrinkwrapFilename,
+              this._rushConfiguration.getCommittedShrinkwrapFilename(options.variant)
+            );
           } else {
             // TODO: Validate whether the package manager updated it in a nontrivial way
           }
@@ -985,8 +1069,11 @@ export class InstallManager {
 
   private _checkIfReleaseIsPublished(): Promise<boolean> {
     return Promise.resolve().then(() => {
-      const lastCheckFile: string = path.join(this._rushGlobalFolder.nodeSpecificPath,
-        'rush-' + Rush.version, 'last-check.flag');
+      const lastCheckFile: string = path.join(
+        this._rushGlobalFolder.nodeSpecificPath,
+        'rush-' + Rush.version,
+        'last-check.flag'
+      );
 
       if (FileSystem.exists(lastCheckFile)) {
         let cachedResult: boolean | 'error' | undefined = undefined;
@@ -1050,48 +1137,48 @@ export class InstallManager {
       agent = new HttpsProxyAgent(process.env.HTTP_PROXY);
     }
 
-    return fetch.default(queryUrl, {
-      headers: headers,
-      agent: agent
-    })
+    return fetch
+      .default(queryUrl, {
+        headers: headers,
+        agent: agent
+      })
       .then((response: fetch.Response) => {
         if (!response.ok) {
           return Promise.reject(new Error('Failed to query'));
         }
-        return response
-          .json()
-          .then((data) => {
-            let url: string;
-            try {
-              if (!data.versions[Rush.version]) {
-                // Version was not published
-                return false;
-              }
-              url = data.versions[Rush.version].dist.tarball;
-              if (!url) {
-                return Promise.reject(new Error(`URL not found`));
-              }
-            } catch (e) {
-              return Promise.reject(new Error('Error parsing response'));
+        return response.json().then(data => {
+          let url: string;
+          try {
+            if (!data.versions[Rush.version]) {
+              // Version was not published
+              return false;
             }
+            url = data.versions[Rush.version].dist.tarball;
+            if (!url) {
+              return Promise.reject(new Error(`URL not found`));
+            }
+          } catch (e) {
+            return Promise.reject(new Error('Error parsing response'));
+          }
 
-            // Make sure the tarball wasn't deleted from the CDN
-            headers.set('accept', '*/*');
-            return fetch.default(url, {
+          // Make sure the tarball wasn't deleted from the CDN
+          headers.set('accept', '*/*');
+          return fetch
+            .default(url, {
               headers: headers,
               agent: agent
             })
-              .then<boolean>((response2: fetch.Response) => {
-                if (!response2.ok) {
-                  if (response2.status === 404) {
-                    return false;
-                  } else {
-                    return Promise.reject(new Error('Failed to fetch'));
-                  }
+            .then<boolean>((response2: fetch.Response) => {
+              if (!response2.ok) {
+                if (response2.status === 404) {
+                  return false;
+                } else {
+                  return Promise.reject(new Error('Failed to fetch'));
                 }
-                return true;
-              });
-          });
+              }
+              return true;
+            });
+        });
       });
   }
 
@@ -1199,7 +1286,8 @@ export class InstallManager {
     return path.join(
       this._rushConfiguration.commonTempFolder,
       RushConstants.rushTempProjectsFolderName,
-      `${project.unscopedTempProjectName}.tgz`);
+      `${project.unscopedTempProjectName}.tgz`
+    );
   }
 
   /**
@@ -1217,15 +1305,20 @@ export class InstallManager {
    * in the node_modules folder, after "npm install" completes.
    */
   private _fixupNpm5Regression(): void {
-    const pathToDeleteWithoutStar: string = path.join(this._rushConfiguration.commonTempFolder,
-      'node_modules', RushConstants.rushTempNpmScope);
+    const pathToDeleteWithoutStar: string = path.join(
+      this._rushConfiguration.commonTempFolder,
+      'node_modules',
+      RushConstants.rushTempNpmScope
+    );
     // Glob can't handle Windows paths
     const normalizedpathToDeleteWithoutStar: string = Text.replaceAll(pathToDeleteWithoutStar, '\\', '/');
 
     let anyChanges: boolean = false;
 
     // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/*/package.json"
-    for (const packageJsonPath of glob.sync(globEscape(normalizedpathToDeleteWithoutStar) + '/*/package.json')) {
+    for (const packageJsonPath of glob.sync(
+      globEscape(normalizedpathToDeleteWithoutStar) + '/*/package.json'
+    )) {
       // Example: "C:/MyRepo/common/temp/node_modules/@rush-temp/example/package.json"
       const packageJsonObject: IRushTempPackageJson = JsonFile.load(packageJsonPath);
 
@@ -1249,18 +1342,23 @@ export class InstallManager {
    * @returns true if orphans were found, or false if everything is okay
    */
   private _findOrphanedTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
-
     // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
     for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {
       if (!this._rushConfiguration.findProjectByTempName(tempProjectName)) {
-        console.log(os.EOL + colors.yellow(Utilities.wrapWords(
-          `Your ${this._shrinkwrapFilePhrase} references a project "${tempProjectName}" which no longer exists.`))
-          + os.EOL);
-        return true;  // found one
+        console.log(
+          os.EOL +
+            colors.yellow(
+              Utilities.wrapWords(
+                `Your ${this._shrinkwrapFilePhrase} references a project "${tempProjectName}" which no longer exists.`
+              )
+            ) +
+            os.EOL
+        );
+        return true; // found one
       }
     }
 
-    return false;  // none found
+    return false; // none found
   }
 
   private get _shrinkwrapFilePhrase(): string {

@@ -21,7 +21,8 @@ export class ApprovedPackagesPolicy {
 
   /** @internal */
   public constructor(rushConfiguration: RushConfiguration, rushConfigurationJson: IRushConfigurationJson) {
-    const approvedPackagesPolicy: IApprovedPackagesPolicyJson = rushConfigurationJson.approvedPackagesPolicy || {};
+    const approvedPackagesPolicy: IApprovedPackagesPolicyJson =
+      rushConfigurationJson.approvedPackagesPolicy || {};
 
     this._enabled = !!rushConfigurationJson.approvedPackagesPolicy;
     this._ignoredNpmScopes = new Set<string>(approvedPackagesPolicy.ignoredNpmScopes);
@@ -29,20 +30,26 @@ export class ApprovedPackagesPolicy {
 
     if (this._enabled) {
       if (!this.reviewCategories.size) {
-        throw new Error(`The "approvedPackagesPolicy" feature is enabled rush.json, but the reviewCategories`
-          + ` list is not configured.`);
+        throw new Error(
+          `The "approvedPackagesPolicy" feature is enabled rush.json, but the reviewCategories` +
+            ` list is not configured.`
+        );
       }
     }
 
     // Load browser-approved-packages.json
-    const browserApprovedPackagesPath: string = path.join(rushConfiguration.commonRushConfigFolder,
-      RushConstants.browserApprovedPackagesFilename);
+    const browserApprovedPackagesPath: string = path.join(
+      rushConfiguration.commonRushConfigFolder,
+      RushConstants.browserApprovedPackagesFilename
+    );
     this._browserApprovedPackages = new ApprovedPackagesConfiguration(browserApprovedPackagesPath);
     this._browserApprovedPackages.tryLoadFromFile(this._enabled);
 
     // Load nonbrowser-approved-packages.json
-    const nonbrowserApprovedPackagesPath: string = path.join(rushConfiguration.commonRushConfigFolder,
-      RushConstants.nonbrowserApprovedPackagesFilename);
+    const nonbrowserApprovedPackagesPath: string = path.join(
+      rushConfiguration.commonRushConfigFolder,
+      RushConstants.nonbrowserApprovedPackagesFilename
+    );
     this._nonbrowserApprovedPackages = new ApprovedPackagesConfiguration(nonbrowserApprovedPackagesPath);
     this._nonbrowserApprovedPackages.tryLoadFromFile(this._enabled);
   }

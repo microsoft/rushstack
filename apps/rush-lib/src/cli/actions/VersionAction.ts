@@ -2,14 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import {
-  IPackageJson,
-  FileConstants
-} from '@microsoft/node-core-library';
-import {
-  CommandLineFlagParameter,
-  CommandLineStringParameter
-} from '@microsoft/ts-command-line';
+import { IPackageJson, FileConstants } from '@microsoft/node-core-library';
+import { CommandLineFlagParameter, CommandLineStringParameter } from '@microsoft/ts-command-line';
 
 import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
@@ -42,7 +36,8 @@ export class VersionAction extends BaseRushAction {
     super({
       actionName: 'version',
       summary: '(EXPERIMENTAL) Manage package versions in the repo.',
-      documentation: '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.',
+      documentation:
+        '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.',
       parser
     });
   }
@@ -52,8 +47,7 @@ export class VersionAction extends BaseRushAction {
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
       argumentName: 'BRANCH',
-      description:
-      'If this flag is specified, changes will be committed and merged into the target branch.'
+      description: 'If this flag is specified, changes will be committed and merged into the target branch.'
     });
     this._ensureVersionPolicy = this.defineFlagParameter({
       parameterLongName: '--ensure-version-policy',
@@ -62,7 +56,8 @@ export class VersionAction extends BaseRushAction {
     this._overrideVersion = this.defineStringParameter({
       parameterLongName: '--override-version',
       argumentName: 'NEW_VERSION',
-      description: 'Override the version in the specified --version-policy. ' +
+      description:
+        'Override the version in the specified --version-policy. ' +
         'This setting only works for lock-step version policy and when --ensure-version-policy is specified.'
     });
     this._bumpVersion = this.defineFlagParameter({
@@ -81,14 +76,16 @@ export class VersionAction extends BaseRushAction {
     this._overwriteBump = this.defineStringParameter({
       parameterLongName: '--override-bump',
       argumentName: 'BUMPTYPE',
-      description: 'Overrides the bump type in the version-policy.json for the specified version policy.' +
+      description:
+        'Overrides the bump type in the version-policy.json for the specified version policy.' +
         'Valid BUMPTYPE values include: prerelease, patch, preminor, minor, major. ' +
         'This setting only works for lock-step version policy in bump action.'
     });
     this._prereleaseIdentifier = this.defineStringParameter({
       parameterLongName: '--override-prerelease-id',
       argumentName: 'ID',
-      description: 'Overrides the prerelease identifier in the version value of version-policy.json ' +
+      description:
+        'Overrides the prerelease identifier in the version value of version-policy.json ' +
         'for the specified version policy. ' +
         'This setting only works for lock-step version policy. ' +
         'This setting increases to new prerelease id when "--bump" is provided but only replaces the ' +
@@ -108,8 +105,11 @@ export class VersionAction extends BaseRushAction {
       if (this._ensureVersionPolicy.value) {
         this._overwritePolicyVersionIfNeeded();
         const tempBranch: string = 'version/ensure-' + new Date().getTime();
-        this._versionManager.ensure(this._versionPolicy.value, true,
-          !!this._overrideVersion.value || !!this._prereleaseIdentifier.value);
+        this._versionManager.ensure(
+          this._versionPolicy.value,
+          true,
+          !!this._overrideVersion.value || !!this._prereleaseIdentifier.value
+        );
 
         const updatedPackages: Map<string, IPackageJson> = this._versionManager.updatedProjects;
         if (updatedPackages.size > 0) {
@@ -118,10 +118,12 @@ export class VersionAction extends BaseRushAction {
         }
       } else if (this._bumpVersion.value) {
         const tempBranch: string = 'version/bump-' + new Date().getTime();
-        this._versionManager.bump(this._versionPolicy.value,
+        this._versionManager.bump(
+          this._versionPolicy.value,
           this._overwriteBump.value ? BumpType[this._overwriteBump.value] : undefined,
           this._prereleaseIdentifier.value,
-          true);
+          true
+        );
         this._gitProcess(tempBranch);
       }
     });
@@ -133,14 +135,16 @@ export class VersionAction extends BaseRushAction {
       return;
     }
     if (this._overrideVersion.value && this._prereleaseIdentifier.value) {
-      throw new Error(`The parameters "--override-version" and` +
-        ` "--override-prerelease-id" cannot be used together.`);
+      throw new Error(
+        `The parameters "--override-version" and` + ` "--override-prerelease-id" cannot be used together.`
+      );
     }
 
     if (this._versionPolicy.value) {
       const versionConfig: VersionPolicyConfiguration = this.rushConfiguration.versionPolicyConfiguration;
-      const policy: LockStepVersionPolicy = versionConfig.getVersionPolicy(this._versionPolicy.value) as
-          LockStepVersionPolicy;
+      const policy: LockStepVersionPolicy = versionConfig.getVersionPolicy(
+        this._versionPolicy.value
+      ) as LockStepVersionPolicy;
       if (!policy || !policy.isLockstepped) {
         throw new Error(`The lockstep version policy "${policy.policyName}" is not found.`);
       }
@@ -164,7 +168,9 @@ export class VersionAction extends BaseRushAction {
         versionConfig.update(this._versionPolicy.value, newVersion);
       }
     } else {
-      throw new Error('Missing --version-policy parameter to specify which version policy should be overwritten.');
+      throw new Error(
+        'Missing --version-policy parameter to specify which version policy should be overwritten.'
+      );
     }
   }
 
@@ -174,27 +180,33 @@ export class VersionAction extends BaseRushAction {
     }
 
     if (this._overwriteBump.value && !BumpType[this._overwriteBump.value]) {
-      throw new Error('The value of override-bump is not valid.  ' +
-      'Valid values include prerelease, patch, preminor, minor, and major');
+      throw new Error(
+        'The value of override-bump is not valid.  ' +
+          'Valid values include prerelease, patch, preminor, minor, and major'
+      );
     }
   }
 
   private _validateResult(): void {
     // Load the config from file to avoid using inconsistent in-memory data.
-    const rushConfig: RushConfiguration =
-      RushConfiguration.loadFromConfigurationFile(this.rushConfiguration.rushJsonFile);
-
-    const commonVersions: CommonVersionsConfiguration = rushConfig.getCommonVersions(
-      /* Always use the default variant */
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      this.rushConfiguration.rushJsonFile
     );
+
+    const commonVersions: CommonVersionsConfiguration = rushConfig
+      .getCommonVersions
+      /* Always use the default variant */
+      ();
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
       rushConfig.projects,
       commonVersions.allowedAlternativeVersions
     );
     if (mismatchFinder.numberOfMismatches) {
-      throw new Error('Unable to finish version bump because inconsistencies were encountered.' +
-        ' Run \"rush check\" to find more details.');
+      throw new Error(
+        'Unable to finish version bump because inconsistencies were encountered.' +
+          ' Run "rush check" to find more details.'
+      );
     }
   }
 
@@ -211,7 +223,7 @@ export class VersionAction extends BaseRushAction {
 
     // Stage, commit, and push the changes to remote temp branch.
     // Need to commit the change log updates in its own commit
-    const changeLogUpdated: boolean = uncommittedChanges.some((changePath) => {
+    const changeLogUpdated: boolean = uncommittedChanges.some(changePath => {
       return changePath.indexOf('CHANGELOG.json') > 0;
     });
 
@@ -223,7 +235,7 @@ export class VersionAction extends BaseRushAction {
     }
 
     // Commit the package.json and change files updates.
-    const packageJsonUpdated: boolean = uncommittedChanges.some((changePath) => {
+    const packageJsonUpdated: boolean = uncommittedChanges.some(changePath => {
       return changePath.indexOf(FileConstants.PackageJson) > 0;
     });
 

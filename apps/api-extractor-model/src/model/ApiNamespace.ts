@@ -11,12 +11,11 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
  * Constructor options for {@link ApiClass}.
  * @public
  */
-export interface IApiNamespaceOptions extends
-  IApiItemContainerMixinOptions,
-  IApiNameMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiNamespaceOptions
+  extends IApiItemContainerMixinOptions,
+    IApiNameMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript namespace declaration.
@@ -41,8 +40,7 @@ export interface IApiNamespaceOptions extends
  * @public
  */
 export class ApiNamespace extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
-
-    public static getCanonicalReference(name: string): string {
+  public static getCanonicalReference(name: string): string {
     return `(${name}:namespace)`;
   }
 

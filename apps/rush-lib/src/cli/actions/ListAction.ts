@@ -25,21 +25,24 @@ export class ListAction extends BaseRushAction {
     this._version = this.defineFlagParameter({
       parameterLongName: '--version',
       parameterShortName: '-v',
-      description: 'If this flag is specified, the project version will be ' +
+      description:
+        'If this flag is specified, the project version will be ' +
         'displayed in a column along with the package name.'
     });
 
     this._path = this.defineFlagParameter({
       parameterLongName: '--path',
       parameterShortName: '-p',
-      description: 'If this flag is specified, the project path will be ' +
+      description:
+        'If this flag is specified, the project path will be ' +
         'displayed in a column along with the package name.'
     });
 
     this._fullPath = this.defineFlagParameter({
       parameterLongName: '--full-path',
       parameterShortName: '-f',
-      description: 'If this flag is specified, the project full path will ' +
+      description:
+        'If this flag is specified, the project full path will ' +
         'be displayed in a column along with the package name.'
     });
   }

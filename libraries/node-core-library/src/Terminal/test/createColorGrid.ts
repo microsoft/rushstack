@@ -5,16 +5,13 @@
  * This file is a little program that prints all of the colors to the console
  */
 
-import {
-  Colors,
-  IColorableSequence
-} from '../../index';
+import { Colors, IColorableSequence } from '../../index';
 
 export function createColorGrid(
   attributeFunction?: (text: string | IColorableSequence) => IColorableSequence
 ): IColorableSequence[][] {
   const foregroundFunctions: ((text: string | IColorableSequence) => IColorableSequence)[] = [
-    (text) => Colors._normalizeStringOrColorableSequence(text),
+    text => Colors._normalizeStringOrColorableSequence(text),
     Colors.black,
     Colors.white,
     Colors.gray,
@@ -27,7 +24,7 @@ export function createColorGrid(
   ];
 
   const backgroundFunctions: ((text: string | IColorableSequence) => IColorableSequence)[] = [
-    (text) => Colors._normalizeStringOrColorableSequence(text),
+    text => Colors._normalizeStringOrColorableSequence(text),
     Colors.blackBackground,
     Colors.whiteBackground,
     Colors.grayBackground,

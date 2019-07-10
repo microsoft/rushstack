@@ -47,9 +47,9 @@ export class LegacyAdapters {
       };
 
       try {
-        if (arg1 !== undefined && arg2 !== undefined ) {
+        if (arg1 !== undefined && arg2 !== undefined) {
           fn(arg1, arg2, cb);
-        } else if (arg1 !== undefined ) {
+        } else if (arg1 !== undefined) {
           fn(arg1, cb);
         } else {
           fn(cb);
@@ -63,7 +63,8 @@ export class LegacyAdapters {
   /**
    * Normalizes an object into an `Error` object.
    */
-  public static scrubError(error: Error | string | any): Error { // tslint:disable-line:no-any
+  public static scrubError(error: Error | string | any): Error {
+    // tslint:disable-line:no-any
     if (error instanceof Error) {
       return error;
     } else if (typeof error === 'string') {

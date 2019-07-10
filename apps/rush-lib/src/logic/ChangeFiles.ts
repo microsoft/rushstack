@@ -14,7 +14,6 @@ import { JsonFile } from '@microsoft/node-core-library';
  * for those change files.
  */
 export class ChangeFiles {
-
   /**
    * Change file path relative to changes folder.
    */
@@ -24,12 +23,9 @@ export class ChangeFiles {
   /**
    * Validate if the newly added change files match the changed packages.
    */
-  public static validate(
-    newChangeFilePaths: string[],
-    changedPackages: string[]
-  ): void {
+  public static validate(newChangeFilePaths: string[], changedPackages: string[]): void {
     const projectsWithChangeDescriptions: Set<string> = new Set<string>();
-    newChangeFilePaths.forEach((filePath) => {
+    newChangeFilePaths.forEach(filePath => {
       console.log(`Found change file: ${filePath}`);
 
       const changeFile: IChangeInfo = JsonFile.load(filePath);
@@ -41,26 +37,26 @@ export class ChangeFiles {
     });
 
     const projectsMissingChangeDescriptions: Set<string> = new Set(changedPackages);
-    projectsWithChangeDescriptions.forEach((name) => projectsMissingChangeDescriptions.delete(name));
+    projectsWithChangeDescriptions.forEach(name => projectsMissingChangeDescriptions.delete(name));
     if (projectsMissingChangeDescriptions.size > 0) {
       const projectsMissingChangeDescriptionsArray: string[] = [];
       projectsMissingChangeDescriptions.forEach(name => projectsMissingChangeDescriptionsArray.push(name));
-      throw new Error([
-        'The following projects have been changed and require change descriptions, but change descriptions were not ' +
-          'detected for them:',
-        ...projectsMissingChangeDescriptionsArray.map((projectName) => `- ${projectName}`),
-        'To resolve this error, run "rush change." This will generate change description files that must be ' +
-          'committed to source control.'
-      ].join(EOL));
+      throw new Error(
+        [
+          'The following projects have been changed and require change descriptions, but change descriptions were not ' +
+            'detected for them:',
+          ...projectsMissingChangeDescriptionsArray.map(projectName => `- ${projectName}`),
+          'To resolve this error, run "rush change." This will generate change description files that must be ' +
+            'committed to source control.'
+        ].join(EOL)
+      );
     }
   }
 
-  public static getChangeComments(
-    newChangeFilePaths: string[]
-  ): Map<string, string[]> {
+  public static getChangeComments(newChangeFilePaths: string[]): Map<string, string[]> {
     const changes: Map<string, string[]> = new Map<string, string[]>();
 
-    newChangeFilePaths.forEach((filePath) => {
+    newChangeFilePaths.forEach(filePath => {
       console.log(`Found change file: ${filePath}`);
       const changeRequest: IChangeInfo = JsonFile.load(filePath);
       if (changeRequest && changeRequest.changes) {
@@ -108,11 +104,11 @@ export class ChangeFiles {
     if (updatedChangelogs) {
       // Skip changes files if the package's change log is not updated.
       const packagesToInclude: Set<string> = new Set<string>();
-      updatedChangelogs.forEach((changelog) => {
+      updatedChangelogs.forEach(changelog => {
         packagesToInclude.add(changelog.name);
       });
 
-      const filesToDelete: string[] = this.getFiles().filter((filePath) => {
+      const filesToDelete: string[] = this.getFiles().filter(filePath => {
         const changeRequest: IChangeInfo = JsonFile.load(filePath);
         for (const changeInfo of changeRequest.changes!) {
           if (!packagesToInclude.has(changeInfo.packageName)) {
@@ -132,9 +128,7 @@ export class ChangeFiles {
   private _deleteFiles(files: string[], shouldDelete: boolean): number {
     if (files.length) {
       console.log(
-        `${EOL}* ` +
-        `${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ` +
-        `${files.length} change file(s).`
+        `${EOL}* ` + `${shouldDelete ? 'DELETING:' : 'DRYRUN: Deleting'} ` + `${files.length} change file(s).`
       );
 
       for (const filePath of files) {

@@ -36,9 +36,11 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
   private _excerpt: Excerpt;
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>, context: DeserializerContext,
-    jsonObject: IApiDeclaredItemJson): void {
-
+  public static onDeserializeInto(
+    options: Partial<IApiDeclaredItemOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiDeclaredItemJson
+  ): void {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.excerptTokens = jsonObject.excerptTokens;
@@ -87,8 +89,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
           }
         }
         if (modifierTags.length > 0) {
-          return '/** ' + modifierTags.join(' ') + ' */\n'
-            + excerpt;
+          return '/** ' + modifierTags.join(' ') + ' */\n' + excerpt;
         }
       }
     }

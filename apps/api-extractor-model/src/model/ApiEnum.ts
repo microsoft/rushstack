@@ -12,12 +12,11 @@ import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
  * Constructor options for {@link ApiEnum}.
  * @public
  */
-export interface IApiEnumOptions extends
-  IApiItemContainerMixinOptions,
-  IApiNameMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-}
+export interface IApiEnumOptions
+  extends IApiItemContainerMixinOptions,
+    IApiNameMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions {}
 
 /**
  * Represents a TypeScript enum declaration.
@@ -40,7 +39,6 @@ export interface IApiEnumOptions extends
  * @public
  */
 export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
-
   public static getCanonicalReference(name: string): string {
     return `(${name}:enum)`;
   }

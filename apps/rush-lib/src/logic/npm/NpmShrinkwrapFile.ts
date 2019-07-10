@@ -1,13 +1,8 @@
 import * as os from 'os';
 
-import {
-  JsonFile,
-  FileSystem
-} from '@microsoft/node-core-library';
+import { JsonFile, FileSystem } from '@microsoft/node-core-library';
 
-import {
-  BaseShrinkwrapFile
-} from '../base/BaseShrinkwrapFile';
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 
 interface INpmShrinkwrapDependencyJson {
   version: string;
@@ -35,7 +30,8 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
       // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
       // and typically very large, so we want to load it the same way that NPM does.
       data = FileSystem.readFile(shrinkwrapJsonFilename);
-      if (data.charCodeAt(0) === 0xFEFF) {  // strip BOM
+      if (data.charCodeAt(0) === 0xfeff) {
+        // strip BOM
         data = data.slice(1);
       }
 
@@ -54,15 +50,17 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
-     // First, check under tempProjectName, as this is the first place "rush link" looks.
-    const dependencyJson: INpmShrinkwrapDependencyJson | undefined =
-      NpmShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+    // First, check under tempProjectName, as this is the first place "rush link" looks.
+    const dependencyJson: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
+      this._shrinkwrapJson.dependencies,
+      dependencyName
+    );
 
-     if (!dependencyJson) {
-       return undefined;
-     }
+    if (!dependencyJson) {
+      return undefined;
+    }
 
-     return dependencyJson.version;
+    return dependencyJson.version;
   }
 
   /**
@@ -70,15 +68,18 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @param tempProjectName the name of the temp project to check for this dependency
    * @param versionRange Not used, just exists to satisfy abstract API contract
    */
-  protected tryEnsureDependencyVersion(dependencyName: string,
+  protected tryEnsureDependencyVersion(
+    dependencyName: string,
     tempProjectName: string,
-    versionRange: string): string | undefined {
-
+    versionRange: string
+  ): string | undefined {
     // First, check under tempProjectName, as this is the first place "rush link" looks.
     let dependencyJson: INpmShrinkwrapDependencyJson | undefined = undefined;
 
     const tempDependency: INpmShrinkwrapDependencyJson | undefined = NpmShrinkwrapFile.tryGetValue(
-      this._shrinkwrapJson.dependencies, tempProjectName);
+      this._shrinkwrapJson.dependencies,
+      tempProjectName
+    );
     if (tempDependency && tempDependency.dependencies) {
       dependencyJson = NpmShrinkwrapFile.tryGetValue(tempDependency.dependencies, dependencyName);
     }
@@ -103,7 +104,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
       this._shrinkwrapJson.name = '';
     }
     if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = { };
+      this._shrinkwrapJson.dependencies = {};
     }
   }
 }

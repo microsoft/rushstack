@@ -111,8 +111,8 @@ export class PackageName {
     }
 
     // Convert "@scope/unscoped-name" --> "scopeunscoped-name"
-    const nameWithoutScopeSymbols: string = (result.scope ? result.scope.slice(1, -1) : '')
-      + result.unscopedName;
+    const nameWithoutScopeSymbols: string =
+      (result.scope ? result.scope.slice(1, -1) : '') + result.unscopedName;
 
     // "New packages must not have uppercase letters in the name."
     // This can't be enforced because "old" packages are still actively maintained.
@@ -125,7 +125,9 @@ export class PackageName {
 
     // "The name ends up being part of a URL, an argument on the command line, and a folder name.
     // Therefore, the name can't contain any non-URL-safe characters"
-    const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(PackageName.invalidNameCharactersRegExp);
+    const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(
+      PackageName.invalidNameCharactersRegExp
+    );
     if (match) {
       result.error = `The package name "${packageName}" contains an invalid character: "${match[0]}"`;
       return result;

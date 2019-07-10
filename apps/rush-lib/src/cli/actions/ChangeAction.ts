@@ -8,17 +8,11 @@ import * as colors from 'colors';
 
 import inquirer = require('inquirer');
 
-import {
-  CommandLineFlagParameter,
-  CommandLineStringParameter
-} from '@microsoft/ts-command-line';
+import { CommandLineFlagParameter, CommandLineStringParameter } from '@microsoft/ts-command-line';
 import { FileSystem } from '@microsoft/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import {
-  IChangeFile,
-  IChangeInfo
-} from '../../api/ChangeManagement';
+import { IChangeFile, IChangeInfo } from '../../api/ChangeManagement';
 import { VersionControl } from '../../utilities/VersionControl';
 import { ChangeFile } from '../../api/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
@@ -46,33 +40,34 @@ export class ChangeAction extends BaseRushAction {
   constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
       'Asks a series of questions and then generates a <branchname>-<timestamp>.json file ' +
-      'in the common folder. The `publish` command will consume these files and perform the proper ' +
-      'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
+        'in the common folder. The `publish` command will consume these files and perform the proper ' +
+        'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
       '',
       'The possible types of changes are: ',
       '',
       'MAJOR - these are breaking changes that are not backwards compatible. ' +
-      'Examples are: renaming a public class, adding/removing a non-optional ' +
-      'parameter from a public API, or renaming an variable or function that ' +
-      'is exported.',
+        'Examples are: renaming a public class, adding/removing a non-optional ' +
+        'parameter from a public API, or renaming an variable or function that ' +
+        'is exported.',
       '',
       'MINOR - these are changes that are backwards compatible (but not ' +
-      'forwards compatible). Examples are: adding a new public API or adding an ' +
-      'optional parameter to a public API',
+        'forwards compatible). Examples are: adding a new public API or adding an ' +
+        'optional parameter to a public API',
       '',
       'PATCH - these are changes that are backwards and forwards compatible. ' +
-      'Examples are: Modifying a private API or fixing a bug in the logic ' +
-      'of how an existing API works.',
+        'Examples are: Modifying a private API or fixing a bug in the logic ' +
+        'of how an existing API works.',
       '',
       'HOTFIX (EXPERIMENTAL) - these are changes that are hotfixes targeting a ' +
-      'specific older version of the package. When a hotfix change is added, ' +
-      'other changes will not be able to increment the version number.' +
-      'Enable this feature by setting \'hotfixChangeEnabled\' in your rush.json.',
+        'specific older version of the package. When a hotfix change is added, ' +
+        'other changes will not be able to increment the version number.' +
+        "Enable this feature by setting 'hotfixChangeEnabled' in your rush.json.",
       ''
     ];
     super({
       actionName: 'change',
-      summary: 'Records changes made to projects, indicating how the package version number should be bumped ' +
+      summary:
+        'Records changes made to projects, indicating how the package version number should be bumped ' +
         'for the next publish.',
       documentation: documentation.join(os.EOL),
       safeForSimultaneousRushProcesses: true,
@@ -96,7 +91,8 @@ export class ChangeAction extends BaseRushAction {
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
       argumentName: 'BRANCH',
-      description: 'If this parameter is specified, compare the checked out branch with the specified branch to' +
+      description:
+        'If this parameter is specified, compare the checked out branch with the specified branch to' +
         'determine which projects were changed. If this parameter is not specified, the checked out branch ' +
         'is compared against the "master" branch.'
     });
@@ -122,10 +118,9 @@ export class ChangeAction extends BaseRushAction {
     this._changeFileData = new Map<string, IChangeFile>();
     this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles());
 
-    return this._promptLoop()
-      .catch((error: Error) => {
-        throw new Error(`There was an error creating a change file: ${error.toString()}`);
-      });
+    return this._promptLoop().catch((error: Error) => {
+      throw new Error(`There was an error creating a change file: ${error.toString()}`);
+    });
   }
 
   private _generateHostMap(): Map<string, string> {
@@ -153,9 +148,9 @@ export class ChangeAction extends BaseRushAction {
 
   private get _targetBranch(): string {
     if (!this._targetBranchName) {
-      this._targetBranchName = (
-        this._targetBranchParameter.value || VersionControl.getRemoteMasterBranch(this.rushConfiguration.repositoryUrl)
-      );
+      this._targetBranchName =
+        this._targetBranchParameter.value ||
+        VersionControl.getRemoteMasterBranch(this.rushConfiguration.repositoryUrl);
     }
 
     return this._targetBranchName;
@@ -172,15 +167,15 @@ export class ChangeAction extends BaseRushAction {
     const changedPackageNames: Set<string> = new Set<string>();
 
     this.rushConfiguration.projects
-    .filter(project => project.shouldPublish)
-    .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
-    .filter(project => this._hasProjectChanged(changedFolders, project))
-    .forEach(project => {
-      const hostName: string | undefined = this._projectHostMap.get(project.packageName);
-      if (hostName) {
-        changedPackageNames.add(hostName);
-      }
-    });
+      .filter(project => project.shouldPublish)
+      .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
+      .filter(project => this._hasProjectChanged(changedFolders, project))
+      .forEach(project => {
+        const hostName: string | undefined = this._projectHostMap.get(project.packageName);
+        if (hostName) {
+          changedPackageNames.add(hostName);
+        }
+      });
     return [...changedPackageNames];
   }
 
@@ -195,8 +190,10 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _hasProjectChanged(changedFolders: Array<string | undefined>,
-    project: RushConfigurationProject): boolean {
+  private _hasProjectChanged(
+    changedFolders: Array<string | undefined>,
+    project: RushConfigurationProject
+  ): boolean {
     let normalizedFolder: string = project.projectRelativeFolder;
     if (normalizedFolder.charAt(normalizedFolder.length - 1) !== '/') {
       normalizedFolder = normalizedFolder + '/';
@@ -217,25 +214,23 @@ export class ChangeAction extends BaseRushAction {
   private _promptLoop(): Promise<void> {
     // If there are still projects, ask about the next one
     if (this._sortedProjectList.length) {
-      return this._askQuestions(this._sortedProjectList.pop()!)
-        .then((answers: IChangeInfo) => {
-          if (answers) {
-            // Save the info into the change file
-            let changeFile: IChangeFile | undefined = this._changeFileData.get(answers.packageName);
-            if (!changeFile) {
-              changeFile = {
-                changes: [],
-                packageName: answers.packageName,
-                email: undefined
-              };
-              this._changeFileData.set(answers.packageName, changeFile!);
-            }
-            changeFile!.changes.push(answers);
+      return this._askQuestions(this._sortedProjectList.pop()!).then((answers: IChangeInfo) => {
+        if (answers) {
+          // Save the info into the change file
+          let changeFile: IChangeFile | undefined = this._changeFileData.get(answers.packageName);
+          if (!changeFile) {
+            changeFile = {
+              changes: [],
+              packageName: answers.packageName,
+              email: undefined
+            };
+            this._changeFileData.set(answers.packageName, changeFile!);
           }
-          // Continue to loop
-          return this._promptLoop();
-
-        });
+          changeFile!.changes.push(answers);
+        }
+        // Continue to loop
+        return this._promptLoop();
+      });
     } else {
       this._warnUncommittedChanges();
       // We are done, collect their email
@@ -267,16 +262,15 @@ export class ChangeAction extends BaseRushAction {
         message: 'Append to existing comments or skip?',
         choices: [
           {
-            'name': 'Skip',
-            'value': 'skip'
+            name: 'Skip',
+            value: 'skip'
           },
           {
-            'name': 'Append',
-            'value': 'append'
+            name: 'Append',
+            value: 'append'
           }
         ]
-      })
-      .then(({ appendComment }: { appendComment: 'skip' | 'append' }) => {
+      }).then(({ appendComment }: { appendComment: 'skip' | 'append' }) => {
         if (appendComment === 'skip') {
           return undefined;
         } else {
@@ -294,8 +288,7 @@ export class ChangeAction extends BaseRushAction {
       name: 'comment',
       type: 'input',
       message: `Describe changes, or ENTER if no changes:`
-    })
-    .then(({ comment }: { comment: string }) => {
+    }).then(({ comment }: { comment: string }) => {
       if (Object.keys(bumpOptions).length === 0 || !comment) {
         return {
           comment: comment || '',
@@ -306,8 +299,8 @@ export class ChangeAction extends BaseRushAction {
         return this._prompt({
           choices: Object.keys(bumpOptions).map(option => {
             return {
-              'value': option,
-              'name': bumpOptions[option]
+              value: option,
+              name: bumpOptions[option]
             };
           }),
           default: 'patch',
@@ -325,14 +318,16 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _getBumpOptions(packageName: string): {[type: string]: string } {
-    const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
+  private _getBumpOptions(packageName: string): { [type: string]: string } {
+    const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
+      packageName
+    );
     const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
 
     let bumpOptions: { [type: string]: string } = {
-      'major': 'major - for changes that break compatibility, e.g. removing an API',
-      'minor': 'minor - for backwards compatible changes, e.g. adding a new API',
-      'patch': 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
+      major: 'major - for changes that break compatibility, e.g. removing an API',
+      minor: 'minor - for backwards compatible changes, e.g. adding a new API',
+      patch: 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
     };
 
     if (this.rushConfiguration.hotfixChangeEnabled) {
@@ -361,13 +356,11 @@ export class ChangeAction extends BaseRushAction {
    */
   private _detectOrAskForEmail(): Promise<string> {
     return this._detectAndConfirmEmail().then((email: string) => {
-
       if (email) {
         return Promise.resolve(email);
       } else {
         return this._promptForEmail();
       }
-
     });
   }
 
@@ -378,7 +371,8 @@ export class ChangeAction extends BaseRushAction {
   private _detectAndConfirmEmail(): Promise<string | undefined> {
     let email: string | undefined;
     try {
-      email = child_process.execSync('git config user.email')
+      email = child_process
+        .execSync('git config user.email')
         .toString()
         .replace(/(\r\n|\n|\r)/gm, '');
     } catch (err) {
@@ -415,8 +409,7 @@ export class ChangeAction extends BaseRushAction {
           return true; // @todo should be an email
         }
       }
-    ])
-    .then(({ email }) => email);
+    ]).then(({ email }) => email);
   }
 
   private _warnUncommittedChanges(): void {
@@ -424,10 +417,10 @@ export class ChangeAction extends BaseRushAction {
       if (VersionControl.hasUncommittedChanges()) {
         console.log(
           os.EOL +
-          colors.yellow(
-            'Warning: You have uncommitted changes, which do not trigger prompting for change ' +
-            'descriptions.'
-          )
+            colors.yellow(
+              'Warning: You have uncommitted changes, which do not trigger prompting for change ' +
+                'descriptions.'
+            )
         );
       }
     } catch (error) {
@@ -457,15 +450,17 @@ export class ChangeAction extends BaseRushAction {
           type: 'confirm',
           message: `Overwrite ${filePath} ?`
         }
-      ]).then(({ overwrite }) => {
-        if (overwrite) {
-          this._writeFile(filePath, output);
-        } else {
-          console.log(`Not overwriting ${filePath}...`);
-        }
-      }).catch((error) => {
-        console.error(colors.red(error.message));
-      });
+      ])
+        .then(({ overwrite }) => {
+          if (overwrite) {
+            this._writeFile(filePath, output);
+          } else {
+            console.log(`Not overwriting ${filePath}...`);
+          }
+        })
+        .catch(error => {
+          console.error(colors.red(error.message));
+        });
     }
 
     this._writeFile(filePath, output);

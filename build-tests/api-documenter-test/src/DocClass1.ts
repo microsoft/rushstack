@@ -1,4 +1,3 @@
-
 /**
  * A class used to exposed events.
  * @public
@@ -8,8 +7,7 @@ export class SystemEvent {
   /**
    * Adds an handler for the event.
    */
-  public addHandler(handler: () => void): void {
-  }
+  public addHandler(handler: () => void): void {}
 }
 
 /**
@@ -28,8 +26,7 @@ export class DocBaseClass {
    */
   public constructor(x: number);
 
-  public constructor(x?: number) {
-  }
+  public constructor(x?: number) {}
 }
 
 /**
@@ -69,7 +66,7 @@ export interface IDocInterface3 {
   /**
    * Construct signature
    */
-  new(): IDocInterface1;
+  new (): IDocInterface1;
 
   /**
    * Indexer
@@ -82,7 +79,7 @@ export interface IDocInterface3 {
  * Generic class.
  * @public
  */
-export class Generic<T> { }
+export class Generic<T> {}
 
 /**
  * Type union in an interface.
@@ -172,22 +169,19 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    *  </tr>
    * </table>
    */
-  tableExample(): void {
-  }
+  tableExample(): void {}
 
   /**
    * Example: "\{ \\"maxItemsToShow\\": 123 \}"
    *
    * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\-_]+$/
    */
-  interestingEdgeCases(): void {
-  }
+  interestingEdgeCases(): void {}
 
   /**
    * @deprecated Use `otherThing()` instead.
    */
-  public deprecatedExample(): void {
-  }
+  public deprecatedExample(): void {}
 
   /**
    * Returns the sum of two numbers.

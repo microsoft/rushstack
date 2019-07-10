@@ -42,15 +42,19 @@ export class SetupChecks {
     // Check for outdated tools
     if (rushConfiguration.packageManager === 'pnpm') {
       if (semver.lt(rushConfiguration.packageManagerToolVersion, MINIMUM_SUPPORTED_PNPM_VERSION)) {
-        return `The rush.json file requests PNPM version `
-          + rushConfiguration.packageManagerToolVersion
-          + `, but PNPM ${MINIMUM_SUPPORTED_PNPM_VERSION} is the minimum supported by Rush.`;
+        return (
+          `The rush.json file requests PNPM version ` +
+          rushConfiguration.packageManagerToolVersion +
+          `, but PNPM ${MINIMUM_SUPPORTED_PNPM_VERSION} is the minimum supported by Rush.`
+        );
       }
     } else if (rushConfiguration.packageManager === 'npm') {
       if (semver.lt(rushConfiguration.packageManagerToolVersion, MINIMUM_SUPPORTED_NPM_VERSION)) {
-        return `The rush.json file requests NPM version `
-          + rushConfiguration.packageManagerToolVersion
-          + `, but NPM ${MINIMUM_SUPPORTED_NPM_VERSION} is the minimum supported by Rush.`;
+        return (
+          `The rush.json file requests NPM version ` +
+          rushConfiguration.packageManagerToolVersion +
+          `, but NPM ${MINIMUM_SUPPORTED_NPM_VERSION} is the minimum supported by Rush.`
+        );
       }
     }
 
@@ -71,17 +75,25 @@ export class SetupChecks {
 
     if (phantomFolders.length > 0) {
       if (phantomFolders.length === 1) {
-        console.log(colors.yellow(Utilities.wrapWords(
-          'Warning: A phantom "node_modules" folder was found. This defeats Rush\'s protection against'
-          + ' NPM phantom dependencies and may cause confusing build errors. It is recommended to'
-          + ' delete this folder:'
-        )));
+        console.log(
+          colors.yellow(
+            Utilities.wrapWords(
+              'Warning: A phantom "node_modules" folder was found. This defeats Rush\'s protection against' +
+                ' NPM phantom dependencies and may cause confusing build errors. It is recommended to' +
+                ' delete this folder:'
+            )
+          )
+        );
       } else {
-        console.log(colors.yellow(Utilities.wrapWords(
-          'Warning: Phantom "node_modules" folders were found. This defeats Rush\'s protection against'
-          + ' NPM phantom dependencies and may cause confusing build errors. It is recommended to'
-          + ' delete these folders:'
-        )));
+        console.log(
+          colors.yellow(
+            Utilities.wrapWords(
+              'Warning: Phantom "node_modules" folders were found. This defeats Rush\'s protection against' +
+                ' NPM phantom dependencies and may cause confusing build errors. It is recommended to' +
+                ' delete these folders:'
+            )
+          )
+        );
       }
       for (const folder of phantomFolders) {
         console.log(colors.yellow(`"${folder}"`));
@@ -95,9 +107,11 @@ export class SetupChecks {
    * The bad folders will be added to phantomFolders.
    * The seenFolders set is used to avoid duplicates.
    */
-  private static _collectPhantomFoldersUpwards(folder: string, phantomFolders: string[],
-    seenFolders: Set<string>): void {
-
+  private static _collectPhantomFoldersUpwards(
+    folder: string,
+    phantomFolders: string[],
+    seenFolders: Set<string>
+  ): void {
     // Stop if we reached a folder that we already analyzed
     while (!seenFolders.has(folder)) {
       seenFolders.add(folder);

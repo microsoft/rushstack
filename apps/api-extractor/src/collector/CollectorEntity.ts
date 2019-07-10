@@ -73,7 +73,7 @@ export class CollectorEntity {
    * In all other cases, it is undefined.
    */
   public get singleExportName(): string | undefined {
-   return this._singleExportName;
+    return this._singleExportName;
   }
 
   /**
@@ -81,9 +81,11 @@ export class CollectorEntity {
    * such as "export class X { }" instead of "export { X }".
    */
   public get shouldInlineExport(): boolean {
-    return this._singleExportName !== undefined
-      && this._singleExportName !== ts.InternalSymbolName.Default
-      && this.astEntity instanceof AstSymbol;
+    return (
+      this._singleExportName !== undefined &&
+      this._singleExportName !== ts.InternalSymbolName.Default &&
+      this.astEntity instanceof AstSymbol
+    );
   }
 
   /**

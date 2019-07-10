@@ -4,11 +4,7 @@
 import * as childProcess from 'child_process';
 import * as path from 'path';
 
-import {
-  IPackageJson,
-  FileSystem,
-  Terminal
-} from '@microsoft/node-core-library';
+import { IPackageJson, FileSystem, Terminal } from '@microsoft/node-core-library';
 import { StandardBuildFolders } from './StandardBuildFolders';
 
 /**
@@ -55,11 +51,7 @@ export class CmdRunner {
   private _options: IBaseTaskOptions;
   private _errorHasBeenLogged: boolean;
 
-  constructor(
-    constants: StandardBuildFolders,
-    terminal: Terminal,
-    options: IBaseTaskOptions
-  ) {
+  constructor(constants: StandardBuildFolders, terminal: Terminal, options: IBaseTaskOptions) {
     this._standardBuildFolders = constants;
     this._terminal = terminal;
     this._options = options;
@@ -84,10 +76,11 @@ export class CmdRunner {
 
     const binaryPath: string = path.resolve(this._options.packagePath, this._options.packageBinPath);
     if (!FileSystem.exists(binaryPath)) {
-      return Promise.reject(new Error(
-        `The binary is missing. This indicates that ${this._options} is not ` +
-        'installed correctly.'
-      ));
+      return Promise.reject(
+        new Error(
+          `The binary is missing. This indicates that ${this._options} is not ` + 'installed correctly.'
+        )
+      );
     }
 
     return new Promise((resolve: () => void, reject: (error: Error) => void) => {
@@ -98,15 +91,11 @@ export class CmdRunner {
       }
 
       // Invoke the tool and watch for log messages
-      const spawnResult: childProcess.ChildProcess = childProcess.spawn(
-        nodePath,
-        [binaryPath, ...args],
-        {
-          cwd: this._standardBuildFolders.projectFolderPath,
-          env: process.env,
-          stdio: 'pipe'
-        }
-      );
+      const spawnResult: childProcess.ChildProcess = childProcess.spawn(nodePath, [binaryPath, ...args], {
+        cwd: this._standardBuildFolders.projectFolderPath,
+        env: process.env,
+        stdio: 'pipe'
+      });
 
       if (spawnResult.stdout !== null) {
         spawnResult.stdout.on('data', onData);
@@ -117,7 +106,7 @@ export class CmdRunner {
           onError(data);
         });
       }
-      spawnResult.on('close', (code) => onClose(code, this._errorHasBeenLogged, resolve, reject));
+      spawnResult.on('close', code => onClose(code, this._errorHasBeenLogged, resolve, reject));
     });
   }
 
@@ -129,7 +118,12 @@ export class CmdRunner {
     this._terminal.writeError(data.toString().trim());
   }
 
-  protected _onClose(code: number, hasErrors: boolean, resolve: () => void, reject: (error: Error) => void): void {
+  protected _onClose(
+    code: number,
+    hasErrors: boolean,
+    resolve: () => void,
+    reject: (error: Error) => void
+  ): void {
     if (code !== 0 || hasErrors) {
       reject(new Error(`exited with code ${code}`));
     } else {

@@ -7,10 +7,7 @@
  * @packageDocumentation
  */
 
-export {
-  CommandLineAction,
-  ICommandLineActionOptions
-} from './CommandLineAction';
+export { CommandLineAction, ICommandLineActionOptions } from './CommandLineAction';
 
 export {
   IBaseCommandLineDefinition,
@@ -38,15 +35,8 @@ export {
   ICommandLineParserData as _ICommandLineParserData
 } from './CommandLineParameterProvider';
 
-export {
-  ICommandLineParserOptions,
-  CommandLineParser
-} from './CommandLineParser';
+export { ICommandLineParserOptions, CommandLineParser } from './CommandLineParser';
 
-export {
-  DynamicCommandLineAction
-} from './DynamicCommandLineAction';
+export { DynamicCommandLineAction } from './DynamicCommandLineAction';
 
-export {
-  DynamicCommandLineParser
-} from './DynamicCommandLineParser';
+export { DynamicCommandLineParser } from './DynamicCommandLineParser';

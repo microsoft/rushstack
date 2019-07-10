@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ITerminalProvider } from '@microsoft/node-core-library';
-import {
-  Extractor,
-  ExtractorConfig,
-  IExtractorInvokeOptions
-} from '@microsoft/api-extractor';
+import { Extractor, ExtractorConfig, IExtractorInvokeOptions } from '@microsoft/api-extractor';
 import * as ApiExtractor from '@microsoft/api-extractor';
 
 import { RushStackCompilerBase } from './RushStackCompilerBase';
