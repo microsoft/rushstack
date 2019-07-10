@@ -177,7 +177,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     }
 
     // e.g.: C:\wbt\common\temp\projects\api-documenter.tgz
-    const absolutePathToTgzFile: string = path.join(this._rushConfiguration.commonTempFolder, relativePathToTgzFile);
+    const absolutePathToTgzFile: string = path.resolve(this._rushConfiguration.commonTempFolder, relativePathToTgzFile);
 
     // e.g.:
     //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
