@@ -109,22 +109,6 @@ export class EventHooks {
     get(event: Event): string[];
     }
 
-// @beta (undocumented)
-export interface IDependencyFileEditor {
-    // (undocumented)
-    addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
-    // (undocumented)
-    allDependencies: ReadonlyArray<PackageJsonDependency>;
-    // (undocumented)
-    filePath: string;
-    // (undocumented)
-    saveIfModified(): boolean;
-    // (undocumented)
-    tryGetDependency(packageName: string): PackageJsonDependency | undefined;
-    // (undocumented)
-    tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
-}
-
 // @beta
 export class IndividualVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
@@ -185,10 +169,9 @@ export class PackageJsonDependency {
     }
 
 // @beta (undocumented)
-export class PackageJsonEditor implements IDependencyFileEditor {
+export class PackageJsonEditor {
     // (undocumented)
     addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
-    readonly allDependencies: ReadonlyArray<PackageJsonDependency>;
     readonly dependencyList: ReadonlyArray<PackageJsonDependency>;
     readonly devDependencyList: ReadonlyArray<PackageJsonDependency>;
     // (undocumented)

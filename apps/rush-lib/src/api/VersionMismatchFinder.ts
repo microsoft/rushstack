@@ -5,27 +5,139 @@ import * as colors from 'colors';
 
 import { RushConfiguration } from './RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
-import { PackageJsonDependency, DependencyType, IDependencyFileEditor } from './PackageJsonEditor';
+import { PackageJsonDependency, DependencyType, PackageJsonEditor } from './PackageJsonEditor';
 import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RushConfigurationProject } from './RushConfigurationProject';
-import { CommonVersionsEditor } from './CommonVersionsEditor';
 
-export enum VersionMismatchFinderEntityKind {
-  project,
-  commonVersionsFile
-}
-
-export interface IVersionMismatchFinderEntity {
-  kind: VersionMismatchFinderEntityKind;
+export interface IVersionMismatchFinderEntityOptions {
   friendlyName: string;
-  editor: IDependencyFileEditor;
   cyclicDependencyProjects: Set<string>;
   skipRushCheck?: boolean;
 }
 
-export interface IVersionMismatchFinderProject extends IVersionMismatchFinderEntity {
-  kind: VersionMismatchFinderEntityKind.project;
-  packageName: string;
+export abstract class VersionMismatchFinderEntity {
+  public readonly friendlyName: string;
+  public readonly cyclicDependencyProjects: Set<string>;
+  public readonly skipRushCheck?: boolean;
+
+  public abstract filePath: string;
+  public abstract allDependencies: ReadonlyArray<PackageJsonDependency>;
+
+  constructor(options: IVersionMismatchFinderEntityOptions) {
+    this.friendlyName = options.friendlyName;
+    this.cyclicDependencyProjects = options.cyclicDependencyProjects;
+    this.skipRushCheck = options.skipRushCheck;
+  }
+
+  public abstract tryGetDependency(packageName: string): PackageJsonDependency | undefined;
+  public abstract tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
+  public abstract addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
+  public abstract saveIfModified(): boolean;
+}
+
+export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
+  public packageName: string;
+  private fileManager: PackageJsonEditor;
+
+  constructor(project: RushConfigurationProject) {
+    super({
+      friendlyName: project.packageName,
+      cyclicDependencyProjects: project.cyclicDependencyProjects,
+      skipRushCheck: project.skipRushCheck
+    });
+
+    this.fileManager = project.packageJsonEditor;
+    this.packageName = project.packageName;
+  }
+
+  public get filePath(): string {
+    return this.fileManager.filePath;
+  }
+
+  public get allDependencies(): ReadonlyArray<PackageJsonDependency> {
+    return [...this.fileManager.dependencyList, ...this.fileManager.devDependencyList];
+  }
+
+  public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
+    return this.fileManager.tryGetDependency(packageName);
+  }
+
+  public tryGetDevDependency(packageName: string): PackageJsonDependency | undefined {
+    return this.fileManager.tryGetDevDependency(packageName);
+  }
+
+  public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
+    return this.fileManager.addOrUpdateDependency(packageName, newVersion, dependencyType);
+  }
+
+  public saveIfModified(): boolean {
+    return this.fileManager.saveIfModified();
+  }
+}
+
+export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEntity {
+  private fileManager: CommonVersionsConfiguration;
+
+  constructor(commonVersionsConfiguration: CommonVersionsConfiguration) {
+    super({
+      friendlyName: `preferred versions from ${RushConstants.commonVersionsFilename}`,
+      cyclicDependencyProjects: new Set<string>()
+    });
+
+    this.fileManager = commonVersionsConfiguration;
+  }
+
+  public get filePath(): string {
+    return this.fileManager.filePath;
+  }
+
+  public get allDependencies(): ReadonlyArray<PackageJsonDependency> {
+    const dependencies: PackageJsonDependency[] = [];
+
+    this.fileManager.getAllPreferredVersions().forEach((version, dependencyName) => {
+      dependencies.push(this._getPackageJsonDependency(dependencyName, version));
+    });
+
+    return dependencies;
+  }
+
+  public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
+    const version: string | undefined = this.fileManager.getAllPreferredVersions().get(packageName);
+    if (!version) {
+      return undefined;
+    } else {
+      return this._getPackageJsonDependency(packageName, version);
+    }
+  }
+
+  public tryGetDevDependency(packageName: string): PackageJsonDependency | undefined {
+    return undefined; // common-versions.json doesn't have a distinction between dev and non-dev dependencies
+  }
+
+  public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
+    if (dependencyType !== DependencyType.Regular) {
+      throw new Error(`${RushConstants.commonVersionsFilename} only accepts "${DependencyType.Regular}" dependencies`);
+    }
+
+    if (this.fileManager.xstitchPreferredVersions.has(packageName)) {
+      this.fileManager.xstitchPreferredVersions.set(packageName, newVersion);
+    } else {
+      this.fileManager.preferredVersions.set(packageName, newVersion);
+    }
+  }
+
+  public saveIfModified(): boolean {
+    return this.fileManager.save();
+  }
+
+  private _getPackageJsonDependency(dependencyName: string, version: string): PackageJsonDependency {
+    return new PackageJsonDependency(
+      dependencyName,
+      version,
+      DependencyType.Regular,
+      () => this.addOrUpdateDependency(dependencyName, version, DependencyType.Regular)
+    );
+  }
 }
 
 export interface IVersionMismatchFinderRushCheckOptions {
@@ -49,27 +161,8 @@ export class VersionMismatchFinder {
   * }
   */
   private _allowedAlternativeVersion:  Map<string, ReadonlyArray<string>>;
-  private _mismatches: Map<string, Map<string, IVersionMismatchFinderEntity[]>>;
-  private _projects: IVersionMismatchFinderEntity[];
-
-  public static convertRushConfigurationProject(
-    project: RushConfigurationProject
-  ): IVersionMismatchFinderProject {
-    return {
-      kind: VersionMismatchFinderEntityKind.project,
-      packageName: project.packageName,
-      friendlyName: project.packageName,
-      editor: project.packageJsonEditor,
-      cyclicDependencyProjects: project.cyclicDependencyProjects,
-      skipRushCheck: project.skipRushCheck
-    };
-  }
-
-  public static convertRushConfigurationProjects(
-    projects: RushConfigurationProject[]
-  ): IVersionMismatchFinderProject[] {
-    return projects.map(VersionMismatchFinder.convertRushConfigurationProject);
-  }
+  private _mismatches: Map<string, Map<string, VersionMismatchFinderEntity[]>>;
+  private _projects: VersionMismatchFinderEntity[];
 
   public static rushCheck(
     rushConfiguration: RushConfiguration,
@@ -101,18 +194,13 @@ export class VersionMismatchFinder {
   ): VersionMismatchFinder {
     const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(options.variant);
 
-    // Create a fake project for the purposes of reporting conflicts with preferredVersions
-    // or xstitchPreferredVersions from common-versions.json
-    const projects: IVersionMismatchFinderEntity[] = (
-      VersionMismatchFinder.convertRushConfigurationProjects(rushConfiguration.projects)
-    );
-
-    projects.push({
-      kind: VersionMismatchFinderEntityKind.commonVersionsFile,
-      friendlyName: `preferred versions from ${RushConstants.commonVersionsFilename}`,
-      cyclicDependencyProjects: new Set<string>(),
-      editor: new CommonVersionsEditor(commonVersions)
+    const projects: VersionMismatchFinderEntity[] = rushConfiguration.projects.map((project) => {
+      return new VersionMismatchFinderProject(project);
     });
+
+    // Create a object for the purposes of reporting conflicts with preferredVersions
+    // or xstitchPreferredVersions from common-versions.json
+    projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
     return new VersionMismatchFinder(
       projects,
@@ -144,10 +232,10 @@ export class VersionMismatchFinder {
     }
   }
 
-  constructor(projects: IVersionMismatchFinderEntity[],
+  constructor(projects: VersionMismatchFinderEntity[],
     allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>) {
     this._projects = projects;
-    this._mismatches = new Map<string, Map<string, IVersionMismatchFinderEntity[]>>();
+    this._mismatches = new Map<string, Map<string, VersionMismatchFinderEntity[]>>();
     this._allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
     this._analyze();
   }
@@ -166,13 +254,13 @@ export class VersionMismatchFinder {
       : undefined;
   }
 
-  public getConsumersOfMismatch(mismatch: string, version: string): Array<IVersionMismatchFinderEntity> | undefined {
-    const mismatchedPackage: Map<string, IVersionMismatchFinderEntity[]> | undefined = this._mismatches.get(mismatch);
+  public getConsumersOfMismatch(mismatch: string, version: string): Array<VersionMismatchFinderEntity> | undefined {
+    const mismatchedPackage: Map<string, VersionMismatchFinderEntity[]> | undefined = this._mismatches.get(mismatch);
     if (!mismatchedPackage) {
       return undefined;
     }
 
-    const mismatchedVersion: IVersionMismatchFinderEntity[] | undefined = mismatchedPackage.get(version);
+    const mismatchedVersion: VersionMismatchFinderEntity[] | undefined = mismatchedPackage.get(version);
     return mismatchedVersion;
   }
 
@@ -182,7 +270,7 @@ export class VersionMismatchFinder {
       console.log(colors.yellow(dependency));
       this.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
         console.log(`  ${version}`);
-        this.getConsumersOfMismatch(dependency, version)!.forEach((project: IVersionMismatchFinderEntity) => {
+        this.getConsumersOfMismatch(dependency, version)!.forEach((project: VersionMismatchFinderEntity) => {
           console.log(`   - ${project.friendlyName}`);
         });
       });
@@ -191,7 +279,7 @@ export class VersionMismatchFinder {
   }
 
   private _analyze(): void {
-    this._projects.forEach((project: IVersionMismatchFinderEntity) => {
+    this._projects.forEach((project: VersionMismatchFinderEntity) => {
       if (!project.skipRushCheck) {
         // NOTE: We do not consider peer dependencies here.  The purpose of "rush check" is
         // mainly to avoid side-by-side duplicates in the node_modules folder, whereas
@@ -200,7 +288,7 @@ export class VersionMismatchFinder {
         // patterns consistent, but on the other hand different projects may have different
         // levels of compatibility -- we should wait for someone to actually request this feature
         // before we get into that.)
-        project.editor.allDependencies.forEach((dependency: PackageJsonDependency) => {
+        project.allDependencies.forEach((dependency: PackageJsonDependency) => {
           if (dependency.dependencyType !== DependencyType.Peer) {
             const version: string = dependency.version!;
 
@@ -213,10 +301,10 @@ export class VersionMismatchFinder {
             const name: string = dependency.name + (isCyclic ? ' (cyclic)' : '');
 
             if (!this._mismatches.has(name)) {
-              this._mismatches.set(name, new Map<string, IVersionMismatchFinderEntity[]>());
+              this._mismatches.set(name, new Map<string, VersionMismatchFinderEntity[]>());
             }
 
-            const dependencyVersions: Map<string, IVersionMismatchFinderEntity[]> = this._mismatches.get(name)!;
+            const dependencyVersions: Map<string, VersionMismatchFinderEntity[]> = this._mismatches.get(name)!;
 
             if (!dependencyVersions.has(version)) {
               dependencyVersions.set(version, []);
@@ -228,7 +316,7 @@ export class VersionMismatchFinder {
       }
     });
 
-    this._mismatches.forEach((mismatches: Map<string, IVersionMismatchFinderEntity[]>, project: string) => {
+    this._mismatches.forEach((mismatches: Map<string, VersionMismatchFinderEntity[]>, project: string) => {
       if (mismatches.size <= 1) {
         this._mismatches.delete(project);
       }

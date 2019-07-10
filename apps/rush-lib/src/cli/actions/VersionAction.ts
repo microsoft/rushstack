@@ -15,7 +15,7 @@ import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionControl } from '../../utilities/VersionControl';
-import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { VersionMismatchFinder, VersionMismatchFinderProject } from '../../api/VersionMismatchFinder';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
@@ -189,7 +189,7 @@ export class VersionAction extends BaseRushAction {
     );
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
-      VersionMismatchFinder.convertRushConfigurationProjects(rushConfig.projects),
+      rushConfig.projects.map((project) => new VersionMismatchFinderProject(project)),
       commonVersions.allowedAlternativeVersions
     );
     if (mismatchFinder.numberOfMismatches) {

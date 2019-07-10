@@ -8,16 +8,14 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { InstallManager, IInstallManagerOptions } from './InstallManager';
 import {
   VersionMismatchFinder,
-  IVersionMismatchFinderEntity,
-  VersionMismatchFinderEntityKind,
-  IVersionMismatchFinderProject
+  VersionMismatchFinderEntity,
+  VersionMismatchFinderProject
 } from '../api/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
 import {
   DependencyType,
-  PackageJsonDependency,
-  IDependencyFileEditor
+  PackageJsonDependency
 } from '../api/PackageJsonEditor';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
@@ -82,7 +80,7 @@ export interface IUpdateProjectOptions {
   /**
    * The project which will have its package.json updated
    */
-  project: IVersionMismatchFinderEntity;
+  project: VersionMismatchFinderEntity;
   /**
    * The name of the dependency to be added or updated in the project
    */
@@ -165,7 +163,7 @@ export class PackageJsonUpdater {
       console.log();
 
       const currentProjectUpdate: IUpdateProjectOptions = {
-        project: VersionMismatchFinder.convertRushConfigurationProject(currentProject),
+        project: new VersionMismatchFinderProject(currentProject),
         packageName,
         newVersion: version,
         dependencyType: devDependency ? DependencyType.Dev : undefined
@@ -193,10 +191,7 @@ export class PackageJsonUpdater {
           if (mismatchedVersions) {
             for (const mismatchedVersion of mismatchedVersions) {
               for (const consumer of mismatchFinder.getConsumersOfMismatch(packageName, mismatchedVersion)!) {
-                if (
-                  consumer.kind !== VersionMismatchFinderEntityKind.project ||
-                  (consumer as IVersionMismatchFinderProject).packageName !== currentProject.packageName
-                ) {
+                if (consumer instanceof VersionMismatchFinderProject) {
                   otherPackageUpdates.push({
                     project: consumer,
                     packageName: packageName,
@@ -213,8 +208,8 @@ export class PackageJsonUpdater {
 
       const allPackageUpdates: IUpdateProjectOptions[] = [currentProjectUpdate, ...otherPackageUpdates];
       for (const { project } of allPackageUpdates) {
-        if (project.editor.saveIfModified()) {
-          console.log(colors.green('Wrote ') + project.editor.filePath);
+        if (project.saveIfModified()) {
+          console.log(colors.green('Wrote ') + project.filePath);
         }
       }
 
@@ -255,18 +250,17 @@ export class PackageJsonUpdater {
       packageName,
       newVersion
     } = options;
-    const editor: IDependencyFileEditor = project.editor;
 
-    const oldDependency: PackageJsonDependency | undefined = editor.tryGetDependency(packageName);
-    const oldDevDependency: PackageJsonDependency | undefined = editor.tryGetDevDependency(packageName);
+    const oldDependency: PackageJsonDependency | undefined = project.tryGetDependency(packageName);
+    const oldDevDependency: PackageJsonDependency | undefined = project.tryGetDevDependency(packageName);
 
-    const oldDependencyType: DependencyType | undefined =
-      oldDevDependency ? oldDevDependency.dependencyType :
-        oldDependency ? oldDependency.dependencyType : undefined;
+    const oldDependencyType: DependencyType | undefined = oldDevDependency
+      ? oldDevDependency.dependencyType
+      : (oldDependency ? oldDependency.dependencyType : undefined);
 
     dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 
-    editor.addOrUpdateDependency(packageName, newVersion, dependencyType!);
+    project.addOrUpdateDependency(packageName, newVersion, dependencyType!);
   }
 
   /**

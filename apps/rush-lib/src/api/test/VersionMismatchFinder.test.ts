@@ -3,76 +3,67 @@
 
 import * as path from 'path';
 
+import { RushConfigurationProject } from '../RushConfigurationProject';
 import {
-  IVersionMismatchFinderProject,
   VersionMismatchFinder,
-  VersionMismatchFinderEntityKind,
-  IVersionMismatchFinderEntity
+  VersionMismatchFinderProject,
+  VersionMismatchFinderEntity,
+  VersionMismatchFinderCommonVersions
 } from '../VersionMismatchFinder';
 import { PackageJsonEditor } from '../PackageJsonEditor';
-import { CommonVersionsEditor } from '../CommonVersionsEditor';
 import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration';
 
 // tslint:disable:no-any
 describe('VersionMismatchFinder', () => {
   it('finds no mismatches if there are none', (done: jest.DoneCallback) => {
-    const projects: IVersionMismatchFinderProject[] = [
-      {
-        kind: VersionMismatchFinderEntityKind.project,
-        packageName: 'A',
-        friendlyName: 'A',
-        editor: PackageJsonEditor.fromObject({
-          dependencies: {
-            '@types/foo': '1.2.3',
-            'karma': '0.0.1'
-          }
-        } as any, 'foo.json'),
-        cyclicDependencyProjects: new Set<string>()
-      },
-      {
-        kind: VersionMismatchFinderEntityKind.project,
-        packageName: 'B',
-        friendlyName: 'B',
-        editor: PackageJsonEditor.fromObject({
-          dependencies: {
-            '@types/foo': '1.2.3',
-            'karma': '0.0.1'
-          }
-        } as any, 'foo.json'),
-        cyclicDependencyProjects: new Set<string>()
-      }
-    ];
-    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(projects);
-    expect(mismatchFinder.numberOfMismatches).toEqual(0);
-    expect(mismatchFinder.getMismatches().length).toEqual(0);
-    done();
-  });
-
-  it('finds a mismatch in two packages', (done: jest.DoneCallback) => {
-    const projectA: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
-      friendlyName: 'A',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectB: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
-      friendlyName: 'B',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
+        dependencies: {
+          '@types/foo': '1.2.3',
+          'karma': '0.0.1'
+        }
+      } as any, 'foo.json'),
+      cyclicDependencyProjects: new Set<string>()
+    } as any as RushConfigurationProject);
+
+    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
+    expect(mismatchFinder.numberOfMismatches).toEqual(0);
+    expect(mismatchFinder.getMismatches().length).toEqual(0);
+    done();
+  });
+
+  it('finds a mismatch in two packages', (done: jest.DoneCallback) => {
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
+      packageName: 'A',
+      packageJsonEditor: PackageJsonEditor.fromObject({
+        dependencies: {
+          '@types/foo': '1.2.3',
+          'karma': '0.0.1'
+        }
+      } as any, 'foo.json'),
+      cyclicDependencyProjects: new Set<string>()
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
+      packageName: 'B',
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '2.0.0',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
+    } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(1);
@@ -85,30 +76,26 @@ describe('VersionMismatchFinder', () => {
   });
 
   it('ignores cyclic dependencies', (done: jest.DoneCallback) => {
-    const projectA: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
-      friendlyName: 'A',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>(['@types/foo'])
-    };
-    const projectB: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
-      friendlyName: 'B',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '2.0.0',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
+    } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(0);
@@ -117,30 +104,27 @@ describe('VersionMismatchFinder', () => {
   });
 
   it('won\'t let you access mismatches that don\t exist', (done: jest.DoneCallback) => {
-    const projectA: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
-      friendlyName: 'A',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectB: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
-      friendlyName: 'B',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '2.0.0',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
+    } as any as RushConfigurationProject);
+
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.getVersionsOfMismatch('@types/foobar')).toEqual(undefined);
     expect(mismatchFinder.getConsumersOfMismatch('@types/fobar', '2.0.0')).toEqual(undefined);
@@ -149,54 +133,47 @@ describe('VersionMismatchFinder', () => {
   });
 
   it('finds two mismatches in two different pairs of projects', (done: jest.DoneCallback) => {
-    const projectA: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
-      friendlyName: 'A',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectB: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
-      friendlyName: 'B',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '2.0.0',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectC: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectC: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'C',
-      friendlyName: 'C',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           'mocha': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectD: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectD: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'D',
-      friendlyName: 'D',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           'mocha': '2.0.0',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
+    } as any as RushConfigurationProject);
+
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB, projectC, projectD]);
     expect(mismatchFinder.numberOfMismatches).toEqual(2);
     expect(mismatchFinder.getMismatches().length).toEqual(2);
@@ -211,42 +188,37 @@ describe('VersionMismatchFinder', () => {
   });
 
   it('finds three mismatches in three projects', (done: jest.DoneCallback) => {
-    const projectA: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
-      friendlyName: 'A',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectB: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
-      friendlyName: 'B',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '2.0.0',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectC: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectC: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'C',
-      friendlyName: 'C',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '9.9.9',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
+    } as any as RushConfigurationProject);
+
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB, projectC]);
     expect(mismatchFinder.numberOfMismatches).toEqual(1);
     expect(mismatchFinder.getMismatches().length).toEqual(1);
@@ -259,32 +231,29 @@ describe('VersionMismatchFinder', () => {
   });
 
   it('checks dev dependencies', (done: jest.DoneCallback) => {
-    const projectA: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
-      friendlyName: 'A',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectB: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
-      friendlyName: 'B',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         devDependencies: {
           '@types/foo': '2.0.0',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
+    } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
+
     expect(mismatchFinder.numberOfMismatches).toEqual(1);
     expect(mismatchFinder.getMismatches().length).toEqual(1);
     expect(mismatchFinder.getMismatches()[0]).toEqual('@types/foo');
@@ -295,30 +264,26 @@ describe('VersionMismatchFinder', () => {
   });
 
   it('does not check peer dependencies', (done: jest.DoneCallback) => {
-    const projectA: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
-      friendlyName: 'A',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectB: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
-      friendlyName: 'B',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         peerDependencies: {
           '@types/foo': '2.0.0',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
+    } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(0);
@@ -326,30 +291,26 @@ describe('VersionMismatchFinder', () => {
   });
 
   it('checks optional dependencies', (done: jest.DoneCallback) => {
-    const projectA: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
-      friendlyName: 'A',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectB: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
-      friendlyName: 'B',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         optionalDependencies: {
           '@types/foo': '2.0.0',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
+    } as any as RushConfigurationProject);
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(1);
@@ -362,30 +323,26 @@ describe('VersionMismatchFinder', () => {
   });
 
   it('allows alternative versions', (done: jest.DoneCallback) => {
-    const projectA: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
-      friendlyName: 'A',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-    const projectB: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'B',
-      friendlyName: 'B',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@types/foo': '2.0.0',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
+    } as any as RushConfigurationProject);
 
     const alternatives: Map<string, ReadonlyArray<string>> = new Map<string, ReadonlyArray<string>>();
     alternatives.set('@types/foo', ['2.0.0']);
@@ -396,35 +353,28 @@ describe('VersionMismatchFinder', () => {
   });
 
   it('handles the common-versions.json file correctly', (done: jest.DoneCallback) => {
-    const projectA: IVersionMismatchFinderProject = {
-      kind: VersionMismatchFinderEntityKind.project,
+    const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
-      friendlyName: 'A',
-      editor: PackageJsonEditor.fromObject({
+      packageJsonEditor: PackageJsonEditor.fromObject({
         dependencies: {
           '@scope/library-1': '1.2.3',
           'karma': '0.0.1'
         }
       } as any, 'foo.json'),
       cyclicDependencyProjects: new Set<string>()
-    };
-
-    const commonVersionsFile: CommonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(
-      path.resolve(__dirname, 'jsonFiles', 'common-versions.json')
+    } as any as RushConfigurationProject);
+    const projectB: VersionMismatchFinderEntity = new VersionMismatchFinderCommonVersions(
+      CommonVersionsConfiguration.loadFromFile(
+        path.resolve(__dirname, 'jsonFiles', 'common-versions.json')
+      )
     );
-    const commonVersionsEntity: IVersionMismatchFinderEntity = {
-      kind: VersionMismatchFinderEntityKind.commonVersionsFile,
-      friendlyName: 'common-versions.json',
-      editor: new CommonVersionsEditor(commonVersionsFile),
-      cyclicDependencyProjects: new Set<string>()
-    };
 
-    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, commonVersionsEntity]);
+    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(1);
     expect(mismatchFinder.getMismatches().length).toEqual(1);
     expect(mismatchFinder.getMismatches()[0]).toEqual('@scope/library-1');
     expect(mismatchFinder.getVersionsOfMismatch('@scope/library-1')!.sort()).toEqual(['1.2.3', '~3.2.1']);
-    expect(mismatchFinder.getConsumersOfMismatch('@scope/library-1', '~3.2.1')).toEqual([commonVersionsEntity]);
+    expect(mismatchFinder.getConsumersOfMismatch('@scope/library-1', '~3.2.1')).toEqual([projectB]);
     expect(mismatchFinder.getConsumersOfMismatch('@scope/library-1', '1.2.3')).toEqual([projectA]);
     done();
   });

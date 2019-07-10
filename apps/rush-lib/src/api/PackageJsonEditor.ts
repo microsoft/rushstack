@@ -12,18 +12,6 @@ import {
 /**
  * @beta
  */
-export interface IDependencyFileEditor {
-  filePath: string;
-  allDependencies: ReadonlyArray<PackageJsonDependency>;
-  tryGetDependency(packageName: string): PackageJsonDependency | undefined;
-  tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
-  addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
-  saveIfModified(): boolean;
-}
-
-/**
- * @beta
- */
 export const enum DependencyType {
   Regular = 'dependencies',
   Dev = 'devDependencies',
@@ -74,7 +62,7 @@ export class PackageJsonDependency {
 /**
  * @beta
  */
-export class PackageJsonEditor implements IDependencyFileEditor {
+export class PackageJsonEditor {
   private readonly _filePath: string;
   private readonly _data: IPackageJson;
   private readonly _dependencies: Map<string, PackageJsonDependency>;
@@ -118,13 +106,6 @@ export class PackageJsonEditor implements IDependencyFileEditor {
    */
   public get devDependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._devDependencies.values()];
-  }
-
-  /**
-   * The concatenation of {@see dependencyList} and {@see devDependencyList}
-   */
-  public get allDependencies(): ReadonlyArray<PackageJsonDependency> {
-    return [...this.dependencyList, ...this.devDependencyList];
   }
 
   public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
