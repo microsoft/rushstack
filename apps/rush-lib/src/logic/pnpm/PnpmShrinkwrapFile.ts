@@ -273,7 +273,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   private _getValidDependencyVersion(dependencyVersion: string): string {
-    const validDependencyVersion = dependencyVersion.split('/').pop()!;
+    const validDependencyVersion: string = dependencyVersion.split('/').pop()!;
     return semver.valid(validDependencyVersion) ? validDependencyVersion : dependencyVersion.split('_')[0]!;
   }
 
