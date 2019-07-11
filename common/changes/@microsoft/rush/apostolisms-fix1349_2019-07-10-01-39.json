@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix for issue https://github.com/microsoft/web-build-tools/issues/1349 rush install fails when there is a preferred version with a peer dependency. This was caused by file format changes in pnpm 3.x ",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "apostolisms@users.noreply.github.com"
+}

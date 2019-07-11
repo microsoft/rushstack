@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 09 Jul 2019 19:13:24 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Jul 2019 19:13:08 GMT and should not be manually modified.
+
+## 7.3.1
+Thu, 11 Jul 2019 19:13:08 GMT
+
+### Patches
+
+- Add support for TypeScript 3.5
 
 ## 7.3.0
 Tue, 09 Jul 2019 19:13:24 GMT
