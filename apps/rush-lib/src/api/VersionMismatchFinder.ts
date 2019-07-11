@@ -18,7 +18,7 @@ export interface IVersionMismatchFinderEntityOptions {
 export abstract class VersionMismatchFinderEntity {
   public readonly friendlyName: string;
   public readonly cyclicDependencyProjects: Set<string>;
-  public readonly skipRushCheck?: boolean;
+  public readonly skipRushCheck: boolean | undefined;
 
   public abstract filePath: string;
   public abstract allDependencies: ReadonlyArray<PackageJsonDependency>;
@@ -213,11 +213,11 @@ export class VersionMismatchFinder {
     options: {
       isRushCheckCommand: boolean;
       variant?: string | undefined;
-    }): void {
+    }
+  ): void {
 
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
-      const mismatchFinder: VersionMismatchFinder
-        = VersionMismatchFinder.getMismatches(rushConfiguration, options);
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfiguration, options);
 
       mismatchFinder.print();
 
@@ -232,8 +232,10 @@ export class VersionMismatchFinder {
     }
   }
 
-  constructor(projects: VersionMismatchFinderEntity[],
-    allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>) {
+  constructor(
+    projects: VersionMismatchFinderEntity[],
+    allowedAlternativeVersions?: Map<string, ReadonlyArray<string>>
+  ) {
     this._projects = projects;
     this._mismatches = new Map<string, Map<string, VersionMismatchFinderEntity[]>>();
     this._allowedAlternativeVersion = allowedAlternativeVersions || new Map<string, ReadonlyArray<string>>();
