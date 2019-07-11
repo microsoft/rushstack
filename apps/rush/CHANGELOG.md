@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 29 Jun 2019 02:47:42 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Jul 2019 22:00:50 GMT and should not be manually modified.
+
+## 5.10.1
+Thu, 11 Jul 2019 22:00:50 GMT
+
+### Updates
+
+- Fix for issue https://github.com/microsoft/web-build-tools/issues/1349 rush install fails when there is a preferred version with a peer dependency. This was caused by file format changes in pnpm 3.x 
+- Fix an issue where "rush add" erroneously believes ensureConsistentVersions is unset.
+- Fix an issue that arises when "rush add" is run and the package manager isn't installed.
+- Fix an issue where rush add -m doesn't corretly update the common-versions.json file.
+- Fix an issue where rush change will detect unrelated changes.
+- When rush change detects no changes, clarify that no *relevant* changes were detected in the case that changes were in a package not versioned by rush'
+- Fix https://github.com/microsoft/web-build-tools/issues/1347: rush link was failing on pnpm 3+ with the changes in shrinkwrap format with regard to peer dependencies. Rush now resolves the path to the local project accurately by referring to the shrinkwrap rather than figuring out the path on its own.
 
 ## 5.10.0
 Sat, 29 Jun 2019 02:47:42 GMT

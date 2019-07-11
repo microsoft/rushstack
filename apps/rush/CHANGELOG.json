@@ -2,6 +2,36 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.10.1",
+      "tag": "@microsoft/rush_v5.10.1",
+      "date": "Thu, 11 Jul 2019 22:00:50 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix for issue https://github.com/microsoft/web-build-tools/issues/1349 rush install fails when there is a preferred version with a peer dependency. This was caused by file format changes in pnpm 3.x "
+          },
+          {
+            "comment": "Fix an issue where \"rush add\" erroneously believes ensureConsistentVersions is unset."
+          },
+          {
+            "comment": "Fix an issue that arises when \"rush add\" is run and the package manager isn't installed."
+          },
+          {
+            "comment": "Fix an issue where rush add -m doesn't corretly update the common-versions.json file."
+          },
+          {
+            "comment": "Fix an issue where rush change will detect unrelated changes."
+          },
+          {
+            "comment": "When rush change detects no changes, clarify that no *relevant* changes were detected in the case that changes were in a package not versioned by rush'"
+          },
+          {
+            "comment": "Fix https://github.com/microsoft/web-build-tools/issues/1347: rush link was failing on pnpm 3+ with the changes in shrinkwrap format with regard to peer dependencies. Rush now resolves the path to the local project accurately by referring to the shrinkwrap rather than figuring out the path on its own."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.10.0",
       "tag": "@microsoft/rush_v5.10.0",
       "date": "Sat, 29 Jun 2019 02:47:42 GMT",
