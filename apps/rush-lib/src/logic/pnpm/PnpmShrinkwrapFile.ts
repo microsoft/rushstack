@@ -146,18 +146,33 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
-   * Serializes the PNPM Shrinkwrap file
+   * Gets the path to the tarball file if the package is a tarball.
+   * Returns undefined if the package entry doesn't exist or the package isn't a tarball.
+   * Example of return value: file:projects/build-tools.tgz
    */
-  protected serialize(): string {
-    return yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
+  public getTarballPath(packageName: string): string | undefined {
+    const dependency: IPnpmShrinkwrapDependencyYaml = this._shrinkwrapJson.packages[packageName];
+
+    if (!dependency) {
+      return undefined;
+    }
+
+    return dependency.resolution.tarball;
   }
 
   /**
    * Gets the version number from the list of top-level dependencies in the "dependencies" section
    * of the shrinkwrap file
    */
-  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+  public getTopLevelDependencyVersion(dependencyName: string): string | undefined {
     return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+  }
+
+  /**
+   * Serializes the PNPM Shrinkwrap file
+   */
+  protected serialize(): string {
+    return yaml.safeDump(this._shrinkwrapJson, SHRINKWRAP_YAML_FORMAT);
   }
 
   /**
