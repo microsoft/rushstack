@@ -71,7 +71,7 @@ export class VersionMismatchFinder {
       return new VersionMismatchFinderProject(project);
     });
 
-    // Create a object for the purposes of reporting conflicts with preferredVersions
+    // Create an object for the purposes of reporting conflicts with preferredVersions
     // or xstitchPreferredVersions from common-versions.json
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
