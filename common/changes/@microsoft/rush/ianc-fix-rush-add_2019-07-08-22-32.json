@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an issue where rush add -m doesn't corretly update the common-versions.json file.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
