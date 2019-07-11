@@ -15,7 +15,7 @@ import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionControl } from '../../utilities/VersionControl';
-import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';

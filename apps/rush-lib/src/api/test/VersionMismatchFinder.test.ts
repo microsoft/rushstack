@@ -4,14 +4,12 @@
 import * as path from 'path';
 
 import { RushConfigurationProject } from '../RushConfigurationProject';
-import {
-  VersionMismatchFinder,
-  VersionMismatchFinderProject,
-  VersionMismatchFinderEntity,
-  VersionMismatchFinderCommonVersions
-} from '../VersionMismatchFinder';
+import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { PackageJsonEditor } from '../PackageJsonEditor';
 import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration';
+import { VersionMismatchFinderEntity } from '../../logic/versionMismatch/VersionMismatchFinderEntity';
+import { VersionMismatchFinderProject } from '../../logic/versionMismatch/VersionMismatchFinderProject';
+import { VersionMismatchFinderCommonVersions } from '../../logic/versionMismatch/VersionMismatchFinderCommonVersions';
 
 // tslint:disable:no-any
 describe('VersionMismatchFinder', () => {

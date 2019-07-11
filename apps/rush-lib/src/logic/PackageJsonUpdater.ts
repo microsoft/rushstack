@@ -6,11 +6,7 @@ import * as semver from 'semver';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { InstallManager, IInstallManagerOptions } from './InstallManager';
-import {
-  VersionMismatchFinder,
-  VersionMismatchFinderEntity,
-  VersionMismatchFinderProject
-} from '../api/VersionMismatchFinder';
+import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
 import {
@@ -19,6 +15,8 @@ import {
 } from '../api/PackageJsonEditor';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
+import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject';
 
 /**
  * The type of SemVer range specifier that is prepended to the version

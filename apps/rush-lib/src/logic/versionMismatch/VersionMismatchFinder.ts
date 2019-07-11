@@ -3,142 +3,15 @@
 
 import * as colors from 'colors';
 
-import { RushConfiguration } from './RushConfiguration';
-import { RushConstants } from '../logic/RushConstants';
-import { PackageJsonDependency, DependencyType, PackageJsonEditor } from './PackageJsonEditor';
-import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
-import { RushConfigurationProject } from './RushConfigurationProject';
-
-export interface IVersionMismatchFinderEntityOptions {
-  friendlyName: string;
-  cyclicDependencyProjects: Set<string>;
-  skipRushCheck?: boolean;
-}
-
-export abstract class VersionMismatchFinderEntity {
-  public readonly friendlyName: string;
-  public readonly cyclicDependencyProjects: Set<string>;
-  public readonly skipRushCheck: boolean | undefined;
-
-  public abstract filePath: string;
-  public abstract allDependencies: ReadonlyArray<PackageJsonDependency>;
-
-  constructor(options: IVersionMismatchFinderEntityOptions) {
-    this.friendlyName = options.friendlyName;
-    this.cyclicDependencyProjects = options.cyclicDependencyProjects;
-    this.skipRushCheck = options.skipRushCheck;
-  }
-
-  public abstract tryGetDependency(packageName: string): PackageJsonDependency | undefined;
-  public abstract tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
-  public abstract addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
-  public abstract saveIfModified(): boolean;
-}
-
-export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
-  public packageName: string;
-  private fileManager: PackageJsonEditor;
-
-  constructor(project: RushConfigurationProject) {
-    super({
-      friendlyName: project.packageName,
-      cyclicDependencyProjects: project.cyclicDependencyProjects,
-      skipRushCheck: project.skipRushCheck
-    });
-
-    this.fileManager = project.packageJsonEditor;
-    this.packageName = project.packageName;
-  }
-
-  public get filePath(): string {
-    return this.fileManager.filePath;
-  }
-
-  public get allDependencies(): ReadonlyArray<PackageJsonDependency> {
-    return [...this.fileManager.dependencyList, ...this.fileManager.devDependencyList];
-  }
-
-  public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
-    return this.fileManager.tryGetDependency(packageName);
-  }
-
-  public tryGetDevDependency(packageName: string): PackageJsonDependency | undefined {
-    return this.fileManager.tryGetDevDependency(packageName);
-  }
-
-  public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
-    return this.fileManager.addOrUpdateDependency(packageName, newVersion, dependencyType);
-  }
-
-  public saveIfModified(): boolean {
-    return this.fileManager.saveIfModified();
-  }
-}
-
-export class VersionMismatchFinderCommonVersions extends VersionMismatchFinderEntity {
-  private fileManager: CommonVersionsConfiguration;
-
-  constructor(commonVersionsConfiguration: CommonVersionsConfiguration) {
-    super({
-      friendlyName: `preferred versions from ${RushConstants.commonVersionsFilename}`,
-      cyclicDependencyProjects: new Set<string>()
-    });
-
-    this.fileManager = commonVersionsConfiguration;
-  }
-
-  public get filePath(): string {
-    return this.fileManager.filePath;
-  }
-
-  public get allDependencies(): ReadonlyArray<PackageJsonDependency> {
-    const dependencies: PackageJsonDependency[] = [];
-
-    this.fileManager.getAllPreferredVersions().forEach((version, dependencyName) => {
-      dependencies.push(this._getPackageJsonDependency(dependencyName, version));
-    });
-
-    return dependencies;
-  }
-
-  public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
-    const version: string | undefined = this.fileManager.getAllPreferredVersions().get(packageName);
-    if (!version) {
-      return undefined;
-    } else {
-      return this._getPackageJsonDependency(packageName, version);
-    }
-  }
-
-  public tryGetDevDependency(packageName: string): PackageJsonDependency | undefined {
-    return undefined; // common-versions.json doesn't have a distinction between dev and non-dev dependencies
-  }
-
-  public addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void {
-    if (dependencyType !== DependencyType.Regular) {
-      throw new Error(`${RushConstants.commonVersionsFilename} only accepts "${DependencyType.Regular}" dependencies`);
-    }
-
-    if (this.fileManager.xstitchPreferredVersions.has(packageName)) {
-      this.fileManager.xstitchPreferredVersions.set(packageName, newVersion);
-    } else {
-      this.fileManager.preferredVersions.set(packageName, newVersion);
-    }
-  }
-
-  public saveIfModified(): boolean {
-    return this.fileManager.save();
-  }
-
-  private _getPackageJsonDependency(dependencyName: string, version: string): PackageJsonDependency {
-    return new PackageJsonDependency(
-      dependencyName,
-      version,
-      DependencyType.Regular,
-      () => this.addOrUpdateDependency(dependencyName, version, DependencyType.Regular)
-    );
-  }
-}
+import { RushConfiguration } from '../../api/RushConfiguration';
+import {
+  PackageJsonDependency,
+  DependencyType
+} from '../../api/PackageJsonEditor';
+import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
+import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
+import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
+import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderCommonVersions';
 
 export interface IVersionMismatchFinderRushCheckOptions {
   variant?: string | undefined;
