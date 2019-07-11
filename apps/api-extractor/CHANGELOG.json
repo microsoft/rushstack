@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.3.1",
+      "tag": "@microsoft/api-extractor_v7.3.1",
+      "date": "Thu, 11 Jul 2019 19:13:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for TypeScript 3.5"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.0",
       "tag": "@microsoft/api-extractor_v7.3.0",
       "date": "Tue, 09 Jul 2019 19:13:24 GMT",
