@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add support for \"Current\" Node version (12.x)",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "mharder@microsoft.com"
+}
