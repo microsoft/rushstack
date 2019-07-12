@@ -11,7 +11,7 @@ assignees: ''
  
 **Is this a feature or a bug?**
 
-- [ ] Issue
+- [ ] Feature
 - [ ] Bug
 
 **Please describe the actual behavior.**
