@@ -69,9 +69,11 @@ export class RunAction extends CommandLineAction {
     this._typescriptCompilerFolder = this.defineStringParameter({
       parameterLongName: '--typescript-compiler-folder',
       argumentName: 'PATH',
-      description: 'By default API Extractor uses its own TypeScript compiler version to analyze your project.'
-        + ' This can often cause compiler errors due to incompatibilities between different TS versions.'
-        + ' Use "--typescript-compiler-folder" to specify the folder path for your compiler version.'
+      description:  'API Extractor uses its own TypeScript compiler engine to analyze your project.  If your project'
+      + ' is built with a significantly different TypeScript version, sometimes API Extractor may report compilation'
+      + ' errors due to differences in the system typings (e.g. lib.dom.d.ts).  You can use the'
+      + ' "--typescriptCompilerFolder" option to specify the folder path where you installed the TypeScript package,'
+      + ' and API Extractor\'s compiler will use those system typings instead.'
     });
   }
 

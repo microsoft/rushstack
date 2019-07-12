@@ -37,9 +37,11 @@ export interface IExtractorInvokeOptions {
 
   /**
    * Indicates that API Extractor is running as part of a local build, e.g. on developer's
-   * machine. This disables certain validation that would normally be performed
-   * for a ship/production build. For example, the *.api.md report file is
-   * automatically updated in a local build.
+   * machine.
+   *
+   * @remarks
+   * This disables certain validation that would normally be performed for a ship/production build. For example,
+   * the *.api.md report file is automatically updated in a local build.
    *
    * The default value is false.
    */
@@ -53,14 +55,21 @@ export interface IExtractorInvokeOptions {
   /**
    * If true, API Extractor will print diagnostic information used for troubleshooting problems.
    * These messages will be included as {@link ExtractorLogLevel.Verbose} output.
+   *
+   * @remarks
    * Setting `showDiagnostics=true` forces `showVerboseMessages=true`.
    */
   showDiagnostics?: boolean;
 
   /**
-   * By default API Extractor uses its own TypeScript compiler version to analyze your project.
-   * This can often cause compiler errors due to incompatibilities between different TS versions.
-   * Use this option to specify the folder path for your compiler version.
+   * Specifies an alternate folder path to be used when loading the TypeScript system typings.
+   *
+   * @remarks
+   * API Extractor uses its own TypeScript compiler engine to analyze your project.  If your project
+   * is built with a significantly different TypeScript version, sometimes API Extractor may report compilation
+   * errors due to differences in the system typings (e.g. lib.dom.d.ts).  You can use the "--typescriptCompilerFolder"
+   * option to specify the folder path where you installed the TypeScript package, and API Extractor's compiler will
+   * use those system typings instead.
    */
   typescriptCompilerFolder?: string;
 
