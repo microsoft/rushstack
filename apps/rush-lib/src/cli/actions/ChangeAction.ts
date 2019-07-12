@@ -329,16 +329,13 @@ export class ChangeAction extends BaseRushAction {
     const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
     const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
 
-    let bumpOptions: { [type: string]: string } = {
+    let bumpOptions: { [type: string]: string } = this.rushConfiguration.hotfixChangeEnabled ? {
+      'hotfix': 'hotfix - for changes that need to be published in a separate hotfix package'
+    } : {
       'major': 'major - for changes that break compatibility, e.g. removing an API',
       'minor': 'minor - for backwards compatible changes, e.g. adding a new API',
       'patch': 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
     };
-
-    if (this.rushConfiguration.hotfixChangeEnabled) {
-      // tslint:disable-next-line:no-string-literal
-      bumpOptions['hotfix'] = 'hotfix - for changes that need to be published in a separate hotfix package';
-    }
 
     if (versionPolicy) {
       if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
