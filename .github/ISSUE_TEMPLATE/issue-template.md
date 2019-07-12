@@ -11,10 +11,19 @@ assignees: ''
  
 **Is this a feature or a bug?**
 
+- [ ] Issue
+- [ ] Bug
+
 **Please describe the actual behavior.**
 
-**If the issue is a bug, how can we reproduce it?**
+**If the issue is a bug, how can we reproduce it? Please provide detailed steps and include a GitHub branch if applicable. Your issue will get resolved faster if you can make it easy to investigate.**
 
 **What is the expected behavior?**
 
 **Please provide the tool version, Node.js version and OS.**
+
+* Tool: 
+* Tool Version:
+* Node Version: 
+* OS:
+
