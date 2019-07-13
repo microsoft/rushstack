@@ -27,11 +27,10 @@
     "@microsoft/node-library-build": "6.0.71",
     "@microsoft/rush-stack-compiler-3.2": "0.3.23",
     "@types/glob": "5.0.30",
-    "@types/gulp": "3.8.32",
+    "@types/gulp": "4.0.6",
     "@types/gulp-istanbul": "0.9.30",
     "@types/gulp-mocha": "0.0.32",
     "@types/mocha": "5.2.5",
-    "@types/orchestrator": "0.0.30",
-    "@types/q": "0.0.32"
+    "@types/orchestrator": "0.0.30"
   }
 }
