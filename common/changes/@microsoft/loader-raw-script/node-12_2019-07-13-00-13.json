@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-raw-script",
+      "comment": "Update dependency gulp to 4.0.2",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-raw-script",
+  "email": "mikeharder@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/load-themed-styles",
+      "comment": "Update dependency gulp to 4.0.2",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "mikeharder@users.noreply.github.com"
+}
