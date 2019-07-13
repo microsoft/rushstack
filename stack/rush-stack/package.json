@@ -30,9 +30,9 @@
     "colors": "~1.2.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.3.24",
     "@microsoft/node-library-build": "6.0.72",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.24",
     "@types/node": "8.5.8",
-    "gulp": "~3.9.1"
+    "gulp": "~4.0.2"
   }
 }

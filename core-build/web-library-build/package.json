@@ -25,7 +25,7 @@
     "@microsoft/gulp-core-build-webpack": "3.4.113",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
-    "gulp": "~3.9.1",
+    "gulp": "~4.0.2",
     "gulp-replace": "^0.5.4"
   },
   "devDependencies": {
