@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.0",
+      "comment": "Update dependency gulp to 4.0.2",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.0",
+  "email": "mikeharder@users.noreply.github.com"
+}
