@@ -30,7 +30,8 @@ else if (semver.satisfies(nodeVersion, '>=13.0.0')) {
 else if (!semver.satisfies(nodeVersion, '^8.9.0')
       && !semver.satisfies(nodeVersion, '^10.13.0')
       && !semver.satisfies(nodeVersion, '^12.0.0')) {
-  console.warn(colors.yellow(`Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) or Current release.`
+  console.warn(colors.yellow(`Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS)`
+    + `or Current release.`
     + ` These versions frequently contain bugs, and the Rush team will not accept issue reports for them.`
     + ` Please consider installing a stable release.`));
 }
