@@ -16,18 +16,6 @@
     "start": "jest --watch"
   },
   "license": "MIT",
-  "dependencies": {
-    "@microsoft/node-core-library": "3.13.0"
-  },
-  "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.3.24",
-    "@microsoft/node-library-build": "6.0.72",
-    "@types/jest": "23.3.11",
-    "@types/node": "8.5.8",
-    "gulp": "~3.9.1",
-    "jest": "~23.6.0",
-    "ts-jest": "~22.4.6"
-  },
   "jest": {
     "moduleFileExtensions": [
       "ts",
@@ -41,5 +29,17 @@
     "testMatch": [
       "<rootDir>/src/**/*.test.ts"
     ]
+  },
+  "dependencies": {
+    "@microsoft/node-core-library": "3.13.0"
+  },
+  "devDependencies": {
+    "@microsoft/node-library-build": "6.0.72",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.24",
+    "@types/jest": "23.3.11",
+    "@types/node": "8.5.8",
+    "gulp": "~4.0.2",
+    "jest": "~23.6.0",
+    "ts-jest": "~22.4.6"
   }
 }

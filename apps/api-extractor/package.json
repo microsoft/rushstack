@@ -51,6 +51,6 @@
     "@types/jest": "23.3.11",
     "@types/lodash": "4.14.116",
     "@types/node": "8.5.8",
-    "gulp": "~3.9.1"
+    "gulp": "~4.0.2"
   }
 }

@@ -22,15 +22,15 @@
     "colors": "~1.2.1",
     "deasync": "~0.1.7",
     "express": "~4.16.2",
-    "gulp": "~3.9.1",
+    "gulp": "~4.0.2",
     "gulp-connect": "~5.5.0",
     "gulp-open": "~3.0.1",
     "node-forge": "~0.7.1",
     "sudo": "~1.0.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.2": "0.3.24",
     "@microsoft/node-library-build": "6.0.72",
+    "@microsoft/rush-stack-compiler-3.2": "0.3.24",
     "@types/express": "4.11.0",
     "@types/express-serve-static-core": "4.11.0",
     "@types/gulp": "3.8.32",

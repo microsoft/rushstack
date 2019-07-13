@@ -21,7 +21,7 @@
     "@microsoft/gulp-core-build-typescript": "8.1.21",
     "@types/gulp": "3.8.32",
     "@types/node": "8.5.8",
-    "gulp": "~3.9.1"
+    "gulp": "~4.0.2"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.2": "0.3.24"
