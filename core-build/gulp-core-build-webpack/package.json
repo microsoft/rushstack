@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.9.26",
-    "@types/gulp": "3.8.32",
+    "@types/gulp": "4.0.6",
     "@types/node": "8.5.8",
     "colors": "~1.2.1",
     "gulp": "~4.0.2",
@@ -27,7 +27,6 @@
     "@microsoft/node-library-build": "6.0.72",
     "@microsoft/rush-stack-compiler-3.2": "0.3.24",
     "@types/orchestrator": "0.0.30",
-    "@types/q": "0.0.32",
     "@types/source-map": "0.5.0",
     "@types/uglify-js": "2.6.29",
     "@types/webpack": "4.4.0"
