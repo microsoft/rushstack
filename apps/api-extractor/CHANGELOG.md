@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 11 Jul 2019 19:13:08 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Jul 2019 19:12:46 GMT and should not be manually modified.
+
+## 7.3.2
+Fri, 12 Jul 2019 19:12:46 GMT
+
+### Patches
+
+- Clarify docs for "--typescript-compiler-folder"
 
 ## 7.3.1
 Thu, 11 Jul 2019 19:13:08 GMT
