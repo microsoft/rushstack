@@ -11,7 +11,7 @@ const nodeVersion: string = process.versions.node;
 // tslint:disable-next-line
 
 // We are on an ancient version of NodeJS that is known not to work with Rush
-if (semver.satisfies(nodeVersion, '<= 6.4.0')) {
+if (semver.satisfies(nodeVersion, '<= 8.9.0')) {
   console.error(colors.red(`Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush.`
     + ` Please upgrade to the latest Long-Term Support (LTS) version.`));
   process.exit(1);
@@ -31,9 +31,8 @@ else if (!semver.satisfies(nodeVersion, '^8.9.0')
       && !semver.satisfies(nodeVersion, '^10.13.0')
       && !semver.satisfies(nodeVersion, '^12.0.0')) {
   console.warn(colors.yellow(`Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS)`
-    + `or Current release.`
-    + ` These versions frequently contain bugs, and the Rush team will not accept issue reports for them.`
-    + ` Please consider installing a stable release.`));
+    + `or Current release. These versions frequently contain bugs, and the Rush team will not accept issue `
+    + `reports for them. Please consider installing a stable release.`));
 }
 
 import {
