@@ -10,14 +10,16 @@ import inquirer = require('inquirer');
 
 import {
   CommandLineFlagParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  CommandLineChoiceParameter
 } from '@microsoft/ts-command-line';
 import { FileSystem } from '@microsoft/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import {
   IChangeFile,
-  IChangeInfo
+  IChangeInfo,
+  ChangeType
 } from '../../api/ChangeManagement';
 import { VersionControl } from '../../utilities/VersionControl';
 import { ChangeFile } from '../../api/ChangeFile';
@@ -30,14 +32,17 @@ import {
   LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
+import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export class ChangeAction extends BaseRushAction {
-  private _sortedProjectList: string[];
-  private _changeFileData: Map<string, IChangeFile>;
   private _changeComments: Map<string, string[]>;
   private _verifyParameter: CommandLineFlagParameter;
   private _noFetchParameter: CommandLineFlagParameter;
   private _targetBranchParameter: CommandLineStringParameter;
+  private _changeEmail: CommandLineStringParameter;
+  private _bulkChangeParameter: CommandLineFlagParameter;
+  private _bulkChangeMessageParameter: CommandLineStringParameter;
+  private _bulkChangeBumpTypeParameter: CommandLineChoiceParameter;
   private _targetBranchName: string;
   private _projectHostMap: Map<string, string>;
 
@@ -100,6 +105,36 @@ export class ChangeAction extends BaseRushAction {
         'determine which projects were changed. If this parameter is not specified, the checked out branch ' +
         'is compared against the "master" branch.'
     });
+
+    this._changeEmail = this.defineStringParameter({
+      parameterLongName: '--email',
+      argumentName: 'EMAIL',
+      description: 'The email address to use in changefiles. If this parameter is not provided, the email address ' +
+        'will be detected or prompted for in intractive mode.'
+    });
+
+    const BULK_LONG_NAME: string = '--bulk';
+    const BULK_MESSAGE_LONG_NAME: string = '--message';
+    const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
+
+    this._bulkChangeParameter = this.defineFlagParameter({
+      parameterLongName: BULK_LONG_NAME,
+      description: 'If this flag is specified, apply the same change message and bump type to all changed projects. ' +
+        `The ${BULK_MESSAGE_LONG_NAME} and the ${BULK_BUMP_TYPE_LONG_NAME} parameters must be specified if the ` +
+        `${BULK_LONG_NAME} parameter is specified`
+    });
+
+    this._bulkChangeMessageParameter = this.defineStringParameter({
+      parameterLongName: BULK_MESSAGE_LONG_NAME,
+      argumentName: 'MESSAGE',
+      description: `The message to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
+    });
+
+    this._bulkChangeBumpTypeParameter = this.defineChoiceParameter({
+      parameterLongName: BULK_BUMP_TYPE_LONG_NAME,
+      alternatives: Object.keys(this._getBumpOptions()),
+      description: `The bump type to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
+    });
   }
 
   public run(): Promise<void> {
@@ -107,25 +142,115 @@ export class ChangeAction extends BaseRushAction {
     this._projectHostMap = this._generateHostMap();
 
     if (this._verifyParameter.value) {
+      const errors: string[] = (
+        [this._bulkChangeParameter, this._bulkChangeMessageParameter, this._bulkChangeBumpTypeParameter]
+      ).map((parameter) => {
+        return parameter.value
+        ? (
+          `The {${this._bulkChangeParameter.longName} parameter cannot be provided with the ` +
+            `${this._verifyParameter.longName} parameter`
+          )
+        : '';
+      }).filter((error) => error !== '');
+      if (errors.length > 0) {
+        errors.forEach((error) => console.error(error));
+        throw new AlreadyReportedError();
+      }
+
       this._verify();
       return Promise.resolve();
     }
 
-    this._sortedProjectList = this._getChangedPackageNames().sort();
-    if (this._sortedProjectList.length === 0) {
+    const sortedProjectList: string[] = this._getChangedPackageNames().sort();
+    if (sortedProjectList.length === 0) {
       this._logNoChangeFileRequired();
       this._warnUncommittedChanges();
       return Promise.resolve();
     }
 
-    this._prompt = inquirer.createPromptModule();
-    this._changeFileData = new Map<string, IChangeFile>();
-    this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles());
+    let changeFileDataPromise: Promise<Map<string, IChangeFile>>;
+    if (this._bulkChangeParameter.value) {
+      if (!this._bulkChangeBumpTypeParameter.value || !this._bulkChangeMessageParameter.value) {
+        throw new Error(
+          `The ${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} ` +
+          `parameters must provided if the ${this._bulkChangeParameter.longName} flag is provided.`
+        );
+      }
 
-    return this._promptLoop()
-      .catch((error: Error) => {
-        throw new Error(`There was an error creating a change file: ${error.toString()}`);
+      const email: string | undefined = this._changeEmail.value || this._detectEmail();
+      if (!email) {
+        throw new Error(
+          'Unable to detect git email and an email address wasn\'t provided on the ' +
+          `${this._changeEmail.longName} paramter.`
+        );
+      }
+
+      const errors: string[] = [];
+
+      const comment: string = this._bulkChangeMessageParameter.value;
+      const changeType: string = this._bulkChangeBumpTypeParameter.value;
+      const changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
+      for (const packageName of sortedProjectList) {
+        const allowedBumpTypes: string[] = Object.keys(this._getBumpOptions(packageName));
+        let projectChangeType: string = changeType;
+        if (allowedBumpTypes.length === 0) {
+          projectChangeType = ChangeType[ChangeType.none];
+        } else if (allowedBumpTypes.indexOf(projectChangeType) === -1) {
+          errors.push(`The ${projectChangeType} is not allowed for package "${packageName}."`);
+        }
+
+        changeFileData.set(
+          packageName,
+          {
+            changes: [
+              {
+                comment,
+                changeType: ChangeType[projectChangeType],
+                packageName
+              }
+            ],
+            packageName,
+            email
+          }
+        );
+      }
+
+      if (errors.length > 0) {
+        for (const error of errors) {
+          console.error(error);
+        }
+        throw new AlreadyReportedError();
+      }
+
+      changeFileDataPromise = Promise.resolve(changeFileData);
+    } else if (this._bulkChangeBumpTypeParameter.value || this._bulkChangeMessageParameter.value) {
+      throw new Error(
+        `The ${this._bulkChangeParameter.longName} flag must be provided with the ` +
+        `${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} parameters.`
+      );
+    } else {
+      this._prompt = inquirer.createPromptModule();
+      this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles());
+      changeFileDataPromise = this._promptForChangeFileData(sortedProjectList).then((changeFileData) => {
+        this._warnUncommittedChanges();
+
+        const emailPromise: Promise<string> = this._changeEmail.value
+          ? Promise.resolve(this._changeEmail.value)
+          : this._detectOrAskForEmail();
+
+        return emailPromise.then((email: string) => {
+          changeFileData.forEach((changeFile: IChangeFile) => {
+            changeFile.email = email;
+          });
+        }).then(() => changeFileData);
       });
+    }
+
+    return changeFileDataPromise.then((changeFileData) => {
+      this._writeChangeFiles(changeFileData);
+    }).catch((error: Error) => {
+      throw new Error(`There was an error creating a change file: ${error.toString()}`);
+    });
   }
 
   private _generateHostMap(): Map<string, string> {
@@ -211,42 +336,40 @@ export class ChangeAction extends BaseRushAction {
   }
 
   /**
-   * The main loop which continually asks user for questions about changes until they don't
-   * have any more, at which point we collect their email and write the change file.
+   * The main loop which prompts the user for information on changed projects.
    */
-  private _promptLoop(): Promise<void> {
-    // If there are still projects, ask about the next one
-    if (this._sortedProjectList.length) {
-      return this._askQuestions(this._sortedProjectList.pop()!)
+  private _promptForChangeFileData(sortedProjectList: string[]): Promise<Map<string, IChangeFile>> {
+    // Clone the sortedProjectList so we can modify it
+    sortedProjectList = [...sortedProjectList];
+    const changedFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
+
+    const promptLoop: () => Promise<void> = () => {
+      return this._askQuestions(sortedProjectList.pop()!)
         .then((answers: IChangeInfo) => {
           if (answers) {
             // Save the info into the change file
-            let changeFile: IChangeFile | undefined = this._changeFileData.get(answers.packageName);
+            let changeFile: IChangeFile | undefined = changedFileData.get(answers.packageName);
             if (!changeFile) {
               changeFile = {
                 changes: [],
                 packageName: answers.packageName,
                 email: undefined
               };
-              this._changeFileData.set(answers.packageName, changeFile!);
+              changedFileData.set(answers.packageName, changeFile!);
             }
             changeFile!.changes.push(answers);
           }
+
           // Continue to loop
-          return this._promptLoop();
-
+          if (sortedProjectList.length > 0) {
+            return promptLoop();
+          } else {
+            return Promise.resolve();
+          }
         });
-    } else {
-      this._warnUncommittedChanges();
-      // We are done, collect their email
-      return this._detectOrAskForEmail().then((email: string) => {
-        this._changeFileData.forEach((changeFile: IChangeFile) => {
-          changeFile.email = email;
-        });
+    };
 
-        this._writeChangeFiles();
-      });
-    }
+    return promptLoop().then(() => changedFileData);
   }
 
   /**
@@ -325,30 +448,33 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _getBumpOptions(packageName: string): {[type: string]: string } {
-    const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
-    const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
-
+  private _getBumpOptions(packageName?: string): { [type: string]: string } {
     let bumpOptions: { [type: string]: string } = this.rushConfiguration.hotfixChangeEnabled ? {
-      'hotfix': 'hotfix - for changes that need to be published in a separate hotfix package'
+      [ChangeType[ChangeType.hotfix]]: 'hotfix - for changes that need to be published in a separate hotfix package'
     } : {
-      'major': 'major - for changes that break compatibility, e.g. removing an API',
-      'minor': 'minor - for backwards compatible changes, e.g. adding a new API',
-      'patch': 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
+      [ChangeType[ChangeType.major]]: 'major - for changes that break compatibility, e.g. removing an API',
+      [ChangeType[ChangeType.minor]]: 'minor - for backwards compatible changes, e.g. adding a new API',
+      [ChangeType[ChangeType.patch]]: 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
     };
 
-    if (versionPolicy) {
-      if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
-        // No need to ask for bump types if project is lockstep versioned.
-        bumpOptions = {};
-      } else if (versionPolicy.definitionName === VersionPolicyDefinitionName.individualVersion) {
-        const individualPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
-        if (individualPolicy.lockedMajor !== undefined) {
-          // tslint:disable-next-line:no-string-literal
-          delete bumpOptions['major'];
+    if (packageName) {
+      const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
+      const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
+
+      if (versionPolicy) {
+        if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
+          // No need to ask for bump types if project is lockstep versioned.
+          bumpOptions = {};
+        } else if (versionPolicy.definitionName === VersionPolicyDefinitionName.individualVersion) {
+          const individualPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
+          if (individualPolicy.lockedMajor !== undefined) {
+            // tslint:disable-next-line:no-string-literal
+            delete bumpOptions[ChangeType.major];
+          }
         }
       }
     }
+
     return bumpOptions;
   }
 
@@ -358,14 +484,23 @@ export class ChangeAction extends BaseRushAction {
    */
   private _detectOrAskForEmail(): Promise<string> {
     return this._detectAndConfirmEmail().then((email: string) => {
-
       if (email) {
         return Promise.resolve(email);
       } else {
         return this._promptForEmail();
       }
-
     });
+  }
+
+  private _detectEmail(): string | undefined {
+    try {
+      return child_process.execSync('git config user.email')
+        .toString()
+        .replace(/(\r\n|\n|\r)/gm, '');
+    } catch (err) {
+      console.log('There was an issue detecting your Git email...');
+      return undefined;
+    }
   }
 
   /**
@@ -373,15 +508,7 @@ export class ChangeAction extends BaseRushAction {
    * detected email. It returns undefined if it cannot be detected.
    */
   private _detectAndConfirmEmail(): Promise<string | undefined> {
-    let email: string | undefined;
-    try {
-      email = child_process.execSync('git config user.email')
-        .toString()
-        .replace(/(\r\n|\n|\r)/gm, '');
-    } catch (err) {
-      console.log('There was an issue detecting your Git email...');
-      email = undefined;
-    }
+    const email: string | undefined = this._detectEmail();
 
     if (email) {
       return this._prompt([
@@ -435,8 +562,8 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
-  private _writeChangeFiles(): void {
-    this._changeFileData.forEach((changeFile: IChangeFile) => {
+  private _writeChangeFiles(changeFileData: Map<string, IChangeFile>): void {
+    changeFileData.forEach((changeFile: IChangeFile) => {
       this._writeChangeFile(changeFile);
     });
   }
@@ -445,26 +572,6 @@ export class ChangeAction extends BaseRushAction {
     const output: string = JSON.stringify(changeFileData, undefined, 2);
     const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
     const filePath: string = changeFile.generatePath();
-
-    if (FileSystem.exists(filePath)) {
-      // prompt about overwrite
-      this._prompt([
-        {
-          name: 'overwrite',
-          type: 'confirm',
-          message: `Overwrite ${filePath} ?`
-        }
-      ]).then(({ overwrite }) => {
-        if (overwrite) {
-          this._writeFile(filePath, output);
-        } else {
-          console.log(`Not overwriting ${filePath}...`);
-        }
-      }).catch((error) => {
-        console.error(colors.red(error.message));
-      });
-    }
-
     this._writeFile(filePath, output);
   }
 
