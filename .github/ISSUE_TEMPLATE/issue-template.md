@@ -1,3 +1,11 @@
+---
+name: New Issue
+about: Information needed when opening a new issue	
+title: ''
+labels: ''	
+assignees: ''
+---
+
 ## Please prefix the issue title with the project name i.e. [rush], [api-extractor] etc. ##
  
 **Is this a feature or a bug?**
