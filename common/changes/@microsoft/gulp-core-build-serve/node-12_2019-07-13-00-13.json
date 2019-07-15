@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/gulp-core-build-serve",
-      "comment": "Update dependency gulp to 4.0.2",
-      "type": "patch"
+      "comment": "Update gulp to 4.0.2",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/gulp-core-build-serve",

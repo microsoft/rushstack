@@ -1,9 +1,9 @@
 {
   "changes": [
     {
+      "comment": "",
       "packageName": "@microsoft/loader-set-webpack-public-path",
-      "comment": "Update dependency gulp to 4.0.2",
-      "type": "patch"
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/loader-set-webpack-public-path",
