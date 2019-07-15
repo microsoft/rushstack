@@ -25,5 +25,7 @@ assignees: ''
 * Tool: 
 * Tool Version:
 * Node Version: 
+  * Is this a LTS version? 
+  * Have you tested on a LTS version? 
 * OS:
 
