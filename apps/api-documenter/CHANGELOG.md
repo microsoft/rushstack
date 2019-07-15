@@ -1,6 +1,33 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 12 Jun 2019 19:12:33 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Jul 2019 19:12:46 GMT and should not be manually modified.
+
+## 7.3.8
+Fri, 12 Jul 2019 19:12:46 GMT
+
+*Version update only*
+
+## 7.3.7
+Thu, 11 Jul 2019 19:13:08 GMT
+
+*Version update only*
+
+## 7.3.6
+Tue, 09 Jul 2019 19:13:24 GMT
+
+*Version update only*
+
+## 7.3.5
+Mon, 08 Jul 2019 19:12:18 GMT
+
+*Version update only*
+
+## 7.3.4
+Sat, 29 Jun 2019 02:30:10 GMT
+
+### Patches
+
+- Avoid reporting a fatal error when an unknown block tag is encountered
 
 ## 7.3.3
 Wed, 12 Jun 2019 19:12:33 GMT

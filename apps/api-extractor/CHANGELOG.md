@@ -1,6 +1,41 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 12 Jun 2019 19:12:33 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Jul 2019 19:12:46 GMT and should not be manually modified.
+
+## 7.3.2
+Fri, 12 Jul 2019 19:12:46 GMT
+
+### Patches
+
+- Clarify docs for "--typescript-compiler-folder"
+
+## 7.3.1
+Thu, 11 Jul 2019 19:13:08 GMT
+
+### Patches
+
+- Add support for TypeScript 3.5
+
+## 7.3.0
+Tue, 09 Jul 2019 19:13:24 GMT
+
+### Minor changes
+
+- Add a "--diagnostics" command-line option to help when troubleshooting problems
+
+## 7.2.3
+Mon, 08 Jul 2019 19:12:18 GMT
+
+### Patches
+
+- Fix a problem when analyzing .d.ts files that appear in the same folder as the corresponding .ts file (GitHub #1310)
+
+## 7.2.2
+Sat, 29 Jun 2019 02:30:10 GMT
+
+### Patches
+
+- Fix GitHub issue #1304 where "IExtractorInvokeOptions.typescriptCompilerFolder" did not work with TypeScript 3.4
 
 ## 7.2.1
 Wed, 12 Jun 2019 19:12:33 GMT

@@ -191,6 +191,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "cli-table",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "colors",
       "allowedCategories": [ "libraries", "tests" ]
     },

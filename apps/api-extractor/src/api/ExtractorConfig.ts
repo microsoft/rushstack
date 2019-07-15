@@ -21,6 +21,7 @@ import {
   IExtractorMessagesConfig
 } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
+import { MessageRouter } from '../collector/MessageRouter';
 
 /**
  * Tokens used during variable expansion of path fields from api-extractor.json.
@@ -218,6 +219,19 @@ export class ExtractorConfig {
     this.tsdocMetadataFilePath = parameters.tsdocMetadataFilePath;
     this.messages = parameters.messages;
     this.testMode = parameters.testMode;
+  }
+
+  /**
+   * Returns a JSON-like string representing the `ExtractorConfig` state, which can be printed to a console
+   * for diagnostic purposes.
+   *
+   * @remarks
+   * This is used by the "--diagnostics" command-line option.  The string is not intended to be deserialized;
+   * its format may be changed at any time.
+   */
+  public getDiagnosticDump(): string {
+    const result: object = MessageRouter.buildJsonDumpObject(this);
+    return JSON.stringify(result, undefined, 2);
   }
 
   /**

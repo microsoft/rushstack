@@ -207,16 +207,18 @@ export class ExtractorMessage {
    * src/folder/File.ts:123:4 - (ae-extra-release-tag) The doc comment should not contain more than one release tag.
    * ```
    */
-  public formatMessageWithLocation(workingPackageFolderPath: string): string {
+  public formatMessageWithLocation(workingPackageFolderPath: string | undefined): string {
     let result: string = '';
 
     if (this.sourceFilePath) {
       // Make the path relative to the workingPackageFolderPath
       let scrubbedPath: string = this.sourceFilePath;
 
-      // If it's under the working folder, make it a relative path
-      if (Path.isUnderOrEqual(this.sourceFilePath, workingPackageFolderPath)) {
-        scrubbedPath = path.relative(workingPackageFolderPath, this.sourceFilePath);
+      if (workingPackageFolderPath !== undefined) {
+        // If it's under the working folder, make it a relative path
+        if (Path.isUnderOrEqual(this.sourceFilePath, workingPackageFolderPath)) {
+          scrubbedPath = path.relative(workingPackageFolderPath, this.sourceFilePath);
+        }
       }
 
       // Convert it to a Unix-style path

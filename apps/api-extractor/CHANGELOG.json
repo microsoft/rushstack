@@ -2,6 +2,66 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.3.2",
+      "tag": "@microsoft/api-extractor_v7.3.2",
+      "date": "Fri, 12 Jul 2019 19:12:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Clarify docs for \"--typescript-compiler-folder\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.1",
+      "tag": "@microsoft/api-extractor_v7.3.1",
+      "date": "Thu, 11 Jul 2019 19:13:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for TypeScript 3.5"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.0",
+      "tag": "@microsoft/api-extractor_v7.3.0",
+      "date": "Tue, 09 Jul 2019 19:13:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a \"--diagnostics\" command-line option to help when troubleshooting problems"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.3",
+      "tag": "@microsoft/api-extractor_v7.2.3",
+      "date": "Mon, 08 Jul 2019 19:12:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a problem when analyzing .d.ts files that appear in the same folder as the corresponding .ts file (GitHub #1310)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.2",
+      "tag": "@microsoft/api-extractor_v7.2.2",
+      "date": "Sat, 29 Jun 2019 02:30:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix GitHub issue #1304 where \"IExtractorInvokeOptions.typescriptCompilerFolder\" did not work with TypeScript 3.4"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.2.1",
       "tag": "@microsoft/api-extractor_v7.2.1",
       "date": "Wed, 12 Jun 2019 19:12:33 GMT",

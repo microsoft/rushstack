@@ -23,6 +23,7 @@ import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { PnpmShrinkwrapFile } from './PnpmShrinkwrapFile';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -35,12 +36,22 @@ export class PnpmLinkManager extends BaseLinkManager {
         localLinks: {}
       };
 
+      // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
+      // See https://github.com/microsoft/web-build-tools/issues/1273#issuecomment-492779995
+      const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+        this._rushConfiguration.tempShrinkwrapFilename
+      );
+
+      if (!pnpmShrinkwrapFile) {
+        throw new InternalError(`Cannot load shrinkwrap at "${this._rushConfiguration.tempShrinkwrapFilename}"`);
+      }
+
       let promise: Promise<void> = Promise.resolve();
 
       for (const rushProject of this._rushConfiguration.projects) {
         promise = promise.then(() => {
           console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-          return this._linkProject(rushProject, rushLinkJson);
+          return this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
         });
       }
 
@@ -60,7 +71,8 @@ export class PnpmLinkManager extends BaseLinkManager {
    */
   private _linkProject(
     project: RushConfigurationProject,
-    rushLinkJson: IRushLinkJson): Promise<void> {
+    rushLinkJson: IRushLinkJson,
+    pnpmShrinkwrapFile: PnpmShrinkwrapFile): Promise<void> {
 
     // first, read the temp package.json information
 
@@ -139,14 +151,55 @@ export class PnpmLinkManager extends BaseLinkManager {
     // appropriate. This folder is usually something like:
     // C:\{uri-encoed-path-to-tgz}\node_modules\{package-name}
 
-    // e.g.: C:\wbt\common\temp\projects\api-documenter.tgz
-    const pathToTgzFile: string = path.join(
-      this._rushConfiguration.commonTempFolder,
-      'projects',
-      `${unscopedTempProjectName}.tgz`);
+    // e.g.:
+    //   file:projects/bentleyjs-core.tgz
+    //   file:projects/build-tools.tgz_dc21d88642e18a947127a751e00b020a
+    //   file:projects/imodel-from-geojson.tgz_request@2.88.0
+    const topLevelDependencyVersion: string | undefined =
+      pnpmShrinkwrapFile.getTopLevelDependencyVersion(project.tempProjectName);
 
-    // e.g.: C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
-    const escapedPathToTgzFile: string = uriEncode(Text.replaceAll(pathToTgzFile, path.sep, '/'));
+    if (!topLevelDependencyVersion) {
+      throw new InternalError(`Cannot find top level dependency for "${project.tempProjectName}"` +
+        ` in shrinkwrap.`);
+    }
+
+    // e.g.: file:projects/project-name.tgz
+    const tarballEntry: string | undefined = pnpmShrinkwrapFile.getTarballPath(topLevelDependencyVersion);
+
+    if (!tarballEntry) {
+      throw new InternalError(`Cannot find tarball path for "${topLevelDependencyVersion}"` +
+        ` in shrinkwrap.`);
+    }
+
+    // e.g.: projects\api-documenter.tgz
+    const relativePathToTgzFile: string | undefined = tarballEntry.slice(`file:`.length);
+
+    // e.g.: C:\wbt\common\temp\projects\api-documenter.tgz
+    const absolutePathToTgzFile: string = path.resolve(this._rushConfiguration.commonTempFolder, relativePathToTgzFile);
+
+    // The folder name in `.local` is constructed as:
+    //   UriEncode(absolutePathToTgzFile) + _suffix
+    //
+    // Note that _suffix is not encoded. The tarball attribute of the package 'file:projects/project-name.tgz_suffix'
+    // holds the tarball path 'file:projects/project-name.tgz', which can be used for the constructing the folder name.
+    //
+    // '_suffix' is extracted by stripping the tarball path from top level dependency value.
+    // tarball path = 'file:projects/project-name.tgz'
+    // top level dependency = 'file:projects/project-name.tgz_suffix'
+
+    // e.g.:
+    //   '' [empty string]
+    //   _jsdom@11.12.0
+    //   _2a665c89609864b4e75bc5365d7f8f56
+    const folderNameSuffix: string = (tarballEntry && tarballEntry.length < topLevelDependencyVersion.length ?
+      topLevelDependencyVersion.slice(tarballEntry.length) : '');
+
+    // e.g.:
+    //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
+    //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fpresentation-integration-tests.tgz_jsdom@11.12.0
+    //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fbuild-tools.tgz_2a665c89609864b4e75bc5365d7f8f56
+    const folderNameInLocalInstallationRoot: string = uriEncode(Text.replaceAll(absolutePathToTgzFile, path.sep, '/')) +
+      folderNameSuffix;
 
     // tslint:disable-next-line:max-line-length
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
@@ -154,7 +207,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       this._rushConfiguration.commonTempFolder,
       RushConstants.nodeModulesFolderName,
       '.local',
-      escapedPathToTgzFile,
+      folderNameInLocalInstallationRoot,
       RushConstants.nodeModulesFolderName);
 
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {

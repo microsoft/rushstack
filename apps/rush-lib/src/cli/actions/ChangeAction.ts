@@ -113,7 +113,7 @@ export class ChangeAction extends BaseRushAction {
 
     this._sortedProjectList = this._getChangedPackageNames().sort();
     if (this._sortedProjectList.length === 0) {
-      console.log('No changes were detected on this branch. Nothing to do.');
+      this._logNoChangeFileRequired();
       this._warnUncommittedChanges();
       return Promise.resolve();
     }
@@ -147,7 +147,7 @@ export class ChangeAction extends BaseRushAction {
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
-      console.log('No changes were detected on this branch.');
+      this._logNoChangeFileRequired();
     }
   }
 
@@ -186,7 +186,7 @@ export class ChangeAction extends BaseRushAction {
 
   private _validateChangeFile(changedPackages: string[]): void {
     const files: string[] = this._getChangeFiles();
-    ChangeFiles.validate(files, changedPackages);
+    ChangeFiles.validate(files, changedPackages, this.rushConfiguration);
   }
 
   private _getChangeFiles(): string[] {
@@ -329,16 +329,13 @@ export class ChangeAction extends BaseRushAction {
     const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
     const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
 
-    let bumpOptions: { [type: string]: string } = {
+    let bumpOptions: { [type: string]: string } = this.rushConfiguration.hotfixChangeEnabled ? {
+      'hotfix': 'hotfix - for changes that need to be published in a separate hotfix package'
+    } : {
       'major': 'major - for changes that break compatibility, e.g. removing an API',
       'minor': 'minor - for backwards compatible changes, e.g. adding a new API',
       'patch': 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
     };
-
-    if (this.rushConfiguration.hotfixChangeEnabled) {
-      // tslint:disable-next-line:no-string-literal
-      bumpOptions['hotfix'] = 'hotfix - for changes that need to be published in a separate hotfix package';
-    }
 
     if (versionPolicy) {
       if (versionPolicy.definitionName === VersionPolicyDefinitionName.lockStepVersion) {
@@ -477,5 +474,9 @@ export class ChangeAction extends BaseRushAction {
   private _writeFile(fileName: string, output: string): void {
     FileSystem.writeFile(fileName, output, { ensureFolderExists: true });
     console.log(`Created file: ${fileName}`);
+  }
+
+  private _logNoChangeFileRequired(): void {
+    console.log('No changes were detected to relevant packages on this branch. Nothing to do.');
   }
 }

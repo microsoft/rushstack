@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.9.1",
+  "rushVersion": "5.10.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -275,6 +275,8 @@
 
   /**
    * Allows creation of hotfix changes. This feature is experimental so it is disabled by default.
+   * If this is set, 'rush change' only allows a 'hotfix' change type to be specified. This change type
+   * will be used when publishing subsequent changes from the monorepo.
    */
   // "hotfixChangeEnabled": false,
 

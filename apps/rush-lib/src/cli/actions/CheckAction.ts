@@ -4,7 +4,7 @@
 import * as colors from 'colors';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseRushAction } from './BaseRushAction';
-import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
 import { CommandLineStringParameter } from '@microsoft/ts-command-line';
 

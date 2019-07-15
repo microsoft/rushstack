@@ -854,13 +854,22 @@ export class RushConfiguration {
   }
 
   /**
+   * Gets the path to the common-versions.json config file for a specific variant.
+   * @param variant - The name of the current variant in use by the active command.
+   */
+  public getCommonVersionsFilePath(variant?: string | undefined): string {
+    const commonVersionsFilename: string = path.join(this.commonRushConfigFolder,
+      ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
+      RushConstants.commonVersionsFilename);
+    return commonVersionsFilename;
+  }
+
+  /**
    * Gets the settings from the common-versions.json config file for a specific variant.
    * @param variant - The name of the current variant in use by the active command.
    */
   public getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration {
-    const commonVersionsFilename: string = path.join(this.commonRushConfigFolder,
-      ...(variant ? [RushConstants.rushVariantsFolderName, variant] : []),
-      RushConstants.commonVersionsFilename);
+    const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
     return CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
   }
 

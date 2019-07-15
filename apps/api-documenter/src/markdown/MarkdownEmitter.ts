@@ -15,7 +15,8 @@ import {
   DocSection,
   DocNodeTransforms,
   DocEscapedText,
-  DocErrorText
+  DocErrorText,
+  DocBlockTag
 } from '@microsoft/tsdoc';
 import { InternalError } from '@microsoft/node-core-library';
 
@@ -191,8 +192,13 @@ export class MarkdownEmitter {
       case DocNodeKind.InlineTag: {
         break;
       }
+      case DocNodeKind.BlockTag: {
+        const tagNode: DocBlockTag = docNode as DocBlockTag;
+        console.warn('Unsupported block tag: ' + tagNode.tagName);
+        break;
+      }
       default:
-        throw new Error('Unsupported element kind: ' + docNode.kind);
+        throw new InternalError('Unsupported DocNodeKind kind: ' + docNode.kind);
     }
   }
 
