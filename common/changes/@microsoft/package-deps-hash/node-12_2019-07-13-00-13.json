@@ -1,9 +1,9 @@
 {
   "changes": [
     {
+      "comment": "",
       "packageName": "@microsoft/package-deps-hash",
-      "comment": "Update dependency gulp to 4.0.2",
-      "type": "patch"
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/package-deps-hash",
