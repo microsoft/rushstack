@@ -46,7 +46,7 @@
       "type": "boolean"
     },
     "hotfixChangeEnabled": {
-      "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default.",
+      "description": "Allows creation of hotfix changes. This feature is experimental so it is disabled by default. If this is set, \"rush change\" only allows a \"hotfix\" change type to be specified. This change type will be used when publishing subsequent changes from the monorepo.",
       "type": "boolean"
     },
     "pnpmOptions": {

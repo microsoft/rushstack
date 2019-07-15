@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.3.2",
+      "tag": "@microsoft/api-extractor_v7.3.2",
+      "date": "Fri, 12 Jul 2019 19:12:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Clarify docs for \"--typescript-compiler-folder\""
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.1",
       "tag": "@microsoft/api-extractor_v7.3.1",
       "date": "Thu, 11 Jul 2019 19:13:08 GMT",
