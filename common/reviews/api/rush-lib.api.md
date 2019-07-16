@@ -285,6 +285,8 @@ export class RushConfiguration {
     readonly shrinkwrapFilename: string;
     readonly shrinkwrapFilePhrase: string;
     // @beta
+    readonly suppressNodeLtsWarning: boolean;
+    // @beta
     readonly telemetryEnabled: boolean;
     readonly tempShrinkwrapFilename: string;
     readonly tempShrinkwrapPreinstallFilename: string;
