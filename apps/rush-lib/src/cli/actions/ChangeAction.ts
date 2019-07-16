@@ -205,9 +205,9 @@ export class ChangeAction extends BaseRushAction {
             changes: [
               {
                 comment,
-                changeType: ChangeType[projectChangeType],
+                changeType: projectChangeType,
                 packageName
-              }
+              } as unknown as IChangeInfo
             ],
             packageName,
             email
@@ -297,15 +297,15 @@ export class ChangeAction extends BaseRushAction {
     const changedPackageNames: Set<string> = new Set<string>();
 
     this.rushConfiguration.projects
-    .filter(project => project.shouldPublish)
-    .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
-    .filter(project => this._hasProjectChanged(changedFolders, project))
-    .forEach(project => {
-      const hostName: string | undefined = this._projectHostMap.get(project.packageName);
-      if (hostName) {
-        changedPackageNames.add(hostName);
-      }
-    });
+      .filter(project => project.shouldPublish)
+      .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
+      .filter(project => this._hasProjectChanged(changedFolders, project))
+      .forEach(project => {
+        const hostName: string | undefined = this._projectHostMap.get(project.packageName);
+        if (hostName) {
+          changedPackageNames.add(hostName);
+        }
+      });
     return [...changedPackageNames];
   }
 
@@ -421,9 +421,9 @@ export class ChangeAction extends BaseRushAction {
     .then(({ comment }: { comment: string }) => {
       if (Object.keys(bumpOptions).length === 0 || !comment) {
         return {
-          comment: comment || '',
           packageName: packageName,
-          type: 'none'
+          comment: comment || '',
+          type: ChangeType[ChangeType.none]
         } as IChangeInfo;
       } else {
         return this._prompt({
