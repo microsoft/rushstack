@@ -449,9 +449,11 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getBumpOptions(packageName?: string): { [type: string]: string } {
-    let bumpOptions: { [type: string]: string } = this.rushConfiguration.hotfixChangeEnabled ? {
+    let bumpOptions: { [type: string]: string } = (this.rushConfiguration && this.rushConfiguration.hotfixChangeEnabled)
+    ? {
       [ChangeType[ChangeType.hotfix]]: 'hotfix - for changes that need to be published in a separate hotfix package'
-    } : {
+      }
+    : {
       [ChangeType[ChangeType.major]]: 'major - for changes that break compatibility, e.g. removing an API',
       [ChangeType[ChangeType.minor]]: 'minor - for backwards compatible changes, e.g. adding a new API',
       [ChangeType[ChangeType.patch]]: 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
@@ -516,7 +518,7 @@ export class ChangeAction extends BaseRushAction {
           type: 'confirm',
           name: 'isCorrectEmail',
           default: 'Y',
-          message: `Is your email address ${email} ?`
+          message: `Is your email address ${email}?`
         }
       ]).then(({ isCorrectEmail }: { isCorrectEmail: boolean }) => {
         return isCorrectEmail ? email : undefined;

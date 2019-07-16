@@ -141,7 +141,9 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: change 1`] = `
-"usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH]
+"usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH] [--email EMAIL] [--bulk]
+                   [--message MESSAGE] [--bump-type {major,minor,patch}]
+                   
 
 Asks a series of questions and then generates a <branchname>-<timestamp>.json 
 file in the common folder. The \`publish\` command will consume these files and 
@@ -172,6 +174,18 @@ Optional arguments:
                         which projects were changed. If this parameter is not 
                         specified, the checked out branch is compared against 
                         the \\"master\\" branch.
+  --email EMAIL         The email address to use in changefiles. If this 
+                        parameter is not provided, the email address will be 
+                        detected or prompted for in intractive mode.
+  --bulk                If this flag is specified, apply the same change 
+                        message and bump type to all changed projects. The 
+                        --message and the --bump-type parameters must be 
+                        specified if the --bulk parameter is specified
+  --message MESSAGE     The message to apply to all changed projects if the 
+                        --bulk flag is provided.
+  --bump-type {major,minor,patch}
+                        The bump type to apply to all changed projects if the 
+                        --bulk flag is provided.
 "
 `;
 
