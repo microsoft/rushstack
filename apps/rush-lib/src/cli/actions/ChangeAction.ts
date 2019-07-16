@@ -508,7 +508,6 @@ export class ChangeAction extends BaseRushAction {
         } else if (versionPolicy.definitionName === VersionPolicyDefinitionName.individualVersion) {
           const individualPolicy: IndividualVersionPolicy = versionPolicy as IndividualVersionPolicy;
           if (individualPolicy.lockedMajor !== undefined) {
-            // tslint:disable-next-line:no-string-literal
             delete bumpOptions[ChangeType.major];
           }
         }
