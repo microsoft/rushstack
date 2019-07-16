@@ -109,6 +109,12 @@ export class EventHooks {
     get(event: Event): string[];
     }
 
+// @public
+export interface ILaunchOptions {
+    alreadyReportedNodeTooNewError?: boolean;
+    isManaged: boolean;
+}
+
 // @beta
 export class IndividualVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
@@ -221,10 +227,10 @@ export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 // @public
 export class Rush {
-    static launch(launcherVersion: string, isManaged: boolean): void;
-    static launchRushX(launcherVersion: string, isManaged: boolean): void;
+    static launch(launcherVersion: string, arg: ILaunchOptions): void;
+    static launchRushX(launcherVersion: string, arg: ILaunchOptions): void;
     static readonly version: string;
-}
+    }
 
 // @public
 export class RushConfiguration {

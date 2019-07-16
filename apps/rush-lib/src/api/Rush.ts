@@ -3,12 +3,31 @@
 
 import { EOL } from 'os';
 import * as colors from 'colors';
+import * as semver from 'semver';
 import { PackageJsonLookup } from '@microsoft/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from '../logic/RushConstants';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
+
+/**
+ * Options to pass to the rush "launch" functions.
+ */
+export interface ILaunchOptions {
+  /**
+   * True if the tool was invoked from within a project with a rush.json file, otherwise false. We
+   * consider a project without a rush.json to be "unmanaged" and we'll print that to the command line when
+   * the tool is executed. This is mainly used for debugging purposes.
+   */
+  isManaged: boolean;
+
+  /**
+   * If true, the wrapper process already printed a warning that the version of NodeJS hasn't been tested
+   * with this version of Rush, so we shouldn't print a similar error.
+   */
+  alreadyReportedNodeTooNewError?: boolean;
+}
 
 /**
  * General operations for the Rush engine.
@@ -22,12 +41,15 @@ export class Rush {
    * and start a new NodeJS process.
    *
    * @param launcherVersion - The version of the `@microsoft/rush` wrapper used to call invoke the CLI.
-   * @param isManaged - True if the tool was invoked from within a project with a rush.json file, otherwise false. We
-   *  consider a project without a rush.json to be "unmanaged" and we'll print that to the command line when
-   *  the tool is executed. This is mainly used for debugging purposes.
    */
-  public static launch(launcherVersion: string, isManaged: boolean): void {
-    Rush._printStartupBanner(isManaged);
+  public static launch(launcherVersion: string, arg: ILaunchOptions): void {
+    const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
+
+    Rush._printStartupBanner(options.isManaged);
+
+    if (!options.alreadyReportedNodeTooNewError) {
+      Rush._warnAboutNodeVersion();
+    }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
       // The migration advisor recognized an obsolete command-line
@@ -45,14 +67,17 @@ export class Rush {
    * and start a new NodeJS process.
    *
    * @param launcherVersion - The version of the `@microsoft/rush` wrapper used to call invoke the CLI.
-   * @param isManaged - True if the tool was invoked from within a project with a rush.json file, otherwise false. We
-   *  consider a project without a rush.json to be "unmanaged" and we'll print that to the command line when
-   *  the tool is executed. This is mainly used for debugging purposes.
    */
-  public static launchRushX(launcherVersion: string, isManaged: boolean): void {
-    Rush._printStartupBanner(isManaged);
+  public static launchRushX(launcherVersion: string, arg: ILaunchOptions): void {
+    const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
-    RushXCommandLine.launchRushX(launcherVersion, isManaged);
+    Rush._printStartupBanner(options.isManaged);
+
+    if (!options.alreadyReportedNodeTooNewError) {
+      Rush._warnAboutNodeVersion();
+    }
+
+    RushXCommandLine.launchRushX(launcherVersion, options.isManaged);
   }
 
   /**
@@ -63,12 +88,49 @@ export class Rush {
     return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
   }
 
+  /**
+   * This function normalizes legacy options to the current {@see ILaunchOptions} object.
+   */
+  private static _normalizeLaunchOptions(arg: ILaunchOptions): ILaunchOptions {
+    return (typeof arg === 'boolean')
+      ? { isManaged: arg } // In older versions of Rush, this the `launch` functions took a boolean arg for "isManaged"
+      : arg;
+  }
+
   private static _printStartupBanner(isManaged: boolean): void {
+    interface IExtendedNodeProcess extends NodeJS.Process {
+      release: {
+        lts?: string;
+      };
+    }
+
+    const nodeVersion: string = process.versions.node;
+    const nodeMajorVersion: number = semver.major(nodeVersion);
+    const nodeReleaseLabel: string = (nodeMajorVersion % 2 === 0)
+      ? (!!(process as IExtendedNodeProcess).release.lts ? 'LTS' : 'pre-LTS')
+      : 'unstable';
+
     console.log(
       EOL +
       colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
       colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
+      EOL +
+      `NodeJS version is ${nodeVersion} (${nodeReleaseLabel})` +
       EOL
     );
+  }
+
+  private static _warnAboutNodeVersion(): void {
+    const nodeVersion: string = process.versions.node;
+
+    if (semver.satisfies(nodeVersion, '>= 11.0.0')) {
+      console.log();
+      console.warn(colors.yellow(
+        `Your version of Node.js (${nodeVersion}) has not been tested with this release` +
+        `of the Rush engine.  Please consider upgrading the "rushVersion" setting in rush.json, ` +
+        `or  downgrading Node.js.`
+      ));
+      console.log();
+    }
   }
 }
