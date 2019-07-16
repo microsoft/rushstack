@@ -9,7 +9,6 @@ import * as semver from 'semver';
 const nodeVersion: string = process.versions.node;
 let alreadyReportedNodeTooNewError: boolean = false;
 
-
 // We are on an ancient version of NodeJS that is known not to work with Rush
 if (semver.satisfies(nodeVersion, '< 8.9.0')) {
   console.error(colors.red(
