@@ -169,6 +169,7 @@ export class ChangeAction extends BaseRushAction {
     }
 
     let changeFileDataPromise: Promise<Map<string, IChangeFile>>;
+    let allowOverwriteHandler: (filePath: string) => Promise<boolean>;
     if (this._bulkChangeParameter.value) {
       if (!this._bulkChangeBumpTypeParameter.value || !this._bulkChangeMessageParameter.value) {
         throw new Error(
@@ -223,6 +224,7 @@ export class ChangeAction extends BaseRushAction {
       }
 
       changeFileDataPromise = Promise.resolve(changeFileData);
+      allowOverwriteHandler = (filePath: string) => Promise.reject(new Error(`Changefile ${filePath} already exists`));
     } else if (this._bulkChangeBumpTypeParameter.value || this._bulkChangeMessageParameter.value) {
       throw new Error(
         `The ${this._bulkChangeParameter.longName} flag must be provided with the ` +
@@ -244,10 +246,27 @@ export class ChangeAction extends BaseRushAction {
           });
         }).then(() => changeFileData);
       });
+
+      allowOverwriteHandler = (filePath) => {
+        return this._prompt([
+          {
+            name: 'overwrite',
+            type: 'confirm',
+            message: `Overwrite ${filePath}?`
+          }
+        ]).then(({ overwrite }) => {
+          if (overwrite) {
+            return true;
+          } else {
+            console.log(`Not overwriting ${filePath}`);
+            return false;
+          }
+        });
+      };
     }
 
     return changeFileDataPromise.then((changeFileData) => {
-      this._writeChangeFiles(changeFileData);
+      this._writeChangeFiles(changeFileData, allowOverwriteHandler);
     }).catch((error: Error) => {
       throw new Error(`There was an error creating a change file: ${error.toString()}`);
     });
@@ -564,17 +583,34 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
-  private _writeChangeFiles(changeFileData: Map<string, IChangeFile>): void {
+  private _writeChangeFiles(
+    changeFileData: Map<string, IChangeFile>,
+    allowOverwriteHandler: (filePath: string) => Promise<boolean>
+  ): Promise<void> {
+    let writePromise: Promise<void> = Promise.resolve();
     changeFileData.forEach((changeFile: IChangeFile) => {
-      this._writeChangeFile(changeFile);
+      writePromise = writePromise.then(() => this._writeChangeFile(changeFile, allowOverwriteHandler));
     });
+
+    return writePromise;
   }
 
-  private _writeChangeFile(changeFileData: IChangeFile): void {
+  private _writeChangeFile(
+    changeFileData: IChangeFile,
+    allowOverwriteHandler: (filePath: string) => Promise<boolean>
+  ): Promise<void> {
     const output: string = JSON.stringify(changeFileData, undefined, 2);
     const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
     const filePath: string = changeFile.generatePath();
-    this._writeFile(filePath, output);
+
+    const overwriteCheckPromise: Promise<boolean> = FileSystem.exists(filePath)
+      ? allowOverwriteHandler(filePath)
+      : Promise.resolve(true);
+    return overwriteCheckPromise.then((shouldWrite) => {
+      if (shouldWrite) {
+        this._writeFile(filePath, output);
+      }
+    });
   }
 
   /**
