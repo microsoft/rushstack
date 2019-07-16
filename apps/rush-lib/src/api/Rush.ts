@@ -10,6 +10,7 @@ import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from '../logic/RushConstants';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
+import { RushConfiguration } from './RushConfiguration';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -47,8 +48,9 @@ export class Rush {
 
     Rush._printStartupBanner(options.isManaged);
 
+    const rushConfiguration: RushConfiguration | undefined = Rush._tryGetRushConfiguration();
     if (!options.alreadyReportedNodeTooNewError) {
-      Rush._warnAboutNodeVersion();
+      Rush._warnAboutNodeVersion(rushConfiguration);
     }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
@@ -57,7 +59,7 @@ export class Rush {
       return;
     }
 
-    const parser: RushCommandLineParser = new RushCommandLineParser();
+    const parser: RushCommandLineParser = new RushCommandLineParser({ rushConfiguration });
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
@@ -73,11 +75,18 @@ export class Rush {
 
     Rush._printStartupBanner(options.isManaged);
 
+    const rushConfiguration: RushConfiguration | undefined = Rush._tryGetRushConfiguration();
     if (!options.alreadyReportedNodeTooNewError) {
-      Rush._warnAboutNodeVersion();
+      Rush._warnAboutNodeVersion(rushConfiguration);
     }
 
-    RushXCommandLine.launchRushX(launcherVersion, options.isManaged);
+    RushXCommandLine._launchRushXInternal(
+      launcherVersion,
+      {
+        isManaged: options.isManaged,
+        rushConfiguration: rushConfiguration
+      }
+    );
   }
 
   /**
@@ -86,6 +95,18 @@ export class Rush {
    */
   public static get version(): string {
     return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+  }
+
+  private static _tryGetRushConfiguration(): RushConfiguration | undefined {
+    try {
+      if (RushConfiguration.tryFindRushJsonLocation()) {
+        return RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    return undefined;
   }
 
   /**
@@ -120,8 +141,14 @@ export class Rush {
     );
   }
 
-  private static _warnAboutNodeVersion(): void {
+  private static _warnAboutNodeVersion(rushConfiguration: RushConfiguration | undefined): void {
     const nodeVersion: string = process.versions.node;
+
+    interface IExtendedNodeProcess extends NodeJS.Process {
+      release: {
+        lts?: string;
+      };
+    }
 
     if (semver.satisfies(nodeVersion, '>= 11.0.0')) {
       console.log();
@@ -129,6 +156,18 @@ export class Rush {
         `Your version of Node.js (${nodeVersion}) has not been tested with this release` +
         `of the Rush engine.  Please consider upgrading the "rushVersion" setting in rush.json, ` +
         `or  downgrading Node.js.`
+      ));
+      console.log();
+    } else if (
+      rushConfiguration &&
+      !rushConfiguration.suppressNodeLtsWarning &&
+      !(process as IExtendedNodeProcess).release.lts
+    ) {
+      console.log();
+      console.warn(colors.yellow(
+        `Your version of Node.js (${nodeVersion}) has an odd major version number. ` +
+        `These releases frequently have bugs.  Please consider installing a Long Term Support (LTS) ` +
+        `version instead.`
       ));
       console.log();
     }

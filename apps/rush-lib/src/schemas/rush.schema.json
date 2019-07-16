@@ -37,6 +37,10 @@
       "description": "A node-semver expression (e.g. \">=1.2.3 <2.0.0\", see https://github.com/npm/node-semver) indicating which versions of Node.js can safely be used to build this repository.  If omitted, no validation is performed.",
       "type": "string"
     },
+    "suppressNodeLtsWarning": {
+      "description": "Rush normally prints a warning if it detects a non-LTS Node.js version. If you are testing pre-LTS versions in preparation for supporting the first LTS version, you can use this setting to disable Rush's warning.",
+      "type": "boolean"
+    },
     "projectFolderMinDepth": {
       "description": "The minimum folder depth for the projectFolder field.  The default value is 1, i.e. no slashes in the path name.",
       "type": "number"

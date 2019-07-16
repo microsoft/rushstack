@@ -14,8 +14,32 @@ import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
 import { RushConfiguration } from '../api/RushConfiguration';
 
+/**
+ * @internal
+ */
+export interface ILaunchRushXInternalOptions {
+  rushConfiguration: RushConfiguration | undefined;
+  isManaged: boolean;
+}
+
 export class RushXCommandLine {
   public static launchRushX(launcherVersion: string, isManaged: boolean): void {
+    // Are we in a Rush repo?
+    let rushConfiguration: RushConfiguration | undefined = undefined;
+    if (RushConfiguration.tryFindRushJsonLocation()) {
+      rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
+    }
+
+    RushXCommandLine._launchRushXInternal(
+      launcherVersion,
+      { isManaged, rushConfiguration }
+    );
+  }
+
+  /**
+   * @internal
+   */
+  public static _launchRushXInternal(launcherVersion: string, options: ILaunchRushXInternalOptions): void {
     // NodeJS can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
     // and set it to 0 only on success.
@@ -67,12 +91,6 @@ export class RushXCommandLine {
         return;
       }
 
-      // Are we in a Rush repo?
-      let rushConfiguration: RushConfiguration | undefined = undefined;
-      if (RushConfiguration.tryFindRushJsonLocation()) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
-      }
-
       console.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
@@ -80,11 +98,11 @@ export class RushXCommandLine {
       const exitCode: number = Utilities.executeLifecycleCommand(
         scriptBody,
         {
-          rushConfiguration,
+          rushConfiguration: options.rushConfiguration,
           workingDirectory: packageFolder,
           // If there is a rush.json then use its .npmrc from the temp folder.
           // Otherwise look for npmrc in the project folder.
-          initCwd: rushConfiguration ? rushConfiguration.commonTempFolder : packageFolder,
+          initCwd: options.rushConfiguration ? options.rushConfiguration.commonTempFolder : packageFolder,
           handleOutput: false,
           environmentPathOptions: {
             includeProjectBin: true

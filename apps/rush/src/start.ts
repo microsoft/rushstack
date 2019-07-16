@@ -9,11 +9,6 @@ import * as semver from 'semver';
 const nodeVersion: string = process.versions.node;
 let alreadyReportedNodeTooNewError: boolean = false;
 
-interface IExtendedNodeProcess extends NodeJS.Process {
-  release: {
-    lts?: string;
-  };
-}
 
 // We are on an ancient version of NodeJS that is known not to work with Rush
 if (semver.satisfies(nodeVersion, '< 8.9.0')) {
@@ -33,15 +28,6 @@ else if (semver.satisfies(nodeVersion, '>= 11.0.0')) {
     `package, or else downgrading Node.js.`
   ));
   alreadyReportedNodeTooNewError = true;
-}
-
-// We are not on an LTS release
-// tslint:disable-next-line
-else if ((process as IExtendedNodeProcess).release.lts) {
-  console.warn(colors.yellow(
-    `Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release. ` +
-    `These versions frequently have bugs. Please consider installing a stable release.`
-  ));
 }
 
 import {

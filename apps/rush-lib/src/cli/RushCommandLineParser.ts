@@ -41,11 +41,11 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
  */
 export interface IRushCommandLineParserOptions {
   cwd?: string;   // Defaults to `cwd`
+  rushConfiguration: RushConfiguration | undefined;
 }
 
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
-  public rushConfiguration: RushConfiguration;
   public rushGlobalFolder: RushGlobalFolder;
 
   private _debugParameter: CommandLineFlagParameter;
@@ -63,10 +63,8 @@ export class RushCommandLineParser extends CommandLineParser {
         + ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,'
         + ' Rush is for you.'
     });
-    const optionsIn: IRushCommandLineParserOptions = options || {};
-    this._rushOptions = {
-      cwd: optionsIn.cwd || process.cwd()
-    };
+
+    this._rushOptions = this._normalizeOptions(options || {});
     this._populateActions();
   }
 
@@ -108,10 +106,29 @@ export class RushCommandLineParser extends CommandLineParser {
     });
   }
 
+  private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
+    const cwd: string = options.cwd || process.cwd();
+    let rushConfiguration: RushConfiguration | undefined = options.rushConfiguration;
+
+    try {
+      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
+        startingFolder: cwd,
+        showVerbose: true
+      });
+      if (rushJsonFilename) {
+        rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+      }
+    } catch (error) {
+      this._reportErrorAndSetExitCode(error);
+    }
+
+    return { cwd, rushConfiguration };
+  }
+
   private _wrapOnExecute(): Promise<void> {
     try {
-      if (this.rushConfiguration) {
-        this.telemetry = new Telemetry(this.rushConfiguration);
+      if (this._rushOptions.rushConfiguration) {
+        this.telemetry = new Telemetry(this._rushOptions.rushConfiguration);
       }
       return super.onExecute().then(() => {
         if (this.telemetry) {
@@ -125,14 +142,6 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _populateActions(): void {
     try {
-      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-        startingFolder: this._rushOptions.cwd,
-        showVerbose: true
-      });
-      if (rushJsonFilename) {
-        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
-      }
-
       this.rushGlobalFolder = new RushGlobalFolder();
 
       this.addAction(new AddAction(this));
@@ -161,9 +170,10 @@ export class RushCommandLineParser extends CommandLineParser {
 
     // If there is not a rush.json file, we still want "build" and "rebuild" to appear in the
     // command-line help
-    if (this.rushConfiguration) {
+    if (this._rushOptions.rushConfiguration) {
       const commandLineConfigFile: string = path.join(
-        this.rushConfiguration.commonRushConfigFolder, RushConstants.commandLineFilename
+        this._rushOptions.rushConfiguration.commonRushConfigFolder,
+        RushConstants.commandLineFilename
       );
 
       commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);

@@ -72,6 +72,19 @@
   "nodeSupportedVersionRange": ">=10.13.0 <11.0.0",
 
   /**
+  * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
+  * spend six months in a stabilization period before the first Long Term Support (LTS) version.
+  * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
+  * for production usage because they frequently have bugs.  They may cause Rush itself
+  * to malfunction.
+  *
+  * Rush normally prints a warning if it detects a non-LTS Node.js version.  If you are testing
+  * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
+  * to disable Rush's warning.
+  */
+  /*[LINE "HYPOTHETICAL"]*/ "suppressNodeLtsWarning": false,
+
+  /**
    * If you would like the version specifiers for your dependencies to be consistent, then
    * uncomment this line. This is effectively similar to running "rush check" before any
    * of the following commands:
