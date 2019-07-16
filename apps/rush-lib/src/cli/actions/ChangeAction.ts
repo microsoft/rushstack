@@ -39,10 +39,12 @@ export class ChangeAction extends BaseRushAction {
   private _verifyParameter: CommandLineFlagParameter;
   private _noFetchParameter: CommandLineFlagParameter;
   private _targetBranchParameter: CommandLineStringParameter;
-  private _changeEmail: CommandLineStringParameter;
+  private _changeEmailParameter: CommandLineStringParameter;
   private _bulkChangeParameter: CommandLineFlagParameter;
   private _bulkChangeMessageParameter: CommandLineStringParameter;
   private _bulkChangeBumpTypeParameter: CommandLineChoiceParameter;
+  private _overwriteFlagParemter: CommandLineFlagParameter;
+
   private _targetBranchName: string;
   private _projectHostMap: Map<string, string>;
 
@@ -86,6 +88,10 @@ export class ChangeAction extends BaseRushAction {
   }
 
   public onDefineParameters(): void {
+    const BULK_LONG_NAME: string = '--bulk';
+    const BULK_MESSAGE_LONG_NAME: string = '--message';
+    const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
+
     this._verifyParameter = this.defineFlagParameter({
       parameterLongName: '--verify',
       parameterShortName: '-v',
@@ -106,16 +112,18 @@ export class ChangeAction extends BaseRushAction {
         'is compared against the "master" branch.'
     });
 
-    this._changeEmail = this.defineStringParameter({
+    this._overwriteFlagParemter = this.defineFlagParameter({
+      parameterLongName: '--overwrite',
+      description: `If a changefile already exists, overwrite without prompting ` +
+        `(or erroring in ${BULK_BUMP_TYPE_LONG_NAME} mode).`
+    });
+
+    this._changeEmailParameter = this.defineStringParameter({
       parameterLongName: '--email',
       argumentName: 'EMAIL',
       description: 'The email address to use in changefiles. If this parameter is not provided, the email address ' +
         'will be detected or prompted for in intractive mode.'
     });
-
-    const BULK_LONG_NAME: string = '--bulk';
-    const BULK_MESSAGE_LONG_NAME: string = '--message';
-    const BULK_BUMP_TYPE_LONG_NAME: string = '--bump-type';
 
     this._bulkChangeParameter = this.defineFlagParameter({
       parameterLongName: BULK_LONG_NAME,
@@ -178,11 +186,11 @@ export class ChangeAction extends BaseRushAction {
         );
       }
 
-      const email: string | undefined = this._changeEmail.value || this._detectEmail();
+      const email: string | undefined = this._changeEmailParameter.value || this._detectEmail();
       if (!email) {
         throw new Error(
           'Unable to detect git email and an email address wasn\'t provided on the ' +
-          `${this._changeEmail.longName} paramter.`
+          `${this._changeEmailParameter.longName} paramter.`
         );
       }
 
@@ -236,8 +244,8 @@ export class ChangeAction extends BaseRushAction {
       changeFileDataPromise = this._promptForChangeFileData(sortedProjectList).then((changeFileData) => {
         this._warnUncommittedChanges();
 
-        const emailPromise: Promise<string> = this._changeEmail.value
-          ? Promise.resolve(this._changeEmail.value)
+        const emailPromise: Promise<string> = this._changeEmailParameter.value
+          ? Promise.resolve(this._changeEmailParameter.value)
           : this._detectOrAskForEmail();
 
         return emailPromise.then((email: string) => {
@@ -265,8 +273,12 @@ export class ChangeAction extends BaseRushAction {
       };
     }
 
+    if (this._overwriteFlagParemter.value) {
+      allowOverwriteHandler = () => Promise.resolve(true);
+    }
+
     return changeFileDataPromise.then((changeFileData) => {
-      this._writeChangeFiles(changeFileData, allowOverwriteHandler);
+      return this._writeChangeFiles(changeFileData, allowOverwriteHandler);
     }).catch((error: Error) => {
       throw new Error(`There was an error creating a change file: ${error.toString()}`);
     });
