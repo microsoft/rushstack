@@ -5,8 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import * as colors from 'colors';
-
-import inquirer = require('inquirer');
+import * as inquirer from 'inquirer';
 
 import {
   CommandLineFlagParameter,
@@ -47,8 +46,6 @@ export class ChangeAction extends BaseRushAction {
 
   private _targetBranchName: string;
   private _projectHostMap: Map<string, string>;
-
-  private _prompt: inquirer.PromptModule;
 
   constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
@@ -255,12 +252,13 @@ export class ChangeAction extends BaseRushAction {
         `${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} parameters.`
       );
     } else {
-      this._prompt = inquirer.createPromptModule();
+      const promptModule: inquirer.PromptModule = inquirer.createPromptModule();
+
       this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles());
-      changeFileDataPromise = this._promptForChangeFileData(sortedProjectList).then((changeFileData) => {
+      changeFileDataPromise = this._promptForChangeFileData(promptModule, sortedProjectList).then((changeFileData) => {
         const emailPromise: Promise<string> = this._changeEmailParameter.value
           ? Promise.resolve(this._changeEmailParameter.value)
-          : this._detectOrAskForEmail();
+          : this._detectOrAskForEmail(promptModule);
 
         return emailPromise.then((email: string) => {
           changeFileData.forEach((changeFile: IChangeFile) => {
@@ -270,7 +268,7 @@ export class ChangeAction extends BaseRushAction {
       });
 
       allowOverwriteHandler = (filePath) => {
-        return this._prompt([
+        return promptModule([
           {
             name: 'overwrite',
             type: 'confirm',
@@ -383,13 +381,16 @@ export class ChangeAction extends BaseRushAction {
   /**
    * The main loop which prompts the user for information on changed projects.
    */
-  private _promptForChangeFileData(sortedProjectList: string[]): Promise<Map<string, IChangeFile>> {
+  private _promptForChangeFileData(
+    promptModule: inquirer.PromptModule,
+    sortedProjectList: string[]
+  ): Promise<Map<string, IChangeFile>> {
     const changedFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
 
     let promptPromise: Promise<void> = Promise.resolve();
     for (const projectName of sortedProjectList) {
       promptPromise = promptPromise
-        .then(() => this._askQuestions(projectName))
+        .then(() => this._askQuestions(promptModule, projectName))
         .then((answers: IChangeInfo) => {
           if (answers) {
             // Save the info into the change file
@@ -413,7 +414,7 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Asks all questions which are needed to generate changelist for a project.
    */
-  private _askQuestions(packageName: string): Promise<IChangeInfo | undefined> {
+  private _askQuestions(promptModule: inquirer.PromptModule, packageName: string): Promise<IChangeInfo | undefined> {
     console.log(`${os.EOL}${packageName}`);
     const comments: string[] | undefined = this._changeComments.get(packageName);
     if (comments) {
@@ -421,7 +422,7 @@ export class ChangeAction extends BaseRushAction {
       comments.forEach(comment => {
         console.log(`    > ${comment}`);
       });
-      return this._prompt({
+      return promptModule({
         name: 'appendComment',
         type: 'list',
         default: 'skip',
@@ -441,17 +442,20 @@ export class ChangeAction extends BaseRushAction {
         if (appendComment === 'skip') {
           return undefined;
         } else {
-          return this._promptForComments(packageName);
+          return this._promptForComments(promptModule, packageName);
         }
       });
     } else {
-      return this._promptForComments(packageName);
+      return this._promptForComments(promptModule, packageName);
     }
   }
 
-  private _promptForComments(packageName: string): Promise<IChangeInfo | undefined> {
+  private _promptForComments(
+    promptModule: inquirer.PromptModule,
+    packageName: string
+  ): Promise<IChangeInfo | undefined> {
     const bumpOptions: { [type: string]: string } = this._getBumpOptions(packageName);
-    return this._prompt({
+    return promptModule({
       name: 'comment',
       type: 'input',
       message: `Describe changes, or ENTER if no changes:`
@@ -464,7 +468,7 @@ export class ChangeAction extends BaseRushAction {
           type: ChangeType[ChangeType.none]
         } as IChangeInfo;
       } else {
-        return this._prompt({
+        return promptModule({
           choices: Object.keys(bumpOptions).map(option => {
             return {
               'value': option,
@@ -521,12 +525,12 @@ export class ChangeAction extends BaseRushAction {
    * Will determine a user's email by first detecting it from their git config,
    * or will ask for it if it is not found or the git config is wrong.
    */
-  private _detectOrAskForEmail(): Promise<string> {
-    return this._detectAndConfirmEmail().then((email: string) => {
+  private _detectOrAskForEmail(promptModule: inquirer.PromptModule): Promise<string> {
+    return this._detectAndConfirmEmail(promptModule).then((email: string) => {
       if (email) {
         return Promise.resolve(email);
       } else {
-        return this._promptForEmail();
+        return this._promptForEmail(promptModule);
       }
     });
   }
@@ -546,11 +550,11 @@ export class ChangeAction extends BaseRushAction {
    * Detects the user's email address from their git configuration, prompts the user to approve the
    * detected email. It returns undefined if it cannot be detected.
    */
-  private _detectAndConfirmEmail(): Promise<string | undefined> {
+  private _detectAndConfirmEmail(promptModule: inquirer.PromptModule): Promise<string | undefined> {
     const email: string | undefined = this._detectEmail();
 
     if (email) {
-      return this._prompt([
+      return promptModule([
         {
           type: 'confirm',
           name: 'isCorrectEmail',
@@ -568,8 +572,8 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Asks the user for their email address
    */
-  private _promptForEmail(): Promise<string> {
-    return this._prompt([
+  private _promptForEmail(promptModule: inquirer.PromptModule): Promise<string> {
+    return promptModule([
       {
         type: 'input',
         name: 'email',
