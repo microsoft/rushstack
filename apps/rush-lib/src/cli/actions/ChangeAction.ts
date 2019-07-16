@@ -193,9 +193,9 @@ export class ChangeAction extends BaseRushAction {
       ) {
         throw new Error(
           `The ${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} ` +
-          `parameters must provided if the ${this._bulkChangeParameter.longName} flag is provided. If the ` +
-          `${this._bulkChangeBumpTypeParameter.longName}'s value is set to "${ChangeType[ChangeType.none]}", the ` +
-          `${this._bulkChangeMessageParameter.longName} parameter may be omitted.`
+          `parameters must provided if the ${this._bulkChangeParameter.longName} flag is provided. If the value ` +
+          `"${ChangeType[ChangeType.none]}" is provided to the ${this._bulkChangeBumpTypeParameter.longName} ` +
+          `patameter, the ${this._bulkChangeMessageParameter.longName} parameter may be omitted.`
         );
       }
 
