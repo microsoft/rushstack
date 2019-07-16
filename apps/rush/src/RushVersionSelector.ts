@@ -11,7 +11,10 @@ import {
   _RushGlobalFolder
 } from '@microsoft/rush-lib';
 
-import { RushCommandSelector } from './RushCommandSelector';
+import {
+  RushCommandSelector,
+  IExceuteOptions
+} from './RushCommandSelector';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
@@ -25,8 +28,11 @@ export class RushVersionSelector {
     this._currentPackageVersion = currentPackageVersion;
   }
 
-  public ensureRushVersionInstalled(version: string,
-    configuration: MinimalRushConfiguration | undefined): Promise<void> {
+  public ensureRushVersionInstalled(
+    version: string,
+    configuration: MinimalRushConfiguration | undefined,
+    executeOptions: IExceuteOptions
+  ): Promise<void> {
 
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
@@ -115,7 +121,7 @@ export class RushVersionSelector {
           'lib',
           'index'
         ));
-        RushCommandSelector.execute(this._currentPackageVersion, true, rushCliEntrypoint);
+        RushCommandSelector.execute(this._currentPackageVersion, rushCliEntrypoint, executeOptions);
       }
     });
   }

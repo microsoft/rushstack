@@ -7,6 +7,7 @@ import * as os from 'os';
 import * as semver from 'semver';
 
 const nodeVersion: string = process.versions.node;
+let alreadyReportedNodeTooNewError: boolean = false;
 
 interface IExtendedNodeProcess extends NodeJS.Process {
   release: {
@@ -31,6 +32,7 @@ else if (semver.satisfies(nodeVersion, '>= 11.0.0')) {
     `of Rush. Please consider installing a newer version of the "@microsoft/rush" ` +
     `package, or else downgrading Node.js.`
   ));
+  alreadyReportedNodeTooNewError = true;
 }
 
 // We are not on an LTS release
@@ -49,7 +51,10 @@ import {
 import { EnvironmentVariableNames } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
-import { RushCommandSelector } from './RushCommandSelector';
+import {
+  RushCommandSelector,
+  IExceuteOptions
+} from './RushCommandSelector';
 import { RushVersionSelector } from './RushVersionSelector';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
@@ -105,19 +110,19 @@ if (rushVersionToLoad && semver.lt(rushVersionToLoad, '5.0.0-dev.18')) {
   delete process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
 }
 
+// Rush is "managed" if its version and configuration are dictated by a repo's rush.json
+const isManaged: boolean = !!configuration;
+const executeOptions: IExceuteOptions = { isManaged, alreadyReportedNodeTooNewError };
+
 // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
 // install it
 if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion) {
   const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageVersion);
-  versionSelector.ensureRushVersionInstalled(rushVersionToLoad, configuration)
+  versionSelector.ensureRushVersionInstalled(rushVersionToLoad, configuration, executeOptions)
     .catch((error: Error) => {
       console.log(colors.red('Error: ' + error.message));
     });
 } else {
   // Otherwise invoke the rush-lib that came with this rush package
-
-  // Rush is "managed" if its version and configuration are dictated by a repo's rush.json
-  const isManaged: boolean = !!configuration;
-
-  RushCommandSelector.execute(currentPackageVersion, isManaged, rushLib);
+  RushCommandSelector.execute(currentPackageVersion, rushLib, executeOptions);
 }
