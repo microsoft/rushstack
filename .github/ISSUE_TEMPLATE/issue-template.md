@@ -7,7 +7,7 @@ assignees: ''
 ---
 
 ## Please prefix the issue title with the project name i.e. [rush], [api-extractor] etc. ##
- 
+
 **Is this a feature or a bug?**
 
 - [ ] Feature
@@ -19,12 +19,11 @@ assignees: ''
 
 **What is the expected behavior?**
 
-**Please provide the tool version, Node.js version and OS.**
+**If this is a bug, please provide the tool version, Node.js version, and OS.**
 
-* Tool: 
-* Tool Version:
-* Node Version: 
-  * Is this a LTS version? 
-  * Have you tested on a LTS version? 
-* OS:
-
+* **Tool:** 
+* **Tool Version:** 
+* **Node Version:** 
+  * **Is this a LTS version?** 
+  * **Have you tested on a LTS version?** 
+* **OS:** 

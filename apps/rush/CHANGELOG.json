@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.10.2",
+      "tag": "@microsoft/rush_v5.10.2",
+      "date": "Tue, 16 Jul 2019 19:36:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Prevent non-hotfix changes from being applied to hotfix branches"
+          },
+          {
+            "comment": "Use the shrinkwrap from temp for \"rush link\" as the committed shrinkwrap may not always be up to date as a result of shrinkwrap churn optimization. See https://github.com/microsoft/web-build-tools/issues/1273#issuecomment-492779995 for more details about shrinkwrap churn optimization."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.10.1",
       "tag": "@microsoft/rush_v5.10.1",
       "date": "Thu, 11 Jul 2019 22:00:50 GMT",
