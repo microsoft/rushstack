@@ -30,6 +30,12 @@ export interface ILaunchOptions {
   alreadyReportedNodeTooNewError?: boolean;
 }
 
+interface IExtendedNodeProcess extends NodeJS.Process {
+  release: {
+    lts?: string;
+  };
+}
+
 /**
  * General operations for the Rush engine.
  *
@@ -70,8 +76,8 @@ export class Rush {
    *
    * @param launcherVersion - The version of the `@microsoft/rush` wrapper used to call invoke the CLI.
    */
-  public static launchRushX(launcherVersion: string, arg: ILaunchOptions): void {
-    const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
+  public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
+    options = Rush._normalizeLaunchOptions(options);
 
     Rush._printStartupBanner(options.isManaged);
 
@@ -119,12 +125,6 @@ export class Rush {
   }
 
   private static _printStartupBanner(isManaged: boolean): void {
-    interface IExtendedNodeProcess extends Node.js.Process {
-      release: {
-        lts?: string;
-      };
-    }
-
     const nodeVersion: string = process.versions.node;
     const nodeMajorVersion: number = semver.major(nodeVersion);
     const nodeReleaseLabel: string = (nodeMajorVersion % 2 === 0)
@@ -143,12 +143,6 @@ export class Rush {
 
   private static _warnAboutNodeVersion(rushConfiguration: RushConfiguration | undefined): void {
     const nodeVersion: string = process.versions.node;
-
-    interface IExtendedNodeProcess extends Node.js.Process {
-      release: {
-        lts?: string;
-      };
-    }
 
     if (semver.satisfies(nodeVersion, '>= 11.0.0')) {
       console.log();
