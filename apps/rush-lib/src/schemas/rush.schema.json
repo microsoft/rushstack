@@ -38,7 +38,7 @@
       "type": "string"
     },
     "suppressNodeLtsWarning": {
-      "description": "Rush normally prints a warning if it detects a non-LTS Node.js version. If you are testing pre-LTS versions in preparation for supporting the first LTS version, you can use this setting to disable Rush's warning.",
+      "description": "Rush normally prints a warning if it detects a pre-LTS Node.js version. If you are testing pre-LTS versions in preparation for supporting the first LTS version, you can use this setting to disable Rush's warning.",
       "type": "boolean"
     },
     "projectFolderMinDepth": {
