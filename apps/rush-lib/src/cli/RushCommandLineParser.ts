@@ -92,8 +92,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
   protected onExecute(): Promise<void> {
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
-    // For example, NodeJS currently has the inexcusable design of terminating with zero exit code when
-    // there is an uncaught promise exception.  This will supposedly be fixed in NodeJS 9.
+    // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
+    // there is an uncaught promise exception.  This will supposedly be fixed in Node.js 9.
     // Ideally we should do this for all the Rush actions, but "rush build" is the most critical one
     // -- if it falsely appears to succeed, we could merge bad PRs, publish empty packages, etc.
     process.exitCode = 1;
@@ -334,7 +334,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     if (this._debugParameter.value) {
-      // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
+      // If catchSyncErrors() called this, then show a call stack similar to what Node.js
       // would show for an uncaught error
       console.error(os.EOL + error.stack);
     }

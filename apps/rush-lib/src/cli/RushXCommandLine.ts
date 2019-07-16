@@ -40,7 +40,7 @@ export class RushXCommandLine {
    * @internal
    */
   public static _launchRushXInternal(launcherVersion: string, options: ILaunchRushXInternalOptions): void {
-    // NodeJS can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
+    // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
     // and set it to 0 only on success.
     process.exitCode = 1;

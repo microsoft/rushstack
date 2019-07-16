@@ -24,7 +24,7 @@ export interface ILaunchOptions {
   isManaged: boolean;
 
   /**
-   * If true, the wrapper process already printed a warning that the version of NodeJS hasn't been tested
+   * If true, the wrapper process already printed a warning that the version of Node.js hasn't been tested
    * with this version of Rush, so we shouldn't print a similar error.
    */
   alreadyReportedNodeTooNewError?: boolean;
@@ -39,7 +39,7 @@ export class Rush {
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
    * Third-party tools should not use this API.  Instead, they should execute the "rush" binary
-   * and start a new NodeJS process.
+   * and start a new Node.js process.
    *
    * @param launcherVersion - The version of the `@microsoft/rush` wrapper used to call invoke the CLI.
    */
@@ -66,7 +66,7 @@ export class Rush {
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rushx" command-line.
    * Third-party tools should not use this API.  Instead, they should execute the "rushx" binary
-   * and start a new NodeJS process.
+   * and start a new Node.js process.
    *
    * @param launcherVersion - The version of the `@microsoft/rush` wrapper used to call invoke the CLI.
    */
@@ -119,7 +119,7 @@ export class Rush {
   }
 
   private static _printStartupBanner(isManaged: boolean): void {
-    interface IExtendedNodeProcess extends NodeJS.Process {
+    interface IExtendedNodeProcess extends Node.js.Process {
       release: {
         lts?: string;
       };
@@ -136,7 +136,7 @@ export class Rush {
       colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
       colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
       EOL +
-      `NodeJS version is ${nodeVersion} (${nodeReleaseLabel})` +
+      `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
       EOL
     );
   }
@@ -144,7 +144,7 @@ export class Rush {
   private static _warnAboutNodeVersion(rushConfiguration: RushConfiguration | undefined): void {
     const nodeVersion: string = process.versions.node;
 
-    interface IExtendedNodeProcess extends NodeJS.Process {
+    interface IExtendedNodeProcess extends Node.js.Process {
       release: {
         lts?: string;
       };

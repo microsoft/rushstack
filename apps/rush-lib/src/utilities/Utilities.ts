@@ -121,7 +121,7 @@ export class Utilities {
   }
 
   /**
-   * NodeJS equivalent of performance.now().
+   * Node.js equivalent of performance.now().
    */
   public static getTimeInMs(): number {
     let seconds: number;
@@ -722,7 +722,7 @@ export class Utilities {
 
     if (result.error && (result.error as any).errno === 'ENOENT') { // tslint:disable-line:no-any
       // This is a workaround for GitHub issue #25330
-      // https://github.com/nodejs/node-v0.x-archive/issues/25330
+      // https://github.com/Node.js/node-v0.x-archive/issues/25330
       result = child_process.spawnSync(command + '.cmd', args, options);
     }
 

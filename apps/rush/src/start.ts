@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// The minimal set of imports that are safe even for ancient NodeJS versions:
+// The minimal set of imports that are safe even for ancient Node.js versions:
 import * as colors from 'colors';
 import * as os from 'os';
 import * as semver from 'semver';
@@ -9,7 +9,7 @@ import * as semver from 'semver';
 const nodeVersion: string = process.versions.node;
 let alreadyReportedNodeTooNewError: boolean = false;
 
-// We are on an ancient version of NodeJS that is known not to work with Rush
+// We are on an ancient version of Node.js that is known not to work with Rush
 if (semver.satisfies(nodeVersion, '< 8.9.0')) {
   console.error(colors.red(
     `Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush. ` +

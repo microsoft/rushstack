@@ -62,11 +62,11 @@
   },
 
   /**
-   * Older releases of the NodeJS engine may be missing features required by your system.
+   * Older releases of the Node.js engine may be missing features required by your system.
    * Other releases may have bugs.  In particular, the "latest" version will not be a
    * Long Term Support (LTS) version and is likely to have regressions.
    *
-   * Specify a SemVer range to ensure developers use a NodeJS version that is appropriate
+   * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
    * for your repo.
    */
   "nodeSupportedVersionRange": ">=10.13.0 <11.0.0",
@@ -113,7 +113,7 @@
    * occasionally, but if that's painful, it's a warning sign that your development style may
    * discourage refactoring.  Reorganizing the categories should be an enlightening discussion
    * that brings people together, and maybe also identifies poor coding practices (e.g. file
-   * references that reach into other project's folders without using NodeJS module resolution).
+   * references that reach into other project's folders without using Node.js module resolution).
    *
    * The defaults are projectFolderMinDepth=1 and projectFolderMaxDepth=2.
    *
