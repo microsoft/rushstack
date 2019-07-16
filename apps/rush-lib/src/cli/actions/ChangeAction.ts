@@ -217,8 +217,11 @@ export class ChangeAction extends BaseRushAction {
         let projectChangeType: string = changeType;
         if (allowedBumpTypes.length === 0) {
           projectChangeType = ChangeType[ChangeType.none];
-        } else if (allowedBumpTypes.indexOf(projectChangeType) === -1) {
-          errors.push(`The ${projectChangeType} is not allowed for package "${packageName}."`);
+        } else if (
+          projectChangeType !== ChangeType[ChangeType.none] &&
+          allowedBumpTypes.indexOf(projectChangeType) === -1
+        ) {
+          errors.push(`The "${projectChangeType}" change type is not allowed for package "${packageName}".`);
         }
 
         changeFileData.set(
