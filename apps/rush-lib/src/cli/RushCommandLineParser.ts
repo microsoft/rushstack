@@ -68,6 +68,10 @@ export class RushCommandLineParser extends CommandLineParser {
     this._populateActions();
   }
 
+  public get rushConfiguration(): RushConfiguration | undefined {
+    return this._rushOptions.rushConfiguration;
+  }
+
   public get isDebug(): boolean {
     return this._debugParameter.value;
   }

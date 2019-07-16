@@ -52,7 +52,7 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
   // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test
   // repo will fail due to contention over the same lock which is kept until the test runner process
   // ends.
-  const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+  const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath, rushConfiguration: undefined });
 
   // Mock the command
   process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', taskName];
