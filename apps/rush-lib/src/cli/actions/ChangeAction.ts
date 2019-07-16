@@ -140,7 +140,7 @@ export class ChangeAction extends BaseRushAction {
 
     this._bulkChangeBumpTypeParameter = this.defineChoiceParameter({
       parameterLongName: BULK_BUMP_TYPE_LONG_NAME,
-      alternatives: Object.keys(this._getBumpOptions()),
+      alternatives: [...Object.keys(this._getBumpOptions()), ChangeType[ChangeType.none]],
       description: `The bump type to apply to all changed projects if the ${BULK_LONG_NAME} flag is provided.`
     });
   }
@@ -150,9 +150,12 @@ export class ChangeAction extends BaseRushAction {
     this._projectHostMap = this._generateHostMap();
 
     if (this._verifyParameter.value) {
-      const errors: string[] = (
-        [this._bulkChangeParameter, this._bulkChangeMessageParameter, this._bulkChangeBumpTypeParameter]
-      ).map((parameter) => {
+      const errors: string[] = ([
+        this._bulkChangeParameter,
+        this._bulkChangeMessageParameter,
+        this._bulkChangeBumpTypeParameter,
+        this._overwriteFlagParemter
+      ]).map((parameter) => {
         return parameter.value
         ? (
           `The {${this._bulkChangeParameter.longName} parameter cannot be provided with the ` +
@@ -181,10 +184,18 @@ export class ChangeAction extends BaseRushAction {
     let changeFileDataPromise: Promise<Map<string, IChangeFile>>;
     let allowOverwriteHandler: (filePath: string) => Promise<boolean>;
     if (this._bulkChangeParameter.value) {
-      if (!this._bulkChangeBumpTypeParameter.value || !this._bulkChangeMessageParameter.value) {
+      if (
+        !this._bulkChangeBumpTypeParameter.value ||
+        (
+          !this._bulkChangeMessageParameter.value &&
+          this._bulkChangeBumpTypeParameter.value !== ChangeType[ChangeType.none]
+        )
+      ) {
         throw new Error(
           `The ${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} ` +
-          `parameters must provided if the ${this._bulkChangeParameter.longName} flag is provided.`
+          `parameters must provided if the ${this._bulkChangeParameter.longName} flag is provided. If the ` +
+          `${this._bulkChangeBumpTypeParameter.longName}'s value is set to "${ChangeType[ChangeType.none]}", the ` +
+          `${this._bulkChangeMessageParameter.longName} parameter may be omitted.`
         );
       }
 
@@ -198,7 +209,7 @@ export class ChangeAction extends BaseRushAction {
 
       const errors: string[] = [];
 
-      const comment: string = this._bulkChangeMessageParameter.value;
+      const comment: string = this._bulkChangeMessageParameter.value || '';
       const changeType: string = this._bulkChangeBumpTypeParameter.value;
       const changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
       for (const packageName of sortedProjectList) {

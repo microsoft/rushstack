@@ -143,7 +143,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: change 1`] = `
 "usage: rush change [-h] [-v] [--no-fetch] [-b BRANCH] [--overwrite]
                    [--email EMAIL] [--bulk] [--message MESSAGE]
-                   [--bump-type {major,minor,patch}]
+                   [--bump-type {major,minor,patch,none}]
                    
 
 Asks a series of questions and then generates a <branchname>-<timestamp>.json 
@@ -186,7 +186,7 @@ Optional arguments:
                         specified if the --bulk parameter is specified
   --message MESSAGE     The message to apply to all changed projects if the 
                         --bulk flag is provided.
-  --bump-type {major,minor,patch}
+  --bump-type {major,minor,patch,none}
                         The bump type to apply to all changed projects if the 
                         --bulk flag is provided.
 "
