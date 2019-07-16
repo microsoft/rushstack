@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 11 Jul 2019 22:00:50 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Jul 2019 19:36:08 GMT and should not be manually modified.
+
+## 5.10.2
+Tue, 16 Jul 2019 19:36:08 GMT
+
+### Updates
+
+- Prevent non-hotfix changes from being applied to hotfix branches
+- Use the shrinkwrap from temp for "rush link" as the committed shrinkwrap may not always be up to date as a result of shrinkwrap churn optimization. See https://github.com/microsoft/web-build-tools/issues/1273#issuecomment-492779995 for more details about shrinkwrap churn optimization.
 
 ## 5.10.1
 Thu, 11 Jul 2019 22:00:50 GMT
