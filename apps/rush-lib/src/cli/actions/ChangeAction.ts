@@ -115,7 +115,7 @@ export class ChangeAction extends BaseRushAction {
     this._overwriteFlagParemter = this.defineFlagParameter({
       parameterLongName: '--overwrite',
       description: `If a changefile already exists, overwrite without prompting ` +
-        `(or erroring in ${BULK_BUMP_TYPE_LONG_NAME} mode).`
+        `(or erroring in ${BULK_LONG_NAME} mode).`
     });
 
     this._changeEmailParameter = this.defineStringParameter({

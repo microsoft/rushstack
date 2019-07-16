@@ -176,7 +176,7 @@ Optional arguments:
                         specified, the checked out branch is compared against 
                         the \\"master\\" branch.
   --overwrite           If a changefile already exists, overwrite without 
-                        prompting (or erroring in --bump-type mode).
+                        prompting (or erroring in --bulk mode).
   --email EMAIL         The email address to use in changefiles. If this 
                         parameter is not provided, the email address will be 
                         detected or prompted for in intractive mode.
