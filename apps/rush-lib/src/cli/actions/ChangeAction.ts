@@ -358,12 +358,12 @@ export class ChangeAction extends BaseRushAction {
    * The main loop which prompts the user for information on changed projects.
    */
   private _promptForChangeFileData(sortedProjectList: string[]): Promise<Map<string, IChangeFile>> {
-    // Clone the sortedProjectList so we can modify it
-    sortedProjectList = [...sortedProjectList];
     const changedFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
 
-    const promptLoop: () => Promise<void> = () => {
-      return this._askQuestions(sortedProjectList.pop()!)
+    let promptPromise: Promise<void> = Promise.resolve();
+    for (const projectName of sortedProjectList) {
+      promptPromise = promptPromise
+        .then(() => this._askQuestions(projectName))
         .then((answers: IChangeInfo) => {
           if (answers) {
             // Save the info into the change file
@@ -378,17 +378,10 @@ export class ChangeAction extends BaseRushAction {
             }
             changeFile!.changes.push(answers);
           }
-
-          // Continue to loop
-          if (sortedProjectList.length > 0) {
-            return promptLoop();
-          } else {
-            return Promise.resolve();
-          }
         });
-    };
+    }
 
-    return promptLoop().then(() => changedFileData);
+    return promptPromise.then(() => changedFileData);
   }
 
   /**
