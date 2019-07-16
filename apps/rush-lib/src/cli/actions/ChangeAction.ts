@@ -488,14 +488,14 @@ export class ChangeAction extends BaseRushAction {
 
   private _getBumpOptions(packageName?: string): { [type: string]: string } {
     let bumpOptions: { [type: string]: string } = (this.rushConfiguration && this.rushConfiguration.hotfixChangeEnabled)
-    ? {
-      [ChangeType[ChangeType.hotfix]]: 'hotfix - for changes that need to be published in a separate hotfix package'
-      }
-    : {
-      [ChangeType[ChangeType.major]]: 'major - for changes that break compatibility, e.g. removing an API',
-      [ChangeType[ChangeType.minor]]: 'minor - for backwards compatible changes, e.g. adding a new API',
-      [ChangeType[ChangeType.patch]]: 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
-    };
+      ? {
+          [ChangeType[ChangeType.hotfix]]: 'hotfix - for changes that need to be published in a separate hotfix package'
+        }
+      : {
+          [ChangeType[ChangeType.major]]: 'major - for changes that break compatibility, e.g. removing an API',
+          [ChangeType[ChangeType.minor]]: 'minor - for backwards compatible changes, e.g. adding a new API',
+          [ChangeType[ChangeType.patch]]: 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
+        };
 
     if (packageName) {
       const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
