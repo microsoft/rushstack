@@ -176,6 +176,8 @@ export class ChangeAction extends BaseRushAction {
       return Promise.resolve();
     }
 
+    this._warnUncommittedChanges();
+
     let changeFileDataPromise: Promise<Map<string, IChangeFile>>;
     let allowOverwriteHandler: (filePath: string) => Promise<boolean>;
     if (this._bulkChangeParameter.value) {
@@ -242,8 +244,6 @@ export class ChangeAction extends BaseRushAction {
       this._prompt = inquirer.createPromptModule();
       this._changeComments = ChangeFiles.getChangeComments(this._getChangeFiles());
       changeFileDataPromise = this._promptForChangeFileData(sortedProjectList).then((changeFileData) => {
-        this._warnUncommittedChanges();
-
         const emailPromise: Promise<string> = this._changeEmailParameter.value
           ? Promise.resolve(this._changeEmailParameter.value)
           : this._detectOrAskForEmail();
