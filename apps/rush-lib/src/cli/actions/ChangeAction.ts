@@ -608,12 +608,13 @@ export class ChangeAction extends BaseRushAction {
     const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
     const filePath: string = changeFile.generatePath();
 
-    const overwriteCheckPromise: Promise<boolean> = FileSystem.exists(filePath)
+    const fileExists: boolean = FileSystem.exists(filePath);
+    const overwriteCheckPromise: Promise<boolean> = fileExists
       ? allowOverwriteHandler(filePath)
       : Promise.resolve(true);
     return overwriteCheckPromise.then((shouldWrite) => {
       if (shouldWrite) {
-        this._writeFile(filePath, output);
+        this._writeFile(filePath, output, shouldWrite && fileExists);
       }
     });
   }
@@ -621,9 +622,13 @@ export class ChangeAction extends BaseRushAction {
   /**
    * Writes a file to disk, ensuring the directory structure up to that point exists
    */
-  private _writeFile(fileName: string, output: string): void {
+  private _writeFile(fileName: string, output: string, isOverwrite: boolean): void {
     FileSystem.writeFile(fileName, output, { ensureFolderExists: true });
-    console.log(`Created file: ${fileName}`);
+    if (isOverwrite) {
+      console.log(`Overwrote file: ${fileName}`);
+    } else {
+      console.log(`Created file: ${fileName}`);
+    }
   }
 
   private _logNoChangeFileRequired(): void {
