@@ -159,15 +159,13 @@ export class PnpmLinkManager extends BaseLinkManager {
       pnpmShrinkwrapFile.getTopLevelDependencyVersion(project.tempProjectName);
 
     if (!tempProjectDependencyKey) {
-      throw new Error(`Cannot get dependency key for temp project: `
-      + `${project.tempProjectName}`);
+      throw new Error(`Cannot get dependency key for temp project: ${project.tempProjectName}`);
     }
     // e.g.: file:projects/project-name.tgz
     const tarballEntry: string | undefined = pnpmShrinkwrapFile.getTarballPath(tempProjectDependencyKey);
 
     if (!tarballEntry) {
-      throw new InternalError(`Cannot find tarball path for "${project.tempProjectName}"` +
-        ` in shrinkwrap.`);
+      throw new InternalError(`Cannot find tarball path for "${project.tempProjectName}" in shrinkwrap.`);
     }
 
     // e.g.: projects\api-documenter.tgz
