@@ -155,19 +155,18 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   file:projects/bentleyjs-core.tgz
     //   file:projects/build-tools.tgz_dc21d88642e18a947127a751e00b020a
     //   file:projects/imodel-from-geojson.tgz_request@2.88.0
-    const topLevelDependencyVersion: string | undefined =
+    const tempProjectDependencyKey: string | undefined =
       pnpmShrinkwrapFile.getTopLevelDependencyVersion(project.tempProjectName);
 
-    if (!topLevelDependencyVersion) {
-      throw new InternalError(`Cannot find top level dependency for "${project.tempProjectName}"` +
-        ` in shrinkwrap.`);
+    if (!tempProjectDependencyKey) {
+      throw new Error(`Cannot get dependency key for temp project: `
+      + `${project.tempProjectName}`);
     }
-
     // e.g.: file:projects/project-name.tgz
-    const tarballEntry: string | undefined = pnpmShrinkwrapFile.getTarballPath(topLevelDependencyVersion);
+    const tarballEntry: string | undefined = pnpmShrinkwrapFile.getTarballPath(tempProjectDependencyKey);
 
     if (!tarballEntry) {
-      throw new InternalError(`Cannot find tarball path for "${topLevelDependencyVersion}"` +
+      throw new InternalError(`Cannot find tarball path for "${project.tempProjectName}"` +
         ` in shrinkwrap.`);
     }
 
@@ -191,8 +190,8 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   '' [empty string]
     //   _jsdom@11.12.0
     //   _2a665c89609864b4e75bc5365d7f8f56
-    const folderNameSuffix: string = (tarballEntry && tarballEntry.length < topLevelDependencyVersion.length ?
-      topLevelDependencyVersion.slice(tarballEntry.length) : '');
+    const folderNameSuffix: string = (tarballEntry && tarballEntry.length < tempProjectDependencyKey.length ?
+      tempProjectDependencyKey.slice(tarballEntry.length) : '');
 
     // e.g.:
     //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
