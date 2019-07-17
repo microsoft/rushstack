@@ -73,7 +73,7 @@ export class PackageJsonEditor {
   // and "peerDependencies" are mutually exclusive, but "devDependencies" is not.
   private readonly _devDependencies: Map<string, PackageJsonDependency>;
 
-  // NOTE: The "resolutions" is yarn specific featrue that controls package
+  // NOTE: The "resolutions" field is a yarn specific feature that controls package
   // resolution override within yarn.
   private readonly _resolutions: object;
   private _modified: boolean;
@@ -174,6 +174,9 @@ export class PackageJsonEditor {
     return [...this._devDependencies.values()];
   }
 
+  /**
+   * This field is a Yarn-specific feature that allows overriding of package resolution.
+   */
   public get resolutions(): object {
     return { ...this._resolutions };
   }
