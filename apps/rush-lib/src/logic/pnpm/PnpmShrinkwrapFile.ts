@@ -1,7 +1,7 @@
 import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as semver from 'semver';
-import { PackageName, FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@microsoft/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 
@@ -161,10 +161,28 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /**
+   * Gets the dependency key name of the given temporary project
+   * Examples of the return value:
+   *   file:projects/empty-webpart-project.tgz
+   *   file:projects/article-site-demo.tgz_jest@22.4.4+typescript@2.9.2
+   *   file:projects/i18n-utilities.tgz_462eaf34881863298955eb323c130fc7
+   */
+  public getTempProjectKey(tempProjectName: string): string {
+    const tempProjectDependencyKey: string | undefined = this.getTopLevelDependencyVersion(tempProjectName);
+
+    if (!tempProjectDependencyKey) {
+      throw new Error(`Cannot get dependency key for temp project: `
+      + `${tempProjectName}`);
+    }
+
+    return tempProjectDependencyKey;
+  }
+
+  /**
    * Gets the version number from the list of top-level dependencies in the "dependencies" section
    * of the shrinkwrap file
    */
-  public getTopLevelDependencyVersion(dependencyName: string): string | undefined {
+  protected getTopLevelDependencyVersion(dependencyName: string): string | undefined {
     return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
   }
 
@@ -191,7 +209,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // Because of this, we actually need to check for a version that this package is directly
     // linked to.
 
-    const tempProjectDependencyKey: string = this._getTempProjectKey(tempProjectName);
+    const tempProjectDependencyKey: string = this.getTempProjectKey(tempProjectName);
+
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
       this._getPackageDescription(tempProjectDependencyKey);
     if (!packageDescription) {
@@ -259,7 +278,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Returns the version of a dependency being used by a given project
    */
   private _getDependencyVersion(dependencyName: string, tempProjectName: string): string | undefined {
-    const tempProjectDependencyKey: string = this._getTempProjectKey(tempProjectName);
+    const tempProjectDependencyKey: string = this.getTempProjectKey(tempProjectName);
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
       this._getPackageDescription(tempProjectDependencyKey);
     if (!packageDescription) {
@@ -290,12 +309,6 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _getValidDependencyVersion(dependencyVersion: string): string {
     const validDependencyVersion: string = dependencyVersion.split('/').pop()!;
     return semver.valid(validDependencyVersion) ? validDependencyVersion : dependencyVersion.split('_')[0]!;
-  }
-
-  private _getTempProjectKey(tempProjectName: string): string {
-    // Example: "project1"
-    const unscopedTempProjectName: string = PackageName.getUnscopedName(tempProjectName);
-    return `file:projects/${unscopedTempProjectName}.tgz`;
   }
 
   private _normalizeDependencyVersion(dependencyName: string, version: string): string | undefined {
