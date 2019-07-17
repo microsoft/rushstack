@@ -137,7 +137,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
       return new PnpmShrinkwrapFile(parsedData);
     } catch (error) {
-      throw new Error(`Error reading "${shrinkwrapYamlFilename}":` + os.EOL + `  ${error.message}`);
+      throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
     }
   }
 
@@ -201,8 +201,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const tempProjectDependencyKey: string | undefined = this.getTopLevelDependencyVersion(tempProjectName);
 
     if (!tempProjectDependencyKey) {
-      throw new Error(`Cannot get dependency key for temp project: `
-      + `${tempProjectName}`);
+      throw new Error(`Cannot get dependency key for temp project: ${tempProjectName}`);
     }
 
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
@@ -275,8 +274,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const tempProjectDependencyKey: string | undefined = this.getTopLevelDependencyVersion(tempProjectName);
 
     if (!tempProjectDependencyKey) {
-      throw new Error(`Cannot get dependency key for temp project: `
-      + `${tempProjectName}`);
+      throw new Error(`Cannot get dependency key for temp project: ${tempProjectName}`);
     }
 
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
@@ -316,8 +314,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       const extractedVersion: string | undefined = extractVersionFromPnpmVersionSpecifier(version);
 
       if (!extractedVersion) {
-        throw new Error(`Cannot parse pnpm shrinkwrap version specifier: `
-          + `"${version}" for "${dependencyName}"`);
+        throw new Error(`Cannot parse pnpm shrinkwrap version specifier: "${version}" for "${dependencyName}"`);
       }
 
       return extractedVersion;
