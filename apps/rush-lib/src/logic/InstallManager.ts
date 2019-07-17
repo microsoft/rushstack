@@ -679,11 +679,12 @@ export class InstallManager {
       }
 
       if (!isEmpty(packageJson.resolutions)) {
-        tempPackageJson.resolutions = tempPackageJson.resolutions || {};
-        commonPackageJson.resolutions = commonPackageJson.resolutions || {};
+        // We do not expect resolutions key to be provided for package managers other than yarn
+        if (this._rushConfiguration.packageManager !== 'yarn') {
+          throw new Error("Unexpected 'resolutions' section found in package.json. Only yarn supports this feature.");
+        }
 
         tempPackageJson.resolutions = packageJson.resolutions;
-        commonPackageJson.resolutions = { ...commonPackageJson.resolutions, ...packageJson.resolutions };
       }
 
       // NPM expects the root of the tarball to have a directory called 'package'
