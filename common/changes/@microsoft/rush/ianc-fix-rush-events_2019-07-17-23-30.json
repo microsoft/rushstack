@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Make event hooks run from the folder that contains the rush.json file.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
