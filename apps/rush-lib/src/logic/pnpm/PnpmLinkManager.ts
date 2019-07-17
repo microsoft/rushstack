@@ -155,8 +155,13 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   file:projects/bentleyjs-core.tgz
     //   file:projects/build-tools.tgz_dc21d88642e18a947127a751e00b020a
     //   file:projects/imodel-from-geojson.tgz_request@2.88.0
-    const tempProjectDependencyKey: string = pnpmShrinkwrapFile.getTempProjectKey(project.tempProjectName);
+    const tempProjectDependencyKey: string | undefined =
+      pnpmShrinkwrapFile.getTopLevelDependencyVersion(project.tempProjectName);
 
+    if (!tempProjectDependencyKey) {
+      throw new Error(`Cannot get dependency key for temp project: `
+      + `${project.tempProjectName}`);
+    }
     // e.g.: file:projects/project-name.tgz
     const tarballEntry: string | undefined = pnpmShrinkwrapFile.getTarballPath(tempProjectDependencyKey);
 
