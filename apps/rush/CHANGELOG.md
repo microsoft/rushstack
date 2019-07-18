@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 16 Jul 2019 19:36:08 GMT and should not be manually modified.
+This log was last generated on Thu, 18 Jul 2019 00:07:46 GMT and should not be manually modified.
+
+## 5.10.3
+Thu, 18 Jul 2019 00:07:46 GMT
+
+### Updates
+
+- Make event hooks run from the folder that contains the rush.json file.
+- Fix 1392 "rush install not working on pnpm 3.5" by getting the temporary project dependency key from the shrinkwrap file. See  https://github.com/microsoft/web-build-tools/issues/1392.
 
 ## 5.10.2
 Tue, 16 Jul 2019 19:36:08 GMT
