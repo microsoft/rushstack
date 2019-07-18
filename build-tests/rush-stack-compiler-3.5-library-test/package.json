@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.0.72",
-    "@microsoft/rush-stack-compiler-3.5": "0.1.0",
+    "@microsoft/rush-stack-compiler-3.5": "0.0.0",
     "gulp": "~3.9.1"
   }
 }
