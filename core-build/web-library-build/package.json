@@ -30,6 +30,6 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.0.72",
-    "@microsoft/rush-stack-compiler-3.2": "0.3.24"
+    "@microsoft/rush-stack-compiler-3.4": "0.1.11"
   }
 }
