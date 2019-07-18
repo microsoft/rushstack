@@ -352,41 +352,78 @@ export class Collector {
    * Ensures a unique name for each item in the package typings file.
    */
   private _makeUniqueNames(): void {
-    const usedNames: Set<string> = new Set<string>();
-    this._collectGlobalNames(usedNames);
+    // The following examples illustrate the nameForEmit heuristics:
+    //
+    // Example 1:
+    //   class X { } <--- nameForEmit should be "A" to simplify things and reduce possibility of conflicts
+    //   export { X as A };
+    //
+    // Example 2:
+    //   class X { } <--- nameForEmit should be "X" because choosing A or B would be nondeterministic
+    //   export { X as A };
+    //   export { X as B };
+    //
+    // Example 3:
+    //   class X { } <--- nameForEmit should be "X_1" because Y has a stronger claim to the name
+    //   export { X as A };
+    //   export { X as B };
+    //   class Y { } <--- nameForEmit should be "X"
+    //   export { Y as X };
 
-    // First collect the explicit package exports (named)
+    // Set of names that should NOT be used when generating a unique nameForEmit
+    const usedNames: Set<string> = new Set<string>();
+
+    // First collect the names of explicit package exports, and perform a sanity check.
     for (const entity of this._entities) {
       for (const exportName of entity.exportNames) {
         if (usedNames.has(exportName)) {
           // This should be impossible
           throw new InternalError(`A package cannot have two exports with the name "${exportName}"`);
         }
-
         usedNames.add(exportName);
       }
     }
 
-    // Next generate unique names for the non-exports that will be emitted (and the default export)
+    // Next, add in the global names
+    const globalNames: Set<string> = new Set<string>();
+    this._collectGlobalNames(globalNames);
+
+    for (const globalName of globalNames) {
+      // Note that globalName may conflict with an exported name.
+      // We'll check for this conflict below.
+      usedNames.add(globalName);
+    }
+
+    // Ensure that each entity has a unique nameForEmit
     for (const entity of this._entities) {
 
-      // If this entity is exported exactly once, then emit the exported name
+      // What name would we ideally want to emit it as?
+      let idealNameForEmit: string;
+
+      // If this entity is exported exactly once, then we prefer the exported name
       if (entity.singleExportName !== undefined && entity.singleExportName !== ts.InternalSymbolName.Default) {
-        entity.nameForEmit = entity.singleExportName;
-        continue;
+        idealNameForEmit = entity.singleExportName;
+      } else {
+        // otherwise use the local name
+        idealNameForEmit = entity.astEntity.localName;
       }
 
-      // If the localName happens to be the same as one of the exports, then emit that name
-      if (entity.exportNames.has(entity.astEntity.localName)) {
-        entity.nameForEmit = entity.astEntity.localName;
-        continue;
+      // If the idealNameForEmit happens to be the same as one of the exports, then we're safe to use that...
+      if (entity.exportNames.has(idealNameForEmit)) {
+        // ...except that if it conflicts with a global name, then the global name wins
+        if (!globalNames.has(idealNameForEmit)) {
+          entity.nameForEmit = idealNameForEmit;
+          continue;
+        }
       }
 
-      // In all other cases, generate a unique name based on the localName
+      // Generate a unique name based on idealNameForEmit
       let suffix: number = 1;
-      let nameForEmit: string = entity.astEntity.localName;
+      let nameForEmit: string = idealNameForEmit;
+
+      // Choose a name that doesn't conflict with usedNames
       while (usedNames.has(nameForEmit)) {
-        nameForEmit = `${entity.astEntity.localName}_${++suffix}`;
+        nameForEmit = `${idealNameForEmit}_${++suffix}`;
       }
       entity.nameForEmit = nameForEmit;
       usedNames.add(nameForEmit);
