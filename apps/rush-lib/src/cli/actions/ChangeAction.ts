@@ -177,8 +177,9 @@ export class ChangeAction extends BaseRushAction {
 
     this._warnUncommittedChanges();
 
+    const promptModule: inquirer.PromptModule = inquirer.createPromptModule();
     let changeFileData: Map<string, IChangeFile> = new Map<string, IChangeFile>();
-    let allowOverwriteHandler: (filePath: string) => Promise<boolean>;
+    let interactiveMode: boolean = false;
     if (this._bulkChangeParameter.value) {
       if (
         !this._bulkChangeBumpTypeParameter.value ||
@@ -239,19 +240,16 @@ export class ChangeAction extends BaseRushAction {
         for (const error of errors) {
           console.error(error);
         }
+
         throw new AlreadyReportedError();
       }
-
-      allowOverwriteHandler = async (filePath: string) => Promise.reject(
-        new Error(`Changefile ${filePath} already exists`)
-      );
     } else if (this._bulkChangeBumpTypeParameter.value || this._bulkChangeMessageParameter.value) {
       throw new Error(
         `The ${this._bulkChangeParameter.longName} flag must be provided with the ` +
         `${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} parameters.`
       );
     } else {
-      const promptModule: inquirer.PromptModule = inquirer.createPromptModule();
+      interactiveMode = true;
 
       const existingChangeComments: Map<string, string[]> = ChangeFiles.getChangeComments(this._getChangeFiles());
       changeFileData = await this._promptForChangeFileData(
@@ -266,31 +264,15 @@ export class ChangeAction extends BaseRushAction {
       changeFileData.forEach((changeFile: IChangeFile) => {
         changeFile.email = email;
       });
-
-      allowOverwriteHandler = async (filePath) => {
-        const overwrite: boolean = await promptModule([
-          {
-            name: 'overwrite',
-            type: 'confirm',
-            message: `Overwrite ${filePath}?`
-          }
-        ]);
-
-        if (overwrite) {
-          return true;
-        } else {
-          console.log(`Not overwriting ${filePath}`);
-          return false;
-        }
-      };
-    }
-
-    if (this._overwriteFlagParameter.value) {
-      allowOverwriteHandler = () => Promise.resolve(true);
     }
 
     try {
-      return await this._writeChangeFiles(changeFileData, allowOverwriteHandler);
+      return await this._writeChangeFiles(
+        promptModule,
+        changeFileData,
+        this._overwriteFlagParameter.value,
+        interactiveMode
+      );
     } catch (error) {
       throw new Error(`There was an error creating a change file: ${error.toString()}`);
     }
@@ -609,28 +591,56 @@ export class ChangeAction extends BaseRushAction {
    * Writes change files to the common/changes folder. Will prompt for overwrite if file already exists.
    */
   private async _writeChangeFiles(
+    promptModule: inquirer.PromptModule,
     changeFileData: Map<string, IChangeFile>,
-    allowOverwriteHandler: (filePath: string) => Promise<boolean>
+    overwrite: boolean,
+    interactiveMode: boolean
   ): Promise<void> {
     await changeFileData.forEach(async (changeFile: IChangeFile) => {
-      await this._writeChangeFile(changeFile, allowOverwriteHandler);
+      await this._writeChangeFile(promptModule, changeFile, overwrite, interactiveMode);
     });
   }
 
   private async _writeChangeFile(
+    promptModule: inquirer.PromptModule,
     changeFileData: IChangeFile,
-    allowOverwriteHandler: (filePath: string) => Promise<boolean>
+    overwrite: boolean,
+    interactiveMode: boolean
   ): Promise<void> {
     const output: string = JSON.stringify(changeFileData, undefined, 2);
     const changeFile: ChangeFile = new ChangeFile(changeFileData, this.rushConfiguration);
     const filePath: string = changeFile.generatePath();
 
     const fileExists: boolean = FileSystem.exists(filePath);
-    const shouldWrite: boolean = fileExists
-      ? await allowOverwriteHandler(filePath)
-      : true;
+    const shouldWrite: boolean = (
+      !fileExists ||
+      overwrite ||
+      (interactiveMode ? await this._promptForOverwrite(promptModule, filePath) : false)
+    );
+
+    if (!interactiveMode && !overwrite) {
+      throw new Error(`Changefile ${filePath} already exists`);
+    }
+
     if (shouldWrite) {
       this._writeFile(filePath, output, shouldWrite && fileExists);
+    }
+  }
+
+  private async _promptForOverwrite(promptModule: inquirer.PromptModule, filePath: string): Promise<boolean> {
+    const overwrite: boolean = await promptModule([
+      {
+        name: 'overwrite',
+        type: 'confirm',
+        message: `Overwrite ${filePath}?`
+      }
+    ]);
+
+    if (overwrite) {
+      return true;
+    } else {
+      console.log(`Not overwriting ${filePath}`);
+      return false;
     }
   }
 
