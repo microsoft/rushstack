@@ -114,10 +114,10 @@ export namespace RushConstants {
   export const commonVersionsFilename: string = 'common-versions.json';
 
   /**
-   * The name of the package-deps.json file, which is used by the "rush build"
-   * command to determine if a particular project needs to be rebuilt.
+   * The name of the folder where package-deps files are stored, which are used
+   * by commands to determine if a particular project needs to be rebuilt.
    */
-  export const packageDepsFilename: string = 'package-deps.json';
+  export const packageDepsFolderName: string = '.rush';
 
   /**
    * Custom command line configuration file, which is used by rush for implementing

@@ -43,10 +43,10 @@ function getCommandLineParserInstance(repoName: string, taskName: string): IPars
   // Point to the test repo folder
   const startPath: string = resolve(__dirname, repoName);
 
-  // The `build` task is hard-coded to be incremental. So delete the `package-deps.json` files in
+  // The `build` task is hard-coded to be incremental. So delete the package-deps file folder in
   // the test repo to guarantee the test actually runs.
-  FileSystem.deleteFile(resolve(__dirname, `${repoName}/a/package-deps.json`));
-  FileSystem.deleteFile(resolve(__dirname, `${repoName}/b/package-deps.json`));
+  FileSystem.deleteFolder(resolve(__dirname, `${repoName}/a/.rush`));
+  FileSystem.deleteFolder(resolve(__dirname, `${repoName}/b/.rush`));
 
   // Create a Rush CLI instance. This instance is heavy-weight and relies on setting process.exit
   // to exit and clear the Rush file lock. So running multiple `it` or `describe` test blocks over the same test

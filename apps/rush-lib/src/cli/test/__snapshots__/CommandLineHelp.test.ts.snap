@@ -105,10 +105,10 @@ files have changed since the last successful build. The analysis requires a
 Git working tree, and only considers source files that are tracked by Git and 
 whose path is under the project folder. (For more details about this 
 algorithm, see the documentation for the \\"package-deps-hash\\" NPM package.) 
-The incremental build state is tracked in a file \\"package-deps.json\\" which 
-should NOT be added to Git. The build command is tracked by the \\"arguments\\" 
-field in this JSON file; a full rebuild is forced whenever the command has 
-changed (e.g. \\"--production\\" or not).
+The incremental build state is tracked in a folder \\".rush\\" which should NOT 
+be added to Git. The build command is tracked by the \\"arguments\\" field in the 
+\\"package-deps.build.json\\" file contained therein; a full rebuild is forced 
+whenever the command has changed (e.g. \\"--production\\" or not).
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -435,7 +435,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
 "usage: rush rebuild [-h] [-p COUNT] [-t PROJECT1]
                     [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2]
-                    [-v] [-s] [-m]
+                    [-v] [-o] [-s] [-m]
                     
 
 This command assumes that the package.json file for each project contains a 
@@ -466,6 +466,10 @@ Optional arguments:
                         indirectly depend on the specified project
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
+  -o, --changed-projects-only
+                        If specified, the incremental build will only rebuild 
+                        projects that have changed, but not any projects that 
+                        directly or indirectly depend on the changed package.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 

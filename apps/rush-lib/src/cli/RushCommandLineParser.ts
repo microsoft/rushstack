@@ -183,19 +183,20 @@ export class RushCommandLineParser extends CommandLineParser {
         summary: '(EXPERIMENTAL) Build all projects that haven\'t been built, or have changed since they were last '
           + 'built.',
         documentation: 'This command is similar to "rush rebuild", except that "rush build" performs'
-          + ' an incremental build. In other words, it only builds projects whose source files have'
-          + ' changed since the last successful build. The analysis requires a Git working tree, and'
-          + ' only considers source files that are tracked by Git and whose path is under the project folder.'
-          + ' (For more details about this algorithm, see the documentation for the "package-deps-hash"'
-          + ' NPM package.) The incremental build state is tracked in a file "package-deps.json" which should'
-          + ' NOT be added to Git.  The build command is tracked by the "arguments" field in this JSON file;'
-          + ' a full rebuild is forced whenever the command has changed (e.g. "--production" or not).',
+          + ' an incremental build. In other words, it only builds projects whose source files have changed'
+          + ' since the last successful build. The analysis requires a Git working tree, and only considers'
+          + ' source files that are tracked by Git and whose path is under the project folder. (For more details'
+          + ' about this algorithm, see the documentation for the "package-deps-hash" NPM package.) The incremental'
+          + ' build state is tracked in a folder ".rush" which should NOT be added to Git. The build command is'
+          + ' tracked by the "arguments" field in the "package-deps.build.json" file contained therein; a full'
+          + ' rebuild is forced whenever the command has changed (e.g. "--production" or not).',
         parser: this,
         commandLineConfiguration: commandLineConfiguration,
 
         enableParallelism: true,
         ignoreMissingScript: false,
         ignoreDependencyOrder: false,
+        incremental: true,
         allowWarningsInSuccessfulBuild: false
       }));
     }
@@ -219,6 +220,7 @@ export class RushCommandLineParser extends CommandLineParser {
         enableParallelism: true,
         ignoreMissingScript: false,
         ignoreDependencyOrder: false,
+        incremental: true,
         allowWarningsInSuccessfulBuild: false
       }));
     }
@@ -252,6 +254,7 @@ export class RushCommandLineParser extends CommandLineParser {
             enableParallelism: command.enableParallelism,
             ignoreMissingScript: command.ignoreMissingScript || false,
             ignoreDependencyOrder: command.ignoreDependencyOrder || false,
+            incremental: command.incremental || false,
             allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild
           }));
           break;

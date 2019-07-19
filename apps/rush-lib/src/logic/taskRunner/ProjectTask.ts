@@ -103,15 +103,21 @@ export class ProjectTask implements ITaskDefinition {
 
       writer.writeLine(`>>> ${this.name}`);
 
-      const currentDepsPath: string = path.join(this._rushProject.projectFolder, RushConstants.packageDepsFilename);
+      const packageDepsFilename: string = `package-deps.${this._commandToRun}.json`;
+      const currentDepsPath: string = path.join(
+        this._rushProject.projectFolder,
+        RushConstants.packageDepsFolderName,
+        packageDepsFilename
+      );
+
       if (FileSystem.exists(currentDepsPath)) {
         try {
           lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
         } catch (e) {
           // Warn and ignore - treat failing to load the file as the project being not built.
           writer.writeLine(
-            `Warning: error parsing ${RushConstants.packageDepsFilename}: ${e}. Ignoring and ` +
-            'treating the project as non-built.'
+            `Warning: error parsing ${packageDepsFilename}: ${e}. Ignoring and ` +
+            `treating the command "${this._commandToRun}" as not run.`
           );
         }
       }
@@ -132,12 +138,14 @@ export class ProjectTask implements ITaskDefinition {
         FileSystem.deleteFile(currentDepsPath);
 
         if (!taskCommand) {
-          writer.writeLine(`The task command ${this._commandToRun} was registered in the package.json but is blank,`
+          writer.writeLine(`The task command "${this._commandToRun}" was registered in the package.json but is blank,`
             + ` so no action will be taken.`);
 
           // Write deps on success.
           if (currentPackageDeps) {
-            JsonFile.save(currentPackageDeps, currentDepsPath);
+            JsonFile.save(currentPackageDeps, currentDepsPath, {
+              ensureFolderExists: true
+            });
           }
 
           return Promise.resolve(TaskStatus.Success);
@@ -187,7 +195,9 @@ export class ProjectTask implements ITaskDefinition {
             } else {
               // Write deps on success.
               if (currentPackageDeps) {
-                JsonFile.save(currentPackageDeps, currentDepsPath);
+                JsonFile.save(currentPackageDeps, currentDepsPath, {
+                  ensureFolderExists: true
+                });
               }
               resolve(TaskStatus.Success);
             }

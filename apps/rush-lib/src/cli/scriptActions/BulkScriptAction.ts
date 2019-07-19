@@ -29,6 +29,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
+  incremental: boolean;
   allowWarningsInSuccessfulBuild: boolean;
 
   /**
@@ -49,6 +50,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
 export class BulkScriptAction extends BaseScriptAction {
   private _enableParallelism: boolean;
   private _ignoreMissingScript: boolean;
+  private _isIncrementalBuildAllowed: boolean;
   private _commandToRun: string;
 
   private _changedProjectsOnly: CommandLineFlagParameter;
@@ -64,6 +66,7 @@ export class BulkScriptAction extends BaseScriptAction {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
+    this._isIncrementalBuildAllowed = options.incremental;
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
@@ -92,7 +95,7 @@ export class BulkScriptAction extends BaseScriptAction {
       customParameter.appendToArgList(customParameterValues);
     }
 
-    const changedProjectsOnly: boolean = this.actionName === 'build' && this._changedProjectsOnly.value;
+    const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const tasks: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
@@ -102,7 +105,7 @@ export class BulkScriptAction extends BaseScriptAction {
       customParameterValues,
       isQuietMode,
       parallelism,
-      isIncrementalBuildAllowed: this.actionName === 'build',
+      isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       changedProjectsOnly,
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
@@ -163,7 +166,7 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
-    if (this.actionName === 'build') {
+    if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
         parameterShortName: '-o',
