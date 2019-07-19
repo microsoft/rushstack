@@ -10,6 +10,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 export class UpdateAction extends BaseInstallAction {
   private _fullParameter: CommandLineFlagParameter;
   private _recheckParameter: CommandLineFlagParameter;
+  private _ignoreLocalParameter: CommandLineFlagParameter;
 
   constructor(parser: RushCommandLineParser) {
     super({
@@ -50,6 +51,13 @@ export class UpdateAction extends BaseInstallAction {
         + ' to process the shrinkwrap file.  This will also update your shrinkwrap file with Rush\'s fixups.'
         + ' (To minimize shrinkwrap churn, these fixups are normally performed only in the temporary folder.)'
     });
+    this._ignoreLocalParameter = this.defineFlagParameter({
+      parameterLongName: '--ignoreLocal',
+      description: 'In case of a mono-repo, if one of your package dependencies is part of the mono-repo, then rush will try to symlink the'
+        + ' local packages, provided the versioning matches. If you want to explicitly make rush use package dependencies from the package manager,'
+        + ' you can use "--ignoreLocalParameter" to enforce that. The advantage of having the "--ignoreLocalParameter" is that you can do a specific'
+        + ' build using the command line option without having to edit your rushConfig file'
+    });
   }
 
   protected buildInstallOptions(): IInstallManagerOptions {
@@ -59,6 +67,7 @@ export class UpdateAction extends BaseInstallAction {
       bypassPolicy: this._bypassPolicyParameter.value!,
       noLink: this._noLinkParameter.value!,
       fullUpgrade: this._fullParameter.value!,
+      ignoreLocal: this._ignoreLocalParameter.value,
       recheckShrinkwrap: this._recheckParameter.value!,
       networkConcurrency: this._networkConcurrencyParameter.value,
       collectLogFile: this._debugPackageManagerParameter.value!,

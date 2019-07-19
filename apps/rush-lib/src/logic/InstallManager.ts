@@ -115,6 +115,11 @@ export interface IInstallManagerOptions {
    * The variant to consider when performing installations and validating shrinkwrap updates.
    */
   variant?: string | undefined;
+
+  /**
+   * Whether to link the package dependencies from the package manager and skip from local code or to link local package dependencies
+   */
+  ignoreLocal: boolean;
 }
 
 /**
@@ -220,22 +225,24 @@ export class InstallManager {
       if (alternativesForThisDependency.indexOf(dependency.version) > 0) {
         ignoreVersion = true;
       } else {
-        // Is it a local project?
-        const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(dependency.name);
-        if (localProject) {
-          // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
-          //    never even see it.
-          // However there are two ways that a local project can NOT be symlinked:
-          // - if the local project doesn't satisfy the referenced semver specifier; OR
-          // - if the local project was specified in "cyclicDependencyProjects" in rush.json
-          if (semver.satisfies(localProject.packageJsonEditor.version, dependency.version)
-            && !cyclicDependencies.has(dependency.name)) {
-            ignoreVersion = true;
+        if(!ignoreLocal){
+          // Is it a local project?
+          const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(dependency.name);
+          if (localProject) {
+            // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
+            //    never even see it.
+            // However there are two ways that a local project can NOT be symlinked:
+            // - if the local project doesn't satisfy the referenced semver specifier; OR
+            // - if the local project was specified in "cyclicDependencyProjects" in rush.json
+            if (semver.satisfies(localProject.packageJsonEditor.version, dependency.version)
+              && !cyclicDependencies.has(dependency.name)) {
+              ignoreVersion = true;
+            }
           }
-        }
 
-        if (!ignoreVersion) {
-          InstallManager._updateVersionsForDependencies(versionsForDependencies, dependency.name, dependency.version);
+          if (!ignoreVersion) {
+            InstallManager._updateVersionsForDependencies(versionsForDependencies, dependency.name, dependency.version);
+          }
         }
       }
     }
@@ -614,13 +621,14 @@ export class InstallManager {
       Sort.sortMapKeys(tempDependencies);
 
       for (const [packageName, packageVersion] of tempDependencies.entries()) {
+        if(!ignoreLocal){
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
         // to record this decision for "rush link" later, so we add it to a special 'rushDependencies' field.
         const localProject: RushConfigurationProject | undefined =
           this._rushConfiguration.getProjectByName(packageName);
-
+        //if flag then skip this
         if (localProject) {
           // Don't locally link if it's listed in the cyclicDependencyProjects
           if (!rushProject.cyclicDependencyProjects.has(packageName)) {
@@ -639,7 +647,7 @@ export class InstallManager {
             }
           }
         }
-
+      }
         // We will NOT locally link this package; add it as a regular dependency.
         tempPackageJson.dependencies![packageName] = packageVersion;
 
