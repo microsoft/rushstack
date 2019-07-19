@@ -1,0 +1,17 @@
+{
+  "name": "@microsoft/rush-stack-compiler-3.5",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@microsoft/rush-stack-compiler-3.5_v0.1.0",
+      "date": "Fri, 19 Jul 2019 01:55:03 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial package creation."
+          }
+        ]
+      }
+    }
+  ]
+}
