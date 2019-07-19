@@ -138,11 +138,12 @@ export class InstallManager {
    * Returns a map: dependency name --> version specifier
    */
   public static collectImplicitlyPreferredVersions(
-    rushConfiguration: RushConfiguration,
-    options: {
-      variant?: string | undefined
-    } = {}
-  ): Map<string, string> {
+{ rushConfiguration, options = {} }: {
+ rushConfiguration: RushConfiguration; options?: {
+  variant?: string | undefined;
+  ignoreLocal?: boolean;
+};
+}  ): Map<string, string> {
     // First, collect all the direct dependencies of all local projects, and their versions:
     // direct dependency name --> set of version specifiers
     const versionsForDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
@@ -154,8 +155,8 @@ export class InstallManager {
           versionsForDependencies,
           dependencies: project.packageJsonEditor.dependencyList,
           cyclicDependencies: project.cyclicDependencyProjects,
-          variant: options.variant
-        });
+          variant: options.variant,
+          ignoreLocal: options.ignoreLocal});
 
       InstallManager._collectVersionsForDependencies(
         rushConfiguration,
@@ -163,7 +164,8 @@ export class InstallManager {
           versionsForDependencies,
           dependencies: project.packageJsonEditor.devDependencyList,
           cyclicDependencies: project.cyclicDependencyProjects,
-          variant: options.variant
+          variant: options.variant,
+          ignoreLocal: options.ignoreLocal
         });
     });
 
@@ -197,12 +199,14 @@ export class InstallManager {
       dependencies: ReadonlyArray<PackageJsonDependency>;
       cyclicDependencies: Set<string>;
       variant: string | undefined;
+      ignoreLocal:boolean;
     }): void {
     const {
       variant,
       dependencies,
       versionsForDependencies,
-      cyclicDependencies
+      cyclicDependencies,
+      ignoreLocal
     } = options;
 
     const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(variant);
@@ -225,7 +229,7 @@ export class InstallManager {
       if (alternativesForThisDependency.indexOf(dependency.version) > 0) {
         ignoreVersion = true;
       } else {
-        if(!ignoreLocal){
+        if(!options.ignoreLocal){
           // Is it a local project?
           const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(dependency.name);
           if (localProject) {
@@ -354,7 +358,8 @@ export class InstallManager {
           const shrinkwrapIsUpToDate: boolean =
             this._createTempModulesAndCheckShrinkwrap({
               shrinkwrapFile,
-              variant: options.variant
+              variant: options.variant,
+              ignoreLocal: options.ignoreLocal
             })
             && !options.recheckShrinkwrap;
 
@@ -477,10 +482,12 @@ export class InstallManager {
   private _createTempModulesAndCheckShrinkwrap(options: {
     shrinkwrapFile: BaseShrinkwrapFile | undefined;
     variant: string | undefined;
+    ignoreLocal: boolean
   }): boolean {
     const {
       shrinkwrapFile,
-      variant
+      variant,
+      ignoreLocal
     } = options;
 
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -555,9 +562,12 @@ export class InstallManager {
 
     // dependency name --> version specifier
     const allPreferredVersions: Map<string, string> =
-      InstallManager.collectImplicitlyPreferredVersions(this._rushConfiguration, {
-        variant
-      });
+      InstallManager.collectImplicitlyPreferredVersions({
+        rushConfiguration: this._rushConfiguration, options: {
+          variant,
+          ignoreLocal
+        }
+        });
 
     // Add in the explicitly preferred versions.
     // Note that these take precedence over implicitly preferred versions.
@@ -621,7 +631,7 @@ export class InstallManager {
       Sort.sortMapKeys(tempDependencies);
 
       for (const [packageName, packageVersion] of tempDependencies.entries()) {
-        if(!ignoreLocal){
+        if(!options.ignoreLocal){
         // Is there a locally built Rush project that could satisfy this dependency?
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need

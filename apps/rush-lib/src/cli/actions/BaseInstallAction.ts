@@ -30,8 +30,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _noLinkParameter: CommandLineFlagParameter;
   protected _networkConcurrencyParameter: CommandLineIntegerParameter;
   protected _debugPackageManagerParameter: CommandLineFlagParameter;
-  protected _ignoreLocalParameter: CommandLineFlagParameter;
-
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -60,13 +58,6 @@ export abstract class BaseInstallAction extends BaseRushAction {
       parameterLongName: '--debug-package-manager',
       description: 'Activates verbose logging for the package manager. You will probably want to pipe'
         + ' the output of Rush to a file when using this command.'
-    });
-    this._ignoreLocalParameter = this.defineFlagParameter({
-      parameterLongName: '--ignoreLocal',
-      description: 'In case of a mono-repo, if one of your package dependencies is part of the mono-repo, then rush will try to symlink the'
-      + ' local packages, provided the versioning matches. If you want to explicitly make rush use package dependencies from the package manager,'
-      + ' you can use "--ignoreLocalParameter" to enforce that. The advantage of having the "--ignoreLocalParameter" is that you can do a specific'
-      + ' build using the command line option without having to edit your rushConfig file'
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }

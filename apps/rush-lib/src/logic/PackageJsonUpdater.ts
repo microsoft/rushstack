@@ -124,11 +124,11 @@ export class PackageJsonUpdater {
     } = options;
 
     const implicitlyPinned: Map<string, string> = InstallManager.collectImplicitlyPreferredVersions(
-      this._rushConfiguration,
       {
+      rushConfiguration: this._rushConfiguration, options: {
         variant
       }
-    );
+      }    );
 
     const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
     const installManagerOptions: IInstallManagerOptions = {
