@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Adding a flag to ignore symlinking of local dependencies and pull from package manager instead",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "kaghiya@microsoft.com"
+}
