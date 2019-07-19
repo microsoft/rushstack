@@ -100,7 +100,7 @@
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.4",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-stack-compiler-3.5",

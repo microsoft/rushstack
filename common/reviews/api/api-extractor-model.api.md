@@ -10,7 +10,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocTagDefinition } from '@microsoft/tsdoc';
 
-// Warning: (ae-internal-missing-underscore) The name AedocDefinitions should be prefixed with an underscore because the declaration is marked as "@internal"
+// Warning: (ae-internal-missing-underscore) The name "AedocDefinitions" should be prefixed with an underscore because the declaration is marked as @internal
 // 
 // @internal (undocumented)
 export class AedocDefinitions {
