@@ -229,7 +229,7 @@ export class InstallManager {
       if (alternativesForThisDependency.indexOf(dependency.version) > 0) {
         ignoreVersion = true;
       } else {
-        if(!options.ignoreLocal){
+        if(!ignoreLocal){
           // Is it a local project?
           const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(dependency.name);
           if (localProject) {
