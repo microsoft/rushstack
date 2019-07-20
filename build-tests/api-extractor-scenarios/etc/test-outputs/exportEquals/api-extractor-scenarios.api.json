@@ -6,18 +6,18 @@
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "containerKey": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "containerKey": "",
       "name": "",
       "members": [
         {
           "kind": "Interface",
-          "canonicalReference": "(ITeamsContext:interface)",
+          "containerKey": "ITeamsContext|Interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -38,7 +38,7 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "context",
+              "containerKey": "context|PropertySignature",
               "docComment": "",
               "excerptTokens": [
                 {

@@ -6,18 +6,18 @@
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "containerKey": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "containerKey": "",
       "name": "",
       "members": [
         {
           "kind": "Interface",
-          "canonicalReference": "(IBeta:interface)",
+          "containerKey": "IBeta|Interface",
           "docComment": "/**\n * @beta\n */\n",
           "excerptTokens": [
             {
@@ -38,7 +38,7 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "x",
+              "containerKey": "x|PropertySignature",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -70,7 +70,7 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(publicFunctionReturnsBeta:0)",
+          "containerKey": "publicFunctionReturnsBeta|Function|0",
           "docComment": "/**\n * It's not okay for a \"public\" function to reference a \"beta\" symbol, because \"beta\" is less public than \"public\".\n *\n * @public\n */\n",
           "excerptTokens": [
             {

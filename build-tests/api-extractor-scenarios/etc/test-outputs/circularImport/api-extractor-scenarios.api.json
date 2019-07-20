@@ -6,18 +6,18 @@
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "containerKey": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "containerKey": "",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "canonicalReference": "(IFile:class)",
+          "containerKey": "IFile|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -38,7 +38,7 @@
           "members": [
             {
               "kind": "Property",
-              "canonicalReference": "(containingFolder:instance)",
+              "containerKey": "containingFolder|Property|instance",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -71,7 +71,7 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(IFolder:class)",
+          "containerKey": "IFolder|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -92,7 +92,7 @@
           "members": [
             {
               "kind": "Property",
-              "canonicalReference": "(containingFolder:instance)",
+              "containerKey": "containingFolder|Property|instance",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -126,7 +126,7 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "(files:instance)",
+              "containerKey": "files|Property|instance",
               "docComment": "",
               "excerptTokens": [
                 {

@@ -6,18 +6,18 @@
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
+  "containerKey": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
+      "containerKey": "",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "canonicalReference": "(DefaultClass:class)",
+          "containerKey": "DefaultClass|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
