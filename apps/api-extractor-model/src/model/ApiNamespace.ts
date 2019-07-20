@@ -42,8 +42,8 @@ export interface IApiNamespaceOptions extends
  */
 export class ApiNamespace extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
 
-    public static getCanonicalReference(name: string): string {
-    return `(${name}:namespace)`;
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.Namespace}`;
   }
 
   public constructor(options: IApiNamespaceOptions) {
@@ -56,7 +56,7 @@ export class ApiNamespace extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseT
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiNamespace.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiNamespace.getContainerKey(this.name);
   }
 }

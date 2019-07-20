@@ -10,7 +10,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocTagDefinition } from '@microsoft/tsdoc';
 
-// Warning: (ae-internal-missing-underscore) The name AedocDefinitions should be prefixed with an underscore because the declaration is marked as "@internal"
+// Warning: (ae-internal-missing-underscore) The name "AedocDefinitions" should be prefixed with an underscore because the declaration is marked as @internal
 // 
 // @internal (undocumented)
 export class AedocDefinitions {
@@ -30,9 +30,9 @@ export class AedocDefinitions {
 export class ApiCallSignature extends ApiCallSignature_base {
     constructor(options: IApiCallSignatureOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(overloadIndex: number): string;
+    static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -43,10 +43,10 @@ export class ApiCallSignature extends ApiCallSignature_base {
 export class ApiClass extends ApiClass_base {
     constructor(options: IApiClassOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     readonly extendsType: HeritageType | undefined;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     readonly implementsTypes: ReadonlyArray<HeritageType>;
     // @override (undocumented)
     readonly kind: ApiItemKind;
@@ -65,9 +65,9 @@ export class ApiClass extends ApiClass_base {
 export class ApiConstructor extends ApiConstructor_base {
     constructor(options: IApiConstructorOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(overloadIndex: number): string;
+    static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -78,9 +78,9 @@ export class ApiConstructor extends ApiConstructor_base {
 export class ApiConstructSignature extends ApiConstructSignature_base {
     constructor(options: IApiConstructSignatureOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(overloadIndex: number): string;
+    static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -121,7 +121,7 @@ export class ApiDocumentedItem extends ApiItem {
 export class ApiEntryPoint extends ApiEntryPoint_base {
     constructor(options: IApiEntryPointOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -134,9 +134,9 @@ export class ApiEnum extends ApiEnum_base {
     // @override (undocumented)
     addMember(member: ApiEnumMember): void;
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
     // @override (undocumented)
@@ -149,9 +149,9 @@ export class ApiEnum extends ApiEnum_base {
 export class ApiEnumMember extends ApiEnumMember_base {
     constructor(options: IApiEnumMemberOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     readonly initializerExcerpt: Excerpt;
     // @override (undocumented)
     readonly kind: ApiItemKind;
@@ -169,9 +169,9 @@ export class ApiEnumMember extends ApiEnumMember_base {
 export class ApiFunction extends ApiFunction_base {
     constructor(options: IApiFunctionOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string, overloadIndex: number): string;
+    static getContainerKey(name: string, overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -182,9 +182,9 @@ export class ApiFunction extends ApiFunction_base {
 export class ApiIndexSignature extends ApiIndexSignature_base {
     constructor(options: IApiIndexSignatureOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(overloadIndex: number): string;
+    static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -195,10 +195,10 @@ export class ApiIndexSignature extends ApiIndexSignature_base {
 export class ApiInterface extends ApiInterface_base {
     constructor(options: IApiInterfaceOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     readonly extendsTypes: ReadonlyArray<HeritageType>;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiInterfaceJson" needs to be exported by the entry point index.d.ts
@@ -214,8 +214,8 @@ export class ApiItem {
     // (undocumented)
     [ApiItem_parent]: ApiItem | undefined;
     constructor(options: IApiItemOptions);
-    // @virtual (undocumented)
-    readonly canonicalReference: string;
+    // @virtual
+    readonly containerKey: string;
     // (undocumented)
     static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem;
     // @virtual
@@ -225,7 +225,7 @@ export class ApiItem {
     getScopedNameWithinPackage(): string;
     // @virtual (undocumented)
     getSortKey(): string;
-    // @virtual (undocumented)
+    // @virtual
     readonly kind: ApiItemKind;
     // @virtual
     readonly members: ReadonlyArray<ApiItem>;
@@ -247,7 +247,7 @@ export interface ApiItemContainerMixin extends ApiItem {
     readonly members: ReadonlyArray<ApiItem>;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
-    tryGetMember(canonicalReference: string): ApiItem | undefined;
+    tryGetMemberByKey(containerKey: string): ApiItem | undefined;
 }
 
 // @public
@@ -305,9 +305,9 @@ export const enum ApiItemKind {
 export class ApiMethod extends ApiMethod_base {
     constructor(options: IApiMethodOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string;
+    static getContainerKey(name: string, isStatic: boolean, overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -318,9 +318,9 @@ export class ApiMethod extends ApiMethod_base {
 export class ApiMethodSignature extends ApiMethodSignature_base {
     constructor(options: IApiMethodSignatureOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string, overloadIndex: number): string;
+    static getContainerKey(name: string, overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -333,7 +333,7 @@ export class ApiModel extends ApiModel_base {
     // @override (undocumented)
     addMember(member: ApiPackage): void;
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
     // (undocumented)
@@ -366,9 +366,9 @@ export namespace ApiNameMixin {
 export class ApiNamespace extends ApiNamespace_base {
     constructor(options: IApiNamespaceOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -381,7 +381,7 @@ export class ApiPackage extends ApiPackage_base {
     // @override (undocumented)
     addMember(member: ApiEntryPoint): void;
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
     readonly entryPoints: ReadonlyArray<ApiEntryPoint>;
     // (undocumented)
@@ -416,9 +416,9 @@ export namespace ApiParameterListMixin {
 export class ApiProperty extends ApiProperty_base {
     constructor(options: IApiPropertyOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string, isStatic: boolean): string;
+    static getContainerKey(name: string, isStatic: boolean): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -442,9 +442,9 @@ export class ApiPropertyItem extends ApiPropertyItem_base {
 export class ApiPropertySignature extends ApiPropertyItem {
     constructor(options: IApiPropertySignatureOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -502,9 +502,9 @@ export namespace ApiStaticMixin {
 export class ApiTypeAlias extends ApiTypeAlias_base {
     constructor(options: IApiTypeAliasOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiTypeAliasJson" needs to be exported by the entry point index.d.ts
@@ -537,9 +537,9 @@ export namespace ApiTypeParameterListMixin {
 export class ApiVariable extends ApiVariable_base {
     constructor(options: IApiVariableOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiVariableJson" needs to be exported by the entry point index.d.ts

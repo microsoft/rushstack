@@ -45,8 +45,8 @@ export interface IApiConstructorOptions extends
  */
 export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
 
-  public static getCanonicalReference(overloadIndex: number): string {
-    return `(:constructor,${overloadIndex})`;
+  public static getContainerKey(overloadIndex: number): string {
+    return `|${ApiItemKind.Constructor}|${overloadIndex}`;
   }
 
   public constructor(options: IApiConstructorOptions) {
@@ -59,7 +59,7 @@ export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(Api
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiConstructor.getCanonicalReference(this.overloadIndex);
+  public get containerKey(): string {
+    return ApiConstructor.getContainerKey(this.overloadIndex);
   }
 }

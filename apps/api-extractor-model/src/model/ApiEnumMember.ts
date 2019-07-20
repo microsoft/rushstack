@@ -50,7 +50,8 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
    */
   public readonly initializerExcerpt: Excerpt;
 
-  public static getCanonicalReference(name: string): string {
+  public static getContainerKey(name: string): string {
+    // No prefix needed, because ApiEnumMember is the only possible member of an ApiEnum
     return name;
   }
 
@@ -75,8 +76,8 @@ export class ApiEnumMember extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredIt
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiEnumMember.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiEnumMember.getContainerKey(this.name);
   }
 
   /** @override */

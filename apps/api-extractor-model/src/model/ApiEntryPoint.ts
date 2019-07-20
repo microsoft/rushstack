@@ -47,7 +47,8 @@ export class ApiEntryPoint extends ApiItemContainerMixin(ApiNameMixin(ApiItem)) 
   }
 
   /** @override */
-  public get canonicalReference(): string {
+  public get containerKey(): string {
+    // No prefix needed, because ApiEntryPoint is the only possible member of an ApiPackage
     return this.name;
   }
 }

@@ -59,8 +59,8 @@ export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiTypePara
 
   private readonly _extendsTypes: HeritageType[] = [];
 
-  public static getCanonicalReference(name: string): string {
-    return `(${name}:interface)`;
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.Interface}`;
   }
 
   /** @override */
@@ -86,8 +86,8 @@ export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiTypePara
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiInterface.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiInterface.getContainerKey(this.name);
   }
 
   /**
