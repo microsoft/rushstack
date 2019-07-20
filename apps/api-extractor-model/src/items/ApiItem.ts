@@ -44,7 +44,6 @@ export interface IApiItemOptions {
 
 export interface IApiItemJson {
   kind: ApiItemKind;
-  containerKey: string;
 }
 
 /**
@@ -85,7 +84,6 @@ export class ApiItem {
   /** @virtual */
   public serializeInto(jsonObject: Partial<IApiItemJson>): void {
     jsonObject.kind = this.kind;
-    jsonObject.containerKey = this.containerKey;
   }
 
   /**
