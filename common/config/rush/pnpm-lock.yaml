@@ -3,7 +3,7 @@ dependencies:
   '@microsoft/rush-stack-compiler-3.2': 0.3.23
   '@microsoft/rush-stack-compiler-3.4': 0.1.11
   '@microsoft/teams-js': 1.3.0-beta.4
-  '@microsoft/tsdoc': 0.12.9
+  '@microsoft/tsdoc': 0.12.10
   '@pnpm/link-bins': 1.0.3
   '@pnpm/logger': 1.0.2
   '@rush-temp/api-documenter': 'file:projects/api-documenter.tgz'
@@ -143,7 +143,7 @@ dependencies:
   js-yaml: 3.13.1
   jsdom: 11.11.0
   loader-utils: 1.1.0
-  lodash: 4.17.14
+  lodash: 4.17.15
   lodash.merge: 4.3.5
   long: 4.0.0
   merge2: 1.0.3
@@ -208,7 +208,7 @@ packages:
       '@microsoft/ts-command-line': 4.2.6
       '@microsoft/tsdoc': 0.12.9
       colors: 1.2.5
-      lodash: 4.17.14
+      lodash: 4.17.15
       resolve: 1.8.1
       source-map: 0.6.1
       typescript: 3.5.3
@@ -223,7 +223,7 @@ packages:
       '@microsoft/ts-command-line': 4.2.6
       '@microsoft/tsdoc': 0.12.9
       colors: 1.2.5
-      lodash: 4.17.14
+      lodash: 4.17.15
       resolve: 1.8.1
       source-map: 0.6.1
       typescript: 3.5.3
@@ -358,6 +358,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-GFLPg9Z5yiNca3di/V6Zt3tAvj1de9EK0eL88tE+1eckQSH405UQcm7D+H8LbEhRpqpG+ZqN9LXCAEw4L5uchg==
+  /@microsoft/tsdoc/0.12.10:
+    dev: false
+    resolution:
+      integrity: sha512-tsog/HTdM88/WyR0Jz7XWTI0ghbJkt9soFXnQJrINDyaTGzbCoJjRttaW/IY5eAp4eqDyfg++jq6o+byEDOkIQ==
   /@microsoft/tsdoc/0.12.9:
     dev: false
     resolution:
@@ -1180,7 +1184,7 @@ packages:
       integrity: sha1-7GphrlZIDAw8skHJVhjiCJL5Zyo=
   /async/2.6.3:
     dependencies:
-      lodash: 4.17.14
+      lodash: 4.17.15
     dev: false
     resolution:
       integrity: sha512-zflvls11DCy+dQWzTW2dzuilv8Z5X/pjfmZOWba6TNIVDm+2UDaJmXSOXlasHKfNBs8oo3M0aT50fDEWfKZjXg==
@@ -1240,7 +1244,7 @@ packages:
       convert-source-map: 1.6.0
       debug: 2.6.9
       json5: 0.5.1
-      lodash: 4.17.14
+      lodash: 4.17.15
       minimatch: 3.0.4
       path-is-absolute: 1.0.1
       private: 0.1.8
@@ -1256,7 +1260,7 @@ packages:
       babel-types: 6.26.0
       detect-indent: 4.0.0
       jsesc: 1.3.0
-      lodash: 4.17.14
+      lodash: 4.17.15
       source-map: 0.5.7
       trim-right: 1.0.1
     dev: false
@@ -1352,7 +1356,7 @@ packages:
       babel-runtime: 6.26.0
       core-js: 2.6.9
       home-or-tmp: 2.0.0
-      lodash: 4.17.14
+      lodash: 4.17.15
       mkdirp: 0.5.1
       source-map-support: 0.4.18
     dev: false
@@ -1371,7 +1375,7 @@ packages:
       babel-traverse: 6.26.0
       babel-types: 6.26.0
       babylon: 6.18.0
-      lodash: 4.17.14
+      lodash: 4.17.15
     dev: false
     resolution:
       integrity: sha1-3gPi0WOWsGn0bdn/+FIfsaDjXgI=
@@ -1385,7 +1389,7 @@ packages:
       debug: 2.6.9
       globals: 9.18.0
       invariant: 2.2.4
-      lodash: 4.17.14
+      lodash: 4.17.15
     dev: false
     resolution:
       integrity: sha1-RqnL1+3MYsjlwGTi0tjQ9ANXZu4=
@@ -1393,7 +1397,7 @@ packages:
     dependencies:
       babel-runtime: 6.26.0
       esutils: 2.0.2
-      lodash: 4.17.14
+      lodash: 4.17.15
       to-fast-properties: 1.0.3
     dev: false
     resolution:
@@ -3585,7 +3589,7 @@ packages:
   /globule/1.2.1:
     dependencies:
       glob: 7.1.4
-      lodash: 4.17.14
+      lodash: 4.17.15
       minimatch: 3.0.4
     dev: false
     engines:
@@ -3670,7 +3674,7 @@ packages:
       gulp-util: 3.0.8
       istanbul: 0.4.5
       istanbul-threshold-checker: 0.1.0
-      lodash: 4.17.14
+      lodash: 4.17.15
       through2: 2.0.5
     dev: false
     resolution:
@@ -4113,7 +4117,7 @@ packages:
       cli-width: 2.2.0
       external-editor: 3.1.0
       figures: 2.0.0
-      lodash: 4.17.14
+      lodash: 4.17.15
       mute-stream: 0.0.7
       run-async: 2.3.0
       rxjs: 6.5.2
@@ -5612,10 +5616,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-Umao9J3Zib5Pn2gbbyoMVShdDZo=
-  /lodash/4.17.14:
+  /lodash/4.17.15:
     dev: false
     resolution:
-      integrity: sha512-mmKYbW3GLuJeX+iGP+Y7Gp1AiGHGbXHCOh/jZmrawMmsE7MS4znI3RL2FsjbqOyMayHInjOeykW7PEajUk1/xw==
+      integrity: sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
   /lolex/1.3.2:
     dev: false
     resolution:
@@ -7236,7 +7240,7 @@ packages:
       integrity: sha512-AC0FiLS352pBBiZhd4VXB1Ab/lh0lEgpP+GGvZqbQh8a5cmXVoTe5EX/YeTFArnp4SRGTHh1qCHu9lGs1qG8sA==
   /request-promise-core/1.1.2_request@2.88.0:
     dependencies:
-      lodash: 4.17.14
+      lodash: 4.17.15
       request: 2.88.0
     dev: false
     engines:
@@ -7468,7 +7472,7 @@ packages:
   /sass-graph/2.2.4:
     dependencies:
       glob: 7.0.6
-      lodash: 4.17.14
+      lodash: 4.17.15
       scss-tokenizer: 0.2.3
       yargs: 7.1.0
     dev: false
@@ -8346,7 +8350,7 @@ packages:
       cpx: 1.5.0
       fs-extra: 6.0.0
       jest-config: 22.4.4
-      lodash: 4.17.14
+      lodash: 4.17.15
       pkg-dir: 2.0.0
       source-map-support: 0.5.12
       typescript: 3.0.3
@@ -8366,7 +8370,7 @@ packages:
       fs-extra: 6.0.0
       jest: 23.6.0
       jest-config: 22.4.4
-      lodash: 4.17.14
+      lodash: 4.17.15
       pkg-dir: 2.0.0
       source-map-support: 0.5.12
       typescript: 3.0.3
@@ -9183,7 +9187,7 @@ packages:
     version: 0.0.0
   'file:projects/api-documenter.tgz':
     dependencies:
-      '@microsoft/tsdoc': 0.12.9
+      '@microsoft/tsdoc': 0.12.10
       '@types/jest': 23.3.11
       '@types/js-yaml': 3.12.1
       '@types/node': 8.5.8
@@ -9194,7 +9198,7 @@ packages:
     dev: false
     name: '@rush-temp/api-documenter'
     resolution:
-      integrity: sha512-hU6N8mFkkCnYCV2HfiXjZXSsqkIj4ZHG5cAbrcBDalldUsdzElOkgaMPNQmtACsPTbWIJCuBgz407WSoqatI1Q==
+      integrity: sha512-m+uzYID8HWX0h508ZoL99MfET3WpfPaMHF/QYoVO4yxZ0nBLbKycYGAkFNn92NnSAPZEnXRes/h8u0vtVx/k4Q==
       tarball: 'file:projects/api-documenter.tgz'
     version: 0.0.0
   'file:projects/api-extractor-lib1-test.tgz':
@@ -9236,9 +9240,8 @@ packages:
   'file:projects/api-extractor-model.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
-      '@microsoft/tsdoc': 0.12.9
+      '@microsoft/tsdoc': 0.12.10
       '@types/jest': 23.3.11
       '@types/node': 8.5.8
       gulp: 3.9.1
@@ -9246,7 +9249,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-model'
     resolution:
-      integrity: sha512-yt0EP5GtXyt9s3H+j/I43IqIsrXHOyDF413kFpxcPAfRPaM7lFh9Jpk0LBYhx/l3CtUCHPP/bWlwhQFuX2kNDg==
+      integrity: sha512-jvtpkse1QV8q1G6bUH9dt5FFQnwx57+SQbQ+Q9cHPwryxcjEEoXgEUIFiJC+Mt7qaBYNLU9YO1su30Q1IpUiDg==
       tarball: 'file:projects/api-extractor-model.tgz'
     version: 0.0.0
   'file:projects/api-extractor-scenarios.tgz':
@@ -9315,28 +9318,26 @@ packages:
   'file:projects/api-extractor.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
-      '@microsoft/tsdoc': 0.12.9
+      '@microsoft/tsdoc': 0.12.10
       '@types/jest': 23.3.11
       '@types/lodash': 4.14.116
       '@types/node': 8.5.8
       colors: 1.2.5
       gulp: 3.9.1
-      lodash: 4.17.14
+      lodash: 4.17.15
       resolve: 1.8.1
       source-map: 0.6.1
       typescript: 3.5.3
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-fxpVT0fCrRl7E/kN+TKr8Iutrfstk5Gsgwyq65ozw2uPkJXjx0b9dyJNcJXFZbV1nY/6dafrGucW0zgP5SuUcw==
+      integrity: sha512-EZoV4FFsTkufwE6PW2QzX4NdHhdeMUTPQY87Ebka8kmXUoT82CYHPiiDWxRdpyn0JeZT7yOXbSkC2AQCqKBjkA==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/gulp-core-build-mocha.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/glob': 5.0.30
       '@types/gulp': 3.8.32
@@ -9408,7 +9409,6 @@ packages:
   'file:projects/gulp-core-build-typescript.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/glob': 5.0.30
       '@types/node': 8.5.8
@@ -9447,7 +9447,6 @@ packages:
   'file:projects/gulp-core-build.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/assertion-error': 1.0.30
       '@types/chai': 3.4.34
@@ -9544,7 +9543,7 @@ packages:
       chai: 3.5.0
       gulp: 3.9.1
       loader-utils: 1.1.0
-      lodash: 4.17.14
+      lodash: 4.17.15
       mocha: 5.2.0
     dev: false
     name: '@rush-temp/loader-set-webpack-public-path'
@@ -9555,7 +9554,6 @@ packages:
   'file:projects/node-core-library.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/fs-extra': 5.0.4
       '@types/jest': 23.3.11
@@ -9650,7 +9648,7 @@ packages:
       https-proxy-agent: 2.2.2
       inquirer: 6.2.2
       js-yaml: 3.13.1
-      lodash: 4.17.14
+      lodash: 4.17.15
       minimatch: 3.0.4
       node-fetch: 2.1.2
       npm-package-arg: 5.1.2
@@ -9679,7 +9677,6 @@ packages:
   'file:projects/rush-stack-compiler-2.4.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/node': 8.5.8
       gulp: 3.9.1
@@ -9705,7 +9702,6 @@ packages:
   'file:projects/rush-stack-compiler-2.7.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/node': 8.5.8
       gulp: 3.9.1
@@ -9731,7 +9727,6 @@ packages:
   'file:projects/rush-stack-compiler-2.8.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/node': 8.5.8
       gulp: 3.9.1
@@ -9757,7 +9752,6 @@ packages:
   'file:projects/rush-stack-compiler-2.9.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/node': 8.5.8
       gulp: 3.9.1
@@ -9783,7 +9777,6 @@ packages:
   'file:projects/rush-stack-compiler-3.0.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/node': 8.5.8
       gulp: 3.9.1
@@ -9809,7 +9802,6 @@ packages:
   'file:projects/rush-stack-compiler-3.1.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/node': 8.5.8
       gulp: 3.9.1
@@ -9835,7 +9827,6 @@ packages:
   'file:projects/rush-stack-compiler-3.2.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/node': 8.5.8
       gulp: 3.9.1
@@ -9861,7 +9852,6 @@ packages:
   'file:projects/rush-stack-compiler-3.3.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/node': 8.5.8
       gulp: 3.9.1
@@ -9887,7 +9877,6 @@ packages:
   'file:projects/rush-stack-compiler-3.4.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/node': 8.5.8
       gulp: 3.9.1
@@ -9907,7 +9896,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-stack-compiler-3.5-library-test'
     resolution:
-      integrity: sha512-deIWCTHdHUkcg5FFpTRScLgSmWM+HCj3gahqEhmA73dp9bdsGu3d4pNQJWvpcxwWW62uUUh93YFZOiIxuBEKKg==
+      integrity: sha512-Qi1cfGBcFQfA5+2NiLPyMj3H9mOyzBh/4WL6lO9ewFc6mnDR1K2ohUjJLiDA8mZqTB9GdtuesG19Wg125MhHsw==
       tarball: 'file:projects/rush-stack-compiler-3.5-library-test.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-3.5.tgz':
@@ -9991,7 +9980,7 @@ packages:
       '@types/webpack': 4.4.0
       chai: 3.5.0
       gulp: 3.9.1
-      lodash: 4.17.14
+      lodash: 4.17.15
       mocha: 5.2.0
       uglify-js: 3.0.28
     dev: false
@@ -10018,7 +10007,6 @@ packages:
   'file:projects/ts-command-line.tgz':
     dependencies:
       '@microsoft/node-library-build': 6.0.71
-      '@microsoft/rush-stack-compiler-3.2': 0.3.23
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
       '@types/argparse': 1.0.33
       '@types/jest': 23.3.11
@@ -10056,13 +10044,12 @@ packages:
       integrity: sha512-DfKMXq5zBvCU5DW5PJQPJbE57ZkDbIugRB/dvGBZMZntVp/+mXSGIxhSrRmxketLfPz6iNQFeAgITB/Ba5qbtw==
       tarball: 'file:projects/web-library-build.tgz'
     version: 0.0.0
-registry: ''
 specifiers:
   '@microsoft/node-library-build': 6.0.71
   '@microsoft/rush-stack-compiler-3.2': 0.3.23
   '@microsoft/rush-stack-compiler-3.4': 0.1.11
   '@microsoft/teams-js': 1.3.0-beta.4
-  '@microsoft/tsdoc': 0.12.9
+  '@microsoft/tsdoc': 0.12.10
   '@pnpm/link-bins': ~1.0.1
   '@pnpm/logger': ~1.0.1
   '@rush-temp/api-documenter': 'file:./projects/api-documenter.tgz'

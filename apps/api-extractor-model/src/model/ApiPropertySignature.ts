@@ -35,8 +35,8 @@ export interface IApiPropertySignatureOptions extends IApiPropertyItemOptions {
  */
 export class ApiPropertySignature extends ApiPropertyItem {
 
-  public static getCanonicalReference(name: string): string {
-    return name;
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.PropertySignature}`;
   }
 
   public constructor(options: IApiPropertySignatureOptions) {
@@ -49,7 +49,7 @@ export class ApiPropertySignature extends ApiPropertyItem {
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiPropertySignature.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiPropertySignature.getContainerKey(this.name);
   }
 }

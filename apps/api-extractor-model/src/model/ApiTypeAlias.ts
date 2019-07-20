@@ -77,8 +77,8 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
     options.typeTokenRange = jsonObject.typeTokenRange;
   }
 
-  public static getCanonicalReference(name: string): string {
-    return name;
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.TypeAlias}`;
   }
 
   public constructor(options: IApiTypeAliasOptions) {
@@ -93,8 +93,8 @@ export class ApiTypeAlias extends ApiTypeParameterListMixin(ApiNameMixin(ApiRele
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiTypeAlias.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiTypeAlias.getContainerKey(this.name);
   }
 
   /** @override */

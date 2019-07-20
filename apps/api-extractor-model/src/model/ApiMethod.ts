@@ -48,11 +48,11 @@ export interface IApiMethodOptions extends
 export class ApiMethod extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(
   ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiDeclaredItem)))))) {
 
-  public static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string {
+  public static getContainerKey(name: string, isStatic: boolean, overloadIndex: number): string {
     if (isStatic) {
-      return `(${name}:static,${overloadIndex})`;
+      return `${name}|${ApiItemKind.Method}|static|${overloadIndex}`;
     } else {
-      return `(${name}:instance,${overloadIndex})`;
+      return `${name}|${ApiItemKind.Method}|instance|${overloadIndex}`;
     }
   }
 
@@ -66,7 +66,7 @@ export class ApiMethod extends ApiNameMixin(ApiTypeParameterListMixin(ApiParamet
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiMethod.getCanonicalReference(this.name, this.isStatic, this.overloadIndex);
+  public get containerKey(): string {
+    return ApiMethod.getContainerKey(this.name, this.isStatic, this.overloadIndex);
   }
 }

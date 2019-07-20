@@ -59,8 +59,8 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
     options.variableTypeTokenRange = jsonObject.variableTypeTokenRange;
   }
 
-  public static getCanonicalReference(name: string): string {
-    return name;
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.Variable}`;
   }
 
   public constructor(options: IApiVariableOptions) {
@@ -75,8 +75,8 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiVariable.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiVariable.getContainerKey(this.name);
   }
 
   /** @override */
