@@ -44,7 +44,7 @@ export interface IApiItemOptions {
 
 export interface IApiItemJson {
   kind: ApiItemKind;
-  canonicalReference: string;
+  containerKey: string;
 }
 
 /**
@@ -85,17 +85,29 @@ export class ApiItem {
   /** @virtual */
   public serializeInto(jsonObject: Partial<IApiItemJson>): void {
     jsonObject.kind = this.kind;
-    jsonObject.canonicalReference = this.canonicalReference;
+    jsonObject.containerKey = this.containerKey;
   }
 
-  /** @virtual */
+  /**
+   * Identifies the subclass of the `ApiItem` base class.
+   * @virtual
+   */
   public get kind(): ApiItemKind {
     throw new Error('ApiItem.kind was not implemented by the child class');
   }
 
-  /** @virtual */
-  public get canonicalReference(): string {
-    throw new Error('ApiItem.canonicalReference was not implemented by the child class');
+  /**
+   * Returns a string key that can be used to efficiently retrieve an `ApiItem` from an `ApiItemContainerMixin`.
+   * The key is unique within the container.  Its format is undocumented and may change at any time.
+   *
+   * @remarks
+   * Use the `getContainerKey()` static member to construct the key.  Each subclass has a different implementation
+   * of this function, according to the aspects that are important for identifying it.
+   *
+   * @virtual
+   */
+  public get containerKey(): string {
+    throw new Error('ApiItem.containerKey was not implemented by the child class');
   }
 
   /**
@@ -203,7 +215,7 @@ export class ApiItem {
 
   /** @virtual */
   public getSortKey(): string {
-    return this.canonicalReference;
+    return this.containerKey;
   }
 }
 

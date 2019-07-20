@@ -43,8 +43,8 @@ export interface IApiMethodSignatureOptions extends
 export class ApiMethodSignature extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(
   ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))))) {
 
-  public static getCanonicalReference(name: string, overloadIndex: number): string {
-    return `(${name}:${overloadIndex})`;
+  public static getContainerKey(name: string, overloadIndex: number): string {
+    return `${name}|${ApiItemKind.MethodSignature}|${overloadIndex}`;
   }
 
   public constructor(options: IApiMethodSignatureOptions) {
@@ -57,7 +57,7 @@ export class ApiMethodSignature extends ApiNameMixin(ApiTypeParameterListMixin(A
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiMethodSignature.getCanonicalReference(this.name, this.overloadIndex);
+  public get containerKey(): string {
+    return ApiMethodSignature.getContainerKey(this.name, this.overloadIndex);
   }
 }
