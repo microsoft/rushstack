@@ -2,22 +2,19 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1002,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "containerKey": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "containerKey": "",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "containerKey": "A|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -40,7 +37,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "B|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -63,7 +59,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "IFile|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -84,7 +79,6 @@
           "members": [
             {
               "kind": "Property",
-              "containerKey": "containingFolder|Property|instance",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -117,7 +111,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "IFolder|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -138,7 +131,6 @@
           "members": [
             {
               "kind": "Property",
-              "containerKey": "containingFolder|Property|instance",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -172,7 +164,6 @@
             },
             {
               "kind": "Property",
-              "containerKey": "files|Property|instance",
               "docComment": "",
               "excerptTokens": [
                 {

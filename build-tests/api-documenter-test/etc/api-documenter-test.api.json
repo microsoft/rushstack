@@ -2,22 +2,19 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1002,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "containerKey": "api-documenter-test",
   "docComment": "/**\n * api-extractor-test-05\n *\n * This project tests various documentation generation scenarios and doc comment syntaxes.\n *\n * @packageDocumentation\n */\n",
   "name": "api-documenter-test",
   "members": [
     {
       "kind": "EntryPoint",
-      "containerKey": "",
       "name": "",
       "members": [
         {
           "kind": "Variable",
-          "containerKey": "constVariable|Variable",
           "docComment": "/**\n * An exported variable declaration.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -42,7 +39,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "DocBaseClass|Class",
           "docComment": "/**\n * Example base class\n *\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -63,7 +59,6 @@
           "members": [
             {
               "kind": "Constructor",
-              "containerKey": "|Constructor|1",
               "docComment": "/**\n * The simple constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -77,7 +72,6 @@
             },
             {
               "kind": "Constructor",
-              "containerKey": "|Constructor|2",
               "docComment": "/**\n * The overloaded constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -118,7 +112,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "DocClass1|Class",
           "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.\n *\n * @defaultValue\n *\n * a default value for this function\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -167,7 +160,6 @@
           "members": [
             {
               "kind": "Method",
-              "containerKey": "deprecatedExample|Method|instance|0",
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
               "excerptTokens": [
                 {
@@ -199,7 +191,6 @@
             },
             {
               "kind": "Method",
-              "containerKey": "exampleFunction|Method|instance|1",
               "docComment": "/**\n * This is an overloaded function.\n *\n * @param a - the first string\n *\n * @param b - the second string\n */\n",
               "excerptTokens": [
                 {
@@ -278,7 +269,6 @@
             },
             {
               "kind": "Method",
-              "containerKey": "exampleFunction|Method|instance|2",
               "docComment": "/**\n * This is also an overloaded function.\n *\n * @param x - the number\n */\n",
               "excerptTokens": [
                 {
@@ -334,7 +324,6 @@
             },
             {
               "kind": "Method",
-              "containerKey": "interestingEdgeCases|Method|instance|0",
               "docComment": "/**\n * Example: \"\\{ \\\\\"maxItemsToShow\\\\\": 123 \\}\"\n *\n * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\\\-_]+$/\n */\n",
               "excerptTokens": [
                 {
@@ -366,7 +355,6 @@
             },
             {
               "kind": "Property",
-              "containerKey": "malformedEvent|Property|instance",
               "docComment": "/**\n * This event should have been marked as readonly.\n *\n * @eventProperty\n */\n",
               "excerptTokens": [
                 {
@@ -396,7 +384,6 @@
             },
             {
               "kind": "Property",
-              "containerKey": "modifiedEvent|Property|instance",
               "docComment": "/**\n * This event is fired whenever the object is modified.\n *\n * @eventProperty\n */\n",
               "excerptTokens": [
                 {
@@ -430,7 +417,6 @@
             },
             {
               "kind": "Property",
-              "containerKey": "regularProperty|Property|instance",
               "docComment": "/**\n * This is a regular property that happens to use the SystemEvent type.\n */\n",
               "excerptTokens": [
                 {
@@ -460,7 +446,6 @@
             },
             {
               "kind": "Method",
-              "containerKey": "sumWithExample|Method|static|0",
               "docComment": "/**\n * Returns the sum of two numbers.\n *\n * @remarks\n *\n * This illustrates usage of the `@example` block tag.\n *\n * @param x - the first number to add\n *\n * @param y - the second number to add\n *\n * @returns the sum of the two numbers\n *\n * @example\n *\n * Here's a simple example:\n * ```\n * // Prints \"2\":\n * console.log(DocClass1.sumWithExample(1,1));\n * ```\n *\n * @example\n *\n * Here's an example with negative numbers:\n * ```\n * // Prints \"0\":\n * console.log(DocClass1.sumWithExample(1,-1));\n * ```\n *\n */\n",
               "excerptTokens": [
                 {
@@ -543,7 +528,6 @@
             },
             {
               "kind": "Method",
-              "containerKey": "tableExample|Method|instance|0",
               "docComment": "/**\n * An example with tables:\n *\n * @remarks\n *\n * <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>\n */\n",
               "excerptTokens": [
                 {
@@ -591,7 +575,6 @@
         },
         {
           "kind": "Enum",
-          "containerKey": "DocEnum|Enum",
           "docComment": "/**\n * Docs for DocEnum\n *\n * {@docCategory SystemEvent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -612,7 +595,6 @@
           "members": [
             {
               "kind": "EnumMember",
-              "containerKey": "One",
               "docComment": "/**\n * These are some docs for One\n */\n",
               "excerptTokens": [
                 {
@@ -637,7 +619,6 @@
             },
             {
               "kind": "EnumMember",
-              "containerKey": "Two",
               "docComment": "/**\n * These are some docs for Two\n */\n",
               "excerptTokens": [
                 {
@@ -662,7 +643,6 @@
             },
             {
               "kind": "EnumMember",
-              "containerKey": "Zero",
               "docComment": "/**\n * These are some docs for Zero\n */\n",
               "excerptTokens": [
                 {
@@ -689,7 +669,6 @@
         },
         {
           "kind": "TypeAlias",
-          "containerKey": "ExampleTypeAlias|TypeAlias",
           "docComment": "/**\n * A type alias\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -726,7 +705,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "Generic|Class",
           "docComment": "/**\n * Generic class.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -770,7 +748,6 @@
         },
         {
           "kind": "Function",
-          "containerKey": "globalFunction|Function|0",
           "docComment": "/**\n * An exported function\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -829,7 +806,6 @@
         },
         {
           "kind": "Interface",
-          "containerKey": "IDocInterface1|Interface",
           "docComment": "/**\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -850,7 +826,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "containerKey": "regularProperty|PropertySignature",
               "docComment": "/**\n * Does something\n */\n",
               "excerptTokens": [
                 {
@@ -882,7 +857,6 @@
         },
         {
           "kind": "Interface",
-          "containerKey": "IDocInterface2|Interface",
           "docComment": "/**\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -911,7 +885,6 @@
           "members": [
             {
               "kind": "MethodSignature",
-              "containerKey": "deprecatedExample|MethodSignature|0",
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
               "excerptTokens": [
                 {
@@ -950,7 +923,6 @@
         },
         {
           "kind": "Interface",
-          "containerKey": "IDocInterface3|Interface",
           "docComment": "/**\n * Some less common TypeScript declaration kinds.\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -971,7 +943,6 @@
           "members": [
             {
               "kind": "CallSignature",
-              "containerKey": "|CallSignature|0",
               "docComment": "/**\n * Call signature\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -1021,7 +992,6 @@
             },
             {
               "kind": "ConstructSignature",
-              "containerKey": "|ConstructSignature|0",
               "docComment": "/**\n * Construct signature\n */\n",
               "excerptTokens": [
                 {
@@ -1047,7 +1017,6 @@
             },
             {
               "kind": "IndexSignature",
-              "containerKey": "|IndexSignature|0",
               "docComment": "/**\n * Indexer\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -1100,7 +1069,6 @@
         },
         {
           "kind": "Interface",
-          "containerKey": "IDocInterface4|Interface",
           "docComment": "/**\n * Type union in an interface.\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1121,7 +1089,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "containerKey": "Context|PropertySignature",
               "docComment": "/**\n * Test newline rendering when code blocks are used in tables\n */\n",
               "excerptTokens": [
                 {
@@ -1166,7 +1133,6 @@
             },
             {
               "kind": "PropertySignature",
-              "containerKey": "generic|PropertySignature",
               "docComment": "/**\n * make sure html entities are escaped in tables.\n */\n",
               "excerptTokens": [
                 {
@@ -1199,7 +1165,6 @@
             },
             {
               "kind": "PropertySignature",
-              "containerKey": "numberOrFunction|PropertySignature",
               "docComment": "/**\n * a union type with a function\n */\n",
               "excerptTokens": [
                 {
@@ -1228,7 +1193,6 @@
             },
             {
               "kind": "PropertySignature",
-              "containerKey": "stringOrNumber|PropertySignature",
               "docComment": "/**\n * a union type\n */\n",
               "excerptTokens": [
                 {
@@ -1260,7 +1224,6 @@
         },
         {
           "kind": "Interface",
-          "containerKey": "IDocInterface5|Interface",
           "docComment": "/**\n * Interface without inline tag to test custom TOC\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1281,7 +1244,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "containerKey": "regularProperty|PropertySignature",
               "docComment": "/**\n * Property of type string that does something\n */\n",
               "excerptTokens": [
                 {
@@ -1313,7 +1275,6 @@
         },
         {
           "kind": "Interface",
-          "containerKey": "IDocInterface6|Interface",
           "docComment": "/**\n * Interface without inline tag to test custom TOC with injection\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1334,7 +1295,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "containerKey": "regularProperty|PropertySignature",
               "docComment": "/**\n * Property of type number that does something\n */\n",
               "excerptTokens": [
                 {
@@ -1366,7 +1326,6 @@
         },
         {
           "kind": "Namespace",
-          "containerKey": "OuterNamespace|Namespace",
           "docComment": "/**\n * A top-level namespace\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1387,7 +1346,6 @@
           "members": [
             {
               "kind": "Namespace",
-              "containerKey": "InnerNamespace|Namespace",
               "docComment": "/**\n * A nested namespace\n */\n",
               "excerptTokens": [
                 {
@@ -1408,7 +1366,6 @@
               "members": [
                 {
                   "kind": "Function",
-                  "containerKey": "nestedFunction|Function|0",
                   "docComment": "/**\n * A function inside a namespace\n */\n",
                   "excerptTokens": [
                     {
@@ -1469,7 +1426,6 @@
             },
             {
               "kind": "Variable",
-              "containerKey": "nestedVariable|Variable",
               "docComment": "/**\n * A variable exported from within a namespace.\n */\n",
               "excerptTokens": [
                 {
@@ -1496,7 +1452,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "SystemEvent|Class",
           "docComment": "/**\n * A class used to exposed events.\n *\n * {@docCategory SystemEvent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1517,7 +1472,6 @@
           "members": [
             {
               "kind": "Method",
-              "containerKey": "addHandler|Method|instance|0",
               "docComment": "/**\n * Adds an handler for the event.\n */\n",
               "excerptTokens": [
                 {

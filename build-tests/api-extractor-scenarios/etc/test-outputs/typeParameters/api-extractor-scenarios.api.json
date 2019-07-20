@@ -2,22 +2,19 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1002,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "containerKey": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "containerKey": "",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "containerKey": "ClassWithGenericMethod|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -38,7 +35,6 @@
           "members": [
             {
               "kind": "Method",
-              "containerKey": "method|Method|instance|0",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -94,7 +90,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "GenericClass|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -138,7 +133,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "GenericClassWithConstraint|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -190,7 +184,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "GenericClassWithDefault|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -242,7 +235,6 @@
         },
         {
           "kind": "Function",
-          "containerKey": "genericFunction|Function|0",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -298,7 +290,6 @@
         },
         {
           "kind": "Interface",
-          "containerKey": "GenericInterface|Interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -342,7 +333,6 @@
         },
         {
           "kind": "TypeAlias",
-          "containerKey": "GenericTypeAlias|TypeAlias",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -396,7 +386,6 @@
         },
         {
           "kind": "Interface",
-          "containerKey": "InterfaceWithGenericCallSignature|Interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -417,7 +406,6 @@
           "members": [
             {
               "kind": "CallSignature",
-              "containerKey": "|CallSignature|0",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -467,7 +455,6 @@
         },
         {
           "kind": "Interface",
-          "containerKey": "InterfaceWithGenericConstructSignature|Interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -488,7 +475,6 @@
           "members": [
             {
               "kind": "ConstructSignature",
-              "containerKey": "|ConstructSignature|0",
               "docComment": "",
               "excerptTokens": [
                 {

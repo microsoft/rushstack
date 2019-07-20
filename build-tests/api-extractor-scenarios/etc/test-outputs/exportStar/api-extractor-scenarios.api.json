@@ -2,22 +2,19 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1002,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "containerKey": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "containerKey": "",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "containerKey": "A|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -40,7 +37,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "B|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -63,7 +59,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "C|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {

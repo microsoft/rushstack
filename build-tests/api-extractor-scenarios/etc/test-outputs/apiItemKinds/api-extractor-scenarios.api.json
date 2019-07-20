@@ -2,22 +2,19 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1002,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "containerKey": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "containerKey": "",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "containerKey": "AbstractClass|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -38,7 +35,6 @@
           "members": [
             {
               "kind": "Method",
-              "containerKey": "member|Method|instance|0",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -77,7 +73,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "ClassWithTypeLiterals|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -98,7 +93,6 @@
           "members": [
             {
               "kind": "Method",
-              "containerKey": "method1|Method|instance|0",
               "docComment": "/**\n * type literal in\n */\n",
               "excerptTokens": [
                 {
@@ -170,7 +164,6 @@
             },
             {
               "kind": "Method",
-              "containerKey": "method2|Method|instance|0",
               "docComment": "/**\n * type literal output\n */\n",
               "excerptTokens": [
                 {
@@ -229,7 +222,6 @@
         },
         {
           "kind": "Enum",
-          "containerKey": "ConstEnum|Enum",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -250,7 +242,6 @@
           "members": [
             {
               "kind": "EnumMember",
-              "containerKey": "One",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -275,7 +266,6 @@
             },
             {
               "kind": "EnumMember",
-              "containerKey": "Two",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -300,7 +290,6 @@
             },
             {
               "kind": "EnumMember",
-              "containerKey": "Zero",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -327,7 +316,6 @@
         },
         {
           "kind": "Interface",
-          "containerKey": "IInterface|Interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -348,7 +336,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "containerKey": "member|PropertySignature",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -380,7 +367,6 @@
         },
         {
           "kind": "Namespace",
-          "containerKey": "NamespaceContainingVariable|Namespace",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -401,7 +387,6 @@
           "members": [
             {
               "kind": "Variable",
-              "containerKey": "constVariable|Variable",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -426,7 +411,6 @@
             },
             {
               "kind": "Variable",
-              "containerKey": "variable|Variable",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -453,7 +437,6 @@
         },
         {
           "kind": "Enum",
-          "containerKey": "RegularEnum|Enum",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -474,7 +457,6 @@
           "members": [
             {
               "kind": "EnumMember",
-              "containerKey": "One",
               "docComment": "/**\n * These are some docs for One\n */\n",
               "excerptTokens": [
                 {
@@ -499,7 +481,6 @@
             },
             {
               "kind": "EnumMember",
-              "containerKey": "Two",
               "docComment": "/**\n * These are some docs for Two\n */\n",
               "excerptTokens": [
                 {
@@ -524,7 +505,6 @@
             },
             {
               "kind": "EnumMember",
-              "containerKey": "Zero",
               "docComment": "/**\n * These are some docs for Zero\n */\n",
               "excerptTokens": [
                 {
@@ -551,7 +531,6 @@
         },
         {
           "kind": "Class",
-          "containerKey": "SimpleClass|Class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -572,7 +551,6 @@
           "members": [
             {
               "kind": "Method",
-              "containerKey": "member|Method|instance|0",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -607,7 +585,6 @@
         },
         {
           "kind": "Variable",
-          "containerKey": "VARIABLE|Variable",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
