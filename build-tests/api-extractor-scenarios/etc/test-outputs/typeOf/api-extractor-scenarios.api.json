@@ -6,15 +6,18 @@
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!f:function(0)",
           "docComment": "/**\n * Reference Lib1Class via \"typeof\"\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -57,6 +60,7 @@
         },
         {
           "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!g:function(0)",
           "docComment": "/**\n * Reference IForgottenExport via \"typeof\"\n *\n * @public\n */\n",
           "excerptTokens": [
             {

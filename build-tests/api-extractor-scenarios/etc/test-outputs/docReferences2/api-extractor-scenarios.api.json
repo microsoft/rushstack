@@ -6,15 +6,18 @@
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!CyclicA:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -35,6 +38,7 @@
           "members": [
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!CyclicA#methodA1:member(0)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -66,6 +70,7 @@
             },
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!CyclicA#methodA3:member(0)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -100,6 +105,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!CyclicB:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -120,6 +126,7 @@
           "members": [
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!CyclicB#methodB2:member(0)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -151,6 +158,7 @@
             },
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!CyclicB#methodB4:member(0)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -185,6 +193,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!FailWithSelfReference:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -205,6 +214,7 @@
           "members": [
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!FailWithSelfReference#method1:member(0)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -236,6 +246,7 @@
             },
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!FailWithSelfReference#method2:member(0)",
               "docComment": "",
               "excerptTokens": [
                 {

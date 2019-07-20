@@ -6,15 +6,18 @@
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!ClassWithGenericMethod:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -35,6 +38,7 @@
           "members": [
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!ClassWithGenericMethod#method:member(0)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -90,6 +94,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!GenericClass:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -133,6 +138,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!GenericClassWithConstraint:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -184,6 +190,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!GenericClassWithDefault:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -235,6 +242,7 @@
         },
         {
           "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!genericFunction:function(0)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -290,6 +298,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!GenericInterface:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -333,6 +342,7 @@
         },
         {
           "kind": "TypeAlias",
+          "canonicalReference": "api-extractor-scenarios!GenericTypeAlias:typealias",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -386,6 +396,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericCallSignature:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -406,6 +417,7 @@
           "members": [
             {
               "kind": "CallSignature",
+              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericCallSignature#:signature(0)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -455,6 +467,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericConstructSignature:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -475,6 +488,7 @@
           "members": [
             {
               "kind": "ConstructSignature",
+              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericConstructSignature#:signature(0)",
               "docComment": "",
               "excerptTokens": [
                 {

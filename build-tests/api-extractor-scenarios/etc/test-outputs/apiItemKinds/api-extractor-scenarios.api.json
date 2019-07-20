@@ -6,15 +6,18 @@
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!AbstractClass:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -35,6 +38,7 @@
           "members": [
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!AbstractClass#member:member(0)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -73,6 +77,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -93,6 +98,7 @@
           "members": [
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals#method1:member(0)",
               "docComment": "/**\n * type literal in\n */\n",
               "excerptTokens": [
                 {
@@ -164,6 +170,7 @@
             },
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals#method2:member(0)",
               "docComment": "/**\n * type literal output\n */\n",
               "excerptTokens": [
                 {
@@ -222,6 +229,7 @@
         },
         {
           "kind": "Enum",
+          "canonicalReference": "api-extractor-scenarios!ConstEnum:enum",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -242,6 +250,7 @@
           "members": [
             {
               "kind": "EnumMember",
+              "canonicalReference": "api-extractor-scenarios!ConstEnum.One:enummember",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -266,6 +275,7 @@
             },
             {
               "kind": "EnumMember",
+              "canonicalReference": "api-extractor-scenarios!ConstEnum.Two:enummember",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -290,6 +300,7 @@
             },
             {
               "kind": "EnumMember",
+              "canonicalReference": "api-extractor-scenarios!ConstEnum.Zero:enummember",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -316,6 +327,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!IInterface:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -336,6 +348,7 @@
           "members": [
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-extractor-scenarios!IInterface#member:member",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -367,6 +380,7 @@
         },
         {
           "kind": "Namespace",
+          "canonicalReference": "api-extractor-scenarios!NamespaceContainingVariable:namespace",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -387,6 +401,7 @@
           "members": [
             {
               "kind": "Variable",
+              "canonicalReference": "api-extractor-scenarios!NamespaceContainingVariable.constVariable:variable",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -411,6 +426,7 @@
             },
             {
               "kind": "Variable",
+              "canonicalReference": "api-extractor-scenarios!NamespaceContainingVariable.variable:variable",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -437,6 +453,7 @@
         },
         {
           "kind": "Enum",
+          "canonicalReference": "api-extractor-scenarios!RegularEnum:enum",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -457,6 +474,7 @@
           "members": [
             {
               "kind": "EnumMember",
+              "canonicalReference": "api-extractor-scenarios!RegularEnum.One:enummember",
               "docComment": "/**\n * These are some docs for One\n */\n",
               "excerptTokens": [
                 {
@@ -481,6 +499,7 @@
             },
             {
               "kind": "EnumMember",
+              "canonicalReference": "api-extractor-scenarios!RegularEnum.Two:enummember",
               "docComment": "/**\n * These are some docs for Two\n */\n",
               "excerptTokens": [
                 {
@@ -505,6 +524,7 @@
             },
             {
               "kind": "EnumMember",
+              "canonicalReference": "api-extractor-scenarios!RegularEnum.Zero:enummember",
               "docComment": "/**\n * These are some docs for Zero\n */\n",
               "excerptTokens": [
                 {
@@ -531,6 +551,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!SimpleClass:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -551,6 +572,7 @@
           "members": [
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!SimpleClass#member:member(0)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -585,6 +607,7 @@
         },
         {
           "kind": "Variable",
+          "canonicalReference": "api-extractor-scenarios!VARIABLE:variable",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
