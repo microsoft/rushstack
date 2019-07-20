@@ -4,6 +4,7 @@
 
 ```ts
 
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { DocDeclarationReference } from '@microsoft/tsdoc';
 import { IJsonFileSaveOptions } from '@microsoft/node-core-library';
 import * as tsdoc from '@microsoft/tsdoc';
@@ -211,9 +212,13 @@ export class ApiInterface extends ApiInterface_base {
 
 // @public
 export class ApiItem {
-    // (undocumented)
-    [ApiItem_parent]: ApiItem | undefined;
+    // @internal
+    [ApiItem_setParent](parent: ApiItem | undefined): void;
     constructor(options: IApiItemOptions);
+    // @virtual
+    protected buildCanonicalReference(): DeclarationReference;
+    // @beta
+    readonly canonicalReference: DeclarationReference;
     // @virtual
     readonly containerKey: string;
     // (undocumented)

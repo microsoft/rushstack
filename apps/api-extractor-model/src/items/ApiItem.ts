@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiPackage } from '../model/ApiPackage';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
+import { InternalError } from '@microsoft/node-core-library';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -46,12 +48,10 @@ export interface IApiItemJson {
   kind: ApiItemKind;
 }
 
-/**
- * PRIVATE
- * Allows ApiItemContainerMixin to assign the parent.
- */
+// PRIVATE - Allows ApiItemContainerMixin to assign the parent.
+//
 // tslint:disable-next-line:variable-name
-export const ApiItem_parent: unique symbol = Symbol('ApiItem._parent');
+export const ApiItem_setParent: unique symbol = Symbol('ApiItem._setParent');
 
 /**
  * The abstract base class for all members of an `ApiModel` object.
@@ -62,7 +62,8 @@ export const ApiItem_parent: unique symbol = Symbol('ApiItem._parent');
  * @public
  */
 export class ApiItem {
-  public [ApiItem_parent]: ApiItem | undefined;
+  private _canonicalReference: DeclarationReference | undefined;
+  private _parent: ApiItem | undefined;
 
   public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
     // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
@@ -95,6 +96,22 @@ export class ApiItem {
   }
 
   /**
+   * Warning: This API is used internally by API extractor but is not yet ready for general usage.
+   *
+   * @remarks
+   *
+   * Returns a `DeclarationReference` object using the experimental new declaration reference notation.
+   *
+   * @beta
+   */
+  public get canonicalReference(): DeclarationReference {
+    if (!this._canonicalReference) {
+      this._canonicalReference = this.buildCanonicalReference();
+    }
+    return this._canonicalReference;
+  }
+
+  /**
    * Returns a string key that can be used to efficiently retrieve an `ApiItem` from an `ApiItemContainerMixin`.
    * The key is unique within the container.  Its format is undocumented and may change at any time.
    *
@@ -105,7 +122,7 @@ export class ApiItem {
    * @virtual
    */
   public get containerKey(): string {
-    throw new Error('ApiItem.containerKey was not implemented by the child class');
+    throw new InternalError('ApiItem.containerKey was not implemented by the child class');
   }
 
   /**
@@ -135,7 +152,7 @@ export class ApiItem {
    * @virtual
    */
   public get parent(): ApiItem | undefined {
-    return this[ApiItem_parent];
+    return this._parent;
   }
 
   /**
@@ -214,6 +231,27 @@ export class ApiItem {
   /** @virtual */
   public getSortKey(): string {
     return this.containerKey;
+  }
+
+  /**
+   * PRIVATE
+   *
+   * @privateRemarks
+   * Allows ApiItemContainerMixin to assign the parent.
+   *
+   * @internal
+   */
+  public [ApiItem_setParent](parent: ApiItem | undefined): void {
+    this._parent = parent;
+    this._canonicalReference = undefined;
+  }
+
+  /**
+   * Builds the cached object used by the `canonicalReference` property.
+   * @virtual
+   */
+  protected buildCanonicalReference(): DeclarationReference {
+    throw new InternalError('ApiItem.canonicalReference was not implemented by the child class');
   }
 }
 
