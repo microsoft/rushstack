@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
 import { ApiPackage } from './ApiPackage';
@@ -139,5 +140,10 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
   public resolveDeclarationReference(declarationReference: DocDeclarationReference,
     contextApiItem: ApiItem | undefined): IResolveDeclarationReferenceResult {
     return this._resolver.resolve(declarationReference, contextApiItem);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    return DeclarationReference.empty();
   }
 }

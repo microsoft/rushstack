@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
 import { IApiParameterListMixinOptions, ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
@@ -61,5 +62,13 @@ export class ApiConstructor extends ApiParameterListMixin(ApiReleaseTagMixin(Api
   /** @override */
   public get containerKey(): string {
     return ApiConstructor.getContainerKey(this.overloadIndex);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(Navigation.Members, '')
+      .withMeaning(Meaning.Constructor)
+      .withOverloadIndex(this.overloadIndex);
   }
 }

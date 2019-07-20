@@ -30,6 +30,8 @@ export class AedocDefinitions {
 // @public
 export class ApiCallSignature extends ApiCallSignature_base {
     constructor(options: IApiCallSignatureOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -43,6 +45,8 @@ export class ApiCallSignature extends ApiCallSignature_base {
 // @public
 export class ApiClass extends ApiClass_base {
     constructor(options: IApiClassOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     readonly extendsType: HeritageType | undefined;
@@ -65,6 +69,8 @@ export class ApiClass extends ApiClass_base {
 // @public
 export class ApiConstructor extends ApiConstructor_base {
     constructor(options: IApiConstructorOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -78,6 +84,8 @@ export class ApiConstructor extends ApiConstructor_base {
 // @public
 export class ApiConstructSignature extends ApiConstructSignature_base {
     constructor(options: IApiConstructSignatureOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -121,6 +129,8 @@ export class ApiDocumentedItem extends ApiItem {
 // @public
 export class ApiEntryPoint extends ApiEntryPoint_base {
     constructor(options: IApiEntryPointOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // @override (undocumented)
@@ -134,6 +144,8 @@ export class ApiEnum extends ApiEnum_base {
     constructor(options: IApiEnumOptions);
     // @override (undocumented)
     addMember(member: ApiEnumMember): void;
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -149,6 +161,8 @@ export class ApiEnum extends ApiEnum_base {
 // @public
 export class ApiEnumMember extends ApiEnumMember_base {
     constructor(options: IApiEnumMemberOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -169,6 +183,8 @@ export class ApiEnumMember extends ApiEnumMember_base {
 // @public
 export class ApiFunction extends ApiFunction_base {
     constructor(options: IApiFunctionOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -182,6 +198,8 @@ export class ApiFunction extends ApiFunction_base {
 // @public
 export class ApiIndexSignature extends ApiIndexSignature_base {
     constructor(options: IApiIndexSignatureOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -195,6 +213,8 @@ export class ApiIndexSignature extends ApiIndexSignature_base {
 // @public
 export class ApiInterface extends ApiInterface_base {
     constructor(options: IApiInterfaceOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     readonly extendsTypes: ReadonlyArray<HeritageType>;
@@ -309,6 +329,8 @@ export const enum ApiItemKind {
 // @public
 export class ApiMethod extends ApiMethod_base {
     constructor(options: IApiMethodOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -322,6 +344,8 @@ export class ApiMethod extends ApiMethod_base {
 // @public
 export class ApiMethodSignature extends ApiMethodSignature_base {
     constructor(options: IApiMethodSignatureOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -337,6 +361,8 @@ export class ApiModel extends ApiModel_base {
     constructor();
     // @override (undocumented)
     addMember(member: ApiPackage): void;
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // @override (undocumented)
@@ -355,6 +381,8 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: 
 
 // @public
 export interface ApiNameMixin extends ApiItem {
+    // @internal (undocumented)
+    _getCanonicalReferenceName(): string;
     readonly name: string;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
@@ -370,6 +398,8 @@ export namespace ApiNameMixin {
 // @public
 export class ApiNamespace extends ApiNamespace_base {
     constructor(options: IApiNamespaceOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -385,6 +415,8 @@ export class ApiPackage extends ApiPackage_base {
     constructor(options: IApiPackageOptions);
     // @override (undocumented)
     addMember(member: ApiEntryPoint): void;
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -420,6 +452,8 @@ export namespace ApiParameterListMixin {
 // @public
 export class ApiProperty extends ApiProperty_base {
     constructor(options: IApiPropertyOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -446,6 +480,8 @@ export class ApiPropertyItem extends ApiPropertyItem_base {
 // @public
 export class ApiPropertySignature extends ApiPropertyItem {
     constructor(options: IApiPropertySignatureOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -506,6 +542,8 @@ export namespace ApiStaticMixin {
 // @public
 export class ApiTypeAlias extends ApiTypeAlias_base {
     constructor(options: IApiTypeAliasOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)
@@ -541,6 +579,8 @@ export namespace ApiTypeParameterListMixin {
 // @public
 export class ApiVariable extends ApiVariable_base {
     constructor(options: IApiVariableOptions);
+    // @beta @override (undocumented)
+    buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
     // (undocumented)

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
@@ -58,5 +59,12 @@ export class ApiNamespace extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseT
   /** @override */
   public get containerKey(): string {
     return ApiNamespace.getContainerKey(this.name);
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(Navigation.Exports, this._getCanonicalReferenceName())
+      .withMeaning(Meaning.Namespace);
   }
 }

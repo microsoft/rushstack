@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { DeclarationReference, Meaning, Navigation } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
@@ -84,5 +85,12 @@ export class ApiVariable extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem
     super.serializeInto(jsonObject);
 
     jsonObject.variableTypeTokenRange = this.variableTypeExcerpt.tokenRange;
+  }
+
+  /** @beta @override */
+  public buildCanonicalReference(): DeclarationReference {
+    return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
+      .addNavigationStep(Navigation.Exports, this._getCanonicalReferenceName())
+      .withMeaning(Meaning.Variable);
   }
 }
