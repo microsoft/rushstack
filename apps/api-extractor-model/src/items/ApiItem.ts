@@ -46,6 +46,7 @@ export interface IApiItemOptions {
 
 export interface IApiItemJson {
   kind: ApiItemKind;
+  canonicalReference: string;
 }
 
 // PRIVATE - Allows ApiItemContainerMixin to assign the parent.
@@ -85,6 +86,7 @@ export class ApiItem {
   /** @virtual */
   public serializeInto(jsonObject: Partial<IApiItemJson>): void {
     jsonObject.kind = this.kind;
+    jsonObject.canonicalReference = this.canonicalReference.toString();
   }
 
   /**

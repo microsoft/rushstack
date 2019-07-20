@@ -13,7 +13,10 @@ export enum ApiJsonSchemaVersion {
   V_1001 = 1001,
 
   /**
-   * Remove "canonicalReference" field.  This field was for diagnostic purposes only and was never deserialized.
+   * Change the "canonicalReference" field to use the experimental new TSDoc declaration reference notation.
+   *
+   * This is not a breaking change because this field is never deserialized; it is provided for informational
+   * purposes only.
    */
   V_1002 = 1002,
 
