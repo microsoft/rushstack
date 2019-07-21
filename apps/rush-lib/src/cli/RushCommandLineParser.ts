@@ -35,18 +35,19 @@ import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import { Telemetry } from '../logic/Telemetry';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 
 /**
  * Options for `RushCommandLineParser`.
  */
 export interface IRushCommandLineParserOptions {
   cwd?: string;   // Defaults to `cwd`
-  rushConfiguration: RushConfiguration | undefined;
 }
 
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushGlobalFolder: RushGlobalFolder;
+  public rushConfiguration: RushConfiguration;
 
   private _debugParameter: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
@@ -65,11 +66,20 @@ export class RushCommandLineParser extends CommandLineParser {
     });
 
     this._rushOptions = this._normalizeOptions(options || {});
-    this._populateActions();
-  }
 
-  public get rushConfiguration(): RushConfiguration | undefined {
-    return this._rushOptions.rushConfiguration;
+    try {
+      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
+        startingFolder: this._rushOptions.cwd,
+        showVerbose: true
+      });
+      if (rushJsonFilename) {
+        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+      }
+    } catch (error) {
+      this._reportErrorAndSetExitCode(error);
+    }
+
+    this._populateActions();
   }
 
   public get isDebug(): boolean {
@@ -102,6 +112,8 @@ export class RushCommandLineParser extends CommandLineParser {
       InternalError.breakInDebugger = true;
     }
 
+    NodeJsCompatibility.warnAboutNonLtsVersion(this.rushConfiguration);
+
     return this._wrapOnExecute().catch((error: Error) => {
       this._reportErrorAndSetExitCode(error);
     }).then(() => {
@@ -112,27 +124,13 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
     const cwd: string = options.cwd || process.cwd();
-    let rushConfiguration: RushConfiguration | undefined = options.rushConfiguration;
-
-    try {
-      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-        startingFolder: cwd,
-        showVerbose: true
-      });
-      if (rushJsonFilename) {
-        rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
-      }
-    } catch (error) {
-      this._reportErrorAndSetExitCode(error);
-    }
-
-    return { cwd, rushConfiguration };
+    return { cwd };
   }
 
   private _wrapOnExecute(): Promise<void> {
     try {
-      if (this._rushOptions.rushConfiguration) {
-        this.telemetry = new Telemetry(this._rushOptions.rushConfiguration);
+      if (this.rushConfiguration) {
+        this.telemetry = new Telemetry(this.rushConfiguration);
       }
       return super.onExecute().then(() => {
         if (this.telemetry) {
@@ -174,9 +172,9 @@ export class RushCommandLineParser extends CommandLineParser {
 
     // If there is not a rush.json file, we still want "build" and "rebuild" to appear in the
     // command-line help
-    if (this._rushOptions.rushConfiguration) {
+    if (this.rushConfiguration) {
       const commandLineConfigFile: string = path.join(
-        this._rushOptions.rushConfiguration.commonRushConfigFolder,
+        this.rushConfiguration.commonRushConfigFolder,
         RushConstants.commandLineFilename
       );
 

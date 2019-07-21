@@ -7,11 +7,6 @@ import * as rushLib from '@microsoft/rush-lib';
 
 type CommandName = 'rush' | 'rushx' | undefined;
 
-export interface IExceuteOptions {
-  isManaged: boolean;
-  alreadyReportedNodeTooNewError: boolean;
-}
-
 /**
  * Both "rush" and "rushx" share the same src/start.ts entry point.  This makes it
  * a little easier for them to share all the same startup checks and version selector
@@ -28,7 +23,7 @@ export class RushCommandSelector {
   }
 
   // tslint:disable-next-line:no-any
-  public static execute(launcherVersion: string, selectedRushLib: any, options: IExceuteOptions): void {
+  public static execute(launcherVersion: string, selectedRushLib: any, options: rushLib.ILaunchOptions): void {
     const Rush: typeof rushLib.Rush = selectedRushLib.Rush;
 
     if (!Rush) {

@@ -10,10 +10,12 @@ import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from '../logic/RushConstants';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
-import { RushConfiguration } from './RushConfiguration';
+import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 
 /**
  * Options to pass to the rush "launch" functions.
+ *
+ * @public
  */
 export interface ILaunchOptions {
   /**
@@ -30,12 +32,6 @@ export interface ILaunchOptions {
   alreadyReportedNodeTooNewError?: boolean;
 }
 
-interface IExtendedNodeProcess extends NodeJS.Process {
-  release: {
-    lts?: string;
-  };
-}
-
 /**
  * General operations for the Rush engine.
  *
@@ -48,15 +44,20 @@ export class Rush {
    * and start a new Node.js process.
    *
    * @param launcherVersion - The version of the `@microsoft/rush` wrapper used to call invoke the CLI.
+   *
+   * @remarks
+   * Earlier versions of the rush frontend used a different API contract. In the old contract,
+   * the second argument was the `isManaged` value of the {@see ILaunchOptions} object.
+   *
+   * Even though this API isn't documented, it is still supported for legacy compatibility.
    */
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
     Rush._printStartupBanner(options.isManaged);
 
-    const rushConfiguration: RushConfiguration | undefined = Rush._tryGetRushConfiguration();
     if (!options.alreadyReportedNodeTooNewError) {
-      Rush._warnAboutNodeVersion(rushConfiguration);
+      NodeJsCompatibility.warnAboutVersionTooNew(true);
     }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
@@ -65,7 +66,7 @@ export class Rush {
       return;
     }
 
-    const parser: RushCommandLineParser = new RushCommandLineParser({ rushConfiguration });
+    const parser: RushCommandLineParser = new RushCommandLineParser();
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
@@ -81,18 +82,11 @@ export class Rush {
 
     Rush._printStartupBanner(options.isManaged);
 
-    const rushConfiguration: RushConfiguration | undefined = Rush._tryGetRushConfiguration();
     if (!options.alreadyReportedNodeTooNewError) {
-      Rush._warnAboutNodeVersion(rushConfiguration);
+      NodeJsCompatibility.warnAboutVersionTooNew(true);
     }
 
-    RushXCommandLine._launchRushXInternal(
-      launcherVersion,
-      {
-        isManaged: options.isManaged,
-        rushConfiguration: rushConfiguration
-      }
-    );
+    RushXCommandLine.launchRushX(launcherVersion, options.isManaged);
   }
 
   /**
@@ -101,18 +95,6 @@ export class Rush {
    */
   public static get version(): string {
     return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
-  }
-
-  private static _tryGetRushConfiguration(): RushConfiguration | undefined {
-    try {
-      if (RushConfiguration.tryFindRushJsonLocation()) {
-        return RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    return undefined;
   }
 
   /**
@@ -128,7 +110,7 @@ export class Rush {
     const nodeVersion: string = process.versions.node;
     const nodeMajorVersion: number = semver.major(nodeVersion);
     const nodeReleaseLabel: string = (nodeMajorVersion % 2 === 0)
-      ? (!!(process as IExtendedNodeProcess).release.lts ? 'LTS' : 'pre-LTS')
+      ? (NodeJsCompatibility.isLtsVersion ? 'LTS' : 'pre-LTS')
       : 'unstable';
 
     console.log(
@@ -139,31 +121,5 @@ export class Rush {
       `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
       EOL
     );
-  }
-
-  private static _warnAboutNodeVersion(rushConfiguration: RushConfiguration | undefined): void {
-    const nodeVersion: string = process.versions.node;
-
-    if (semver.satisfies(nodeVersion, '>= 11.0.0')) {
-      console.log();
-      console.warn(colors.yellow(
-        `Your version of Node.js (${nodeVersion}) has not been tested with this release` +
-        `of the Rush engine.  Please consider upgrading the "rushVersion" setting in rush.json, ` +
-        `or  downgrading Node.js.`
-      ));
-      console.log();
-    } else if (
-      rushConfiguration &&
-      !rushConfiguration.suppressNodeLtsWarning &&
-      !(process as IExtendedNodeProcess).release.lts
-    ) {
-      console.log();
-      console.warn(colors.yellow(
-        `Your version of Node.js (${nodeVersion}) has an odd major version number. ` +
-        `These releases frequently have bugs.  Please consider installing a Long Term Support (LTS) ` +
-        `version instead.`
-      ));
-      console.log();
-    }
   }
 }

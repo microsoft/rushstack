@@ -8,13 +8,11 @@ import { LockFile } from '@microsoft/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import {
   _LastInstallFlag,
-  _RushGlobalFolder
+  _RushGlobalFolder,
+  ILaunchOptions
 } from '@microsoft/rush-lib';
 
-import {
-  RushCommandSelector,
-  IExceuteOptions
-} from './RushCommandSelector';
+import { RushCommandSelector } from './RushCommandSelector';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
@@ -31,7 +29,7 @@ export class RushVersionSelector {
   public ensureRushVersionInstalled(
     version: string,
     configuration: MinimalRushConfiguration | undefined,
-    executeOptions: IExceuteOptions
+    executeOptions: ILaunchOptions
   ): Promise<void> {
 
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
