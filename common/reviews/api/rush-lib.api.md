@@ -230,7 +230,7 @@ export class Rush {
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static readonly version: string;
-    }
+}
 
 // @public
 export class RushConfiguration {
@@ -284,7 +284,6 @@ export class RushConfiguration {
     readonly rushLinkJsonFilename: string;
     readonly shrinkwrapFilename: string;
     readonly shrinkwrapFilePhrase: string;
-    // @beta
     readonly suppressNodeLtsWarning: boolean;
     // @beta
     readonly telemetryEnabled: boolean;
