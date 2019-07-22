@@ -13,6 +13,14 @@ Some less common TypeScript declaration kinds.
 export interface IDocInterface3 
 ```
 
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [\[EcmaSmbols.example\]](./api-documenter-test.idocinterface3.[ecmasmbols.example].md) | <code>string</code> | ECMAScript symbol |
+|  [\[not.a.symbol\]](./api-documenter-test.idocinterface3.[not.a.symbol].md) | <code>string</code> | An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol. |
+|  [redundantQuotes](./api-documenter-test.idocinterface3.redundantquotes.md) | <code>string</code> | A quoted identifier with redundant quotes. |
+
 ## Methods
 
 |  Method | Description |
