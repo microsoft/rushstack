@@ -26,7 +26,7 @@ export const enum EnvironmentVariableNames {
    * of Node that does not match the criteria specified in the "nodeSupportedVersionRange"
    * field from rush.json.
    */
-  RUSH_ALLOW_CUSTOM_NODE_VERSION = 'RUSH_ALLOW_CUSTOM_NODE_VERSION',
+  RUSH_ALLOW_UNSUPPORTED_NODEJS = 'RUSH_ALLOW_UNSUPPORTED_NODEJS',
 
   /**
    * This variable selects a specific installation variant for Rush to use when installing
@@ -57,7 +57,7 @@ export class EnvironmentConfiguration {
 
   private static _absoluteSymlinks: boolean = false;
 
-  private static _allowCustomNodeVersion: boolean = false;
+  private static _allowUnsupportedNodeVersion: boolean = false;
 
   /**
    * An override for the common/temp folder path.
@@ -81,9 +81,9 @@ export class EnvironmentConfiguration {
    * instead of causing a hard error if the environment's Node.js version doesn't match the
    * version specifier in `rush.json`'s "nodeSupportedVersionRange" property.
    */
-  public static get allowCustomNodeVersion(): boolean {
+  public static get allowUnsupportedNodeVersion(): boolean {
     EnvironmentConfiguration._ensureInitialized();
-    return EnvironmentConfiguration._allowCustomNodeVersion;
+    return EnvironmentConfiguration._allowUnsupportedNodeVersion;
   }
 
   /**
@@ -109,8 +109,8 @@ export class EnvironmentConfiguration {
             break;
           }
 
-          case EnvironmentVariableNames.RUSH_ALLOW_CUSTOM_NODE_VERSION: {
-            EnvironmentConfiguration._allowCustomNodeVersion = value === 'true';
+          case EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS: {
+            EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
             break;
           }
 

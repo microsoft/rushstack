@@ -992,7 +992,7 @@ export class RushConfiguration {
         const message: string = `Your dev environment is running Node.js version ${process.version} which does`
           + ` not meet the requirements for building this repository.  (The rush.json configuration`
           + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`;
-        if (EnvironmentConfiguration.allowCustomNodeVersion) {
+        if (EnvironmentConfiguration.allowUnsupportedNodeVersion) {
           console.warn(message);
         } else {
           throw new Error(message);
