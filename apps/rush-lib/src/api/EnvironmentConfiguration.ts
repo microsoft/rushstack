@@ -77,7 +77,9 @@ export class EnvironmentConfiguration {
   }
 
   /**
-   * An override for the common/temp folder path.
+   * If this environment variable is set to "true", the Node.js version check will print a warning
+   * instead of causing a hard error if the environment's Node.js version doesn't match the
+   * version specifier in `rush.json`'s "nodeSupportedVersionRange" property.
    */
   public static get allowCustomNodeVersion(): boolean {
     EnvironmentConfiguration._ensureInitialized();
