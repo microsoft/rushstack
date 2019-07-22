@@ -63,7 +63,7 @@
           "members": [
             {
               "kind": "Constructor",
-              "canonicalReference": "api-documenter-test!DocBaseClass#:constructor(1)",
+              "canonicalReference": "api-documenter-test!DocBaseClass:constructor(1)",
               "docComment": "/**\n * The simple constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -77,7 +77,7 @@
             },
             {
               "kind": "Constructor",
-              "canonicalReference": "api-documenter-test!DocBaseClass#:constructor(2)",
+              "canonicalReference": "api-documenter-test!DocBaseClass:constructor(2)",
               "docComment": "/**\n * The overloaded constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -971,7 +971,7 @@
           "members": [
             {
               "kind": "CallSignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#:signature(1)",
+              "canonicalReference": "api-documenter-test!IDocInterface3:signature(1)",
               "docComment": "/**\n * Call signature\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -1021,7 +1021,7 @@
             },
             {
               "kind": "ConstructSignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#:signature(1)",
+              "canonicalReference": "api-documenter-test!IDocInterface3:signature(1)",
               "docComment": "/**\n * Construct signature\n */\n",
               "excerptTokens": [
                 {
@@ -1047,7 +1047,7 @@
             },
             {
               "kind": "IndexSignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#:signature(1)",
+              "canonicalReference": "api-documenter-test!IDocInterface3:signature(1)",
               "docComment": "/**\n * Indexer\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {

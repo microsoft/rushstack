@@ -417,7 +417,7 @@
           "members": [
             {
               "kind": "CallSignature",
-              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericCallSignature#:signature(1)",
+              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericCallSignature:signature(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -488,7 +488,7 @@
           "members": [
             {
               "kind": "ConstructSignature",
-              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericConstructSignature#:signature(1)",
+              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericConstructSignature:signature(1)",
               "docComment": "",
               "excerptTokens": [
                 {
