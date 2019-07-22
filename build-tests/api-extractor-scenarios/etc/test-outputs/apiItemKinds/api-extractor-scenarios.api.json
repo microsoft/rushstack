@@ -38,7 +38,7 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!AbstractClass#member:member(0)",
+              "canonicalReference": "api-extractor-scenarios!AbstractClass#member:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -68,7 +68,7 @@
                 "endIndex": 4
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "member"
             }
@@ -98,7 +98,7 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals#method1:member(0)",
+              "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals#method1:member(1)",
               "docComment": "/**\n * type literal in\n */\n",
               "excerptTokens": [
                 {
@@ -156,7 +156,7 @@
                 "endIndex": 11
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "vector",
@@ -170,7 +170,7 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals#method2:member(0)",
+              "canonicalReference": "api-extractor-scenarios!ClassWithTypeLiterals#method2:member(1)",
               "docComment": "/**\n * type literal output\n */\n",
               "excerptTokens": [
                 {
@@ -220,7 +220,7 @@
                 "endIndex": 9
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "method2"
             }
@@ -572,7 +572,7 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!SimpleClass#member:member(0)",
+              "canonicalReference": "api-extractor-scenarios!SimpleClass#member:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -598,7 +598,7 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "member"
             }

@@ -112,7 +112,7 @@
               "members": [
                 {
                   "kind": "Method",
-                  "canonicalReference": "api-extractor-scenarios!A.B#myMethod:member(0)",
+                  "canonicalReference": "api-extractor-scenarios!A.B#myMethod:member(1)",
                   "docComment": "",
                   "excerptTokens": [
                     {
@@ -138,7 +138,7 @@
                     "endIndex": 3
                   },
                   "releaseTag": "Public",
-                  "overloadIndex": 0,
+                  "overloadIndex": 1,
                   "parameters": [],
                   "name": "myMethod"
                 }
@@ -149,7 +149,7 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "api-extractor-scenarios!failWithAmbiguity:function(0)",
+          "canonicalReference": "api-extractor-scenarios!failWithAmbiguity:function(1)",
           "docComment": "/**\n * {@link MyNamespace.MyClass.myMethod | the method}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -178,13 +178,13 @@
             "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "failWithAmbiguity"
         },
         {
           "kind": "Function",
-          "canonicalReference": "api-extractor-scenarios!succeedWithExternalReference:function(0)",
+          "canonicalReference": "api-extractor-scenarios!succeedWithExternalReference:function(1)",
           "docComment": "/**\n * NOTE: The broken link checker currently is not able to validate references to external packages. Tracked by: https://github.com/Microsoft/web-build-tools/issues/1195 {@link nonexistent#nonexistent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -213,13 +213,13 @@
             "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "succeedWithExternalReference"
         },
         {
           "kind": "Function",
-          "canonicalReference": "api-extractor-scenarios!succeedWithSelector:function(0)",
+          "canonicalReference": "api-extractor-scenarios!succeedWithSelector:function(1)",
           "docComment": "/**\n * {@link (A:namespace).B.myMethod | the method} {@link (A:interface).myProperty | the property}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -248,7 +248,7 @@
             "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "succeedWithSelector"
         }

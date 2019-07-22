@@ -167,7 +167,7 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "api-documenter-test!DocClass1#deprecatedExample:member(0)",
+              "canonicalReference": "api-documenter-test!DocClass1#deprecatedExample:member(1)",
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
               "excerptTokens": [
                 {
@@ -193,7 +193,7 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "deprecatedExample"
             },
@@ -334,7 +334,7 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "api-documenter-test!DocClass1#interestingEdgeCases:member(0)",
+              "canonicalReference": "api-documenter-test!DocClass1#interestingEdgeCases:member(1)",
               "docComment": "/**\n * Example: \"\\{ \\\\\"maxItemsToShow\\\\\": 123 \\}\"\n *\n * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\\\-_]+$/\n */\n",
               "excerptTokens": [
                 {
@@ -360,7 +360,7 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "interestingEdgeCases"
             },
@@ -460,7 +460,7 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "api-documenter-test!DocClass1.sumWithExample:member(0)",
+              "canonicalReference": "api-documenter-test!DocClass1.sumWithExample:member(1)",
               "docComment": "/**\n * Returns the sum of two numbers.\n *\n * @remarks\n *\n * This illustrates usage of the `@example` block tag.\n *\n * @param x - the first number to add\n *\n * @param y - the second number to add\n *\n * @returns the sum of the two numbers\n *\n * @example\n *\n * Here's a simple example:\n * ```\n * // Prints \"2\":\n * console.log(DocClass1.sumWithExample(1,1));\n * ```\n *\n * @example\n *\n * Here's an example with negative numbers:\n * ```\n * // Prints \"0\":\n * console.log(DocClass1.sumWithExample(1,-1));\n * ```\n *\n */\n",
               "excerptTokens": [
                 {
@@ -522,7 +522,7 @@
                 "endIndex": 12
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "x",
@@ -543,7 +543,7 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "api-documenter-test!DocClass1#tableExample:member(0)",
+              "canonicalReference": "api-documenter-test!DocClass1#tableExample:member(1)",
               "docComment": "/**\n * An example with tables:\n *\n * @remarks\n *\n * <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>\n */\n",
               "excerptTokens": [
                 {
@@ -569,7 +569,7 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "tableExample"
             }
@@ -770,7 +770,7 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "api-documenter-test!globalFunction:function(0)",
+          "canonicalReference": "api-documenter-test!globalFunction:function(1)",
           "docComment": "/**\n * An exported function\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -815,7 +815,7 @@
             "endIndex": 8
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [
             {
               "parameterName": "x",
@@ -911,7 +911,7 @@
           "members": [
             {
               "kind": "MethodSignature",
-              "canonicalReference": "api-documenter-test!IDocInterface2#deprecatedExample:member(0)",
+              "canonicalReference": "api-documenter-test!IDocInterface2#deprecatedExample:member(1)",
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
               "excerptTokens": [
                 {
@@ -936,7 +936,7 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "deprecatedExample"
             }
@@ -971,7 +971,7 @@
           "members": [
             {
               "kind": "CallSignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#:signature(0)",
+              "canonicalReference": "api-documenter-test!IDocInterface3#:signature(1)",
               "docComment": "/**\n * Call signature\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -1008,7 +1008,7 @@
                 "endIndex": 6
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "x",
@@ -1021,7 +1021,7 @@
             },
             {
               "kind": "ConstructSignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#:signature(0)",
+              "canonicalReference": "api-documenter-test!IDocInterface3#:signature(1)",
               "docComment": "/**\n * Construct signature\n */\n",
               "excerptTokens": [
                 {
@@ -1042,12 +1042,12 @@
                 "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": []
             },
             {
               "kind": "IndexSignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#:signature(0)",
+              "canonicalReference": "api-documenter-test!IDocInterface3#:signature(1)",
               "docComment": "/**\n * Indexer\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -1084,7 +1084,7 @@
                 "endIndex": 6
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "x",
@@ -1408,7 +1408,7 @@
               "members": [
                 {
                   "kind": "Function",
-                  "canonicalReference": "api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(0)",
+                  "canonicalReference": "api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)",
                   "docComment": "/**\n * A function inside a namespace\n */\n",
                   "excerptTokens": [
                     {
@@ -1453,7 +1453,7 @@
                     "endIndex": 8
                   },
                   "releaseTag": "Public",
-                  "overloadIndex": 0,
+                  "overloadIndex": 1,
                   "parameters": [
                     {
                       "parameterName": "x",
@@ -1517,7 +1517,7 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "api-documenter-test!SystemEvent#addHandler:member(0)",
+              "canonicalReference": "api-documenter-test!SystemEvent#addHandler:member(1)",
               "docComment": "/**\n * Adds an handler for the event.\n */\n",
               "excerptTokens": [
                 {
@@ -1559,7 +1559,7 @@
                 "endIndex": 7
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "handler",

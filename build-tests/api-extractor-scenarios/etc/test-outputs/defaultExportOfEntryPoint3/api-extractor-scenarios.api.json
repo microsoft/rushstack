@@ -17,7 +17,7 @@
       "members": [
         {
           "kind": "Function",
-          "canonicalReference": "api-extractor-scenarios!defaultFunctionDeclaration:function(0)",
+          "canonicalReference": "api-extractor-scenarios!defaultFunctionDeclaration:function(1)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -46,7 +46,7 @@
             "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "defaultFunctionDeclaration"
         }

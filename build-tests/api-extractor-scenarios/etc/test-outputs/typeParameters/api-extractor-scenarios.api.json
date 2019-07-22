@@ -38,7 +38,7 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!ClassWithGenericMethod#method:member(0)",
+              "canonicalReference": "api-extractor-scenarios!ClassWithGenericMethod#method:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -72,7 +72,7 @@
                 "endIndex": 5
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "typeParameters": [
                 {
@@ -242,7 +242,7 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "api-extractor-scenarios!genericFunction:function(0)",
+          "canonicalReference": "api-extractor-scenarios!genericFunction:function(1)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -279,7 +279,7 @@
             "endIndex": 6
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "typeParameters": [
             {
@@ -417,7 +417,7 @@
           "members": [
             {
               "kind": "CallSignature",
-              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericCallSignature#:signature(0)",
+              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericCallSignature#:signature(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -446,7 +446,7 @@
                 "endIndex": 4
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "typeParameters": [
                 {
@@ -488,7 +488,7 @@
           "members": [
             {
               "kind": "ConstructSignature",
-              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericConstructSignature#:signature(0)",
+              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericConstructSignature#:signature(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -517,7 +517,7 @@
                 "endIndex": 4
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "typeParameters": [
                 {

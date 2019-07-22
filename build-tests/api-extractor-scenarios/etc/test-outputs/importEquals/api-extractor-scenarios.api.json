@@ -17,7 +17,7 @@
       "members": [
         {
           "kind": "Function",
-          "canonicalReference": "api-extractor-scenarios!useColors:function(0)",
+          "canonicalReference": "api-extractor-scenarios!useColors:function(1)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -58,7 +58,7 @@
             "endIndex": 7
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "useColors"
         }

@@ -38,7 +38,7 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!CyclicA#methodA1:member(0)",
+              "canonicalReference": "api-extractor-scenarios!CyclicA#methodA1:member(1)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -64,13 +64,13 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "methodA1"
             },
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!CyclicA#methodA3:member(0)",
+              "canonicalReference": "api-extractor-scenarios!CyclicA#methodA3:member(1)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -96,7 +96,7 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "methodA3"
             }
@@ -126,7 +126,7 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!CyclicB#methodB2:member(0)",
+              "canonicalReference": "api-extractor-scenarios!CyclicB#methodB2:member(1)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -152,13 +152,13 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "methodB2"
             },
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!CyclicB#methodB4:member(0)",
+              "canonicalReference": "api-extractor-scenarios!CyclicB#methodB4:member(1)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -184,7 +184,7 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "methodB4"
             }
@@ -214,7 +214,7 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!FailWithSelfReference#method1:member(0)",
+              "canonicalReference": "api-extractor-scenarios!FailWithSelfReference#method1:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -240,13 +240,13 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "method1"
             },
             {
               "kind": "Method",
-              "canonicalReference": "api-extractor-scenarios!FailWithSelfReference#method2:member(0)",
+              "canonicalReference": "api-extractor-scenarios!FailWithSelfReference#method2:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -272,7 +272,7 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "method2"
             }
