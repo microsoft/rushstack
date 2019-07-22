@@ -91,7 +91,7 @@ export class ApiConstructSignature extends ApiTypeParameterListMixin(ApiParamete
       // .withMeaning() requires some kind of component
       : DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
     return parent
-      .withMeaning(Meaning.Signature)
+      .withMeaning(Meaning.ConstructSignature)
       .withOverloadIndex(this.overloadIndex);
   }
 }

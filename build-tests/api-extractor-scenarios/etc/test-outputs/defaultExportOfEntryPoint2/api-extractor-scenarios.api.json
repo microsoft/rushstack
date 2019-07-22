@@ -17,7 +17,7 @@
       "members": [
         {
           "kind": "Variable",
-          "canonicalReference": "api-extractor-scenarios!defaultFunctionStatement:variable",
+          "canonicalReference": "api-extractor-scenarios!defaultFunctionStatement:var",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {

@@ -68,7 +68,7 @@ export class ApiIndexSignature extends ApiParameterListMixin(ApiReleaseTagMixin(
       // .withMeaning() requires some kind of component
       : DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
     return parent
-      .withMeaning(Meaning.Signature)
+      .withMeaning(Meaning.IndexSignature)
       .withOverloadIndex(this.overloadIndex);
   }
 }

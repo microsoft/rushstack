@@ -78,7 +78,7 @@ export class ApiCallSignature extends ApiTypeParameterListMixin(ApiParameterList
       // .withMeaning() requires some kind of component
       : DeclarationReference.empty().addNavigationStep(Navigation.Members, '(parent)');
     return parent
-      .withMeaning(Meaning.Signature)
+      .withMeaning(Meaning.CallSignature)
       .withOverloadIndex(this.overloadIndex);
   }
 }

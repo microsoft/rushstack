@@ -17,7 +17,7 @@
       "members": [
         {
           "kind": "Variable",
-          "canonicalReference": "api-documenter-test!constVariable:variable",
+          "canonicalReference": "api-documenter-test!constVariable:var",
           "docComment": "/**\n * An exported variable declaration.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -612,7 +612,7 @@
           "members": [
             {
               "kind": "EnumMember",
-              "canonicalReference": "api-documenter-test!DocEnum.One:enummember",
+              "canonicalReference": "api-documenter-test!DocEnum.One:member",
               "docComment": "/**\n * These are some docs for One\n */\n",
               "excerptTokens": [
                 {
@@ -637,7 +637,7 @@
             },
             {
               "kind": "EnumMember",
-              "canonicalReference": "api-documenter-test!DocEnum.Two:enummember",
+              "canonicalReference": "api-documenter-test!DocEnum.Two:member",
               "docComment": "/**\n * These are some docs for Two\n */\n",
               "excerptTokens": [
                 {
@@ -662,7 +662,7 @@
             },
             {
               "kind": "EnumMember",
-              "canonicalReference": "api-documenter-test!DocEnum.Zero:enummember",
+              "canonicalReference": "api-documenter-test!DocEnum.Zero:member",
               "docComment": "/**\n * These are some docs for Zero\n */\n",
               "excerptTokens": [
                 {
@@ -689,7 +689,7 @@
         },
         {
           "kind": "TypeAlias",
-          "canonicalReference": "api-documenter-test!ExampleTypeAlias:typealias",
+          "canonicalReference": "api-documenter-test!ExampleTypeAlias:type",
           "docComment": "/**\n * A type alias\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -971,7 +971,7 @@
           "members": [
             {
               "kind": "CallSignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3:signature(1)",
+              "canonicalReference": "api-documenter-test!IDocInterface3:call(1)",
               "docComment": "/**\n * Call signature\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -1021,7 +1021,7 @@
             },
             {
               "kind": "ConstructSignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3:signature(1)",
+              "canonicalReference": "api-documenter-test!IDocInterface3:new(1)",
               "docComment": "/**\n * Construct signature\n */\n",
               "excerptTokens": [
                 {
@@ -1047,7 +1047,7 @@
             },
             {
               "kind": "IndexSignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3:signature(1)",
+              "canonicalReference": "api-documenter-test!IDocInterface3:index(1)",
               "docComment": "/**\n * Indexer\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -1469,7 +1469,7 @@
             },
             {
               "kind": "Variable",
-              "canonicalReference": "api-documenter-test!OuterNamespace.nestedVariable:variable",
+              "canonicalReference": "api-documenter-test!OuterNamespace.nestedVariable:var",
               "docComment": "/**\n * A variable exported from within a namespace.\n */\n",
               "excerptTokens": [
                 {
