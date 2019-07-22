@@ -669,7 +669,6 @@
         },
         {
           "kind": "Namespace",
-          "canonicalReference": "api-documenter-test!EcmaSmbols:namespace",
           "docComment": "/**\n * A namespace containing an ECMAScript symbol\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -690,7 +689,6 @@
           "members": [
             {
               "kind": "Variable",
-              "canonicalReference": "api-documenter-test!EcmaSmbols.example:var",
               "docComment": "/**\n * An ECMAScript symbol\n */\n",
               "excerptTokens": [
                 {
@@ -991,7 +989,30 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#\"\\\"[EcmaSmbols.example]\\\"\":member",
+              "docComment": "/**\n * An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "\"[not.a.symbol]\": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "\"[not.a.symbol]\"",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
               "docComment": "/**\n * ECMAScript symbol\n */\n",
               "excerptTokens": [
                 {
@@ -1028,31 +1049,6 @@
               "propertyTypeTokenRange": {
                 "startIndex": 5,
                 "endIndex": 6
-              }
-            },
-            {
-              "kind": "PropertySignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#\"\\\"[not.a.symbol]\\\"\":member",
-              "docComment": "/**\n * An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol.\n */\n",
-              "excerptTokens": [
-                {
-                  "kind": "Content",
-                  "text": "\"[not.a.symbol]\": "
-                },
-                {
-                  "kind": "Content",
-                  "text": "string"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";"
-                }
-              ],
-              "releaseTag": "Public",
-              "name": "[not.a.symbol]",
-              "propertyTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
               }
             },
             {
@@ -1180,7 +1176,6 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#redundantQuotes:member",
               "docComment": "/**\n * A quoted identifier with redundant quotes.\n */\n",
               "excerptTokens": [
                 {

@@ -17,13 +17,13 @@ export interface IDocInterface3
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [\[EcmaSmbols.example\]](./api-documenter-test.idocinterface3.[ecmasmbols.example].md) | <code>string</code> | ECMAScript symbol |
-|  [\[not.a.symbol\]](./api-documenter-test.idocinterface3.[not.a.symbol].md) | <code>string</code> | An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol. |
+|  ["\[not.a.symbol\]"](./api-documenter-test.idocinterface3.__not.a.symbol__.md) | <code>string</code> | An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol. |
+|  [\[EcmaSmbols.example\]](./api-documenter-test.idocinterface3._ecmasmbols.example_.md) | <code>string</code> | ECMAScript symbol |
 |  [redundantQuotes](./api-documenter-test.idocinterface3.redundantquotes.md) | <code>string</code> | A quoted identifier with redundant quotes. |
 
 ## Methods
 
 |  Method | Description |
 |  --- | --- |
-|  [(new)()](./api-documenter-test.idocinterface3.(new).md) | Construct signature |
+|  [(new)()](./api-documenter-test.idocinterface3._new_.md) | Construct signature |
 
