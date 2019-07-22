@@ -13,6 +13,7 @@ import { ExportAnalyzer } from './ExportAnalyzer';
 import { AstImport } from './AstImport';
 import { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals } from './TypeScriptInternals';
+import { StringChecks } from './StringChecks';
 
 export type AstEntity = AstSymbol | AstImport;
 
@@ -208,6 +209,73 @@ export class AstSymbolTable {
       throw new InternalError('tryGetEntityForIdentifier() called for an identifier that was not analyzed');
     }
     return this._entitiesByIdentifierNode.get(identifier);
+  }
+
+  /**
+   * Builds an AstSymbol.localName for a given ts.Symbol.  In the current implementation, the localName is
+   * a TypeScript-like expression that may be a string literal or ECMAScript symbol expression.
+   *
+   * ```ts
+   * class X {
+   *   // localName="identifier"
+   *   public identifier: number = 1;
+   *   // localName="\"identifier\""
+   *   public "quoted string!": number = 2;
+   *   // localName="[MyNamespace.MySymbol]"
+   *   public [MyNamespace.MySymbol]: number = 3;
+   * }
+   * ```
+   */
+  public static getLocalNameForSymbol(symbol: ts.Symbol): string {
+    const symbolName: string = symbol.name;
+
+    if (TypeScriptHelpers.isWellKnownSymbolName(symbolName)) {
+      // TypeScript binds well-known ECMAScript symbols like "Symbol.iterator" as "__@iterator".
+      // This converts a string like "__@iterator" into the property name "[Symbol.iterator]".
+      return `[Symbol.${symbolName.slice(3)}]`;
+    }
+
+    const isUniqueSymbol: boolean = TypeScriptHelpers.isUniqueSymbolName(symbolName);
+
+    // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name.
+    // This handles cases such as "export default class X { }" where the symbol name is "default"
+    // but the declaration name is "X".
+    for (const declaration of symbol.declarations || []) {
+      const declarationName: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
+
+      if (declarationName && ts.isIdentifier(declarationName)) {
+        // It's an ordinary identifier, so the symbolName is what we want
+        break;
+      }
+
+      // If it is a non-well-known symbol, then return the late bound name
+      if (isUniqueSymbol && declarationName && ts.isComputedPropertyName(declarationName)) {
+        const lateBoundName: string | undefined = TypeScriptHelpers.tryGetLateBoundName(declarationName);
+        if (lateBoundName) {
+          // Here the string may contain an expression such as "[x.y.z]".  Names starting with "[" are always
+          // expressions.  If a string literal contains those characters, the code below will JSON.stringify() it
+          // to avoid a collision.
+          return lateBoundName;
+        }
+      }
+    }
+
+    // Otherwise that name may come from a quoted string or pseudonym like `__constructor`.
+    // If the string is not a safe identifier, then we must add quotes.
+    // Note that if it was quoted but did not need to be quoted, here we will remove the quotes.
+    if (!StringChecks.isSafeUnquotedMemberIdentifier(symbolName)) {
+      // For API Extractor's purposes, a canonical form is more appropriate than trying to reflect whatever
+      // appeared in the source code.  The code is not even guaranteed to be consistent, for example:
+      //
+      //   class X {
+      //     public "f1"(x: string): void;
+      //     public f1(x: boolean): void;
+      //     public 'f1'(x: string | boolean): void { }
+      //   }
+      return JSON.stringify(symbolName);
+    }
+
+    return symbolName;
   }
 
   /**
@@ -425,35 +493,7 @@ export class AstSymbolTable {
         }
       }
 
-      let localName: string | undefined = options.localName;
-
-      if (localName === undefined) {
-        // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name
-        // This handles cases such as "export default class X { }" where the symbol name is "default"
-        // but the declaration name is "X".
-        localName = followedSymbol.name;
-        if (TypeScriptHelpers.isWellKnownSymbolName(localName)) {
-          // TypeScript binds well-known ECMAScript symbols like "Symbol.iterator" as "__@iterator".
-          // This converts a string like "__@iterator" into the property name "[Symbol.iterator]".
-          localName = `[Symbol.${localName.slice(3)}]`;
-        } else {
-          const isUniqueSymbol: boolean = TypeScriptHelpers.isUniqueSymbolName(localName);
-          for (const declaration of followedSymbol.declarations || []) {
-            const declarationName: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
-            if (declarationName && ts.isIdentifier(declarationName)) {
-              localName = declarationName.getText().trim();
-              break;
-            }
-            if (isUniqueSymbol && declarationName && ts.isComputedPropertyName(declarationName)) {
-              const lateBoundName: string | undefined = TypeScriptHelpers.tryGetLateBoundName(declarationName);
-              if (lateBoundName) {
-                localName = lateBoundName;
-                break;
-              }
-            }
-          }
-        }
-      }
+      const localName: string | undefined = options.localName || AstSymbolTable.getLocalNameForSymbol(followedSymbol);
 
       astSymbol = new AstSymbol({
         followedSymbol: followedSymbol,
