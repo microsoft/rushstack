@@ -7,7 +7,7 @@ import {
 } from '@microsoft/api-extractor-model';
 
 export class Utilities {
-  private static readonly _badFilenameCharsRegExp: RegExp = /[^\w\-\.]/ig;
+  private static readonly _badFilenameCharsRegExp: RegExp = /[^a-z0-9_\-\.]/ig;
   /**
    * Generates a concise signature for a function.  Example: "getArea(width, height)"
    */
