@@ -207,6 +207,6 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
 
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
-    return new DeclarationReference(new ModuleSource(this.name));
+    return DeclarationReference.module(this.name);
   }
 }
