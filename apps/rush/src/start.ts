@@ -13,7 +13,7 @@ if (NodeJsCompatibility.warnAboutVersionTooOld()) {
   process.exit(1);
 }
 
-const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVersionTooNew(false);
+const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVersionTooNew(false, false);
 
 import {
   Text,
