@@ -229,10 +229,11 @@ export class AstSymbolTable {
   public static getLocalNameForSymbol(symbol: ts.Symbol): string {
     const symbolName: string = symbol.name;
 
-    if (TypeScriptHelpers.isWellKnownSymbolName(symbolName)) {
-      // TypeScript binds well-known ECMAScript symbols like "Symbol.iterator" as "__@iterator".
-      // This converts a string like "__@iterator" into the property name "[Symbol.iterator]".
-      return `[Symbol.${symbolName.slice(3)}]`;
+    // TypeScript binds well-known ECMAScript symbols like "[Symbol.iterator]" as "__@iterator".
+    // Decode it back into "[Symbol.iterator]".
+    const wellKnownSymbolName: string | undefined = TypeScriptHelpers.tryDecodeWellKnownSymbolName(symbolName);
+    if (wellKnownSymbolName) {
+      return wellKnownSymbolName;
     }
 
     const isUniqueSymbol: boolean = TypeScriptHelpers.isUniqueSymbolName(symbolName);
