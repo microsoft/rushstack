@@ -12,6 +12,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
  */
 const UPCOMING_NODE_LTS_VERSION: number = 12;
 const nodeVersion: string = process.versions.node;
+const nodeMajorVersion: number = semver.major(nodeVersion);
 
 /**
  * This class provides useful functions for warning if the current Node.js runtime isn't supported.
@@ -19,6 +20,19 @@ const nodeVersion: string = process.versions.node;
  * @internal
  */
 export class NodeJsCompatibility {
+  public static warnAboutCompatibilityIssues(
+    alreadyReportedNodeTooNewError: boolean,
+    rushConfiguration: RushConfiguration | undefined
+  ): boolean {
+    // Only show the first warning
+    return (
+      NodeJsCompatibility.warnAboutVersionTooOld() ||
+      NodeJsCompatibility.warnAboutVersionTooNew(true, alreadyReportedNodeTooNewError) ||
+      NodeJsCompatibility.warnAboutOddNumberedVersion() ||
+      NodeJsCompatibility.warnAboutNonLtsVersion(rushConfiguration)
+    );
+  }
+
   public static warnAboutVersionTooOld(): boolean {
     if (semver.satisfies(nodeVersion, '< 8.9.0')) {
       // We are on an ancient version of Node.js that is known not to work with Rush
@@ -33,12 +47,12 @@ export class NodeJsCompatibility {
     }
   }
 
-  public static warnAboutVersionTooNew(isRushLib: boolean): boolean {
-    if (semver.satisfies(nodeVersion, `>= ${UPCOMING_NODE_LTS_VERSION + 1}.0.0`)) {
+  public static warnAboutVersionTooNew(isRushLib: boolean, alreadyReportedNodeTooNewError: boolean): boolean {
+    if (!alreadyReportedNodeTooNewError && nodeMajorVersion >= (UPCOMING_NODE_LTS_VERSION + 1)) {
       // We are on a much newer release than we have tested and support
       if (isRushLib) {
         console.warn(colors.yellow(
-          `Your version of Node.js (${nodeVersion}) has not been tested with this release` +
+          `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
           `of the Rush engine. Please consider upgrading the "rushVersion" setting in rush.json, ` +
           `or downgrading Node.js.`
         ));
@@ -63,6 +77,19 @@ export class NodeJsCompatibility {
       !NodeJsCompatibility.isLtsVersion
     ) {
       console.warn(colors.yellow(
+        `Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release. ` +
+        'These versions frequently have bugs. Please consider installing a stable release.'
+      ));
+
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public static warnAboutOddNumberedVersion(): boolean {
+    if (NodeJsCompatibility.isOddNumberedVersion) {
+      console.warn(colors.yellow(
         `Your version of Node.js (${nodeVersion}) is an odd-numbered release. ` +
         `These releases frequently have bugs. Please consider installing a Long Term Support (LTS) ` +
         `version instead.`
@@ -82,5 +109,9 @@ export class NodeJsCompatibility {
     }
 
      return !!(process as IExtendedNodeProcess).release.lts;
+  }
+
+  public static get isOddNumberedVersion(): boolean {
+    return (nodeMajorVersion % 2) !== 0;
   }
 }

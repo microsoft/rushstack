@@ -15,14 +15,37 @@ import { ProjectCommandSet } from '../logic/ProjectCommandSet';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 
+/**
+ * @internal
+ */
+export interface ILaunchRushXInternalOptions {
+  isManaged: boolean;
+  alreadyReportedNodeTooNewError?: boolean;
+}
+
 export class RushXCommandLine {
   public static launchRushX(launcherVersion: string, isManaged: boolean): void {
+    RushXCommandLine._launchRushXInternal(launcherVersion, { isManaged });
+  }
+
+  /**
+   * @internal
+   */
+  public static _launchRushXInternal(launcherVersion: string, options: ILaunchRushXInternalOptions): void {
     // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
     // and set it to 0 only on success.
     process.exitCode = 1;
 
     try {
+      // Are we in a Rush repo?
+      let rushConfiguration: RushConfiguration | undefined = undefined;
+      if (RushConfiguration.tryFindRushJsonLocation()) {
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
+      }
+
+      NodeJsCompatibility.warnAboutCompatibilityIssues(!!options.alreadyReportedNodeTooNewError, rushConfiguration);
+
       // Find the governing package.json for this folder:
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
@@ -67,14 +90,6 @@ export class RushXCommandLine {
         console.log(`Use ${colors.yellow('"rushx --help"')} for more information.`);
         return;
       }
-
-      // Are we in a Rush repo?
-      let rushConfiguration: RushConfiguration | undefined = undefined;
-      if (RushConfiguration.tryFindRushJsonLocation()) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
-      }
-
-      NodeJsCompatibility.warnAboutNonLtsVersion(rushConfiguration);
 
       console.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);
 

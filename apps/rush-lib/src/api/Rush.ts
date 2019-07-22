@@ -3,7 +3,6 @@
 
 import { EOL } from 'os';
 import * as colors from 'colors';
-import * as semver from 'semver';
 import { PackageJsonLookup } from '@microsoft/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
@@ -56,17 +55,15 @@ export class Rush {
 
     Rush._printStartupBanner(options.isManaged);
 
-    if (!options.alreadyReportedNodeTooNewError) {
-      NodeJsCompatibility.warnAboutVersionTooNew(true);
-    }
-
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
       // The migration advisor recognized an obsolete command-line
       process.exitCode = 1;
       return;
     }
 
-    const parser: RushCommandLineParser = new RushCommandLineParser();
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      alreadyReportedNodeTooNewError: arg.alreadyReportedNodeTooNewError
+    });
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
 
@@ -82,11 +79,13 @@ export class Rush {
 
     Rush._printStartupBanner(options.isManaged);
 
-    if (!options.alreadyReportedNodeTooNewError) {
-      NodeJsCompatibility.warnAboutVersionTooNew(true);
-    }
-
-    RushXCommandLine.launchRushX(launcherVersion, options.isManaged);
+    RushXCommandLine._launchRushXInternal(
+      launcherVersion,
+      {
+        isManaged: options.isManaged,
+        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+      }
+    );
   }
 
   /**
@@ -108,10 +107,9 @@ export class Rush {
 
   private static _printStartupBanner(isManaged: boolean): void {
     const nodeVersion: string = process.versions.node;
-    const nodeMajorVersion: number = semver.major(nodeVersion);
-    const nodeReleaseLabel: string = (nodeMajorVersion % 2 === 0)
-      ? (NodeJsCompatibility.isLtsVersion ? 'LTS' : 'pre-LTS')
-      : 'unstable';
+    const nodeReleaseLabel: string = (NodeJsCompatibility.isOddNumberedVersion)
+    ? 'unstable'
+    : (NodeJsCompatibility.isLtsVersion ? 'LTS' : 'pre-LTS');
 
     console.log(
       EOL +

@@ -41,7 +41,12 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
  * Options for `RushCommandLineParser`.
  */
 export interface IRushCommandLineParserOptions {
-  cwd?: string;   // Defaults to `cwd`
+  cwd: string;   // Defaults to `cwd`
+
+  /**
+   * @internal
+   */
+  alreadyReportedNodeTooNewError: boolean;
 }
 
 export class RushCommandLineParser extends CommandLineParser {
@@ -52,7 +57,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private _debugParameter: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
 
-  constructor(options?: IRushCommandLineParserOptions) {
+  constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
       toolFilename: 'rush',
       toolDescription: 'Rush makes life easier for JavaScript developers who develop, build, and publish'
@@ -80,6 +85,11 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     this._populateActions();
+
+    NodeJsCompatibility.warnAboutCompatibilityIssues(
+      this._rushOptions.alreadyReportedNodeTooNewError,
+      this.rushConfiguration
+    );
   }
 
   public get isDebug(): boolean {
@@ -112,8 +122,6 @@ export class RushCommandLineParser extends CommandLineParser {
       InternalError.breakInDebugger = true;
     }
 
-    NodeJsCompatibility.warnAboutNonLtsVersion(this.rushConfiguration);
-
     return this._wrapOnExecute().catch((error: Error) => {
       this._reportErrorAndSetExitCode(error);
     }).then(() => {
@@ -123,8 +131,10 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
-    const cwd: string = options.cwd || process.cwd();
-    return { cwd };
+    return {
+      cwd: options.cwd || process.cwd(),
+      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false
+    };
   }
 
   private _wrapOnExecute(): Promise<void> {
