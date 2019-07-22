@@ -22,6 +22,13 @@ export const enum EnvironmentVariableNames {
   RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION',
 
   /**
+   * If this variable is set to "true", Rush will not fail the build when running a version
+   * of Node that does not match the criteria specified in the "nodeSupportedVersionRange"
+   * field from rush.json.
+   */
+  RUSH_ALLOW_CUSTOM_NODE_VERSION = 'RUSH_ALLOW_CUSTOM_NODE_VERSION',
+
+  /**
    * This variable selects a specific installation variant for Rush to use when installing
    * and linking package dependencies.  For more information, see this article:
    * https://rushjs.io/pages/advanced/installation_variants/
@@ -50,6 +57,8 @@ export class EnvironmentConfiguration {
 
   private static _absoluteSymlinks: boolean = false;
 
+  private static _allowCustomNodeVersion: boolean = false;
+
   /**
    * An override for the common/temp folder path.
    */
@@ -65,6 +74,14 @@ export class EnvironmentConfiguration {
   public static get absoluteSymlinks(): boolean {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._absoluteSymlinks;
+  }
+
+  /**
+   * An override for the common/temp folder path.
+   */
+  public static get allowCustomNodeVersion(): boolean {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._allowCustomNodeVersion;
   }
 
   /**
@@ -87,6 +104,11 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS: {
             EnvironmentConfiguration._absoluteSymlinks = value === 'true';
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_ALLOW_CUSTOM_NODE_VERSION: {
+            EnvironmentConfiguration._allowCustomNodeVersion = value === 'true';
             break;
           }
 
