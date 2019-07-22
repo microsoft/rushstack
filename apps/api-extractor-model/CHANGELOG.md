@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Tue, 11 Jun 2019 00:48:06 GMT and should not be manually modified.
+This log was last generated on Mon, 22 Jul 2019 19:13:10 GMT and should not be manually modified.
+
+## 7.3.0
+Mon, 22 Jul 2019 19:13:10 GMT
+
+### Minor changes
+
+- Rename `ApiItem.canonicalReference` to `.containerKey`; rename `ApiItemContainerMixin.tryGetMember()` to `.tryGetMemberByKey()`; rename `Api___.getCanonicalReference()` to `.getContainerKey()`
 
 ## 7.2.0
 Tue, 11 Jun 2019 00:48:06 GMT
