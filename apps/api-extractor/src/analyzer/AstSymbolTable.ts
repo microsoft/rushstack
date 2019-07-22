@@ -238,24 +238,27 @@ export class AstSymbolTable {
     const isUniqueSymbol: boolean = TypeScriptHelpers.isUniqueSymbolName(symbolName);
 
     // We will try to obtain the name from a declaration; otherwise we'll fall back to the symbol name.
-    // This handles cases such as "export default class X { }" where the symbol name is "default"
-    // but the declaration name is "X".
-    for (const declaration of symbol.declarations || []) {
-      const declarationName: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
+    let unquotedName: string = symbolName;
 
-      if (declarationName && ts.isIdentifier(declarationName)) {
-        // It's an ordinary identifier, so the symbolName is what we want
-        break;
+    for (const declaration of symbol.declarations || []) {
+      // Handle cases such as "export default class X { }" where the symbol name is "default"
+      // but the local name is "X".
+      const localSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetLocalSymbol(declaration);
+      if (localSymbol) {
+        unquotedName = localSymbol.name;
       }
 
       // If it is a non-well-known symbol, then return the late bound name
-      if (isUniqueSymbol && declarationName && ts.isComputedPropertyName(declarationName)) {
-        const lateBoundName: string | undefined = TypeScriptHelpers.tryGetLateBoundName(declarationName);
-        if (lateBoundName) {
-          // Here the string may contain an expression such as "[x.y.z]".  Names starting with "[" are always
-          // expressions.  If a string literal contains those characters, the code below will JSON.stringify() it
-          // to avoid a collision.
-          return lateBoundName;
+      if (isUniqueSymbol) {
+        const declarationName: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
+        if (declarationName && ts.isComputedPropertyName(declarationName)) {
+          const lateBoundName: string | undefined = TypeScriptHelpers.tryGetLateBoundName(declarationName);
+          if (lateBoundName) {
+            // Here the string may contain an expression such as "[x.y.z]".  Names starting with "[" are always
+            // expressions.  If a string literal contains those characters, the code below will JSON.stringify() it
+            // to avoid a collision.
+            return lateBoundName;
+          }
         }
       }
     }
@@ -263,7 +266,7 @@ export class AstSymbolTable {
     // Otherwise that name may come from a quoted string or pseudonym like `__constructor`.
     // If the string is not a safe identifier, then we must add quotes.
     // Note that if it was quoted but did not need to be quoted, here we will remove the quotes.
-    if (!StringChecks.isSafeUnquotedMemberIdentifier(symbolName)) {
+    if (!StringChecks.isSafeUnquotedMemberIdentifier(unquotedName)) {
       // For API Extractor's purposes, a canonical form is more appropriate than trying to reflect whatever
       // appeared in the source code.  The code is not even guaranteed to be consistent, for example:
       //
@@ -272,10 +275,10 @@ export class AstSymbolTable {
       //     public f1(x: boolean): void;
       //     public 'f1'(x: string | boolean): void { }
       //   }
-      return JSON.stringify(symbolName);
+      return JSON.stringify(unquotedName);
     }
 
-    return symbolName;
+    return unquotedName;
   }
 
   /**
