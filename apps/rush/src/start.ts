@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// The minimal set of imports that are safe even for ancient Node.js versions:
-import * as colors from 'colors';
-import * as os from 'os';
-import * as semver from 'semver';
-
+// We're using a path-based import here to minimize the amount of code that is evaluated before
+// we check to see if the Node.js version is too old. If, for whatever reason, Rush crashes with
+// an old Node.js version when evaluating one of the more complex imports, we'll at least
+// shown a meaningful error message.
 import { NodeJsCompatibility } from '@microsoft/rush-lib/lib/logic/NodeJsCompatibility';
 
 if (NodeJsCompatibility.warnAboutVersionTooOld()) {
@@ -13,7 +12,14 @@ if (NodeJsCompatibility.warnAboutVersionTooOld()) {
   process.exit(1);
 }
 
-const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVersionTooNew(false, false);
+const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVersionTooNew({
+  isRushLib: false,
+  alreadyReportedNodeTooNewError: false
+});
+
+import * as colors from 'colors';
+import * as os from 'os';
+import * as semver from 'semver';
 
 import {
   Text,

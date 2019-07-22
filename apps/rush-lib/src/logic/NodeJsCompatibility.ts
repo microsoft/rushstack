@@ -14,22 +14,28 @@ const UPCOMING_NODE_LTS_VERSION: number = 12;
 const nodeVersion: string = process.versions.node;
 const nodeMajorVersion: number = semver.major(nodeVersion);
 
+export interface IWarnAboutVersionTooNewOptions {
+  isRushLib: boolean;
+  alreadyReportedNodeTooNewError: boolean;
+}
+
+export interface IWarnAboutCompatibilityIssuesOptions extends IWarnAboutVersionTooNewOptions {
+  rushConfiguration: RushConfiguration | undefined;
+}
+
 /**
  * This class provides useful functions for warning if the current Node.js runtime isn't supported.
  *
  * @internal
  */
 export class NodeJsCompatibility {
-  public static warnAboutCompatibilityIssues(
-    alreadyReportedNodeTooNewError: boolean,
-    rushConfiguration: RushConfiguration | undefined
-  ): boolean {
+  public static warnAboutCompatibilityIssues(options: IWarnAboutCompatibilityIssuesOptions): boolean {
     // Only show the first warning
     return (
       NodeJsCompatibility.warnAboutVersionTooOld() ||
-      NodeJsCompatibility.warnAboutVersionTooNew(true, alreadyReportedNodeTooNewError) ||
+      NodeJsCompatibility.warnAboutVersionTooNew(options) ||
       NodeJsCompatibility.warnAboutOddNumberedVersion() ||
-      NodeJsCompatibility.warnAboutNonLtsVersion(rushConfiguration)
+      NodeJsCompatibility.warnAboutNonLtsVersion(options.rushConfiguration)
     );
   }
 
@@ -47,10 +53,10 @@ export class NodeJsCompatibility {
     }
   }
 
-  public static warnAboutVersionTooNew(isRushLib: boolean, alreadyReportedNodeTooNewError: boolean): boolean {
-    if (!alreadyReportedNodeTooNewError && nodeMajorVersion >= (UPCOMING_NODE_LTS_VERSION + 1)) {
+  public static warnAboutVersionTooNew(options: IWarnAboutVersionTooNewOptions): boolean {
+    if (!options.alreadyReportedNodeTooNewError && nodeMajorVersion >= (UPCOMING_NODE_LTS_VERSION + 1)) {
       // We are on a much newer release than we have tested and support
-      if (isRushLib) {
+      if (options.isRushLib) {
         console.warn(colors.yellow(
           `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
           `of the Rush engine. Please consider upgrading the "rushVersion" setting in rush.json, ` +

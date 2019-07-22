@@ -44,7 +44,11 @@ export class RushXCommandLine {
         rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
       }
 
-      NodeJsCompatibility.warnAboutCompatibilityIssues(!!options.alreadyReportedNodeTooNewError, rushConfiguration);
+      NodeJsCompatibility.warnAboutCompatibilityIssues({
+        isRushLib: true,
+        alreadyReportedNodeTooNewError: !!options.alreadyReportedNodeTooNewError,
+        rushConfiguration
+      });
 
       // Find the governing package.json for this folder:
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();

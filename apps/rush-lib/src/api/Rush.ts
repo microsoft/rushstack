@@ -62,7 +62,7 @@ export class Rush {
     }
 
     const parser: RushCommandLineParser = new RushCommandLineParser({
-      alreadyReportedNodeTooNewError: arg.alreadyReportedNodeTooNewError
+      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
     });
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }
@@ -79,13 +79,7 @@ export class Rush {
 
     Rush._printStartupBanner(options.isManaged);
 
-    RushXCommandLine._launchRushXInternal(
-      launcherVersion,
-      {
-        isManaged: options.isManaged,
-        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
-      }
-    );
+    RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
   }
 
   /**

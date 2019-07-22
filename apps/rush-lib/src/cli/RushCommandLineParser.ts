@@ -42,10 +42,6 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
  */
 export interface IRushCommandLineParserOptions {
   cwd: string;   // Defaults to `cwd`
-
-  /**
-   * @internal
-   */
   alreadyReportedNodeTooNewError: boolean;
 }
 
@@ -84,12 +80,13 @@ export class RushCommandLineParser extends CommandLineParser {
       this._reportErrorAndSetExitCode(error);
     }
 
-    this._populateActions();
+    NodeJsCompatibility.warnAboutCompatibilityIssues({
+      isRushLib: true,
+      alreadyReportedNodeTooNewError: this._rushOptions.alreadyReportedNodeTooNewError,
+      rushConfiguration: this.rushConfiguration
+    });
 
-    NodeJsCompatibility.warnAboutCompatibilityIssues(
-      this._rushOptions.alreadyReportedNodeTooNewError,
-      this.rushConfiguration
-    );
+    this._populateActions();
   }
 
   public get isDebug(): boolean {
