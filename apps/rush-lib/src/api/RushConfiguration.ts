@@ -1006,9 +1006,14 @@ export class RushConfiguration {
           + ` field from rush.json: "${rushConfigurationJson.nodeSupportedVersionRange}"`);
       }
       if (!semver.satisfies(process.version, rushConfigurationJson.nodeSupportedVersionRange)) {
-        throw new Error(`Your dev environment is running Node.js version ${process.version} which does`
+        const message: string = `Your dev environment is running Node.js version ${process.version} which does`
           + ` not meet the requirements for building this repository.  (The rush.json configuration`
-          + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`);
+          + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`;
+        if (EnvironmentConfiguration.allowUnsupportedNodeVersion) {
+          console.warn(message);
+        } else {
+          throw new Error(message);
+        }
       }
     }
     this._rushJsonFile = rushJsonFilename;
