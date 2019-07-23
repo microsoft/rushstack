@@ -382,7 +382,7 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: 
 // @public
 export interface ApiNameMixin extends ApiItem {
     // @internal (undocumented)
-    _getCanonicalReferenceName(): string;
+    _getCanonicalReferenceName(): string | DeclarationReference;
     readonly name: string;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;

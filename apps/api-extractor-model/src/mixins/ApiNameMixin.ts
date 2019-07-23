@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { StringChecks } from '@microsoft/tsdoc/lib/parser/StringChecks';
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import { DeserializerContext } from '../model/DeserializerContext';
 
@@ -49,7 +49,7 @@ export interface ApiNameMixin extends ApiItem {
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 
   /** @internal */
-  _getCanonicalReferenceName(): string;
+  _getCanonicalReferenceName(): string | DeclarationReference;
 }
 
 /**
@@ -100,14 +100,15 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: 
     }
 
     /** @internal */
-    public _getCanonicalReferenceName(): string {
-      // TODO: This is a temporary workaround for a limitation of the experimental DeclarationReference API.
-      // We will remove this when the final implementation is in place.
-      if (StringChecks.explainIfInvalidUnquotedIdentifier(this.name)) {
-        return JSON.stringify(this.name);
-      } else {
-        return this.name;
+    public _getCanonicalReferenceName(): string | DeclarationReference {
+      const name: string = this.name;
+      if (name[0] === '"') {
+        return JSON.parse(name);
       }
+      if (name[0] === '[') {
+        return DeclarationReference.parse(name);
+      }
+      return name;
     }
   }
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, ModuleSource } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
@@ -56,18 +56,9 @@ export class ApiEntryPoint extends ApiItemContainerMixin(ApiNameMixin(ApiItem)) 
 
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
-    let modulePath: string = '';
 
     if (this.parent instanceof ApiPackage) {
-      modulePath = this.parent.name;
-    }
-
-    if (this.name) {
-      modulePath += this.name;
-    }
-
-    if (modulePath) {
-      return new DeclarationReference(new ModuleSource(modulePath));
+      return DeclarationReference.package(this.parent.name, this.name);
     }
 
     return DeclarationReference.empty();

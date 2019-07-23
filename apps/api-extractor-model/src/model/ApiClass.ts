@@ -121,7 +121,7 @@ export class ApiClass extends ApiItemContainerMixin(ApiNameMixin(ApiTypeParamete
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
-      .addNavigationStep(Navigation.Exports, this.name)
+      .addNavigationStep(Navigation.Exports, this._getCanonicalReferenceName())
       .withMeaning(Meaning.Class);
   }
 }
