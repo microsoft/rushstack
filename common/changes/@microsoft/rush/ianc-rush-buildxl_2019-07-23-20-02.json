@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add experimental rush-buildxl package",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
