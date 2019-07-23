@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/package-deps-hash",
-  "version": "2.2.165",
+  "version": "2.2.166",
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.4": "0.1.13",
-    "@microsoft/node-library-build": "6.0.74",
+    "@microsoft/node-library-build": "6.1.0",
     "@microsoft/node-core-library": "3.13.0",
     "@types/chai": "3.4.34",
     "@types/mocha": "5.2.5",
