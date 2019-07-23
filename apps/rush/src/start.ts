@@ -1,39 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// The minimal set of imports that are safe even for ancient NodeJS versions:
-import * as colors from 'colors';
-import * as os from 'os';
-import * as semver from 'semver';
+// We're using a path-based import here to minimize the amount of code that is evaluated before
+// we check to see if the Node.js version is too old. If, for whatever reason, Rush crashes with
+// an old Node.js version when evaluating one of the more complex imports, we'll at least
+// shown a meaningful error message.
+import { NodeJsCompatibility } from '@microsoft/rush-lib/lib/logic/NodeJsCompatibility';
 
-const nodeVersion: string = process.versions.node;
-
-// tslint:disable-next-line
-
-// We are on an ancient version of NodeJS that is known not to work with Rush
-if (semver.satisfies(nodeVersion, '<= 6.4.0')) {
-  console.error(colors.red(`Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush.`
-    + ` Please upgrade to the latest Long-Term Support (LTS) version.`));
+if (NodeJsCompatibility.warnAboutVersionTooOld()) {
+  // We are on an ancient version of Node.js that is known not to work with Rush
   process.exit(1);
 }
 
-// We are on a much newer release than we have tested and support
-// tslint:disable-next-line
-else if (semver.satisfies(nodeVersion, '>=11.0.0')) {
-  console.warn(colors.yellow(`Your version of Node.js (${nodeVersion}) has not been tested with this release of Rush.`
-    + ` The Rush team will not accept issue reports for it.`
-    + ` Please consider upgrading Rush or downgrading Node.js.`));
-}
+const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVersionTooNew({
+  isRushLib: false,
+  alreadyReportedNodeTooNewError: false
+});
 
-// We are not on an LTS release
-// tslint:disable-next-line
-else if (!semver.satisfies(nodeVersion, '^6.9.0')
-      && !semver.satisfies(nodeVersion, '^8.9.0')
-      && !semver.satisfies(nodeVersion, '^10.13.0')) {
-  console.warn(colors.yellow(`Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release.`
-    + ` These versions frequently contain bugs, and the Rush team will not accept issue reports for them.`
-    + ` Please consider installing a stable release.`));
-}
+import * as colors from 'colors';
+import * as os from 'os';
+import * as semver from 'semver';
 
 import {
   Text,
@@ -98,19 +84,19 @@ if (rushVersionToLoad && semver.lt(rushVersionToLoad, '5.0.0-dev.18')) {
   delete process.env[EnvironmentVariableNames.RUSH_PREVIEW_VERSION];
 }
 
+// Rush is "managed" if its version and configuration are dictated by a repo's rush.json
+const isManaged: boolean = !!configuration;
+const launchOptions: rushLib.ILaunchOptions = { isManaged, alreadyReportedNodeTooNewError };
+
 // If we're inside a repo folder, and it's requesting a different version, then use the RushVersionManager to
 // install it
 if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion) {
   const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageVersion);
-  versionSelector.ensureRushVersionInstalled(rushVersionToLoad, configuration)
+  versionSelector.ensureRushVersionInstalled(rushVersionToLoad, configuration, launchOptions)
     .catch((error: Error) => {
       console.log(colors.red('Error: ' + error.message));
     });
 } else {
   // Otherwise invoke the rush-lib that came with this rush package
-
-  // Rush is "managed" if its version and configuration are dictated by a repo's rush.json
-  const isManaged: boolean = !!configuration;
-
-  RushCommandSelector.execute(currentPackageVersion, isManaged, rushLib);
+  RushCommandSelector.execute(currentPackageVersion, rushLib, launchOptions);
 }

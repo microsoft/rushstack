@@ -8,7 +8,8 @@ import { LockFile } from '@microsoft/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
 import {
   _LastInstallFlag,
-  _RushGlobalFolder
+  _RushGlobalFolder,
+  ILaunchOptions
 } from '@microsoft/rush-lib';
 
 import { RushCommandSelector } from './RushCommandSelector';
@@ -25,8 +26,11 @@ export class RushVersionSelector {
     this._currentPackageVersion = currentPackageVersion;
   }
 
-  public ensureRushVersionInstalled(version: string,
-    configuration: MinimalRushConfiguration | undefined): Promise<void> {
+  public ensureRushVersionInstalled(
+    version: string,
+    configuration: MinimalRushConfiguration | undefined,
+    executeOptions: ILaunchOptions
+  ): Promise<void> {
 
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
     const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
@@ -115,7 +119,7 @@ export class RushVersionSelector {
           'lib',
           'index'
         ));
-        RushCommandSelector.execute(this._currentPackageVersion, true, rushCliEntrypoint);
+        RushCommandSelector.execute(this._currentPackageVersion, rushCliEntrypoint, executeOptions);
       }
     });
   }
