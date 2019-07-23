@@ -249,13 +249,24 @@ export class AstSymbolTable {
         unquotedName = localSymbol.name;
       }
 
-      // If it is a non-well-known symbol, then return the late bound name
+      // If it is a non-well-known symbol, then return the late-bound name.  For example, "X.Y.z" in this example:
+      //
+      //   namespace X {
+      //     export namespace Y {
+      //       export const z: unique symbol = Symbol("z");
+      //     }
+      //  }
+      //
+      //  class C {
+      //    public [X.Y.z](): void { }
+      //  }
+      //
       if (isUniqueSymbol) {
         const declarationName: ts.DeclarationName | undefined = ts.getNameOfDeclaration(declaration);
         if (declarationName && ts.isComputedPropertyName(declarationName)) {
           const lateBoundName: string | undefined = TypeScriptHelpers.tryGetLateBoundName(declarationName);
           if (lateBoundName) {
-            // Here the string may contain an expression such as "[x.y.z]".  Names starting with "[" are always
+            // Here the string may contain an expression such as "[X.Y.z]".  Names starting with "[" are always
             // expressions.  If a string literal contains those characters, the code below will JSON.stringify() it
             // to avoid a collision.
             return lateBoundName;
