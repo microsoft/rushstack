@@ -106,7 +106,8 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: 
         return JSON.parse(name);
       }
       if (name[0] === '[') {
-        return DeclarationReference.parse(name);
+        // Unwrap the [] and parse the reference
+        return DeclarationReference.parse(name.substr(1, name.length - 2));
       }
       return name;
     }

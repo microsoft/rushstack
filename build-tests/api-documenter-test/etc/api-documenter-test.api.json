@@ -1044,7 +1044,7 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "api-documenter-test!IDocInterface3#[[EcmaSmbols.example]]:member",
+              "canonicalReference": "api-documenter-test!IDocInterface3#[EcmaSmbols.example]:member",
               "docComment": "/**\n * ECMAScript symbol\n */\n",
               "excerptTokens": [
                 {
