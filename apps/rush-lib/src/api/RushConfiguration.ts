@@ -115,6 +115,7 @@ export interface IRushConfigurationJson {
   rushVersion: string;
   repository?: IRushRepositoryJson;
   nodeSupportedVersionRange?: string;
+  suppressNodeLtsWarning?: boolean;
   projectFolderMinDepth?: number;
   projectFolderMaxDepth?: number;
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
@@ -269,6 +270,7 @@ export class RushConfiguration {
   private _projectFolderMinDepth: number;
   private _projectFolderMaxDepth: number;
   private _ensureConsistentVersions: boolean;
+  private _suppressNodeLtsWarning: boolean;
   private _variants: {
     [variantName: string]: boolean;
   };
@@ -776,6 +778,21 @@ export class RushConfiguration {
   }
 
   /**
+    * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
+    * spend six months in a stabilization period before the first Long Term Support (LTS) version.
+    * For example, 8.9.0 was the first LTS version of Node.js 8.  Pre-LTS versions are not recommended
+    * for production usage because they frequently have bugs.  They may cause Rush itself
+    * to malfunction.
+    *
+    * Rush normally prints a warning if it detects a pre-LTS Node.js version.  If you are testing
+    * pre-LTS versions in preparation for supporting the first LTS version, you can use this setting
+    * to disable Rush's warning.
+   */
+  public get suppressNodeLtsWarning(): boolean {
+    return this._suppressNodeLtsWarning;
+  }
+
+  /**
    * If true, then consistent version specifiers for dependencies will be enforced.
    * I.e. "rush check" is run before some commands.
    */
@@ -989,9 +1006,14 @@ export class RushConfiguration {
           + ` field from rush.json: "${rushConfigurationJson.nodeSupportedVersionRange}"`);
       }
       if (!semver.satisfies(process.version, rushConfigurationJson.nodeSupportedVersionRange)) {
-        throw new Error(`Your dev environment is running Node.js version ${process.version} which does`
+        const message: string = `Your dev environment is running Node.js version ${process.version} which does`
           + ` not meet the requirements for building this repository.  (The rush.json configuration`
-          + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`);
+          + ` requires nodeSupportedVersionRange="${rushConfigurationJson.nodeSupportedVersionRange}")`;
+        if (EnvironmentConfiguration.allowUnsupportedNodeVersion) {
+          console.warn(message);
+        } else {
+          throw new Error(message);
+        }
       }
     }
     this._rushJsonFile = rushJsonFilename;
@@ -1015,6 +1037,8 @@ export class RushConfiguration {
 
     this._rushLinkJsonFilename = path.join(this._commonTempFolder, 'rush-link.json');
     this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
+
+    this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 

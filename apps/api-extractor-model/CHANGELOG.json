@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.3.0",
+      "tag": "@microsoft/api-extractor-model_v7.3.0",
+      "date": "Mon, 22 Jul 2019 19:13:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Rename `ApiItem.canonicalReference` to `.containerKey`; rename `ApiItemContainerMixin.tryGetMember()` to `.tryGetMemberByKey()`; rename `Api___.getCanonicalReference()` to `.getContainerKey()`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.2.0",
       "tag": "@microsoft/api-extractor-model_v7.2.0",
       "date": "Tue, 11 Jun 2019 00:48:06 GMT",

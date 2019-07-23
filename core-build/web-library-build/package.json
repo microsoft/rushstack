@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/web-library-build",
-  "version": "7.0.50",
+  "version": "7.0.51",
   "description": "",
   "engines": {
     "npm": "3.10.8"
@@ -19,17 +19,17 @@
   },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.9.26",
-    "@microsoft/gulp-core-build-sass": "4.7.10",
-    "@microsoft/gulp-core-build-serve": "3.3.46",
-    "@microsoft/gulp-core-build-typescript": "8.1.21",
-    "@microsoft/gulp-core-build-webpack": "3.4.113",
+    "@microsoft/gulp-core-build-sass": "4.7.11",
+    "@microsoft/gulp-core-build-serve": "3.3.47",
+    "@microsoft/gulp-core-build-typescript": "8.1.22",
+    "@microsoft/gulp-core-build-webpack": "3.4.114",
     "@types/gulp": "4.0.6",
     "@types/node": "8.5.8",
     "gulp": "~4.0.2",
     "gulp-replace": "^0.5.4"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.0.72",
-    "@microsoft/rush-stack-compiler-3.2": "0.3.24"
+    "@microsoft/node-library-build": "6.0.73",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.12"
   }
 }

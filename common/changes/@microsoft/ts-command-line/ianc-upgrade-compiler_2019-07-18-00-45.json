@@ -2,10 +2,10 @@
   "changes": [
     {
       "comment": "",
-      "packageName": "@microsoft/api-extractor-model",
+      "packageName": "@microsoft/ts-command-line",
       "type": "none"
     }
   ],
-  "packageName": "@microsoft/api-extractor-model",
+  "packageName": "@microsoft/ts-command-line",
   "email": "iclanton@users.noreply.github.com"
 }

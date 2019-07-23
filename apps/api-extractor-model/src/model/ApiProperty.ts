@@ -49,11 +49,11 @@ export interface IApiPropertyOptions extends IApiPropertyItemOptions,
  */
 export class ApiProperty extends ApiStaticMixin(ApiPropertyItem) {
 
-  public static getCanonicalReference(name: string, isStatic: boolean): string {
+  public static getContainerKey(name: string, isStatic: boolean): string {
     if (isStatic) {
-      return `(${name}:static)`;
+      return `${name}|${ApiItemKind.Property}|static`;
     } else {
-      return `(${name}:instance)`;
+      return `${name}|${ApiItemKind.Property}|instance`;
     }
   }
 
@@ -67,7 +67,7 @@ export class ApiProperty extends ApiStaticMixin(ApiPropertyItem) {
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiProperty.getCanonicalReference(this.name, this.isStatic);
+  public get containerKey(): string {
+    return ApiProperty.getContainerKey(this.name, this.isStatic);
   }
 }

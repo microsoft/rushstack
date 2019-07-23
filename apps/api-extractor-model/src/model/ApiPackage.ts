@@ -162,7 +162,8 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
   }
 
   /** @override */
-  public get canonicalReference(): string {
+  public get containerKey(): string {
+    // No prefix needed, because ApiPackage is the only possible member of an ApiModel
     return this.name;
   }
 

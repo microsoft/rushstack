@@ -46,8 +46,8 @@ export interface IApiFunctionOptions extends
 export class ApiFunction extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(
   ApiReturnTypeMixin(ApiDeclaredItem))))) {
 
-  public static getCanonicalReference(name: string, overloadIndex: number): string {
-    return `(${name}:${overloadIndex})`;
+  public static getContainerKey(name: string, overloadIndex: number): string {
+    return `${name}|${ApiItemKind.Function}|${overloadIndex}`;
   }
 
   public constructor(options: IApiFunctionOptions) {
@@ -60,7 +60,7 @@ export class ApiFunction extends ApiNameMixin(ApiTypeParameterListMixin(ApiParam
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiFunction.getCanonicalReference(this.name, this.overloadIndex);
+  public get containerKey(): string {
+    return ApiFunction.getContainerKey(this.name, this.overloadIndex);
   }
 }

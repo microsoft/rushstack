@@ -2,6 +2,21 @@
   "name": "@microsoft/stream-collator",
   "entries": [
     {
+      "version": "3.0.79",
+      "tag": "@microsoft/stream-collator_v3.0.79",
+      "date": "Mon, 22 Jul 2019 19:13:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.11` to `0.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.72` to `6.0.73`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.78",
       "tag": "@microsoft/stream-collator_v3.0.78",
       "date": "Fri, 12 Jul 2019 19:12:46 GMT",

@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor-model",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "description": "A helper library for loading and saving the .api.json files created by API Extractor",
   "repository": {
     "type": "git",
@@ -18,12 +18,12 @@
   },
   "dependencies": {
     "@microsoft/node-core-library": "3.13.0",
-    "@microsoft/tsdoc": "0.12.9",
+    "@microsoft/tsdoc": "0.12.10",
     "@types/node": "8.5.8"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.0.71",
-    "@microsoft/rush-stack-compiler-3.2": "0.3.23",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.11",
     "@types/jest": "23.3.11",
     "gulp": "~4.0.2",
     "tslint-microsoft-contrib": "~5.2.1"

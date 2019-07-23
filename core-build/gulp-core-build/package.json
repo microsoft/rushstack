@@ -55,7 +55,7 @@
     "@types/mocha": "5.2.5",
     "@types/chai": "3.4.34",
     "@microsoft/node-library-build": "6.0.71",
-    "@microsoft/rush-stack-compiler-3.2": "0.3.23",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.11",
     "@types/z-schema": "3.16.31",
     "chai": "~3.5.0"
   }

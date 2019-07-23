@@ -25,10 +25,9 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.0.71",
-    "@microsoft/rush-stack-compiler-3.2": "0.3.23",
     "@types/jest": "23.3.11",
     "gulp": "~4.0.2",
-    "tslint-microsoft-contrib": "~5.2.1"
+    "@microsoft/node-library-build": "6.0.71",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.11"
   }
 }
