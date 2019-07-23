@@ -121,7 +121,7 @@ export class Utilities {
   }
 
   /**
-   * NodeJS equivalent of performance.now().
+   * Node.js equivalent of performance.now().
    */
   public static getTimeInMs(): number {
     let seconds: number;

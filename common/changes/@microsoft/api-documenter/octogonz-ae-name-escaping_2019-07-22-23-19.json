@@ -1,9 +1,9 @@
 {
   "changes": [
     {
-      "comment": "",
       "packageName": "@microsoft/api-documenter",
-      "type": "none"
+      "comment": "Fix an issue where generated filenames sometimes mcontained invalid characters",
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/api-documenter",

@@ -991,7 +991,7 @@ export class InstallManager {
       if (FileSystem.exists(lastCheckFile)) {
         let cachedResult: boolean | 'error' | undefined = undefined;
         try {
-          // NOTE: mtimeMs is not supported yet in NodeJS 6.x
+          // NOTE: mtimeMs is not supported yet in Node.js 6.x
           const nowMs: number = new Date().getTime();
           const ageMs: number = nowMs - FileSystem.getStatistics(lastCheckFile).mtime.getTime();
           const HOUR: number = 60 * 60 * 1000;
