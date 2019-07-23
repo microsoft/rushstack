@@ -212,13 +212,23 @@ export class TypeScriptHelpers {
 
   // Matches TypeScript's encoded names for well-known ECMAScript symbols like
   // "__@iterator" or "__@toStringTag".
-  private static readonly _wellKnownSymbolNameRegExp: RegExp = /^__@\w+$/;
+  private static readonly _wellKnownSymbolNameRegExp: RegExp = /^__@(\w+)$/;
 
   /**
-   * Returns whether the provided name was generated for a built-in ECMAScript symbol.
+   * Decodes the names that the compiler generates for a built-in ECMAScript symbol.
+   *
+   * @remarks
+   * TypeScript binds well-known ECMAScript symbols like `[Symbol.iterator]` as `__@iterator`.
+   * If `name` is of this form, then `tryGetWellKnownSymbolName()` converts it back into e.g. `[Symbol.iterator]`.
+   * If the string does not start with `__@` then `undefined` is returned.
    */
-  public static isWellKnownSymbolName(name: string): boolean {
-    return TypeScriptHelpers._wellKnownSymbolNameRegExp.test(name);
+  public static tryDecodeWellKnownSymbolName(name: string): string | undefined {
+    const match: RegExpExecArray | null = TypeScriptHelpers._wellKnownSymbolNameRegExp.exec(name);
+    if (match) {
+      const identifier: string = match[1];
+      return `[Symbol.${identifier}]`;
+    }
+    return undefined;
   }
 
   // Matches TypeScript's encoded names for late-bound symbols derived from `unique symbol` declarations

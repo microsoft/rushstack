@@ -7,6 +7,7 @@ import {
 } from '@microsoft/api-extractor-model';
 
 export class Utilities {
+  private static readonly _badFilenameCharsRegExp: RegExp = /[^a-z0-9_\-\.]/ig;
   /**
    * Generates a concise signature for a function.  Example: "getArea(width, height)"
    */
@@ -15,5 +16,14 @@ export class Utilities {
       return apiItem.displayName + '(' + apiItem.parameters.map(x => x.name).join(', ') + ')';
     }
     return apiItem.displayName;
+  }
+
+  /**
+   * Converts bad filename characters to underscores.
+   */
+  public static getSafeFilenameForName(name: string): string {
+    // TODO: This can introduce naming collisions.
+    // We will fix that as part of https://github.com/microsoft/web-build-tools/issues/1308
+    return name.replace(Utilities._badFilenameCharsRegExp, '_').toLowerCase();
   }
 }

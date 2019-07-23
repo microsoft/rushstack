@@ -668,6 +668,52 @@
           ]
         },
         {
+          "kind": "Namespace",
+          "docComment": "/**\n * A namespace containing an ECMAScript symbol\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare namespace "
+            },
+            {
+              "kind": "Reference",
+              "text": "EcmaSmbols"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "EcmaSmbols",
+          "members": [
+            {
+              "kind": "Variable",
+              "docComment": "/**\n * An ECMAScript symbol\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "example"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "unique symbol"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "example",
+              "variableTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              }
+            }
+          ]
+        },
+        {
           "kind": "TypeAlias",
           "docComment": "/**\n * A type alias\n *\n * @public\n */\n",
           "excerptTokens": [
@@ -942,6 +988,70 @@
           "name": "IDocInterface3",
           "members": [
             {
+              "kind": "PropertySignature",
+              "docComment": "/**\n * An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "\"[not.a.symbol]\": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "\"[not.a.symbol]\"",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "docComment": "/**\n * ECMAScript symbol\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "["
+                },
+                {
+                  "kind": "Reference",
+                  "text": "EcmaSmbols"
+                },
+                {
+                  "kind": "Content",
+                  "text": "."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "example"
+                },
+                {
+                  "kind": "Content",
+                  "text": "]: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "[EcmaSmbols.example]",
+              "propertyTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            },
+            {
               "kind": "CallSignature",
               "docComment": "/**\n * Call signature\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
@@ -1063,6 +1173,30 @@
                   }
                 }
               ]
+            },
+            {
+              "kind": "PropertySignature",
+              "docComment": "/**\n * A quoted identifier with redundant quotes.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "\"redundantQuotes\": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "redundantQuotes",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
             }
           ],
           "extendsTokenRanges": []

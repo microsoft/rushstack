@@ -83,4 +83,13 @@ export class TypeScriptInternals {
   public static getSymbolParent(symbol: ts.Symbol): ts.Symbol | undefined {
     return (symbol as any).parent;
   }
+
+  /**
+   * In an statement like `export default class X { }`, the `Symbol.name` will be `default`
+   * whereas the `localSymbol` is `X`.
+   */
+  public static tryGetLocalSymbol(declaration: ts.Declaration): ts.Symbol | undefined {
+    return (declaration as any).localSymbol;
+  }
+
 }
