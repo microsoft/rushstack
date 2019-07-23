@@ -2,6 +2,26 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.4.0",
+      "tag": "@microsoft/gulp-core-build-serve_v3.4.0",
+      "date": "Tue, 23 Jul 2019 19:14:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update gulp to 4.0.2"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.26` to `3.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.74` to `6.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.3.48",
       "tag": "@microsoft/gulp-core-build-serve_v3.3.48",
       "date": "Tue, 23 Jul 2019 01:13:01 GMT",

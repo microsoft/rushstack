@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Tue, 23 Jul 2019 01:13:01 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Jul 2019 19:14:38 GMT and should not be manually modified.
+
+## 4.7.13
+Tue, 23 Jul 2019 19:14:38 GMT
+
+### Patches
+
+- Update node-sass to latest. Required for compatibility with Node 12.
 
 ## 4.7.12
 Tue, 23 Jul 2019 01:13:01 GMT
