@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Mon, 22 Jul 2019 19:13:10 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Jul 2019 01:13:01 GMT and should not be manually modified.
+
+## 7.3.10
+Tue, 23 Jul 2019 01:13:01 GMT
+
+### Patches
+
+- Fix an issue where generated filenames sometimes mcontained invalid characters
 
 ## 7.3.9
 Mon, 22 Jul 2019 19:13:10 GMT
