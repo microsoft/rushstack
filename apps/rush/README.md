@@ -17,7 +17,7 @@
 
 - **Automatic local linking:** Inside a Rush repo, all your projects are automatically symlinked to each other. When you make a change, you can see the downstream effects without publishing anything, and without any `npm link` headaches.  If you don't want certain projects to get linked, that's supported, too.
 
-- **Fast builds:** Rush detects your dependency graph and builds your projects in the right order.  If two packages don't directly depend on each other, Rush parallelizes their build as separate NodeJS processes (and shows live console output in a [readable order](https://www.npmjs.com/package/@microsoft/stream-collator)).  In practice this multi-process approach can yield more significant speedups than all those async functions in your single-threaded Gulpfile.
+- **Fast builds:** Rush detects your dependency graph and builds your projects in the right order.  If two packages don't directly depend on each other, Rush parallelizes their build as separate Node.js processes (and shows live console output in a [readable order](https://www.npmjs.com/package/@microsoft/stream-collator)).  In practice this multi-process approach can yield more significant speedups than all those async functions in your single-threaded Gulpfile.
 
 - **Subset and incremental builds:** If you only plan to work with a few projects from your repo, `rush rebuild --to <project>` does a clean build of just your upstream dependencies.  After you make changes, `rush rebuild --from <project>` does a clean build of only the affected downstream projects.  And if your toolchain is [package-deps-hash](https://www.npmjs.com/package/@microsoft/package-deps-hash) enabled, `rush build` delivers a powerful cross-project incremental build (that also supports subset builds).
 

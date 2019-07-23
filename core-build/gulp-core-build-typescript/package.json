@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-typescript",
-  "version": "8.1.21",
+  "version": "8.1.23",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -25,13 +25,13 @@
     "resolve": "1.8.1"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.3.2",
+    "@microsoft/api-extractor": "7.3.4",
     "@microsoft/node-library-build": "6.0.71",
-    "@microsoft/rush-stack-compiler-3.1": "0.6.23",
-    "@microsoft/rush-stack-compiler-3.2": "0.3.23",
+    "@microsoft/rush-stack-compiler-3.1": "0.6.25",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.11",
     "@types/glob": "5.0.30",
     "@types/resolve": "0.0.8",
-    "gulp": "~3.9.1",
+    "gulp": "~4.0.2",
     "tslint-microsoft-contrib": "~5.2.1",
     "typescript": "~3.2.4"
   }

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "packageName": "@microsoft/rush-stack-compiler-3.2",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.2",
+  "email": "mikeharder@users.noreply.github.com"
+}

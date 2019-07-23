@@ -42,8 +42,8 @@ export interface IApiIndexSignatureOptions extends
  */
 export class ApiIndexSignature extends ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))) {
 
-  public static getCanonicalReference(overloadIndex: number): string {
-    return `(:index,${overloadIndex})`;
+  public static getContainerKey(overloadIndex: number): string {
+    return `|${ApiItemKind.IndexSignature}|${overloadIndex}`;
   }
 
   public constructor(options: IApiIndexSignatureOptions) {
@@ -56,7 +56,7 @@ export class ApiIndexSignature extends ApiParameterListMixin(ApiReleaseTagMixin(
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiIndexSignature.getCanonicalReference(this.overloadIndex);
+  public get containerKey(): string {
+    return ApiIndexSignature.getContainerKey(this.overloadIndex);
   }
 }

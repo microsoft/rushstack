@@ -2,22 +2,43 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1002,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-documenter-test",
   "docComment": "/**\n * api-extractor-test-05\n *\n * This project tests various documentation generation scenarios and doc comment syntaxes.\n *\n * @packageDocumentation\n */\n",
   "name": "api-documenter-test",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
       "name": "",
       "members": [
         {
+          "kind": "Variable",
+          "docComment": "/**\n * An exported variable declaration.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Reference",
+              "text": "constVariable"
+            },
+            {
+              "kind": "Content",
+              "text": ": "
+            },
+            {
+              "kind": "Content",
+              "text": "number"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "constVariable",
+          "variableTypeTokenRange": {
+            "startIndex": 2,
+            "endIndex": 3
+          }
+        },
+        {
           "kind": "Class",
-          "canonicalReference": "(DocBaseClass:class)",
           "docComment": "/**\n * Example base class\n *\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -38,7 +59,6 @@
           "members": [
             {
               "kind": "Constructor",
-              "canonicalReference": "(:constructor,1)",
               "docComment": "/**\n * The simple constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -52,7 +72,6 @@
             },
             {
               "kind": "Constructor",
-              "canonicalReference": "(:constructor,2)",
               "docComment": "/**\n * The overloaded constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -93,7 +112,6 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(DocClass1:class)",
           "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.\n *\n * @defaultValue\n *\n * a default value for this function\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -142,7 +160,6 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(deprecatedExample:instance,0)",
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
               "excerptTokens": [
                 {
@@ -174,7 +191,6 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(exampleFunction:instance,1)",
               "docComment": "/**\n * This is an overloaded function.\n *\n * @param a - the first string\n *\n * @param b - the second string\n */\n",
               "excerptTokens": [
                 {
@@ -253,7 +269,6 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(exampleFunction:instance,2)",
               "docComment": "/**\n * This is also an overloaded function.\n *\n * @param x - the number\n */\n",
               "excerptTokens": [
                 {
@@ -309,7 +324,6 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(interestingEdgeCases:instance,0)",
               "docComment": "/**\n * Example: \"\\{ \\\\\"maxItemsToShow\\\\\": 123 \\}\"\n *\n * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\\\-_]+$/\n */\n",
               "excerptTokens": [
                 {
@@ -341,7 +355,6 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "(malformedEvent:instance)",
               "docComment": "/**\n * This event should have been marked as readonly.\n *\n * @eventProperty\n */\n",
               "excerptTokens": [
                 {
@@ -371,7 +384,6 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "(modifiedEvent:instance)",
               "docComment": "/**\n * This event is fired whenever the object is modified.\n *\n * @eventProperty\n */\n",
               "excerptTokens": [
                 {
@@ -405,7 +417,6 @@
             },
             {
               "kind": "Property",
-              "canonicalReference": "(regularProperty:instance)",
               "docComment": "/**\n * This is a regular property that happens to use the SystemEvent type.\n */\n",
               "excerptTokens": [
                 {
@@ -435,7 +446,6 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(sumWithExample:static,0)",
               "docComment": "/**\n * Returns the sum of two numbers.\n *\n * @remarks\n *\n * This illustrates usage of the `@example` block tag.\n *\n * @param x - the first number to add\n *\n * @param y - the second number to add\n *\n * @returns the sum of the two numbers\n *\n * @example\n *\n * Here's a simple example:\n * ```\n * // Prints \"2\":\n * console.log(DocClass1.sumWithExample(1,1));\n * ```\n *\n * @example\n *\n * Here's an example with negative numbers:\n * ```\n * // Prints \"0\":\n * console.log(DocClass1.sumWithExample(1,-1));\n * ```\n *\n */\n",
               "excerptTokens": [
                 {
@@ -518,7 +528,6 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(tableExample:instance,0)",
               "docComment": "/**\n * An example with tables:\n *\n * @remarks\n *\n * <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>\n */\n",
               "excerptTokens": [
                 {
@@ -566,7 +575,6 @@
         },
         {
           "kind": "Enum",
-          "canonicalReference": "(DocEnum:enum)",
           "docComment": "/**\n * Docs for DocEnum\n *\n * {@docCategory SystemEvent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -587,7 +595,6 @@
           "members": [
             {
               "kind": "EnumMember",
-              "canonicalReference": "One",
               "docComment": "/**\n * These are some docs for One\n */\n",
               "excerptTokens": [
                 {
@@ -612,7 +619,6 @@
             },
             {
               "kind": "EnumMember",
-              "canonicalReference": "Two",
               "docComment": "/**\n * These are some docs for Two\n */\n",
               "excerptTokens": [
                 {
@@ -637,7 +643,6 @@
             },
             {
               "kind": "EnumMember",
-              "canonicalReference": "Zero",
               "docComment": "/**\n * These are some docs for Zero\n */\n",
               "excerptTokens": [
                 {
@@ -663,8 +668,89 @@
           ]
         },
         {
+          "kind": "Namespace",
+          "docComment": "/**\n * A namespace containing an ECMAScript symbol\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare namespace "
+            },
+            {
+              "kind": "Reference",
+              "text": "EcmaSmbols"
+            },
+            {
+              "kind": "Content",
+              "text": " "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "EcmaSmbols",
+          "members": [
+            {
+              "kind": "Variable",
+              "docComment": "/**\n * An ECMAScript symbol\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Reference",
+                  "text": "example"
+                },
+                {
+                  "kind": "Content",
+                  "text": ": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "unique symbol"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "example",
+              "variableTypeTokenRange": {
+                "startIndex": 2,
+                "endIndex": 3
+              }
+            }
+          ]
+        },
+        {
+          "kind": "TypeAlias",
+          "docComment": "/**\n * A type alias\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare type "
+            },
+            {
+              "kind": "Reference",
+              "text": "ExampleTypeAlias"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Promise"
+            },
+            {
+              "kind": "Content",
+              "text": "<boolean>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "ExampleTypeAlias",
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 5
+          }
+        },
+        {
           "kind": "Class",
-          "canonicalReference": "(Generic:class)",
           "docComment": "/**\n * Generic class.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -708,7 +794,6 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(globalFunction:0)",
           "docComment": "/**\n * An exported function\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -767,7 +852,6 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "(IDocInterface1:interface)",
           "docComment": "/**\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -788,7 +872,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "regularProperty",
               "docComment": "/**\n * Does something\n */\n",
               "excerptTokens": [
                 {
@@ -820,7 +903,6 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "(IDocInterface2:interface)",
           "docComment": "/**\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -849,7 +931,6 @@
           "members": [
             {
               "kind": "MethodSignature",
-              "canonicalReference": "(deprecatedExample:0)",
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
               "excerptTokens": [
                 {
@@ -888,7 +969,6 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "(IDocInterface3:interface)",
           "docComment": "/**\n * Some less common TypeScript declaration kinds.\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -908,8 +988,71 @@
           "name": "IDocInterface3",
           "members": [
             {
+              "kind": "PropertySignature",
+              "docComment": "/**\n * An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "\"[not.a.symbol]\": "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "\"[not.a.symbol]\"",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "docComment": "/**\n * ECMAScript symbol\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "["
+                },
+                {
+                  "kind": "Reference",
+                  "text": "EcmaSmbols"
+                },
+                {
+                  "kind": "Content",
+                  "text": "."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "example"
+                },
+                {
+                  "kind": "Content",
+                  "text": "]: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "[EcmaSmbols.example]",
+              "propertyTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            },
+            {
               "kind": "CallSignature",
-              "canonicalReference": "(:call,0)",
               "docComment": "/**\n * Call signature\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -958,8 +1101,32 @@
               ]
             },
             {
+              "kind": "ConstructSignature",
+              "docComment": "/**\n * Construct signature\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "new (): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "IDocInterface1"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 0,
+              "parameters": []
+            },
+            {
               "kind": "IndexSignature",
-              "canonicalReference": "(:index,0)",
               "docComment": "/**\n * Indexer\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -1008,37 +1175,34 @@
               ]
             },
             {
-              "kind": "ConstructSignature",
-              "canonicalReference": "(:new,0)",
-              "docComment": "/**\n * Construct signature\n */\n",
+              "kind": "PropertySignature",
+              "docComment": "/**\n * A quoted identifier with redundant quotes.\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
-                  "text": "new (): "
+                  "text": "\"redundantQuotes\": "
                 },
                 {
-                  "kind": "Reference",
-                  "text": "IDocInterface1"
+                  "kind": "Content",
+                  "text": "string"
                 },
                 {
                   "kind": "Content",
                   "text": ";"
                 }
               ],
-              "returnTypeTokenRange": {
+              "releaseTag": "Public",
+              "name": "redundantQuotes",
+              "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
-              },
-              "releaseTag": "Public",
-              "overloadIndex": 0,
-              "parameters": []
+              }
             }
           ],
           "extendsTokenRanges": []
         },
         {
           "kind": "Interface",
-          "canonicalReference": "(IDocInterface4:interface)",
           "docComment": "/**\n * Type union in an interface.\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1059,7 +1223,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "Context",
               "docComment": "/**\n * Test newline rendering when code blocks are used in tables\n */\n",
               "excerptTokens": [
                 {
@@ -1104,7 +1267,6 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "generic",
               "docComment": "/**\n * make sure html entities are escaped in tables.\n */\n",
               "excerptTokens": [
                 {
@@ -1137,7 +1299,6 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "numberOrFunction",
               "docComment": "/**\n * a union type with a function\n */\n",
               "excerptTokens": [
                 {
@@ -1166,7 +1327,6 @@
             },
             {
               "kind": "PropertySignature",
-              "canonicalReference": "stringOrNumber",
               "docComment": "/**\n * a union type\n */\n",
               "excerptTokens": [
                 {
@@ -1198,7 +1358,6 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "(IDocInterface5:interface)",
           "docComment": "/**\n * Interface without inline tag to test custom TOC\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1219,7 +1378,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "regularProperty",
               "docComment": "/**\n * Property of type string that does something\n */\n",
               "excerptTokens": [
                 {
@@ -1251,7 +1409,6 @@
         },
         {
           "kind": "Interface",
-          "canonicalReference": "(IDocInterface6:interface)",
           "docComment": "/**\n * Interface without inline tag to test custom TOC with injection\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1272,7 +1429,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "regularProperty",
               "docComment": "/**\n * Property of type number that does something\n */\n",
               "excerptTokens": [
                 {
@@ -1304,7 +1460,6 @@
         },
         {
           "kind": "Namespace",
-          "canonicalReference": "(OuterNamespace:namespace)",
           "docComment": "/**\n * A top-level namespace\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1325,7 +1480,6 @@
           "members": [
             {
               "kind": "Namespace",
-              "canonicalReference": "(InnerNamespace:namespace)",
               "docComment": "/**\n * A nested namespace\n */\n",
               "excerptTokens": [
                 {
@@ -1346,7 +1500,6 @@
               "members": [
                 {
                   "kind": "Function",
-                  "canonicalReference": "(nestedFunction:0)",
                   "docComment": "/**\n * A function inside a namespace\n */\n",
                   "excerptTokens": [
                     {
@@ -1407,7 +1560,6 @@
             },
             {
               "kind": "Variable",
-              "canonicalReference": "nestedVariable",
               "docComment": "/**\n * A variable exported from within a namespace.\n */\n",
               "excerptTokens": [
                 {
@@ -1434,7 +1586,6 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(SystemEvent:class)",
           "docComment": "/**\n * A class used to exposed events.\n *\n * {@docCategory SystemEvent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1455,7 +1606,6 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(addHandler:instance,0)",
               "docComment": "/**\n * Adds an handler for the event.\n */\n",
               "excerptTokens": [
                 {
@@ -1511,68 +1661,6 @@
             }
           ],
           "implementsTokenRanges": []
-        },
-        {
-          "kind": "Variable",
-          "canonicalReference": "constVariable",
-          "docComment": "/**\n * An exported variable declaration.\n *\n * @public\n */\n",
-          "excerptTokens": [
-            {
-              "kind": "Reference",
-              "text": "constVariable"
-            },
-            {
-              "kind": "Content",
-              "text": ": "
-            },
-            {
-              "kind": "Content",
-              "text": "number"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "constVariable",
-          "variableTypeTokenRange": {
-            "startIndex": 2,
-            "endIndex": 3
-          }
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "ExampleTypeAlias",
-          "docComment": "/**\n * A type alias\n *\n * @public\n */\n",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export declare type "
-            },
-            {
-              "kind": "Reference",
-              "text": "ExampleTypeAlias"
-            },
-            {
-              "kind": "Content",
-              "text": " = "
-            },
-            {
-              "kind": "Reference",
-              "text": "Promise"
-            },
-            {
-              "kind": "Content",
-              "text": "<boolean>"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "releaseTag": "Public",
-          "name": "ExampleTypeAlias",
-          "typeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 5
-          }
         }
       ]
     }

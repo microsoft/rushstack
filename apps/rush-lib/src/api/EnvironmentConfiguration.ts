@@ -22,6 +22,13 @@ export const enum EnvironmentVariableNames {
   RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION',
 
   /**
+   * If this variable is set to "true", Rush will not fail the build when running a version
+   * of Node that does not match the criteria specified in the "nodeSupportedVersionRange"
+   * field from rush.json.
+   */
+  RUSH_ALLOW_UNSUPPORTED_NODEJS = 'RUSH_ALLOW_UNSUPPORTED_NODEJS',
+
+  /**
    * This variable selects a specific installation variant for Rush to use when installing
    * and linking package dependencies.  For more information, see this article:
    * https://rushjs.io/pages/advanced/installation_variants/
@@ -50,6 +57,8 @@ export class EnvironmentConfiguration {
 
   private static _absoluteSymlinks: boolean = false;
 
+  private static _allowUnsupportedNodeVersion: boolean = false;
+
   /**
    * An override for the common/temp folder path.
    */
@@ -65,6 +74,18 @@ export class EnvironmentConfiguration {
   public static get absoluteSymlinks(): boolean {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._absoluteSymlinks;
+  }
+
+  /**
+   * If this environment variable is set to "true", the Node.js version check will print a warning
+   * instead of causing a hard error if the environment's Node.js version doesn't match the
+   * version specifier in `rush.json`'s "nodeSupportedVersionRange" property.
+   *
+   * See {@link EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS}.
+   */
+  public static get allowUnsupportedNodeVersion(): boolean {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._allowUnsupportedNodeVersion;
   }
 
   /**
@@ -87,6 +108,11 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS: {
             EnvironmentConfiguration._absoluteSymlinks = value === 'true';
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS: {
+            EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
             break;
           }
 

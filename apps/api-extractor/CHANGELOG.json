@@ -2,6 +2,35 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.3.4",
+      "tag": "@microsoft/api-extractor_v7.3.4",
+      "date": "Tue, 23 Jul 2019 01:13:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "ApiItem.name is now quoted when it contains invalid identifier characters, to avoid conflicts with an ECMAScript symbol expression"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.3",
+      "tag": "@microsoft/api-extractor_v7.3.3",
+      "date": "Mon, 22 Jul 2019 19:13:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update to use new api-extractor-model"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" from `7.2.0` to `7.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.2",
       "tag": "@microsoft/api-extractor_v7.3.2",
       "date": "Fri, 12 Jul 2019 19:12:46 GMT",

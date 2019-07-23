@@ -693,7 +693,7 @@ export class YamlDocumenter {
         case ApiItemKind.EntryPoint:
           break;
         case ApiItemKind.Package:
-          result += PackageName.getUnscopedName(current.displayName);
+          result += Utilities.getSafeFilenameForName(PackageName.getUnscopedName(current.displayName));
           break;
         default:
           if (current.parent && current.parent.kind === ApiItemKind.EntryPoint) {
@@ -701,11 +701,11 @@ export class YamlDocumenter {
           } else {
             result += '.';
           }
-          result += current.displayName;
+          result += Utilities.getSafeFilenameForName(current.displayName);
           break;
       }
     }
-    return path.join(this._outputFolder, result.toLowerCase() + '.yml');
+    return path.join(this._outputFolder, result + '.yml');
   }
 
   private _deleteOldOutputFiles(): void {

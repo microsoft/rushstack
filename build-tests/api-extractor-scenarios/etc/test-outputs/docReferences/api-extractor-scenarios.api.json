@@ -2,22 +2,19 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1001,
+    "schemaVersion": 1002,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
       "name": "",
       "members": [
         {
           "kind": "Function",
-          "canonicalReference": "(failWithBrokenLink:0)",
           "docComment": "/**\n * {@inheritDoc MyNamespace.MyClass.nonExistentMethod}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -52,7 +49,6 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(failWithMissingReference:0)",
           "docComment": "/**\n * {@inheritDoc}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -87,7 +83,6 @@
         },
         {
           "kind": "Namespace",
-          "canonicalReference": "(MyNamespace:namespace)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -108,7 +103,6 @@
           "members": [
             {
               "kind": "Class",
-              "canonicalReference": "(MyClass:class)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -129,7 +123,6 @@
               "members": [
                 {
                   "kind": "Method",
-                  "canonicalReference": "(myMethod:instance,0)",
                   "docComment": "/**\n * Summary for myMethod\n *\n * @remarks\n *\n * Remarks for myMethod\n *\n * @param x - the parameter\n *\n * @returns a number\n *\n * @beta\n */\n",
                   "excerptTokens": [
                     {
@@ -190,7 +183,6 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(succeedForNow:0)",
           "docComment": "/**\n * {@inheritDoc nonexistent-package#MyNamespace.MyClass.nonExistentMethod}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -225,7 +217,6 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(testSimple:0)",
           "docComment": "/**\n * Summary for myMethod\n *\n * @remarks\n *\n * Remarks for myMethod\n *\n * @param x - the parameter\n *\n * @returns a number\n *\n * @public\n */\n",
           "excerptTokens": [
             {

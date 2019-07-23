@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/web-library-build",
+      "comment": "Update gulp to 4.0.2.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/web-library-build",
+  "email": "mikeharder@users.noreply.github.com"
+}
