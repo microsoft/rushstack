@@ -371,6 +371,12 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@microsoft/rush-buildxl",
+      "projectFolder": "apps/rush-buildxl",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
+    {
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "apps/rush-lib",
       "reviewCategory": "libraries",
