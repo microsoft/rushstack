@@ -20,7 +20,7 @@
     "@types/mocha": "5.2.5",
     "@types/node": "8.5.8",
     "chai": "~3.5.0",
-    "gulp": "~3.9.1",
+    "gulp": "~4.0.2",
     "mocha": "^5.2.0",
     "@microsoft/node-library-build": "6.0.74"
   }

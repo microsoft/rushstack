@@ -31,7 +31,7 @@
     "@microsoft/rush-stack-compiler-3.4": "0.1.11",
     "@types/glob": "5.0.30",
     "@types/resolve": "0.0.8",
-    "gulp": "~3.9.1",
+    "gulp": "~4.0.2",
     "tslint-microsoft-contrib": "~5.2.1",
     "typescript": "~3.2.4"
   }

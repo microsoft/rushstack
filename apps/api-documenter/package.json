@@ -25,10 +25,10 @@
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.4": "0.1.13",
     "@microsoft/node-library-build": "6.0.74",
+    "@types/jest": "23.3.11",
     "@types/js-yaml": "3.12.1",
     "@types/node": "8.5.8",
-    "gulp": "~3.9.1",
-    "@types/jest": "23.3.11",
+    "gulp": "~4.0.2",
     "jest": "~23.6.0"
   }
 }

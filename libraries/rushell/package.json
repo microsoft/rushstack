@@ -24,7 +24,7 @@
     "@microsoft/node-library-build": "6.0.74",
     "@types/jest": "23.3.11",
     "@types/node": "8.5.8",
-    "gulp": "~3.9.1",
+    "gulp": "~4.0.2",
     "jest": "~23.6.0",
     "ts-jest": "~22.4.6"
   },

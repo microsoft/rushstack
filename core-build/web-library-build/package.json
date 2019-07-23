@@ -23,9 +23,9 @@
     "@microsoft/gulp-core-build-serve": "3.3.48",
     "@microsoft/gulp-core-build-typescript": "8.1.23",
     "@microsoft/gulp-core-build-webpack": "3.4.115",
-    "@types/gulp": "3.8.32",
+    "@types/gulp": "4.0.6",
     "@types/node": "8.5.8",
-    "gulp": "~3.9.1",
+    "gulp": "~4.0.2",
     "gulp-replace": "^0.5.4"
   },
   "devDependencies": {

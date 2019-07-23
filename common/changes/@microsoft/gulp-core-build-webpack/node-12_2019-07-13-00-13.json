@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-webpack",
+      "comment": "Update gulp to 4.0.2",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-webpack",
+  "email": "mikeharder@users.noreply.github.com"
+}

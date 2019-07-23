@@ -21,14 +21,14 @@
     "@microsoft/api-extractor": "7.3.4",
     "@microsoft/node-core-library": "3.13.0",
     "@types/node": "8.5.8",
-    "tslint-microsoft-contrib": "~5.2.1",
     "tslint": "~5.12.1",
+    "tslint-microsoft-contrib": "~5.2.1",
     "typescript": "~2.9.2"
   },
   "devDependencies": {
     "@microsoft/node-library-build": "6.0.71",
     "@microsoft/rush-stack-compiler-3.4": "0.1.11",
     "@microsoft/rush-stack-compiler-shared": "0.0.0",
-    "gulp": "~3.9.1"
+    "gulp": "~4.0.2"
   }
 }
