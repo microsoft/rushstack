@@ -1,6 +1,18 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Mon, 22 Jul 2019 19:13:10 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Jul 2019 19:14:38 GMT and should not be manually modified.
+
+## 7.1.0
+Tue, 23 Jul 2019 19:14:38 GMT
+
+### Minor changes
+
+- Update gulp to 4.0.2.
+
+## 7.0.52
+Tue, 23 Jul 2019 01:13:01 GMT
+
+*Version update only*
 
 ## 7.0.51
 Mon, 22 Jul 2019 19:13:10 GMT

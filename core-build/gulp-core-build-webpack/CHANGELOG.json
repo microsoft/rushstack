@@ -2,6 +2,41 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "3.5.0",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.5.0",
+      "date": "Tue, 23 Jul 2019 19:14:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update gulp to 4.0.2"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" from `3.9.26` to `3.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.74` to `6.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.4.115",
+      "tag": "@microsoft/gulp-core-build-webpack_v3.4.115",
+      "date": "Tue, 23 Jul 2019 01:13:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.12` to `0.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.73` to `6.0.74`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.4.114",
       "tag": "@microsoft/gulp-core-build-webpack_v3.4.114",
       "date": "Mon, 22 Jul 2019 19:13:10 GMT",

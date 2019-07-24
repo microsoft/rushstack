@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 22 Jul 2019 19:13:10 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Jul 2019 01:13:01 GMT and should not be manually modified.
+
+## 7.3.4
+Tue, 23 Jul 2019 01:13:01 GMT
+
+### Patches
+
+- ApiItem.name is now quoted when it contains invalid identifier characters, to avoid conflicts with an ECMAScript symbol expression
 
 ## 7.3.3
 Mon, 22 Jul 2019 19:13:10 GMT

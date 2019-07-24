@@ -2,6 +2,38 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.3.11",
+      "tag": "@microsoft/api-documenter_v7.3.11",
+      "date": "Tue, 23 Jul 2019 19:14:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.74` to `6.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.3.10",
+      "tag": "@microsoft/api-documenter_v7.3.10",
+      "date": "Tue, 23 Jul 2019 01:13:01 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where generated filenames sometimes mcontained invalid characters"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.12` to `0.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.73` to `6.0.74`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.9",
       "tag": "@microsoft/api-documenter_v7.3.9",
       "date": "Mon, 22 Jul 2019 19:13:10 GMT",
