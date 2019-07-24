@@ -3,6 +3,7 @@
 
 import { CommandLineParser } from '@microsoft/ts-command-line';
 import { Terminal } from '@microsoft/node-core-library';
+import { CleanAction } from './actions/CleanAction';
 import { GenerateAction } from './actions/GenerateAction';
 
 export class RushBuildXLCommandLineParser extends CommandLineParser {
@@ -16,6 +17,7 @@ export class RushBuildXLCommandLineParser extends CommandLineParser {
 
     this._terminal = terminal;
 
+    this.addAction(new CleanAction(this._terminal));
     this.addAction(new GenerateAction(this._terminal));
   }
 
