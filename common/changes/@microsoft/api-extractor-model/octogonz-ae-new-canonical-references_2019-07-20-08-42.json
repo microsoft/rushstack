@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/api-extractor-model",
       "comment": "(Experimental) Add ApiExtractor.canonicalReference which is a beta implementation of the revised TSDoc declaration reference notation",
-      "type": "minor"
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/api-extractor-model",
