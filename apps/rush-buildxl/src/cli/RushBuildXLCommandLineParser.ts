@@ -3,6 +3,7 @@
 
 import { CommandLineParser } from '@microsoft/ts-command-line';
 import { Terminal } from '@microsoft/node-core-library';
+
 import { CleanAction } from './actions/CleanAction';
 import { GenerateAction } from './actions/GenerateAction';
 
