@@ -21,7 +21,9 @@ export class CleanAction extends CommandLineAction {
     this._terminal = terminal;
   }
 
-  public onDefineParameters(): void {/***/}
+  public onDefineParameters(): void {
+    /* This action doesn't take any parameters*/
+  }
 
   protected async onExecute(): Promise<void> {
     const rushConfig: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
