@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, Meaning, Navigation } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions } from '../items/ApiDeclaredItem';
 import { ApiParameterListMixin, IApiParameterListMixinOptions } from '../mixins/ApiParameterListMixin';
@@ -64,8 +64,9 @@ export class ApiMethodSignature extends ApiNameMixin(ApiTypeParameterListMixin(A
 
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
+    const nameComponent: Component = DeclarationReference.parseComponent(this.name);
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
-      .addNavigationStep(Navigation.Members, this._getCanonicalReferenceName())
+      .addNavigationStep(Navigation.Members, nameComponent)
       .withMeaning(Meaning.Member)
       .withOverloadIndex(this.overloadIndex);
   }

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import { DeserializerContext } from '../model/DeserializerContext';
 
@@ -47,9 +46,6 @@ export interface ApiNameMixin extends ApiItem {
 
   /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
-
-  /** @internal */
-  _getCanonicalReferenceName(): string | DeclarationReference;
 }
 
 /**
@@ -97,19 +93,6 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: 
       super.serializeInto(jsonObject);
 
       jsonObject.name = this.name;
-    }
-
-    /** @internal */
-    public _getCanonicalReferenceName(): string | DeclarationReference {
-      const name: string = this.name;
-      if (name[0] === '"') {
-        return JSON.parse(name);
-      }
-      if (name[0] === '[') {
-        // Unwrap the [] and parse the reference
-        return DeclarationReference.parse(name.substr(1, name.length - 2));
-      }
-      return name;
     }
   }
 
