@@ -2,16 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import {
-  CommandLineStringParameter,
   CommandLineAction
 } from '@microsoft/ts-command-line';
 
 import { Terminal } from '@microsoft/node-core-library';
+import { RushConfiguration } from '@microsoft/rush-lib';
+import { BxlModulesGenerator } from '../../api/BxlModulesGenerator';
 
 export class GenerateAction extends CommandLineAction {
   private _terminal: Terminal;
-
-  private _exampleOption: CommandLineStringParameter;
 
   constructor(terminal: Terminal) {
     super({
@@ -23,17 +22,24 @@ export class GenerateAction extends CommandLineAction {
     this._terminal = terminal;
   }
 
-  public onDefineParameters(): void {
-    this._exampleOption = this.defineStringParameter({
-      parameterLongName: '--example-parameter',
-      argumentName: 'STRING',
-      description: 'Am example paramter'
-    });
-  }
+  public onDefineParameters(): void {/***/}
 
   protected async onExecute(): Promise<void> {
-    this._terminal.writeLine('Example terminal output');
 
-    this._terminal.writeLine(`The value of ${this._exampleOption.longName} is "${this._exampleOption.value}".`);
+    if (process.env.BUILDXL_BIN === undefined) {
+      throw new Error('Environment variable BUILDXL_BIN not defined');
+    }
+
+    const generator: BxlModulesGenerator =
+        new BxlModulesGenerator(
+          RushConfiguration.loadFromDefaultLocation(),
+          process.env.BUILDXL_BIN);
+
+    if (!generator.run()) {
+      this._terminal.writeErrorLine('Error generating bxl scripts');
+      return;
+    }
+
+    this._terminal.writeLine(`Successfully generated BuildXL configuration.`);
   }
 }
