@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { RushConfiguration } from '@microsoft/rush-lib';
+
 import { BxlModule } from './BxlModule';
 import { BxlConfig } from './BxlConfig';
 
@@ -16,14 +17,14 @@ export class BxlModulesGenerator {
 
   public run(): boolean {
     const modulesRoot: string = this._normalizePathSeparator(`${this._rushConfiguration.commonTempFolder}/bxl`);
-    const rushJsonFile: string = this._normalizePathSeparator(this._rushConfiguration.rushJsonFile);
+    const rushJsonFilePath: string = this._normalizePathSeparator(this._rushConfiguration.rushJsonFile);
 
-    const modules: BxlModule[] =  this._rushConfiguration.projects.map(project => {
+    const modules: BxlModule[] =  this._rushConfiguration.projects.map((project) => {
       const name: string = this._packageNameToModuleName(project.packageName);
       const moduleRoot: string = `${modulesRoot}/${name}`;
       const projDir: string = this._normalizePathSeparator(project.projectFolder);
 
-      return new BxlModule(name, projDir, rushJsonFile, moduleRoot);
+      return new BxlModule(name, projDir, rushJsonFilePath, moduleRoot);
     });
 
     const bxlConfig: BxlConfig = new BxlConfig(this._buildXLRoot, modulesRoot, modules);

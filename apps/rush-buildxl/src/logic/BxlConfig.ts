@@ -2,21 +2,22 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem } from '@microsoft/node-core-library';
+
 import { BxlModule } from './BxlModule';
 
 export class BxlConfig {
   private _bxlRoot: string;
-  private _moduleDir: string;
+  private _modulesFolder: string;
   private _modules: BxlModule[];
 
-  constructor(bxlRoot: string, moduleDir: string, modules: BxlModule[]) {
+  constructor(bxlRoot: string, modulesFolder: string, modules: BxlModule[]) {
     this._bxlRoot = bxlRoot;
-    this._moduleDir = moduleDir;
+    this._modulesFolder = modulesFolder;
     this._modules = modules;
   }
 
-  public get filePath(): string {
-    return `${this._moduleDir}/config.dsc`;
+  public get bxlConfigFilePath(): string {
+    return `${this._modulesFolder}/config.dsc`;
   }
 
   public writeFile(): Promise<void> {
@@ -45,8 +46,7 @@ export class BxlConfig {
     ]
 });`;
 
-    FileSystem.ensureFolder(this._moduleDir);
-    FileSystem.writeFile(this.filePath, contents);
+    FileSystem.writeFile(this.bxlConfigFilePath, contents, { ensureFolderExists: true });
     return Promise.resolve();
   }
 }

@@ -2,27 +2,28 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem } from '@microsoft/node-core-library';
+
 import { BxlModuleConfig } from './BxlModuleConfig';
 
 export interface IBxlModuleInfo {
   name: string;
   packageRoot: string;
-  moduleDir: string;
+  moduleFolder: string;
 }
 
 export class BxlModule {
   private _name: string;
-  private _moduleDir: string;
+  private _moduleFolder: string;
   private _config: BxlModuleConfig;
-  private _projDir: string;
+  private _projectFolder: string;
   private _rushJson: string;
 
-  constructor(name: string, projDir: string, rushJson: string, moduleDir: string) {
+  constructor(name: string, projectFolder: string, rushJson: string, moduleFolder: string) {
     this._name = name;
-    this._projDir = projDir;
+    this._projectFolder = projectFolder;
     this._rushJson = rushJson;
-    this._moduleDir = moduleDir;
-    this._config = new BxlModuleConfig(name, moduleDir, this.moduleFilePath);
+    this._moduleFolder = moduleFolder;
+    this._config = new BxlModuleConfig(name, moduleFolder, this.moduleFilePath);
   }
 
   public get configFilePath(): string {
@@ -30,7 +31,7 @@ export class BxlModule {
   }
 
   public get moduleFilePath(): string {
-    return `${this._moduleDir}/${this._name}.dsc`;
+    return `${this._moduleFolder}/${this._name}.dsc`;
   }
 
   public writeFile(): Promise<void> {
@@ -42,8 +43,8 @@ export const cmdTool: Transformer.ToolDefinition = {
   dependsOnWindowsDirectories: true,
 };
 
-const packageRoot = d\`${this._projDir}\`;
-const packageJson = f\`${this._projDir}/package.json\`;
+const packageRoot = d\`${this._projectFolder}\`;
+const packageJson = f\`${this._projectFolder}/package.json\`;
 const rushJson = f\`${this._rushJson}\`;
 const outFile = f\`\${Context.getMount("Out").path}\\${this._name}.snt\`;
 
@@ -77,8 +78,7 @@ export const buildPip = Transformer.execute({
 });
 `;
 
-    FileSystem.ensureFolder(this._moduleDir);
-    FileSystem.writeFile(this.moduleFilePath, contents);
+    FileSystem.writeFile(this.moduleFilePath, contents, { ensureFolderExists: true });
     return this._config.writeFile();
   }
 }

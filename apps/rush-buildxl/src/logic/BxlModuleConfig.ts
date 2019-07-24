@@ -5,17 +5,17 @@ import { FileSystem } from '@microsoft/node-core-library';
 
 export class BxlModuleConfig {
   private _name: string;
-  private _project: string;
-  private _moduleDir: string;
+  private _moduleFilePath: string;
+  private _moduleFolder: string;
 
-  constructor(name: string, moduleDir: string, moduleFilePath: string) {
+  constructor(name: string, moduleFolder: string, moduleFilePath: string) {
     this._name = name;
-    this._moduleDir = moduleDir;
-    this._project = moduleFilePath;
+    this._moduleFolder = moduleFolder;
+    this._moduleFilePath = moduleFilePath;
   }
 
   public get moduleConfigFilePath(): string {
-    return this._moduleDir + '/module.config.dsc';
+    return this._moduleFolder + '/module.config.dsc';
   }
 
   public writeFile(): Promise<void> {
@@ -24,12 +24,11 @@ export class BxlModuleConfig {
     name: "${this._name}",
     nameResolutionSemantics: NameResolutionSemantics.implicitProjectReferences,
     projects: [
-        f\`${this._project}\`
+        f\`${this._moduleFilePath}\`
     ]
 });`;
 
-    FileSystem.ensureFolder(this._moduleDir);
-    FileSystem.writeFile(this.moduleConfigFilePath, contents);
+    FileSystem.writeFile(this.moduleConfigFilePath, contents, { ensureFolderExists: true });
 
     return Promise.resolve();
   }
