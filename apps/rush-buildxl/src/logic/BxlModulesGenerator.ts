@@ -16,8 +16,9 @@ export class BxlModulesGenerator {
   }
 
   public run(): boolean {
-    const modulesRoot: string = this._normalizePathSeparator(`${this._rushConfiguration.commonTempFolder}/bxl`);
+    const modulesRoot: string = this._normalizePathSeparator(`${this._rushConfiguration.commonTempFolder}/bxl/modules`);
     const rushJsonFilePath: string = this._normalizePathSeparator(this._rushConfiguration.rushJsonFile);
+    const commonRushConfigFolder: string = this._normalizePathSeparator(this._rushConfiguration.commonRushConfigFolder);
 
     const modules: BxlModule[] =  this._rushConfiguration.projects.map((project) => {
       const name: string = this._packageNameToModuleName(project.packageName);
@@ -27,7 +28,7 @@ export class BxlModulesGenerator {
       return new BxlModule(name, projDir, rushJsonFilePath, moduleRoot);
     });
 
-    const bxlConfig: BxlConfig = new BxlConfig(this._buildXLRoot, modulesRoot, modules);
+    const bxlConfig: BxlConfig = new BxlConfig(this._buildXLRoot, modulesRoot, modules, commonRushConfigFolder);
 
     const tasks: Array<Promise<void>> = modules.map(module => module.writeFile());
     tasks.push(bxlConfig.writeFile());

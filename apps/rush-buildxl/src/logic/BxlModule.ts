@@ -16,12 +16,12 @@ export class BxlModule {
   private _moduleFolder: string;
   private _config: BxlModuleConfig;
   private _projectFolder: string;
-  private _rushJson: string;
+  private _rushJsonPath: string;
 
-  constructor(name: string, projectFolder: string, rushJson: string, moduleFolder: string) {
+  constructor(name: string, projectFolder: string, rushJsonPath: string, moduleFolder: string) {
     this._name = name;
     this._projectFolder = projectFolder;
-    this._rushJson = rushJson;
+    this._rushJsonPath = rushJsonPath;
     this._moduleFolder = moduleFolder;
     this._config = new BxlModuleConfig(name, moduleFolder, this.moduleFilePath);
   }
@@ -43,11 +43,17 @@ export const cmdTool: Transformer.ToolDefinition = {
   dependsOnWindowsDirectories: true,
 };
 
-const packageRoot = d\`${this._projectFolder}\`;
-const packageJson = f\`${this._projectFolder}/package.json\`;
-const rushJson = f\`${this._rushJson}\`;
-const outFile = f\`\${Context.getMount("Out").path}\\${this._name}.snt\`;
+const packageRoot: Directory = d\`${this._projectFolder}\`;
+const packageJson: File = f\`${this._projectFolder}/package.json\`;
+const rushJsonPath: File  = f\`${this._rushJsonPath}\`;
+const outFile: File = f\`\${Context.getMount("Out").path}\\${this._name}.snt\`;
 
+const commonRushConfig: StaticDirectory =
+   Transformer.sealSourceDirectory(
+      d\`\${Context.getMount("CommonRushConfig").path}\`,
+      Transformer.SealSourceDirectoryOption.allDirectories);
+
+// Invoke the rushx build command for the package
 export const buildPip = Transformer.execute({
     tool: cmdTool,
     arguments: [
@@ -57,18 +63,22 @@ export const buildPip = Transformer.execute({
     ],
     dependencies: [
         packageJson,
-        rushJson,
+        rushJsonPath,
+        commonRushConfig,
     ],
     environmentVariables: [],
     outputs: [
         outFile
     ],
+    // BuildXL ignores changes to these paths and variables. Unsafe options reduce determinism and can
+    // cause distributed build failures if used too broadly.
     unsafe: {
         passThroughEnvironmentVariables : [
           "PATH",
           "USERPROFILE",
         ],
         untrackedScopes: [
+          d\`\${Environment.getPathValue("USERPROFILE").path}/.rush\`,
           d\`\${Context.getMount("AppData").path}\`,
           d\`\${Context.getMount("ProgramFiles").path}\`,
           d\`\${Context.getMount("ProgramFilesX86").path}\`,

@@ -7,7 +7,8 @@ import {
 
 import { Terminal } from '@microsoft/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
-import { BxlModulesGenerator } from '../../api/BxlModulesGenerator';
+
+import { BxlModulesGenerator } from '../../logic/BxlModulesGenerator';
 
 export class GenerateAction extends CommandLineAction {
   private _terminal: Terminal;
@@ -22,7 +23,9 @@ export class GenerateAction extends CommandLineAction {
     this._terminal = terminal;
   }
 
-  public onDefineParameters(): void {/***/}
+  public onDefineParameters(): void {
+    /* This action doesn't take any parameters*/
+  }
 
   protected async onExecute(): Promise<void> {
 

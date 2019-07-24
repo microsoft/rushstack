@@ -9,11 +9,13 @@ export class BxlConfig {
   private _bxlRoot: string;
   private _modulesFolder: string;
   private _modules: BxlModule[];
+  private _commonRushConfigFolder: string;
 
-  constructor(bxlRoot: string, modulesFolder: string, modules: BxlModule[]) {
+  constructor(bxlRoot: string, modulesFolder: string, modules: BxlModule[], commonRushConfigFolder: string) {
     this._bxlRoot = bxlRoot;
     this._modulesFolder = modulesFolder;
     this._modules = modules;
+    this._commonRushConfigFolder = commonRushConfigFolder;
   }
 
   public get bxlConfigFilePath(): string {
@@ -23,7 +25,7 @@ export class BxlConfig {
   public writeFile(): Promise<void> {
     const contents: string =
 `config({
-    packages: [
+    modules: [
         f\`${this._modules[0].configFilePath}\`,
     ],
     resolvers: [
@@ -37,13 +39,20 @@ export class BxlConfig {
     ],
     mounts: [
         {
-            name: a\`Out\`,
-            path: p\`Out\\Bin\`,
+            name: a\`CommonRushConfig\`,
+            path: p\`${this._commonRushConfigFolder}\`,
             trackSourceFileChanges: true,
-            isWritable: true,
+            isWritable: false,
             isReadable: true
         },
-    ]
+        {
+          name: a\`Out\`,
+          path: p\`../out\`,
+          trackSourceFileChanges: true,
+          isWritable: true,
+          isReadable: true
+        },
+  ]
 });`;
 
     FileSystem.writeFile(this.bxlConfigFilePath, contents, { ensureFolderExists: true });

@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
+
 import {
   CommandLineAction
 } from '@microsoft/ts-command-line';
@@ -28,7 +30,7 @@ export class CleanAction extends CommandLineAction {
   protected async onExecute(): Promise<void> {
     const rushConfig: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
-    FileSystem.deleteFolder(`${rushConfig.commonTempFolder}/bxl`);
+    FileSystem.deleteFolder(path.resolve(rushConfig.commonTempFolder, 'bxl', 'modules'));
 
     this._terminal.writeLine(`Successfully cleaned BuildXL configuration.`);
   }
