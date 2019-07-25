@@ -34,7 +34,7 @@ export class BxlModule {
     return `${this._moduleFolder}/${this._name}.dsc`;
   }
 
-  public writeFile(): Promise<void> {
+  public async writeFile(): Promise<void> {
     const contents: string =
 `import { Cmd, Transformer } from "Sdk.Transformers";
 
@@ -89,6 +89,8 @@ export const buildPip = Transformer.execute({
 `;
 
     FileSystem.writeFile(this.moduleFilePath, contents, { ensureFolderExists: true });
-    return this._config.writeFile();
+
+    // Also write the module config file
+    await this._config.writeFile();
   }
 }

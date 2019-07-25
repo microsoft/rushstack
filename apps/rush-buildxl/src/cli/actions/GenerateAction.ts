@@ -38,11 +38,7 @@ export class GenerateAction extends CommandLineAction {
           RushConfiguration.loadFromDefaultLocation(),
           process.env.BUILDXL_BIN);
 
-    if (!generator.run()) {
-      this._terminal.writeErrorLine('Error generating bxl scripts');
-      return;
-    }
-
+    await generator.run();
     this._terminal.writeLine(`Successfully generated BuildXL configuration.`);
   }
 }

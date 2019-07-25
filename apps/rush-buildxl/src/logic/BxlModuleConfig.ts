@@ -18,7 +18,7 @@ export class BxlModuleConfig {
     return this._moduleFolder + '/module.config.dsc';
   }
 
-  public writeFile(): Promise<void> {
+  public async writeFile(): Promise<void> {
     const contents: string =
 `package({
     name: "${this._name}",
@@ -29,7 +29,5 @@ export class BxlModuleConfig {
 });`;
 
     FileSystem.writeFile(this.moduleConfigFilePath, contents, { ensureFolderExists: true });
-
-    return Promise.resolve();
   }
 }
