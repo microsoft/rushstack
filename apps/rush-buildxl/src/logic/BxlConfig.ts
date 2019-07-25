@@ -8,14 +8,22 @@ import { BxlModule } from './BxlModule';
 export class BxlConfig {
   private _bxlRoot: string;
   private _modulesFolder: string;
-  private _modules: BxlModule[];
+  private _modules: string;
   private _commonRushConfigFolder: string;
+  private _repoRoot: string;
 
-  constructor(bxlRoot: string, modulesFolder: string, modules: BxlModule[], commonRushConfigFolder: string) {
+  constructor(
+      bxlRoot: string,
+      modulesFolder: string,
+      modules: BxlModule[],
+      commonRushConfigFolder: string,
+      repoRoot: string) {
+
     this._bxlRoot = bxlRoot;
     this._modulesFolder = modulesFolder;
-    this._modules = modules;
+    this._modules = modules.map((m) => `f\`${m.configFilePath}\`,`).join('\n    ');
     this._commonRushConfigFolder = commonRushConfigFolder;
+    this._repoRoot = repoRoot;
   }
 
   public get bxlConfigFilePath(): string {
@@ -26,7 +34,7 @@ export class BxlConfig {
     const contents: string =
 `config({
   modules: [
-    f\`${this._modules[0].configFilePath}\`,
+    ${this._modules}
   ],
   resolvers: [
     {
@@ -43,6 +51,13 @@ export class BxlConfig {
       path: p\`${this._commonRushConfigFolder}\`,
       trackSourceFileChanges: true,
       isWritable: false,
+      isReadable: true
+    },
+    {
+      name: a\`Root\`,
+      path: p\`${this._repoRoot}\`,
+      trackSourceFileChanges: true,
+      isWritable: true,
       isReadable: true
     },
     {
