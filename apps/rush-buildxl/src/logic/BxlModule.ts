@@ -48,43 +48,43 @@ const packageJson: File = f\`${this._projectFolder}/package.json\`;
 const rushJsonPath: File  = f\`${this._rushJsonPath}\`;
 const outFile: File = f\`\${Context.getMount("Out").path}\\${this._name}.snt\`;
 
-const commonRushConfig: StaticDirectory =
-   Transformer.sealSourceDirectory(
-      d\`\${Context.getMount("CommonRushConfig").path}\`,
-      Transformer.SealSourceDirectoryOption.allDirectories);
+const commonRushConfig: StaticDirectory = Transformer.sealSourceDirectory(
+  d\`\${Context.getMount("CommonRushConfig").path}\`,
+  Transformer.SealSourceDirectoryOption.allDirectories
+);
 
 // Invoke the rushx build command for the package
 export const buildPip = Transformer.execute({
-    tool: cmdTool,
-    arguments: [
-        Cmd.argument("/D"),
-        Cmd.argument("/C"),
-        Cmd.argument("rushx.cmd build"),
+  tool: cmdTool,
+  arguments: [
+    Cmd.argument("/D"),
+    Cmd.argument("/C"),
+    Cmd.argument("rushx.cmd build"),
+  ],
+  dependencies: [
+    packageJson,
+    rushJsonPath,
+    commonRushConfig,
+  ],
+  environmentVariables: [],
+  outputs: [
+    outFile
+  ],
+  // BuildXL ignores changes to these paths and variables. Unsafe options reduce determinism and can
+  // cause distributed build failures if used too broadly.
+  unsafe: {
+    passThroughEnvironmentVariables : [
+      "PATH",
+      "USERPROFILE",
     ],
-    dependencies: [
-        packageJson,
-        rushJsonPath,
-        commonRushConfig,
+    untrackedScopes: [
+      d\`\${Environment.getPathValue("USERPROFILE").path}/.rush\`,
+      d\`\${Context.getMount("AppData").path}\`,
+      d\`\${Context.getMount("ProgramFiles").path}\`,
+      d\`\${Context.getMount("ProgramFilesX86").path}\`,
     ],
-    environmentVariables: [],
-    outputs: [
-        outFile
-    ],
-    // BuildXL ignores changes to these paths and variables. Unsafe options reduce determinism and can
-    // cause distributed build failures if used too broadly.
-    unsafe: {
-        passThroughEnvironmentVariables : [
-          "PATH",
-          "USERPROFILE",
-        ],
-        untrackedScopes: [
-          d\`\${Environment.getPathValue("USERPROFILE").path}/.rush\`,
-          d\`\${Context.getMount("AppData").path}\`,
-          d\`\${Context.getMount("ProgramFiles").path}\`,
-          d\`\${Context.getMount("ProgramFilesX86").path}\`,
-        ],
-    },
-    workingDirectory: packageRoot,
+  },
+  workingDirectory: packageRoot,
 });
 `;
 

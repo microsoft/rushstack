@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
+
 import { RushConfiguration } from '@microsoft/rush-lib';
 
 import { BxlModule } from './BxlModule';
@@ -16,13 +18,15 @@ export class BxlModulesGenerator {
   }
 
   public async run(): Promise<void> {
-    const modulesRoot: string = this._normalizePathSeparator(`${this._rushConfiguration.commonTempFolder}/bxl/modules`);
+    const modulesRoot: string = this._normalizePathSeparator(
+      path.resolve(this._rushConfiguration.commonTempFolder, 'bxl', 'modules')
+    );
     const rushJsonFilePath: string = this._normalizePathSeparator(this._rushConfiguration.rushJsonFile);
     const commonRushConfigFolder: string = this._normalizePathSeparator(this._rushConfiguration.commonRushConfigFolder);
 
     const modules: BxlModule[] =  this._rushConfiguration.projects.map((project) => {
       const name: string = this._packageNameToModuleName(project.packageName);
-      const moduleRoot: string = `${modulesRoot}/${name}`;
+      const moduleRoot: string = path.resolve(modulesRoot, name);
       const projDir: string = this._normalizePathSeparator(project.projectFolder);
 
       return new BxlModule(name, projDir, rushJsonFilePath, moduleRoot);
@@ -31,7 +35,7 @@ export class BxlModulesGenerator {
     const bxlConfig: BxlConfig = new BxlConfig(this._buildXLRoot, modulesRoot, modules, commonRushConfigFolder);
 
     // Write individual module dsc files
-    const tasks: Array<Promise<void>> = modules.map(module => module.writeFile());
+    const tasks: Promise<void>[] = modules.map(module => module.writeFile());
     await Promise.all(tasks);
 
     // Write config.dsc
@@ -42,7 +46,7 @@ export class BxlModulesGenerator {
     return packageName.replace('/', '_');
   }
 
-  private _normalizePathSeparator(path: string): string {
-    return path.replace(/\\/g, '/');
+  private _normalizePathSeparator(str: string): string {
+    return str.replace(/\\/g, '/');
   }
 }

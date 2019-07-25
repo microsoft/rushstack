@@ -2,12 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-
+import { CommandLineAction } from '@microsoft/ts-command-line';
 import {
-  CommandLineAction
-} from '@microsoft/ts-command-line';
-
-import { Terminal, FileSystem } from '@microsoft/node-core-library';
+  Terminal,
+  FileSystem
+} from '@microsoft/node-core-library';
 import { RushConfiguration } from '@microsoft/rush-lib';
 
 export class CleanAction extends CommandLineAction {

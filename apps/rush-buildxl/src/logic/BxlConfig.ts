@@ -25,33 +25,33 @@ export class BxlConfig {
   public async writeFile(): Promise<void> {
     const contents: string =
 `config({
-    modules: [
-        f\`${this._modules[0].configFilePath}\`,
-    ],
-    resolvers: [
-        {
-            kind: "SourceResolver",
-            packages: [
-                f\`${this._bxlRoot}/sdk/sdk.transformers/package.config.dsc\`,
-                f\`${this._bxlRoot}/sdk/sdk.prelude/package.config.dsc\`,
-            ]
-        }
-    ],
-    mounts: [
-        {
-            name: a\`CommonRushConfig\`,
-            path: p\`${this._commonRushConfigFolder}\`,
-            trackSourceFileChanges: true,
-            isWritable: false,
-            isReadable: true
-        },
-        {
-          name: a\`Out\`,
-          path: p\`../out\`,
-          trackSourceFileChanges: true,
-          isWritable: true,
-          isReadable: true
-        },
+  modules: [
+    f\`${this._modules[0].configFilePath}\`,
+  ],
+  resolvers: [
+    {
+      kind: "SourceResolver",
+      packages: [
+        f\`${this._bxlRoot}/sdk/sdk.transformers/package.config.dsc\`,
+        f\`${this._bxlRoot}/sdk/sdk.prelude/package.config.dsc\`,
+      ]
+    }
+  ],
+  mounts: [
+    {
+      name: a\`CommonRushConfig\`,
+      path: p\`${this._commonRushConfigFolder}\`,
+      trackSourceFileChanges: true,
+      isWritable: false,
+      isReadable: true
+    },
+    {
+      name: a\`Out\`,
+      path: p\`../out\`,
+      trackSourceFileChanges: true,
+      isWritable: true,
+      isReadable: true
+    },
   ]
 });`;
 
