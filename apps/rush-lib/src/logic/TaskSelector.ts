@@ -5,7 +5,7 @@ import {
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { JsonFile } from '@microsoft/node-core-library';
 
-import { ProjectTask } from '../logic/taskRunner/ProjectTask';
+import { ProjectTask, convertSlashesForWindows } from '../logic/taskRunner/ProjectTask';
 import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
 import { TaskCollection } from './taskRunner/TaskCollection';
 
@@ -173,10 +173,8 @@ export class TaskSelector {
       const projectTask: ProjectTask = new ProjectTask({
         rushProject: project,
         rushConfiguration: this._options.rushConfiguration,
-        commandToRun: this._options.commandToRun,
-        customParameterValues: this._options.customParameterValues,
+        commandToRun: this._getScriptToRun(project),
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
-        ignoreMissingScript: this._options.ignoreMissingScript,
         packageChangeAnalyzer: this._packageChangeAnalyzer
       });
 
@@ -184,5 +182,39 @@ export class TaskSelector {
         this._taskCollection.addTask(projectTask);
       }
     }
+  }
+
+  private _getScriptToRun(rushProject: RushConfigurationProject): string {
+    const script: string | undefined = this._getScriptCommand(rushProject, this._options.commandToRun);
+
+    if (script === undefined && !this._options.ignoreMissingScript) {
+      // tslint:disable-next-line:max-line-length
+      throw new Error(`The project [${rushProject.packageName}] does not define a '${this._options.commandToRun}' command in the 'scripts' section of its package.json`);
+    }
+
+    if (!script) {
+      return '';
+    }
+
+    const taskCommand: string = `${script} ${this._options.customParameterValues.join(' ')}`;
+    return process.platform === 'win32'
+      ? convertSlashesForWindows(taskCommand)
+      : taskCommand;
+  }
+
+  private _getScriptCommand(rushProject: RushConfigurationProject, script: string): string | undefined {
+    // tslint:disable-next-line:no-string-literal
+    if (!rushProject.packageJson.scripts) {
+      return undefined;
+    }
+
+    const rawCommand: string = rushProject.packageJson.scripts[script];
+
+    // tslint:disable-next-line:no-null-keyword
+    if (rawCommand === undefined || rawCommand === null) {
+      return undefined;
+    }
+
+    return rawCommand;
   }
 }
