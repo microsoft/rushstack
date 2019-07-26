@@ -105,7 +105,7 @@ export class EnvironmentConfiguration {
         switch (normalizedEnvVarName) {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
             EnvironmentConfiguration._rushTempFolderOverride = value
-              ? EnvironmentConfiguration._normalizeFirstExistingFolderPath(value) || value
+              ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
               : value;
             break;
           }
@@ -159,17 +159,17 @@ export class EnvironmentConfiguration {
 
   /**
    * Given a path to a folder (that may or may not exist), normalize the path, including casing,
-   * to the first existing folder in the path.
+   * to the first existing parent folder in the path.
    *
    * If no existing path can be found (for example, if the root is a volume that doesn't exist),
-   * this function returns undefined
+   * this function returns undefined.
    *
    * @example
    * If the following path exists on disk: C:\Folder1\folder2\
    * _normalizeFirstExistingFolderPath('c:\\folder1\\folder2\\temp\\subfolder')
    * returns 'C:\\Folder1\\folder2\\temp\\subfolder'
    */
-  private static _normalizeFirstExistingFolderPath(folderPath: string): string | undefined {
+  private static _normalizeDeepestParentFolderPath(folderPath: string): string | undefined {
     folderPath = path.normalize(folderPath);
     const endsWithSlash: boolean = folderPath.charAt(folderPath.length - 1) === path.sep;
     const parsedPath: path.ParsedPath = path.parse(folderPath);
@@ -177,6 +177,11 @@ export class EnvironmentConfiguration {
     const pathWithoutRoot: String = parsedPath.dir.substr(pathRoot.length);
     const pathParts: string[] = [...pathWithoutRoot.split(path.sep), parsedPath.name].filter((part) => !!part);
 
+    // Starting with all path sections, and eliminating one from the end during each loop iteration,
+    // run trueCasePathSync. If trueCasePathSync returns without exception, we've found a subset
+    // of the path that exists and we've now gotten the correct casing.
+    //
+    // Once we've found a parent folder that exists, append the path sections that didn't exist.
     for (let i: number = pathParts.length; i >= 0; i--) {
       const constructedPath: string = path.join(pathRoot, ...pathParts.slice(0, i));
       try {
@@ -188,7 +193,7 @@ export class EnvironmentConfiguration {
           return result;
         }
       } catch (e) {
-        // This path doesn't exist, continue to the next
+        // This path doesn't exist, continue to the next subpath
       }
     }
 
