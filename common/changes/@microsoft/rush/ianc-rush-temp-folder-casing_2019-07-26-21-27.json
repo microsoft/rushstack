@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Normalize the casing of a temp folder specified with RUSH_TEMP_FOLDER.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
