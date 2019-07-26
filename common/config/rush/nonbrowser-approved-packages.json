@@ -483,6 +483,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "true-case-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "ts-jest",
       "allowedCategories": [ "libraries", "tests" ]
     },

@@ -581,6 +581,12 @@
 
     // "libraries" folder (alphabetical order)
     {
+      "packageName": "@microsoft/eslint-config-scalable-ts",
+      "projectFolder": "libraries/eslint-config-scalable-ts",
+      "reviewCategory": "libraries",
+      "shouldPublish": false // For now
+    },
+    {
       "packageName": "@microsoft/load-themed-styles",
       "projectFolder": "libraries/load-themed-styles",
       "reviewCategory": "libraries",

@@ -201,7 +201,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const tempProjectDependencyKey: string | undefined = this.getTopLevelDependencyVersion(tempProjectName);
 
     if (!tempProjectDependencyKey) {
-      throw new Error(`Cannot get dependency key for temp project: ${tempProjectName}`);
+      return undefined;
     }
 
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =

@@ -2,6 +2,33 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.11.0",
+      "tag": "@microsoft/rush_v5.11.0",
+      "date": "Fri, 26 Jul 2019 08:34:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Generate skeleton BuildXL script modules for each package"
+          },
+          {
+            "comment": "Allow building with newer versions of Node during development"
+          },
+          {
+            "comment": "Add experimental rush-buildxl package"
+          },
+          {
+            "comment": "Ensure the filesystem paths that Rush uses have the same character casing that exists on disk."
+          },
+          {
+            "comment": "Tweak NodeJS version warning messages and add suppressNodeLtsWarning option to rush.json to suppress non-LTS version warning."
+          },
+          {
+            "comment": "Do not terminate rush execution if a temp project lacks an entry in the PNPM shrinkwrap. Instead, allow the program to continue so that PNPM can update the outdated shrinkwrap. This fixes #1418 https://github.com/microsoft/web-build-tools/issues/1418."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.10.3",
       "tag": "@microsoft/rush_v5.10.3",
       "date": "Thu, 18 Jul 2019 00:07:46 GMT",
