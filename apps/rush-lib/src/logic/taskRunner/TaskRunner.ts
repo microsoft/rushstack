@@ -371,7 +371,7 @@ export class TaskRunner {
     } else {
       // Otherwise we are as long as the longest package + 1
       const depsLengths: number[] = [];
-      task.dependents.forEach(dep => this._calculateCriticalPaths(dep));
+      task.dependents.forEach(dep => depsLengths.push(this._calculateCriticalPaths(dep)));
       return task.criticalPathLength = Math.max(...depsLengths) + 1;
     }
   }
