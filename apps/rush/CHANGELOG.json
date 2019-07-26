@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.11.1",
+      "tag": "@microsoft/rush_v5.11.1",
+      "date": "Fri, 26 Jul 2019 23:08:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix critical path computation for projects"
+          },
+          {
+            "comment": "Normalize the casing of a temp folder specified with RUSH_TEMP_FOLDER."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.11.0",
       "tag": "@microsoft/rush_v5.11.0",
       "date": "Fri, 26 Jul 2019 08:34:03 GMT",

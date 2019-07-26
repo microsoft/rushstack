@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 26 Jul 2019 08:34:03 GMT and should not be manually modified.
+This log was last generated on Fri, 26 Jul 2019 23:08:23 GMT and should not be manually modified.
+
+## 5.11.1
+Fri, 26 Jul 2019 23:08:23 GMT
+
+### Updates
+
+- Fix critical path computation for projects
+- Normalize the casing of a temp folder specified with RUSH_TEMP_FOLDER.
 
 ## 5.11.0
 Fri, 26 Jul 2019 08:34:03 GMT
