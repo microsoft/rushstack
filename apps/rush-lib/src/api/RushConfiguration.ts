@@ -309,13 +309,15 @@ export class RushConfiguration {
    */
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
     let resolvedRushJsonFilename: string = path.resolve(rushJsonFilename);
+    // Load the rush.json before we fix the casing. If the case is wrong on a case-sensitive filesystem,
+    // the next line show throw.
+    const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(resolvedRushJsonFilename);
+
     try {
       resolvedRushJsonFilename = trueCasePathSync(resolvedRushJsonFilename);
     } catch (error) {
-      throw new Error(`Unable to resolve rush.json filename. Inner error: ${error}`);
+      /* ignore errors from true-case-path */
     }
-
-    const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(resolvedRushJsonFilename);
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
     // then the schema may have changed. This should no longer be a problem after Rush 4.0 and the C2R wrapper,
