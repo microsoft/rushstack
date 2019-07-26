@@ -17,6 +17,9 @@
   "scripts": {
     "build": "gulp test --clean"
   },
+  "bin": {
+    "rush-buildxl": "./bin/rush-buildxl"
+  },
   "license": "MIT",
   "dependencies": {
     "@microsoft/node-core-library": "3.13.0",
