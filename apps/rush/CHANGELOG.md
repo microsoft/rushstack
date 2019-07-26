@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 18 Jul 2019 00:07:46 GMT and should not be manually modified.
+This log was last generated on Fri, 26 Jul 2019 08:34:03 GMT and should not be manually modified.
+
+## 5.11.0
+Fri, 26 Jul 2019 08:34:03 GMT
+
+### Updates
+
+- Generate skeleton BuildXL script modules for each package
+- Allow building with newer versions of Node during development
+- Add experimental rush-buildxl package
+- Ensure the filesystem paths that Rush uses have the same character casing that exists on disk.
+- Tweak NodeJS version warning messages and add suppressNodeLtsWarning option to rush.json to suppress non-LTS version warning.
+- Do not terminate rush execution if a temp project lacks an entry in the PNPM shrinkwrap. Instead, allow the program to continue so that PNPM can update the outdated shrinkwrap. This fixes #1418 https://github.com/microsoft/web-build-tools/issues/1418.
 
 ## 5.10.3
 Thu, 18 Jul 2019 00:07:46 GMT
