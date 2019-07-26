@@ -1016,6 +1016,18 @@ export class RushConfiguration {
         }
       }
     }
+
+    // Ensure the rush.json filename has the casing that exists on the filesystem
+    const correctlyCasedRushJsonFilename: string | undefined = Utilities.getCorrectlyCasedPath(rushJsonFilename);
+    if (!correctlyCasedRushJsonFilename) {
+      console.warn(
+        `The rush.json file ${rushJsonFilename} does not exist. This is unexpected and is likely to ` +
+        'produce incorrect behavior.'
+      );
+    } else {
+      rushJsonFilename = correctlyCasedRushJsonFilename;
+    }
+
     this._rushJsonFile = rushJsonFilename;
     this._rushJsonFolder = path.dirname(rushJsonFilename);
 

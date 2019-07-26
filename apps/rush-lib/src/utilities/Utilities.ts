@@ -564,6 +564,65 @@ export class Utilities {
     return new Error('Unable to find rush.json configuration file');
   }
 
+  /**
+    * Gets a path to a file or folder on disk with the exact character casing that exists on disk.
+    *
+    * If the file or folder specified doesn't exist on disk, undefined is returned
+    *
+    * @example
+    * getCorrectlyCasedPath('c:\\uppercase-folder\\LOWERCASE-FILE') => 'C:\\UPPERCASE-FOLDER\\lowercase-file'
+    * getCorrectlyCasedPath('/uppercase-folder/LOWERCASE-FILE') => '/UPPERCASE-FOLDER/lowercase-file'
+    *
+    * @remarks
+    * This function assumes the path passed to it is absolute and is on the local filesystem
+    */
+  public static getCorrectlyCasedPath(pathToNormalize: string): string | undefined {
+    const parsedPath: path.ParsedPath = path.parse(pathToNormalize);
+    const root: string = parsedPath.root.toUpperCase();
+    const pathWithoutRoot: string = parsedPath.dir.substr(root.length);
+    const pathSections: string[] = [...pathWithoutRoot.split(path.sep), parsedPath.base];
+
+    let constructedPath: string = root;
+    for (let i: number = 0; i < pathSections.length; i++) {
+      const pathSection: string = pathSections[i];
+      if (!pathSection) {
+        // If we encounter an empty path section, just skip over it
+        continue;
+      }
+
+      const folderContents: string[] = FileSystem.readFolder(constructedPath);
+
+      let foundCasedPathSection: string | undefined = undefined;
+      let foundCaseInsensitivePathSection: string | undefined = undefined;
+
+      for (let j: number = 0; j < folderContents.length; j++) {
+        const folderElement: string = folderContents[j];
+        // First, check if we see an item in the folder with the same casing as the path we're normalizing. This is
+        // to ensure we disambiguate between items with the same (case-insensitive) name on case-sensitive filesystems.
+        if (folderElement === pathSection) {
+          foundCasedPathSection = folderElement;
+          // If we find an item in the folder with the same casing as the path we're normalizing, break out
+          // because that's the path we'll use.
+          break;
+        }
+
+        if (folderElement.toUpperCase() === pathSection.toUpperCase()) {
+          foundCaseInsensitivePathSection = folderElement;
+        }
+      }
+
+      const pathSectionToUse: string | undefined = foundCasedPathSection || foundCaseInsensitivePathSection;
+      if (pathSectionToUse) {
+        constructedPath = path.join(constructedPath, pathSectionToUse);
+      } else {
+        // We didn't find this path section, so the item doesn't exist
+        return undefined;
+      }
+    }
+
+    return constructedPath;
+  }
+
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
     spawnFunction: (command: String, args: string[], spawnOptions: child_process.SpawnOptions) => TCommandResult,
