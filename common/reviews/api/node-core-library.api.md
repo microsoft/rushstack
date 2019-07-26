@@ -285,7 +285,9 @@ export interface INodePackageJson {
     peerDependencies?: IPackageJsonDependencyTable;
     private?: boolean;
     repository?: string;
-    resolutions?: Object;
+    resolutions?: {
+        [name: string]: string;
+    };
     scripts?: IPackageJsonScriptTable;
     // @beta
     tsdocMetadata?: string;

@@ -203,8 +203,9 @@ export class PackageJsonEditor {
     static load(filePath: string): PackageJsonEditor;
     // (undocumented)
     readonly name: string;
-    // (undocumented)
-    readonly resolutions: object;
+    readonly resolutions: {
+        [name: string]: string;
+    };
     // (undocumented)
     saveIfModified(): boolean;
     // (undocumented)

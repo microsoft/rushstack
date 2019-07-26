@@ -75,7 +75,7 @@ export class PackageJsonEditor {
 
   // NOTE: The "resolutions" field is a yarn specific feature that controls package
   // resolution override within yarn.
-  private readonly _resolutions: object;
+  private readonly _resolutions: { [name: string]: string };
   private _modified: boolean;
 
   private constructor(filepath: string, data: IPackageJson) {
@@ -177,7 +177,7 @@ export class PackageJsonEditor {
   /**
    * This field is a Yarn-specific feature that allows overriding of package resolution.
    */
-  public get resolutions(): object {
+  public get resolutions(): { [name: string]: string } {
     return { ...this._resolutions };
   }
 
