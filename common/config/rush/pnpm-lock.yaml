@@ -10106,7 +10106,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-buildxl'
     resolution:
-      integrity: sha512-fsDHrftTnadUhs5TVww3pdwO1WoxPVDjQV7majZUTmqbj43YDLYPhNnlKJjBsqp6awxObw5VcwgIiiH0xOXmVQ==
+      integrity: sha512-sVjERYAYyWfkrg64xNmy72pmt5DHbiJHbNKtjYV4WIJekTTnpzgO70WKFoeeiEaFdaYafvj5n5C3xvllKO7r2A==
       tarball: 'file:projects/rush-buildxl.tgz'
     version: 0.0.0
   'file:projects/rush-lib.tgz':
@@ -10441,7 +10441,7 @@ packages:
     dev: false
     name: '@rush-temp/rush'
     resolution:
-      integrity: sha512-sQu633Jnd2GggC/W+8x484enU7vnjjdJHus8p5fno1paCZOX8QCUz2O0uJOxcoEAHtovxKmQhouxwCHZkg5edQ==
+      integrity: sha512-y7QKzk+ckpjc03pHnwtmfVW99Syo1+kGZrNnBrxqSKUai7rBPHvUsrI2+X6XrmpeDWd8Om4qB2Fk2Li6iAMdaw==
       tarball: 'file:projects/rush.tgz'
     version: 0.0.0
   'file:projects/rushell.tgz':
@@ -10530,7 +10530,6 @@ packages:
       integrity: sha512-3T1D8T+obRzYE6eWTRaALuoSJvd9DBj44S/Q3vwWuA7dxgQd6/vFOfpY+OIuV/ci3AE1953yEvcVuI6Ya9mCdQ==
       tarball: 'file:projects/web-library-build.tgz'
     version: 0.0.0
-registry: ''
 specifiers:
   '@microsoft/node-library-build': 6.0.71
   '@microsoft/rush-stack-compiler-3.4': 0.1.11
