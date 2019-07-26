@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
+import { trueCasePathSync } from 'true-case-path';
 
 /**
  * Names of environment variables used by Rush.
@@ -102,7 +104,9 @@ export class EnvironmentConfiguration {
         const normalizedEnvVarName: string = os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
         switch (normalizedEnvVarName) {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
-            EnvironmentConfiguration._rushTempFolderOverride = value;
+            EnvironmentConfiguration._rushTempFolderOverride = value
+              ? EnvironmentConfiguration._normalizeFirstExistingFolderPath(value) || value
+              : value;
             break;
           }
 
@@ -151,5 +155,43 @@ export class EnvironmentConfiguration {
     if (!EnvironmentConfiguration._hasBeenInitialized) {
       throw new Error('The EnvironmentConfiguration must be initialized before values can be accessed.');
     }
+  }
+
+  /**
+   * Given a path to a folder (that may or may not exist), normalize the path, including casing,
+   * to the first existing folder in the path.
+   *
+   * If no existing path can be found (for example, if the root is a volume that doesn't exist),
+   * this function returns undefined
+   *
+   * @example
+   * If the following path exists on disk: C:\Folder1\folder2\
+   * _normalizeFirstExistingFolderPath('c:\\folder1\\folder2\\temp\\subfolder')
+   * returns 'C:\\Folder1\\folder2\\temp\\subfolder'
+   */
+  private static _normalizeFirstExistingFolderPath(folderPath: string): string | undefined {
+    folderPath = path.normalize(folderPath);
+    const endsWithSlash: boolean = folderPath.charAt(folderPath.length - 1) === path.sep;
+    const parsedPath: path.ParsedPath = path.parse(folderPath);
+    const pathRoot: string = parsedPath.root;
+    const pathWithoutRoot: String = parsedPath.dir.substr(pathRoot.length);
+    const pathParts: string[] = [...pathWithoutRoot.split(path.sep), parsedPath.name].filter((part) => !!part);
+
+    for (let i: number = pathParts.length; i >= 0; i--) {
+      const constructedPath: string = path.join(pathRoot, ...pathParts.slice(0, i));
+      try {
+        const normalizedConstructedPath: string = trueCasePathSync(constructedPath);
+        const result: string = path.join(normalizedConstructedPath, ...pathParts.slice(i));
+        if (endsWithSlash) {
+          return `${result}${path.sep}`;
+        } else {
+          return result;
+        }
+      } catch (e) {
+        // This path doesn't exist, continue to the next
+      }
+    }
+
+    return undefined;
   }
 }
