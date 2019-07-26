@@ -42,16 +42,16 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
         messageCallback: (message: ApiExtractor.ExtractorMessage) => {
           switch (message.logLevel) {
             case ApiExtractor.ExtractorLogLevel.Error:
-              this._terminal.writeErrorLine.bind(this._terminal);
+              this._terminal.writeErrorLine(message.text);
               break;
             case ApiExtractor.ExtractorLogLevel.Warning:
-              this._terminal.writeWarningLine.bind(this._terminal);
+              this._terminal.writeWarningLine(message.text);
               break;
             case ApiExtractor.ExtractorLogLevel.Info:
-              this._terminal.writeLine.bind(this._terminal);
+              this._terminal.writeLine(message.text);
               break;
             case ApiExtractor.ExtractorLogLevel.Verbose:
-              this._terminal.writeVerboseLine.bind(this._terminal);
+              this._terminal.writeVerboseLine(message.text);
               break;
             default:
               return;
