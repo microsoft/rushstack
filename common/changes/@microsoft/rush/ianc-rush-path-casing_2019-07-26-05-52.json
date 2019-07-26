@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Ensure the filesystem paths that Rush uses have the same character casing that exists on disk.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
