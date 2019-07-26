@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Do not terminate rush execution if a temp project lacks an entry in the PNPM shrinkwrap. Instead, allow the program to continue so that PNPM can update the outdated shrinkwrap. This fixes #1418 https://github.com/microsoft/web-build-tools/issues/1418.",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "sachinjoseph@users.noreply.github.com"
+}
