@@ -5,9 +5,9 @@ import {
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { JsonFile } from '@microsoft/node-core-library';
 
-import { TaskRunner } from '../logic/taskRunner/TaskRunner';
 import { ProjectTask } from '../logic/taskRunner/ProjectTask';
 import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
+import { TaskCollection } from './taskRunner/TaskCollection';
 
 export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
@@ -16,12 +16,9 @@ export interface ITaskSelectorConstructor {
   commandToRun: string;
   customParameterValues: string[];
   isQuietMode: boolean;
-  parallelism: string | undefined;
   isIncrementalBuildAllowed: boolean;
-  changedProjectsOnly: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
-  allowWarningsInSuccessfulBuild: boolean;
 }
 
 /**
@@ -33,7 +30,7 @@ export interface ITaskSelectorConstructor {
  * This class is currently only used by CustomRushAction
  */
 export class TaskSelector {
-  private _taskRunner: TaskRunner;
+  private _taskCollection: TaskCollection;
   private _dependentList: Map<string, Set<string>>;
   private _rushLinkJson: IRushLinkJson;
   private _options: ITaskSelectorConstructor;
@@ -43,11 +40,8 @@ export class TaskSelector {
     this._options = options;
 
     this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
-    this._taskRunner = new TaskRunner({
-      quietMode: this._options.isQuietMode,
-      parallelism: this._options.parallelism,
-      changedProjectsOnly: this._options.changedProjectsOnly,
-      allowWarningsInSuccessfulBuild: this._options.allowWarningsInSuccessfulBuild
+    this._taskCollection = new TaskCollection({
+      quietMode: options.isQuietMode
     });
 
     try {
@@ -56,7 +50,9 @@ export class TaskSelector {
       throw new Error(`Could not read "${this._options.rushConfiguration.rushLinkJsonFilename}".`
         + ` Did you run "rush install" or "rush update"?`);
     }
+  }
 
+  public registerTasks(): TaskCollection {
     if (this._options.toFlags.length > 0) {
       this._registerToFlags(this._options.toFlags);
     }
@@ -66,10 +62,8 @@ export class TaskSelector {
     if (this._options.toFlags.length === 0 && this._options.fromFlags.length === 0) {
       this._registerAll();
     }
-  }
 
-  public execute(): Promise<void> {
-    return this._taskRunner.execute();
+    return this._taskCollection;
   }
 
   private _registerToFlags(toFlags: ReadonlyArray<string>): void {
@@ -87,7 +81,7 @@ export class TaskSelector {
 
       if (!this._options.ignoreDependencyOrder) {
         // Add ordering relationships for each dependency
-        deps.forEach(dep => this._taskRunner.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
+        deps.forEach(dep => this._taskCollection.addDependencies(dep, this._rushLinkJson.localLinks[dep] || []));
       }
     }
   }
@@ -116,7 +110,7 @@ export class TaskSelector {
         // Only add ordering relationships for projects which have been registered
         // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
         dependents.forEach(dependent =>
-          this._taskRunner.addDependencies(dependent,
+          this._taskCollection.addDependencies(dependent,
             (this._rushLinkJson.localLinks[dependent] || []).filter(dep => dependents.has(dep))));
       }
     }
@@ -130,7 +124,7 @@ export class TaskSelector {
     if (!this._options.ignoreDependencyOrder) {
       // Add ordering relationships for each dependency
       for (const projectName of Object.keys(this._rushLinkJson.localLinks)) {
-        this._taskRunner.addDependencies(projectName, this._rushLinkJson.localLinks[projectName]);
+        this._taskCollection.addDependencies(projectName, this._rushLinkJson.localLinks[projectName]);
       }
     }
   }
@@ -186,8 +180,8 @@ export class TaskSelector {
         packageChangeAnalyzer: this._packageChangeAnalyzer
       });
 
-      if (!this._taskRunner.hasTask(projectTask.name)) {
-        this._taskRunner.addTask(projectTask);
+      if (!this._taskCollection.hasTask(projectTask.name)) {
+        this._taskCollection.addTask(projectTask);
       }
     }
   }
