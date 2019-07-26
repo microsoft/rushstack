@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-buildxl",
-  "version": "5.11.0",
+  "version": "5.11.1",
   "description": "An experimental tool that connects Rush and BuildXL",
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "@microsoft/node-core-library": "3.13.0",
-    "@microsoft/rush-lib": "5.11.0",
+    "@microsoft/rush-lib": "5.11.1",
     "@microsoft/ts-command-line": "4.2.6"
   },
   "devDependencies": {
