@@ -167,6 +167,7 @@ dependencies:
   sudo: 1.0.3
   tar: 4.4.10
   through2: 2.0.5
+  true-case-path: 2.2.1
   ts-jest: 22.4.6
   tslint: 5.12.1
   tslint-microsoft-contrib: 5.2.1
@@ -8727,6 +8728,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-m6s2OdQe5wgpFMC+pAJ+q9djG82O2jcHPOI6RNg1yy9rCYR+WD6Nbpl32fDpfC56nirdRy+opFa/Vk7HYhqaew==
+  /true-case-path/2.2.1:
+    dev: false
+    resolution:
+      integrity: sha512-0z3j8R7MCjy10kc/g+qg7Ln3alJTodw9aDuVWZa3uiWqfuBMKeAeP2ocWcxoyM3D73yz3Jt/Pu4qPr4wHSdB/Q==
   /ts-jest/22.4.6:
     dependencies:
       babel-core: 6.26.3
@@ -10138,12 +10143,13 @@ packages:
       semver: 5.3.0
       strict-uri-encode: 2.0.0
       tar: 4.4.10
+      true-case-path: 2.2.1
       wordwrap: 1.0.0
       z-schema: 3.18.4
     dev: false
     name: '@rush-temp/rush-lib'
     resolution:
-      integrity: sha512-rIQWW5cCD+MtyGPU1f4ye2zlGsjnNqNOS4esrmQwuSywFrSH6W+J+aKzR+hBoGuau7JJRdrXwK69UdXnL0rDEA==
+      integrity: sha512-aO4oRdBc1gGS5/t4YGUCGt4AAJRboTWaHxfTySKOEWMP/Co5JtRnj2zqInK9+EJIarwOAJReIif97fMe2Pfnpg==
       tarball: 'file:projects/rush-lib.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-2.4-library-test.tgz':
@@ -10524,6 +10530,7 @@ packages:
       integrity: sha512-3T1D8T+obRzYE6eWTRaALuoSJvd9DBj44S/Q3vwWuA7dxgQd6/vFOfpY+OIuV/ci3AE1953yEvcVuI6Ya9mCdQ==
       tarball: 'file:projects/web-library-build.tgz'
     version: 0.0.0
+registry: ''
 specifiers:
   '@microsoft/node-library-build': 6.0.71
   '@microsoft/rush-stack-compiler-3.4': 0.1.11
@@ -10693,6 +10700,7 @@ specifiers:
   sudo: ~1.0.3
   tar: ~4.4.1
   through2: ~2.0.1
+  true-case-path: ~2.2.1
   ts-jest: ~22.4.6
   tslint: ~5.12.1
   tslint-microsoft-contrib: ~5.2.1

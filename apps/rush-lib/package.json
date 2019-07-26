@@ -46,6 +46,7 @@
     "semver": "~5.3.0",
     "strict-uri-encode": "~2.0.0",
     "tar": "~4.4.1",
+    "true-case-path": "~2.2.1",
     "wordwrap": "~1.0.0",
     "z-schema": "~3.18.3"
   },

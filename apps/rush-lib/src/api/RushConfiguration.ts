@@ -11,6 +11,7 @@ import {
   PackageName,
   FileSystem
 } from '@microsoft/node-core-library';
+import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from '../api/Rush';
 import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
@@ -307,7 +308,13 @@ export class RushConfiguration {
    * an RushConfiguration object.
    */
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
-    const resolvedRushJsonFilename: string = path.resolve(rushJsonFilename);
+    let resolvedRushJsonFilename: string = path.resolve(rushJsonFilename);
+    try {
+      resolvedRushJsonFilename = trueCasePathSync(resolvedRushJsonFilename);
+    } catch (error) {
+      throw new Error(`Unable to resolve rush.json filename. Inner error: ${error}`);
+    }
+
     const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(resolvedRushJsonFilename);
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
@@ -1015,17 +1022,6 @@ export class RushConfiguration {
           throw new Error(message);
         }
       }
-    }
-
-    // Ensure the rush.json filename has the casing that exists on the filesystem
-    const correctlyCasedRushJsonFilename: string | undefined = Utilities.getCorrectlyCasedPath(rushJsonFilename);
-    if (!correctlyCasedRushJsonFilename) {
-      console.warn(
-        `The rush.json file ${rushJsonFilename} does not exist. This is unexpected and is likely to ` +
-        'produce incorrect behavior.'
-      );
-    } else {
-      rushJsonFilename = correctlyCasedRushJsonFilename;
     }
 
     this._rushJsonFile = rushJsonFilename;
