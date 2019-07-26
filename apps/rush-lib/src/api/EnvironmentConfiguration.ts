@@ -5,6 +5,10 @@ import * as os from 'os';
 import * as path from 'path';
 import { trueCasePathSync } from 'true-case-path';
 
+export interface IEnvironmentConfigurationInitializeOptions {
+  doNotNormalizePaths?: boolean;
+}
+
 /**
  * Names of environment variables used by Rush.
  * @public
@@ -93,7 +97,7 @@ export class EnvironmentConfiguration {
   /**
    * Reads and validates environment variables. If any are invalid, this function will throw.
    */
-  public static initialize(): void {
+  public static initialize(options: IEnvironmentConfigurationInitializeOptions = {}): void {
     EnvironmentConfiguration.reset();
 
     const unknownEnvVariables: string[] = [];
@@ -104,7 +108,7 @@ export class EnvironmentConfiguration {
         const normalizedEnvVarName: string = os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
         switch (normalizedEnvVarName) {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
-            EnvironmentConfiguration._rushTempFolderOverride = value
+            EnvironmentConfiguration._rushTempFolderOverride = (value && !options.doNotNormalizePaths)
               ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
               : value;
             break;
