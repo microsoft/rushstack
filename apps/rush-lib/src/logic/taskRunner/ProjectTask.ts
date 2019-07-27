@@ -28,6 +28,7 @@ export interface IProjectTaskOptions {
   commandToRun: string;
   isIncrementalBuildAllowed: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
+  staticMode: boolean;
 }
 
 /**
@@ -46,6 +47,7 @@ export class ProjectTask implements ITaskDefinition {
   private _rushConfiguration: RushConfiguration;
   private _commandToRun: string;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
+  private _staticMode: boolean;
 
   constructor(options: IProjectTaskOptions) {
     this._rushProject = options.rushProject;
@@ -53,6 +55,7 @@ export class ProjectTask implements ITaskDefinition {
     this._commandToRun = options.commandToRun;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
+    this._staticMode = options.staticMode;
 }
 
   public execute(writer: ITaskWriter): Promise<TaskStatus> {
@@ -60,6 +63,12 @@ export class ProjectTask implements ITaskDefinition {
       if (!this._commandToRun) {
         this.hadEmptyScript = true;
       }
+
+      if (this._staticMode) {
+        writer.write(this._commandToRun);
+        return Promise.resolve(TaskStatus.Success);
+      }
+
       const deps: IPackageDependencies | undefined = this._getPackageDependencies(writer);
       return this._executeTask(writer, deps);
     } catch (error) {

@@ -130,6 +130,16 @@ export class IndividualVersionPolicy extends VersionPolicy {
     validate(versionString: string, packageName: string): void;
 }
 
+// @public (undocumented)
+export interface IStaticProject {
+    // (undocumented)
+    buildCommand: string;
+    // (undocumented)
+    dependencies: RushConfigurationProject[];
+    // (undocumented)
+    rushProject: RushConfigurationProject;
+}
+
 // @public
 export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
@@ -331,6 +341,13 @@ export class _RushGlobalFolder {
     constructor();
     readonly nodeSpecificPath: string;
     readonly path: string;
+    }
+
+// @public (undocumented)
+export class StaticGraph {
+    constructor(rushConfiguration: RushConfiguration);
+    // (undocumented)
+    generate(): Promise<IStaticProject[]>;
     }
 
 // @beta

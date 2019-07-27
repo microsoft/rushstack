@@ -79,3 +79,8 @@ export {
   ILaunchOptions,
   Rush
 } from './api/Rush';
+
+export {
+  StaticGraph,
+  IStaticProject
+} from './api/StaticGraph';
