@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 
-import { RushConfiguration } from '@microsoft/rush-lib';
+import { RushConfiguration, IStaticProject } from '@microsoft/rush-lib';
 
 import { BxlModule } from './BxlModule';
 import { BxlConfig } from './BxlConfig';
@@ -11,10 +11,12 @@ import { BxlConfig } from './BxlConfig';
 export class BxlModulesGenerator {
   private _rushConfiguration: RushConfiguration;
   private _buildXLRoot: string;
+  private _projects: IStaticProject[];
 
-  constructor(rushConfiguration: RushConfiguration, buildXLRoot: string) {
+  constructor(rushConfiguration: RushConfiguration, buildXLRoot: string, projects: IStaticProject[]) {
     this._rushConfiguration = rushConfiguration;
     this._buildXLRoot = this._normalizePathSeparator(buildXLRoot);
+    this._projects = projects;
   }
 
   public async run(): Promise<void> {
@@ -23,6 +25,9 @@ export class BxlModulesGenerator {
     );
     const rushJsonFilePath: string = this._normalizePathSeparator(this._rushConfiguration.rushJsonFile);
     const commonRushConfigFolder: string = this._normalizePathSeparator(this._rushConfiguration.commonRushConfigFolder);
+    if (this._projects === undefined) {
+      throw new Error('Null');
+    }
 
     const modules: BxlModule[] =  this._rushConfiguration.projects.map((project) => {
       const name: string = this._packageNameToModuleName(project.packageName);

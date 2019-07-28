@@ -3,7 +3,7 @@
 
 import { CommandLineAction } from '@microsoft/ts-command-line';
 import { Terminal } from '@microsoft/node-core-library';
-import { RushConfiguration } from '@microsoft/rush-lib';
+import { RushConfiguration, StaticGraph } from '@microsoft/rush-lib';
 
 import { BxlModulesGenerator } from '../../logic/BxlModulesGenerator';
 
@@ -29,10 +29,14 @@ export class GenerateAction extends CommandLineAction {
       throw new Error('Environment variable BUILDXL_BIN not defined');
     }
 
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
+    const staticGraph: StaticGraph = new StaticGraph(rushConfig);
+
     const generator: BxlModulesGenerator =
         new BxlModulesGenerator(
-          RushConfiguration.loadFromDefaultLocation(),
-          process.env.BUILDXL_BIN);
+          rushConfig,
+          process.env.BUILDXL_BIN,
+          await staticGraph.generate());
 
     await generator.run();
     this._terminal.writeLine(`Successfully generated BuildXL configuration.`);
