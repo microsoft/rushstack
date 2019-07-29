@@ -26,8 +26,7 @@ export interface ITaskRunnerOptions {
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
- * Any class of task definition may be registered, and dependencies between tasks are
- * easily specified. Initially, and at the end of each task execution, all unblocked tasks
+ * Initially, and at the end of each task execution, all unblocked tasks
  * are added to a ready queue which is then executed. This is done continually until all
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
