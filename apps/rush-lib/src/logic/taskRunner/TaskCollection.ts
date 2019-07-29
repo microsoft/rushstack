@@ -15,7 +15,7 @@ export interface ITaskCollectionOptions {
 }
 
 /**
- * This class represents a set of tasks with interdependencies.  Any class of task definition 
+ * This class represents a set of tasks with interdependencies.  Any class of task definition
  * may be registered, and dependencies between tasks are easily specified. There is a check for
  * cyclic dependencies and tasks are ordered based on critical path.
  */
