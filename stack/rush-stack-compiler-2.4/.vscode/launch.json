@@ -8,8 +8,13 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/node_modules/gulp/bin/gulp.js",
-      "sourceMaps": false
+      "program": "${workspaceFolder}/node_modules/webpack-cli/bin/cli"
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach",
+      "port": 9229
     }
   ]
 }
