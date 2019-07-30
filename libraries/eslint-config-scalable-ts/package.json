@@ -13,5 +13,15 @@
     "eslint",
     "typescript",
     "eslint-config"
-  ]
+  ],
+  "peerDependencies": {
+    "eslint": "^5.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^1.12.0",
+    "@typescript-eslint/parser": "^1.12.0",
+    "eslint": "^5.0.0",
+    "eslint-config-prettier": "^6.0.0",
+    "typescript": "^3.5.3"
+  }
 }
