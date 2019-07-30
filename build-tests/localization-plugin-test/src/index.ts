@@ -5,7 +5,12 @@ console.log(string1);
 
 console.log(strings2.string2);
 
-import(/* webpackChunkName: 'secondary-chunk' */ './secondaryChunk').then(({ SecondaryChunk }) => {
-  const chunk = new SecondaryChunk();
+import(/* webpackChunkName: 'chunk-with-strings' */ './chunkWithStrings').then(({ ChunkWithStringsClass }) => {
+  const chunk = new ChunkWithStringsClass();
+  chunk.doStuff();
+});
+
+import(/* webpackChunkName: 'chunk-without-strings' */ './chunkWithoutStrings').then(({ ChunkWithoutStringsClass }) => {
+  const chunk = new ChunkWithoutStringsClass();
   chunk.doStuff();
 });

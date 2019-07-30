@@ -1,6 +1,6 @@
 import * as strings from './strings2.loc.json';
 
-export class SecondaryChunk {
+export class ChunkWithStringsClass {
   public doStuff(): void {
     console.log(strings.string1);
   }

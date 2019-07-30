@@ -3,7 +3,7 @@
   "compilerOptions": {
     "rootDirs": [
       "./src",
-      "./temp/loc-json-ts"
+      "./temp/loc-json-ts/"
     ]
   }
 }

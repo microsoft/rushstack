@@ -51,6 +51,7 @@ module.exports = function(env) {
             "./strings3.loc.json": {
               "string1": "the third string",
               "string2": "the fourth string",
+              "string3": "UNUSED STRING!"
             }
           },
           "es-es": {
@@ -63,6 +64,7 @@ module.exports = function(env) {
             "./strings3.loc.json": {
               "string1": "la tercera cadena",
               "string2": "la cuarta cadena",
+              "string3": "UNUSED STRING!"
             }
           }
         },
