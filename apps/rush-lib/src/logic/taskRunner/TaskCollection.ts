@@ -87,8 +87,8 @@ export class TaskCollection {
   }
 
   /**
-   * Executes all tasks which have been registered, returning a promise which is resolved when all the
-   * tasks are completed successfully, or rejects when any task fails.
+   * Returns the tasks registered with the collection ordered by the critical path.
+   * It also makes sure there are no cyclic dependencies in the tasks.
    */
   public getOrderedTasks(): ITask[] {
     this._checkForCyclicDependencies(this._tasks.values(), []);
