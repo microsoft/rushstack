@@ -9,8 +9,8 @@
  * https://pnpm.js.org/docs/en/hooks.html
  *
  * IMPORTANT: SINCE THIS FILE CONTAINS EXECUTABLE CODE, MODIFYING IT IS LIKELY TO INVALIDATE
- * ANY CACHED DEPENDENCY ANALYSIS.  After any modification to pnpmfile, it's recommended to run
- * "rush update --full" so that the package manager will recalculate all version selections.
+ * ANY CACHED DEPENDENCY ANALYSIS.  After any modification to pnpmfile.js, it's recommended to run
+ * "rush update --full" so that PNPM will recalculate all version selections.
  */
 module.exports = {
   hooks: {
