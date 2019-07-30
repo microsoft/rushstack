@@ -79,6 +79,10 @@ export class AddAction extends BaseRushAction {
       description: 'If specified, the "rush update" command will not be run after updating the'
         + ' package.json files.'
     });
+    this._allFlag = this.defineFlagParameter({
+      parameterLongName: '--all',
+      description: 'If specified, the package will be added to all of your projects.'
+    });
   }
 
   public run(): Promise<void> {
@@ -116,16 +120,25 @@ export class AddAction extends BaseRushAction {
       return Promise.reject(new Error(`The SemVer specifier "${version}" is not valid.`));
     }
 
-    return new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder).doRushAdd({
-      currentProject: currentProject,
-      packageName: packageName,
-      initialVersion: version,
-      devDependency: this._devDependencyFlag.value,
-      updateOtherPackages: this._makeConsistentFlag.value,
-      skipUpdate: this._skipUpdateFlag.value,
-      debugInstall: this.parser.isDebug,
-      rangeStyle: this._caretFlag.value ? SemVerStyle.Caret
-        : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde)
-    });
+    let projects: RushConfigurationProject[];
+    if (this._allFlag) {
+      projects = Object.values(this._rushConfiguration.projectsByName);
+    } else {
+      projects = [currentProject];
+    }
+
+    for (const project of projects) {
+      return new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder).doRushAdd({
+        currentProject: project,
+        packageName: packageName,
+        initialVersion: version,
+        devDependency: this._devDependencyFlag.value,
+        updateOtherPackages: this._makeConsistentFlag.value,
+        skipUpdate: this._skipUpdateFlag.value,
+        debugInstall: this.parser.isDebug,
+        rangeStyle: this._caretFlag.value ? SemVerStyle.Caret
+          : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde)
+      });
+    }
   }
 }
