@@ -52,7 +52,10 @@ module.exports = {
         //                    but writing code is a much less important activity than reading it.
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        "@typescript-eslint/explicit-function-return-type": "error",
+        "@typescript-eslint/explicit-function-return-type": [
+          "error",
+          { allowTypedFunctionExpressions: true }
+        ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         "@typescript-eslint/explicit-member-accessibility": "error",
@@ -64,8 +67,7 @@ module.exports = {
         //                    objects, here the "I" prefix also helps by avoiding spurious conflicts with classes
         //                    by the same name.
         //
-        // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        "@typescript-eslint/interface-name-prefix": "error",
+        "@typescript-eslint/interface-name-prefix": [ "error", "always" ],
 
         // RATIONALE:         Requiring private members to be prefixed with an underscore prevents accidental access
         //                    by scripts that are coded in plain JavaScript and cannot see the TypeScript visibility
@@ -242,9 +244,6 @@ module.exports = {
 
         // RATIONALE:         Deprecated language feature.
         "no-caller": "error",
-
-        // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        "no-case-declarations": "error",
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         "no-compare-neg-zero": "error",
