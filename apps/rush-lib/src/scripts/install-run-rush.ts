@@ -23,8 +23,13 @@ import {
 } from './install-run';
 
 const PACKAGE_NAME: string = '@microsoft/rush';
+const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';
 
 function getRushVersion(): string {
+  if (process.env[RUSH_PREVIEW_VERSION] !== undefined) {
+    return process.env[RUSH_PREVIEW_VERSION]!;
+  }
+
   const rushJsonFolder: string = findRushJsonFolder();
   const rushJsonPath: string = path.join(rushJsonFolder, RUSH_JSON_FILENAME);
   try {
