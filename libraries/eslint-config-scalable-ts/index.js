@@ -3,7 +3,9 @@ module.exports = {
   parser: "",
 
   plugins: [
-    "@typescript-eslint"
+    "@typescript-eslint/eslint-plugin",
+    "eslint-plugin-promise",
+    "eslint-plugin-security"
   ],
 
   overrides: [
@@ -410,39 +412,6 @@ module.exports = {
 
         // RATIONALE:         Catches a common coding mistake where "resolve" and "reject" are confused.
         "promise/param-names": "error",
-
-        // RATIONALE:         When React components are added to an array, they generally need a "key".
-        "react/jsx-key": "error",
-
-        // RATIONALE:         Catches a common coding practice that significantly impacts performance.
-        "react/jsx-no-bind": "error",
-
-        // RATIONALE:         Catches a common coding mistake.
-        "react/jsx-no-comment-textnodes": "error",
-
-        // RATIONALE:         Security risk.
-        "react/jsx-no-target-blank": "error",
-
-        // RATIONALE:         Catches a common coding mistake.
-        "react/no-children-prop": "error",
-
-        // RATIONALE:         Catches a common coding mistake.
-        "react/no-danger-with-children": "error",
-
-        // RATIONALE:         Catches a common coding mistake.
-        "react/no-direct-mutation-state": "error",
-
-        // RATIONALE:         Avoids a potential performance problem.
-        "react/no-find-dom-node": "error",
-
-        // RATIONALE:         Deprecated API.
-        "react/no-is-mounted": "error",
-
-        // RATIONALE:         Deprecated API.
-        "react/no-render-return-value": "error",
-
-        // RATIONALE:         Deprecated API.
-        "react/no-string-refs": "error",
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         "require-atomic-updates": "error",
