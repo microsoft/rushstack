@@ -18,11 +18,11 @@
     "eslint": "^5.0.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "~1.12.0",
-    "@typescript-eslint/parser": "~1.12.0",
-    "eslint-plugin-promise": "~4.2.1",
-    "eslint-plugin-react": "~7.14.3",
-    "eslint-plugin-security": "~1.4.0",
+    "@typescript-eslint/eslint-plugin": "^2.0.0-alpha.4",
+    "@typescript-eslint/parser": "^1.13.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.14.3",
+    "eslint-plugin-security": "^1.4.0",
     "eslint": "^5.0.0",
     "typescript": "~3.5.3"
   }
