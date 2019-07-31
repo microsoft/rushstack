@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "install-run doesn't respect RUSH_PREVIEW_VERSION environment variable",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nayanshah@users.noreply.github.com"
+}
