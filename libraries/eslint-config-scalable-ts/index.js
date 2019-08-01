@@ -120,14 +120,16 @@ module.exports = {
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         "@typescript-eslint/no-misused-new": "error",
 
-        // RATIONALE:         The "module" keyword should only be used for declaring typings for legacy JavaScript
-        //                    libraries.  The "namespace" keyword is not recommended for organizing code because
-        //                    JavaScript lacks a "using" statement to traverse namespaces.  For functions/variables,
-        //                    it's better to group them as members of a class, since the exercise of choosing a
-        //                    meaningful class name tends to produce more discoverable APIs.  Also, a bulk search for
-        //                    e.g. "Text.reverse()" will be more accurate than a short name like "reverse()".
-        //                    If you have too many classes, it's recommended to group them into an NPM package
-        //                    which forces dependencies to be tracked more conscientiously.
+        // RATIONALE:         The "namespace" keyword is not recommended for organizing code because JavaScript lacks
+        //                    a "using" statement to traverse namespaces.  Nested namespaces prevent certain bundler
+        //                    optimizations.  If you are declaring loose functions/variables, it's better to make them
+        //                    static members of a class, since classes support property getters and their private
+        //                    members are accessible by unit tests.  Also, the exercise of choosing a meaningful
+        //                    class name tends to produce more discoverable APIs: for example, search+replacing
+        //                    the function "reverse()" is likely to return many false matches, whereas if we always
+        //                    write "Text.reverse()" is more unique.  For large scale organization, it's recommended
+        //                    to decompose your code into separate NPM packages, which ensures that component
+        //                    dependencies are tracked more conscientiously.
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         "@typescript-eslint/no-namespace": [
