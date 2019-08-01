@@ -187,7 +187,7 @@ module.exports = {
           "error",
           {
             "arrayDestructuring": false,
-            "arrowParameter": true,
+            "arrowParameter": false,
             "memberVariableDeclaration": true,
             "parameter": true,
             "objectDestructuring": false,
