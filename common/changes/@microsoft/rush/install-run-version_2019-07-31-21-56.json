@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "install-run doesn't respect RUSH_PREVIEW_VERSION environment variable",
+      "comment": "Add support for the RUSH_PREVIEW_VERSION environment variable to the install-run-rush script.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
