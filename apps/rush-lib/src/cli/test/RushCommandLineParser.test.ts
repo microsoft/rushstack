@@ -130,6 +130,62 @@ describe('RushCommandLineParser', () => {
         });
       });
 
+      describe(`'(pre|post)build' action`, () => {
+        it(`executes the package's pre and post scripts`, () => {
+          const repoName: string = 'basicAndRunPrePostBuildActionRepo';
+          const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
+
+          expect.assertions(14);
+          return expect(instance.parser.execute()).resolves.toEqual(true)
+            .then(() => {
+              // There should be 1 build per package
+              const packageCount: number = instance.spawnMock.mock.calls.length;
+              expect(packageCount).toEqual(2);
+
+              // Use regex for task name in case spaces were prepended or appended to spawned command
+              const expectedPreBuildTaskRegexp: RegExp = /fake_prebuild_task_but_works_with_mock/;
+              const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
+              const expectedPostBuildTaskRegexp: RegExp = /fake_postbuild_task_but_works_with_mock/;
+
+              // tslint:disable-next-line: no-any
+              const preBuildSpawnA: any[] = instance.spawnMock.mock.calls[0];
+              expect(preBuildSpawnA[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
+                // Project a has prebuild
+                expect.stringMatching(expectedPreBuildTaskRegexp)
+              ]));
+              expect(preBuildSpawnA[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+              expect(preBuildSpawnA[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+
+              // tslint:disable-next-line: no-any
+              const buildSpawnB: any[] = instance.spawnMock.mock.calls[1];
+              expect(buildSpawnB[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
+                // Project b has build
+                expect.stringMatching(expectedBuildTaskRegexp)
+              ]));
+              expect(buildSpawnB[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+              expect(buildSpawnB[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+
+              // tslint:disable-next-line: no-any
+              const buildSpawnA: any[] = instance.spawnMock.mock.calls[2];
+              expect(buildSpawnA[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
+                // Project a has build.
+                expect.stringMatching(expectedBuildTaskRegexp)
+              ]));
+              expect(buildSpawnA[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+              expect(buildSpawnA[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/a`));
+
+              // tslint:disable-next-line: no-any
+              const postBuildSpawnB: any[] = instance.spawnMock.mock.calls[3];
+              expect(postBuildSpawnB[SPAWN_ARG_ARGS]).toEqual(expect.arrayContaining([
+                // Project b has postbuild.
+                expect.stringMatching(expectedPostBuildTaskRegexp)
+              ]));
+              expect(postBuildSpawnB[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+              expect(postBuildSpawnB[SPAWN_ARG_OPTIONS].cwd).toEqual(resolve(__dirname, `${repoName}/b`));
+            });
+        });
+      });
+
       describe(`'rebuild' action`, () => {
         it(`executes the package's 'build' script`, () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
