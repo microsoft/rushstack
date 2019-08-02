@@ -19,7 +19,7 @@ import * as path from 'path';
 import { IPackageJson } from '@microsoft/node-core-library';
 
 export const RUSH_JSON_FILENAME: string = 'rush.json';
-const RUSH_TEMP_FOLDER: string = 'RUSH_TEMP_FOLDER';
+const RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME: string = 'RUSH_TEMP_FOLDER';
 const INSTALLED_FLAG_FILENAME: string = 'installed.flag';
 const NODE_MODULES_FOLDER_NAME: string = 'node_modules';
 const PACKAGE_JSON_FILENAME: string = 'package.json';
@@ -372,7 +372,16 @@ function writeFlagFile(packageInstallFolder: string): void {
 }
 
 function getRushTempFolder(rushCommonFolder: string): string {
-  return process.env[RUSH_TEMP_FOLDER] || ensureAndJoinPath(rushCommonFolder, 'temp');
+  const rushTempFolder: string | undefined = process.env[RUSH_TEMP_FOLDER_ENV_VARIABLE_NAME];
+  if (rushTempFolder !== undefined) {
+    if (!fs.existsSync(rushTempFolder)) {
+      fs.mkdirSync(rushTempFolder);
+    }
+
+    return rushTempFolder;
+  }
+
+  return ensureAndJoinPath(rushCommonFolder, 'temp');
 }
 
 export function installAndRun(
