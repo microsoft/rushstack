@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Added support for incremental custom commands",
+      "comment": "Add support for incremental custom commands",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
