@@ -157,7 +157,16 @@ module.exports = {
         //                    may impact performance.
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        "@typescript-eslint/no-unused-vars": "error",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "vars": "all",
+            // Unused function arguments often indicate a mistake in JavaScript code.  However in TypeScript code,
+            // the compiler catches most of those mistakes, and unused arguments are fairly common for type signatures
+            // that are overriding a base class method or implementing an interface.
+            "args": "none"
+          }
+        ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         "@typescript-eslint/no-use-before-define": "error",
