@@ -54,7 +54,11 @@ module.exports = {
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         "@typescript-eslint/explicit-function-return-type": [
           "error",
-          { allowTypedFunctionExpressions: true }
+          {
+            allowExpressions: true,
+            allowTypedFunctionExpressions: true,
+            allowHigherOrderFunctions: false,
+          },
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
@@ -208,9 +212,6 @@ module.exports = {
         // RATIONALE:         Catches a common coding mistake.
         "accessor-pairs": "error",
 
-        // RATIONALE:         Catches a common coding mistake.
-        "array-callback-return": "error",
-
         // RATIONALE:         In TypeScript, if you write x["y"] instead of x.y, it disables type checking.
         "dot-notation": "error",
 
@@ -313,9 +314,6 @@ module.exports = {
 
         // RATIONALE:         Catches a common coding mistake.
         "no-implied-eval": "error",
-
-        // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
-        "no-inner-declarations": "error",
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         "no-invalid-regexp": "error",
@@ -438,3 +436,4 @@ module.exports = {
     }
   ]
 };
+//https://eslint.org/docs/rules/func-style
