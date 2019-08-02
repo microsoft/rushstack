@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "rush add --all",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "sadasant@gmail.com"
+}
