@@ -26,8 +26,10 @@ const PACKAGE_NAME: string = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';
 
 function getRushVersion(): string {
-  if (process.env[RUSH_PREVIEW_VERSION] !== undefined) {
-    return process.env[RUSH_PREVIEW_VERSION]!;
+  const rushPreviewVersion: string | undefined = process.env[RUSH_PREVIEW_VERSION];
+  if (rushPreviewVersion !== undefined) {
+    console.log(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
+    return rushPreviewVersion;
   }
 
   const rushJsonFolder: string = findRushJsonFolder();
