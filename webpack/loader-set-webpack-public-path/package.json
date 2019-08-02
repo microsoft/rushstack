@@ -16,7 +16,7 @@
     "@types/node": "8.5.8",
     "@microsoft/set-webpack-public-path-plugin": "2.1.110",
     "loader-utils": "~1.1.0",
-    "lodash": "~4.17.5"
+    "lodash": "~4.17.15"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.2": "0.3.14",

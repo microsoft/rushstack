@@ -39,7 +39,7 @@
     "gulp-flatten": "~0.2.0",
     "gulp-if": "^2.0.1",
     "vinyl": "~2.2.0",
-    "lodash.merge": "~4.3.2",
+    "lodash.merge": "~4.6.2",
     "merge2": "~1.0.2",
     "node-notifier": "~5.0.2",
     "object-assign": "~4.1.0",
