@@ -213,7 +213,12 @@ module.exports = {
         "accessor-pairs": "error",
 
         // RATIONALE:         In TypeScript, if you write x["y"] instead of x.y, it disables type checking.
-        "dot-notation": "error",
+        "dot-notation": [
+          "error",
+          {
+            "allowPattern": "^_"
+          }
+        ],
 
         // RATIONALE:         Catches a common coding mistake.
         "eqeqeq": "error",
