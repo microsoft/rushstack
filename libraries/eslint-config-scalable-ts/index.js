@@ -36,7 +36,12 @@ module.exports = {
         "@typescript-eslint/camelcase": "error",
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        "@typescript-eslint/class-name-casing": "error",
+        "@typescript-eslint/class-name-casing": [
+          "error",
+          {
+            "allowUnderscorePrefix": true
+          }
+        ],
 
         // RATIONALE:         We require "x as number" instead of "<number>x" to avoid conflicts with JSX.
         "@typescript-eslint/consistent-type-assertions": "error",
@@ -71,7 +76,13 @@ module.exports = {
         //                    objects, here the "I" prefix also helps by avoiding spurious conflicts with classes
         //                    by the same name.
         //
-        "@typescript-eslint/interface-name-prefix": [ "error", "always" ],
+        "@typescript-eslint/interface-name-prefix": [
+          "error",
+          {
+            "prefixWithI": "always",
+            "allowUnderscorePrefix": true
+          }
+        ],
 
         // RATIONALE:         Requiring private members to be prefixed with an underscore prevents accidental access
         //                    by scripts that are coded in plain JavaScript and cannot see the TypeScript visibility
