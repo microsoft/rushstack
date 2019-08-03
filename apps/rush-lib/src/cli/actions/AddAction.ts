@@ -16,6 +16,7 @@ import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater'
 import { PackageName } from '@microsoft/node-core-library';
 
 export class AddAction extends BaseRushAction {
+  private _allFlag: CommandLineFlagParameter;
   private _exactFlag: CommandLineFlagParameter;
   private _caretFlag: CommandLineFlagParameter;
   private _devDependencyFlag: CommandLineFlagParameter;
@@ -85,7 +86,7 @@ export class AddAction extends BaseRushAction {
     });
   }
 
-  public run(): Promise<void> {
+  public async run(): Promise<void> {
     const currentProject: RushConfigurationProject | undefined = this.rushConfiguration.tryGetProjectForPath(
       process.cwd()
     );
@@ -122,13 +123,15 @@ export class AddAction extends BaseRushAction {
 
     let projects: RushConfigurationProject[];
     if (this._allFlag) {
-      projects = Object.values(this._rushConfiguration.projectsByName);
+      projects = this.rushConfiguration.projects;
     } else {
       projects = [currentProject];
     }
 
+    const updater: PackageJsonUpdater = new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
+
     for (const project of projects) {
-      return new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder).doRushAdd({
+      await updater.doRushAdd({
         currentProject: project,
         packageName: packageName,
         initialVersion: version,
@@ -140,5 +143,7 @@ export class AddAction extends BaseRushAction {
           : (this._exactFlag.value ? SemVerStyle.Exact : SemVerStyle.Tilde)
       });
     }
+
+    return;
   }
 }
