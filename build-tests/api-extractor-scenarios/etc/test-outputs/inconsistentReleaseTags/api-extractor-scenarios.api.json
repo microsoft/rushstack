@@ -2,21 +2,19 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1000
+    "schemaVersion": 1002,
+    "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
       "name": "",
       "members": [
         {
           "kind": "Interface",
-          "canonicalReference": "(IBeta:interface)",
           "docComment": "/**\n * @beta\n */\n",
           "excerptTokens": [
             {
@@ -37,7 +35,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "x",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -69,7 +66,6 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(publicFunctionReturnsBeta:0)",
           "docComment": "/**\n * It's not okay for a \"public\" function to reference a \"beta\" symbol, because \"beta\" is less public than \"public\".\n *\n * @public\n */\n",
           "excerptTokens": [
             {

@@ -15,14 +15,13 @@ import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionControl } from '../../utilities/VersionControl';
-import { VersionMismatchFinder } from '../../api/VersionMismatchFinder';
+import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { BaseRushAction } from './BaseRushAction';
 import { VersionManager } from '../../logic/VersionManager';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
-import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 
 export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Applying package updates.';
 
@@ -181,17 +180,11 @@ export class VersionAction extends BaseRushAction {
 
   private _validateResult(): void {
     // Load the config from file to avoid using inconsistent in-memory data.
-    const rushConfig: RushConfiguration =
-      RushConfiguration.loadFromConfigurationFile(this.rushConfiguration.rushJsonFile);
-
-    const commonVersions: CommonVersionsConfiguration = rushConfig.getCommonVersions(
-      /* Always use the default variant */
+    const rushConfig: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      this.rushConfiguration.rushJsonFile
     );
 
-    const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder(
-      rushConfig.projects,
-      commonVersions.allowedAlternativeVersions
-    );
+    const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfig);
     if (mismatchFinder.numberOfMismatches) {
       throw new Error('Unable to finish version bump because inconsistencies were encountered.' +
         ' Run \"rush check\" to find more details.');
@@ -236,6 +229,7 @@ export class VersionAction extends BaseRushAction {
       git.push(tempBranch);
 
       // Now merge to target branch.
+      git.fetch();
       git.checkout(this._targetBranch.value);
       git.pull();
       git.merge(tempBranch);
@@ -243,6 +237,7 @@ export class VersionAction extends BaseRushAction {
       git.deleteBranch(tempBranch);
     } else {
       // skip commits
+      git.fetch();
       git.checkout(this._targetBranch.value);
       git.deleteBranch(tempBranch, false);
     }

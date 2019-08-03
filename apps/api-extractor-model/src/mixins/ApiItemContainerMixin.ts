@@ -3,6 +3,7 @@
 
 import { ApiItem, ApiItem_parent, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.
@@ -18,7 +19,7 @@ export interface IApiItemContainerJson extends IApiItemJson {
 
 const _members: unique symbol = Symbol('ApiItemContainerMixin._members');
 const _membersSorted: unique symbol = Symbol('ApiItemContainerMixin._membersSorted');
-const _membersByCanonicalReference: unique symbol = Symbol('ApiItemContainerMixin._membersByCanonicalReference');
+const _membersByContainerKey: unique symbol = Symbol('ApiItemContainerMixin._membersByContainerKey');
 const _membersByName: unique symbol = Symbol('ApiItemContainerMixin._membersByName');
 
 /**
@@ -57,9 +58,15 @@ export interface ApiItemContainerMixin extends ApiItem {
   addMember(member: ApiItem): void;
 
   /**
-   * Attempts to retrieve a member using its canonicalReference, or returns undefined if no matching member was found.
+   * Attempts to retrieve a member using its containerKey, or returns `undefined` if no matching member was found.
+   *
+   * @remarks
+   * Use the `getContainerKey()` static member to construct the key.  Each subclass has a different implementation
+   * of this function, according to the aspects that are important for identifying it.
+   *
+   * See {@link ApiItem.containerKey} for more information.
    */
-  tryGetMember(canonicalReference: string): ApiItem | undefined;
+  tryGetMemberByKey(containerKey: string): ApiItem | undefined;
 
   /**
    * Returns a list of members with the specified name.
@@ -84,18 +91,18 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
   abstract class MixedClass extends baseClass implements ApiItemContainerMixin {
     public readonly [_members]: ApiItem[];
     public [_membersSorted]: boolean;
-    public [_membersByCanonicalReference]: Map<string, ApiItem>;
+    public [_membersByContainerKey]: Map<string, ApiItem>;
     public [_membersByName]: Map<string, ApiItem[]> | undefined;
 
     /** @override */
     public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
-      jsonObject: IApiItemContainerJson): void {
+      context: DeserializerContext, jsonObject: IApiItemContainerJson): void {
 
-      baseClass.onDeserializeInto(options, jsonObject);
+      baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.members = [];
       for (const memberObject of jsonObject.members) {
-        options.members.push(ApiItem.deserialize(memberObject));
+        options.members.push(ApiItem.deserialize(memberObject, context));
       }
     }
 
@@ -105,7 +112,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
       const options: IApiItemContainerMixinOptions = args[0] as IApiItemContainerMixinOptions;
 
       this[_members] = [];
-      this[_membersByCanonicalReference] = new Map<string, ApiItem>();
+      this[_membersByContainerKey] = new Map<string, ApiItem>();
 
       if (options.members) {
         for (const member of options.members) {
@@ -124,8 +131,8 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     }
 
     public addMember(member: ApiItem): void {
-      if (this[_membersByCanonicalReference].has(member.canonicalReference)) {
-        throw new Error('Another member has already been added with the same name and canonicalReference');
+      if (this[_membersByContainerKey].has(member.containerKey)) {
+        throw new Error('Another member has already been added with the same name and containerKey');
       }
 
       const existingParent: ApiItem | undefined = member[ApiItem_parent];
@@ -136,13 +143,13 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
       this[_members].push(member);
       this[_membersByName] = undefined; // invalidate the lookup
       this[_membersSorted] = false;
-      this[_membersByCanonicalReference].set(member.canonicalReference, member);
+      this[_membersByContainerKey].set(member.containerKey, member);
 
       member[ApiItem_parent] = this;
     }
 
-    public tryGetMember(canonicalReference: string): ApiItem | undefined {
-      return this[_membersByCanonicalReference].get(canonicalReference);
+    public tryGetMemberByKey(containerKey: string): ApiItem | undefined {
+      return this[_membersByContainerKey].get(containerKey);
     }
 
     public findMembersByName(name: string): ReadonlyArray<ApiItem> {

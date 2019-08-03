@@ -26,6 +26,7 @@ export class RunAction extends CommandLineAction {
   private _configFileParameter: CommandLineStringParameter;
   private _localParameter: CommandLineFlagParameter;
   private _verboseParameter: CommandLineFlagParameter;
+  private _diagnosticsParameter: CommandLineFlagParameter;
   private _typescriptCompilerFolder: CommandLineStringParameter;
 
   constructor(parser: ApiExtractorCommandLine) {
@@ -56,15 +57,23 @@ export class RunAction extends CommandLineAction {
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
-      description: 'Show additional diagnostic messages in the output.'
+      description: 'Show additional informational messages in the output.'
+    });
+
+    this._diagnosticsParameter = this.defineFlagParameter({
+      parameterLongName: '--diagnostics',
+      description: 'Show diagnostic messages used for troubleshooting problems with API Extractor.'
+        + '  This flag also enables the "--verbose" flag.'
     });
 
     this._typescriptCompilerFolder = this.defineStringParameter({
       parameterLongName: '--typescript-compiler-folder',
       argumentName: 'PATH',
-      description: 'By default API Extractor uses its own TypeScript compiler version to analyze your project.'
-        + ' This can often cause compiler errors due to incompatibilities between different TS versions.'
-        + ' Use "--typescript-compiler-folder" to specify the folder path for your compiler version.'
+      description:  'API Extractor uses its own TypeScript compiler engine to analyze your project.  If your project'
+      + ' is built with a significantly different TypeScript version, sometimes API Extractor may report compilation'
+      + ' errors due to differences in the system typings (e.g. lib.dom.d.ts).  You can use the'
+      + ' "--typescriptCompilerFolder" option to specify the folder path where you installed the TypeScript package,'
+      + ' and API Extractor\'s compiler will use those system typings instead.'
     });
   }
 
@@ -142,6 +151,7 @@ export class RunAction extends CommandLineAction {
       {
         localBuild: this._localParameter.value,
         showVerboseMessages: this._verboseParameter.value,
+        showDiagnostics: this._diagnosticsParameter.value,
         typescriptCompilerFolder: typescriptCompilerFolder
       }
     );

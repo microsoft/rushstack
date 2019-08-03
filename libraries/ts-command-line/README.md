@@ -104,7 +104,7 @@ To invoke the parser, the application entry point will do something like this:
 
 ```typescript
 const commandLine: WidgetCommandLine = new WidgetCommandLine();
-commandLine.execute(process.argv);
+commandLine.execute();
 ```
 
 When we run `widget --verbose push --force`, the `PushAction.onExecute()` method will get invoked and then your business logic takes over.

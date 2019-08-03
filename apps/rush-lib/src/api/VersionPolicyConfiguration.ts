@@ -14,6 +14,7 @@ export interface IVersionPolicyJson {
   policyName: string;
   definitionName: string;
   dependencies?: IVersionPolicyDependencyJson;
+  exemptFromRushChange?: boolean;
 }
 
 /**

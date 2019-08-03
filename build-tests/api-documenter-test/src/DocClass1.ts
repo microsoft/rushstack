@@ -55,6 +55,17 @@ export interface IDocInterface2 extends IDocInterface1 {
 }
 
 /**
+ * A namespace containing an ECMAScript symbol
+ * @public
+ */
+export namespace EcmaSmbols {
+  /**
+   * An ECMAScript symbol
+   */
+  export const example: unique symbol = Symbol('EcmaSmbols.exampleSymbol');
+}
+
+/**
  * Some less common TypeScript declaration kinds.
  * @public
  * {@docCategory DocClass1}
@@ -76,6 +87,21 @@ export interface IDocInterface3 {
    * @param x - the parameter
    */
   [x: string]: string;
+
+  /**
+   * ECMAScript symbol
+   */
+  [EcmaSmbols.example]: string;
+
+  /**
+   * A quoted identifier with redundant quotes.
+   */
+  "redundantQuotes": string;
+
+  /**
+   * An identifier that does needs quotes.  It misleadingly looks like an ECMAScript symbol.
+   */
+  "[not.a.symbol]": string
 }
 
 /**
@@ -215,4 +241,26 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   public static sumWithExample(x: number, y: number): number {
     return x + y;
   }
+}
+
+/**
+ * Interface without inline tag to test custom TOC
+ * @public
+ */
+export interface IDocInterface5 {
+  /**
+   * Property of type string that does something
+   */
+  regularProperty: string;
+}
+
+/**
+ * Interface without inline tag to test custom TOC with injection
+ * @public
+ */
+export interface IDocInterface6 {
+  /**
+   * Property of type number that does something
+   */
+  regularProperty: number;
 }

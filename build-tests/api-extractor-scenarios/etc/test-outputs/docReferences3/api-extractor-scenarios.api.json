@@ -2,21 +2,19 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1000
+    "schemaVersion": 1002,
+    "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
       "name": "",
       "members": [
         {
           "kind": "Interface",
-          "canonicalReference": "(A:interface)",
           "docComment": "",
           "excerptTokens": [
             {
@@ -37,7 +35,6 @@
           "members": [
             {
               "kind": "PropertySignature",
-              "canonicalReference": "myProperty",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -69,7 +66,6 @@
         },
         {
           "kind": "Namespace",
-          "canonicalReference": "(A:namespace)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -90,7 +86,6 @@
           "members": [
             {
               "kind": "Class",
-              "canonicalReference": "(B:class)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -111,7 +106,6 @@
               "members": [
                 {
                   "kind": "Method",
-                  "canonicalReference": "(myMethod:instance,0)",
                   "docComment": "",
                   "excerptTokens": [
                     {
@@ -148,7 +142,6 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(failWithAmbiguity:0)",
           "docComment": "/**\n * {@link MyNamespace.MyClass.myMethod | the method}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -183,7 +176,6 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(succeedWithExternalReference:0)",
           "docComment": "/**\n * NOTE: The broken link checker currently is not able to validate references to external packages. Tracked by: https://github.com/Microsoft/web-build-tools/issues/1195 {@link nonexistent#nonexistent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -218,7 +210,6 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(succeedWithSelector:0)",
           "docComment": "/**\n * {@link (A:namespace).B.myMethod | the method} {@link (A:interface).myProperty | the property}\n *\n * @public\n */\n",
           "excerptTokens": [
             {

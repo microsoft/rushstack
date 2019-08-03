@@ -21,6 +21,7 @@
     "importEquals",
     "inconsistentReleaseTags",
     "preapproved",
-    "typeOf"
+    "typeOf",
+    "typeParameters"
   ]
 }

@@ -83,6 +83,10 @@
         "mainProject": {
           "description": "The main project for this version policy",
           "type": "string"
+        },
+        "exemptFromRushChange": {
+          "description": "If true, the version policy will not require changelog files.",
+          "type": "boolean"
         }
       },
       "required": ["policyName", "definitionName", "version", "nextBump"],
@@ -105,6 +109,10 @@
         "lockedMajor": {
           "description": "The locked major version",
           "type": "number"
+        },
+        "exemptFromRushChange": {
+          "description": "If true, the version policy will not require changelog files.",
+          "type": "boolean"
         }
       },
       "required": ["policyName", "definitionName"],

@@ -2,21 +2,19 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1000
+    "schemaVersion": 1002,
+    "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
       "name": "",
       "members": [
         {
           "kind": "Class",
-          "canonicalReference": "(CyclicA:class)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -37,7 +35,6 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(methodA1:instance,0)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -69,7 +66,6 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(methodA3:instance,0)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -104,7 +100,6 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(CyclicB:class)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -125,7 +120,6 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(methodB2:instance,0)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -157,7 +151,6 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(methodB4:instance,0)",
               "docComment": "/**\n * THE COMMENT\n */\n",
               "excerptTokens": [
                 {
@@ -192,7 +185,6 @@
         },
         {
           "kind": "Class",
-          "canonicalReference": "(FailWithSelfReference:class)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -213,7 +205,6 @@
           "members": [
             {
               "kind": "Method",
-              "canonicalReference": "(method1:instance,0)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -245,7 +236,6 @@
             },
             {
               "kind": "Method",
-              "canonicalReference": "(method2:instance,0)",
               "docComment": "",
               "excerptTokens": [
                 {

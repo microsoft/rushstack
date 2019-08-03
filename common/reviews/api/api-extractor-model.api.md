@@ -10,7 +10,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocTagDefinition } from '@microsoft/tsdoc';
 
-// Warning: (ae-internal-missing-underscore) The name AedocDefinitions should be prefixed with an underscore because the declaration is marked as "@internal"
+// Warning: (ae-internal-missing-underscore) The name "AedocDefinitions" should be prefixed with an underscore because the declaration is marked as @internal
 // 
 // @internal (undocumented)
 export class AedocDefinitions {
@@ -30,9 +30,9 @@ export class AedocDefinitions {
 export class ApiCallSignature extends ApiCallSignature_base {
     constructor(options: IApiCallSignatureOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(overloadIndex: number): string;
+    static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -43,17 +43,18 @@ export class ApiCallSignature extends ApiCallSignature_base {
 export class ApiClass extends ApiClass_base {
     constructor(options: IApiClassOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     readonly extendsType: HeritageType | undefined;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     readonly implementsTypes: ReadonlyArray<HeritageType>;
     // @override (undocumented)
     readonly kind: ApiItemKind;
+    // Warning: (ae-forgotten-export) The symbol "DeserializerContext" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "IApiClassJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiClassOptions>, jsonObject: IApiClassJson): void;
+    static onDeserializeInto(options: Partial<IApiClassOptions>, context: DeserializerContext, jsonObject: IApiClassJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiClassJson>): void;
 }
@@ -64,9 +65,9 @@ export class ApiClass extends ApiClass_base {
 export class ApiConstructor extends ApiConstructor_base {
     constructor(options: IApiConstructorOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(isStatic: boolean, overloadIndex: number): string;
+    static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -77,9 +78,9 @@ export class ApiConstructor extends ApiConstructor_base {
 export class ApiConstructSignature extends ApiConstructSignature_base {
     constructor(options: IApiConstructSignatureOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(overloadIndex: number): string;
+    static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -94,7 +95,7 @@ export class ApiDeclaredItem extends ApiDocumentedItem {
     // Warning: (ae-forgotten-export) The symbol "IApiDeclaredItemJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>, jsonObject: IApiDeclaredItemJson): void;
+    static onDeserializeInto(options: Partial<IApiDeclaredItemOptions>, context: DeserializerContext, jsonObject: IApiDeclaredItemJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiDeclaredItemJson>): void;
 }
@@ -105,7 +106,7 @@ export class ApiDocumentedItem extends ApiItem {
     // Warning: (ae-forgotten-export) The symbol "IApiItemJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>, jsonObject: IApiItemJson): void;
+    static onDeserializeInto(options: Partial<IApiDocumentedItemOptions>, context: DeserializerContext, jsonObject: IApiItemJson): void;
     // Warning: (ae-forgotten-export) The symbol "IApiDocumentedItemJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
@@ -120,7 +121,7 @@ export class ApiDocumentedItem extends ApiItem {
 export class ApiEntryPoint extends ApiEntryPoint_base {
     constructor(options: IApiEntryPointOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -133,9 +134,9 @@ export class ApiEnum extends ApiEnum_base {
     // @override (undocumented)
     addMember(member: ApiEnumMember): void;
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
     // @override (undocumented)
@@ -148,16 +149,16 @@ export class ApiEnum extends ApiEnum_base {
 export class ApiEnumMember extends ApiEnumMember_base {
     constructor(options: IApiEnumMemberOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     readonly initializerExcerpt: Excerpt;
     // @override (undocumented)
     readonly kind: ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiEnumMemberJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, jsonObject: IApiEnumMemberJson): void;
+    static onDeserializeInto(options: Partial<IApiEnumMemberOptions>, context: DeserializerContext, jsonObject: IApiEnumMemberJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiEnumMemberJson>): void;
 }
@@ -168,9 +169,9 @@ export class ApiEnumMember extends ApiEnumMember_base {
 export class ApiFunction extends ApiFunction_base {
     constructor(options: IApiFunctionOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string, overloadIndex: number): string;
+    static getContainerKey(name: string, overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -181,9 +182,9 @@ export class ApiFunction extends ApiFunction_base {
 export class ApiIndexSignature extends ApiIndexSignature_base {
     constructor(options: IApiIndexSignatureOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(overloadIndex: number): string;
+    static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -194,16 +195,16 @@ export class ApiIndexSignature extends ApiIndexSignature_base {
 export class ApiInterface extends ApiInterface_base {
     constructor(options: IApiInterfaceOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     readonly extendsTypes: ReadonlyArray<HeritageType>;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiInterfaceJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiInterfaceOptions>, jsonObject: IApiInterfaceJson): void;
+    static onDeserializeInto(options: Partial<IApiInterfaceOptions>, context: DeserializerContext, jsonObject: IApiInterfaceJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiInterfaceJson>): void;
 }
@@ -213,10 +214,10 @@ export class ApiItem {
     // (undocumented)
     [ApiItem_parent]: ApiItem | undefined;
     constructor(options: IApiItemOptions);
-    // @virtual (undocumented)
-    readonly canonicalReference: string;
+    // @virtual
+    readonly containerKey: string;
     // (undocumented)
-    static deserialize(jsonObject: IApiItemJson): ApiItem;
+    static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem;
     // @virtual
     readonly displayName: string;
     getAssociatedPackage(): ApiPackage | undefined;
@@ -224,12 +225,12 @@ export class ApiItem {
     getScopedNameWithinPackage(): string;
     // @virtual (undocumented)
     getSortKey(): string;
-    // @virtual (undocumented)
+    // @virtual
     readonly kind: ApiItemKind;
     // @virtual
     readonly members: ReadonlyArray<ApiItem>;
     // @virtual (undocumented)
-    static onDeserializeInto(options: Partial<IApiItemOptions>, jsonObject: IApiItemJson): void;
+    static onDeserializeInto(options: Partial<IApiItemOptions>, context: DeserializerContext, jsonObject: IApiItemJson): void;
     // @virtual
     readonly parent: ApiItem | undefined;
     // @virtual (undocumented)
@@ -246,7 +247,7 @@ export interface ApiItemContainerMixin extends ApiItem {
     readonly members: ReadonlyArray<ApiItem>;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
-    tryGetMember(canonicalReference: string): ApiItem | undefined;
+    tryGetMemberByKey(containerKey: string): ApiItem | undefined;
 }
 
 // @public
@@ -304,9 +305,9 @@ export const enum ApiItemKind {
 export class ApiMethod extends ApiMethod_base {
     constructor(options: IApiMethodOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string, isStatic: boolean, overloadIndex: number): string;
+    static getContainerKey(name: string, isStatic: boolean, overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -317,9 +318,9 @@ export class ApiMethod extends ApiMethod_base {
 export class ApiMethodSignature extends ApiMethodSignature_base {
     constructor(options: IApiMethodSignatureOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string, overloadIndex: number): string;
+    static getContainerKey(name: string, overloadIndex: number): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -332,7 +333,7 @@ export class ApiModel extends ApiModel_base {
     // @override (undocumented)
     addMember(member: ApiPackage): void;
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
     // (undocumented)
@@ -344,15 +345,30 @@ export class ApiModel extends ApiModel_base {
     tryGetPackageByName(packageName: string): ApiPackage | undefined;
 }
 
+// @public
+export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiNameMixin);
+
+// @public
+export interface ApiNameMixin extends ApiItem {
+    readonly name: string;
+    // @override (undocumented)
+    serializeInto(jsonObject: Partial<IApiItemJson>): void;
+}
+
+// @public
+export namespace ApiNameMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiNameMixin;
+}
+
 // Warning: (ae-forgotten-export) The symbol "ApiNamespace_base" needs to be exported by the entry point index.d.ts
 // 
 // @public
 export class ApiNamespace extends ApiNamespace_base {
     constructor(options: IApiNamespaceOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -365,7 +381,7 @@ export class ApiPackage extends ApiPackage_base {
     // @override (undocumented)
     addMember(member: ApiEntryPoint): void;
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
     readonly entryPoints: ReadonlyArray<ApiEntryPoint>;
     // (undocumented)
@@ -400,9 +416,9 @@ export namespace ApiParameterListMixin {
 export class ApiProperty extends ApiProperty_base {
     constructor(options: IApiPropertyOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string, isStatic: boolean): string;
+    static getContainerKey(name: string, isStatic: boolean): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -416,7 +432,7 @@ export class ApiPropertyItem extends ApiPropertyItem_base {
     // Warning: (ae-forgotten-export) The symbol "IApiPropertyItemJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiPropertyItemOptions>, jsonObject: IApiPropertyItemJson): void;
+    static onDeserializeInto(options: Partial<IApiPropertyItemOptions>, context: DeserializerContext, jsonObject: IApiPropertyItemJson): void;
     readonly propertyTypeExcerpt: Excerpt;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiPropertyItemJson>): void;
@@ -426,9 +442,9 @@ export class ApiPropertyItem extends ApiPropertyItem_base {
 export class ApiPropertySignature extends ApiPropertyItem {
     constructor(options: IApiPropertySignatureOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
@@ -486,11 +502,33 @@ export namespace ApiStaticMixin {
 export class ApiTypeAlias extends ApiTypeAlias_base {
     constructor(options: IApiTypeAliasOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
+    // Warning: (ae-forgotten-export) The symbol "IApiTypeAliasJson" needs to be exported by the entry point index.d.ts
+    // 
+    // @override (undocumented)
+    static onDeserializeInto(options: Partial<IApiTypeAliasOptions>, context: DeserializerContext, jsonObject: IApiTypeAliasJson): void;
+    // @override (undocumented)
+    serializeInto(jsonObject: Partial<IApiTypeAliasJson>): void;
+    readonly typeExcerpt: Excerpt;
+}
+
+// @public
+export function ApiTypeParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiTypeParameterListMixin);
+
+// @public
+export interface ApiTypeParameterListMixin extends ApiItem {
+    // (undocumented)
+    serializeInto(jsonObject: Partial<IApiItemJson>): void;
+    readonly typeParameters: ReadonlyArray<TypeParameter>;
+}
+
+// @public
+export namespace ApiTypeParameterListMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiTypeParameterListMixin;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiVariable_base" needs to be exported by the entry point index.d.ts
@@ -499,15 +537,15 @@ export class ApiTypeAlias extends ApiTypeAlias_base {
 export class ApiVariable extends ApiVariable_base {
     constructor(options: IApiVariableOptions);
     // @override (undocumented)
-    readonly canonicalReference: string;
+    readonly containerKey: string;
     // (undocumented)
-    static getCanonicalReference(name: string): string;
+    static getContainerKey(name: string): string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiVariableJson" needs to be exported by the entry point index.d.ts
     // 
     // @override (undocumented)
-    static onDeserializeInto(options: Partial<IApiVariableOptions>, jsonObject: IApiVariableJson): void;
+    static onDeserializeInto(options: Partial<IApiVariableOptions>, context: DeserializerContext, jsonObject: IApiVariableJson): void;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiVariableJson>): void;
     readonly variableTypeExcerpt: Excerpt;
@@ -519,6 +557,8 @@ export type Constructor<T = {}> = new (...args: any[]) => T;
 // @public
 export class Excerpt {
     constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange);
+    // (undocumented)
+    readonly isEmpty: boolean;
     // (undocumented)
     readonly text: string;
     // (undocumented)
@@ -551,13 +591,11 @@ export class HeritageType {
 }
 
 // @public
-export interface IApiCallSignatureOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
+export interface IApiCallSignatureOptions extends IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
 }
 
-// Warning: (ae-forgotten-export) The symbol "IApiNameMixinOptions" needs to be exported by the entry point index.d.ts
-// 
 // @public
-export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions {
     // (undocumented)
     extendsTokenRange: IExcerptTokenRange | undefined;
     // (undocumented)
@@ -565,11 +603,11 @@ export interface IApiClassOptions extends IApiItemContainerMixinOptions, IApiNam
 }
 
 // @public
-export interface IApiConstructorOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiStaticMixinOptions, IApiDeclaredItemOptions {
+export interface IApiConstructorOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
-export interface IApiConstructSignatureOptions extends IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
+export interface IApiConstructSignatureOptions extends IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
@@ -599,7 +637,7 @@ export interface IApiEnumOptions extends IApiItemContainerMixinOptions, IApiName
 }
 
 // @public
-export interface IApiFunctionOptions extends IApiNameMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
+export interface IApiFunctionOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
@@ -607,7 +645,7 @@ export interface IApiIndexSignatureOptions extends IApiParameterListMixinOptions
 }
 
 // @public
-export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiInterfaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
     // (undocumented)
     extendsTokenRanges: IExcerptTokenRange[];
 }
@@ -627,11 +665,17 @@ export interface IApiItemOptions {
 }
 
 // @public
-export interface IApiMethodOptions extends IApiNameMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public (undocumented)
-export interface IApiMethodSignatureOptions extends IApiNameMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodSignatureOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
+}
+
+// @public
+export interface IApiNameMixinOptions extends IApiItemOptions {
+    // (undocumented)
+    name: string;
 }
 
 // @public
@@ -698,7 +742,25 @@ export interface IApiStaticMixinOptions extends IApiItemOptions {
 }
 
 // @public
-export interface IApiTypeAliasOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiTypeAliasOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions, IApiTypeParameterListMixinOptions {
+    // (undocumented)
+    typeTokenRange: IExcerptTokenRange;
+}
+
+// @public
+export interface IApiTypeParameterListMixinOptions extends IApiItemOptions {
+    // (undocumented)
+    typeParameters: IApiTypeParameterOptions[];
+}
+
+// @public
+export interface IApiTypeParameterOptions {
+    // (undocumented)
+    constraintTokenRange: IExcerptTokenRange;
+    // (undocumented)
+    defaultTypeTokenRange: IExcerptTokenRange;
+    // (undocumented)
+    typeParameterName: string;
 }
 
 // @public
@@ -740,6 +802,18 @@ export interface IResolveDeclarationReferenceResult {
 }
 
 // @public
+export interface ITypeParameterOptions {
+    // (undocumented)
+    constraintExcerpt: Excerpt;
+    // (undocumented)
+    defaultTypeExcerpt: Excerpt;
+    // (undocumented)
+    name: string;
+    // (undocumented)
+    parent: ApiTypeParameterListMixin;
+}
+
+// @public
 export class Parameter {
     constructor(options: IParameterOptions);
     name: string;
@@ -765,6 +839,15 @@ export enum ReleaseTag {
 export namespace ReleaseTag {
     export function compare(a: ReleaseTag, b: ReleaseTag): number;
     export function getTagName(releaseTag: ReleaseTag): string;
+}
+
+// @public
+export class TypeParameter {
+    constructor(options: ITypeParameterOptions);
+    readonly constraintExcerpt: Excerpt;
+    readonly defaultTypeExcerpt: Excerpt;
+    name: string;
+    readonly tsdocTypeParamBlock: tsdoc.DocParamBlock | undefined;
 }
 
 

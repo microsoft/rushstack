@@ -28,6 +28,10 @@ This is a <b>bold</b> word.
 
 [a link](./index.md)<!-- --><b>bold</b>non-boldmore-non-bold
 
+## Unknown block tag
+
+<b>bold</b>non-boldmore-non-bold
+
 ## Bad characters
 
 <b>\\\\*one\\\\*two\\\\*</b><b>three\\\\*four</b>

@@ -2,6 +2,59 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.3.0",
+      "tag": "@microsoft/api-extractor-model_v7.3.0",
+      "date": "Mon, 22 Jul 2019 19:13:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Rename `ApiItem.canonicalReference` to `.containerKey`; rename `ApiItemContainerMixin.tryGetMember()` to `.tryGetMemberByKey()`; rename `Api___.getCanonicalReference()` to `.getContainerKey()`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.2.0",
+      "tag": "@microsoft/api-extractor-model_v7.2.0",
+      "date": "Tue, 11 Jun 2019 00:48:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the .api.json deserializer to validate the schema version and support backwards compatibility"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add API support for type parameters and type alias types"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.3",
+      "tag": "@microsoft/api-extractor-model_v7.1.3",
+      "date": "Wed, 05 Jun 2019 19:12:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where TSDoc index selectors (ApiParameterListMixin.overloadIndex) started from 0, whereas TSDoc requires a nonzero number"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.1.2",
+      "tag": "@microsoft/api-extractor-model_v7.1.2",
+      "date": "Tue, 04 Jun 2019 05:51:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where ApiConstructor inherited from ApiStaticMixin, but TypeScript constructors cannot be static"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.1.1",
       "tag": "@microsoft/api-extractor-model_v7.1.1",
       "date": "Mon, 27 May 2019 04:13:44 GMT",

@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Fix typo in command-line help for \"rush add\"",
+      "comment": "Clarify that \"rush update --full\" should be run when changing certain settings",
       "packageName": "@microsoft/rush",
       "type": "none"
     }

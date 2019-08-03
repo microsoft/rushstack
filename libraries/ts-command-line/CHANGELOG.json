@@ -2,6 +2,18 @@
   "name": "@microsoft/ts-command-line",
   "entries": [
     {
+      "version": "4.2.6",
+      "tag": "@microsoft/ts-command-line_v4.2.6",
+      "date": "Wed, 12 Jun 2019 19:12:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update Readme."
+          }
+        ]
+      }
+    },
+    {
       "version": "4.2.5",
       "tag": "@microsoft/ts-command-line_v4.2.5",
       "date": "Mon, 27 May 2019 04:13:44 GMT",

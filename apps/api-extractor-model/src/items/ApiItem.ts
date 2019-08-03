@@ -4,6 +4,7 @@
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiPackage } from '../model/ApiPackage';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
+import { DeserializerContext } from '../model/DeserializerContext';
 
 /**
  * The type returned by the {@link ApiItem.kind} property, which can be used to easily distinguish subclasses of
@@ -43,7 +44,6 @@ export interface IApiItemOptions {
 
 export interface IApiItemJson {
   kind: ApiItemKind;
-  canonicalReference: string;
 }
 
 /**
@@ -64,15 +64,16 @@ export const ApiItem_parent: unique symbol = Symbol('ApiItem._parent');
 export class ApiItem {
   public [ApiItem_parent]: ApiItem | undefined;
 
-  public static deserialize(jsonObject: IApiItemJson): ApiItem {
+  public static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem {
     // The Deserializer class is coupled with a ton of other classes, so  we delay loading it
     // to avoid ES5 circular imports.
     const deserializerModule: typeof import('../model/Deserializer') = require('../model/Deserializer');
-    return deserializerModule.Deserializer.deserialize(jsonObject);
+    return deserializerModule.Deserializer.deserialize(context, jsonObject);
   }
 
   /** @virtual */
-  public static onDeserializeInto(options: Partial<IApiItemOptions>, jsonObject: IApiItemJson): void {
+  public static onDeserializeInto(options: Partial<IApiItemOptions>,  context: DeserializerContext,
+    jsonObject: IApiItemJson): void {
     // (implemented by subclasses)
   }
 
@@ -83,17 +84,28 @@ export class ApiItem {
   /** @virtual */
   public serializeInto(jsonObject: Partial<IApiItemJson>): void {
     jsonObject.kind = this.kind;
-    jsonObject.canonicalReference = this.canonicalReference;
   }
 
-  /** @virtual */
+  /**
+   * Identifies the subclass of the `ApiItem` base class.
+   * @virtual
+   */
   public get kind(): ApiItemKind {
     throw new Error('ApiItem.kind was not implemented by the child class');
   }
 
-  /** @virtual */
-  public get canonicalReference(): string {
-    throw new Error('ApiItem.canonicalReference was not implemented by the child class');
+  /**
+   * Returns a string key that can be used to efficiently retrieve an `ApiItem` from an `ApiItemContainerMixin`.
+   * The key is unique within the container.  Its format is undocumented and may change at any time.
+   *
+   * @remarks
+   * Use the `getContainerKey()` static member to construct the key.  Each subclass has a different implementation
+   * of this function, according to the aspects that are important for identifying it.
+   *
+   * @virtual
+   */
+  public get containerKey(): string {
+    throw new Error('ApiItem.containerKey was not implemented by the child class');
   }
 
   /**
@@ -201,7 +213,7 @@ export class ApiItem {
 
   /** @virtual */
   public getSortKey(): string {
-    return this.canonicalReference;
+    return this.containerKey;
   }
 }
 

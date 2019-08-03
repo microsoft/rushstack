@@ -2,6 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
+import { trueCasePathSync } from 'true-case-path';
+
+export interface IEnvironmentConfigurationInitializeOptions {
+  doNotNormalizePaths?: boolean;
+}
 
 /**
  * Names of environment variables used by Rush.
@@ -20,6 +26,13 @@ export const enum EnvironmentVariableNames {
    * field from rush.json.
    */
   RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION',
+
+  /**
+   * If this variable is set to "true", Rush will not fail the build when running a version
+   * of Node that does not match the criteria specified in the "nodeSupportedVersionRange"
+   * field from rush.json.
+   */
+  RUSH_ALLOW_UNSUPPORTED_NODEJS = 'RUSH_ALLOW_UNSUPPORTED_NODEJS',
 
   /**
    * This variable selects a specific installation variant for Rush to use when installing
@@ -50,6 +63,8 @@ export class EnvironmentConfiguration {
 
   private static _absoluteSymlinks: boolean = false;
 
+  private static _allowUnsupportedNodeVersion: boolean = false;
+
   /**
    * An override for the common/temp folder path.
    */
@@ -68,9 +83,21 @@ export class EnvironmentConfiguration {
   }
 
   /**
+   * If this environment variable is set to "true", the Node.js version check will print a warning
+   * instead of causing a hard error if the environment's Node.js version doesn't match the
+   * version specifier in `rush.json`'s "nodeSupportedVersionRange" property.
+   *
+   * See {@link EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS}.
+   */
+  public static get allowUnsupportedNodeVersion(): boolean {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._allowUnsupportedNodeVersion;
+  }
+
+  /**
    * Reads and validates environment variables. If any are invalid, this function will throw.
    */
-  public static initialize(): void {
+  public static initialize(options: IEnvironmentConfigurationInitializeOptions = {}): void {
     EnvironmentConfiguration.reset();
 
     const unknownEnvVariables: string[] = [];
@@ -81,12 +108,19 @@ export class EnvironmentConfiguration {
         const normalizedEnvVarName: string = os.platform() === 'win32' ? envVarName.toUpperCase() : envVarName;
         switch (normalizedEnvVarName) {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
-            EnvironmentConfiguration._rushTempFolderOverride = value;
+            EnvironmentConfiguration._rushTempFolderOverride = (value && !options.doNotNormalizePaths)
+              ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
+              : value;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS: {
             EnvironmentConfiguration._absoluteSymlinks = value === 'true';
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS: {
+            EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
             break;
           }
 
@@ -125,5 +159,48 @@ export class EnvironmentConfiguration {
     if (!EnvironmentConfiguration._hasBeenInitialized) {
       throw new Error('The EnvironmentConfiguration must be initialized before values can be accessed.');
     }
+  }
+
+  /**
+   * Given a path to a folder (that may or may not exist), normalize the path, including casing,
+   * to the first existing parent folder in the path.
+   *
+   * If no existing path can be found (for example, if the root is a volume that doesn't exist),
+   * this function returns undefined.
+   *
+   * @example
+   * If the following path exists on disk: C:\Folder1\folder2\
+   * _normalizeFirstExistingFolderPath('c:\\folder1\\folder2\\temp\\subfolder')
+   * returns 'C:\\Folder1\\folder2\\temp\\subfolder'
+   */
+  private static _normalizeDeepestParentFolderPath(folderPath: string): string | undefined {
+    folderPath = path.normalize(folderPath);
+    const endsWithSlash: boolean = folderPath.charAt(folderPath.length - 1) === path.sep;
+    const parsedPath: path.ParsedPath = path.parse(folderPath);
+    const pathRoot: string = parsedPath.root;
+    const pathWithoutRoot: String = parsedPath.dir.substr(pathRoot.length);
+    const pathParts: string[] = [...pathWithoutRoot.split(path.sep), parsedPath.name].filter((part) => !!part);
+
+    // Starting with all path sections, and eliminating one from the end during each loop iteration,
+    // run trueCasePathSync. If trueCasePathSync returns without exception, we've found a subset
+    // of the path that exists and we've now gotten the correct casing.
+    //
+    // Once we've found a parent folder that exists, append the path sections that didn't exist.
+    for (let i: number = pathParts.length; i >= 0; i--) {
+      const constructedPath: string = path.join(pathRoot, ...pathParts.slice(0, i));
+      try {
+        const normalizedConstructedPath: string = trueCasePathSync(constructedPath);
+        const result: string = path.join(normalizedConstructedPath, ...pathParts.slice(i));
+        if (endsWithSlash) {
+          return `${result}${path.sep}`;
+        } else {
+          return result;
+        }
+      } catch (e) {
+        // This path doesn't exist, continue to the next subpath
+      }
+    }
+
+    return undefined;
   }
 }

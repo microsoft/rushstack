@@ -7,6 +7,7 @@ import { JsonFile, IJsonFileSaveOptions, PackageJsonLookup, IPackageJson } from 
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiPackage}.
@@ -18,19 +19,13 @@ export interface IApiPackageOptions extends
   IApiDocumentedItemOptions {
 }
 
-export enum ApiJsonSchemaVersion {
-  /**
-   * The initial release.
-   */
-  V_1000 = 1000
-}
-
 export interface IApiPackageMetadataJson {
   /**
    * The NPM package name for the tool that wrote the *.api.json file.
    * For informational purposes only.
    */
   toolPackage: string;
+
   /**
    * The NPM package version for the tool that wrote the *.api.json file.
    * For informational purposes only.
@@ -38,10 +33,26 @@ export interface IApiPackageMetadataJson {
   toolVersion: string;
 
   /**
-   * The *.api.json schema version.  Used for determining whether the file format is
+   * The schema version for the .api.json file format.  Used for determining whether the file format is
    * supported, and for backwards compatibility.
    */
   schemaVersion: ApiJsonSchemaVersion;
+
+  /**
+   * To support forwards compatibility, the `oldestForwardsCompatibleVersion` field tracks the oldest schema version
+   * whose corresponding deserializer could safely load this file.
+   *
+   * @remarks
+   * Normally api-extractor-model should refuse to load a schema version that is newer than the latest version
+   * that its deserializer understands.  However, sometimes a schema change may merely introduce some new fields
+   * without modifying or removing any existing fields.  In this case, an older api-extractor-model library can
+   * safely deserialize the newer version (by ignoring the extra fields that it doesn't recognize).  The newer
+   * serializer can use this field to communicate that.
+   *
+   * If present, the `oldestForwardsCompatibleVersion` must be less than or equal to
+   * `IApiPackageMetadataJson.schemaVersion`.
+   */
+  oldestForwardsCompatibleVersion?: ApiJsonSchemaVersion;
 }
 
 export interface IApiPackageJson extends IApiItemJson {
@@ -90,8 +101,55 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
  */
 export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
-    const jsonObject: IApiItemJson = JsonFile.load(apiJsonFilename);
-    return ApiItem.deserialize(jsonObject) as ApiPackage;
+    const jsonObject: IApiPackageJson = JsonFile.load(apiJsonFilename);
+
+    if (!jsonObject
+      || !jsonObject.metadata
+      || typeof jsonObject.metadata.schemaVersion !== 'number') {
+        throw new Error(`Error loading ${apiJsonFilename}:`
+        + `\nThe file format is not recognized; the "metadata.schemaVersion" field is missing or invalid`);
+    }
+
+    const schemaVersion: number = jsonObject.metadata.schemaVersion;
+
+    if (schemaVersion < ApiJsonSchemaVersion.OLDEST_SUPPORTED) {
+      throw new Error(`Error loading ${apiJsonFilename}:`
+        + `\nThe file format is version ${schemaVersion},`
+        + ` whereas ${ApiJsonSchemaVersion.OLDEST_SUPPORTED} is the oldest version supported by this tool`);
+    }
+
+    let oldestForwardsCompatibleVersion: number = schemaVersion;
+    if (jsonObject.metadata.oldestForwardsCompatibleVersion) {
+      // Sanity check
+      if (jsonObject.metadata.oldestForwardsCompatibleVersion > schemaVersion) {
+        throw new Error(`Error loading ${apiJsonFilename}:`
+        + `\nInvalid file format; "oldestForwardsCompatibleVersion" cannot be newer than "schemaVersion"`);
+      }
+      oldestForwardsCompatibleVersion = jsonObject.metadata.oldestForwardsCompatibleVersion;
+    }
+
+    let versionToDeserialize: number = schemaVersion;
+    if (versionToDeserialize > ApiJsonSchemaVersion.LATEST) {
+      // If the file format is too new, can we treat it as some earlier compatible version
+      // as indicated by oldestForwardsCompatibleVersion?
+      versionToDeserialize = Math.max(oldestForwardsCompatibleVersion, ApiJsonSchemaVersion.LATEST);
+
+      if (versionToDeserialize > ApiJsonSchemaVersion.LATEST) {
+        // Nope, still too new
+        throw new Error(`Error loading ${apiJsonFilename}:`
+        + `\nThe file format version ${schemaVersion} was written by a newer release of`
+        + ` the api-extractor-model library; you may need to upgrade your software`);
+      }
+    }
+
+    const context: DeserializerContext = new DeserializerContext({
+      apiJsonFilename,
+      toolPackage: jsonObject.metadata.toolPackage,
+      toolVersion: jsonObject.metadata.toolVersion,
+      versionToDeserialize: versionToDeserialize
+    });
+
+    return ApiItem.deserialize(jsonObject, context) as ApiPackage;
   }
 
   public constructor(options: IApiPackageOptions) {
@@ -104,7 +162,8 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
   }
 
   /** @override */
-  public get canonicalReference(): string {
+  public get containerKey(): string {
+    // No prefix needed, because ApiPackage is the only possible member of an ApiModel
     return this.name;
   }
 
@@ -135,9 +194,10 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
       metadata: {
         toolPackage: options.toolPackage || packageJson.name,
         // In test mode, we don't write the real version, since that would cause spurious diffs whenever
-        // the verison is bumped.  Instead we write a placeholder string.
+        // the version is bumped.  Instead we write a placeholder string.
         toolVersion: options.testMode ? '[test mode]' : options.toolVersion || packageJson.version,
-        schemaVersion: ApiJsonSchemaVersion.V_1000
+        schemaVersion: ApiJsonSchemaVersion.LATEST,
+        oldestForwardsCompatibleVersion: ApiJsonSchemaVersion.OLDEST_FORWARDS_COMPATIBLE
       }
     } as IApiPackageJson;
     this.serializeInto(jsonObject);

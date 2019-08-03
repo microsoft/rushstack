@@ -41,8 +41,8 @@ export interface IApiEnumOptions extends
  */
 export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))) {
 
-  public static getCanonicalReference(name: string): string {
-    return `(${name}:enum)`;
+  public static getContainerKey(name: string): string {
+    return `${name}|${ApiItemKind.Enum}`;
   }
 
   public constructor(options: IApiEnumOptions) {
@@ -60,8 +60,8 @@ export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMix
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiEnum.getCanonicalReference(this.name);
+  public get containerKey(): string {
+    return ApiEnum.getContainerKey(this.name);
   }
 
   /** @override */

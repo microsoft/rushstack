@@ -72,7 +72,7 @@ export class CopyTask extends GulpTask<ICopyConfig> {
         const sources: string[] = copyTo[copyDest];
 
         sources.forEach(sourceMatch => allStreams.push(
-          gulp.src(sourceMatch)
+          gulp.src(sourceMatch, { allowEmpty: true })
             .pipe(gulpif(shouldFlatten, flatten()))
             .pipe(gulp.dest(copyDest))
         ));

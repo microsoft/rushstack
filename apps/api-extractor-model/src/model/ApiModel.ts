@@ -71,7 +71,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
   }
 
   /** @override */
-  public get canonicalReference(): string {
+  public get containerKey(): string {
     return '';
   }
 

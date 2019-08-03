@@ -52,6 +52,7 @@ export enum VersionPolicyDefinitionName {
 export abstract class VersionPolicy {
   private _policyName: string;
   private _definitionName: VersionPolicyDefinitionName;
+  private _exemptFromRushChange: boolean;
   private _versionFormatForCommit: VersionFormatForCommit;
   private _versionFormatForPublish: VersionFormatForPublish;
 
@@ -80,6 +81,7 @@ export abstract class VersionPolicy {
   constructor(versionPolicyJson: IVersionPolicyJson) {
     this._policyName = versionPolicyJson.policyName;
     this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+    this._exemptFromRushChange = versionPolicyJson.exemptFromRushChange || false;
 
     const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || { };
     this._versionFormatForCommit = jsonDependencies.versionFormatForCommit || VersionFormatForCommit.original;
@@ -105,6 +107,13 @@ export abstract class VersionPolicy {
    */
   public get isLockstepped(): boolean {
     return this.definitionName === VersionPolicyDefinitionName.lockStepVersion;
+  }
+
+  /**
+   * Determines if a version policy wants to opt out of changelog files.
+   */
+  public get exemptFromRushChange(): boolean {
+    return this._exemptFromRushChange;
   }
 
   /**

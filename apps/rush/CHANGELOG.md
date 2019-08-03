@@ -1,6 +1,89 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 06 May 2019 21:03:32 GMT and should not be manually modified.
+This log was last generated on Fri, 26 Jul 2019 23:08:23 GMT and should not be manually modified.
+
+## 5.11.1
+Fri, 26 Jul 2019 23:08:23 GMT
+
+### Updates
+
+- Fix critical path computation for projects
+- Normalize the casing of a temp folder specified with RUSH_TEMP_FOLDER.
+
+## 5.11.0
+Fri, 26 Jul 2019 08:34:03 GMT
+
+### Updates
+
+- Generate skeleton BuildXL script modules for each package
+- Allow building with newer versions of Node during development
+- Add experimental rush-buildxl package
+- Ensure the filesystem paths that Rush uses have the same character casing that exists on disk.
+- Tweak NodeJS version warning messages and add suppressNodeLtsWarning option to rush.json to suppress non-LTS version warning.
+- Do not terminate rush execution if a temp project lacks an entry in the PNPM shrinkwrap. Instead, allow the program to continue so that PNPM can update the outdated shrinkwrap. This fixes #1418 https://github.com/microsoft/web-build-tools/issues/1418.
+
+## 5.10.3
+Thu, 18 Jul 2019 00:07:46 GMT
+
+### Updates
+
+- Make event hooks run from the folder that contains the rush.json file.
+- Fix 1392 "rush install not working on pnpm 3.5" by getting the temporary project dependency key from the shrinkwrap file. See  https://github.com/microsoft/web-build-tools/issues/1392.
+
+## 5.10.2
+Tue, 16 Jul 2019 19:36:08 GMT
+
+### Updates
+
+- Prevent non-hotfix changes from being applied to hotfix branches
+- Use the shrinkwrap from temp for "rush link" as the committed shrinkwrap may not always be up to date as a result of shrinkwrap churn optimization. See https://github.com/microsoft/web-build-tools/issues/1273#issuecomment-492779995 for more details about shrinkwrap churn optimization.
+
+## 5.10.1
+Thu, 11 Jul 2019 22:00:50 GMT
+
+### Updates
+
+- Fix for issue https://github.com/microsoft/web-build-tools/issues/1349 rush install fails when there is a preferred version with a peer dependency. This was caused by file format changes in pnpm 3.x 
+- Fix an issue where "rush add" erroneously believes ensureConsistentVersions is unset.
+- Fix an issue that arises when "rush add" is run and the package manager isn't installed.
+- Fix an issue where rush add -m doesn't corretly update the common-versions.json file.
+- Fix an issue where rush change will detect unrelated changes.
+- When rush change detects no changes, clarify that no *relevant* changes were detected in the case that changes were in a package not versioned by rush'
+- Fix https://github.com/microsoft/web-build-tools/issues/1347: rush link was failing on pnpm 3+ with the changes in shrinkwrap format with regard to peer dependencies. Rush now resolves the path to the local project accurately by referring to the shrinkwrap rather than figuring out the path on its own.
+
+## 5.10.0
+Sat, 29 Jun 2019 02:47:42 GMT
+
+### Updates
+
+- New action added to list package name for all projects
+- Add ability to opt out of changelog files for version policies.
+- Workaround for pnpm issue 1890: https://github.com/pnpm/pnpm/issues/1890. Fixes the issue of "rush update --full" not working correctly if the internal copy of the pnpm shrinkwrap "common/temp/node_modules/.shrinkwrap.yaml" exists even though Rush deletes the formal copy in "common/temp/shrinkwrap.yaml".
+
+## 5.9.1
+Thu, 13 Jun 2019 04:46:18 GMT
+
+### Updates
+
+- Fix an issue where custom command-line parameters weren't passed to projects' builds.
+
+## 5.9.0
+Tue, 11 Jun 2019 02:26:20 GMT
+
+### Updates
+
+- (BEHAVIOR CHANGE) Fix an issue where CI jobs could succeed even if a task reported warnings to stderr; if your build fails due to warnings after upgrading, please see https://github.com/microsoft/web-build-tools/issues/1329
+
+## 5.8.0
+Tue, 11 Jun 2019 01:28:33 GMT
+
+### Updates
+
+- Add a new setting "ignoreDependencyOrder" in command-line.json
+- Clarify "rush change" messages.
+- Improve 'rush version' to fetch before checkout, which avoids an error in cases where the branch wasn't fetched.
+- Fix typo in command-line help for "rush add"
+- Fix an issue where "rush build" ignored changes to a project with an empty build script (GitHub #1282)
 
 ## 5.7.3
 Mon, 06 May 2019 21:03:32 GMT

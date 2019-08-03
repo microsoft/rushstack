@@ -7,10 +7,12 @@ import { ApiParameterListMixin, IApiParameterListMixinOptions } from '../mixins/
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from '../mixins/ApiReturnTypeMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
+import { IApiTypeParameterListMixinOptions, ApiTypeParameterListMixin } from '../mixins/ApiTypeParameterListMixin';
 
 /** @public */
 export interface IApiMethodSignatureOptions extends
   IApiNameMixinOptions,
+  IApiTypeParameterListMixinOptions,
   IApiParameterListMixinOptions,
   IApiReleaseTagMixinOptions,
   IApiReturnTypeMixinOptions,
@@ -38,11 +40,11 @@ export interface IApiMethodSignatureOptions extends
  *
  * @public
  */
-export class ApiMethodSignature extends ApiNameMixin(ApiParameterListMixin(ApiReleaseTagMixin(
-  ApiReturnTypeMixin(ApiDeclaredItem)))) {
+export class ApiMethodSignature extends ApiNameMixin(ApiTypeParameterListMixin(ApiParameterListMixin(
+  ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))))) {
 
-  public static getCanonicalReference(name: string, overloadIndex: number): string {
-    return `(${name}:${overloadIndex})`;
+  public static getContainerKey(name: string, overloadIndex: number): string {
+    return `${name}|${ApiItemKind.MethodSignature}|${overloadIndex}`;
   }
 
   public constructor(options: IApiMethodSignatureOptions) {
@@ -55,7 +57,7 @@ export class ApiMethodSignature extends ApiNameMixin(ApiParameterListMixin(ApiRe
   }
 
   /** @override */
-  public get canonicalReference(): string {
-    return ApiMethodSignature.getCanonicalReference(this.name, this.overloadIndex);
+  public get containerKey(): string {
+    return ApiMethodSignature.getContainerKey(this.name, this.overloadIndex);
   }
 }

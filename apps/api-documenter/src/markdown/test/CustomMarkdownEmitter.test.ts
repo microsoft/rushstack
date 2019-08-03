@@ -10,7 +10,8 @@ import {
   DocSoftBreak,
   DocLinkTag,
   DocHtmlStartTag,
-  DocHtmlEndTag
+  DocHtmlEndTag,
+  DocBlockTag
 } from '@microsoft/tsdoc';
 
 import { CustomDocNodes } from '../../nodes/CustomDocNodeKind';
@@ -121,6 +122,23 @@ test('render Markdown from TSDoc', () => {
           tagName: '@link',
           linkText: 'a link',
           urlDestination: './index.md'
+        }),
+        new DocEmphasisSpan({ configuration, bold: true },
+          [ new DocPlainText({ configuration, text: 'bold' }) ]
+        ),
+        new DocPlainText({ configuration, text: 'non-bold' }),
+        new DocPlainText({ configuration, text: 'more-non-bold' })
+      ]
+    )
+  ]);
+
+  output.appendNodes([
+    new DocHeading({ configuration, title: 'Unknown block tag' }),
+    new DocParagraph({ configuration },
+      [
+        new DocBlockTag({
+          configuration,
+          tagName: '@unknown'
         }),
         new DocEmphasisSpan({ configuration, bold: true },
           [ new DocPlainText({ configuration, text: 'bold' }) ]

@@ -791,10 +791,12 @@ export class MarkdownDocumenter {
     let baseName: string = '';
     for (const hierarchyItem of apiItem.getHierarchy()) {
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
-      let qualifiedName: string = hierarchyItem.displayName;
+      let qualifiedName: string = Utilities.getSafeFilenameForName(hierarchyItem.displayName);
       if (ApiParameterListMixin.isBaseClassOf(hierarchyItem)) {
-        if (hierarchyItem.overloadIndex > 0) {
-          qualifiedName += `_${hierarchyItem.overloadIndex}`;
+        if (hierarchyItem.overloadIndex > 1) {
+          // Subtract one for compatibility with earlier releases of API Documenter.
+          // (This will get revamped when we fix GitHub issue #1308)
+          qualifiedName += `_${hierarchyItem.overloadIndex - 1}`;
         }
       }
 
@@ -803,13 +805,13 @@ export class MarkdownDocumenter {
         case ApiItemKind.EntryPoint:
           break;
         case ApiItemKind.Package:
-          baseName = PackageName.getUnscopedName(hierarchyItem.displayName);
+          baseName = Utilities.getSafeFilenameForName(PackageName.getUnscopedName(hierarchyItem.displayName));
           break;
         default:
           baseName += '.' + qualifiedName;
       }
     }
-    return baseName.toLowerCase() + '.md';
+    return baseName + '.md';
   }
 
   private _getLinkFilenameForApiItem(apiItem: ApiItem): string {

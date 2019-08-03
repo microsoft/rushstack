@@ -2,6 +2,198 @@
   "name": "@microsoft/resolve-chunk-plugin",
   "entries": [
     {
+      "version": "2.0.123",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.123",
+      "date": "Tue, 23 Jul 2019 19:14:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.74` to `6.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.122",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.122",
+      "date": "Tue, 23 Jul 2019 01:13:01 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.12` to `0.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.73` to `6.0.74`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.121",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.121",
+      "date": "Mon, 22 Jul 2019 19:13:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.4\" from `0.1.11` to `0.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.72` to `6.0.73`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.120",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.120",
+      "date": "Fri, 12 Jul 2019 19:12:46 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.23` to `0.3.24`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.71` to `6.0.72`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.119",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.119",
+      "date": "Thu, 11 Jul 2019 19:13:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.22` to `0.3.23`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.70` to `6.0.71`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.118",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.118",
+      "date": "Tue, 09 Jul 2019 19:13:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.21` to `0.3.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.69` to `6.0.70`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.117",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.117",
+      "date": "Mon, 08 Jul 2019 19:12:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.20` to `0.3.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.68` to `6.0.69`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.116",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.116",
+      "date": "Sat, 29 Jun 2019 02:30:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.19` to `0.3.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.67` to `6.0.68`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.115",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.115",
+      "date": "Wed, 12 Jun 2019 19:12:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.18` to `0.3.19`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.66` to `6.0.67`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.114",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.114",
+      "date": "Tue, 11 Jun 2019 00:48:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.17` to `0.3.18`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.65` to `6.0.66`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.113",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.113",
+      "date": "Thu, 06 Jun 2019 22:33:36 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.16` to `0.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.64` to `6.0.65`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.112",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.112",
+      "date": "Wed, 05 Jun 2019 19:12:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.15` to `0.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.63` to `6.0.64`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.111",
+      "tag": "@microsoft/resolve-chunk-plugin_v2.0.111",
+      "date": "Tue, 04 Jun 2019 05:51:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.2\" from `0.3.14` to `0.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" from `6.0.62` to `6.0.63`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.110",
       "tag": "@microsoft/resolve-chunk-plugin_v2.0.110",
       "date": "Mon, 27 May 2019 04:13:44 GMT",

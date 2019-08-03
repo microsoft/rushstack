@@ -29,7 +29,6 @@ import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
-import { ExtractorMessage } from '../api/ExtractorMessage';
 
 /**
  * Options for Collector constructor.
@@ -45,7 +44,7 @@ export interface ICollectorOptions {
    */
   program: ts.Program;
 
-  messageCallback: ((message: ExtractorMessage) => void) | undefined;
+  messageRouter: MessageRouter;
 
   extractorConfig: ExtractorConfig;
 }
@@ -108,10 +107,7 @@ export class Collector {
       entryPointSourceFile
     });
 
-    this.messageRouter = new MessageRouter(
-      this.workingPackage.packageFolder,
-      options.messageCallback,
-      options.extractorConfig.messages || { });
+    this.messageRouter = options.messageRouter;
 
     this.program = options.program;
     this.typeChecker = options.program.getTypeChecker();
@@ -169,6 +165,20 @@ export class Collector {
     // compile errors that would result from a full compilation.
     for (const diagnostic of this._program.getSemanticDiagnostics()) {
       this.messageRouter.addCompilerDiagnostic(diagnostic);
+    }
+
+    if (this.messageRouter.showDiagnostics) {
+      this.messageRouter.logDiagnosticHeader('Root filenames');
+      for (const fileName of this.program.getRootFileNames()) {
+        this.messageRouter.logDiagnostic(fileName);
+      }
+      this.messageRouter.logDiagnosticFooter();
+
+      this.messageRouter.logDiagnosticHeader('Files analyzed by compiler');
+      for (const sourceFile of this.program.getSourceFiles()) {
+        this.messageRouter.logDiagnostic(sourceFile.fileName);
+      }
+      this.messageRouter.logDiagnosticFooter();
     }
 
     // Build the entry point

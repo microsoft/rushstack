@@ -729,6 +729,23 @@ export class InstallManager {
     } else {
       // Otherwise delete the temporary file
       FileSystem.deleteFile(this._rushConfiguration.tempShrinkwrapFilename);
+
+      if (this._rushConfiguration.packageManager === 'pnpm') {
+        const commonNodeModulesFolder: string = path.join(this._rushConfiguration.commonTempFolder, 'node_modules');
+
+        // Workaround for https://github.com/pnpm/pnpm/issues/1890
+        //
+        // When "rush update --full" is run, rush deletes common/temp/pnpm-lock.yaml so that
+        // a new lockfile can be generated. But because of the above bug "pnpm install" would
+        // respect "common/temp/node_modules/.pnpm-lock.yaml" and thus would not generate a
+        // new lockfile. Deleting this file in addition to deleting common/temp/pnpm-lock.yaml
+        // ensures that a new lockfile will be generated with "rush update --full".
+
+        // Note that there is period in the file name: common/temp/node_modules/.pnpm-lock.yaml
+        const pnpmShrinkwrapInNodeModulesFolder: string = path.join(commonNodeModulesFolder, '.'
+          + this._rushConfiguration.shrinkwrapFilename);
+        FileSystem.deleteFile(pnpmShrinkwrapInNodeModulesFolder);
+      }
     }
 
     // Don't update the file timestamp unless the content has changed, since "rush install"
@@ -974,7 +991,7 @@ export class InstallManager {
       if (FileSystem.exists(lastCheckFile)) {
         let cachedResult: boolean | 'error' | undefined = undefined;
         try {
-          // NOTE: mtimeMs is not supported yet in NodeJS 6.x
+          // NOTE: mtimeMs is not supported yet in Node.js 6.x
           const nowMs: number = new Date().getTime();
           const ageMs: number = nowMs - FileSystem.getStatistics(lastCheckFile).mtime.getTime();
           const HOUR: number = 60 * 60 * 1000;

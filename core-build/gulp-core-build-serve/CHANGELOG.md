@@ -1,6 +1,73 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Mon, 27 May 2019 04:13:44 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Jul 2019 19:14:38 GMT and should not be manually modified.
+
+## 3.4.0
+Tue, 23 Jul 2019 19:14:38 GMT
+
+### Minor changes
+
+- Update gulp to 4.0.2
+
+## 3.3.48
+Tue, 23 Jul 2019 01:13:01 GMT
+
+*Version update only*
+
+## 3.3.47
+Mon, 22 Jul 2019 19:13:10 GMT
+
+*Version update only*
+
+## 3.3.46
+Fri, 12 Jul 2019 19:12:46 GMT
+
+*Version update only*
+
+## 3.3.45
+Thu, 11 Jul 2019 19:13:08 GMT
+
+*Version update only*
+
+## 3.3.44
+Tue, 09 Jul 2019 19:13:24 GMT
+
+*Version update only*
+
+## 3.3.43
+Mon, 08 Jul 2019 19:12:18 GMT
+
+*Version update only*
+
+## 3.3.42
+Sat, 29 Jun 2019 02:30:10 GMT
+
+*Version update only*
+
+## 3.3.41
+Wed, 12 Jun 2019 19:12:33 GMT
+
+*Version update only*
+
+## 3.3.40
+Tue, 11 Jun 2019 00:48:06 GMT
+
+*Version update only*
+
+## 3.3.39
+Thu, 06 Jun 2019 22:33:36 GMT
+
+*Version update only*
+
+## 3.3.38
+Wed, 05 Jun 2019 19:12:34 GMT
+
+*Version update only*
+
+## 3.3.37
+Tue, 04 Jun 2019 05:51:54 GMT
+
+*Version update only*
 
 ## 3.3.36
 Mon, 27 May 2019 04:13:44 GMT

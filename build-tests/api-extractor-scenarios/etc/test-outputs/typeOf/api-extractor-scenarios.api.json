@@ -2,21 +2,19 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1000
+    "schemaVersion": 1002,
+    "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
-  "canonicalReference": "api-extractor-scenarios",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
-      "canonicalReference": "",
       "name": "",
       "members": [
         {
           "kind": "Function",
-          "canonicalReference": "(f:0)",
           "docComment": "/**\n * Reference Lib1Class via \"typeof\"\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -59,7 +57,6 @@
         },
         {
           "kind": "Function",
-          "canonicalReference": "(g:0)",
           "docComment": "/**\n * Reference IForgottenExport via \"typeof\"\n *\n * @public\n */\n",
           "excerptTokens": [
             {

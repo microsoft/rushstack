@@ -22,6 +22,7 @@ import { UpdateAction } from './actions/UpdateAction';
 import { InstallAction } from './actions/InstallAction';
 import { InitAction } from './actions/InitAction';
 import { LinkAction } from './actions/LinkAction';
+import { ListAction } from './actions/ListAction';
 import { PublishAction } from './actions/PublishAction';
 import { PurgeAction } from './actions/PurgeAction';
 import { UnlinkAction } from './actions/UnlinkAction';
@@ -34,23 +35,25 @@ import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import { Telemetry } from '../logic/Telemetry';
 import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 
 /**
  * Options for `RushCommandLineParser`.
  */
 export interface IRushCommandLineParserOptions {
-  cwd?: string;   // Defaults to `cwd`
+  cwd: string;   // Defaults to `cwd`
+  alreadyReportedNodeTooNewError: boolean;
 }
 
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
-  public rushConfiguration: RushConfiguration;
   public rushGlobalFolder: RushGlobalFolder;
+  public rushConfiguration: RushConfiguration;
 
   private _debugParameter: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
 
-  constructor(options?: IRushCommandLineParserOptions) {
+  constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
       toolFilename: 'rush',
       toolDescription: 'Rush makes life easier for JavaScript developers who develop, build, and publish'
@@ -62,10 +65,27 @@ export class RushCommandLineParser extends CommandLineParser {
         + ' automation tools.  If you are looking for a proven turnkey solution for monorepo management,'
         + ' Rush is for you.'
     });
-    const optionsIn: IRushCommandLineParserOptions = options || {};
-    this._rushOptions = {
-      cwd: optionsIn.cwd || process.cwd()
-    };
+
+    this._rushOptions = this._normalizeOptions(options || {});
+
+    try {
+      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
+        startingFolder: this._rushOptions.cwd,
+        showVerbose: true
+      });
+      if (rushJsonFilename) {
+        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+      }
+    } catch (error) {
+      this._reportErrorAndSetExitCode(error);
+    }
+
+    NodeJsCompatibility.warnAboutCompatibilityIssues({
+      isRushLib: true,
+      alreadyReportedNodeTooNewError: this._rushOptions.alreadyReportedNodeTooNewError,
+      rushConfiguration: this.rushConfiguration
+    });
+
     this._populateActions();
   }
 
@@ -89,8 +109,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
   protected onExecute(): Promise<void> {
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
-    // For example, NodeJS currently has the inexcusable design of terminating with zero exit code when
-    // there is an uncaught promise exception.  This will supposedly be fixed in NodeJS 9.
+    // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
+    // there is an uncaught promise exception.  This will supposedly be fixed in Node.js 9.
     // Ideally we should do this for all the Rush actions, but "rush build" is the most critical one
     // -- if it falsely appears to succeed, we could merge bad PRs, publish empty packages, etc.
     process.exitCode = 1;
@@ -105,6 +125,13 @@ export class RushCommandLineParser extends CommandLineParser {
       // If we make it here, everything went fine, so reset the exit code back to 0
       process.exitCode = 0;
     });
+  }
+
+  private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
+    return {
+      cwd: options.cwd || process.cwd(),
+      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false
+    };
   }
 
   private _wrapOnExecute(): Promise<void> {
@@ -124,14 +151,6 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _populateActions(): void {
     try {
-      const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
-        startingFolder: this._rushOptions.cwd,
-        showVerbose: true
-      });
-      if (rushJsonFilename) {
-        this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
-      }
-
       this.rushGlobalFolder = new RushGlobalFolder();
 
       this.addAction(new AddAction(this));
@@ -140,6 +159,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new InstallAction(this));
       this.addAction(new InitAction(this));
       this.addAction(new LinkAction(this));
+      this.addAction(new ListAction(this));
       this.addAction(new PublishAction(this));
       this.addAction(new PurgeAction(this));
       this.addAction(new ScanAction(this));
@@ -161,7 +181,8 @@ export class RushCommandLineParser extends CommandLineParser {
     // command-line help
     if (this.rushConfiguration) {
       const commandLineConfigFile: string = path.join(
-        this.rushConfiguration.commonRushConfigFolder, RushConstants.commandLineFilename
+        this.rushConfiguration.commonRushConfigFolder,
+        RushConstants.commandLineFilename
       );
 
       commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
@@ -192,7 +213,9 @@ export class RushCommandLineParser extends CommandLineParser {
         commandLineConfiguration: commandLineConfiguration,
 
         enableParallelism: true,
-        ignoreMissingScript: false
+        ignoreMissingScript: false,
+        ignoreDependencyOrder: false,
+        allowWarningsInSuccessfulBuild: false
       }));
     }
 
@@ -213,7 +236,9 @@ export class RushCommandLineParser extends CommandLineParser {
         commandLineConfiguration: commandLineConfiguration,
 
         enableParallelism: true,
-        ignoreMissingScript: false
+        ignoreMissingScript: false,
+        ignoreDependencyOrder: false,
+        allowWarningsInSuccessfulBuild: false
       }));
     }
   }
@@ -244,7 +269,9 @@ export class RushCommandLineParser extends CommandLineParser {
             commandLineConfiguration: commandLineConfiguration,
 
             enableParallelism: command.enableParallelism,
-            ignoreMissingScript: command.ignoreMissingScript || false
+            ignoreMissingScript: command.ignoreMissingScript || false,
+            ignoreDependencyOrder: command.ignoreDependencyOrder || false,
+            allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild
           }));
           break;
         case 'global':
@@ -312,7 +339,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     if (this._debugParameter.value) {
-      // If catchSyncErrors() called this, then show a call stack similar to what NodeJS
+      // If catchSyncErrors() called this, then show a call stack similar to what Node.js
       // would show for an uncaught error
       console.error(os.EOL + error.stack);
     }

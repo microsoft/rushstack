@@ -6,8 +6,7 @@ import * as ts from 'typescript';
 import colors = require('colors');
 
 import {
-  JsonFile,
-  FileSystem
+  JsonFile
 } from '@microsoft/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
@@ -71,8 +70,6 @@ export class CompilerState {
       ));
     }
 
-    CompilerState._updateCommandLineForTypescriptPackage(commandLine, options);
-
     const inputFilePaths: string[] = commandLine.fileNames.concat(extractorConfig.mainEntryPointFilePath);
     if (options && options.additionalEntryPoints) {
       inputFilePaths.push(...options.additionalEntryPoints);
@@ -81,7 +78,9 @@ export class CompilerState {
     // Append the entry points and remove any non-declaration files from the list
     const analysisFilePaths: string[] = CompilerState._generateFilePathsForAnalysis(inputFilePaths);
 
-    const program: ts.Program = ts.createProgram(analysisFilePaths, commandLine.options);
+    const compilerHost: ts.CompilerHost = CompilerState._createCompilerHost(commandLine, options);
+
+    const program: ts.Program = ts.createProgram(analysisFilePaths, commandLine.options, compilerHost);
 
     if (commandLine.errors.length > 0) {
       const errorText: string = TypeScriptMessageFormatter.format(commandLine.errors[0].messageText);
@@ -130,54 +129,75 @@ export class CompilerState {
     return analysisFilePaths;
   }
 
-  /**
-   * Update the parsed command line to use paths from the specified TS compiler folder, if
-   * a TS compiler folder is specified.
-   */
-  private static _updateCommandLineForTypescriptPackage(
-    commandLine: ts.ParsedCommandLine,
-    options?: IExtractorInvokeOptions
-  ): void {
-    const DEFAULT_BUILTIN_LIBRARY: string = 'lib.d.ts';
-    const OTHER_BUILTIN_LIBRARIES: string[] = ['lib.es5.d.ts', 'lib.es6.d.ts'];
+  private static _createCompilerHost(commandLine: ts.ParsedCommandLine,
+    options: IExtractorInvokeOptions | undefined):  ts.CompilerHost {
+
+    // Create a default CompilerHost that we will override
+    const compilerHost: ts.CompilerHost = ts.createCompilerHost(commandLine.options);
+
+    // Save a copy of the original members.  Note that "compilerHost" cannot be the copy, because
+    // createCompilerHost() captures that instance in a closure that is used by the members.
+    const defaultCompilerHost: ts.CompilerHost = { ...compilerHost };
 
     if (options && options.typescriptCompilerFolder) {
-      commandLine.options.noLib = true;
-      const compilerLibFolder: string = path.join(options.typescriptCompilerFolder, 'lib');
-
-      let foundBaseLib: boolean = false;
-      const filesToAdd: string[] = [];
-      for (const libFilename of commandLine.options.lib || []) {
-        if (libFilename === DEFAULT_BUILTIN_LIBRARY) {
-          // Ignore the default lib - it'll get added later
-          continue;
-        }
-
-        if (OTHER_BUILTIN_LIBRARIES.indexOf(libFilename) !== -1) {
-          foundBaseLib = true;
-        }
-
-        const libPath: string = path.join(compilerLibFolder, libFilename);
-        if (!FileSystem.exists(libPath)) {
-          throw new Error(`lib ${libFilename} does not exist in the compiler specified in typescriptLibPackage`);
-        }
-
-        filesToAdd.push(libPath);
-      }
-
-      if (!foundBaseLib) {
-        // If we didn't find another version of the base lib library, include the default
-        filesToAdd.push(path.join(compilerLibFolder, 'lib.d.ts'));
-      }
-
-      if (!commandLine.fileNames) {
-        commandLine.fileNames = [];
-      }
-
-      commandLine.fileNames.push(...filesToAdd);
-
-      commandLine.options.lib = undefined;
+      // Prevent a closure parameter
+      const typescriptCompilerLibFolder: string = path.join(options.typescriptCompilerFolder, 'lib');
+      compilerHost.getDefaultLibLocation = () => typescriptCompilerLibFolder;
     }
-  }
 
+    // Used by compilerHost.fileExists()
+    // .d.ts file path --> whether the file exists
+    const dtsExistsCache: Map<string, boolean> = new Map<string, boolean>();
+
+    // Used by compilerHost.fileExists()
+    // Example: "c:/folder/file.part.ts"
+    const fileExtensionRegExp: RegExp = /^(.+)(\.[a-z0-9_]+)$/i;
+
+    compilerHost.fileExists = (fileName: string): boolean => {
+      // In certain deprecated setups, the compiler may write its output files (.js and .d.ts)
+      // in the same folder as the corresponding input file (.ts or .tsx).  When following imports,
+      // API Extractor wants to analyze the .d.ts file; however recent versions of the compiler engine
+      // will instead choose the .ts file.  To work around this, we hook fileExists() to hide the
+      // existence of those files.
+
+      // Is "fileName" a .d.ts file?  The double extension ".d.ts" needs to be matched specially.
+      if (!ExtractorConfig.hasDtsFileExtension(fileName)) {
+        // It's not a .d.ts file.  Is the file extension a potential source file?
+        const match: RegExpExecArray | null = fileExtensionRegExp.exec(fileName);
+        if (match) {
+          // Example: "c:/folder/file.part"
+          const pathWithoutExtension: string = match[1];
+          // Example: ".ts"
+          const fileExtension: string = match[2];
+
+          switch (fileExtension.toLocaleLowerCase()) {
+            case '.ts':
+            case '.tsx':
+            case '.js':
+            case '.jsx':
+              // Yes, this is a possible source file.  Is there a corresponding .d.ts file in the same folder?
+              const dtsFileName: string = `${pathWithoutExtension}.d.ts`;
+
+              let dtsFileExists: boolean | undefined = dtsExistsCache.get(dtsFileName);
+              if (dtsFileExists === undefined) {
+                dtsFileExists = defaultCompilerHost.fileExists!(dtsFileName);
+                dtsExistsCache.set(dtsFileName, dtsFileExists);
+              }
+
+              if (dtsFileExists) {
+                // fileName is a potential source file and a corresponding .d.ts file exists.
+                // Thus, API Extractor should ignore this file (so the .d.ts file will get analyzed instead).
+                return false;
+              }
+              break;
+          }
+        }
+      }
+
+      // Fall through to the default implementation
+      return defaultCompilerHost.fileExists!(fileName);
+    };
+
+    return compilerHost;
+  }
 }
