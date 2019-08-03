@@ -40,7 +40,7 @@
     "@microsoft/ts-command-line": "4.2.6",
     "@microsoft/tsdoc": "0.12.10",
     "colors": "~1.2.1",
-    "lodash": "~4.17.5",
+    "lodash": "~4.17.15",
     "resolve": "1.8.1",
     "source-map": "~0.6.1",
     "typescript": "~3.5.3"

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/loader-set-webpack-public-path",
+      "comment": "Security updates.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/loader-set-webpack-public-path",
+  "email": "halfnibble@users.noreply.github.com"
+}

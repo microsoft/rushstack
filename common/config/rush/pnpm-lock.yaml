@@ -143,7 +143,7 @@ dependencies:
   jsdom: 11.11.0
   loader-utils: 1.1.0
   lodash: 4.17.15
-  lodash.merge: 4.3.5
+  lodash.merge: 4.6.2
   long: 4.0.0
   merge2: 1.0.3
   minimatch: 3.0.4
@@ -5850,6 +5850,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-VOWMTyCD2f7MsVeaYPdLCT1yrRc=
+  /lodash.merge/4.6.2:
+    dev: false
+    resolution:
+      integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
   /lodash.rest/4.0.5:
     dev: false
     resolution:
@@ -9808,7 +9812,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-8F805AyGMOXEc55yOQy0NnKS4ek6lbYGTAP0lFGMRxlB04BXbuQW10mIFSDTv8umgS6QYa3KH+8msf99G70PgQ==
+      integrity: sha512-DNTpByXHqWWl0yZgF0TU5/gCXzH485ZGrN6nvLSZhxFQuDAksppfJwGRixklGUkzw4yTLDL+KgKlO0QurGkRxA==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/eslint-config-scalable-ts.tgz':
@@ -9953,7 +9957,7 @@ packages:
       jest-environment-jsdom: 22.4.3
       jest-resolve: 22.4.3
       jsdom: 11.11.0
-      lodash.merge: 4.3.5
+      lodash.merge: 4.6.2
       merge2: 1.0.3
       node-notifier: 5.0.2
       object-assign: 4.1.1
@@ -9967,7 +9971,7 @@ packages:
     dev: false
     name: '@rush-temp/gulp-core-build'
     resolution:
-      integrity: sha512-iOtWaAHZCZ/jXwPbFSuoyInlwGSQA/EDX3UH4hvH8LfGWKsHbup0gvF14jPTQkmmTv9n7RuUiEhYw9bPyinVzQ==
+      integrity: sha512-H27CrMQEBUInBXFu4U2k0aqWMwNCfvOT2aNUAkrInwcJuqWW73Gn5E40YIbvjMV+VCeYx9jng8tsjsFp9HOKmA==
       tarball: 'file:projects/gulp-core-build.tgz'
     version: 0.0.0
   'file:projects/load-themed-styles.tgz':
@@ -10025,7 +10029,7 @@ packages:
     dev: false
     name: '@rush-temp/loader-set-webpack-public-path'
     resolution:
-      integrity: sha512-5HlCPx0ItSF/Q1yBOPsvnGKdlRSX9S9uWQsKBLG7DhddNf43GxDptthgpyEz9cb/TmaoVayaDgpld0jiQuFTAw==
+      integrity: sha512-QA2lYaG9QLBvYpR7/EB730y4H1DV0mhkfyENin6glEEbLykheMiA93ZcIiwpCh1RQvW0laRKHL35v6Rz1knWcg==
       tarball: 'file:projects/loader-set-webpack-public-path.tgz'
     version: 0.0.0
   'file:projects/node-core-library.tgz':
@@ -10106,7 +10110,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-buildxl'
     resolution:
-      integrity: sha512-sVjERYAYyWfkrg64xNmy72pmt5DHbiJHbNKtjYV4WIJekTTnpzgO70WKFoeeiEaFdaYafvj5n5C3xvllKO7r2A==
+      integrity: sha512-up7exMV6T+cBGc9/E2FBdYmIxVeDWsW+RZwDh72LBepQ27lMqLVVwzBislNBp/o9Q0qe/tNZyDzhOxrVqUs8sg==
       tarball: 'file:projects/rush-buildxl.tgz'
     version: 0.0.0
   'file:projects/rush-lib.tgz':
@@ -10149,7 +10153,7 @@ packages:
     dev: false
     name: '@rush-temp/rush-lib'
     resolution:
-      integrity: sha512-aO4oRdBc1gGS5/t4YGUCGt4AAJRboTWaHxfTySKOEWMP/Co5JtRnj2zqInK9+EJIarwOAJReIif97fMe2Pfnpg==
+      integrity: sha512-8N7cT8aQz+GFFinCjEYC/eGiYy3G+B6Zvz8aOQEgOWunX43wIaqwcwHeWWtmwNCh/jfTuduIO8sM2eCTmTKFYg==
       tarball: 'file:projects/rush-lib.tgz'
     version: 0.0.0
   'file:projects/rush-stack-compiler-2.4-library-test.tgz':
@@ -10441,7 +10445,7 @@ packages:
     dev: false
     name: '@rush-temp/rush'
     resolution:
-      integrity: sha512-y7QKzk+ckpjc03pHnwtmfVW99Syo1+kGZrNnBrxqSKUai7rBPHvUsrI2+X6XrmpeDWd8Om4qB2Fk2Li6iAMdaw==
+      integrity: sha512-4UIns4+wu0WCVqsrtOIqTSW6oBlcA41uB3VI0DbvHhPu5cq6ITMZNnCQrJknbCCGs7Wa+coQb8rbdsqgYTsgrQ==
       tarball: 'file:projects/rush.tgz'
     version: 0.0.0
   'file:projects/rushell.tgz':
@@ -10473,7 +10477,7 @@ packages:
     dev: false
     name: '@rush-temp/set-webpack-public-path-plugin'
     resolution:
-      integrity: sha512-k7q9rfsXh+RAiReH1V3jDu0Rgfnmvr8OF/No5Bb3eoKzVucmCylJmZ+Vh9oVYFlwngJGuMqUl/Z6MN3PnoZCFA==
+      integrity: sha512-Y9cHvupWvAXPLvbCqc+Gx3/s2ZveCfnjGqTk82QbxTCV/YQze6aQPDNESi1z51D2Z9AxL/qY/CZNLT9svB6XRg==
       tarball: 'file:projects/set-webpack-public-path-plugin.tgz'
     version: 0.0.0
   'file:projects/stream-collator.tgz':
@@ -10530,6 +10534,7 @@ packages:
       integrity: sha512-3T1D8T+obRzYE6eWTRaALuoSJvd9DBj44S/Q3vwWuA7dxgQd6/vFOfpY+OIuV/ci3AE1953yEvcVuI6Ya9mCdQ==
       tarball: 'file:projects/web-library-build.tgz'
     version: 0.0.0
+registry: ''
 specifiers:
   '@microsoft/node-library-build': 6.0.71
   '@microsoft/rush-stack-compiler-3.4': 0.1.11
@@ -10674,8 +10679,8 @@ specifiers:
   js-yaml: ~3.13.1
   jsdom: ~11.11.0
   loader-utils: ~1.1.0
-  lodash: ~4.17.5
-  lodash.merge: ~4.3.2
+  lodash: ~4.17.15
+  lodash.merge: ~4.6.2
   long: ^4.0.0
   merge2: ~1.0.2
   minimatch: ~3.0.2
