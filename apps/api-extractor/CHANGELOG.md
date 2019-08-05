@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 23 Jul 2019 01:13:01 GMT and should not be manually modified.
+This log was last generated on Mon, 05 Aug 2019 22:04:32 GMT and should not be manually modified.
+
+## 7.3.5
+Mon, 05 Aug 2019 22:04:32 GMT
+
+### Patches
+
+- Security updates.
 
 ## 7.3.4
 Tue, 23 Jul 2019 01:13:01 GMT

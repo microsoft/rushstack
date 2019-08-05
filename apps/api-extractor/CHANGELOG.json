@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.3.5",
+      "tag": "@microsoft/api-extractor_v7.3.5",
+      "date": "Mon, 05 Aug 2019 22:04:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Security updates."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.4",
       "tag": "@microsoft/api-extractor_v7.3.4",
       "date": "Tue, 23 Jul 2019 01:13:01 GMT",
