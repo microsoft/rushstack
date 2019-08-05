@@ -27,8 +27,8 @@
     "@microsoft/ts-command-line": "4.2.6"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.1.0",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.13",
+    "@microsoft/node-library-build": "6.1.1",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.14",
     "@types/jest": "23.3.11",
     "@types/node": "8.5.8",
     "gulp": "~4.0.2"
