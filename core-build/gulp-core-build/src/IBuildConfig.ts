@@ -17,7 +17,7 @@ export interface IBuildConfig {
    *
    * If set to zero (0), the build will never time out.
    */
-  maxBuildTime: number;
+  maxBuildTimeMs: number;
 
   /**
    * Proxy gulp instance.

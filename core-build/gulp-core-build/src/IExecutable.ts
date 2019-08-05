@@ -15,7 +15,7 @@ export interface IExecutable {
    *
    * This option overrides the maxBuildTime property on the global build config.
    */
-  maxBuildTime?: number;
+  maxBuildTimeMs?: number;
 
   /**
    * Helper function which is called one time when the task is registered
