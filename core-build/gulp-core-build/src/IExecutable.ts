@@ -8,6 +8,16 @@ import { IBuildConfig } from './IBuildConfig';
  */
 export interface IExecutable {
   /**
+   * The maximum amount of time the build can run before being terminated.
+   * Specified in milliseconds. By default, there is no timeout.
+   *
+   * If set to zero (0), the build will never time out.
+   *
+   * This option overrides the maxBuildTime property on the global build config.
+   */
+  maxBuildTime?: number;
+
+  /**
    * Helper function which is called one time when the task is registered
    */
   onRegister?: () => void;

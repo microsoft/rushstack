@@ -3,6 +3,7 @@ import * as gulp from 'gulp';
 import { IBuildConfig } from './../IBuildConfig';
 
 export const mockBuildConfig: IBuildConfig = {
+  maxBuildTime: 5 * 1000,
   gulp,
   rootPath: '',
   packageFolder: '',
