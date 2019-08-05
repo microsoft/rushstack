@@ -18,7 +18,7 @@ import { CleanFlagTask } from './tasks/CleanFlagTask';
 import { CopyStaticAssetsTask } from  './tasks/copyStaticAssets/CopyStaticAssetsTask';
 import { args, builtPackage } from './State';
 export { IExecutable } from './IExecutable';
-import { log } from './logging';
+import { log, error as logError } from './logging';
 import { initialize as initializeLogging, markTaskCreationTime, generateGulpError, setWatchMode } from './logging';
 import { getFlagValue } from './config';
 import * as Gulp from 'gulp';
@@ -60,6 +60,7 @@ const packageFolder: string = (builtPackage.directories && builtPackage.director
   : '';
 
 let _buildConfig: IBuildConfig = {
+  maxBuildTime: 0, // Defaults to no timeout
   // gulp and rootPath are set to undefined here because they'll be defined in the initialize function below,
   //  but we don't want their types to be nullable because a task that uses StrictNullChecks should expect them
   //  to be defined without checking their values.
@@ -361,13 +362,36 @@ export function initialize(gulp: typeof Gulp): void {
  */
 function _registerTask(gulp: typeof Gulp, taskName: string, taskExecutable: IExecutable): void {
   gulp.task(taskName, (cb) => {
-    _executeTask(taskExecutable, _buildConfig)
-      .then(() => {
+    const maxBuildTime: number = taskExecutable.maxBuildTime === undefined
+      ? _buildConfig.maxBuildTime
+      : taskExecutable.maxBuildTime;
+    const timer: NodeJS.Timer | undefined = maxBuildTime === 0
+      ? undefined
+      : setTimeout(
+          () => {
+            logError(
+              `Build ran for ${maxBuildTime} milliseconds without completing. Cancelling build with error.`
+            );
+            cb(new Error('Timeout'));
+          },
+          maxBuildTime
+        );
+    _executeTask(taskExecutable, _buildConfig).then(
+      () => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+
         cb();
       },
       (error: Error) => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+
         cb(generateGulpError(error));
-      });
+      }
+    );
   });
 }
 
