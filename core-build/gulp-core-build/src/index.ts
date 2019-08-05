@@ -60,7 +60,7 @@ const packageFolder: string = (builtPackage.directories && builtPackage.director
   : '';
 
 let _buildConfig: IBuildConfig = {
-  maxBuildTime: 0, // Defaults to no timeout
+  maxBuildTimeMs: 0, // Defaults to no timeout
   // gulp and rootPath are set to undefined here because they'll be defined in the initialize function below,
   //  but we don't want their types to be nullable because a task that uses StrictNullChecks should expect them
   //  to be defined without checking their values.
@@ -362,19 +362,19 @@ export function initialize(gulp: typeof Gulp): void {
  */
 function _registerTask(gulp: typeof Gulp, taskName: string, taskExecutable: IExecutable): void {
   gulp.task(taskName, (cb) => {
-    const maxBuildTime: number = taskExecutable.maxBuildTime === undefined
-      ? _buildConfig.maxBuildTime
-      : taskExecutable.maxBuildTime;
-    const timer: NodeJS.Timer | undefined = maxBuildTime === 0
+    const maxBuildTimeMs: number = taskExecutable.maxBuildTimeMs === undefined
+      ? _buildConfig.maxBuildTimeMs
+      : taskExecutable.maxBuildTimeMs;
+    const timer: NodeJS.Timer | undefined = maxBuildTimeMs === 0
       ? undefined
       : setTimeout(
           () => {
             logError(
-              `Build ran for ${maxBuildTime} milliseconds without completing. Cancelling build with error.`
+              `Build ran for ${maxBuildTimeMs} milliseconds without completing. Cancelling build with error.`
             );
             cb(new Error('Timeout'));
           },
-          maxBuildTime
+          maxBuildTimeMs
         );
     _executeTask(taskExecutable, _buildConfig).then(
       () => {

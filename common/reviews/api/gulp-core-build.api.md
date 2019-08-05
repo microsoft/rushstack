@@ -131,7 +131,7 @@ export interface IBuildConfig {
     libES6Folder?: string;
     libESNextFolder?: string;
     libFolder: string;
-    maxBuildTime: number;
+    maxBuildTimeMs: number;
     onTaskEnd?: (taskName: string, duration: number[], error?: any) => void;
     onTaskStart?: (taskName: string) => void;
     packageFolder: string;
@@ -180,7 +180,7 @@ export interface IExecutable {
     execute: (config: IBuildConfig) => Promise<void>;
     getCleanMatch?: (config: IBuildConfig, taskConfig?: any) => string[];
     isEnabled?: (buildConfig: IBuildConfig) => boolean;
-    maxBuildTime?: number;
+    maxBuildTimeMs?: number;
     name?: string;
     onRegister?: () => void;
 }
