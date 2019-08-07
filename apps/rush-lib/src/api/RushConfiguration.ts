@@ -11,6 +11,7 @@ import {
   PackageName,
   FileSystem
 } from '@microsoft/node-core-library';
+import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from '../api/Rush';
 import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
@@ -307,8 +308,16 @@ export class RushConfiguration {
    * an RushConfiguration object.
    */
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
-    const resolvedRushJsonFilename: string = path.resolve(rushJsonFilename);
+    let resolvedRushJsonFilename: string = path.resolve(rushJsonFilename);
+    // Load the rush.json before we fix the casing. If the case is wrong on a case-sensitive filesystem,
+    // the next line show throw.
     const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(resolvedRushJsonFilename);
+
+    try {
+      resolvedRushJsonFilename = trueCasePathSync(resolvedRushJsonFilename);
+    } catch (error) {
+      /* ignore errors from true-case-path */
+    }
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
     // then the schema may have changed. This should no longer be a problem after Rush 4.0 and the C2R wrapper,
@@ -1016,6 +1025,7 @@ export class RushConfiguration {
         }
       }
     }
+
     this._rushJsonFile = rushJsonFilename;
     this._rushJsonFolder = path.dirname(rushJsonFilename);
 

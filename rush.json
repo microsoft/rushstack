@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.10.1",
+  "rushVersion": "5.11.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -580,6 +580,12 @@
     },
 
     // "libraries" folder (alphabetical order)
+    {
+      "packageName": "@microsoft/eslint-config-scalable-ts",
+      "projectFolder": "libraries/eslint-config-scalable-ts",
+      "reviewCategory": "libraries",
+      "shouldPublish": false // For now
+    },
     {
       "packageName": "@microsoft/load-themed-styles",
       "projectFolder": "libraries/load-themed-styles",

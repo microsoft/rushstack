@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Clarify that \"rush update --full\" should be run when changing certain settings",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

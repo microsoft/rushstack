@@ -1,17 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  CommandLineStringParameter,
-  CommandLineAction
-} from '@microsoft/ts-command-line';
-
+import { CommandLineAction } from '@microsoft/ts-command-line';
 import { Terminal } from '@microsoft/node-core-library';
+import { RushConfiguration } from '@microsoft/rush-lib';
+
+import { BxlModulesGenerator } from '../../logic/BxlModulesGenerator';
 
 export class GenerateAction extends CommandLineAction {
   private _terminal: Terminal;
-
-  private _exampleOption: CommandLineStringParameter;
 
   constructor(terminal: Terminal) {
     super({
@@ -24,16 +21,20 @@ export class GenerateAction extends CommandLineAction {
   }
 
   public onDefineParameters(): void {
-    this._exampleOption = this.defineStringParameter({
-      parameterLongName: '--example-parameter',
-      argumentName: 'STRING',
-      description: 'Am example paramter'
-    });
+    /* This action doesn't take any parameters*/
   }
 
   protected async onExecute(): Promise<void> {
-    this._terminal.writeLine('Example terminal output');
+    if (process.env.BUILDXL_BIN === undefined) {
+      throw new Error('Environment variable BUILDXL_BIN not defined');
+    }
 
-    this._terminal.writeLine(`The value of ${this._exampleOption.longName} is "${this._exampleOption.value}".`);
+    const generator: BxlModulesGenerator =
+        new BxlModulesGenerator(
+          RushConfiguration.loadFromDefaultLocation(),
+          process.env.BUILDXL_BIN);
+
+    await generator.run();
+    this._terminal.writeLine(`Successfully generated BuildXL configuration.`);
   }
 }

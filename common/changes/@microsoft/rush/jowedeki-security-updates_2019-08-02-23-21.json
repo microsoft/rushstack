@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "comment": "Allow building with newer versions of Node during development",
+      "comment": "Security updates.",
       "packageName": "@microsoft/rush",
       "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
-  "email": "nayanshah@users.noreply.github.com"
+  "email": "halfnibble@users.noreply.github.com"
 }

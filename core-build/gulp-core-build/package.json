@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "3.10.0",
+  "version": "3.11.0",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -39,7 +39,7 @@
     "jest-environment-jsdom": "~22.4.3",
     "jest-resolve": "~22.4.3",
     "jsdom": "~11.11.0",
-    "lodash.merge": "~4.3.2",
+    "lodash.merge": "~4.6.2",
     "merge2": "~1.0.2",
     "node-notifier": "~5.0.2",
     "object-assign": "~4.1.0",
