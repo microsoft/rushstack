@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Use static graph of projects with dependencies to generate BuildXL scripts",
+      "packageName": "@microsoft/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nayanshah@users.noreply.github.com"
+}
