@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@microsoft/node-core-library": "3.13.0",
-    "@microsoft/tsdoc": "0.12.11",
+    "@microsoft/tsdoc": "0.12.12",
     "@types/node": "8.5.8"
   },
   "devDependencies": {

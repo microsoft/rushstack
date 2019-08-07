@@ -2,7 +2,7 @@ dependencies:
   '@microsoft/node-library-build': 6.0.71
   '@microsoft/rush-stack-compiler-3.4': 0.1.11
   '@microsoft/teams-js': 1.3.0-beta.4
-  '@microsoft/tsdoc': 0.12.11
+  '@microsoft/tsdoc': 0.12.12
   '@pnpm/link-bins': 1.0.3
   '@pnpm/logger': 1.0.2
   '@rush-temp/api-documenter': 'file:projects/api-documenter.tgz'
@@ -331,10 +331,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-GFLPg9Z5yiNca3di/V6Zt3tAvj1de9EK0eL88tE+1eckQSH405UQcm7D+H8LbEhRpqpG+ZqN9LXCAEw4L5uchg==
-  /@microsoft/tsdoc/0.12.11:
+  /@microsoft/tsdoc/0.12.12:
     dev: false
     resolution:
-      integrity: sha512-CXAEl/mTBkr+KcX/+Xi7wbNBnofZ1p2UwYbaJ+zwcVMCWQTMsheqkOwPM3BQ7J6uOacxwxO6rBRDjQqBdfe8dQ==
+      integrity: sha512-5EzH1gHIonvvgA/xWRmVAJmRkTQj/yayUXyr66hFwNZiFE4j7lP8is9YQeXhwxGZEjO1PVMblAmFF0CyjNtPGw==
   /@microsoft/tsdoc/0.12.9:
     dev: false
     resolution:
@@ -9675,7 +9675,7 @@ packages:
     version: 0.0.0
   'file:projects/api-documenter.tgz':
     dependencies:
-      '@microsoft/tsdoc': 0.12.11
+      '@microsoft/tsdoc': 0.12.12
       '@types/jest': 23.3.11
       '@types/js-yaml': 3.12.1
       '@types/node': 8.5.8
@@ -9686,7 +9686,7 @@ packages:
     dev: false
     name: '@rush-temp/api-documenter'
     resolution:
-      integrity: sha512-oovql2s0nv/l0rK6cwfUYtYl1c9tMVwOov58IXNO/eWkCGe0hW4ZxhSiSYI1aqjAE1LaRmfFxa4DtrdoS8sPQw==
+      integrity: sha512-bOFKX8xJtoRE8VeZ/I3LtznwZFbDeTL1nMtWLzL3RbuNwgqTBJEyjdrqS7okik5h35hKMY4EJQCaekBlR8WzjA==
       tarball: 'file:projects/api-documenter.tgz'
     version: 0.0.0
   'file:projects/api-extractor-lib1-test.tgz':
@@ -9729,7 +9729,7 @@ packages:
     dependencies:
       '@microsoft/node-library-build': 6.0.71
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
-      '@microsoft/tsdoc': 0.12.11
+      '@microsoft/tsdoc': 0.12.12
       '@types/jest': 23.3.11
       '@types/node': 8.5.8
       gulp: 4.0.2
@@ -9737,7 +9737,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor-model'
     resolution:
-      integrity: sha512-rb6jgpLT8jVuHTqlAh/ZzvHqFr66BNvXlp6dOGhJO3u5oH/pB3U7EMwL6QIFGwNHVilmxDo5UVa6V7zeFDM1zQ==
+      integrity: sha512-wwScZSrQ71x9rv0NLXQgWv0jj6poRm1bxA2JUMFvutufdkxNdHe65biMBPHKzD9ZZHCuP4pyBTZ47P2h6npYgg==
       tarball: 'file:projects/api-extractor-model.tgz'
     version: 0.0.0
   'file:projects/api-extractor-scenarios.tgz':
@@ -9807,7 +9807,7 @@ packages:
     dependencies:
       '@microsoft/node-library-build': 6.0.71
       '@microsoft/rush-stack-compiler-3.4': 0.1.11
-      '@microsoft/tsdoc': 0.12.11
+      '@microsoft/tsdoc': 0.12.12
       '@types/jest': 23.3.11
       '@types/lodash': 4.14.116
       '@types/node': 8.5.8
@@ -9820,7 +9820,7 @@ packages:
     dev: false
     name: '@rush-temp/api-extractor'
     resolution:
-      integrity: sha512-8Pft8iR1ln2FLIKXSgfyOuLgBRY6nY7RfQDzSK2n8Dm/fy2R3KBV56Q2JODKCTrgxtShISR7yrlfQ6a2R9CBJQ==
+      integrity: sha512-01GBJs0JEbT9XYou74sVsT+S3xE4SoNwUOoRkejE9QsEkdoliDW9JeBKFzY2f/YtGBCnqgJp4U+OC+si/a6vGA==
       tarball: 'file:projects/api-extractor.tgz'
     version: 0.0.0
   'file:projects/eslint-config-scalable-ts.tgz':
@@ -10546,7 +10546,7 @@ specifiers:
   '@microsoft/node-library-build': 6.0.71
   '@microsoft/rush-stack-compiler-3.4': 0.1.11
   '@microsoft/teams-js': 1.3.0-beta.4
-  '@microsoft/tsdoc': 0.12.11
+  '@microsoft/tsdoc': 0.12.12
   '@pnpm/link-bins': ~1.0.1
   '@pnpm/logger': ~1.0.1
   '@rush-temp/api-documenter': 'file:./projects/api-documenter.tgz'

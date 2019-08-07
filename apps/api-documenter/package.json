@@ -18,7 +18,7 @@
     "@microsoft/api-extractor-model": "7.3.0",
     "@microsoft/node-core-library": "3.13.0",
     "@microsoft/ts-command-line": "4.2.6",
-    "@microsoft/tsdoc": "0.12.11",
+    "@microsoft/tsdoc": "0.12.12",
     "colors": "~1.2.1",
     "js-yaml": "~3.13.1"
   },
