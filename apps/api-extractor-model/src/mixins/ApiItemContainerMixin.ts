@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
-import { ApiItem, ApiItem_setParent, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../items/ApiItem';
+import { ApiItem, ApiItem_onParentChanged, IApiItemJson, IApiItemOptions, IApiItemConstructor } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
 
@@ -145,7 +145,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
       this[_membersSorted] = false;
       this[_membersByContainerKey].set(member.containerKey, member);
 
-      member[ApiItem_setParent](this);
+      member[ApiItem_onParentChanged](this);
     }
 
     public tryGetMemberByKey(containerKey: string): ApiItem | undefined {

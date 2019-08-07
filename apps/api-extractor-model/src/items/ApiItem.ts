@@ -52,7 +52,7 @@ export interface IApiItemJson {
 // PRIVATE - Allows ApiItemContainerMixin to assign the parent.
 //
 // tslint:disable-next-line:variable-name
-export const ApiItem_setParent: unique symbol = Symbol('ApiItem._setParent');
+export const ApiItem_onParentChanged: unique symbol = Symbol('ApiItem._onAddToContainer');
 
 /**
  * The abstract base class for all members of an `ApiModel` object.
@@ -245,11 +245,11 @@ export class ApiItem {
    * PRIVATE
    *
    * @privateRemarks
-   * Allows ApiItemContainerMixin to assign the parent.
+   * Allows ApiItemContainerMixin to assign the parent when the item is added to a container.
    *
    * @internal
    */
-  public [ApiItem_setParent](parent: ApiItem | undefined): void {
+  public [ApiItem_onParentChanged](parent: ApiItem | undefined): void {
     this._parent = parent;
     this._canonicalReference = undefined;
   }

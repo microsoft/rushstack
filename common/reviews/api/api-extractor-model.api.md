@@ -233,7 +233,7 @@ export class ApiInterface extends ApiInterface_base {
 // @public
 export class ApiItem {
     // @internal
-    [ApiItem_setParent](parent: ApiItem | undefined): void;
+    [ApiItem_onParentChanged](parent: ApiItem | undefined): void;
     constructor(options: IApiItemOptions);
     // @virtual
     protected buildCanonicalReference(): DeclarationReference;
