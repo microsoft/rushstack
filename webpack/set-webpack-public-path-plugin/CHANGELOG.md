@@ -1,6 +1,11 @@
 # Change Log - @microsoft/set-webpack-public-path-plugin
 
-This log was last generated on Thu, 08 Aug 2019 00:49:06 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Aug 2019 15:14:17 GMT and should not be manually modified.
+
+## 2.1.126
+Thu, 08 Aug 2019 15:14:17 GMT
+
+*Version update only*
 
 ## 2.1.125
 Thu, 08 Aug 2019 00:49:06 GMT

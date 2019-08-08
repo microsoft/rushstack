@@ -2,6 +2,18 @@
   "name": "@microsoft/node-core-library",
   "entries": [
     {
+      "version": "3.14.0",
+      "tag": "@microsoft/node-core-library_v3.14.0",
+      "date": "Thu, 08 Aug 2019 15:14:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove experimental IPackageJsonTsdocConfiguration API, since the \"tsdocFlavor\" field is no longer used by API Extractor"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.13.0",
       "tag": "@microsoft/node-core-library_v3.13.0",
       "date": "Wed, 20 Mar 2019 19:14:49 GMT",
