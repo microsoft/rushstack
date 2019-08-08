@@ -28,7 +28,6 @@ import {
   ApiEnumMember,
   ApiClass,
   ApiInterface,
-  ApiParameterListMixin,
   ApiMethod,
   ApiMethodSignature,
   ApiConstructor,
@@ -551,36 +550,10 @@ export class YamlDocumenter {
 
   /**
    * Calculate the DocFX "uid" for the ApiItem
-   * Example:  node-core-library.JsonFile.load
+   * Example:  `node-core-library!JsonFile#load`
    */
   protected _getUid(apiItem: ApiItem): string {
-    let result: string = '';
-    for (const hierarchyItem of apiItem.getHierarchy()) {
-
-      // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
-      let qualifiedName: string = hierarchyItem.displayName;
-      if (ApiParameterListMixin.isBaseClassOf(hierarchyItem)) {
-        if (hierarchyItem.overloadIndex > 1) {
-          // Subtract one for compatibility with earlier releases of API Documenter.
-          // (This will get revamped when we fix GitHub issue #1308)
-          qualifiedName += `_${hierarchyItem.overloadIndex - 1}`;
-        }
-      }
-
-      switch (hierarchyItem.kind) {
-        case ApiItemKind.Model:
-        case ApiItemKind.EntryPoint:
-          break;
-        case ApiItemKind.Package:
-          result += PackageName.getUnscopedName(hierarchyItem.displayName);
-          break;
-        default:
-          result += '.';
-          result += qualifiedName;
-          break;
-      }
-    }
-    return result;
+    return apiItem.canonicalReference.toString();
   }
 
   /**
@@ -679,7 +652,7 @@ export class YamlDocumenter {
     if (apiItem.parent && apiItem.parent.kind === ApiItemKind.Namespace) {
       // For members a namespace, show the full name excluding the package part:
       // Example: excel.Excel.Binding --> Excel.Binding
-      return this._getUid(apiItem).replace(/^[^.]+\./, '');
+      return apiItem.getScopedNameWithinPackage();
     }
     return Utilities.getConciseSignature(apiItem);
   }
