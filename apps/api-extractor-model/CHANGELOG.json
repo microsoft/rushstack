@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.3.1",
+      "tag": "@microsoft/api-extractor-model_v7.3.1",
+      "date": "Thu, 08 Aug 2019 00:49:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "(Experimental) Add ApiExtractor.canonicalReference which is a beta implementation of the revised TSDoc declaration reference notation"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.3.0",
       "tag": "@microsoft/api-extractor-model_v7.3.0",
       "date": "Mon, 22 Jul 2019 19:13:10 GMT",

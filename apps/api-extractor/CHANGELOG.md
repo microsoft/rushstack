@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 05 Aug 2019 22:04:32 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Aug 2019 00:49:05 GMT and should not be manually modified.
+
+## 7.3.6
+Thu, 08 Aug 2019 00:49:05 GMT
+
+### Patches
+
+- Fix an issue where a function with only one declaration was assigned an overloadIndex of 0 instead of 1
 
 ## 7.3.5
 Mon, 05 Aug 2019 22:04:32 GMT

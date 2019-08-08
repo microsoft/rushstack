@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Mon, 22 Jul 2019 19:13:10 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Aug 2019 00:49:05 GMT and should not be manually modified.
+
+## 7.3.1
+Thu, 08 Aug 2019 00:49:05 GMT
+
+### Patches
+
+- (Experimental) Add ApiExtractor.canonicalReference which is a beta implementation of the revised TSDoc declaration reference notation
 
 ## 7.3.0
 Mon, 22 Jul 2019 19:13:10 GMT
