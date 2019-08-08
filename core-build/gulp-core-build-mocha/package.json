@@ -24,7 +24,7 @@
     "gulp-mocha": "~6.0.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.4": "0.1.11",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.15",
     "@types/glob": "5.0.30",
     "@types/gulp": "4.0.6",
     "@types/gulp-istanbul": "0.9.30",

@@ -26,9 +26,9 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "7.3.6",
-    "@microsoft/node-library-build": "6.0.71",
+    "@microsoft/node-library-build": "6.1.2",
     "@microsoft/rush-stack-compiler-3.1": "0.6.27",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.11",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.15",
     "@types/glob": "5.0.30",
     "@types/resolve": "0.0.8",
     "gulp": "~4.0.2",
