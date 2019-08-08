@@ -133,6 +133,7 @@ export class ApiEntryPoint extends ApiEntryPoint_base {
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
     readonly containerKey: string;
+    readonly importPath: string;
     // @override (undocumented)
     readonly kind: ApiItemKind;
 }
