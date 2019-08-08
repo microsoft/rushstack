@@ -44,8 +44,8 @@ items:
             - number
   - uid: 'api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)'
     summary: A function inside a namespace
-    name: OuterNamespace.InnerNamespace.nestedFunction()
-    fullName: OuterNamespace.InnerNamespace.nestedFunction()
+    name: OuterNamespace.InnerNamespace.nestedFunction(x)
+    fullName: OuterNamespace.InnerNamespace.nestedFunction(x)
     langs:
       - typeScript
     type: function

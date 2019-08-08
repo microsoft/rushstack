@@ -650,11 +650,46 @@ export class YamlDocumenter {
 
   private _getYamlItemName(apiItem: ApiItem): string {
     if (apiItem.parent && apiItem.parent.kind === ApiItemKind.Namespace) {
-      // For members a namespace, show the full name excluding the package part:
-      // Example: excel.Excel.Binding --> Excel.Binding
-      return apiItem.getScopedNameWithinPackage();
+      // If the immediate parent is a namespace, then add the namespaces to the name.  For example:
+      //
+      //   // Name: "N1"
+      //   export namespace N1 {
+      //     // Name: "N1.N2"
+      //     export namespace N2 {
+      //       // Name: "N1.N2.f(x,y)"
+      //       export function f(x: string, y: string): string {
+      //         return x + y;
+      //       }
+      //
+      //
+      //       // Name: "N1.N2.C"
+      //       export class C {
+      //         // Name: "member(x,y)"  <===========
+      //         public member(x: string, y: string): string {
+      //           return x + y;
+      //         }
+      //       }
+      //     }
+      //   }
+      //
+      // In the above example, "member(x, y)" does not appear as "N1.N2.C.member(x,y)" because YamlDocumenter
+      // embeds this entry in the web page for "N1.N2.C", so the container is obvious.  Whereas "N1.N2.f(x,y)"
+      // needs to be qualified because the DocFX template doesn't make pages for namespaces.  Instead, they get
+      // flattened into the package's page.
+      const nameParts: string[] = [ Utilities.getConciseSignature(apiItem) ];
+
+      for (let current: ApiItem | undefined = apiItem.parent; current; current = current.parent) {
+        if (current.kind !== ApiItemKind.Namespace) {
+          break;
+        }
+
+        nameParts.unshift(current.displayName);
+      }
+
+      return nameParts.join('.');
+    } else {
+      return Utilities.getConciseSignature(apiItem);
     }
-    return Utilities.getConciseSignature(apiItem);
   }
 
   private _getYamlFilePath(apiItem: ApiItem): string {
