@@ -14,9 +14,6 @@
   },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "dependencies": {
     "@microsoft/gulp-core-build": "3.11.0",
     "@microsoft/gulp-core-build-sass": "4.7.15",

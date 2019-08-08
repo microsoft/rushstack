@@ -11,9 +11,6 @@
   },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "license": "MIT",
   "dependencies": {
     "@microsoft/node-core-library": "3.13.0",

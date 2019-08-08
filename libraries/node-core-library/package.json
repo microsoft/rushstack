@@ -4,9 +4,6 @@
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
   "typings": "dist/node-core-library.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "license": "MIT",
   "repository": {
     "url": "https://github.com/Microsoft/web-build-tools/tree/master/libraries/node-core-library"

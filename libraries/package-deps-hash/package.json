@@ -4,9 +4,6 @@
   "description": "",
   "main": "lib/index.js",
   "typings": "dist/package-deps-hash.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "license": "MIT",
   "repository": {
     "type": "git",

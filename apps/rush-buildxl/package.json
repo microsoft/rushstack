@@ -11,9 +11,6 @@
   },
   "engineStrict": true,
   "homepage": "https://rushjs.io",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "scripts": {
     "build": "gulp test --clean"
   },

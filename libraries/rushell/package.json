@@ -8,9 +8,6 @@
   },
   "main": "lib/index.js",
   "typings": "dist/rushell.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "scripts": {
     "build": "gulp test --clean",
     "start": "jest --watch"
