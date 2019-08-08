@@ -1,19 +1,19 @@
 ### YamlMime:UniversalReference
 items:
-  - uid: api-documenter-test.IDocInterface4
+  - uid: 'api-documenter-test!IDocInterface4:interface'
     summary: Type union in an interface.
     name: IDocInterface4
     fullName: IDocInterface4
     langs:
       - typeScript
     type: interface
-    package: api-documenter-test
+    package: api-documenter-test!
     children:
-      - api-documenter-test.IDocInterface4.Context
-      - api-documenter-test.IDocInterface4.generic
-      - api-documenter-test.IDocInterface4.numberOrFunction
-      - api-documenter-test.IDocInterface4.stringOrNumber
-  - uid: api-documenter-test.IDocInterface4.Context
+      - 'api-documenter-test!IDocInterface4#Context:member'
+      - 'api-documenter-test!IDocInterface4#generic:member'
+      - 'api-documenter-test!IDocInterface4#numberOrFunction:member'
+      - 'api-documenter-test!IDocInterface4#stringOrNumber:member'
+  - uid: 'api-documenter-test!IDocInterface4#Context:member'
     summary: Test newline rendering when code blocks are used in tables
     name: Context
     fullName: Context
@@ -31,7 +31,7 @@ items:
             ({ children }: {
                     children: string;
                 }) => boolean
-  - uid: api-documenter-test.IDocInterface4.generic
+  - uid: 'api-documenter-test!IDocInterface4#generic:member'
     summary: make sure html entities are escaped in tables.
     name: generic
     fullName: generic
@@ -43,7 +43,7 @@ items:
       return:
         type:
           - Generic<number>
-  - uid: api-documenter-test.IDocInterface4.numberOrFunction
+  - uid: 'api-documenter-test!IDocInterface4#numberOrFunction:member'
     summary: a union type with a function
     name: numberOrFunction
     fullName: numberOrFunction
@@ -55,7 +55,7 @@ items:
       return:
         type:
           - number | (() => number)
-  - uid: api-documenter-test.IDocInterface4.stringOrNumber
+  - uid: 'api-documenter-test!IDocInterface4#stringOrNumber:member'
     summary: a union type
     name: stringOrNumber
     fullName: stringOrNumber
