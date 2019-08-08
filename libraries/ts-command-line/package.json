@@ -8,9 +8,6 @@
   },
   "main": "lib/index.js",
   "typings": "dist/ts-command-line.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "scripts": {
     "build": "gulp test --clean"
   },
@@ -24,7 +21,7 @@
   "devDependencies": {
     "@types/jest": "23.3.11",
     "gulp": "~4.0.2",
-    "@microsoft/node-library-build": "6.0.71",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.11"
+    "@microsoft/node-library-build": "6.1.2",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.15"
   }
 }

@@ -4,9 +4,6 @@
   "description": "",
   "main": "lib/test.js",
   "module": "lib-es6/test.js",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "private": true,
   "scripts": {
     "build": "gulp --clean"

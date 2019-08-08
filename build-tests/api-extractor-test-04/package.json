@@ -5,9 +5,6 @@
   "private": true,
   "main": "lib/index.js",
   "typings": "dist/api-extractor-test-04.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "scripts": {
     "build": "node build.js"
   },

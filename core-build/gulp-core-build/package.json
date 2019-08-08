@@ -11,9 +11,6 @@
   },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "license": "MIT",
   "dependencies": {
     "@microsoft/node-core-library": "3.13.0",
@@ -54,8 +51,8 @@
   "devDependencies": {
     "@types/mocha": "5.2.5",
     "@types/chai": "3.4.34",
-    "@microsoft/node-library-build": "6.0.71",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.11",
+    "@microsoft/node-library-build": "6.1.2",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.15",
     "@types/z-schema": "3.16.31",
     "chai": "~3.5.0"
   }

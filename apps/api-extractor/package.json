@@ -24,9 +24,6 @@
   "homepage": "https://api-extractor.com",
   "main": "lib/index.js",
   "typings": "dist/rollup.d.ts",
-  "tsdoc": {
-    "tsdocFlavor": "AEDoc"
-  },
   "bin": {
     "api-extractor": "./bin/api-extractor"
   },
@@ -46,8 +43,8 @@
     "typescript": "~3.5.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.0.71",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.11",
+    "@microsoft/node-library-build": "6.1.2",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.15",
     "@types/jest": "23.3.11",
     "@types/lodash": "4.14.116",
     "@types/node": "8.5.8",

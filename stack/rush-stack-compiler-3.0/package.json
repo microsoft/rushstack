@@ -26,8 +26,8 @@
     "typescript": "~3.0.3"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.0.71",
-    "@microsoft/rush-stack-compiler-3.4": "0.1.11",
+    "@microsoft/node-library-build": "6.1.2",
+    "@microsoft/rush-stack-compiler-3.4": "0.1.15",
     "@microsoft/rush-stack-compiler-shared": "0.0.0",
     "gulp": "~4.0.2"
   }
