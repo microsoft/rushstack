@@ -2,19 +2,22 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1002,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!ClassWithGenericMethod:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -35,6 +38,7 @@
           "members": [
             {
               "kind": "Method",
+              "canonicalReference": "api-extractor-scenarios!ClassWithGenericMethod#method:member(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -68,7 +72,7 @@
                 "endIndex": 5
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "typeParameters": [
                 {
@@ -90,6 +94,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!GenericClass:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -133,6 +138,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!GenericClassWithConstraint:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -184,6 +190,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-extractor-scenarios!GenericClassWithDefault:class",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -235,6 +242,7 @@
         },
         {
           "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!genericFunction:function(1)",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -271,7 +279,7 @@
             "endIndex": 6
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "typeParameters": [
             {
@@ -290,6 +298,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!GenericInterface:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -333,6 +342,7 @@
         },
         {
           "kind": "TypeAlias",
+          "canonicalReference": "api-extractor-scenarios!GenericTypeAlias:type",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -386,6 +396,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericCallSignature:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -406,6 +417,7 @@
           "members": [
             {
               "kind": "CallSignature",
+              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericCallSignature:call(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -434,7 +446,7 @@
                 "endIndex": 4
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "typeParameters": [
                 {
@@ -455,6 +467,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericConstructSignature:interface",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -475,6 +488,7 @@
           "members": [
             {
               "kind": "ConstructSignature",
+              "canonicalReference": "api-extractor-scenarios!InterfaceWithGenericConstructSignature:new(1)",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -503,7 +517,7 @@
                 "endIndex": 4
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "typeParameters": [
                 {

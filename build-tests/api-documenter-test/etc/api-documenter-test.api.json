@@ -2,19 +2,22 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1002,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
+  "canonicalReference": "api-documenter-test!",
   "docComment": "/**\n * api-extractor-test-05\n *\n * This project tests various documentation generation scenarios and doc comment syntaxes.\n *\n * @packageDocumentation\n */\n",
   "name": "api-documenter-test",
   "members": [
     {
       "kind": "EntryPoint",
+      "canonicalReference": "api-documenter-test!",
       "name": "",
       "members": [
         {
           "kind": "Variable",
+          "canonicalReference": "api-documenter-test!constVariable:var",
           "docComment": "/**\n * An exported variable declaration.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -39,6 +42,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-documenter-test!DocBaseClass:class",
           "docComment": "/**\n * Example base class\n *\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -59,6 +63,7 @@
           "members": [
             {
               "kind": "Constructor",
+              "canonicalReference": "api-documenter-test!DocBaseClass:constructor(1)",
               "docComment": "/**\n * The simple constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -72,6 +77,7 @@
             },
             {
               "kind": "Constructor",
+              "canonicalReference": "api-documenter-test!DocBaseClass:constructor(2)",
               "docComment": "/**\n * The overloaded constructor for `DocBaseClass`\n */\n",
               "excerptTokens": [
                 {
@@ -112,6 +118,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-documenter-test!DocClass1:class",
           "docComment": "/**\n * This is an example class.\n *\n * @remarks\n *\n * These are some remarks.\n *\n * The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `DocClass1` class.\n *\n * @defaultValue\n *\n * a default value for this function\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -160,6 +167,7 @@
           "members": [
             {
               "kind": "Method",
+              "canonicalReference": "api-documenter-test!DocClass1#deprecatedExample:member(1)",
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
               "excerptTokens": [
                 {
@@ -185,12 +193,13 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "deprecatedExample"
             },
             {
               "kind": "Method",
+              "canonicalReference": "api-documenter-test!DocClass1#exampleFunction:member(1)",
               "docComment": "/**\n * This is an overloaded function.\n *\n * @param a - the first string\n *\n * @param b - the second string\n */\n",
               "excerptTokens": [
                 {
@@ -269,6 +278,7 @@
             },
             {
               "kind": "Method",
+              "canonicalReference": "api-documenter-test!DocClass1#exampleFunction:member(2)",
               "docComment": "/**\n * This is also an overloaded function.\n *\n * @param x - the number\n */\n",
               "excerptTokens": [
                 {
@@ -324,6 +334,7 @@
             },
             {
               "kind": "Method",
+              "canonicalReference": "api-documenter-test!DocClass1#interestingEdgeCases:member(1)",
               "docComment": "/**\n * Example: \"\\{ \\\\\"maxItemsToShow\\\\\": 123 \\}\"\n *\n * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\\\-_]+$/\n */\n",
               "excerptTokens": [
                 {
@@ -349,12 +360,13 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "interestingEdgeCases"
             },
             {
               "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1#malformedEvent:member",
               "docComment": "/**\n * This event should have been marked as readonly.\n *\n * @eventProperty\n */\n",
               "excerptTokens": [
                 {
@@ -384,6 +396,7 @@
             },
             {
               "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1#modifiedEvent:member",
               "docComment": "/**\n * This event is fired whenever the object is modified.\n *\n * @eventProperty\n */\n",
               "excerptTokens": [
                 {
@@ -417,6 +430,7 @@
             },
             {
               "kind": "Property",
+              "canonicalReference": "api-documenter-test!DocClass1#regularProperty:member",
               "docComment": "/**\n * This is a regular property that happens to use the SystemEvent type.\n */\n",
               "excerptTokens": [
                 {
@@ -446,6 +460,7 @@
             },
             {
               "kind": "Method",
+              "canonicalReference": "api-documenter-test!DocClass1.sumWithExample:member(1)",
               "docComment": "/**\n * Returns the sum of two numbers.\n *\n * @remarks\n *\n * This illustrates usage of the `@example` block tag.\n *\n * @param x - the first number to add\n *\n * @param y - the second number to add\n *\n * @returns the sum of the two numbers\n *\n * @example\n *\n * Here's a simple example:\n * ```\n * // Prints \"2\":\n * console.log(DocClass1.sumWithExample(1,1));\n * ```\n *\n * @example\n *\n * Here's an example with negative numbers:\n * ```\n * // Prints \"0\":\n * console.log(DocClass1.sumWithExample(1,-1));\n * ```\n *\n */\n",
               "excerptTokens": [
                 {
@@ -507,7 +522,7 @@
                 "endIndex": 12
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "x",
@@ -528,6 +543,7 @@
             },
             {
               "kind": "Method",
+              "canonicalReference": "api-documenter-test!DocClass1#tableExample:member(1)",
               "docComment": "/**\n * An example with tables:\n *\n * @remarks\n *\n * <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>\n */\n",
               "excerptTokens": [
                 {
@@ -553,7 +569,7 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "tableExample"
             }
@@ -575,6 +591,7 @@
         },
         {
           "kind": "Enum",
+          "canonicalReference": "api-documenter-test!DocEnum:enum",
           "docComment": "/**\n * Docs for DocEnum\n *\n * {@docCategory SystemEvent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -595,6 +612,7 @@
           "members": [
             {
               "kind": "EnumMember",
+              "canonicalReference": "api-documenter-test!DocEnum.One:member",
               "docComment": "/**\n * These are some docs for One\n */\n",
               "excerptTokens": [
                 {
@@ -619,6 +637,7 @@
             },
             {
               "kind": "EnumMember",
+              "canonicalReference": "api-documenter-test!DocEnum.Two:member",
               "docComment": "/**\n * These are some docs for Two\n */\n",
               "excerptTokens": [
                 {
@@ -643,6 +662,7 @@
             },
             {
               "kind": "EnumMember",
+              "canonicalReference": "api-documenter-test!DocEnum.Zero:member",
               "docComment": "/**\n * These are some docs for Zero\n */\n",
               "excerptTokens": [
                 {
@@ -669,6 +689,7 @@
         },
         {
           "kind": "Namespace",
+          "canonicalReference": "api-documenter-test!EcmaSmbols:namespace",
           "docComment": "/**\n * A namespace containing an ECMAScript symbol\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -689,6 +710,7 @@
           "members": [
             {
               "kind": "Variable",
+              "canonicalReference": "api-documenter-test!EcmaSmbols.example:var",
               "docComment": "/**\n * An ECMAScript symbol\n */\n",
               "excerptTokens": [
                 {
@@ -715,6 +737,7 @@
         },
         {
           "kind": "TypeAlias",
+          "canonicalReference": "api-documenter-test!ExampleTypeAlias:type",
           "docComment": "/**\n * A type alias\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -751,6 +774,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-documenter-test!Generic:class",
           "docComment": "/**\n * Generic class.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -794,6 +818,7 @@
         },
         {
           "kind": "Function",
+          "canonicalReference": "api-documenter-test!globalFunction:function(1)",
           "docComment": "/**\n * An exported function\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -838,7 +863,7 @@
             "endIndex": 8
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [
             {
               "parameterName": "x",
@@ -852,6 +877,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-documenter-test!IDocInterface1:interface",
           "docComment": "/**\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -872,6 +898,7 @@
           "members": [
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface1#regularProperty:member",
               "docComment": "/**\n * Does something\n */\n",
               "excerptTokens": [
                 {
@@ -903,6 +930,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-documenter-test!IDocInterface2:interface",
           "docComment": "/**\n * {@docCategory DocBaseClass}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -931,6 +959,7 @@
           "members": [
             {
               "kind": "MethodSignature",
+              "canonicalReference": "api-documenter-test!IDocInterface2#deprecatedExample:member(1)",
               "docComment": "/**\n * @deprecated\n *\n * Use `otherThing()` instead.\n */\n",
               "excerptTokens": [
                 {
@@ -955,7 +984,7 @@
                 "endIndex": 3
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [],
               "name": "deprecatedExample"
             }
@@ -969,6 +998,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-documenter-test!IDocInterface3:interface",
           "docComment": "/**\n * Some less common TypeScript declaration kinds.\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -989,6 +1019,7 @@
           "members": [
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface3#\"[not.a.symbol]\":member",
               "docComment": "/**\n * An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol.\n */\n",
               "excerptTokens": [
                 {
@@ -1013,6 +1044,7 @@
             },
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface3#[EcmaSmbols.example]:member",
               "docComment": "/**\n * ECMAScript symbol\n */\n",
               "excerptTokens": [
                 {
@@ -1053,6 +1085,7 @@
             },
             {
               "kind": "CallSignature",
+              "canonicalReference": "api-documenter-test!IDocInterface3:call(1)",
               "docComment": "/**\n * Call signature\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -1089,7 +1122,7 @@
                 "endIndex": 6
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "x",
@@ -1102,6 +1135,7 @@
             },
             {
               "kind": "ConstructSignature",
+              "canonicalReference": "api-documenter-test!IDocInterface3:new(1)",
               "docComment": "/**\n * Construct signature\n */\n",
               "excerptTokens": [
                 {
@@ -1122,11 +1156,12 @@
                 "endIndex": 2
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": []
             },
             {
               "kind": "IndexSignature",
+              "canonicalReference": "api-documenter-test!IDocInterface3:index(1)",
               "docComment": "/**\n * Indexer\n *\n * @param x - the parameter\n */\n",
               "excerptTokens": [
                 {
@@ -1163,7 +1198,7 @@
                 "endIndex": 6
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "x",
@@ -1176,6 +1211,7 @@
             },
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface3#redundantQuotes:member",
               "docComment": "/**\n * A quoted identifier with redundant quotes.\n */\n",
               "excerptTokens": [
                 {
@@ -1203,6 +1239,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-documenter-test!IDocInterface4:interface",
           "docComment": "/**\n * Type union in an interface.\n *\n * {@docCategory DocClass1}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1223,6 +1260,7 @@
           "members": [
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface4#Context:member",
               "docComment": "/**\n * Test newline rendering when code blocks are used in tables\n */\n",
               "excerptTokens": [
                 {
@@ -1267,6 +1305,7 @@
             },
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface4#generic:member",
               "docComment": "/**\n * make sure html entities are escaped in tables.\n */\n",
               "excerptTokens": [
                 {
@@ -1299,6 +1338,7 @@
             },
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface4#numberOrFunction:member",
               "docComment": "/**\n * a union type with a function\n */\n",
               "excerptTokens": [
                 {
@@ -1327,6 +1367,7 @@
             },
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface4#stringOrNumber:member",
               "docComment": "/**\n * a union type\n */\n",
               "excerptTokens": [
                 {
@@ -1358,6 +1399,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-documenter-test!IDocInterface5:interface",
           "docComment": "/**\n * Interface without inline tag to test custom TOC\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1378,6 +1420,7 @@
           "members": [
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface5#regularProperty:member",
               "docComment": "/**\n * Property of type string that does something\n */\n",
               "excerptTokens": [
                 {
@@ -1409,6 +1452,7 @@
         },
         {
           "kind": "Interface",
+          "canonicalReference": "api-documenter-test!IDocInterface6:interface",
           "docComment": "/**\n * Interface without inline tag to test custom TOC with injection\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1429,6 +1473,7 @@
           "members": [
             {
               "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface6#regularProperty:member",
               "docComment": "/**\n * Property of type number that does something\n */\n",
               "excerptTokens": [
                 {
@@ -1460,6 +1505,7 @@
         },
         {
           "kind": "Namespace",
+          "canonicalReference": "api-documenter-test!OuterNamespace:namespace",
           "docComment": "/**\n * A top-level namespace\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1480,6 +1526,7 @@
           "members": [
             {
               "kind": "Namespace",
+              "canonicalReference": "api-documenter-test!OuterNamespace.InnerNamespace:namespace",
               "docComment": "/**\n * A nested namespace\n */\n",
               "excerptTokens": [
                 {
@@ -1500,6 +1547,7 @@
               "members": [
                 {
                   "kind": "Function",
+                  "canonicalReference": "api-documenter-test!OuterNamespace.InnerNamespace.nestedFunction:function(1)",
                   "docComment": "/**\n * A function inside a namespace\n */\n",
                   "excerptTokens": [
                     {
@@ -1544,7 +1592,7 @@
                     "endIndex": 8
                   },
                   "releaseTag": "Public",
-                  "overloadIndex": 0,
+                  "overloadIndex": 1,
                   "parameters": [
                     {
                       "parameterName": "x",
@@ -1560,6 +1608,7 @@
             },
             {
               "kind": "Variable",
+              "canonicalReference": "api-documenter-test!OuterNamespace.nestedVariable:var",
               "docComment": "/**\n * A variable exported from within a namespace.\n */\n",
               "excerptTokens": [
                 {
@@ -1586,6 +1635,7 @@
         },
         {
           "kind": "Class",
+          "canonicalReference": "api-documenter-test!SystemEvent:class",
           "docComment": "/**\n * A class used to exposed events.\n *\n * {@docCategory SystemEvent}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -1606,6 +1656,7 @@
           "members": [
             {
               "kind": "Method",
+              "canonicalReference": "api-documenter-test!SystemEvent#addHandler:member(1)",
               "docComment": "/**\n * Adds an handler for the event.\n */\n",
               "excerptTokens": [
                 {
@@ -1647,7 +1698,7 @@
                 "endIndex": 7
               },
               "releaseTag": "Public",
-              "overloadIndex": 0,
+              "overloadIndex": 1,
               "parameters": [
                 {
                   "parameterName": "handler",

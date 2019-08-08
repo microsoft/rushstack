@@ -2,19 +2,22 @@
   "metadata": {
     "toolPackage": "@microsoft/api-extractor",
     "toolVersion": "[test mode]",
-    "schemaVersion": 1002,
+    "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001
   },
   "kind": "Package",
+  "canonicalReference": "api-extractor-scenarios!",
   "docComment": "",
   "name": "api-extractor-scenarios",
   "members": [
     {
       "kind": "EntryPoint",
+      "canonicalReference": "api-extractor-scenarios!",
       "name": "",
       "members": [
         {
           "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!failWithBrokenLink:function(1)",
           "docComment": "/**\n * {@inheritDoc MyNamespace.MyClass.nonExistentMethod}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -43,12 +46,13 @@
             "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "failWithBrokenLink"
         },
         {
           "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!failWithMissingReference:function(1)",
           "docComment": "/**\n * {@inheritDoc}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -77,12 +81,13 @@
             "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "failWithMissingReference"
         },
         {
           "kind": "Namespace",
+          "canonicalReference": "api-extractor-scenarios!MyNamespace:namespace",
           "docComment": "/**\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -103,6 +108,7 @@
           "members": [
             {
               "kind": "Class",
+              "canonicalReference": "api-extractor-scenarios!MyNamespace.MyClass:class",
               "docComment": "",
               "excerptTokens": [
                 {
@@ -123,6 +129,7 @@
               "members": [
                 {
                   "kind": "Method",
+                  "canonicalReference": "api-extractor-scenarios!MyNamespace.MyClass#myMethod:member(1)",
                   "docComment": "/**\n * Summary for myMethod\n *\n * @remarks\n *\n * Remarks for myMethod\n *\n * @param x - the parameter\n *\n * @returns a number\n *\n * @beta\n */\n",
                   "excerptTokens": [
                     {
@@ -164,7 +171,7 @@
                     "endIndex": 7
                   },
                   "releaseTag": "Beta",
-                  "overloadIndex": 0,
+                  "overloadIndex": 1,
                   "parameters": [
                     {
                       "parameterName": "x",
@@ -183,6 +190,7 @@
         },
         {
           "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!succeedForNow:function(1)",
           "docComment": "/**\n * {@inheritDoc nonexistent-package#MyNamespace.MyClass.nonExistentMethod}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -211,12 +219,13 @@
             "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "succeedForNow"
         },
         {
           "kind": "Function",
+          "canonicalReference": "api-extractor-scenarios!testSimple:function(1)",
           "docComment": "/**\n * Summary for myMethod\n *\n * @remarks\n *\n * Remarks for myMethod\n *\n * @param x - the parameter\n *\n * @returns a number\n *\n * @public\n */\n",
           "excerptTokens": [
             {
@@ -245,7 +254,7 @@
             "endIndex": 4
           },
           "releaseTag": "Public",
-          "overloadIndex": 0,
+          "overloadIndex": 1,
           "parameters": [],
           "name": "testSimple"
         }
