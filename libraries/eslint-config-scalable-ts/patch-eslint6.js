@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 // This is a workaround for https://github.com/eslint/eslint/issues/3458
 //
 // To correct how ESLint searches for plugin packages, add this line to the top of your project's .eslintrc.js file:
