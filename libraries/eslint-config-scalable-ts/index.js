@@ -4,6 +4,7 @@ module.exports = {
 
   plugins: [
     "@typescript-eslint/eslint-plugin",
+    "eslint-plugin-no-null",
     "eslint-plugin-promise",
     "eslint-plugin-security"
   ],
@@ -454,8 +455,21 @@ module.exports = {
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         "use-isnan": "error",
+
+        // RATIONALE:         Most programming languages have a "null" or "nil" value that serves several purposes:
+        //                    (1) the initial value for an uninitialized variable, (2) the value of x.y or x["y"]
+        //                    when x has no such key, and (3) a special token that developers can assign to indicate
+        //                    an unknown or empty state.  In JavaScript, the "undefined" value fulfills all three
+        //                    roles.  JavaScript's "null" value is a redundant secondary token that only fulfills #3,
+        //                    even though its name confusingly implies otherwise.  The "null" value was arguably
+        //                    a mistake in the original JavaScript language design, but it cannot be banned entirely
+        //                    because it is returned by some entrenched system APIs such as JSON.parse(), and also
+        //                    some popular NPM packages.  To avoid requiring lint suppressions when interacting with
+        //                    these legacy APIs, the "no-null" rule prohibits the value but not the type annotation.
+        //                    In other words, it tolerates preexisting nulls but blocks new ones from being
+        //                    introduced.
+        "no-null/no-null": "error",
       }
     }
   ]
 };
-//https://eslint.org/docs/rules/func-style
